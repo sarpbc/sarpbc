@@ -1,0 +1,14 @@
+import { Module } from "@nestjs/common";
+import { MikroOrmModule } from "@mikro-orm/nestjs";
+import { Reply } from "./domain/reply.entity";
+import { ReplyController } from "./reply.controller";
+import { ReplyService } from "./reply.service";
+import { UserModule } from "src/user/user.module";
+
+@Module({
+  imports: [MikroOrmModule.forFeature([Reply]), UserModule],
+  controllers: [ReplyController],
+  providers: [ReplyService],
+  exports: [ReplyService],
+})
+export class ReplyModule {}

@@ -1,0 +1,38 @@
+{
+  "name": "sarpbc",
+  "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "pnpm --parallel --filter ./apps/back --filter ./apps/front dev",
+    "dev:back": "pnpm --filter back dev",
+    "dev:front": "pnpm --filter front dev",
+    "build": "pnpm -r --filter ./apps/* build",
+    "start": "pnpm --filter back start",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt . --check"
+  },
+  "devDependencies": {
+    "lefthook": "^2.1.6",
+    "only-allow": "^1.2.2",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@parcel/watcher",
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "bcrypt",
+      "esbuild",
+      "maplibre-gl",
+      "sharp",
+      "unrs-resolver",
+      "vue-demi",
+      "lefthook"
+    ]
+  }
+}

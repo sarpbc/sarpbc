@@ -1,0 +1,17 @@
+.vscode/
+
+node_modules/
+dist/
+build/
+
+.git/
+
+.env
+
+*.log
+*.tmp
+*.swp
+README.md
+
+.dockerignore
+Dockerfile

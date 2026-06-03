@@ -1,0 +1,7 @@
+# https://lefthook.dev/
+
+pre-commit:
+  jobs:
+    - name: oxfmt
+      run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
