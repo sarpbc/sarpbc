@@ -1,0 +1,50 @@
+# Sarpbc.org
+
+> Rocket League news and data platform
+
+## About
+
+Sarpbc.org is a comprehensive Rocket League esports website providing:
+- Latest news and updates about Rocket League competitive scene
+- Tournament information and brackets
+- Player and team statistics
+- Community forum for discussions
+- Interactive games like Airriddle and Pick'ems
+
+## Key Sections
+
+### News
+Stay up to date with the latest Rocket League esports news, roster changes, and tournament announcements.
+URL: https://sarpbc.org/
+
+### Tournaments
+Browse ongoing and upcoming Rocket League tournaments with detailed brackets and match schedules.
+URL: https://sarpbc.org/tournaments
+
+### Players
+Explore player profiles, statistics, and career information for professional Rocket League players.
+URL: https://sarpbc.org/player
+
+### Teams
+Find information about Rocket League teams, their rosters, and match history.
+URL: https://sarpbc.org/team
+
+### Forum
+Community-driven forum for Rocket League discussions, predictions, and interactions.
+URL: https://sarpbc.org/forum
+
+### Games
+
+#### Airriddle
+Daily Rocket League trivia game where you guess players based on clues.
+URL: https://sarpbc.org/game/airriddle
+
+#### Pick'ems
+Tournament prediction game where users predict match outcomes.
+URL: https://sarpbc.org/game/pickems
+
+## Languages
+
+The website is available in:
+- English (default): https://sarpbc.org
+- French: https://sarpbc.org/fr

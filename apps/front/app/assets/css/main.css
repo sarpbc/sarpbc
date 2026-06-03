@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+html {
+  scrollbar-color: var(--color-neutral-300) transparent;
+}
+
+/* Apply scrollbar-gutter only to landing pages (default layout) */
+html:has(main.min-h-svh) {
+  scrollbar-gutter: stable;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  transition-duration: 300ms;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+input[type="number"] {
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+:root {
+  --ui-radius: 0.25rem;
+}

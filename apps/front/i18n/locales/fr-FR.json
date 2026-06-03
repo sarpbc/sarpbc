@@ -1,0 +1,771 @@
+{
+  "common": {
+    "all": "Tous",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "page": "Page",
+    "of": "sur",
+    "showing": "Affichage",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "overview": "Aperçu",
+    "contractRole": {
+      "active": "Actif",
+      "benched": "Remplaçant",
+      "loaned": "Prêté"
+    },
+    "cancel": "Annuler"
+  },
+  "general": {
+    "news": "Actualités",
+    "tournaments": "Tournois",
+    "forum": "Forum",
+    "teams": "Équipes",
+    "players": "Joueurs",
+    "games": "Jeux",
+    "matches": "Matchs"
+  },
+  "components": {
+    "cookiePopup": {
+      "description": "Acceptez-vous les cookies analytiques en plus des cookies essentiels? Vous pouvez changer d'avis à tout moment."
+    },
+    "footer": {
+      "cookiePolicy": "Politique de cookies",
+      "privacyPolicy": "Politique de confidentialité",
+      "termsOfService": "Conditions d'utilisation",
+      "legalNotice": "Mentions légales"
+    },
+    "forum": {
+      "createPost": "Créer un post",
+      "editPost": "Modifier le post",
+      "deletePost": "Supprimer le post",
+      "reply": "Répondre",
+      "viewReplies": "Voir les réponses",
+      "recentPosts": "Activités récentes"
+    },
+    "header": {
+      "signin": "Se connecter"
+    },
+    "input": {
+      "search": "Rechercher...",
+      "noResult": "Aucun résultat"
+    },
+    "match": {
+      "todaysMatch": "Matchs d'aujourd'hui",
+      "results": "Résultats",
+      "tbd": "À déterminer"
+    },
+    "reply": {
+      "validation": {
+        "contentMinLength": "Votre réponse doit contenir au moins 1 caractère",
+        "contentMaxLength": "Votre réponse doit contenir au maximum 2048 caractères"
+      },
+      "messages": {
+        "successTitle": "Succès",
+        "successDescription": "Réponse créée avec succès !",
+        "errorTitle": "Erreur",
+        "errorDescription": "Échec de la création de la réponse."
+      },
+      "inputTitle": "Réponse",
+      "inputPlaceholder": "Entrez votre réponse ici...",
+      "submit": "Répondre"
+    },
+    "tournaments": {
+      "prizepoolOther": "Autre",
+      "prize": "Prix",
+      "online": "Online",
+      "offline": "LAN",
+      "online/offline": "Online & LAN"
+    }
+  },
+  "timeAgo": {
+    "just-now": "à l'instant",
+    "ago": "il y a {0}",
+    "in": "dans {0}",
+    "last-month": "le mois dernier",
+    "next-month": "le mois prochain",
+    "last-year": "l'année dernière",
+    "next-year": "l'année prochaine",
+    "yesterday": "hier",
+    "tomorrow": "demain",
+    "last-week": "la semaine dernière",
+    "next-week": "la semaine prochaine",
+    "hour": {
+      "past": "heure | heures",
+      "future": "heure | heures"
+    },
+    "minute": {
+      "past": "minute | minutes",
+      "future": "minute | minutes"
+    },
+    "second": {
+      "past": "seconde | secondes",
+      "future": "seconde | secondes"
+    },
+    "day": {
+      "past": "jour | jours",
+      "future": "jour | jours"
+    },
+    "week": {
+      "past": "semaine | semaines",
+      "future": "semaine | semaines"
+    },
+    "month": {
+      "past": "mois | mois",
+      "future": "mois | mois"
+    },
+    "year": {
+      "past": "an | ans",
+      "future": "an | ans"
+    }
+  },
+  "page": {
+    "dashboard": {
+      "nav": {
+        "home": "Accueil",
+        "news": "Actualités",
+        "tournaments": "Tournois",
+        "forum": "Forum",
+        "pickems": "Pick'ems",
+        "players": "Joueurs",
+        "teams": "Équipes"
+      },
+      "news": {
+        "title": "News",
+        "create": {
+          "title": "Nouvel article",
+          "save": "Enregistrer l'article",
+          "image": "Image de couverture",
+          "tab": {
+            "write": "Écrire",
+            "preview": "Aperçu"
+          },
+          "preview": {
+            "empty": "Rien à prévisualiser pour l'instant. Commencez à écrire pour voir le rendu."
+          }
+        }
+      },
+      "players": {
+        "title": "Joueurs",
+        "playersCount": "{count} joueurs",
+        "save": "Enregistrer",
+        "columns": {
+          "name": "Nom",
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "nationality": "Nationalité"
+        },
+        "fields": {
+          "name": "Nom",
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "nationality": "Nationalité",
+          "birthday": "Date de naissance",
+          "imageUrl": "URL de l'image"
+        },
+        "create": {
+          "title": "Nouveau joueur",
+          "save": "Créer le joueur"
+        },
+        "delete": {
+          "title": "Supprimer le joueur",
+          "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
+          "confirm_button": "Supprimer"
+        },
+        "info": {
+          "title": "Informations du joueur"
+        },
+        "contracts": {
+          "title": "Historique des contrats",
+          "empty": "Aucun contrat trouvé.",
+          "save": "Enregistrer le contrat",
+          "columns": {
+            "team": "Équipe",
+            "role": "Rôle",
+            "startDate": "Date de début",
+            "endDate": "Date de fin"
+          },
+          "fields": {
+            "teamId": "ID de l'équipe",
+            "role": "Rôle",
+            "startDate": "Date de début",
+            "endDate": "Date de fin (laisser vide pour actuel)"
+          },
+          "create": {
+            "title": "Ajouter un contrat"
+          },
+          "edit": {
+            "title": "Modifier le contrat"
+          },
+          "delete": {
+            "title": "Supprimer le contrat",
+            "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {team} ?",
+            "confirm_button": "Supprimer"
+          }
+        }
+      },
+      "teams": {
+        "title": "Équipes",
+        "teamsCount": "{count} équipes",
+        "save": "Enregistrer",
+        "columns": {
+          "name": "Nom",
+          "location": "Localisation"
+        },
+        "fields": {
+          "name": "Nom",
+          "location": "Localisation",
+          "imageUrl": "URL de l'image"
+        },
+        "create": {
+          "title": "Nouvelle équipe",
+          "save": "Créer l'équipe"
+        },
+        "delete": {
+          "title": "Supprimer l'équipe",
+          "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
+          "confirm_button": "Supprimer"
+        },
+        "info": {
+          "title": "Informations de l'équipe"
+        },
+        "contracts": {
+          "title": "Historique des contrats",
+          "empty": "Aucun contrat trouvé.",
+          "save": "Enregistrer le contrat",
+          "columns": {
+            "player": "Joueur",
+            "role": "Rôle",
+            "startDate": "Date de début",
+            "endDate": "Date de fin"
+          },
+          "fields": {
+            "playerId": "ID du joueur",
+            "role": "Rôle",
+            "startDate": "Date de début",
+            "endDate": "Date de fin (laisser vide pour actuel)"
+          },
+          "create": {
+            "title": "Ajouter un contrat"
+          },
+          "edit": {
+            "title": "Modifier le contrat"
+          },
+          "delete": {
+            "title": "Supprimer le contrat",
+            "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {player} ?",
+            "confirm_button": "Supprimer"
+          }
+        }
+      }
+    },
+    "game": {
+      "airriddle": {
+        "title": "Air Riddle",
+        "description": "Devinez le joueur Rocket League en 6 essais.",
+        "subtitle": "Devinez le nom du joueur !",
+        "loadingChallenge": "Chargement du défi d'aujourd'hui...",
+        "submitting": "Envoi en cours...",
+        "guess": "Deviner",
+        "enterGuess": "Entrez votre proposition...",
+        "congratulations": "Félicitations !",
+        "guessedInAttempts": "Vous l'avez trouvé en {attempts} tentatives !",
+        "gameOver": "Fin de partie !",
+        "playersNameWas": "Le joueur à deviner était {name}",
+        "attemptsLeft": "Tentatives : {current} / {max}",
+        "howToPlay": "Comment jouer ?",
+        "correctPosition": "Bonne position",
+        "wrongPosition": "Mauvaise position",
+        "notInWord": "Pas dans le mot",
+        "failedToLoad": "Échec du chargement du défi d'aujourd'hui",
+        "tryAgainLater": "Veuillez réessayer plus tard.",
+        "playerNotFound": "Joueur introuvable",
+        "seo": {
+          "title": "Air Riddle - Devinez le joueur Rocket League",
+          "description": "Participez à Air Riddle et devinez le joueur Rocket League en 6 essais. Testez vos connaissances des joueurs RL et améliorez votre score quotidiennement !"
+        }
+      },
+      "pickems": {
+        "title": "Pick'ems",
+        "description": "Faites vos prédictions !"
+      }
+    },
+    "news": {
+      "articleNotFound": "Article introuvable"
+    },
+    "players": {
+      "index": {
+        "title": "Tous les joueurs - SARPBC",
+        "description": "Parcourez tous les {count} joueurs de la base de données SARPBC. Trouvez les joueurs par nom organisés alphabétiquement.",
+        "ogTitle": "Tous les joueurs - SARPBC",
+        "ogDescription": "Parcourez tous les {count} joueurs de la base de données SARPBC.",
+        "pageTitle": "Répertoire des joueurs",
+        "player": "joueur",
+        "players": "joueurs",
+        "noPlayersFound": "Aucun joueur trouvé",
+        "showing": "Affichage",
+        "of": "sur",
+        "page": "Page"
+      },
+      "letter": {
+        "title": "Joueurs commençant par {letter} - SARPBC",
+        "description": "Parcourez tous les joueurs dont les noms commencent par {letter}. Trouvez des profils détaillés, des statistiques et des informations d'équipe.",
+        "ogTitle": "Joueurs commençant par {letter} - SARPBC",
+        "ogDescription": "Parcourez {count} joueurs dont les noms commencent par {letter}.",
+        "pageTitle": "Joueurs - {letter}",
+        "playersFound": "{count} joueur trouvé | {count} joueurs trouvés",
+        "noPlayersFound": "Aucun joueur trouvé",
+        "noPlayersStartingWith": "Il n'y a aucun joueur dont le nom commence par \"{letter}\"",
+        "backToAllPlayers": "Retour à tous les joueurs"
+      }
+    },
+    "player": {
+      "slug": {
+        "loadingPlayer": "Chargement du joueur...",
+        "errorLoadingPlayer": "Erreur lors du chargement du joueur",
+        "failedToLoadPlayerData": "Échec du chargement des données du joueur",
+        "playerNotFound": "Joueur introuvable",
+        "playerCouldNotBeFound": "Le joueur \"{slug}\" n'a pas pu être trouvé.",
+        "goBackToHome": "Retour à l'accueil",
+        "seoTitleWithName": "{name} - Sarpbc",
+        "seoTitleDefault": "Joueur - Sarpbc",
+        "seoDescriptionWithName": "Voir le profil et les statistiques de {name}",
+        "seoDescriptionDefault": "Profil du joueur",
+        "currentTeam": "Équipe actuelle",
+        "nationality": "Nationalité",
+        "age": "Âge",
+        "xYears": "{years} ans",
+        "formerTeams": "Anciennes équipes"
+      }
+    },
+    "teams": {
+      "index": {
+        "title": "Toutes les équipes - SARPBC",
+        "description": "Parcourez toutes les {count} équipes de la base de données SARPBC. Trouvez les équipes par nom organisées alphabétiquement.",
+        "ogTitle": "Toutes les équipes - SARPBC",
+        "ogDescription": "Parcourez toutes les {count} équipes de la base de données SARPBC.",
+        "pageTitle": "Répertoire des équipes",
+        "team": "équipe",
+        "teams": "équipes",
+        "noTeamsFound": "Aucune équipe trouvée",
+        "showing": "Affichage",
+        "of": "sur",
+        "page": "Page"
+      },
+      "letter": {
+        "title": "Équipes commençant par {letter} - SARPBC",
+        "description": "Parcourez toutes les équipes dont les noms commencent par {letter}. Trouvez des profils détaillés, des effectifs et des informations de match.",
+        "ogTitle": "Équipes commençant par {letter} - SARPBC",
+        "ogDescription": "Parcourez {count} équipes dont les noms commencent par {letter}.",
+        "pageTitle": "Équipes - {letter}",
+        "teamsFound": "{count} équipe trouvée | {count} équipes trouvées",
+        "noTeamsFound": "Aucune équipe trouvée",
+        "noTeamsStartingWith": "Il n'y a aucune équipe dont le nom commence par \"{letter}\"",
+        "backToAllTeams": "Retour à toutes les équipes"
+      }
+    },
+    "team": {
+      "slug": {
+        "loadingTeam": "Chargement de l'équipe...",
+        "errorLoadingTeam": "Erreur lors du chargement de l'équipe",
+        "failedToLoadTeamData": "Échec du chargement des données de l'équipe",
+        "teamNotFound": "Équipe introuvable",
+        "seoTitleWithName": "{name} - Sarpbc",
+        "seoTitleDefault": "Équipe - Sarpbc",
+        "seoDescriptionWithName": "Voir le profil et les joueurs de {name}",
+        "seoDescriptionDefault": "Profil de l'équipe",
+        "location": "Localisation",
+        "players": "Joueurs",
+        "playersCount": "{count} joueur | {count} joueurs",
+        "statistics": "Statistiques",
+        "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
+        "formerPlayers": "Anciens joueurs"
+      }
+    },
+    "tournaments": {
+      "index": {
+        "title": "Tournois"
+      },
+      "id": {
+        "seoTitle": "{tournamentName} - sarpbc",
+        "seoDescription": "Voir les détails du tournoi {tournamentName} sur sarpbc.",
+        "noMatches": "Aucun match disponible pour ce tournoi."
+      }
+    },
+    "forum": {
+      "index": {
+        "title": "Forum | Sarpbc",
+        "description": "Rejoignez le forum de la communauté Sarpbc. Discutez de stratégies Rocket League, partagez vos expériences et connectez-vous avec d'autres joueurs dans notre communauté dynamique.",
+        "ogTitle": "Forum Sarpbc - Communauté Rocket League",
+        "ogDescription": "Connectez-vous avec la communauté Rocket League sur le Forum Sarpbc. Partagez des stratégies, discutez du gameplay et restez informé des dernières nouvelles de la communauté.",
+        "pageTitle": "Forum",
+        "createNewPost": "Créer un nouveau post",
+        "noPosts": "Aucun post disponible",
+        "loading": "Chargement des posts...",
+        "lastActivity": "Dernière activité",
+        "messages": "messages",
+        "message": "message",
+        "posts": "Posts",
+        "topics": "Sujets",
+        "allTopics": "Tous les sujets",
+        "filterByTopic": "Filtrer par sujet",
+        "searchPosts": "Rechercher des posts...",
+        "clearFilters": "Effacer les filtres"
+      },
+      "new": {
+        "title": "Créer un nouveau post",
+        "description": "Créez un nouveau post dans le forum Sarpbc. Partagez vos pensées, idées et discussions sur Rocket League avec la communauté.",
+        "ogTitle": "Créer un nouveau post | Forum Sarpbc",
+        "ogDescription": "Rejoignez la conversation ! Créez un nouveau post dans le forum Sarpbc et partagez vos connaissances Rocket League avec la communauté.",
+        "pageTitle": "Créer un nouveau post",
+        "form": {
+          "title": "Titre",
+          "titlePlaceholder": "Entrez le titre",
+          "topic": "Sujet",
+          "content": "Contenu",
+          "contentPlaceholder": "Un avis, une idée ou une anecdote Rocket League ? Partage-les !",
+          "submit": "Envoyer"
+        },
+        "validation": {
+          "titleMinLength": "Le titre doit contenir au moins 1 caractère",
+          "titleMaxLength": "Le titre doit contenir au maximum 100 caractères",
+          "contentMinLength": "Le contenu doit contenir au moins 1 caractère",
+          "contentMaxLength": "Le contenu doit contenir au maximum 2048 caractères"
+        },
+        "messages": {
+          "successTitle": "Succès",
+          "successDescription": "Post créé avec succès !",
+          "errorTitle": "Erreur",
+          "errorDescription": "Échec de la création du post."
+        }
+      },
+      "post": {
+        "loadingPost": "Chargement du post...",
+        "errorLoadingPost": "Erreur lors du chargement du post",
+        "failedToLoadPostData": "Échec du chargement des données du post",
+        "postNotFound": "Post introuvable",
+        "postCouldNotBeFound": "Le post n'a pas pu être trouvé.",
+        "goBackToForum": "Retour au forum",
+        "seoTitleWithTitle": "{title} - Forum Sarpbc",
+        "seoTitleDefault": "Post du forum - Sarpbc",
+        "seoDescriptionWithTitle": "Lire \"{title}\" dans le forum Sarpbc",
+        "seoDescriptionDefault": "Post du forum",
+        "author": "Auteur",
+        "topic": "Sujet",
+        "postedOn": "Publié le {date}"
+      }
+    },
+    "profile": {
+      "title": "Profil",
+      "logout": "Se déconnecter"
+    },
+    "authentication": {
+      "login": "Connexion",
+      "email": "Email",
+      "password": "Mot de passe",
+      "noAccount": "Pas de compte?",
+      "register": "Inscrivez-vous",
+      "continueWithGoogle": "Continuer avec Google",
+      "or": "ou",
+      "logIn": "Se connecter",
+      "userName": "Nom d'utilisateur",
+      "alreadyHaveAnAccount": "Vous avez déjà un compte?",
+      "toRegister": "S'inscrire"
+    }
+  },
+  "pages": {
+    "cookiePolicy": {
+      "title": "Politique des Cookies",
+      "metaDescription": "Découvrez comment nous utilisons les cookies sur notre site web, y compris Google Analytics et autres technologies de suivi.",
+      "lastUpdated": "Dernière mise à jour",
+      "lastUpdatedDate": "4 septembre 2025",
+      "whatAreCookies": {
+        "title": "Que sont les Cookies ?",
+        "description": "Les cookies sont de petits fichiers texte stockés sur votre appareil lorsque vous visitez notre site web. Ils nous aident à vous offrir une meilleure expérience de navigation en mémorisant vos préférences et en activant les fonctionnalités essentielles du site."
+      },
+      "howWeUseCookies": {
+        "title": "Comment Nous Utilisons les Cookies",
+        "description": "Nous utilisons les cookies pour améliorer votre expérience sur notre site web, analyser le trafic du site et comprendre comment les visiteurs interagissent avec notre site. Cela nous aide à améliorer nos services et à vous fournir un contenu plus pertinent."
+      },
+      "typesOfCookies": {
+        "title": "Types de Cookies que Nous Utilisons",
+        "essential": {
+          "title": "Cookies Essentiels",
+          "description": "Ces cookies sont nécessaires au bon fonctionnement du site web. Ils permettent des fonctionnalités de base comme la navigation entre les pages, l'accès aux zones sécurisées et la mémorisation de vos préférences de cookies. Ces cookies ne peuvent pas être désactivés car ils sont essentiels au fonctionnement du site."
+        },
+        "analytics": {
+          "title": "Cookies Analytiques",
+          "description": "Nous utilisons des cookies analytiques pour comprendre comment les visiteurs interagissent avec notre site web. Ces cookies nous aident à analyser le trafic du site, à mesurer l'efficacité de notre contenu et à améliorer nos services.",
+          "googleAnalytics": "Nous utilisons spécifiquement Google Analytics pour collecter des informations anonymes sur la façon dont vous utilisez notre site, y compris les pages que vous visitez, le temps que vous passez sur chaque page et comment vous avez trouvé notre site."
+        }
+      },
+      "managingCookies": {
+        "title": "Gestion de Vos Préférences de Cookies",
+        "description": "Vous avez plusieurs options pour gérer les cookies sur notre site web :",
+        "options": {
+          "browserSettings": "Ajustez les paramètres de votre navigateur pour bloquer ou supprimer les cookies",
+          "cookiePopup": "Utilisez notre popup de consentement aux cookies pour accepter ou refuser les cookies non essentiels",
+          "thirdPartyTools": "Utilisez des outils tiers comme des extensions de navigateur pour gérer le suivi"
+        }
+      },
+      "cookieRetention": {
+        "title": "Conservation des Cookies",
+        "description": "Les cookies essentiels sont stockés pendant la durée de votre session ou jusqu'à ce que vous supprimiez les données de votre navigateur. Les cookies analytiques sont généralement stockés jusqu'à 24 mois pour nous aider à comprendre les modèles d'utilisation à long terme."
+      },
+      "changes": {
+        "title": "Modifications de Cette Politique",
+        "description": "Nous pouvons mettre à jour cette politique des cookies de temps à autre pour refléter les changements dans nos pratiques ou pour d'autres raisons opérationnelles, légales ou réglementaires. Veuillez consulter cette page périodiquement pour toute mise à jour."
+      },
+      "contact": {
+        "title": "Nous Contacter",
+        "description": "Si vous avez des questions sur notre utilisation des cookies ou cette politique des cookies, veuillez nous contacter via notre site web ou forum."
+      },
+      "quickActions": {
+        "title": "Préférences Cookies Rapides",
+        "description": "Vous pouvez définir rapidement vos préférences de cookies ici. Cela remplacera tous les paramètres précédents.",
+        "acceptAnalytics": "Accepter les Cookies Analytiques",
+        "declineAnalytics": "Refuser les Cookies Analytiques",
+        "alreadySet": "Vous avez déjà défini vos préférences de cookies. Supprimez les données de votre navigateur pour les modifier.",
+        "success": "Préférences de cookies mises à jour avec succès !"
+      },
+      "currentStatus": {
+        "title": "Vos Préférences de Cookies Actuelles",
+        "essential": "Cookies Essentiels",
+        "analytics": "Cookies Analytiques",
+        "enabled": "Activé",
+        "disabled": "Désactivé",
+        "lastModified": "Dernière modification",
+        "noPreferences": "Aucune préférence de cookies définie. Utilisez les boutons ci-dessous pour définir vos préférences."
+      },
+      "backToHome": "Retour à l'Accueil",
+      "manageCookiePreferences": "Gérer les Préférences des Cookies"
+    },
+    "legalNotice": {
+      "title": "Mentions Légales",
+      "metaDescription": "Informations légales sur le site web Sarpbc, incluant les détails de l'éditeur, l'hébergement et les droits de propriété intellectuelle.",
+      "lastUpdated": "Dernière mise à jour",
+      "lastUpdatedDate": "4 septembre 2025",
+      "siteEditor": {
+        "title": "Éditeur du site",
+        "description": "Le site sarpbc.org est édité par :",
+        "name": "Nom",
+        "address": "Adresse",
+        "addressText": "« adresse communiquée à l'hébergeur, conformément à la loi »",
+        "email": "Email"
+      },
+      "publicationDirector": {
+        "title": "Directeur de la publication",
+        "name": "Nom",
+        "email": "Email"
+      },
+      "hosting": {
+        "title": "Hébergement",
+        "description": "Le site sarpbc.org est hébergé par :",
+        "companyName": "Dénomination sociale",
+        "address": "Siège social"
+      },
+      "intellectualProperty": {
+        "title": "Propriété Intellectuelle",
+        "description": "Le contenu original de ce site web, y compris le texte, les graphiques, les logos et les logiciels développés par Sarpbc, est la propriété de Sarpbc et est protégé par les lois sur la propriété intellectuelle. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
+        "rocketLeague": "Rocket League est une marque déposée de Psyonix LLC. Ce site web n'est pas affilié à ou approuvé par Psyonix LLC."
+      },
+      "personalData": {
+        "title": "Données Personnelles",
+        "description": "Pour des informations sur la façon dont nous collectons, utilisons et protégeons vos données personnelles, veuillez consulter notre Politique de Confidentialité.",
+        "privacyPolicyLink": "Voir la Politique de Confidentialité"
+      },
+      "liability": {
+        "title": "Limitation de Responsabilité",
+        "description": "Les informations sur ce site web sont fournies à des fins d'information générale uniquement. Nous ne faisons aucune déclaration ou garantie d'aucune sorte concernant l'exhaustivité, la précision, la fiabilité ou la disponibilité du site web ou de son contenu.",
+        "accuracy": "Nous nous efforçons de maintenir les informations à jour et correctes, mais nous ne garantissons pas la précision des informations fournies."
+      },
+      "applicableLaw": {
+        "title": "Droit Applicable",
+        "description": "Ce site web et ces mentions légales sont régis par le droit français. Tout litige relatif à l'utilisation de ce site web sera soumis à la juridiction exclusive des tribunaux français."
+      },
+      "backToHome": "Retour à l'Accueil"
+    },
+    "privacyPolicy": {
+      "title": "Politique de Confidentialité",
+      "metaDescription": "Découvrez comment nous collectons, utilisons et protégeons vos informations personnelles en conformité avec le RGPD et les lois françaises sur la protection des données.",
+      "lastUpdated": "Dernière mise à jour",
+      "lastUpdatedDate": "4 septembre 2025",
+      "introduction": {
+        "title": "Introduction",
+        "description": "Cette Politique de Confidentialité explique comment Sarpbc collecte, utilise et protège vos informations personnelles lorsque vous utilisez notre site web et nos services. Nous nous engageons à protéger votre vie privée et à assurer la transparence de nos pratiques de données."
+      },
+      "dataController": {
+        "title": "Responsable du Traitement",
+        "email": "Email de Contact"
+      },
+      "dataCollected": {
+        "title": "Données que Nous Collectons",
+        "description": "Nous collectons les types d'informations personnelles suivants :",
+        "account": {
+          "title": "Informations de Compte",
+          "email": "Adresse email",
+          "username": "Nom d'utilisateur",
+          "profile": "Informations de profil que vous choisissez de fournir"
+        },
+        "technical": {
+          "title": "Informations Techniques",
+          "ip": "Adresse IP",
+          "browser": "Type et version du navigateur",
+          "usage": "Données d'utilisation du site web et analyses"
+        }
+      },
+      "purposes": {
+        "title": "Comment Nous Utilisons Vos Données",
+        "service": "Pour fournir et maintenir nos services",
+        "communication": "Pour communiquer avec vous concernant votre compte et nos services",
+        "improvement": "Pour améliorer notre site web et l'expérience utilisateur",
+        "legal": "Pour respecter les obligations légales"
+      },
+      "legalBasis": {
+        "title": "Base Légale du Traitement",
+        "description": "Nous traitons vos données personnelles sur la base de :",
+        "consent": "Votre consentement pour les communications marketing et les analyses",
+        "contract": "L'exécution de nos conditions de service",
+        "interest": "Nos intérêts légitimes dans l'exploitation et l'amélioration de nos services"
+      },
+      "dataSharing": {
+        "title": "Partage des Données",
+        "description": "Nous pouvons partager vos données avec :",
+        "analytics": "Les fournisseurs d'analyses (Google Analytics) pour l'analyse du site web",
+        "hosting": "Les fournisseurs d'hébergement pour le fonctionnement du site web",
+        "legal": "Les forces de l'ordre ou les autorités réglementaires lorsque requis par la loi"
+      },
+      "rights": {
+        "title": "Vos Droits",
+        "description": "Sous le RGPD et la loi française sur la protection des données, vous avez le droit de :",
+        "access": "Accéder à vos données personnelles",
+        "rectification": "Corriger les données inexactes",
+        "erasure": "Demander la suppression de vos données",
+        "portability": "Portabilité des données",
+        "objection": "Vous opposer au traitement",
+        "complaint": "Déposer une plainte auprès de la CNIL (autorité française de protection des données)"
+      },
+      "retention": {
+        "title": "Conservation des Données",
+        "description": "Nous conservons vos données personnelles uniquement aussi longtemps que nécessaire aux fins pour lesquelles elles ont été collectées, ou comme requis par la loi. Les données de compte sont généralement conservées pendant la durée de votre compte plus 3 ans pour la conformité légale."
+      },
+      "contact": {
+        "title": "Nous Contacter",
+        "description": "Si vous avez des questions sur cette Politique de Confidentialité ou souhaitez exercer vos droits, veuillez nous contacter à contact{'@'}sarpbc.org."
+      },
+      "backToHome": "Retour à l'Accueil"
+    },
+    "termsOfService": {
+      "title": "Conditions Générales d'Utilisation",
+      "metaDescription": "Lisez nos conditions de service pour comprendre les règles et directives d'utilisation du site web et de la communauté Sarpbc.",
+      "lastUpdated": "Dernière mise à jour",
+      "lastUpdatedDate": "4 septembre 2025",
+      "acceptance": {
+        "title": "Acceptation des Conditions",
+        "description": "En accédant et en utilisant ce site web, vous acceptez et acceptez d'être lié par les termes et dispositions de cet accord. Si vous n'acceptez pas de respecter ce qui précède, veuillez ne pas utiliser ce service."
+      },
+      "description": {
+        "title": "Description du Service",
+        "content": "Sarpbc est un site web communautaire axé sur les actualités Rocket League, les tournois, les statistiques des joueurs et les discussions communautaires. Nos services sont fournis gratuitement à tous les utilisateurs."
+      },
+      "userAccounts": {
+        "title": "Comptes Utilisateur",
+        "description": "Pour accéder à certaines fonctionnalités, vous devrez peut-être créer un compte. Vous acceptez de :",
+        "accurate": "Fournir des informations exactes et complètes",
+        "security": "Maintenir la sécurité de vos identifiants de compte",
+        "responsibility": "Prendre la responsabilité de toutes les activités sous votre compte"
+      },
+      "userContent": {
+        "title": "Contenu Utilisateur",
+        "description": "Vous êtes responsable de tout contenu que vous publiez sur notre site web, y compris les messages de forum et les commentaires. Vous conservez la propriété de votre contenu mais nous accordez une licence pour l'utiliser sur notre plateforme.",
+        "prohibited": {
+          "title": "Le contenu interdit inclut :",
+          "illegal": "Contenu illégal ou nuisible",
+          "harmful": "Harcèlement, discours de haine ou contenu discriminatoire",
+          "spam": "Spam ou sollicitation commerciale",
+          "copyright": "Contenu qui enfreint les droits de propriété intellectuelle"
+        }
+      },
+      "intellectualProperty": {
+        "title": "Propriété Intellectuelle",
+        "description": "Le site web et son contenu original, ses fonctionnalités et sa fonctionnalité sont la propriété de Sarpbc et sont protégés par les lois internationales sur le droit d'auteur, les marques déposées et autres propriétés intellectuelles. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
+        "userContent": "Vous conservez les droits sur le contenu que vous créez, mais nous accordez une licence non exclusive pour l'utiliser, le modifier et l'afficher sur notre plateforme."
+      },
+      "disclaimer": {
+        "title": "Clause de Non-Responsabilité",
+        "description": "Les informations sur ce site web sont fournies « en l'état ». Nous ne faisons aucune déclaration ou garantie d'aucune sorte, expresse ou implicite, concernant l'exhaustivité, la précision, la fiabilité ou la disponibilité du site web.",
+        "warranty": "Nous déclinons toutes garanties, expresses ou implicites, y compris mais sans s'y limiter aux garanties implicites de qualité marchande et d'adéquation à un usage particulier."
+      },
+      "limitation": {
+        "title": "Limitation de Responsabilité",
+        "description": "En aucun cas Sarpbc ne sera responsable de dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, y compris sans limitation, la perte de profits, de données, d'utilisation, de clientèle ou d'autres pertes intangibles."
+      },
+      "termination": {
+        "title": "Résiliation",
+        "description": "Nous pouvons résilier ou suspendre votre compte et l'accès au service immédiatement, sans préavis ni responsabilité, pour quelque raison que ce soit, y compris sans limitation si vous violez les Conditions."
+      },
+      "changes": {
+        "title": "Modifications des Conditions",
+        "description": "Nous nous réservons le droit de modifier ou de remplacer ces Conditions à tout moment. Si une révision est importante, nous essaierons de fournir un préavis d'au moins 30 jours avant que de nouvelles conditions prennent effet."
+      },
+      "contact": {
+        "title": "Informations de Contact",
+        "description": "Si vous avez des questions sur ces Conditions de Service, veuillez nous contacter à contact{'@'}sarpbc.org."
+      },
+      "backToHome": "Retour à l'Accueil"
+    },
+    "accessibility": {
+      "title": "Déclaration d'Accessibilité",
+      "metaDescription": "Notre engagement envers l'accessibilité web et les informations sur les fonctionnalités d'accessibilité de notre site web.",
+      "lastUpdated": "Dernière mise à jour",
+      "lastUpdatedDate": "4 septembre 2025",
+      "commitment": {
+        "title": "Notre Engagement envers l'Accessibilité",
+        "description": "Sarpbc s'engage à assurer l'accessibilité numérique pour les personnes handicapées. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes."
+      },
+      "compliance": {
+        "title": "Statut de Conformité",
+        "description": "Les Directives pour l'Accessibilité des Contenus Web (WCAG) définissent les exigences pour les concepteurs et développeurs afin d'améliorer l'accessibilité pour les personnes handicapées. Elles définissent trois niveaux de conformité : Niveau A, Niveau AA et Niveau AAA.",
+        "status": "Ce site web est partiellement conforme aux WCAG 2.1 niveau AA. Partiellement conforme signifie que certaines parties du contenu ne sont pas entièrement conformes à la norme d'accessibilité."
+      },
+      "measures": {
+        "title": "Mesures d'Accessibilité",
+        "description": "Nous avons mis en place les mesures d'accessibilité suivantes :",
+        "keyboard": "Support de navigation au clavier",
+        "screenReader": "Compatibilité avec les lecteurs d'écran",
+        "contrast": "Ratios de contraste de couleur suffisants",
+        "text": "Texte redimensionnable jusqu'à 200% sans perte de fonctionnalité",
+        "images": "Texte alternatif pour les images"
+      },
+      "limitations": {
+        "title": "Limitations Connues",
+        "description": "Malgré nos meilleurs efforts, certaines limitations peuvent exister :",
+        "thirdParty": "Le contenu de tiers peut ne pas être entièrement accessible",
+        "userContent": "Le contenu généré par les utilisateurs peut ne pas respecter les normes d'accessibilité"
+      },
+      "feedback": {
+        "title": "Commentaires et Contact",
+        "description": "Nous accueillons vos commentaires sur l'accessibilité de notre site web. Veuillez nous faire savoir si vous rencontrez des obstacles d'accessibilité :",
+        "email": "Email",
+        "response": "Temps de réponse",
+        "responseTime": "Nous visons à répondre dans les 3 jours ouvrables"
+      },
+      "enforcement": {
+        "title": "Procédure d'Application",
+        "description": "Si vous n'êtes pas satisfait de notre réponse à votre préoccupation d'accessibilité, vous pouvez contacter :",
+        "authority": "Autorité d'Accessibilité",
+        "authorityName": "Défenseur des Droits",
+        "authorityAddress": "TSA 90716, 75334 Paris Cedex 07, France",
+        "website": "Site Web"
+      },
+      "technical": {
+        "title": "Spécifications Techniques",
+        "description": "L'accessibilité de ce site web repose sur les technologies suivantes :",
+        "technologies": "HTML, CSS, JavaScript et attributs ARIA",
+        "assistive": "Conçu pour fonctionner avec les technologies d'assistance",
+        "testing": "Tests réguliers avec les lecteurs d'écran et la navigation au clavier"
+      },
+      "backToHome": "Retour à l'Accueil"
+    }
+  }
+}

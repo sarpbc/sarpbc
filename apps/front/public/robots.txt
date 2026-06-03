@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard/
+
+Sitemap: https://sarpbc.org/sitemap.xml
+
+# LLM-friendly content description
+# See: https://sarpbc.org/llms.txt

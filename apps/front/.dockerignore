@@ -1,0 +1,14 @@
+node_modules
+.pnpm
+.pnpm-store
+.nuxt
+.output
+.DS_Store
+.github
+.vscode
+
+!pnpm-lock.yaml
+!.npmrc
+
+.env.example
+.gitignore

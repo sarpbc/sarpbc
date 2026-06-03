@@ -1,0 +1,235 @@
+import type { Team } from "~/types/team";
+import type { ContractRole, TeamContract } from "~/types/contract";
+
+export async function getTeamFromSlug(slug: string): Promise<Team | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/slug/${slug}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    return res.team || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getAllTeams(query?: {
+  limit?: number;
+  search?: string;
+  offset?: number;
+  start?: string;
+}): Promise<{ teams: Team[]; total: number }> {
+  const config = useRuntimeConfig();
+  try {
+    const params: Record<string, string | number | undefined> = {
+      limit: query?.limit || 50,
+    };
+
+    if (query?.offset && query.offset > 0) {
+      params.offset = query.offset;
+    }
+
+    if (query?.start) {
+      params.start = query.start;
+    } else if (query?.search) {
+      params.name = query.search;
+    }
+
+    const res = await $fetch<{ teams?: Team[]; count?: number }>(`${config.public.apiBase}/team`, {
+      method: "GET",
+      credentials: "include",
+      params,
+    });
+
+    const teams = res.teams || [];
+    const total = res.count ?? teams.length;
+
+    return {
+      teams,
+      total,
+    };
+  } catch (error) {
+    console.error("Error fetching teams:", error);
+    return { teams: [], total: 0 };
+  }
+}
+
+export async function syncTeamFromPandascore(): Promise<void> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/team/sync`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Error syncing team:", error);
+  }
+}
+
+export async function getTeamFormerPlayers(teamId: string): Promise<TeamContract[]> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ contracts?: TeamContract[] }>(
+      `${config.public.apiBase}/team/${teamId}/former-players`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+    return res.contracts || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getTeamById(id: string): Promise<Team | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/${id}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    return res.team || null;
+  } catch (error) {
+    console.error("Error fetching team by id:", error);
+    return null;
+  }
+}
+
+export async function createTeam(body: {
+  name: string;
+  location?: string;
+  imageUrl?: string;
+}): Promise<Team | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team`, {
+      method: "POST",
+      credentials: "include",
+      body,
+    });
+    return res.team || null;
+  } catch (error) {
+    console.error("Error creating team:", error);
+    throw error;
+  }
+}
+
+export async function updateTeam(
+  id: string,
+  body: {
+    name?: string;
+    location?: string;
+    imageUrl?: string;
+  },
+): Promise<Team | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      body,
+    });
+    return res.team || null;
+  } catch (error) {
+    console.error("Error updating team:", error);
+    throw error;
+  }
+}
+
+export async function deleteTeam(id: string): Promise<void> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/team/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Error deleting team:", error);
+    throw error;
+  }
+}
+
+export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ contracts?: TeamContract[] }>(
+      `${config.public.apiBase}/team/${teamId}/contract`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+    return res.contracts || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createTeamContract(
+  teamId: string,
+  body: {
+    playerId: string;
+    role: ContractRole;
+    startDate: string;
+    endDate?: string | null;
+  },
+): Promise<TeamContract | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ contract?: TeamContract }>(
+      `${config.public.apiBase}/team/${teamId}/contract`,
+      {
+        method: "POST",
+        credentials: "include",
+        body,
+      },
+    );
+    return res.contract || null;
+  } catch (error) {
+    console.error("Error creating team contract:", error);
+    throw error;
+  }
+}
+
+export async function updateTeamContract(
+  teamId: string,
+  contractId: string,
+  body: {
+    playerId?: string;
+    role?: ContractRole;
+    startDate?: string;
+    endDate?: string | null;
+  },
+): Promise<TeamContract | null> {
+  const config = useRuntimeConfig();
+  try {
+    const res = await $fetch<{ contract?: TeamContract }>(
+      `${config.public.apiBase}/team/${teamId}/contract/${contractId}`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        body,
+      },
+    );
+    return res.contract || null;
+  } catch (error) {
+    console.error("Error updating team contract:", error);
+    throw error;
+  }
+}
+
+export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/team/${teamId}/contract/${contractId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Error deleting team contract:", error);
+    throw error;
+  }
+}

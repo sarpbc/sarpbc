@@ -1,0 +1,14 @@
+services:
+  sarpbc-front:
+    image: ghcr.io/sarpbc/sarpbc-front:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 5s
+      restart_policy:
+        condition: on-failure
