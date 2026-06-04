@@ -12,14 +12,16 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/src/main",
+    "start:prod": "node dist/main",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
-    "mikro:migrate": "mikro-orm migration:up --config=./src/mikro-orm.config.ts"
+    "mikro:migrate": "mikro-orm migration:up --config=./src/mikro-orm.config.ts",
+    "mikro:migrate:prod": "mikro-orm migration:up --config=./dist/mikro-orm.config.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/multipart": "^9.4.0",
+    "@mikro-orm/cli": "^6.6.7",
     "@mikro-orm/core": "^6.6.7",
     "@mikro-orm/entity-generator": "^6.6.7",
     "@mikro-orm/migrations": "^6.6.7",
@@ -51,7 +53,6 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@mikro-orm/cli": "^6.6.7",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
     "@swc/cli": "^0.7.10",

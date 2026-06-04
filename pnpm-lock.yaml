@@ -29,6 +29,9 @@ importers:
       '@fastify/multipart':
         specifier: ^9.4.0
         version: 9.4.0
+      '@mikro-orm/cli':
+        specifier: ^6.6.7
+        version: 6.6.14(pg@8.21.0)
       '@mikro-orm/core':
         specifier: ^6.6.7
         version: 6.6.14
@@ -117,9 +120,6 @@ importers:
         specifier: ^13.0.0
         version: 13.0.2
     devDependencies:
-      '@mikro-orm/cli':
-        specifier: ^6.6.7
-        version: 6.6.14(pg@8.21.0)
       '@nestjs/cli':
         specifier: ^11.0.16
         version: 11.0.21(@swc/cli@0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3))(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.1)
