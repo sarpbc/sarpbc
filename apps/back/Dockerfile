@@ -6,7 +6,7 @@ FROM node:24.13.1-bookworm-slim AS base
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
-  && npm install -g pnpm@10.33.2
+  && npm install -g pnpm@11.8.0
 
 WORKDIR /app
 
@@ -43,7 +43,7 @@ ARG APP_RELEASE=unknown
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
-  && npm install -g pnpm@10.33.2 \
+  && npm install -g pnpm@11.8.0 \
   && addgroup --system --gid 1001 app \
   && adduser --system --uid 1001 --ingroup app --home /nonexistent --shell /usr/sbin/nologin app
 

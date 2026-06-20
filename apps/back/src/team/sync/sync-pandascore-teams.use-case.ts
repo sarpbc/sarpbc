@@ -1,0 +1,101 @@
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { EntityManager } from "@mikro-orm/postgresql";
+import {
+  PANDASCORE_GATEWAY,
+  PandascoreGateway,
+} from "src/pandascore/application/ports/pandascore.gateway.port";
+import { PandascorePlayerMapper } from "src/pandascore/application/mappers/pandascore-player.mapper";
+import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
+import { Player } from "src/player/domain/player.entity";
+import { Team } from "src/team/domain/team.entity";
+
+@Injectable()
+export class SyncPandascoreTeamsUseCase {
+  private readonly logger = new Logger(SyncPandascoreTeamsUseCase.name);
+
+  constructor(
+    private readonly em: EntityManager,
+    @Inject(PANDASCORE_GATEWAY)
+    private readonly pandascoreGateway: PandascoreGateway,
+  ) {}
+
+  async execute(cancelIfExistingTeam: boolean): Promise<void> {
+    const em = this.em.fork();
+    const existingTeams = await em.find(Team, {});
+    if (existingTeams.length > 0 && cancelIfExistingTeam) {
+      return;
+    }
+
+    const pandaScorePlayers = await this.pandascoreGateway.getRocketLeaguePlayers();
+    const createdTeams = new Map<string, Team>();
+
+    for (const pandaPlayer of pandaScorePlayers) {
+      if (!pandaPlayer.current_team) {
+        continue;
+      }
+
+      const teamCommand = PandascoreTeamMapper.fromCurrentTeam(pandaPlayer.current_team);
+      const teamSlug = teamCommand.slug;
+      let team = createdTeams.get(teamSlug);
+
+      if (!team) {
+        const existingTeam = await em.findOne(Team, { slug: teamSlug });
+        team = existingTeam ?? new Team();
+        team.slug = teamSlug;
+        team.name = teamCommand.name;
+        team.imageUrl = teamCommand.imageUrl;
+        team.pandascoreId = teamCommand.pandascoreId;
+        em.persist(team);
+        createdTeams.set(teamSlug, team);
+      }
+    }
+
+    await em.flush();
+
+    let playersCreated = 0;
+    let playersUpdated = 0;
+
+    for (const pandaPlayer of pandaScorePlayers) {
+      if (!pandaPlayer.slug) {
+        continue;
+      }
+
+      const playerCommand = PandascorePlayerMapper.fromRocketLeaguePlayer(pandaPlayer);
+      const existingPlayer = await em.findOne(Player, { slug: playerCommand.slug });
+
+      if (!existingPlayer) {
+        const newPlayer = new Player();
+        newPlayer.name = playerCommand.name;
+        newPlayer.firstName = playerCommand.firstName;
+        newPlayer.lastName = playerCommand.lastName;
+        newPlayer.birthday = playerCommand.birthday;
+        newPlayer.nationality = playerCommand.nationality;
+        newPlayer.imageUrl = playerCommand.imageUrl;
+        newPlayer.slug = playerCommand.slug;
+
+        if (playerCommand.teamSlug) {
+          const team = createdTeams.get(playerCommand.teamSlug);
+          if (team) {
+            newPlayer.team = team;
+          }
+        }
+
+        em.persist(newPlayer);
+        playersCreated += 1;
+      } else if (playerCommand.teamSlug) {
+        const team = createdTeams.get(playerCommand.teamSlug);
+        if (team && existingPlayer.team?.id !== team.id) {
+          existingPlayer.team = team;
+          em.persist(existingPlayer);
+          playersUpdated += 1;
+        }
+      }
+    }
+
+    await em.flush();
+
+    this.logger.log(
+      `Team sync complete: teams=${createdTeams.size}, created=${playersCreated}, updated=${playersUpdated}`,
+    );
+  }
+}

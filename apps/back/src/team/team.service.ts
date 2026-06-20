@@ -2,21 +2,18 @@
 import { TeamRepository } from "./team.repository";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { PlayerService } from "../player/player.service";
-import { PandascoreService } from "../pandascore/pandascore.service";
 import { Team } from "./domain/team.entity";
-import { Player } from "../player/domain/player.entity";
 import { TeamSearchProps } from "./interfaces/search-team-props";
+import { SyncPandascoreTeamsUseCase } from "./sync/sync-pandascore-teams.use-case";
 
 @Injectable()
 export class TeamService {
   constructor(
     private readonly teamRepository: TeamRepository,
-    // EntityManager kept only for the bulk PandaScore sync which requires
-    // a forked context. All regular CRUD goes through the repository.
     private readonly em: EntityManager,
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
-    private readonly pandascoreService: PandascoreService,
+    private readonly syncPandascoreTeamsUseCase: SyncPandascoreTeamsUseCase,
   ) {}
 
   async find(options: Partial<TeamSearchProps>): Promise<Team[]> {
@@ -69,96 +66,6 @@ export class TeamService {
   }
 
   async initializeTeamsFromPandaScore(cancelIfExistingTeam: boolean): Promise<void> {
-    const em = this.em.fork();
-
-    const existingTeams = await em.find(Team, {});
-    if (existingTeams.length > 0 && cancelIfExistingTeam) {
-      return;
-    }
-
-    try {
-      const pandaScorePlayers = await this.pandascoreService.getRocketLeaguePlayers();
-      const createdTeams = new Map<string, Team>();
-
-      for (const pandaPlayer of pandaScorePlayers) {
-        if (pandaPlayer.current_team) {
-          const teamSlug = pandaPlayer.current_team.slug;
-          let team = createdTeams.get(teamSlug);
-
-          if (!team) {
-            const existingTeam = await em.findOne(Team, { slug: teamSlug });
-            if (!existingTeam) {
-              team = new Team();
-              team.slug = teamSlug;
-            } else {
-              team = existingTeam;
-            }
-            team.name = pandaPlayer.current_team.name;
-            team.imageUrl = pandaPlayer.current_team.image_url ?? undefined;
-            team.pandascoreId = pandaPlayer.current_team.id;
-            em.persist(team);
-            createdTeams.set(teamSlug, team);
-          }
-        }
-      }
-
-      await em.flush();
-
-      let playersCreated = 0;
-      let playersUpdated = 0;
-      let playersWithoutTeam = 0;
-      let playersSkippedNoSlug = 0;
-
-      for (const pandaPlayer of pandaScorePlayers) {
-        if (!pandaPlayer.slug) {
-          playersSkippedNoSlug++;
-          continue;
-        }
-
-        const existingPlayer = await em.findOne(Player, {
-          slug: pandaPlayer.slug,
-        });
-
-        if (!existingPlayer) {
-          const newPlayer = new Player();
-          newPlayer.name = pandaPlayer.name;
-          newPlayer.firstName = pandaPlayer.first_name ?? undefined;
-          newPlayer.lastName = pandaPlayer.last_name ?? undefined;
-          newPlayer.birthday = pandaPlayer.birthday ? new Date(pandaPlayer.birthday) : undefined;
-          newPlayer.nationality = pandaPlayer.nationality ?? undefined;
-          newPlayer.imageUrl = pandaPlayer.image_url ?? undefined;
-          newPlayer.slug = pandaPlayer.slug;
-
-          if (pandaPlayer.current_team) {
-            const team = createdTeams.get(pandaPlayer.current_team.slug);
-            if (team) {
-              newPlayer.team = team;
-            } else {
-              playersWithoutTeam++;
-            }
-          } else {
-            playersWithoutTeam++;
-          }
-          em.persist(newPlayer);
-          playersCreated++;
-        } else if (pandaPlayer.current_team) {
-          const team = createdTeams.get(pandaPlayer.current_team.slug);
-          if (team && existingPlayer.team?.id !== team.id) {
-            existingPlayer.team = team;
-            em.persist(existingPlayer);
-            playersUpdated++;
-          }
-        }
-      }
-
-      await em.flush();
-
-      console.log(
-        `Init complete: Teams=${createdTeams.size}, Created=${playersCreated}, Updated=${playersUpdated}, NoTeam=${playersWithoutTeam}, SkippedNoSlug=${playersSkippedNoSlug}`,
-      );
-    } catch (error) {
-      console.error("Failed to initialize teams from PandaScore:", error);
-      throw error;
-    }
+    await this.syncPandascoreTeamsUseCase.execute(cancelIfExistingTeam);
   }
 }

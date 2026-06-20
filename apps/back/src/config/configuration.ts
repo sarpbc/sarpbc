@@ -19,6 +19,7 @@ export default () => ({
   google_redirect_uri: getGoogleRedirectUri(),
   front_url: getFrontUrl(),
   pandascore_api_token: getPandaScoreApiToken(),
+  pandascore_sync_on_boot: process.env.PANDASCORE_SYNC_ON_BOOT === "true",
   production: process.env.NODE_ENV === "production",
   cloudflare_account_id: getCloudflareAccountId(),
   cloudflare_api_token: getCloudflareApiToken(),

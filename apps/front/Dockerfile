@@ -5,7 +5,7 @@ FROM node:24.13.1-alpine AS base
 
 WORKDIR /app
 RUN apk add --no-cache libc6-compat \
-  && npm install -g pnpm@10.33.2
+  && npm install -g pnpm@11.8.0
 
 FROM base AS deps
 

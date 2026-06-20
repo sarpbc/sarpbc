@@ -45,6 +45,13 @@ export class TournamentController {
   }
 
   @UseGuards(AuthGuard, AdminGuard)
+  @Post("sync/additions")
+  async syncPandascoreAdditions() {
+    await this.tournamentService.syncPandascoreAdditions();
+    return { success: true };
+  }
+
+  @UseGuards(AuthGuard, AdminGuard)
   @Post(":id/sync")
   async syncTournamentFromPandascore(@Param("id") id: string) {
     await this.tournamentService.syncTournamentFromPandascore(id);
