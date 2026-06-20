@@ -6,7 +6,6 @@ import { SYNC_CURSOR_REPOSITORY } from "./domain/sync-cursor.repository.interfac
 import { PandascoreApiClient } from "./infrastructure/pandascore-api.client";
 import { PandascoreGatewayImpl } from "./infrastructure/pandascore.gateway";
 import { RedisSyncCursorRepository } from "./infrastructure/redis-sync-cursor.repository";
-import { PandascoreService } from "./pandascore.service";
 
 @Module({
   imports: [ConfigModule, RedisModule],
@@ -21,14 +20,7 @@ import { PandascoreService } from "./pandascore.service";
       provide: SYNC_CURSOR_REPOSITORY,
       useClass: RedisSyncCursorRepository,
     },
-    PandascoreService,
   ],
-  exports: [
-    PandascoreApiClient,
-    PandascoreGatewayImpl,
-    PANDASCORE_GATEWAY,
-    SYNC_CURSOR_REPOSITORY,
-    PandascoreService,
-  ],
+  exports: [PandascoreApiClient, PandascoreGatewayImpl, PANDASCORE_GATEWAY, SYNC_CURSOR_REPOSITORY],
 })
 export class PandascoreModule {}
