@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   UseGuards,
@@ -11,6 +14,7 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { AuthGuard } from "../../auth/auth.guard";
+import { AdminGuard } from "../../user/user.guard";
 import { CurrentUserId } from "../../user/decorator/current-user.decorator";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { PostResponse } from "./dto/post-response.dto";
@@ -30,6 +34,10 @@ export class PostController {
         title: post.title,
         author: post.author.userName,
         createdAt: post.createdAt,
+        topic: {
+          id: post.topic.id,
+          title: post.topic.title,
+        },
       })),
     };
   }
@@ -66,5 +74,12 @@ export class PostController {
   async create(@CurrentUserId() userId: string, @Body() createPostDto: CreatePostDto) {
     await this.postService.create(userId, createPostDto);
     return { success: true };
+  }
+
+  @UseGuards(AuthGuard, AdminGuard)
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param("id") id: string) {
+    await this.postService.delete(id);
   }
 }

@@ -7,6 +7,7 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { UserService } from "src/user/user.service";
 import { PostDto } from "./dto/post-response.dto";
 import { PostType } from "./post-type.enum";
+import { ReplyService } from "src/reply/reply.service";
 
 @Injectable()
 export class PostService {
@@ -14,6 +15,7 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly topicRepository: TopicRepository,
     private readonly userService: UserService,
+    private readonly replyService: ReplyService,
   ) {}
 
   async find(options: { limit?: number; offset?: number }): Promise<Post[]> {
@@ -115,5 +117,21 @@ export class PostService {
 
   async findRecentActivity(limit: number = 20) {
     return this.postRepository.findRecentActivity(limit);
+  }
+
+  async delete(id: string): Promise<void> {
+    const post = await this.postRepository.findWithDetails(id);
+    if (!post) {
+      throw new NotFoundException("Post not found");
+    }
+
+    await this.replyService.deleteAllForPost(id);
+
+    for (const translation of post.translations.getItems()) {
+      this.postRepository.getEntityManager().remove(translation);
+    }
+    await this.postRepository.getEntityManager().flush();
+
+    await this.postRepository.delete(post);
   }
 }

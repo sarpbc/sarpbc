@@ -1,6 +1,17 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { ReplyService } from "./reply.service";
 import { AuthGuard } from "../auth/auth.guard";
+import { AdminGuard } from "../user/user.guard";
 import { CurrentUserId } from "../user/decorator/current-user.decorator";
 import { CreateReplyDto } from "./dto/create-reply.dto";
 
@@ -25,5 +36,12 @@ export class ReplyController {
   async create(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
     await this.replyService.create(userId, createReplyDto);
     return { success: true };
+  }
+
+  @UseGuards(AuthGuard, AdminGuard)
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param("id") id: string) {
+    await this.replyService.delete(id);
   }
 }

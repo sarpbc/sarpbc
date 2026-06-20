@@ -11,7 +11,10 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
     limit?: number;
     offset?: number;
   }): Promise<Post[]> {
-    return super.find({}, { limit, offset, populate: ["author"], orderBy: { createdAt: "DESC" } });
+    return super.find(
+      {},
+      { limit, offset, populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
+    );
   }
 
   async findByTopicId(topicId: string): Promise<Post[]> {
@@ -77,10 +80,14 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
   }
 
   async save(post: Post): Promise<void> {
-    await this.em.persistAndFlush(post);
+    await this.em.persist(post).flush();
   }
 
   async saveTranslation(translation: PostTranslation): Promise<void> {
-    await this.em.persistAndFlush(translation);
+    await this.em.remove(translation).flush();
+  }
+
+  async delete(post: Post): Promise<void> {
+    await this.em.remove(post).flush();
   }
 }

@@ -90,7 +90,7 @@ export async function createForumReply(data: {
 }): Promise<boolean> {
   const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/forum/replies`, {
+    const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/replies`, {
       method: "POST",
       body: data,
       credentials: "include",
@@ -99,6 +99,34 @@ export async function createForumReply(data: {
     return res.success ?? false;
   } catch (error) {
     console.error("Error creating forum reply:", error);
+    return false;
+  }
+}
+
+export async function deleteForumPost(postId: string): Promise<boolean> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/posts/${postId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting forum post:", error);
+    return false;
+  }
+}
+
+export async function deleteForumReply(replyId: string): Promise<boolean> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/replies/${replyId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting forum reply:", error);
     return false;
   }
 }

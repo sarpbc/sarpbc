@@ -95,3 +95,32 @@ export async function setTournamentPickemsEnabled(
     return false;
   }
 }
+
+export async function syncTournamentAdditions(): Promise<boolean> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/tournaments/sync/additions`, {
+      method: "POST",
+      credentials: "include",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error syncing tournament additions:", error);
+    return false;
+  }
+}
+
+export async function setMatchWinner(matchId: string, winnerId: string): Promise<boolean> {
+  const config = useRuntimeConfig();
+  try {
+    await $fetch(`${config.public.apiBase}/tournaments/matches/${matchId}/winner`, {
+      method: "PUT",
+      body: { winnerId },
+      credentials: "include",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error setting match winner:", error);
+    return false;
+  }
+}

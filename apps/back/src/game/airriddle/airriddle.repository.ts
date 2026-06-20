@@ -7,6 +7,6 @@ export class AirRiddleRepository extends EntityRepository<AirRiddle> {
   }
 
   async save(riddle: AirRiddle): Promise<void> {
-    await this.getEntityManager().persistAndFlush(riddle);
+    await this.getEntityManager().persist(riddle).flush();
   }
 }

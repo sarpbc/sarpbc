@@ -25,6 +25,6 @@ export class UserRepository extends EntityRepository<User> implements IUserRepos
   }
 
   async save(user: User): Promise<void> {
-    await this.em.persistAndFlush(user);
+    await this.em.persist(user).flush();
   }
 }

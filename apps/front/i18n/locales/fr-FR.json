@@ -122,16 +122,65 @@
   "page": {
     "dashboard": {
       "nav": {
-        "home": "Accueil",
+        "home": "Tableau de bord",
+        "articles": "Articles",
         "news": "Actualités",
         "tournaments": "Tournois",
         "forum": "Forum",
         "pickems": "Pick'ems",
         "players": "Joueurs",
-        "teams": "Équipes"
+        "teams": "Équipes",
+        "backToSite": "Retour sur sarpbc.org"
+      },
+      "tournaments": {
+        "title": "Tournois",
+        "tournamentsCount": "{count} tournois",
+        "syncAdditions": "Synchroniser les nouveaux tournois",
+        "syncTournament": "Actualiser le tournoi",
+        "viewMatches": "Voir les matchs",
+        "matchesTitle": "Matchs",
+        "matchesCount": "{count} matchs",
+        "noMatches": "Aucun match trouvé pour ce tournoi.",
+        "columns": {
+          "name": "Tournoi",
+          "status": "Statut",
+          "beginAt": "Début"
+        },
+        "match": {
+          "status": "Statut",
+          "score": "Score",
+          "setWinner": "Définir le vainqueur",
+          "syncScores": "Actualiser les scores"
+        }
+      },
+      "forum": {
+        "title": "Forum",
+        "postsCount": "{count} publications",
+        "columns": {
+          "title": "Titre",
+          "author": "Auteur",
+          "topic": "Sujet",
+          "createdAt": "Créé le"
+        },
+        "replies": {
+          "title": "Commentaires",
+          "empty": "Aucun commentaire sur cette publication.",
+          "columns": {
+            "author": "Auteur",
+            "content": "Contenu",
+            "createdAt": "Créé le"
+          }
+        },
+        "delete": {
+          "postTitle": "Supprimer la publication",
+          "postConfirm": "Voulez-vous vraiment supprimer « {title} » ? Tous les commentaires seront également supprimés.",
+          "replyTitle": "Supprimer le commentaire",
+          "replyConfirm": "Voulez-vous vraiment supprimer ce commentaire ?",
+          "confirmButton": "Supprimer"
+        }
       },
       "news": {
-        "title": "News",
+        "title": "Articles",
         "create": {
           "title": "Nouvel article",
           "save": "Enregistrer l'article",

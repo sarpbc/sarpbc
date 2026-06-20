@@ -16,6 +16,6 @@ export class TopicRepository extends EntityRepository<Topic> implements ITopicRe
   }
 
   async save(topic: Topic): Promise<void> {
-    await this.em.persistAndFlush(topic);
+    await this.em.persist(topic).flush();
   }
 }

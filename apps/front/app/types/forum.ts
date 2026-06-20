@@ -10,6 +10,10 @@ export interface PostShort {
   title: string;
   author: string;
   createdAt: Date;
+  topic?: {
+    id: string;
+    title: string;
+  };
 }
 
 export interface Reply {

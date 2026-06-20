@@ -30,6 +30,21 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
   }
 
   async save(reply: Reply): Promise<void> {
-    await this.em.persistAndFlush(reply);
+    await this.em.persist(reply).flush();
+  }
+
+  async delete(reply: Reply): Promise<void> {
+    await this.em.remove(reply).flush();
+  }
+
+  async findChildren(replyId: string): Promise<Reply[]> {
+    return this.find({ replyTo: { id: replyId } });
+  }
+
+  async deleteByPostId(postId: string): Promise<void> {
+    const replies = await this.find({ post: { id: postId } });
+    for (const reply of replies) {
+      await this.delete(reply);
+    }
   }
 }

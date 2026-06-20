@@ -59,6 +59,7 @@ export class NewsController {
     return article;
   }
 
+  @UseGuards(AuthGuard, AdminGuard)
   @Get("admin/:slug")
   async findOneAdmin(@Param("slug") slug: string) {
     return this.newsService.findOneBySlug(slug);

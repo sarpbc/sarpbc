@@ -58,6 +58,6 @@ export class PlayerRepository extends EntityRepository<Player> implements IPlaye
   }
 
   async delete(player: Player): Promise<void> {
-    await this.em.removeAndFlush(player);
+    await this.em.remove(player).flush();
   }
 }

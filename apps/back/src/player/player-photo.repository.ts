@@ -15,10 +15,10 @@ export class PlayerPhotoRepository
   }
 
   async save(photo: PlayerPhoto): Promise<void> {
-    await this.em.persistAndFlush(photo);
+    await this.em.persist(photo).flush();
   }
 
   async delete(photo: PlayerPhoto): Promise<void> {
-    await this.em.removeAndFlush(photo);
+    await this.em.remove(photo).flush();
   }
 }

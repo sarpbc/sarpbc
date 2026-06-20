@@ -1,12 +1,17 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Post, Body, UseGuards } from "@nestjs/common";
 import { TopicService } from "./topic/topic.service";
 import { PostService } from "./post/post.service";
+import { ReplyService } from "../reply/reply.service";
+import { AuthGuard } from "../auth/auth.guard";
+import { CurrentUserId } from "../user/decorator/current-user.decorator";
+import { CreateReplyDto } from "../reply/dto/create-reply.dto";
 
 @Controller("forum")
 export class ForumController {
   constructor(
     private topicService: TopicService,
     private postService: PostService,
+    private replyService: ReplyService,
   ) {}
 
   @Get()
@@ -30,5 +35,12 @@ export class ForumController {
     return {
       recentPosts,
     };
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("replies")
+  async createReply(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
+    await this.replyService.create(userId, createReplyDto);
+    return { success: true };
   }
 }

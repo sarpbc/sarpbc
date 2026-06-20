@@ -40,10 +40,10 @@ export class ContractRepository extends EntityRepository<Contract> implements IC
   }
 
   async save(contract: Contract): Promise<void> {
-    await this.em.persistAndFlush(contract);
+    await this.em.persist(contract).flush();
   }
 
   async delete(contract: Contract): Promise<void> {
-    await this.em.removeAndFlush(contract);
+    await this.em.remove(contract).flush();
   }
 }

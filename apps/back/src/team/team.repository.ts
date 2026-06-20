@@ -49,7 +49,7 @@ export class TeamRepository extends EntityRepository<Team> implements ITeamRepos
   }
 
   async save(team: Team): Promise<void> {
-    await this.em.persistAndFlush(team);
+    await this.em.persist(team).flush();
   }
 
   async saveMany(teams: Team[]): Promise<void> {
@@ -65,5 +65,9 @@ export class TeamRepository extends EntityRepository<Team> implements ITeamRepos
 
   persist(team: Team): void {
     this.em.persist(team);
+  }
+
+  async delete(team: Team): Promise<void> {
+    await this.em.remove(team).flush();
   }
 }

@@ -72,4 +72,34 @@ export class ReplyService {
 
     await this.replyRepository.save(newReply);
   }
+
+  async delete(id: string): Promise<void> {
+    const reply = await this.replyRepository.findById(id);
+    if (!reply) {
+      throw new NotFoundException("Reply not found");
+    }
+
+    await this.deleteWithChildren(id);
+  }
+
+  async deleteAllForPost(postId: string): Promise<void> {
+    const replies = await this.replyRepository.findByPostId(postId);
+    const rootReplies = replies.filter((reply) => !reply.replyTo);
+
+    for (const reply of rootReplies) {
+      await this.deleteWithChildren(reply.id);
+    }
+  }
+
+  private async deleteWithChildren(replyId: string): Promise<void> {
+    const children = await this.replyRepository.findChildren(replyId);
+    for (const child of children) {
+      await this.deleteWithChildren(child.id);
+    }
+
+    const reply = await this.replyRepository.findById(replyId);
+    if (reply) {
+      await this.replyRepository.delete(reply);
+    }
+  }
 }

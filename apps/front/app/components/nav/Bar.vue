@@ -2,11 +2,21 @@
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const links = [
+const links = computed(() => [
   {
     label: t("page.dashboard.nav.home"),
     icon: "i-fluent-home-24-regular",
     to: localePath("/dashboard"),
+  },
+  {
+    label: t("page.dashboard.nav.articles"),
+    icon: "i-fluent-news-24-regular",
+    to: localePath("/dashboard/news"),
+  },
+  {
+    label: t("page.dashboard.nav.tournaments"),
+    icon: "i-fluent-trophy-24-regular",
+    to: localePath("/dashboard/tournaments"),
   },
   {
     label: t("page.dashboard.nav.players"),
@@ -19,16 +29,17 @@ const links = [
     to: localePath("/dashboard/teams"),
   },
   {
-    label: t("page.dashboard.nav.pickems"),
-    icon: "i-fluent-clipboard-data-bar-24-regular",
-    to: localePath("/dashboard/pickems"),
+    label: t("page.dashboard.nav.forum"),
+    icon: "i-fluent-chat-24-regular",
+    to: localePath("/dashboard/forum"),
   },
   {
-    label: t("page.dashboard.nav.news"),
-    icon: "i-fluent-news-24-regular",
-    to: localePath("/dashboard/news"),
+    label: t("page.dashboard.nav.backToSite"),
+    icon: "i-fluent-arrow-left-24-regular",
+    to: "https://sarpbc.org",
+    target: "_blank",
   },
-];
+]);
 </script>
 
 <template>
