@@ -28,6 +28,9 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store --filter ./apps/back...
 
 RUN pnpm --filter ./apps/back run build \
+  && test -f /app/apps/back/dist/mikro-orm.config.js \
+  && test -f /app/apps/back/dist/main.js \
+  && test -d /app/apps/back/dist/migrations \
   && chmod +x /app/apps/back/entrypoint.sh
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
