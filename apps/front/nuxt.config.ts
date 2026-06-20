@@ -84,7 +84,7 @@ export default defineNuxtConfig({
       },
     },
     optimizeDeps: {
-      include: ["@nuxt/ui", "@nuxt/content", "@nuxtjs/i18n", "@internationalized/date"],
+      include: ["@internationalized/date", "@vueuse/core"],
     },
   },
 });

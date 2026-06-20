@@ -193,7 +193,6 @@ async function saveArticle() {
   }
 }
 
-// eslint-disable-next-line no-constant-condition
 const appendToBody = false ? () => document.body : undefined;
 
 const tabItems: TabsItem[] = [

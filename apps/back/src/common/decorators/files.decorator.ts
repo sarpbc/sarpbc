@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/require-await */
 import type { Storage } from "../../global";
 
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";

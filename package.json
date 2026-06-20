@@ -14,25 +14,10 @@
     "fmt:check": "oxfmt . --check"
   },
   "devDependencies": {
-    "lefthook": "^2.1.6",
+    "lefthook": "^2.1.9",
     "only-allow": "^1.2.2",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0"
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0"
   },
-  "packageManager": "pnpm@10.33.2",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@parcel/watcher",
-      "@swc/core",
-      "@tailwindcss/oxide",
-      "bcrypt",
-      "esbuild",
-      "maplibre-gl",
-      "sharp",
-      "unrs-resolver",
-      "vue-demi",
-      "lefthook"
-    ]
-  }
+  "packageManager": "pnpm@11.8.0"
 }
