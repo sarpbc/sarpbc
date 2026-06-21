@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/core";
 import { MatchRepository } from "./match.repository";
 import { Match } from "./match.entity";
@@ -6,6 +6,41 @@ import { TournamentParticipantRepository } from "../tournament-participant.repos
 import { TournamentRepository } from "../tournament.repository";
 import { BracketLink } from "./bracket-link.entity";
 import { MatchResult } from "./match-result.entity";
+
+const RECENT_FORM_LIMIT = 5;
+
+export interface TeamFormRecord {
+  wins: number;
+  losses: number;
+}
+
+export interface TeamFormOpponent {
+  id: string;
+  name: string;
+  slug?: string;
+  imageUrl?: string;
+}
+
+export interface TeamFormMatchScore {
+  team: number | null;
+  opponent: number | null;
+}
+
+export interface TeamFormMatchEntry {
+  id: string;
+  beginAt?: Date;
+  endAt?: Date;
+  opponent: TeamFormOpponent;
+  score: TeamFormMatchScore;
+  outcome: "win" | "loss" | null;
+}
+
+export interface TeamForm {
+  recent: TeamFormMatchEntry[];
+  record: TeamFormRecord;
+}
+
+export type TeamFormsMap = Record<string, TeamForm>;
 
 @Injectable()
 export class MatchService {
@@ -92,6 +127,121 @@ export class MatchService {
     minutesAgo?: number;
   }): Promise<Match[]> {
     return this.matchRepository.findRecentlyEnded({ limit, minutesAgo });
+  }
+
+  async findDetailById(id: string): Promise<{ match: Match; teamForms: TeamFormsMap }> {
+    const match = await this.matchRepository.findDetailById(id);
+
+    if (!match) {
+      throw new NotFoundException(
+        "This match could not be found. Check the link or browse matches from the homepage.",
+      );
+    }
+
+    const teamForms = await this.buildTeamForms(match);
+
+    return { match, teamForms };
+  }
+
+  private async buildTeamForms(match: Match): Promise<TeamFormsMap> {
+    const participants = match.participants.getItems();
+    const teamForms: TeamFormsMap = {};
+
+    await Promise.all(
+      participants.map(async (participant) => {
+        const teamId = participant.team.id;
+        const recent = await this.matchRepository.findRecentFinishedByTeamId({
+          teamId,
+          excludeMatchId: match.id,
+          limit: RECENT_FORM_LIMIT,
+        });
+
+        const entries = recent
+          .map((recentMatch) => this.mapTeamFormEntry(recentMatch, teamId))
+          .filter((entry): entry is TeamFormMatchEntry => entry !== null);
+
+        const record = entries.reduce<TeamFormRecord>(
+          (acc, entry) => {
+            if (entry.outcome === "win") {
+              acc.wins += 1;
+            } else if (entry.outcome === "loss") {
+              acc.losses += 1;
+            }
+            return acc;
+          },
+          { wins: 0, losses: 0 },
+        );
+
+        teamForms[teamId] = { recent: entries, record };
+      }),
+    );
+
+    return teamForms;
+  }
+
+  private mapTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
+    const participants = match.participants.getItems();
+    const teamParticipant = participants.find((p) => p.team.id === teamId);
+    const opponentParticipant = participants.find((p) => p.team.id !== teamId);
+
+    if (!teamParticipant || !opponentParticipant) {
+      return null;
+    }
+
+    const results = match.results.getItems();
+    const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score ?? null;
+    const opponentScore =
+      results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
+
+    return {
+      id: match.id,
+      beginAt: match.beginAt,
+      endAt: match.endAt,
+      opponent: {
+        id: opponentParticipant.team.id,
+        name: opponentParticipant.team.name,
+        slug: opponentParticipant.team.slug,
+        imageUrl: opponentParticipant.team.imageUrl,
+      },
+      score: { team: teamScore, opponent: opponentScore },
+      outcome: this.getTeamMatchOutcome(match, teamId),
+    };
+  }
+
+  private getTeamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
+    if (match.winner?.team?.id) {
+      return match.winner.team.id === teamId ? "win" : "loss";
+    }
+
+    const participants = match.participants.getItems();
+    if (participants.length !== 2) {
+      return null;
+    }
+
+    const teamParticipant = participants.find((p) => p.team.id === teamId);
+    const opponentParticipant = participants.find((p) => p.team.id !== teamId);
+
+    if (!teamParticipant || !opponentParticipant) {
+      return null;
+    }
+
+    const results = match.results.getItems();
+    const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score;
+    const opponentScore = results.find((r) => r.participant.id === opponentParticipant.id)?.score;
+
+    if (teamScore === undefined || opponentScore === undefined) {
+      return null;
+    }
+
+    if (teamScore > opponentScore) {
+      return "win";
+    }
+
+    if (teamScore < opponentScore) {
+      return "loss";
+    }
+
+    return null;
   }
 
   async upsertMatch(

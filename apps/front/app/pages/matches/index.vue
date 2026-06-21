@@ -109,6 +109,10 @@ function tournamentMatchesPath(tournamentId: string) {
   return `/tournaments/${tournamentId}/matches`;
 }
 
+function matchDetailPath(id: string) {
+  return `/matches/${id}`;
+}
+
 setPageSeo({
   title: t("page.matches.seo.title"),
   description: t("page.matches.seo.description"),
@@ -182,7 +186,12 @@ setPageSeo({
                     {{ tournamentLabel(match) }}
                   </ULink>
                 </div>
-                <MatchRow :match="match" :live="true" :last="index === liveMatches.length - 1" />
+                <ULink
+                  :to="$localePath(matchDetailPath(match.id))"
+                  class="block hover:bg-elevated/50 transition-colors"
+                >
+                  <MatchRow :match="match" :live="true" :last="index === liveMatches.length - 1" />
+                </ULink>
               </div>
             </div>
           </UiCard>
@@ -207,7 +216,12 @@ setPageSeo({
                     {{ tournamentLabel(match) }}
                   </ULink>
                 </div>
-                <MatchRow :match="match" :last="index === upcomingMatches.length - 1" />
+                <ULink
+                  :to="$localePath(matchDetailPath(match.id))"
+                  class="block hover:bg-elevated/50 transition-colors"
+                >
+                  <MatchRow :match="match" :last="index === upcomingMatches.length - 1" />
+                </ULink>
               </div>
             </div>
           </UiCard>
@@ -230,7 +244,12 @@ setPageSeo({
                   {{ tournamentLabel(match) }}
                 </ULink>
               </div>
-              <MatchResultRow :match="match" :last="index === pastMatches.length - 1" />
+              <ULink
+                :to="$localePath(matchDetailPath(match.id))"
+                class="block hover:bg-elevated/50 transition-colors"
+              >
+                <MatchResultRow :match="match" :last="index === pastMatches.length - 1" />
+              </ULink>
             </div>
           </div>
         </UiCard>

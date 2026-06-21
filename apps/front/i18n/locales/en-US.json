@@ -470,6 +470,41 @@
         "page": "Page"
       }
     },
+    "match": {
+      "detail": {
+        "seoTitle": "{teamA} vs {teamB} | {tournament} | Sarpbc",
+        "seoTitleDefault": "Match | Sarpbc",
+        "seoDescriptionLive": "Live match: {teamA} vs {teamB} in {tournament}.",
+        "seoDescriptionUpcoming": "Upcoming match: {teamA} vs {teamB} in {tournament} on {date}.",
+        "seoDescriptionFinished": "Final score: {teamA} {scoreA} - {scoreB} {teamB} in {tournament}.",
+        "seoDescriptionDefault": "View match details, team form, and roster on Sarpbc.",
+        "notFound": "Match not found",
+        "error": "Could not load this match. Check your connection and try again.",
+        "retry": "Try Again",
+        "unknownTeam": "TBD",
+        "unknownTournament": "Unknown tournament",
+        "status": {
+          "live": "Live",
+          "upcoming": "Upcoming",
+          "finished": "Finished"
+        },
+        "format": "Bo{count}",
+        "sections": {
+          "recentForm": "Recent Form",
+          "rosters": "Rosters",
+          "gameStats": "Game Stats"
+        },
+        "gameStatsPlaceholder": "Detailed game stats will appear here once available.",
+        "gameStatsHint": "Ballchasing integration is coming in a future update.",
+        "formRecord": "{wins}W - {losses}L",
+        "formEmpty": "Not enough recent matches",
+        "formVs": "vs {opponent}",
+        "formScore": "{teamScore}-{opponentScore}",
+        "win": "W",
+        "loss": "L",
+        "noRoster": "Roster not available"
+      }
+    },
     "forum": {
       "index": {
         "title": "Forum | Sarpbc",

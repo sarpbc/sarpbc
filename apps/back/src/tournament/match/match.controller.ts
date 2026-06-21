@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from "@nestjs/common";
+import { Controller, Get, Param, Query } from "@nestjs/common";
 import { MatchService } from "./match.service";
 
 @Controller("matches")
@@ -53,5 +53,10 @@ export class MatchController {
       results,
       total,
     };
+  }
+
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
+    return this.matchService.findDetailById(id);
   }
 }

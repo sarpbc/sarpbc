@@ -27,19 +27,26 @@ watch(
       </div>
       <UiCard>
         <div class="w-full flex flex-col">
-          <MatchRow
+          <ULink
             v-for="(match, index) in data.live"
             :key="match.id"
-            :match="match"
-            :live="true"
-            :last="index === data.live.length - 1 && data.upcoming.length === 0"
-          />
-          <MatchRow
+            :to="$localePath(`/matches/${match.id}`)"
+            class="block hover:bg-elevated/50 transition-colors"
+          >
+            <MatchRow
+              :match="match"
+              :live="true"
+              :last="index === data.live.length - 1 && data.upcoming.length === 0"
+            />
+          </ULink>
+          <ULink
             v-for="(match, index) in data.upcoming"
             :key="match.id"
-            :match="match"
-            :last="index === data.upcoming.length - 1"
-          />
+            :to="$localePath(`/matches/${match.id}`)"
+            class="block hover:bg-elevated/50 transition-colors"
+          >
+            <MatchRow :match="match" :last="index === data.upcoming.length - 1" />
+          </ULink>
         </div>
       </UiCard>
     </div>
@@ -49,12 +56,14 @@ watch(
       </div>
       <UiCard>
         <div class="w-full flex flex-col">
-          <MatchResultRow
+          <ULink
             v-for="(match, index) in results.results"
             :key="match.id"
-            :match="match"
-            :last="index === results.results.length - 1"
-          />
+            :to="$localePath(`/matches/${match.id}`)"
+            class="block hover:bg-elevated/50 transition-colors"
+          >
+            <MatchResultRow :match="match" :last="index === results.results.length - 1" />
+          </ULink>
         </div>
       </UiCard>
     </div>

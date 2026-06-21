@@ -3,6 +3,25 @@ import { Match } from "./match.entity";
 
 const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;
 
+const DETAIL_POPULATE = [
+  "participants.team",
+  "participants.players",
+  "results",
+  "results.participant",
+  "winner",
+  "winner.team",
+  "tournament",
+  "tournament.league",
+] as const;
+
+const TEAM_FORM_POPULATE = [
+  "participants.team",
+  "results",
+  "results.participant",
+  "winner",
+  "winner.team",
+] as const;
+
 export class MatchRepository extends EntityRepository<Match> {
   async findByPandascoreId(pandascoreId: number): Promise<Match | null> {
     return this.findOne({ pandascoreId });
@@ -126,6 +145,35 @@ export class MatchRepository extends EntityRepository<Match> {
         offset,
         orderBy: { endAt: "DESC" },
         populate: [...LIST_POPULATE],
+      },
+    );
+  }
+
+  async findDetailById(id: string): Promise<Match | null> {
+    return this.findOne({ id }, { populate: [...DETAIL_POPULATE] });
+  }
+
+  async findRecentFinishedByTeamId({
+    teamId,
+    excludeMatchId,
+    limit = 5,
+  }: {
+    teamId: string;
+    excludeMatchId: string;
+    limit?: number;
+  }): Promise<Match[]> {
+    return this.find(
+      {
+        id: { $ne: excludeMatchId },
+        endAt: { $ne: null },
+        participants: {
+          team: { id: teamId },
+        },
+      },
+      {
+        limit,
+        orderBy: { endAt: "DESC" },
+        populate: [...TEAM_FORM_POPULATE],
       },
     );
   }
