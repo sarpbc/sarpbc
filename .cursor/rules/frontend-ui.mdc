@@ -1,0 +1,18 @@
+---
+description: Nuxt frontend — Geist design, Nuxt UI, i18n
+globs: apps/front/**
+alwaysApply: false
+---
+
+# Frontend (apps/front)
+
+Read **`.agents/skills/geist-design/SKILL.md`** (UI work) and **`.agents/skills/nuxt/SKILL.md`** (framework).
+
+- Use `@nuxt/ui` primitives before custom markup; extend `app/components/ui/` when repeating patterns.
+- All user strings in `i18n/locales/en-US.json` + `fr-FR.json`; links via `$localePath()`.
+- Navigation: `NuxtLink` / `ULink`, not buttons. Persist filters/tabs in URL query.
+- Design every state: empty, loading, error. Keyboard + `:focus-visible`. Button keeps label while loading.
+- API: `$fetch` to `runtimeConfig.public.apiBase` with `credentials: 'include'`.
+- Toasts: specific outcome, no trailing period (see geist-design copy rules).
+
+Details: `.agents/skills/geist-design/AGENTS.md`, `references/nuxt-sarpbc.md`
