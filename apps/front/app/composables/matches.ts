@@ -1,4 +1,8 @@
-import type { MatchResultsResponse, UpcomingMatchesResponse } from "~/types/matches";
+import type {
+  MatchDetailResponse,
+  MatchResultsResponse,
+  UpcomingMatchesResponse,
+} from "~/types/matches";
 
 export type MatchesListQuery = {
   limit?: number;
@@ -48,4 +52,12 @@ export async function getMatchesResults(query?: MatchesListQuery): Promise<Match
     results,
     total: res.total ?? results.length,
   };
+}
+
+export async function getMatchById(id: string): Promise<MatchDetailResponse> {
+  const config = useRuntimeConfig();
+  return $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
 }

@@ -470,6 +470,41 @@
         "page": "Page"
       }
     },
+    "match": {
+      "detail": {
+        "seoTitle": "{teamA} vs {teamB} | {tournament} | Sarpbc",
+        "seoTitleDefault": "Match | Sarpbc",
+        "seoDescriptionLive": "Match en direct : {teamA} vs {teamB} dans {tournament}.",
+        "seoDescriptionUpcoming": "Match à venir : {teamA} vs {teamB} dans {tournament} le {date}.",
+        "seoDescriptionFinished": "Score final : {teamA} {scoreA} - {scoreB} {teamB} dans {tournament}.",
+        "seoDescriptionDefault": "Consultez les détails du match, la forme récente et les rosters sur Sarpbc.",
+        "notFound": "Match introuvable",
+        "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer",
+        "unknownTeam": "À déterminer",
+        "unknownTournament": "Tournoi inconnu",
+        "status": {
+          "live": "En direct",
+          "upcoming": "À venir",
+          "finished": "Terminé"
+        },
+        "format": "Bo{count}",
+        "sections": {
+          "recentForm": "Forme récente",
+          "rosters": "Rosters",
+          "gameStats": "Stats de jeu"
+        },
+        "gameStatsPlaceholder": "Les statistiques détaillées apparaîtront ici dès qu'elles seront disponibles.",
+        "gameStatsHint": "L'intégration Ballchasing arrive dans une prochaine mise à jour.",
+        "formRecord": "{wins}V - {losses}D",
+        "formEmpty": "Pas assez de matchs récents",
+        "formVs": "vs {opponent}",
+        "formScore": "{teamScore}-{opponentScore}",
+        "win": "V",
+        "loss": "D",
+        "noRoster": "Roster non disponible"
+      }
+    },
     "forum": {
       "index": {
         "title": "Forum | Sarpbc",
