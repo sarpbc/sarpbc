@@ -11,6 +11,8 @@
     "start:prod": "node dist/main",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt . --check",
     "mikro:migrate": "mikro-orm migration:up --config=./src/mikro-orm.config.ts",
     "mikro:migrate:prod": "mikro-orm migration:up --config=./dist/mikro-orm.config.js",
     "test": "jest",

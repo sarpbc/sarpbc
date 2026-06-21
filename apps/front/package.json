@@ -11,6 +11,8 @@
     "postinstall": "nuxt prepare",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt . --check",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
