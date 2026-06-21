@@ -41,6 +41,10 @@ const items = ref<NavigationMenuItem[]>([
     to: localePath("/tournaments"),
   },
   {
+    label: t("general.matches"),
+    to: localePath("/matches"),
+  },
+  {
     label: t("general.players"),
     to: localePath("/player"),
   },

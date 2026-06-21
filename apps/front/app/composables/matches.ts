@@ -1,45 +1,51 @@
-import type { Match } from "~/types/matches";
+import type { MatchResultsResponse, UpcomingMatchesResponse } from "~/types/matches";
 
-export async function getUpcomingMatches(query?: {
+export type MatchesListQuery = {
   limit?: number;
-}): Promise<{ live: Match[]; upcoming: Match[] }> {
+  offset?: number;
+};
+
+function buildMatchesUrl(path: string, query?: MatchesListQuery): string {
   const config = useRuntimeConfig();
-  const { limit } = query || {};
-  try {
-    const url = new URL(`${config.public.apiBase}/matches/upcoming`);
-    if (limit !== undefined) {
-      url.searchParams.set("limit", String(limit));
-    }
+  const url = new URL(`${config.public.apiBase}${path}`);
 
-    const res = await $fetch<{ live: Match[]; upcoming: Match[] }>(url.toString(), {
-      method: "GET",
-      credentials: "include",
-    });
-
-    return { live: res.live ?? [], upcoming: res.upcoming ?? [] };
-  } catch (error) {
-    console.error("Error fetching upcoming matches:", error);
-    return { live: [], upcoming: [] };
+  if (query?.limit !== undefined) {
+    url.searchParams.set("limit", String(query.limit));
   }
+  if (query?.offset !== undefined && query.offset > 0) {
+    url.searchParams.set("offset", String(query.offset));
+  }
+
+  return url.toString();
 }
 
-export async function getMatchesResults(query?: { limit?: number }): Promise<Match[]> {
-  const config = useRuntimeConfig();
-  const { limit } = query || {};
-  try {
-    const url = new URL(`${config.public.apiBase}/matches/results`);
-    if (limit !== undefined) {
-      url.searchParams.set("limit", String(limit));
-    }
+export async function getUpcomingMatches(
+  query?: MatchesListQuery,
+): Promise<UpcomingMatchesResponse> {
+  const res = await $fetch<UpcomingMatchesResponse>(buildMatchesUrl("/matches/upcoming", query), {
+    method: "GET",
+    credentials: "include",
+  });
 
-    const res = await $fetch<{ results?: Match[] }>(url.toString(), {
-      method: "GET",
-      credentials: "include",
-    });
+  return {
+    live: res.live ?? [],
+    upcoming: res.upcoming ?? [],
+    liveTotal: res.liveTotal ?? res.live?.length ?? 0,
+    upcomingTotal: res.upcomingTotal ?? res.upcoming?.length ?? 0,
+    total: res.total ?? (res.live?.length ?? 0) + (res.upcoming?.length ?? 0),
+  };
+}
 
-    return res.results ?? [];
-  } catch (error) {
-    console.error("Error fetching matches results:", error);
-    return [];
-  }
+export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+  const res = await $fetch<MatchResultsResponse>(buildMatchesUrl("/matches/results", query), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const results = res.results ?? [];
+
+  return {
+    results,
+    total: res.total ?? results.length,
+  };
 }

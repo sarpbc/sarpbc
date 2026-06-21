@@ -11,18 +11,19 @@ export class MatchController {
     @Query("offset") offset?: string,
     @Query("today") today?: string,
   ) {
-    const searchLimit = limit ? parseInt(limit, 10) : 20;
+    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
+    const searchLimit = Math.min(searchLimitRaw, 100);
     const todayOnly = today === "true";
 
-    const [upcomingMatches, liveMatches] = await Promise.all([
-      this.matchService.findUpcoming({
-        limit: Math.min(searchLimit, 100),
+    const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
+      this.matchService.findUpcomingAndCount({
+        limit: searchLimit,
         offset: searchOffset,
         todayOnly,
       }),
-      this.matchService.findLive({
-        limit: Math.min(searchLimit, 100),
+      this.matchService.findLiveAndCount({
+        limit: searchLimit,
         offset: searchOffset,
         todayOnly,
       }),
@@ -31,21 +32,26 @@ export class MatchController {
     return {
       upcoming: upcomingMatches,
       live: liveMatches,
+      upcomingTotal,
+      liveTotal,
+      total: upcomingTotal + liveTotal,
     };
   }
 
   @Get("results")
   async findResults(@Query("limit") limit?: string, @Query("offset") offset?: string) {
-    const searchLimit = limit ? parseInt(limit, 10) : 20;
+    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
+    const searchLimit = Math.min(searchLimitRaw, 100);
 
-    const results = await this.matchService.findResults({
-      limit: Math.min(searchLimit, 100),
+    const [results, total] = await this.matchService.findResultsAndCount({
+      limit: searchLimit,
       offset: searchOffset,
     });
 
     return {
       results,
+      total,
     };
   }
 }

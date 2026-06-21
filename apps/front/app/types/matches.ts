@@ -5,6 +5,21 @@ export interface MatchResult {
   score: number;
 }
 
+export interface UpcomingMatchesResponse {
+  live: Match[];
+  upcoming: Match[];
+  liveTotal: number;
+  upcomingTotal: number;
+  total: number;
+}
+
+export interface MatchResultsResponse {
+  results: Match[];
+  total: number;
+}
+
+export type MatchesPageData = UpcomingMatchesResponse | MatchResultsResponse;
+
 export interface Match {
   id: string;
   pandascoreId?: number;

@@ -43,17 +43,17 @@ watch(
         </div>
       </UiCard>
     </div>
-    <div v-if="results && results.length > 0" class="w-full flex flex-col">
+    <div v-if="results && results.results.length > 0" class="w-full flex flex-col">
       <div class="flex flex-col-reverse text-sm font-medium text-toned h-10 pl-2 pb-1">
         {{ $t("components.match.results") }}
       </div>
       <UiCard>
         <div class="w-full flex flex-col">
           <MatchResultRow
-            v-for="(match, index) in results"
+            v-for="(match, index) in results.results"
             :key="match.id"
             :match="match"
-            :last="index === results.length - 1"
+            :last="index === results.results.length - 1"
           />
         </div>
       </UiCard>
