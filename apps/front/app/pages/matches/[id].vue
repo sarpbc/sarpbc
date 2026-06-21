@@ -236,22 +236,22 @@ function tournamentMatchesPath(tournamentId: string) {
 
     <template v-else-if="match">
       <UiCrossCard class="min-h-14">
-        <div class="w-full flex flex-col items-center gap-2 p-4 text-center">
+        <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
           <ULink
             v-if="match.tournament"
             :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-            class="text-sm text-muted hover:text-highlighted"
+            class="text-sm text-muted rounded-sm transition-colors hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             {{ tournamentLabel(match) }}
           </ULink>
 
           <div
-            class="flex flex-wrap items-center justify-center gap-3 text-xl md:text-2xl font-bold tracking-tight"
+            class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xl md:text-2xl font-bold tracking-tight text-balance max-w-3xl"
           >
             <ULink
               v-if="teamA?.team.slug"
               :to="$localePath(`/team/${teamA.team.slug}`)"
-              class="hover:underline"
+              class="rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
             >
               {{ participantName(teamA) }}
             </ULink>
@@ -259,89 +259,99 @@ function tournamentMatchesPath(tournamentId: string) {
 
             <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
               <span
-                class="font-mono tabular-nums"
-                :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'"
+                class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
+                aria-hidden="true"
               >
-                {{ teamA ? (getParticipantScore(match, teamA.id) ?? "-") : "-" }}
-              </span>
-              <span class="text-muted font-normal text-base">vs</span>
-              <span
-                class="font-mono tabular-nums"
-                :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'"
-              >
-                {{ teamB ? (getParticipantScore(match, teamB.id) ?? "-") : "-" }}
+                <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
+                  {{ teamA ? (getParticipantScore(match, teamA.id) ?? "-") : "-" }}
+                </span>
+                <span class="text-muted font-normal text-base">-</span>
+                <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
+                  {{ teamB ? (getParticipantScore(match, teamB.id) ?? "-") : "-" }}
+                </span>
               </span>
             </template>
-            <span v-else class="text-muted font-normal text-base">vs</span>
+            <span v-else class="text-muted font-normal text-base" aria-hidden="true">vs</span>
 
             <ULink
               v-if="teamB?.team.slug"
               :to="$localePath(`/team/${teamB.team.slug}`)"
-              class="hover:underline"
+              class="rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
             >
               {{ participantName(teamB) }}
             </ULink>
             <span v-else>{{ participantName(teamB) }}</span>
           </div>
 
-          <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-muted">
+          <div
+            class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
+          >
             <UiBadgeLive v-if="matchStatus === 'live'" />
             <span v-else>{{ statusLabel }}</span>
-            <span v-if="match.numberOfGames"
-              >· {{ t("page.match.detail.format", { count: match.numberOfGames }) }}</span
-            >
-            <span v-if="match.beginAt">
+            <span v-if="match.numberOfGames" class="tabular-nums">
+              · {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
+            </span>
+            <span v-if="match.beginAt" class="tabular-nums">
               · {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
             </span>
           </div>
         </div>
       </UiCrossCard>
 
-      <UiCard class="p-4 md:p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
-            v-for="participant in participants"
-            :key="participant.id"
-            class="flex flex-col items-center gap-4 text-center"
-          >
-            <ULink
-              v-if="participant.team.slug"
-              :to="$localePath(`/team/${participant.team.slug}`)"
-              class="flex flex-col items-center gap-3 hover:opacity-90"
-            >
-              <TeamImg
-                :team-name="participant.team.name"
-                :image-url="participant.team.imageUrl"
-                size="md"
-              />
-              <span class="text-lg font-semibold">{{ participant.team.name }}</span>
-            </ULink>
-            <div v-else class="flex flex-col items-center gap-3">
-              <TeamImg
-                :team-name="participant.team.name"
-                :image-url="participant.team.imageUrl"
-                size="md"
-              />
-              <span class="text-lg font-semibold">{{ participant.team.name }}</span>
-            </div>
-
+      <section class="w-full flex flex-col gap-3">
+        <h2 class="text-sm font-medium text-toned pl-1">
+          {{ t("page.match.detail.sections.rosters") }}
+        </h2>
+        <UiCard class="p-4 md:p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div
-              v-if="participant.players && participant.players.length > 0"
-              class="w-full flex flex-wrap justify-center gap-3"
+              v-for="participant in participants"
+              :key="participant.id"
+              class="flex flex-col items-center gap-4 text-center"
             >
-              <PlayerProfile
-                v-for="player in participant.players"
-                :key="player.id"
-                :player="player"
-                size="md"
-              />
+              <ULink
+                v-if="participant.team.slug"
+                :to="$localePath(`/team/${participant.team.slug}`)"
+                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+              >
+                <TeamImg
+                  :team-name="participant.team.name"
+                  :image-url="participant.team.imageUrl"
+                  size="md"
+                />
+                <span class="max-w-full text-lg font-semibold text-balance">
+                  {{ participant.team.name }}
+                </span>
+              </ULink>
+              <div v-else class="flex flex-col items-center gap-3">
+                <TeamImg
+                  :team-name="participant.team.name"
+                  :image-url="participant.team.imageUrl"
+                  size="md"
+                />
+                <span class="max-w-full text-lg font-semibold text-balance">
+                  {{ participant.team.name }}
+                </span>
+              </div>
+
+              <div
+                v-if="participant.players && participant.players.length > 0"
+                class="w-full flex flex-wrap justify-center gap-3"
+              >
+                <PlayerProfile
+                  v-for="player in participant.players"
+                  :key="player.id"
+                  :player="player"
+                  size="md"
+                />
+              </div>
+              <p v-else class="text-sm text-pretty text-muted">
+                {{ t("page.match.detail.noRoster") }}
+              </p>
             </div>
-            <p v-else class="text-sm text-muted">
-              {{ t("page.match.detail.noRoster") }}
-            </p>
           </div>
-        </div>
-      </UiCard>
+        </UiCard>
+      </section>
 
       <section class="w-full flex flex-col gap-3">
         <h2 class="text-sm font-medium text-toned pl-1">

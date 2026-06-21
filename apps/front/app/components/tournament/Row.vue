@@ -11,7 +11,7 @@ const { formatTournamentPrizepool } = useCurrency();
 <template>
   <ULink
     :to="$localePath(`/tournaments/${tournament.id}`)"
-    class="block group border border-default p-2"
+    class="block group rounded-none border border-default p-2 not-first:-mt-px"
   >
     <div
       v-if="tournament.tier === 's' && tournament.league?.imageUrl"

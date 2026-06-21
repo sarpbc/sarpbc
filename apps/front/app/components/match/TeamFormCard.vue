@@ -13,9 +13,14 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
 
 <template>
   <UiCard class="p-4">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-      <h3 class="text-sm font-semibold">{{ teamName }}</h3>
-      <span v-if="teamForm && hasRecentMatches" class="text-sm text-muted tabular-nums">
+    <div
+      class="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-default pb-3"
+    >
+      <h3 class="text-sm font-semibold text-balance">{{ teamName }}</h3>
+      <span
+        v-if="teamForm && hasRecentMatches"
+        class="shrink-0 text-sm font-medium text-muted tabular-nums"
+      >
         {{
           t("page.match.detail.formRecord", {
             wins: teamForm.record.wins,
@@ -25,17 +30,17 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
       </span>
     </div>
 
-    <p v-if="!hasRecentMatches" class="text-sm text-muted">
+    <p v-if="!hasRecentMatches" class="text-sm text-pretty text-muted">
       {{ t("page.match.detail.formEmpty") }}
     </p>
 
-    <ul v-else class="flex flex-col gap-2">
+    <ul v-else class="flex flex-col gap-1.5">
       <li
         v-for="recentMatch in teamForm!.recent"
         :key="recentMatch.id"
-        class="flex items-center justify-between gap-3 text-sm"
+        class="flex items-center justify-between gap-3 rounded-md bg-elevated/50 px-2.5 py-2 text-sm"
       >
-        <div class="flex items-center gap-2 min-w-0">
+        <div class="flex min-w-0 items-center gap-2">
           <UBadge
             v-if="recentMatch.outcome"
             :color="recentMatch.outcome === 'win' ? 'success' : 'error'"
@@ -56,7 +61,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
             }}
           </span>
         </div>
-        <span class="shrink-0 font-mono tabular-nums text-muted">
+        <span class="shrink-0 font-mono tabular-nums text-toned">
           {{
             t("page.match.detail.formScore", {
               teamScore: recentMatch.score.team ?? "-",

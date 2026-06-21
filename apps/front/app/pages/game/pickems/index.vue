@@ -21,7 +21,7 @@ const { data: tournaments } = await useLazyAsyncData(`tournaments-pickems`, () =
         </h1>
       </div>
     </UiCrossCard>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-0">
       <TournamentRow
         v-for="tournament in tournaments"
         :key="tournament.id"
