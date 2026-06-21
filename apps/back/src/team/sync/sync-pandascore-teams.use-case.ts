@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import {
   PANDASCORE_GATEWAY,
@@ -6,13 +6,12 @@ import {
 } from "src/pandascore/application/ports/pandascore.gateway.port";
 import { PandascorePlayerMapper } from "src/pandascore/application/mappers/pandascore-player.mapper";
 import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
+import { createLogger } from "evlog";
 import { Player } from "src/player/domain/player.entity";
 import { Team } from "src/team/domain/team.entity";
 
 @Injectable()
 export class SyncPandascoreTeamsUseCase {
-  private readonly logger = new Logger(SyncPandascoreTeamsUseCase.name);
-
   constructor(
     private readonly em: EntityManager,
     @Inject(PANDASCORE_GATEWAY)
@@ -20,82 +19,96 @@ export class SyncPandascoreTeamsUseCase {
   ) {}
 
   async execute(cancelIfExistingTeam: boolean): Promise<void> {
-    const em = this.em.fork();
-    const existingTeams = await em.find(Team, {});
-    if (existingTeams.length > 0 && cancelIfExistingTeam) {
-      return;
-    }
+    const log = createLogger({ component: SyncPandascoreTeamsUseCase.name });
 
-    const pandaScorePlayers = await this.pandascoreGateway.getRocketLeaguePlayers();
-    const createdTeams = new Map<string, Team>();
-
-    for (const pandaPlayer of pandaScorePlayers) {
-      if (!pandaPlayer.current_team) {
-        continue;
+    try {
+      const em = this.em.fork();
+      const existingTeams = await em.find(Team, {});
+      if (existingTeams.length > 0 && cancelIfExistingTeam) {
+        log.set({ skipped: true, reason: "teams_already_exist" });
+        return;
       }
 
-      const teamCommand = PandascoreTeamMapper.fromCurrentTeam(pandaPlayer.current_team);
-      const teamSlug = teamCommand.slug;
-      let team = createdTeams.get(teamSlug);
+      const pandaScorePlayers = await this.pandascoreGateway.getRocketLeaguePlayers();
+      const createdTeams = new Map<string, Team>();
 
-      if (!team) {
-        const existingTeam = await em.findOne(Team, { slug: teamSlug });
-        team = existingTeam ?? new Team();
-        team.slug = teamSlug;
-        team.name = teamCommand.name;
-        team.imageUrl = teamCommand.imageUrl;
-        team.pandascoreId = teamCommand.pandascoreId;
-        em.persist(team);
-        createdTeams.set(teamSlug, team);
-      }
-    }
+      for (const pandaPlayer of pandaScorePlayers) {
+        if (!pandaPlayer.current_team) {
+          continue;
+        }
 
-    await em.flush();
+        const teamCommand = PandascoreTeamMapper.fromCurrentTeam(pandaPlayer.current_team);
+        const teamSlug = teamCommand.slug;
+        let team = createdTeams.get(teamSlug);
 
-    let playersCreated = 0;
-    let playersUpdated = 0;
-
-    for (const pandaPlayer of pandaScorePlayers) {
-      if (!pandaPlayer.slug) {
-        continue;
+        if (!team) {
+          const existingTeam = await em.findOne(Team, { slug: teamSlug });
+          team = existingTeam ?? new Team();
+          team.slug = teamSlug;
+          team.name = teamCommand.name;
+          team.imageUrl = teamCommand.imageUrl;
+          team.pandascoreId = teamCommand.pandascoreId;
+          em.persist(team);
+          createdTeams.set(teamSlug, team);
+        }
       }
 
-      const playerCommand = PandascorePlayerMapper.fromRocketLeaguePlayer(pandaPlayer);
-      const existingPlayer = await em.findOne(Player, { slug: playerCommand.slug });
+      await em.flush();
 
-      if (!existingPlayer) {
-        const newPlayer = new Player();
-        newPlayer.name = playerCommand.name;
-        newPlayer.firstName = playerCommand.firstName;
-        newPlayer.lastName = playerCommand.lastName;
-        newPlayer.birthday = playerCommand.birthday;
-        newPlayer.nationality = playerCommand.nationality;
-        newPlayer.imageUrl = playerCommand.imageUrl;
-        newPlayer.slug = playerCommand.slug;
+      let playersCreated = 0;
+      let playersUpdated = 0;
 
-        if (playerCommand.teamSlug) {
+      for (const pandaPlayer of pandaScorePlayers) {
+        if (!pandaPlayer.slug) {
+          continue;
+        }
+
+        const playerCommand = PandascorePlayerMapper.fromRocketLeaguePlayer(pandaPlayer);
+        const existingPlayer = await em.findOne(Player, { slug: playerCommand.slug });
+
+        if (!existingPlayer) {
+          const newPlayer = new Player();
+          newPlayer.name = playerCommand.name;
+          newPlayer.firstName = playerCommand.firstName;
+          newPlayer.lastName = playerCommand.lastName;
+          newPlayer.birthday = playerCommand.birthday;
+          newPlayer.nationality = playerCommand.nationality;
+          newPlayer.imageUrl = playerCommand.imageUrl;
+          newPlayer.slug = playerCommand.slug;
+
+          if (playerCommand.teamSlug) {
+            const team = createdTeams.get(playerCommand.teamSlug);
+            if (team) {
+              newPlayer.team = team;
+            }
+          }
+
+          em.persist(newPlayer);
+          playersCreated += 1;
+        } else if (playerCommand.teamSlug) {
           const team = createdTeams.get(playerCommand.teamSlug);
-          if (team) {
-            newPlayer.team = team;
+          if (team && existingPlayer.team?.id !== team.id) {
+            existingPlayer.team = team;
+            em.persist(existingPlayer);
+            playersUpdated += 1;
           }
         }
-
-        em.persist(newPlayer);
-        playersCreated += 1;
-      } else if (playerCommand.teamSlug) {
-        const team = createdTeams.get(playerCommand.teamSlug);
-        if (team && existingPlayer.team?.id !== team.id) {
-          existingPlayer.team = team;
-          em.persist(existingPlayer);
-          playersUpdated += 1;
-        }
       }
+
+      await em.flush();
+
+      log.set({
+        sync: {
+          teams: createdTeams.size,
+          playersCreated,
+          playersUpdated,
+        },
+      });
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    } finally {
+      log.emit();
     }
-
-    await em.flush();
-
-    this.logger.log(
-      `Team sync complete: teams=${createdTeams.size}, created=${playersCreated}, updated=${playersUpdated}`,
-    );
   }
 }

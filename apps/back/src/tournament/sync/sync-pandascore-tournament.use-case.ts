@@ -1,4 +1,5 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
+import { createLogger } from "evlog";
 import {
   PANDASCORE_GATEWAY,
   PandascoreGateway,
@@ -9,8 +10,6 @@ import { TournamentSyncPersistence } from "./tournament-sync.persistence";
 
 @Injectable()
 export class SyncPandascoreTournamentUseCase {
-  private readonly logger = new Logger(SyncPandascoreTournamentUseCase.name);
-
   constructor(
     @Inject(PANDASCORE_GATEWAY)
     private readonly pandascoreGateway: PandascoreGateway,
@@ -18,49 +17,77 @@ export class SyncPandascoreTournamentUseCase {
   ) {}
 
   async execute(tournamentId: string): Promise<void> {
-    this.logger.log(`Syncing tournament ${tournamentId} from PandaScore...`);
+    const log = createLogger({
+      component: SyncPandascoreTournamentUseCase.name,
+      tournamentId,
+    });
 
-    const tournament = await this.persistence.findTournamentById(tournamentId);
-    if (!tournament) {
-      throw new Error("Tournament not found");
+    try {
+      const tournament = await this.persistence.findTournamentById(tournamentId);
+      if (!tournament) {
+        throw new Error("Tournament not found");
+      }
+
+      const pandascoreId = tournament.pandascoreId;
+      if (!pandascoreId) {
+        throw new Error("Tournament does not have a PandaScore ID");
+      }
+
+      log.set({ pandascoreId });
+
+      const participantsUpserted = await this.syncTournamentDetails(log, pandascoreId);
+      const matchesCreated = await this.syncTournamentMatches(log, tournamentId, pandascoreId);
+
+      log.set({
+        sync: {
+          participantsUpserted,
+          matchesCreated: matchesCreated >= 0 ? matchesCreated : 0,
+        },
+      });
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    } finally {
+      log.emit();
     }
-
-    const pandascoreId = tournament.pandascoreId;
-    if (!pandascoreId) {
-      throw new Error("Tournament does not have a PandaScore ID");
-    }
-
-    await this.syncTournamentDetails(pandascoreId);
-    await this.syncTournamentMatches(tournamentId, pandascoreId);
-
-    this.logger.log(`Finished syncing tournament ${tournamentId}`);
   }
 
-  private async syncTournamentDetails(pandascoreId: number): Promise<void> {
+  private async syncTournamentDetails(
+    log: ReturnType<typeof createLogger>,
+    pandascoreId: number,
+  ): Promise<number> {
     const pandaTournament = await this.pandascoreGateway.getTournamentById(pandascoreId);
     if (!pandaTournament) {
-      this.logger.warn(`PandaScore tournament ${pandascoreId} not found`);
-      return;
+      log.warn(`PandaScore tournament not found (pandascoreId=${pandascoreId})`);
+      return 0;
     }
 
     const command = PandascoreTournamentMapper.toUpsertCommand(pandaTournament);
     await this.persistence.upsertTournament(command);
 
+    let participantsUpserted = 0;
     if (pandaTournament.expected_roster) {
       for (const roster of pandaTournament.expected_roster) {
         const participantCommand = PandascoreTournamentMapper.toParticipantCommand(roster);
         const tournament = await this.persistence.findTournamentByPandascoreId(pandascoreId);
         if (tournament) {
           await this.persistence.upsertTournamentParticipant(tournament, participantCommand);
+          participantsUpserted += 1;
         }
       }
     }
+
+    return participantsUpserted;
   }
 
-  private async syncTournamentMatches(tournamentId: string, pandascoreId: number): Promise<number> {
+  private async syncTournamentMatches(
+    log: ReturnType<typeof createLogger>,
+    tournamentId: string,
+    pandascoreId: number,
+  ): Promise<number> {
     const tournament = await this.persistence.findTournamentById(tournamentId);
     if (!tournament) {
-      this.logger.warn(`Tournament ${tournamentId} not found`);
+      log.warn(`Tournament not found for match sync (tournamentId=${tournamentId})`);
       return -1;
     }
 

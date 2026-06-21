@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { UpsertLeagueCommand } from "src/pandascore/application/commands/upsert-league.command";
@@ -17,8 +17,6 @@ import { MatchService } from "../match/match.service";
 
 @Injectable()
 export class TournamentSyncPersistence {
-  private readonly logger = new Logger(TournamentSyncPersistence.name);
-
   constructor(
     @InjectRepository(Tournament)
     private readonly tournamentRepository: EntityRepository<Tournament>,

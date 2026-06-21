@@ -20,6 +20,7 @@ import { TournamentSyncPersistence } from "./sync/tournament-sync.persistence";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import { log } from "evlog";
 
 @Module({
   imports: [
@@ -53,7 +54,12 @@ export class TournamentModule implements OnModuleInit {
   onModuleInit() {
     if (this.configService.get<boolean>("pandascore_sync_on_boot")) {
       this.tournamentService.syncAllTournaments().catch((error) => {
-        console.error("Failed to sync tournaments on module init:", error);
+        log.error({
+          component: TournamentModule.name,
+          job: "module_init",
+          message: "Failed to sync tournaments on module init",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
       });
     }
   }

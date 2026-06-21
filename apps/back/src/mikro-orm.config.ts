@@ -1,13 +1,11 @@
 import { defineConfig } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
-import { Logger } from "@nestjs/common";
+import { log } from "evlog";
 import * as dotenv from "dotenv";
 import { getDatabasePassword } from "./common/envirronement/secrets";
 
 dotenv.config();
-
-const logger = new Logger("MikroORMCLI");
 
 export default defineConfig({
   entities: ["dist/**/*.entity.js"],
@@ -20,7 +18,7 @@ export default defineConfig({
   metadataProvider: TsMorphMetadataProvider,
   highlighter: new SqlHighlighter(),
   debug: process.env.NODE_ENV !== "production",
-  logger: logger.log.bind(logger),
+  logger: (message: string) => log.debug({ component: "MikroORMCLI", message }),
   migrations: {
     path: "dist/migrations",
     pathTs: "src/migrations",

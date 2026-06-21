@@ -1,9 +1,10 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PandascoreAdditionType, PandascoreAdditionsListDto } from "./dto/addition.dto";
 import { MatchDto } from "./dto/match.dto";
 import { TournamentDto } from "./dto/tournament.dto";
 import { PandascoreApiError } from "./pandascore-api.errors";
+import { log } from "evlog";
 
 export interface PandascoreRequestOptions {
   params?: Record<string, string | string[] | undefined>;
@@ -45,14 +46,16 @@ export interface ListAdditionsClientParams {
 
 @Injectable()
 export class PandascoreApiClient {
-  private readonly logger = new Logger(PandascoreApiClient.name);
   private readonly baseUrl = "https://api.pandascore.co";
   private readonly apiToken: string;
 
   constructor(private readonly configService: ConfigService) {
     const apiToken = this.configService.get<string>("pandascore_api_token");
     if (!apiToken) {
-      this.logger.error("PANDASCORE_API_TOKEN not configured");
+      log.error({
+        component: PandascoreApiClient.name,
+        message: "PANDASCORE_API_TOKEN not configured",
+      });
       throw new Error("PandaScore API token not configured");
     }
     this.apiToken = apiToken;
@@ -97,7 +100,12 @@ export class PandascoreApiClient {
       if (error instanceof PandascoreApiError && error.status === 404) {
         return null;
       }
-      this.logger.warn(`Failed to fetch tournament ${tournamentId}`, error);
+      log.warn({
+        component: PandascoreApiClient.name,
+        tournamentId,
+        message: "Failed to fetch tournament",
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }

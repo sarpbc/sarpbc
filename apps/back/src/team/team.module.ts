@@ -8,6 +8,7 @@ import { PlayerModule } from "../player/player.module";
 import { UserModule } from "src/user/user.module";
 import { PandascoreModule } from "src/pandascore/pandascore.module";
 import { SyncPandascoreTeamsUseCase } from "./sync/sync-pandascore-teams.use-case";
+import { log } from "evlog";
 
 @Module({
   imports: [
@@ -30,7 +31,12 @@ export class TeamModule implements OnModuleInit {
   onModuleInit() {
     if (this.configService.get<boolean>("pandascore_sync_on_boot")) {
       this.teamService.initializeTeamsFromPandaScore(true).catch((error) => {
-        console.error("Failed to initialize teams on module init:", error);
+        log.error({
+          component: TeamModule.name,
+          job: "module_init",
+          message: "Failed to initialize teams on module init",
+          error: error instanceof Error ? error : new Error(String(error)),
+        });
       });
     }
   }
