@@ -441,6 +441,35 @@
         "noMatches": "No matches available for this tournament."
       }
     },
+    "matches": {
+      "title": "Matches",
+      "seo": {
+        "title": "Matches | Sarpbc",
+        "description": "Browse live, upcoming, and past Rocket League matches from every tournament on Sarpbc."
+      },
+      "tabs": {
+        "upcoming": "Upcoming",
+        "past": "Past"
+      },
+      "sections": {
+        "live": "Live Now",
+        "upcoming": "Upcoming"
+      },
+      "empty": {
+        "upcoming": "No live or upcoming matches right now.",
+        "past": "No completed matches to show yet.",
+        "upcomingHint": "Check past results or come back later for new schedules.",
+        "pastHint": "Switch to upcoming matches to see what is scheduled next.",
+        "viewPast": "View Past Matches",
+        "viewUpcoming": "View Upcoming Matches"
+      },
+      "error": "Could not load matches. Check your connection and try again.",
+      "retry": "Try Again",
+      "unknownTournament": "Unknown tournament",
+      "pagination": {
+        "page": "Page"
+      }
+    },
     "forum": {
       "index": {
         "title": "Forum | Sarpbc",

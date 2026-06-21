@@ -441,6 +441,35 @@
         "noMatches": "Aucun match disponible pour ce tournoi."
       }
     },
+    "matches": {
+      "title": "Matchs",
+      "seo": {
+        "title": "Matchs | Sarpbc",
+        "description": "Parcourez les matchs Rocket League en direct, à venir et passés de tous les tournois sur Sarpbc."
+      },
+      "tabs": {
+        "upcoming": "À venir",
+        "past": "Passés"
+      },
+      "sections": {
+        "live": "En direct",
+        "upcoming": "À venir"
+      },
+      "empty": {
+        "upcoming": "Aucun match en direct ou à venir pour le moment.",
+        "past": "Aucun match terminé à afficher pour l'instant.",
+        "upcomingHint": "Consultez les résultats passés ou revenez plus tard pour les prochains matchs.",
+        "pastHint": "Basculez vers les matchs à venir pour voir la suite du calendrier.",
+        "viewPast": "Voir les matchs passés",
+        "viewUpcoming": "Voir les matchs à venir"
+      },
+      "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "unknownTournament": "Tournoi inconnu",
+      "pagination": {
+        "page": "Page"
+      }
+    },
     "forum": {
       "index": {
         "title": "Forum | Sarpbc",

@@ -1,5 +1,7 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
+import { EntityRepository, FilterQuery } from "@mikro-orm/postgresql";
 import { Match } from "./match.entity";
+
+const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;
 
 export class MatchRepository extends EntityRepository<Match> {
   async findByPandascoreId(pandascoreId: number): Promise<Match | null> {
@@ -27,7 +29,25 @@ export class MatchRepository extends EntityRepository<Match> {
       limit,
       offset,
       orderBy: { beginAt: "ASC" },
-      populate: ["participants.team", "results"],
+      populate: [...LIST_POPULATE],
+    });
+  }
+
+  async findUpcomingAndCount({
+    limit = 20,
+    offset = 0,
+    todayOnly = false,
+  }: {
+    limit?: number;
+    offset?: number;
+    todayOnly?: boolean;
+  }): Promise<[Match[], number]> {
+    const query = this.buildUpcomingQuery(todayOnly);
+    return this.findAndCount(query, {
+      limit,
+      offset,
+      orderBy: { beginAt: "ASC" },
+      populate: [...LIST_POPULATE],
     });
   }
 
@@ -52,7 +72,25 @@ export class MatchRepository extends EntityRepository<Match> {
       limit,
       offset,
       orderBy: { beginAt: "ASC" },
-      populate: ["participants.team", "results", "tournament"],
+      populate: [...LIST_POPULATE],
+    });
+  }
+
+  async findLiveAndCount({
+    limit = 20,
+    offset = 0,
+    todayOnly = false,
+  }: {
+    limit?: number;
+    offset?: number;
+    todayOnly?: boolean;
+  }): Promise<[Match[], number]> {
+    const query = this.buildLiveQuery(todayOnly);
+    return this.findAndCount(query, {
+      limit,
+      offset,
+      orderBy: { beginAt: "ASC" },
+      populate: [...LIST_POPULATE],
     });
   }
 
@@ -69,7 +107,25 @@ export class MatchRepository extends EntityRepository<Match> {
         limit,
         offset,
         orderBy: { endAt: "DESC" },
-        populate: ["participants.team", "results"],
+        populate: [...LIST_POPULATE],
+      },
+    );
+  }
+
+  async findResultsAndCount({
+    limit = 20,
+    offset = 0,
+  }: {
+    limit?: number;
+    offset?: number;
+  }): Promise<[Match[], number]> {
+    return this.findAndCount(
+      { endAt: { $ne: null } },
+      {
+        limit,
+        offset,
+        orderBy: { endAt: "DESC" },
+        populate: [...LIST_POPULATE],
       },
     );
   }
@@ -89,8 +145,26 @@ export class MatchRepository extends EntityRepository<Match> {
       {
         limit,
         orderBy: { endAt: "DESC" },
-        populate: ["participants.team", "results", "tournament"],
+        populate: [...LIST_POPULATE],
       },
     );
+  }
+
+  private buildUpcomingQuery(todayOnly: boolean): FilterQuery<Match> {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return todayOnly ? { beginAt: { $gte: now, $lte: endOfDay } } : { beginAt: { $gte: now } };
+  }
+
+  private buildLiveQuery(todayOnly: boolean): FilterQuery<Match> {
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    return todayOnly
+      ? { beginAt: { $lte: now, $gte: startOfDay }, endAt: null }
+      : { beginAt: { $lte: now }, endAt: null };
   }
 }

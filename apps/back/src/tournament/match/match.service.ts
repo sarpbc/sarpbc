@@ -50,6 +50,40 @@ export class MatchService {
     return this.matchRepository.findResults({ limit, offset });
   }
 
+  async findUpcomingAndCount({
+    limit = 20,
+    offset = 0,
+    todayOnly = false,
+  }: {
+    limit?: number;
+    offset?: number;
+    todayOnly?: boolean;
+  }): Promise<[Match[], number]> {
+    return this.matchRepository.findUpcomingAndCount({ limit, offset, todayOnly });
+  }
+
+  async findLiveAndCount({
+    limit = 20,
+    offset = 0,
+    todayOnly = false,
+  }: {
+    limit?: number;
+    offset?: number;
+    todayOnly?: boolean;
+  }): Promise<[Match[], number]> {
+    return this.matchRepository.findLiveAndCount({ limit, offset, todayOnly });
+  }
+
+  async findResultsAndCount({
+    limit = 20,
+    offset = 0,
+  }: {
+    limit?: number;
+    offset?: number;
+  }): Promise<[Match[], number]> {
+    return this.matchRepository.findResultsAndCount({ limit, offset });
+  }
+
   async findRecentlyEnded({
     limit = 100,
     minutesAgo = 15,
