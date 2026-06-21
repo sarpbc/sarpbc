@@ -4,6 +4,9 @@ node_modules/
 package-lock.json
 yarn.lock
 
+# turbo
+.turbo/
+
 # builds
 dist/
 build/

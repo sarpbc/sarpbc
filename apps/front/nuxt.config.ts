@@ -84,7 +84,7 @@ export default defineNuxtConfig({
       },
     },
     optimizeDeps: {
-      include: ["@internationalized/date", "@vueuse/core"],
+      include: ["@internationalized/date", "@vueuse/core", "zod"],
     },
   },
 });

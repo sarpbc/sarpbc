@@ -3,22 +3,23 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "pnpm --parallel --filter ./apps/back --filter ./apps/front dev",
-    "dev:back": "pnpm --filter back dev",
-    "dev:front": "pnpm --filter front dev",
-    "build": "pnpm -r --filter ./apps/* build",
+    "dev": "turbo run dev",
+    "dev:back": "turbo run dev --filter=back",
+    "dev:front": "turbo run dev --filter=front",
+    "build": "turbo run build",
     "start": "pnpm --filter back start",
-    "lint": "oxlint .",
-    "lint:fix": "oxlint . --fix",
-    "fmt": "oxfmt .",
-    "fmt:check": "oxfmt . --check",
-    "test:back": "pnpm --filter back test"
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "fmt": "turbo run fmt",
+    "fmt:check": "turbo run fmt:check",
+    "test:back": "turbo run test --filter=back"
   },
   "devDependencies": {
     "lefthook": "^2.1.9",
     "only-allow": "^1.2.2",
     "oxfmt": "^0.55.0",
-    "oxlint": "^1.70.0"
+    "oxlint": "^1.70.0",
+    "turbo": "^2.5.4"
   },
   "packageManager": "pnpm@11.8.0"
 }

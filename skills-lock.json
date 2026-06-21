@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "geist-design": {
+      "source": "local",
+      "sourceType": "local",
+      "skillPath": ".agents/skills/geist-design/SKILL.md",
+      "computedHash": "local"
+    },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -31,11 +37,11 @@
       "skillPath": "cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md",
       "computedHash": "9052b01b46b1d8dbf94c45f9313ec1983443f9a460e83d49cdc7fe0f640ca476"
     },
-    "geist-design": {
-      "source": "local",
-      "sourceType": "local",
-      "skillPath": ".agents/skills/geist-design/SKILL.md",
-      "computedHash": "local"
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "skillPath": "skills/turborepo/SKILL.md",
+      "computedHash": "b7c3165ae67a2892d6195a5b2cba15c8d96341f5c64ddd0d3ce4225c94a2ae83"
     }
   }
 }
