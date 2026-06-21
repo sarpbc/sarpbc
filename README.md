@@ -95,6 +95,10 @@ pnpm lint
 pnpm lint:fix
 ```
 
+## AI / Cursor
+
+Agent index and skill routing: [AGENTS.md](AGENTS.md). Cursor rules in `.cursor/rules/` (hub + scoped front/back).
+
 ## Migration from legacy repos
 
 The former `sarpbc-front` and `sarpbc-back` repositories are superseded by this monorepo. Archive or mark them read-only after switching Dokploy to `sarpbc/sarpbc`.

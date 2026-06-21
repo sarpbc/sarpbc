@@ -1,0 +1,17 @@
+---
+description: NestJS API — modules, validation, security, MikroORM
+globs: apps/back/**
+alwaysApply: false
+---
+
+# Backend (apps/back)
+
+Read **`.agents/skills/nestjs-best-practices/SKILL.md`** then **`AGENTS.md`** in that folder for full rules.
+
+- Organize by **feature modules**; constructor injection; no service locator.
+- Validate all input with DTOs + global `ValidationPipe` (`whitelist`, `transform`).
+- Auth via guards; throw `HttpException` subclasses with **actionable** messages (shown in the Nuxt UI).
+- MikroORM migrations for schema changes; transactions for multi-step writes.
+- Response DTOs / `@Exclude()` — never leak entities raw.
+
+Error messages consumed by the frontend should follow geist-design copy (what happened + what to do next).
