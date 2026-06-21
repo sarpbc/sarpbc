@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EvlogModule } from "evlog/nestjs";
 import { UserModule } from "./user/user.module";
 import { AuthModule } from "./auth/auth.module";
 import { TeamModule } from "./team/team.module";
@@ -22,6 +23,7 @@ import { ImagesModule } from "./images/images.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
+    EvlogModule.forRoot(),
     MikroOrmModule.forRoot({
       host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT || "5433", 10),

@@ -107,6 +107,9 @@ importers:
       dotenv:
         specifier: ^17.3.1
         version: 17.4.2
+      evlog:
+        specifier: ^2.19.1
+        version: 2.19.1(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nuxt/kit@4.4.8(magicast@0.5.3))(express@5.2.1)(fastify@5.8.5)(h3@1.15.11)(hono@4.12.23)(nitropack@2.13.4(oxc-parser@0.133.0)(srvx@0.11.16))(ofetch@1.5.1)(vite@7.3.5(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))
       fastify:
         specifier: ^5.8.5
         version: 5.8.5
@@ -137,7 +140,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.16
-        version: 11.0.21(@swc/cli@0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3))(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)
+        version: 11.0.21(@swc/cli@0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3))(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)(lightningcss@1.32.0)
       '@nestjs/schematics':
         specifier: ^11.0.9
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -191,7 +194,7 @@ importers:
         version: 29.4.11(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.4.2(@types/node@25.9.4)(ts-node@10.9.2(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)(typescript@5.9.3)))(typescript@5.9.3)
       ts-loader:
         specifier: ^9.5.4
-        version: 9.6.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23)))
+        version: 9.6.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0))
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)(typescript@5.9.3)
@@ -237,6 +240,9 @@ importers:
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.3.0(vue@3.5.38(typescript@5.9.3))
+      evlog:
+        specifier: ^2.19.1
+        version: 2.19.1(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nuxt/kit@4.4.8(magicast@0.5.3))(express@5.2.1)(fastify@5.8.5)(h3@1.15.11)(hono@4.12.23)(nitropack@2.13.4(oxc-parser@0.133.0)(srvx@0.11.16))(ofetch@1.5.1)(vite@7.3.5(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0))
       motion-v:
         specifier: ^2.3.0
         version: 2.3.0(@vueuse/core@14.3.0(vue@3.5.38(typescript@5.9.3)))(vue@3.5.38(typescript@5.9.3))
@@ -5763,6 +5769,63 @@ packages:
     resolution: {integrity: sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==}
     engines: {node: '>=18.0.0'}
 
+  evlog@2.19.1:
+    resolution: {integrity: sha512-KhI3QTIBY7izfM7HhHGN199EgXjatbO+GuACETrK+Urc+ibudpqVRqpu+0wAA8M9NgdjOpzSnIhtBJ1oV2Vffg==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@nestjs/common': '>=11.1.19'
+      '@nuxt/kit': ^4.4.2
+      '@orpc/server': '>=1.14.0'
+      '@tanstack/start-client-core': ^1.167.20
+      ai: '>=6.0.168'
+      elysia: '>=1.4.28'
+      express: '>=5.2.1'
+      fastify: '>=5.8.5'
+      h3: ^1.15.11
+      hono: '>=4.11.0'
+      next: '>=16.2.4'
+      nitro: ^3.0.260311-beta
+      nitropack: ^2.13.3
+      ofetch: ^1.5.1
+      react: '>=19.2.5'
+      react-router: '>=7.14.2'
+      vite: ^7.0.0 || ^8.0.0
+    peerDependenciesMeta:
+      '@nestjs/common':
+        optional: true
+      '@nuxt/kit':
+        optional: true
+      '@orpc/server':
+        optional: true
+      '@tanstack/start-client-core':
+        optional: true
+      ai:
+        optional: true
+      elysia:
+        optional: true
+      express:
+        optional: true
+      fastify:
+        optional: true
+      h3:
+        optional: true
+      hono:
+        optional: true
+      next:
+        optional: true
+      nitro:
+        optional: true
+      nitropack:
+        optional: true
+      ofetch:
+        optional: true
+      react:
+        optional: true
+      react-router:
+        optional: true
+      vite:
+        optional: true
+
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
@@ -11217,7 +11280,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.2
     optional: true
 
-  '@nestjs/cli@11.0.21(@swc/cli@0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3))(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)':
+  '@nestjs/cli@11.0.21(@swc/cli@0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3))(@swc/core@1.15.40(@swc/helpers@0.5.23))(@types/node@25.9.4)(lightningcss@1.32.0)':
     dependencies:
       '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
@@ -11228,14 +11291,14 @@ snapshots:
       chokidar: 4.0.3
       cli-table3: 0.6.5
       commander: 4.1.1
-      fork-ts-checker-webpack-plugin: 9.1.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23)))
+      fork-ts-checker-webpack-plugin: 9.1.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0))
       glob: 13.0.6
       node-emoji: 1.11.0
       ora: 5.4.1
       tsconfig-paths: 4.2.0
       tsconfig-paths-webpack-plugin: 4.2.0
       typescript: 5.9.3
-      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))
+      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)
       webpack-node-externals: 3.0.0
     optionalDependencies:
       '@swc/cli': 0.7.10(@swc/core@1.15.40(@swc/helpers@0.5.23))(chokidar@4.0.3)
@@ -15208,6 +15271,18 @@ snapshots:
     dependencies:
       eventsource-parser: 3.1.0
 
+  evlog@2.19.1(@nestjs/common@11.1.24(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nuxt/kit@4.4.8(magicast@0.5.3))(express@5.2.1)(fastify@5.8.5)(h3@1.15.11)(hono@4.12.23)(nitropack@2.13.4(oxc-parser@0.133.0)(srvx@0.11.16))(ofetch@1.5.1)(vite@7.3.5(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)):
+    optionalDependencies:
+      '@nestjs/common': 11.1.24(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nuxt/kit': 4.4.8(magicast@0.5.3)
+      express: 5.2.1
+      fastify: 5.8.5
+      h3: 1.15.11
+      hono: 4.12.23
+      nitropack: 2.13.4(oxc-parser@0.133.0)(srvx@0.11.16)
+      ofetch: 1.5.1
+      vite: 7.3.5(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(yaml@2.9.0)
+
   execa@5.1.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -15523,7 +15598,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  fork-ts-checker-webpack-plugin@9.1.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))):
+  fork-ts-checker-webpack-plugin@9.1.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)):
     dependencies:
       '@babel/code-frame': 7.29.7
       chalk: 4.1.2
@@ -15538,7 +15613,7 @@ snapshots:
       semver: 7.8.1
       tapable: 2.3.3
       typescript: 5.9.3
-      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))
+      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)
 
   form-data-encoder@2.1.4: {}
 
@@ -19217,15 +19292,16 @@ snapshots:
       - bare-abort-controller
       - react-native-b4a
 
-  terser-webpack-plugin@5.6.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))):
+  terser-webpack-plugin@5.6.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.48.0
-      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))
+      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)
     optionalDependencies:
       '@swc/core': 1.15.40(@swc/helpers@0.5.23)
+      lightningcss: 1.32.0
 
   terser@5.48.0:
     dependencies:
@@ -19327,7 +19403,7 @@ snapshots:
       babel-jest: 30.4.1(@babel/core@7.29.7)
       jest-util: 30.4.1
 
-  ts-loader@9.6.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))):
+  ts-loader@9.6.0(typescript@5.9.3)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 5.22.2
@@ -19335,7 +19411,7 @@ snapshots:
       semver: 7.8.1
       source-map: 0.7.6
       typescript: 5.9.3
-      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))
+      webpack: 5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)
 
   ts-morph@27.0.2:
     dependencies:
@@ -19909,7 +19985,7 @@ snapshots:
 
   webpack-virtual-modules@0.6.2: {}
 
-  webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23)):
+  webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.9
@@ -19933,7 +20009,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23)))
+      terser-webpack-plugin: 5.6.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0)(webpack@5.106.0(@swc/core@1.15.40(@swc/helpers@0.5.23))(lightningcss@1.32.0))
       watchpack: 2.5.1
       webpack-sources: 3.5.0
     transitivePeerDependencies:

@@ -1,14 +1,13 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CreateRequestContext, MikroORM } from "@mikro-orm/postgresql";
+import { createLogger } from "evlog";
 import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "./match/match.service";
 
 @Injectable()
 export class TournamentCron {
-  private readonly logger = new Logger(TournamentCron.name);
-
   constructor(
     private readonly orm: MikroORM,
     private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
@@ -19,7 +18,10 @@ export class TournamentCron {
   @Cron(CronExpression.EVERY_5_MINUTES)
   @CreateRequestContext()
   async syncLiveTournaments() {
-    this.logger.log("Starting sync of live tournaments and matches...");
+    const log = createLogger({
+      component: TournamentCron.name,
+      job: "syncLiveTournaments",
+    });
 
     try {
       const liveMatches = await this.matchService.findLive({
@@ -36,13 +38,9 @@ export class TournamentCron {
       const allMatches = [...liveMatches, ...recentlyEndedMatches];
 
       if (allMatches.length === 0) {
-        this.logger.log("No live or recently ended matches found");
+        log.set({ matches: { live: 0, recentlyEnded: 0, tournaments: 0 } });
         return;
       }
-
-      this.logger.log(
-        `Found ${liveMatches.length} live matches and ${recentlyEndedMatches.length} recently ended matches`,
-      );
 
       const tournamentIds = new Set<string>();
       for (const match of allMatches) {
@@ -51,35 +49,51 @@ export class TournamentCron {
         }
       }
 
-      this.logger.log(
-        `Found ${tournamentIds.size} tournaments with live or recently ended matches`,
-      );
+      log.set({
+        matches: {
+          live: liveMatches.length,
+          recentlyEnded: recentlyEndedMatches.length,
+          tournaments: tournamentIds.size,
+        },
+      });
+
+      let synced = 0;
+      let failed = 0;
 
       for (const tournamentId of tournamentIds) {
         try {
           await this.syncPandascoreTournamentUseCase.execute(tournamentId);
-          this.logger.log(`Successfully synced tournament ${tournamentId}`);
+          synced += 1;
         } catch (error) {
-          this.logger.error(`Failed to sync tournament ${tournamentId}`, error);
+          failed += 1;
+          log.set({ tournamentId });
+          log.error(error instanceof Error ? error : new Error(String(error)));
         }
       }
 
-      this.logger.log("Finished syncing live tournaments and matches");
+      log.set({ sync: { synced, failed } });
     } catch (error) {
-      this.logger.error("Failed to sync live tournaments", error);
+      log.error(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      log.emit();
     }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   @CreateRequestContext()
   async syncPandascoreAdditionsDaily() {
-    this.logger.log("Starting daily incremental PandaScore additions sync...");
+    const log = createLogger({
+      component: TournamentCron.name,
+      job: "syncPandascoreAdditionsDaily",
+    });
 
     try {
       await this.syncPandascoreAdditionsUseCase.execute();
-      this.logger.log("Successfully completed daily PandaScore additions sync");
+      log.set({ jobStatus: "completed" });
     } catch (error) {
-      this.logger.error("Failed to sync PandaScore additions daily", error);
+      log.error(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      log.emit();
     }
   }
 }

@@ -1,4 +1,5 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
+import { createLogger } from "evlog";
 import {
   PANDASCORE_GATEWAY,
   PandascoreAdditionDto,
@@ -21,8 +22,6 @@ const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class SyncPandascoreAdditionsUseCase {
-  private readonly logger = new Logger(SyncPandascoreAdditionsUseCase.name);
-
   constructor(
     @Inject(PANDASCORE_GATEWAY)
     private readonly pandascoreGateway: PandascoreGateway,
@@ -32,39 +31,57 @@ export class SyncPandascoreAdditionsUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    const since = await this.resolveSinceCursor();
-    this.logger.log(`Fetching PandaScore additions since ${since.toISOString()}`);
+    const log = createLogger({ component: SyncPandascoreAdditionsUseCase.name });
 
-    const additions = await this.pandascoreGateway.listAdditions({
-      since,
-      videogame: [ROCKET_LEAGUE_VIDEOGAME],
-      sort: "modified_at",
-      perPage: 100,
-    });
+    try {
+      const since = await this.resolveSinceCursor();
+      log.set({ since: since.toISOString() });
 
-    if (additions.length === 0) {
-      this.logger.log("No PandaScore additions found");
-      await this.syncCursorRepository.setLastSyncAt(new Date());
-      return;
-    }
+      const additions = await this.pandascoreGateway.listAdditions({
+        since,
+        videogame: [ROCKET_LEAGUE_VIDEOGAME],
+        sort: "modified_at",
+        perPage: 100,
+      });
 
-    let latestModifiedAt = since;
-
-    for (const addition of additions) {
-      try {
-        await this.processAddition(addition);
-      } catch (error) {
-        this.logger.error(`Failed to process addition ${addition.type}:${addition.id}`, error);
+      if (additions.length === 0) {
+        await this.syncCursorRepository.setLastSyncAt(new Date());
+        log.set({ additions: { total: 0, processed: 0, failed: 0 } });
+        return;
       }
 
-      const modifiedAt = new Date(addition.modified_at);
-      if (modifiedAt > latestModifiedAt) {
-        latestModifiedAt = modifiedAt;
-      }
-    }
+      let latestModifiedAt = since;
+      let failed = 0;
 
-    await this.syncCursorRepository.setLastSyncAt(latestModifiedAt);
-    this.logger.log(`Processed ${additions.length} PandaScore additions`);
+      for (const addition of additions) {
+        try {
+          await this.processAddition(log, addition);
+        } catch (error) {
+          failed += 1;
+          log.set({ additionType: addition.type, additionId: addition.id });
+          log.error(error instanceof Error ? error : new Error(String(error)));
+        }
+
+        const modifiedAt = new Date(addition.modified_at);
+        if (modifiedAt > latestModifiedAt) {
+          latestModifiedAt = modifiedAt;
+        }
+      }
+
+      await this.syncCursorRepository.setLastSyncAt(latestModifiedAt);
+      log.set({
+        additions: {
+          total: additions.length,
+          processed: additions.length - failed,
+          failed,
+        },
+      });
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    } finally {
+      log.emit();
+    }
   }
 
   private async resolveSinceCursor(): Promise<Date> {
@@ -75,7 +92,10 @@ export class SyncPandascoreAdditionsUseCase {
     return new Date(Date.now() - DEFAULT_LOOKBACK_MS);
   }
 
-  private async processAddition(addition: PandascoreAdditionDto): Promise<void> {
+  private async processAddition(
+    log: ReturnType<typeof createLogger>,
+    addition: PandascoreAdditionDto,
+  ): Promise<void> {
     switch (addition.type) {
       case "tournament":
         await this.persistence.upsertTournament(
@@ -83,7 +103,7 @@ export class SyncPandascoreAdditionsUseCase {
         );
         break;
       case "match":
-        await this.processMatchAddition(addition.object);
+        await this.processMatchAddition(log, addition.object);
         break;
       case "team":
         await this.persistence.upsertTeam(PandascoreTeamMapper.toUpsertCommand(addition.object));
@@ -99,20 +119,23 @@ export class SyncPandascoreAdditionsUseCase {
         );
         break;
       case "serie":
-        this.logger.debug(`Skipping serie addition ${addition.id}`);
+        log.info(`Skipping serie addition (id=${addition.id})`);
         break;
       default: {
         const _exhaustive: never = addition;
-        this.logger.warn(`Unhandled PandaScore addition type: ${String(_exhaustive)}`);
+        log.warn(`Unhandled PandaScore addition type: ${String(_exhaustive)}`);
       }
     }
   }
 
-  private async processMatchAddition(matchDto: MatchDto): Promise<void> {
+  private async processMatchAddition(
+    log: ReturnType<typeof createLogger>,
+    matchDto: MatchDto,
+  ): Promise<void> {
     const tournament = await this.persistence.findTournamentByPandascoreId(matchDto.tournament_id);
     if (!tournament) {
-      this.logger.debug(
-        `Skipping match ${matchDto.id}: tournament ${matchDto.tournament_id} not found locally`,
+      log.info(
+        `Skipping match addition because tournament is not stored locally (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
       );
       return;
     }

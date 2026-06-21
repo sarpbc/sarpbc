@@ -1,6 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { CreateRequestContext, EntityManager, EntityRepository } from "@mikro-orm/postgresql";
+import { log } from "evlog";
 import { TournamentParticipant } from "./domain/tournament-participant.entity";
 import { Tournament } from "./domain/tournament.entity";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
@@ -9,8 +10,6 @@ import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions
 
 @Injectable()
 export class TournamentService {
-  private readonly logger = new Logger(TournamentService.name);
-
   constructor(
     @InjectRepository(Tournament)
     private readonly tournamentRepository: EntityRepository<Tournament>,
@@ -79,7 +78,11 @@ export class TournamentService {
     try {
       await this.syncAllTournamentsUseCase.execute();
     } catch (error) {
-      this.logger.error("Failed to sync tournaments", error);
+      log.error({
+        component: TournamentService.name,
+        message: "Failed to sync tournaments",
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
       throw error;
     }
   }

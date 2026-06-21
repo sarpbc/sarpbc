@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from "@nestjs/common";
+import { useLogger } from "evlog/nestjs";
 import { AuthGuard } from "./auth.guard";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
@@ -69,6 +70,8 @@ export class AuthController {
 
   @Get("google/callback")
   async handleGoogleCallback(@Query("code") code: string, @Res() res: FastifyReply) {
+    const log = useLogger();
+
     try {
       const access_token = await this.authService.handleGoogleCallback(code);
 
@@ -76,7 +79,7 @@ export class AuthController {
 
       return res.code(302).redirect(this.authService.getFrontUrl());
     } catch (error) {
-      console.error(error);
+      log.error(error instanceof Error ? error : new Error(String(error)));
       return res.code(302).redirect(this.authService.getFrontUrl());
     }
   }

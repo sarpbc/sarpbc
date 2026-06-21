@@ -42,7 +42,28 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxtjs/i18n", "@nuxt/ui", "@nuxt/content", "motion-v/nuxt"],
+  modules: ["evlog/nuxt", "@nuxtjs/i18n", "@nuxt/ui", "@nuxt/content", "motion-v/nuxt"],
+
+  evlog: {
+    env: {
+      service: "sarpbc-front",
+    },
+  },
+
+  $production: {
+    evlog: {
+      console: false,
+      sampling: {
+        rates: {
+          info: 5,
+          warn: 50,
+          debug: 0,
+          error: 100,
+        },
+        keep: [{ duration: 1000 }, { status: 400 }],
+      },
+    },
+  },
 
   nitro: {
     preset: "node-server",
