@@ -17,6 +17,12 @@ const iconClasses = {
   lg: "size-10",
 };
 
+const fallbackRadiusClasses = {
+  sm: "rounded-sm",
+  md: "rounded-md",
+  lg: "rounded-lg",
+};
+
 const { teamName, imageUrl, size = "md" } = defineProps<Props>();
 
 const invertLightmode = computed(() => imageUrl !== undefined && imageUrl.includes("lightmode"));
@@ -28,13 +34,21 @@ const invertLightmode = computed(() => imageUrl !== undefined && imageUrl.includ
       v-if="imageUrl"
       :src="imageUrl"
       :alt="`${teamName} logo`"
-      class="max-h-full max-w-full object-contain"
+      :class="[
+        fallbackRadiusClasses[size],
+        'max-h-full max-w-full object-contain ring-1 ring-black/10 dark:ring-white/10',
+      ]"
       :style="invertLightmode ? 'filter: invert(1);' : ''"
     />
-    <UIcon
+    <div
       v-else
-      name="i-fluent-people-team-24-regular"
-      :class="[iconClasses[size], 'text-muted']"
-    />
+      :class="[
+        boxClasses[size],
+        fallbackRadiusClasses[size],
+        'flex items-center justify-center bg-elevated ring-1 ring-black/10 dark:ring-white/10',
+      ]"
+    >
+      <UIcon name="i-fluent-people-team-24-regular" :class="[iconClasses[size], 'text-muted']" />
+    </div>
   </div>
 </template>

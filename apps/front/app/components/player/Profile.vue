@@ -12,12 +12,12 @@ const { player, size = "md" } = defineProps<Props>();
 <template>
   <ULink
     :to="$localePath(`/player/${player.slug}`)"
-    class="flex flex-col gap-1 hover:cursor-pointer"
+    class="flex min-h-10 min-w-10 max-w-[9rem] flex-col items-center gap-1.5 rounded-md p-2 touch-manipulation transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
   >
     <PlayerImg :player-name="player.name" :img="player.imageUrl" :size="size" />
-    <div class="w-full flex flex-row justify-center items-center gap-1">
-      <FlagIcon :nationality="player.nationality" />
-      <span class="text-center">{{ player.name }}</span>
+    <div class="flex w-full min-w-0 flex-row items-center justify-center gap-1">
+      <FlagIcon :nationality="player.nationality" class="shrink-0" />
+      <span class="truncate text-center text-sm">{{ player.name }}</span>
     </div>
   </ULink>
 </template>

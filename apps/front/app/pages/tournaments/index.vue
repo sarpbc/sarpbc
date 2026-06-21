@@ -21,7 +21,7 @@ setPageSeo({
         </h1>
       </div>
     </UiCrossCard>
-    <div class="w-full flex flex-col gap-2">
+    <div class="w-full flex flex-col gap-0">
       <TournamentRow
         v-for="tournament in tournaments"
         :key="tournament.id"
