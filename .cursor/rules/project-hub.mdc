@@ -12,5 +12,6 @@ Before non-trivial work, read **[AGENTS.md](../AGENTS.md)** at the repo root and
 - UI / copy / a11y → `geist-design`
 - NestJS / API / DB → `nestjs-best-practices`
 - Nuxt / SSR / routing → `nuxt`
+- Roadmap / backlog / scope grilling → `sarpbc-pm`
 
 Do not duplicate full skill docs in responses. Prefer minimal diffs; oxlint + oxfmt; i18n for all user strings in the frontend.
