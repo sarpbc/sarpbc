@@ -25,6 +25,12 @@
       "skillPath": "skills/make-interfaces-feel-better/SKILL.md",
       "computedHash": "54b6e221bbe4e2d1a8461c3f9ecabe69daf891f964e9ee5e699c323daa018f2e"
     },
+    "sarpbc-pm": {
+      "source": "local",
+      "sourceType": "local",
+      "skillPath": ".agents/skills/sarpbc-pm/SKILL.md",
+      "computedHash": "local"
+    },
     "nestjs-best-practices": {
       "source": "kadajett/agent-nestjs-skills",
       "sourceType": "github",
