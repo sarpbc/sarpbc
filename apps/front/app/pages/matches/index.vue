@@ -1,117 +1,31 @@
 <script lang="ts" setup>
-import type { Match, MatchesPageData } from "~/types/matches";
-
 const { t } = useI18n();
-const route = useRoute();
 const { setPageSeo } = useSarpbcSeo();
 
-const MATCHES_PER_PAGE = 20;
-
-type MatchesTab = "upcoming" | "past";
-
-const tab = computed<MatchesTab>(() => {
-  const value = route.query.tab as string;
-  return value === "past" ? "past" : "upcoming";
-});
-
-const offset = computed(() => {
-  const param = route.query.offset as string;
-  const parsed = param ? parseInt(param, 10) : 0;
-  return Number.isNaN(parsed) ? 0 : parsed;
-});
-
 const {
-  data: matchesData,
+  tab,
+  offset,
+  hasActiveFilters,
+  tournamentFilterOptions,
+  selectedTournamentFilterValue,
   pending,
   error,
   refresh,
-} = await useLazyAsyncData<MatchesPageData | null>(
-  () => `matches-${tab.value}-${offset.value}`,
-  (): Promise<MatchesPageData> => {
-    const query = { limit: MATCHES_PER_PAGE, offset: offset.value };
-    return tab.value === "past" ? getMatchesResults(query) : getUpcomingMatches(query);
-  },
-  {
-    watch: [tab, offset],
-    default: () => null,
-  },
-);
-
-const liveMatches = computed(() =>
-  tab.value === "upcoming" && matchesData.value && "live" in matchesData.value
-    ? matchesData.value.live
-    : [],
-);
-
-const upcomingMatches = computed(() =>
-  tab.value === "upcoming" && matchesData.value && "upcoming" in matchesData.value
-    ? matchesData.value.upcoming
-    : [],
-);
-
-const pastMatches = computed(() =>
-  tab.value === "past" && matchesData.value && "results" in matchesData.value
-    ? matchesData.value.results
-    : [],
-);
-
-const totalMatches = computed(() => {
-  if (!matchesData.value) return 0;
-  if ("total" in matchesData.value && tab.value === "upcoming") {
-    return matchesData.value.total;
-  }
-  if ("total" in matchesData.value && tab.value === "past") {
-    return matchesData.value.total;
-  }
-  return 0;
-});
-
-const hasMatches = computed(() => {
-  if (tab.value === "past") {
-    return pastMatches.value.length > 0;
-  }
-  return liveMatches.value.length > 0 || upcomingMatches.value.length > 0;
-});
-
-const currentPage = computed(() => Math.floor(offset.value / MATCHES_PER_PAGE) + 1);
-const totalPages = computed(() => Math.max(1, Math.ceil(totalMatches.value / MATCHES_PER_PAGE)));
-
-const hasPrevious = computed(() => offset.value > 0);
-const hasNext = computed(() => offset.value + MATCHES_PER_PAGE < totalMatches.value);
-
-const tabItems = computed(() => [
-  { value: "upcoming" as const, label: t("page.matches.tabs.upcoming") },
-  { value: "past" as const, label: t("page.matches.tabs.past") },
-]);
-
-function getTabQuery(nextTab: MatchesTab) {
-  return {
-    tab: nextTab,
-    offset: "0",
-  };
-}
-
-function getPageQuery(nextOffset: number) {
-  return {
-    tab: tab.value,
-    offset: String(Math.max(0, nextOffset)),
-  };
-}
-
-function tournamentLabel(match: Match) {
-  const league = match.tournament?.league?.name;
-  const name = match.tournament?.name;
-  if (league && name) return `${league} ${name}`;
-  return name ?? t("page.matches.unknownTournament");
-}
-
-function tournamentMatchesPath(tournamentId: string) {
-  return `/tournaments/${tournamentId}/matches`;
-}
-
-function matchDetailPath(id: string) {
-  return `/matches/${id}`;
-}
+  liveMatches,
+  upcomingMatches,
+  pastMatches,
+  totalMatches,
+  hasMatches,
+  currentPage,
+  totalPages,
+  hasPrevious,
+  hasNext,
+  tabItems,
+  getTabQuery,
+  getPageQuery,
+  onTournamentFilterChange,
+  clearFilters,
+} = useMatchesListPage();
 
 setPageSeo({
   title: t("page.matches.seo.title"),
@@ -129,194 +43,99 @@ setPageSeo({
       </div>
     </UiCrossCard>
 
-    <UiCard>
-      <div class="flex flex-wrap gap-1 p-1.5">
-        <UButton
-          v-for="item in tabItems"
-          :key="item.value"
-          variant="soft"
-          :color="tab === item.value ? 'primary' : 'neutral'"
-          :to="{ path: $localePath('/matches'), query: getTabQuery(item.value) }"
-          class="min-h-9 px-3"
+    <div>
+      <MatchListToolbar
+        :tab="tab"
+        :tab-items="tabItems"
+        :get-tab-query="getTabQuery"
+        :tournament-filter-options="tournamentFilterOptions"
+        :selected-tournament-filter-value="selectedTournamentFilterValue"
+        :has-active-filters="hasActiveFilters"
+        @tournament-change="onTournamentFilterChange"
+        @clear="clearFilters"
+        class="mb-0.25"
+      />
+
+      <div v-if="pending" class="w-full pt-11.25 flex flex-col" aria-live="polite">
+        <UiCard
+          v-for="index in 20"
+          :key="index"
+          :class="{ 'border-t-0': index > 1, 'h-11.5': index === 1, 'h-11.25': index > 1 }"
         >
-          {{ item.label }}
-        </UButton>
-      </div>
-    </UiCard>
-
-    <div v-if="pending" class="w-full flex flex-col gap-2" aria-live="polite">
-      <UiCard v-for="index in 4" :key="index" class="p-4">
-        <div class="flex flex-col gap-3 animate-pulse">
-          <div class="h-3 w-40 rounded bg-elevated" />
-          <div class="h-8 w-full rounded bg-elevated" />
-        </div>
-      </UiCard>
-    </div>
-
-    <UiCard v-else-if="error">
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-        <p class="text-sm text-muted">
-          {{ t("page.matches.error") }}
-        </p>
-        <UButton variant="outline" @click="refresh()">
-          {{ t("page.matches.retry") }}
-        </UButton>
-      </div>
-    </UiCard>
-
-    <template v-else-if="hasMatches">
-      <template v-if="tab === 'upcoming'">
-        <section v-if="liveMatches.length > 0" class="w-full flex flex-col gap-2">
-          <h2 class="text-sm font-medium text-toned pl-1">
-            {{ t("page.matches.sections.live") }}
-          </h2>
-          <UiCard variant="soft">
-            <div class="flex flex-col">
-              <div
-                v-for="(match, index) in liveMatches"
-                :key="match.id"
-                class="border-b border-default last:border-b-0"
-              >
-                <div class="px-2 pt-2 pb-1">
-                  <ULink
-                    :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-                    class="text-xs text-muted hover:text-highlighted"
-                  >
-                    {{ tournamentLabel(match) }}
-                  </ULink>
-                </div>
-                <ULink
-                  :to="$localePath(matchDetailPath(match.id))"
-                  class="block hover:bg-elevated/50 transition-colors"
-                >
-                  <MatchRow :match="match" :live="true" :last="index === liveMatches.length - 1" />
-                </ULink>
+          <div v-if="tab === 'past'" class="w-full flex py-1 px-2 items-center">
+            <div class="w-full flex flex-col gap-1">
+              <div class="w-full grid grid-cols-3 gap-2 items-center">
+                <USkeleton class="col-span-2 h-3 max-w-32" />
+                <USkeleton class="col-span-1 h-3 w-6 justify-self-end" />
+              </div>
+              <div class="w-full grid grid-cols-3 gap-2 items-center">
+                <USkeleton class="col-span-2 h-3 max-w-28" />
+                <USkeleton class="col-span-1 h-3 w-6 justify-self-end" />
               </div>
             </div>
-          </UiCard>
-        </section>
-
-        <section v-if="upcomingMatches.length > 0" class="w-full flex flex-col gap-2">
-          <h2 class="text-sm font-medium text-toned pl-1">
-            {{ t("page.matches.sections.upcoming") }}
-          </h2>
-          <UiCard variant="soft">
-            <div class="flex flex-col">
-              <div
-                v-for="(match, index) in upcomingMatches"
-                :key="match.id"
-                class="border-b border-default last:border-b-0"
-              >
-                <div class="px-2 pt-2 pb-1">
-                  <ULink
-                    :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-                    class="text-xs text-muted hover:text-highlighted"
-                  >
-                    {{ tournamentLabel(match) }}
-                  </ULink>
-                </div>
-                <ULink
-                  :to="$localePath(matchDetailPath(match.id))"
-                  class="block hover:bg-elevated/50 transition-colors"
-                >
-                  <MatchRow :match="match" :last="index === upcomingMatches.length - 1" />
-                </ULink>
-              </div>
+          </div>
+          <div v-else class="w-full grid grid-cols-3 py-1 px-2 items-center">
+            <div class="col-span-2 flex flex-col gap-0.5">
+              <USkeleton class="h-3 w-24" />
+              <USkeleton class="h-3 w-28" />
             </div>
-          </UiCard>
-        </section>
-      </template>
-
-      <section v-else class="w-full flex flex-col gap-2">
-        <UiCard variant="soft">
-          <div class="flex flex-col">
-            <div
-              v-for="(match, index) in pastMatches"
-              :key="match.id"
-              class="border-b border-default last:border-b-0"
-            >
-              <div class="px-2 pt-2 pb-1">
-                <ULink
-                  :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-                  class="text-xs text-muted hover:text-highlighted"
-                >
-                  {{ tournamentLabel(match) }}
-                </ULink>
-              </div>
-              <ULink
-                :to="$localePath(matchDetailPath(match.id))"
-                class="block hover:bg-elevated/50 transition-colors"
-              >
-                <MatchResultRow :match="match" :last="index === pastMatches.length - 1" />
-              </ULink>
+            <div class="col-span-1 flex justify-end">
+              <USkeleton class="h-3 w-10" />
             </div>
           </div>
         </UiCard>
-      </section>
+      </div>
 
-      <UiCard v-if="totalMatches > MATCHES_PER_PAGE">
-        <div class="flex justify-between items-center p-2 gap-2">
-          <UButton
-            :disabled="!hasPrevious"
-            variant="outline"
-            :to="{ path: $localePath('/matches'), query: getPageQuery(offset - MATCHES_PER_PAGE) }"
-            as="link"
-          >
-            <UIcon name="i-fluent-chevron-left-24-regular" />
-            {{ t("common.previous") }}
-          </UButton>
-
-          <div class="text-sm text-muted tabular-nums">
-            {{ t("page.matches.pagination.page") }} {{ currentPage }} / {{ totalPages }}
-          </div>
-
-          <UButton
-            :disabled="!hasNext"
-            variant="outline"
-            :to="{ path: $localePath('/matches'), query: getPageQuery(offset + MATCHES_PER_PAGE) }"
-            as="link"
-          >
-            {{ t("common.next") }}
-            <UIcon name="i-fluent-chevron-right-24-regular" />
+      <UiCard v-else-if="error">
+        <div class="flex flex-col items-center h-67.25 gap-3 justify-center">
+          <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
+          <p class="text-sm text-muted">
+            {{ t("page.matches.error") }}
+          </p>
+          <UButton variant="outline" @click="refresh()" color="error">
+            {{ t("page.matches.retry") }}
           </UButton>
         </div>
       </UiCard>
-    </template>
 
-    <UiCard v-else>
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-        <UIcon
-          :name="
-            tab === 'upcoming' ? 'i-fluent-calendar-clock-24-regular' : 'i-fluent-trophy-24-regular'
-          "
-          class="text-4xl text-muted"
+      <template v-else-if="hasMatches">
+        <template v-if="tab === 'upcoming'">
+          <MatchListGroup
+            v-if="liveMatches.length > 0"
+            :matches="liveMatches"
+            variant="live"
+            :title="t('page.matches.sections.live')"
+          />
+          <MatchListGroup
+            v-if="upcomingMatches.length > 0"
+            :matches="upcomingMatches"
+            variant="upcoming"
+            :title="t('page.matches.sections.upcoming')"
+          />
+        </template>
+
+        <MatchListGroup v-else :matches="pastMatches" variant="result" />
+
+        <MatchListPagination
+          v-if="totalMatches > MATCHES_PER_PAGE"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :has-previous="hasPrevious"
+          :has-next="hasNext"
+          :get-page-query="getPageQuery"
+          :offset="offset"
+          :page-size="MATCHES_PER_PAGE"
+          class="mt-11"
         />
-        <p class="text-sm text-muted">
-          {{ tab === "upcoming" ? t("page.matches.empty.upcoming") : t("page.matches.empty.past") }}
-        </p>
-        <p class="text-xs text-dimmed">
-          {{
-            tab === "upcoming"
-              ? t("page.matches.empty.upcomingHint")
-              : t("page.matches.empty.pastHint")
-          }}
-        </p>
-        <UButton
-          variant="soft"
-          color="primary"
-          :to="{
-            path: $localePath('/matches'),
-            query: getTabQuery(tab === 'upcoming' ? 'past' : 'upcoming'),
-          }"
-        >
-          {{
-            tab === "upcoming"
-              ? t("page.matches.empty.viewPast")
-              : t("page.matches.empty.viewUpcoming")
-          }}
-        </UButton>
-      </div>
-    </UiCard>
+      </template>
+
+      <MatchListEmpty
+        v-else
+        :tab="tab"
+        :has-active-filters="hasActiveFilters"
+        :get-tab-query="getTabQuery"
+        @clear="clearFilters"
+      />
+    </div>
   </div>
 </template>
