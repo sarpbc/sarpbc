@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/core";
 import { MatchRepository } from "./match.repository";
 import { Match } from "./match.entity";
+import type { MatchListQueryOptions } from "./match-list-filters";
 import { TournamentParticipantRepository } from "../tournament-participant.repository";
 import { TournamentRepository } from "../tournament.repository";
 import { BracketLink } from "./bracket-link.entity";
@@ -51,72 +52,28 @@ export class MatchService {
     private readonly em: EntityManager,
   ) {}
 
-  async findUpcoming({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-  }: {
-    limit?: number;
-    offset?: number;
-    todayOnly?: boolean;
-  }): Promise<Match[]> {
-    return this.matchRepository.findUpcoming({ limit, offset, todayOnly });
+  async findUpcoming(options: MatchListQueryOptions = {}): Promise<Match[]> {
+    return this.matchRepository.findUpcoming(options);
   }
 
-  async findLive({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-  }: {
-    limit?: number;
-    offset?: number;
-    todayOnly?: boolean;
-  }): Promise<Match[]> {
-    return this.matchRepository.findLive({ limit, offset, todayOnly });
+  async findLive(options: MatchListQueryOptions = {}): Promise<Match[]> {
+    return this.matchRepository.findLive(options);
   }
 
-  async findResults({
-    limit = 20,
-    offset = 0,
-  }: {
-    limit?: number;
-    offset?: number;
-  }): Promise<Match[]> {
-    return this.matchRepository.findResults({ limit, offset });
+  async findResults(options: MatchListQueryOptions = {}): Promise<Match[]> {
+    return this.matchRepository.findResults(options);
   }
 
-  async findUpcomingAndCount({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-  }: {
-    limit?: number;
-    offset?: number;
-    todayOnly?: boolean;
-  }): Promise<[Match[], number]> {
-    return this.matchRepository.findUpcomingAndCount({ limit, offset, todayOnly });
+  async findUpcomingAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
+    return this.matchRepository.findUpcomingAndCount(options);
   }
 
-  async findLiveAndCount({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-  }: {
-    limit?: number;
-    offset?: number;
-    todayOnly?: boolean;
-  }): Promise<[Match[], number]> {
-    return this.matchRepository.findLiveAndCount({ limit, offset, todayOnly });
+  async findLiveAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
+    return this.matchRepository.findLiveAndCount(options);
   }
 
-  async findResultsAndCount({
-    limit = 20,
-    offset = 0,
-  }: {
-    limit?: number;
-    offset?: number;
-  }): Promise<[Match[], number]> {
-    return this.matchRepository.findResultsAndCount({ limit, offset });
+  async findResultsAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
+    return this.matchRepository.findResultsAndCount(options);
   }
 
   async findRecentlyEnded({

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { en, fr } from "@nuxt/ui/locale";
+import { uiComponentDefaults } from "~/config/ui-component-defaults";
 
 const appConfig = useAppConfig();
 const { locale } = useI18n();
@@ -22,11 +23,11 @@ useHead({
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster" :locale="uiLocale">
-    <div>
+  <UApp :toaster="appConfig.toaster" :locale="uiLocale" :scroll-body="false">
+    <UTheme :props="uiComponentDefaults">
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
-    </div>
+    </UTheme>
   </UApp>
 </template>
