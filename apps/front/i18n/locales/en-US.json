@@ -455,6 +455,14 @@
         "live": "Live Now",
         "upcoming": "Upcoming"
       },
+      "filters": {
+        "title": "Filters",
+        "tournament": "Tournament",
+        "allTournaments": "All tournaments",
+        "clear": "Clear Filters",
+        "filteredEmpty": "No matches match this tournament.",
+        "filteredEmptyHint": "Try another tournament or clear the filter to see all matches."
+      },
       "empty": {
         "upcoming": "No live or upcoming matches right now.",
         "past": "No completed matches to show yet.",
@@ -466,6 +474,7 @@
       "error": "Could not load matches. Check your connection and try again.",
       "retry": "Try Again",
       "unknownTournament": "Unknown tournament",
+      "unknownSubTournament": "Unknown event",
       "pagination": {
         "page": "Page"
       }

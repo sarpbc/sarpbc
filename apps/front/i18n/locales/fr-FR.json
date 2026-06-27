@@ -455,6 +455,14 @@
         "live": "En direct",
         "upcoming": "À venir"
       },
+      "filters": {
+        "title": "Filtres",
+        "tournament": "Tournoi",
+        "allTournaments": "Tous les tournois",
+        "clear": "Effacer les filtres",
+        "filteredEmpty": "Aucun match ne correspond à ce tournoi.",
+        "filteredEmptyHint": "Essayez un autre tournoi ou effacez le filtre pour voir tous les matchs."
+      },
       "empty": {
         "upcoming": "Aucun match en direct ou à venir pour le moment.",
         "past": "Aucun match terminé à afficher pour l'instant.",
@@ -466,6 +474,7 @@
       "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",
       "unknownTournament": "Tournoi inconnu",
+      "unknownSubTournament": "Épreuve inconnue",
       "pagination": {
         "page": "Page"
       }
