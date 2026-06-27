@@ -2,12 +2,9 @@
 @import "@nuxt/ui";
 
 html {
-  scrollbar-color: var(--color-neutral-300) transparent;
-}
-
-/* Apply scrollbar-gutter only to landing pages (default layout) */
-html:has(main.min-h-svh) {
+  /* Reserve scrollbar space so Reka UI body lock (selects, menus, modals) does not shift layout. */
   scrollbar-gutter: stable;
+  scrollbar-color: var(--color-neutral-300) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -39,5 +36,5 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 :root {
-  --ui-radius: 0.25rem;
+  --ui-radius: 0rem;
 }
