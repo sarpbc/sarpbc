@@ -322,7 +322,7 @@
         "gameOver": "Fin de partie !",
         "playersNameWas": "Le joueur à deviner était {name}",
         "attemptsLeft": "Tentatives : {current} / {max}",
-        "howToPlay": "Comment jouer ?",
+        "howToPlay": "Comment Jouer",
         "correctPosition": "Bonne position",
         "wrongPosition": "Mauvaise position",
         "notInWord": "Pas dans le mot",

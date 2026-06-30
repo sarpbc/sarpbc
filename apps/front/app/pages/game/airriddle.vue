@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 import { motion } from "motion-v";
+import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -24,6 +24,7 @@ const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
 const answer = ref<string | undefined>(undefined);
 const inputRef = useTemplateRef("inputRef");
+const prefersReducedMotion = ref(false);
 
 const gameState = reactive<GameState>({
   targetLength: 0,
@@ -32,13 +33,37 @@ const gameState = reactive<GameState>({
   isGameOver: false,
 });
 
+const statusMessage = computed(() => {
+  if (gameState.isWon) {
+    return t("page.game.airriddle.guessedInAttempts", {
+      attempts: gameState.attempts.length,
+    });
+  }
+  if (gameState.isGameOver) {
+    return t("page.game.airriddle.playersNameWas", { name: answer.value });
+  }
+  return t("page.game.airriddle.attemptsLeft", {
+    current: gameState.attempts.length,
+    max: maxAttempts,
+  });
+});
+
+const emptyRows = computed(() => {
+  if (gameState.isWon || gameState.isGameOver) {
+    return 0;
+  }
+  return Math.max(0, maxAttempts - gameState.attempts.length - 1);
+});
+
 onMounted(async () => {
+  prefersReducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   try {
     const length = await getTodayAirRiddleLength();
     gameState.targetLength = length;
-    loading.value = false;
-  } catch (error) {
-    console.error("Failed to initialize game:", error);
+  } catch (loadError) {
+    console.error("Failed to initialize game:", loadError);
+  } finally {
     loading.value = false;
   }
 });
@@ -82,8 +107,8 @@ async function submitGuess() {
     }
 
     currentGuess.value = "";
-  } catch (error) {
-    console.error("Failed to submit guess:", error);
+  } catch (submitError) {
+    console.error("Failed to submit guess:", submitError);
   } finally {
     submitting.value = false;
     if (!gameState.isWon && !gameState.isGameOver) {
@@ -91,23 +116,6 @@ async function submitGuess() {
         inputRef.value?.inputRef?.focus();
       });
     }
-  }
-}
-
-function getLetterClasses(result?: AirRiddleResultEnum): string {
-  const baseClasses = "";
-
-  if (!result) return baseClasses;
-
-  switch (result) {
-    case AirRiddleResultEnum.CORRECT:
-      return `${baseClasses} bg-success border-success text-white`;
-    case AirRiddleResultEnum.MISPLACED:
-      return `${baseClasses} bg-warning border-warning text-white`;
-    case AirRiddleResultEnum.INCORRECT:
-      return `${baseClasses} bg-accented border-accented text-white`;
-    default:
-      return baseClasses;
   }
 }
 
@@ -124,205 +132,213 @@ setPageSeo({
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-14">
-      <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold">
+  <section class="flex w-full flex-col gap-4">
+    <UiCrossCard class="min-h-14">
+      <div class="flex w-full flex-col items-center justify-center gap-1 px-4 py-3 text-center">
+        <h1 class="text-xl font-semibold tracking-tight">
           {{ t("page.game.airriddle.title") }}
         </h1>
+        <p class="text-sm text-muted text-pretty">
+          {{ t("page.game.airriddle.description") }}
+        </p>
       </div>
     </UiCrossCard>
 
-    <div v-if="loading" class="flex flex-row justify-center items-center border border-default p-2">
-      <div class="flex flex-col items-center gap-4">
-        <UIcon name="i-ph-spinner-bold" class="size-8 animate-spin" />
-        <p class="text-lg text-muted">
+    <UiCard v-if="loading" class="mx-auto w-full max-w-md p-6">
+      <div class="flex flex-col items-center gap-6">
+        <div class="flex w-full flex-col gap-2">
+          <USkeleton class="mx-auto h-4 w-40" />
+          <div class="flex justify-center gap-1.5">
+            <USkeleton v-for="index in 6" :key="index" class="size-12 sm:size-14" />
+          </div>
+          <div class="flex justify-center gap-1.5">
+            <USkeleton v-for="index in 6" :key="`row-${index}`" class="size-12 sm:size-14" />
+          </div>
+        </div>
+        <p class="text-sm text-muted">
           {{ t("page.game.airriddle.loadingChallenge") }}
         </p>
       </div>
-    </div>
+    </UiCard>
 
-    <div v-else-if="gameState.targetLength > 0" class="flex flex-col gap-4">
-      <div class="flex flex-col justify-center items-center border border-default p-4">
-        <div class="text-center">
-          <motion.div
-            v-if="gameState.isWon"
-            class="text-success"
-            :initial="{ scale: 0, y: -20 }"
-            :animate="{ scale: 1, y: 0 }"
-            :transition="{
-              type: 'spring',
-              stiffness: 200,
-              damping: 15,
-              delay: 0.3,
-            }"
-          >
-            <p class="text-xl font-bold">
-              {{ t("page.game.airriddle.congratulations") }}
-            </p>
-            <p class="text-lg">
-              {{
-                t("page.game.airriddle.guessedInAttempts", {
-                  attempts: gameState.attempts.length,
-                })
-              }}
-            </p>
-          </motion.div>
-          <motion.div
-            v-else-if="gameState.isGameOver"
-            class="text-error"
-            :initial="{ scale: 0, y: -20 }"
-            :animate="{ scale: 1, y: 0 }"
-            :transition="{
-              type: 'spring',
-              stiffness: 200,
-              damping: 15,
-              delay: 0.3,
-            }"
-          >
-            <p class="text-xl font-bold">
-              {{ t("page.game.airriddle.gameOver") }}
-            </p>
-            <p class="text-lg">
-              {{ t("page.game.airriddle.playersNameWas", { name: answer }) }}
-            </p>
-          </motion.div>
-          <div v-else class="text-muted">
-            <p class="text-lg font-semibold">
-              {{
-                t("page.game.airriddle.attemptsLeft", {
-                  current: gameState.attempts.length,
-                  max: maxAttempts,
-                })
-              }}
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-2 p-4">
-          <div
-            v-for="(attempt, attemptIndex) in gameState.attempts"
-            :key="attemptIndex"
-            class="flex justify-center gap-1"
-          >
+    <template v-else-if="gameState.targetLength > 0">
+      <UiCard class="mx-auto w-full max-w-md p-4 sm:p-6">
+        <div class="flex flex-col items-center gap-6">
+          <div class="w-full text-center" aria-live="polite" aria-atomic="true">
             <motion.div
-              v-for="(letter, letterIndex) in attempt.letters"
-              :key="letterIndex"
-              class="w-12 h-12 border-2 flex items-center justify-center text-xl font-bold"
-              :class="getLetterClasses(attempt.results?.[letterIndex])"
-              :initial="{ scale: 0, y: -50 }"
-              :animate="{ scale: 1, y: 0 }"
+              v-if="gameState.isWon"
+              class="text-success"
+              :initial="prefersReducedMotion ? false : { scale: 0, y: -20 }"
+              :animate="prefersReducedMotion ? undefined : { scale: 1, y: 0 }"
               :transition="{
                 type: 'spring',
-                stiffness: 300,
-                damping: 20,
-                delay: letterIndex * 0.1,
+                stiffness: 200,
+                damping: 15,
+                delay: prefersReducedMotion ? 0 : 0.3,
               }"
             >
-              {{ letter.toUpperCase() }}
+              <p class="text-xl font-bold tracking-tight">
+                {{ t("page.game.airriddle.congratulations") }}
+              </p>
+              <p class="text-sm text-muted tabular-nums">
+                {{ statusMessage }}
+              </p>
             </motion.div>
-          </div>
-
-          <div v-if="!gameState.isWon && !gameState.isGameOver" class="flex justify-center gap-1">
             <motion.div
-              v-for="letterIndex in gameState.targetLength"
-              :key="letterIndex"
-              class="w-12 h-12 border border-primary bg-primary/20 flex items-center justify-center text-xl font-bold"
-              :initial="{ scale: 0.9, opacity: 0.7 }"
-              :animate="{
-                scale: currentGuess[letterIndex - 1] ? 1.05 : 1,
-                opacity: currentGuess[letterIndex - 1] ? 1 : 0.7,
-              }"
+              v-else-if="gameState.isGameOver"
+              class="text-error"
+              :initial="prefersReducedMotion ? false : { scale: 0, y: -20 }"
+              :animate="prefersReducedMotion ? undefined : { scale: 1, y: 0 }"
               :transition="{
                 type: 'spring',
-                stiffness: 400,
-                damping: 25,
+                stiffness: 200,
+                damping: 15,
+                delay: prefersReducedMotion ? 0 : 0.3,
               }"
             >
-              {{ currentGuess[letterIndex - 1]?.toUpperCase() || "" }}
+              <p class="text-xl font-bold tracking-tight">
+                {{ t("page.game.airriddle.gameOver") }}
+              </p>
+              <p class="text-sm text-muted">
+                {{ statusMessage }}
+              </p>
             </motion.div>
-          </div>
-        </div>
-
-        <div
-          v-if="!gameState.isWon && !gameState.isGameOver"
-          class="w-full max-w-2xl flex flex-col sm:flex-row gap-4 items-center"
-        >
-          <UInput
-            ref="inputRef"
-            v-model="currentGuess"
-            :maxlength="gameState.targetLength"
-            class="flex-1 text-center font-semibold uppercase"
-            :placeholder="t('page.game.airriddle.enterGuess')"
-            :disabled="submitting"
-            size="lg"
-            @keyup.enter="submitGuess"
-          />
-          <UButton
-            :disabled="currentGuess.length !== gameState.targetLength || submitting"
-            :loading="submitting"
-            size="lg"
-            color="primary"
-            @click="submitGuess"
-          >
-            {{ submitting ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess") }}
-          </UButton>
-        </div>
-        <div v-if="error" class="text-error">
-          {{ t(`page.game.airriddle.${error}`) }}
-        </div>
-      </div>
-
-      <div class="flex flex-col justify-center items-center border border-default">
-        <h3 class="w-full border-b border-default text-lg font-semibold text-highlighted p-4">
-          {{ t("page.game.airriddle.howToPlay") }}
-        </h3>
-        <div class="flex flex-wrap justify-center gap-4 p-4">
-          <div class="flex items-center gap-2">
-            <div
-              class="w-6 h-6 bg-success flex items-center justify-center text-white font-bold text-sm"
-            >
-              A
+            <div v-else>
+              <p class="text-sm font-semibold text-muted tabular-nums">
+                {{ statusMessage }}
+              </p>
+              <p class="mt-1 text-xs text-dimmed">
+                {{ t("page.game.airriddle.subtitle") }}
+              </p>
             </div>
+          </div>
+
+          <div class="flex w-full flex-col gap-1.5">
+            <div
+              v-for="(attempt, attemptIndex) in gameState.attempts"
+              :key="attemptIndex"
+              class="flex justify-center gap-1.5"
+            >
+              <AirRiddleTile
+                v-for="(letter, letterIndex) in attempt.letters"
+                :key="`${attemptIndex}-${letterIndex}`"
+                :letter="letter"
+                :result="attempt.results?.[letterIndex]"
+                :animate="!prefersReducedMotion"
+                :animation-delay="letterIndex * 0.1"
+              />
+            </div>
+
+            <div
+              v-if="!gameState.isWon && !gameState.isGameOver"
+              class="flex justify-center gap-1.5"
+            >
+              <AirRiddleTile
+                v-for="letterIndex in gameState.targetLength"
+                :key="`current-${letterIndex}`"
+                variant="current"
+                :letter="currentGuess[letterIndex - 1] ?? ''"
+                :animate="false"
+              />
+            </div>
+
+            <div
+              v-for="rowIndex in emptyRows"
+              :key="`empty-${rowIndex}`"
+              class="flex justify-center gap-1.5"
+            >
+              <AirRiddleTile
+                v-for="letterIndex in gameState.targetLength"
+                :key="`empty-${rowIndex}-${letterIndex}`"
+                variant="empty"
+                :animate="false"
+              />
+            </div>
+          </div>
+
+          <div
+            v-if="!gameState.isWon && !gameState.isGameOver"
+            class="flex w-full flex-col gap-3 sm:flex-row sm:items-end"
+          >
+            <UFormField
+              :label="t('page.game.airriddle.enterGuess')"
+              name="airriddle-guess"
+              class="w-full flex-1"
+              :error="error ? t(`page.game.airriddle.${error}`) : undefined"
+            >
+              <UInput
+                ref="inputRef"
+                v-model="currentGuess"
+                :maxlength="gameState.targetLength"
+                class="w-full uppercase"
+                :placeholder="t('page.game.airriddle.enterGuess')"
+                :disabled="submitting"
+                :aria-label="t('page.game.airriddle.enterGuess')"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                size="lg"
+                @keyup.enter="submitGuess"
+              />
+            </UFormField>
+            <UButton
+              class="w-full shrink-0 sm:w-auto"
+              :disabled="currentGuess.length !== gameState.targetLength || submitting"
+              :loading="submitting"
+              size="lg"
+              color="primary"
+              @click="submitGuess"
+            >
+              {{
+                submitting ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess")
+              }}
+            </UButton>
+          </div>
+        </div>
+      </UiCard>
+
+      <UiCard class="mx-auto w-full max-w-md">
+        <h2
+          class="border-b border-default p-4 text-lg font-semibold tracking-tight text-highlighted"
+        >
+          {{ t("page.game.airriddle.howToPlay") }}
+        </h2>
+        <ul class="flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:justify-center">
+          <li class="flex items-center gap-2">
+            <AirRiddleLegendTile tone="success" />
             <span class="text-sm text-muted">
               {{ t("page.game.airriddle.correctPosition") }}
             </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div
-              class="w-6 h-6 bg-warning flex items-center justify-center text-white font-bold text-sm"
-            >
-              A
-            </div>
+          </li>
+          <li class="flex items-center gap-2">
+            <AirRiddleLegendTile tone="warning" />
             <span class="text-sm text-muted">
               {{ t("page.game.airriddle.wrongPosition") }}
             </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div
-              class="w-6 h-6 bg-accented flex items-center justify-center text-white font-bold text-sm"
-            >
-              A
-            </div>
+          </li>
+          <li class="flex items-center gap-2">
+            <AirRiddleLegendTile tone="accented" />
             <span class="text-sm text-muted">
               {{ t("page.game.airriddle.notInWord") }}
             </span>
-          </div>
+          </li>
+        </ul>
+      </UiCard>
+    </template>
+
+    <UiCard v-else class="mx-auto w-full max-w-md">
+      <div class="flex flex-col items-center gap-4 px-4 py-10 text-center">
+        <UIcon name="i-fluent-warning-24-regular" class="size-8 text-error" />
+        <div class="space-y-1">
+          <p class="text-lg font-semibold text-error">
+            {{ t("page.game.airriddle.failedToLoad") }}
+          </p>
+          <p class="text-sm text-muted">
+            {{ t("page.game.airriddle.tryAgainLater") }}
+          </p>
         </div>
       </div>
-    </div>
-
-    <div v-else class="flex flex-col justify-center items-center border border-default">
-      <div class="flex flex-col text-center items-center gap-4">
-        <UIcon name="i-fluent-warning-24-regular" class="size-8 text-error" />
-        <p class="text-lg text-error dark:text-error font-semibold">
-          {{ t("page.game.airriddle.failedToLoad") }}
-        </p>
-        <p class="text-muted">
-          {{ t("page.game.airriddle.tryAgainLater") }}
-        </p>
-      </div>
-    </div>
+    </UiCard>
   </section>
 </template>
 
