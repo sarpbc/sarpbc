@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useMediaQuery } from "@vueuse/core";
 import { motion } from "motion-v";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
@@ -19,12 +20,12 @@ interface GameState {
 
 const loading = ref(true);
 const submitting = ref(false);
-const currentGuess = ref("");
 const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
 const answer = ref<string | undefined>(undefined);
-const inputRef = useTemplateRef("inputRef");
+const hiddenInputRef = useTemplateRef("hiddenInputRef");
 const prefersReducedMotion = ref(false);
+const isMobile = useMediaQuery("(max-width: 639px)");
 
 const gameState = reactive<GameState>({
   targetLength: 0,
@@ -32,6 +33,19 @@ const gameState = reactive<GameState>({
   isWon: false,
   isGameOver: false,
 });
+
+const targetLength = computed(() => gameState.targetLength);
+const { currentGuess, canSubmit, appendToGuess, removeFromGuess, clearGuess } =
+  useAirRiddleGuess(targetLength);
+
+const canType = computed(
+  () =>
+    !loading.value &&
+    gameState.targetLength > 0 &&
+    !gameState.isWon &&
+    !gameState.isGameOver &&
+    !submitting.value,
+);
 
 const statusMessage = computed(() => {
   if (gameState.isWon) {
@@ -55,8 +69,74 @@ const emptyRows = computed(() => {
   return Math.max(0, maxAttempts - gameState.attempts.length - 1);
 });
 
+function focusHiddenInput() {
+  if (isMobile.value || !canType.value) {
+    return;
+  }
+  nextTick(() => {
+    hiddenInputRef.value?.focus();
+  });
+}
+
+function onPhysicalKeydown(event: KeyboardEvent) {
+  if (isMobile.value || !canType.value) {
+    return;
+  }
+
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return;
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    submitGuess();
+    return;
+  }
+
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    removeFromGuess();
+    error.value = undefined;
+    return;
+  }
+
+  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/.test(event.key)) {
+    event.preventDefault();
+    appendToGuess(event.key);
+    error.value = undefined;
+  }
+}
+
+function onKeyboardLetter(letter: string) {
+  appendToGuess(letter);
+  error.value = undefined;
+}
+
+function onKeyboardBackspace() {
+  removeFromGuess();
+  error.value = undefined;
+}
+
+function onPaste(event: ClipboardEvent) {
+  if (isMobile.value || !canType.value) {
+    return;
+  }
+
+  const active = document.activeElement;
+  const tag = active?.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || active?.getAttribute("contenteditable") === "true") {
+    return;
+  }
+
+  event.preventDefault();
+  appendToGuess(event.clipboardData?.getData("text") ?? "");
+  error.value = undefined;
+}
+
 onMounted(async () => {
   prefersReducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.addEventListener("keydown", onPhysicalKeydown);
+  window.addEventListener("paste", onPaste);
 
   try {
     const length = await getTodayAirRiddleLength();
@@ -65,11 +145,27 @@ onMounted(async () => {
     console.error("Failed to initialize game:", loadError);
   } finally {
     loading.value = false;
+    focusHiddenInput();
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", onPhysicalKeydown);
+  window.removeEventListener("paste", onPaste);
+});
+
+watch(isMobile, () => {
+  focusHiddenInput();
+});
+
+watch(canType, (value) => {
+  if (value) {
+    focusHiddenInput();
   }
 });
 
 async function submitGuess() {
-  if (currentGuess.value.length !== gameState.targetLength || submitting.value) {
+  if (!canSubmit.value || submitting.value) {
     return;
   }
 
@@ -106,24 +202,14 @@ async function submitGuess() {
       gameState.isGameOver = true;
     }
 
-    currentGuess.value = "";
+    clearGuess();
   } catch (submitError) {
     console.error("Failed to submit guess:", submitError);
   } finally {
     submitting.value = false;
-    if (!gameState.isWon && !gameState.isGameOver) {
-      nextTick(() => {
-        inputRef.value?.inputRef?.focus();
-      });
-    }
+    focusHiddenInput();
   }
 }
-
-watch(currentGuess, (newValue) => {
-  if (newValue.length > gameState.targetLength) {
-    currentGuess.value = newValue.slice(0, gameState.targetLength);
-  }
-});
 
 setPageSeo({
   title: t("page.game.airriddle.seo.title"),
@@ -134,13 +220,18 @@ setPageSeo({
 <template>
   <section class="flex w-full flex-col gap-4">
     <UiCrossCard class="min-h-14">
-      <div class="flex w-full flex-col items-center justify-center gap-1 px-4 py-3 text-center">
-        <h1 class="text-xl font-semibold tracking-tight">
-          {{ t("page.game.airriddle.title") }}
-        </h1>
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.game.airriddle.description") }}
-        </p>
+      <div class="relative flex w-full items-center justify-center px-12 py-3 text-center">
+        <div class="flex flex-col items-center gap-1">
+          <h1 class="text-xl font-semibold tracking-tight">
+            {{ t("page.game.airriddle.title") }}
+          </h1>
+          <p class="text-sm text-muted text-pretty">
+            {{ t("page.game.airriddle.description") }}
+          </p>
+        </div>
+        <div class="absolute right-3 top-1/2 -translate-y-1/2">
+          <AirRiddleHowToPlayPopover />
+        </div>
       </div>
     </UiCrossCard>
 
@@ -162,7 +253,18 @@ setPageSeo({
     </UiCard>
 
     <template v-else-if="gameState.targetLength > 0">
-      <UiCard class="mx-auto w-full max-w-md p-4 sm:p-6">
+      <UiCard class="mx-auto w-full max-w-md p-4 sm:p-6" @click="focusHiddenInput">
+        <input
+          v-if="!isMobile"
+          ref="hiddenInputRef"
+          type="text"
+          class="sr-only"
+          readonly
+          :value="currentGuess"
+          :aria-label="t('page.game.airriddle.enterGuess')"
+          tabindex="-1"
+        />
+
         <div class="flex flex-col items-center gap-6">
           <div class="w-full text-center" aria-live="polite" aria-atomic="true">
             <motion.div
@@ -210,6 +312,9 @@ setPageSeo({
               <p class="mt-1 text-xs text-dimmed">
                 {{ t("page.game.airriddle.subtitle") }}
               </p>
+              <p v-if="!isMobile" class="mt-1 text-xs text-dimmed">
+                {{ t("page.game.airriddle.desktopHint") }}
+              </p>
             </div>
           </div>
 
@@ -256,73 +361,33 @@ setPageSeo({
             </div>
           </div>
 
-          <div
-            v-if="!gameState.isWon && !gameState.isGameOver"
-            class="flex w-full flex-col gap-3 sm:flex-row sm:items-end"
-          >
-            <UFormField
-              :label="t('page.game.airriddle.enterGuess')"
-              name="airriddle-guess"
-              class="w-full flex-1"
-              :error="error ? t(`page.game.airriddle.${error}`) : undefined"
-            >
-              <UInput
-                ref="inputRef"
-                v-model="currentGuess"
-                :maxlength="gameState.targetLength"
-                class="w-full uppercase"
-                :placeholder="t('page.game.airriddle.enterGuess')"
-                :disabled="submitting"
-                :aria-label="t('page.game.airriddle.enterGuess')"
-                autocomplete="off"
-                autocapitalize="characters"
-                spellcheck="false"
-                size="lg"
-                @keyup.enter="submitGuess"
-              />
-            </UFormField>
-            <UButton
-              class="w-full shrink-0 sm:w-auto"
-              :disabled="currentGuess.length !== gameState.targetLength || submitting"
-              :loading="submitting"
-              size="lg"
-              color="primary"
-              @click="submitGuess"
-            >
-              {{
-                submitting ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess")
-              }}
-            </UButton>
-          </div>
-        </div>
-      </UiCard>
+          <p v-if="error" class="w-full text-center text-sm text-error" role="alert">
+            {{ t(`page.game.airriddle.${error}`) }}
+          </p>
 
-      <UiCard class="mx-auto w-full max-w-md">
-        <h2
-          class="border-b border-default p-4 text-lg font-semibold tracking-tight text-highlighted"
-        >
-          {{ t("page.game.airriddle.howToPlay") }}
-        </h2>
-        <ul class="flex flex-col gap-3 p-4 sm:flex-row sm:flex-wrap sm:justify-center">
-          <li class="flex items-center gap-2">
-            <AirRiddleLegendTile tone="success" />
-            <span class="text-sm text-muted">
-              {{ t("page.game.airriddle.correctPosition") }}
-            </span>
-          </li>
-          <li class="flex items-center gap-2">
-            <AirRiddleLegendTile tone="warning" />
-            <span class="text-sm text-muted">
-              {{ t("page.game.airriddle.wrongPosition") }}
-            </span>
-          </li>
-          <li class="flex items-center gap-2">
-            <AirRiddleLegendTile tone="accented" />
-            <span class="text-sm text-muted">
-              {{ t("page.game.airriddle.notInWord") }}
-            </span>
-          </li>
-        </ul>
+          <div v-if="!gameState.isWon && !gameState.isGameOver && isMobile" class="w-full">
+            <AirRiddleKeyboard
+              :disabled="!canType"
+              :can-submit="canSubmit"
+              :loading="submitting"
+              @letter="onKeyboardLetter"
+              @backspace="onKeyboardBackspace"
+              @submit="submitGuess"
+            />
+          </div>
+
+          <UButton
+            v-else-if="!gameState.isWon && !gameState.isGameOver"
+            class="w-full sm:w-auto"
+            :disabled="!canSubmit"
+            :loading="submitting"
+            size="lg"
+            color="primary"
+            @click="submitGuess"
+          >
+            {{ submitting ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess") }}
+          </UButton>
+        </div>
       </UiCard>
     </template>
 
@@ -341,13 +406,3 @@ setPageSeo({
     </UiCard>
   </section>
 </template>
-
-<style scoped>
-:deep(.uppercase input) {
-  text-transform: uppercase !important;
-}
-
-:deep(.uppercase) {
-  text-transform: uppercase;
-}
-</style>
