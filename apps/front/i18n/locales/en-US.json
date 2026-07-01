@@ -474,7 +474,8 @@
         "upcomingHint": "Check past results or come back later for new schedules.",
         "pastHint": "Switch to upcoming matches to see what is scheduled next.",
         "viewPast": "View Past Matches",
-        "viewUpcoming": "View Upcoming Matches"
+        "viewUpcoming": "View Upcoming Matches",
+        "viewTournaments": "View Tournaments"
       },
       "error": "Could not load matches. Check your connection and try again.",
       "retry": "Try Again",
