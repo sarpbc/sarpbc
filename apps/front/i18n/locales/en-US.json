@@ -53,7 +53,8 @@
     "match": {
       "todaysMatch": "Today's Matches",
       "results": "Results",
-      "tbd": "To Be Determined"
+      "tbd": "To Be Determined",
+      "live": "Live"
     },
     "reply": {
       "validation": {
