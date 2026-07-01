@@ -43,10 +43,12 @@ function onLetterPress(letter: string) {
       <UButton
         v-for="letter in row"
         :key="letter"
+        type="button"
         variant="soft"
         color="neutral"
         class="h-11 min-h-11 flex-1 max-w-10 px-0 font-mono text-sm font-semibold uppercase sm:max-w-11"
         :disabled="disabled"
+        :aria-label="letter"
         @click="onLetterPress(letter)"
       >
         {{ letter }}
@@ -57,10 +59,12 @@ function onLetterPress(letter: string) {
       <UButton
         v-for="digit in numberRow"
         :key="digit"
+        type="button"
         variant="soft"
         color="neutral"
         class="h-11 min-h-11 flex-1 max-w-10 px-0 font-mono text-sm font-semibold tabular-nums sm:max-w-11"
         :disabled="disabled"
+        :aria-label="digit"
         @click="onLetterPress(digit)"
       >
         {{ digit }}
@@ -69,15 +73,18 @@ function onLetterPress(letter: string) {
 
     <div class="flex justify-center gap-1">
       <UButton
+        type="button"
         variant="soft"
         color="neutral"
         class="h-11 min-h-11 flex-[2] font-mono text-sm font-semibold uppercase"
         :disabled="disabled"
+        :aria-label="t('page.game.airriddle.keyboardSpace')"
         @click="onLetterPress(' ')"
       >
         {{ t("page.game.airriddle.keyboardSpace") }}
       </UButton>
       <UButton
+        type="button"
         variant="soft"
         color="neutral"
         icon="i-lucide-delete"
@@ -89,6 +96,7 @@ function onLetterPress(letter: string) {
     </div>
 
     <UButton
+      type="button"
       class="h-11 min-h-11 w-full"
       color="primary"
       :disabled="disabled || !canSubmit"
