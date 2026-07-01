@@ -99,13 +99,15 @@ setPageSeo({
       </UiCard>
 
       <template v-else-if="hasMatches">
+        <MatchListGroup
+          v-if="liveMatches.length > 0"
+          :matches="liveMatches"
+          variant="live"
+          :title="t('page.matches.sections.live')"
+          class="mb-4"
+        />
+
         <template v-if="tab === 'upcoming'">
-          <MatchListGroup
-            v-if="liveMatches.length > 0"
-            :matches="liveMatches"
-            variant="live"
-            :title="t('page.matches.sections.live')"
-          />
           <MatchListGroup
             v-if="upcomingMatches.length > 0"
             :matches="upcomingMatches"
@@ -114,7 +116,11 @@ setPageSeo({
           />
         </template>
 
-        <MatchListGroup v-else :matches="pastMatches" variant="result" />
+        <MatchListGroup
+          v-else-if="pastMatches.length > 0"
+          :matches="pastMatches"
+          variant="result"
+        />
 
         <MatchListPagination
           v-if="totalMatches > MATCHES_PER_PAGE"
