@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useMediaQuery } from "@vueuse/core";
+import { useMediaQuery, usePreferredReducedMotion } from "@vueuse/core";
 import { motion } from "motion-v";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
@@ -24,7 +24,8 @@ const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
 const answer = ref<string | undefined>(undefined);
 const hiddenInputRef = useTemplateRef("hiddenInputRef");
-const prefersReducedMotion = ref(false);
+const reducedMotionPreference = usePreferredReducedMotion();
+const prefersReducedMotion = computed(() => reducedMotionPreference.value === "reduce");
 const isMobile = useMediaQuery("(max-width: 639px)");
 
 const gameState = reactive<GameState>({
@@ -134,7 +135,6 @@ function onPaste(event: ClipboardEvent) {
 }
 
 onMounted(async () => {
-  prefersReducedMotion.value = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.addEventListener("keydown", onPhysicalKeydown);
   window.addEventListener("paste", onPaste);
 

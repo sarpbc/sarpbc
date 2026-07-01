@@ -2,6 +2,8 @@
 const { t } = useI18n();
 
 const open = ref(false);
+const dialogId = "airriddle-how-to-play-dialog";
+const titleId = "airriddle-how-to-play-title";
 </script>
 
 <template>
@@ -12,13 +14,21 @@ const open = ref(false);
       size="sm"
       class="size-9 min-h-9 min-w-9 p-0 font-semibold tabular-nums"
       :aria-label="t('page.game.airriddle.howToPlayLabel')"
+      aria-haspopup="dialog"
+      :aria-expanded="open"
+      :aria-controls="dialogId"
     >
       ?
     </UButton>
 
     <template #content>
-      <div class="flex w-64 flex-col gap-3 p-4 sm:w-72">
-        <p class="text-sm font-semibold tracking-tight text-highlighted">
+      <div
+        :id="dialogId"
+        class="flex w-64 flex-col gap-3 p-4 sm:w-72"
+        role="dialog"
+        :aria-labelledby="titleId"
+      >
+        <p :id="titleId" class="text-sm font-semibold tracking-tight text-highlighted">
           {{ t("page.game.airriddle.howToPlay") }}
         </p>
         <ul class="flex flex-col gap-2.5">
