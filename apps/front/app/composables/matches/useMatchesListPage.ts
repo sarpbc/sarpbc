@@ -1,7 +1,10 @@
-import type { MatchesPageData } from "~/types/matches";
+import type { Match, MatchesPageData } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 
 export const MATCHES_PER_PAGE = 20;
+
+/** Live matches are pinned above tab content and are not paginated. */
+const LIVE_MATCHES_FETCH_LIMIT = 100;
 
 /** Sentinel for "All" — USelect reserves empty string for clearing the selection. */
 export const MATCHES_FILTER_ALL = "__all__";
@@ -110,11 +113,34 @@ export function useMatchesListPage() {
     leagueId: selectedTournamentFilter.value,
   }));
 
+  const liveListQuery = computed(() => ({
+    limit: LIVE_MATCHES_FETCH_LIMIT,
+    offset: 0,
+    leagueId: selectedTournamentFilter.value,
+  }));
+
+  const {
+    data: liveMatchesData,
+    pending: livePending,
+    error: liveError,
+    refresh: refreshLiveMatches,
+  } = useLazyAsyncData<Match[]>(
+    () => `matches-live-${selectedTournamentFilter.value ?? ""}`,
+    async () => {
+      const response = await getUpcomingMatches(liveListQuery.value);
+      return response.live;
+    },
+    {
+      watch: [selectedTournamentFilter],
+      default: () => [] as Match[],
+    },
+  );
+
   const {
     data: matchesData,
-    pending,
-    error,
-    refresh,
+    pending: tabPending,
+    error: tabError,
+    refresh: refreshTabMatches,
   } = useLazyAsyncData<MatchesPageData | null>(
     () => `matches-${tab.value}-${offset.value}-${selectedTournamentFilter.value ?? ""}`,
     (): Promise<MatchesPageData> => {
@@ -128,11 +154,14 @@ export function useMatchesListPage() {
     },
   );
 
-  const liveMatches = computed(() =>
-    tab.value === "upcoming" && matchesData.value && "live" in matchesData.value
-      ? matchesData.value.live
-      : [],
-  );
+  const pending = computed(() => tabPending.value || livePending.value);
+  const error = computed(() => tabError.value ?? liveError.value);
+
+  function refresh() {
+    return Promise.all([refreshTabMatches(), refreshLiveMatches()]);
+  }
+
+  const liveMatches = computed(() => liveMatchesData.value ?? []);
 
   const upcomingMatches = computed(() =>
     tab.value === "upcoming" && matchesData.value && "upcoming" in matchesData.value
@@ -158,10 +187,13 @@ export function useMatchesListPage() {
   });
 
   const hasMatches = computed(() => {
+    if (liveMatches.value.length > 0) {
+      return true;
+    }
     if (tab.value === "past") {
       return pastMatches.value.length > 0;
     }
-    return liveMatches.value.length > 0 || upcomingMatches.value.length > 0;
+    return upcomingMatches.value.length > 0;
   });
 
   const currentPage = computed(() => Math.floor(offset.value / MATCHES_PER_PAGE) + 1);

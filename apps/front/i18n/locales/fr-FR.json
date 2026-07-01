@@ -53,7 +53,8 @@
     "match": {
       "todaysMatch": "Matchs d'aujourd'hui",
       "results": "Résultats",
-      "tbd": "À déterminer"
+      "tbd": "À déterminer",
+      "live": "En direct"
     },
     "reply": {
       "validation": {
