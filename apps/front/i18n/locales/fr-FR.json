@@ -474,7 +474,8 @@
         "upcomingHint": "Consultez les résultats passés ou revenez plus tard pour les prochains matchs.",
         "pastHint": "Basculez vers les matchs à venir pour voir la suite du calendrier.",
         "viewPast": "Voir les matchs passés",
-        "viewUpcoming": "Voir les matchs à venir"
+        "viewUpcoming": "Voir les matchs à venir",
+        "viewTournaments": "Voir les tournois"
       },
       "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",

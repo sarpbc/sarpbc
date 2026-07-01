@@ -10,6 +10,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 
 const iconName = computed(() => {
   if (hasActiveFilters) return "i-fluent-filter-24-regular";
@@ -39,30 +40,35 @@ const hint = computed(() => {
       <p class="text-xs text-dimmed">
         {{ hint }}
       </p>
-      <UButton
-        v-if="hasActiveFilters"
-        variant="soft"
-        color="primary"
-        class="min-h-9"
-        @click="emit('clear')"
-      >
-        {{ t("page.matches.filters.clear") }}
-      </UButton>
-      <UButton
-        v-else
-        variant="soft"
-        color="primary"
-        :to="{
-          path: $localePath('/matches'),
-          query: getTabQuery(tab === 'upcoming' ? 'past' : 'upcoming'),
-        }"
-      >
-        {{
-          tab === "upcoming"
-            ? t("page.matches.empty.viewPast")
-            : t("page.matches.empty.viewUpcoming")
-        }}
-      </UButton>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <UButton v-if="hasActiveFilters" color="primary" class="min-h-9" @click="emit('clear')">
+          {{ t("page.matches.filters.clear") }}
+        </UButton>
+        <UButton v-else color="primary" class="min-h-9" :to="localePath('/tournaments')">
+          {{ t("page.matches.empty.viewTournaments") }}
+        </UButton>
+        <UButton
+          variant="outline"
+          color="neutral"
+          class="min-h-9"
+          :to="
+            hasActiveFilters
+              ? localePath('/tournaments')
+              : {
+                  path: localePath('/matches'),
+                  query: getTabQuery(tab === 'upcoming' ? 'past' : 'upcoming'),
+                }
+          "
+        >
+          {{
+            hasActiveFilters
+              ? t("page.matches.empty.viewTournaments")
+              : tab === "upcoming"
+                ? t("page.matches.empty.viewPast")
+                : t("page.matches.empty.viewUpcoming")
+          }}
+        </UButton>
+      </div>
     </div>
   </UiCard>
 </template>
