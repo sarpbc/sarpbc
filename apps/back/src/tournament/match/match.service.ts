@@ -9,8 +9,6 @@ import { BracketLink } from "./bracket-link.entity";
 import { MatchResult } from "./match-result.entity";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 
-export type { HeadToHead, HeadToHeadMeeting } from "./match-head-to-head";
-
 const RECENT_FORM_LIMIT = 5;
 
 export interface TeamFormRecord {
