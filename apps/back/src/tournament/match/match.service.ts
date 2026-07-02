@@ -7,6 +7,7 @@ import { TournamentParticipantRepository } from "../tournament-participant.repos
 import { TournamentRepository } from "../tournament.repository";
 import { BracketLink } from "./bracket-link.entity";
 import { MatchResult } from "./match-result.entity";
+import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 
 const RECENT_FORM_LIMIT = 5;
 
@@ -86,7 +87,9 @@ export class MatchService {
     return this.matchRepository.findRecentlyEnded({ limit, minutesAgo });
   }
 
-  async findDetailById(id: string): Promise<{ match: Match; teamForms: TeamFormsMap }> {
+  async findDetailById(
+    id: string,
+  ): Promise<{ match: Match; teamForms: TeamFormsMap; headToHead: HeadToHead | null }> {
     const match = await this.matchRepository.findDetailById(id);
 
     if (!match) {
@@ -95,9 +98,31 @@ export class MatchService {
       );
     }
 
-    const teamForms = await this.buildTeamForms(match);
+    const [teamForms, headToHead] = await Promise.all([
+      this.buildTeamForms(match),
+      this.buildHeadToHead(match),
+    ]);
 
-    return { match, teamForms };
+    return { match, teamForms, headToHead };
+  }
+
+  private async buildHeadToHead(match: Match): Promise<HeadToHead | null> {
+    const participants = match.participants.getItems();
+    if (participants.length !== 2) {
+      return null;
+    }
+
+    const teamAId = participants[0].team.id;
+    const teamBId = participants[1].team.id;
+
+    const historicalMatches = await this.matchRepository.findFinishedBetweenTeams({
+      teamAId,
+      teamBId,
+      excludeMatchId: match.id,
+      limit: 20,
+    });
+
+    return buildHeadToHead(historicalMatches, teamAId, teamBId);
   }
 
   private async buildTeamForms(match: Match): Promise<TeamFormsMap> {
