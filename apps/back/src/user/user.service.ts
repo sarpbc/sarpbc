@@ -1,14 +1,17 @@
-﻿import { Injectable } from "@nestjs/common";
+﻿import { Inject, Injectable } from "@nestjs/common";
 import { User } from "./domain/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { validate } from "class-validator";
-import { UserRepository } from "./user.repository";
 import { SignInUserDto } from "./dto/signin-user.dto";
 import { comparePasswordHash, hashPassword } from "../common/password/password";
+import { IUserRepository, USER_REPOSITORY } from "./domain/user.repository.interface";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: IUserRepository,
+  ) {}
 
   async findOneByEmail(email: string): Promise<User | null> {
     return this.userRepository.findByEmail(email);

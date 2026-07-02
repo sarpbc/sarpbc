@@ -37,7 +37,7 @@ export const UserSchema = defineEntity({
     userName: p.string(),
     password: p.string().nullable().hidden(),
     avatarUrl: p.string().nullable(),
-    createdAt: p.datetime().type("Date").defaultRaw("now()"),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     googleId: p.string().nullable().hidden(),
   },
 });

@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/core";
+import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 import { Post, PostTranslation } from "../forum.entities";
 import { IPostRepository } from "./domain/post.repository.interface";
 
@@ -74,7 +74,7 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
     const count = await this.count({
       author: { id: userId },
       createdAt: { $gte: sinceDate },
-    } as any);
+    } satisfies FilterQuery<Post>);
     return count > 0;
   }
 
@@ -83,7 +83,14 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
   }
 
   async saveTranslation(translation: PostTranslation): Promise<void> {
-    await this.em.remove(translation).flush();
+    await this.em.persist(translation).flush();
+  }
+
+  async deleteTranslations(post: Post): Promise<void> {
+    for (const translation of post.translations.getItems()) {
+      this.em.remove(translation);
+    }
+    await this.em.flush();
   }
 
   async delete(post: Post): Promise<void> {

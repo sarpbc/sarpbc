@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TeamController } from "./team.controller";
 import { TeamService } from "./team.service";
 import { Team } from "../player/player.entities";
+import { TeamRepository } from "./team.repository";
+import { TEAM_REPOSITORY } from "./domain/team.repository.interface";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PlayerModule } from "../player/player.module";
 import { UserModule } from "src/user/user.module";
@@ -19,8 +21,15 @@ import { log } from "evlog";
     ConfigModule,
   ],
   controllers: [TeamController],
-  providers: [TeamService, SyncPandascoreTeamsUseCase],
-  exports: [TeamService],
+  providers: [
+    TeamService,
+    SyncPandascoreTeamsUseCase,
+    {
+      provide: TEAM_REPOSITORY,
+      useExisting: TeamRepository,
+    },
+  ],
+  exports: [TeamService, TEAM_REPOSITORY],
 })
 export class TeamModule implements OnModuleInit {
   constructor(

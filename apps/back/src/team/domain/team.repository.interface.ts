@@ -1,6 +1,8 @@
 import { Team } from "../../player/player.entities";
 import { TeamSearchProps } from "../interfaces/search-team-props";
 
+export const TEAM_REPOSITORY = Symbol("TEAM_REPOSITORY");
+
 export interface ITeamRepository {
   search(options: Partial<TeamSearchProps>): Promise<Team[]>;
   searchAndCount(options: Partial<TeamSearchProps>): Promise<[Team[], number]>;
@@ -11,4 +13,5 @@ export interface ITeamRepository {
   save(team: Team): Promise<void>;
   saveMany(teams: Team[]): Promise<void>;
   flush(): Promise<void>;
+  delete(team: Team): Promise<void>;
 }

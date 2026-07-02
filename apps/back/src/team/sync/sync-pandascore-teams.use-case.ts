@@ -7,7 +7,8 @@ import {
 import { PandascorePlayerMapper } from "src/pandascore/application/mappers/pandascore-player.mapper";
 import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
 import { createLogger } from "evlog";
-import { Player, Team } from "src/player/player.entities";
+import { Player } from "src/player/player.entities";
+import { Team } from "src/player/player.entities";
 
 @Injectable()
 export class SyncPandascoreTeamsUseCase {

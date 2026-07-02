@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/core";
+import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
 import { IReplyRepository } from "./domain/reply.repository.interface";
 
@@ -25,7 +25,7 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
     const count = await this.count({
       author: { id: userId },
       createdAt: { $gte: sinceDate },
-    } as any);
+    } satisfies FilterQuery<Reply>);
     return count > 0;
   }
 

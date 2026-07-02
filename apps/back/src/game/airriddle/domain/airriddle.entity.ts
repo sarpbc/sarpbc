@@ -15,6 +15,6 @@ export const AirRiddleSchema = defineEntity({
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     playerId: p.string(),
     playerName: p.string(),
-    createdAt: p.datetime().type("date").defaultRaw("now()"),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

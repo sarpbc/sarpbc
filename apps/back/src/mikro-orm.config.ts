@@ -3,6 +3,7 @@ import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
 import { log } from "evlog";
 import * as dotenv from "dotenv";
 import { getDatabasePassword } from "./common/envirronement/secrets";
+import { SarpbcNamingStrategy } from "./common/mikro-orm/sarpbc-naming.strategy";
 import { mikroOrmEntities } from "./mikro-orm.entities";
 
 dotenv.config();
@@ -14,6 +15,8 @@ export default defineConfig({
   password: getDatabasePassword(),
   host: process.env.DB_HOST || "localhost",
   port: parseInt(process.env.DB_PORT || "5433", 10),
+  namingStrategy: SarpbcNamingStrategy,
+  // MikroORM v7 PoolConfig: min, max, idleTimeoutMillis only (pg reap/acquire timeouts removed from API).
   pool: {
     min: 0,
     max: 10,

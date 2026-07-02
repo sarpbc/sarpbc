@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/core";
+import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 import { User } from "./domain/user.entity";
 import { IUserRepository } from "./domain/user.repository.interface";
 
@@ -16,7 +16,10 @@ export class UserRepository extends EntityRepository<User> implements IUserRepos
   }
 
   async findByEmailWithPassword(email: string): Promise<User | null> {
-    return this.findOne({ email, password: { $ne: null } } as any);
+    return this.findOne({
+      email,
+      password: { $ne: null },
+    } satisfies FilterQuery<User>);
   }
 
   async existsByEmail(email: string): Promise<boolean> {

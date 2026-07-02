@@ -1,6 +1,7 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { v4 } from "uuid";
-import { Player, Team } from "../player/player.entities";
+import { Player } from "../player/player.entities";
+import { Team } from "../player/player.entities";
 import { LeagueRepository } from "./league/league.repository";
 import { MatchRepository } from "./match/match.repository";
 import { TournamentParticipantRepository } from "./tournament-participant.repository";
@@ -93,11 +94,11 @@ export const LeagueSchema = defineEntity({
     slug: p.string().nullable(),
     url: p.string().nullable(),
     imageUrl: p.string().nullable(),
-    modifiedAt: p.datetime().type("date").nullable(),
-    createdAt: p.datetime().type("date"),
+    modifiedAt: p.datetime().type("timestamptz").nullable(),
+    createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
-      .type("date")
+      .type("timestamptz")
       .onUpdate(() => new Date()),
     tournaments: p.oneToMany(Tournament).mappedBy("league"),
   },
@@ -114,8 +115,8 @@ export const TournamentSchema = defineEntity({
     slug: p.string().nullable(),
     serie: p.string().nullable(),
     tier: p.string().nullable(),
-    beginAt: p.datetime().type("date").nullable(),
-    endAt: p.datetime().type("date").nullable(),
+    beginAt: p.datetime().type("timestamptz").nullable(),
+    endAt: p.datetime().type("timestamptz").nullable(),
     winner: p.manyToOne(TournamentParticipant).nullable(),
     winnerType: p.string().nullable(),
     type: p.string().nullable(),
@@ -123,10 +124,10 @@ export const TournamentSchema = defineEntity({
     imageUrl: p.string().nullable(),
     league: p.manyToOne(League).nullable(),
     pickemsEnabled: p.boolean().default(false),
-    createdAt: p.datetime().type("date"),
+    createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
-      .type("date")
+      .type("timestamptz")
       .onUpdate(() => new Date()),
     matches: p.oneToMany(Match).mappedBy("tournament"),
     participants: p.oneToMany(TournamentParticipant).mappedBy("tournament"),
@@ -141,10 +142,10 @@ export const TournamentParticipantSchema = defineEntity({
     tournament: p.manyToOne(Tournament),
     team: p.manyToOne(Team),
     players: p.manyToMany(Player),
-    createdAt: p.datetime().type("date"),
+    createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
-      .type("date")
+      .type("timestamptz")
       .onUpdate(() => new Date()),
   },
 });
@@ -157,16 +158,19 @@ export const MatchSchema = defineEntity({
     pandascoreId: p.integer().nullable().unique(),
     name: p.string(),
     slug: p.string().nullable(),
-    beginAt: p.datetime().nullable(),
-    endAt: p.datetime().nullable(),
+    beginAt: p.datetime().type("timestamptz").nullable(),
+    endAt: p.datetime().type("timestamptz").nullable(),
     status: p.string().nullable(),
     participants: p.manyToMany(TournamentParticipant),
     winner: p.manyToOne(TournamentParticipant).nullable(),
     numberOfGames: p.integer().nullable(),
     previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
     results: p.oneToMany(MatchResult).mappedBy("match"),
-    createdAt: p.datetime(),
-    updatedAt: p.datetime().onUpdate(() => new Date()),
+    createdAt: p.datetime().type("timestamptz"),
+    updatedAt: p
+      .datetime()
+      .type("timestamptz")
+      .onUpdate(() => new Date()),
     tournament: p.manyToOne(Tournament),
   },
 });

@@ -1,19 +1,25 @@
 import { Injectable, Inject, forwardRef, NotFoundException } from "@nestjs/common";
-import { PlayerRepository } from "./player.repository";
-import { PlayerPhotoRepository } from "./player-photo.repository";
-import { ContractRepository } from "./contract.repository";
 import { TeamService } from "../team/team.service";
 import { Player, PlayerPhoto } from "./player.entities";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
 import { CreatePlayerDto } from "./dto/create-player.dto";
 import { UpdatePlayerDto } from "./dto/update-player.dto";
+import { IContractRepository, CONTRACT_REPOSITORY } from "./domain/contract.repository.interface";
+import {
+  IPlayerPhotoRepository,
+  PLAYER_PHOTO_REPOSITORY,
+} from "./domain/player-photo.repository.interface";
+import { IPlayerRepository, PLAYER_REPOSITORY } from "./domain/player.repository.interface";
 
 @Injectable()
 export class PlayerService {
   constructor(
-    private readonly playerRepository: PlayerRepository,
-    private readonly playerPhotoRepository: PlayerPhotoRepository,
-    private readonly contractRepository: ContractRepository,
+    @Inject(PLAYER_REPOSITORY)
+    private readonly playerRepository: IPlayerRepository,
+    @Inject(PLAYER_PHOTO_REPOSITORY)
+    private readonly playerPhotoRepository: IPlayerPhotoRepository,
+    @Inject(CONTRACT_REPOSITORY)
+    private readonly contractRepository: IContractRepository,
     @Inject(forwardRef(() => TeamService))
     private readonly teamService: TeamService,
   ) {}

@@ -7,7 +7,8 @@ import { UpsertPlayerCommand } from "src/pandascore/application/commands/upsert-
 import { UpsertTeamCommand } from "src/pandascore/application/commands/upsert-team.command";
 import { UpsertTournamentCommand } from "src/pandascore/application/commands/upsert-tournament.command";
 import { UpsertTournamentParticipantCommand } from "src/pandascore/application/commands/upsert-tournament-participant.command";
-import { Player, Team } from "src/player/player.entities";
+import { Player } from "src/player/player.entities";
+import { Team } from "src/player/player.entities";
 import { League, Tournament, TournamentParticipant } from "../tournament.entities";
 import { LeagueService } from "../league/league.service";
 import { MatchService } from "../match/match.service";

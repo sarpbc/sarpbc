@@ -1,5 +1,7 @@
 import { Topic } from "../../forum.entities";
 
+export const TOPIC_REPOSITORY = Symbol("TOPIC_REPOSITORY");
+
 export interface ITopicRepository {
   findAllTopics(): Promise<Topic[]>;
   findById(id: string): Promise<Topic | null>;

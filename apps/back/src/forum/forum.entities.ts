@@ -57,9 +57,13 @@ export const TopicSchema = defineEntity({
     title: p.string(),
     description: p.text().nullable(),
     posts: p.oneToMany(Post).mappedBy("topic"),
-    createdAt: p.datetime().onCreate(() => new Date()),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
     updatedAt: p
       .datetime()
+      .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
   },
@@ -80,9 +84,13 @@ export const PostSchema = defineEntity({
       .columnType("text")
       .default(PostType.DISCUSSION),
     replies: p.oneToMany(Reply).mappedBy("post"),
-    createdAt: p.datetime().onCreate(() => new Date()),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
     updatedAt: p
       .datetime()
+      .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
   },
@@ -96,9 +104,13 @@ export const PostTranslationSchema = defineEntity({
     locale: p.string(),
     title: p.string(),
     content: p.text(),
-    createdAt: p.datetime().onCreate(() => new Date()),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
     updatedAt: p
       .datetime()
+      .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
   },
@@ -110,7 +122,10 @@ export const ReplySchema = defineEntity({
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     content: p.text(),
-    createdAt: p.datetime().onCreate(() => new Date()),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
     author: p.manyToOne(User),
     post: p.manyToOne(Post).nullable(),
     newsArticle: p.manyToOne(NewsArticle).nullable(),

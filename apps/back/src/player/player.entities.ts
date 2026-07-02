@@ -98,7 +98,7 @@ export const ContractSchema = defineEntity({
       .enum(() => ContractRole)
       .columnType("text")
       .default(ContractRole.ACTIVE),
-    createdAt: p.datetime().type("Date").defaultRaw("now()"),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });
 
@@ -109,6 +109,6 @@ export const PlayerPhotoSchema = defineEntity({
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     player: p.manyToOne(Player),
     url: p.string(),
-    createdAt: p.datetime().type("Date").defaultRaw("now()"),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

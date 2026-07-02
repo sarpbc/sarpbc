@@ -4,6 +4,12 @@ import { PlayerController } from "./player.controller";
 import { Player, Contract, PlayerPhoto } from "./player.entities";
 import { PlayerService } from "./player.service";
 import { ContractService } from "./contract.service";
+import { PlayerRepository } from "./player.repository";
+import { ContractRepository } from "./contract.repository";
+import { PlayerPhotoRepository } from "./player-photo.repository";
+import { CONTRACT_REPOSITORY } from "./domain/contract.repository.interface";
+import { PLAYER_PHOTO_REPOSITORY } from "./domain/player-photo.repository.interface";
+import { PLAYER_REPOSITORY } from "./domain/player.repository.interface";
 import { TeamModule } from "../team/team.module";
 import { UserModule } from "src/user/user.module";
 import { TournamentModule } from "src/tournament/tournament.module";
@@ -16,7 +22,28 @@ import { TournamentModule } from "src/tournament/tournament.module";
     UserModule,
   ],
   controllers: [PlayerController],
-  providers: [PlayerService, ContractService],
-  exports: [PlayerService, ContractService],
+  providers: [
+    PlayerService,
+    ContractService,
+    {
+      provide: PLAYER_REPOSITORY,
+      useExisting: PlayerRepository,
+    },
+    {
+      provide: CONTRACT_REPOSITORY,
+      useExisting: ContractRepository,
+    },
+    {
+      provide: PLAYER_PHOTO_REPOSITORY,
+      useExisting: PlayerPhotoRepository,
+    },
+  ],
+  exports: [
+    PlayerService,
+    ContractService,
+    PLAYER_REPOSITORY,
+    CONTRACT_REPOSITORY,
+    PLAYER_PHOTO_REPOSITORY,
+  ],
 })
 export class PlayerModule {}

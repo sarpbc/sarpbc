@@ -8,20 +8,20 @@
       "columns": {
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": "now()",
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "id": {
           "name": "id",
@@ -452,20 +452,20 @@
       "columns": {
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "id": {
           "name": "id",
@@ -503,20 +503,20 @@
         },
         "modified_at": {
           "name": "modified_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "name": {
           "name": "name",
@@ -571,20 +571,20 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "url": {
           "name": "url",
@@ -1214,6 +1214,14 @@
           "unique": false
         },
         {
+          "columnNames": ["author_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "news_article_author_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -1228,6 +1236,14 @@
           "keyName": "news_article_slug_unique",
           "primary": false,
           "unique": true
+        },
+        {
+          "columnNames": ["title"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "news_article_title_index",
+          "primary": false,
+          "unique": false
         },
         {
           "columnNames": ["title"],
@@ -1258,20 +1274,20 @@
       "columns": {
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "id": {
           "name": "id",
@@ -2464,37 +2480,37 @@
       "columns": {
         "begin_at": {
           "name": "begin_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "description": {
           "name": "description",
@@ -2515,20 +2531,20 @@
         },
         "end_at": {
           "name": "end_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "id": {
           "name": "id",
@@ -2719,20 +2735,20 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "winner_id": {
           "name": "winner_id",
@@ -2817,20 +2833,20 @@
       "columns": {
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         },
         "id": {
           "name": "id",
@@ -2885,20 +2901,20 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "date",
+          "type": "timestamptz(6)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
           "unique": false,
-          "length": null,
+          "length": 6,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "date"
+          "mappedType": "datetime"
         }
       },
       "indexes": [
@@ -2985,21 +3001,21 @@
       "checks": [],
       "triggers": [],
       "foreignKeys": {
+        "tournament_participant_players_foreign_tournament_part_5cea64eb": {
+          "columnNames": ["tournament_participant_id"],
+          "constraintName": "tournament_participant_players_foreign_tournament_part_5cea64eb",
+          "localTableName": "public.tournament_participant_players",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tournament_participant",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        },
         "tournament_participant_players_player_id_foreign": {
           "columnNames": ["player_id"],
           "constraintName": "tournament_participant_players_player_id_foreign",
           "localTableName": "public.tournament_participant_players",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
-          "updateRule": "cascade",
-          "deleteRule": "cascade"
-        },
-        "tournament_participant_players_tournament_partic_f2b12_foreign": {
-          "columnNames": ["tournament_participant_id"],
-          "constraintName": "tournament_participant_players_tournament_partic_f2b12_foreign",
-          "localTableName": "public.tournament_participant_players",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         }

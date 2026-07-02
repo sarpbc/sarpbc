@@ -1,6 +1,8 @@
 import { Player } from "../player.entities";
 import { PlayerSearchProps } from "../interfaces/search-player-props";
 
+export const PLAYER_REPOSITORY = Symbol("PLAYER_REPOSITORY");
+
 export interface IPlayerRepository {
   search(options: Partial<PlayerSearchProps>): Promise<Player[]>;
   searchAndCount(options: Partial<PlayerSearchProps>): Promise<[Player[], number]>;

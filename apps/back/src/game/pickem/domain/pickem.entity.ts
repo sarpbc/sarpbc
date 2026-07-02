@@ -24,6 +24,6 @@ export const PickemChoiceSchema = defineEntity({
     pickedParticipant: p.manyToOne(TournamentParticipant),
     points: p.integer().nullable(),
     scored: p.boolean().default(false),
-    createdAt: p.datetime().type("date"),
+    createdAt: p.datetime().type("timestamptz"),
   },
 });

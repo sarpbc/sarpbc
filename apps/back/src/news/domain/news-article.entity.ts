@@ -14,7 +14,6 @@ export class NewsArticle {
 
 export const NewsArticleSchema = defineEntity({
   class: NewsArticle,
-  uniques: [{ properties: ["slug"] }],
   indexes: [{ properties: ["title"] }, { properties: ["author"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
@@ -22,9 +21,13 @@ export const NewsArticleSchema = defineEntity({
     title: p.string().length(255).index(),
     content: p.text(),
     author: p.manyToOne(User).index(),
-    createdAt: p.datetime().onCreate(() => new Date()),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
     updatedAt: p
       .datetime()
+      .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
     isDraft: p.boolean().default(true),

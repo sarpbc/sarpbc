@@ -1,8 +1,8 @@
 ﻿import { MikroORM } from "@mikro-orm/postgresql";
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import { TopicRepository } from "./topic.repository";
 import { Topic } from "../forum.entities";
+import { ITopicRepository, TOPIC_REPOSITORY } from "./domain/topic.repository.interface";
 
 const predefinedTopics = [
   {
@@ -26,7 +26,8 @@ const predefinedTopics = [
 @Injectable()
 export class TopicService implements OnModuleInit {
   constructor(
-    private readonly topicRepository: TopicRepository,
+    @Inject(TOPIC_REPOSITORY)
+    private readonly topicRepository: ITopicRepository,
     // MikroORM is required for @CreateRequestContext() on lifecycle hook
     private readonly orm: MikroORM,
   ) {}

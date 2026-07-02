@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@mikro-orm/nestjs";
-import { EntityRepository } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { Match, TournamentParticipant } from "../../tournament/tournament.entities";
 import { User } from "../../user/domain/user.entity";
 import { PickemChoice } from "./domain/pickem.entity";
@@ -10,12 +9,7 @@ import { PickemRepository } from "./pickem.repository";
 export class PickemService {
   constructor(
     private readonly pickemRepository: PickemRepository,
-    @InjectRepository(User)
-    private readonly userRepository: EntityRepository<User>,
-    @InjectRepository(Match)
-    private readonly matchRepository: EntityRepository<Match>,
-    @InjectRepository(TournamentParticipant)
-    private readonly participantRepository: EntityRepository<TournamentParticipant>,
+    private readonly em: EntityManager,
   ) {}
 
   async listByTournament(tournamentId: string) {
@@ -31,12 +25,9 @@ export class PickemService {
   }
 
   async makePick(userId: string, matchId: string, participantId: string) {
-    const user = await this.userRepository.findOne({ id: userId });
-    const match = await this.matchRepository.findOne(
-      { id: matchId },
-      { populate: ["participants"] },
-    );
-    const participant = await this.participantRepository.findOne({
+    const user = await this.em.findOne(User, { id: userId });
+    const match = await this.em.findOne(Match, { id: matchId }, { populate: ["participants"] });
+    const participant = await this.em.findOne(TournamentParticipant, {
       id: participantId,
     });
 
@@ -68,7 +59,7 @@ export class PickemService {
   }
 
   async validateMatchResult(matchId: string) {
-    const match = await this.matchRepository.findOne({ id: matchId }, { populate: ["winner"] });
+    const match = await this.em.findOne(Match, { id: matchId }, { populate: ["winner"] });
     if (!match) {
       throw new Error("Match not found");
     }

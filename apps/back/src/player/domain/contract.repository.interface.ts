@@ -1,5 +1,7 @@
 import { Contract, ContractRole, Player } from "../player.entities";
 
+export const CONTRACT_REPOSITORY = Symbol("CONTRACT_REPOSITORY");
+
 export interface IContractRepository {
   findByPlayer(playerId: string): Promise<Contract[]>;
   findPastContractsByPlayer(playerId: string): Promise<Contract[]>;
