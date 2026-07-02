@@ -385,7 +385,6 @@ setPageSeo({
               @submit="submitGuess"
             />
           </div>
-
         </div>
       </UiCard>
     </template>
