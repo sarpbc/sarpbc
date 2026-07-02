@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
+import { EntityRepository } from "@mikro-orm/core";
 import { AirRiddle } from "./domain/airriddle.entity";
 
 export class AirRiddleRepository extends EntityRepository<AirRiddle> {

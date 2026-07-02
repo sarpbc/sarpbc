@@ -1,5 +1,4 @@
-import { Match } from "../match/match.entity";
-import { TournamentParticipant } from "./tournament-participant.entity";
+import { Match, TournamentParticipant } from "../tournament.entities";
 
 export interface UpsertMatchData {
   name: string;

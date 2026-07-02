@@ -7,11 +7,9 @@ import { UpsertPlayerCommand } from "src/pandascore/application/commands/upsert-
 import { UpsertTeamCommand } from "src/pandascore/application/commands/upsert-team.command";
 import { UpsertTournamentCommand } from "src/pandascore/application/commands/upsert-tournament.command";
 import { UpsertTournamentParticipantCommand } from "src/pandascore/application/commands/upsert-tournament-participant.command";
-import { Player } from "src/player/domain/player.entity";
-import { Team } from "src/team/domain/team.entity";
-import { TournamentParticipant } from "../domain/tournament-participant.entity";
-import { Tournament } from "../domain/tournament.entity";
-import { League } from "../league/league.entity";
+import { Player } from "src/player/player.entities";
+import { Team } from "src/player/player.entities";
+import { League, Tournament, TournamentParticipant } from "../tournament.entities";
 import { LeagueService } from "../league/league.service";
 import { MatchService } from "../match/match.service";
 
@@ -32,7 +30,7 @@ export class TournamentSyncPersistence {
       pandascoreId: command.pandascoreId,
     });
 
-    let league: League | undefined;
+    let league: League | null = null;
     if (command.league) {
       league = await this.upsertLeague(command.league);
     }
@@ -43,15 +41,15 @@ export class TournamentSyncPersistence {
     }
 
     tournament.name = command.name;
-    tournament.slug = command.slug;
-    tournament.serie = command.serie;
-    tournament.tier = command.tier;
-    tournament.beginAt = command.beginAt;
-    tournament.endAt = command.endAt;
-    tournament.prizepool = command.prizepool;
+    tournament.slug = command.slug ?? null;
+    tournament.serie = command.serie ?? null;
+    tournament.tier = command.tier ?? null;
+    tournament.beginAt = command.beginAt ?? null;
+    tournament.endAt = command.endAt ?? null;
+    tournament.prizepool = command.prizepool ?? null;
     tournament.league = league;
-    tournament.type = command.type;
-    tournament.winnerType = command.winnerType;
+    tournament.type = command.type ?? null;
+    tournament.winnerType = command.winnerType ?? null;
 
     this.em.persist(tournament);
     await this.em.flush();
@@ -93,8 +91,8 @@ export class TournamentSyncPersistence {
     }
 
     team.name = command.name;
-    team.location = command.location;
-    team.imageUrl = command.imageUrl;
+    team.location = command.location ?? null;
+    team.imageUrl = command.imageUrl ?? null;
     if (command.pandascoreId != null) {
       team.pandascoreId = command.pandascoreId;
     }
@@ -112,11 +110,11 @@ export class TournamentSyncPersistence {
     }
 
     player.name = command.name;
-    player.firstName = command.firstName;
-    player.lastName = command.lastName;
-    player.birthday = command.birthday;
-    player.nationality = command.nationality;
-    player.imageUrl = command.imageUrl;
+    player.firstName = command.firstName ?? null;
+    player.lastName = command.lastName ?? null;
+    player.birthday = command.birthday ?? null;
+    player.nationality = command.nationality ?? null;
+    player.imageUrl = command.imageUrl ?? null;
     if (team) {
       player.team = team;
     }

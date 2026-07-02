@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { TournamentParticipant } from "./domain/tournament-participant.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { TournamentParticipant } from "./tournament.entities";
 
 export class TournamentParticipantRepository extends EntityRepository<TournamentParticipant> {}

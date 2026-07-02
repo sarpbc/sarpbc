@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { PlayerPhoto } from "./domain/player-photo.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { PlayerPhoto } from "./player.entities";
 import { IPlayerPhotoRepository } from "./domain/player-photo.repository.interface";
 
 export class PlayerPhotoRepository

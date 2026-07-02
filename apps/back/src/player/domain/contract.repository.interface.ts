@@ -1,5 +1,6 @@
-import { Contract, ContractRole } from "./contract.entity";
-import { Player } from "./player.entity";
+import { Contract, ContractRole, Player } from "../player.entities";
+
+export const CONTRACT_REPOSITORY = Symbol("CONTRACT_REPOSITORY");
 
 export interface IContractRepository {
   findByPlayer(playerId: string): Promise<Contract[]>;

@@ -1,4 +1,4 @@
-import { Tournament } from "./tournament.entity";
+import { Tournament } from "../tournament.entities";
 
 export interface UpsertTournamentData {
   id: number;

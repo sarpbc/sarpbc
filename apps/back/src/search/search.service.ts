@@ -7,8 +7,8 @@ import {
   PlayerSearchParams,
   TeamSearchParams,
 } from "./interfaces/search-result.interface";
-import { Player } from "../player/domain/player.entity";
-import { Team } from "../team/domain/team.entity";
+import { Player } from "../player/player.entities";
+import { Team } from "../player/player.entities";
 
 @Injectable()
 export class SearchService {

@@ -1,5 +1,5 @@
-import { EntityRepository, FilterQuery } from "@mikro-orm/postgresql";
-import { Match } from "./match.entity";
+import { EntityRepository, FilterQuery } from "@mikro-orm/core";
+import { Match } from "../tournament.entities";
 import type { MatchListQueryOptions, MatchListScopeFilters } from "./match-list-filters";
 
 const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;

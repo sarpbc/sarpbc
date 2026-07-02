@@ -1,10 +1,10 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { ReplyRepository } from "./reply.repository";
-import { Reply } from "./domain/reply.entity";
+import { Reply } from "../forum/forum.entities";
 import { CreateReplyDto } from "./dto/create-reply.dto";
 import { UserService } from "src/user/user.service";
-import { Post } from "src/forum/post/domain/post.entity";
+import { Post } from "src/forum/forum.entities";
 import { NewsArticle } from "src/news/domain/news-article.entity";
 
 @Injectable()

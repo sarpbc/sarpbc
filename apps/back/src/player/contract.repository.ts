@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Contract } from "./domain/contract.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Contract } from "./player.entities";
 import { IContractRepository } from "./domain/contract.repository.interface";
 
 export class ContractRepository extends EntityRepository<Contract> implements IContractRepository {
