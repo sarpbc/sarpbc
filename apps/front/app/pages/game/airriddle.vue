@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { useMediaQuery, usePreferredReducedMotion } from "@vueuse/core";
 import { motion } from "motion-v";
+import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.vue";
+import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
+import AirRiddleTile from "~/components/airriddle/Tile.vue";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
 const { t } = useI18n();
@@ -69,6 +72,10 @@ const emptyRows = computed(() => {
   }
   return Math.max(0, maxAttempts - gameState.attempts.length - 1);
 });
+
+const tileGridStyle = computed(() => ({
+  gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, minmax(0, 1fr))`,
+}));
 
 function focusHiddenInput() {
   if (isMobile.value || !canType.value) {
@@ -322,7 +329,8 @@ setPageSeo({
             <div
               v-for="(attempt, attemptIndex) in gameState.attempts"
               :key="attemptIndex"
-              class="flex justify-center gap-1.5"
+              class="grid w-full gap-1.5"
+              :style="tileGridStyle"
             >
               <AirRiddleTile
                 v-for="(letter, letterIndex) in attempt.letters"
@@ -336,7 +344,8 @@ setPageSeo({
 
             <div
               v-if="!gameState.isWon && !gameState.isGameOver"
-              class="flex justify-center gap-1.5"
+              class="grid w-full gap-1.5"
+              :style="tileGridStyle"
             >
               <AirRiddleTile
                 v-for="letterIndex in gameState.targetLength"
@@ -350,7 +359,8 @@ setPageSeo({
             <div
               v-for="rowIndex in emptyRows"
               :key="`empty-${rowIndex}`"
-              class="flex justify-center gap-1.5"
+              class="grid w-full gap-1.5"
+              :style="tileGridStyle"
             >
               <AirRiddleTile
                 v-for="letterIndex in gameState.targetLength"
@@ -365,7 +375,7 @@ setPageSeo({
             {{ t(`page.game.airriddle.${error}`) }}
           </p>
 
-          <div v-if="!gameState.isWon && !gameState.isGameOver && isMobile" class="w-full">
+          <div v-if="!gameState.isWon && !gameState.isGameOver" class="w-full">
             <AirRiddleKeyboard
               :disabled="!canType"
               :can-submit="canSubmit"
@@ -375,18 +385,6 @@ setPageSeo({
               @submit="submitGuess"
             />
           </div>
-
-          <UButton
-            v-else-if="!gameState.isWon && !gameState.isGameOver"
-            class="w-full sm:w-auto"
-            :disabled="!canSubmit"
-            :loading="submitting"
-            size="lg"
-            color="primary"
-            @click="submitGuess"
-          >
-            {{ submitting ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess") }}
-          </UButton>
         </div>
       </UiCard>
     </template>

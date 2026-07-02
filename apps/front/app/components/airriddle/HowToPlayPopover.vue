@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import AirRiddleLegendTile from "~/components/airriddle/LegendTile.vue";
+
 const { t } = useI18n();
 
 const open = ref(false);
