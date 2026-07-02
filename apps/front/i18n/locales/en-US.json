@@ -507,7 +507,15 @@
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
-          "gameStats": "Game Stats"
+          "gameStats": "Game Stats",
+          "headToHead": "Head-to-Head"
+        },
+        "h2h": {
+          "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",
+          "empty": "No previous meetings between these teams yet",
+          "score": "{scoreA}-{scoreB}",
+          "winner": "{team} won",
+          "draw": "Draw"
         },
         "gameStatsPlaceholder": "Detailed game stats will appear here once available.",
         "gameStatsHint": "Ballchasing integration is coming in a future update.",

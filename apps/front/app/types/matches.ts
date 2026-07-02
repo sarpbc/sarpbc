@@ -57,9 +57,31 @@ export interface TeamForm {
 
 export type TeamFormsMap = Record<string, TeamForm>;
 
+export interface HeadToHeadMeeting {
+  id: string;
+  beginAt?: Date;
+  endAt?: Date;
+  tournamentLabel: string;
+  teamAId: string;
+  teamBId: string;
+  scoreA: number | null;
+  scoreB: number | null;
+  winnerTeamId: string | null;
+}
+
+export interface HeadToHead {
+  teamAId: string;
+  teamBId: string;
+  teamAWins: number;
+  teamBWins: number;
+  totalMeetings: number;
+  recentMeetings: HeadToHeadMeeting[];
+}
+
 export interface MatchDetailResponse {
   match: Match;
   teamForms: TeamFormsMap;
+  headToHead: HeadToHead | null;
 }
 
 export interface Match {

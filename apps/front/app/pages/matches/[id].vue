@@ -5,7 +5,7 @@ import type { TournamentParticipant } from "~/types/tournament";
 
 const { t, locale } = useI18n();
 const route = useRoute();
-const { setPageSeo } = useSarpbcSeo();
+const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
 const matchId = computed(() => route.params.id as string);
 
@@ -43,6 +43,7 @@ const {
 
 const match = computed(() => matchDetail.value?.match ?? null);
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
+const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
 
 const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
@@ -185,12 +186,18 @@ const seoDescription = computed(() => {
   }
 });
 
+function getMatchOgImageUrl(id: string): string {
+  const origin = new URL(getCanonicalUrl()).origin;
+  return `${origin}/og/match/${id}.svg`;
+}
+
 watch(
-  [seoTitle, seoDescription],
+  [seoTitle, seoDescription, matchId, match],
   () => {
     setPageSeo({
       title: seoTitle.value,
       description: seoDescription.value,
+      image: match.value ? getMatchOgImageUrl(matchId.value) : undefined,
     });
   },
   { immediate: true },
@@ -351,6 +358,17 @@ function tournamentMatchesPath(tournamentId: string) {
             </div>
           </div>
         </UiCard>
+      </section>
+
+      <section v-if="headToHead && teamA && teamB" class="w-full flex flex-col gap-3">
+        <h2 class="text-sm font-medium text-toned pl-1">
+          {{ t("page.match.detail.sections.headToHead") }}
+        </h2>
+        <MatchHeadToHeadCard
+          :head-to-head="headToHead"
+          :team-a-name="participantName(teamA)"
+          :team-b-name="participantName(teamB)"
+        />
       </section>
 
       <section class="w-full flex flex-col gap-3">

@@ -23,6 +23,16 @@ const TEAM_FORM_POPULATE = [
   "winner.team",
 ] as const;
 
+const HEAD_TO_HEAD_POPULATE = [
+  "participants.team",
+  "results",
+  "results.participant",
+  "winner",
+  "winner.team",
+  "tournament",
+  "tournament.league",
+] as const;
+
 export class MatchRepository extends EntityRepository<Match> {
   async findByPandascoreId(pandascoreId: number): Promise<Match | null> {
     return this.findOne({ pandascoreId });
@@ -163,6 +173,34 @@ export class MatchRepository extends EntityRepository<Match> {
         limit,
         orderBy: { endAt: "DESC" },
         populate: [...TEAM_FORM_POPULATE],
+      },
+    );
+  }
+
+  async findFinishedBetweenTeams({
+    teamAId,
+    teamBId,
+    excludeMatchId,
+    limit = 20,
+  }: {
+    teamAId: string;
+    teamBId: string;
+    excludeMatchId: string;
+    limit?: number;
+  }): Promise<Match[]> {
+    return this.find(
+      {
+        id: { $ne: excludeMatchId },
+        endAt: { $ne: null },
+        $and: [
+          { participants: { team: { id: teamAId } } },
+          { participants: { team: { id: teamBId } } },
+        ],
+      },
+      {
+        limit,
+        orderBy: { endAt: "DESC" },
+        populate: [...HEAD_TO_HEAD_POPULATE],
       },
     );
   }

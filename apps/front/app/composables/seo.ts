@@ -24,12 +24,14 @@ export const useSarpbcSeo = () => {
     description?: string;
     image?: string;
     noIndex?: boolean;
+    twitterCard?: "summary" | "summary_large_image";
   }) => {
     const {
       title = "Rocket League news & data | Sarpbc",
       description = "Rocket League news & data | Sarpbc",
       image = "https://sarpbc.org/sarpbc.png",
       noIndex = false,
+      twitterCard = "summary_large_image",
     } = opts || {};
 
     // Get canonical URL for og:url (remove /fr prefix)
@@ -74,8 +76,11 @@ export const useSarpbcSeo = () => {
       ogDescription: description,
       ogUrl: canonicalUrl,
       ogImage: image,
+      ogType: "website",
+      twitterCard,
       twitterTitle: title,
       twitterDescription: description,
+      twitterImage: image,
       robots: noIndex ? "noindex, nofollow" : "index, follow",
     });
   };

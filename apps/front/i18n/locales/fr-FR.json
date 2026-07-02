@@ -507,7 +507,15 @@
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
-          "gameStats": "Stats de jeu"
+          "gameStats": "Stats de jeu",
+          "headToHead": "Face-à-face"
+        },
+        "h2h": {
+          "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",
+          "empty": "Aucune confrontation précédente entre ces équipes",
+          "score": "{scoreA}-{scoreB}",
+          "winner": "Victoire de {team}",
+          "draw": "Match nul"
         },
         "gameStatsPlaceholder": "Les statistiques détaillées apparaîtront ici dès qu'elles seront disponibles.",
         "gameStatsHint": "L'intégration Ballchasing arrive dans une prochaine mise à jour.",
