@@ -37,7 +37,7 @@ const displayLetter = computed(() => letter.toUpperCase());
 
 <template>
   <motion.div
-    class="flex size-12 items-center justify-center border-2 font-mono text-xl font-bold tabular-nums select-none sm:size-14 sm:text-2xl"
+    class="flex aspect-square w-full max-w-14 justify-self-center items-center justify-center border-2 font-mono text-[clamp(1rem,8vw,1.25rem)] font-bold tabular-nums select-none sm:text-2xl"
     :class="tileClass"
     :initial="animate ? { scale: 0, y: -50 } : false"
     :animate="animate ? { scale: 1, y: 0 } : undefined"
