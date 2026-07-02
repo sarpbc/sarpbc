@@ -305,6 +305,8 @@ function tournamentMatchesPath(tournamentId: string) {
         </div>
       </UiCrossCard>
 
+      <PickemMatchCta :match="match" :match-status="matchStatus" />
+
       <section class="w-full flex flex-col gap-3">
         <h2 class="text-sm font-medium text-toned pl-1">
           {{ t("page.match.detail.sections.rosters") }}

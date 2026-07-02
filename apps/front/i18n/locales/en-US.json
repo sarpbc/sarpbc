@@ -341,7 +341,17 @@
       },
       "pickems": {
         "title": "Pick'ems",
-        "description": "Make your predictions!"
+        "description": "Make your predictions!",
+        "banner": {
+          "title": "Pick'ems Are Open",
+          "description": "Predict match outcomes for {tournament} and compete with the community.",
+          "cta": "Join Pick'em"
+        },
+        "matchCta": {
+          "title": "Predict This Match",
+          "description": "Submit your pick'em pick before this series starts.",
+          "cta": "Make Pick"
+        }
       }
     },
     "news": {
