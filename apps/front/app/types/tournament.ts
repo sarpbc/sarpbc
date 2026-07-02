@@ -36,6 +36,7 @@ export interface Tournament {
   matches?: Match[];
   participants?: TournamentParticipant[];
   type?: string;
+  pickemsEnabled?: boolean;
 }
 
 export interface TournamentParticipant {
