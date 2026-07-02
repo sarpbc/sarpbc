@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { CreateRequestContext, MikroORM } from "@mikro-orm/core";
+import { MikroORM } from "@mikro-orm/core";
+import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { AirRiddleRepository } from "./airriddle.repository";
 import { PlayerService } from "src/player/player.service";
 import { AirRiddleResultEnum } from "./enum/airriddle-result.enum";

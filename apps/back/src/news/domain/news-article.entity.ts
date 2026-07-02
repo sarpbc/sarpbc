@@ -1,32 +1,32 @@
-import { Entity, Index, ManyToOne, PrimaryKey, Property, Unique } from "@mikro-orm/postgresql";
+import { defineEntity, p } from "@mikro-orm/core";
 import { User } from "../../user/domain/user.entity";
 
-@Entity()
 export class NewsArticle {
-  @PrimaryKey({ type: "uuid", defaultRaw: "gen_random_uuid()" })
   id!: string;
-
-  @Unique()
-  @Property({ type: "varchar", length: 255 })
   slug!: string;
-
-  @Index()
-  @Property({ type: "varchar", length: 255 })
   title!: string;
-
-  @Property({ type: "text" })
   content!: string;
-
-  @Index()
-  @ManyToOne(() => User)
   author!: User;
-
-  @Property({ type: "datetime", onCreate: () => new Date() })
   createdAt: Date = new Date();
-
-  @Property({ type: "datetime", onUpdate: () => new Date(), nullable: true })
-  updatedAt?: Date;
-
-  @Property({ type: "boolean", default: true })
+  updatedAt: Date | null = null;
   isDraft: boolean = true;
 }
+
+export const NewsArticleSchema = defineEntity({
+  class: NewsArticle,
+  uniques: [{ properties: ["slug"] }],
+  indexes: [{ properties: ["title"] }, { properties: ["author"] }],
+  properties: {
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    slug: p.string().length(255).unique(),
+    title: p.string().length(255).index(),
+    content: p.text(),
+    author: p.manyToOne(User).index(),
+    createdAt: p.datetime().onCreate(() => new Date()),
+    updatedAt: p
+      .datetime()
+      .nullable()
+      .onUpdate(() => new Date()),
+    isDraft: p.boolean().default(true),
+  },
+});

@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityRepository } from "@mikro-orm/postgresql";
-import { TournamentParticipant } from "../../tournament/domain/tournament-participant.entity";
+import { Match, TournamentParticipant } from "../../tournament/tournament.entities";
 import { User } from "../../user/domain/user.entity";
 import { PickemChoice } from "./domain/pickem.entity";
 import { PickemRepository } from "./pickem.repository";
-import { Match } from "src/tournament/match/match.entity";
 
 @Injectable()
 export class PickemService {

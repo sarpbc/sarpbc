@@ -1,6 +1,5 @@
-import { Post } from "./post.entity";
+import { Post, PostTranslation } from "../../forum.entities";
 import { PostType } from "../post-type.enum";
-import { PostTranslation } from "./post-translation.entity";
 
 export interface CreatePostData {
   title: string;

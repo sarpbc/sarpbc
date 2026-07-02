@@ -1,9 +1,7 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PlayerController } from "./player.controller";
-import { Player } from "./domain/player.entity";
-import { Contract } from "./domain/contract.entity";
-import { PlayerPhoto } from "./domain/player-photo.entity";
+import { Player, Contract, PlayerPhoto } from "./player.entities";
 import { PlayerService } from "./player.service";
 import { ContractService } from "./contract.service";
 import { TeamModule } from "../team/team.module";

@@ -1,4 +1,4 @@
-import { Player } from "./player.entity";
+import { Player } from "../player.entities";
 import { PlayerSearchProps } from "../interfaces/search-player-props";
 
 export interface IPlayerRepository {

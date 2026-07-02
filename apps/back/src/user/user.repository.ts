@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
+import { EntityRepository } from "@mikro-orm/core";
 import { User } from "./domain/user.entity";
 import { IUserRepository } from "./domain/user.repository.interface";
 

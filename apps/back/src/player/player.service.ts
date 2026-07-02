@@ -3,8 +3,7 @@ import { PlayerRepository } from "./player.repository";
 import { PlayerPhotoRepository } from "./player-photo.repository";
 import { ContractRepository } from "./contract.repository";
 import { TeamService } from "../team/team.service";
-import { Player } from "./domain/player.entity";
-import { PlayerPhoto } from "./domain/player-photo.entity";
+import { Player, PlayerPhoto } from "./player.entities";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
 import { CreatePlayerDto } from "./dto/create-player.dto";
 import { UpdatePlayerDto } from "./dto/update-player.dto";
@@ -72,11 +71,11 @@ export class PlayerService {
 
     const player = new Player();
     player.name = dto.name;
-    player.firstName = dto.firstName ?? undefined;
-    player.lastName = dto.lastName ?? undefined;
-    player.birthday = dto.birthday ? new Date(dto.birthday) : undefined;
-    player.nationality = dto.nationality ?? undefined;
-    player.imageUrl = dto.imageUrl ?? undefined;
+    player.firstName = dto.firstName ?? null;
+    player.lastName = dto.lastName ?? null;
+    player.birthday = dto.birthday ? new Date(dto.birthday) : null;
+    player.nationality = dto.nationality ?? null;
+    player.imageUrl = dto.imageUrl ?? null;
     player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
 
     if (dto.teamId) {
@@ -99,8 +98,7 @@ export class PlayerService {
     if (dto.name !== undefined) player.name = dto.name;
     if (dto.firstName !== undefined) player.firstName = dto.firstName;
     if (dto.lastName !== undefined) player.lastName = dto.lastName;
-    if (dto.birthday !== undefined)
-      player.birthday = dto.birthday ? new Date(dto.birthday) : undefined;
+    if (dto.birthday !== undefined) player.birthday = dto.birthday ? new Date(dto.birthday) : null;
     if (dto.nationality !== undefined) player.nationality = dto.nationality;
     if (dto.slug !== undefined) player.slug = dto.slug;
 
@@ -116,7 +114,7 @@ export class PlayerService {
 
     if (dto.teamId !== undefined) {
       if (dto.teamId === null) {
-        player.team = undefined;
+        player.team = null;
       } else {
         const team = await this.teamService.findById(dto.teamId);
         if (team) {

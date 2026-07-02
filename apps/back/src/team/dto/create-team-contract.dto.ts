@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsUUID } from "class-validator";
-import { ContractRole } from "../../player/domain/contract.entity";
+import { ContractRole } from "../../player/player.entities";
 
 export class CreateTeamContractDto {
   @IsNotEmpty()

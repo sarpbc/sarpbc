@@ -1,4 +1,4 @@
-import { PlayerPhoto } from "./player-photo.entity";
+import { PlayerPhoto } from "../player.entities";
 
 export interface IPlayerPhotoRepository {
   findByPlayer(playerId: string): Promise<PlayerPhoto[]>;

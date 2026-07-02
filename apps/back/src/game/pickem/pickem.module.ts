@@ -5,8 +5,7 @@ import { PickemController } from "./pickem.controller";
 import { PickemService } from "./pickem.service";
 import { UserModule } from "src/user/user.module";
 import { User } from "src/user/domain/user.entity";
-import { TournamentParticipant } from "src/tournament/domain/tournament-participant.entity";
-import { Match } from "src/tournament/match/match.entity";
+import { Match, TournamentParticipant } from "src/tournament/tournament.entities";
 
 @Module({
   imports: [

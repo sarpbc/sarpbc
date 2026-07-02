@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Player } from "./domain/player.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Player } from "./player.entities";
 import { IPlayerRepository } from "./domain/player.repository.interface";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
 

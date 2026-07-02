@@ -2,7 +2,7 @@ import { Module, forwardRef, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TeamController } from "./team.controller";
 import { TeamService } from "./team.service";
-import { Team } from "./domain/team.entity";
+import { Team } from "../player/player.entities";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PlayerModule } from "../player/player.module";
 import { UserModule } from "src/user/user.module";

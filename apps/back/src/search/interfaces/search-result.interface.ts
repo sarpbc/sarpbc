@@ -1,5 +1,4 @@
-import { Player } from "../../player/domain/player.entity";
-import { Team } from "../../team/domain/team.entity";
+import { Player, Team } from "../../player/player.entities";
 
 export interface SearchResult {
   players: Player[];

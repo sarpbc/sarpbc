@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Reply } from "./domain/reply.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Reply } from "../forum/forum.entities";
 import { IReplyRepository } from "./domain/reply.repository.interface";
 
 export class ReplyRepository extends EntityRepository<Reply> implements IReplyRepository {

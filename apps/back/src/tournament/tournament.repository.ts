@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Tournament } from "./domain/tournament.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Tournament } from "./tournament.entities";
 
 export class TournamentRepository extends EntityRepository<Tournament> {
   async findByPandascoreId(pandascoreId: number): Promise<Tournament | null> {

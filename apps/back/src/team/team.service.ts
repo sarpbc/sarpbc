@@ -2,7 +2,7 @@
 import { TeamRepository } from "./team.repository";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { PlayerService } from "../player/player.service";
-import { Team } from "./domain/team.entity";
+import { Team } from "../player/player.entities";
 import { TeamSearchProps } from "./interfaces/search-team-props";
 import { SyncPandascoreTeamsUseCase } from "./sync/sync-pandascore-teams.use-case";
 import { CreateTeamDto } from "./dto/create-team.dto";
@@ -53,10 +53,10 @@ export class TeamService {
 
     const team = new Team();
     team.name = dto.name;
-    team.location = dto.location ?? undefined;
-    team.imageUrl = dto.imageUrl ?? undefined;
+    team.location = dto.location ?? null;
+    team.imageUrl = dto.imageUrl ?? null;
     team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
-    team.pandascoreId = pandascoreId ?? undefined;
+    team.pandascoreId = pandascoreId ?? null;
     await this.teamRepository.save(team);
     return team;
   }
@@ -90,7 +90,7 @@ export class TeamService {
     const teamWithPlayers = await this.teamRepository.findWithPlayers(id);
     if (teamWithPlayers) {
       for (const player of teamWithPlayers.players.getItems()) {
-        player.team = undefined;
+        player.team = null;
         await this.em.persist(player);
       }
     }

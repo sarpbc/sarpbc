@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Topic } from "./domain/topic.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Topic } from "../forum.entities";
 import { ITopicRepository } from "./domain/topic.repository.interface";
 
 export class TopicRepository extends EntityRepository<Topic> implements ITopicRepository {

@@ -8,7 +8,7 @@ import {
 import { ContractRepository } from "./contract.repository";
 import { PlayerRepository } from "./player.repository";
 import { TeamService } from "../team/team.service";
-import { Contract, ContractRole } from "./domain/contract.entity";
+import { Contract, ContractRole } from "./player.entities";
 import { CreateContractDto } from "./dto/create-contract.dto";
 import { UpdateContractDto } from "./dto/update-contract.dto";
 import { CreateTeamContractDto } from "../team/dto/create-team-contract.dto";
@@ -93,7 +93,7 @@ export class ContractService {
     contract.player = player;
     contract.team = team;
     contract.startDate = new Date(dto.startDate);
-    contract.endDate = dto.endDate ? new Date(dto.endDate) : undefined;
+    contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
     contract.role = dto.role ?? ContractRole.ACTIVE;
 
     await this.contractRepository.save(contract);
@@ -119,7 +119,7 @@ export class ContractService {
     }
 
     if (dto.endDate !== undefined) {
-      contract.endDate = dto.endDate ? new Date(dto.endDate) : undefined;
+      contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
     }
 
     if (dto.role !== undefined) {

@@ -7,8 +7,7 @@ import {
 import { PandascorePlayerMapper } from "src/pandascore/application/mappers/pandascore-player.mapper";
 import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
 import { createLogger } from "evlog";
-import { Player } from "src/player/domain/player.entity";
-import { Team } from "src/team/domain/team.entity";
+import { Player, Team } from "src/player/player.entities";
 
 @Injectable()
 export class SyncPandascoreTeamsUseCase {
@@ -46,8 +45,8 @@ export class SyncPandascoreTeamsUseCase {
           team = existingTeam ?? new Team();
           team.slug = teamSlug;
           team.name = teamCommand.name;
-          team.imageUrl = teamCommand.imageUrl;
-          team.pandascoreId = teamCommand.pandascoreId;
+          team.imageUrl = teamCommand.imageUrl ?? null;
+          team.pandascoreId = teamCommand.pandascoreId ?? null;
           em.persist(team);
           createdTeams.set(teamSlug, team);
         }
@@ -69,11 +68,11 @@ export class SyncPandascoreTeamsUseCase {
         if (!existingPlayer) {
           const newPlayer = new Player();
           newPlayer.name = playerCommand.name;
-          newPlayer.firstName = playerCommand.firstName;
-          newPlayer.lastName = playerCommand.lastName;
-          newPlayer.birthday = playerCommand.birthday;
-          newPlayer.nationality = playerCommand.nationality;
-          newPlayer.imageUrl = playerCommand.imageUrl;
+          newPlayer.firstName = playerCommand.firstName ?? null;
+          newPlayer.lastName = playerCommand.lastName ?? null;
+          newPlayer.birthday = playerCommand.birthday ?? null;
+          newPlayer.nationality = playerCommand.nationality ?? null;
+          newPlayer.imageUrl = playerCommand.imageUrl ?? null;
           newPlayer.slug = playerCommand.slug;
 
           if (playerCommand.teamSlug) {

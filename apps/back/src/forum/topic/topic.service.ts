@@ -1,7 +1,8 @@
-﻿import { CreateRequestContext, MikroORM } from "@mikro-orm/postgresql";
+﻿import { MikroORM } from "@mikro-orm/postgresql";
 import { Injectable, OnModuleInit } from "@nestjs/common";
+import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { TopicRepository } from "./topic.repository";
-import { Topic } from "./domain/topic.entity";
+import { Topic } from "../forum.entities";
 
 const predefinedTopics = [
   {

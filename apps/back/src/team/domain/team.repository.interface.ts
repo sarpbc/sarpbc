@@ -1,4 +1,4 @@
-import { Team } from "./team.entity";
+import { Team } from "../../player/player.entities";
 import { TeamSearchProps } from "../interfaces/search-team-props";
 
 export interface ITeamRepository {

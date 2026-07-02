@@ -1,9 +1,6 @@
 import { Collection } from "@mikro-orm/core";
-import { Match } from "./match.entity";
-import { Tournament } from "../domain/tournament.entity";
-import { TournamentParticipant } from "../domain/tournament-participant.entity";
-import { Team } from "../../team/domain/team.entity";
-import { MatchResult } from "./match-result.entity";
+import { Match, MatchResult, Tournament, TournamentParticipant } from "../tournament.entities";
+import { Team } from "../../player/player.entities";
 import { buildHeadToHead, getWinnerTeamId, mapHeadToHeadMeeting } from "./match-head-to-head";
 
 function createTeam(id: string, name: string): Team {
@@ -126,7 +123,7 @@ describe("match-head-to-head", () => {
       scoreA: 3,
       scoreB: 3,
     });
-    match.winner = undefined;
+    match.winner = null;
 
     const headToHead = buildHeadToHead([match], teamVitality.id, teamKarmine.id);
 
@@ -144,7 +141,7 @@ describe("match-head-to-head", () => {
       scoreA: 4,
       scoreB: 1,
     });
-    match.winner = undefined;
+    match.winner = null;
 
     expect(getWinnerTeamId(match, teamVitality.id, teamKarmine.id)).toBe(teamVitality.id);
   });

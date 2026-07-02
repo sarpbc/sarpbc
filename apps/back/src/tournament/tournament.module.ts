@@ -1,10 +1,7 @@
 import { Module, OnModuleInit, forwardRef } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { Tournament } from "./domain/tournament.entity";
-import { Match } from "./match/match.entity";
-import { TournamentParticipant } from "./domain/tournament-participant.entity";
-import { League } from "./league/league.entity";
+import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
 import { TeamModule } from "../team/team.module";
 import { PlayerModule } from "../player/player.module";
 import { TournamentController } from "./tournament.controller";

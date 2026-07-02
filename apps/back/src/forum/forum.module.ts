@@ -1,8 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { Post } from "./post/domain/post.entity";
-import { PostTranslation } from "./post/domain/post-translation.entity";
-import { Topic } from "./topic/domain/topic.entity";
+import { Post, PostTranslation, Topic } from "./forum.entities";
 import { ForumController } from "./forum.controller";
 import { TopicController } from "./topic/topic.contoller";
 import { PostController } from "./post/post.controller";

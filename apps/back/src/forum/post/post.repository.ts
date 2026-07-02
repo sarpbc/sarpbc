@@ -1,6 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Post } from "./domain/post.entity";
-import { PostTranslation } from "./domain/post-translation.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import { Post, PostTranslation } from "../forum.entities";
 import { IPostRepository } from "./domain/post.repository.interface";
 
 export class PostRepository extends EntityRepository<Post> implements IPostRepository {
@@ -62,7 +61,7 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
       ORDER BY COALESCE(MAX(r.created_at), p.created_at) DESC
       LIMIT ${limit}
     `;
-    const results = await this.em.execute(query);
+    const results = await this.em.getConnection().execute(query);
     return results.map((row: any) => ({
       id: row.id,
       title: row.title,

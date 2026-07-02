@@ -1,8 +1,7 @@
 ﻿import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { PostRepository } from "./post.repository";
 import { TopicRepository } from "../topic/topic.repository";
-import { Post } from "./domain/post.entity";
-import { PostTranslation } from "./domain/post-translation.entity";
+import { Post, PostTranslation } from "../forum.entities";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UserService } from "src/user/user.service";
 import { PostDto } from "./dto/post-response.dto";

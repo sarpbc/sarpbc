@@ -1,5 +1,5 @@
 import { IsDateString, IsEnum, IsOptional, IsUUID } from "class-validator";
-import { ContractRole } from "../domain/contract.entity";
+import { ContractRole } from "../player.entities";
 
 export class UpdateContractDto {
   @IsOptional()
