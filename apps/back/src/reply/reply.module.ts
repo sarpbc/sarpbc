@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { Reply } from "./domain/reply.entity";
+import { Reply } from "../forum/forum.entities";
 import { ReplyController } from "./reply.controller";
 import { ReplyService } from "./reply.service";
 import { UserModule } from "src/user/user.module";

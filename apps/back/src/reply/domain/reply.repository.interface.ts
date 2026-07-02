@@ -1,4 +1,4 @@
-import { Reply } from "./reply.entity";
+import { Reply } from "../../forum/forum.entities";
 
 export interface IReplyRepository {
   findByPostId(postId: string): Promise<Reply[]>;

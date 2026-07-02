@@ -1,19 +1,20 @@
-﻿import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
-import { PostRepository } from "./post.repository";
-import { TopicRepository } from "../topic/topic.repository";
-import { Post } from "./domain/post.entity";
-import { PostTranslation } from "./domain/post-translation.entity";
+﻿import { Injectable, BadRequestException, NotFoundException, Inject } from "@nestjs/common";
+import { Post, PostTranslation } from "../forum.entities";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UserService } from "src/user/user.service";
 import { PostDto } from "./dto/post-response.dto";
 import { PostType } from "./post-type.enum";
 import { ReplyService } from "src/reply/reply.service";
+import { IPostRepository, POST_REPOSITORY } from "./domain/post.repository.interface";
+import { ITopicRepository, TOPIC_REPOSITORY } from "../topic/domain/topic.repository.interface";
 
 @Injectable()
 export class PostService {
   constructor(
-    private readonly postRepository: PostRepository,
-    private readonly topicRepository: TopicRepository,
+    @Inject(POST_REPOSITORY)
+    private readonly postRepository: IPostRepository,
+    @Inject(TOPIC_REPOSITORY)
+    private readonly topicRepository: ITopicRepository,
     private readonly userService: UserService,
     private readonly replyService: ReplyService,
   ) {}
@@ -127,10 +128,7 @@ export class PostService {
 
     await this.replyService.deleteAllForPost(id);
 
-    for (const translation of post.translations.getItems()) {
-      this.postRepository.getEntityManager().remove(translation);
-    }
-    await this.postRepository.getEntityManager().flush();
+    await this.postRepository.deleteTranslations(post);
 
     await this.postRepository.delete(post);
   }

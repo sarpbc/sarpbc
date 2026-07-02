@@ -1,12 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/core";
 import { MatchRepository } from "./match.repository";
-import { Match } from "./match.entity";
+import { BracketLink, Match, MatchResult } from "../tournament.entities";
 import type { MatchListQueryOptions } from "./match-list-filters";
 import { TournamentParticipantRepository } from "../tournament-participant.repository";
 import { TournamentRepository } from "../tournament.repository";
-import { BracketLink } from "./bracket-link.entity";
-import { MatchResult } from "./match-result.entity";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 
 const RECENT_FORM_LIMIT = 5;
@@ -19,8 +17,8 @@ export interface TeamFormRecord {
 export interface TeamFormOpponent {
   id: string;
   name: string;
-  slug?: string;
-  imageUrl?: string;
+  slug?: string | null;
+  imageUrl?: string | null;
 }
 
 export interface TeamFormMatchScore {
@@ -30,8 +28,8 @@ export interface TeamFormMatchScore {
 
 export interface TeamFormMatchEntry {
   id: string;
-  beginAt?: Date;
-  endAt?: Date;
+  beginAt?: Date | null;
+  endAt?: Date | null;
   opponent: TeamFormOpponent;
   score: TeamFormMatchScore;
   outcome: "win" | "loss" | null;
@@ -268,16 +266,16 @@ export class MatchService {
     if (!match) {
       match = new Match();
       match.tournament = tournament;
-      match.pandascoreId = matchData.pandascoreId;
+      match.pandascoreId = matchData.pandascoreId ?? null;
       this.em.persist(match);
     }
 
     match.name = matchData.name;
-    match.slug = matchData.slug;
-    match.beginAt = matchData.beginAt;
-    match.endAt = matchData.endAt;
-    match.status = matchData.status;
-    match.numberOfGames = matchData.numberOfGames;
+    match.slug = matchData.slug ?? null;
+    match.beginAt = matchData.beginAt ?? null;
+    match.endAt = matchData.endAt ?? null;
+    match.status = matchData.status ?? null;
+    match.numberOfGames = matchData.numberOfGames ?? null;
 
     match.participants.removeAll();
     for (const participant of participants) {

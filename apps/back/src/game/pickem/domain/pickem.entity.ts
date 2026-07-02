@@ -1,30 +1,29 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from "@mikro-orm/core";
+import { defineEntity, p } from "@mikro-orm/core";
 import { v4 } from "uuid";
+import { Match, TournamentParticipant } from "../../../tournament/tournament.entities";
 import { User } from "../../../user/domain/user.entity";
-import { TournamentParticipant } from "../../../tournament/domain/tournament-participant.entity";
 import { PickemRepository } from "../pickem.repository";
-import { Match } from "src/tournament/match/match.entity";
 
-@Entity({ repository: () => PickemRepository })
 export class PickemChoice {
-  @PrimaryKey()
   id: string = v4();
-
-  @ManyToOne(() => User)
   user!: User;
-
-  @ManyToOne(() => Match)
   match!: Match;
-
-  @ManyToOne(() => TournamentParticipant)
   pickedParticipant!: TournamentParticipant;
-
-  @Property({ nullable: true })
-  points?: number;
-
-  @Property({ type: "boolean", default: "false" })
+  points: number | null = null;
   scored = false;
-
-  @Property({ type: "date" })
   createdAt: Date = new Date();
 }
+
+export const PickemChoiceSchema = defineEntity({
+  class: PickemChoice,
+  repository: () => PickemRepository,
+  properties: {
+    id: p.string().primary(),
+    user: p.manyToOne(User),
+    match: p.manyToOne(Match),
+    pickedParticipant: p.manyToOne(TournamentParticipant),
+    points: p.integer().nullable(),
+    scored: p.boolean().default(false),
+    createdAt: p.datetime().type("timestamptz"),
+  },
+});

@@ -1,4 +1,4 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
+import { EntityRepository } from "@mikro-orm/core";
 import { PickemChoice } from "./domain/pickem.entity";
 
 export class PickemRepository extends EntityRepository<PickemChoice> {

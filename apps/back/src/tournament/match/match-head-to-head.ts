@@ -1,9 +1,9 @@
-import type { Match } from "./match.entity";
+import type { Match } from "../tournament.entities";
 
 export interface HeadToHeadMeeting {
   id: string;
-  beginAt?: Date;
-  endAt?: Date;
+  beginAt?: Date | null;
+  endAt?: Date | null;
   tournamentLabel: string;
   teamAId: string;
   teamBId: string;

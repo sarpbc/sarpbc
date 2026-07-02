@@ -1,5 +1,5 @@
-import { EntityRepository } from "@mikro-orm/postgresql";
-import { Team } from "./domain/team.entity";
+import { EntityRepository } from "@mikro-orm/core";
+import type { Team } from "../player/player.entities";
 import { ITeamRepository } from "./domain/team.repository.interface";
 import { TeamSearchProps } from "./interfaces/search-team-props";
 

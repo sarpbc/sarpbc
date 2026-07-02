@@ -1,6 +1,7 @@
-import { Post } from "./post.entity";
+import { Post, PostTranslation } from "../../forum.entities";
 import { PostType } from "../post-type.enum";
-import { PostTranslation } from "./post-translation.entity";
+
+export const POST_REPOSITORY = Symbol("POST_REPOSITORY");
 
 export interface CreatePostData {
   title: string;
@@ -26,4 +27,6 @@ export interface IPostRepository {
   hasRecentPostByUser(userId: string, sinceDate: Date): Promise<boolean>;
   save(post: Post): Promise<void>;
   saveTranslation(translation: PostTranslation): Promise<void>;
+  deleteTranslations(post: Post): Promise<void>;
+  delete(post: Post): Promise<void>;
 }

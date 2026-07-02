@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { League } from "./league.entity";
+import { League } from "../tournament.entities";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { InjectRepository } from "@mikro-orm/nestjs";
 
@@ -23,7 +23,7 @@ export class LeagueService {
       league.slug = pandaLeague.slug;
       league.url = pandaLeague.url;
       league.imageUrl = pandaLeague.image_url;
-      league.modifiedAt = pandaLeague.modified_at ? new Date(pandaLeague.modified_at) : undefined;
+      league.modifiedAt = pandaLeague.modified_at ? new Date(pandaLeague.modified_at) : null;
 
       await this.em.persist(league).flush();
     } else {
@@ -31,7 +31,7 @@ export class LeagueService {
       league.slug = pandaLeague.slug;
       league.url = pandaLeague.url;
       league.imageUrl = pandaLeague.image_url;
-      league.modifiedAt = pandaLeague.modified_at ? new Date(pandaLeague.modified_at) : undefined;
+      league.modifiedAt = pandaLeague.modified_at ? new Date(pandaLeague.modified_at) : null;
     }
 
     return league;
