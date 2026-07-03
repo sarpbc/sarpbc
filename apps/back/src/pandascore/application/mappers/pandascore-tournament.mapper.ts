@@ -17,6 +17,7 @@ export class PandascoreTournamentMapper {
       endAt: dto.end_at ? new Date(dto.end_at) : undefined,
       prizepool: dto.prizepool != null ? String(dto.prizepool) : undefined,
       type: dto.type,
+      hasBracket: dto.has_bracket,
       winnerType: dto.winner_type,
       winnerPandascoreTeamId: dto.winner_id,
       league: dto.league ? PandascoreLeagueMapper.toUpsertCommand(dto.league) : undefined,

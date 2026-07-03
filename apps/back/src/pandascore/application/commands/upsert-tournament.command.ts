@@ -11,6 +11,7 @@ export interface UpsertTournamentCommand {
   endAt?: Date;
   prizepool?: string;
   type?: string;
+  hasBracket?: boolean;
   winnerType?: string;
   winnerPandascoreTeamId?: number | null;
   league?: UpsertLeagueCommand;

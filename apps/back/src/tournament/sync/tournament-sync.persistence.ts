@@ -49,6 +49,7 @@ export class TournamentSyncPersistence {
     tournament.prizepool = command.prizepool ?? null;
     tournament.league = league;
     tournament.type = command.type ?? null;
+    tournament.hasBracket = command.hasBracket ?? false;
     tournament.winnerType = command.winnerType ?? null;
 
     this.em.persist(tournament);

@@ -1,136 +1,66 @@
 <script lang="ts" setup>
-import type { Team } from "~/types/team";
-import type { DrawnBracketMatch, Tournament } from "~/types/tournament";
+import type { Tournament } from "~/types/tournament";
+import { buildTournamentBracketView } from "~/utils/tournamentBracket";
 
 interface Props {
   tournament: Tournament;
 }
 
-interface BracketMatch {
-  matchId: string;
-  teamA?: Team;
-  teamB?: Team;
-  previousMatchA?: {
-    id: string;
-    type: "winner" | "loser";
-  };
-  previousMatchB?: {
-    id: string;
-    type: "winner" | "loser";
-  };
-}
-
 const { tournament } = defineProps<Props>();
-const matchesToDraw = ref<DrawnBracketMatch[]>([]);
 
-const buildBracket = () => {
-  const matchesMap = new Map<string, BracketMatch>();
-
-  if (!tournament.matches) {
-    return;
-  }
-
-  tournament.matches.forEach((match) => {
-    matchesMap.set(match.id, {
-      matchId: match.id,
-      teamA: match.participants?.[0]?.team ?? undefined,
-      teamB: match.participants?.[1]?.team ?? undefined,
-      previousMatchA: match.previousMatches?.[0]
-        ? {
-            id: match.previousMatches[0].previousMatch,
-            type: match.previousMatches[0].type,
-          }
-        : undefined,
-      previousMatchB: match.previousMatches?.[1]
-        ? {
-            id: match.previousMatches[1].previousMatch,
-            type: match.previousMatches[1].type,
-          }
-        : undefined,
-    });
-  });
-
-  const matchesArray = Array.from(matchesMap.values());
-  const lastMatch: BracketMatch[] = [];
-  for (let i = 0; i < matchesArray.length; i++) {
-    let found = false;
-    for (let j = 0; j < matchesArray.length; j++) {
-      if (
-        matchesArray[i]?.previousMatchA &&
-        matchesArray[i]?.previousMatchA?.id === matchesArray[j]?.matchId
-      ) {
-        found = true;
-        break;
-      }
-      if (
-        matchesArray[i]?.previousMatchB &&
-        matchesArray[i]?.previousMatchB?.id === matchesArray[j]?.matchId
-      ) {
-        found = true;
-        break;
-      }
-    }
-    if (found) {
-      lastMatch.push(matchesArray[i]!);
-    }
-  }
-
-  const drawnMatches: DrawnBracketMatch[] = [];
-  const addedMatches = new Map<string, DrawnBracketMatch>();
-
-  const processMatch = (match: BracketMatch): DrawnBracketMatch | string => {
-    if (addedMatches.has(match.matchId)) {
-      return addedMatches.get(match.matchId)!;
-    }
-
-    const drawnMatch: DrawnBracketMatch = {
-      matchId: match.matchId,
-      teamA: match.teamA,
-      teamB: match.teamB,
-    };
-
-    addedMatches.set(match.matchId, drawnMatch);
-
-    if (match.previousMatchA) {
-      if (match.previousMatchA.type === "winner") {
-        const previousMatchA = matchesMap.get(match.previousMatchA.id);
-        if (previousMatchA) {
-          drawnMatch.previousMatchA = processMatch(previousMatchA);
-        }
-      } else {
-        drawnMatch.previousMatchA = match.previousMatchA.id;
-      }
-    }
-
-    if (match.previousMatchB) {
-      if (match.previousMatchB.type === "winner") {
-        const previousMatchB = matchesMap.get(match.previousMatchB.id);
-        if (previousMatchB) {
-          drawnMatch.previousMatchB = processMatch(previousMatchB);
-        }
-      } else {
-        drawnMatch.previousMatchB = match.previousMatchB.id;
-      }
-    }
-
-    drawnMatches.push(drawnMatch);
-    return drawnMatch;
-  };
-
-  lastMatch.forEach((m) => {
-    processMatch(m);
-  });
-
-  matchesToDraw.value = drawnMatches.filter((m) =>
-    lastMatch.find((lm) => lm.matchId === m.matchId),
-  );
-};
-
-buildBracket();
+const bracketView = computed(() => buildTournamentBracketView(tournament));
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-4">
-    <TournamentBracketMatch v-for="match in matchesToDraw" :key="match.matchId" :match="match" />
+  <div class="w-full flex flex-col gap-6">
+    <p v-if="!tournament.matches?.length" class="text-sm text-muted">
+      {{ $t("page.tournaments.id.noMatches") }}
+    </p>
+
+    <template
+      v-else-if="bracketView.format === 'flat-stage' || bracketView.format === 'fallback-list'"
+    >
+      <div class="flex flex-col gap-2">
+        <TournamentFlatMatchRow
+          v-for="match in bracketView.flatMatches"
+          :key="match.id"
+          :match="match"
+        />
+      </div>
+    </template>
+
+    <template v-else>
+      <section v-if="bracketView.eliminationTree.length" class="flex flex-col gap-3">
+        <h2
+          v-if="bracketView.format === 'double-elimination'"
+          class="text-sm font-semibold text-muted"
+        >
+          {{ $t("components.tournament.bracket.upperBracket") }}
+        </h2>
+        <div class="w-full flex flex-col gap-4 overflow-x-auto">
+          <TournamentBracketMatch
+            v-for="match in bracketView.eliminationTree"
+            :key="match.matchId"
+            :match="match"
+          />
+        </div>
+      </section>
+
+      <section
+        v-if="bracketView.lowerBracketMatches.length"
+        class="flex flex-col gap-3 border-t border-default pt-4"
+      >
+        <h2 class="text-sm font-semibold text-muted">
+          {{ $t("components.tournament.bracket.lowerBracket") }}
+        </h2>
+        <div class="flex flex-col gap-2">
+          <TournamentFlatMatchRow
+            v-for="match in bracketView.lowerBracketMatches"
+            :key="match.id"
+            :match="match"
+          />
+        </div>
+      </section>
+    </template>
   </div>
 </template>

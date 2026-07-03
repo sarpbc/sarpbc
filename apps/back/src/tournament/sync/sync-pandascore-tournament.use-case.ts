@@ -91,7 +91,9 @@ export class SyncPandascoreTournamentUseCase {
       return -1;
     }
 
-    const pandaMatches = await this.pandascoreGateway.getTournamentBrackets(pandascoreId);
+    const pandaMatches = tournament.hasBracket
+      ? await this.pandascoreGateway.getTournamentBrackets(pandascoreId)
+      : await this.pandascoreGateway.getTournamentMatches(pandascoreId);
     const commands = pandaMatches.map((match) => PandascoreMatchMapper.toUpsertCommand(match));
     return this.persistence.upsertMatchesForTournament(tournament, commands);
   }
