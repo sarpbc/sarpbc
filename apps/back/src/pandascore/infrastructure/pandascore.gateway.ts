@@ -28,6 +28,10 @@ export class PandascoreGatewayImpl implements PandascoreGateway {
     return this.apiClient.getTournamentBrackets(tournamentId);
   }
 
+  getTournamentMatches(tournamentId: number): Promise<MatchDto[]> {
+    return this.apiClient.getTournamentMatches(tournamentId);
+  }
+
   getRocketLeaguePlayers() {
     return this.apiClient.getRocketLeaguePlayers();
   }

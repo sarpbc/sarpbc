@@ -114,6 +114,10 @@ export class PandascoreApiClient {
     return this.paginateAll<MatchDto>(`/tournaments/${tournamentId}/brackets`);
   }
 
+  async getTournamentMatches(tournamentId: number): Promise<MatchDto[]> {
+    return this.paginateAll<MatchDto>(`/tournaments/${tournamentId}/matches`);
+  }
+
   async getRocketLeaguePlayers(): Promise<RocketLeaguePlayerDto[]> {
     return this.paginateAll<RocketLeaguePlayerDto>("/rl/players", {
       params: { sort: "name" },
