@@ -56,6 +56,12 @@
       "tbd": "To Be Determined",
       "live": "Live"
     },
+    "tournament": {
+      "bracket": {
+        "upperBracket": "Upper Bracket",
+        "lowerBracket": "Lower Bracket"
+      }
+    },
     "reply": {
       "validation": {
         "contentMinLength": "Your reply must be at least 1 character",

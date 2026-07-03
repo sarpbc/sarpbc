@@ -37,6 +37,7 @@ export class Tournament {
   imageUrl: string | null = null;
   league: League | null = null;
   pickemsEnabled = false;
+  hasBracket = false;
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   matches = new Collection<Match>(this);
@@ -124,6 +125,7 @@ export const TournamentSchema = defineEntity({
     imageUrl: p.string().nullable(),
     league: p.manyToOne(League).nullable(),
     pickemsEnabled: p.boolean().default(false),
+    hasBracket: p.boolean().default(false),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()

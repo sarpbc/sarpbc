@@ -15,24 +15,23 @@ const { match } = defineProps<{
       "
       class="flex flex-col gap-1"
     >
-      <BracketMatch
+      <TournamentBracketMatch
         v-if="match.previousMatchA && typeof match.previousMatchA !== 'string'"
         :match="match.previousMatchA"
       />
-      <BracketMatch
+      <TournamentBracketMatch
         v-if="match.previousMatchB && typeof match.previousMatchB !== 'string'"
         :match="match.previousMatchB"
       />
     </div>
-    <div class="w-64 h-16 flex flex-col items-start justify-center p-2 gap-1 bg-muted/70">
-      <div class="w-full grid grid-cols-5">
-        <div class="col-span-4 truncate">{{ match.teamA?.name ?? "TBD" }}</div>
-        <div class="col-span-1 text-end">0</div>
-      </div>
-      <div class="w-full grid grid-cols-5">
-        <div class="col-span-4 truncate">{{ match.teamB?.name ?? "TBD" }}</div>
-        <div class="col-span-1 text-end">0</div>
-      </div>
-    </div>
+    <TournamentMatchScoreLink
+      compact
+      :match-id="match.matchId"
+      :team-a-name="match.teamA?.name"
+      :team-b-name="match.teamB?.name"
+      :participant-a-id="match.participantAId"
+      :participant-b-id="match.participantBId"
+      :results="match.results"
+    />
   </div>
 </template>

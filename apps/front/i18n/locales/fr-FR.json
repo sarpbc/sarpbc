@@ -56,6 +56,12 @@
       "tbd": "À déterminer",
       "live": "En direct"
     },
+    "tournament": {
+      "bracket": {
+        "upperBracket": "Bracket supérieur",
+        "lowerBracket": "Bracket inférieur"
+      }
+    },
     "reply": {
       "validation": {
         "contentMinLength": "Votre réponse doit contenir au moins 1 caractère",

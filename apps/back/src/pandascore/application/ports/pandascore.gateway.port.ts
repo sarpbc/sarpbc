@@ -23,6 +23,7 @@ export interface PandascoreGateway {
   getTournaments(): Promise<TournamentDto[]>;
   getTournamentById(tournamentId: number): Promise<TournamentDto | null>;
   getTournamentBrackets(tournamentId: number): Promise<MatchDto[]>;
+  getTournamentMatches(tournamentId: number): Promise<MatchDto[]>;
   getRocketLeaguePlayers(): Promise<
     Array<{
       name: string;
