@@ -1,17 +1,9 @@
 <script lang="ts" setup>
 import type { DrawnBracketMatch } from "~/types/tournament";
-import { getTeamScore } from "~/utils/tournamentBracket";
-
-const localePath = useLocalePath();
 
 const { match } = defineProps<{
   match: DrawnBracketMatch;
 }>();
-
-const scoreA = computed(() => getTeamScore(match.results, match.participantAId));
-const scoreB = computed(() => getTeamScore(match.results, match.participantBId));
-
-const hasScore = computed(() => scoreA.value !== null && scoreB.value !== null);
 </script>
 
 <template>
@@ -32,26 +24,14 @@ const hasScore = computed(() => scoreA.value !== null && scoreB.value !== null);
         :match="match.previousMatchB"
       />
     </div>
-    <NuxtLink
-      :to="localePath(`/matches/${match.matchId}`)"
-      class="w-64 min-h-16 flex flex-col items-start justify-center p-2 gap-1 bg-muted/70 border border-transparent rounded-sm hover:border-default hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-    >
-      <div class="w-full grid grid-cols-5 gap-1">
-        <div class="col-span-4 truncate text-sm">
-          {{ match.teamA?.name ?? $t("components.match.tbd") }}
-        </div>
-        <div class="col-span-1 text-end text-sm tabular-nums font-semibold">
-          {{ hasScore ? scoreA : "–" }}
-        </div>
-      </div>
-      <div class="w-full grid grid-cols-5 gap-1">
-        <div class="col-span-4 truncate text-sm">
-          {{ match.teamB?.name ?? $t("components.match.tbd") }}
-        </div>
-        <div class="col-span-1 text-end text-sm tabular-nums font-semibold">
-          {{ hasScore ? scoreB : "–" }}
-        </div>
-      </div>
-    </NuxtLink>
+    <TournamentMatchScoreLink
+      compact
+      :match-id="match.matchId"
+      :team-a-name="match.teamA?.name"
+      :team-b-name="match.teamB?.name"
+      :participant-a-id="match.participantAId"
+      :participant-b-id="match.participantBId"
+      :results="match.results"
+    />
   </div>
 </template>

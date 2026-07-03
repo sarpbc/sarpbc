@@ -12,7 +12,8 @@
     "lint:fix": "turbo run lint:fix",
     "fmt": "turbo run fmt",
     "fmt:check": "turbo run fmt:check",
-    "test:back": "turbo run test --filter=back"
+    "test:back": "turbo run test --filter=back",
+    "test:front": "turbo run test --filter=front"
   },
   "devDependencies": {
     "lefthook": "^2.1.9",

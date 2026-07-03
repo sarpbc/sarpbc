@@ -35,8 +35,16 @@ export class SyncPandascoreTournamentUseCase {
 
       log.set({ pandascoreId });
 
-      const participantsUpserted = await this.syncTournamentDetails(log, pandascoreId);
-      const matchesCreated = await this.syncTournamentMatches(log, tournamentId, pandascoreId);
+      const { participantsUpserted, hasBracket } = await this.syncTournamentDetails(
+        log,
+        pandascoreId,
+      );
+      const matchesCreated = await this.syncTournamentMatches(
+        log,
+        tournamentId,
+        pandascoreId,
+        hasBracket,
+      );
 
       log.set({
         sync: {
@@ -55,11 +63,11 @@ export class SyncPandascoreTournamentUseCase {
   private async syncTournamentDetails(
     log: ReturnType<typeof createLogger>,
     pandascoreId: number,
-  ): Promise<number> {
+  ): Promise<{ participantsUpserted: number; hasBracket: boolean }> {
     const pandaTournament = await this.pandascoreGateway.getTournamentById(pandascoreId);
     if (!pandaTournament) {
       log.warn(`PandaScore tournament not found (pandascoreId=${pandascoreId})`);
-      return 0;
+      return { participantsUpserted: 0, hasBracket: false };
     }
 
     const command = PandascoreTournamentMapper.toUpsertCommand(pandaTournament);
@@ -77,13 +85,14 @@ export class SyncPandascoreTournamentUseCase {
       }
     }
 
-    return participantsUpserted;
+    return { participantsUpserted, hasBracket: command.hasBracket ?? false };
   }
 
   private async syncTournamentMatches(
     log: ReturnType<typeof createLogger>,
     tournamentId: string,
     pandascoreId: number,
+    hasBracket: boolean,
   ): Promise<number> {
     const tournament = await this.persistence.findTournamentById(tournamentId);
     if (!tournament) {
@@ -91,7 +100,7 @@ export class SyncPandascoreTournamentUseCase {
       return -1;
     }
 
-    const pandaMatches = tournament.hasBracket
+    const pandaMatches = hasBracket
       ? await this.pandascoreGateway.getTournamentBrackets(pandascoreId)
       : await this.pandascoreGateway.getTournamentMatches(pandascoreId);
     const commands = pandaMatches.map((match) => PandascoreMatchMapper.toUpsertCommand(match));

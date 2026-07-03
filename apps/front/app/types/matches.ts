@@ -9,6 +9,21 @@ export function getResultParticipantId(participant: MatchResult["participant"]):
   return typeof participant === "string" ? participant : participant.id;
 }
 
+export function getMatchParticipantScore(
+  results: MatchResult[] | undefined,
+  participantId: string | undefined,
+): number | null {
+  if (!results || !participantId || results.length === 0) {
+    return null;
+  }
+
+  const result = results.find(
+    (entry) => getResultParticipantId(entry.participant) === participantId,
+  );
+
+  return result?.score ?? null;
+}
+
 export interface UpcomingMatchesResponse {
   live: Match[];
   upcoming: Match[];

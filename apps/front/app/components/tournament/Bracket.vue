@@ -17,9 +17,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
       {{ $t("page.tournaments.id.noMatches") }}
     </p>
 
-    <template
-      v-else-if="bracketView.format === 'flat-stage' || bracketView.format === 'fallback-list'"
-    >
+    <template v-else-if="bracketView.format === 'flat-stage'">
       <div class="flex flex-col gap-2">
         <TournamentFlatMatchRow
           v-for="match in bracketView.flatMatches"
