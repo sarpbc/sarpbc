@@ -50,37 +50,21 @@ const isDoubleElimination = computed(
     </template>
 
     <template v-else>
-      <section v-if="bracketView.eliminationTree.length" class="flex flex-col gap-3">
+      <section v-if="bracketView.upperLayout" class="flex flex-col gap-3">
         <h2 v-if="isDoubleElimination" class="text-sm font-semibold text-muted">
           {{ $t("components.tournament.bracket.upperBracket") }}
         </h2>
-        <div class="w-full overflow-x-auto pb-2">
-          <div class="flex flex-col gap-6 min-w-max">
-            <TournamentBracketMatch
-              v-for="match in bracketView.eliminationTree"
-              :key="match.matchId"
-              :match="match"
-            />
-          </div>
-        </div>
+        <TournamentBracketGrid :layout="bracketView.upperLayout" />
       </section>
 
       <section
-        v-if="bracketView.lowerEliminationTree.length || bracketView.lowerBracketFlatMatches.length"
+        v-if="bracketView.lowerLayout || bracketView.lowerBracketFlatMatches.length"
         class="flex flex-col gap-3 border-t border-default pt-4"
       >
         <h2 class="text-sm font-semibold text-muted">
           {{ $t("components.tournament.bracket.lowerBracket") }}
         </h2>
-        <div v-if="bracketView.lowerEliminationTree.length" class="w-full overflow-x-auto pb-2">
-          <div class="flex flex-col gap-6 min-w-max">
-            <TournamentBracketMatch
-              v-for="match in bracketView.lowerEliminationTree"
-              :key="match.matchId"
-              :match="match"
-            />
-          </div>
-        </div>
+        <TournamentBracketGrid v-if="bracketView.lowerLayout" :layout="bracketView.lowerLayout" />
         <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
           <TournamentFlatMatchRow
             v-for="match in bracketView.lowerBracketFlatMatches"

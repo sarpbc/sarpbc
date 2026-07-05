@@ -1214,14 +1214,6 @@
           "unique": false
         },
         {
-          "columnNames": ["author_id"],
-          "composite": false,
-          "constraint": false,
-          "keyName": "news_article_author_id_index",
-          "primary": false,
-          "unique": false
-        },
-        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -1236,14 +1228,6 @@
           "keyName": "news_article_slug_unique",
           "primary": false,
           "unique": true
-        },
-        {
-          "columnNames": ["title"],
-          "composite": false,
-          "constraint": false,
-          "keyName": "news_article_title_index",
-          "primary": false,
-          "unique": false
         },
         {
           "columnNames": ["title"],
@@ -2545,6 +2529,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "has_bracket": {
+          "name": "has_bracket",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
         },
         "id": {
           "name": "id",
