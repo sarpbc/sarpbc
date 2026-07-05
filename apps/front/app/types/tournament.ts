@@ -1,22 +1,11 @@
 import type { League } from "./league";
-import type { Match, MatchResult } from "./matches";
+import type { Match } from "./matches";
 import type { Player } from "./player";
 import type { Team } from "./team";
 
-export interface DrawnBracketMatch {
-  matchId: string;
-  teamA?: Team;
-  teamB?: Team;
-  participantAId?: string;
-  participantBId?: string;
-  results?: MatchResult[];
-  previousMatchA?: DrawnBracketMatch | string;
-  previousMatchB?: DrawnBracketMatch | string;
-}
-
 export interface BracketLink {
-  match: string;
-  previousMatch: string;
+  match: string | { id: string };
+  previousMatch: string | { id: string };
   type: "winner" | "loser";
 }
 

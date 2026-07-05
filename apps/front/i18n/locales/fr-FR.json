@@ -59,7 +59,8 @@
     "tournament": {
       "bracket": {
         "upperBracket": "Bracket supérieur",
-        "lowerBracket": "Bracket inférieur"
+        "lowerBracket": "Bracket inférieur",
+        "missingLinks": "La structure du bracket n'est pas encore disponible. Les matchs sont regroupés par round."
       }
     },
     "reply": {
@@ -459,7 +460,11 @@
       "id": {
         "seoTitle": "{tournamentName} - sarpbc",
         "seoDescription": "Voir les détails du tournoi {tournamentName} sur sarpbc.",
-        "noMatches": "Aucun match disponible pour ce tournoi."
+        "noMatches": "Aucun match disponible pour ce tournoi.",
+        "matchSections": {
+          "upcoming": "À venir",
+          "unknownDate": "Date à confirmer"
+        }
       }
     },
     "matches": {
