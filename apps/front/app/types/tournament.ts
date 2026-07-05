@@ -15,8 +15,8 @@ export interface DrawnBracketMatch {
 }
 
 export interface BracketLink {
-  match: string;
-  previousMatch: string;
+  match: string | { id: string };
+  previousMatch: string | { id: string };
   type: "winner" | "loser";
 }
 

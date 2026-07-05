@@ -9,6 +9,10 @@ interface Props {
 const { tournament } = defineProps<Props>();
 
 const bracketView = computed(() => buildTournamentBracketView(tournament));
+
+const isDoubleElimination = computed(
+  () => bracketView.value.format === "linked-double-elimination",
+);
 </script>
 
 <template>
@@ -27,33 +31,59 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
       </div>
     </template>
 
+    <template v-else-if="bracketView.format === 'bracket-missing-links'">
+      <p class="text-sm text-muted">
+        {{ $t("components.tournament.bracket.missingLinks") }}
+      </p>
+      <section
+        v-for="group in bracketView.groupedMatches"
+        :key="group.round"
+        class="flex flex-col gap-2"
+      >
+        <h2 class="text-sm font-semibold text-muted">
+          {{ group.round }}
+        </h2>
+        <div class="flex flex-col gap-2">
+          <TournamentFlatMatchRow v-for="match in group.matches" :key="match.id" :match="match" />
+        </div>
+      </section>
+    </template>
+
     <template v-else>
       <section v-if="bracketView.eliminationTree.length" class="flex flex-col gap-3">
-        <h2
-          v-if="bracketView.format === 'double-elimination'"
-          class="text-sm font-semibold text-muted"
-        >
+        <h2 v-if="isDoubleElimination" class="text-sm font-semibold text-muted">
           {{ $t("components.tournament.bracket.upperBracket") }}
         </h2>
-        <div class="w-full flex flex-col gap-4 overflow-x-auto">
-          <TournamentBracketMatch
-            v-for="match in bracketView.eliminationTree"
-            :key="match.matchId"
-            :match="match"
-          />
+        <div class="w-full overflow-x-auto pb-2">
+          <div class="flex flex-col gap-6 min-w-max">
+            <TournamentBracketMatch
+              v-for="match in bracketView.eliminationTree"
+              :key="match.matchId"
+              :match="match"
+            />
+          </div>
         </div>
       </section>
 
       <section
-        v-if="bracketView.lowerBracketMatches.length"
+        v-if="bracketView.lowerEliminationTree.length || bracketView.lowerBracketFlatMatches.length"
         class="flex flex-col gap-3 border-t border-default pt-4"
       >
         <h2 class="text-sm font-semibold text-muted">
           {{ $t("components.tournament.bracket.lowerBracket") }}
         </h2>
-        <div class="flex flex-col gap-2">
+        <div v-if="bracketView.lowerEliminationTree.length" class="w-full overflow-x-auto pb-2">
+          <div class="flex flex-col gap-6 min-w-max">
+            <TournamentBracketMatch
+              v-for="match in bracketView.lowerEliminationTree"
+              :key="match.matchId"
+              :match="match"
+            />
+          </div>
+        </div>
+        <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
           <TournamentFlatMatchRow
-            v-for="match in bracketView.lowerBracketMatches"
+            v-for="match in bracketView.lowerBracketFlatMatches"
             :key="match.id"
             :match="match"
           />

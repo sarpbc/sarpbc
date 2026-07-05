@@ -1,11 +1,39 @@
 import type { Match } from "~/types/matches";
-import type { DrawnBracketMatch, Tournament } from "~/types/tournament";
+import type { BracketLink, DrawnBracketMatch, Tournament } from "~/types/tournament";
 
-export type TournamentBracketFormat = "flat-stage" | "single-elimination" | "double-elimination";
+export type TournamentBracketFormat =
+  | "flat-stage"
+  | "linked-single-elimination"
+  | "linked-double-elimination"
+  | "bracket-missing-links";
 
-interface BracketTreeNode extends DrawnBracketMatch {
+export interface TournamentBracketRoundGroup {
+  round: string;
+  matches: Match[];
+}
+
+export interface TournamentBracketView {
+  format: TournamentBracketFormat;
+  eliminationTree: DrawnBracketMatch[];
+  lowerEliminationTree: DrawnBracketMatch[];
+  lowerBracketFlatMatches: Match[];
+  flatMatches: Match[];
+  groupedMatches: TournamentBracketRoundGroup[];
+}
+
+interface BracketTreeNode {
+  matchId: string;
+  teamA?: DrawnBracketMatch["teamA"];
+  teamB?: DrawnBracketMatch["teamB"];
+  participantAId?: string;
+  participantBId?: string;
+  results?: DrawnBracketMatch["results"];
   previousMatchA?: { id: string; type: "winner" };
   previousMatchB?: { id: string; type: "winner" };
+}
+
+export function resolvePreviousMatchId(previousMatch: BracketLink["previousMatch"]): string {
+  return typeof previousMatch === "string" ? previousMatch : previousMatch.id;
 }
 
 function toDrawnBracketMatch(match: Match): DrawnBracketMatch {
@@ -25,10 +53,10 @@ function toBracketTreeNode(match: Match): BracketTreeNode {
   return {
     ...toDrawnBracketMatch(match),
     previousMatchA: winnerLinks[0]
-      ? { id: winnerLinks[0].previousMatch, type: "winner" }
+      ? { id: resolvePreviousMatchId(winnerLinks[0].previousMatch), type: "winner" }
       : undefined,
     previousMatchB: winnerLinks[1]
-      ? { id: winnerLinks[1].previousMatch, type: "winner" }
+      ? { id: resolvePreviousMatchId(winnerLinks[1].previousMatch), type: "winner" }
       : undefined,
   };
 }
@@ -43,14 +71,18 @@ export function classifyTournamentBracket(tournament: Tournament): TournamentBra
     match.previousMatches?.some((link) => link.type === "loser"),
   );
   if (hasLoserLinks) {
-    return "double-elimination";
+    return "linked-double-elimination";
   }
 
   const hasWinnerLinks = matches.some((match) =>
     match.previousMatches?.some((link) => link.type === "winner"),
   );
   if (hasWinnerLinks) {
-    return "single-elimination";
+    return "linked-single-elimination";
+  }
+
+  if (tournament.hasBracket) {
+    return "bracket-missing-links";
   }
 
   return "flat-stage";
@@ -62,6 +94,28 @@ export function sortMatchesByBeginAt(matches: Match[]): Match[] {
     const dateB = b.beginAt ? new Date(b.beginAt).getTime() : 0;
     return dateA - dateB;
   });
+}
+
+export function groupMatchesByRound(matches: Match[]): TournamentBracketRoundGroup[] {
+  const groups = new Map<string, Match[]>();
+
+  for (const match of matches) {
+    const round = match.name?.trim() || "TBD";
+    const roundMatches = groups.get(round) ?? [];
+    roundMatches.push(match);
+    groups.set(round, roundMatches);
+  }
+
+  return [...groups.entries()]
+    .map(([round, roundMatches]) => ({
+      round,
+      matches: sortMatchesByBeginAt(roundMatches),
+    }))
+    .sort((a, b) => {
+      const dateA = a.matches[0]?.beginAt ? new Date(a.matches[0].beginAt).getTime() : 0;
+      const dateB = b.matches[0]?.beginAt ? new Date(b.matches[0].beginAt).getTime() : 0;
+      return dateA - dateB;
+    });
 }
 
 /**
@@ -85,6 +139,26 @@ export function splitDoubleEliminationMatches(matches: Match[]): {
     upper: matches.filter((match) => !lowerIds.has(match.id)),
     lower: sortMatchesByBeginAt(matches.filter((match) => lowerIds.has(match.id))),
   };
+}
+
+function collectTreeMatchIds(nodes: DrawnBracketMatch[]): Set<string> {
+  const ids = new Set<string>();
+
+  const walk = (node: DrawnBracketMatch): void => {
+    ids.add(node.matchId);
+    if (node.previousMatchA && typeof node.previousMatchA !== "string") {
+      walk(node.previousMatchA);
+    }
+    if (node.previousMatchB && typeof node.previousMatchB !== "string") {
+      walk(node.previousMatchB);
+    }
+  };
+
+  for (const root of nodes) {
+    walk(root);
+  }
+
+  return ids;
 }
 
 export function buildEliminationTree(matches: Match[]): DrawnBracketMatch[] {
@@ -152,12 +226,12 @@ export function buildEliminationTree(matches: Match[]): DrawnBracketMatch[] {
   return drawnMatches.filter((match) => finalIds.has(match.matchId));
 }
 
-export function buildTournamentBracketView(tournament: Tournament): {
-  format: TournamentBracketFormat;
-  eliminationTree: DrawnBracketMatch[];
-  flatMatches: Match[];
-  lowerBracketMatches: Match[];
-} {
+function partitionOrphanMatches(matches: Match[], tree: DrawnBracketMatch[]): Match[] {
+  const connectedIds = collectTreeMatchIds(tree);
+  return sortMatchesByBeginAt(matches.filter((match) => !connectedIds.has(match.id)));
+}
+
+export function buildTournamentBracketView(tournament: Tournament): TournamentBracketView {
   const format = classifyTournamentBracket(tournament);
   const matches = tournament.matches ?? [];
 
@@ -166,23 +240,39 @@ export function buildTournamentBracketView(tournament: Tournament): {
       return {
         format,
         eliminationTree: [],
+        lowerEliminationTree: [],
+        lowerBracketFlatMatches: [],
         flatMatches: sortMatchesByBeginAt(matches),
-        lowerBracketMatches: [],
+        groupedMatches: [],
       };
-    case "single-elimination":
+    case "bracket-missing-links":
+      return {
+        format,
+        eliminationTree: [],
+        lowerEliminationTree: [],
+        lowerBracketFlatMatches: [],
+        flatMatches: [],
+        groupedMatches: groupMatchesByRound(matches),
+      };
+    case "linked-single-elimination":
       return {
         format,
         eliminationTree: buildEliminationTree(matches),
+        lowerEliminationTree: [],
+        lowerBracketFlatMatches: [],
         flatMatches: [],
-        lowerBracketMatches: [],
+        groupedMatches: [],
       };
-    case "double-elimination": {
+    case "linked-double-elimination": {
       const { upper, lower } = splitDoubleEliminationMatches(matches);
+      const lowerEliminationTree = buildEliminationTree(lower);
       return {
         format,
         eliminationTree: buildEliminationTree(upper),
+        lowerEliminationTree,
+        lowerBracketFlatMatches: partitionOrphanMatches(lower, lowerEliminationTree),
         flatMatches: [],
-        lowerBracketMatches: lower,
+        groupedMatches: [],
       };
     }
     default: {

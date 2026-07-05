@@ -7,13 +7,13 @@ const { match } = defineProps<{
 </script>
 
 <template>
-  <div class="w-fit h-fit flex flex-row items-center gap-1">
+  <div class="w-fit h-fit flex flex-row items-center gap-3">
     <div
       v-if="
         (match.previousMatchA && typeof match.previousMatchA !== 'string') ||
         (match.previousMatchB && typeof match.previousMatchB !== 'string')
       "
-      class="flex flex-col gap-1"
+      class="flex flex-col justify-center gap-4 pr-2 border-r border-default"
     >
       <TournamentBracketMatch
         v-if="match.previousMatchA && typeof match.previousMatchA !== 'string'"
