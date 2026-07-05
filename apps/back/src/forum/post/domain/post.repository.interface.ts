@@ -24,7 +24,7 @@ export interface IPostRepository {
       lastActivity: Date;
     }>
   >;
-  hasRecentPostByUser(userId: string, sinceDate: Date): Promise<boolean>;
+  findLatestByUser(userId: string): Promise<Post | null>;
   save(post: Post): Promise<void>;
   saveTranslation(translation: PostTranslation): Promise<void>;
   deleteTranslations(post: Post): Promise<void>;

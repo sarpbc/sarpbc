@@ -39,3 +39,25 @@ export interface Topic {
   title: string;
   description: string;
 }
+
+export interface ForumPostCreationStatus {
+  canCreate: boolean;
+  nextAvailableAt: string | null;
+  cooldownHours: number;
+}
+
+export type CreateForumPostResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "unauthorized" | "rate_limited" | "conflict" | "unknown";
+      message?: string;
+    };
+
+export type CreateForumReplyResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "unauthorized" | "rate_limited" | "unknown";
+      message?: string;
+    };

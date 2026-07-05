@@ -17,6 +17,7 @@ import { AuthGuard } from "../../auth/auth.guard";
 import { AdminGuard } from "../../user/user.guard";
 import { CurrentUserId } from "../../user/decorator/current-user.decorator";
 import { CreatePostDto } from "./dto/create-post.dto";
+import { PostCreationStatusDto } from "./dto/post-creation-status.dto";
 import { PostResponse } from "./dto/post-response.dto";
 import { AuthenticatedUserRequest } from "src/common/types/authenticated.interface";
 
@@ -48,6 +49,12 @@ export class PostController {
     return { posts };
   }
 
+  @Get("creation-status")
+  @UseGuards(AuthGuard)
+  async getCreationStatus(@CurrentUserId() userId: string): Promise<PostCreationStatusDto> {
+    return this.postService.getCreationStatus(userId);
+  }
+
   @Get(":id")
   async findById(
     @Param("id") id: string,
@@ -71,9 +78,9 @@ export class PostController {
 
   @UseGuards(AuthGuard)
   @Post()
+  @HttpCode(HttpStatus.NO_CONTENT)
   async create(@CurrentUserId() userId: string, @Body() createPostDto: CreatePostDto) {
     await this.postService.create(userId, createPostDto);
-    return { success: true };
   }
 
   @UseGuards(AuthGuard, AdminGuard)

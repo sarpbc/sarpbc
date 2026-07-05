@@ -100,7 +100,7 @@ function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   <text x="600" y="360" fill="#3b82f6" font-family="ui-monospace, monospace" font-size="44" font-weight="700" text-anchor="middle">${escapeXml(centerLine)}</text>
   <text x="600" y="430" fill="#fafafa" font-family="system-ui, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamBName)}</text>
   <text x="600" y="500" fill="#a1a1aa" font-family="system-ui, sans-serif" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
-  <text x="600" y="560" fill="#71717a" font-family="system-ui, sans-serif" font-size="22" text-anchor="middle">SARPBC.org</text>
+  <text x="600" y="560" fill="#71717a" font-family="system-ui, sans-serif" font-size="22" text-anchor="middle">sarpbc.org</text>
 </svg>`;
 }
 

@@ -2,6 +2,7 @@
 import type { Reply } from "~/types/forum";
 
 const { locale } = useI18n();
+const user = useUser();
 
 const displayReplyCreation = ref(false);
 
@@ -39,19 +40,21 @@ function onReplyCreated() {
         </span>
 
         <div class="flex flex-row items-center gap-1">
-          <UButton
-            size="sm"
-            variant="soft"
-            :label="$t('components.reply.submit')"
-            icon="i-fluent-arrow-reply-24-regular"
-            class="p-1! gap-1! cursor-pointer"
-            @click="toggleDisplayReply"
-          />
+          <ForumSignInPrompt action="reply">
+            <UButton
+              size="sm"
+              variant="soft"
+              :label="$t('components.reply.submit')"
+              icon="i-fluent-arrow-reply-24-regular"
+              class="p-1! gap-1! cursor-pointer"
+              @click="toggleDisplayReply"
+            />
+          </ForumSignInPrompt>
         </div>
       </div>
     </UiCard>
     <div class="w-full flex flex-col">
-      <div v-if="displayReplyCreation" class="w-full flex flex-row h-fit">
+      <div v-if="displayReplyCreation && user" class="w-full flex flex-row h-fit">
         <ForumReplyConnector :show-full-connector="true" />
         <UiCard class="w-full mt-4">
           <ForumReplyCreate :post-id="postId" :reply="reply" @reply-created="onReplyCreated" />

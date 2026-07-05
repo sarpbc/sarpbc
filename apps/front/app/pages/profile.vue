@@ -23,8 +23,8 @@ const handleLogout = async () => {
 };
 
 setPageSeo({
-  title: `${t("page.profile.title")} | Sarpbc`,
-  description: "Manage your Sarpbc profile and settings",
+  title: `${t("page.profile.title")} | sarpbc.org`,
+  description: "Manage your sarpbc.org profile and settings",
   noIndex: true,
 });
 </script>

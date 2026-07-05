@@ -81,7 +81,7 @@ const items = ref<NavigationMenuItem[]>([
     >
       <div class="h-full flex flex-row items-center">
         <ULink :to="$localePath('/')" class="flex flex-row flex-1 items-center">
-          <img src="/sarpbc.png" alt="sarpbc logo" class="size-12 bg-transparent hover:spin" />
+          <img src="/sarpbc.png" alt="sarpbc.org logo" class="size-12 bg-transparent hover:spin" />
         </ULink>
         <UNavigationMenu
           :items="items"

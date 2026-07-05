@@ -2,6 +2,7 @@
 const route = useRoute();
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+const user = useUser();
 
 const postId = computed(() => route.params.id as string);
 
@@ -85,21 +86,23 @@ function refreshPost() {
             </span>
 
             <div class="flex flex-row items-center gap-1">
-              <UButton
-                size="sm"
-                variant="soft"
-                :label="$t('components.reply.submit')"
-                icon="i-fluent-arrow-reply-24-regular"
-                class="p-1! gap-1! cursor-pointer"
-                @click="toggleDisplayReply"
-              />
+              <ForumSignInPrompt action="reply">
+                <UButton
+                  size="sm"
+                  variant="soft"
+                  :label="$t('components.reply.submit')"
+                  icon="i-fluent-arrow-reply-24-regular"
+                  class="p-1! gap-1! cursor-pointer"
+                  @click="toggleDisplayReply"
+                />
+              </ForumSignInPrompt>
             </div>
           </div>
         </div>
       </UiCrossCard>
 
       <div class="flex flex-col mt-8 gap-2">
-        <div v-if="displayReply" class="flex flex-col border border-default">
+        <div v-if="displayReply && user" class="flex flex-col border border-default">
           <ForumReplyCreate :post-id="postId" @reply-created="refreshPost" />
         </div>
 

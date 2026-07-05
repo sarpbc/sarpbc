@@ -13,8 +13,9 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-
+const user = useUser();
 const toast = useToast();
+const isSubmitting = ref(false);
 
 const schema = z.object({
   content: z
@@ -29,36 +30,62 @@ const state = reactive<Partial<Schema>>({
   content: "",
 });
 
+const contentInputRef = useTemplateRef("contentInput");
+
+function focusContentInput() {
+  nextTick(() => {
+    const component = contentInputRef.value;
+    if (!component) return;
+
+    const root =
+      component instanceof HTMLElement ? component : (component as { $el?: HTMLElement }).$el;
+    const textarea = root?.querySelector?.("textarea") ?? root;
+    textarea?.focus();
+  });
+}
+
+onMounted(focusContentInput);
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   event.preventDefault();
+
+  if (!user.value) {
+    return;
+  }
 
   const result = schema.safeParse(state);
   if (!result.success) {
     return;
   }
 
-  const success = await createForumReply({
+  isSubmitting.value = true;
+
+  const createResult = await createForumReply({
     content: result.data.content,
     postId,
     replyToId: reply?.id,
   });
 
-  if (success) {
-    toast.add({
-      title: t("components.reply.messages.successTitle"),
-      description: t("components.reply.messages.successDescription"),
-      color: "success",
-    });
+  isSubmitting.value = false;
 
+  if (createResult.ok) {
     state.content = "";
     emit("replyCreated");
-  } else {
-    toast.add({
-      title: t("components.reply.messages.errorTitle"),
-      description: t("components.reply.messages.errorDescription"),
-      color: "error",
-    });
+    return;
   }
+
+  const description =
+    createResult.reason === "unauthorized"
+      ? t("components.reply.messages.signInRequired")
+      : createResult.reason === "rate_limited"
+        ? (createResult.message ?? t("components.reply.messages.rateLimitDescription"))
+        : (createResult.message ?? t("components.reply.messages.errorDescription"));
+
+  toast.add({
+    title: t("components.reply.messages.errorTitle"),
+    description,
+    color: "error",
+  });
 }
 </script>
 
@@ -67,15 +94,23 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UForm :schema="schema" :state="state" class="w-full flex flex-col gap-2" @submit="onSubmit">
       <UFormField :label="$t('components.reply.inputTitle')" name="content" required class="w-full">
         <UTextarea
+          ref="contentInput"
           v-model="state.content"
           variant="soft"
           :placeholder="$t('components.reply.inputPlaceholder')"
           class="w-full"
           autoresize
+          :disabled="isSubmitting"
         />
       </UFormField>
 
-      <UButton type="submit" variant="soft" class="w-fit cursor-pointer">
+      <UButton
+        type="submit"
+        variant="soft"
+        class="w-fit cursor-pointer"
+        :loading="isSubmitting"
+        :disabled="isSubmitting"
+      >
         {{ $t("components.reply.submit") }}
       </UButton>
     </UForm>

@@ -1,4 +1,4 @@
-import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
+import { EntityRepository } from "@mikro-orm/core";
 import { Post, PostTranslation } from "../forum.entities";
 import { IPostRepository } from "./domain/post.repository.interface";
 
@@ -70,12 +70,8 @@ export class PostRepository extends EntityRepository<Post> implements IPostRepos
     }));
   }
 
-  async hasRecentPostByUser(userId: string, sinceDate: Date): Promise<boolean> {
-    const count = await this.count({
-      author: { id: userId },
-      createdAt: { $gte: sinceDate },
-    } satisfies FilterQuery<Post>);
-    return count > 0;
+  async findLatestByUser(userId: string): Promise<Post | null> {
+    return this.findOne({ author: { id: userId } }, { orderBy: { createdAt: "DESC" } });
   }
 
   async save(post: Post): Promise<void> {

@@ -29,6 +29,10 @@ class TranslationDto {
 
 export class CreatePostDto {
   @IsNotEmpty()
+  @IsUUID("4")
+  readonly id!: string;
+
+  @IsNotEmpty()
   @IsString()
   @MaxLength(128)
   @MinLength(1)

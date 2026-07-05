@@ -91,6 +91,9 @@
           <p class="text-muted">
             {{ t("pages.termsOfService.disclaimer.warranty") }}
           </p>
+          <p class="text-muted mt-3">
+            {{ t("pages.termsOfService.disclaimer.affiliation") }}
+          </p>
         </section>
 
         <section class="mb-6">

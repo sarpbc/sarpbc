@@ -19,7 +19,7 @@ const predefinedTopics = [
   },
   {
     title: "Bug & Suggestion",
-    description: "Report bugs and suggest improvements for the SARPBC platform",
+    description: "Report bugs and suggest improvements for the sarpbc.org platform",
   },
 ];
 
