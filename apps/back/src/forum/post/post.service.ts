@@ -1,12 +1,29 @@
-﻿import { Injectable, BadRequestException, NotFoundException, Inject } from "@nestjs/common";
+﻿import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  Inject,
+} from "@nestjs/common";
 import { Post, PostTranslation } from "../forum.entities";
 import { CreatePostDto } from "./dto/create-post.dto";
+import { PostCreationStatusDto } from "./dto/post-creation-status.dto";
 import { UserService } from "src/user/user.service";
 import { PostDto } from "./dto/post-response.dto";
 import { PostType } from "./post-type.enum";
 import { ReplyService } from "src/reply/reply.service";
 import { IPostRepository, POST_REPOSITORY } from "./domain/post.repository.interface";
 import { ITopicRepository, TOPIC_REPOSITORY } from "../topic/domain/topic.repository.interface";
+import {
+  FORUM_ERROR_CODES,
+  POST_CREATION_COOLDOWN_HOURS,
+  POST_CREATION_COOLDOWN_MS,
+} from "../forum.constants";
+
+interface PostCreationEligibility {
+  canCreate: boolean;
+  nextAvailableAt: Date | null;
+}
 
 @Injectable()
 export class PostService {
@@ -78,11 +95,31 @@ export class PostService {
     };
   }
 
+  async getCreationStatus(userId: string): Promise<PostCreationStatusDto> {
+    const eligibility = await this.resolvePostCreationEligibility(userId);
+
+    return {
+      canCreate: eligibility.canCreate,
+      nextAvailableAt: eligibility.nextAvailableAt?.toISOString() ?? null,
+      cooldownHours: POST_CREATION_COOLDOWN_HOURS,
+    };
+  }
+
   async create(userId: string, createPostDto: CreatePostDto): Promise<void> {
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const hasRecentPost = await this.postRepository.hasRecentPostByUser(userId, oneHourAgo);
-    if (hasRecentPost) {
-      throw new BadRequestException("You can only create one post per hour");
+    const eligibility = await this.resolvePostCreationEligibility(userId);
+    if (!eligibility.canCreate) {
+      throw new BadRequestException({
+        message:
+          "You can only create one post per hour. Wait until the cooldown ends and try again.",
+        code: FORUM_ERROR_CODES.POST_RATE_LIMITED,
+      });
+    }
+
+    const existing = await this.postRepository.findById(createPostDto.id);
+    if (existing) {
+      throw new ConflictException(
+        "A post with this ID already exists. Refresh the page and try again.",
+      );
     }
 
     const topic = await this.topicRepository.findById(createPostDto.topicId);
@@ -96,6 +133,7 @@ export class PostService {
     }
 
     const newPost = new Post();
+    newPost.id = createPostDto.id;
     newPost.title = createPostDto.title;
     newPost.content = createPostDto.content;
     newPost.topic = topic;
@@ -131,5 +169,20 @@ export class PostService {
     await this.postRepository.deleteTranslations(post);
 
     await this.postRepository.delete(post);
+  }
+
+  private async resolvePostCreationEligibility(userId: string): Promise<PostCreationEligibility> {
+    const latest = await this.postRepository.findLatestByUser(userId);
+    if (!latest) {
+      return { canCreate: true, nextAvailableAt: null };
+    }
+
+    const nextAvailable = new Date(latest.createdAt.getTime() + POST_CREATION_COOLDOWN_MS);
+    const canCreate = nextAvailable <= new Date();
+
+    return {
+      canCreate,
+      nextAvailableAt: canCreate ? null : nextAvailable,
+    };
   }
 }

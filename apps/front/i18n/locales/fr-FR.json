@@ -33,7 +33,8 @@
       "cookiePolicy": "Politique de cookies",
       "privacyPolicy": "Politique de confidentialité",
       "termsOfService": "Conditions d'utilisation",
-      "legalNotice": "Mentions légales"
+      "legalNotice": "Mentions légales",
+      "disclaimer": "sarpbc.org n'est pas affilié à Rocket League, Psyonix ou Epic Games."
     },
     "forum": {
       "createPost": "Créer un post",
@@ -41,7 +42,8 @@
       "deletePost": "Supprimer le post",
       "reply": "Répondre",
       "viewReplies": "Voir les réponses",
-      "recentPosts": "Activités récentes"
+      "recentPosts": "Activités récentes",
+      "signInToCreate": "Connectez-vous pour créer un post"
     },
     "header": {
       "signin": "Se connecter"
@@ -69,10 +71,10 @@
         "contentMaxLength": "Votre réponse doit contenir au maximum 2048 caractères"
       },
       "messages": {
-        "successTitle": "Succès",
-        "successDescription": "Réponse créée avec succès !",
         "errorTitle": "Erreur",
-        "errorDescription": "Échec de la création de la réponse."
+        "errorDescription": "Échec de la création de la réponse.",
+        "rateLimitDescription": "Vous ne pouvez publier qu'une réponse par minute. Attendez et réessayez.",
+        "signInRequired": "Connectez-vous pour répondre à ce fil."
       },
       "inputTitle": "Réponse",
       "inputPlaceholder": "Entrez votre réponse ici...",
@@ -366,10 +368,10 @@
     },
     "players": {
       "index": {
-        "title": "Tous les joueurs - SARPBC",
-        "description": "Parcourez tous les {count} joueurs de la base de données SARPBC. Trouvez les joueurs par nom organisés alphabétiquement.",
-        "ogTitle": "Tous les joueurs - SARPBC",
-        "ogDescription": "Parcourez tous les {count} joueurs de la base de données SARPBC.",
+        "title": "Tous les joueurs - sarpbc.org",
+        "description": "Parcourez tous les {count} joueurs de la base de données sarpbc.org. Trouvez les joueurs par nom organisés alphabétiquement.",
+        "ogTitle": "Tous les joueurs - sarpbc.org",
+        "ogDescription": "Parcourez tous les {count} joueurs de la base de données sarpbc.org.",
         "pageTitle": "Répertoire des joueurs",
         "player": "joueur",
         "players": "joueurs",
@@ -379,9 +381,9 @@
         "page": "Page"
       },
       "letter": {
-        "title": "Joueurs commençant par {letter} - SARPBC",
+        "title": "Joueurs commençant par {letter} - sarpbc.org",
         "description": "Parcourez tous les joueurs dont les noms commencent par {letter}. Trouvez des profils détaillés, des statistiques et des informations d'équipe.",
-        "ogTitle": "Joueurs commençant par {letter} - SARPBC",
+        "ogTitle": "Joueurs commençant par {letter} - sarpbc.org",
         "ogDescription": "Parcourez {count} joueurs dont les noms commencent par {letter}.",
         "pageTitle": "Joueurs - {letter}",
         "playersFound": "{count} joueur trouvé | {count} joueurs trouvés",
@@ -398,8 +400,8 @@
         "playerNotFound": "Joueur introuvable",
         "playerCouldNotBeFound": "Le joueur \"{slug}\" n'a pas pu être trouvé.",
         "goBackToHome": "Retour à l'accueil",
-        "seoTitleWithName": "{name} - Sarpbc",
-        "seoTitleDefault": "Joueur - Sarpbc",
+        "seoTitleWithName": "{name} - sarpbc.org",
+        "seoTitleDefault": "Joueur - sarpbc.org",
         "seoDescriptionWithName": "Voir le profil et les statistiques de {name}",
         "seoDescriptionDefault": "Profil du joueur",
         "currentTeam": "Équipe actuelle",
@@ -411,10 +413,10 @@
     },
     "teams": {
       "index": {
-        "title": "Toutes les équipes - SARPBC",
-        "description": "Parcourez toutes les {count} équipes de la base de données SARPBC. Trouvez les équipes par nom organisées alphabétiquement.",
-        "ogTitle": "Toutes les équipes - SARPBC",
-        "ogDescription": "Parcourez toutes les {count} équipes de la base de données SARPBC.",
+        "title": "Toutes les équipes - sarpbc.org",
+        "description": "Parcourez toutes les {count} équipes de la base de données sarpbc.org. Trouvez les équipes par nom organisées alphabétiquement.",
+        "ogTitle": "Toutes les équipes - sarpbc.org",
+        "ogDescription": "Parcourez toutes les {count} équipes de la base de données sarpbc.org.",
         "pageTitle": "Répertoire des équipes",
         "team": "équipe",
         "teams": "équipes",
@@ -424,9 +426,9 @@
         "page": "Page"
       },
       "letter": {
-        "title": "Équipes commençant par {letter} - SARPBC",
+        "title": "Équipes commençant par {letter} - sarpbc.org",
         "description": "Parcourez toutes les équipes dont les noms commencent par {letter}. Trouvez des profils détaillés, des effectifs et des informations de match.",
-        "ogTitle": "Équipes commençant par {letter} - SARPBC",
+        "ogTitle": "Équipes commençant par {letter} - sarpbc.org",
         "ogDescription": "Parcourez {count} équipes dont les noms commencent par {letter}.",
         "pageTitle": "Équipes - {letter}",
         "teamsFound": "{count} équipe trouvée | {count} équipes trouvées",
@@ -441,8 +443,8 @@
         "errorLoadingTeam": "Erreur lors du chargement de l'équipe",
         "failedToLoadTeamData": "Échec du chargement des données de l'équipe",
         "teamNotFound": "Équipe introuvable",
-        "seoTitleWithName": "{name} - Sarpbc",
-        "seoTitleDefault": "Équipe - Sarpbc",
+        "seoTitleWithName": "{name} - sarpbc.org",
+        "seoTitleDefault": "Équipe - sarpbc.org",
         "seoDescriptionWithName": "Voir le profil et les joueurs de {name}",
         "seoDescriptionDefault": "Profil de l'équipe",
         "location": "Localisation",
@@ -458,8 +460,8 @@
         "title": "Tournois"
       },
       "id": {
-        "seoTitle": "{tournamentName} - sarpbc",
-        "seoDescription": "Voir les détails du tournoi {tournamentName} sur sarpbc.",
+        "seoTitle": "{tournamentName} - sarpbc.org",
+        "seoDescription": "Voir les détails du tournoi {tournamentName} sur sarpbc.org.",
         "noMatches": "Aucun match disponible pour ce tournoi.",
         "matchSections": {
           "upcoming": "À venir",
@@ -470,8 +472,8 @@
     "matches": {
       "title": "Matchs",
       "seo": {
-        "title": "Matchs | Sarpbc",
-        "description": "Parcourez les matchs Rocket League en direct, à venir et passés de tous les tournois sur Sarpbc."
+        "title": "Matchs | sarpbc.org",
+        "description": "Parcourez les matchs Rocket League en direct, à venir et passés de tous les tournois sur sarpbc.org."
       },
       "tabs": {
         "upcoming": "À venir",
@@ -508,12 +510,12 @@
     },
     "match": {
       "detail": {
-        "seoTitle": "{teamA} vs {teamB} | {tournament} | Sarpbc",
-        "seoTitleDefault": "Match | Sarpbc",
+        "seoTitle": "{teamA} vs {teamB} | {tournament} | sarpbc.org",
+        "seoTitleDefault": "Match | sarpbc.org",
         "seoDescriptionLive": "Match en direct : {teamA} vs {teamB} dans {tournament}.",
         "seoDescriptionUpcoming": "Match à venir : {teamA} vs {teamB} dans {tournament} le {date}.",
         "seoDescriptionFinished": "Score final : {teamA} {scoreA} - {scoreB} {teamB} dans {tournament}.",
-        "seoDescriptionDefault": "Consultez les détails du match, la forme récente et les rosters sur Sarpbc.",
+        "seoDescriptionDefault": "Consultez les détails du match, la forme récente et les rosters sur sarpbc.org.",
         "notFound": "Match introuvable",
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
         "retry": "Réessayer",
@@ -551,10 +553,10 @@
     },
     "forum": {
       "index": {
-        "title": "Forum | Sarpbc",
-        "description": "Rejoignez le forum de la communauté Sarpbc. Discutez de stratégies Rocket League, partagez vos expériences et connectez-vous avec d'autres joueurs dans notre communauté dynamique.",
-        "ogTitle": "Forum Sarpbc - Communauté Rocket League",
-        "ogDescription": "Connectez-vous avec la communauté Rocket League sur le Forum Sarpbc. Partagez des stratégies, discutez du gameplay et restez informé des dernières nouvelles de la communauté.",
+        "title": "Forum | sarpbc.org",
+        "description": "Rejoignez le forum de la communauté sarpbc.org. Discutez de stratégies Rocket League, partagez vos expériences et connectez-vous avec d'autres joueurs dans notre communauté dynamique.",
+        "ogTitle": "Forum sarpbc.org - Communauté Rocket League",
+        "ogDescription": "Connectez-vous avec la communauté Rocket League sur le Forum sarpbc.org. Partagez des stratégies, discutez du gameplay et restez informé des dernières nouvelles de la communauté.",
         "pageTitle": "Forum",
         "createNewPost": "Créer un nouveau post",
         "noPosts": "Aucun post disponible",
@@ -571,9 +573,9 @@
       },
       "new": {
         "title": "Créer un nouveau post",
-        "description": "Créez un nouveau post dans le forum Sarpbc. Partagez vos pensées, idées et discussions sur Rocket League avec la communauté.",
-        "ogTitle": "Créer un nouveau post | Forum Sarpbc",
-        "ogDescription": "Rejoignez la conversation ! Créez un nouveau post dans le forum Sarpbc et partagez vos connaissances Rocket League avec la communauté.",
+        "description": "Créez un nouveau post dans le forum sarpbc.org. Partagez vos pensées, idées et discussions sur Rocket League avec la communauté.",
+        "ogTitle": "Créer un nouveau post | Forum sarpbc.org",
+        "ogDescription": "Rejoignez la conversation ! Créez un nouveau post dans le forum sarpbc.org et partagez vos connaissances Rocket League avec la communauté.",
         "pageTitle": "Créer un nouveau post",
         "form": {
           "title": "Titre",
@@ -590,11 +592,14 @@
           "contentMaxLength": "Le contenu doit contenir au maximum 2048 caractères"
         },
         "messages": {
-          "successTitle": "Succès",
-          "successDescription": "Post créé avec succès !",
           "errorTitle": "Erreur",
-          "errorDescription": "Échec de la création du post."
-        }
+          "errorDescription": "Échec de la création du post.",
+          "rateLimitDescription": "Vous ne pouvez créer qu'un post par heure. Attendez la fin du délai et réessayez.",
+          "signInRequired": "Connectez-vous pour créer un post."
+        },
+        "rateLimitWait": "Vous ne pouvez créer qu'un post toutes les {hours}\u00a0heures. Réessayez à {time}.",
+        "statusLoading": "Vérification de vos limites de publication…",
+        "statusLoadError": "Impossible de vérifier vos limites de publication. Actualisez la page et réessayez."
       },
       "post": {
         "loadingPost": "Chargement du post...",
@@ -603,13 +608,14 @@
         "postNotFound": "Post introuvable",
         "postCouldNotBeFound": "Le post n'a pas pu être trouvé.",
         "goBackToForum": "Retour au forum",
-        "seoTitleWithTitle": "{title} - Forum Sarpbc",
-        "seoTitleDefault": "Post du forum - Sarpbc",
-        "seoDescriptionWithTitle": "Lire \"{title}\" dans le forum Sarpbc",
+        "seoTitleWithTitle": "{title} - Forum sarpbc.org",
+        "seoTitleDefault": "Post du forum - sarpbc.org",
+        "seoDescriptionWithTitle": "Lire \"{title}\" dans le forum sarpbc.org",
         "seoDescriptionDefault": "Post du forum",
         "author": "Auteur",
         "topic": "Sujet",
-        "postedOn": "Publié le {date}"
+        "postedOn": "Publié le {date}",
+        "signInToReply": "Connectez-vous pour répondre"
       }
     },
     "profile": {
@@ -699,7 +705,7 @@
     },
     "legalNotice": {
       "title": "Mentions Légales",
-      "metaDescription": "Informations légales sur le site web Sarpbc, incluant les détails de l'éditeur, l'hébergement et les droits de propriété intellectuelle.",
+      "metaDescription": "Informations légales sur le site web sarpbc.org, incluant les détails de l'éditeur, l'hébergement et les droits de propriété intellectuelle.",
       "lastUpdated": "Dernière mise à jour",
       "lastUpdatedDate": "4 septembre 2025",
       "siteEditor": {
@@ -723,8 +729,8 @@
       },
       "intellectualProperty": {
         "title": "Propriété Intellectuelle",
-        "description": "Le contenu original de ce site web, y compris le texte, les graphiques, les logos et les logiciels développés par Sarpbc, est la propriété de Sarpbc et est protégé par les lois sur la propriété intellectuelle. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
-        "rocketLeague": "Rocket League est une marque déposée de Psyonix LLC. Ce site web n'est pas affilié à ou approuvé par Psyonix LLC."
+        "description": "Le contenu original de ce site web, y compris le texte, les graphiques, les logos et les logiciels développés par sarpbc.org, est la propriété de sarpbc.org et est protégé par les lois sur la propriété intellectuelle. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
+        "rocketLeague": "Rocket League est une marque déposée de Psyonix LLC, filiale d'Epic Games, Inc. sarpbc.org n'est pas affilié à, approuvé par ou sponsorisé par Psyonix LLC, Epic Games, Inc. ou Rocket League."
       },
       "personalData": {
         "title": "Données Personnelles",
@@ -749,7 +755,7 @@
       "lastUpdatedDate": "4 septembre 2025",
       "introduction": {
         "title": "Introduction",
-        "description": "Cette Politique de Confidentialité explique comment Sarpbc collecte, utilise et protège vos informations personnelles lorsque vous utilisez notre site web et nos services. Nous nous engageons à protéger votre vie privée et à assurer la transparence de nos pratiques de données."
+        "description": "Cette Politique de Confidentialité explique comment sarpbc.org collecte, utilise et protège vos informations personnelles lorsque vous utilisez notre site web et nos services. Nous nous engageons à protéger votre vie privée et à assurer la transparence de nos pratiques de données."
       },
       "dataController": {
         "title": "Responsable du Traitement",
@@ -814,7 +820,7 @@
     },
     "termsOfService": {
       "title": "Conditions Générales d'Utilisation",
-      "metaDescription": "Lisez nos conditions de service pour comprendre les règles et directives d'utilisation du site web et de la communauté Sarpbc.",
+      "metaDescription": "Lisez nos conditions de service pour comprendre les règles et directives d'utilisation du site web et de la communauté sarpbc.org.",
       "lastUpdated": "Dernière mise à jour",
       "lastUpdatedDate": "4 septembre 2025",
       "acceptance": {
@@ -823,7 +829,7 @@
       },
       "description": {
         "title": "Description du Service",
-        "content": "Sarpbc est un site web communautaire axé sur les actualités Rocket League, les tournois, les statistiques des joueurs et les discussions communautaires. Nos services sont fournis gratuitement à tous les utilisateurs."
+        "content": "sarpbc.org est un site web communautaire axé sur les actualités Rocket League, les tournois, les statistiques des joueurs et les discussions communautaires. Nos services sont fournis gratuitement à tous les utilisateurs."
       },
       "userAccounts": {
         "title": "Comptes Utilisateur",
@@ -845,17 +851,18 @@
       },
       "intellectualProperty": {
         "title": "Propriété Intellectuelle",
-        "description": "Le site web et son contenu original, ses fonctionnalités et sa fonctionnalité sont la propriété de Sarpbc et sont protégés par les lois internationales sur le droit d'auteur, les marques déposées et autres propriétés intellectuelles. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
+        "description": "Le site web et son contenu original, ses fonctionnalités et sa fonctionnalité sont la propriété de sarpbc.org et sont protégés par les lois internationales sur le droit d'auteur, les marques déposées et autres propriétés intellectuelles. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.",
         "userContent": "Vous conservez les droits sur le contenu que vous créez, mais nous accordez une licence non exclusive pour l'utiliser, le modifier et l'afficher sur notre plateforme."
       },
       "disclaimer": {
         "title": "Clause de Non-Responsabilité",
         "description": "Les informations sur ce site web sont fournies « en l'état ». Nous ne faisons aucune déclaration ou garantie d'aucune sorte, expresse ou implicite, concernant l'exhaustivité, la précision, la fiabilité ou la disponibilité du site web.",
-        "warranty": "Nous déclinons toutes garanties, expresses ou implicites, y compris mais sans s'y limiter aux garanties implicites de qualité marchande et d'adéquation à un usage particulier."
+        "warranty": "Nous déclinons toutes garanties, expresses ou implicites, y compris mais sans s'y limiter aux garanties implicites de qualité marchande et d'adéquation à un usage particulier.",
+        "affiliation": "Rocket League est une marque déposée de Psyonix LLC, filiale d'Epic Games, Inc. sarpbc.org est un site de fans indépendant et n'est pas affilié à, approuvé par ou sponsorisé par Psyonix LLC, Epic Games, Inc. ou Rocket League."
       },
       "limitation": {
         "title": "Limitation de Responsabilité",
-        "description": "En aucun cas Sarpbc ne sera responsable de dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, y compris sans limitation, la perte de profits, de données, d'utilisation, de clientèle ou d'autres pertes intangibles."
+        "description": "En aucun cas sarpbc.org ne sera responsable de dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, y compris sans limitation, la perte de profits, de données, d'utilisation, de clientèle ou d'autres pertes intangibles."
       },
       "termination": {
         "title": "Résiliation",
@@ -878,7 +885,7 @@
       "lastUpdatedDate": "4 septembre 2025",
       "commitment": {
         "title": "Notre Engagement envers l'Accessibilité",
-        "description": "Sarpbc s'engage à assurer l'accessibilité numérique pour les personnes handicapées. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes."
+        "description": "sarpbc.org s'engage à assurer l'accessibilité numérique pour les personnes handicapées. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes."
       },
       "compliance": {
         "title": "Statut de Conformité",

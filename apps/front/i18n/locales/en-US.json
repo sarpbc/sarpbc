@@ -33,7 +33,8 @@
       "cookiePolicy": "Cookie Policy",
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",
-      "legalNotice": "Legal Notice"
+      "legalNotice": "Legal Notice",
+      "disclaimer": "sarpbc.org is not affiliated with Rocket League, Psyonix, or Epic Games."
     },
     "forum": {
       "createPost": "Create Post",
@@ -41,7 +42,8 @@
       "deletePost": "Delete Post",
       "reply": "Reply",
       "viewReplies": "View Replies",
-      "recentPosts": "Recent Activity"
+      "recentPosts": "Recent Activity",
+      "signInToCreate": "Sign in to create a post"
     },
     "header": {
       "signin": "Sign In"
@@ -69,10 +71,10 @@
         "contentMaxLength": "Your reply must be at most 2048 characters"
       },
       "messages": {
-        "successTitle": "Success",
-        "successDescription": "Reply created successfully!",
         "errorTitle": "Error",
-        "errorDescription": "Failed to create reply."
+        "errorDescription": "Failed to create reply.",
+        "rateLimitDescription": "You can only post one reply per minute. Wait and try again.",
+        "signInRequired": "Sign in to reply to this thread."
       },
       "inputTitle": "Reply",
       "inputPlaceholder": "Enter your reply here...",
@@ -366,10 +368,10 @@
     },
     "players": {
       "index": {
-        "title": "All Players - SARPBC",
-        "description": "Browse all {count} players in the SARPBC database. Find players by name alphabetically organized.",
-        "ogTitle": "All Players - SARPBC",
-        "ogDescription": "Browse all {count} players in the SARPBC database.",
+        "title": "All Players - sarpbc.org",
+        "description": "Browse all {count} players in the sarpbc.org database. Find players by name alphabetically organized.",
+        "ogTitle": "All Players - sarpbc.org",
+        "ogDescription": "Browse all {count} players in the sarpbc.org database.",
         "pageTitle": "Players Directory",
         "player": "player",
         "players": "players",
@@ -379,9 +381,9 @@
         "page": "Page"
       },
       "letter": {
-        "title": "Players starting with {letter} - SARPBC",
+        "title": "Players starting with {letter} - sarpbc.org",
         "description": "Browse all players whose names start with {letter}. Find detailed player profiles, stats, and team information.",
-        "ogTitle": "Players starting with {letter} - SARPBC",
+        "ogTitle": "Players starting with {letter} - sarpbc.org",
         "ogDescription": "Browse {count} players whose names start with {letter}.",
         "pageTitle": "Players - {letter}",
         "playersFound": "{count} player found | {count} players found",
@@ -398,8 +400,8 @@
         "playerNotFound": "Player Not Found",
         "playerCouldNotBeFound": "The player \"{slug}\" could not be found.",
         "goBackToHome": "Go back to home",
-        "seoTitleWithName": "{name} - Sarpbc",
-        "seoTitleDefault": "Player - Sarpbc",
+        "seoTitleWithName": "{name} - sarpbc.org",
+        "seoTitleDefault": "Player - sarpbc.org",
         "seoDescriptionWithName": "View {name}'s profile and stats",
         "seoDescriptionDefault": "Player profile",
         "currentTeam": "Current Team",
@@ -411,10 +413,10 @@
     },
     "teams": {
       "index": {
-        "title": "All Teams - SARPBC",
-        "description": "Browse all {count} teams in the SARPBC database. Find teams by name alphabetically organized.",
-        "ogTitle": "All Teams - SARPBC",
-        "ogDescription": "Browse all {count} teams in the SARPBC database.",
+        "title": "All Teams - sarpbc.org",
+        "description": "Browse all {count} teams in the sarpbc.org database. Find teams by name alphabetically organized.",
+        "ogTitle": "All Teams - sarpbc.org",
+        "ogDescription": "Browse all {count} teams in the sarpbc.org database.",
         "pageTitle": "Teams Directory",
         "team": "team",
         "teams": "teams",
@@ -424,9 +426,9 @@
         "page": "Page"
       },
       "letter": {
-        "title": "Teams starting with {letter} - SARPBC",
+        "title": "Teams starting with {letter} - sarpbc.org",
         "description": "Browse all teams whose names start with {letter}. Find detailed team profiles, rosters, and match information.",
-        "ogTitle": "Teams starting with {letter} - SARPBC",
+        "ogTitle": "Teams starting with {letter} - sarpbc.org",
         "ogDescription": "Browse {count} teams whose names start with {letter}.",
         "pageTitle": "Teams - {letter}",
         "teamsFound": "{count} team found | {count} teams found",
@@ -441,8 +443,8 @@
         "errorLoadingTeam": "Error Loading Team",
         "failedToLoadTeamData": "Failed to load team data",
         "teamNotFound": "Team Not Found",
-        "seoTitleWithName": "{name} - Sarpbc",
-        "seoTitleDefault": "Team - Sarpbc",
+        "seoTitleWithName": "{name} - sarpbc.org",
+        "seoTitleDefault": "Team - sarpbc.org",
         "seoDescriptionWithName": "View {name}'s profile and players",
         "seoDescriptionDefault": "Team profile",
         "location": "Location",
@@ -458,8 +460,8 @@
         "title": "Tournaments"
       },
       "id": {
-        "seoTitle": "{tournamentName} - sarpbc",
-        "seoDescription": "View details of the tournament {tournamentName} on sarpbc.",
+        "seoTitle": "{tournamentName} - sarpbc.org",
+        "seoDescription": "View details of the tournament {tournamentName} on sarpbc.org.",
         "noMatches": "No matches available for this tournament.",
         "matchSections": {
           "upcoming": "Upcoming",
@@ -470,8 +472,8 @@
     "matches": {
       "title": "Matches",
       "seo": {
-        "title": "Matches | Sarpbc",
-        "description": "Browse live, upcoming, and past Rocket League matches from every tournament on Sarpbc."
+        "title": "Matches | sarpbc.org",
+        "description": "Browse live, upcoming, and past Rocket League matches from every tournament on sarpbc.org."
       },
       "tabs": {
         "upcoming": "Upcoming",
@@ -508,12 +510,12 @@
     },
     "match": {
       "detail": {
-        "seoTitle": "{teamA} vs {teamB} | {tournament} | Sarpbc",
-        "seoTitleDefault": "Match | Sarpbc",
+        "seoTitle": "{teamA} vs {teamB} | {tournament} | sarpbc.org",
+        "seoTitleDefault": "Match | sarpbc.org",
         "seoDescriptionLive": "Live match: {teamA} vs {teamB} in {tournament}.",
         "seoDescriptionUpcoming": "Upcoming match: {teamA} vs {teamB} in {tournament} on {date}.",
         "seoDescriptionFinished": "Final score: {teamA} {scoreA} - {scoreB} {teamB} in {tournament}.",
-        "seoDescriptionDefault": "View match details, team form, and roster on Sarpbc.",
+        "seoDescriptionDefault": "View match details, team form, and roster on sarpbc.org.",
         "notFound": "Match not found",
         "error": "Could not load this match. Check your connection and try again.",
         "retry": "Try Again",
@@ -551,10 +553,10 @@
     },
     "forum": {
       "index": {
-        "title": "Forum | Sarpbc",
-        "description": "Join the Sarpbc community forum. Discuss Rocket League strategies, share experiences, and connect with fellow players in our vibrant community.",
-        "ogTitle": "Sarpbc Forum - Rocket League Community",
-        "ogDescription": "Connect with the Rocket League community on Sarpbc Forum. Share strategies, discuss gameplay, and stay updated with the latest community news.",
+        "title": "Forum | sarpbc.org",
+        "description": "Join the sarpbc.org community forum. Discuss Rocket League strategies, share experiences, and connect with fellow players in our vibrant community.",
+        "ogTitle": "sarpbc.org Forum - Rocket League Community",
+        "ogDescription": "Connect with the Rocket League community on sarpbc.org Forum. Share strategies, discuss gameplay, and stay updated with the latest community news.",
         "pageTitle": "Forum",
         "createNewPost": "Create New Post",
         "noPosts": "No posts available",
@@ -571,9 +573,9 @@
       },
       "new": {
         "title": "Create New Post",
-        "description": "Create a new post in the Sarpbc forum. Share your thoughts, ideas, and discussions about Rocket League with the community.",
-        "ogTitle": "Create New Post | Sarpbc Forum",
-        "ogDescription": "Join the conversation! Create a new post in the Sarpbc forum and share your Rocket League insights with the community.",
+        "description": "Create a new post in the sarpbc.org forum. Share your thoughts, ideas, and discussions about Rocket League with the community.",
+        "ogTitle": "Create New Post | sarpbc.org Forum",
+        "ogDescription": "Join the conversation! Create a new post in the sarpbc.org forum and share your Rocket League insights with the community.",
         "pageTitle": "Create a New Post",
         "form": {
           "title": "Title",
@@ -590,11 +592,14 @@
           "contentMaxLength": "Content must be at most 2048 characters"
         },
         "messages": {
-          "successTitle": "Success",
-          "successDescription": "Post created successfully!",
           "errorTitle": "Error",
-          "errorDescription": "Failed to create post."
-        }
+          "errorDescription": "Failed to create post.",
+          "rateLimitDescription": "You can only create one post per hour. Wait until the cooldown ends and try again.",
+          "signInRequired": "Sign in to create a post."
+        },
+        "rateLimitWait": "You can only create one post every {hours}\u00a0hours. Try again at {time}.",
+        "statusLoading": "Checking whether you can post…",
+        "statusLoadError": "Could not verify posting limits. Refresh the page and try again."
       },
       "post": {
         "loadingPost": "Loading post...",
@@ -603,13 +608,14 @@
         "postNotFound": "Post Not Found",
         "postCouldNotBeFound": "The post could not be found.",
         "goBackToForum": "Go back to forum",
-        "seoTitleWithTitle": "{title} - Sarpbc Forum",
-        "seoTitleDefault": "Forum Post - Sarpbc",
-        "seoDescriptionWithTitle": "Read \"{title}\" in the Sarpbc forum",
+        "seoTitleWithTitle": "{title} - sarpbc.org Forum",
+        "seoTitleDefault": "Forum Post - sarpbc.org",
+        "seoDescriptionWithTitle": "Read \"{title}\" in the sarpbc.org forum",
         "seoDescriptionDefault": "Forum post",
         "author": "Author",
         "topic": "Topic",
-        "postedOn": "Posted on {date}"
+        "postedOn": "Posted on {date}",
+        "signInToReply": "Sign in to reply"
       }
     },
     "profile": {
@@ -699,7 +705,7 @@
     },
     "legalNotice": {
       "title": "Legal Notice",
-      "metaDescription": "Legal information about Sarpbc website, including editor details, hosting information, and intellectual property rights.",
+      "metaDescription": "Legal information about sarpbc.org website, including editor details, hosting information, and intellectual property rights.",
       "lastUpdated": "Last updated",
       "lastUpdatedDate": "September 4, 2025",
       "siteEditor": {
@@ -723,8 +729,8 @@
       },
       "intellectualProperty": {
         "title": "Intellectual Property",
-        "description": "The original content of this website, including text, graphics, logos, and software developed by Sarpbc, is the property of Sarpbc and is protected by intellectual property laws. Player images and other third-party content belong to their respective owners.",
-        "rocketLeague": "Rocket League is a trademark of Psyonix LLC. This website is not affiliated with or endorsed by Psyonix LLC."
+        "description": "The original content of this website, including text, graphics, logos, and software developed by sarpbc.org, is the property of sarpbc.org and is protected by intellectual property laws. Player images and other third-party content belong to their respective owners.",
+        "rocketLeague": "Rocket League is a trademark of Psyonix LLC, a subsidiary of Epic Games, Inc. sarpbc.org is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League."
       },
       "personalData": {
         "title": "Personal Data",
@@ -749,7 +755,7 @@
       "lastUpdatedDate": "September 4, 2025",
       "introduction": {
         "title": "Introduction",
-        "description": "This Privacy Policy explains how Sarpbc collects, uses, and protects your personal information when you use our website and services. We are committed to protecting your privacy and ensuring transparency about our data practices."
+        "description": "This Privacy Policy explains how sarpbc.org collects, uses, and protects your personal information when you use our website and services. We are committed to protecting your privacy and ensuring transparency about our data practices."
       },
       "dataController": {
         "title": "Data Controller",
@@ -814,7 +820,7 @@
     },
     "termsOfService": {
       "title": "Terms of Service",
-      "metaDescription": "Read our terms of service to understand the rules and guidelines for using the Sarpbc website and community.",
+      "metaDescription": "Read our terms of service to understand the rules and guidelines for using the sarpbc.org website and community.",
       "lastUpdated": "Last updated",
       "lastUpdatedDate": "September 4, 2025",
       "acceptance": {
@@ -823,7 +829,7 @@
       },
       "description": {
         "title": "Service Description",
-        "content": "Sarpbc is a community website focused on Rocket League news, tournaments, player statistics, and community discussions. Our services are provided free of charge to all users."
+        "content": "sarpbc.org is a community website focused on Rocket League news, tournaments, player statistics, and community discussions. Our services are provided free of charge to all users."
       },
       "userAccounts": {
         "title": "User Accounts",
@@ -845,17 +851,18 @@
       },
       "intellectualProperty": {
         "title": "Intellectual Property",
-        "description": "The website and its original content, features, and functionality are owned by Sarpbc and are protected by international copyright, trademark, and other intellectual property laws. Player images and other third-party content belong to their respective owners.",
+        "description": "The website and its original content, features, and functionality are owned by sarpbc.org and are protected by international copyright, trademark, and other intellectual property laws. Player images and other third-party content belong to their respective owners.",
         "userContent": "You retain rights to content you create, but grant us a non-exclusive license to use, modify, and display it on our platform."
       },
       "disclaimer": {
         "title": "Disclaimer",
         "description": "The information on this website is provided on an 'as is' basis. We make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, or availability of the website.",
-        "warranty": "We disclaim all warranties, express or implied, including but not limited to implied warranties of merchantability and fitness for a particular purpose."
+        "warranty": "We disclaim all warranties, express or implied, including but not limited to implied warranties of merchantability and fitness for a particular purpose.",
+        "affiliation": "Rocket League is a trademark of Psyonix LLC, a subsidiary of Epic Games, Inc. sarpbc.org is an independent fan site and is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League."
       },
       "limitation": {
         "title": "Limitation of Liability",
-        "description": "In no event shall Sarpbc be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses."
+        "description": "In no event shall sarpbc.org be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses."
       },
       "termination": {
         "title": "Termination",
@@ -878,7 +885,7 @@
       "lastUpdatedDate": "September 4, 2025",
       "commitment": {
         "title": "Our Commitment to Accessibility",
-        "description": "Sarpbc is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards."
+        "description": "sarpbc.org is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards."
       },
       "compliance": {
         "title": "Conformance Status",

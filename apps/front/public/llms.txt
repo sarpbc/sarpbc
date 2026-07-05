@@ -1,15 +1,17 @@
-# Sarpbc.org
+# sarpbc.org
 
 > Rocket League news and data platform
 
 ## About
 
-Sarpbc.org is a comprehensive Rocket League esports website providing:
+sarpbc.org is a comprehensive Rocket League esports website providing:
 - Latest news and updates about Rocket League competitive scene
 - Tournament information and brackets
 - Player and team statistics
 - Community forum for discussions
 - Interactive games like Airriddle and Pick'ems
+
+sarpbc.org is an independent fan site and is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League.
 
 ## Key Sections
 

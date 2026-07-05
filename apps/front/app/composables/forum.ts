@@ -1,4 +1,19 @@
-import type { Post, PostPreview, PostShort, Topic } from "~/types/forum";
+import type {
+  CreateForumPostResult,
+  CreateForumReplyResult,
+  ForumPostCreationStatus,
+  Post,
+  PostPreview,
+  PostShort,
+  Topic,
+} from "~/types/forum";
+import { apiFetch } from "~/utils/apiFetch";
+import {
+  FORUM_ERROR_CODES,
+  getApiErrorCode,
+  getApiErrorMessage,
+  getApiErrorStatus,
+} from "~/utils/apiError";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
   const config = useRuntimeConfig();
@@ -63,23 +78,47 @@ export async function getPostById(id: string): Promise<Post | null> {
   }
 }
 
+export async function getForumPostCreationStatus(): Promise<ForumPostCreationStatus | null> {
+  try {
+    return await apiFetch<ForumPostCreationStatus>("/posts/creation-status", {
+      method: "GET",
+    });
+  } catch (error) {
+    console.error("Error fetching forum post creation status:", error);
+    return null;
+  }
+}
+
 export async function createForumPost(data: {
+  id: string;
   title: string;
   content: string;
   topicId: string;
-}): Promise<boolean> {
-  const config = useRuntimeConfig();
+}): Promise<CreateForumPostResult> {
   try {
-    const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/posts`, {
+    await apiFetch("/posts", {
       method: "POST",
       body: data,
-      credentials: "include",
     });
 
-    return res.success ?? false;
+    return { ok: true };
   } catch (error) {
+    const status = getApiErrorStatus(error);
+    const message = getApiErrorMessage(error);
+    const code = getApiErrorCode(error);
+
+    if (status === 401) {
+      return { ok: false, reason: "unauthorized", message };
+    }
+    if (code === FORUM_ERROR_CODES.POST_RATE_LIMITED) {
+      return { ok: false, reason: "rate_limited", message };
+    }
+    if (status === 409) {
+      return { ok: false, reason: "conflict", message };
+    }
+
     console.error("Error creating forum post:", error);
-    return false;
+    return { ok: false, reason: "unknown", message };
   }
 }
 
@@ -87,28 +126,35 @@ export async function createForumReply(data: {
   content: string;
   postId: string;
   replyToId?: string;
-}): Promise<boolean> {
-  const config = useRuntimeConfig();
+}): Promise<CreateForumReplyResult> {
   try {
-    const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/replies`, {
+    await apiFetch("/replies", {
       method: "POST",
       body: data,
-      credentials: "include",
     });
 
-    return res.success ?? false;
+    return { ok: true };
   } catch (error) {
+    const status = getApiErrorStatus(error);
+    const message = getApiErrorMessage(error);
+    const code = getApiErrorCode(error);
+
+    if (status === 401) {
+      return { ok: false, reason: "unauthorized", message };
+    }
+    if (code === FORUM_ERROR_CODES.REPLY_RATE_LIMITED) {
+      return { ok: false, reason: "rate_limited", message };
+    }
+
     console.error("Error creating forum reply:", error);
-    return false;
+    return { ok: false, reason: "unknown", message };
   }
 }
 
 export async function deleteForumPost(postId: string): Promise<boolean> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/posts/${postId}`, {
+    await apiFetch(`/posts/${postId}`, {
       method: "DELETE",
-      credentials: "include",
     });
     return true;
   } catch (error) {
@@ -118,11 +164,9 @@ export async function deleteForumPost(postId: string): Promise<boolean> {
 }
 
 export async function deleteForumReply(replyId: string): Promise<boolean> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/replies/${replyId}`, {
+    await apiFetch(`/replies/${replyId}`, {
       method: "DELETE",
-      credentials: "include",
     });
     return true;
   } catch (error) {

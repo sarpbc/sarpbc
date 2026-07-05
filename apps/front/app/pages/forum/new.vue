@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { Topic } from "~/types/forum";
+import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 const localePath = useLocalePath();
+const user = useUser();
+
+if (!user.value) {
+  navigateTo(localePath("/login"));
+}
 
 setPageSeo({
   title: t("page.forum.new.title"),
@@ -15,6 +20,7 @@ setPageSeo({
 });
 
 const toast = useToast();
+const isSubmitting = ref(false);
 
 const schema = z.object({
   title: z
@@ -37,40 +43,92 @@ const state = reactive<Partial<Schema>>({
 });
 
 const topics = ref<Topic[]>([]);
+const creationStatus = ref<ForumPostCreationStatus | null>(null);
+const creationStatusLoadState = ref<"loading" | "ready" | "error">("loading");
+
+const canSubmit = computed(
+  () =>
+    creationStatusLoadState.value === "ready" &&
+    creationStatus.value?.canCreate === true &&
+    !isSubmitting.value,
+);
+
+const rateLimitMessage = computed(() => {
+  if (creationStatusLoadState.value !== "ready" || !creationStatus.value) return null;
+  if (creationStatus.value.canCreate) return null;
+  if (!creationStatus.value.nextAvailableAt) return null;
+
+  const nextAt = df(locale.value).format(new Date(creationStatus.value.nextAvailableAt));
+  return t("page.forum.new.rateLimitWait", {
+    hours: creationStatus.value.cooldownHours,
+    time: nextAt,
+  });
+});
 
 onMounted(async () => {
-  topics.value = await getTopics();
+  const [loadedTopics, status] = await Promise.all([getTopics(), getForumPostCreationStatus()]);
+  topics.value = loadedTopics;
+
+  if (!status) {
+    creationStatusLoadState.value = "error";
+    return;
+  }
+
+  creationStatus.value = status;
+  creationStatusLoadState.value = "ready";
 });
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   event.preventDefault();
+
+  if (!canSubmit.value) {
+    return;
+  }
 
   const result = schema.safeParse(state);
   if (!result.success) {
     return;
   }
 
-  const success = await createForumPost({
+  isSubmitting.value = true;
+
+  const postId = crypto.randomUUID();
+  const createResult = await createForumPost({
+    id: postId,
     title: result.data.title,
     content: result.data.content,
     topicId: result.data.topicId,
   });
 
-  if (success) {
-    toast.add({
-      title: t("page.forum.new.messages.successTitle"),
-      description: t("page.forum.new.messages.successDescription"),
-      color: "success",
-    });
+  isSubmitting.value = false;
 
-    navigateTo(localePath("/forum"));
-  } else {
-    toast.add({
-      title: t("page.forum.new.messages.errorTitle"),
-      description: t("page.forum.new.messages.errorDescription"),
-      color: "error",
-    });
+  if (createResult.ok) {
+    await navigateTo(localePath(`/forum/post/${postId}`));
+    return;
   }
+
+  if (createResult.reason === "rate_limited") {
+    const status = await getForumPostCreationStatus();
+    if (status) {
+      creationStatus.value = status;
+      creationStatusLoadState.value = "ready";
+    } else {
+      creationStatusLoadState.value = "error";
+    }
+  }
+
+  const description =
+    createResult.reason === "rate_limited"
+      ? (createResult.message ?? t("page.forum.new.messages.rateLimitDescription"))
+      : createResult.reason === "unauthorized"
+        ? t("page.forum.new.messages.signInRequired")
+        : (createResult.message ?? t("page.forum.new.messages.errorDescription"));
+
+  toast.add({
+    title: t("page.forum.new.messages.errorTitle"),
+    description,
+    color: "error",
+  });
 }
 </script>
 
@@ -84,6 +142,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       </div>
     </UiCrossCard>
     <UiCard class="p-4">
+      <p v-if="creationStatusLoadState === 'loading'" class="text-sm text-muted mb-4">
+        {{ $t("page.forum.new.statusLoading") }}
+      </p>
+      <p v-else-if="creationStatusLoadState === 'error'" class="text-sm text-error mb-4">
+        {{ $t("page.forum.new.statusLoadError") }}
+      </p>
+      <p v-else-if="rateLimitMessage" class="text-sm text-muted mb-4">
+        {{ rateLimitMessage }}
+      </p>
       <UForm :schema="schema" :state="state" class="w-full space-y-4" @submit="onSubmit">
         <UFormField
           :label="$t('page.forum.new.form.title')"
@@ -96,6 +163,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             variant="soft"
             :placeholder="$t('page.forum.new.form.titlePlaceholder')"
             class="w-full"
+            :disabled="!canSubmit"
           />
         </UFormField>
 
@@ -112,8 +180,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               variant="soft"
               size="lg"
               :color="state.topicId === topic.id ? 'primary' : 'neutral'"
-              class="cursor-pointer"
-              @click="state.topicId = topic.id"
+              :class="canSubmit ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
+              @click="canSubmit && (state.topicId = topic.id)"
             >
               {{ topic.title }}
             </UBadge>
@@ -132,10 +200,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             :placeholder="$t('page.forum.new.form.contentPlaceholder')"
             class="w-full"
             autoresize
+            :disabled="!canSubmit"
           />
         </UFormField>
 
-        <UButton type="submit" variant="soft" class="cursor-pointer">
+        <UButton
+          type="submit"
+          variant="soft"
+          class="cursor-pointer"
+          :disabled="!canSubmit"
+          :loading="isSubmitting"
+        >
           {{ $t("page.forum.new.form.submit") }}
         </UButton>
       </UForm>

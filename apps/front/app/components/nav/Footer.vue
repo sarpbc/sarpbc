@@ -4,12 +4,20 @@
       class="w-full max-w-7xl px-8 mx-auto flex flex-col md:grid grid-cols-3 items-start gap-8 md:gap-4 text-sm"
     >
       <div class="flex flex-col gap-2 col-span-1">
-        <span class="font-semibold text-dimmed"> {{ new Date().getFullYear() }} sarpbc </span>
+        <span class="font-semibold text-dimmed"> {{ new Date().getFullYear() }} sarpbc.org </span>
+
+        <span class="text-muted text-xs">
+          {{ $t("components.footer.disclaimer") }}
+        </span>
 
         <span class="text-muted">
           Data &amp; images: <span class="italic">Source: Pandascore</span>
         </span>
-        <ULink to="https://x.com/SARPBCorg" class="h-6!" aria-label="sarpbc X / Twitter account">
+        <ULink
+          to="https://x.com/SARPBCorg"
+          class="h-6!"
+          aria-label="sarpbc.org X / Twitter account"
+        >
           <UIcon name="i-ri-twitter-x-fill" class="h-6 w-6" />
         </ULink>
       </div>

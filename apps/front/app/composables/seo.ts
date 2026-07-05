@@ -5,7 +5,7 @@
  * // In a page component:
  * const { setPageSeo } = useSarpbcSeo();
  * setPageSeo({
- *   title: "Player Name | Sarpbc",
+ *   title: "Player Name | sarpbc.org",
  *   description: "View player statistics and match history",
  *   image: "https://sarpbc.org/custom-image.png"
  * });
@@ -27,8 +27,8 @@ export const useSarpbcSeo = () => {
     twitterCard?: "summary" | "summary_large_image";
   }) => {
     const {
-      title = "Rocket League news & data | Sarpbc",
-      description = "Rocket League news & data | Sarpbc",
+      title = "Rocket League news & data | sarpbc.org",
+      description = "Rocket League news & data | sarpbc.org",
       image = "https://sarpbc.org/sarpbc.png",
       noIndex = false,
       twitterCard = "summary_large_image",

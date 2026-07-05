@@ -7,8 +7,8 @@ const { data: tournaments } = await useLazyAsyncData(`tournaments-index`, () =>
 );
 
 setPageSeo({
-  title: `${t("page.tournaments.index.title")} | Sarpbc`,
-  description: "Browse all Rocket League tournaments, brackets, and schedules on Sarpbc.org",
+  title: `${t("page.tournaments.index.title")} | sarpbc.org`,
+  description: "Browse all Rocket League tournaments, brackets, and schedules on sarpbc.org",
 });
 </script>
 

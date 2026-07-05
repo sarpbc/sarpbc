@@ -8,9 +8,9 @@ const { data: article } = await useAsyncData(`news-${slug}`, () => {
 });
 
 setPageSeo({
-  title: article.value?.title ? `${article.value.title} | Sarpbc` : t("page.news.title"),
+  title: article.value?.title ? `${article.value.title} | sarpbc.org` : t("page.news.title"),
   description:
-    article.value?.description || "Read the latest Rocket League esports news on Sarpbc.org",
+    article.value?.description || "Read the latest Rocket League esports news on sarpbc.org",
   image: article.value?.image || undefined,
 });
 </script>
