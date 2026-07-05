@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import type { MatchResult } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
+import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
 
 const localePath = useLocalePath();
+const { t } = useI18n();
 
 const {
   matchId,
@@ -35,6 +37,22 @@ const {
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
 
+const displayTeamA = computed(() => {
+  if (!teamAName) {
+    return t("components.match.tbd");
+  }
+
+  return bracket ? formatBracketTeamName(teamAName) : teamAName;
+});
+
+const displayTeamB = computed(() => {
+  if (!teamBName) {
+    return t("components.match.tbd");
+  }
+
+  return bracket ? formatBracketTeamName(teamBName) : teamBName;
+});
+
 function participantRowClass(participantId: string | undefined): string {
   if (!winnerParticipantId || !participantId) {
     return "";
@@ -52,56 +70,74 @@ function participantRowClass(participantId: string | undefined): string {
   <NuxtLink
     :to="localePath(`/matches/${matchId}`)"
     :class="[
-      'flex flex-col items-start justify-center gap-0.5 border rounded-sm hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+      'flex flex-col rounded-sm hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
       bracket
-        ? 'w-full min-h-13 p-1 bg-muted/70 border-default/60 hover:border-default'
+        ? 'w-full p-0 bg-muted/70 border-0'
         : compact
-          ? 'w-64 min-h-16 p-2 bg-muted/70 border-transparent hover:border-default'
-          : 'w-full max-w-xl p-3 bg-muted/70 border-default',
+          ? 'w-64 min-h-16 p-2 bg-muted/70 border border-transparent hover:border-default'
+          : 'w-full max-w-xl p-3 bg-muted/70 border border-default',
     ]"
   >
     <p v-if="name && !bracket" class="text-xs text-dimmed truncate">{{ name }}</p>
-    <div
-      :class="[
-        'w-full grid grid-cols-[1fr_auto] items-center gap-1 rounded-xs px-0.5',
-        participantRowClass(participantAId),
-      ]"
-    >
-      <div class="flex min-w-0 items-center gap-1">
+
+    <template v-if="bracket">
+      <div
+        :class="[
+          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-[22px] px-1',
+          participantRowClass(participantAId),
+        ]"
+      >
         <TeamImg
-          v-if="bracket"
           :team-name="teamAName ?? $t('components.match.tbd')"
           :image-url="teamAImageUrl"
           size="xs"
         />
-        <span :class="['truncate', bracket ? 'text-xs' : 'text-sm']">
-          {{ teamAName ?? $t("components.match.tbd") }}
-        </span>
+        <span class="truncate text-xs">{{ displayTeamA }}</span>
+        <span class="tabular-nums font-semibold text-xs">{{ scoreA ?? "–" }}</span>
       </div>
-      <span :class="['tabular-nums font-semibold', bracket ? 'text-xs' : 'text-sm']">
-        {{ scoreA ?? "–" }}
-      </span>
-    </div>
-    <div
-      :class="[
-        'w-full grid grid-cols-[1fr_auto] items-center gap-1 rounded-xs px-0.5',
-        participantRowClass(participantBId),
-      ]"
-    >
-      <div class="flex min-w-0 items-center gap-1">
+      <div
+        :class="[
+          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-[22px] px-1',
+          participantRowClass(participantBId),
+        ]"
+      >
         <TeamImg
-          v-if="bracket"
           :team-name="teamBName ?? $t('components.match.tbd')"
           :image-url="teamBImageUrl"
           size="xs"
         />
-        <span :class="['truncate', bracket ? 'text-xs' : 'text-sm']">
-          {{ teamBName ?? $t("components.match.tbd") }}
+        <span class="truncate text-xs">{{ displayTeamB }}</span>
+        <span class="tabular-nums font-semibold text-xs">{{ scoreB ?? "–" }}</span>
+      </div>
+    </template>
+
+    <template v-else>
+      <div
+        :class="[
+          'w-full grid grid-cols-[1fr_auto] items-center gap-1 rounded-xs px-0.5',
+          participantRowClass(participantAId),
+        ]"
+      >
+        <div class="flex min-w-0 items-center gap-1">
+          <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamA }}</span>
+        </div>
+        <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
+          {{ scoreA ?? "–" }}
         </span>
       </div>
-      <span :class="['tabular-nums font-semibold', bracket ? 'text-xs' : 'text-sm']">
-        {{ scoreB ?? "–" }}
-      </span>
-    </div>
+      <div
+        :class="[
+          'w-full grid grid-cols-[1fr_auto] items-center gap-1 rounded-xs px-0.5',
+          participantRowClass(participantBId),
+        ]"
+      >
+        <div class="flex min-w-0 items-center gap-1">
+          <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamB }}</span>
+        </div>
+        <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
+          {{ scoreB ?? "–" }}
+        </span>
+      </div>
+    </template>
   </NuxtLink>
 </template>

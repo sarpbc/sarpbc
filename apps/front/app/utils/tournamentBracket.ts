@@ -3,10 +3,16 @@ import { getMatchParticipantScore } from "~/types/matches";
 import type { BracketLink, DrawnBracketMatch, Tournament } from "~/types/tournament";
 import type { Team } from "~/types/team";
 
-export const BRACKET_MATCH_WIDTH = 176;
-export const BRACKET_MATCH_HEIGHT = 52;
-export const BRACKET_COLUMN_GAP = 20;
-export const BRACKET_ROW_UNIT = 28;
+export const BRACKET_MATCH_WIDTH = 148;
+export const BRACKET_MATCH_HEIGHT = 44;
+export const BRACKET_TEAM_ROW_HEIGHT = BRACKET_MATCH_HEIGHT / 2;
+export const BRACKET_COLUMN_GAP = 12;
+/** Extra pixels between vertically stacked match blocks. */
+export const BRACKET_VERTICAL_GAP = 6;
+/** Pixels per logical row index (MIN_ROW_GAP row units between stacked matches). */
+export const BRACKET_ROW_STEP = (BRACKET_MATCH_HEIGHT + BRACKET_VERTICAL_GAP) / 2;
+
+export type BracketZone = "upper" | "lower";
 
 export type TournamentBracketFormat =
   | "flat-stage"
@@ -23,6 +29,7 @@ export interface BracketLayoutMatch {
   matchId: string;
   column: number;
   row: number;
+  zone?: BracketZone;
   name?: string;
   teamA?: Team;
   teamB?: Team;
@@ -46,9 +53,32 @@ export interface BracketSectionLayout {
   rowCount: number;
 }
 
+export function bracketMatchLeft(column: number): number {
+  return column * (BRACKET_MATCH_WIDTH + BRACKET_COLUMN_GAP);
+}
+
+export function bracketMatchTop(row: number): number {
+  return row * BRACKET_ROW_STEP;
+}
+
+export function bracketMatchCenterY(row: number): number {
+  return bracketMatchTop(row) + BRACKET_MATCH_HEIGHT / 2;
+}
+
+export function bracketTeamRowCenterY(row: number, slot: "a" | "b"): number {
+  const top = bracketMatchTop(row);
+  if (slot === "a") {
+    return top + BRACKET_TEAM_ROW_HEIGHT / 2;
+  }
+
+  return top + BRACKET_TEAM_ROW_HEIGHT + BRACKET_TEAM_ROW_HEIGHT / 2;
+}
+
 export interface TournamentBracketView {
   format: TournamentBracketFormat;
   upperLayout: BracketSectionLayout | null;
+  /** Lower bracket + cross-bracket semifinals/grand final on a single Liquipedia-like grid. */
+  doubleEliminationLayout: BracketSectionLayout | null;
   lowerLayout: BracketSectionLayout | null;
   lowerBracketFlatMatches: Match[];
   flatMatches: Match[];
@@ -99,6 +129,94 @@ function getParentIds(match: Match, matchIds: Set<string>): string[] {
   return (match.previousMatches ?? [])
     .map((link) => resolvePreviousMatchId(link.previousMatch))
     .filter((id) => matchIds.has(id));
+}
+
+function getWinnerParentIds(match: Match, matchIds: Set<string>): string[] {
+  return (match.previousMatches ?? [])
+    .filter((link) => link.type === "winner")
+    .map((link) => resolvePreviousMatchId(link.previousMatch))
+    .filter((id) => matchIds.has(id));
+}
+
+function hasUpperWinnerFeed(match: Match, upperIds: Set<string>): boolean {
+  return (match.previousMatches ?? []).some(
+    (link) => link.type === "winner" && upperIds.has(resolvePreviousMatchId(link.previousMatch)),
+  );
+}
+
+type BracketSection = "upper" | "lower" | "finals";
+
+function inferBracketSectionFromName(name: string | undefined): BracketSection | null {
+  const normalized = name?.trim().toLowerCase() ?? "";
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.includes("upper bracket")) {
+    return "upper";
+  }
+
+  if (normalized.includes("grand final") || normalized.includes("semifinal")) {
+    return "finals";
+  }
+
+  if (normalized.includes("lower bracket")) {
+    return "lower";
+  }
+
+  return null;
+}
+
+function getCombinedColumnFromName(name: string | undefined): number | null {
+  const normalized = name?.trim().toLowerCase() ?? "";
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.includes("lower bracket round 1")) {
+    return 0;
+  }
+  if (normalized.includes("lower bracket round 2")) {
+    return 1;
+  }
+  if (normalized.includes("lower bracket quarterfinal")) {
+    return 2;
+  }
+  if (normalized.includes("semifinal")) {
+    return 3;
+  }
+  if (normalized.includes("grand final")) {
+    return 4;
+  }
+
+  return null;
+}
+
+function getUpperColumnFromName(name: string | undefined): number | null {
+  const normalized = name?.trim().toLowerCase() ?? "";
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.includes("upper bracket quarterfinal")) {
+    return 2;
+  }
+  if (normalized.includes("upper bracket semifinal")) {
+    return 3;
+  }
+  if (normalized.includes("upper bracket final")) {
+    return 4;
+  }
+
+  return null;
+}
+
+const UPPER_TO_LOWER_ROW_GAP = 2;
+
+function getWinnerParentIdsFromLinks(match: Match): string[] {
+  return (match.previousMatches ?? [])
+    .filter((link) => link.type === "winner")
+    .map((link) => resolvePreviousMatchId(link.previousMatch));
 }
 
 function getMatchBeginAtTime(match: Match): number | null {
@@ -319,11 +437,17 @@ function buildConnectors(matches: Match[], matchIds: Set<string>): BracketConnec
   return connectors;
 }
 
-function toLayoutMatch(match: Match, column: number, row: number): BracketLayoutMatch {
+function toLayoutMatch(
+  match: Match,
+  column: number,
+  row: number,
+  zone?: BracketZone,
+): BracketLayoutMatch {
   return {
     matchId: match.id,
     column,
     row,
+    zone,
     name: match.name,
     teamA: match.participants?.[0]?.team,
     teamB: match.participants?.[1]?.team,
@@ -457,20 +581,33 @@ export function groupMatchesByRound(matches: Match[]): TournamentBracketRoundGro
 }
 
 /**
- * PandaScore double-elim split: loser-fed matches and their winner-only descendants
- * stay in the lower bracket. Upper bracket keeps cross-bracket finals.
+ * PandaScore double-elim split: upper bracket stays isolated; lower progression and
+ * cross-bracket finals share the combined grid. Match names are used when PandaScore
+ * omits feeder links (common for lower round 1).
  */
 export function splitDoubleEliminationMatches(matches: Match[]): {
   upper: Match[];
   lower: Match[];
 } {
   const matchIds = new Set(matches.map((match) => match.id));
+  const matchById = new Map(matches.map((match) => [match.id, match]));
   const lowerIds = new Set<string>();
+  const upperIds = new Set<string>();
+
+  for (const match of matches) {
+    const section = inferBracketSectionFromName(match.name);
+    if (section === "upper") {
+      upperIds.add(match.id);
+    } else if (section === "lower" || section === "finals") {
+      lowerIds.add(match.id);
+    }
+  }
 
   for (const match of matches) {
     const hasLoserFeed = match.previousMatches?.some((link) => link.type === "loser");
     if (hasLoserFeed) {
       lowerIds.add(match.id);
+      upperIds.delete(match.id);
     }
   }
 
@@ -479,23 +616,346 @@ export function splitDoubleEliminationMatches(matches: Match[]): {
     changed = false;
 
     for (const match of matches) {
-      if (lowerIds.has(match.id)) {
+      if (upperIds.has(match.id) || inferBracketSectionFromName(match.name) === "upper") {
         continue;
       }
 
-      const parents = getParentIds(match, matchIds);
-      if (parents.length === 0 || !parents.every((parentId) => lowerIds.has(parentId))) {
+      const winnerParents = getWinnerParentIds(match, matchIds);
+      if (winnerParents.some((parentId) => lowerIds.has(parentId))) {
+        if (!lowerIds.has(match.id)) {
+          lowerIds.add(match.id);
+          upperIds.delete(match.id);
+          changed = true;
+        }
+      }
+    }
+
+    for (const match of matches) {
+      if (lowerIds.has(match.id) || upperIds.has(match.id)) {
         continue;
       }
 
-      lowerIds.add(match.id);
-      changed = true;
+      for (const parentId of getWinnerParentIdsFromLinks(match)) {
+        if (!lowerIds.has(parentId) || !matchIds.has(parentId)) {
+          continue;
+        }
+
+        const parent = matchById.get(parentId);
+        if (inferBracketSectionFromName(parent?.name) === "upper") {
+          continue;
+        }
+
+        if (!lowerIds.has(match.id)) {
+          lowerIds.add(match.id);
+          changed = true;
+        }
+      }
     }
   }
 
+  for (const match of matches) {
+    if (inferBracketSectionFromName(match.name) === "upper") {
+      lowerIds.delete(match.id);
+    }
+  }
+
+  const lower = sortMatchesByBeginAt(matches.filter((match) => lowerIds.has(match.id)));
+  const upper = sortMatchesByBeginAt(matches.filter((match) => !lowerIds.has(match.id)));
+
+  return { upper, lower };
+}
+
+const MAX_DOUBLE_ELIM_COMBINED_COLUMNS = 5;
+
+function computeLowerProgressionDepths(
+  matches: Match[],
+  crossBracketFinalIds: Set<string>,
+): Map<string, number> {
+  const matchIds = new Set(matches.map((match) => match.id));
+  const depths = new Map<string, number>();
+  const progressionMatches = matches.filter((match) => !crossBracketFinalIds.has(match.id));
+
+  for (const match of progressionMatches) {
+    const parentsInSection = getParentIds(match, matchIds).filter(
+      (parentId) => !crossBracketFinalIds.has(parentId),
+    );
+    if (parentsInSection.length === 0) {
+      depths.set(match.id, 0);
+    }
+  }
+
+  let changed = true;
+  let iterations = 0;
+
+  while (changed && iterations < progressionMatches.length + 1) {
+    changed = false;
+    iterations++;
+
+    for (const match of progressionMatches) {
+      const parentsInSection = getParentIds(match, matchIds).filter(
+        (parentId) => !crossBracketFinalIds.has(parentId),
+      );
+      if (parentsInSection.length === 0) {
+        continue;
+      }
+
+      const parentDepths = parentsInSection
+        .map((parentId) => depths.get(parentId))
+        .filter((depth): depth is number => depth !== undefined);
+
+      if (parentDepths.length !== parentsInSection.length) {
+        continue;
+      }
+
+      const nextDepth = Math.max(...parentDepths) + 1;
+      if (depths.get(match.id) !== nextDepth) {
+        depths.set(match.id, nextDepth);
+        changed = true;
+      }
+    }
+  }
+
+  for (const match of progressionMatches) {
+    if (!depths.has(match.id)) {
+      depths.set(match.id, 0);
+    }
+  }
+
+  return depths;
+}
+
+function remapDepthsToColumnRange(
+  depths: Map<string, number>,
+  targetMaxColumn: number,
+): Map<string, number> {
+  if (depths.size === 0) {
+    return new Map();
+  }
+
+  const usedDepths = [...new Set(depths.values())].sort((a, b) => a - b);
+  const depthRemap = new Map(
+    usedDepths.map((depth, index) => {
+      if (usedDepths.length === 1) {
+        return [depth, 0] as const;
+      }
+
+      const ratio = index / (usedDepths.length - 1);
+      return [depth, Math.round(ratio * targetMaxColumn)] as const;
+    }),
+  );
+
+  const remapped = new Map<string, number>();
+  for (const [matchId, depth] of depths) {
+    remapped.set(matchId, depthRemap.get(depth) ?? 0);
+  }
+
+  return remapped;
+}
+
+/**
+ * Combined lower + finals grid: progression columns on the left, cross-bracket finals
+ * on the right (up to 5 columns total, Liquipedia-like placement).
+ */
+export function buildDoubleEliminationCombinedLayout(
+  lowerMatches: Match[],
+  upperIds: Set<string>,
+): BracketSectionLayout | null {
+  if (lowerMatches.length === 0) {
+    return null;
+  }
+
+  const matchIds = new Set(lowerMatches.map((match) => match.id));
+  const namedColumns = new Map<string, number>();
+  const unnamedMatches: Match[] = [];
+
+  for (const match of lowerMatches) {
+    const namedColumn = getCombinedColumnFromName(match.name);
+    if (namedColumn === null) {
+      unnamedMatches.push(match);
+    } else {
+      namedColumns.set(match.id, namedColumn);
+    }
+  }
+
+  const crossBracketFinalIds = new Set(
+    lowerMatches
+      .filter(
+        (match) =>
+          inferBracketSectionFromName(match.name) === "finals" ||
+          hasUpperWinnerFeed(match, upperIds),
+      )
+      .map((match) => match.id),
+  );
+
+  const columns = new Map<string, number>(namedColumns);
+
+  if (unnamedMatches.length > 0) {
+    const progressionDepths = computeLowerProgressionDepths(unnamedMatches, crossBracketFinalIds);
+    const unnamedFinals = sortMatchesByBeginAt(
+      unnamedMatches.filter((match) => crossBracketFinalIds.has(match.id)),
+    );
+    const maxNamedColumn = namedColumns.size > 0 ? Math.max(...namedColumns.values()) : -1;
+    const finalColumnCount = unnamedFinals.length > 0 ? Math.min(unnamedFinals.length, 2) : 0;
+    const maxProgressionDepth = progressionDepths.size
+      ? Math.max(...progressionDepths.values())
+      : 0;
+    const progressionRoundCount = maxProgressionDepth + 1;
+    const firstUnnamedColumn = maxNamedColumn + 1;
+    const totalNeededColumns = firstUnnamedColumn + progressionRoundCount + finalColumnCount;
+
+    if (totalNeededColumns <= MAX_DOUBLE_ELIM_COMBINED_COLUMNS) {
+      for (const [matchId, depth] of progressionDepths) {
+        columns.set(matchId, firstUnnamedColumn + depth);
+      }
+
+      unnamedFinals.forEach((match, index) => {
+        columns.set(match.id, firstUnnamedColumn + progressionRoundCount + index);
+      });
+    } else {
+      const progressionTargetMax = Math.max(
+        0,
+        MAX_DOUBLE_ELIM_COMBINED_COLUMNS - finalColumnCount - firstUnnamedColumn - 1,
+      );
+      const remappedProgression = remapDepthsToColumnRange(progressionDepths, progressionTargetMax);
+
+      for (const [matchId, depth] of remappedProgression) {
+        columns.set(matchId, firstUnnamedColumn + depth);
+      }
+
+      const firstFinalColumn = MAX_DOUBLE_ELIM_COMBINED_COLUMNS - finalColumnCount;
+      unnamedFinals.forEach((match, index) => {
+        columns.set(match.id, firstFinalColumn + index);
+      });
+    }
+  }
+
+  for (const match of lowerMatches) {
+    if (columns.has(match.id)) {
+      continue;
+    }
+
+    columns.set(match.id, 0);
+  }
+
+  const compressedColumns = compressColumnIndices(columns);
+  const rows = assignMatchRows(lowerMatches, compressedColumns);
+  const maxColumn = Math.max(...compressedColumns.values(), 0);
+
+  const layoutMatches = lowerMatches.map((match) =>
+    toLayoutMatch(match, compressedColumns.get(match.id) ?? 0, rows.get(match.id) ?? 0, "lower"),
+  );
+
+  const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
+
   return {
-    upper: matches.filter((match) => !lowerIds.has(match.id)),
-    lower: sortMatchesByBeginAt(matches.filter((match) => lowerIds.has(match.id))),
+    matches: layoutMatches,
+    connectors: buildConnectors(lowerMatches, matchIds),
+    columnCount: maxColumn + 1,
+    rowCount: maxRow + 2,
+  };
+}
+
+/**
+ * Single double-elim grid: lower/finals progression plus upper matches aligned above
+ * the lower rounds they feed (Liquipedia-style placement).
+ */
+export function buildUnifiedDoubleEliminationLayout(
+  upperMatches: Match[],
+  lowerMatches: Match[],
+  allMatches: Match[],
+): BracketSectionLayout | null {
+  if (upperMatches.length === 0 && lowerMatches.length === 0) {
+    return null;
+  }
+
+  const upperIds = new Set(upperMatches.map((match) => match.id));
+  const lowerLayout = buildDoubleEliminationCombinedLayout(lowerMatches, upperIds);
+  const lowerPositionById = new Map(
+    (lowerLayout?.matches ?? []).map((match) => [match.matchId, match]),
+  );
+
+  const upperPlacements: Array<{ match: Match; column: number; row: number }> = [];
+
+  for (const upperMatch of sortMatchesByBeginAt(upperMatches)) {
+    let anchorColumn: number | null = getUpperColumnFromName(upperMatch.name);
+    let anchorRow: number | null = null;
+    let foundLoserAnchor = false;
+
+    for (const child of allMatches) {
+      const childPosition = lowerPositionById.get(child.id);
+      if (!childPosition) {
+        continue;
+      }
+
+      for (const link of child.previousMatches ?? []) {
+        if (resolvePreviousMatchId(link.previousMatch) !== upperMatch.id) {
+          continue;
+        }
+
+        if (link.type === "loser") {
+          anchorColumn = childPosition.column;
+          anchorRow = childPosition.row;
+          foundLoserAnchor = true;
+          break;
+        }
+
+        if (anchorRow === null) {
+          anchorColumn = childPosition.column;
+          anchorRow = childPosition.row;
+        }
+      }
+
+      if (foundLoserAnchor) {
+        break;
+      }
+    }
+
+    const column = anchorColumn ?? 0;
+    const row = Math.max(0, (anchorRow ?? 0) - UPPER_TO_LOWER_ROW_GAP);
+    upperPlacements.push({ match: upperMatch, column, row });
+  }
+
+  const takenUpperRows = new Map<number, number[]>();
+  const sortedUpperPlacements = sortMatchesByBeginAt(
+    upperPlacements.map((placement) => placement.match),
+  ).map((match) => upperPlacements.find((placement) => placement.match.id === match.id)!);
+
+  const upperLayoutMatches: BracketLayoutMatch[] = [];
+
+  for (const placement of sortedUpperPlacements) {
+    const takenRows = takenUpperRows.get(placement.column) ?? [];
+    const row = nextAvailableRow(placement.row, takenRows);
+    takenRows.push(row);
+    takenUpperRows.set(placement.column, takenRows);
+    upperLayoutMatches.push({
+      ...toLayoutMatch(placement.match, placement.column, row, "upper"),
+    });
+  }
+
+  const upperBand =
+    upperLayoutMatches.length > 0
+      ? Math.max(...upperLayoutMatches.map((match) => match.row)) + MIN_ROW_GAP
+      : 0;
+
+  const layoutMatches: BracketLayoutMatch[] = [
+    ...upperLayoutMatches,
+    ...(lowerLayout?.matches ?? []).map((lowerMatch) => ({
+      ...lowerMatch,
+      row: lowerMatch.row + upperBand,
+      zone: "lower" as const,
+    })),
+  ];
+
+  const gridMatches = [...upperMatches, ...lowerMatches];
+  const gridMatchIds = new Set(gridMatches.map((match) => match.id));
+  const maxColumn = Math.max(...layoutMatches.map((match) => match.column), 0);
+  const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
+
+  return {
+    matches: layoutMatches,
+    connectors: buildConnectors(gridMatches, gridMatchIds),
+    columnCount: maxColumn + 1,
+    rowCount: maxRow + 2,
   };
 }
 
@@ -598,6 +1058,7 @@ export function buildTournamentBracketView(tournament: Tournament): TournamentBr
       return {
         format,
         upperLayout: null,
+        doubleEliminationLayout: null,
         lowerLayout: null,
         lowerBracketFlatMatches: [],
         flatMatches: sortMatchesByBeginAt(matches),
@@ -607,6 +1068,7 @@ export function buildTournamentBracketView(tournament: Tournament): TournamentBr
       return {
         format,
         upperLayout: null,
+        doubleEliminationLayout: null,
         lowerLayout: null,
         lowerBracketFlatMatches: [],
         flatMatches: [],
@@ -616,6 +1078,7 @@ export function buildTournamentBracketView(tournament: Tournament): TournamentBr
       return {
         format,
         upperLayout: buildBracketSectionLayout(matches),
+        doubleEliminationLayout: null,
         lowerLayout: null,
         lowerBracketFlatMatches: [],
         flatMatches: [],
@@ -623,12 +1086,13 @@ export function buildTournamentBracketView(tournament: Tournament): TournamentBr
       };
     case "linked-double-elimination": {
       const { upper, lower } = splitDoubleEliminationMatches(matches);
-      const lowerLayout = buildBracketSectionLayout(lower);
+      const doubleEliminationLayout = buildUnifiedDoubleEliminationLayout(upper, lower, matches);
       const lowerEliminationTree = buildEliminationTree(lower);
       return {
         format,
-        upperLayout: buildBracketSectionLayout(upper),
-        lowerLayout,
+        upperLayout: null,
+        doubleEliminationLayout,
+        lowerLayout: doubleEliminationLayout,
         lowerBracketFlatMatches: partitionOrphanMatches(lower, lowerEliminationTree),
         flatMatches: [],
         groupedMatches: [],

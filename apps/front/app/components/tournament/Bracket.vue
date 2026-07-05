@@ -9,10 +9,6 @@ interface Props {
 const { tournament } = defineProps<Props>();
 
 const bracketView = computed(() => buildTournamentBracketView(tournament));
-
-const isDoubleElimination = computed(
-  () => bracketView.value.format === "linked-double-elimination",
-);
 </script>
 
 <template>
@@ -49,30 +45,22 @@ const isDoubleElimination = computed(
       </section>
     </template>
 
-    <template v-else>
-      <section v-if="bracketView.upperLayout" class="flex flex-col gap-3">
-        <h2 v-if="isDoubleElimination" class="text-sm font-semibold text-muted">
-          {{ $t("components.tournament.bracket.upperBracket") }}
-        </h2>
-        <TournamentBracketGrid :layout="bracketView.upperLayout" />
-      </section>
+    <template v-else-if="bracketView.format === 'linked-double-elimination'">
+      <TournamentBracketGrid
+        v-if="bracketView.doubleEliminationLayout"
+        :layout="bracketView.doubleEliminationLayout"
+      />
+      <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
+        <TournamentFlatMatchRow
+          v-for="match in bracketView.lowerBracketFlatMatches"
+          :key="match.id"
+          :match="match"
+        />
+      </div>
+    </template>
 
-      <section
-        v-if="bracketView.lowerLayout || bracketView.lowerBracketFlatMatches.length"
-        class="flex flex-col gap-3 border-t border-default pt-4"
-      >
-        <h2 class="text-sm font-semibold text-muted">
-          {{ $t("components.tournament.bracket.lowerBracket") }}
-        </h2>
-        <TournamentBracketGrid v-if="bracketView.lowerLayout" :layout="bracketView.lowerLayout" />
-        <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
-          <TournamentFlatMatchRow
-            v-for="match in bracketView.lowerBracketFlatMatches"
-            :key="match.id"
-            :match="match"
-          />
-        </div>
-      </section>
+    <template v-else>
+      <TournamentBracketGrid v-if="bracketView.upperLayout" :layout="bracketView.upperLayout" />
     </template>
   </div>
 </template>

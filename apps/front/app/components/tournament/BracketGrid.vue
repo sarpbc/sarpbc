@@ -4,25 +4,25 @@ import {
   BRACKET_COLUMN_GAP,
   BRACKET_MATCH_HEIGHT,
   BRACKET_MATCH_WIDTH,
-  BRACKET_ROW_UNIT,
+  BRACKET_ROW_STEP,
+  bracketMatchCenterY,
+  bracketMatchLeft,
+  bracketMatchTop,
+  bracketTeamRowCenterY,
 } from "~/utils/tournamentBracket";
 
 const { layout } = defineProps<{
   layout: BracketSectionLayout;
 }>();
 
-const containerHeight = computed(() => layout.rowCount * BRACKET_ROW_UNIT + BRACKET_MATCH_HEIGHT);
+const containerHeight = computed(() => layout.rowCount * BRACKET_ROW_STEP + BRACKET_MATCH_HEIGHT);
 
 const containerWidth = computed(
   () => layout.columnCount * BRACKET_MATCH_WIDTH + (layout.columnCount - 1) * BRACKET_COLUMN_GAP,
 );
 
 function matchTop(row: number): number {
-  return row * BRACKET_ROW_UNIT;
-}
-
-function matchLeft(column: number): number {
-  return column * (BRACKET_MATCH_WIDTH + BRACKET_COLUMN_GAP);
+  return bracketMatchTop(row);
 }
 
 const connectorPaths = computed(() => {
@@ -36,13 +36,15 @@ const connectorPaths = computed(() => {
         return null;
       }
 
-      const fromX = matchLeft(from.column) + BRACKET_MATCH_WIDTH;
-      const fromY = matchTop(from.row) + BRACKET_MATCH_HEIGHT / 2;
+      if (from.zone && to.zone && from.zone !== to.zone) {
+        return null;
+      }
 
-      const toX = matchLeft(to.column);
-      const slotOffset =
-        connector.targetSlot === "a" ? BRACKET_MATCH_HEIGHT * 0.25 : BRACKET_MATCH_HEIGHT * 0.75;
-      const toY = matchTop(to.row) + slotOffset;
+      const fromX = bracketMatchLeft(from.column) + BRACKET_MATCH_WIDTH;
+      const fromY = bracketMatchCenterY(from.row);
+
+      const toX = bracketMatchLeft(to.column);
+      const toY = bracketTeamRowCenterY(to.row, connector.targetSlot);
 
       const midX = fromX + BRACKET_COLUMN_GAP / 2;
 
@@ -86,7 +88,7 @@ const connectorPaths = computed(() => {
         :key="match.matchId"
         class="absolute"
         :style="{
-          left: `${matchLeft(match.column)}px`,
+          left: `${bracketMatchLeft(match.column)}px`,
           top: `${matchTop(match.row)}px`,
           width: `${BRACKET_MATCH_WIDTH}px`,
         }"
