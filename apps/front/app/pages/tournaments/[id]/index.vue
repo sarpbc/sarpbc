@@ -39,7 +39,7 @@ setPageSeo({
       </div>
     </UiCrossCard>
     <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
-    <UCard v-if="tournament" variant="soft" class="w-full overflow-scroll p-2">
+    <UCard v-if="tournament" variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
       <TournamentBracket :tournament="tournament" />
     </UCard>
   </div>

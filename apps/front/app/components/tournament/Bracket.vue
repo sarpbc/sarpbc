@@ -27,38 +27,40 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
       </div>
     </template>
 
-    <template v-else>
-      <section v-if="bracketView.eliminationTree.length" class="flex flex-col gap-3">
-        <h2
-          v-if="bracketView.format === 'double-elimination'"
-          class="text-sm font-semibold text-muted"
-        >
-          {{ $t("components.tournament.bracket.upperBracket") }}
-        </h2>
-        <div class="w-full flex flex-col gap-4 overflow-x-auto">
-          <TournamentBracketMatch
-            v-for="match in bracketView.eliminationTree"
-            :key="match.matchId"
-            :match="match"
-          />
-        </div>
-      </section>
-
+    <template v-else-if="bracketView.format === 'bracket-missing-links'">
+      <p class="text-sm text-muted">
+        {{ $t("components.tournament.bracket.missingLinks") }}
+      </p>
       <section
-        v-if="bracketView.lowerBracketMatches.length"
-        class="flex flex-col gap-3 border-t border-default pt-4"
+        v-for="group in bracketView.groupedMatches"
+        :key="group.round"
+        class="flex flex-col gap-2"
       >
         <h2 class="text-sm font-semibold text-muted">
-          {{ $t("components.tournament.bracket.lowerBracket") }}
+          {{ group.round }}
         </h2>
         <div class="flex flex-col gap-2">
-          <TournamentFlatMatchRow
-            v-for="match in bracketView.lowerBracketMatches"
-            :key="match.id"
-            :match="match"
-          />
+          <TournamentFlatMatchRow v-for="match in group.matches" :key="match.id" :match="match" />
         </div>
       </section>
+    </template>
+
+    <template v-else-if="bracketView.format === 'linked-double-elimination'">
+      <TournamentBracketGrid
+        v-if="bracketView.doubleEliminationLayout"
+        :layout="bracketView.doubleEliminationLayout"
+      />
+      <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
+        <TournamentFlatMatchRow
+          v-for="match in bracketView.lowerBracketFlatMatches"
+          :key="match.id"
+          :match="match"
+        />
+      </div>
+    </template>
+
+    <template v-else>
+      <TournamentBracketGrid v-if="bracketView.upperLayout" :layout="bracketView.upperLayout" />
     </template>
   </div>
 </template>
