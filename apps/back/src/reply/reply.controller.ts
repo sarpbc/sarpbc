@@ -33,9 +33,9 @@ export class ReplyController {
 
   @UseGuards(AuthGuard)
   @Post()
+  @HttpCode(HttpStatus.NO_CONTENT)
   async create(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
     await this.replyService.create(userId, createReplyDto);
-    return { success: true };
   }
 
   @UseGuards(AuthGuard, AdminGuard)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from "@nestjs/common";
 import { TopicService } from "./topic/topic.service";
 import { PostService } from "./post/post.service";
 import { ReplyService } from "../reply/reply.service";
@@ -39,8 +39,8 @@ export class ForumController {
 
   @UseGuards(AuthGuard)
   @Post("replies")
+  @HttpCode(HttpStatus.NO_CONTENT)
   async createReply(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
     await this.replyService.create(userId, createReplyDto);
-    return { success: true };
   }
 }
