@@ -6,6 +6,7 @@ import { CreateReplyDto } from "./dto/create-reply.dto";
 import { UserService } from "src/user/user.service";
 import { Post } from "src/forum/forum.entities";
 import { NewsArticle } from "src/news/domain/news-article.entity";
+import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.constants";
 
 @Injectable()
 export class ReplyService {
@@ -28,10 +29,13 @@ export class ReplyService {
       throw new BadRequestException("Either postId or newsArticleId must be provided");
     }
 
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const hasRecentReply = await this.replyRepository.hasRecentReplyByUser(userId, oneMinuteAgo);
-    if (hasRecentReply) {
-      throw new BadRequestException("You can only create one reply per minute");
+    const oneMinuteAgo = new Date(Date.now() - REPLY_CREATION_COOLDOWN_MS);
+    const latestReply = await this.replyRepository.findLatestByUser(userId);
+    if (latestReply && latestReply.createdAt >= oneMinuteAgo) {
+      throw new BadRequestException({
+        message: "You can only create one reply per minute. Wait and try again.",
+        code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED,
+      });
     }
 
     const user = await this.userService.findById(userId);

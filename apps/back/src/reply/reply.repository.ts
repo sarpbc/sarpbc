@@ -1,4 +1,4 @@
-import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
+import { EntityRepository } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
 import { IReplyRepository } from "./domain/reply.repository.interface";
 
@@ -21,12 +21,8 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
     return this.findOne({ id });
   }
 
-  async hasRecentReplyByUser(userId: string, sinceDate: Date): Promise<boolean> {
-    const count = await this.count({
-      author: { id: userId },
-      createdAt: { $gte: sinceDate },
-    } satisfies FilterQuery<Reply>);
-    return count > 0;
+  async findLatestByUser(userId: string): Promise<Reply | null> {
+    return this.findOne({ author: { id: userId } }, { orderBy: { createdAt: "DESC" } });
   }
 
   async save(reply: Reply): Promise<void> {
