@@ -13,28 +13,34 @@ const { data: tournament } = await useLazyAsyncData(`tournament-${tournamentId.v
 
 const title = computed(() =>
   tournament.value
-    ? t(`page.tournaments.id.seoTitle`, {
+    ? t("page.tournaments.id.seoTitle", {
         tournamentName: tournament.value.name,
       })
-    : "",
+    : t("page.tournaments.id.seoTitleDefault"),
 );
 
 const description = computed(() =>
   tournament.value
-    ? t(`page.tournaments.id.seoDescription`, {
+    ? t("page.tournaments.id.seoDescription", {
         tournamentName: tournament.value.name,
       })
-    : "",
+    : t("page.tournaments.id.seoDescriptionDefault"),
 );
 
 const showPickemCta = computed(
   () => tournament.value != null && isPickemTournamentActive(tournament.value),
 );
 
-setPageSeo({
-  title: title.value,
-  description: description.value,
-});
+watch(
+  [title, description],
+  () => {
+    setPageSeo({
+      title: title.value,
+      description: description.value,
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -50,8 +56,17 @@ setPageSeo({
       :tournament="tournament"
       variant="homepage"
     />
-    <UCard v-if="tournament" variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
-      <TournamentBracket :tournament="tournament" />
-    </UCard>
+    <section
+      v-if="tournament"
+      class="w-full flex flex-col gap-3"
+      aria-labelledby="tournament-bracket-title"
+    >
+      <h2 id="tournament-bracket-title" class="text-xl font-semibold tracking-tight">
+        {{ $t("page.tournaments.id.bracketTitle") }}
+      </h2>
+      <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
+        <TournamentBracket :tournament="tournament" />
+      </UCard>
+    </section>
   </div>
 </template>
