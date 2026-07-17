@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { isPickemTournamentActive } from "~/utils/pickems";
+
 const route = useRoute();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -25,6 +27,10 @@ const description = computed(() =>
     : "",
 );
 
+const showPickemCta = computed(
+  () => tournament.value != null && isPickemTournamentActive(tournament.value),
+);
+
 setPageSeo({
   title: title.value,
   description: description.value,
@@ -39,6 +45,11 @@ setPageSeo({
       </div>
     </UiCrossCard>
     <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
+    <PickemPromoBanner
+      v-if="showPickemCta && tournament"
+      :tournament="tournament"
+      variant="homepage"
+    />
     <UCard v-if="tournament" variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
       <TournamentBracket :tournament="tournament" />
     </UCard>

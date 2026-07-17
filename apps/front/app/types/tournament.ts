@@ -20,6 +20,8 @@ export interface Tournament {
   beginAt?: Date;
   endAt?: Date;
   winnerId?: string;
+  /** Populated relation or FK id from API serialization */
+  winner?: { id: string } | string | null;
   prizepool?: string;
   imageUrl?: string;
   league?: League;

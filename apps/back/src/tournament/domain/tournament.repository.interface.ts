@@ -15,7 +15,12 @@ export interface UpsertTournamentData {
 }
 
 export interface ITournamentRepository {
-  find(options: { limit?: number; offset?: number; pickems?: boolean }): Promise<Tournament[]>;
+  find(options: {
+    limit?: number;
+    offset?: number;
+    pickems?: boolean;
+    activeOnly?: boolean;
+  }): Promise<Tournament[]>;
   findById(id: string): Promise<Tournament | null>;
   findByPandascoreId(pandascoreId: number): Promise<Tournament | null>;
   findAll(fields?: string[]): Promise<Tournament[]>;
