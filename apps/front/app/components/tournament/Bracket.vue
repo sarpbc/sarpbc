@@ -14,7 +14,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
 <template>
   <div class="w-full flex flex-col gap-6">
     <p v-if="!tournament.matches?.length" class="text-sm text-muted">
-      {{ $t("page.tournaments.id.noMatches") }}
+      {{ $t("page.tournaments.id.bracketEmpty") }}
     </p>
 
     <template v-else-if="bracketView.format === 'flat-stage'">

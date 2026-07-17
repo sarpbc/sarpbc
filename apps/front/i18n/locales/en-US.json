@@ -460,8 +460,12 @@
         "title": "Tournaments"
       },
       "id": {
-        "seoTitle": "{tournamentName} - sarpbc.org",
-        "seoDescription": "View details of the tournament {tournamentName} on sarpbc.org.",
+        "seoTitle": "{tournamentName} Bracket | sarpbc.org",
+        "seoTitleDefault": "Rocket League Tournament Bracket | sarpbc.org",
+        "seoDescription": "View the {tournamentName} Rocket League bracket, schedule, and match results on sarpbc.org.",
+        "seoDescriptionDefault": "Browse Rocket League tournament brackets, schedules, and match results on sarpbc.org.",
+        "bracketTitle": "Tournament Bracket",
+        "bracketEmpty": "The tournament bracket is not available yet. Check back after matches are announced.",
         "noMatches": "No matches available for this tournament.",
         "matchSections": {
           "upcoming": "Upcoming",
