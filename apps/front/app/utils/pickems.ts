@@ -8,8 +8,17 @@ export function getTournamentDisplayName(tournament: Tournament): string {
   return name ?? "";
 }
 
+function hasTournamentWinner(tournament: Tournament): boolean {
+  if (tournament.winnerId) return true;
+  const winner = tournament.winner;
+  if (winner == null) return false;
+  if (typeof winner === "string") return winner.length > 0;
+  return Boolean(winner.id);
+}
+
 export function isPickemTournamentActive(tournament: Tournament, now = Date.now()): boolean {
   if (!tournament.pickemsEnabled) return false;
+  if (hasTournamentWinner(tournament)) return false;
   if (tournament.endAt && new Date(tournament.endAt).getTime() < now) return false;
   return true;
 }
