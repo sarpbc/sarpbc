@@ -2,9 +2,13 @@ import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
 import type { Tournament } from "~/types/tournament";
 
-export async function getActivePickemTournaments(limit = 5): Promise<Tournament[]> {
-  const tournaments = await getAllTournaments({ limit, pickems: true });
-  return tournaments.filter(isPickemTournamentActive);
+export async function getActivePickemTournaments(limit = 1): Promise<Tournament[]> {
+  const tournaments = await getAllTournaments({
+    limit: Math.max(limit, 1),
+    pickems: true,
+    activeOnly: true,
+  });
+  return tournaments.filter(isPickemTournamentActive).slice(0, limit);
 }
 
 export async function getUserPickemsForTournament(

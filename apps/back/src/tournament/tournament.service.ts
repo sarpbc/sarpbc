@@ -25,14 +25,21 @@ export class TournamentService {
     limit = 20,
     offset = 0,
     pickems,
+    activeOnly = false,
   }: {
     limit?: number;
     offset?: number;
     pickems?: boolean;
+    activeOnly?: boolean;
   }): Promise<Tournament[]> {
     const where: Record<string, unknown> = {};
     if (typeof pickems === "boolean") {
       where.pickemsEnabled = pickems;
+    }
+    if (activeOnly) {
+      // Homepage / CTA: only open pick'ems — not finished events.
+      where.winner = null;
+      where.$or = [{ endAt: null }, { endAt: { $gt: new Date() } }];
     }
     const tournaments = await this.tournamentRepository.find(where, {
       limit,
