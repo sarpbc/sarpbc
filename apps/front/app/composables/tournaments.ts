@@ -34,19 +34,14 @@ export async function getAllTournaments(query?: {
 
 export async function getTournamentById(id: string): Promise<Tournament | null> {
   const config = useRuntimeConfig();
-  try {
-    const url = new URL(`${config.public.apiBase}/tournaments/${id}`);
+  const url = new URL(`${config.public.apiBase}/tournaments/${id}`);
 
-    const res = await $fetch<{ tournament?: Tournament }>(url.toString(), {
-      method: "GET",
-      credentials: "include",
-    });
+  const res = await $fetch<{ tournament?: Tournament }>(url.toString(), {
+    method: "GET",
+    credentials: "include",
+  });
 
-    return res.tournament ?? null;
-  } catch (error) {
-    console.error("Error fetching tournament by ID:", error);
-    return null;
-  }
+  return res.tournament ?? null;
 }
 
 export async function syncTournament(tournamentId: string): Promise<boolean> {
