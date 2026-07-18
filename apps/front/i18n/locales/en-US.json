@@ -467,6 +467,14 @@
         "bracketTitle": "Tournament Bracket",
         "bracketEmpty": "The tournament bracket is not available yet. Check back after matches are announced.",
         "noMatches": "No matches available for this tournament.",
+        "notFound": "Tournament not found",
+        "error": "Could not load this tournament. Check your connection and try again.",
+        "retry": "Try Again",
+        "status": {
+          "live": "Live",
+          "upcoming": "Upcoming",
+          "finished": "Finished"
+        },
         "matchSections": {
           "upcoming": "Upcoming",
           "unknownDate": "Date TBD"

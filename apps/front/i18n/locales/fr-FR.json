@@ -467,6 +467,14 @@
         "bracketTitle": "Bracket du tournoi",
         "bracketEmpty": "Le bracket du tournoi n’est pas encore disponible. Revenez lorsque les matchs auront été annoncés.",
         "noMatches": "Aucun match disponible pour ce tournoi.",
+        "notFound": "Tournoi introuvable",
+        "error": "Impossible de charger ce tournoi. Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer",
+        "status": {
+          "live": "En direct",
+          "upcoming": "À venir",
+          "finished": "Terminé"
+        },
         "matchSections": {
           "upcoming": "À venir",
           "unknownDate": "Date à confirmer"
