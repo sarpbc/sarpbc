@@ -19,6 +19,7 @@ export class TournamentController {
     @Query("limit") limit?: string,
     @Query("offset") offset?: string,
     @Query("pickems") pickems?: string,
+    @Query("activeOnly") activeOnly?: string,
   ) {
     const searchLimit = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
@@ -27,6 +28,7 @@ export class TournamentController {
       limit: Math.min(searchLimit, 100),
       offset: searchOffset,
       pickems: pickems ? pickems === "true" : undefined,
+      activeOnly: activeOnly === "true",
     });
 
     return { tournaments };

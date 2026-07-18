@@ -4,9 +4,10 @@ import type { Tournament } from "~/types/tournament";
 export async function getAllTournaments(query?: {
   limit?: number;
   pickems?: boolean;
+  activeOnly?: boolean;
 }): Promise<Tournament[]> {
   const config = useRuntimeConfig();
-  const { limit, pickems } = query || {};
+  const { limit, pickems, activeOnly } = query || {};
   try {
     const url = new URL(`${config.public.apiBase}/tournaments`);
     if (limit !== undefined) {
@@ -14,6 +15,9 @@ export async function getAllTournaments(query?: {
     }
     if (pickems !== undefined) {
       url.searchParams.set("pickems", pickems ? "true" : "false");
+    }
+    if (activeOnly) {
+      url.searchParams.set("activeOnly", "true");
     }
 
     const res = await $fetch<{ tournaments?: Tournament[] }>(url.toString(), {

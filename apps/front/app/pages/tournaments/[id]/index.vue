@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { isPickemTournamentActive } from "~/utils/pickems";
+
 const route = useRoute();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -33,7 +35,7 @@ const title = computed(() =>
     ? t("page.tournaments.id.seoTitle", {
         tournamentName: tournament.value.name,
       })
-    : "",
+    : t("page.tournaments.id.seoTitleDefault"),
 );
 
 const description = computed(() =>
@@ -41,7 +43,11 @@ const description = computed(() =>
     ? t("page.tournaments.id.seoDescription", {
         tournamentName: tournament.value.name,
       })
-    : "",
+    : t("page.tournaments.id.seoDescriptionDefault"),
+);
+
+const showPickemCta = computed(
+  () => tournament.value != null && isPickemTournamentActive(tournament.value),
 );
 
 watch(
@@ -83,9 +89,15 @@ watch(
     <template v-else-if="tournament">
       <TournamentHero :tournament="tournament" />
       <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
-      <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
-        <TournamentBracket :tournament="tournament" />
-      </UCard>
+      <PickemPromoBanner v-if="showPickemCta" :tournament="tournament" variant="homepage" />
+      <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-bracket-title">
+        <h2 id="tournament-bracket-title" class="text-xl font-semibold tracking-tight">
+          {{ $t("page.tournaments.id.bracketTitle") }}
+        </h2>
+        <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
+          <TournamentBracket :tournament="tournament" />
+        </UCard>
+      </section>
     </template>
   </div>
 </template>
