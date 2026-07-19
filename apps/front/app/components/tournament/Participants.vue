@@ -34,7 +34,10 @@ const hasTeams = computed(() => teams.value.length > 0);
 
 <template>
   <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-participants-title">
-    <h2 id="tournament-participants-title" class="text-xl font-semibold tracking-tight pl-1">
+    <h2
+      id="tournament-participants-title"
+      class="text-xl font-semibold tracking-tight pl-1 text-balance"
+    >
       {{ t("page.tournaments.id.participants.title") }}
     </h2>
 
@@ -43,7 +46,7 @@ const hasTeams = computed(() => teams.value.length > 0);
         v-for="team in teams"
         :key="team.id"
         :to="$localePath(`/team/${team.slug}`)"
-        class="flex items-center gap-2 border border-default p-2 hover:bg-elevated/50 transition-colors min-h-11"
+        class="flex items-center gap-2 border border-default p-2 hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation min-h-11"
         role="listitem"
       >
         <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="sm" />
@@ -54,10 +57,10 @@ const hasTeams = computed(() => teams.value.length > 0);
     <UiCard v-else variant="soft">
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
-        <p class="text-sm text-muted">
+        <p class="text-sm text-muted text-pretty">
           {{ t("page.tournaments.id.participants.empty") }}
         </p>
-        <p class="text-xs text-dimmed">
+        <p class="text-xs text-dimmed text-pretty">
           {{ t("page.tournaments.id.participants.emptyHint") }}
         </p>
       </div>

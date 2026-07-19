@@ -5,6 +5,8 @@ html {
   /* Reserve scrollbar space so Reka UI body lock (selects, menus, modals) does not shift layout. */
   scrollbar-gutter: stable;
   scrollbar-color: var(--color-neutral-300) transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::-webkit-scrollbar {
