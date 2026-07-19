@@ -80,6 +80,8 @@ const showPickemCta = computed(
   () => tournament.value != null && isPickemTournamentActive(tournament.value),
 );
 
+const tournamentMatches = computed(() => tournament.value?.matches ?? []);
+
 watch(
   [title, description],
   () => {
@@ -128,6 +130,12 @@ watch(
         :has-error="Boolean(matchHighlightsError)"
         @retry="refreshMatchHighlights()"
       />
+      <TournamentLatestResults
+        :tournament-id="tournamentId"
+        :matches="tournamentMatches"
+        :pending="pending"
+      />
+      <TournamentParticipants :tournament="tournament" />
       <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-bracket-title">
         <h2 id="tournament-bracket-title" class="text-xl font-semibold tracking-tight">
           {{ $t("page.tournaments.id.bracketTitle") }}
