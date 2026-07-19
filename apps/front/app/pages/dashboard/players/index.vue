@@ -53,7 +53,7 @@ const newPlayer = ref({
   imageUrl: "",
 });
 
-const { status, data, refresh } = getAllPlayers({ offset: page.value, limit });
+const { status, data, refresh } = getAllPlayers(computed(() => ({ offset: page.value, limit })));
 
 watch(
   status,

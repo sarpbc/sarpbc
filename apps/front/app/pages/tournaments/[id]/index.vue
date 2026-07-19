@@ -10,7 +10,7 @@ const { setPageSeo } = useSarpbcSeo();
 
 const tournamentId = computed(() => route.params.id as string);
 
-const tournamentRequest = useLazyAsyncData(
+const tournamentRequest = useAsyncData(
   () => `tournament-${tournamentId.value}`,
   async () => {
     const result = await getTournamentById(tournamentId.value);
@@ -28,7 +28,7 @@ const tournamentRequest = useLazyAsyncData(
   },
 );
 
-const matchHighlightsRequest = useLazyAsyncData<UpcomingMatchesResponse>(
+const matchHighlightsRequest = useAsyncData<UpcomingMatchesResponse>(
   () => `tournament-match-highlights-${tournamentId.value}`,
   () =>
     getUpcomingMatches({

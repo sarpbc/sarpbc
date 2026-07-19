@@ -1,9 +1,31 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const apiBase =
+  process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
+
+function apiOrigin(base: string): string | undefined {
+  try {
+    return new URL(base).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+const apiOriginUrl = apiOrigin(apiBase);
+
+const listHubSwr = { swr: 60 } as const;
+const contentSwr = { swr: 300 } as const;
+
 export default defineNuxtConfig({
   app: {
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
+      link: apiOriginUrl
+        ? [
+            { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
+            { rel: "dns-prefetch", href: apiOriginUrl },
+          ]
+        : [],
     },
   },
 
@@ -42,7 +64,18 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["evlog/nuxt", "@nuxtjs/i18n", "@nuxt/ui", "@nuxt/content", "motion-v/nuxt"],
+  image: {
+    domains: ["cdn.pandascore.co", "imagedelivery.net"],
+  },
+
+  modules: [
+    "evlog/nuxt",
+    "@nuxtjs/i18n",
+    "@nuxt/ui",
+    "@nuxt/content",
+    "@nuxt/image",
+    "motion-v/nuxt",
+  ],
 
   evlog: {
     env: {
@@ -76,17 +109,44 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/dashboard/**": { appLayout: "dashboard", appMiddleware: ["admin"] },
-    "/fr/dashboard/**": { appLayout: "dashboard", appMiddleware: ["admin"] },
+    // Admin dashboard — client-only SPA
+    "/dashboard/**": { ssr: false, appLayout: "dashboard", appMiddleware: ["admin"] },
+    "/fr/dashboard/**": { ssr: false, appLayout: "dashboard", appMiddleware: ["admin"] },
+
+    // Auth layouts
     "/login": { appLayout: "login" },
     "/fr/login": { appLayout: "login" },
     "/register": { appLayout: "login" },
     "/fr/register": { appLayout: "login" },
+
+    // Content / legal — longer SWR
+    "/": contentSwr,
+    "/fr": contentSwr,
+    "/news/**": contentSwr,
+    "/fr/news/**": contentSwr,
+    "/privacy-policy": contentSwr,
+    "/fr/privacy-policy": contentSwr,
+    "/terms-of-service": contentSwr,
+    "/fr/terms-of-service": contentSwr,
+    "/legal-notice": contentSwr,
+    "/fr/legal-notice": contentSwr,
+    "/cookie-policy": contentSwr,
+    "/fr/cookie-policy": contentSwr,
+
+    // Public list hubs — short SWR
+    "/matches": listHubSwr,
+    "/fr/matches": listHubSwr,
+    "/tournaments": listHubSwr,
+    "/fr/tournaments": listHubSwr,
+    "/player": listHubSwr,
+    "/fr/player": listHubSwr,
+    "/team": listHubSwr,
+    "/fr/team": listHubSwr,
   },
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org",
+      apiBase: apiBase,
     },
   },
 
@@ -100,7 +160,8 @@ export default defineNuxtConfig({
     },
     server: {
       watch: {
-        usePolling: true,
+        usePolling:
+          process.env.CHOKIDAR_USEPOLLING === "true" || process.env.CHOKIDAR_USEPOLLING === "1",
         interval: 1000,
       },
     },
