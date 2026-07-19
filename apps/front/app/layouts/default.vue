@@ -4,9 +4,9 @@
     <div class="w-full flex flex-col items-center py-16">
       <div class="w-full md:max-w-7xl py-6 md:py-4 px-2 md:px-0">
         <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-4">
-          <!-- Match Lateral Bar -->
+          <!-- Match Lateral Bar (desktop only; hydrate when visible) -->
           <div class="hidden md:flex md:col-span-3 lg:col-span-2">
-            <MatchLateralBar />
+            <LazyMatchLateralBar hydrate-on-visible />
           </div>
 
           <!-- Main Slot -->
@@ -16,12 +16,12 @@
 
           <!-- Forum Preview -->
           <div class="flex md:col-span-3 lg:col-span-2 mt-4 md:mt-0">
-            <ForumPreview />
+            <LazyForumPreview hydrate-on-idle />
           </div>
         </div>
       </div>
     </div>
     <NavFooter class="mt-auto" />
-    <LandingCookiePopup />
+    <LazyLandingCookiePopup hydrate-on-idle />
   </main>
 </template>

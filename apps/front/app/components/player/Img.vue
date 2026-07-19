@@ -3,6 +3,8 @@ interface Props {
   playerName: string;
   img?: string;
   size?: "sm" | "md" | "lg" | "xl";
+  /** Use for above-the-fold / LCP images */
+  priority?: boolean;
 }
 
 const boxClasses = {
@@ -10,6 +12,20 @@ const boxClasses = {
   md: "h-24 w-36",
   lg: "h-32 w-48",
   xl: "h-48 w-64",
+};
+
+const dimensions = {
+  sm: { width: 64, height: 48 },
+  md: { width: 144, height: 96 },
+  lg: { width: 192, height: 128 },
+  xl: { width: 256, height: 192 },
+};
+
+const sizesAttr = {
+  sm: "64px",
+  md: "144px",
+  lg: "192px",
+  xl: "256px",
 };
 
 const iconClasses = {
@@ -26,15 +42,22 @@ const fallbackRadiusClasses = {
   xl: "rounded-lg",
 };
 
-const { playerName, img = undefined, size = "md" } = defineProps<Props>();
+const { playerName, img = undefined, size = "md", priority = false } = defineProps<Props>();
+
+const dim = computed(() => dimensions[size]);
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
-    <img
+    <NuxtImg
       v-if="img"
       :src="img"
       :alt="playerName"
+      :width="dim.width"
+      :height="dim.height"
+      :sizes="sizesAttr[size]"
+      :loading="priority ? 'eager' : 'lazy'"
+      :fetchpriority="priority ? 'high' : undefined"
       :class="[
         fallbackRadiusClasses[size],
         'max-h-full max-w-full object-contain ring-1 ring-black/10 dark:ring-white/10',
