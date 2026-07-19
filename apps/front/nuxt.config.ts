@@ -84,6 +84,7 @@ export default defineNuxtConfig({
   },
 
   $production: {
+    // Evlog: never sample debug in production; silence console transport
     evlog: {
       console: false,
       sampling: {
@@ -94,6 +95,21 @@ export default defineNuxtConfig({
           error: 100,
         },
         keep: [{ duration: 1000 }, { status: 400 }],
+      },
+    },
+    // Strip debug noise from client + server bundles (keep console.error/warn)
+    vite: {
+      esbuild: {
+        drop: ["debugger"],
+        pure: ["console.debug", "console.log"],
+      },
+    },
+    nitro: {
+      esbuild: {
+        options: {
+          drop: ["debugger"],
+          pure: ["console.debug", "console.log"],
+        },
       },
     },
   },
