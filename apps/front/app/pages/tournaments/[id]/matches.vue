@@ -129,7 +129,7 @@ watch(
               <div v-for="(match, index) in dayGroup.matches" :key="match.id">
                 <ULink
                   :to="$localePath(`/matches/${match.id}`)"
-                  class="block hover:bg-elevated/50 transition-colors"
+                  class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
                 >
                   <MatchRow :match="match" :last="index === dayGroup.matches.length - 1" />
                 </ULink>
@@ -150,7 +150,7 @@ watch(
             <div v-for="(match, index) in dayGroup.matches" :key="match.id">
               <ULink
                 :to="$localePath(`/matches/${match.id}`)"
-                class="block hover:bg-elevated/50 transition-colors"
+                class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
               >
                 <MatchResultRow :match="match" :last="index === dayGroup.matches.length - 1" />
               </ULink>
