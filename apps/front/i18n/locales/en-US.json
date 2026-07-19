@@ -487,6 +487,22 @@
           "error": "Could not load tournament matches. Check your connection and try again.",
           "empty": "No live or upcoming matches yet.",
           "emptyHint": "Check back when the tournament schedule is announced."
+        },
+        "latestResults": {
+          "title": "Latest Results",
+          "viewAll": "View All Results",
+          "error": "Could not load tournament results. Check your connection and try again.",
+          "empty": "No results yet.",
+          "emptyHint": "Finished matches will show up here as the tournament progresses."
+        },
+        "participants": {
+          "title": "Participating Teams",
+          "empty": "Teams not announced yet.",
+          "emptyHint": "Check back when the tournament roster is confirmed."
+        },
+        "hero": {
+          "teamsCount": "{count} team | {count} teams",
+          "champion": "Champion:"
         }
       }
     },
