@@ -104,8 +104,36 @@ function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
 </svg>`;
 }
 
+function getFetchStatusCode(error: unknown): number | undefined {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  if ("statusCode" in error && typeof error.statusCode === "number") {
+    return error.statusCode;
+  }
+
+  if ("status" in error && typeof error.status === "number") {
+    return error.status;
+  }
+
+  if (
+    "response" in error &&
+    error.response &&
+    typeof error.response === "object" &&
+    "status" in error.response &&
+    typeof error.response.status === "number"
+  ) {
+    return error.response.status;
+  }
+
+  return undefined;
+}
+
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id")?.replace(/\.svg$/, "");
+  // Nitro names the param `id.svg` for `[id].svg.get.ts` (not `id`). See nitrojs/nitro#3846.
+  const raw = getRouterParam(event, "id.svg") ?? getRouterParam(event, "id");
+  const id = raw?.replace(/\.svg$/, "");
   if (!id) {
     throw createError({ statusCode: 404, statusMessage: "Match not found" });
   }
@@ -115,8 +143,17 @@ export default defineEventHandler(async (event) => {
   let matchDetail: MatchDetailResponse;
   try {
     matchDetail = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
-  } catch {
-    throw createError({ statusCode: 404, statusMessage: "Match not found" });
+  } catch (error: unknown) {
+    const statusCode = getFetchStatusCode(error);
+    if (statusCode === 404) {
+      throw createError({ statusCode: 404, statusMessage: "Match not found" });
+    }
+
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Could not load match for OG image",
+      cause: error,
+    });
   }
 
   setHeader(event, "Content-Type", "image/svg+xml; charset=utf-8");
