@@ -478,6 +478,15 @@
         "matchSections": {
           "upcoming": "Upcoming",
           "unknownDate": "Date TBD"
+        },
+        "matchHighlights": {
+          "title": "Tournament Matches",
+          "viewSchedule": "View Full Schedule",
+          "live": "Live Now",
+          "upcoming": "Up Next",
+          "error": "Could not load tournament matches. Check your connection and try again.",
+          "empty": "No live or upcoming matches yet.",
+          "emptyHint": "Check back when the tournament schedule is announced."
         }
       }
     },
