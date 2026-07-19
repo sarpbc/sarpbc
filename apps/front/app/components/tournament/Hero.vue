@@ -60,10 +60,10 @@ const typeLabel = computed(() => {
 });
 
 const metaItems = computed(() => {
-  const items: string[] = [];
-  if (prizepoolLabel.value) items.push(prizepoolLabel.value);
-  if (teamCountLabel.value) items.push(teamCountLabel.value);
-  if (typeLabel.value) items.push(typeLabel.value);
+  const items: { label: string; tabular: boolean }[] = [];
+  if (prizepoolLabel.value) items.push({ label: prizepoolLabel.value, tabular: true });
+  if (teamCountLabel.value) items.push({ label: teamCountLabel.value, tabular: true });
+  if (typeLabel.value) items.push({ label: typeLabel.value, tabular: false });
   return items;
 });
 
@@ -88,7 +88,7 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
           v-if="tournament.league?.imageUrl"
           :src="tournament.league.imageUrl"
           :alt="tournament.league.name"
-          class="size-4 object-contain"
+          class="size-4 object-contain outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
         <p v-if="tournament.league?.name" class="text-sm text-muted text-pretty">
           {{ tournament.league.name }}
@@ -113,16 +113,19 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
         v-if="metaItems.length > 0"
         class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
       >
-        <template v-for="(item, index) in metaItems" :key="item">
+        <template v-for="(item, index) in metaItems" :key="item.label">
           <span v-if="index > 0" aria-hidden="true">·</span>
-          <span class="tabular-nums">{{ item }}</span>
+          <span :class="{ 'tabular-nums': item.tabular }">{{ item.label }}</span>
         </template>
       </div>
 
       <p v-if="showChampion && championTeam" class="text-sm text-highlighted text-pretty">
         <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
         {{ " " }}
-        <ULink :to="$localePath(`/team/${championTeam.slug}`)" class="font-medium hover:underline">
+        <ULink
+          :to="$localePath(`/team/${championTeam.slug}`)"
+          class="inline-flex items-center min-h-10 font-medium hover:underline"
+        >
           {{ championTeam.name }}
         </ULink>
       </p>

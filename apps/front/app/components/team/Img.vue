@@ -59,7 +59,10 @@ const dim = computed(() => dimensions[size]);
       :sizes="sizesAttr[size]"
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
-      :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
+      :class="[
+        fallbackRadiusClasses[size],
+        'max-h-full max-w-full object-contain outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10',
+      ]"
       :style="invertLightmode ? 'filter: invert(1);' : ''"
     />
     <div
@@ -67,7 +70,7 @@ const dim = computed(() => dimensions[size]);
       :class="[
         boxClasses[size],
         fallbackRadiusClasses[size],
-        'flex items-center justify-center bg-elevated',
+        'flex items-center justify-center bg-elevated outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10',
       ]"
     >
       <UIcon name="i-fluent-people-team-24-regular" :class="[iconClasses[size], 'text-muted']" />

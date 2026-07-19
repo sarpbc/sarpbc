@@ -27,12 +27,12 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
 <template>
   <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-matches-title">
     <div class="flex items-center justify-between gap-3 pl-1">
-      <h2 id="tournament-matches-title" class="text-xl font-semibold tracking-tight">
+      <h2 id="tournament-matches-title" class="text-xl font-semibold tracking-tight text-balance">
         {{ t("page.tournaments.id.matchHighlights.title") }}
       </h2>
       <ULink
         :to="$localePath(`/tournaments/${tournamentId}/matches`)"
-        class="text-sm text-muted hover:text-highlighted"
+        class="inline-flex items-center min-h-10 px-1 -mr-1 text-sm text-muted hover:text-highlighted touch-manipulation"
       >
         {{ t("page.tournaments.id.matchHighlights.viewSchedule") }}
       </ULink>
@@ -53,7 +53,7 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
     <UiCard v-else-if="hasError" variant="soft">
       <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-        <p class="text-sm text-muted">
+        <p class="text-sm text-muted text-pretty">
           {{ t("page.tournaments.id.matchHighlights.error") }}
         </p>
         <UButton variant="outline" color="error" @click="emit('retry')">
@@ -67,11 +67,11 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         <h3 class="text-sm font-medium text-highlighted pl-1">
           {{ t("page.tournaments.id.matchHighlights.live") }}
         </h3>
-        <UiCard class="border-error/30 bg-error/5 ring-1 ring-error/15">
+        <UiCard class="border-error/30 bg-error/5">
           <div v-for="(match, index) in liveMatches" :key="match.id">
             <ULink
               :to="$localePath(`/matches/${match.id}`)"
-              class="block hover:bg-elevated/50 transition-colors"
+              class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
               <MatchRow :match="match" live :last="index === liveMatches.length - 1" />
             </ULink>
@@ -87,7 +87,7 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
           <div v-for="(match, index) in upcomingMatches" :key="match.id">
             <ULink
               :to="$localePath(`/matches/${match.id}`)"
-              class="block hover:bg-elevated/50 transition-colors"
+              class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
               <MatchRow :match="match" :last="index === upcomingMatches.length - 1" />
             </ULink>
@@ -99,10 +99,10 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
     <UiCard v-else variant="soft">
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon name="i-fluent-calendar-clock-24-regular" class="text-3xl text-muted" />
-        <p class="text-sm text-muted">
+        <p class="text-sm text-muted text-pretty">
           {{ t("page.tournaments.id.matchHighlights.empty") }}
         </p>
-        <p class="text-xs text-dimmed">
+        <p class="text-xs text-dimmed text-pretty">
           {{ t("page.tournaments.id.matchHighlights.emptyHint") }}
         </p>
       </div>

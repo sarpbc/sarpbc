@@ -47,7 +47,7 @@ const winnerParticipantId = computed(() => {
           }}
         </span>
         <span
-          class="col-span-1 truncate font-semibold text-end"
+          class="col-span-1 truncate font-semibold text-end tabular-nums"
           :class="winnerParticipantId === match.participants[0]!.id ? 'text-success' : 'text-error'"
         >
           {{ getMatchParticipantScore(match.results, match.participants[0]!.id) }}
@@ -65,7 +65,7 @@ const winnerParticipantId = computed(() => {
           }}
         </span>
         <span
-          class="col-span-1 truncate font-semibold text-end"
+          class="col-span-1 truncate font-semibold text-end tabular-nums"
           :class="winnerParticipantId === match.participants[1]!.id ? 'text-success' : 'text-error'"
         >
           {{ getMatchParticipantScore(match.results, match.participants[1]!.id) }}

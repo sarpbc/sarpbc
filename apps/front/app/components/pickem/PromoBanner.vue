@@ -39,7 +39,7 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
             class="shrink-0 text-lg text-primary"
             aria-hidden="true"
           />
-          <h2 class="text-base font-semibold tracking-tight">
+          <h2 class="text-base font-semibold tracking-tight text-balance">
             {{ title }}
           </h2>
         </div>

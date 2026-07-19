@@ -48,7 +48,10 @@ const {
     </div>
     <div v-if="!result" class="col-span-1 flex flex-row items-center justify-end">
       <UiBadgeLive v-if="live" />
-      <span v-else-if="match.beginAt" class="text-end text-xs text-muted font-thin col-span-1">
+      <span
+        v-else-if="match.beginAt"
+        class="text-end text-xs text-muted font-thin col-span-1 tabular-nums"
+      >
         {{ hourDf.format(new Date(match.beginAt)) }}
       </span>
     </div>
