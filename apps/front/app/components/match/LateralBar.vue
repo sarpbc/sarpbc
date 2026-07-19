@@ -1,19 +1,14 @@
 <script lang="ts" setup>
-const { data, refresh: refreshUpcomingMatches } = await useLazyAsyncData(`upcoming-matches`, () =>
-  getUpcomingMatches(),
-);
-const { data: results, refresh: refreshResults } = await useLazyAsyncData(`matches-results`, () =>
-  getMatchesResults(),
-);
-
-const route = useRoute();
-watch(
-  () => route.path,
-  () => {
-    refreshUpcomingMatches();
-    refreshResults();
+const { data } = await useLazyAsyncData(`upcoming-matches`, () => getUpcomingMatches(), {
+  getCachedData(key, nuxtApp) {
+    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
   },
-);
+});
+const { data: results } = await useLazyAsyncData(`matches-results`, () => getMatchesResults(), {
+  getCachedData(key, nuxtApp) {
+    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+  },
+});
 </script>
 
 <template>

@@ -1,24 +1,32 @@
 import { useUser } from "~/composables/state";
 import { getProfile } from "~/composables/user";
 
+const ACCESS_TOKEN_COOKIE = "access_token";
+
 /**
  * Global authentication middleware
- * Runs on every route to check if user has a valid session cookie
- * Sets user state based on cookie validity
+ * Resolves session once per app load.
+ * `undefined` = unknown, `null` = guest, `User` = authenticated.
+ *
+ * SSR skips the profile request when the httpOnly access_token cookie is absent.
+ * Client cannot read httpOnly cookies, so it fetches once when state is still unknown
+ * (credentials are sent automatically via apiFetch).
  */
-export default defineNuxtRouteMiddleware(async (_to, _from) => {
+export default defineNuxtRouteMiddleware(async () => {
   const user = useUser();
 
-  // Server-side: Always try to get profile from cookie
-  if (import.meta.server) {
-    const profile = await getProfile();
-    user.value = profile;
+  if (user.value !== undefined) {
     return;
   }
 
-  // Client-side: Load profile if not already loaded
-  if (import.meta.client && user.value === null) {
-    const profile = await getProfile();
-    user.value = profile;
+  if (import.meta.server) {
+    const accessToken = useCookie(ACCESS_TOKEN_COOKIE);
+    if (!accessToken.value) {
+      user.value = null;
+      return;
+    }
   }
+
+  const profile = await getProfile();
+  user.value = profile;
 });

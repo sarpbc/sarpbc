@@ -13,7 +13,7 @@ const {
   pending,
   error,
   refresh,
-} = await useLazyAsyncData(
+} = await useAsyncData(
   () => `tournament-${tournamentId.value}`,
   async () => {
     const result = await getTournamentById(tournamentId.value);
@@ -31,7 +31,7 @@ const {
   },
 );
 
-const { data: matches } = await useLazyAsyncData(
+const { data: matches } = await useAsyncData(
   () => `tournament-matches-${tournamentId.value}`,
   () => getTournamentMatches(tournamentId.value),
   {

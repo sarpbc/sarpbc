@@ -1,11 +1,14 @@
 <script lang="ts" setup>
-const route = useRoute();
 const localePath = useLocalePath();
 
 const { data: recentForumActivities } = await useLazyAsyncData(
   `forum-posts-preview`,
   () => getRecentForumActivities(),
-  { watch: [() => route.path] },
+  {
+    getCachedData(key, nuxtApp) {
+      return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+    },
+  },
 );
 </script>
 

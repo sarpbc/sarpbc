@@ -14,7 +14,7 @@ const {
   pending,
   error,
   refresh,
-} = await useLazyAsyncData<MatchDetailResponse | null>(
+} = await useAsyncData<MatchDetailResponse | null>(
   () => `match-${matchId.value}`,
   async () => {
     try {

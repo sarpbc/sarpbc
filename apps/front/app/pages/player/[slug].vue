@@ -66,7 +66,12 @@ setPageSeo({
         </div>
       </div>
       <div class="w-full flex flex-row border border-default gap-4 p-4">
-        <PlayerImg :player-name="currentPlayer.name" :img="currentPlayer.imageUrl" size="xl" />
+        <PlayerImg
+          :player-name="currentPlayer.name"
+          :img="currentPlayer.imageUrl"
+          size="xl"
+          priority
+        />
         <div class="w-full flex flex-col">
           <div class="w-full flex flex-row justify-between">
             <span class="text-muted">{{ t("page.player.slug.age") }}</span>

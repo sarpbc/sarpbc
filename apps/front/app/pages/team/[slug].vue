@@ -12,10 +12,14 @@ const {
   data: team,
   pending,
   error,
-} = await useLazyAsyncData(`team-${slug.value}`, () => getTeamFromSlug(slug.value));
+} = await useAsyncData(
+  () => `team-${slug.value}`,
+  () => getTeamFromSlug(slug.value),
+  { watch: [slug] },
+);
 
-const { data: formerPlayers } = await useLazyAsyncData(
-  `team-former-players-${slug.value}`,
+const { data: formerPlayers } = await useAsyncData(
+  () => `team-former-players-${slug.value}`,
   async () => {
     if (!team.value?.id) return [];
     return getTeamFormerPlayers(team.value.id);

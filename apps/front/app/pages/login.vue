@@ -14,12 +14,12 @@ const state = reactive<LoginState>({
 onMounted(async () => {
   const user = useUser();
 
-  if (user.value === null) {
+  if (user.value === undefined) {
     const profile = await getProfile();
     user.value = profile;
   }
 
-  if (user.value === null) {
+  if (!user.value) {
     return;
   }
 

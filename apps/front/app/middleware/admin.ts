@@ -8,8 +8,8 @@ import { useUser } from "~/composables/state";
 export default defineNuxtRouteMiddleware((_to, _from) => {
   const user = useUser();
 
-  // Redirect to login if not authenticated
-  if (user.value === null) {
+  // Redirect to login if not authenticated (null guest or unresolved)
+  if (!user.value) {
     return navigateTo("/login");
   }
 

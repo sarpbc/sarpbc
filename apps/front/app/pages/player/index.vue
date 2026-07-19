@@ -17,11 +17,13 @@ const start = computed(() => {
   return param?.toUpperCase() || "";
 });
 
-const { data: playersResponse, pending } = getAllPlayers({
-  limit: PLAYERS_PER_PAGE,
-  offset: offset.value,
-  start: start.value || undefined,
-});
+const { data: playersResponse, pending } = getAllPlayers(
+  computed(() => ({
+    limit: PLAYERS_PER_PAGE,
+    offset: offset.value,
+    start: start.value || undefined,
+  })),
+);
 
 const players = computed(() => playersResponse.value?.players || []);
 const totalPlayers = computed(() => playersResponse.value?.total || 0);

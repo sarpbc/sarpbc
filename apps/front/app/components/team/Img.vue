@@ -3,6 +3,8 @@ interface Props {
   teamName: string;
   imageUrl?: string;
   size?: "xs" | "sm" | "md" | "lg";
+  /** Use for above-the-fold / LCP images */
+  priority?: boolean;
 }
 
 const boxClasses = {
@@ -10,6 +12,20 @@ const boxClasses = {
   sm: "size-10",
   md: "size-16",
   lg: "size-24",
+};
+
+const dimensions = {
+  xs: { width: 16, height: 16 },
+  sm: { width: 40, height: 40 },
+  md: { width: 64, height: 64 },
+  lg: { width: 96, height: 96 },
+};
+
+const sizesAttr = {
+  xs: "16px",
+  sm: "40px",
+  md: "64px",
+  lg: "96px",
 };
 
 const iconClasses = {
@@ -26,17 +42,23 @@ const fallbackRadiusClasses = {
   lg: "rounded-lg",
 };
 
-const { teamName, imageUrl, size = "md" } = defineProps<Props>();
+const { teamName, imageUrl, size = "md", priority = false } = defineProps<Props>();
 
 const invertLightmode = computed(() => imageUrl !== undefined && imageUrl.includes("lightmode"));
+const dim = computed(() => dimensions[size]);
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
-    <img
+    <NuxtImg
       v-if="imageUrl"
       :src="imageUrl"
       :alt="`${teamName} logo`"
+      :width="dim.width"
+      :height="dim.height"
+      :sizes="sizesAttr[size]"
+      :loading="priority ? 'eager' : 'lazy'"
+      :fetchpriority="priority ? 'high' : undefined"
       :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
       :style="invertLightmode ? 'filter: invert(1);' : ''"
     />
