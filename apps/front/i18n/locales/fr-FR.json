@@ -478,6 +478,15 @@
         "matchSections": {
           "upcoming": "À venir",
           "unknownDate": "Date à confirmer"
+        },
+        "matchHighlights": {
+          "title": "Matchs du tournoi",
+          "viewSchedule": "Voir le calendrier complet",
+          "live": "En direct",
+          "upcoming": "À venir",
+          "error": "Impossible de charger les matchs du tournoi. Vérifiez votre connexion et réessayez.",
+          "empty": "Aucun match en direct ou à venir pour le moment.",
+          "emptyHint": "Revenez lorsque le calendrier du tournoi sera annoncé."
         }
       }
     },

@@ -9,6 +9,8 @@ export type MatchesListQuery = {
   offset?: number;
   /** User-facing tournament filter — League id in the API. */
   leagueId?: string;
+  /** Sub-event filter — Tournament id in the API. */
+  tournamentId?: string;
 };
 
 function buildMatchesUrl(path: string, query?: MatchesListQuery): string {
@@ -23,6 +25,9 @@ function buildMatchesUrl(path: string, query?: MatchesListQuery): string {
   }
   if (query?.leagueId) {
     url.searchParams.set("leagueId", query.leagueId);
+  }
+  if (query?.tournamentId) {
+    url.searchParams.set("tournamentId", query.tournamentId);
   }
 
   return url.toString();
