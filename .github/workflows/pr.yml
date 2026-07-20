@@ -7,14 +7,59 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      quality: ${{ steps.filter.outputs.quality }}
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Filter paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            quality:
+              - 'apps/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+              - '.oxlintrc.json'
+              - '.oxfmtrc.json'
+              - '.nvmrc'
+              - '.npmrc'
+              - 'lefthook.yml'
+              - 'docker-compose.local.yml'
+              - '.github/workflows/**'
+            backend:
+              - 'apps/back/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+            frontend:
+              - 'apps/front/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+
   quality:
     name: Lint and format
+    needs: changes
+    if: needs.changes.outputs.quality == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,6 +86,8 @@ jobs:
 
   backend:
     name: Backend unit tests
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -67,6 +114,8 @@ jobs:
 
   frontend:
     name: Frontend typecheck and build
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -93,3 +142,30 @@ jobs:
         env:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
+
+  ci:
+    name: CI
+    needs: [changes, quality, backend, frontend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          results=(
+            "${{ needs.changes.result }}"
+            "${{ needs.quality.result }}"
+            "${{ needs.backend.result }}"
+            "${{ needs.frontend.result }}"
+          )
+
+          for result in "${results[@]}"; do
+            case "$result" in
+              success|skipped) ;;
+              *)
+                echo "A required job finished with status: $result"
+                exit 1
+                ;;
+            esac
+          done
+
+          echo "All executed jobs succeeded (path-skipped jobs ignored)."
