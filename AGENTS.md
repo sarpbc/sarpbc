@@ -24,6 +24,7 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 | **thermo-nuclear-code-quality-review** | `.agents/skills/thermo-nuclear-code-quality-review/` | Deep code quality audit (explicit request)                                    |
 | **grill-me**                           | `.agents/skills/grill-me/`                           | Interview-style plan review (explicit `/grilling`)                            |
 | **sarpbc-pm**                          | `.agents/skills/sarpbc-pm/`                          | Roadmap, backlog audit, feature design, scope grilling, Linear tickets        |
+| **customer-needs**                     | `.agents/skills/customer-needs/`                     | Interpret feedback; underlying needs vs literal feature requests              |
 
 **Deep dives:** read each skill's `SKILL.md` first, then `AGENTS.md` or `references/` if needed.
 
