@@ -80,6 +80,7 @@ describe("PandascoreTournamentMapper", () => {
       type: "online",
       winnerType: "Team",
       winnerPandascoreTeamId: 7,
+      hasBracket: undefined,
       league: {
         pandascoreId: 1,
         name: "RLCS",
@@ -107,6 +108,7 @@ describe("PandascoreTournamentMapper", () => {
               nationality: "FR",
               imageUrl: undefined,
               teamSlug: "team-vitality",
+              role: null,
             },
           ],
         },
