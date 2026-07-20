@@ -45,6 +45,14 @@
       "recentPosts": "Activités récentes",
       "signInToCreate": "Connectez-vous pour créer un post"
     },
+    "game": {
+      "sidebarPromo": {
+        "heading": "Jeux du jour",
+        "title": "Air Riddle",
+        "description": "Devinez le joueur Rocket League du jour en 6 essais.",
+        "cta": "Jouer à Air Riddle"
+      }
+    },
     "header": {
       "signin": "Se connecter"
     },

@@ -45,6 +45,14 @@
       "recentPosts": "Recent Activity",
       "signInToCreate": "Sign in to create a post"
     },
+    "game": {
+      "sidebarPromo": {
+        "heading": "Daily Games",
+        "title": "Air Riddle",
+        "description": "Guess today's Rocket League player in 6 tries.",
+        "cta": "Play Air Riddle"
+      }
+    },
     "header": {
       "signin": "Sign In"
     },
