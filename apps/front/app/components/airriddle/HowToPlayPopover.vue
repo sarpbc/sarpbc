@@ -13,12 +13,12 @@ const titleId = "airriddle-how-to-play-title";
     <UButton
       variant="ghost"
       color="neutral"
-      size="sm"
-      class="size-9 min-h-9 min-w-9 p-0 font-semibold tabular-nums"
+      class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-semibold leading-none tabular-nums"
       :aria-label="t('page.game.airriddle.howToPlayLabel')"
       aria-haspopup="dialog"
       :aria-expanded="open"
       :aria-controls="dialogId"
+      @click.stop
     >
       ?
     </UButton>
