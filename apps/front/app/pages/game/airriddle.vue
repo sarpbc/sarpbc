@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useMediaQuery, usePreferredReducedMotion } from "@vueuse/core";
-import { motion } from "motion-v";
+import { useMediaQuery } from "@vueuse/core";
 import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.vue";
 import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
 import AirRiddleTile from "~/components/airriddle/Tile.vue";
@@ -27,8 +26,6 @@ const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
 const answer = ref<string | undefined>(undefined);
 const hiddenInputRef = useTemplateRef("hiddenInputRef");
-const reducedMotionPreference = usePreferredReducedMotion();
-const prefersReducedMotion = computed(() => reducedMotionPreference.value === "reduce");
 const isMobile = useMediaQuery("(max-width: 639px)");
 
 const gameState = reactive<GameState>({
@@ -73,8 +70,10 @@ const emptyRows = computed(() => {
   return Math.max(0, maxAttempts - gameState.attempts.length - 1);
 });
 
+const tileSize = computed(() => (isMobile.value ? "2.75rem" : "3.5rem"));
+
 const tileGridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, minmax(0, 1fr))`,
+  gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, ${tileSize.value})`,
 }));
 
 function focusHiddenInput() {
@@ -141,6 +140,32 @@ function onPaste(event: ClipboardEvent) {
   error.value = undefined;
 }
 
+function persistGameState() {
+  if (gameState.targetLength <= 0) {
+    return;
+  }
+
+  saveAirRiddleStoredState({
+    targetLength: gameState.targetLength,
+    attempts: gameState.attempts,
+    isWon: gameState.isWon,
+    isGameOver: gameState.isGameOver,
+    answer: answer.value,
+  });
+}
+
+function restoreGameState(length: number) {
+  const stored = loadAirRiddleStoredState();
+  if (!stored || stored.targetLength !== length) {
+    return;
+  }
+
+  gameState.attempts = stored.attempts;
+  gameState.isWon = stored.isWon;
+  gameState.isGameOver = stored.isGameOver;
+  answer.value = stored.answer;
+}
+
 onMounted(async () => {
   window.addEventListener("keydown", onPhysicalKeydown);
   window.addEventListener("paste", onPaste);
@@ -148,6 +173,9 @@ onMounted(async () => {
   try {
     const length = await getTodayAirRiddleLength();
     gameState.targetLength = length;
+    if (length > 0) {
+      restoreGameState(length);
+    }
   } catch (loadError) {
     console.error("Failed to initialize game:", loadError);
   } finally {
@@ -210,6 +238,7 @@ async function submitGuess() {
     }
 
     clearGuess();
+    persistGameState();
   } catch (submitError) {
     console.error("Failed to submit guess:", submitError);
   } finally {
@@ -227,30 +256,33 @@ setPageSeo({
 <template>
   <section class="flex w-full flex-col gap-4">
     <UiCrossCard class="min-h-14">
-      <div class="relative flex w-full items-center justify-center px-12 py-3 text-center">
-        <div class="flex flex-col items-center gap-1">
-          <h1 class="text-xl font-semibold tracking-tight">
-            {{ t("page.game.airriddle.title") }}
-          </h1>
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.game.airriddle.description") }}
-          </p>
-        </div>
-        <div class="absolute right-3 top-1/2 -translate-y-1/2">
-          <AirRiddleHowToPlayPopover />
-        </div>
+      <div class="flex w-full items-center justify-center py-3 text-center">
+        <h1 class="text-xl font-semibold tracking-tight">
+          {{ t("page.game.airriddle.title") }}
+        </h1>
       </div>
     </UiCrossCard>
 
-    <UiCard v-if="loading" class="mx-auto w-full max-w-md p-6">
+    <UiCard v-if="loading" class="relative w-full p-6">
+      <div class="absolute right-3 top-3" @click.stop>
+        <AirRiddleHowToPlayPopover />
+      </div>
       <div class="flex flex-col items-center gap-6">
-        <div class="flex w-full flex-col gap-2">
-          <USkeleton class="mx-auto h-4 w-40" />
-          <div class="flex justify-center gap-1.5">
-            <USkeleton v-for="index in 6" :key="index" class="size-12 sm:size-14" />
+        <USkeleton class="h-4 w-40" />
+        <div class="inline-flex flex-col border-l border-t border-default">
+          <div class="inline-grid grid-cols-6 gap-0">
+            <USkeleton
+              v-for="index in 6"
+              :key="index"
+              class="size-11 rounded-none border-r border-b border-default sm:size-14"
+            />
           </div>
-          <div class="flex justify-center gap-1.5">
-            <USkeleton v-for="index in 6" :key="`row-${index}`" class="size-12 sm:size-14" />
+          <div class="inline-grid grid-cols-6 gap-0">
+            <USkeleton
+              v-for="index in 6"
+              :key="`row-${index}`"
+              class="size-11 rounded-none border-r border-b border-default sm:size-14"
+            />
           </div>
         </div>
         <p class="text-sm text-muted">
@@ -260,12 +292,15 @@ setPageSeo({
     </UiCard>
 
     <template v-else-if="gameState.targetLength > 0">
-      <UiCard class="mx-auto w-full max-w-md p-4 sm:p-6" @click="focusHiddenInput">
+      <UiCard class="relative w-full p-4 sm:p-6" @click="focusHiddenInput">
+        <div class="absolute right-3 top-3" @click.stop>
+          <AirRiddleHowToPlayPopover />
+        </div>
         <input
           v-if="!isMobile"
           ref="hiddenInputRef"
           type="text"
-          class="sr-only"
+          class="sr-only outline-none focus:outline-none"
           readonly
           :value="currentGuess"
           :aria-label="t('page.game.airriddle.enterGuess')"
@@ -274,44 +309,22 @@ setPageSeo({
 
         <div class="flex flex-col items-center gap-6">
           <div class="w-full text-center" aria-live="polite" aria-atomic="true">
-            <motion.div
-              v-if="gameState.isWon"
-              class="text-success"
-              :initial="prefersReducedMotion ? false : { scale: 0, y: -20 }"
-              :animate="prefersReducedMotion ? undefined : { scale: 1, y: 0 }"
-              :transition="{
-                type: 'spring',
-                stiffness: 200,
-                damping: 15,
-                delay: prefersReducedMotion ? 0 : 0.3,
-              }"
-            >
+            <div v-if="gameState.isWon" class="text-success">
               <p class="text-xl font-bold tracking-tight">
                 {{ t("page.game.airriddle.congratulations") }}
               </p>
               <p class="text-sm text-muted tabular-nums">
                 {{ statusMessage }}
               </p>
-            </motion.div>
-            <motion.div
-              v-else-if="gameState.isGameOver"
-              class="text-error"
-              :initial="prefersReducedMotion ? false : { scale: 0, y: -20 }"
-              :animate="prefersReducedMotion ? undefined : { scale: 1, y: 0 }"
-              :transition="{
-                type: 'spring',
-                stiffness: 200,
-                damping: 15,
-                delay: prefersReducedMotion ? 0 : 0.3,
-              }"
-            >
+            </div>
+            <div v-else-if="gameState.isGameOver" class="text-error">
               <p class="text-xl font-bold tracking-tight">
                 {{ t("page.game.airriddle.gameOver") }}
               </p>
               <p class="text-sm text-muted">
                 {{ statusMessage }}
               </p>
-            </motion.div>
+            </div>
             <div v-else>
               <p class="text-sm font-semibold text-muted tabular-nums">
                 {{ statusMessage }}
@@ -325,49 +338,47 @@ setPageSeo({
             </div>
           </div>
 
-          <div class="flex w-full flex-col gap-1.5">
-            <div
-              v-for="(attempt, attemptIndex) in gameState.attempts"
-              :key="attemptIndex"
-              class="grid w-full gap-1.5"
-              :style="tileGridStyle"
-            >
-              <AirRiddleTile
-                v-for="(letter, letterIndex) in attempt.letters"
-                :key="`${attemptIndex}-${letterIndex}`"
-                :letter="letter"
-                :result="attempt.results?.[letterIndex]"
-                :animate="!prefersReducedMotion"
-                :animation-delay="letterIndex * 0.1"
-              />
-            </div>
+          <div class="flex w-full justify-center">
+            <div class="inline-flex flex-col border-l border-t border-default">
+              <div
+                v-for="(attempt, attemptIndex) in gameState.attempts"
+                :key="attemptIndex"
+                class="inline-grid gap-0"
+                :style="tileGridStyle"
+              >
+                <AirRiddleTile
+                  v-for="(letter, letterIndex) in attempt.letters"
+                  :key="`${attemptIndex}-${letterIndex}`"
+                  :letter="letter"
+                  :result="attempt.results?.[letterIndex]"
+                />
+              </div>
 
-            <div
-              v-if="!gameState.isWon && !gameState.isGameOver"
-              class="grid w-full gap-1.5"
-              :style="tileGridStyle"
-            >
-              <AirRiddleTile
-                v-for="letterIndex in gameState.targetLength"
-                :key="`current-${letterIndex}`"
-                variant="current"
-                :letter="currentGuess[letterIndex - 1] ?? ''"
-                :animate="false"
-              />
-            </div>
+              <div
+                v-if="!gameState.isWon && !gameState.isGameOver"
+                class="inline-grid gap-0"
+                :style="tileGridStyle"
+              >
+                <AirRiddleTile
+                  v-for="letterIndex in gameState.targetLength"
+                  :key="`current-${letterIndex}`"
+                  variant="current"
+                  :letter="currentGuess[letterIndex - 1] ?? ''"
+                />
+              </div>
 
-            <div
-              v-for="rowIndex in emptyRows"
-              :key="`empty-${rowIndex}`"
-              class="grid w-full gap-1.5"
-              :style="tileGridStyle"
-            >
-              <AirRiddleTile
-                v-for="letterIndex in gameState.targetLength"
-                :key="`empty-${rowIndex}-${letterIndex}`"
-                variant="empty"
-                :animate="false"
-              />
+              <div
+                v-for="rowIndex in emptyRows"
+                :key="`empty-${rowIndex}`"
+                class="inline-grid gap-0"
+                :style="tileGridStyle"
+              >
+                <AirRiddleTile
+                  v-for="letterIndex in gameState.targetLength"
+                  :key="`empty-${rowIndex}-${letterIndex}`"
+                  variant="empty"
+                />
+              </div>
             </div>
           </div>
 
@@ -375,7 +386,7 @@ setPageSeo({
             {{ t(`page.game.airriddle.${error}`) }}
           </p>
 
-          <div v-if="!gameState.isWon && !gameState.isGameOver" class="w-full">
+          <div v-if="isMobile && !gameState.isWon && !gameState.isGameOver" class="w-full">
             <AirRiddleKeyboard
               :disabled="!canType"
               :can-submit="canSubmit"
@@ -389,7 +400,10 @@ setPageSeo({
       </UiCard>
     </template>
 
-    <UiCard v-else class="mx-auto w-full max-w-md">
+    <UiCard v-else class="relative w-full">
+      <div class="absolute right-3 top-3" @click.stop>
+        <AirRiddleHowToPlayPopover />
+      </div>
       <div class="flex flex-col items-center gap-4 px-4 py-10 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="size-8 text-error" />
         <div class="space-y-1">
