@@ -45,6 +45,12 @@
       "recentPosts": "Activités récentes",
       "signInToCreate": "Connectez-vous pour créer un post"
     },
+    "game": {
+      "sidebarPromo": {
+        "heading": "Minijeux",
+        "play": "Jouer"
+      }
+    },
     "header": {
       "signin": "Se connecter"
     },
