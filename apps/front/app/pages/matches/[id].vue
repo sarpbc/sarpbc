@@ -253,41 +253,47 @@ function tournamentMatchesPath(tournamentId: string) {
           </ULink>
 
           <div
-            class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xl md:text-2xl font-bold tracking-tight text-balance max-w-3xl"
+            class="w-full max-w-3xl grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 text-xl md:text-2xl font-bold tracking-tight"
           >
-            <ULink
-              v-if="teamA?.team.slug"
-              :to="$localePath(`/team/${teamA.team.slug}`)"
-              class="rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
-            >
-              {{ participantName(teamA) }}
-            </ULink>
-            <span v-else>{{ participantName(teamA) }}</span>
-
-            <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
-              <span
-                class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
-                aria-hidden="true"
+            <div class="min-w-0 justify-self-end text-end">
+              <ULink
+                v-if="teamA?.team.slug"
+                :to="$localePath(`/team/${teamA.team.slug}`)"
+                class="inline-block max-w-full truncate rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
               >
-                <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
-                  {{ teamA ? (getParticipantScore(match, teamA.id) ?? "-") : "-" }}
-                </span>
-                <span class="text-muted font-normal text-base">-</span>
-                <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
-                  {{ teamB ? (getParticipantScore(match, teamB.id) ?? "-") : "-" }}
-                </span>
-              </span>
-            </template>
-            <span v-else class="text-muted font-normal text-base" aria-hidden="true">vs</span>
+                {{ participantName(teamA) }}
+              </ULink>
+              <span v-else class="block truncate">{{ participantName(teamA) }}</span>
+            </div>
 
-            <ULink
-              v-if="teamB?.team.slug"
-              :to="$localePath(`/team/${teamB.team.slug}`)"
-              class="rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
-            >
-              {{ participantName(teamB) }}
-            </ULink>
-            <span v-else>{{ participantName(teamB) }}</span>
+            <div class="shrink-0 justify-self-center">
+              <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
+                <span
+                  class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
+                  aria-hidden="true"
+                >
+                  <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
+                    {{ teamA ? (getParticipantScore(match, teamA.id) ?? "–") : "–" }}
+                  </span>
+                  <span class="text-muted font-normal text-base">–</span>
+                  <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
+                    {{ teamB ? (getParticipantScore(match, teamB.id) ?? "–") : "–" }}
+                  </span>
+                </span>
+              </template>
+              <span v-else class="text-muted font-normal text-base" aria-hidden="true">vs</span>
+            </div>
+
+            <div class="min-w-0 justify-self-start text-start">
+              <ULink
+                v-if="teamB?.team.slug"
+                :to="$localePath(`/team/${teamB.team.slug}`)"
+                class="inline-block max-w-full truncate rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+              >
+                {{ participantName(teamB) }}
+              </ULink>
+              <span v-else class="block truncate">{{ participantName(teamB) }}</span>
+            </div>
           </div>
 
           <div

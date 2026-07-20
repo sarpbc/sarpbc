@@ -7,6 +7,9 @@ const { match, last = false } = defineProps<{
   last?: boolean;
 }>();
 
+const teamA = computed(() => match.participants?.[0]);
+const teamB = computed(() => match.participants?.[1]);
+
 const winnerParticipantId = computed(() => {
   if (!match.results || match.results.length < 2) {
     return null;
@@ -22,55 +25,47 @@ const winnerParticipantId = computed(() => {
 
   return null;
 });
+
+function teamNameClass(participantId: string | undefined): string {
+  if (!participantId) {
+    return "text-dimmed";
+  }
+
+  return winnerParticipantId.value === participantId ? "text-muted" : "text-dimmed";
+}
+
+function scoreClass(participantId: string | undefined): string {
+  if (!participantId || !winnerParticipantId.value) {
+    return "text-toned";
+  }
+
+  return winnerParticipantId.value === participantId ? "text-success" : "text-error";
+}
 </script>
 
 <template>
   <div
-    class="w-full flex py-1 px-2 items-center"
+    class="w-full min-w-0 py-1 px-2"
     :class="{
       'border-b border-default': !last,
     }"
   >
     <div
-      v-if="match.participants && match.participants.length === 2"
-      class="w-full flex flex-col gap-1 text-xs font-medium text-dimmed truncate"
+      v-if="teamA && teamB"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"
     >
-      <div class="w-full grid grid-cols-3 gap-2">
-        <span
-          class="col-span-2 truncate"
-          :class="winnerParticipantId === match.participants[0]!.id ? 'text-muted' : 'text-dimmed'"
-        >
-          {{
-            match.participants.length > 0
-              ? match.participants[0]?.team.name
-              : $t("components.match.tbd")
-          }}
-        </span>
-        <span
-          class="col-span-1 truncate font-semibold text-end tabular-nums"
-          :class="winnerParticipantId === match.participants[0]!.id ? 'text-success' : 'text-error'"
-        >
-          {{ getMatchParticipantScore(match.results, match.participants[0]!.id) }}
-        </span>
-      </div>
-      <div class="w-full grid grid-cols-3 gap-2">
-        <span
-          class="col-span-2 truncate"
-          :class="winnerParticipantId === match.participants[1]!.id ? 'text-muted' : 'text-dimmed'"
-        >
-          {{
-            match.participants.length > 1
-              ? match.participants[1]?.team.name
-              : $t("components.match.tbd")
-          }}
-        </span>
-        <span
-          class="col-span-1 truncate font-semibold text-end tabular-nums"
-          :class="winnerParticipantId === match.participants[1]!.id ? 'text-success' : 'text-error'"
-        >
-          {{ getMatchParticipantScore(match.results, match.participants[1]!.id) }}
-        </span>
-      </div>
+      <span class="truncate" :class="teamNameClass(teamA.id)">
+        {{ teamA.team.name || $t("components.match.tbd") }}
+      </span>
+      <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamA.id)">
+        {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+      </span>
+      <span class="truncate" :class="teamNameClass(teamB.id)">
+        {{ teamB.team.name || $t("components.match.tbd") }}
+      </span>
+      <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamB.id)">
+        {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
+      </span>
     </div>
   </div>
 </template>

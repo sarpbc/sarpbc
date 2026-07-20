@@ -62,16 +62,14 @@ setPageSeo({
           :key="index"
           :class="{ 'border-t-0': index > 1, 'h-11.5': index === 1, 'h-11.25': index > 1 }"
         >
-          <div v-if="tab === 'past'" class="w-full flex py-1 px-2 items-center">
-            <div class="w-full flex flex-col gap-1">
-              <div class="w-full grid grid-cols-3 gap-2 items-center">
-                <USkeleton class="col-span-2 h-3 max-w-32" />
-                <USkeleton class="col-span-1 h-3 w-6 justify-self-end" />
-              </div>
-              <div class="w-full grid grid-cols-3 gap-2 items-center">
-                <USkeleton class="col-span-2 h-3 max-w-28" />
-                <USkeleton class="col-span-1 h-3 w-6 justify-self-end" />
-              </div>
+          <div v-if="tab === 'past'" class="w-full min-w-0 py-1 px-2">
+            <div
+              class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1"
+            >
+              <USkeleton class="h-3 max-w-32" />
+              <USkeleton class="h-3 w-4 justify-self-end" />
+              <USkeleton class="h-3 max-w-28" />
+              <USkeleton class="h-3 w-4 justify-self-end" />
             </div>
           </div>
           <div v-else class="w-full grid grid-cols-3 py-1 px-2 items-center">
