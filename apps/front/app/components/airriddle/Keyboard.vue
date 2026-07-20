@@ -46,7 +46,7 @@ function onLetterPress(letter: string) {
         type="button"
         variant="soft"
         color="neutral"
-        class="h-11 min-h-11 flex-1 max-w-10 px-0 font-mono text-sm font-semibold uppercase sm:max-w-11"
+        class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold uppercase sm:max-w-11"
         :disabled="disabled"
         :aria-label="letter"
         @click="onLetterPress(letter)"
@@ -62,7 +62,7 @@ function onLetterPress(letter: string) {
         type="button"
         variant="soft"
         color="neutral"
-        class="h-11 min-h-11 flex-1 max-w-10 px-0 font-mono text-sm font-semibold tabular-nums sm:max-w-11"
+        class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold tabular-nums sm:max-w-11"
         :disabled="disabled"
         :aria-label="digit"
         @click="onLetterPress(digit)"
@@ -76,7 +76,7 @@ function onLetterPress(letter: string) {
         type="button"
         variant="soft"
         color="neutral"
-        class="h-11 min-h-11 flex-[2] font-mono text-sm font-semibold uppercase"
+        class="inline-flex h-11 min-h-11 flex-2 items-center justify-center font-mono text-sm font-semibold uppercase"
         :disabled="disabled"
         :aria-label="t('page.game.airriddle.keyboardSpace')"
         @click="onLetterPress(' ')"
@@ -88,22 +88,22 @@ function onLetterPress(letter: string) {
         variant="soft"
         color="neutral"
         icon="i-lucide-delete"
-        class="h-11 min-h-11 flex-1"
+        class="inline-flex h-11 min-h-11 flex-1 items-center justify-center"
         :aria-label="t('page.game.airriddle.keyboardBackspace')"
         :disabled="disabled"
         @click="emit('backspace')"
       />
+      <UButton
+        type="button"
+        color="primary"
+        class="inline-flex h-11 min-h-11 flex-1 items-center justify-center font-mono text-sm font-semibold"
+        :disabled="disabled || !canSubmit"
+        :loading="loading"
+        :aria-label="t('page.game.airriddle.keyboardEnter')"
+        @click="emit('submit')"
+      >
+        {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.keyboardEnter") }}
+      </UButton>
     </div>
-
-    <UButton
-      type="button"
-      class="h-11 min-h-11 w-full"
-      color="primary"
-      :disabled="disabled || !canSubmit"
-      :loading="loading"
-      @click="emit('submit')"
-    >
-      {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.guess") }}
-    </UButton>
   </div>
 </template>

@@ -6,11 +6,11 @@ const { tone } = defineProps<{
 const toneClass = computed(() => {
   switch (tone) {
     case "success":
-      return "border-success bg-success";
+      return "bg-success text-white";
     case "warning":
-      return "border-warning bg-warning";
+      return "bg-warning text-white";
     case "accented":
-      return "border-accented bg-accented";
+      return "bg-default text-highlighted";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;
@@ -21,7 +21,7 @@ const toneClass = computed(() => {
 
 <template>
   <div
-    class="flex size-7 items-center justify-center border font-mono text-sm font-bold text-white"
+    class="flex size-7 items-center justify-center border border-default font-mono text-sm font-bold"
     :class="toneClass"
     aria-hidden="true"
   >
