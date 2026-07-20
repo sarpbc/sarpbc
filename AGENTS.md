@@ -18,6 +18,7 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 | Skill                                  | Path                                                 | Use when                                                                      |
 | -------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
 | **geist-design**                       | `.agents/skills/geist-design/`                       | UI, UX, components, forms, copy, a11y, toasts, API error text shown in the UI |
+| **llm-safe-design-system**             | `.agents/skills/llm-safe-design-system/`             | Design-system constraints for agentic UI (intent tokens, CI as contract)      |
 | **nestjs-best-practices**              | `.agents/skills/nestjs-best-practices/`              | NestJS modules, DI, auth, validation, DB, API design, tests                   |
 | **nuxt**                               | `.agents/skills/nuxt/`                               | Routing, `useFetch`, SSR, Nitro, Nuxt modules, composables                    |
 | **improve-codebase-architecture**      | `.agents/skills/improve-codebase-architecture/`      | Architecture review, deepening refactors (explicit request)                   |

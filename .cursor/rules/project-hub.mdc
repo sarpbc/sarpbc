@@ -10,6 +10,7 @@ Monorepo: `apps/front` (Nuxt 4) + `apps/back` (NestJS). pnpm only.
 Before non-trivial work, read **[AGENTS.md](../AGENTS.md)** at the repo root and load the relevant skill from `.agents/skills/`:
 
 - UI / copy / a11y → `geist-design`
+- Design-system constraints for agents / UI drift → `llm-safe-design-system`
 - NestJS / API / DB → `nestjs-best-practices`
 - Nuxt / SSR / routing → `nuxt`
 - Roadmap / backlog / scope grilling → `sarpbc-pm`
