@@ -47,10 +47,8 @@
     },
     "game": {
       "sidebarPromo": {
-        "heading": "Daily Games",
-        "title": "Air Riddle",
-        "description": "Guess today's Rocket League player in 6 tries.",
-        "cta": "Play Air Riddle"
+        "heading": "Minigame",
+        "play": "Play"
       }
     },
     "header": {

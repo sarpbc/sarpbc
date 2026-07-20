@@ -14,12 +14,9 @@
             <slot />
           </div>
 
-          <!-- Right sidebar -->
-          <div class="flex flex-col gap-4 md:col-span-3 lg:col-span-2 mt-4 md:mt-0">
+          <!-- Forum Preview -->
+          <div class="flex md:col-span-3 lg:col-span-2 mt-4 md:mt-0">
             <LazyForumPreview hydrate-on-idle />
-            <div class="hidden md:flex">
-              <LazyGameSidebarPromo hydrate-on-idle />
-            </div>
           </div>
         </div>
       </div>

@@ -47,5 +47,6 @@ const { data: recentForumActivities } = await useLazyAsyncData(
         />
       </ForumSignInPrompt>
     </div>
+    <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
   </div>
 </template>
