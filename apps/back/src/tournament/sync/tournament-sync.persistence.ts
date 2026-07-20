@@ -116,6 +116,9 @@ export class TournamentSyncPersistence {
     player.birthday = command.birthday ?? null;
     player.nationality = command.nationality ?? null;
     player.imageUrl = command.imageUrl ?? null;
+    if (command.role !== undefined) {
+      player.role = command.role;
+    }
     if (team) {
       player.team = team;
     }
