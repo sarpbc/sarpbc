@@ -35,6 +35,7 @@ Expert PM lens for **SARPBC.org**: gaming communities, esports platforms, fan en
 | Skill | When |
 | ----- | ---- |
 | **grill-me** | Pure design/technical plan grilling (no product scope) |
+| **customer-needs** | Interpreting feedback—symptoms vs underlying needs, requests as input |
 | **geist-design** | UI copy and UX for user-facing features |
 | **nuxt** / **nestjs-best-practices** | Implementation feasibility |
 
