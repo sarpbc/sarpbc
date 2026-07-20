@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const localePath = useLocalePath();
+const user = useUser();
 
 const { data: recentForumActivities } = await useLazyAsyncData(
   `forum-posts-preview`,
@@ -34,18 +35,16 @@ const { data: recentForumActivities } = await useLazyAsyncData(
         </div>
       </UButton>
     </div>
-    <div class="w-full border border-t-0 border-default p-1 h-11 max-h-8.25">
-      <ForumSignInPrompt action="create">
-        <UButton
-          :to="localePath('/forum/new')"
-          icon="i-fluent-add-24-regular"
-          color="primary"
-          variant="soft"
-          :label="$t('components.forum.createPost')"
-          :title="$t('components.forum.createPost')"
-          class="w-full h-full p-1! font-normal!"
-        />
-      </ForumSignInPrompt>
+    <div v-if="user" class="w-full border border-t-0 border-default p-1 h-11 max-h-8.25">
+      <UButton
+        :to="localePath('/forum/new')"
+        icon="i-fluent-add-24-regular"
+        color="primary"
+        variant="soft"
+        :label="$t('components.forum.createPost')"
+        :title="$t('components.forum.createPost')"
+        class="w-full h-full p-1! font-normal!"
+      />
     </div>
   </div>
 </template>
