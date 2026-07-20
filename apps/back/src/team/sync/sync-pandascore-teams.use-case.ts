@@ -74,6 +74,7 @@ export class SyncPandascoreTeamsUseCase {
           newPlayer.birthday = playerCommand.birthday ?? null;
           newPlayer.nationality = playerCommand.nationality ?? null;
           newPlayer.imageUrl = playerCommand.imageUrl ?? null;
+          newPlayer.role = playerCommand.role ?? null;
           newPlayer.slug = playerCommand.slug;
 
           if (playerCommand.teamSlug) {
@@ -85,10 +86,24 @@ export class SyncPandascoreTeamsUseCase {
 
           em.persist(newPlayer);
           playersCreated += 1;
-        } else if (playerCommand.teamSlug) {
-          const team = createdTeams.get(playerCommand.teamSlug);
-          if (team && existingPlayer.team?.id !== team.id) {
-            existingPlayer.team = team;
+        } else {
+          let changed = false;
+
+          if (playerCommand.teamSlug) {
+            const team = createdTeams.get(playerCommand.teamSlug);
+            if (team && existingPlayer.team?.id !== team.id) {
+              existingPlayer.team = team;
+              changed = true;
+            }
+          }
+
+          const nextRole = playerCommand.role ?? null;
+          if (existingPlayer.role !== nextRole) {
+            existingPlayer.role = nextRole;
+            changed = true;
+          }
+
+          if (changed) {
             em.persist(existingPlayer);
             playersUpdated += 1;
           }

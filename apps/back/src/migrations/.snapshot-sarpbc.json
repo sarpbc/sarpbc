@@ -1214,6 +1214,14 @@
           "unique": false
         },
         {
+          "columnNames": ["author_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "news_article_author_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -1228,6 +1236,14 @@
           "keyName": "news_article_slug_unique",
           "primary": false,
           "unique": true
+        },
+        {
+          "columnNames": ["title"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "news_article_title_index",
+          "primary": false,
+          "unique": false
         },
         {
           "columnNames": ["title"],
@@ -1524,6 +1540,23 @@
         },
         "nationality": {
           "name": "nationality",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "role": {
+          "name": "role",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,

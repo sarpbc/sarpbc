@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
 import type { ContractRole } from "~/types/contract";
+import { selectActiveRosterPlayers } from "~/utils/teamRoster";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -27,10 +28,12 @@ const { data: formerPlayers } = await useAsyncData(
   { watch: [team] },
 );
 
-const teamNationalities = computed(() => {
-  if (!team.value?.players?.length) return [];
+const activeRoster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
-  return team.value.players
+const teamNationalities = computed(() => {
+  if (!activeRoster.value.length) return [];
+
+  return activeRoster.value
     .map((player) => player.nationality)
     .filter(
       (nationality): nationality is string => nationality != null && nationality.trim() !== "",
@@ -119,10 +122,10 @@ setPageSeo({
       </div>
 
       <div
-        v-if="team.players?.length"
-        class="flex flex-row justify-between items-center gap-4 border border-default p-4"
+        v-if="activeRoster.length"
+        class="flex flex-row flex-wrap justify-center items-center gap-4 border border-default p-4"
       >
-        <PlayerProfile v-for="player in team.players" :key="player.id" :player="player" size="lg" />
+        <PlayerProfile v-for="player in activeRoster" :key="player.id" :player="player" size="lg" />
       </div>
 
       <div v-if="formerPlayers && formerPlayers.length > 0" class="w-full flex flex-col mt-6 gap-2">

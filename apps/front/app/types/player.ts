@@ -9,6 +9,8 @@ export interface Player {
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
+  /** PandaScore role (e.g. "Coach"); null/undefined for standard players. */
+  role?: string | null;
   photos?: string[];
   slug: string;
 }

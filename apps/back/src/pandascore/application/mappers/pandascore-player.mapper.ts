@@ -11,6 +11,7 @@ export class PandascorePlayerMapper {
       birthday: dto.birthday ? new Date(dto.birthday) : undefined,
       nationality: dto.nationality,
       imageUrl: dto.image_url ?? undefined,
+      role: dto.role,
       teamSlug,
     };
   }
@@ -23,6 +24,7 @@ export class PandascorePlayerMapper {
     birthday?: string;
     nationality?: string;
     image_url?: string;
+    role?: string | null;
     current_team?: { slug: string };
   }): UpsertPlayerCommand {
     return {
@@ -33,6 +35,7 @@ export class PandascorePlayerMapper {
       birthday: dto.birthday ? new Date(dto.birthday) : undefined,
       nationality: dto.nationality,
       imageUrl: dto.image_url,
+      role: dto.role ?? null,
       teamSlug: dto.current_team?.slug,
     };
   }

@@ -60,7 +60,7 @@ const dim = computed(() => dimensions[size]);
       :fetchpriority="priority ? 'high' : undefined"
       :class="[
         fallbackRadiusClasses[size],
-        'max-h-full max-w-full object-contain ring-1 ring-black/10 dark:ring-white/10',
+        'h-full w-full object-cover ring-1 ring-black/10 dark:ring-white/10',
       ]"
     />
     <div

@@ -1,9 +1,14 @@
 <script lang="ts" setup>
 import type { Team } from "~/types/team";
+import { selectActiveRosterPlayers } from "~/utils/teamRoster";
 
-defineProps<{
+const props = defineProps<{
   team: Team;
 }>();
+
+const activePlayerCount = computed(
+  () => selectActiveRosterPlayers(props.team.players ?? []).length,
+);
 </script>
 
 <template>
@@ -29,12 +34,10 @@ defineProps<{
         {{ team.location }}
       </div>
     </div>
-    <div v-if="team.players && team.players.length > 0" class="text-xs text-muted">
-      {{ team.players.length }}
+    <div v-if="activePlayerCount > 0" class="text-xs text-muted">
+      {{ activePlayerCount }}
       {{
-        team.players.length === 1
-          ? $t("page.players.index.player")
-          : $t("page.players.index.players")
+        activePlayerCount === 1 ? $t("page.players.index.player") : $t("page.players.index.players")
       }}
     </div>
   </UButton>

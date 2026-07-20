@@ -33,6 +33,7 @@ export interface PandascoreGateway {
       birthday?: string;
       nationality?: string;
       image_url?: string;
+      role?: string | null;
       current_team?: {
         id: number;
         name: string;
