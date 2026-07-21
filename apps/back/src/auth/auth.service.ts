@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { UserService } from "../user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
@@ -47,7 +47,9 @@ export class AuthService {
   async signIn(userData: SignInUserDto): Promise<string> {
     const user = await this.userService.signIn(userData);
     if (!user) {
-      throw new NotFoundException();
+      throw new UnauthorizedException(
+        "Email or password is incorrect. Check your credentials and try again.",
+      );
     }
 
     const payload = {
@@ -92,25 +94,35 @@ export class AuthService {
     });
 
     if (!profile || !profile.email || !profile.name || !profile.id) {
-      throw new NotFoundException("Incomplete Google profile");
+      throw new UnauthorizedException(
+        "Google did not return a complete profile. Try again or use email and password.",
+      );
     }
 
     let user = await this.userService.findOneByGoogleId(profile.id);
 
     if (!user) {
-      user = await this.userService.createGoogleUser(
-        profile.email,
-        profile.name,
-        profile.id,
-        profile.picture ?? null,
-      );
+      const existingByEmail = await this.userService.findOneByEmail(profile.email);
 
-      if (!user) {
-        throw new UnauthorizedException();
+      if (existingByEmail) {
+        user = await this.userService.linkGoogleAccount(
+          existingByEmail,
+          profile.id,
+          profile.picture ?? null,
+        );
+      } else {
+        user = await this.userService.createGoogleUser(
+          profile.email,
+          profile.name,
+          profile.id,
+          profile.picture ?? null,
+        );
       }
 
       if (!user) {
-        throw new NotFoundException("User creation failed");
+        throw new UnauthorizedException(
+          "Could not sign in with Google. Try again or use email and password.",
+        );
       }
     }
 

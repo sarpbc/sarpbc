@@ -14,22 +14,33 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  private setAccessTokenCookie(res: FastifyReply, access_token: string) {
+  private accessTokenCookieOptions(includeMaxAge = true): Record<string, unknown> {
     const production = this.configService.get<boolean>("production");
 
-    const cookieOptions: Record<string, any> = {
+    const cookieOptions: Record<string, unknown> = {
       httpOnly: true,
       secure: production,
       sameSite: "lax",
       path: "/",
-      maxAge: 30 * 24 * 60 * 60,
     };
+
+    if (includeMaxAge) {
+      cookieOptions.maxAge = 30 * 24 * 60 * 60;
+    }
 
     if (production) {
       cookieOptions.domain = ".sarpbc.org";
     }
 
-    res.setCookie("access_token", access_token, cookieOptions);
+    return cookieOptions;
+  }
+
+  private setAccessTokenCookie(res: FastifyReply, access_token: string) {
+    res.setCookie("access_token", access_token, this.accessTokenCookieOptions(true));
+  }
+
+  private clearAccessTokenCookie(res: FastifyReply) {
+    res.clearCookie("access_token", this.accessTokenCookieOptions(false));
   }
 
   @Post("login")
@@ -43,7 +54,7 @@ export class AuthController {
 
   @Get("logout")
   logout(@Res() res: FastifyReply) {
-    res.clearCookie("access_token");
+    this.clearAccessTokenCookie(res);
     return res.send({ success: true });
   }
 
@@ -71,16 +82,18 @@ export class AuthController {
   @Get("google/callback")
   async handleGoogleCallback(@Query("code") code: string, @Res() res: FastifyReply) {
     const log = useLogger();
+    const frontUrl = this.authService.getFrontUrl();
 
     try {
       const access_token = await this.authService.handleGoogleCallback(code);
 
       this.setAccessTokenCookie(res, access_token);
 
-      return res.code(302).redirect(this.authService.getFrontUrl());
+      return res.code(302).redirect(frontUrl);
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
-      return res.code(302).redirect(this.authService.getFrontUrl());
+      const separator = frontUrl.includes("?") ? "&" : "?";
+      return res.code(302).redirect(`${frontUrl}${separator}authError=google`);
     }
   }
 }
