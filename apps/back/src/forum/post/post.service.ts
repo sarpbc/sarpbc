@@ -91,7 +91,9 @@ export class PostService {
       topic: { id: post.topic.id, title: post.topic.title },
       author: post.author.userName,
       createdAt: post.createdAt,
-      replies: buildNestedReplies(post.replies.toArray() || []),
+      replies: buildNestedReplies(
+        (post.replies.toArray() || []).filter((reply) => !reply.hiddenAt),
+      ),
     };
   }
 

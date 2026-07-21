@@ -404,6 +404,9 @@ function tournamentMatchesPath(tournamentId: string) {
           {{ t("page.match.detail.gameStatsHint") }}
         </p>
       </UiCard>
+
+      <!-- Discussion metric: comments per match page view (instrument via analytics later). -->
+      <DiscussionCommentThread target-type="match" :target-id="match.id" />
     </template>
   </div>
 </template>

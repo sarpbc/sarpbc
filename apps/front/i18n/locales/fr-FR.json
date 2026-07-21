@@ -86,6 +86,34 @@
       "inputPlaceholder": "Entrez votre réponse ici...",
       "submit": "Répondre"
     },
+    "discussion": {
+      "heading": "Discussion",
+      "subtitle": "Partagez votre avis sur ce match avec la communauté.",
+      "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
+      "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "inputTitle": "Commentaire",
+      "inputPlaceholder": "Écrire un commentaire…",
+      "submit": "Publier le commentaire",
+      "submitting": "Publication…",
+      "reply": "Répondre",
+      "hide": "Masquer",
+      "delete": "Supprimer",
+      "validation": {
+        "contentMinLength": "Le commentaire doit contenir au moins 1 caractère",
+        "contentMaxLength": "Le commentaire doit contenir au maximum 2048 caractères"
+      },
+      "messages": {
+        "created": "Commentaire publié",
+        "hidden": "Commentaire masqué",
+        "deleted": "Commentaire supprimé",
+        "errorTitle": "Impossible de publier le commentaire",
+        "errorDescription": "Une erreur s'est produite. Réessayez.",
+        "rateLimitDescription": "Vous ne pouvez publier qu'un commentaire par minute. Attendez et réessayez.",
+        "signInRequired": "Connectez-vous pour commenter.",
+        "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      }
+    },
     "tournaments": {
       "prizepoolOther": "Autre",
       "prize": "Prix",

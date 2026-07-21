@@ -11,6 +11,8 @@ const isDeleteReplyModalOpen = ref(false);
 const replyToDelete = ref<Reply | null>(null);
 const isDeletingPost = ref(false);
 const isDeletingReply = ref(false);
+const isHidingReply = ref(false);
+const toast = useToast();
 
 const { data: post, refresh } = await useLazyAsyncData(
   () => `admin-forum-post-${postId.value}`,
@@ -78,6 +80,28 @@ async function confirmDeleteReply() {
     isDeletingReply.value = false;
   }
 }
+
+async function hideReply(reply: Reply) {
+  isHidingReply.value = true;
+  try {
+    const success = await hideComment(reply.id);
+    if (success) {
+      toast.add({
+        title: t("components.discussion.messages.hidden"),
+        color: "success",
+      });
+      await refresh();
+    } else {
+      toast.add({
+        title: t("components.discussion.messages.errorTitle"),
+        description: t("components.discussion.messages.moderateError"),
+        color: "error",
+      });
+    }
+  } finally {
+    isHidingReply.value = false;
+  }
+}
 </script>
 
 <template>
@@ -121,12 +145,22 @@ async function confirmDeleteReply() {
               </p>
               <p class="whitespace-pre-wrap">{{ reply.content }}</p>
             </div>
-            <UButton
-              color="error"
-              variant="ghost"
-              icon="i-fluent-delete-24-regular"
-              @click="openDeleteReplyModal(reply)"
-            />
+            <div class="flex flex-row items-center gap-1 shrink-0">
+              <UButton
+                color="neutral"
+                variant="ghost"
+                :label="$t('components.discussion.hide')"
+                :loading="isHidingReply"
+                :disabled="isHidingReply"
+                @click="hideReply(reply)"
+              />
+              <UButton
+                color="error"
+                variant="ghost"
+                icon="i-fluent-delete-24-regular"
+                @click="openDeleteReplyModal(reply)"
+              />
+            </div>
           </UiCard>
 
           <p v-if="flatReplies.length === 0" class="text-sm text-muted">
