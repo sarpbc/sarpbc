@@ -2,23 +2,41 @@ import { EntityRepository } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
 import { IReplyRepository } from "./domain/reply.repository.interface";
 
+const POPULATE = ["author", "replyTo", "replyTo.author"] as const;
+
 export class ReplyRepository extends EntityRepository<Reply> implements IReplyRepository {
-  async findByPostId(postId: string): Promise<Reply[]> {
+  async findByPostId(postId: string, includeHidden = false): Promise<Reply[]> {
     return this.find(
-      { post: { id: postId } },
-      { populate: ["author", "replyTo", "replyTo.author"] },
+      {
+        post: { id: postId },
+        ...(includeHidden ? {} : { hiddenAt: null }),
+      },
+      { populate: [...POPULATE] },
     );
   }
 
-  async findByNewsArticleId(newsArticleId: string): Promise<Reply[]> {
+  async findByNewsArticleId(newsArticleId: string, includeHidden = false): Promise<Reply[]> {
     return this.find(
-      { newsArticle: { id: newsArticleId } },
-      { populate: ["author", "replyTo", "replyTo.author"] },
+      {
+        newsArticle: { id: newsArticleId },
+        ...(includeHidden ? {} : { hiddenAt: null }),
+      },
+      { populate: [...POPULATE] },
+    );
+  }
+
+  async findByMatchId(matchId: string, includeHidden = false): Promise<Reply[]> {
+    return this.find(
+      {
+        match: { id: matchId },
+        ...(includeHidden ? {} : { hiddenAt: null }),
+      },
+      { populate: [...POPULATE] },
     );
   }
 
   async findById(id: string): Promise<Reply | null> {
-    return this.findOne({ id });
+    return this.findOne({ id }, { populate: ["author"] });
   }
 
   async findLatestByUser(userId: string): Promise<Reply | null> {

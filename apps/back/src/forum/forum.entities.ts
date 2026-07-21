@@ -1,6 +1,7 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { NewsArticle } from "../news/domain/news-article.entity";
 import { ReplyRepository } from "../reply/reply.repository";
+import { Match } from "../tournament/tournament.entities";
 import { User } from "../user/domain/user.entity";
 import { PostRepository } from "./post/post.repository";
 import { PostType } from "./post/post-type.enum";
@@ -45,8 +46,11 @@ export class Reply {
   author!: User;
   post: Post | null = null;
   newsArticle: NewsArticle | null = null;
+  match: Match | null = null;
   replyTo: Reply | null = null;
   replies = new Collection<Reply>(this);
+  /** When set, reply is hidden from public lists (admin soft-hide). */
+  hiddenAt: Date | null = null;
 }
 
 export const TopicSchema = defineEntity({
@@ -129,7 +133,9 @@ export const ReplySchema = defineEntity({
     author: p.manyToOne(User),
     post: p.manyToOne(Post).nullable(),
     newsArticle: p.manyToOne(NewsArticle).nullable(),
+    match: p.manyToOne(Match).nullable(),
     replyTo: p.manyToOne(Reply).nullable(),
     replies: p.oneToMany(Reply).mappedBy("replyTo"),
+    hiddenAt: p.datetime().type("timestamptz").nullable(),
   },
 });

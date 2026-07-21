@@ -86,6 +86,34 @@
       "inputPlaceholder": "Enter your reply here...",
       "submit": "Reply"
     },
+    "discussion": {
+      "heading": "Discussion",
+      "subtitle": "Share your take on this match with the community.",
+      "empty": "No comments yet. Be the first to start the discussion.",
+      "error": "Could not load comments. Check your connection and try again.",
+      "retry": "Try Again",
+      "inputTitle": "Comment",
+      "inputPlaceholder": "Write a comment…",
+      "submit": "Post Comment",
+      "submitting": "Posting…",
+      "reply": "Reply",
+      "hide": "Hide",
+      "delete": "Delete",
+      "validation": {
+        "contentMinLength": "Comment must be at least 1 character",
+        "contentMaxLength": "Comment must be at most 2048 characters"
+      },
+      "messages": {
+        "created": "Comment posted",
+        "hidden": "Comment hidden",
+        "deleted": "Comment deleted",
+        "errorTitle": "Could not post comment",
+        "errorDescription": "Something went wrong. Try again.",
+        "rateLimitDescription": "You can only post one comment per minute. Wait and try again.",
+        "signInRequired": "Sign in to comment.",
+        "moderateError": "Could not moderate this comment. Try again."
+      }
+    },
     "tournaments": {
       "prizepoolOther": "Other",
       "prize": "Prize",

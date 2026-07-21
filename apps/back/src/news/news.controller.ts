@@ -88,7 +88,7 @@ export class NewsController {
   @Get(":slug/replies")
   async findReplies(@Param("slug") slug: string) {
     const articleId = await this.newsService.findArticleIdBySlug(slug);
-    const replies = await this.replyService.findByNewsArticleId(articleId);
+    const replies = await this.replyService.findByTarget("newsArticle", articleId);
     return { replies };
   }
 
@@ -97,13 +97,13 @@ export class NewsController {
   async createReply(
     @Param("slug") slug: string,
     @CurrentUserId() userId: string,
-    @Body() dto: Omit<CreateReplyDto, "postId" | "newsArticleId">,
+    @Body() dto: Omit<CreateReplyDto, "postId" | "newsArticleId" | "matchId">,
   ) {
     const articleId = await this.newsService.findArticleIdBySlug(slug);
-    await this.replyService.create(userId, {
+    const reply = await this.replyService.create(userId, {
       ...dto,
       newsArticleId: articleId,
     });
-    return { success: true };
+    return { reply };
   }
 }

@@ -2128,6 +2128,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "hidden_at": {
+          "name": "hidden_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "id": {
           "name": "id",
           "type": "uuid",
@@ -2144,6 +2161,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "uuid"
+        },
+        "match_id": {
+          "name": "match_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
         },
         "news_article_id": {
           "name": "news_article_id",
@@ -2217,6 +2251,15 @@
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
+        },
+        "reply_match_id_foreign": {
+          "columnNames": ["match_id"],
+          "constraintName": "reply_match_id_foreign",
+          "localTableName": "public.reply",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.match",
+          "updateRule": "cascade",
+          "deleteRule": "set null"
         },
         "reply_news_article_id_foreign": {
           "columnNames": ["news_article_id"],
