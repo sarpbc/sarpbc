@@ -1214,14 +1214,6 @@
           "unique": false
         },
         {
-          "columnNames": ["author_id"],
-          "composite": false,
-          "constraint": false,
-          "keyName": "news_article_author_id_index",
-          "primary": false,
-          "unique": false
-        },
-        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -1236,14 +1228,6 @@
           "keyName": "news_article_slug_unique",
           "primary": false,
           "unique": true
-        },
-        {
-          "columnNames": ["title"],
-          "composite": false,
-          "constraint": false,
-          "keyName": "news_article_title_index",
-          "primary": false,
-          "unique": false
         },
         {
           "columnNames": ["title"],
@@ -2232,6 +2216,22 @@
         }
       },
       "indexes": [
+        {
+          "columnNames": ["hidden_at"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "reply_hidden_at_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["match_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "reply_match_id_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": ["id"],
           "composite": false,
