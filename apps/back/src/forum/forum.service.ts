@@ -8,7 +8,10 @@ export class ForumService {
   async getForumStats() {
     const topics = await this.topicService.find();
     const totalTopics = topics.length;
-    const totalPosts = topics.reduce((sum, topic) => sum + topic.posts.length, 0);
+    const totalPosts = topics.reduce(
+      (sum, topic) => sum + (topic.posts.isInitialized() ? topic.posts.length : 0),
+      0,
+    );
 
     return {
       totalTopics,

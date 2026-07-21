@@ -1,7 +1,6 @@
-﻿import { Inject, Injectable } from "@nestjs/common";
+﻿import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import { User } from "./domain/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { validate } from "class-validator";
 import { SignInUserDto } from "./dto/signin-user.dto";
 import { comparePasswordHash, hashPassword } from "../common/password/password";
 import { IUserRepository, USER_REPOSITORY } from "./domain/user.repository.interface";
@@ -38,18 +37,19 @@ export class UserService {
     return user;
   }
 
-  async create(dto: CreateUserDto): Promise<User | null> {
+  async create(dto: CreateUserDto): Promise<User> {
     const alreadyExists = await this.userRepository.existsByEmail(dto.email);
     if (alreadyExists) {
-      return null;
+      throw new ConflictException(
+        "An account with this email already exists. Log in or use a different email.",
+      );
     }
 
+    // CreateUserDto is already validated by the global ValidationPipe.
+    // Do not class-validator.validate() the MikroORM entity — 0.14+ defaults
+    // forbidUnknownValues and rejects undecorated entities (breaks all signups).
     const hash = await hashPassword(dto.password);
     const user = new User(dto.email, dto.userName, hash);
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      return null;
-    }
 
     await this.userRepository.save(user);
     return user;
@@ -65,17 +65,15 @@ export class UserService {
     userName: string,
     googleId: string,
     avatarUrl: string | null | undefined,
-  ): Promise<User | null> {
+  ): Promise<User> {
     const alreadyExists = await this.userRepository.existsByEmail(email);
     if (alreadyExists) {
-      return null;
+      throw new ConflictException(
+        "An account with this email already exists. Log in or link Google from your profile.",
+      );
     }
 
     const user = new User(email, userName, null, googleId, avatarUrl ?? null);
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      return null;
-    }
 
     await this.userRepository.save(user);
     return user;
