@@ -1,11 +1,14 @@
 /**
  * Surfaces OAuth / auth redirect errors from `?authError=` (set by Nest Google callback).
+ *
+ * Do not call `useI18n()` here — vue-i18n requires a component setup instance.
+ * Use `nuxtApp.$i18n` from `@nuxtjs/i18n` instead.
  */
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((nuxtApp) => {
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
-  const { t } = useI18n();
+  const i18n = nuxtApp.$i18n as { t: (key: string) => string };
 
   const showAuthError = (code: unknown) => {
     if (typeof code !== "string" || !code) {
@@ -18,7 +21,7 @@ export default defineNuxtPlugin(() => {
         : "page.authentication.errors.googleFailed";
 
     toast.add({
-      title: t(titleKey),
+      title: i18n.t(titleKey),
       color: "error",
     });
 
