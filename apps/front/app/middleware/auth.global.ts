@@ -16,7 +16,7 @@ const ACCESS_TOKEN_COOKIE = "access_token";
  * that stamp in this middleware on the client — mutating `user` before / during
  * hydration (especially with `Lazy*` + `hydrate-on-idle` in the default layout)
  * mismatches the SWR HTML and can crash the app. Post-hydrate revalidation lives in
- * `plugins/auth-revalidate.client.ts` (`onNuxtReady` → after suspense + idle).
+ * `plugins/session-revalidate.client.ts` (`onNuxtReady` → after suspense + idle).
  *
  * Read the token with h3 `getCookie` (not `useCookie`) so Nuxt never tries to
  * re-serialize the httpOnly JWT into the payload / Set-Cookie.
@@ -31,7 +31,7 @@ export default defineNuxtRouteMiddleware(async () => {
 
   // Client-only routes / SPA entry with no SSR user in the payload.
   // Initial SSR payloads (including SWR `null`) are left untouched until
-  // `auth-revalidate.client` runs after hydration.
+  // `session-revalidate.client` runs after hydration.
   if (import.meta.client) {
     user.value = await getProfile();
     authHydrated.value = true;
