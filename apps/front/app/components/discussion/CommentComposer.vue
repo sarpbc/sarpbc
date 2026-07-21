@@ -24,6 +24,10 @@ const user = useUser();
 const toast = useToast();
 const isSubmitting = ref(false);
 
+/** Wait until session is known so SSR guest HTML can hydrate before auth upgrades. */
+const sessionReady = computed(() => user.value !== undefined);
+const isSignedIn = computed(() => !!user.value);
+
 const schema = z.object({
   content: z
     .string()
@@ -107,9 +111,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <div class="w-full">
-    <ForumSignInPrompt v-if="!user" action="reply" />
+    <ForumSignInPrompt v-if="sessionReady && !isSignedIn" action="reply" />
     <UForm
-      v-else
+      v-else-if="isSignedIn"
       :schema="schema"
       :state="state"
       class="w-full flex flex-col gap-2"
