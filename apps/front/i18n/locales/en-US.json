@@ -675,9 +675,15 @@
       "continueWithGoogle": "Continue with Google",
       "or": "or",
       "logIn": "Log In",
+      "loggingIn": "Logging in…",
       "userName": "Username",
       "alreadyHaveAnAccount": "Already have an account?",
-      "toRegister": "Register"
+      "toRegister": "Register",
+      "errors": {
+        "loginFailed": "Could not log in. Check your email and password and try again.",
+        "googleFailed": "Google sign-in failed. Try again or use email and password.",
+        "googleLinkFailed": "Could not link Google to your account. Try email and password."
+      }
     }
   },
   "pages": {

@@ -1,5 +1,9 @@
 <script lang="ts" setup>
+import { getApiErrorMessage } from "~/utils/apiError";
+
 const config = useRuntimeConfig();
+const toast = useToast();
+const { t } = useI18n();
 
 interface LoginState {
   email: string;
@@ -10,6 +14,8 @@ const state = reactive<LoginState>({
   email: "",
   password: "",
 });
+
+const pending = ref(false);
 
 onMounted(async () => {
   const user = useUser();
@@ -28,6 +34,11 @@ onMounted(async () => {
 
 async function onSubmit(event: Event) {
   event.preventDefault();
+  if (pending.value) {
+    return;
+  }
+
+  pending.value = true;
 
   try {
     const res: { success?: boolean } = await $fetch<{
@@ -35,7 +46,7 @@ async function onSubmit(event: Event) {
     }>(`${config.public.apiBase}/auth/login`, {
       method: "POST",
       body: {
-        email: state.email,
+        email: state.email.trim(),
         password: state.password,
       },
       credentials: "include",
@@ -50,9 +61,17 @@ async function onSubmit(event: Event) {
       return;
     }
 
-    console.error("Login failed: Invalid credentials");
+    toast.add({
+      title: t("page.authentication.errors.loginFailed"),
+      color: "error",
+    });
   } catch (error) {
-    console.error("Login failed:", error);
+    toast.add({
+      title: getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed"),
+      color: "error",
+    });
+  } finally {
+    pending.value = false;
   }
 }
 
@@ -93,7 +112,13 @@ function googleLogin() {
 
         <UForm :state="state" class="w-80 h-fit" method="post" @submit="onSubmit">
           <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
-            <UInput v-model="state.email" type="email" class="w-full" />
+            <UInput
+              v-model="state.email"
+              type="email"
+              autocomplete="email"
+              spellcheck="false"
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField
@@ -101,13 +126,20 @@ function googleLogin() {
             name="password"
             class="w-full pb-8"
           >
-            <UInput v-model="state.password" type="password" class="w-full" />
+            <UInput
+              v-model="state.password"
+              type="password"
+              autocomplete="current-password"
+              class="w-full"
+            />
           </UFormField>
 
           <UButton
-            :label="$t('page.authentication.logIn')"
+            :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
             color="neutral"
             type="submit"
+            :loading="pending"
+            :disabled="pending"
             class="w-full flex flex-col items-center cursor-pointer"
           />
         </UForm>
