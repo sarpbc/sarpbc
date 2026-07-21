@@ -23,6 +23,7 @@ const { t } = useI18n();
 const user = useUser();
 const toast = useToast();
 const isSubmitting = ref(false);
+const posthog = usePostHog();
 
 /** Wait until session is known so SSR guest HTML can hydrate before auth upgrades. */
 const sessionReady = computed(() => user.value !== undefined);
@@ -86,6 +87,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
   if (createResult.ok) {
     state.content = "";
+    posthog?.capture("comment_posted", { target_type: targetType, target_id: targetId });
     emit("commentCreated");
     toast.add({
       title: t("components.discussion.messages.created"),

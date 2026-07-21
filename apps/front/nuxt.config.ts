@@ -75,7 +75,20 @@ export default defineNuxtConfig({
     "@nuxt/content",
     "@nuxt/image",
     "motion-v/nuxt",
+    "@posthog/nuxt",
   ],
+
+  posthogConfig: {
+    publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
+    host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+    clientConfig: {
+      capture_exceptions: true,
+      __add_tracing_headers: ["localhost", "api.sarpbc.org"],
+    },
+    serverConfig: {
+      enableExceptionAutocapture: true,
+    },
+  },
 
   evlog: {
     env: {
@@ -163,6 +176,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: apiBase,
+      posthog: {
+        publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
+        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+      },
     },
   },
 

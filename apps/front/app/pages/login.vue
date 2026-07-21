@@ -4,6 +4,7 @@ import { getApiErrorMessage } from "~/utils/apiError";
 const config = useRuntimeConfig();
 const toast = useToast();
 const { t } = useI18n();
+const posthog = usePostHog();
 
 interface LoginState {
   email: string;
@@ -56,6 +57,11 @@ async function onSubmit(event: Event) {
       const user = useUser();
       const profile = await getProfile();
       user.value = profile;
+
+      if (profile) {
+        posthog?.identify(profile.id, { userName: profile.userName, email: profile.email });
+        posthog?.capture("user_logged_in");
+      }
 
       navigateTo("/");
       return;

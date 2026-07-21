@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const config = useRuntimeConfig();
+const posthog = usePostHog();
 
 interface RegisterState {
   userName: string;
@@ -32,6 +33,11 @@ async function onSubmit(event: Event) {
     const user = useUser();
     const profile = await getProfile();
     user.value = profile;
+
+    if (profile) {
+      posthog?.identify(profile.id, { userName: profile.userName, email: profile.email });
+      posthog?.capture("user_signed_up");
+    }
 
     navigateTo("/");
     return;

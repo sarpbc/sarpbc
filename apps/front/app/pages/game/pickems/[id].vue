@@ -5,6 +5,7 @@ import type { Match } from "~/types/match";
 const route = useRoute();
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+const posthog = usePostHog();
 
 const tournamentId = computed(() => route.params.id as string);
 
@@ -30,8 +31,16 @@ setPageSeo({
 
 const pickTeam = async (matchId: string, participantId: string) => {
   await updatePickemForMatch(matchId, participantId);
+  posthog?.capture("pickem_pick_submitted", {
+    match_id: matchId,
+    tournament_id: tournamentId.value,
+  });
   await refresh();
 };
+
+onMounted(() => {
+  posthog?.capture("pickem_tournament_opened", { tournament_id: tournamentId.value });
+});
 
 const pickemDf = new DateFormatter(locale.value, {
   month: "short",

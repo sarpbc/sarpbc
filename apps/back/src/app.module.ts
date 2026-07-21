@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { EvlogModule } from "evlog/nestjs";
+import { PostHogModule } from "./posthog/posthog.module";
 import { UserModule } from "./user/user.module";
 import { AuthModule } from "./auth/auth.module";
 import { TeamModule } from "./team/team.module";
@@ -24,6 +25,7 @@ import mikroOrmConfig from "./mikro-orm.config";
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     EvlogModule.forRoot(),
+    PostHogModule,
     MikroOrmModule.forRoot({
       ...mikroOrmConfig,
       driver: PostgreSqlDriver,

@@ -4,14 +4,16 @@ import { AuthGuard } from "./auth.guard";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { SignInUserDto } from "src/user/dto/signin-user.dto";
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
+import { PostHogService } from "src/posthog/posthog.service";
 
 @Controller("auth")
 export class AuthController {
   constructor(
     private authService: AuthService,
     private configService: ConfigService,
+    private posthog: PostHogService,
   ) {}
 
   private accessTokenCookieOptions(includeMaxAge = true): Record<string, unknown> {
@@ -44,10 +46,19 @@ export class AuthController {
   }
 
   @Post("login")
-  async signIn(@Body() userData: SignInUserDto, @Res() res: FastifyReply) {
+  async signIn(
+    @Body() userData: SignInUserDto,
+    @Res() res: FastifyReply,
+    @Request() req: FastifyRequest,
+  ) {
     const access_token = await this.authService.signIn(userData);
 
     this.setAccessTokenCookie(res, access_token);
+
+    const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
+    const sessionId = req.headers["x-posthog-session-id"] as string | undefined;
+    this.posthog.capture({ distinctId, event: "server_user_logged_in", sessionId });
+    await this.posthog.flush();
 
     return res.code(200).send({ success: true });
   }
@@ -59,10 +70,19 @@ export class AuthController {
   }
 
   @Post("signup")
-  async signUp(@Body() userData: CreateUserDto, @Res() res: FastifyReply) {
+  async signUp(
+    @Body() userData: CreateUserDto,
+    @Res() res: FastifyReply,
+    @Request() req: FastifyRequest,
+  ) {
     const access_token = await this.authService.signUp(userData);
 
     this.setAccessTokenCookie(res, access_token);
+
+    const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
+    const sessionId = req.headers["x-posthog-session-id"] as string | undefined;
+    this.posthog.capture({ distinctId, event: "server_user_signed_up", sessionId });
+    await this.posthog.flush();
 
     return res.code(200).send({ success: true });
   }
