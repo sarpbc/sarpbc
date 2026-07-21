@@ -24,7 +24,7 @@ export class ForumController {
         title: topic.title,
         description: topic.description,
         createdAt: topic.createdAt,
-        postsCount: topic.posts.isInitialized() ? topic.posts.length : 0,
+        postsCount: topic.posts.length,
       })),
     };
   }

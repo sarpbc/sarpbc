@@ -3,6 +3,7 @@ import { Topic } from "../forum.entities";
 import { ITopicRepository } from "./domain/topic.repository.interface";
 
 export class TopicRepository extends EntityRepository<Topic> implements ITopicRepository {
+  /** Always populates `posts` so callers can use `topic.posts.length` safely. */
   async findAllTopics(): Promise<Topic[]> {
     return this.findAll({ populate: ["posts"] });
   }
