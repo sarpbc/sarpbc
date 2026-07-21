@@ -7,15 +7,19 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
 
+/** `undefined` = session still resolving — avoid flashing the sign-in CTA. */
+const sessionReady = computed(() => user.value !== undefined);
+const isSignedIn = computed(() => !!user.value);
+
 const signInLabel = computed(() =>
   action === "create" ? t("components.forum.signInToCreate") : t("page.forum.post.signInToReply"),
 );
 </script>
 
 <template>
-  <slot v-if="user" />
+  <slot v-if="isSignedIn" />
   <ULink
-    v-else
+    v-else-if="sessionReady"
     :to="localePath('/login')"
     :class="
       action === 'create'

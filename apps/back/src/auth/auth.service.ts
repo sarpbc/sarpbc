@@ -67,9 +67,6 @@ export class AuthService {
 
   async signUp(userData: CreateUserDto): Promise<string> {
     const newUser = await this.userService.create(userData);
-    if (!newUser) {
-      throw new UnauthorizedException("User creation failed");
-    }
 
     const payload = {
       id: newUser.id,
@@ -116,12 +113,6 @@ export class AuthService {
           profile.name,
           profile.id,
           profile.picture ?? null,
-        );
-      }
-
-      if (!user) {
-        throw new UnauthorizedException(
-          "Could not sign in with Google. Try again or use email and password.",
         );
       }
     }
