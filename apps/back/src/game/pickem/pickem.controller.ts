@@ -3,10 +3,14 @@ import { PickemService } from "./pickem.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { AdminGuard } from "src/user/user.guard";
 import { AuthenticatedUserRequest } from "src/common/types/authenticated.interface";
+import { PostHogService } from "src/posthog/posthog.service";
 
 @Controller("pickem")
 export class PickemController {
-  constructor(private readonly pickemService: PickemService) {}
+  constructor(
+    private readonly pickemService: PickemService,
+    private readonly posthog: PostHogService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get("tournament/:tournamentId/user/picks")
@@ -28,6 +32,15 @@ export class PickemController {
     const userId = req.user.id;
     try {
       await this.pickemService.makePick(userId, matchId, body.pickedParticipantId);
+      const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
+      const sessionId = req.headers["x-posthog-session-id"] as string | undefined;
+      this.posthog.capture({
+        distinctId,
+        event: "server_pickem_pick_submitted",
+        sessionId,
+        properties: { match_id: matchId },
+      });
+      await this.posthog.flush();
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

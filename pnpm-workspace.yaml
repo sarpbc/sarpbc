@@ -9,8 +9,10 @@ overrides:
 allowBuilds:
   "@nestjs/core": true
   "@parcel/watcher": true
+  "@posthog/cli": true
   "@swc/core": true
   bcrypt: true
+  core-js: true
   esbuild: true
   lefthook: true
   sharp: true

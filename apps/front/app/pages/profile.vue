@@ -3,6 +3,7 @@ const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const user = useUser();
 const localePath = useLocalePath();
+const posthog = usePostHog();
 
 if (!user.value) {
   navigateTo(localePath("/login"));
@@ -13,6 +14,8 @@ const isLoggingOut = ref(false);
 const handleLogout = async () => {
   isLoggingOut.value = true;
   try {
+    posthog?.capture("user_logged_out");
+    posthog?.reset();
     await logout();
   } catch (error) {
     console.error("Logout error:", error);
