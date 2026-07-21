@@ -675,9 +675,15 @@
       "continueWithGoogle": "Continuer avec Google",
       "or": "ou",
       "logIn": "Se connecter",
+      "loggingIn": "Connexion…",
       "userName": "Nom d'utilisateur",
       "alreadyHaveAnAccount": "Vous avez déjà un compte?",
-      "toRegister": "S'inscrire"
+      "toRegister": "S'inscrire",
+      "errors": {
+        "loginFailed": "Connexion impossible. Vérifiez votre email et mot de passe, puis réessayez.",
+        "googleFailed": "Échec de la connexion Google. Réessayez ou utilisez email et mot de passe.",
+        "googleLinkFailed": "Impossible de lier Google à votre compte. Essayez email et mot de passe."
+      }
     }
   },
   "pages": {

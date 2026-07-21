@@ -80,4 +80,13 @@ export class UserService {
     await this.userRepository.save(user);
     return user;
   }
+
+  async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null): Promise<User> {
+    user.googleId = googleId;
+    if (avatarUrl && !user.avatarUrl) {
+      user.avatarUrl = avatarUrl;
+    }
+    await this.userRepository.save(user);
+    return user;
+  }
 }
