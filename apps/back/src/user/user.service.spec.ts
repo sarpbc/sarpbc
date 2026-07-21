@@ -1,4 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConflictException } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { USER_REPOSITORY } from "./domain/user.repository.interface";
 import { User } from "./domain/user.entity";
@@ -21,6 +22,38 @@ describe("UserService", () => {
 
     service = module.get(UserService);
     jest.clearAllMocks();
+  });
+
+  describe("create", () => {
+    it("persists a new user without class-validator on the entity", async () => {
+      userRepository.existsByEmail.mockResolvedValue(false);
+      userRepository.save.mockImplementation(async (user: User) => {
+        user.id = "user-1";
+      });
+
+      const created = await service.create({
+        email: "new@example.com",
+        password: "Password1!",
+        userName: "newbie",
+      });
+
+      expect(created.email).toBe("new@example.com");
+      expect(created.userName).toBe("newbie");
+      expect(created.password).toBeTruthy();
+      expect(userRepository.save).toHaveBeenCalled();
+    });
+
+    it("throws ConflictException when email already exists", async () => {
+      userRepository.existsByEmail.mockResolvedValue(true);
+
+      await expect(
+        service.create({
+          email: "taken@example.com",
+          password: "Password1!",
+          userName: "taken",
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
   });
 
   describe("linkGoogleAccount", () => {

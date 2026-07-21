@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   UseGuards,
   UseInterceptors,
@@ -57,7 +58,7 @@ export class PostController {
 
   @Get(":id")
   async findById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
     const post = await this.postService.findByIdDto(id);
