@@ -3,10 +3,51 @@
     "home": {
       "brand": "SARPBC Admin",
       "title": "Console Staff",
-      "subtitle": "Les outils du dashboard arriveront dans une phase suivante. L’auth est en place.",
+      "subtitle": "Le CMS Actualités est disponible ici. Les autres outils du dashboard restent sur le site public jusqu’à leur migration.",
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
-      "loggingOut": "Déconnexion…"
+      "loggingOut": "Déconnexion…",
+      "openNews": "Ouvrir les Articles"
+    },
+    "nav": {
+      "home": "Tableau de bord",
+      "articles": "Articles",
+      "backToSite": "Retour sur sarpbc.org"
+    },
+    "news": {
+      "title": "Articles",
+      "articlesCount": "{count} articles",
+      "columns": {
+        "title": "Titre",
+        "author": "Auteur",
+        "createdAt": "Créé le"
+      },
+      "create": {
+        "title": "Nouvel Article",
+        "titleField": "Titre",
+        "save": "Enregistrer l’Article",
+        "saved": "Article enregistré",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "cancel": "Annuler",
+        "placeholder": "Commencez à écrire le contenu de l’article…",
+        "tab": {
+          "write": "Écrire",
+          "preview": "Aperçu"
+        },
+        "preview": {
+          "empty": "Rien à prévisualiser pour l’instant. Commencez à écrire pour voir le rendu."
+        }
+      },
+      "edit": {
+        "save": "Enregistrer l’Article",
+        "saved": "Article enregistré",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "publish": "Publier",
+        "unpublish": "Dépublier",
+        "published": "Article publié",
+        "unpublished": "Article dépublié",
+        "publishFailed": "Impossible de mettre à jour l’état de publication. Réessayez."
+      }
     },
     "authentication": {
       "login": "Connexion Staff",
