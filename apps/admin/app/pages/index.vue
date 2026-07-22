@@ -3,6 +3,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
 const pending = ref(false);
+const syncing = ref(false);
 
 const items = [
   {
@@ -19,6 +20,18 @@ async function onLogout() {
     await logout();
   } finally {
     pending.value = false;
+  }
+}
+
+async function onSyncTeams() {
+  if (syncing.value) {
+    return;
+  }
+  syncing.value = true;
+  try {
+    await syncTeamFromPandascore();
+  } finally {
+    syncing.value = false;
   }
 }
 </script>
@@ -56,9 +69,29 @@ async function onLogout() {
           <p class="text-sm text-muted" translate="no">{{ user?.email }}</p>
         </div>
 
-        <div class="mt-6">
+        <div class="mt-6 flex flex-wrap gap-3">
           <UButton :to="localePath('/news')" icon="i-fluent-news-24-regular">
             {{ $t("page.home.openNews") }}
+          </UButton>
+          <UButton :to="localePath('/players')" icon="i-fluent-person-24-regular" color="neutral">
+            {{ $t("page.home.openPlayers") }}
+          </UButton>
+          <UButton
+            :to="localePath('/teams')"
+            icon="i-fluent-people-team-24-regular"
+            color="neutral"
+          >
+            {{ $t("page.home.openTeams") }}
+          </UButton>
+          <UButton
+            icon="i-fluent-arrow-sync-24-regular"
+            color="neutral"
+            variant="outline"
+            :loading="syncing"
+            :disabled="syncing"
+            @click="onSyncTeams"
+          >
+            {{ syncing ? $t("page.home.syncingTeams") : $t("page.home.syncTeams") }}
           </UButton>
         </div>
       </div>
