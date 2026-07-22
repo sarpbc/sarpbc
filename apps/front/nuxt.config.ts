@@ -80,8 +80,11 @@ export default defineNuxtConfig({
 
   posthogConfig: {
     publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
-    host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+    // Client ingestion goes through the reverse proxy (ad-block resistant)
+    host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
     clientConfig: {
+      api_host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
+      ui_host: "https://eu.posthog.com", // toolbar — never the proxy
       capture_exceptions: true,
       __add_tracing_headers: ["localhost", "api.sarpbc.org"],
     },
@@ -178,7 +181,7 @@ export default defineNuxtConfig({
       apiBase: apiBase,
       posthog: {
         publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
-        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
       },
     },
   },
