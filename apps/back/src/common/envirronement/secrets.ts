@@ -79,6 +79,13 @@ export function getFrontUrl(): string {
   throw new Error("Front URL not found");
 }
 
+export function getAdminUrl(): string {
+  if (process.env.ADMIN_URL !== undefined) {
+    return process.env.ADMIN_URL;
+  }
+  throw new Error("Admin URL not found");
+}
+
 export function getCloudflareAccountId(): string {
   if (process.env.CLOUDFLARE_ACCOUNT_ID !== undefined) {
     return process.env.CLOUDFLARE_ACCOUNT_ID;

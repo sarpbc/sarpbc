@@ -32,8 +32,10 @@ async function bootstrap() {
     origin: [
       "http://localhost:4000",
       "http://localhost:4001",
+      "http://localhost:4002",
       "https://sarpbc.org",
       "https://www.sarpbc.org",
+      "https://admin.sarpbc.org",
     ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,

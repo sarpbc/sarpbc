@@ -41,6 +41,8 @@ describe("AuthService", () => {
                   return "http://localhost/callback";
                 case "front_url":
                   return "http://localhost:4000";
+                case "admin_url":
+                  return "http://localhost:4002";
                 default:
                   return undefined;
               }
@@ -74,6 +76,21 @@ describe("AuthService", () => {
 
       await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toBe("jwt-token");
       expect(jwtService.signAsync).toHaveBeenCalled();
+    });
+  });
+
+  describe("OAuth return destination", () => {
+    it("parses returnTo allowlist and defaults to front", () => {
+      expect(service.parseOAuthReturnTo("admin")).toBe("admin");
+      expect(service.parseOAuthReturnTo("front")).toBe("front");
+      expect(service.parseOAuthReturnTo("https://evil.example")).toBe("front");
+      expect(service.parseOAuthReturnTo(undefined)).toBe("front");
+    });
+
+    it("resolves only FRONT_URL or ADMIN_URL", () => {
+      expect(service.resolveOAuthReturnUrl("admin")).toBe("http://localhost:4002");
+      expect(service.resolveOAuthReturnUrl("front")).toBe("http://localhost:4000");
+      expect(service.resolveOAuthReturnUrl(undefined)).toBe("http://localhost:4000");
     });
   });
 });
