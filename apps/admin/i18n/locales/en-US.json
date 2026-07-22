@@ -1,0 +1,26 @@
+{
+  "page": {
+    "home": {
+      "brand": "SARPBC Admin",
+      "title": "Staff Console",
+      "subtitle": "Dashboard tools will move here in a later phase. Auth is live.",
+      "signedInAs": "Signed in as",
+      "logout": "Log Out",
+      "loggingOut": "Logging out…"
+    },
+    "authentication": {
+      "login": "Staff Login",
+      "staffOnly": "Admin access only. Use your SARPBC staff account.",
+      "email": "Email",
+      "password": "Password",
+      "continueWithGoogle": "Continue with Google",
+      "or": "or",
+      "logIn": "Log In",
+      "loggingIn": "Logging in…",
+      "errors": {
+        "loginFailed": "Could not log in. Check your email and password and try again.",
+        "notAdmin": "This account is not a staff admin. Contact an administrator."
+      }
+    }
+  }
+}

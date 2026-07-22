@@ -21,6 +21,7 @@ jobs:
       quality: ${{ steps.filter.outputs.quality }}
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      admin: ${{ steps.filter.outputs.admin }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -51,6 +52,12 @@ jobs:
               - 'turbo.json'
             frontend:
               - 'apps/front/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'turbo.json'
+            admin:
+              - 'apps/admin/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
@@ -111,6 +118,8 @@ jobs:
         env:
           PANDASCORE_API_TOKEN: test-token
           JWT_KEY: test-jwt-key
+          FRONT_URL: http://localhost:4000
+          ADMIN_URL: http://localhost:4002
 
   frontend:
     name: Frontend typecheck and build
@@ -143,9 +152,40 @@ jobs:
           CI: true
           NODE_OPTIONS: --max-old-space-size=8192
 
+  admin:
+    name: Admin typecheck and build
+    needs: changes
+    if: needs.changes.outputs.admin == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.8.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter admin run typecheck
+
+      - name: Build
+        run: pnpm --filter admin run build
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+
   ci:
     name: CI
-    needs: [changes, quality, backend, frontend]
+    needs: [changes, quality, backend, frontend, admin]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -156,6 +196,7 @@ jobs:
             "${{ needs.quality.result }}"
             "${{ needs.backend.result }}"
             "${{ needs.frontend.result }}"
+            "${{ needs.admin.result }}"
           )
 
           for result in "${results[@]}"; do

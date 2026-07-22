@@ -17,6 +17,8 @@ export interface GoogleIdTokenPayload {
   locale?: string;
 }
 
+export type OAuthReturnTo = "front" | "admin";
+
 @Injectable()
 export class AuthService {
   private jwtToken: string;
@@ -24,6 +26,7 @@ export class AuthService {
   private googleClientId: string;
   private googleRedirectUri: string;
   private front_url: string;
+  private admin_url: string;
   private oauthClient;
 
   constructor(
@@ -36,6 +39,7 @@ export class AuthService {
     this.googleClientId = this.configService.get<string>("google_client_id")!;
     this.googleRedirectUri = this.configService.get<string>("google_redirect_uri")!;
     this.front_url = this.configService.get<string>("front_url")!;
+    this.admin_url = this.configService.get<string>("admin_url")!;
 
     this.oauthClient = new google.auth.OAuth2(
       this.googleClientId,
@@ -134,11 +138,33 @@ export class AuthService {
     return this.front_url;
   }
 
-  getGoogleAuthUrl(): string {
+  getAdminUrl(): string {
+    return this.admin_url;
+  }
+
+  /**
+   * Resolve post-OAuth redirect URL. Only `front` | `admin` are allowed (no open redirects).
+   */
+  resolveOAuthReturnUrl(returnTo: string | undefined): string {
+    if (returnTo === "admin") {
+      return this.admin_url;
+    }
+    return this.front_url;
+  }
+
+  parseOAuthReturnTo(state: string | undefined): OAuthReturnTo {
+    if (state === "admin") {
+      return "admin";
+    }
+    return "front";
+  }
+
+  getGoogleAuthUrl(returnTo: OAuthReturnTo = "front"): string {
     return this.oauthClient.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
       scope: ["profile", "email"],
+      state: returnTo,
     });
   }
 }

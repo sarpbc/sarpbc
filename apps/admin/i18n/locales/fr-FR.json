@@ -1,0 +1,26 @@
+{
+  "page": {
+    "home": {
+      "brand": "SARPBC Admin",
+      "title": "Console Staff",
+      "subtitle": "Les outils du dashboard arriveront dans une phase suivante. L’auth est en place.",
+      "signedInAs": "Connecté en tant que",
+      "logout": "Se Déconnecter",
+      "loggingOut": "Déconnexion…"
+    },
+    "authentication": {
+      "login": "Connexion Staff",
+      "staffOnly": "Accès admin uniquement. Utilisez votre compte staff SARPBC.",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "continueWithGoogle": "Continuer avec Google",
+      "or": "ou",
+      "logIn": "Se Connecter",
+      "loggingIn": "Connexion…",
+      "errors": {
+        "loginFailed": "Impossible de se connecter. Vérifiez votre e-mail et mot de passe, puis réessayez.",
+        "notAdmin": "Ce compte n’est pas un admin staff. Contactez un administrateur."
+      }
+    }
+  }
+}

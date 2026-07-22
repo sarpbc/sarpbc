@@ -1,6 +1,6 @@
 # sarpbc — Agent Guide
 
-Rocket League news and data platform. Monorepo: **Nuxt 4** frontend + **NestJS** API.
+Rocket League news and data platform. Monorepo: **Nuxt 4** public site + **Nuxt 4** staff admin + **NestJS** API.
 
 > This file is the **index**. Detailed rules live in `.agents/skills/` — load the relevant skill instead of guessing.
 
@@ -10,8 +10,9 @@ Rocket League news and data platform. Monorepo: **Nuxt 4** frontend + **NestJS**
 | ------------- | --------------------------------------------- | ------------ |
 | `apps/front/` | Nuxt 4, `@nuxt/ui`, Tailwind v4, i18n (en/fr) | 4000         |
 | `apps/back/`  | NestJS, MikroORM, PostgreSQL, Redis           | 4001         |
+| `apps/admin/` | Nuxt 4 SPA staff console (`admin.sarpbc.org`) | 4002         |
 
-Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back`.
+Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back`, `pnpm dev:admin`.
 
 ## Skills — When to Use
 
@@ -33,8 +34,8 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 
 - **Package manager:** pnpm only (`only-allow` enforced).
 - **Linter / formatter:** oxlint, oxfmt — run before considering work done.
-- **i18n:** user-facing strings in `apps/front/i18n/locales/` (en-US + fr-FR); use `$t()` and `$localePath()`.
-- **API:** frontend calls `runtimeConfig.public.apiBase` (NestJS `apps/back`); cookies for auth.
+- **i18n:** user-facing strings in each Nuxt app's `i18n/locales/` (en-US + fr-FR); use `$t()` and `$localePath()`.
+- **API:** Nuxt apps call `runtimeConfig.public.apiBase` (NestJS `apps/back`); cookies for auth.
 - **Imports:** top of file; no inline imports unless circular-deps documented.
 - **TypeScript:** exhaustive `switch` with `never` in default for unions/enums.
 - **Scope:** minimal diffs; match existing patterns; no drive-by refactors.
@@ -45,8 +46,14 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 
 - Config: `nuxt.config.ts`, `app/app.config.ts` (`primary: blue`, `neutral: zinc`).
 - Components: prefer `@nuxt/ui` (`UButton`, `UFormField`, `UTable`); shared primitives in `app/components/ui/`.
-- Admin: `/dashboard/**` → `dashboard` layout + `admin` middleware.
+- Admin (legacy until cutover): `/dashboard/**` → `dashboard` layout + `admin` middleware.
 - Design rules: `.agents/skills/geist-design/AGENTS.md`
+
+### Staff admin (`apps/admin`)
+
+- SPA (`ssr: false`), port 4002, target host `admin.sarpbc.org`.
+- Auth: login page + `admin` middleware (`user.admin`); same API cookie session as front.
+- Dashboard feature pages migrate here in later SAR-76 phases.
 
 ### Backend (`apps/back`)
 
