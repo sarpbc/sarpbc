@@ -3,10 +3,51 @@
     "home": {
       "brand": "SARPBC Admin",
       "title": "Staff Console",
-      "subtitle": "Dashboard tools will move here in a later phase. Auth is live.",
+      "subtitle": "News CMS is live here. Other dashboard tools still run on the public site until they migrate.",
       "signedInAs": "Signed in as",
       "logout": "Log Out",
-      "loggingOut": "Logging out…"
+      "loggingOut": "Logging out…",
+      "openNews": "Open Articles"
+    },
+    "nav": {
+      "home": "Dashboard",
+      "articles": "Articles",
+      "backToSite": "Back to sarpbc.org"
+    },
+    "news": {
+      "title": "Articles",
+      "articlesCount": "{count} articles",
+      "columns": {
+        "title": "Title",
+        "author": "Author",
+        "createdAt": "Created At"
+      },
+      "create": {
+        "title": "New Article",
+        "titleField": "Title",
+        "save": "Save Article",
+        "saved": "Article saved",
+        "saveFailed": "Could not save article. Check the title and content, then try again.",
+        "cancel": "Cancel",
+        "placeholder": "Start writing the article content…",
+        "tab": {
+          "write": "Write",
+          "preview": "Preview"
+        },
+        "preview": {
+          "empty": "Nothing to preview yet. Start writing to see the rendered output."
+        }
+      },
+      "edit": {
+        "save": "Save Article",
+        "saved": "Article saved",
+        "saveFailed": "Could not save article. Check the title and content, then try again.",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "published": "Article published",
+        "unpublished": "Article unpublished",
+        "publishFailed": "Could not update publish state. Try again."
+      }
     },
     "authentication": {
       "login": "Staff Login",
