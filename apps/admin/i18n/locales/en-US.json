@@ -1,17 +1,31 @@
 {
+  "common": {
+    "cancel": "Cancel",
+    "contractRole": {
+      "active": "Active",
+      "benched": "Benched",
+      "loaned": "Loaned"
+    }
+  },
   "page": {
     "home": {
       "brand": "SARPBC Admin",
       "title": "Staff Console",
-      "subtitle": "News CMS is live here. Other dashboard tools still run on the public site until they migrate.",
+      "subtitle": "News, players, and teams live here. Tournaments, pick'ems, and forum still run on the public site until they migrate.",
       "signedInAs": "Signed in as",
       "logout": "Log Out",
       "loggingOut": "Logging out…",
-      "openNews": "Open Articles"
+      "openNews": "Open Articles",
+      "openPlayers": "Open Players",
+      "openTeams": "Open Teams",
+      "syncTeams": "Sync Teams",
+      "syncingTeams": "Syncing…"
     },
     "nav": {
       "home": "Dashboard",
       "articles": "Articles",
+      "players": "Players",
+      "teams": "Teams",
       "backToSite": "Back to sarpbc.org"
     },
     "news": {
@@ -47,6 +61,119 @@
         "published": "Article published",
         "unpublished": "Article unpublished",
         "publishFailed": "Could not update publish state. Try again."
+      }
+    },
+    "players": {
+      "title": "Players",
+      "playersCount": "{count} players",
+      "save": "Save",
+      "columns": {
+        "name": "Name",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "nationality": "Nationality"
+      },
+      "fields": {
+        "name": "Name",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "nationality": "Nationality",
+        "birthday": "Birthday",
+        "imageUrl": "Image URL"
+      },
+      "create": {
+        "title": "New Player",
+        "save": "Create Player"
+      },
+      "delete": {
+        "title": "Delete Player",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "confirm_button": "Delete"
+      },
+      "info": {
+        "title": "Player Information"
+      },
+      "contracts": {
+        "title": "Contract History",
+        "empty": "No contracts found.",
+        "save": "Save Contract",
+        "columns": {
+          "team": "Team",
+          "role": "Role",
+          "startDate": "Start Date",
+          "endDate": "End Date"
+        },
+        "fields": {
+          "teamId": "Team ID",
+          "role": "Role",
+          "startDate": "Start Date",
+          "endDate": "End Date (leave empty for current)"
+        },
+        "create": {
+          "title": "Add Contract"
+        },
+        "edit": {
+          "title": "Edit Contract"
+        },
+        "delete": {
+          "title": "Delete Contract",
+          "confirm": "Are you sure you want to delete the contract with {team}?",
+          "confirm_button": "Delete"
+        }
+      }
+    },
+    "teams": {
+      "title": "Teams",
+      "teamsCount": "{count} teams",
+      "save": "Save",
+      "columns": {
+        "name": "Name",
+        "location": "Location"
+      },
+      "fields": {
+        "name": "Name",
+        "location": "Location",
+        "imageUrl": "Image URL"
+      },
+      "create": {
+        "title": "New Team",
+        "save": "Create Team"
+      },
+      "delete": {
+        "title": "Delete Team",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "confirm_button": "Delete"
+      },
+      "info": {
+        "title": "Team Information"
+      },
+      "contracts": {
+        "title": "Contract History",
+        "empty": "No contracts found.",
+        "save": "Save Contract",
+        "columns": {
+          "player": "Player",
+          "role": "Role",
+          "startDate": "Start Date",
+          "endDate": "End Date"
+        },
+        "fields": {
+          "playerId": "Player ID",
+          "role": "Role",
+          "startDate": "Start Date",
+          "endDate": "End Date (leave empty for current)"
+        },
+        "create": {
+          "title": "Add Contract"
+        },
+        "edit": {
+          "title": "Edit Contract"
+        },
+        "delete": {
+          "title": "Delete Contract",
+          "confirm": "Are you sure you want to delete the contract with {player}?",
+          "confirm_button": "Delete"
+        }
       }
     },
     "authentication": {

@@ -14,6 +14,16 @@ const links = computed(() => [
     to: localePath("/news"),
   },
   {
+    label: t("page.nav.players"),
+    icon: "i-fluent-person-24-regular",
+    to: localePath("/players"),
+  },
+  {
+    label: t("page.nav.teams"),
+    icon: "i-fluent-people-team-24-regular",
+    to: localePath("/teams"),
+  },
+  {
     label: t("page.nav.backToSite"),
     icon: "i-fluent-arrow-left-24-regular",
     to: "https://sarpbc.org",

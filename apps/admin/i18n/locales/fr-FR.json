@@ -1,17 +1,31 @@
 {
+  "common": {
+    "cancel": "Annuler",
+    "contractRole": {
+      "active": "Actif",
+      "benched": "Remplaçant",
+      "loaned": "Prêté"
+    }
+  },
   "page": {
     "home": {
       "brand": "SARPBC Admin",
       "title": "Console Staff",
-      "subtitle": "Le CMS Actualités est disponible ici. Les autres outils du dashboard restent sur le site public jusqu’à leur migration.",
+      "subtitle": "Actualités, joueurs et équipes sont ici. Tournois, pick'ems et forum restent sur le site public jusqu’à leur migration.",
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
-      "openNews": "Ouvrir les Articles"
+      "openNews": "Ouvrir les Articles",
+      "openPlayers": "Ouvrir les Joueurs",
+      "openTeams": "Ouvrir les Équipes",
+      "syncTeams": "Synchroniser les Équipes",
+      "syncingTeams": "Synchronisation…"
     },
     "nav": {
       "home": "Tableau de bord",
       "articles": "Articles",
+      "players": "Joueurs",
+      "teams": "Équipes",
       "backToSite": "Retour sur sarpbc.org"
     },
     "news": {
@@ -47,6 +61,119 @@
         "published": "Article publié",
         "unpublished": "Article dépublié",
         "publishFailed": "Impossible de mettre à jour l’état de publication. Réessayez."
+      }
+    },
+    "players": {
+      "title": "Joueurs",
+      "playersCount": "{count} joueurs",
+      "save": "Enregistrer",
+      "columns": {
+        "name": "Nom",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "nationality": "Nationalité"
+      },
+      "fields": {
+        "name": "Nom",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "nationality": "Nationalité",
+        "birthday": "Date de naissance",
+        "imageUrl": "URL de l'image"
+      },
+      "create": {
+        "title": "Nouveau joueur",
+        "save": "Créer le joueur"
+      },
+      "delete": {
+        "title": "Supprimer le joueur",
+        "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
+        "confirm_button": "Supprimer"
+      },
+      "info": {
+        "title": "Informations du joueur"
+      },
+      "contracts": {
+        "title": "Historique des contrats",
+        "empty": "Aucun contrat trouvé.",
+        "save": "Enregistrer le contrat",
+        "columns": {
+          "team": "Équipe",
+          "role": "Rôle",
+          "startDate": "Date de début",
+          "endDate": "Date de fin"
+        },
+        "fields": {
+          "teamId": "ID de l'équipe",
+          "role": "Rôle",
+          "startDate": "Date de début",
+          "endDate": "Date de fin (laisser vide pour actuel)"
+        },
+        "create": {
+          "title": "Ajouter un contrat"
+        },
+        "edit": {
+          "title": "Modifier le contrat"
+        },
+        "delete": {
+          "title": "Supprimer le contrat",
+          "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {team} ?",
+          "confirm_button": "Supprimer"
+        }
+      }
+    },
+    "teams": {
+      "title": "Équipes",
+      "teamsCount": "{count} équipes",
+      "save": "Enregistrer",
+      "columns": {
+        "name": "Nom",
+        "location": "Localisation"
+      },
+      "fields": {
+        "name": "Nom",
+        "location": "Localisation",
+        "imageUrl": "URL de l'image"
+      },
+      "create": {
+        "title": "Nouvelle équipe",
+        "save": "Créer l'équipe"
+      },
+      "delete": {
+        "title": "Supprimer l'équipe",
+        "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
+        "confirm_button": "Supprimer"
+      },
+      "info": {
+        "title": "Informations de l'équipe"
+      },
+      "contracts": {
+        "title": "Historique des contrats",
+        "empty": "Aucun contrat trouvé.",
+        "save": "Enregistrer le contrat",
+        "columns": {
+          "player": "Joueur",
+          "role": "Rôle",
+          "startDate": "Date de début",
+          "endDate": "Date de fin"
+        },
+        "fields": {
+          "playerId": "ID du joueur",
+          "role": "Rôle",
+          "startDate": "Date de début",
+          "endDate": "Date de fin (laisser vide pour actuel)"
+        },
+        "create": {
+          "title": "Ajouter un contrat"
+        },
+        "edit": {
+          "title": "Modifier le contrat"
+        },
+        "delete": {
+          "title": "Supprimer le contrat",
+          "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {player} ?",
+          "confirm_button": "Supprimer"
+        }
       }
     },
     "authentication": {
