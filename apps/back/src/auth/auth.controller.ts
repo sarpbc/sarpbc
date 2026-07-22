@@ -94,26 +94,33 @@ export class AuthController {
   }
 
   @Get("google")
-  redirectToGoogle(@Res() res: FastifyReply) {
-    const url = this.authService.getGoogleAuthUrl();
+  redirectToGoogle(@Query("returnTo") returnTo: string | undefined, @Res() res: FastifyReply) {
+    const destination = this.authService.parseOAuthReturnTo(returnTo);
+    const url = this.authService.getGoogleAuthUrl(destination);
     return res.code(302).redirect(url);
   }
 
   @Get("google/callback")
-  async handleGoogleCallback(@Query("code") code: string, @Res() res: FastifyReply) {
+  async handleGoogleCallback(
+    @Query("code") code: string,
+    @Query("state") state: string | undefined,
+    @Res() res: FastifyReply,
+  ) {
     const log = useLogger();
-    const frontUrl = this.authService.getFrontUrl();
+    const returnUrl = this.authService.resolveOAuthReturnUrl(
+      this.authService.parseOAuthReturnTo(state),
+    );
 
     try {
       const access_token = await this.authService.handleGoogleCallback(code);
 
       this.setAccessTokenCookie(res, access_token);
 
-      return res.code(302).redirect(frontUrl);
+      return res.code(302).redirect(returnUrl);
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
-      const separator = frontUrl.includes("?") ? "&" : "?";
-      return res.code(302).redirect(`${frontUrl}${separator}authError=google`);
+      const separator = returnUrl.includes("?") ? "&" : "?";
+      return res.code(302).redirect(`${returnUrl}${separator}authError=google`);
     }
   }
 }

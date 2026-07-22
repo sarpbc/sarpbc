@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+html {
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--color-neutral-300) transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  transition-duration: 300ms;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+:root {
+  --ui-radius: 0.25rem;
+}

@@ -1,6 +1,7 @@
 import {
   getDatabasePassword,
   getFrontUrl,
+  getAdminUrl,
   getGoogleClientId,
   getGoogleClientSecret,
   getGoogleRedirectUri,
@@ -18,6 +19,7 @@ export default () => ({
   google_client_id: getGoogleClientId(),
   google_redirect_uri: getGoogleRedirectUri(),
   front_url: getFrontUrl(),
+  admin_url: getAdminUrl(),
   pandascore_api_token: getPandaScoreApiToken(),
   pandascore_sync_on_boot: process.env.PANDASCORE_SYNC_ON_BOOT === "true",
   production: process.env.NODE_ENV === "production",
