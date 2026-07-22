@@ -11,10 +11,54 @@
  * });
  */
 
+const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
+const DEFAULT_DESCRIPTION = "Rocket League news & data | sarpbc.org";
+const DEFAULT_IMAGE_PATH = "/sarpbc.png";
+const OG_IMAGE_WIDTH = 1200;
+const OG_IMAGE_HEIGHT = 630;
+
 export const useSarpbcSeo = () => {
   const { locales } = useI18n();
   const route = useRoute();
   const baseUrl = "https://sarpbc.org";
+
+  const resolveImageUrl = (image?: string | null): string => {
+    const trimmed = image?.trim();
+    if (!trimmed) {
+      return `${baseUrl}${DEFAULT_IMAGE_PATH}`;
+    }
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+
+    if (trimmed.startsWith("//")) {
+      return `https:${trimmed}`;
+    }
+
+    const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+    return `${baseUrl}${path}`;
+  };
+
+  const resolveImageType = (imageUrl: string): string | undefined => {
+    const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";
+    if (path.endsWith(".png")) {
+      return "image/png";
+    }
+    if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+      return "image/jpeg";
+    }
+    if (path.endsWith(".webp")) {
+      return "image/webp";
+    }
+    if (path.endsWith(".gif")) {
+      return "image/gif";
+    }
+    if (path.endsWith(".svg")) {
+      return "image/svg+xml";
+    }
+    return undefined;
+  };
 
   /**
    * Set page-specific SEO meta tags, canonical URL, and alternate links
@@ -22,17 +66,16 @@ export const useSarpbcSeo = () => {
   const setPageSeo = (opts?: {
     title?: string;
     description?: string;
-    image?: string;
+    image?: string | null;
     noIndex?: boolean;
     twitterCard?: "summary" | "summary_large_image";
   }) => {
-    const {
-      title = "Rocket League news & data | sarpbc.org",
-      description = "Rocket League news & data | sarpbc.org",
-      image = "https://sarpbc.org/sarpbc.png",
-      noIndex = false,
-      twitterCard = "summary_large_image",
-    } = opts || {};
+    const title = opts?.title ?? DEFAULT_TITLE;
+    const description = opts?.description ?? DEFAULT_DESCRIPTION;
+    const image = resolveImageUrl(opts?.image);
+    const imageType = resolveImageType(image);
+    const noIndex = opts?.noIndex ?? false;
+    const twitterCard = opts?.twitterCard ?? "summary_large_image";
 
     // Get canonical URL for og:url (remove /fr prefix)
     const cleanPath = route.path.replace(/^\/fr/, "");
@@ -76,6 +119,9 @@ export const useSarpbcSeo = () => {
       ogDescription: description,
       ogUrl: canonicalUrl,
       ogImage: image,
+      ogImageWidth: OG_IMAGE_WIDTH,
+      ogImageHeight: OG_IMAGE_HEIGHT,
+      ...(imageType ? { ogImageType: imageType } : {}),
       ogType: "website",
       twitterCard,
       twitterTitle: title,

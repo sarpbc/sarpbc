@@ -43,12 +43,9 @@ const description = computed(() =>
     : t("page.player.slug.seoDescriptionDefault"),
 );
 
-useHead({
-  title,
-  meta: [{ name: "description", content: description }],
-});
-
 setPageSeo({
+  title: title.value,
+  description: description.value,
   image: currentPlayer.value.imageUrl || undefined,
 });
 </script>
