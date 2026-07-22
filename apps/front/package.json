@@ -26,6 +26,7 @@
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/i18n": "^10.4.0",
     "@posthog/nuxt": "^1.7.80",
+    "@resvg/resvg-js": "^2.6.2",
     "@tiptap/core": "^3.27.1",
     "@tiptap/extension-collaboration": "^3.27.1",
     "@tiptap/pm": "^3.27.1",

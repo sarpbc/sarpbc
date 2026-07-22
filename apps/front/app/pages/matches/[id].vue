@@ -188,7 +188,7 @@ const seoDescription = computed(() => {
 
 function getMatchOgImageUrl(id: string): string {
   const origin = new URL(getCanonicalUrl()).origin;
-  return `${origin}/og/match/${id}.svg`;
+  return `${origin}/og/match/${id}.png`;
 }
 
 watch(
@@ -197,7 +197,7 @@ watch(
     setPageSeo({
       title: seoTitle.value,
       description: seoDescription.value,
-      image: match.value ? getMatchOgImageUrl(matchId.value) : undefined,
+      ...(match.value ? { image: getMatchOgImageUrl(matchId.value) } : {}),
     });
   },
   { immediate: true },
