@@ -717,7 +717,7 @@
   "pages": {
     "cookiePolicy": {
       "title": "Politique des Cookies",
-      "metaDescription": "Découvrez comment nous utilisons les cookies sur notre site web, y compris Google Analytics et autres technologies de suivi.",
+      "metaDescription": "Découvrez comment nous utilisons les cookies sur notre site web, y compris PostHog et autres technologies de suivi.",
       "lastUpdated": "Dernière mise à jour",
       "lastUpdatedDate": "4 septembre 2025",
       "whatAreCookies": {
@@ -737,7 +737,7 @@
         "analytics": {
           "title": "Cookies Analytiques",
           "description": "Nous utilisons des cookies analytiques pour comprendre comment les visiteurs interagissent avec notre site web. Ces cookies nous aident à analyser le trafic du site, à mesurer l'efficacité de notre contenu et à améliorer nos services.",
-          "googleAnalytics": "Nous utilisons spécifiquement Google Analytics pour collecter des informations anonymes sur la façon dont vous utilisez notre site, y compris les pages que vous visitez, le temps que vous passez sur chaque page et comment vous avez trouvé notre site."
+          "googleAnalytics": "Nous utilisons PostHog (UE) pour l'analyse produit. Des événements d'usage anonymes peuvent être collectés sans être liés à votre compte. Si vous acceptez les cookies analytiques, nous pouvons associer votre session à votre compte pour comprendre l'usage connecté. Vous pouvez modifier ce choix à tout moment."
         }
       },
       "managingCookies": {
@@ -872,7 +872,7 @@
       "dataSharing": {
         "title": "Partage des Données",
         "description": "Nous pouvons partager vos données avec :",
-        "analytics": "Les fournisseurs d'analyses (Google Analytics) pour l'analyse du site web",
+        "analytics": "Les fournisseurs d'analyses (PostHog) pour l'analyse du site web",
         "hosting": "Les fournisseurs d'hébergement pour le fonctionnement du site web",
         "legal": "Les forces de l'ordre ou les autorités réglementaires lorsque requis par la loi"
       },

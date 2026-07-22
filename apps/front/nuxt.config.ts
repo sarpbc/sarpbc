@@ -14,6 +14,10 @@ const apiOriginUrl = apiOrigin(apiBase);
 
 const listHubSwr = { swr: 60 } as const;
 const contentSwr = { swr: 300 } as const;
+const isProduction = process.env.NODE_ENV === "production";
+const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
+// Client ingestion goes through the reverse proxy (ad-block resistant)
+const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
 
 export default defineNuxtConfig({
   app: {
@@ -79,14 +83,19 @@ export default defineNuxtConfig({
   ],
 
   posthogConfig: {
-    publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
-    // Client ingestion goes through the reverse proxy (ad-block resistant)
-    host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
+    publicKey: posthogPublicKey,
+    host: posthogHost,
     clientConfig: {
-      api_host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
+      api_host: posthogHost,
       ui_host: "https://eu.posthog.com", // toolbar — never the proxy
       capture_exceptions: true,
       __add_tracing_headers: ["localhost", "api.sarpbc.org"],
+      loaded: (ph) => {
+        if (!isProduction) {
+          ph.opt_out_capturing();
+          ph.set_config({ disable_session_recording: true, autocapture: false });
+        }
+      },
     },
     serverConfig: {
       enableExceptionAutocapture: true,
@@ -180,8 +189,8 @@ export default defineNuxtConfig({
     public: {
       apiBase: apiBase,
       posthog: {
-        publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
-        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org",
+        publicKey: posthogPublicKey,
+        host: posthogHost,
       },
     },
   },

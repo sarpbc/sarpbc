@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "motion-v";
 
 const { t } = useI18n();
 const { visible, open, close, hasChoice, setChoice } = useCookieConsent();
-const { $reloadVisitorsScript } = useNuxtApp();
+const { identifyUser, clearIdentity } = usePostHogIdentity();
+const user = useUser();
 
 onMounted(() => {
   if (!hasChoice()) open();
@@ -17,16 +18,13 @@ watchEffect(() => {
 const acceptCookies = () => {
   setChoice("accepted");
   close();
-
-  // Reload visitors.now script with persist mode enabled
-  if (typeof $reloadVisitorsScript === "function") {
-    $reloadVisitorsScript();
-  }
+  identifyUser(user.value);
 };
 
 const rejectCookies = () => {
   setChoice("rejected");
   close();
+  clearIdentity();
 };
 </script>
 

@@ -99,7 +99,7 @@ Extend here when the same pattern appears 3+ times.
 </ClientOnly>
 ```
 
-Use for: charts, `window` access, visitors plugin, heavy client-only editors.
+Use for: charts, `window` access, heavy client-only editors.
 
 ## Route Rules (nuxt.config.ts)
 
