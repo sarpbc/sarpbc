@@ -56,7 +56,7 @@ function buildTournamentLabel(match: MatchDetailResponse["match"]): string {
   return name ?? "Rocket League";
 }
 
-function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
+export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const match = matchDetail.match;
   const participants = match.participants ?? [];
   const teamA = participants[0];
@@ -86,6 +86,7 @@ function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
     });
   }
 
+  // Prefer fonts Resvg can resolve on typical hosts (Arial / Consolas).
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -95,16 +96,16 @@ function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect x="48" y="48" width="1104" height="534" rx="24" fill="#18181b" stroke="#27272a"/>
-  <text x="600" y="120" fill="#a1a1aa" font-family="system-ui, sans-serif" font-size="28" text-anchor="middle">${escapeXml(tournament)}</text>
-  <text x="600" y="290" fill="#fafafa" font-family="system-ui, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamAName)}</text>
-  <text x="600" y="360" fill="#3b82f6" font-family="ui-monospace, monospace" font-size="44" font-weight="700" text-anchor="middle">${escapeXml(centerLine)}</text>
-  <text x="600" y="430" fill="#fafafa" font-family="system-ui, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamBName)}</text>
-  <text x="600" y="500" fill="#a1a1aa" font-family="system-ui, sans-serif" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
-  <text x="600" y="560" fill="#71717a" font-family="system-ui, sans-serif" font-size="22" text-anchor="middle">sarpbc.org</text>
+  <text x="600" y="120" fill="#a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="28" text-anchor="middle">${escapeXml(tournament)}</text>
+  <text x="600" y="290" fill="#fafafa" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamAName)}</text>
+  <text x="600" y="360" fill="#3b82f6" font-family="Consolas, monospace" font-size="44" font-weight="700" text-anchor="middle">${escapeXml(centerLine)}</text>
+  <text x="600" y="430" fill="#fafafa" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamBName)}</text>
+  <text x="600" y="500" fill="#a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
+  <text x="600" y="560" fill="#71717a" font-family="Arial, Helvetica, sans-serif" font-size="22" text-anchor="middle">sarpbc.org</text>
 </svg>`;
 }
 
-function getFetchStatusCode(error: unknown): number | undefined {
+export function getFetchStatusCode(error: unknown): number | undefined {
   if (!error || typeof error !== "object") {
     return undefined;
   }
@@ -130,19 +131,11 @@ function getFetchStatusCode(error: unknown): number | undefined {
   return undefined;
 }
 
-export default defineEventHandler(async (event) => {
-  // Nitro names the param `id.svg` for `[id].svg.get.ts` (not `id`). See nitrojs/nitro#3846.
-  const raw = getRouterParam(event, "id.svg") ?? getRouterParam(event, "id");
-  const id = raw?.replace(/\.svg$/, "");
-  if (!id) {
-    throw createError({ statusCode: 404, statusMessage: "Match not found" });
-  }
-
+export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   const config = useRuntimeConfig();
 
-  let matchDetail: MatchDetailResponse;
   try {
-    matchDetail = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
+    return await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
   } catch (error: unknown) {
     const statusCode = getFetchStatusCode(error);
     if (statusCode === 404) {
@@ -155,9 +148,4 @@ export default defineEventHandler(async (event) => {
       cause: error,
     });
   }
-
-  setHeader(event, "Content-Type", "image/svg+xml; charset=utf-8");
-  setHeader(event, "Cache-Control", "public, max-age=300");
-
-  return buildMatchOgSvg(matchDetail);
-});
+}
