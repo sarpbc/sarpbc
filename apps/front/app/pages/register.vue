@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 const config = useRuntimeConfig();
 const posthog = usePostHog();
+const { identifyUser } = usePostHogIdentity();
 
 interface RegisterState {
   userName: string;
@@ -35,7 +36,7 @@ async function onSubmit(event: Event) {
     user.value = profile;
 
     if (profile) {
-      posthog?.identify(profile.id, { userName: profile.userName, email: profile.email });
+      identifyUser(profile);
       posthog?.capture("user_signed_up");
     }
 

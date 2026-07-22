@@ -11,12 +11,16 @@ export const useCookieConsent = () => {
     visible.value = false;
   };
 
-  const hasChoice = () => {
-    if (import.meta.client) {
-      return !!localStorage.getItem("cookieConsent");
-    }
-    return false;
+  const getChoice = (): CookieChoice | null => {
+    if (!import.meta.client) return null;
+    const value = localStorage.getItem("cookieConsent");
+    if (value === "accepted" || value === "rejected") return value;
+    return null;
   };
+
+  const hasChoice = () => getChoice() !== null;
+
+  const isAccepted = () => getChoice() === "accepted";
 
   const setChoice = (value: CookieChoice) => {
     if (import.meta.client) {
@@ -28,7 +32,9 @@ export const useCookieConsent = () => {
     visible: visible as Ref<boolean>,
     open,
     close,
+    getChoice,
     hasChoice,
+    isAccepted,
     setChoice,
   };
 };

@@ -717,7 +717,7 @@
   "pages": {
     "cookiePolicy": {
       "title": "Cookie Policy",
-      "metaDescription": "Learn about how we use cookies on our website, including Google Analytics and other tracking technologies.",
+      "metaDescription": "Learn about how we use cookies on our website, including PostHog analytics and other tracking technologies.",
       "lastUpdated": "Last updated",
       "lastUpdatedDate": "September 4, 2025",
       "whatAreCookies": {
@@ -737,7 +737,7 @@
         "analytics": {
           "title": "Analytics Cookies",
           "description": "We use analytics cookies to understand how visitors interact with our website. These cookies help us analyze website traffic, measure the effectiveness of our content, and improve our services.",
-          "googleAnalytics": "We specifically use Google Analytics to collect anonymous information about how you use our site, including which pages you visit, how long you spend on each page, and how you found our site."
+          "googleAnalytics": "We use PostHog (EU) for product analytics. Anonymous usage events may be collected without linking them to your account. If you accept analytics cookies, we may identify your session with your account so we can understand signed-in usage. You can change this choice at any time."
         }
       },
       "managingCookies": {
@@ -872,7 +872,7 @@
       "dataSharing": {
         "title": "Data Sharing",
         "description": "We may share your data with:",
-        "analytics": "Analytics providers (Google Analytics) for website analysis",
+        "analytics": "Analytics providers (PostHog) for website analysis",
         "hosting": "Hosting providers for website operation",
         "legal": "Law enforcement or regulatory authorities when required by law"
       },
