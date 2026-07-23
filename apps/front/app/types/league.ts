@@ -1,14 +1,6 @@
+import type { League as SharedLeague } from "@sarpbc/types";
 import type { Tournament } from "./tournament";
 
-export interface League {
-  id: string;
-  pandascoreId: number;
-  name: string;
-  slug?: string;
-  url?: string;
-  imageUrl?: string;
-  modifiedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+export type League = Omit<SharedLeague, "tournaments"> & {
   tournaments?: Tournament[];
-}
+};

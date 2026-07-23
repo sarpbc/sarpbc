@@ -75,6 +75,8 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    "@sarpbc/composables",
+    "@sarpbc/ui",
     "evlog/nuxt",
     "@nuxtjs/i18n",
     "@nuxt/ui",
