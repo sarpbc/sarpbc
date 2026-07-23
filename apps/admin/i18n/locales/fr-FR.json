@@ -11,13 +11,15 @@
     "home": {
       "brand": "SARPBC Admin",
       "title": "Console Staff",
-      "subtitle": "Actualités, joueurs et équipes sont ici. Tournois, pick'ems et forum restent sur le site public jusqu’à leur migration.",
+      "subtitle": "Actualités, joueurs, équipes, tournois et pick'ems sont ici. Le forum reste sur le site public jusqu’à sa migration.",
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
       "openNews": "Ouvrir les Articles",
       "openPlayers": "Ouvrir les Joueurs",
       "openTeams": "Ouvrir les Équipes",
+      "openTournaments": "Ouvrir les Tournois",
+      "openPickems": "Ouvrir les Pick'ems",
       "syncTeams": "Synchroniser les Équipes",
       "syncingTeams": "Synchronisation…"
     },
@@ -26,7 +28,37 @@
       "articles": "Articles",
       "players": "Joueurs",
       "teams": "Équipes",
+      "tournaments": "Tournois",
+      "pickems": "Pick'ems",
       "backToSite": "Retour sur sarpbc.org"
+    },
+    "tournaments": {
+      "title": "Tournois",
+      "loading": "Chargement…",
+      "tournamentsCount": "{count} tournois",
+      "syncAdditions": "Synchroniser les Nouveaux Tournois",
+      "syncTournament": "Actualiser le Tournoi",
+      "viewMatches": "Voir les Matchs",
+      "matchesCount": "{count} matchs",
+      "noMatches": "Aucun match trouvé pour ce tournoi.",
+      "noTournaments": "Aucun tournoi trouvé.",
+      "match": {
+        "status": "Statut",
+        "score": "Score",
+        "setWinner": "Définir le Vainqueur",
+        "syncScores": "Actualiser les Scores"
+      }
+    },
+    "pickems": {
+      "title": "Pick'ems",
+      "loading": "Chargement…",
+      "tournamentsCount": "{count} tournois",
+      "matchesCount": "{count} matchs",
+      "noTournaments": "Aucun tournoi trouvé.",
+      "noMatches": "Aucun match trouvé pour ce tournoi.",
+      "expand": "Développer",
+      "syncTournament": "Synchroniser le Tournoi",
+      "enablePickems": "Activer les Pick'ems"
     },
     "news": {
       "title": "Articles",

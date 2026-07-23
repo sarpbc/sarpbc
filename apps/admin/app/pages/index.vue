@@ -84,6 +84,20 @@ async function onSyncTeams() {
             {{ $t("page.home.openTeams") }}
           </UButton>
           <UButton
+            :to="localePath('/tournaments')"
+            icon="i-fluent-trophy-24-regular"
+            color="neutral"
+          >
+            {{ $t("page.home.openTournaments") }}
+          </UButton>
+          <UButton
+            :to="localePath('/pickems')"
+            icon="i-fluent-predictions-24-regular"
+            color="neutral"
+          >
+            {{ $t("page.home.openPickems") }}
+          </UButton>
+          <UButton
             icon="i-fluent-arrow-sync-24-regular"
             color="neutral"
             variant="outline"
