@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/sarpbc/sarpbc/security/advisories/new
+    about: Report a security issue privately (see SECURITY.md).
+  - name: Trademark / branding questions
+    url: https://github.com/sarpbc/sarpbc/blob/main/docs/TRADEMARK.md
+    about: Forking is fine; do not claim official SARPBC branding without permission.

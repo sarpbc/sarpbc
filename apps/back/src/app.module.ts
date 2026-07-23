@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { EvlogModule } from "evlog/nestjs";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { PostHogModule } from "./posthog/posthog.module";
 import { UserModule } from "./user/user.module";
 import { AuthModule } from "./auth/auth.module";
@@ -25,6 +26,13 @@ import mikroOrmConfig from "./mikro-orm.config";
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     EvlogModule.forRoot(),
+    ThrottlerModule.forRoot([
+      {
+        name: "default",
+        ttl: 60_000,
+        limit: 100,
+      },
+    ]),
     PostHogModule,
     MikroOrmModule.forRoot({
       ...mikroOrmConfig,
