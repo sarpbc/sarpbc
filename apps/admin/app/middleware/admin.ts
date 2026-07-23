@@ -1,9 +1,9 @@
 import { useUser } from "~/composables/state";
+import { hasPermission, isStaffUser, permissionForAdminPath } from "~/utils/staff";
 
 /**
- * Admin-only middleware for the staff console.
- * Guests and non-admins are sent to /login (not the public site).
- * Login routes are excluded so the form is reachable.
+ * Staff-only middleware for the console.
+ * Guests → /login. Staff without the route permission → home with ?forbidden=1.
  */
 export default defineNuxtRouteMiddleware((to) => {
   const path = to.path.replace(/\/$/, "") || "/";
@@ -17,7 +17,20 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo("/login");
   }
 
-  if (user.value.admin !== true) {
+  if (!isStaffUser(user.value)) {
     return navigateTo("/login");
+  }
+
+  const required = permissionForAdminPath(to.path);
+  if (required === null || required === "staff") {
+    return;
+  }
+
+  if (!hasPermission(user.value, required)) {
+    const localePath = useLocalePath();
+    return navigateTo({
+      path: localePath("/"),
+      query: { forbidden: "1" },
+    });
   }
 });

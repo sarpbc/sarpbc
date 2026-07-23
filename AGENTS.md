@@ -51,9 +51,10 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 ### Staff admin (`apps/admin`)
 
 - SPA (`ssr: false`), port 4002, target host `admin.sarpbc.org`.
-- Auth: login page + `admin` middleware (`user.admin`); same API cookie session as front.
+- Auth: login page + `admin` middleware (staff role with permissions); same API cookie session as front.
+- Access: permissions (`news.manage`, `forum.moderate`, …) granted by pre-configured roles (`admin` / `journalist` / `moderator`).
 - Staff tooling lives here (news, players, teams, tournaments, pick'ems, forum moderation).
-- Public profile links admins to `runtimeConfig.public.adminUrl`; legacy `/dashboard/**` redirects to the admin app.
+- Public profile links staff to `runtimeConfig.public.adminUrl`; legacy `/dashboard/**` redirects to the admin app.
 
 ### Backend (`apps/back`)
 

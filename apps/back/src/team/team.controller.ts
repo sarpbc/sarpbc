@@ -14,7 +14,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { TeamService } from "./team.service";
-import { AdminGuard } from "src/user/user.guard";
+import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "src/user/user.guard";
 import { AuthGuard } from "src/auth/auth.guard";
 import { ContractService } from "../player/contract.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
@@ -52,7 +53,8 @@ export class TeamController {
     };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post()
   async create(@Body() dto: CreateTeamDto) {
     const team = await this.teamService.createFromDto(dto);
@@ -65,7 +67,8 @@ export class TeamController {
     return { team };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync")
   async syncPandaScoreTeams() {
     await this.teamService.initializeTeamsFromPandaScore(false);
@@ -92,14 +95,16 @@ export class TeamController {
     return { contracts };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/contract")
   async createContract(@Param("id") id: string, @Body() dto: CreateTeamContractDto) {
     const contract = await this.contractService.createForTeam(id, dto);
     return { contract };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id/contract/:contractId")
   async updateContract(
     @Param("id") id: string,
@@ -110,7 +115,8 @@ export class TeamController {
     return { contract };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id/contract/:contractId")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteContract(@Param("id") id: string, @Param("contractId") contractId: string) {
@@ -123,14 +129,16 @@ export class TeamController {
     return { team };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateTeamDto) {
     const team = await this.teamService.update(id, dto);
     return { team };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id") id: string) {

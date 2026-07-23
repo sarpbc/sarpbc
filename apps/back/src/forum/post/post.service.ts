@@ -144,7 +144,7 @@ export class PostService {
 
     await this.postRepository.save(newPost);
 
-    if (user.admin === true && createPostDto.translations?.length) {
+    if (user.role === "admin" && createPostDto.translations?.length) {
       for (const tr of createPostDto.translations) {
         const t = new PostTranslation();
         t.post = newPost;

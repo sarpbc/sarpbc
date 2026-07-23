@@ -2,7 +2,8 @@ import { Controller, Get, Param, Query, Post, Body, Put, UseGuards } from "@nest
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { AuthGuard } from "src/auth/auth.guard";
-import { AdminGuard } from "src/user/user.guard";
+import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "src/user/user.guard";
 import { TournamentService } from "./tournament.service";
 import { MatchService } from "./match/match.service";
 
@@ -46,14 +47,16 @@ export class TournamentController {
     return { tournament };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync/additions")
   async syncPandascoreAdditions() {
     await this.tournamentService.syncPandascoreAdditions();
     return { success: true };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/sync")
   async syncTournamentFromPandascore(@Param("id") id: string) {
     await this.tournamentService.syncTournamentFromPandascore(id);
@@ -64,7 +67,8 @@ export class TournamentController {
   }
 
   @Post(":tournamentId/enable-pickems")
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   async setPickemsEnabled(
     @Param("tournamentId") tournamentId: string,
     @Body("enabled") enabled: boolean,
@@ -79,7 +83,8 @@ export class TournamentController {
     return { matches };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/matches")
   async createMatch(@Param("id") tournamentId: string, @Body() matchData: CreateMatchDto) {
     const match = await this.matchService.upsertMatch(tournamentId, {
@@ -90,7 +95,8 @@ export class TournamentController {
     return { match };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/winner")
   async setMatchWinner(@Param("matchId") matchId: string, @Body() body: SetMatchWinnerDto) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);

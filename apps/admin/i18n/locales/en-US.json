@@ -22,7 +22,9 @@
       "openPickems": "Open Pick'ems",
       "openForum": "Open Forum",
       "syncTeams": "Sync Teams",
-      "syncingTeams": "Syncing…"
+      "syncingTeams": "Syncing…",
+      "forbidden": "You do not have access to that section",
+      "noTools": "No tools are available for your staff role yet. Ask an admin if you need access."
     },
     "nav": {
       "home": "Dashboard",
@@ -242,7 +244,7 @@
     },
     "authentication": {
       "login": "Staff Login",
-      "staffOnly": "Admin access only. Use your SARPBC staff account.",
+      "staffOnly": "Staff access only. Use your SARPBC staff account.",
       "email": "Email",
       "password": "Password",
       "continueWithGoogle": "Continue with Google",
@@ -251,7 +253,7 @@
       "loggingIn": "Logging in…",
       "errors": {
         "loginFailed": "Could not log in. Check your email and password and try again.",
-        "notAdmin": "This account is not a staff admin. Contact an administrator."
+        "notAdmin": "This account is not staff. Contact an administrator for access."
       }
     }
   }

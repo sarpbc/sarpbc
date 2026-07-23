@@ -14,7 +14,8 @@ import {
 } from "@nestjs/common";
 import { ReplyService } from "./reply.service";
 import { AuthGuard } from "../auth/auth.guard";
-import { AdminGuard } from "../user/user.guard";
+import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "../user/user.guard";
 import { CurrentUserId } from "../user/decorator/current-user.decorator";
 import { CreateReplyDto } from "./dto/create-reply.dto";
 import { ListRepliesQueryDto } from "./dto/list-replies-query.dto";
@@ -56,14 +57,16 @@ export class ReplyController {
     return { reply };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("forum.moderate")
   @Patch(":id/hide")
   @HttpCode(HttpStatus.NO_CONTENT)
   async hide(@Param("id", ParseUUIDPipe) id: string) {
     await this.replyService.hide(id);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("forum.moderate")
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id", ParseUUIDPipe) id: string) {

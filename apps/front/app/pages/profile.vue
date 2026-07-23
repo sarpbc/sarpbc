@@ -16,6 +16,8 @@ const adminHomeUrl = computed(() => {
   return base;
 });
 
+const showStaffConsole = computed(() => isStaffUser(user.value));
+
 const handleLogout = async () => {
   isLoggingOut.value = true;
   try {
@@ -65,7 +67,7 @@ setPageSeo({
 
       <div class="flex flex-row items-center gap-2">
         <UButton
-          v-if="user.admin"
+          v-if="showStaffConsole"
           :to="adminHomeUrl"
           external
           target="_blank"

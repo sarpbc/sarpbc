@@ -18,9 +18,10 @@ import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 
 import { AuthGuard } from "../auth/auth.guard";
 import { CurrentUserId } from "../user/decorator/current-user.decorator";
+import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
 import { ReplyService } from "../reply/reply.service";
 import { CreateReplyDto } from "../reply/dto/create-reply.dto";
-import { AdminGuard } from "src/user/user.guard";
+import { PermissionGuard } from "src/user/user.guard";
 
 @Controller("news")
 export class NewsController {
@@ -29,7 +30,8 @@ export class NewsController {
     private readonly replyService: ReplyService,
   ) {}
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -44,7 +46,8 @@ export class NewsController {
     return this.newsService.findAllPublishedArticle(page, limit);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Get("admin")
   findAllAdmin(@Query() { page, limit }: PaginationQueryDto) {
     return this.newsService.findAll(page, limit);
@@ -59,26 +62,30 @@ export class NewsController {
     return article;
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Get("admin/:slug")
   async findOneAdmin(@Param("slug") slug: string) {
     return this.newsService.findOneBySlug(slug);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Patch(":slug")
   async update(@Param("slug") slug: string, @Body() dto: UpdateNewsArticleDto) {
     return this.newsService.update(slug, dto);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Patch(":slug/publish")
   @HttpCode(HttpStatus.NO_CONTENT)
   async publish(@Param("slug") slug: string) {
     await this.newsService.setDraftStatus(slug, false);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
   @Patch(":slug/unpublish")
   @HttpCode(HttpStatus.NO_CONTENT)
   async unpublish(@Param("slug") slug: string) {

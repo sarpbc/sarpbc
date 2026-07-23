@@ -4,6 +4,12 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { SignInUserDto } from "./dto/signin-user.dto";
 import { comparePasswordHash, hashPassword } from "../common/password/password";
 import { IUserRepository, USER_REPOSITORY } from "./domain/user.repository.interface";
+import {
+  isStaffRole,
+  roleHasAnyPermission,
+  roleHasPermission,
+  StaffPermission,
+} from "./domain/staff-access";
 
 @Injectable()
 export class UserService {
@@ -57,7 +63,25 @@ export class UserService {
 
   async isAdmin(id: string): Promise<boolean> {
     const user = await this.userRepository.findById(id);
-    return user?.admin === true;
+    return user?.role === "admin";
+  }
+
+  async isStaff(id: string): Promise<boolean> {
+    const user = await this.userRepository.findById(id);
+    return user ? isStaffRole(user.role) : false;
+  }
+
+  async hasPermission(id: string, permission: StaffPermission): Promise<boolean> {
+    const user = await this.userRepository.findById(id);
+    return user ? roleHasPermission(user.role, permission) : false;
+  }
+
+  async hasAnyPermission(id: string, permissions: StaffPermission[]): Promise<boolean> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      return false;
+    }
+    return roleHasAnyPermission(user.role, permissions);
   }
 
   async createGoogleUser(

@@ -1,0 +1,54 @@
+/**
+ * Staff access model (SAR-81):
+ * - Permissions are what code checks.
+ * - Roles are pre-configured permission bundles assigned on the user.
+ */
+
+export const STAFF_PERMISSIONS = [
+  "news.manage",
+  "images.manage",
+  "forum.moderate",
+  "players.manage",
+  "teams.manage",
+  "tournaments.manage",
+  "pickems.manage",
+] as const;
+
+export type StaffPermission = (typeof STAFF_PERMISSIONS)[number];
+
+export const STAFF_ROLES = ["admin", "moderator", "journalist"] as const;
+
+export type StaffRole = (typeof STAFF_ROLES)[number];
+
+/** Pre-configured role → permission matrix. Edit here to change what a role can do. */
+export const ROLE_PERMISSIONS: Record<StaffRole, readonly StaffPermission[]> = {
+  admin: STAFF_PERMISSIONS,
+  journalist: ["news.manage", "images.manage"],
+  moderator: ["forum.moderate"],
+};
+
+export function isStaffRole(value: string | null | undefined): value is StaffRole {
+  return value === "admin" || value === "moderator" || value === "journalist";
+}
+
+export function permissionsForRole(role: StaffRole | null | undefined): readonly StaffPermission[] {
+  if (!isStaffRole(role)) {
+    return [];
+  }
+  return ROLE_PERMISSIONS[role];
+}
+
+export function roleHasPermission(
+  role: StaffRole | null | undefined,
+  permission: StaffPermission,
+): boolean {
+  return permissionsForRole(role).includes(permission);
+}
+
+export function roleHasAnyPermission(
+  role: StaffRole | null | undefined,
+  permissions: readonly StaffPermission[],
+): boolean {
+  const granted = permissionsForRole(role);
+  return permissions.some((permission) => granted.includes(permission));
+}

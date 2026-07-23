@@ -1,7 +1,8 @@
 import { Controller, Get, Param, Post, Body, UseGuards, Request } from "@nestjs/common";
 import { PickemService } from "./pickem.service";
 import { AuthGuard } from "src/auth/auth.guard";
-import { AdminGuard } from "src/user/user.guard";
+import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "src/user/user.guard";
 import { AuthenticatedUserRequest } from "src/common/types/authenticated.interface";
 import { PostHogService } from "src/posthog/posthog.service";
 
@@ -47,7 +48,8 @@ export class PickemController {
     }
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("pickems.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post("matches/:matchId/validate")
   async validateMatch(@Param("matchId") matchId: string) {
     const res = await this.pickemService.validateMatchResult(matchId);

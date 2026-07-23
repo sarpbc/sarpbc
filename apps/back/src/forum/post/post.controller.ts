@@ -15,7 +15,8 @@ import {
 } from "@nestjs/common";
 import { PostService } from "./post.service";
 import { AuthGuard } from "../../auth/auth.guard";
-import { AdminGuard } from "../../user/user.guard";
+import { RequirePermissions } from "../../user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "../../user/user.guard";
 import { CurrentUserId } from "../../user/decorator/current-user.decorator";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { PostCreationStatusDto } from "./dto/post-creation-status.dto";
@@ -84,7 +85,8 @@ export class PostController {
     await this.postService.create(userId, createPostDto);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("forum.moderate")
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id") id: string) {
