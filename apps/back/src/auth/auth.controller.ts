@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from "@nestjs/common";
+import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import { useLogger } from "evlog/nestjs";
 import { AuthGuard } from "./auth.guard";
 import { AuthService } from "./auth.service";
@@ -8,6 +9,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { PostHogService } from "src/posthog/posthog.service";
 
+@UseGuards(ThrottlerGuard)
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -45,6 +47,7 @@ export class AuthController {
     res.clearCookie("access_token", this.accessTokenCookieOptions(false));
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("login")
   async signIn(
     @Body() userData: SignInUserDto,
@@ -69,6 +72,7 @@ export class AuthController {
     return res.send({ success: true });
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("signup")
   async signUp(
     @Body() userData: CreateUserDto,
@@ -93,6 +97,7 @@ export class AuthController {
     return req.user;
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get("google")
   redirectToGoogle(@Query("returnTo") returnTo: string | undefined, @Res() res: FastifyReply) {
     const destination = this.authService.parseOAuthReturnTo(returnTo);
@@ -100,6 +105,7 @@ export class AuthController {
     return res.code(302).redirect(url);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get("google/callback")
   async handleGoogleCallback(
     @Query("code") code: string,

@@ -1,10 +1,23 @@
-# SARPBC Monorepo
+# SARPBC
 
-Rocket League news and data platform.
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
+Open-source Rocket League news and data platform — built to improve the esports environment for fans and communities.
 
 - `apps/front`: Nuxt 4 frontend (port **4000**)
 - `apps/back`: NestJS backend with MikroORM, PostgreSQL, and Redis (port **4001**)
 - `apps/admin`: Nuxt 4 staff console SPA (port **4002**)
+
+## Why open source
+
+SARPBC should be reusable by the community: fork it, self-host it, fix bugs, and build on it. The code is under **Apache-2.0** (free reuse with attribution). The **SARPBC** name, logos, and production domains are not licensed for claiming as your own — see [docs/TRADEMARK.md](docs/TRADEMARK.md).
+
+## Community
+
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security](SECURITY.md)
+- [License](LICENSE) · [NOTICE](NOTICE)
 
 ## Prerequisites
 
@@ -27,6 +40,8 @@ cp apps/front/.env.example apps/front/.env
 cp apps/admin/.env.example apps/admin/.env
 cp apps/back/.env.example apps/back/.env
 ```
+
+Use your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). PandaScore data is subject to **their** terms — bring your own API token. Never commit real secrets; local `.env` files are gitignored. Production secrets belong in Dokploy / Docker secrets only.
 
 ## Build
 

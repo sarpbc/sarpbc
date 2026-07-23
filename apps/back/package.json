@@ -39,6 +39,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-fastify": "^11.1.14",
     "@nestjs/schedule": "^6.1.1",
+    "@nestjs/throttler": "^6.5.0",
     "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

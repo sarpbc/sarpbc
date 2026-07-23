@@ -1,6 +1,11 @@
 {
   "name": "sarpbc",
   "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarpbc/sarpbc.git"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "turbo run dev",

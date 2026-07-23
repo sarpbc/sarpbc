@@ -1,0 +1,36 @@
+SARPBC
+Copyright 2024-2026 SARPBC contributors
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+---------------------------------------------------------------------------
+Third-party services and data (runtime)
+
+PandaScore
+  Tournament, match, team, and player data may be fetched at runtime via the
+  PandaScore API when you supply your own PANDASCORE_API_TOKEN.
+  Redistribution of PandaScore data and assets is governed by PandaScore's
+  terms of service — not by this project's Apache-2.0 license.
+  Bring your own API key and comply with https://pandascore.co/ terms.
+
+Cloudflare Images
+  Uploaded and CDN-hosted images may be served via Cloudflare Images when
+  CLOUDFLARE_* credentials are configured. Usage is subject to Cloudflare's
+  terms. This repository does not redistribute Cloudflare-hosted media.
+
+Rocket League / Psyonix / Epic Games
+  SARPBC is an unofficial community project and is not affiliated with,
+  endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League.
+  Rocket League is a trademark of Psyonix LLC / Epic Games, Inc.
+
+---------------------------------------------------------------------------
+Third-party materials in this repository
+
+Agent skills under .agents/skills/ may include third-party content with their
+own licenses (for example nestjs-best-practices declares MIT). Those notices
+apply to the corresponding skill trees; they do not change the Apache-2.0
+license of the SARPBC application code.
+
+npm / pnpm dependencies are licensed separately under their respective
+licenses as declared in each package.
