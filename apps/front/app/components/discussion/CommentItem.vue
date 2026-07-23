@@ -22,6 +22,7 @@ const user = useUser();
 const toast = useToast();
 const displayReply = ref(false);
 const isModerating = ref(false);
+const canModerate = computed(() => canModerateComments(user.value));
 
 const authorLabel = computed(() => comment.author.userName);
 
@@ -92,7 +93,7 @@ async function onDelete() {
             />
           </ForumSignInPrompt>
         </div>
-        <div v-if="user?.admin" class="flex flex-row items-center gap-1">
+        <div v-if="canModerate" class="flex flex-row items-center gap-1">
           <UButton
             size="sm"
             variant="ghost"

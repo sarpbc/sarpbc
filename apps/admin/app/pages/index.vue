@@ -1,6 +1,11 @@
 <script lang="ts" setup>
+import { hasPermission } from "~/utils/staff";
+
 const { t } = useI18n();
 const localePath = useLocalePath();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 const user = useUser();
 const pending = ref(false);
 const syncing = ref(false);
@@ -10,6 +15,36 @@ const items = [
     label: t("page.nav.home"),
   },
 ];
+
+const canNews = computed(() => hasPermission(user.value, "news.manage"));
+const canPlayers = computed(() => hasPermission(user.value, "players.manage"));
+const canTeams = computed(() => hasPermission(user.value, "teams.manage"));
+const canTournaments = computed(() => hasPermission(user.value, "tournaments.manage"));
+const canPickems = computed(() => hasPermission(user.value, "pickems.manage"));
+const canForum = computed(() => hasPermission(user.value, "forum.moderate"));
+const canSyncTeams = computed(() => hasPermission(user.value, "teams.manage"));
+
+const hasAnyTool = computed(
+  () =>
+    canNews.value ||
+    canPlayers.value ||
+    canTeams.value ||
+    canTournaments.value ||
+    canPickems.value ||
+    canForum.value,
+);
+
+onMounted(() => {
+  if (route.query.forbidden === "1") {
+    toast.add({
+      title: t("page.home.forbidden"),
+      color: "warning",
+    });
+    const query = { ...route.query };
+    delete query.forbidden;
+    void router.replace({ path: route.path, query });
+  }
+});
 
 async function onLogout() {
   if (pending.value) {
@@ -24,7 +59,7 @@ async function onLogout() {
 }
 
 async function onSyncTeams() {
-  if (syncing.value) {
+  if (syncing.value || !canSyncTeams.value) {
     return;
   }
   syncing.value = true;
@@ -69,14 +104,24 @@ async function onSyncTeams() {
           <p class="text-sm text-muted" translate="no">{{ user?.email }}</p>
         </div>
 
+        <p v-if="!hasAnyTool" class="mt-6 text-sm text-muted">
+          {{ $t("page.home.noTools") }}
+        </p>
+
         <div class="mt-6 flex flex-wrap gap-3">
-          <UButton :to="localePath('/news')" icon="i-fluent-news-24-regular">
+          <UButton v-if="canNews" :to="localePath('/news')" icon="i-fluent-news-24-regular">
             {{ $t("page.home.openNews") }}
           </UButton>
-          <UButton :to="localePath('/players')" icon="i-fluent-person-24-regular" color="neutral">
+          <UButton
+            v-if="canPlayers"
+            :to="localePath('/players')"
+            icon="i-fluent-person-24-regular"
+            color="neutral"
+          >
             {{ $t("page.home.openPlayers") }}
           </UButton>
           <UButton
+            v-if="canTeams"
             :to="localePath('/teams')"
             icon="i-fluent-people-team-24-regular"
             color="neutral"
@@ -84,6 +129,7 @@ async function onSyncTeams() {
             {{ $t("page.home.openTeams") }}
           </UButton>
           <UButton
+            v-if="canTournaments"
             :to="localePath('/tournaments')"
             icon="i-fluent-trophy-24-regular"
             color="neutral"
@@ -91,16 +137,23 @@ async function onSyncTeams() {
             {{ $t("page.home.openTournaments") }}
           </UButton>
           <UButton
+            v-if="canPickems"
             :to="localePath('/pickems')"
             icon="i-fluent-predictions-24-regular"
             color="neutral"
           >
             {{ $t("page.home.openPickems") }}
           </UButton>
-          <UButton :to="localePath('/forum')" icon="i-fluent-chat-24-regular" color="neutral">
+          <UButton
+            v-if="canForum"
+            :to="localePath('/forum')"
+            icon="i-fluent-chat-24-regular"
+            color="neutral"
+          >
             {{ $t("page.home.openForum") }}
           </UButton>
           <UButton
+            v-if="canSyncTeams"
             icon="i-fluent-arrow-sync-24-regular"
             color="neutral"
             variant="outline"

@@ -16,7 +16,8 @@ import {
 import { PlayerService } from "./player.service";
 import { ContractService } from "./contract.service";
 import { AuthGuard } from "src/auth/auth.guard";
-import { AdminGuard } from "src/user/user.guard";
+import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "src/user/user.guard";
 import { CreatePlayerDto } from "./dto/create-player.dto";
 import { UpdatePlayerDto } from "./dto/update-player.dto";
 import { CreateContractDto } from "./dto/create-contract.dto";
@@ -55,7 +56,8 @@ export class PlayerController {
     };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post()
   async create(@Body() dto: CreatePlayerDto) {
     const player = await this.playerService.create(dto);
@@ -74,14 +76,16 @@ export class PlayerController {
     return { player };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdatePlayerDto) {
     const player = await this.playerService.update(id, dto);
     return { player };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id") id: string) {
@@ -100,14 +104,16 @@ export class PlayerController {
     return { contracts };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/contract")
   async createContract(@Param("id") id: string, @Body() dto: CreateContractDto) {
     const contract = await this.contractService.create(id, dto);
     return { contract };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id/contract/:contractId")
   async updateContract(
     @Param("id") id: string,
@@ -118,7 +124,8 @@ export class PlayerController {
     return { contract };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id/contract/:contractId")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteContract(@Param("id") id: string, @Param("contractId") contractId: string) {
@@ -155,21 +162,24 @@ export class PlayerController {
     return { photos };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/photo")
   async addPhoto(@Param("id") id: string, @Body() dto: AddPlayerPhotoDto) {
     const photo = await this.playerService.addPhoto(id, dto.url);
     return { photo };
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id/photo/:photoId")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePhoto(@Param("id") id: string, @Param("photoId") photoId: string) {
     await this.playerService.deletePhoto(id, photoId);
   }
 
-  @UseGuards(AuthGuard, AdminGuard)
+  @RequirePermissions("players.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id/photo/:photoId/set-profile")
   async setProfilePhoto(@Param("id") id: string, @Param("photoId") photoId: string) {
     const player = await this.playerService.setProfilePhoto(id, photoId);

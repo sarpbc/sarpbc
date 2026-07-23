@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { getApiErrorMessage } from "~/utils/apiError";
+import { isStaffUser } from "~/utils/staff";
 
 const config = useRuntimeConfig();
 const toast = useToast();
@@ -25,7 +26,7 @@ onMounted(async () => {
     user.value = profile;
   }
 
-  if (user.value?.admin === true) {
+  if (isStaffUser(user.value)) {
     await navigateTo("/");
   }
 });
@@ -53,7 +54,7 @@ async function onSubmit(event: Event) {
       const profile = await getProfile();
       user.value = profile;
 
-      if (profile?.admin === true) {
+      if (isStaffUser(profile)) {
         await navigateTo("/");
         return;
       }
