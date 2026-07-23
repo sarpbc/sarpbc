@@ -9,7 +9,7 @@
   },
   "page": {
     "home": {
-      "brand": "SARPBC Admin",
+      "brand": "sarpbc.org Admin",
       "title": "Staff Console",
       "subtitle": "News, players, teams, tournaments, pick'ems, and forum moderation live here.",
       "signedInAs": "Signed in as",
@@ -244,7 +244,7 @@
     },
     "authentication": {
       "login": "Staff Login",
-      "staffOnly": "Staff access only. Use your SARPBC staff account.",
+      "staffOnly": "Staff access only. Use your sarpbc.org staff account.",
       "email": "Email",
       "password": "Password",
       "continueWithGoogle": "Continue with Google",

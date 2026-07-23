@@ -1,16 +1,25 @@
-# SARPBC
+# sarpbc.org
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-Open-source Rocket League news and data platform — built to improve the esports environment for fans and communities.
+Open-source Rocket League news and data platform for fans who want a clear, healthy place to follow the competitive scene.
 
 - `apps/front`: Nuxt 4 frontend (port **4000**)
 - `apps/back`: NestJS backend with MikroORM, PostgreSQL, and Redis (port **4001**)
 - `apps/admin`: Nuxt 4 staff console SPA (port **4002**)
 
+## Vision
+
+**sarpbc.org** exists to make Rocket League esports easier to understand and safer to enjoy.
+
+- **Clarity:** schedules, matches, teams, and context in one place so fans can follow the scene without needing insider fluency.
+- **Healthy community:** no betting or gambling promotion, no shady practices, and no racism, homophobia, misogyny, or related harassment. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and the site Terms of Service.
+- **Independent:** sarpbc.org is a community project. It is **not** affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League.
+- **Free for fans:** the site is free to use. We are not here to extract money from the community. The goal is a bigger, healthier Rocket League esports scene, and the hope that Rocket League can grow toward the same scale as titles like League of Legends and Counter-Strike.
+
 ## Why open source
 
-SARPBC should be reusable by the community: fork it, self-host it, fix bugs, and build on it. The code is under **Apache-2.0** (free reuse with attribution). The **SARPBC** name, logos, and production domains are not licensed for claiming as your own — see [docs/TRADEMARK.md](docs/TRADEMARK.md).
+The code should be reusable by the community: fork it, self-host it, fix bugs, and build on it. It is under **Apache-2.0** (free reuse with attribution). The **sarpbc.org** name, logos, and production domains are not licensed for claiming as your own. See [docs/TRADEMARK.md](docs/TRADEMARK.md).
 
 ## Community
 
@@ -41,7 +50,7 @@ cp apps/admin/.env.example apps/admin/.env
 cp apps/back/.env.example apps/back/.env
 ```
 
-Use your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). PandaScore data is subject to **their** terms — bring your own API token. Never commit real secrets; local `.env` files are gitignored. Production secrets belong in Dokploy / Docker secrets only.
+Use your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). PandaScore data is subject to **their** terms; bring your own API token. Never commit real secrets; local `.env` files are gitignored. Production secrets belong in Dokploy / Docker secrets only.
 
 ## Build
 
@@ -102,7 +111,7 @@ Set secrets and env vars from `apps/back/.env.example`, `apps/front/.env.example
 
 Optional build arg: `APP_RELEASE` = tag name.
 
-CI on pull requests: lint, format, frontend typecheck and build — see [`.github/workflows/pr.yml`](.github/workflows/pr.yml).
+CI on pull requests: lint, format, frontend typecheck and build. See [`.github/workflows/pr.yml`](.github/workflows/pr.yml).
 
 ## Useful Commands
 

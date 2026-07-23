@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something is broken in SARPBC
+about: Something is broken on sarpbc.org
 title: "[Bug] "
 labels: Bug
 ---

@@ -14,5 +14,14 @@ export default defineContentConfig({
         image: z.string().optional(),
       }),
     }),
+    legal: defineCollection({
+      type: "page",
+      source: "legal/**/*.md",
+      schema: z.object({
+        title: z.string().min(1),
+        description: z.string().min(1),
+        lastUpdated: z.string().min(1),
+      }),
+    }),
   },
 });

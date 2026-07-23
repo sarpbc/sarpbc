@@ -1,5 +1,5 @@
 export default defineAppConfig({
-  title: "SARPBC Admin",
+  title: "sarpbc.org Admin",
   toaster: {
     position: "bottom-right" as const,
     expand: true,
