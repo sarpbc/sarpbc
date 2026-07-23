@@ -11,13 +11,15 @@
     "home": {
       "brand": "SARPBC Admin",
       "title": "Staff Console",
-      "subtitle": "News, players, and teams live here. Tournaments, pick'ems, and forum still run on the public site until they migrate.",
+      "subtitle": "News, players, teams, tournaments, and pick'ems live here. Forum still runs on the public site until it migrates.",
       "signedInAs": "Signed in as",
       "logout": "Log Out",
       "loggingOut": "Logging out…",
       "openNews": "Open Articles",
       "openPlayers": "Open Players",
       "openTeams": "Open Teams",
+      "openTournaments": "Open Tournaments",
+      "openPickems": "Open Pick'ems",
       "syncTeams": "Sync Teams",
       "syncingTeams": "Syncing…"
     },
@@ -26,7 +28,37 @@
       "articles": "Articles",
       "players": "Players",
       "teams": "Teams",
+      "tournaments": "Tournaments",
+      "pickems": "Pick'ems",
       "backToSite": "Back to sarpbc.org"
+    },
+    "tournaments": {
+      "title": "Tournaments",
+      "loading": "Loading…",
+      "tournamentsCount": "{count} tournaments",
+      "syncAdditions": "Sync New Tournaments",
+      "syncTournament": "Refresh Tournament",
+      "viewMatches": "View Matches",
+      "matchesCount": "{count} matches",
+      "noMatches": "No matches found for this tournament.",
+      "noTournaments": "No tournaments found.",
+      "match": {
+        "status": "Status",
+        "score": "Score",
+        "setWinner": "Set Winner",
+        "syncScores": "Refresh Scores"
+      }
+    },
+    "pickems": {
+      "title": "Pick'ems",
+      "loading": "Loading…",
+      "tournamentsCount": "{count} tournaments",
+      "matchesCount": "{count} matches",
+      "noTournaments": "No tournaments found.",
+      "noMatches": "No matches found for this tournament.",
+      "expand": "Expand",
+      "syncTournament": "Sync Tournament",
+      "enablePickems": "Enable Pick'ems"
     },
     "news": {
       "title": "Articles",

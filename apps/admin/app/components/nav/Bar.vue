@@ -24,6 +24,16 @@ const links = computed(() => [
     to: localePath("/teams"),
   },
   {
+    label: t("page.nav.tournaments"),
+    icon: "i-fluent-trophy-24-regular",
+    to: localePath("/tournaments"),
+  },
+  {
+    label: t("page.nav.pickems"),
+    icon: "i-fluent-predictions-24-regular",
+    to: localePath("/pickems"),
+  },
+  {
     label: t("page.nav.backToSite"),
     icon: "i-fluent-arrow-left-24-regular",
     to: "https://sarpbc.org",
