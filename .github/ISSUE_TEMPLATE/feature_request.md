@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an improvement for the Rocket League / esports community
+about: Suggest an improvement for sarpbc.org / Rocket League esports community
 title: "[Feature] "
 labels: Feature
 ---

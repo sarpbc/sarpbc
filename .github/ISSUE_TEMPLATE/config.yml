@@ -5,4 +5,4 @@ contact_links:
     about: Report a security issue privately (see SECURITY.md).
   - name: Trademark / branding questions
     url: https://github.com/sarpbc/sarpbc/blob/main/docs/TRADEMARK.md
-    about: Forking is fine; do not claim official SARPBC branding without permission.
+    about: Forking is fine; do not claim official sarpbc.org branding without permission.

@@ -1,6 +1,6 @@
-# Contributing to SARPBC
+# Contributing to sarpbc.org
 
-Thanks for helping improve the Rocket League / esports community stack.
+Thanks for helping improve a clearer, healthier Rocket League esports community.
 
 ## Code of conduct
 
@@ -26,7 +26,7 @@ pnpm dev
 
 Local URLs: front `http://localhost:4000`, API `http://localhost:4001`, admin `http://localhost:4002`.
 
-Bring your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). Respect each provider’s terms — see [NOTICE](NOTICE).
+Bring your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). Respect each provider’s terms. See [NOTICE](NOTICE).
 
 ## Project layout
 
@@ -49,13 +49,13 @@ pnpm --filter back test
 pnpm --filter front build
 ```
 
-4. User-facing strings in Nuxt apps must use i18n (`en-US` + `fr-FR`) — no hardcoded copy in templates.
+4. User-facing strings in Nuxt apps must use i18n (`en-US` + `fr-FR`). No hardcoded copy in templates.
 5. Backend validation / HTTP errors should be actionable for the UI (what failed + what to do next).
 6. Do not commit `.env`, secrets, or production credentials.
 
 ## Security
 
-Report vulnerabilities privately via [SECURITY.md](SECURITY.md) — do not open public issues for exploitable bugs.
+Report vulnerabilities privately via [SECURITY.md](SECURITY.md). Do not open public issues for exploitable bugs.
 
 ## License and trademarks
 

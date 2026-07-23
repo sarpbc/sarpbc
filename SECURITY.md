@@ -10,7 +10,7 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 
 Prefer one of:
 
-1. **GitHub Security Advisories** — [Report a vulnerability](https://github.com/sarpbc/sarpbc/security/advisories/new) on this repository (private disclosure).
+1. **GitHub Security Advisories:** [Report a vulnerability](https://github.com/sarpbc/sarpbc/security/advisories/new) on this repository (private disclosure).
 2. Email the maintainers if Advisories are unavailable: **security@sarpbc.org** (or contact a maintainer listed on the GitHub org).
 
 Include:

@@ -17,7 +17,7 @@ export default defineNuxtConfig({
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      title: "SARPBC Admin",
+      title: "sarpbc.org Admin",
       link: apiOriginUrl
         ? [
             { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
