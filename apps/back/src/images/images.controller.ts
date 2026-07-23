@@ -1,10 +1,12 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
-import { AdminGuard } from "../user/user.guard";
+import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
+import { PermissionGuard } from "../user/user.guard";
 import { ImagesService } from "./images.service";
 import { SaveImageDto } from "./dto/save-image.dto";
 
-@UseGuards(AuthGuard, AdminGuard)
+@UseGuards(AuthGuard, PermissionGuard)
+@RequirePermissions("images.manage")
 @Controller("images")
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}

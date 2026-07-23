@@ -77,4 +77,38 @@ describe("UserService", () => {
       expect(user.avatarUrl).toBe("https://existing");
     });
   });
+
+  describe("isAdmin", () => {
+    it("returns true when the user role is admin", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      user.role = "admin";
+      userRepository.findById.mockResolvedValue(user);
+
+      await expect(service.isAdmin("user-1")).resolves.toBe(true);
+    });
+
+    it("returns false when the user is missing or not admin", async () => {
+      userRepository.findById.mockResolvedValue(null);
+      await expect(service.isAdmin("missing")).resolves.toBe(false);
+
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      user.role = "journalist";
+      userRepository.findById.mockResolvedValue(user);
+      await expect(service.isAdmin("user-1")).resolves.toBe(false);
+    });
+  });
+
+  describe("hasPermission", () => {
+    it("resolves permissions from the assigned role", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      user.role = "journalist";
+      userRepository.findById.mockResolvedValue(user);
+
+      await expect(service.hasPermission("user-1", "news.manage")).resolves.toBe(true);
+      await expect(service.hasPermission("user-1", "forum.moderate")).resolves.toBe(false);
+    });
+  });
 });

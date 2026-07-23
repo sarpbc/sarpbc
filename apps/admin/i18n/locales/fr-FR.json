@@ -22,7 +22,9 @@
       "openPickems": "Ouvrir les Pick'ems",
       "openForum": "Ouvrir le Forum",
       "syncTeams": "Synchroniser les Équipes",
-      "syncingTeams": "Synchronisation…"
+      "syncingTeams": "Synchronisation…",
+      "forbidden": "Vous n’avez pas accès à cette section",
+      "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin."
     },
     "nav": {
       "home": "Tableau de bord",
@@ -242,7 +244,7 @@
     },
     "authentication": {
       "login": "Connexion Staff",
-      "staffOnly": "Accès admin uniquement. Utilisez votre compte staff SARPBC.",
+      "staffOnly": "Accès staff uniquement. Utilisez votre compte staff SARPBC.",
       "email": "E-mail",
       "password": "Mot de passe",
       "continueWithGoogle": "Continuer avec Google",
@@ -251,7 +253,7 @@
       "loggingIn": "Connexion…",
       "errors": {
         "loginFailed": "Impossible de se connecter. Vérifiez votre e-mail et mot de passe, puis réessayez.",
-        "notAdmin": "Ce compte n’est pas un admin staff. Contactez un administrateur."
+        "notAdmin": "Ce compte n’est pas staff. Contactez un administrateur pour obtenir l’accès."
       }
     }
   }

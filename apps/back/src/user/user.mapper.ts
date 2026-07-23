@@ -1,5 +1,6 @@
 import { UserDto } from "./dto/user.dto";
 import { User } from "./domain/user.entity";
+import { isStaffRole, permissionsForRole } from "./domain/staff-access";
 
 export class UserMapper {
   static toDto(user: User): UserDto {
@@ -10,8 +11,12 @@ export class UserMapper {
       avatarUrl: user.avatarUrl ?? undefined,
     };
 
-    if (user.admin === true) {
-      dto.admin = true;
+    if (isStaffRole(user.role)) {
+      dto.role = user.role;
+      dto.permissions = [...permissionsForRole(user.role)];
+      if (user.role === "admin") {
+        dto.admin = true;
+      }
     }
 
     return dto;

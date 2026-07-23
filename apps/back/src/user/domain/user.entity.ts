@@ -1,9 +1,11 @@
 import { defineEntity, p } from "@mikro-orm/core";
 import { UserRepository } from "../user.repository";
+import type { StaffRole } from "./staff-access";
 
 export class User {
   id!: string;
-  admin = false;
+  /** Pre-configured staff role; null = regular member. Permissions come from ROLE_PERMISSIONS. */
+  role: StaffRole | null = null;
   email!: string;
   userName!: string;
   password!: string | null;
@@ -32,7 +34,7 @@ export const UserSchema = defineEntity({
   indexes: [{ properties: ["email"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    admin: p.boolean().default(false).hidden(),
+    role: p.string().nullable().hidden(),
     email: p.string(),
     userName: p.string(),
     password: p.string().nullable().hidden(),
