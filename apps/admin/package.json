@@ -16,22 +16,22 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@nuxt/ui": "^4.10.0",
-    "@nuxtjs/i18n": "^10.4.0",
-    "@tiptap/core": "3.27.1",
-    "@tiptap/pm": "3.27.1",
-    "@tiptap/vue-3": "3.27.1",
-    "nuxt": "^4.5.0",
-    "vue": "^3.5.39",
-    "vue-i18n": "^11.4.6",
-    "vue-router": "^5.2.0"
+    "@nuxt/ui": "catalog:",
+    "@nuxtjs/i18n": "catalog:",
+    "@tiptap/core": "catalog:",
+    "@tiptap/pm": "catalog:",
+    "@tiptap/vue-3": "catalog:",
+    "nuxt": "catalog:",
+    "vue": "catalog:",
+    "vue-i18n": "catalog:",
+    "vue-router": "catalog:"
   },
   "devDependencies": {
-    "@iconify-json/fluent": "^1.2.51",
-    "@iconify-json/logos": "^1.2.10",
-    "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/fluent": "catalog:",
+    "@iconify-json/logos": "catalog:",
+    "@iconify-json/lucide": "catalog:",
     "@types/node": "catalog:",
     "typescript": "catalog:",
-    "vue-tsc": "^3.3.7"
+    "vue-tsc": "catalog:"
   }
 }

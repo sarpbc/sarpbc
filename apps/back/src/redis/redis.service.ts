@@ -4,7 +4,7 @@ import { env } from "process";
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private client: Redis.Redis;
+  private client!: Redis.Redis;
 
   onModuleInit() {
     this.client = new Redis.Redis({
