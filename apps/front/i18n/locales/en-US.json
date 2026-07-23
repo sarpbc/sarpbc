@@ -164,194 +164,6 @@
     }
   },
   "page": {
-    "dashboard": {
-      "nav": {
-        "home": "Dashboard",
-        "articles": "Articles",
-        "news": "News",
-        "tournaments": "Tournaments",
-        "forum": "Forum",
-        "pickems": "Pick'ems",
-        "players": "Players",
-        "teams": "Teams",
-        "backToSite": "Back to sarpbc.org"
-      },
-      "tournaments": {
-        "title": "Tournaments",
-        "tournamentsCount": "{count} tournaments",
-        "syncAdditions": "Sync new tournaments",
-        "syncTournament": "Refresh tournament",
-        "viewMatches": "View matches",
-        "matchesTitle": "Matches",
-        "matchesCount": "{count} matches",
-        "noMatches": "No matches found for this tournament.",
-        "columns": {
-          "name": "Tournament",
-          "status": "Status",
-          "beginAt": "Starts"
-        },
-        "match": {
-          "status": "Status",
-          "score": "Score",
-          "setWinner": "Set winner",
-          "syncScores": "Refresh scores"
-        }
-      },
-      "forum": {
-        "title": "Forum",
-        "postsCount": "{count} posts",
-        "columns": {
-          "title": "Title",
-          "author": "Author",
-          "topic": "Topic",
-          "createdAt": "Created"
-        },
-        "replies": {
-          "title": "Comments",
-          "empty": "No comments on this post.",
-          "columns": {
-            "author": "Author",
-            "content": "Content",
-            "createdAt": "Created"
-          }
-        },
-        "delete": {
-          "postTitle": "Delete post",
-          "postConfirm": "Are you sure you want to delete \"{title}\"? All comments will also be deleted.",
-          "replyTitle": "Delete comment",
-          "replyConfirm": "Are you sure you want to delete this comment?",
-          "confirmButton": "Delete"
-        }
-      },
-      "news": {
-        "title": "Articles",
-        "create": {
-          "title": "New Article",
-          "save": "Save Article",
-          "image": "Cover Image",
-          "tab": {
-            "write": "Write",
-            "preview": "Preview"
-          },
-          "preview": {
-            "empty": "Nothing to preview yet. Start writing to see the rendered output."
-          }
-        }
-      },
-      "players": {
-        "title": "Players",
-        "playersCount": "{count} players",
-        "save": "Save",
-        "columns": {
-          "name": "Name",
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "nationality": "Nationality"
-        },
-        "fields": {
-          "name": "Name",
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "nationality": "Nationality",
-          "birthday": "Birthday",
-          "imageUrl": "Image URL"
-        },
-        "create": {
-          "title": "New Player",
-          "save": "Create Player"
-        },
-        "delete": {
-          "title": "Delete Player",
-          "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
-          "confirm_button": "Delete"
-        },
-        "info": {
-          "title": "Player Information"
-        },
-        "contracts": {
-          "title": "Contract History",
-          "empty": "No contracts found.",
-          "save": "Save Contract",
-          "columns": {
-            "team": "Team",
-            "role": "Role",
-            "startDate": "Start Date",
-            "endDate": "End Date"
-          },
-          "fields": {
-            "teamId": "Team ID",
-            "role": "Role",
-            "startDate": "Start Date",
-            "endDate": "End Date (leave empty for current)"
-          },
-          "create": {
-            "title": "Add Contract"
-          },
-          "edit": {
-            "title": "Edit Contract"
-          },
-          "delete": {
-            "title": "Delete Contract",
-            "confirm": "Are you sure you want to delete the contract with {team}?",
-            "confirm_button": "Delete"
-          }
-        }
-      },
-      "teams": {
-        "title": "Teams",
-        "teamsCount": "{count} teams",
-        "save": "Save",
-        "columns": {
-          "name": "Name",
-          "location": "Location"
-        },
-        "fields": {
-          "name": "Name",
-          "location": "Location",
-          "imageUrl": "Image URL"
-        },
-        "create": {
-          "title": "New Team",
-          "save": "Create Team"
-        },
-        "delete": {
-          "title": "Delete Team",
-          "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
-          "confirm_button": "Delete"
-        },
-        "info": {
-          "title": "Team Information"
-        },
-        "contracts": {
-          "title": "Contract History",
-          "empty": "No contracts found.",
-          "save": "Save Contract",
-          "columns": {
-            "player": "Player",
-            "role": "Role",
-            "startDate": "Start Date",
-            "endDate": "End Date"
-          },
-          "fields": {
-            "playerId": "Player ID",
-            "role": "Role",
-            "startDate": "Start Date",
-            "endDate": "End Date (leave empty for current)"
-          },
-          "create": {
-            "title": "Add Contract"
-          },
-          "edit": {
-            "title": "Edit Contract"
-          },
-          "delete": {
-            "title": "Delete Contract",
-            "confirm": "Are you sure you want to delete the contract with {player}?",
-            "confirm_button": "Delete"
-          }
-        }
-      }
-    },
     "game": {
       "airriddle": {
         "title": "Air Riddle",
@@ -669,7 +481,7 @@
           "rateLimitDescription": "You can only create one post per hour. Wait until the cooldown ends and try again.",
           "signInRequired": "Sign in to create a post."
         },
-        "rateLimitWait": "You can only create one post every {hours}\u00a0hours. Try again at {time}.",
+        "rateLimitWait": "You can only create one post every {hours} hours. Try again at {time}.",
         "statusLoading": "Checking whether you can post…",
         "statusLoadError": "Could not verify posting limits. Refresh the page and try again."
       },
@@ -692,7 +504,8 @@
     },
     "profile": {
       "title": "Profile",
-      "logout": "Logout"
+      "logout": "Logout",
+      "openAdmin": "Staff Console"
     },
     "authentication": {
       "login": "Login",

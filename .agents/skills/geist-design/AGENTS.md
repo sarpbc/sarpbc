@@ -60,7 +60,7 @@ Before choosing a solution, identify the real constraint:
 - **SSR** — data must be consistent server/client (`useFetch`, `useAsyncData`)
 - **i18n** — en/fr via `@nuxtjs/i18n`; never hardcode user strings in templates
 - **Auth** — cookie session to `apiBase`; `auth.global` + `admin` middleware
-- **Admin dashboard** — `routeRules` set `appLayout: dashboard` + `admin` middleware
+- **Admin** — staff console is `apps/admin` (`admin.sarpbc.org`); cookie session to `apiBase`
 
 ### 1.4 Build for Everyone (`de-accessible-by-default`)
 
@@ -265,7 +265,7 @@ const page = computed({
 
 ### 5.1 Structure (`form-labels`)
 
-Use `UForm` + `UFormField` (see `apps/front/app/pages/dashboard/players/index.vue`).
+Use `UForm` + `UFormField` (see `apps/admin/app/pages/players/index.vue`).
 
 ```vue
 <UFormField :label="$t('fields.email')" name="email" required>

@@ -46,14 +46,14 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 
 - Config: `nuxt.config.ts`, `app/app.config.ts` (`primary: blue`, `neutral: zinc`).
 - Components: prefer `@nuxt/ui` (`UButton`, `UFormField`, `UTable`); shared primitives in `app/components/ui/`.
-- Admin (legacy until cutover): `/dashboard/**` → `dashboard` layout + `admin` middleware.
 - Design rules: `.agents/skills/geist-design/AGENTS.md`
 
 ### Staff admin (`apps/admin`)
 
 - SPA (`ssr: false`), port 4002, target host `admin.sarpbc.org`.
 - Auth: login page + `admin` middleware (`user.admin`); same API cookie session as front.
-- Dashboard feature pages migrate here in later SAR-76 phases.
+- Staff tooling lives here (news, players, teams, tournaments, pick'ems, forum moderation).
+- Public profile links admins to `runtimeConfig.public.adminUrl`; legacy `/dashboard/**` redirects to the admin app.
 
 ### Backend (`apps/back`)
 
