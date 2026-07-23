@@ -164,194 +164,6 @@
     }
   },
   "page": {
-    "dashboard": {
-      "nav": {
-        "home": "Tableau de bord",
-        "articles": "Articles",
-        "news": "Actualités",
-        "tournaments": "Tournois",
-        "forum": "Forum",
-        "pickems": "Pick'ems",
-        "players": "Joueurs",
-        "teams": "Équipes",
-        "backToSite": "Retour sur sarpbc.org"
-      },
-      "tournaments": {
-        "title": "Tournois",
-        "tournamentsCount": "{count} tournois",
-        "syncAdditions": "Synchroniser les nouveaux tournois",
-        "syncTournament": "Actualiser le tournoi",
-        "viewMatches": "Voir les matchs",
-        "matchesTitle": "Matchs",
-        "matchesCount": "{count} matchs",
-        "noMatches": "Aucun match trouvé pour ce tournoi.",
-        "columns": {
-          "name": "Tournoi",
-          "status": "Statut",
-          "beginAt": "Début"
-        },
-        "match": {
-          "status": "Statut",
-          "score": "Score",
-          "setWinner": "Définir le vainqueur",
-          "syncScores": "Actualiser les scores"
-        }
-      },
-      "forum": {
-        "title": "Forum",
-        "postsCount": "{count} publications",
-        "columns": {
-          "title": "Titre",
-          "author": "Auteur",
-          "topic": "Sujet",
-          "createdAt": "Créé le"
-        },
-        "replies": {
-          "title": "Commentaires",
-          "empty": "Aucun commentaire sur cette publication.",
-          "columns": {
-            "author": "Auteur",
-            "content": "Contenu",
-            "createdAt": "Créé le"
-          }
-        },
-        "delete": {
-          "postTitle": "Supprimer la publication",
-          "postConfirm": "Voulez-vous vraiment supprimer « {title} » ? Tous les commentaires seront également supprimés.",
-          "replyTitle": "Supprimer le commentaire",
-          "replyConfirm": "Voulez-vous vraiment supprimer ce commentaire ?",
-          "confirmButton": "Supprimer"
-        }
-      },
-      "news": {
-        "title": "Articles",
-        "create": {
-          "title": "Nouvel article",
-          "save": "Enregistrer l'article",
-          "image": "Image de couverture",
-          "tab": {
-            "write": "Écrire",
-            "preview": "Aperçu"
-          },
-          "preview": {
-            "empty": "Rien à prévisualiser pour l'instant. Commencez à écrire pour voir le rendu."
-          }
-        }
-      },
-      "players": {
-        "title": "Joueurs",
-        "playersCount": "{count} joueurs",
-        "save": "Enregistrer",
-        "columns": {
-          "name": "Nom",
-          "firstName": "Prénom",
-          "lastName": "Nom de famille",
-          "nationality": "Nationalité"
-        },
-        "fields": {
-          "name": "Nom",
-          "firstName": "Prénom",
-          "lastName": "Nom de famille",
-          "nationality": "Nationalité",
-          "birthday": "Date de naissance",
-          "imageUrl": "URL de l'image"
-        },
-        "create": {
-          "title": "Nouveau joueur",
-          "save": "Créer le joueur"
-        },
-        "delete": {
-          "title": "Supprimer le joueur",
-          "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
-          "confirm_button": "Supprimer"
-        },
-        "info": {
-          "title": "Informations du joueur"
-        },
-        "contracts": {
-          "title": "Historique des contrats",
-          "empty": "Aucun contrat trouvé.",
-          "save": "Enregistrer le contrat",
-          "columns": {
-            "team": "Équipe",
-            "role": "Rôle",
-            "startDate": "Date de début",
-            "endDate": "Date de fin"
-          },
-          "fields": {
-            "teamId": "ID de l'équipe",
-            "role": "Rôle",
-            "startDate": "Date de début",
-            "endDate": "Date de fin (laisser vide pour actuel)"
-          },
-          "create": {
-            "title": "Ajouter un contrat"
-          },
-          "edit": {
-            "title": "Modifier le contrat"
-          },
-          "delete": {
-            "title": "Supprimer le contrat",
-            "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {team} ?",
-            "confirm_button": "Supprimer"
-          }
-        }
-      },
-      "teams": {
-        "title": "Équipes",
-        "teamsCount": "{count} équipes",
-        "save": "Enregistrer",
-        "columns": {
-          "name": "Nom",
-          "location": "Localisation"
-        },
-        "fields": {
-          "name": "Nom",
-          "location": "Localisation",
-          "imageUrl": "URL de l'image"
-        },
-        "create": {
-          "title": "Nouvelle équipe",
-          "save": "Créer l'équipe"
-        },
-        "delete": {
-          "title": "Supprimer l'équipe",
-          "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
-          "confirm_button": "Supprimer"
-        },
-        "info": {
-          "title": "Informations de l'équipe"
-        },
-        "contracts": {
-          "title": "Historique des contrats",
-          "empty": "Aucun contrat trouvé.",
-          "save": "Enregistrer le contrat",
-          "columns": {
-            "player": "Joueur",
-            "role": "Rôle",
-            "startDate": "Date de début",
-            "endDate": "Date de fin"
-          },
-          "fields": {
-            "playerId": "ID du joueur",
-            "role": "Rôle",
-            "startDate": "Date de début",
-            "endDate": "Date de fin (laisser vide pour actuel)"
-          },
-          "create": {
-            "title": "Ajouter un contrat"
-          },
-          "edit": {
-            "title": "Modifier le contrat"
-          },
-          "delete": {
-            "title": "Supprimer le contrat",
-            "confirm": "Êtes-vous sûr de vouloir supprimer le contrat avec {player} ?",
-            "confirm_button": "Supprimer"
-          }
-        }
-      }
-    },
     "game": {
       "airriddle": {
         "title": "Air Riddle",
@@ -669,7 +481,7 @@
           "rateLimitDescription": "Vous ne pouvez créer qu'un post par heure. Attendez la fin du délai et réessayez.",
           "signInRequired": "Connectez-vous pour créer un post."
         },
-        "rateLimitWait": "Vous ne pouvez créer qu'un post toutes les {hours}\u00a0heures. Réessayez à {time}.",
+        "rateLimitWait": "Vous ne pouvez créer qu'un post toutes les {hours} heures. Réessayez à {time}.",
         "statusLoading": "Vérification de vos limites de publication…",
         "statusLoadError": "Impossible de vérifier vos limites de publication. Actualisez la page et réessayez."
       },
@@ -692,7 +504,8 @@
     },
     "profile": {
       "title": "Profil",
-      "logout": "Se déconnecter"
+      "logout": "Se déconnecter",
+      "openAdmin": "Console Staff"
     },
     "authentication": {
       "login": "Connexion",

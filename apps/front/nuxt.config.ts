@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const apiBase =
   process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
+const adminUrl =
+  process.env.NUXT_PUBLIC_ADMIN_URL || process.env.ADMIN_URL || "https://admin.sarpbc.org";
 
 function apiOrigin(base: string): string | undefined {
   try {
@@ -150,10 +152,6 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Admin dashboard — client-only SPA
-    "/dashboard/**": { ssr: false, appLayout: "dashboard", appMiddleware: ["admin"] },
-    "/fr/dashboard/**": { ssr: false, appLayout: "dashboard", appMiddleware: ["admin"] },
-
     // Auth layouts
     "/login": { appLayout: "login" },
     "/fr/login": { appLayout: "login" },
@@ -188,6 +186,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: apiBase,
+      adminUrl: adminUrl,
       posthog: {
         publicKey: posthogPublicKey,
         host: posthogHost,

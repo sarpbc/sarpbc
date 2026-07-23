@@ -68,7 +68,7 @@ Challenge every ticket. A ticket without measurable value should not exist.
 Before keeping a ticket open, check whether it is already shipped:
 
 - Public pages: `apps/front/app/pages/`
-- Admin: `apps/front/app/pages/dashboard/`
+- Admin: `apps/admin/app/pages/` (staff console)
 - API: `apps/back/src/` feature modules
 - Nav: `apps/front/app/components/nav/`
 
@@ -333,13 +333,13 @@ Verify in codebase before assuming gaps. As of skill authorship, the platform in
 
 | Area | Public | Admin |
 | ---- | ------ | ----- |
-| News | `/`, `/news/[slug]` | `/dashboard/news` |
-| Tournaments | `/tournaments` | `/dashboard/tournaments` |
-| Matches | `/matches`, `/matches/[id]` | match sync in dashboard |
-| Players | `/player`, `/player/[slug]` | `/dashboard/players` |
-| Teams | `/team`, `/team/[slug]` | `/dashboard/teams` |
-| Forum | `/forum` | `/dashboard/forum` |
-| Pick'ems | `/game/pickems` | `/dashboard/pickems` |
+| News | `/`, `/news/[slug]` | `admin` `/news` |
+| Tournaments | `/tournaments` | `admin` `/tournaments` |
+| Matches | `/matches`, `/matches/[id]` | match sync in admin tournaments |
+| Players | `/player`, `/player/[slug]` | `admin` `/players` |
+| Teams | `/team`, `/team/[slug]` | `admin` `/teams` |
+| Forum | `/forum` | `admin` `/forum` |
+| Pick'ems | `/game/pickems` | `admin` `/pickems` |
 | Air Riddle | `/game/airriddle` | — |
 
 Data: PandaScore sync (tournaments/matches), MikroORM + PostgreSQL, Redis.
