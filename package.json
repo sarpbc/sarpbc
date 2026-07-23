@@ -22,11 +22,11 @@
     "test:front": "turbo run test --filter=front"
   },
   "devDependencies": {
-    "lefthook": "^2.1.9",
+    "lefthook": "^2.1.10",
     "only-allow": "^1.2.2",
-    "oxfmt": "^0.55.0",
-    "oxlint": "^1.70.0",
-    "turbo": "^2.10.3"
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0",
+    "turbo": "^2.10.6"
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@11.17.0"
 }

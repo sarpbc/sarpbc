@@ -1,9 +1,9 @@
 import type { StaffPermission, StaffRole } from "../domain/staff-access";
 
 export class UserDto {
-  id: string;
-  email: string;
-  userName: string;
+  id!: string;
+  email!: string;
+  userName!: string;
   avatarUrl?: string;
   /** Assigned staff role, when any. */
   role?: StaffRole;

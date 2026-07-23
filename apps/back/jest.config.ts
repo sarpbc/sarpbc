@@ -5,7 +5,12 @@ const config: Config = {
   rootDir: "src",
   testRegex: ".*\\.spec\\.ts$",
   transform: {
-    "^.+\\.(t|j)s$": "ts-jest",
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        tsconfig: "<rootDir>/../tsconfig.spec.json",
+      },
+    ],
   },
   // Coverage only on code we actually unit-test today — not the whole Nest app (~200 files).
   collectCoverageFrom: [

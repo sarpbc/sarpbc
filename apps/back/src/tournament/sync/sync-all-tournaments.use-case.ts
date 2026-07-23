@@ -48,7 +48,7 @@ export class SyncAllTournamentsUseCase {
         },
       });
     } catch (error) {
-      log.error(error);
+      log.error(error instanceof Error ? error : String(error));
       throw error;
     } finally {
       log.emit();

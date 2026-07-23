@@ -12,72 +12,72 @@ import { Type, Expose } from "class-transformer";
 export class ShortTopicDto {
   @Expose()
   @IsUUID()
-  id: string;
+  id!: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 }
 
 export class ReplyDto {
   @Expose()
   @IsUUID()
-  id: string;
+  id!: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  author: string;
+  author!: string;
 
   @Expose()
   @IsDate()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Expose()
   @IsArray()
   @ValidateNested({ each: true })
-  replies: ReplyDto[];
+  replies!: ReplyDto[];
 }
 
 export class PostDto {
   @Expose()
   @IsUUID()
-  id: string;
+  id!: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 
   @Expose()
   @ValidateNested()
   @Type(() => ShortTopicDto)
-  topic: ShortTopicDto;
+  topic!: ShortTopicDto;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  author: string;
+  author!: string;
 
   @Expose()
   @IsArray()
   @ValidateNested({ each: true })
-  replies: ReplyDto[];
+  replies!: ReplyDto[];
 
   @Expose()
   @IsDate()
-  createdAt: Date;
+  createdAt!: Date;
 }
 
 export class PostResponse {
@@ -85,5 +85,5 @@ export class PostResponse {
   @ValidateNested()
   @Type(() => PostDto)
   @IsOptional()
-  post: PostDto | null;
+  post!: PostDto | null;
 }

@@ -20,8 +20,33 @@ allowBuilds:
   vue-demi: true
 
 catalog:
-  typescript: ^5.9.3
-  "@types/node": ^25.9.4
+  typescript: ^6.0.3
+  "@types/node": ^26.1.1
+  nuxt: ^4.5.0
+  vue: ^3.5.40
+  vue-router: ^5.2.0
+  vue-i18n: ^11.4.7
+  "@nuxt/ui": ^4.10.0
+  "@nuxtjs/i18n": ^10.5.0
+  "@tiptap/core": ^3.28.0
+  "@tiptap/pm": ^3.28.0
+  "@tiptap/vue-3": ^3.28.0
+  vue-tsc: ^3.3.8
+  "@iconify-json/fluent": ^1.2.53
+  "@iconify-json/lucide": ^1.2.118
+  "@iconify-json/logos": ^1.2.11
+  evlog: ^2.22.3
+  "@nestjs/common": ^11.1.28
+  "@nestjs/core": ^11.1.28
+  "@nestjs/platform-fastify": ^11.1.28
+  "@nestjs/testing": ^11.1.28
+  "@mikro-orm/cli": ^7.1.7
+  "@mikro-orm/core": ^7.1.7
+  "@mikro-orm/decorators": ^7.1.7
+  "@mikro-orm/entity-generator": ^7.1.7
+  "@mikro-orm/migrations": ^7.1.7
+  "@mikro-orm/postgresql": ^7.1.7
+  "@mikro-orm/seeder": ^7.1.7
 
 minimumReleaseAgeExclude:
   - "@nuxt/kit@4.5.0"
@@ -29,3 +54,5 @@ minimumReleaseAgeExclude:
   - "@nuxt/schema@4.5.0"
   - "@nuxt/vite-builder@4.5.0"
   - nuxt@4.5.0
+  - "@posthog/core@1.45.1"
+  - posthog-node@5.46.1
