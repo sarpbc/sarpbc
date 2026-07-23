@@ -1,6 +1,4 @@
-import type { StaffPermission, StaffRole, User } from "~/types/user";
-
-export type { StaffPermission, StaffRole };
+import type { StaffPermission, User } from "~/types/user";
 
 export function isStaffUser(user: User | null | undefined): boolean {
   if (!user) {

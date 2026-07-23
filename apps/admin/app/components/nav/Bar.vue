@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { hasPermission, type StaffPermission } from "~/utils/staff";
+import type { StaffPermission } from "~/types/user";
+import { hasPermission } from "~/utils/staff";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
