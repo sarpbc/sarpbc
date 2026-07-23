@@ -4,12 +4,17 @@ const { setPageSeo } = useSarpbcSeo();
 const user = useUser();
 const localePath = useLocalePath();
 const posthog = usePostHog();
+const config = useRuntimeConfig();
 
 if (!user.value) {
   navigateTo(localePath("/login"));
 }
 
 const isLoggingOut = ref(false);
+const adminHomeUrl = computed(() => {
+  const base = String(config.public.adminUrl || "https://admin.sarpbc.org").replace(/\/$/, "");
+  return base;
+});
 
 const handleLogout = async () => {
   isLoggingOut.value = true;
@@ -61,10 +66,12 @@ setPageSeo({
       <div class="flex flex-row items-center gap-2">
         <UButton
           v-if="user.admin"
-          :to="localePath('/dashboard')"
+          :to="adminHomeUrl"
+          external
+          target="_blank"
           color="primary"
           variant="soft"
-          label="Dashboard"
+          :label="$t('page.profile.openAdmin')"
           class="cursor-pointer w-fit"
         />
         <UButton

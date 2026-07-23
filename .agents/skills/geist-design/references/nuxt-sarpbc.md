@@ -61,14 +61,14 @@ await $fetch(`${config.public.apiBase}/resource`, {
 - On error: `useToast()` with actionable message from `error.data?.message`
 - Don't expose raw `FetchError` strings without mapping
 
-## Dashboard Patterns
+## Admin Console Patterns
 
-Admin routes under `/dashboard/**`:
+Staff console lives in `apps/admin` (`admin.sarpbc.org`):
 
-- Layout: `dashboard` or `dashboardheader` (see `layouts/`)
-- Middleware: `admin` via `routeRules` in `nuxt.config.ts`
+- Layout: `default` + `header` (see `apps/admin/app/layouts/`)
+- Middleware: `admin` via `routeRules` in `apps/admin/nuxt.config.ts`
 - Lists: `UTable` + `UButton` actions + `UModal` for create/edit
-- Reference: `pages/dashboard/players/index.vue`
+- Reference: `apps/admin/app/pages/players/index.vue`
 
 ## Custom UI Primitives
 
@@ -104,13 +104,19 @@ Use for: charts, `window` access, heavy client-only editors.
 ## Route Rules (nuxt.config.ts)
 
 ```ts
+// apps/front
 routeRules: {
-  '/dashboard/**': { appLayout: 'dashboard', appMiddleware: ['admin'] },
   '/login': { appLayout: 'login' },
+}
+
+// apps/admin
+routeRules: {
+  '/login': { appLayout: 'login' },
+  '/**': { appMiddleware: ['admin'] },
 }
 ```
 
-Match layout/middleware when adding new auth or admin pages (including `/fr/...` prefix).
+Match layout/middleware when adding new auth or staff pages (including `/fr/...` prefix).
 
 ## Toaster
 

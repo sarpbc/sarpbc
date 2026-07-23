@@ -11,7 +11,7 @@
     "home": {
       "brand": "SARPBC Admin",
       "title": "Console Staff",
-      "subtitle": "Actualités, joueurs, équipes, tournois et pick'ems sont ici. Le forum reste sur le site public jusqu’à sa migration.",
+      "subtitle": "Actualités, joueurs, équipes, tournois, pick'ems et modération du forum sont ici.",
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
@@ -20,6 +20,7 @@
       "openTeams": "Ouvrir les Équipes",
       "openTournaments": "Ouvrir les Tournois",
       "openPickems": "Ouvrir les Pick'ems",
+      "openForum": "Ouvrir le Forum",
       "syncTeams": "Synchroniser les Équipes",
       "syncingTeams": "Synchronisation…"
     },
@@ -30,7 +31,38 @@
       "teams": "Équipes",
       "tournaments": "Tournois",
       "pickems": "Pick'ems",
+      "forum": "Forum",
       "backToSite": "Retour sur sarpbc.org"
+    },
+    "forum": {
+      "title": "Forum",
+      "loading": "Chargement…",
+      "empty": "Aucun message de forum pour le moment.",
+      "notFound": "Message introuvable.",
+      "postsCount": "{count} messages",
+      "hide": "Masquer",
+      "columns": {
+        "title": "Titre",
+        "author": "Auteur",
+        "topic": "Sujet",
+        "createdAt": "Créé le"
+      },
+      "replies": {
+        "title": "Commentaires",
+        "empty": "Aucun commentaire sur ce message."
+      },
+      "delete": {
+        "postTitle": "Supprimer le Message",
+        "postConfirm": "Êtes-vous sûr de vouloir supprimer « {title} » ? Tous les commentaires seront également supprimés.",
+        "replyTitle": "Supprimer le Commentaire",
+        "replyConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+        "confirmButton": "Supprimer"
+      },
+      "messages": {
+        "hidden": "Commentaire masqué",
+        "errorTitle": "Impossible de modérer le commentaire",
+        "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      }
     },
     "tournaments": {
       "title": "Tournois",

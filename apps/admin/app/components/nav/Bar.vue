@@ -34,6 +34,11 @@ const links = computed(() => [
     to: localePath("/pickems"),
   },
   {
+    label: t("page.nav.forum"),
+    icon: "i-fluent-chat-24-regular",
+    to: localePath("/forum"),
+  },
+  {
     label: t("page.nav.backToSite"),
     icon: "i-fluent-arrow-left-24-regular",
     to: "https://sarpbc.org",

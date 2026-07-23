@@ -7,28 +7,32 @@ const localePath = useLocalePath();
 
 const breadcrumbItems = [
   {
-    label: t("page.dashboard.forum.title"),
+    label: t("page.forum.title"),
   },
 ];
 
 const columns: TableColumn<PostShort>[] = [
   {
     accessorKey: "title",
-    header: t("page.dashboard.forum.columns.title"),
+    header: t("page.forum.columns.title"),
   },
   {
     accessorKey: "author",
-    header: t("page.dashboard.forum.columns.author"),
+    header: t("page.forum.columns.author"),
   },
   {
     id: "topic",
-    header: t("page.dashboard.forum.columns.topic"),
+    header: t("page.forum.columns.topic"),
     cell: ({ row }) => row.original.topic?.title ?? "-",
   },
   {
     accessorKey: "createdAt",
-    header: t("page.dashboard.forum.columns.createdAt"),
+    header: t("page.forum.columns.createdAt"),
     cell: ({ getValue }) => new Date(getValue() as string).toLocaleString(),
+  },
+  {
+    id: "actions",
+    header: "",
   },
 ];
 
@@ -53,7 +57,7 @@ watch(
 
 function selectRow(e: Event, row: TableRow<PostShort>) {
   e.preventDefault();
-  navigateTo(localePath(`/dashboard/forum/${row.original.id}`));
+  navigateTo(localePath(`/forum/${row.original.id}`));
 }
 
 function openDeleteModal(e: Event, post: PostShort) {
@@ -79,7 +83,7 @@ async function confirmDelete() {
 </script>
 
 <template>
-  <NuxtLayout name="dashboardheader">
+  <NuxtLayout name="header">
     <template #breadcrumb>
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
@@ -87,11 +91,16 @@ async function confirmDelete() {
     <DashboardContent>
       <div class="flex flex-col gap-4">
         <p class="text-sm text-muted">
-          {{ $t("page.dashboard.forum.postsCount", { count: posts.length }) }}
+          {{ $t("page.forum.postsCount", { count: posts.length }) }}
+        </p>
+
+        <p v-if="status === 'success' && posts.length === 0" class="text-sm text-muted">
+          {{ $t("page.forum.empty") }}
         </p>
 
         <ClientOnly>
           <UTable
+            v-if="posts.length > 0 || status === 'pending'"
             :data="posts"
             :columns="columns"
             :ui="{
@@ -112,6 +121,8 @@ async function confirmDelete() {
                 variant="ghost"
                 size="xs"
                 icon="i-fluent-delete-24-regular"
+                :aria-label="$t('page.forum.delete.postTitle')"
+                class="cursor-pointer"
                 @click="(e) => openDeleteModal(e, row.original)"
               />
             </template>
@@ -119,33 +130,36 @@ async function confirmDelete() {
         </ClientOnly>
       </div>
 
-      <UModal v-model:open="isDeleteModalOpen">
-        <template #content>
-          <div class="p-6 flex flex-col gap-4">
-            <h3 class="text-lg font-semibold">
-              {{ $t("page.dashboard.forum.delete.postTitle") }}
-            </h3>
-            <p>
-              {{
-                $t("page.dashboard.forum.delete.postConfirm", {
-                  title: postToDelete?.title ?? "",
-                })
-              }}
-            </p>
-            <div class="flex justify-end gap-2">
-              <UButton
-                variant="ghost"
-                :label="$t('common.cancel')"
-                @click="isDeleteModalOpen = false"
-              />
-              <UButton
-                color="error"
-                :loading="isDeleting"
-                :label="$t('page.dashboard.forum.delete.confirmButton')"
-                @click="confirmDelete"
-              />
-            </div>
-          </div>
+      <UModal
+        v-model:open="isDeleteModalOpen"
+        :title="$t('page.forum.delete.postTitle')"
+        :dismissible="!isDeleting"
+      >
+        <template #body>
+          <p>
+            {{
+              $t("page.forum.delete.postConfirm", {
+                title: postToDelete?.title ?? "",
+              })
+            }}
+          </p>
+        </template>
+        <template #footer>
+          <UButton
+            color="error"
+            :loading="isDeleting"
+            :label="$t('page.forum.delete.confirmButton')"
+            class="cursor-pointer"
+            @click="confirmDelete"
+          />
+          <UButton
+            color="neutral"
+            variant="subtle"
+            :label="$t('common.cancel')"
+            :disabled="isDeleting"
+            class="cursor-pointer"
+            @click="isDeleteModalOpen = false"
+          />
         </template>
       </UModal>
     </DashboardContent>

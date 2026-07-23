@@ -97,6 +97,9 @@ async function onSyncTeams() {
           >
             {{ $t("page.home.openPickems") }}
           </UButton>
+          <UButton :to="localePath('/forum')" icon="i-fluent-chat-24-regular" color="neutral">
+            {{ $t("page.home.openForum") }}
+          </UButton>
           <UButton
             icon="i-fluent-arrow-sync-24-regular"
             color="neutral"
