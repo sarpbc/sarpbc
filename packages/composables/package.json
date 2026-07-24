@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/module.ts"
+    ".": "./src/module.ts",
+    "./apiFetch": "./src/runtime/composables/apiFetch.ts",
+    "./useUser": "./src/runtime/composables/useUser.ts"
   },
   "scripts": {
     "lint": "oxlint .",
