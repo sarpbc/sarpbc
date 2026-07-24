@@ -19,8 +19,14 @@ COPY packages/types/package.json ./packages/types/package.json
 COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/utils/package.json ./packages/utils/package.json
 
+# Include ./packages/utils... so utils gets its own workspace links
+# (utils → @sarpbc/types). `--filter ./apps/back...` alone links packages into
+# apps/back/node_modules only; nest/tsc then fails resolving imports from
+# packages/utils/src/*.ts (see staff.ts → @sarpbc/types).
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
-    pnpm install --frozen-lockfile --store-dir=/pnpm/store --filter ./apps/back...
+    pnpm install --frozen-lockfile --store-dir=/pnpm/store \
+      --filter ./apps/back... \
+      --filter ./packages/utils...
 
 FROM base AS build
 
@@ -31,7 +37,9 @@ COPY apps/back ./apps/back
 # Fresh install after package sources are present so workspace package
 # node_modules (e.g. packages/utils → @sarpbc/types) are linked for nest/tsc.
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
-    pnpm install --frozen-lockfile --store-dir=/pnpm/store --filter ./apps/back...
+    pnpm install --frozen-lockfile --store-dir=/pnpm/store \
+      --filter ./apps/back... \
+      --filter ./packages/utils...
 
 RUN pnpm --filter ./apps/back run build \
   && test -f /app/apps/back/dist/mikro-orm.config.js \
@@ -40,8 +48,10 @@ RUN pnpm --filter ./apps/back run build \
   && chmod +x /app/apps/back/entrypoint.sh
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
-    rm -rf /app/node_modules /app/apps/back/node_modules \
-    && pnpm install --frozen-lockfile --prod --store-dir=/pnpm/store --filter ./apps/back...
+    rm -rf /app/node_modules /app/apps/back/node_modules /app/packages/utils/node_modules \
+    && pnpm install --frozen-lockfile --prod --store-dir=/pnpm/store \
+      --filter ./apps/back... \
+      --filter ./packages/utils...
 
 FROM node:24.13.1-bookworm-slim AS runtime
 
