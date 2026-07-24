@@ -11,6 +11,10 @@ FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 COPY apps/front/package.json ./apps/front/package.json
+COPY packages/composables/package.json ./packages/composables/package.json
+COPY packages/types/package.json ./packages/types/package.json
+COPY packages/ui/package.json ./packages/ui/package.json
+COPY packages/utils/package.json ./packages/utils/package.json
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-front \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store --filter ./apps/front...
@@ -19,6 +23,7 @@ FROM base AS build
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
+COPY packages ./packages
 COPY apps/front ./apps/front
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-front \
