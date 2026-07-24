@@ -4,6 +4,12 @@
  * - Roles are pre-configured permission bundles assigned on the user.
  */
 
+import type {
+  StaffPermission as ClientStaffPermission,
+  StaffRole as ClientStaffRole,
+} from "@sarpbc/types";
+import type { ApiErrorBody } from "@sarpbc/utils";
+
 export const STAFF_PERMISSIONS = [
   "news.manage",
   "images.manage",
@@ -19,6 +25,18 @@ export type StaffPermission = (typeof STAFF_PERMISSIONS)[number];
 export const STAFF_ROLES = ["admin", "moderator", "journalist"] as const;
 
 export type StaffRole = (typeof STAFF_ROLES)[number];
+
+/** Compile-time parity with `@sarpbc/types` (workspace package smoke). */
+type AssertExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+type _StaffPermissionParity = AssertExact<StaffPermission, ClientStaffPermission>;
+type _StaffRoleParity = AssertExact<StaffRole, ClientStaffRole>;
+const _staffPermissionParity: _StaffPermissionParity = true;
+const _staffRoleParity: _StaffRoleParity = true;
+void _staffPermissionParity;
+void _staffRoleParity;
+
+/** Compile-time link proving `@sarpbc/utils` resolves in the Nest graph. */
+export type NestLinkedApiErrorBody = ApiErrorBody;
 
 /** Pre-configured role → permission matrix. Edit here to change what a role can do. */
 export const ROLE_PERMISSIONS: Record<StaffRole, readonly StaffPermission[]> = {

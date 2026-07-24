@@ -1,10 +1,1 @@
-import type { Player } from "./player";
-
-export interface Team {
-  id: string;
-  name: string;
-  players: Player[];
-  location?: string;
-  imageUrl?: string;
-  slug: string;
-}
+export type { Team } from "@sarpbc/types";

@@ -56,7 +56,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxtjs/i18n", "@nuxt/ui"],
+  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui"],
 
   nitro: {
     preset: "node-server",

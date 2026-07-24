@@ -18,6 +18,10 @@
   "dependencies": {
     "@nuxt/ui": "catalog:",
     "@nuxtjs/i18n": "catalog:",
+    "@sarpbc/composables": "workspace:*",
+    "@sarpbc/types": "workspace:*",
+    "@sarpbc/ui": "workspace:*",
+    "@sarpbc/utils": "workspace:*",
     "@tiptap/core": "catalog:",
     "@tiptap/pm": "catalog:",
     "@tiptap/vue-3": "catalog:",
