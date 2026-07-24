@@ -12,6 +12,17 @@ Rocket League news and data platform. Monorepo: **Nuxt 4** public site + **Nuxt 
 | `apps/back/`  | NestJS, MikroORM, PostgreSQL, Redis           | 4001         |
 | `apps/admin/` | Nuxt 4 SPA staff console (`admin.sarpbc.org`) | 4002         |
 
+### Shared packages (`packages/`)
+
+| Package               | Consumers          | Notes                                                  |
+| --------------------- | ------------------ | ------------------------------------------------------ |
+| `@sarpbc/types`       | front, admin, back | Pure TS domain types — no Vue/Nuxt                     |
+| `@sarpbc/utils`       | front, admin, back | Pure TS helpers — no Vue/Nuxt                          |
+| `@sarpbc/composables` | front, admin       | Nuxt module (`apiFetch`, `useUser`, …)                 |
+| `@sarpbc/ui`          | front, admin       | Nuxt module for shared Vue components (`Sarp*` prefix) |
+
+Depend via `"workspace:*"`. Do not put Vue/Nuxt APIs in `types` or `utils`.
+
 Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back`, `pnpm dev:admin`.
 
 ## Skills — When to Use

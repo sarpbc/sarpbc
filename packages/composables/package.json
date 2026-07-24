@@ -1,0 +1,31 @@
+{
+  "name": "@sarpbc/composables",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/module.ts",
+    "./apiFetch": "./src/runtime/composables/apiFetch.ts",
+    "./useUser": "./src/runtime/composables/useUser.ts"
+  },
+  "scripts": {
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt . --check",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@nuxt/kit": "^4.5.0",
+    "@sarpbc/types": "workspace:*"
+  },
+  "devDependencies": {
+    "nuxt": "catalog:",
+    "typescript": "catalog:",
+    "vue": "catalog:"
+  },
+  "peerDependencies": {
+    "nuxt": "^4.5.0",
+    "vue": "^3.5.40"
+  }
+}
