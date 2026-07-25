@@ -91,7 +91,7 @@
     },
     "discussion": {
       "heading": "Discussion",
-      "subtitle": "Partagez votre avis sur ce match avec la communauté.",
+      "subtitle": "Partagez votre avis avec la communauté.",
       "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",

@@ -105,9 +105,12 @@
       "create": {
         "title": "Nouvel Article",
         "titleField": "Titre",
+        "slugField": "Slug d’URL",
+        "slugHint": "Utilisé dans /news/votre-slug. Laissez vide pour le générer depuis le titre.",
+        "slugPlaceholder": "mon-article",
         "save": "Enregistrer l’Article",
         "saved": "Article enregistré",
-        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre, le slug et le contenu, puis réessayez.",
         "cancel": "Annuler",
         "placeholder": "Commencez à écrire le contenu de l’article…",
         "tab": {
@@ -121,7 +124,7 @@
       "edit": {
         "save": "Enregistrer l’Article",
         "saved": "Article enregistré",
-        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre, le slug et le contenu, puis réessayez.",
         "publish": "Publier",
         "unpublish": "Dépublier",
         "published": "Article publié",

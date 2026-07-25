@@ -155,11 +155,37 @@ const suggestionItems: EditorSuggestionMenuItem[][] = [
 ];
 
 const title = ref("");
+const articleSlug = ref("");
+const slugTouched = ref(false);
 const content = ref("");
 const isSaving = ref(false);
 const isModalOpen = ref(false);
 
+function suggestSlug(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+watch(title, (next) => {
+  if (!slugTouched.value) {
+    articleSlug.value = suggestSlug(next);
+  }
+});
+
+function onSlugInput(value: string) {
+  slugTouched.value = true;
+  articleSlug.value = value;
+}
+
 function openSaveModal() {
+  if (!slugTouched.value && title.value) {
+    articleSlug.value = suggestSlug(title.value);
+  }
   isModalOpen.value = true;
 }
 
@@ -170,11 +196,13 @@ async function saveArticle() {
 
   isSaving.value = true;
   try {
-    const ok = await createNewsArticle({
+    const trimmedSlug = articleSlug.value.trim();
+    const created = await createNewsArticle({
       title: title.value,
       content: content.value,
+      ...(trimmedSlug ? { slug: trimmedSlug } : {}),
     });
-    if (!ok) {
+    if (!created) {
       toast.add({
         title: t("page.news.create.saveFailed"),
         color: "error",
@@ -186,7 +214,7 @@ async function saveArticle() {
       title: t("page.news.create.saved"),
       color: "success",
     });
-    await navigateTo(localePath("/news"));
+    await navigateTo(localePath(`/news/${created.slug}`));
   } catch (error) {
     console.error("Failed to save article:", error);
     toast.add({
@@ -231,9 +259,25 @@ const tabItems: TabsItem[] = [
         />
 
         <template #body>
-          <UFormField :label="$t('page.news.create.titleField')" required>
-            <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
-          </UFormField>
+          <div class="flex flex-col gap-4">
+            <UFormField :label="$t('page.news.create.titleField')" required>
+              <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
+            </UFormField>
+            <UFormField
+              :label="$t('page.news.create.slugField')"
+              :hint="$t('page.news.create.slugHint')"
+            >
+              <UInput
+                :model-value="articleSlug"
+                class="w-full"
+                :placeholder="$t('page.news.create.slugPlaceholder')"
+                spellcheck="false"
+                autocomplete="off"
+                @update:model-value="onSlugInput"
+                @keydown.enter="saveArticle"
+              />
+            </UFormField>
+          </div>
         </template>
 
         <template #footer>

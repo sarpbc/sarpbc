@@ -1,23 +1,37 @@
 <script setup lang="ts">
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const slug = useRoute().params.slug;
+const route = useRoute();
+const slug = computed(() => route.params.slug as string);
 
-const { data: article } = await useAsyncData(`news-${slug}`, () => {
-  return queryCollection("news").path(`/news/${slug}`).first();
-});
+const { data: article } = await useAsyncData(
+  () => `news-${slug.value}`,
+  () => getNewsArticle(slug.value),
+  { watch: [slug] },
+);
+
+if (!article.value) {
+  throw createError({
+    statusCode: 404,
+    message: t("page.news.articleNotFound"),
+  });
+}
+
+const contentPlain = article.value.content
+  .replace(/[#>*_`[\]()!\\-]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
 
 setPageSeo({
-  title: article.value?.title ? `${article.value.title} | sarpbc.org` : t("page.news.title"),
+  title: `${article.value.title} | sarpbc.org`,
   description:
-    article.value?.description || "Read the latest Rocket League esports news on sarpbc.org",
-  image: article.value?.image || undefined,
+    contentPlain.slice(0, 160) || "Read the latest Rocket League esports news on sarpbc.org",
 });
 </script>
 
 <template>
-  <div class="w-full flex flex-col">
-    <UiCrossCard v-if="article" class="w-full">
+  <div v-if="article" class="w-full flex flex-col gap-4">
+    <UiCrossCard class="w-full">
       <div class="w-full flex flex-col gap-2 p-4">
         <div class="w-full flex flex-col h-16 justify-center gap-1">
           <h1 class="text-highlighted text-2xl font-bold">
@@ -28,18 +42,16 @@ setPageSeo({
             class="flex flex-row justify-between text-xs font-normal text-muted"
           >
             <p>{{ article.author }}</p>
-            <p>{{ df(locale).format(new Date(article.date)) }}</p>
+            <p>{{ df(locale).format(new Date(article.createdAt)) }}</p>
           </span>
         </div>
-        <ContentRenderer :value="article" :prose="true" />
+        <MDC
+          :value="article.content"
+          class="news-prose text-muted [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-1 [&_ol]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:text-highlighted"
+        />
       </div>
     </UiCrossCard>
-    <div v-else class="pt-16">
-      <div class="w-full flex justify-center items-center p-4 border border-default">
-        <span class="text-highlighted font-bold text-2xl">
-          {{ $t("page.news.articleNotFound") }}
-        </span>
-      </div>
-    </div>
+
+    <DiscussionCommentThread target-type="newsArticle" :target-id="article.id" />
   </div>
 </template>

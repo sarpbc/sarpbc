@@ -158,6 +158,7 @@ const suggestionItems: EditorSuggestionMenuItem[][] = [
 ];
 
 const title = ref(article.value?.title ?? "");
+const articleSlug = ref(article.value?.slug ?? "");
 const content = ref(article.value?.content ?? "");
 const isDraft = ref(article.value?.isDraft ?? true);
 const isSaving = ref(false);
@@ -169,17 +170,18 @@ function openSaveModal() {
 }
 
 async function saveArticle() {
-  if (!title.value || !content.value) {
+  if (!title.value || !content.value || !articleSlug.value.trim()) {
     return;
   }
 
   isSaving.value = true;
   try {
-    const ok = await editNewsArticle(slug, {
+    const updated = await editNewsArticle(slug, {
       title: title.value,
       content: content.value,
+      slug: articleSlug.value.trim(),
     });
-    if (!ok) {
+    if (!updated) {
       toast.add({
         title: t("page.news.edit.saveFailed"),
         color: "error",
@@ -191,6 +193,9 @@ async function saveArticle() {
       title: t("page.news.edit.saved"),
       color: "success",
     });
+    if (updated.slug !== slug) {
+      await navigateTo(localePath(`/news/${updated.slug}`));
+    }
   } catch (error) {
     console.error("Failed to save article:", error);
     toast.add({
@@ -269,9 +274,25 @@ const tabItems: TabsItem[] = [
         />
 
         <template #body>
-          <UFormField :label="$t('page.news.create.titleField')" required>
-            <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
-          </UFormField>
+          <div class="flex flex-col gap-4">
+            <UFormField :label="$t('page.news.create.titleField')" required>
+              <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
+            </UFormField>
+            <UFormField
+              :label="$t('page.news.create.slugField')"
+              :hint="$t('page.news.create.slugHint')"
+              required
+            >
+              <UInput
+                v-model="articleSlug"
+                class="w-full"
+                :placeholder="$t('page.news.create.slugPlaceholder')"
+                spellcheck="false"
+                autocomplete="off"
+                @keydown.enter="saveArticle"
+              />
+            </UFormField>
+          </div>
         </template>
 
         <template #footer>
@@ -279,7 +300,7 @@ const tabItems: TabsItem[] = [
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.edit.save')"
             :loading="isSaving"
-            :disabled="!title || !content"
+            :disabled="!title || !content || !articleSlug.trim()"
             class="cursor-pointer"
             @click="saveArticle"
           />

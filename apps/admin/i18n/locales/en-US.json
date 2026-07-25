@@ -105,9 +105,12 @@
       "create": {
         "title": "New Article",
         "titleField": "Title",
+        "slugField": "URL Slug",
+        "slugHint": "Used in /news/your-slug. Leave empty to generate from the title.",
+        "slugPlaceholder": "my-article",
         "save": "Save Article",
         "saved": "Article saved",
-        "saveFailed": "Could not save article. Check the title and content, then try again.",
+        "saveFailed": "Could not save article. Check the title, slug, and content, then try again.",
         "cancel": "Cancel",
         "placeholder": "Start writing the article content…",
         "tab": {
@@ -121,7 +124,7 @@
       "edit": {
         "save": "Save Article",
         "saved": "Article saved",
-        "saveFailed": "Could not save article. Check the title and content, then try again.",
+        "saveFailed": "Could not save article. Check the title, slug, and content, then try again.",
         "publish": "Publish",
         "unpublish": "Unpublish",
         "published": "Article published",
