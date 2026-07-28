@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { newsMdcComponents } from "~/utils/newsMdcComponents";
+
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const route = useRoute();
@@ -47,6 +49,7 @@ setPageSeo({
         </div>
         <MDC
           :value="article.content"
+          :components="newsMdcComponents"
           class="news-prose text-muted [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-1 [&_ol]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:text-highlighted"
         />
       </div>

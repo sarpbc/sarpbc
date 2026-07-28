@@ -130,6 +130,17 @@
         "published": "Article published",
         "unpublished": "Article unpublished",
         "publishFailed": "Could not update publish state. Try again."
+      },
+      "editor": {
+        "insertPlayer": "Player Tag",
+        "insertTeam": "Team Tag",
+        "picker": {
+          "titlePlayer": "Insert Player Tag",
+          "titleTeam": "Insert Team Tag",
+          "placeholderPlayer": "Search players by name…",
+          "placeholderTeam": "Search teams by name…",
+          "empty": "No results. Try a different search."
+        }
       }
     },
     "players": {
@@ -259,5 +270,12 @@
         "notAdmin": "This account is not staff. Contact an administrator for access."
       }
     }
+  },
+  "newsTag": {
+    "loading": "Loading…",
+    "error": "Could not load profile. Try again later.",
+    "viewProfile": "View profile",
+    "roster": "Roster",
+    "noTeam": "No current team"
   }
 }

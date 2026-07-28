@@ -16,6 +16,13 @@
     },
     "cancel": "Cancel"
   },
+  "newsTag": {
+    "loading": "Loading…",
+    "error": "Could not load profile. Try again later.",
+    "viewProfile": "View profile",
+    "roster": "Roster",
+    "noTeam": "No current team"
+  },
   "general": {
     "news": "News",
     "tournaments": "Tournaments",

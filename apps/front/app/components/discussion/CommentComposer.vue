@@ -60,10 +60,8 @@ onMounted(() => {
   if (autofocus) focusContentInput();
 });
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  event.preventDefault();
-
-  if (!user.value) {
+async function submitComment() {
+  if (!user.value || isSubmitting.value) {
     return;
   }
 
@@ -109,6 +107,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     color: "error",
   });
 }
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+  event.preventDefault();
+  await submitComment();
+}
+
+function onEnterKey(event: KeyboardEvent) {
+  event.preventDefault();
+  void submitComment();
+}
 </script>
 
 <template>
@@ -135,6 +143,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           class="w-full text-base"
           autoresize
           :disabled="isSubmitting"
+          @keydown.enter.exact="onEnterKey"
         />
       </UFormField>
 

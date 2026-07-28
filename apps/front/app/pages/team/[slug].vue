@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
 import type { ContractRole } from "~/types/contract";
-import { selectActiveRosterPlayers } from "~/utils/teamRoster";
+import { selectActiveRosterPlayers } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t, locale } = useI18n();

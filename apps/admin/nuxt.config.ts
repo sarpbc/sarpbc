@@ -1,6 +1,32 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { dirname } from "node:path";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
+
+function prosemirrorAlias(packageName: string) {
+  const resolved = require.resolve(packageName, { paths: [tiptapPmPath] });
+  return resolved.replace(/index\.cjs$/, "index.js");
+}
+
+const prosemirrorPackages = [
+  "prosemirror-model",
+  "prosemirror-state",
+  "prosemirror-view",
+  "prosemirror-transform",
+  "prosemirror-commands",
+  "prosemirror-keymap",
+] as const;
+
+const prosemirrorAliases = Object.fromEntries(
+  prosemirrorPackages.map((name) => [name, prosemirrorAlias(name)]),
+);
+
 const apiBase =
   process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
+const publicSiteUrl =
+  process.env.NUXT_PUBLIC_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "https://sarpbc.org";
 
 function apiOrigin(base: string): string | undefined {
   try {
@@ -56,7 +82,16 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui"],
+  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
+
+  mdc: {
+    components: {
+      map: {
+        player: "SarpPlayerTag",
+        team: "SarpTeamTag",
+      },
+    },
+  },
 
   nitro: {
     preset: "node-server",
@@ -78,12 +113,46 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: apiBase,
+      publicSiteUrl: publicSiteUrl,
     },
   },
 
   vite: {
     define: {
       __VUE_PROD_DEVTOOLS__: false,
+    },
+    resolve: {
+      dedupe: [
+        "@tiptap/pm",
+        ...prosemirrorPackages,
+        "prosemirror-schema-list",
+        "prosemirror-history",
+        "prosemirror-dropcursor",
+        "prosemirror-gapcursor",
+        "prosemirror-tables",
+      ],
+      alias: prosemirrorAliases,
+    },
+    optimizeDeps: {
+      include: [
+        "@tiptap/pm/view",
+        "@tiptap/pm/model",
+        "@tiptap/pm/state",
+        "@tiptap/pm/transform",
+        "@tiptap/pm/commands",
+        "@tiptap/pm/keymap",
+        "@tiptap/pm/schema-list",
+        "@tiptap/pm/history",
+        "@tiptap/pm/dropcursor",
+        "@tiptap/pm/gapcursor",
+        "@tiptap/pm/tables",
+        "prosemirror-model",
+        "prosemirror-state",
+        "prosemirror-view",
+        "prosemirror-transform",
+        "prosemirror-commands",
+        "prosemirror-keymap",
+      ],
     },
   },
 });

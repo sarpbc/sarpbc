@@ -25,11 +25,17 @@ const {
 async function onChanged() {
   await refresh();
 }
+
+const hasComments = computed(() => (comments.value?.length ?? 0) > 0);
+const composerAutofocus = computed(() => !pending.value && !hasComments.value);
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-4" aria-labelledby="discussion-heading">
-    <div class="flex flex-col gap-1">
+  <section
+    class="w-full flex flex-col gap-4"
+    :aria-labelledby="hasComments ? 'discussion-heading' : undefined"
+  >
+    <div v-if="hasComments" class="flex flex-col gap-1">
       <h2 id="discussion-heading" class="text-sm font-medium text-toned pl-1">
         {{ t("components.discussion.heading") }}
       </h2>
@@ -42,7 +48,7 @@ async function onChanged() {
       <DiscussionCommentComposer
         :target-type="targetType"
         :target-id="targetId"
-        :autofocus="false"
+        :autofocus="composerAutofocus"
         @comment-created="onChanged"
       />
     </div>
@@ -67,16 +73,7 @@ async function onChanged() {
       </UButton>
     </div>
 
-    <div
-      v-else-if="!comments?.length"
-      class="flex flex-col items-center gap-2 py-8 px-4 text-center border border-default rounded-sm"
-    >
-      <p class="text-sm text-muted text-pretty">
-        {{ t("components.discussion.empty") }}
-      </p>
-    </div>
-
-    <div v-else class="flex flex-col gap-4">
+    <div v-else-if="hasComments" class="flex flex-col gap-4">
       <DiscussionCommentItem
         v-for="comment in comments"
         :key="comment.id"

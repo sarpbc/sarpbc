@@ -16,6 +16,13 @@
     },
     "cancel": "Annuler"
   },
+  "newsTag": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger le profil. Réessayez plus tard.",
+    "viewProfile": "Voir le profil",
+    "roster": "Effectif",
+    "noTeam": "Aucune équipe actuelle"
+  },
   "general": {
     "news": "Actualités",
     "tournaments": "Tournois",
