@@ -105,9 +105,12 @@
       "create": {
         "title": "Nouvel Article",
         "titleField": "Titre",
+        "slugField": "Slug d’URL",
+        "slugHint": "Utilisé dans /news/votre-slug. Laissez vide pour le générer depuis le titre.",
+        "slugPlaceholder": "mon-article",
         "save": "Enregistrer l’Article",
         "saved": "Article enregistré",
-        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre, le slug et le contenu, puis réessayez.",
         "cancel": "Annuler",
         "placeholder": "Commencez à écrire le contenu de l’article…",
         "tab": {
@@ -121,12 +124,23 @@
       "edit": {
         "save": "Enregistrer l’Article",
         "saved": "Article enregistré",
-        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre et le contenu, puis réessayez.",
+        "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre, le slug et le contenu, puis réessayez.",
         "publish": "Publier",
         "unpublish": "Dépublier",
         "published": "Article publié",
         "unpublished": "Article dépublié",
         "publishFailed": "Impossible de mettre à jour l’état de publication. Réessayez."
+      },
+      "editor": {
+        "insertPlayer": "Tag Joueur",
+        "insertTeam": "Tag Équipe",
+        "picker": {
+          "titlePlayer": "Insérer un Tag Joueur",
+          "titleTeam": "Insérer un Tag Équipe",
+          "placeholderPlayer": "Rechercher un joueur par nom…",
+          "placeholderTeam": "Rechercher une équipe par nom…",
+          "empty": "Aucun résultat. Essayez une autre recherche."
+        }
       }
     },
     "players": {
@@ -256,5 +270,12 @@
         "notAdmin": "Ce compte n’est pas staff. Contactez un administrateur pour obtenir l’accès."
       }
     }
+  },
+  "newsTag": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger le profil. Réessayez plus tard.",
+    "viewProfile": "Voir le profil",
+    "roster": "Effectif",
+    "noTeam": "Aucune équipe actuelle"
   }
 }

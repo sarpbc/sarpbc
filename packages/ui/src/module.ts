@@ -12,5 +12,11 @@ export default defineNuxtModule({
       pathPrefix: false,
       prefix: "Sarp",
     });
+    addComponentsDir({
+      path: resolve("./runtime/components-mdc"),
+      pathPrefix: false,
+      prefix: "Sarp",
+      global: true,
+    });
   },
 });

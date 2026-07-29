@@ -16,6 +16,13 @@
     },
     "cancel": "Cancel"
   },
+  "newsTag": {
+    "loading": "Loading…",
+    "error": "Could not load profile. Try again later.",
+    "viewProfile": "View profile",
+    "roster": "Roster",
+    "noTeam": "No current team"
+  },
   "general": {
     "news": "News",
     "tournaments": "Tournaments",
@@ -91,7 +98,7 @@
     },
     "discussion": {
       "heading": "Discussion",
-      "subtitle": "Share your take on this match with the community.",
+      "subtitle": "Share your take with the community.",
       "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
       "retry": "Try Again",

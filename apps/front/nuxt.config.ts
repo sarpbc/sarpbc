@@ -47,6 +47,15 @@ export default defineNuxtConfig({
     },
   },
 
+  mdc: {
+    components: {
+      map: {
+        player: "SarpPlayerTag",
+        team: "SarpTeamTag",
+      },
+    },
+  },
+
   css: ["~/assets/css/main.css"],
 
   devtools: { enabled: false },
@@ -160,11 +169,7 @@ export default defineNuxtConfig({
     "/register": { appLayout: "login" },
     "/fr/register": { appLayout: "login" },
 
-    // Content / legal — longer SWR
-    "/": contentSwr,
-    "/fr": contentSwr,
-    "/news/**": contentSwr,
-    "/fr/news/**": contentSwr,
+    // Legal — longer SWR (homepage + news stay fresh for editorial updates)
     "/privacy-policy": contentSwr,
     "/fr/privacy-policy": contentSwr,
     "/terms-of-service": contentSwr,
