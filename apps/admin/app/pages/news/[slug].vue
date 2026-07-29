@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { EditorToolbarItem, EditorSuggestionMenuItem, TabsItem } from "@nuxt/ui";
+import type { TabsItem } from "@nuxt/ui";
+import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -18,146 +19,8 @@ const items = computed(() => [
   },
 ]);
 
-const toolbarItems: EditorToolbarItem[][] = [
-  [
-    {
-      icon: "i-lucide-heading",
-      tooltip: { text: "Headings" },
-      content: {
-        align: "start",
-      },
-      items: [
-        {
-          kind: "heading",
-          level: 1,
-          icon: "i-lucide-heading-1",
-          label: "Heading 1",
-        },
-        {
-          kind: "heading",
-          level: 2,
-          icon: "i-lucide-heading-2",
-          label: "Heading 2",
-        },
-        {
-          kind: "heading",
-          level: 3,
-          icon: "i-lucide-heading-3",
-          label: "Heading 3",
-        },
-        {
-          kind: "heading",
-          level: 4,
-          icon: "i-lucide-heading-4",
-          label: "Heading 4",
-        },
-      ],
-    },
-  ],
-  [
-    {
-      kind: "mark",
-      mark: "bold",
-      icon: "i-lucide-bold",
-      tooltip: { text: "Bold" },
-    },
-    {
-      kind: "mark",
-      mark: "italic",
-      icon: "i-lucide-italic",
-      tooltip: { text: "Italic" },
-    },
-    {
-      kind: "mark",
-      mark: "underline",
-      icon: "i-lucide-underline",
-      tooltip: { text: "Underline" },
-    },
-    {
-      kind: "mark",
-      mark: "strike",
-      icon: "i-lucide-strikethrough",
-      tooltip: { text: "Strikethrough" },
-    },
-    {
-      kind: "mark",
-      mark: "code",
-      icon: "i-lucide-code",
-      tooltip: { text: "Code" },
-    },
-  ],
-];
-
-const suggestionItems: EditorSuggestionMenuItem[][] = [
-  [
-    {
-      type: "label",
-      label: "Text",
-    },
-    {
-      kind: "paragraph",
-      label: "Paragraph",
-      icon: "i-lucide-type",
-    },
-    {
-      kind: "heading",
-      level: 1,
-      label: "Heading 1",
-      icon: "i-lucide-heading-1",
-    },
-    {
-      kind: "heading",
-      level: 2,
-      label: "Heading 2",
-      icon: "i-lucide-heading-2",
-    },
-    {
-      kind: "heading",
-      level: 3,
-      label: "Heading 3",
-      icon: "i-lucide-heading-3",
-    },
-  ],
-  [
-    {
-      type: "label",
-      label: "Lists",
-    },
-    {
-      kind: "bulletList",
-      label: "Bullet List",
-      icon: "i-lucide-list",
-    },
-    {
-      kind: "orderedList",
-      label: "Numbered List",
-      icon: "i-lucide-list-ordered",
-    },
-  ],
-  [
-    {
-      type: "label",
-      label: "Insert",
-    },
-    {
-      kind: "blockquote",
-      label: "Blockquote",
-      icon: "i-lucide-text-quote",
-    },
-    {
-      kind: "codeBlock",
-      label: "Code Block",
-      icon: "i-lucide-square-code",
-    },
-    {
-      kind: "horizontalRule",
-      label: "Divider",
-      icon: "i-lucide-separator-horizontal",
-    },
-  ],
-];
-
 const title = ref(article.value?.title ?? "");
+const articleSlug = ref(article.value?.slug ?? "");
 const content = ref(article.value?.content ?? "");
 const isDraft = ref(article.value?.isDraft ?? true);
 const isSaving = ref(false);
@@ -169,17 +32,18 @@ function openSaveModal() {
 }
 
 async function saveArticle() {
-  if (!title.value || !content.value) {
+  if (!title.value || !content.value || !articleSlug.value.trim()) {
     return;
   }
 
   isSaving.value = true;
   try {
-    const ok = await editNewsArticle(slug, {
+    const updated = await editNewsArticle(slug, {
       title: title.value,
       content: content.value,
+      slug: articleSlug.value.trim(),
     });
-    if (!ok) {
+    if (!updated) {
       toast.add({
         title: t("page.news.edit.saveFailed"),
         color: "error",
@@ -191,6 +55,9 @@ async function saveArticle() {
       title: t("page.news.edit.saved"),
       color: "success",
     });
+    if (updated.slug !== slug) {
+      await navigateTo(localePath(`/news/${updated.slug}`));
+    }
   } catch (error) {
     console.error("Failed to save article:", error);
     toast.add({
@@ -269,9 +136,25 @@ const tabItems: TabsItem[] = [
         />
 
         <template #body>
-          <UFormField :label="$t('page.news.create.titleField')" required>
-            <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
-          </UFormField>
+          <div class="flex flex-col gap-4">
+            <UFormField :label="$t('page.news.create.titleField')" required>
+              <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
+            </UFormField>
+            <UFormField
+              :label="$t('page.news.create.slugField')"
+              :hint="$t('page.news.create.slugHint')"
+              required
+            >
+              <UInput
+                v-model="articleSlug"
+                class="w-full"
+                :placeholder="$t('page.news.create.slugPlaceholder')"
+                spellcheck="false"
+                autocomplete="off"
+                @keydown.enter="saveArticle"
+              />
+            </UFormField>
+          </div>
         </template>
 
         <template #footer>
@@ -279,7 +162,7 @@ const tabItems: TabsItem[] = [
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.edit.save')"
             :loading="isSaving"
-            :disabled="!title || !content"
+            :disabled="!title || !content || !articleSlug.trim()"
             class="cursor-pointer"
             @click="saveArticle"
           />
@@ -307,31 +190,21 @@ const tabItems: TabsItem[] = [
     >
       <template #editor>
         <DashboardContent class="p-0 px-0 py-4">
-          <UEditor
-            v-slot="{ editor }"
-            v-model="content"
-            :placeholder="$t('page.news.create.placeholder')"
-            content-type="markdown"
-            class="h-full flex-1"
-          >
-            <UEditorToolbar :editor="editor" :items="toolbarItems" layout="bubble" />
-            <UEditorSuggestionMenu :editor="editor" :items="suggestionItems" />
-            <UEditorDragHandle :editor="editor" icon="i-fluent-re-order-dots-vertical-24-regular" />
-          </UEditor>
+          <NewsArticleEditor v-model="content" />
         </DashboardContent>
       </template>
 
       <template #preview>
-        <DashboardContent class="overflow-y-auto px-8">
-          <h1 v-if="title" class="mb-4 text-2xl font-bold">
-            {{ title }}
-          </h1>
-          <pre v-if="content" class="font-sans text-base leading-relaxed whitespace-pre-wrap">{{
-            content
-          }}</pre>
-          <p v-else class="text-muted italic">
-            {{ $t("page.news.create.preview.empty") }}
-          </p>
+        <DashboardContent class="overflow-y-auto py-4">
+          <div :class="[newsSurfaceClass, 'p-4']">
+            <h1 v-if="title" class="mb-4 text-2xl font-bold">
+              {{ title }}
+            </h1>
+            <NewsMarkdownPreview v-if="content" :value="content" />
+            <p v-else class="text-muted italic">
+              {{ $t("page.news.create.preview.empty") }}
+            </p>
+          </div>
         </DashboardContent>
       </template>
     </UTabs>

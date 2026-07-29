@@ -18,17 +18,16 @@ export type PaginatedNewsArticles = {
 export async function createNewsArticle(body: {
   title: string;
   content: string;
-  imageUrl?: string;
-}): Promise<boolean> {
+  slug?: string;
+}): Promise<NewsArticle | null> {
   try {
-    const res = await apiFetch<{ success?: boolean }>("/news", {
+    return await apiFetch<NewsArticle>("/news", {
       method: "POST",
       body,
     });
-    return res.success ?? false;
   } catch (error) {
     console.error("Error creating news article:", error);
-    return false;
+    return null;
   }
 }
 
@@ -60,17 +59,17 @@ export async function editNewsArticle(
   body: {
     title: string;
     content: string;
+    slug?: string;
   },
-): Promise<boolean> {
+): Promise<NewsArticle | null> {
   try {
-    await apiFetch(`/news/${slug}`, {
+    return await apiFetch<NewsArticle>(`/news/${slug}`, {
       method: "PATCH",
       body,
     });
-    return true;
   } catch (error) {
     console.error("Error editing news article:", error);
-    return false;
+    return null;
   }
 }
 

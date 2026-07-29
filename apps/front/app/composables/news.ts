@@ -20,20 +20,19 @@ export type PaginatedNewsArticles = {
 export async function createNewsArticle(body: {
   title: string;
   content: string;
+  slug?: string;
   imageUrl?: string;
-}): Promise<boolean> {
+}): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/news`, {
+    return await $fetch<NewsArticle>(`${config.public.apiBase}/news`, {
       method: "POST",
       body,
       credentials: "include",
     });
-
-    return res.success ?? false;
   } catch (error) {
     console.error("Error creating news article:", error);
-    return false;
+    return null;
   }
 }
 
@@ -104,20 +103,19 @@ export async function editNewsArticle(
   body: {
     title: string;
     content: string;
+    slug?: string;
   },
-): Promise<boolean> {
+): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/news/${slug}`, {
+    return await $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
       method: "PATCH",
       body,
       credentials: "include",
     });
-
-    return true;
   } catch (error) {
     console.error("Error editing news article:", error);
-    return false;
+    return null;
   }
 }
 

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 const HOMEPAGE_NEWS_LIMIT = 20;
 
-const allPosts = await queryCollection("news")
-  .order("date", "DESC")
-  .limit(HOMEPAGE_NEWS_LIMIT)
-  .all();
+const { data: newsPage } = await useAsyncData("homepage-news", () =>
+  getNewsArticles(0, HOMEPAGE_NEWS_LIMIT),
+);
+
+const posts = computed(() => newsPage.value?.data ?? []);
 
 const { data: activePickemTournament } = await useLazyAsyncData(
   "active-pickem-tournament",
@@ -23,6 +24,6 @@ const { data: activePickemTournament } = await useLazyAsyncData(
       variant="homepage"
       class="mb-2"
     />
-    <NewsRow v-for="value in allPosts" :key="value.id" :article="value" />
+    <NewsRow v-for="article in posts" :key="article.id" :article="article" />
   </div>
 </template>

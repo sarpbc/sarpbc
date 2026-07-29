@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { Team } from "~/types/team";
-import { selectActiveRosterPlayers } from "~/utils/teamRoster";
+import { selectActiveRosterPlayers } from "@sarpbc/utils";
 
 const props = defineProps<{
   team: Team;

@@ -90,6 +90,8 @@ catalogs:
 
 overrides:
   h3: 1.15.11
+  prosemirror-model: 1.25.11
+  prosemirror-view: 1.42.1
 
 importers:
 
@@ -119,6 +121,9 @@ importers:
       '@nuxtjs/i18n':
         specifier: 'catalog:'
         version: 10.5.0(@vue/compiler-dom@3.5.40)(db0@0.3.4)(esbuild@0.28.0)(eslint@10.4.1(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(magicast@0.5.3)(rolldown@1.2.0)(rollup@4.61.0)(supports-color@10.2.2)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vue@3.5.40(typescript@6.0.3))(webpack@5.106.2(@swc/core@1.15.46(@swc/helpers@0.5.23))(cssnano@8.0.2(postcss@8.5.19))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.32.0)(postcss@8.5.19)(uglify-js@3.19.3))
+      '@nuxtjs/mdc':
+        specifier: ^0.22.2
+        version: 0.22.2(magic-string@1.0.0)(magicast@0.5.3)(oxc-parser@0.139.0)(rolldown@1.2.0)(supports-color@10.2.2)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.0)(rollup@4.61.0)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.106.2(@swc/core@1.15.46(@swc/helpers@0.5.23))(cssnano@8.0.2(postcss@8.5.19))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.32.0)(postcss@8.5.19)(uglify-js@3.19.3)))
       '@sarpbc/composables':
         specifier: workspace:*
         version: link:../../packages/composables
@@ -513,6 +518,12 @@ importers:
       '@nuxt/kit':
         specifier: ^4.5.0
         version: 4.5.0(magic-string@1.0.0)(magicast@0.5.3)(oxc-parser@0.140.0)(rolldown@1.2.0)(unplugin@3.3.0(esbuild@0.28.0)(rolldown@1.2.0)(rollup@4.61.0)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(webpack@5.106.2(@swc/core@1.15.46(@swc/helpers@0.5.23))(cssnano@8.0.2(postcss@8.5.19))(csso@5.0.5)(esbuild@0.28.0)(lightningcss@1.32.0)(postcss@8.5.19)(uglify-js@3.19.3)))
+      '@sarpbc/types':
+        specifier: workspace:*
+        version: link:../types
+      '@sarpbc/utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       nuxt:
         specifier: 'catalog:'
@@ -4675,9 +4686,9 @@ packages:
     resolution: {integrity: sha512-3VG01F7i2JDghWsBZSBKi7ypMiN5UVVSyD18IwoXx7ilm0ZynrTS+XNpmgxfuiSBjdauWk7tUlP04xfM8Bw4Vw==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
-      prosemirror-model: ^1.7.1
+      prosemirror-model: 1.25.11
       prosemirror-state: ^1.2.3
-      prosemirror-view: ^1.9.10
+      prosemirror-view: 1.42.1
       y-protocols: ^1.0.1
       yjs: ^13.5.38
 
@@ -9045,9 +9056,6 @@ packages:
   prosemirror-model@1.25.11:
     resolution: {integrity: sha512-QWg9RhnpLlogAmp3p96uEFrE5txQpFynd4vhBAELkwgOCWQs/X0yCzB3/hrHqiPwf91RG5KyWq6553zs9JqIOQ==}
 
-  prosemirror-model@1.25.7:
-    resolution: {integrity: sha512-A79aN8QEFUwI6cax8Yq4Rpcx1TJZ3Kagn+ii7qLo4/V8H3mMiHrhFyhTyHHvpSnOgMPpWiDGSwM3etwrxE50ug==}
-
   prosemirror-schema-list@1.5.1:
     resolution: {integrity: sha512-927lFx/uwyQaGwJxLWCZRkjXG0p48KpMj6ueoYiu4JX05GGuGcgzAy62dfiV8eFZftgyBUvLx76RsMe20fJl+Q==}
 
@@ -9059,9 +9067,6 @@ packages:
 
   prosemirror-transform@1.12.0:
     resolution: {integrity: sha512-GxboyN4AMIsoHNtz5uf2r2Ru551i5hWeCMD6E2Ib4Eogqoub0NflniaBPVQ4MrGE5yZ8JV9tUHg9qcZTTrcN4w==}
-
-  prosemirror-view@1.41.8:
-    resolution: {integrity: sha512-TnKDdohEatgyZNGCDWIdccOHXhYloJwbwU+phw/a23KBvJIR9lWQWW7WHHK3vBdOLDNuF7TaX98GObUZOWkOnA==}
 
   prosemirror-view@1.42.1:
     resolution: {integrity: sha512-rRqzZnRgkyh69XoOMrfFJHwauHscLBmHbq772kwbic1ymQAM8gXjzEbJse5j1ep2UO2HRIAQL0bY3kZ/RoqjVw==}
@@ -20955,7 +20960,7 @@ snapshots:
 
   prosemirror-commands@1.7.1:
     dependencies:
-      prosemirror-model: 1.25.7
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
 
@@ -20963,20 +20968,20 @@ snapshots:
     dependencies:
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.8
+      prosemirror-view: 1.42.1
 
   prosemirror-gapcursor@1.4.1:
     dependencies:
       prosemirror-keymap: 1.2.3
-      prosemirror-model: 1.25.7
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
-      prosemirror-view: 1.41.8
+      prosemirror-view: 1.42.1
 
   prosemirror-history@1.5.0:
     dependencies:
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.8
+      prosemirror-view: 1.42.1
       rope-sequence: 1.3.4
 
   prosemirror-inputrules@1.5.1:
@@ -20993,13 +20998,9 @@ snapshots:
     dependencies:
       orderedmap: 2.1.1
 
-  prosemirror-model@1.25.7:
-    dependencies:
-      orderedmap: 2.1.1
-
   prosemirror-schema-list@1.5.1:
     dependencies:
-      prosemirror-model: 1.25.7
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
 
@@ -21012,20 +21013,14 @@ snapshots:
   prosemirror-tables@1.8.5:
     dependencies:
       prosemirror-keymap: 1.2.3
-      prosemirror-model: 1.25.7
+      prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.8
+      prosemirror-view: 1.42.1
 
   prosemirror-transform@1.12.0:
     dependencies:
-      prosemirror-model: 1.25.7
-
-  prosemirror-view@1.41.8:
-    dependencies:
-      prosemirror-model: 1.25.7
-      prosemirror-state: 1.4.4
-      prosemirror-transform: 1.12.0
+      prosemirror-model: 1.25.11
 
   prosemirror-view@1.42.1:
     dependencies:

@@ -4,7 +4,7 @@ import {
   isActiveRosterPlayer,
   isTeamStaffRole,
   selectActiveRosterPlayers,
-} from "./teamRoster";
+} from "@sarpbc/utils";
 
 describe("isTeamStaffRole", () => {
   it("treats null/empty as non-staff", () => {
@@ -14,11 +14,11 @@ describe("isTeamStaffRole", () => {
     expect(isTeamStaffRole("   ")).toBe(false);
   });
 
-  it("detects coach and related staff roles", () => {
+  it("detects common staff roles", () => {
     expect(isTeamStaffRole("Coach")).toBe(true);
-    expect(isTeamStaffRole("coach")).toBe(true);
+    expect(isTeamStaffRole("co-coach")).toBe(true);
+    expect(isTeamStaffRole("Assistant Coach")).toBe(true);
     expect(isTeamStaffRole("Head Coach")).toBe(true);
-    expect(isTeamStaffRole("assistant-coach")).toBe(true);
     expect(isTeamStaffRole("Manager")).toBe(true);
     expect(isTeamStaffRole("Analyst")).toBe(true);
   });
