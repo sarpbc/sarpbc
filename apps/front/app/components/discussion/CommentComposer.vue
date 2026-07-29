@@ -7,7 +7,7 @@ const {
   targetType,
   targetId,
   replyToId = undefined,
-  autofocus = true,
+  autofocus = false,
 } = defineProps<{
   targetType: CommentTargetType;
   targetId: string;

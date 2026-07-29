@@ -27,7 +27,6 @@ async function onChanged() {
 }
 
 const hasComments = computed(() => (comments.value?.length ?? 0) > 0);
-const composerAutofocus = computed(() => !pending.value && !hasComments.value);
 </script>
 
 <template>
@@ -48,7 +47,6 @@ const composerAutofocus = computed(() => !pending.value && !hasComments.value);
       <DiscussionCommentComposer
         :target-type="targetType"
         :target-id="targetId"
-        :autofocus="composerAutofocus"
         @comment-created="onChanged"
       />
     </div>

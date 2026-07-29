@@ -123,6 +123,7 @@ async function onDelete() {
         :target-type="targetType"
         :target-id="targetId"
         :reply-to-id="comment.id"
+        autofocus
         @comment-created="onCommentCreated"
       />
     </div>
