@@ -44,12 +44,7 @@ function scoreClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <div
-    class="w-full min-w-0 py-1 px-2"
-    :class="{
-      'border-b border-default': !last,
-    }"
-  >
+  <UiListItem size="default" :divider="!last" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"
@@ -67,5 +62,5 @@ function scoreClass(participantId: string | undefined): string {
         {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
       </span>
     </div>
-  </div>
+  </UiListItem>
 </template>

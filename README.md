@@ -126,6 +126,10 @@ pnpm lint
 pnpm lint:fix
 ```
 
+## Design (public frontend)
+
+Human-facing UI decisions for the Nuxt site (hub vs marketing, row grid, components): [`apps/front/DESIGN.md`](apps/front/DESIGN.md). Agent craft rules live under [`.agents/skills/geist-design/`](.agents/skills/geist-design/).
+
 ## AI / Cursor
 
 Agent index and skill routing: [AGENTS.md](AGENTS.md). Cursor rules in `.cursor/rules/` (hub + scoped front/back).

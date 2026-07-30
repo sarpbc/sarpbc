@@ -80,6 +80,7 @@ Before adding a new primitive, check `app/components/ui/`:
 | `UiCrossCard` | Auth/marketing cards with cross motif |
 | `UiBadgeLive` | Live status with redundant text |
 | `UiLink` | Styled internal links |
+| `UiListItem` | Hub list row (`size`: compact/default/header/double; optional `to`, `divider`) |
 
 Extend here when the same pattern appears 3+ times.
 

@@ -262,7 +262,7 @@ setPageSeo({
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <UiCrossCard class="min-h-14">
+    <UiCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
         <h1 class="text-xl font-semibold tracking-tight">
           {{ t("page.game.airriddle.title") }}

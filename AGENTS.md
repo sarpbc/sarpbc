@@ -57,7 +57,8 @@ Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back
 
 - Config: `nuxt.config.ts`, `app/app.config.ts` (`primary: blue`, `neutral: zinc`).
 - Components: prefer `@nuxt/ui` (`UButton`, `UFormField`, `UTable`); shared primitives in `app/components/ui/`.
-- Design rules: `.agents/skills/geist-design/AGENTS.md`
+- Human design doc (hub vs marketing, grid module): [`apps/front/DESIGN.md`](apps/front/DESIGN.md).
+- Agent design rules: `.agents/skills/geist-design/AGENTS.md` (do not duplicate full skill into DESIGN.md).
 
 ### Staff admin (`apps/admin`)
 

@@ -242,7 +242,7 @@ function tournamentMatchesPath(tournamentId: string) {
     </UiCard>
 
     <template v-else-if="match">
-      <UiCrossCard class="min-h-14">
+      <UiCrossCard class="min-h-row-header">
         <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
           <ULink
             v-if="match.tournament"

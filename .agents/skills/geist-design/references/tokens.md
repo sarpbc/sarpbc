@@ -75,11 +75,25 @@ Geist 4px base = Tailwind default scale.
 
 Rhythm: `gap-2` in groups, `gap-4`/`mt-4` between groups, `gap-8`/`py-8` between sections.
 
+## Grid module (hub rows)
+
+Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Human doc: [`apps/front/DESIGN.md`](../../../../apps/front/DESIGN.md).
+
+| Token | Variable | px | Utilities | Use |
+|-------|----------|----|-----------|-----|
+| row | `--spacing-row` (`2.75rem`) | 44 | `h-row`, `min-h-row` | News link, match row, toolbar |
+| row-compact | `--spacing-row-compact` (`1.75rem`) | 28 | `h-row-compact` | Forum rail, game promo |
+| row-header | `--spacing-row-header` (`3.5rem`) | 56 | `h-row-header`, `min-h-row-header` | Page title band |
+| row-double | `--spacing-row-double` (`5.5rem`) | 88 | `h-row-double` | Rare 2× cells |
+| rail-caption | `--spacing-rail-caption` (`4.5rem`) | 72 | `h-rail-caption` | Section label above rail cards |
+
+**Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`.
+
 ## Radius
 
 | Geist | Value | sarpbc |
 |-------|-------|--------|
-| sm | 6px | `--ui-radius: 0.25rem` (4px)—**project uses tighter radius; don't mix** |
+| sm | 6px | `--ui-radius: 0rem` (sharp)—**project uses zero radius; don't mix** |
 | md | 12px | Nuxt UI modal/menu default |
 | full | 9999px | `rounded-full` avatars, pills |
 
