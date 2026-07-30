@@ -78,7 +78,7 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
 </script>
 
 <template>
-  <UiCrossCard class="min-h-14">
+  <UiCrossCard class="min-h-row-header">
     <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
       <div
         v-if="tournament.league?.imageUrl || tournament.league?.name"

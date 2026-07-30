@@ -94,7 +94,7 @@ const matchesByDay = computed(() => {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="w-full h-14">
+    <UiCrossCard class="w-full h-row-header">
       <div v-if="tournament" class="w-full flex justify-center items-center">
         <h1 class="text-xl font-semibold">
           {{ tournament.league?.name }} {{ tournament.name }} Pick'em

@@ -14,7 +14,7 @@ const { data: tournaments } = await useLazyAsyncData(`tournaments-pickems`, () =
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-14">
+    <UiCrossCard class="h-row-header">
       <div class="w-full flex justify-center items-center">
         <h1 class="text-xl font-semibold">
           {{ $t("page.game.pickems.title") }}

@@ -92,7 +92,7 @@ Use semantic tokens via Nuxt UI / Tailwind—not raw hex in components.
 | Primary action | `color="primary"` on `UButton` |
 | Destructive | `color="error"` |
 | Focus ring | Built into `@nuxt/ui` focus styles—don't remove |
-| Radius | `--ui-radius: 0.25rem` in `main.css` (tighter than Geist 6px—stay consistent) |
+| Radius | `--ui-radius: 0rem` in `main.css` (sharp corners—stay consistent) |
 
 Full mapping: [references/tokens.md](references/tokens.md)
 

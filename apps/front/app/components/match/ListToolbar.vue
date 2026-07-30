@@ -17,7 +17,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <UiCard class="h-11.25 border-0">
+  <UiCard class="h-row border-0">
     <div class="h-full flex flex-row justify-between items-center">
       <div class="flex gap-1">
         <UButton

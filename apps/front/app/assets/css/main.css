@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
+@theme {
+  --spacing-row: 2.75rem; /* 44px — news link, match row, toolbar */
+  --spacing-row-compact: 1.75rem; /* 28px — forum rail, game promo */
+  --spacing-row-header: 3.5rem; /* 56px — page title band */
+  --spacing-row-double: 5.5rem; /* 88px — rare 2× cells */
+  --spacing-rail-caption: 4.5rem; /* 72px — section label above rail cards */
+}
+
 html {
   /* Reserve scrollbar space so Reka UI body lock (selects, menus, modals) does not shift layout. */
   scrollbar-gutter: stable;

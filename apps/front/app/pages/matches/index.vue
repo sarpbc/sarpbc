@@ -35,7 +35,7 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-14">
+    <UiCrossCard class="h-row-header">
       <div class="w-full flex justify-center items-center">
         <h1 class="text-xl font-semibold">
           {{ t("page.matches.title") }}
@@ -53,26 +53,26 @@ setPageSeo({
         :has-active-filters="hasActiveFilters"
         @tournament-change="onTournamentFilterChange"
         @clear="clearFilters"
-        class="mb-0.25"
       />
 
-      <div v-if="pending" class="w-full pt-11.25 flex flex-col" aria-live="polite">
-        <UiCard
+      <UiCard v-if="pending" class="flex flex-col" aria-live="polite">
+        <UiListItem
           v-for="index in 20"
           :key="index"
-          :class="{ 'border-t-0': index > 1, 'h-11.5': index === 1, 'h-11.25': index > 1 }"
+          size="default"
+          :divider="index < 20"
+          :class="tab === 'past' ? 'min-w-0' : undefined"
         >
-          <div v-if="tab === 'past'" class="w-full min-w-0 py-1 px-2">
-            <div
-              class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1"
-            >
-              <USkeleton class="h-3 max-w-32" />
-              <USkeleton class="h-3 w-4 justify-self-end" />
-              <USkeleton class="h-3 max-w-28" />
-              <USkeleton class="h-3 w-4 justify-self-end" />
-            </div>
+          <div
+            v-if="tab === 'past'"
+            class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1"
+          >
+            <USkeleton class="h-3 max-w-32" />
+            <USkeleton class="h-3 w-4 justify-self-end" />
+            <USkeleton class="h-3 max-w-28" />
+            <USkeleton class="h-3 w-4 justify-self-end" />
           </div>
-          <div v-else class="w-full grid grid-cols-3 py-1 px-2 items-center">
+          <div v-else class="grid w-full grid-cols-3 items-center">
             <div class="col-span-2 flex flex-col gap-0.5">
               <USkeleton class="h-3 w-24" />
               <USkeleton class="h-3 w-28" />
@@ -81,8 +81,8 @@ setPageSeo({
               <USkeleton class="h-3 w-10" />
             </div>
           </div>
-        </UiCard>
-      </div>
+        </UiListItem>
+      </UiCard>
 
       <UiCard v-else-if="error">
         <div class="flex flex-col items-center h-67.25 gap-3 justify-center">

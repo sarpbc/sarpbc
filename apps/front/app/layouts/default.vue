@@ -6,18 +6,20 @@
         <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-4">
           <!-- Match Lateral Bar (desktop only; hydrate when visible) -->
           <div class="hidden md:flex md:col-span-3 lg:col-span-2">
-            <LazyMatchLateralBar hydrate-on-visible />
+            <UiHubColumn variant="main">
+              <LazyMatchLateralBar hydrate-on-visible />
+            </UiHubColumn>
           </div>
 
           <!-- Main Slot -->
-          <div class="flex w-full md:col-span-6 lg:col-span-8">
+          <UiHubColumn variant="main" class="md:col-span-6 lg:col-span-8">
             <slot />
-          </div>
+          </UiHubColumn>
 
           <!-- Forum Preview -->
-          <div class="flex md:col-span-3 lg:col-span-2 mt-4 md:mt-0">
+          <UiHubColumn variant="rail" class="md:col-span-3 lg:col-span-2">
             <LazyForumPreview hydrate-on-idle />
-          </div>
+          </UiHubColumn>
         </div>
       </div>
     </div>

@@ -11,44 +11,44 @@ const { data: recentForumActivities } = await useLazyAsyncData(
     },
   },
 );
+
+const activities = computed(() => recentForumActivities.value ?? []);
 </script>
 
 <template>
   <div class="w-full flex flex-col">
-    <div class="flex flex-col-reverse text-sm font-medium text-toned md:h-18 pl-2 pb-1">
-      {{ $t("components.forum.recentPosts") }}
-    </div>
-    <div class="w-full flex flex-col border border-default py-0 gap-0 overflow-hidden">
-      <UButton
-        v-for="activity in recentForumActivities"
-        :key="activity.id"
-        :to="$localePath(`/forum/post/${activity.id}`)"
-        color="neutral"
-        variant="link"
-        :ui="{ base: 'rounded-none' }"
-        :title="activity.title"
-        class="w-full grid grid-cols-6 items-center text-xs font-normal px-2 py-[2.75px]! leading-5.5"
-      >
-        <div class="col-span-5 truncate">{{ activity.title }}</div>
-        <div class="col-span-1 flex flex-row justify-end">
-          {{ activity.messageCount }}
-        </div>
-      </UButton>
-    </div>
-    <!-- ClientOnly: this island is hydrate-on-idle; auth may revalidate after hydrate. -->
-    <ClientOnly>
-      <div v-if="user" class="w-full border border-t-0 border-default p-1 h-11 max-h-8.25">
-        <UButton
-          :to="localePath('/forum/new')"
-          icon="i-fluent-add-24-regular"
-          color="primary"
-          variant="soft"
-          :label="$t('components.forum.createPost')"
-          :title="$t('components.forum.createPost')"
-          class="w-full h-full p-1! font-normal!"
-        />
+    <UiRail :title="$t('components.forum.recentPosts')">
+      <!-- Bordered stack matches match-rail UiCard (hub DA — not a one-off). -->
+      <div class="w-full flex flex-col border border-default overflow-hidden">
+        <UiListItem
+          v-for="(activity, index) in activities"
+          :key="activity.id"
+          size="compact"
+          :divider="index < activities.length - 1"
+          :to="$localePath(`/forum/post/${activity.id}`)"
+          :title="activity.title"
+          class="text-xs font-normal text-muted"
+        >
+          <div class="min-w-0 flex-1 truncate">{{ activity.title }}</div>
+          <div class="shrink-0 tabular-nums text-muted">{{ activity.messageCount }}</div>
+        </UiListItem>
+        <!-- ClientOnly: island is hydrate-on-idle; auth may revalidate after hydrate.
+             border-t (not last-item divider) avoids a double bottom edge before hydrate. -->
+        <ClientOnly>
+          <UButton
+            v-if="user"
+            :to="localePath('/forum/new')"
+            icon="i-fluent-add-24-regular"
+            color="primary"
+            variant="soft"
+            size="xs"
+            :label="$t('components.forum.createPost')"
+            :title="$t('components.forum.createPost')"
+            class="h-row-compact min-h-row-compact w-full rounded-none border-t border-default font-normal"
+          />
+        </ClientOnly>
       </div>
-    </ClientOnly>
+    </UiRail>
     <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
   </div>
 </template>

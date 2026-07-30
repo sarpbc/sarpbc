@@ -6,13 +6,15 @@ const { article } = defineProps<{ article: NewsArticle }>();
 
 <template>
   <UiCrossLink :to="$localePath(`/news/${article.slug}`)">
-    <div class="w-full flex flex-row items-center justify-between px-4 py-2">
-      <h2 class="text-toned font-medium text-lg truncate">
-        {{ article.title }}
-      </h2>
-      <p class="text-muted font-light truncate">
-        {{ formatLocaleTimeAgo(new Date(article.createdAt)) }}
-      </p>
-    </div>
+    <UiListItem size="default" class="px-4!">
+      <div class="flex w-full flex-row items-center justify-between gap-3 min-w-0">
+        <h2 class="text-toned font-medium text-lg truncate">
+          {{ article.title }}
+        </h2>
+        <p class="shrink-0 text-muted font-light truncate">
+          {{ formatLocaleTimeAgo(new Date(article.createdAt)) }}
+        </p>
+      </div>
+    </UiListItem>
   </UiCrossLink>
 </template>

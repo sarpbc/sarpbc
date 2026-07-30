@@ -12,14 +12,11 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
 </script>
 
 <template>
-  <div class="w-full flex flex-col pt-8">
-    <div
+  <div class="w-full flex flex-col">
+    <UiRail
       v-if="data && (data.live.length > 0 || data.upcoming.length > 0)"
-      class="w-full flex flex-col"
+      :title="$t('components.match.todaysMatch')"
     >
-      <div class="flex flex-col-reverse text-sm font-medium text-toned h-10 pl-2 pb-1">
-        {{ $t("components.match.todaysMatch") }}
-      </div>
       <UiCard>
         <div class="w-full flex flex-col">
           <ULink
@@ -44,11 +41,8 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
           </ULink>
         </div>
       </UiCard>
-    </div>
-    <div v-if="results && results.results.length > 0" class="w-full flex flex-col">
-      <div class="flex flex-col-reverse text-sm font-medium text-toned h-10 pl-2 pb-1">
-        {{ $t("components.match.results") }}
-      </div>
+    </UiRail>
+    <UiRail v-if="results && results.results.length > 0" :title="$t('components.match.results')">
       <UiCard>
         <div class="w-full flex flex-col">
           <ULink
@@ -61,6 +55,6 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
           </ULink>
         </div>
       </UiCard>
-    </div>
+    </UiRail>
   </div>
 </template>
