@@ -1,4 +1,4 @@
-import type { Match, MatchesPageData } from "~/types/matches";
+import type { MatchListItem, MatchesPageData } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 
 export const MATCHES_PER_PAGE = 20;
@@ -124,7 +124,7 @@ export function useMatchesListPage() {
     pending: livePending,
     error: liveError,
     refresh: refreshLiveMatches,
-  } = useLazyAsyncData<Match[]>(
+  } = useLazyAsyncData<MatchListItem[]>(
     () => `matches-live-${selectedTournamentFilter.value ?? ""}`,
     async () => {
       const response = await getUpcomingMatches(liveListQuery.value);
@@ -132,7 +132,7 @@ export function useMatchesListPage() {
     },
     {
       watch: [selectedTournamentFilter],
-      default: () => [] as Match[],
+      default: () => [] as MatchListItem[],
     },
   );
 

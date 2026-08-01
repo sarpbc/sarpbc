@@ -24,16 +24,36 @@ export function getMatchParticipantScore(
   return result?.score ?? null;
 }
 
+export interface MatchListTournament {
+  id: string;
+  name: string;
+  serie?: string | null;
+  league?: { id: string; name: string };
+}
+
+export interface MatchListParticipant {
+  id: string;
+  team: { name: string };
+}
+
+export interface MatchListItem {
+  id: string;
+  beginAt?: Date | null;
+  participants?: MatchListParticipant[];
+  results?: MatchResult[];
+  tournament: MatchListTournament;
+}
+
 export interface UpcomingMatchesResponse {
-  live: Match[];
-  upcoming: Match[];
+  live: MatchListItem[];
+  upcoming: MatchListItem[];
   liveTotal: number;
   upcomingTotal: number;
   total: number;
 }
 
 export interface MatchResultsResponse {
-  results: Match[];
+  results: MatchListItem[];
   total: number;
 }
 

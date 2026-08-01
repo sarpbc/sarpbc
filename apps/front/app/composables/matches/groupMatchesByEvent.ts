@@ -1,14 +1,14 @@
-import type { Match } from "~/types/matches";
+import type { MatchListItem } from "~/types/matches";
 
 export type MatchEventGroup = {
   key: string;
   tournamentId?: string;
   /** league.name + serie + tournament.name (stage), e.g. "RLCS Major Paris 2026 Playoffs" */
   displayName: string;
-  matches: Match[];
+  matches: MatchListItem[];
 };
 
-function buildGroupKey(match: Match): string {
+function buildGroupKey(match: MatchListItem): string {
   const tournament = match.tournament;
   const leagueKey = tournament?.league?.id ?? "__no_league__";
   const serieKey = tournament?.serie ?? "";
@@ -17,7 +17,7 @@ function buildGroupKey(match: Match): string {
 }
 
 export function buildMatchEventDisplayName(
-  tournament: Match["tournament"] | undefined,
+  tournament: MatchListItem["tournament"] | undefined,
   unknownLabel: string,
 ): string {
   if (!tournament) return unknownLabel;
@@ -29,7 +29,10 @@ export function buildMatchEventDisplayName(
   return parts.length > 0 ? parts.join(" ") : unknownLabel;
 }
 
-export function groupMatchesByEvent(matches: Match[], unknownLabel: string): MatchEventGroup[] {
+export function groupMatchesByEvent(
+  matches: MatchListItem[],
+  unknownLabel: string,
+): MatchEventGroup[] {
   const order: string[] = [];
   const byKey = new Map<string, MatchEventGroup>();
 

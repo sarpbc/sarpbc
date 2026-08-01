@@ -1,17 +1,20 @@
 import type { Reply } from "~/types/forum";
 
-export type NewsArticle = {
+export type NewsArticleListItem = {
   id: string;
   slug: string;
   title: string;
+  createdAt: string;
+};
+
+export type NewsArticle = NewsArticleListItem & {
   author: string;
   content: string;
-  createdAt: string;
   isDraft: boolean;
 };
 
 export type PaginatedNewsArticles = {
-  data: NewsArticle[];
+  data: NewsArticleListItem[];
   total: number;
   page: number;
   limit: number;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Match } from "~/types/matches";
+import type { MatchListItem } from "~/types/matches";
 const { locale } = useI18n();
 
 const hourDf = new Intl.DateTimeFormat(locale.value, {
@@ -13,7 +13,7 @@ const {
   last = false,
   result = false,
 } = defineProps<{
-  match: Match;
+  match: MatchListItem;
   live?: boolean;
   last?: boolean;
   result?: boolean;

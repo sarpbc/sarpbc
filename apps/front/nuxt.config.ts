@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 const apiBase =
   process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
 const adminUrl =
@@ -18,20 +17,24 @@ const listHubSwr = { swr: 60 } as const;
 const contentSwr = { swr: 300 } as const;
 const isProduction = process.env.NODE_ENV === "production";
 const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
-// Client ingestion goes through the reverse proxy (ad-block resistant)
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
+
+const apiHeadLinks = apiOriginUrl
+  ? ([
+      { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
+      { rel: "dns-prefetch", href: apiOriginUrl },
+    ] as const)
+  : [];
 
 export default defineNuxtConfig({
   app: {
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      link: apiOriginUrl
-        ? [
-            { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
-            { rel: "dns-prefetch", href: apiOriginUrl },
-          ]
-        : [],
+      link: [
+        ...apiHeadLinks,
+        { rel: "preload", href: "/sarpbc.png", as: "image", type: "image/png" },
+      ],
     },
   },
 
@@ -83,6 +86,21 @@ export default defineNuxtConfig({
     domains: ["cdn.pandascore.co", "imagedelivery.net"],
   },
 
+  icon: {
+    clientBundle: {
+      scan: true,
+      sizeLimitKb: 512,
+      icons: [
+        "fluent:text-align-justify-24-regular",
+        "fluent:dismiss-24-regular",
+        "fluent:trophy-24-regular",
+        "fluent:weather-moon-24-regular",
+        "fluent:weather-sunny-24-regular",
+        "ri:twitter-x-fill",
+      ],
+    },
+  },
+
   modules: [
     "@sarpbc/composables",
     "@sarpbc/ui",
@@ -91,29 +109,7 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@nuxt/content",
     "@nuxt/image",
-    "motion-v/nuxt",
-    "@posthog/nuxt",
   ],
-
-  posthogConfig: {
-    publicKey: posthogPublicKey,
-    host: posthogHost,
-    clientConfig: {
-      api_host: posthogHost,
-      ui_host: "https://eu.posthog.com", // toolbar — never the proxy
-      capture_exceptions: true,
-      __add_tracing_headers: ["localhost", "api.sarpbc.org"],
-      loaded: (ph) => {
-        if (!isProduction) {
-          ph.opt_out_capturing();
-          ph.set_config({ disable_session_recording: true, autocapture: false });
-        }
-      },
-    },
-    serverConfig: {
-      enableExceptionAutocapture: true,
-    },
-  },
 
   evlog: {
     env: {
@@ -122,7 +118,6 @@ export default defineNuxtConfig({
   },
 
   $production: {
-    // Evlog: never sample debug in production; silence console transport
     evlog: {
       console: false,
       sampling: {
@@ -135,7 +130,6 @@ export default defineNuxtConfig({
         keep: [{ duration: 1000 }, { status: 400 }],
       },
     },
-    // Strip debug noise from client + server bundles (keep console.error/warn)
     vite: {
       esbuild: {
         drop: ["debugger"],
@@ -154,6 +148,10 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "node-server",
+    compressPublicAssets: {
+      gzip: true,
+      brotli: true,
+    },
   },
 
   ssr: true,
@@ -163,17 +161,12 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Auth layouts
     "/login": { appLayout: "login" },
     "/fr/login": { appLayout: "login" },
     "/register": { appLayout: "login" },
     "/fr/register": { appLayout: "login" },
-
-    // Marketing
     "/about": { appLayout: "marketing", ...contentSwr },
     "/fr/about": { appLayout: "marketing", ...contentSwr },
-
-    // Legal — longer SWR (homepage + news stay fresh for editorial updates)
     "/privacy-policy": contentSwr,
     "/fr/privacy-policy": contentSwr,
     "/terms-of-service": contentSwr,
@@ -182,8 +175,6 @@ export default defineNuxtConfig({
     "/fr/legal-notice": contentSwr,
     "/cookie-policy": contentSwr,
     "/fr/cookie-policy": contentSwr,
-
-    // Public list hubs — short SWR
     "/matches": listHubSwr,
     "/fr/matches": listHubSwr,
     "/tournaments": listHubSwr,

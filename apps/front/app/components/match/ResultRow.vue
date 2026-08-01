@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { Match } from "~/types/matches";
+import type { MatchListItem } from "~/types/matches";
 import { getMatchParticipantScore, getResultParticipantId } from "~/types/matches";
 
 const { match, last = false } = defineProps<{
-  match: Match;
+  match: MatchListItem;
   last?: boolean;
 }>();
 

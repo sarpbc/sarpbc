@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import type { MatchListScopeFilters } from "./match-list-filters";
+import { mapMatchListItem } from "./match-list.mapper";
 
 function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
   return {
@@ -43,8 +44,8 @@ export class MatchController {
     ]);
 
     return {
-      upcoming: upcomingMatches,
-      live: liveMatches,
+      upcoming: upcomingMatches.map(mapMatchListItem),
+      live: liveMatches.map(mapMatchListItem),
       upcomingTotal,
       liveTotal,
       total: upcomingTotal + liveTotal,
@@ -70,7 +71,7 @@ export class MatchController {
     });
 
     return {
-      results,
+      results: results.map(mapMatchListItem),
       total,
     };
   }
