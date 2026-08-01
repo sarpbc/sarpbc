@@ -37,6 +37,7 @@
       "description": "Acceptez-vous les cookies analytiques en plus des cookies essentiels? Vous pouvez changer d'avis à tout moment."
     },
     "footer": {
+      "about": "À propos",
       "cookiePolicy": "Politique de cookies",
       "privacyPolicy": "Politique de confidentialité",
       "termsOfService": "Conditions d'utilisation",

@@ -11,5 +11,13 @@ export default defineContentConfig({
         lastUpdated: z.string().min(1),
       }),
     }),
+    about: defineCollection({
+      type: "page",
+      source: "about/**/*.md",
+      schema: z.object({
+        title: z.string().min(1),
+        description: z.string().min(1),
+      }),
+    }),
   },
 });

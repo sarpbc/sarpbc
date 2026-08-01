@@ -21,10 +21,10 @@ Inspired by [Geist](https://vercel.com/design), Linear, and Polar-style product 
 
 sarpbc has two public design modes. Same tokens and components; different density and layout.
 
-| Mode          | Routes                                                                               | Layout                                           | Density                    | Job                                          |
-| ------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------ | -------------------------- | -------------------------------------------- |
-| **Hub**       | `/`, `/matches`, `/news`, `/forum`, `/player`, `/team`, `/tournaments`, `/game/*`, … | Default 3-column shell (`layouts/default.vue`)   | Dense, border-aligned rows | Daily returning fans — news, schedule, rails |
-| **Marketing** | `/about` (planned)                                                                   | Dedicated marketing layout — **no** hub sidebars | Editorial, more whitespace | First-time visitors — what sarpbc is         |
+| Mode          | Routes                                                                               | Layout                                         | Density                    | Job                                          |
+| ------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------- | -------------------------- | -------------------------------------------- |
+| **Hub**       | `/`, `/matches`, `/news`, `/forum`, `/player`, `/team`, `/tournaments`, `/game/*`, … | Default 3-column shell (`layouts/default.vue`) | Dense, border-aligned rows | Daily returning fans — news, schedule, rails |
+| **Marketing** | `/about`                                                                             | `layouts/marketing.vue` — **no** hub sidebars  | Editorial, more whitespace | First-time visitors — what sarpbc is         |
 
 ### Hub (default)
 
@@ -35,8 +35,10 @@ sarpbc has two public design modes. Same tokens and components; different densit
 
 ### Marketing (`/about`)
 
-- No match lateral bar, no forum preview rail.
+- Layout: `layouts/marketing.vue` — `NavHeader`, full-width main (`max-w-7xl`), `NavFooter`; no match lateral bar, no forum preview rail.
+- Copy: `content/about/{en|fr}.md` (Nuxt Content) — editorial markdown only.
 - Same color, type, and radius tokens; looser vertical spacing; prose-forward.
+- Lower density than hub — no `UiCrossCard` row-compact lists or hub grid module on marketing routes.
 - Link from footer (and similar entry points) — not from the homepage feed.
 
 **Rule:** if removing the nav still looks like a generic SaaS landing page, branding is too weak for marketing. If a hub page feels sparse or card-heavy, density is wrong for hub.
