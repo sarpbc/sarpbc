@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { NewsArticle } from "~/composables/news";
+import type { NewsArticleListItem } from "~/composables/news";
 
-const { article } = defineProps<{ article: NewsArticle }>();
+const { article } = defineProps<{ article: NewsArticleListItem }>();
 </script>
 
 <template>

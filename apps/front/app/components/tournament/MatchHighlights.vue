@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Match } from "~/types/matches";
+import type { MatchListItem } from "~/types/matches";
 
 const {
   tournamentId,
@@ -9,8 +9,8 @@ const {
   hasError = false,
 } = defineProps<{
   tournamentId: string;
-  liveMatches: Match[];
-  upcomingMatches: Match[];
+  liveMatches: MatchListItem[];
+  upcomingMatches: MatchListItem[];
   pending?: boolean;
   hasError?: boolean;
 }>();

@@ -1,19 +1,8 @@
 <script setup lang="ts">
-import { onMounted, watchEffect } from "vue";
-import { motion, AnimatePresence } from "motion-v";
-
 const { t } = useI18n();
-const { visible, open, close, hasChoice, setChoice } = useCookieConsent();
+const { visible, close, setChoice } = useCookieConsent();
 const { identifyUser, clearIdentity } = usePostHogIdentity();
 const user = useUser();
-
-onMounted(() => {
-  if (!hasChoice()) open();
-});
-
-watchEffect(() => {
-  if (!import.meta.client) return;
-});
 
 const acceptCookies = () => {
   setChoice("accepted");
@@ -29,17 +18,10 @@ const rejectCookies = () => {
 </script>
 
 <template>
-  <AnimatePresence>
-    <motion.div
+  <Transition name="cookie-popup">
+    <div
       v-if="visible"
-      key="cookie-popup"
-      :initial="{ y: 100 }"
-      :animate="{
-        y: 0,
-        transition: { type: 'spring', stiffness: 300, damping: 25 },
-      }"
-      :exit="{ y: 200 }"
-      class="fixed bottom-4 z-50 max-w-sm w-full left-1/2 transform -translate-x-1/2 md:right-4 md:left-auto md:transform-none"
+      class="cookie-popup fixed bottom-4 z-50 max-w-sm w-full left-1/2 -translate-x-1/2 md:right-4 md:left-auto md:translate-x-0"
     >
       <UiCard variant="subtle" class="bg-default p-2">
         <p class="text-toned text-md mb-4">
@@ -55,6 +37,33 @@ const rejectCookies = () => {
           </UButton>
         </div>
       </UiCard>
-    </motion.div>
-  </AnimatePresence>
+    </div>
+  </Transition>
 </template>
+
+<style scoped>
+.cookie-popup-enter-active,
+.cookie-popup-leave-active {
+  transition:
+    transform 200ms cubic-bezier(0.175, 0.885, 0.32, 1.1),
+    opacity 200ms ease;
+}
+
+.cookie-popup-enter-from,
+.cookie-popup-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-popup-enter-active,
+  .cookie-popup-leave-active {
+    transition: opacity 150ms ease;
+  }
+
+  .cookie-popup-enter-from,
+  .cookie-popup-leave-to {
+    transform: none;
+  }
+}
+</style>

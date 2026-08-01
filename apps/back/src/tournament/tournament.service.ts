@@ -45,7 +45,7 @@ export class TournamentService {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
-      populate: ["league", "participants", "participants.team"],
+      populate: activeOnly ? ["league"] : ["league", "participants", "participants.team"],
     });
     return tournaments;
   }

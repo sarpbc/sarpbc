@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import type { Match } from "~/types/matches";
+import type { MatchListItem } from "~/types/matches";
 
 const { matches, variant, title } = defineProps<{
-  matches: Match[];
+  matches: MatchListItem[];
   variant: "live" | "upcoming" | "result";
   title?: string;
 }>();
@@ -33,7 +33,7 @@ const eventGroups = computed(() =>
       </h2>
     </div>
 
-    <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-0.25">
+    <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
       <h3 class="flex text-sm font-medium text-toned h-10.75 items-end">
         <ULink
           v-if="group.tournamentId"

@@ -7,6 +7,13 @@ import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { UserService } from "src/user/user.service";
 import slugify from "slugify";
 
+export interface NewsArticleListItemResponse {
+  id: string;
+  title: string;
+  slug: string;
+  createdAt: Date;
+}
+
 export interface NewsArticleResponse {
   id: string;
   author: string;
@@ -24,6 +31,15 @@ export class NewsService {
     private readonly newsRepository: EntityRepository<NewsArticle>,
     private readonly userService: UserService,
   ) {}
+
+  private mapListArticle(article: NewsArticle): NewsArticleListItemResponse {
+    return {
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      createdAt: article.createdAt,
+    };
+  }
 
   private mapArticle(article: NewsArticle): NewsArticleResponse {
     return {
@@ -100,7 +116,7 @@ export class NewsService {
     page: number,
     limit: number,
   ): Promise<{
-    data: NewsArticleResponse[];
+    data: NewsArticleListItemResponse[];
     total: number;
     page: number;
     limit: number;
@@ -108,10 +124,10 @@ export class NewsService {
     const offset = page * limit;
     const [articles, total] = await this.newsRepository.findAndCount(
       { isDraft: false },
-      { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset },
+      { orderBy: { createdAt: "DESC" }, limit, offset },
     );
     return {
-      data: articles.map((a) => this.mapArticle(a)),
+      data: articles.map((a) => this.mapListArticle(a)),
       total,
       page,
       limit,
