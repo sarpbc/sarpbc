@@ -169,6 +169,10 @@ export default defineNuxtConfig({
     "/register": { appLayout: "login" },
     "/fr/register": { appLayout: "login" },
 
+    // Marketing
+    "/about": { appLayout: "marketing", ...contentSwr },
+    "/fr/about": { appLayout: "marketing", ...contentSwr },
+
     // Legal — longer SWR (homepage + news stay fresh for editorial updates)
     "/privacy-policy": contentSwr,
     "/fr/privacy-policy": contentSwr,
