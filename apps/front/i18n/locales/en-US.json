@@ -37,6 +37,7 @@
       "description": "Do you accept analytics cookies in addition to the essential ones? You can change your mind at any time."
     },
     "footer": {
+      "about": "About",
       "cookiePolicy": "Cookie Policy",
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",

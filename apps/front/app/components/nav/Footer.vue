@@ -22,6 +22,9 @@
         </ULink>
       </div>
       <div class="flex flex-col gap-2 col-span-1">
+        <ULink :to="$localePath('/about')" class="text-muted">
+          {{ $t("components.footer.about") }}
+        </ULink>
         <ULink :to="$localePath('/cookie-policy')" class="text-muted">
           {{ $t("components.footer.cookiePolicy") }}
         </ULink>
