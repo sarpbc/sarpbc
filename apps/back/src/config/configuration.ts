@@ -10,6 +10,10 @@ import {
   getCloudflareAccountId,
   getCloudflareApiToken,
   getCloudflareAccountHash,
+  getR2AccessKeyId,
+  getR2SecretAccessKey,
+  getR2PublicBaseUrl,
+  getR2Endpoint,
 } from "src/common/envirronement/secrets";
 
 export default () => ({
@@ -26,4 +30,10 @@ export default () => ({
   cloudflare_account_id: getCloudflareAccountId(),
   cloudflare_api_token: getCloudflareApiToken(),
   cloudflare_account_hash: getCloudflareAccountHash(),
+  r2_account_id: process.env.R2_ACCOUNT_ID ?? getCloudflareAccountId(),
+  r2_access_key_id: getR2AccessKeyId(),
+  r2_secret_access_key: getR2SecretAccessKey(),
+  r2_bucket: process.env.R2_BUCKET ?? "sarpbc-org",
+  r2_endpoint: getR2Endpoint(),
+  r2_public_base_url: getR2PublicBaseUrl(),
 });

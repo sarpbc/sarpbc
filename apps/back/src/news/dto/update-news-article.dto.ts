@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
 
 export class UpdateNewsArticleDto {
@@ -12,6 +12,13 @@ export class UpdateNewsArticleDto {
   @IsString()
   @IsNotEmpty()
   content?: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsUrl({}, { message: "Enter a valid cover image URL." })
+  @MaxLength(255)
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  imageUrl?: string | null;
 
   /** Optional URL slug. Normalized server-side. */
   @IsOptional()

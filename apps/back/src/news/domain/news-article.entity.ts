@@ -10,6 +10,7 @@ export class NewsArticle {
   createdAt: Date = new Date();
   updatedAt: Date | null = null;
   isDraft: boolean = true;
+  imageUrl: string | null = null;
 }
 
 export const NewsArticleSchema = defineEntity({
@@ -31,5 +32,6 @@ export const NewsArticleSchema = defineEntity({
       .nullable()
       .onUpdate(() => new Date()),
     isDraft: p.boolean().default(true),
+    imageUrl: p.string().length(255).nullable(),
   },
 });

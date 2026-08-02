@@ -43,7 +43,11 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
 
-  await app.register(multipart);
+  await app.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  });
   await app.register(cookie);
 
   const port = process.env.PORT ?? 4001;

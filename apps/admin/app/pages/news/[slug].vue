@@ -22,6 +22,7 @@ const items = computed(() => [
 const title = ref(article.value?.title ?? "");
 const articleSlug = ref(article.value?.slug ?? "");
 const content = ref(article.value?.content ?? "");
+const imageUrl = ref<string | null>(article.value?.imageUrl ?? null);
 const isDraft = ref(article.value?.isDraft ?? true);
 const isSaving = ref(false);
 const isPublishing = ref(false);
@@ -42,6 +43,7 @@ async function saveArticle() {
       title: title.value,
       content: content.value,
       slug: articleSlug.value.trim(),
+      imageUrl: imageUrl.value,
     });
     if (!updated) {
       toast.add({
@@ -153,6 +155,9 @@ const tabItems: TabsItem[] = [
                 autocomplete="off"
                 @keydown.enter="saveArticle"
               />
+            </UFormField>
+            <UFormField :label="$t('page.news.cover.label')">
+              <NewsCoverUpload v-model:image-url="imageUrl" />
             </UFormField>
           </div>
         </template>

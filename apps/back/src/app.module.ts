@@ -20,6 +20,7 @@ import { PandascoreModule } from "./pandascore/pandascore.module";
 import { NewsModule } from "./news/news.module";
 import { ReplyModule } from "./reply/reply.module";
 import { ImagesModule } from "./images/images.module";
+import { StorageModule } from "./storage/storage.module";
 import mikroOrmConfig from "./mikro-orm.config";
 
 @Module({
@@ -52,6 +53,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     NewsModule,
     ReplyModule,
     ImagesModule,
+    StorageModule,
   ],
 })
 export class AppModule {}

@@ -6,6 +6,7 @@ export type NewsArticle = {
   content: string;
   createdAt: string;
   isDraft: boolean;
+  imageUrl?: string | null;
 };
 
 export type PaginatedNewsArticles = {
@@ -19,6 +20,7 @@ export async function createNewsArticle(body: {
   title: string;
   content: string;
   slug?: string;
+  imageUrl?: string;
 }): Promise<NewsArticle | null> {
   try {
     return await apiFetch<NewsArticle>("/news", {
@@ -60,6 +62,7 @@ export async function editNewsArticle(
     title: string;
     content: string;
     slug?: string;
+    imageUrl?: string | null;
   },
 ): Promise<NewsArticle | null> {
   try {

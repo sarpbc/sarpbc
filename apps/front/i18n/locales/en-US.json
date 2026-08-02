@@ -73,7 +73,8 @@
       "todaysMatch": "Today's Matches",
       "results": "Results",
       "tbd": "To Be Determined",
-      "live": "Live"
+      "live": "Live",
+      "viewAll": "View all matches"
     },
     "tournament": {
       "bracket": {
@@ -175,6 +176,12 @@
     }
   },
   "page": {
+    "home": {
+      "seo": {
+        "title": "Rocket League news & matches | sarpbc.org",
+        "description": "Live RLCS schedules, match results, news, pick'ems, and Air Riddle — bilingual Rocket League esports hub."
+      }
+    },
     "game": {
       "airriddle": {
         "title": "Air Riddle",
