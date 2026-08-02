@@ -2,9 +2,10 @@
 import type { MatchListItem } from "~/types/matches";
 import { getMatchParticipantScore, getResultParticipantId } from "~/types/matches";
 
-const { match, last = false } = defineProps<{
+const { match, divider = true } = defineProps<{
   match: MatchListItem;
-  last?: boolean;
+  /** Bottom border between rows. Omit on the last row when a footer owns the separator. */
+  divider?: boolean;
 }>();
 
 const teamA = computed(() => match.participants?.[0]);
@@ -44,7 +45,7 @@ function scoreClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <UiListItem size="default" :divider="!last" class="min-w-0">
+  <UiListItem size="default" :divider="divider" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"

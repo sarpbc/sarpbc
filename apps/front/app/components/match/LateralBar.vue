@@ -17,41 +17,37 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
       v-if="data && (data.live.length > 0 || data.upcoming.length > 0)"
       :title="$t('components.match.todaysMatch')"
     >
-      <UiCard>
+      <UiCard flush-bottom>
         <div class="w-full flex flex-col">
           <ULink
-            v-for="(match, index) in data.live"
+            v-for="match in data.live"
             :key="match.id"
             :to="$localePath(`/matches/${match.id}`)"
             class="block hover:bg-elevated/50 transition-colors"
           >
-            <MatchRow
-              :match="match"
-              :live="true"
-              :last="index === data.live.length - 1 && data.upcoming.length === 0"
-            />
+            <MatchRow :match="match" :live="true" />
           </ULink>
           <ULink
-            v-for="(match, index) in data.upcoming"
+            v-for="match in data.upcoming"
             :key="match.id"
             :to="$localePath(`/matches/${match.id}`)"
             class="block hover:bg-elevated/50 transition-colors"
           >
-            <MatchRow :match="match" :last="index === data.upcoming.length - 1" />
+            <MatchRow :match="match" />
           </ULink>
         </div>
       </UiCard>
     </UiRail>
     <UiRail v-if="results && results.results.length > 0" :title="$t('components.match.results')">
-      <UiCard>
+      <UiCard flush-bottom>
         <div class="w-full flex flex-col">
           <ULink
-            v-for="(match, index) in results.results"
+            v-for="match in results.results"
             :key="match.id"
             :to="$localePath(`/matches/${match.id}`)"
             class="block hover:bg-elevated/50 transition-colors"
           >
-            <MatchResultRow :match="match" :last="index === results.results.length - 1" />
+            <MatchResultRow :match="match" />
           </ULink>
         </div>
       </UiCard>

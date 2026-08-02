@@ -10,6 +10,7 @@ const {
 } = defineProps<{
   size?: ListItemSize;
   to?: string;
+  /** Bottom border. Use on every row including last when the parent is `flushBottom`. */
   divider?: boolean;
 }>();
 
@@ -35,7 +36,7 @@ function listItemSizeClasses(value: ListItemSize): string {
 const itemClass = computed(() => [
   "flex w-full items-center px-2",
   listItemSizeClasses(size),
-  divider && "border-b border-default not-first:-mt-px",
+  divider && "border-b border-default",
   to &&
     "hover:bg-elevated/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
   attrs.class,

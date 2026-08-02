@@ -55,12 +55,12 @@ setPageSeo({
         @clear="clearFilters"
       />
 
-      <UiCard v-if="pending" class="flex flex-col" aria-live="polite">
+      <UiCard v-if="pending" flush-bottom class="flex flex-col" aria-live="polite">
         <UiListItem
           v-for="index in 20"
           :key="index"
           size="default"
-          :divider="index < 20"
+          divider
           :class="tab === 'past' ? 'min-w-0' : undefined"
         >
           <div

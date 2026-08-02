@@ -136,7 +136,7 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 
 | Primitive     | Role                                                                   |
 | ------------- | ---------------------------------------------------------------------- |
-| `UiCard`      | Bordered box (`border-default`)                                        |
+| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks         |
 | `UiCrossCard` | Hub title band / featured block with corner crosses                    |
 | `UiCrossLink` | Cross-motif link wrapper (e.g. news rows)                              |
 | `UiLink`      | Styled internal link                                                   |
@@ -154,13 +154,13 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 | `header`                | `h-row-header`, `min-h-row-header`   | 56px  |
 | `double`                | `h-row-double`, `min-h-row-double`   | 88px  |
 
-Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border + `not-first:-mt-px` for stacked lists). Default slot; override padding via `class` (default `px-2`).
+Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — include on every row including last when the parent is `flushBottom`). Default slot; override padding via `class` (default `px-2`).
 
 ### Rails & list rows
 
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `UiRail` — caption `h-rail-caption` + `text-toned`, then a bordered card/rows stack in the default slot (same idea as match-rail `UiCard`). Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `UiHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Desktop caption baselines align via shared `h-rail-caption` on every `UiRail`; do not add per-rail `pt-8` or `md:h-18` offsets.
-- **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module; stacking borders share edges (`divider` or `border-t-0` on subsequent items) so columns align across the hub.
+- **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Only omit `divider` on the last row when a footer below owns the separator (`border-t`) — e.g. forum create button, mobile match “view all”.
 - **Don't** put marketing cards in the hub hero/main column.
 
 ---

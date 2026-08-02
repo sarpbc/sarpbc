@@ -67,13 +67,13 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         <h3 class="text-sm font-medium text-highlighted pl-1">
           {{ t("page.tournaments.id.matchHighlights.live") }}
         </h3>
-        <UiCard class="border-error/30 bg-error/5">
-          <div v-for="(match, index) in liveMatches" :key="match.id">
+        <UiCard flush-bottom class="border-error/30 bg-error/5">
+          <div v-for="match in liveMatches" :key="match.id">
             <ULink
               :to="$localePath(`/matches/${match.id}`)"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
-              <MatchRow :match="match" live :last="index === liveMatches.length - 1" />
+              <MatchRow :match="match" live />
             </ULink>
           </div>
         </UiCard>
@@ -83,13 +83,13 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         <h3 class="text-sm font-medium text-toned pl-1">
           {{ t("page.tournaments.id.matchHighlights.upcoming") }}
         </h3>
-        <UiCard variant="soft">
-          <div v-for="(match, index) in upcomingMatches" :key="match.id">
+        <UiCard flush-bottom variant="soft">
+          <div v-for="match in upcomingMatches" :key="match.id">
             <ULink
               :to="$localePath(`/matches/${match.id}`)"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
-              <MatchRow :match="match" :last="index === upcomingMatches.length - 1" />
+              <MatchRow :match="match" />
             </ULink>
           </div>
         </UiCard>

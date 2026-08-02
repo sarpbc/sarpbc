@@ -45,21 +45,17 @@ const eventGroups = computed(() =>
         <span v-else>{{ group.displayName }}</span>
       </h3>
       <UiCard
+        flush-bottom
         class="flex flex-col"
         :class="variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined"
       >
-        <div v-for="(match, index) in group.matches" :key="match.id">
+        <div v-for="match in group.matches" :key="match.id">
           <ULink
             :to="$localePath(`/matches/${match.id}`)"
             class="block hover:bg-elevated/50 transition-colors"
           >
-            <MatchRow
-              v-if="variant !== 'result'"
-              :match="match"
-              :live="variant === 'live'"
-              :last="index === group.matches.length - 1"
-            />
-            <MatchResultRow v-else :match="match" :last="index === group.matches.length - 1" />
+            <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
+            <MatchResultRow v-else :match="match" />
           </ULink>
         </div>
       </UiCard>
