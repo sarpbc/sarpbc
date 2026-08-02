@@ -125,13 +125,13 @@ watch(
             <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
               {{ formatDayHeader(dayGroup) }}
             </h3>
-            <UiCard variant="soft" class="w-full">
-              <div v-for="(match, index) in dayGroup.matches" :key="match.id">
+            <UiCard flush-bottom variant="soft" class="w-full">
+              <div v-for="match in dayGroup.matches" :key="match.id">
                 <ULink
                   :to="$localePath(`/matches/${match.id}`)"
                   class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
                 >
-                  <MatchRow :match="match" :last="index === dayGroup.matches.length - 1" />
+                  <MatchRow :match="match" />
                 </ULink>
               </div>
             </UiCard>
@@ -146,13 +146,13 @@ watch(
           <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
             {{ formatDayHeader(dayGroup) }}
           </h3>
-          <UiCard variant="soft" class="w-full">
-            <div v-for="(match, index) in dayGroup.matches" :key="match.id">
+          <UiCard flush-bottom variant="soft" class="w-full">
+            <div v-for="match in dayGroup.matches" :key="match.id">
               <ULink
                 :to="$localePath(`/matches/${match.id}`)"
                 class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
               >
-                <MatchResultRow :match="match" :last="index === dayGroup.matches.length - 1" />
+                <MatchResultRow :match="match" />
               </ULink>
             </div>
           </UiCard>

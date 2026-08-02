@@ -10,18 +10,19 @@ const hourDf = new Intl.DateTimeFormat(locale.value, {
 const {
   match,
   live = false,
-  last = false,
+  divider = true,
   result = false,
 } = defineProps<{
   match: MatchListItem;
   live?: boolean;
-  last?: boolean;
+  /** Bottom border between rows. Omit on the last row when a footer owns the separator. */
+  divider?: boolean;
   result?: boolean;
 }>();
 </script>
 
 <template>
-  <UiListItem size="default" :divider="!last">
+  <UiListItem size="default" :divider="divider">
     <div class="grid w-full grid-cols-3 items-center">
       <div
         v-if="match.participants"

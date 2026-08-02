@@ -76,13 +76,13 @@ const hasResults = computed(() => latestResults.value.length > 0);
       </div>
     </UiCard>
 
-    <UiCard v-else-if="hasResults" variant="soft">
-      <div v-for="(match, index) in latestResults" :key="match.id">
+    <UiCard v-else-if="hasResults" flush-bottom variant="soft">
+      <div v-for="match in latestResults" :key="match.id">
         <ULink
           :to="$localePath(`/matches/${match.id}`)"
           class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
         >
-          <MatchResultRow :match="match" :last="index === latestResults.length - 1" />
+          <MatchResultRow :match="match" />
         </ULink>
       </div>
     </UiCard>
