@@ -1,26 +1,40 @@
 <script setup lang="ts">
+import type { CollectionQueryBuilder, Collections } from "@nuxt/content";
+
+type LegalPage = Collections["legal"];
+
 const props = defineProps<{
   slug: string;
 }>();
 
 const { locale } = useI18n();
+const { setPageSeo } = useSarpbcSeo();
 const localeCode = computed(() => (locale.value === "fr" ? "fr" : "en"));
 
-const { data: doc } = await useAsyncData(
-  `legal-${props.slug}`,
-  () => queryCollection("legal").path(`/legal/${localeCode.value}/${props.slug}`).first(),
+const queryLegalCollection = queryCollection as (
+  collection: "legal",
+) => CollectionQueryBuilder<LegalPage>;
+
+const { data: doc } = await useAsyncData<LegalPage | null>(
+  () => `legal-${props.slug}-${localeCode.value}`,
+  () => queryLegalCollection("legal").path(`/legal/${localeCode.value}/${props.slug}`).first(),
   { watch: [localeCode] },
 );
 
-useHead({
-  title: computed(() => doc.value?.title ?? "sarpbc.org"),
-  meta: [
-    {
-      name: "description",
-      content: computed(() => doc.value?.description ?? ""),
-    },
-  ],
-});
+watch(
+  doc,
+  (value) => {
+    if (!value) {
+      return;
+    }
+
+    setPageSeo({
+      title: value.title,
+      description: value.description,
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>

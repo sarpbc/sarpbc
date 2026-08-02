@@ -11,7 +11,7 @@ The Apache License 2.0 grants rights to the **source code**. It does **not** gra
 ## You may not (without written permission)
 
 - Use **sarpbc.org** or confusingly similar names as the primary brand of a competing public site or product
-- Use official logos (for example `apps/front/public/sarpbc.png`) in a way that implies you operate the official sarpbc.org project
+- Use official logos (for example `apps/front/public/sarpbc.svg`) in a way that implies you operate the official sarpbc.org project
 - Use production hostnames (`sarpbc.org`, `admin.sarpbc.org`, `api.sarpbc.org`, `t.sarpbc.org`, etc.) for your own deployment
 - Suggest affiliation with or endorsement by the sarpbc.org maintainers when that is not true
 

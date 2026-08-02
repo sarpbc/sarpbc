@@ -120,7 +120,7 @@ watch(
           <div
             v-for="dayGroup in groupedMatches.upcoming"
             :key="`upcoming-${dayGroup.dateKey}`"
-            class="flex flex-col gap-0.25"
+            class="flex flex-col gap-px"
           >
             <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
               {{ formatDayHeader(dayGroup) }}
@@ -141,7 +141,7 @@ watch(
         <section
           v-for="dayGroup in groupedMatches.completed"
           :key="`completed-${dayGroup.dateKey}`"
-          class="flex flex-col gap-0.25"
+          class="flex flex-col gap-px"
         >
           <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
             {{ formatDayHeader(dayGroup) }}
