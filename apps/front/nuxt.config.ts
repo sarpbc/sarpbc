@@ -19,6 +19,19 @@ const isProduction = process.env.NODE_ENV === "production";
 const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
 
+function hostnameFromUrl(base: string | undefined): string | undefined {
+  if (!base) {
+    return undefined;
+  }
+  try {
+    return new URL(base).hostname;
+  } catch {
+    return undefined;
+  }
+}
+
+const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
+
 const apiHeadLinks = apiOriginUrl
   ? ([
       { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
@@ -83,7 +96,7 @@ export default defineNuxtConfig({
   },
 
   image: {
-    domains: ["cdn.pandascore.co", "imagedelivery.net"],
+    domains: ["cdn.pandascore.co", "imagedelivery.net", ...(r2ImageHost ? [r2ImageHost] : [])],
   },
 
   icon: {

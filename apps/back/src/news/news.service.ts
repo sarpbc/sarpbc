@@ -4,6 +4,7 @@ import { EntityRepository } from "@mikro-orm/postgresql";
 import { NewsArticle } from "./domain/news-article.entity";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
+import { excerptFromContent } from "./news-content.util";
 import { UserService } from "src/user/user.service";
 import slugify from "slugify";
 
@@ -12,6 +13,8 @@ export interface NewsArticleListItemResponse {
   title: string;
   slug: string;
   createdAt: Date;
+  imageUrl: string | null;
+  excerpt: string;
 }
 
 export interface NewsArticleResponse {
@@ -22,6 +25,7 @@ export interface NewsArticleResponse {
   content: string;
   createdAt: Date;
   isDraft: boolean;
+  imageUrl: string | null;
 }
 
 @Injectable()
@@ -38,6 +42,8 @@ export class NewsService {
       title: article.title,
       slug: article.slug,
       createdAt: article.createdAt,
+      imageUrl: article.imageUrl,
+      excerpt: excerptFromContent(article.content),
     };
   }
 
@@ -50,6 +56,7 @@ export class NewsService {
       content: article.content,
       createdAt: article.createdAt,
       isDraft: article.isDraft,
+      imageUrl: article.imageUrl,
     };
   }
 
@@ -106,6 +113,7 @@ export class NewsService {
       author,
       slug,
       isDraft: true,
+      imageUrl: dto.imageUrl ?? null,
       createdAt: new Date(),
     });
     await this.newsRepository.getEntityManager().persist(article).flush();
@@ -182,6 +190,9 @@ export class NewsService {
     }
     if (dto.content !== undefined) {
       article.content = dto.content;
+    }
+    if (dto.imageUrl !== undefined) {
+      article.imageUrl = dto.imageUrl ?? null;
     }
     if (dto.slug !== undefined) {
       const nextSlug = this.normalizeSlug(dto.slug);

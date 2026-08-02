@@ -131,6 +131,15 @@
         "unpublished": "Article dépublié",
         "publishFailed": "Impossible de mettre à jour l’état de publication. Réessayez."
       },
+      "cover": {
+        "label": "Image de couverture",
+        "upload": "Ajouter une couverture",
+        "uploading": "Envoi en cours…",
+        "replace": "Remplacer la couverture",
+        "remove": "Supprimer la couverture",
+        "progress": "Envoi en cours… {percent}%",
+        "uploadFailed": "Impossible d’envoyer l’image de couverture. Vérifiez le type de fichier et réessayez."
+      },
       "editor": {
         "insertPlayer": "Tag Joueur",
         "insertTeam": "Tag Équipe",

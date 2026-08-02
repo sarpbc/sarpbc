@@ -20,6 +20,7 @@ const title = ref("");
 const articleSlug = ref("");
 const slugTouched = ref(false);
 const content = ref("");
+const imageUrl = ref<string | null>(null);
 const isSaving = ref(false);
 const isModalOpen = ref(false);
 
@@ -63,6 +64,7 @@ async function saveArticle() {
       title: title.value,
       content: content.value,
       ...(trimmedSlug ? { slug: trimmedSlug } : {}),
+      ...(imageUrl.value ? { imageUrl: imageUrl.value } : {}),
     });
     if (!created) {
       toast.add({
@@ -138,6 +140,9 @@ const tabItems: TabsItem[] = [
                 @update:model-value="onSlugInput"
                 @keydown.enter="saveArticle"
               />
+            </UFormField>
+            <UFormField :label="$t('page.news.cover.label')">
+              <NewsCoverUpload v-model:image-url="imageUrl" />
             </UFormField>
           </div>
         </template>

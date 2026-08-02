@@ -131,6 +131,15 @@
         "unpublished": "Article unpublished",
         "publishFailed": "Could not update publish state. Try again."
       },
+      "cover": {
+        "label": "Cover Image",
+        "upload": "Upload Cover",
+        "uploading": "Uploading…",
+        "replace": "Replace Cover",
+        "remove": "Remove Cover",
+        "progress": "Uploading… {percent}%",
+        "uploadFailed": "Could not upload cover image. Check the file type and try again."
+      },
       "editor": {
         "insertPlayer": "Player Tag",
         "insertTeam": "Team Tag",

@@ -124,3 +124,37 @@ export function getCloudflareAccountHash(): string {
     throw new Error("Cloudflare Account Hash not found");
   }
 }
+
+export function getR2AccessKeyId(): string | undefined {
+  if (process.env.R2_ACCESS_KEY_ID !== undefined) {
+    return process.env.R2_ACCESS_KEY_ID;
+  }
+
+  try {
+    const secret = readFileSync("/run/secrets/sarpbc_r2_access_key_id", "utf8");
+    return secret.trim();
+  } catch {
+    return undefined;
+  }
+}
+
+export function getR2SecretAccessKey(): string | undefined {
+  if (process.env.R2_SECRET_ACCESS_KEY !== undefined) {
+    return process.env.R2_SECRET_ACCESS_KEY;
+  }
+
+  try {
+    const secret = readFileSync("/run/secrets/sarpbc_r2_secret_access_key", "utf8");
+    return secret.trim();
+  } catch {
+    return undefined;
+  }
+}
+
+export function getR2PublicBaseUrl(): string | undefined {
+  return process.env.R2_PUBLIC_BASE_URL;
+}
+
+export function getR2Endpoint(): string | undefined {
+  return process.env.R2_ENDPOINT;
+}

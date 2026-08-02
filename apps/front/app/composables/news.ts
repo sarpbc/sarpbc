@@ -5,6 +5,8 @@ export type NewsArticleListItem = {
   slug: string;
   title: string;
   createdAt: string;
+  imageUrl?: string | null;
+  excerpt?: string;
 };
 
 export type NewsArticle = NewsArticleListItem & {

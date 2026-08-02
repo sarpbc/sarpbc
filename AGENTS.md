@@ -1,92 +1,123 @@
-# sarpbc — Agent Guide
+# AGENTS.md
 
-Rocket League news and data platform. Monorepo: **Nuxt 4** public site + **Nuxt 4** staff admin + **NestJS** API.
+# Engineering Principles
 
-> This file is the **index**. Detailed rules live in `.agents/skills/` — load the relevant skill instead of guessing.
+- Do not preserve backward compatibility. Remove obsolete code instead of adding compatibility layers, fallbacks, or migrations.
+- Choose the simplest implementation that fully satisfies the current requirements. Avoid speculative abstractions and unnecessary configuration.
+- Grow the system incrementally. Build the smallest version that works end-to-end before adding capabilities.
+- Keep components modular and responsibilities clearly separated.
+- Prefer mature, well-maintained libraries over custom implementations unless there is a compelling reason.
+- Reuse existing project dependencies before introducing new ones.
+- Make architectural decisions that are intended to last, not temporary stopgaps.
 
-## Repository Layout
+---
 
-| Path          | Stack                                         | Port (local) |
-| ------------- | --------------------------------------------- | ------------ |
-| `apps/front/` | Nuxt 4, `@nuxt/ui`, Tailwind v4, i18n (en/fr) | 4000         |
-| `apps/back/`  | NestJS, MikroORM, PostgreSQL, Redis           | 4001         |
-| `apps/admin/` | Nuxt 4 SPA staff console (`admin.sarpbc.org`) | 4002         |
+# Project
 
-### Shared packages (`packages/`)
+SARPBC is a Rocket League esports platform combining news, competitive data, forums and community features.
 
-| Package               | Consumers          | Notes                                                  |
-| --------------------- | ------------------ | ------------------------------------------------------ |
-| `@sarpbc/types`       | front, admin, back | Pure TS domain types — no Vue/Nuxt                     |
-| `@sarpbc/utils`       | front, admin, back | Pure TS helpers — no Vue/Nuxt                          |
-| `@sarpbc/composables` | front, admin       | Nuxt module (`apiFetch`, `useUser`, …)                 |
-| `@sarpbc/ui`          | front, admin       | Nuxt module for shared Vue components (`Sarp*` prefix) |
+This repository is a pnpm monorepo containing:
 
-Depend via `"workspace:*"`. Do not put Vue/Nuxt APIs in `types` or `utils`.
+- **apps/front** — Public Nuxt 4 website
+- **apps/back** — NestJS API
+- **apps/admin** — Internal Nuxt 4 staff application
+- **packages/** — Shared libraries
 
-Root scripts: `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm fmt`, `pnpm test:back`, `pnpm dev:admin`.
+This file contains only repository-wide guidance.
 
-## Skills — When to Use
+Framework-specific and domain-specific rules live inside `.agents/skills/`.
 
-| Skill                                  | Path                                                 | Use when                                                                      |
-| -------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **geist-design**                       | `.agents/skills/geist-design/`                       | UI, UX, components, forms, copy, a11y, toasts, API error text shown in the UI |
-| **llm-safe-design-system**             | `.agents/skills/llm-safe-design-system/`             | Design-system constraints for agentic UI (intent tokens, CI as contract)      |
-| **nestjs-best-practices**              | `.agents/skills/nestjs-best-practices/`              | NestJS modules, DI, auth, validation, DB, API design, tests                   |
-| **nuxt**                               | `.agents/skills/nuxt/`                               | Routing, `useFetch`, SSR, Nitro, Nuxt modules, composables                    |
-| **improve-codebase-architecture**      | `.agents/skills/improve-codebase-architecture/`      | Architecture review, deepening refactors (explicit request)                   |
-| **thermo-nuclear-code-quality-review** | `.agents/skills/thermo-nuclear-code-quality-review/` | Deep code quality audit (explicit request)                                    |
-| **grill-me**                           | `.agents/skills/grill-me/`                           | Interview-style plan review (explicit `/grilling`)                            |
-| **sarpbc-pm**                          | `.agents/skills/sarpbc-pm/`                          | Roadmap, backlog audit, feature design, scope grilling, Linear tickets        |
-| **customer-needs**                     | `.agents/skills/customer-needs/`                     | Interpret feedback; underlying needs vs literal feature requests              |
+---
 
-**Deep dives:** read each skill's `SKILL.md` first, then `AGENTS.md` or `references/` if needed.
+# Repository Layout
 
-## Cross-Cutting Conventions
+## Applications
 
-- **Package manager:** pnpm only (`only-allow` enforced).
-- **Linter / formatter:** oxlint, oxfmt — run before considering work done.
-- **i18n:** user-facing strings in each Nuxt app's `i18n/locales/` (en-US + fr-FR); use `$t()` and `$localePath()`.
-- **API:** Nuxt apps call `runtimeConfig.public.apiBase` (NestJS `apps/back`); cookies for auth.
-- **Imports:** top of file; no inline imports unless circular-deps documented.
-- **TypeScript:** exhaustive `switch` with `never` in default for unions/enums.
-- **Scope:** minimal diffs; match existing patterns; no drive-by refactors.
+| Path         | Purpose                 |
+| ------------ | ----------------------- |
+| `apps/front` | Public website          |
+| `apps/back`  | NestJS API              |
+| `apps/admin` | Internal administration |
 
-## Stack Pointers
+## Shared packages
 
-### Frontend (`apps/front`)
+| Package               | Purpose                               |
+| --------------------- | ------------------------------------- |
+| `@sarpbc/types`       | Shared domain types (TypeScript only) |
+| `@sarpbc/utils`       | Shared utilities (TypeScript only)    |
+| `@sarpbc/composables` | Shared Nuxt composables               |
+| `@sarpbc/ui`          | Shared Vue components                 |
 
-- Config: `nuxt.config.ts`, `app/app.config.ts` (`primary: blue`, `neutral: zinc`).
-- Components: prefer `@nuxt/ui` (`UButton`, `UFormField`, `UTable`); shared primitives in `app/components/ui/`.
-- Human design doc (hub vs marketing, grid module): [`apps/front/DESIGN.md`](apps/front/DESIGN.md).
-- Agent design rules: `.agents/skills/geist-design/AGENTS.md` (do not duplicate full skill into DESIGN.md).
+### Package Rules
 
-### Staff admin (`apps/admin`)
+- `types` and `utils` must remain framework-independent.
+- Never import Vue or Nuxt into `types` or `utils`.
+- Use `workspace:*` for internal dependencies.
 
-- SPA (`ssr: false`), port 4002, target host `admin.sarpbc.org`.
-- Auth: login page + `admin` middleware (staff role with permissions); same API cookie session as front.
-- Access: permissions (`news.manage`, `forum.moderate`, …) granted by pre-configured roles (`admin` / `journalist` / `moderator`).
-- Staff tooling lives here (news, players, teams, tournaments, pick'ems, forum moderation).
-- Public profile links staff to `runtimeConfig.public.adminUrl`; legacy `/dashboard/**` redirects to the admin app.
+---
 
-### Backend (`apps/back`)
+# Skills
 
-- Feature modules under `src/` (not technical layers).
-- DTOs + `ValidationPipe`; guards for auth; exception filters for consistent errors.
-- Migrations via MikroORM — never `synchronize: true` in production.
-- NestJS rules: `.agents/skills/nestjs-best-practices/AGENTS.md`
+Before making significant changes, load the relevant skill(s).
 
-## UI ↔ API Contract
+| Skill                                | When to use                                                   |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `nuxt`                               | Nuxt, Vue, routing, SSR, composables, Nitro                   |
+| `nestjs-best-practices`              | Backend architecture, modules, DTOs, MikroORM, authentication |
+| `geist-design`                       | UI, UX, forms, accessibility, copywriting                     |
+| `llm-safe-design-system`             | Design system rules                                           |
+| `customer-needs`                     | Product feedback interpretation                               |
+| `sarpbc-pm`                          | Roadmap, backlog, feature planning                            |
+| `improve-codebase-architecture`      | Large architectural refactors                                 |
+| `thermo-nuclear-code-quality-review` | Deep code quality audits                                      |
+| `grill-me`                           | Critical review and planning sessions                         |
 
-Messages from NestJS (`BadRequestException`, class-validator) often appear in toasts or form errors. Write them **actionable** (what failed + what to do). See `geist-design` § NestJS ↔ UI.
+Each skill contains the authoritative guidance for its domain.
 
-## Agent Workflow
+---
 
-1. Identify touched app (`front` / `back` / both).
-2. Read the matching skill(s) from the table above.
-3. Follow conventions in this file; defer details to skill `AGENTS.md`.
-4. Verify: lint, types (front build on CI), relevant tests.
+# Repository Conventions
 
-## References
+## TypeScript
 
-- Human onboarding: [README.md](README.md)
-- Geist / UI: [vercel.com/design](https://vercel.com/design), [vercel.com/design/guidelines](https://vercel.com/design/guidelines)
+- Prefer explicit typing.
+- Use exhaustive `switch` statements with `never`.
+- Match the existing code style.
+
+## Internationalization
+
+- Every user-facing string must be translated.
+- Supported locales:
+  - `en-US`
+  - `fr-FR`
+
+## API
+
+- Frontend communicates only through the NestJS API.
+- Authentication uses cookies.
+
+## Code Changes
+
+- Prefer minimal, focused diffs.
+- Avoid unrelated refactors.
+- Remove dead code instead of leaving unused paths.
+- Keep implementations simple.
+
+---
+
+# Workflow
+
+When working on this repository:
+
+1. Identify the affected application(s).
+2. Read the corresponding skill(s).
+3. Follow repository conventions.
+4. Run formatting and linting before considering the task complete.
+
+---
+
+# References
+
+- `README.md` — Human onboarding
+- `apps/front/DESIGN.md` — Human design documentation
+- `.agents/skills/` — Detailed agent instructions

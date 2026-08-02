@@ -26,25 +26,33 @@ setPageSeo({
   title: `${article.value.title} | sarpbc.org`,
   description:
     contentPlain.slice(0, 160) || "Read the latest Rocket League esports news on sarpbc.org",
+  image: article.value.imageUrl ?? undefined,
 });
 </script>
 
 <template>
   <div v-if="article" class="w-full flex flex-col gap-4">
     <UiCrossCard class="w-full">
-      <div class="w-full flex flex-col gap-2 p-4">
-        <div class="w-full flex flex-col h-16 justify-center gap-1">
-          <h1 class="text-highlighted text-2xl font-bold">
-            {{ article.title }}
-          </h1>
-          <span
-            v-if="article.author"
-            class="flex flex-row justify-between text-xs font-normal text-muted"
-          >
-            <p>{{ article.author }}</p>
-            <p>{{ df(locale).format(new Date(article.createdAt)) }}</p>
-          </span>
+      <div class="w-full flex flex-col gap-4 p-4">
+        <h1 class="text-2xl font-bold tracking-tight text-highlighted">
+          {{ article.title }}
+        </h1>
+        <div class="flex w-full flex-row items-center justify-between gap-3 text-xs text-muted">
+          <p v-if="article.author">{{ article.author }}</p>
+          <span v-else aria-hidden="true" />
+          <p class="shrink-0 tabular-nums">
+            {{ df(locale).format(new Date(article.createdAt)) }}
+          </p>
         </div>
+        <NuxtImg
+          v-if="article.imageUrl"
+          :src="article.imageUrl"
+          :alt="article.title"
+          width="1200"
+          height="630"
+          sizes="(max-width: 768px) 100vw, 768px"
+          class="w-full max-h-96 rounded-sm object-cover outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+        />
         <MDC
           :value="article.content"
           class="news-prose text-muted [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-1 [&_ol]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:text-highlighted"
