@@ -82,7 +82,7 @@ const items = ref<NavigationMenuItem[]>([
       <div class="h-full flex flex-row items-center">
         <ULink :to="$localePath('/')" class="flex flex-row flex-1 items-center">
           <img
-            src="/sarpbc.png"
+            src="/sarpbc.svg"
             alt="sarpbc.org logo"
             width="48"
             height="48"

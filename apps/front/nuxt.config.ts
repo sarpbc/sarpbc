@@ -46,7 +46,7 @@ export default defineNuxtConfig({
       viewport: "width=device-width, initial-scale=1",
       link: [
         ...apiHeadLinks,
-        { rel: "preload", href: "/sarpbc.png", as: "image", type: "image/png" },
+        { rel: "preload", href: "/sarpbc.svg", as: "image", type: "image/svg+xml" },
       ],
     },
   },
