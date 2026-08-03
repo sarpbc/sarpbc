@@ -8,7 +8,7 @@ Repo-specific implementation notes for `apps/front`.
 apps/front/
 ├── app/
 │   ├── app.vue          # UApp + i18n locale
-│   ├── app.config.ts    # UI theme (primary: blue, neutral: zinc)
+│   ├── app.config.ts    # UI theme (primary: blue, neutral: ink)
 │   ├── assets/css/main.css
 │   ├── components/
 │   │   ├── ui/          # Shared primitives (Card, badge, link)

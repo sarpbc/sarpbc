@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/*
+ * Brand neutral `ink` — Linear/Resend-dark cool charcoal (OKLCH hue ~255).
+ * Canvas ~#010101, surfaces step through #080a0d → #14171c → #262a30 (Linear-like ladder).
+ * Tuned to brand blue #2B7FFF; keep front/admin shades in sync.
+ */
+@theme static {
+  --color-ink-50: #f9fafc;
+  --color-ink-100: #f0f2f4;
+  --color-ink-200: #dee2e6;
+  --color-ink-300: #c3c8ce;
+  --color-ink-400: #9399a0;
+  --color-ink-500: #646971;
+  --color-ink-600: #43484f;
+  --color-ink-700: #262a30;
+  --color-ink-800: #14171c;
+  --color-ink-900: #080a0d;
+  --color-ink-950: #010101;
+}
+
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
 @theme {
   --spacing-row: 2.75rem; /* 44px — news link, match row, toolbar */

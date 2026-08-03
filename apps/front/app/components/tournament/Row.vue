@@ -1,18 +1,19 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
 
-const { tournament } = defineProps<{
+const { tournament, to } = defineProps<{
   tournament: Tournament;
+  to?: string;
 }>();
 
+const localePath = useLocalePath();
 const { formatTournamentPrizepool } = useCurrency();
+
+const href = computed(() => to ?? localePath(`/tournaments/${tournament.id}`));
 </script>
 
 <template>
-  <ULink
-    :to="$localePath(`/tournaments/${tournament.id}`)"
-    class="block group rounded-none border border-default p-2 not-first:-mt-px"
-  >
+  <ULink :to="href" class="block group rounded-none border border-default p-2 not-first:-mt-px">
     <div
       v-if="tournament.tier === 's' && tournament.league?.imageUrl"
       class="w-full grid grid-cols-5 items-center"

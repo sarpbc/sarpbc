@@ -18,8 +18,12 @@ const { data: userPicks } = useLazyAsyncData(
       return null;
     }
 
-    const picks = await getUserPickemsForTournament(tournamentId.value);
-    return new Set(picks.map((pick) => pick.match));
+    try {
+      const picks = await getUserPickemsForTournament(tournamentId.value);
+      return new Set(picks.map((pick) => pick.match));
+    } catch {
+      return null;
+    }
   },
   {
     server: false,

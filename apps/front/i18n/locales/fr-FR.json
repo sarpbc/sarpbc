@@ -225,6 +225,38 @@
           "title": "Prédire ce match",
           "description": "Soumettez votre pick'em avant le début de la série.",
           "cta": "Faire mon pick"
+        },
+        "list": {
+          "empty": "Aucun tournoi pick'em n'est ouvert pour le moment. Revenez pendant le prochain événement.",
+          "error": "Impossible de charger les pick'ems. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer"
+        },
+        "detail": {
+          "title": "Pick'em {tournament}",
+          "seoTitle": "Pick'em {tournament}",
+          "remaining": "{count} pick restant | {count} picks restants",
+          "jumpToNext": "Aller au suivant",
+          "allCaughtUp": "Vous êtes à jour sur les picks ouverts.",
+          "signInPrompt": "Connectez-vous pour enregistrer vos picks et monter au classement.",
+          "signInCta": "Se connecter",
+          "pickSaved": "Pick enregistré",
+          "pickFailed": "Impossible d'enregistrer le pick. Actualisez et réessayez.",
+          "error": "Impossible de charger ce pick'em. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "emptyMatches": "Aucun match n'est encore disponible pour ce pick'em.",
+          "outcome": {
+            "correct": "Correct · +{points}",
+            "incorrect": "Incorrect",
+            "pending": "Pick enregistré",
+            "locked": "Verrouillé"
+          },
+          "leaderboard": {
+            "title": "Classement",
+            "yourRank": "Votre rang : #{rank} sur {total} · {points} pts",
+            "noRankYet": "Faites vos picks et attendez les résultats pour apparaître au classement.",
+            "points": "{points} pts",
+            "empty": "Aucun pick scoré pour l'instant. Le classement apparaît après les matchs."
+          }
         }
       }
     },

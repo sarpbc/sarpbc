@@ -49,10 +49,12 @@ sarpbc has two public design modes. Same tokens and components; different densit
 
 Configured in `app/app.config.ts`:
 
-| Intent  | Value  |
-| ------- | ------ |
-| Primary | `blue` |
-| Neutral | `zinc` |
+| Intent  | Value                                             |
+| ------- | ------------------------------------------------- |
+| Primary | `blue`                                            |
+| Neutral | `ink` (custom scale in `app/assets/css/main.css`) |
+
+`ink` is a Linear/Resend-style near-black cool charcoal (canvas `#010101`, surfaces `#080a0d` → `#14171c`) tuned to brand blue `#2B7FFF`.
 
 Use semantic classes — not raw hex:
 
@@ -78,7 +80,7 @@ Ink strength on light surfaces. Never put caption chrome and list titles on the 
 
 **Rail rule (forum):** caption = `text-toned`; row title = `text-muted`; row meta = `text-muted`. Caption stays slightly stronger via `font-medium` + larger `text-sm` vs row `text-xs`.
 
-Note: on zinc, `text-highlighted` ≈ `text-toned` optically — avoid that pairing.
+Note: on `ink`, keep caption/title steps distinct — avoid pairing `text-highlighted` with `text-toned` on the same density.
 
 Color signals **state** (live, error, success) — not decoration. One primary action per view.
 
