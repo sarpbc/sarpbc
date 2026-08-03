@@ -4,6 +4,8 @@ import { getApiErrorMessage } from "~/utils/apiError";
 const config = useRuntimeConfig();
 const toast = useToast();
 const { t } = useI18n();
+const route = useRoute();
+const localePath = useLocalePath();
 const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
 
@@ -19,6 +21,14 @@ const state = reactive<LoginState>({
 
 const pending = ref(false);
 
+function safeRedirectTarget(): string {
+  const raw = route.query.redirect;
+  if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//")) {
+    return localePath("/");
+  }
+  return raw;
+}
+
 onMounted(async () => {
   const user = useUser();
 
@@ -31,7 +41,7 @@ onMounted(async () => {
     return;
   }
 
-  navigateTo("/");
+  navigateTo(safeRedirectTarget());
 });
 
 async function onSubmit(event: Event) {
@@ -64,7 +74,7 @@ async function onSubmit(event: Event) {
         posthog?.capture("user_logged_in");
       }
 
-      navigateTo("/");
+      navigateTo(safeRedirectTarget());
       return;
     }
 

@@ -17,6 +17,7 @@ export class PickemChoice {
 export const PickemChoiceSchema = defineEntity({
   class: PickemChoice,
   repository: () => PickemRepository,
+  uniques: [{ properties: ["user", "match"], name: "pickem_choice_user_match_unique" }],
   properties: {
     id: p.string().primary(),
     user: p.manyToOne(User),
