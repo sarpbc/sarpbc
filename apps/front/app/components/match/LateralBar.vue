@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-const { data } = await useLazyAsyncData(`upcoming-matches`, () => getUpcomingMatches(), {
-  getCachedData(key, nuxtApp) {
-    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
-  },
-});
+const { data } = await useUpcomingMatches();
 const { data: results } = await useLazyAsyncData(`matches-results`, () => getMatchesResults(), {
   getCachedData(key, nuxtApp) {
     return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];

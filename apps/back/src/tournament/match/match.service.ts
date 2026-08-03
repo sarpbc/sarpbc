@@ -6,6 +6,8 @@ import type { MatchListQueryOptions } from "./match-list-filters";
 import { TournamentParticipantRepository } from "../tournament-participant.repository";
 import { TournamentRepository } from "../tournament.repository";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
+import { deriveWinnerParticipantId } from "./derive-match-winner";
+import { PickemService } from "../../game/pickem/pickem.service";
 
 const RECENT_FORM_LIMIT = 5;
 
@@ -48,6 +50,7 @@ export class MatchService {
     private readonly matchRepository: MatchRepository,
     private readonly tournamentRepository: TournamentRepository,
     private readonly participantRepository: TournamentParticipantRepository,
+    private readonly pickemService: PickemService,
     private readonly em: EntityManager,
   ) {}
 
@@ -322,7 +325,32 @@ export class MatchService {
       }
     }
 
+    const isFinished =
+      matchData.status === "finished" ||
+      Boolean(matchData.endAt) ||
+      match.status === "finished" ||
+      Boolean(match.endAt);
+
+    if (isFinished && matchData.results) {
+      const winnerId = deriveWinnerParticipantId(
+        matchData.results
+          .filter((r): r is { participantId: string; score: number } => Boolean(r.participantId))
+          .map((r) => ({ participantId: r.participantId, score: r.score })),
+      );
+      if (winnerId) {
+        const winner = participants.find((p) => p.id === winnerId) ?? null;
+        if (winner) {
+          match.winner = winner;
+          match.status = "finished";
+        }
+      }
+    }
+
     await this.em.flush();
+
+    if (isFinished && match.winner) {
+      await this.pickemService.tryValidateMatchResult(match.id);
+    }
 
     return match;
   }
@@ -353,6 +381,7 @@ export class MatchService {
     match.status = "finished";
 
     await this.em.flush();
+    await this.pickemService.tryValidateMatchResult(match.id);
     return match;
   }
 

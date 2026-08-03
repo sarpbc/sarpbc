@@ -225,6 +225,38 @@
           "title": "Predict This Match",
           "description": "Submit your pick'em pick before this series starts.",
           "cta": "Make Pick"
+        },
+        "list": {
+          "empty": "No pick'em tournaments are open right now. Check back during the next event.",
+          "error": "Could not load pick'em tournaments. Check your connection and try again.",
+          "retry": "Try Again"
+        },
+        "detail": {
+          "title": "{tournament} Pick'em",
+          "seoTitle": "{tournament} Pick'em",
+          "remaining": "{count} pick left | {count} picks left",
+          "jumpToNext": "Jump to next",
+          "allCaughtUp": "You're all caught up on open picks.",
+          "signInPrompt": "Sign in to save your picks and climb the leaderboard.",
+          "signInCta": "Sign In",
+          "pickSaved": "Pick saved",
+          "pickFailed": "Could not save pick. Refresh and try again.",
+          "error": "Could not load this pick'em. Check your connection and try again.",
+          "retry": "Try Again",
+          "emptyMatches": "No matches are available for this pick'em yet.",
+          "outcome": {
+            "correct": "Correct · +{points}",
+            "incorrect": "Incorrect",
+            "pending": "Pick saved",
+            "locked": "Locked"
+          },
+          "leaderboard": {
+            "title": "Leaderboard",
+            "yourRank": "Your rank: #{rank} of {total} · {points} pts",
+            "noRankYet": "Make picks and wait for results to appear on the leaderboard.",
+            "points": "{points} pts",
+            "empty": "No scored picks yet. Rankings appear after matches finish."
+          }
         }
       }
     },

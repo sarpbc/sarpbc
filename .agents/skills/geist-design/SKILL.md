@@ -95,7 +95,7 @@ Unified design-engineering guide for **apps/front** (Nuxt, `@nuxt/ui` v4, Tailwi
 | Area | Location / pattern |
 |------|-------------------|
 | Nuxt app | `apps/front/app/` |
-| Global UI config | `app/app.config.ts` (`primary: blue`, `neutral: zinc`) |
+| Global UI config | `app/app.config.ts` (`primary: blue`, `neutral: ink`) |
 | Global CSS | `app/assets/css/main.css` (`--ui-radius: 0.25rem`) |
 | Custom primitives | `app/components/ui/` (`Card`, `cross/Card`, `badge/Live`) |
 | Composables | `app/composables/` |

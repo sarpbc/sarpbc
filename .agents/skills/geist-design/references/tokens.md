@@ -11,7 +11,7 @@ Nuxt UI exposes semantic colors via `app.config.ts`:
 ui: {
   colors: {
     primary: "blue",   // Geist blue-700 (#006bff) ≈ Tailwind blue-600/700
-    neutral: "zinc",   // Geist gray scale ≈ zinc
+    neutral: "ink",    // Custom OKLCH cool charcoal in main.css (@theme static)
   },
 }
 ```

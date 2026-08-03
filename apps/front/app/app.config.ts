@@ -8,7 +8,7 @@ export default defineAppConfig({
   ui: {
     colors: {
       primary: "blue",
-      neutral: "zinc",
+      neutral: "ink",
     },
     breadcrumb: {
       variants: {

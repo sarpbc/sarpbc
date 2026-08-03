@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 const MAX_MATCHES = 5;
 
-const { data, pending } = await useLazyAsyncData(`upcoming-matches`, () => getUpcomingMatches(), {
-  getCachedData(key, nuxtApp) {
-    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
-  },
-});
+const { data, pending } = await useUpcomingMatches();
 
 const matches = computed(() => {
   if (!data.value) {

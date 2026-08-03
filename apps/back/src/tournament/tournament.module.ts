@@ -17,6 +17,7 @@ import { TournamentSyncPersistence } from "./sync/tournament-sync.persistence";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import { PickemModule } from "src/game/pickem/pickem.module";
 import { log } from "evlog";
 
 @Module({
@@ -28,6 +29,7 @@ import { log } from "evlog";
     PandascoreModule,
     RedisModule,
     ConfigModule,
+    PickemModule,
   ],
   controllers: [TournamentController, MatchController],
   providers: [
