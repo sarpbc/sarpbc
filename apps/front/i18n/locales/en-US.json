@@ -44,6 +44,14 @@
       "legalNotice": "Legal Notice",
       "disclaimer": "sarpbc.org is not affiliated with Rocket League, Psyonix, or Epic Games."
     },
+    "settings": {
+      "language": {
+        "label": "Site language"
+      },
+      "theme": {
+        "switchTo": "Switch to {mode} mode"
+      }
+    },
     "legal": {
       "notFound": "This document could not be found."
     },

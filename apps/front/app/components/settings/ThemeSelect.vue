@@ -1,7 +1,12 @@
 <script setup lang="ts">
 const colorMode = useColorMode();
+const { t } = useI18n();
 
 const nextTheme = computed(() => (colorMode.value === "dark" ? "light" : "dark"));
+
+const themeAriaLabel = computed(() =>
+  t("components.settings.theme.switchTo", { mode: nextTheme.value }),
+);
 
 const switchTheme = () => {
   colorMode.preference = nextTheme.value;
@@ -52,7 +57,7 @@ const startViewTransition = (event: MouseEvent) => {
           : 'i-fluent-weather-sunny-24-regular'
       "
       size="md"
-      :aria-label="`Switch to ${nextTheme} mode`"
+      :aria-label="themeAriaLabel"
       @click="startViewTransition"
     />
 
@@ -62,6 +67,7 @@ const startViewTransition = (event: MouseEvent) => {
         icon="i-fluent-weather-moon-24-regular"
         size="md"
         color="neutral"
+        :aria-label="themeAriaLabel"
       />
     </template>
   </ClientOnly>
