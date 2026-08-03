@@ -2,53 +2,33 @@
 
 > Make Rocket League esports easier to understand, in a healthy, independent, free community.
 
-## About
-
 sarpbc.org is a free Rocket League esports website. It helps fans follow the competitive scene without needing insider fluency, and aims for a healthy environment (no betting promotion, no hate or harassment).
 
-sarpbc.org provides:
-- Latest news and updates about the Rocket League competitive scene
-- Tournament information and brackets
-- Player and team context
-- Community forum for discussions
-- Interactive games like Airriddle and Pick'ems
+sarpbc.org is an independent fan site and is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League. The site is free for fans; we are not here to extract money from the community.
 
-sarpbc.org is an independent fan site and is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League. The site is free for fans; we are not here to extract money from the community. Success means a bigger, healthier Rocket League esports scene, with the aspiration that Rocket League can grow toward the same scale as titles like League of Legends and Counter-Strike.
+## Site
 
-## Key Sections
+- [News](https://sarpbc.org/): Latest Rocket League esports news, roster changes, and tournament announcements.
+- [Matches](https://sarpbc.org/matches): Live, upcoming, and past matches with filters by tournament.
+- [Tournaments](https://sarpbc.org/tournaments): Ongoing and upcoming tournaments with brackets and schedules.
+- [Players](https://sarpbc.org/player): Professional Rocket League player profiles and career context.
+- [Teams](https://sarpbc.org/team): Team rosters, profiles, and match history.
+- [Forum](https://sarpbc.org/forum): Community discussions, predictions, and interactions.
 
-### News
-Stay up to date with the latest Rocket League esports news, roster changes, and tournament announcements.
-URL: https://sarpbc.org/
+## Games
 
-### Tournaments
-Browse ongoing and upcoming Rocket League tournaments with detailed brackets and match schedules.
-URL: https://sarpbc.org/tournaments
+- [Air Riddle](https://sarpbc.org/game/airriddle): Daily Rocket League trivia game where you guess players from clues.
+- [Pick'ems](https://sarpbc.org/game/pickems): Tournament prediction game where users predict match outcomes.
 
-### Players
-Explore player profiles, statistics, and career information for professional Rocket League players.
-URL: https://sarpbc.org/player
+## Locales
 
-### Teams
-Find information about Rocket League teams, their rosters, and match history.
-URL: https://sarpbc.org/team
+- [English](https://sarpbc.org/): Default site language.
+- [French](https://sarpbc.org/fr/): French version of the site.
 
-### Forum
-Community-driven forum for Rocket League discussions, predictions, and interactions.
-URL: https://sarpbc.org/forum
+## Optional
 
-### Games
-
-#### Airriddle
-Daily Rocket League trivia game where you guess players based on clues.
-URL: https://sarpbc.org/game/airriddle
-
-#### Pick'ems
-Tournament prediction game where users predict match outcomes.
-URL: https://sarpbc.org/game/pickems
-
-## Languages
-
-The website is available in:
-- English (default): https://sarpbc.org
-- French: https://sarpbc.org/fr
+- [About](https://sarpbc.org/about): Mission, values, and background on sarpbc.org.
+- [Cookie Policy](https://sarpbc.org/cookie-policy): How cookies and analytics are used on the site.
+- [Privacy Policy](https://sarpbc.org/privacy-policy): How personal data is collected and handled.
+- [Terms of Service](https://sarpbc.org/terms-of-service): Rules for using sarpbc.org.
+- [Legal Notice](https://sarpbc.org/legal-notice): Publisher and legal information for sarpbc.org.

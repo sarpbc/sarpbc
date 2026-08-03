@@ -11,7 +11,7 @@ const languages: LanguageOption[] = [
   { value: "en", label: "English" },
 ];
 
-const { locale, setLocale } = useI18n();
+const { locale, setLocale, t } = useI18n();
 const selectedLanguage = ref(locale.value);
 
 async function handleLanguageChange(payload: boolean | string | number | undefined) {
@@ -29,6 +29,7 @@ async function handleLanguageChange(payload: boolean | string | number | undefin
     value-key="value"
     label-key="label"
     :items="languages"
+    :aria-label="t('components.settings.language.label')"
     class="w-48"
     @update:model-value="handleLanguageChange"
   />

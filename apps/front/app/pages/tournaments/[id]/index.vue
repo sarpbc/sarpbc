@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { usePreferredReducedMotion } from "@vueuse/core";
-import { motion } from "motion-v";
 import type { UpcomingMatchesResponse } from "~/types/matches";
 import { isPickemTournamentActive } from "~/utils/pickems";
 
@@ -9,30 +7,6 @@ const MATCH_HIGHLIGHTS_LIMIT = 5;
 const route = useRoute();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-
-const reducedMotionPreference = usePreferredReducedMotion();
-const prefersReducedMotion = computed(() => reducedMotionPreference.value === "reduce");
-
-function sectionMotion(delayIndex: number) {
-  if (prefersReducedMotion.value) {
-    return {
-      initial: false as const,
-      animate: undefined,
-      transition: undefined,
-    };
-  }
-
-  return {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    transition: {
-      type: "spring" as const,
-      duration: 0.35,
-      bounce: 0,
-      delay: delayIndex * 0.1,
-    },
-  };
-}
 
 const tournamentId = computed(() => route.params.id as string);
 
@@ -145,48 +119,31 @@ watch(
     </UiCard>
 
     <template v-else-if="tournament">
-      <motion.div v-bind="sectionMotion(0)">
-        <TournamentHero :tournament="tournament" />
-      </motion.div>
-      <motion.div v-bind="sectionMotion(1)">
-        <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
-      </motion.div>
-      <motion.div v-if="showPickemCta" v-bind="sectionMotion(2)">
-        <PickemPromoBanner :tournament="tournament" variant="homepage" />
-      </motion.div>
-      <motion.div v-bind="sectionMotion(showPickemCta ? 3 : 2)">
-        <TournamentMatchHighlights
-          :tournament-id="tournamentId"
-          :live-matches="matchHighlights.live"
-          :upcoming-matches="matchHighlights.upcoming"
-          :pending="matchHighlightsPending"
-          :has-error="Boolean(matchHighlightsError)"
-          @retry="refreshMatchHighlights()"
-        />
-      </motion.div>
-      <motion.div v-bind="sectionMotion(showPickemCta ? 4 : 3)">
-        <TournamentLatestResults
-          :tournament-id="tournamentId"
-          :matches="tournamentMatches"
-          :pending="pending"
-        />
-      </motion.div>
-      <motion.div v-bind="sectionMotion(showPickemCta ? 5 : 4)">
-        <TournamentParticipants :tournament="tournament" />
-      </motion.div>
-      <motion.div v-bind="sectionMotion(showPickemCta ? 6 : 5)">
-        <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-bracket-title">
-          <h2
-            id="tournament-bracket-title"
-            class="text-xl font-semibold tracking-tight text-balance"
-          >
-            {{ $t("page.tournaments.id.bracketTitle") }}
-          </h2>
-          <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
-            <TournamentBracket :tournament="tournament" />
-          </UCard>
-        </section>
-      </motion.div>
+      <TournamentHero :tournament="tournament" />
+      <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
+      <PickemPromoBanner v-if="showPickemCta" :tournament="tournament" variant="homepage" />
+      <TournamentMatchHighlights
+        :tournament-id="tournamentId"
+        :live-matches="matchHighlights.live"
+        :upcoming-matches="matchHighlights.upcoming"
+        :pending="matchHighlightsPending"
+        :has-error="Boolean(matchHighlightsError)"
+        @retry="refreshMatchHighlights()"
+      />
+      <TournamentLatestResults
+        :tournament-id="tournamentId"
+        :matches="tournamentMatches"
+        :pending="pending"
+      />
+      <TournamentParticipants :tournament="tournament" />
+      <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-bracket-title">
+        <h2 id="tournament-bracket-title" class="text-xl font-semibold tracking-tight text-balance">
+          {{ $t("page.tournaments.id.bracketTitle") }}
+        </h2>
+        <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
+          <TournamentBracket :tournament="tournament" />
+        </UCard>
+      </section>
     </template>
   </div>
 </template>
