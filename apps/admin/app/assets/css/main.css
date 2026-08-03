@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/*
+ * Brand neutral `ink` — same Linear/Resend-dark scale as apps/front.
+ * Keep front/admin in sync when adjusting shades.
+ */
+@theme static {
+  --color-ink-50: #f9fafc;
+  --color-ink-100: #f0f2f4;
+  --color-ink-200: #dee2e6;
+  --color-ink-300: #c3c8ce;
+  --color-ink-400: #9399a0;
+  --color-ink-500: #646971;
+  --color-ink-600: #43484f;
+  --color-ink-700: #262a30;
+  --color-ink-800: #14171c;
+  --color-ink-900: #080a0d;
+  --color-ink-950: #010101;
+}
+
 html {
   scrollbar-gutter: stable;
   scrollbar-color: var(--color-neutral-300) transparent;
