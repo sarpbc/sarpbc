@@ -367,6 +367,22 @@
           "retry": "Réessayer",
           "wonOn": "Remporté le {date}"
         },
+        "events": {
+          "error": "Impossible de charger les événements de cette équipe. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "live": "En direct",
+          "winner": "Vainqueur",
+          "upcoming": {
+            "title": "Événements à venir",
+            "empty": "Aucun événement à venir.",
+            "emptyHint": "Les événements apparaîtront ici lorsque cette équipe sera inscrite à un tournoi."
+          },
+          "past": {
+            "title": "Événements passés",
+            "empty": "Aucun événement passé pour le moment.",
+            "emptyHint": "Les tournois terminés auxquels cette équipe a participé apparaîtront ici."
+          }
+        },
         "matches": {
           "live": "En direct",
           "error": "Impossible de charger les matchs de cette équipe. Vérifiez votre connexion et réessayez.",

@@ -1,0 +1,183 @@
+<script lang="ts" setup>
+import type { TeamEventListItem } from "~/composables/team/useTeamTournaments";
+import type { TournamentStatus } from "~/utils/tournamentStatus";
+import { formatTournamentDateRange } from "~/utils/tournamentStatus";
+
+type TeamEventsVariant = "upcoming" | "past";
+
+const {
+  variant,
+  events,
+  liveEvents = [],
+  pending = false,
+  hasError = false,
+} = defineProps<{
+  variant: TeamEventsVariant;
+  events: TeamEventListItem[];
+  /** Live events rendered above the schedule. Ignored on the past variant. */
+  liveEvents?: TeamEventListItem[];
+  pending?: boolean;
+  hasError?: boolean;
+}>();
+
+const emit = defineEmits<{
+  retry: [];
+}>();
+
+const { t, locale } = useI18n();
+
+const headingId = computed(() => `team-events-${variant}-title`);
+
+const live = computed(() => (variant === "upcoming" ? liveEvents : []));
+
+const hasEvents = computed(() => live.value.length > 0 || events.length > 0);
+
+const emptyIcon = computed(() => {
+  switch (variant) {
+    case "upcoming":
+      return "i-fluent-calendar-clock-24-regular";
+    case "past":
+      return "i-fluent-checkmark-circle-24-regular";
+    default: {
+      const exhaustive: never = variant;
+      return exhaustive;
+    }
+  }
+});
+
+function statusLabel(status: TournamentStatus): string {
+  switch (status) {
+    case "live":
+      return t("page.tournaments.id.status.live");
+    case "upcoming":
+      return t("page.tournaments.id.status.upcoming");
+    case "finished":
+      return t("page.tournaments.id.status.finished");
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
+function formatDateRange(event: TeamEventListItem): string | null {
+  return formatTournamentDateRange(event.beginAt, event.endAt, locale.value);
+}
+</script>
+
+<template>
+  <section class="w-full flex flex-col gap-3" :aria-labelledby="headingId">
+    <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
+      {{ t(`page.team.slug.events.${variant}.title`) }}
+    </h2>
+
+    <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
+      <UiCard v-for="index in 3" :key="index">
+        <div class="flex items-center gap-3 py-2 px-3">
+          <USkeleton class="h-3 w-16 shrink-0" />
+          <div class="flex flex-1 flex-col gap-1">
+            <USkeleton class="h-3 w-40" />
+            <USkeleton class="h-3 w-28" />
+          </div>
+        </div>
+      </UiCard>
+    </div>
+
+    <UiCard v-else-if="hasError">
+      <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
+        <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
+        <p class="text-sm text-muted text-pretty">
+          {{ t("page.team.slug.events.error") }}
+        </p>
+        <UButton variant="outline" color="error" @click="emit('retry')">
+          {{ t("page.team.slug.events.retry") }}
+        </UButton>
+      </div>
+    </UiCard>
+
+    <div v-else-if="hasEvents" class="flex flex-col gap-4">
+      <div v-if="live.length > 0" class="flex flex-col gap-2">
+        <h3 class="text-sm font-semibold text-muted pl-1">
+          {{ t("page.team.slug.events.live") }}
+        </h3>
+        <div class="flex flex-col border border-default divide-y divide-default">
+          <ULink
+            v-for="event in live"
+            :key="event.id"
+            :to="$localePath(`/tournaments/${event.id}`)"
+            class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors"
+          >
+            <div class="flex-1 min-w-0">
+              <p class="font-medium truncate">{{ event.name }}</p>
+              <p class="text-sm text-muted truncate">
+                <span v-if="event.leagueName">{{ event.leagueName }}</span>
+                <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
+                <span v-if="event.serie">{{ event.serie }}</span>
+                <span
+                  v-if="(event.leagueName || event.serie) && formatDateRange(event)"
+                  class="mx-1"
+                  >·</span
+                >
+                <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
+              </p>
+            </div>
+            <UiBadgeLive />
+          </ULink>
+        </div>
+      </div>
+
+      <div
+        v-if="events.length > 0"
+        class="flex flex-col border border-default divide-y divide-default"
+      >
+        <ULink
+          v-for="event in events"
+          :key="event.id"
+          :to="$localePath(`/tournaments/${event.id}`)"
+          class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors"
+        >
+          <div class="flex-1 min-w-0">
+            <p class="font-medium truncate">{{ event.name }}</p>
+            <p class="text-sm text-muted truncate">
+              <span v-if="event.leagueName">{{ event.leagueName }}</span>
+              <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
+              <span v-if="event.serie">{{ event.serie }}</span>
+              <span v-if="(event.leagueName || event.serie) && formatDateRange(event)" class="mx-1"
+                >·</span
+              >
+              <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <span v-if="variant === 'upcoming'" class="text-xs font-medium text-muted">
+              {{ statusLabel(event.status) }}
+            </span>
+            <UBadge
+              v-if="variant === 'past' && event.isWinner"
+              color="primary"
+              variant="subtle"
+              size="sm"
+            >
+              {{ t("page.team.slug.events.winner") }}
+            </UBadge>
+            <span v-else-if="variant === 'past'" class="text-xs font-medium text-dimmed">
+              {{ statusLabel(event.status) }}
+            </span>
+          </div>
+        </ULink>
+      </div>
+    </div>
+
+    <UiCard v-else>
+      <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
+        <UIcon :name="emptyIcon" class="text-3xl text-muted" />
+        <p class="text-sm text-muted text-pretty">
+          {{ t(`page.team.slug.events.${variant}.empty`) }}
+        </p>
+        <p class="text-xs text-dimmed text-pretty">
+          {{ t(`page.team.slug.events.${variant}.emptyHint`) }}
+        </p>
+      </div>
+    </UiCard>
+  </section>
+</template>

@@ -100,6 +100,20 @@ export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   return res.trophies ?? [];
 }
 
+/** Throws on failure so event sections can render their own error state. */
+export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
+  const config = useRuntimeConfig();
+  const res = await $fetch<{ tournaments?: Tournament[] }>(
+    `${config.public.apiBase}/team/${teamId}/tournaments`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  return res.tournaments ?? [];
+}
+
 /** Throws on failure so match sections can render their own error state. */
 export async function getTeamMatches(teamId: string): Promise<Match[]> {
   const config = useRuntimeConfig();
