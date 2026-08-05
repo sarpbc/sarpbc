@@ -70,22 +70,19 @@ export async function syncTeamFromPandascore(): Promise<void> {
   }
 }
 
-export async function getTeamFormerPlayers(teamId: string): Promise<TeamContract[]> {
+/** Throws on failure so roster history can render its own error state. */
+export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
   const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ contracts?: TeamContract[] }>(
-      `${config.public.apiBase}/team/${teamId}/former-players`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
-    return res.contracts || [];
-  } catch {
-    return [];
-  }
-}
+  const res = await $fetch<{ contracts?: TeamContract[] }>(
+    `${config.public.apiBase}/team/${teamId}/contract`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
+  return res.contracts ?? [];
+}
 /** Throws on failure so trophy section can render its own error state. */
 export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   const config = useRuntimeConfig();
@@ -193,22 +190,6 @@ export async function deleteTeam(id: string): Promise<void> {
   } catch (error) {
     console.error("Error deleting team:", error);
     throw error;
-  }
-}
-
-export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
-  const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ contracts?: TeamContract[] }>(
-      `${config.public.apiBase}/team/${teamId}/contract`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
-    return res.contracts || [];
-  } catch {
-    return [];
   }
 }
 

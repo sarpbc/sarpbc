@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { ContractRole } from "~/types/contract";
 import { selectActiveRosterPlayers } from "@sarpbc/utils";
 
 const route = useRoute();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 const slug = computed(() => route.params.slug as string);
@@ -24,15 +22,6 @@ if (!team.value && !error.value) {
 }
 
 const teamId = computed(() => team.value?.id);
-
-const { data: formerPlayers } = await useAsyncData(
-  () => `team-former-players-${slug.value}`,
-  async () => {
-    if (!team.value?.id) return [];
-    return getTeamFormerPlayers(team.value.id);
-  },
-  { watch: [team] },
-);
 
 const {
   trophies,
@@ -59,6 +48,13 @@ const {
   refresh: refreshMatches,
 } = useTeamMatches(teamId);
 
+const {
+  eras: rosterHistoryEras,
+  pending: rosterHistoryPending,
+  error: rosterHistoryError,
+  refresh: refreshRosterHistory,
+} = useTeamRosterHistory(teamId);
+
 const activeRoster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
 const teamNationalities = computed(() => {
@@ -81,15 +77,6 @@ const description = computed(() =>
     ? t("page.team.slug.seoDescriptionWithName", { name: team.value.name })
     : t("page.team.slug.seoDescriptionDefault"),
 );
-
-const contractDateDf = new DateFormatter(locale.value, {
-  dateStyle: "medium",
-});
-
-const formatContractDate = (dateStr: string | null) =>
-  dateStr ? contractDateDf.format(new Date(dateStr)) : "-";
-
-const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
 
 setPageSeo({
   title: title.value,
@@ -194,40 +181,12 @@ setPageSeo({
         />
       </div>
 
-      <div v-if="formerPlayers && formerPlayers.length > 0" class="w-full flex flex-col gap-2">
-        <h2 class="text-lg font-semibold">
-          {{ t("page.team.slug.formerPlayers") }}
-        </h2>
-        <div class="flex flex-col border border-default divide-y divide-default">
-          <div
-            v-for="contract in formerPlayers"
-            :key="contract.id"
-            class="flex flex-row items-center gap-3 p-3"
-          >
-            <PlayerImg
-              :player-name="contract.player.name"
-              :img="contract.player.imageUrl || undefined"
-              size="sm"
-            />
-            <div class="flex-1 min-w-0">
-              <ULink
-                :to="$localePath(`/player/${contract.player.slug}`)"
-                class="font-medium hover:underline"
-              >
-                {{ contract.player.name }}
-              </ULink>
-              <div class="text-sm text-muted">
-                <span>{{ roleLabel(contract.role) }}</span>
-                <span class="mx-1">·</span>
-                <span
-                  >{{ formatContractDate(contract.startDate) }} →
-                  {{ formatContractDate(contract.endDate) }}</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TeamRosterTimeline
+        :eras="rosterHistoryEras"
+        :pending="rosterHistoryPending"
+        :has-error="Boolean(rosterHistoryError)"
+        @retry="refreshRosterHistory()"
+      />
     </section>
   </div>
 </template>

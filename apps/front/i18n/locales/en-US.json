@@ -358,7 +358,19 @@
         "playersCount": "{count} player | {count} players",
         "statistics": "Statistics",
         "teamStatisticsComingSoon": "Team statistics coming soon...",
-        "formerPlayers": "Former Players",
+        "rosterHistory": {
+          "title": "Roster History",
+          "current": "Current",
+          "present": "Present",
+          "joinedLabel": "Joined",
+          "leftLabel": "Left",
+          "showAll": "Show Full History ({count})",
+          "showLess": "Show Less",
+          "empty": "No roster history yet.",
+          "emptyHint": "Lineups appear here once player contracts are recorded for this team.",
+          "error": "Could not load this team's roster history. Check your connection and try again.",
+          "retry": "Try Again"
+        },
         "trophies": {
           "title": "Trophy Cabinet",
           "empty": "No tournament wins yet.",
