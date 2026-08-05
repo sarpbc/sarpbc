@@ -18,6 +18,7 @@ import { RequirePermissions } from "src/user/decorator/require-permissions.decor
 import { PermissionGuard } from "src/user/user.guard";
 import { AuthGuard } from "src/auth/auth.guard";
 import { ContractService } from "../player/contract.service";
+import { TournamentService } from "../tournament/tournament.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
@@ -28,6 +29,7 @@ export class TeamController {
   constructor(
     private teamService: TeamService,
     private contractService: ContractService,
+    private tournamentService: TournamentService,
   ) {}
 
   @Get()
@@ -73,6 +75,16 @@ export class TeamController {
   async syncPandaScoreTeams() {
     await this.teamService.initializeTeamsFromPandaScore(false);
     return { success: true };
+  }
+
+  @Get(":id/trophies")
+  async getTrophies(@Param("id", ParseUUIDPipe) id: string) {
+    const team = await this.teamService.findById(id);
+    if (!team) {
+      throw new NotFoundException(`Team with id "${id}" not found`);
+    }
+    const trophies = await this.tournamentService.getTournamentsWonByTeam(id);
+    return { trophies };
   }
 
   @Get(":id/former-players")

@@ -122,4 +122,14 @@ export class TournamentService {
 
     return participants.map((participant) => participant.tournament);
   }
+
+  async getTournamentsWonByTeam(teamId: string): Promise<Tournament[]> {
+    return this.tournamentRepository.find(
+      { winner: { team: { id: teamId } } },
+      {
+        populate: ["league", "winner", "winner.team"],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+  }
 }

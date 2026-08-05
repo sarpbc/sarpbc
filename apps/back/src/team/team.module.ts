@@ -9,6 +9,7 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PlayerModule } from "../player/player.module";
 import { UserModule } from "src/user/user.module";
 import { PandascoreModule } from "src/pandascore/pandascore.module";
+import { TournamentModule } from "src/tournament/tournament.module";
 import { SyncPandascoreTeamsUseCase } from "./sync/sync-pandascore-teams.use-case";
 import { log } from "evlog";
 
@@ -16,6 +17,7 @@ import { log } from "evlog";
   imports: [
     MikroOrmModule.forFeature([Team]),
     forwardRef(() => PlayerModule),
+    forwardRef(() => TournamentModule),
     UserModule,
     PandascoreModule,
     ConfigModule,

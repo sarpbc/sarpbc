@@ -359,6 +359,14 @@
         "statistics": "Statistics",
         "teamStatisticsComingSoon": "Team statistics coming soon...",
         "formerPlayers": "Former Players",
+        "trophies": {
+          "title": "Trophy Cabinet",
+          "empty": "No tournament wins yet.",
+          "emptyHint": "Titles appear here when this team wins an event.",
+          "error": "Could not load this team's trophies. Check your connection and try again.",
+          "retry": "Try Again",
+          "wonOn": "Won {date}"
+        },
         "matches": {
           "live": "Live Now",
           "error": "Could not load this team's matches. Check your connection and try again.",
