@@ -380,32 +380,38 @@
           "wonOn": "Remporté le {date}"
         },
         "events": {
+          "sectionTitle": "Événements",
           "error": "Impossible de charger les événements de cette équipe. Vérifiez votre connexion et réessayez.",
           "retry": "Réessayer",
           "live": "En direct",
           "winner": "Vainqueur",
+          "tabs": {
+            "upcoming": "À venir",
+            "past": "Passés"
+          },
           "upcoming": {
-            "title": "Événements à venir",
             "empty": "Aucun événement à venir.",
             "emptyHint": "Les événements apparaîtront ici lorsque cette équipe sera inscrite à un tournoi."
           },
           "past": {
-            "title": "Événements passés",
             "empty": "Aucun événement passé pour le moment.",
             "emptyHint": "Les tournois terminés auxquels cette équipe a participé apparaîtront ici."
           }
         },
         "matches": {
+          "sectionTitle": "Matchs",
           "live": "En direct",
           "error": "Impossible de charger les matchs de cette équipe. Vérifiez votre connexion et réessayez.",
           "retry": "Réessayer",
+          "tabs": {
+            "upcoming": "À venir",
+            "past": "Passés"
+          },
           "upcoming": {
-            "title": "Prochains matchs",
             "empty": "Aucun match à venir programmé.",
             "emptyHint": "Le calendrier apparaîtra ici dès l'annonce du prochain tournoi."
           },
           "past": {
-            "title": "Derniers résultats",
             "empty": "Aucun match terminé pour le moment.",
             "emptyHint": "Les résultats apparaîtront ici après le premier match de cette équipe."
           }

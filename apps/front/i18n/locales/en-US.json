@@ -380,32 +380,38 @@
           "wonOn": "Won {date}"
         },
         "events": {
+          "sectionTitle": "Events",
           "error": "Could not load this team's events. Check your connection and try again.",
           "retry": "Try Again",
           "live": "Live Now",
           "winner": "Winner",
+          "tabs": {
+            "upcoming": "Upcoming",
+            "past": "Past"
+          },
           "upcoming": {
-            "title": "Upcoming Events",
             "empty": "No upcoming events.",
             "emptyHint": "Events appear here when this team is entered in a tournament."
           },
           "past": {
-            "title": "Past Events",
             "empty": "No past events yet.",
             "emptyHint": "Finished tournaments this team entered will show up here."
           }
         },
         "matches": {
+          "sectionTitle": "Matches",
           "live": "Live Now",
           "error": "Could not load this team's matches. Check your connection and try again.",
           "retry": "Try Again",
+          "tabs": {
+            "upcoming": "Upcoming",
+            "past": "Past"
+          },
           "upcoming": {
-            "title": "Upcoming Matches",
             "empty": "No upcoming matches scheduled.",
             "emptyHint": "Schedules appear here once the next tournament is announced."
           },
           "past": {
-            "title": "Recent Results",
             "empty": "No completed matches yet.",
             "emptyHint": "Results appear here once this team plays its first match."
           }
