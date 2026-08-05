@@ -359,6 +359,14 @@
         "statistics": "Statistiques",
         "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
         "formerPlayers": "Anciens joueurs",
+        "trophies": {
+          "title": "Palmarès",
+          "empty": "Aucun tournoi remporté pour le moment.",
+          "emptyHint": "Les titres apparaîtront ici lorsque cette équipe remportera un événement.",
+          "error": "Impossible de charger le palmarès de cette équipe. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "wonOn": "Remporté le {date}"
+        },
         "matches": {
           "live": "En direct",
           "error": "Impossible de charger les matchs de cette équipe. Vérifiez votre connexion et réessayez.",

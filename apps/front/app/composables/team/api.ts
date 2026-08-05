@@ -1,5 +1,6 @@
 import type { Match } from "~/types/matches";
 import type { Team } from "~/types/team";
+import type { Tournament } from "~/types/tournament";
 import type { ContractRole, TeamContract } from "~/types/contract";
 
 export async function getTeamFromSlug(slug: string): Promise<Team | null> {
@@ -83,6 +84,20 @@ export async function getTeamFormerPlayers(teamId: string): Promise<TeamContract
   } catch {
     return [];
   }
+}
+
+/** Throws on failure so trophy section can render its own error state. */
+export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
+  const config = useRuntimeConfig();
+  const res = await $fetch<{ trophies?: Tournament[] }>(
+    `${config.public.apiBase}/team/${teamId}/trophies`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  return res.trophies ?? [];
 }
 
 /** Throws on failure so match sections can render their own error state. */
