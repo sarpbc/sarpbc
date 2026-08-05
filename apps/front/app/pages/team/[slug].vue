@@ -23,6 +23,8 @@ if (!team.value && !error.value) {
   throw createError({ statusCode: 404, message: t("page.team.slug.teamNotFound") });
 }
 
+const teamId = computed(() => team.value?.id);
+
 const { data: formerPlayers } = await useAsyncData(
   () => `team-former-players-${slug.value}`,
   async () => {
@@ -31,6 +33,15 @@ const { data: formerPlayers } = await useAsyncData(
   },
   { watch: [team] },
 );
+
+const {
+  live: liveMatches,
+  upcoming: upcomingMatches,
+  past: pastMatches,
+  pending: matchesPending,
+  error: matchesError,
+  refresh: refreshMatches,
+} = useTeamMatches(teamId);
 
 const activeRoster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
@@ -89,35 +100,60 @@ setPageSeo({
       </p>
     </div>
 
-    <section v-else-if="team" class="w-full">
-      <div class="w-full flex flex-row items-center gap-2 md:h-18 justify-start">
-        <img
-          v-if="team.imageUrl"
-          :src="team.imageUrl"
-          :alt="`${team.name} logo`"
-          class="size-12"
-          :style="team.imageUrl.includes('lightmode') ? 'filter: invert(1);' : ''"
-        />
-        <div class="h-full flex flex-col">
-          <h1 class="flex text-xl font-semibold">{{ team.name }}</h1>
-          <div v-if="teamNationalities.length > 0" class="flex items-center gap-2 mt-1">
-            <FlagNationalities
-              :nationalities="teamNationalities"
-              size="lg"
-              :fallback-to-continent="true"
-            />
+    <section v-else-if="team" class="w-full flex flex-col gap-6">
+      <div class="w-full flex flex-col">
+        <div class="w-full flex flex-row items-center gap-2 md:h-18 justify-start">
+          <img
+            v-if="team.imageUrl"
+            :src="team.imageUrl"
+            :alt="`${team.name} logo`"
+            class="size-12"
+            :style="team.imageUrl.includes('lightmode') ? 'filter: invert(1);' : ''"
+          />
+          <div class="h-full flex flex-col">
+            <h1 class="flex text-xl font-semibold">{{ team.name }}</h1>
+            <div v-if="teamNationalities.length > 0" class="flex items-center gap-2 mt-1">
+              <FlagNationalities
+                :nationalities="teamNationalities"
+                size="lg"
+                :fallback-to-continent="true"
+              />
+            </div>
           </div>
+        </div>
+
+        <div
+          v-if="activeRoster.length"
+          class="flex flex-row flex-wrap justify-center items-center gap-4 border border-default p-4"
+        >
+          <PlayerProfile
+            v-for="player in activeRoster"
+            :key="player.id"
+            :player="player"
+            size="lg"
+          />
         </div>
       </div>
 
-      <div
-        v-if="activeRoster.length"
-        class="flex flex-row flex-wrap justify-center items-center gap-4 border border-default p-4"
-      >
-        <PlayerProfile v-for="player in activeRoster" :key="player.id" :player="player" size="lg" />
+      <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
+        <TeamMatchesSection
+          variant="upcoming"
+          :matches="upcomingMatches"
+          :live-matches="liveMatches"
+          :pending="matchesPending"
+          :has-error="Boolean(matchesError)"
+          @retry="refreshMatches()"
+        />
+        <TeamMatchesSection
+          variant="past"
+          :matches="pastMatches"
+          :pending="matchesPending"
+          :has-error="Boolean(matchesError)"
+          @retry="refreshMatches()"
+        />
       </div>
 
-      <div v-if="formerPlayers && formerPlayers.length > 0" class="w-full flex flex-col mt-6 gap-2">
+      <div v-if="formerPlayers && formerPlayers.length > 0" class="w-full flex flex-col gap-2">
         <h2 class="text-lg font-semibold">
           {{ t("page.team.slug.formerPlayers") }}
         </h2>
