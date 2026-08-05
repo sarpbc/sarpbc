@@ -1,3 +1,4 @@
+import type { Match } from "~/types/matches";
 import type { Team } from "~/types/team";
 import type { ContractRole, TeamContract } from "~/types/contract";
 
@@ -82,6 +83,20 @@ export async function getTeamFormerPlayers(teamId: string): Promise<TeamContract
   } catch {
     return [];
   }
+}
+
+/** Throws on failure so match sections can render their own error state. */
+export async function getTeamMatches(teamId: string): Promise<Match[]> {
+  const config = useRuntimeConfig();
+  const res = await $fetch<{ matches?: Match[] }>(
+    `${config.public.apiBase}/tournaments/matches/team/${teamId}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  return res.matches ?? [];
 }
 
 export async function getTeamById(id: string): Promise<Team | null> {
