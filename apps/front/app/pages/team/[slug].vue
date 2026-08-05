@@ -19,6 +19,10 @@ const {
   { watch: [slug] },
 );
 
+if (!team.value && !error.value) {
+  throw createError({ statusCode: 404, message: t("page.team.slug.teamNotFound") });
+}
+
 const { data: formerPlayers } = await useAsyncData(
   () => `team-former-players-${slug.value}`,
   async () => {
@@ -83,21 +87,6 @@ setPageSeo({
       <p class="text-muted">
         {{ error.message || $t("page.team.slug.failedToLoadTeamData") }}
       </p>
-    </div>
-
-    <div
-      v-else-if="!pending && !team && !error"
-      class="w-full flex flex-col items-center py-16 text-center"
-    >
-      <h1 class="text-2xl font-bold text-muted mb-4">
-        {{ $t("page.player.slug.playerNotFound") }}
-      </h1>
-      <p class="text-muted mb-6">
-        {{ $t("page.player.slug.playerCouldNotBeFound", { slug }) }}
-      </p>
-      <UButton :to="$localePath('/')" variant="outline">
-        {{ $t("page.player.slug.goBackToHome") }}
-      </UButton>
     </div>
 
     <section v-else-if="team" class="w-full">

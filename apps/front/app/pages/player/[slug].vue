@@ -96,7 +96,7 @@ setPageSeo({
             </span>
             <span v-if="currentPlayer.team === undefined"> "-" </span>
             <span v-else>
-              <ULink :to="`/team/${currentPlayer.team?.slug}`" class="text-default">
+              <ULink :to="$localePath(`/team/${currentPlayer.team?.slug}`)" class="text-default">
                 {{ currentPlayer.team?.name }}
               </ULink>
             </span>

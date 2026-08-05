@@ -248,6 +248,7 @@ async function submitGuess() {
     persistGameState();
   } catch (submitError) {
     console.error("Failed to submit guess:", submitError);
+    error.value = "submitFailed";
   } finally {
     submitting.value = false;
     focusHiddenInput();
