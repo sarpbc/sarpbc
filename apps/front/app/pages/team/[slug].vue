@@ -145,41 +145,23 @@ setPageSeo({
         @retry="refreshTrophies()"
       />
 
-      <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
-        <TeamEventsSection
-          variant="upcoming"
-          :events="upcomingEvents"
-          :live-events="liveEvents"
-          :pending="eventsPending"
-          :has-error="Boolean(eventsError)"
-          @retry="refreshEvents()"
-        />
-        <TeamEventsSection
-          variant="past"
-          :events="pastEvents"
-          :pending="eventsPending"
-          :has-error="Boolean(eventsError)"
-          @retry="refreshEvents()"
-        />
-      </div>
+      <TeamEventsSection
+        :upcoming-events="upcomingEvents"
+        :past-events="pastEvents"
+        :live-events="liveEvents"
+        :pending="eventsPending"
+        :has-error="Boolean(eventsError)"
+        @retry="refreshEvents()"
+      />
 
-      <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
-        <TeamMatchesSection
-          variant="upcoming"
-          :matches="upcomingMatches"
-          :live-matches="liveMatches"
-          :pending="matchesPending"
-          :has-error="Boolean(matchesError)"
-          @retry="refreshMatches()"
-        />
-        <TeamMatchesSection
-          variant="past"
-          :matches="pastMatches"
-          :pending="matchesPending"
-          :has-error="Boolean(matchesError)"
-          @retry="refreshMatches()"
-        />
-      </div>
+      <TeamMatchesSection
+        :upcoming-matches="upcomingMatches"
+        :past-matches="pastMatches"
+        :live-matches="liveMatches"
+        :pending="matchesPending"
+        :has-error="Boolean(matchesError)"
+        @retry="refreshMatches()"
+      />
 
       <TeamRosterTimeline
         :eras="rosterHistoryEras"
