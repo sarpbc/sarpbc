@@ -358,7 +358,19 @@
         "playersCount": "{count} joueur | {count} joueurs",
         "statistics": "Statistiques",
         "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
-        "formerPlayers": "Anciens joueurs",
+        "rosterHistory": {
+          "title": "Historique de l'effectif",
+          "current": "Actuel",
+          "present": "Aujourd'hui",
+          "joinedLabel": "Arrivées",
+          "leftLabel": "Départs",
+          "showAll": "Voir tout l'historique ({count})",
+          "showLess": "Voir moins",
+          "empty": "Aucun historique d'effectif pour le moment.",
+          "emptyHint": "Les compositions apparaîtront ici dès que des contrats seront enregistrés pour cette équipe.",
+          "error": "Impossible de charger l'historique de l'effectif de cette équipe. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer"
+        },
         "trophies": {
           "title": "Palmarès",
           "empty": "Aucun tournoi remporté pour le moment.",
