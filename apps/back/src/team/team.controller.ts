@@ -87,6 +87,16 @@ export class TeamController {
     return { trophies };
   }
 
+  @Get(":id/tournaments")
+  async getTournaments(@Param("id", ParseUUIDPipe) id: string) {
+    const team = await this.teamService.findById(id);
+    if (!team) {
+      throw new NotFoundException(`Team with id "${id}" not found`);
+    }
+    const tournaments = await this.tournamentService.getTournamentsByTeam(id);
+    return { tournaments };
+  }
+
   @Get(":id/former-players")
   async getFormerPlayers(@Param("id") id: string) {
     const team = await this.teamService.findById(id);

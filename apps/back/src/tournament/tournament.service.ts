@@ -132,4 +132,28 @@ export class TournamentService {
       },
     );
   }
+
+  async getTournamentsByTeam(teamId: string): Promise<Tournament[]> {
+    const participants = await this.participantRepository.find(
+      { team: { id: teamId } },
+      {
+        populate: [
+          "tournament",
+          "tournament.league",
+          "tournament.winner",
+          "tournament.winner.team",
+        ],
+      },
+    );
+
+    const tournamentsById = new Map<string, Tournament>();
+    for (const participant of participants) {
+      const tournament = participant.tournament;
+      if (tournament && !tournamentsById.has(tournament.id)) {
+        tournamentsById.set(tournament.id, tournament);
+      }
+    }
+
+    return Array.from(tournamentsById.values());
+  }
 }
