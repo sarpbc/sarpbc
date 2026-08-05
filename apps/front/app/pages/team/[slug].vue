@@ -42,6 +42,15 @@ const {
 } = useTeamTrophies(teamId);
 
 const {
+  live: liveEvents,
+  upcoming: upcomingEvents,
+  past: pastEvents,
+  pending: eventsPending,
+  error: eventsError,
+  refresh: refreshEvents,
+} = useTeamTournaments(teamId);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -148,6 +157,24 @@ setPageSeo({
         :has-error="Boolean(trophiesError)"
         @retry="refreshTrophies()"
       />
+
+      <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
+        <TeamEventsSection
+          variant="upcoming"
+          :events="upcomingEvents"
+          :live-events="liveEvents"
+          :pending="eventsPending"
+          :has-error="Boolean(eventsError)"
+          @retry="refreshEvents()"
+        />
+        <TeamEventsSection
+          variant="past"
+          :events="pastEvents"
+          :pending="eventsPending"
+          :has-error="Boolean(eventsError)"
+          @retry="refreshEvents()"
+        />
+      </div>
 
       <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
         <TeamMatchesSection
