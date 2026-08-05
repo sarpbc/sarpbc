@@ -216,6 +216,7 @@
         "failedToLoad": "Échec du chargement du défi d'aujourd'hui",
         "tryAgainLater": "Veuillez réessayer plus tard.",
         "playerNotFound": "Joueur introuvable",
+        "submitFailed": "Impossible d'envoyer votre proposition. Vérifiez votre connexion et réessayez.",
         "seo": {
           "title": "Air Riddle - Devinez le joueur Rocket League",
           "description": "Participez à Air Riddle et devinez le joueur Rocket League en 6 essais. Testez vos connaissances des joueurs RL et améliorez votre score quotidiennement !"

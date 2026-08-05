@@ -38,6 +38,6 @@ export async function guessAirRiddle(
     };
   } catch (error) {
     console.error("Error fetching air riddle guess:", error);
-    return { result: [], error: "Failed to submit guess" };
+    return { result: [], error: "submitFailed" };
   }
 }

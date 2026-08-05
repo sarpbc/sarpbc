@@ -216,6 +216,7 @@
         "failedToLoad": "Failed to load today's challenge",
         "tryAgainLater": "Please try again later.",
         "playerNotFound": "Player Not Found",
+        "submitFailed": "Could not submit your guess. Check your connection and try again.",
         "seo": {
           "title": "Air Riddle - Guess the Rocket League Player",
           "description": "Participate in Air Riddle and guess the Rocket League player in 6 tries. Test your knowledge of RL players and improve your daily score!"
