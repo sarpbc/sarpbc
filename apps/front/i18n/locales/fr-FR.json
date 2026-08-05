@@ -351,14 +351,29 @@
         "teamNotFound": "Équipe introuvable",
         "seoTitleWithName": "{name} - sarpbc.org",
         "seoTitleDefault": "Équipe - sarpbc.org",
-        "seoDescriptionWithName": "Voir le profil et les joueurs de {name}",
-        "seoDescriptionDefault": "Profil de l'équipe",
+        "seoDescriptionWithName": "Voir l'effectif, les prochains matchs et les derniers résultats de {name}",
+        "seoDescriptionDefault": "Effectif, prochains matchs et derniers résultats de l'équipe",
         "location": "Localisation",
         "players": "Joueurs",
         "playersCount": "{count} joueur | {count} joueurs",
         "statistics": "Statistiques",
         "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
-        "formerPlayers": "Anciens joueurs"
+        "formerPlayers": "Anciens joueurs",
+        "matches": {
+          "live": "En direct",
+          "error": "Impossible de charger les matchs de cette équipe. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "upcoming": {
+            "title": "Prochains matchs",
+            "empty": "Aucun match à venir programmé.",
+            "emptyHint": "Le calendrier apparaîtra ici dès l'annonce du prochain tournoi."
+          },
+          "past": {
+            "title": "Derniers résultats",
+            "empty": "Aucun match terminé pour le moment.",
+            "emptyHint": "Les résultats apparaîtront ici après le premier match de cette équipe."
+          }
+        }
       }
     },
     "tournaments": {
