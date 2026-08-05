@@ -35,6 +35,13 @@ const { data: formerPlayers } = await useAsyncData(
 );
 
 const {
+  trophies,
+  pending: trophiesPending,
+  error: trophiesError,
+  refresh: refreshTrophies,
+} = useTeamTrophies(teamId);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -134,6 +141,13 @@ setPageSeo({
           />
         </div>
       </div>
+
+      <TeamTrophyCabinet
+        :trophies="trophies"
+        :pending="trophiesPending"
+        :has-error="Boolean(trophiesError)"
+        @retry="refreshTrophies()"
+      />
 
       <div class="w-full flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start">
         <TeamMatchesSection
