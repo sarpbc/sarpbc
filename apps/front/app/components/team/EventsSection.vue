@@ -3,18 +3,17 @@ import type { TeamEventListItem } from "~/composables/team/useTeamTournaments";
 import type { TournamentStatus } from "~/utils/tournamentStatus";
 import { formatTournamentDateRange } from "~/utils/tournamentStatus";
 
-type TeamEventsVariant = "upcoming" | "past";
+type TeamEventsTab = "upcoming" | "past";
 
 const {
-  variant,
-  events,
+  upcomingEvents,
+  pastEvents,
   liveEvents = [],
   pending = false,
   hasError = false,
 } = defineProps<{
-  variant: TeamEventsVariant;
-  events: TeamEventListItem[];
-  /** Live events rendered above the schedule. Ignored on the past variant. */
+  upcomingEvents: TeamEventListItem[];
+  pastEvents: TeamEventListItem[];
   liveEvents?: TeamEventListItem[];
   pending?: boolean;
   hasError?: boolean;
@@ -25,25 +24,51 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
-const headingId = computed(() => `team-events-${variant}-title`);
+const headingId = "team-events-title";
 
-const live = computed(() => (variant === "upcoming" ? liveEvents : []));
+const tab = computed<TeamEventsTab>(() => {
+  const value = route.query.events;
+  return value === "past" ? "past" : "upcoming";
+});
 
-const hasEvents = computed(() => live.value.length > 0 || events.length > 0);
+const tabItems = computed(() => [
+  { value: "upcoming" as const, label: t("page.team.slug.events.tabs.upcoming") },
+  { value: "past" as const, label: t("page.team.slug.events.tabs.past") },
+]);
+
+const activeEvents = computed(() => (tab.value === "past" ? pastEvents : upcomingEvents));
+
+const live = computed(() => (tab.value === "upcoming" ? liveEvents : []));
+
+const hasEvents = computed(() => live.value.length > 0 || activeEvents.value.length > 0);
 
 const emptyIcon = computed(() => {
-  switch (variant) {
+  switch (tab.value) {
     case "upcoming":
       return "i-fluent-calendar-clock-24-regular";
     case "past":
       return "i-fluent-checkmark-circle-24-regular";
     default: {
-      const exhaustive: never = variant;
+      const exhaustive: never = tab.value;
       return exhaustive;
     }
   }
 });
+
+function setTab(nextTab: TeamEventsTab) {
+  const query = { ...route.query };
+
+  if (nextTab === "upcoming") {
+    delete query.events;
+  } else {
+    query.events = nextTab;
+  }
+
+  router.replace({ query });
+}
 
 function statusLabel(status: TournamentStatus): string {
   switch (status) {
@@ -67,9 +92,25 @@ function formatDateRange(event: TeamEventListItem): string | null {
 
 <template>
   <section class="w-full flex flex-col gap-3" :aria-labelledby="headingId">
-    <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
-      {{ t(`page.team.slug.events.${variant}.title`) }}
-    </h2>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
+        {{ t("page.team.slug.events.sectionTitle") }}
+      </h2>
+      <div class="flex gap-1" role="tablist" :aria-label="t('page.team.slug.events.sectionTitle')">
+        <UButton
+          v-for="item in tabItems"
+          :key="item.value"
+          role="tab"
+          :aria-selected="tab === item.value"
+          variant="soft"
+          size="sm"
+          :color="tab === item.value ? 'primary' : 'neutral'"
+          @click="setTab(item.value)"
+        >
+          {{ item.label }}
+        </UButton>
+      </div>
+    </div>
 
     <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
       <UiCard v-for="index in 3" :key="index">
@@ -127,11 +168,11 @@ function formatDateRange(event: TeamEventListItem): string | null {
       </div>
 
       <div
-        v-if="events.length > 0"
+        v-if="activeEvents.length > 0"
         class="flex flex-col border border-default divide-y divide-default"
       >
         <ULink
-          v-for="event in events"
+          v-for="event in activeEvents"
           :key="event.id"
           :to="$localePath(`/tournaments/${event.id}`)"
           class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors"
@@ -149,18 +190,18 @@ function formatDateRange(event: TeamEventListItem): string | null {
             </p>
           </div>
           <div class="flex shrink-0 items-center gap-2">
-            <span v-if="variant === 'upcoming'" class="text-xs font-medium text-muted">
+            <span v-if="tab === 'upcoming'" class="text-xs font-medium text-muted">
               {{ statusLabel(event.status) }}
             </span>
             <UBadge
-              v-if="variant === 'past' && event.isWinner"
+              v-if="tab === 'past' && event.isWinner"
               color="primary"
               variant="subtle"
               size="sm"
             >
               {{ t("page.team.slug.events.winner") }}
             </UBadge>
-            <span v-else-if="variant === 'past'" class="text-xs font-medium text-dimmed">
+            <span v-else-if="tab === 'past'" class="text-xs font-medium text-dimmed">
               {{ statusLabel(event.status) }}
             </span>
           </div>
@@ -172,10 +213,10 @@ function formatDateRange(event: TeamEventListItem): string | null {
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon :name="emptyIcon" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
-          {{ t(`page.team.slug.events.${variant}.empty`) }}
+          {{ t(`page.team.slug.events.${tab}.empty`) }}
         </p>
         <p class="text-xs text-dimmed text-pretty">
-          {{ t(`page.team.slug.events.${variant}.emptyHint`) }}
+          {{ t(`page.team.slug.events.${tab}.emptyHint`) }}
         </p>
       </div>
     </UiCard>

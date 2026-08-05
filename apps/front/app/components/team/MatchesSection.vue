@@ -1,18 +1,17 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "~/types/matches";
 
-type TeamMatchesVariant = "upcoming" | "past";
+type TeamMatchesTab = "upcoming" | "past";
 
 const {
-  variant,
-  matches,
+  upcomingMatches,
+  pastMatches,
   liveMatches = [],
   pending = false,
   hasError = false,
 } = defineProps<{
-  variant: TeamMatchesVariant;
-  matches: MatchListItem[];
-  /** Live matches rendered above the schedule. Ignored on the past variant. */
+  upcomingMatches: MatchListItem[];
+  pastMatches: MatchListItem[];
   liveMatches?: MatchListItem[];
   pending?: boolean;
   hasError?: boolean;
@@ -23,45 +22,87 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
-const headingId = computed(() => `team-matches-${variant}-title`);
+const headingId = "team-matches-title";
 
-const live = computed(() => (variant === "upcoming" ? liveMatches : []));
+const tab = computed<TeamMatchesTab>(() => {
+  const value = route.query.matches;
+  return value === "past" ? "past" : "upcoming";
+});
 
-const hasMatches = computed(() => live.value.length > 0 || matches.length > 0);
+const tabItems = computed(() => [
+  { value: "upcoming" as const, label: t("page.team.slug.matches.tabs.upcoming") },
+  { value: "past" as const, label: t("page.team.slug.matches.tabs.past") },
+]);
+
+const activeMatches = computed(() => (tab.value === "past" ? pastMatches : upcomingMatches));
+
+const live = computed(() => (tab.value === "upcoming" ? liveMatches : []));
+
+const hasMatches = computed(() => live.value.length > 0 || activeMatches.value.length > 0);
 
 const listVariant = computed<"upcoming" | "result">(() => {
-  switch (variant) {
+  switch (tab.value) {
     case "upcoming":
       return "upcoming";
     case "past":
       return "result";
     default: {
-      const exhaustive: never = variant;
+      const exhaustive: never = tab.value;
       return exhaustive;
     }
   }
 });
 
 const emptyIcon = computed(() => {
-  switch (variant) {
+  switch (tab.value) {
     case "upcoming":
       return "i-fluent-calendar-clock-24-regular";
     case "past":
       return "i-fluent-checkmark-circle-24-regular";
     default: {
-      const exhaustive: never = variant;
+      const exhaustive: never = tab.value;
       return exhaustive;
     }
   }
 });
+
+function setTab(nextTab: TeamMatchesTab) {
+  const query = { ...route.query };
+
+  if (nextTab === "upcoming") {
+    delete query.matches;
+  } else {
+    query.matches = nextTab;
+  }
+
+  router.replace({ query });
+}
 </script>
 
 <template>
   <section class="w-full flex flex-col gap-3" :aria-labelledby="headingId">
-    <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
-      {{ t(`page.team.slug.matches.${variant}.title`) }}
-    </h2>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
+        {{ t("page.team.slug.matches.sectionTitle") }}
+      </h2>
+      <div class="flex gap-1" role="tablist" :aria-label="t('page.team.slug.matches.sectionTitle')">
+        <UButton
+          v-for="item in tabItems"
+          :key="item.value"
+          role="tab"
+          :aria-selected="tab === item.value"
+          variant="soft"
+          size="sm"
+          :color="tab === item.value ? 'primary' : 'neutral'"
+          @click="setTab(item.value)"
+        >
+          {{ item.label }}
+        </UButton>
+      </div>
+    </div>
 
     <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
       <UiCard v-for="index in 3" :key="index">
@@ -94,17 +135,21 @@ const emptyIcon = computed(() => {
         variant="live"
         :title="t('page.team.slug.matches.live')"
       />
-      <MatchListGroup v-if="matches.length > 0" :matches="matches" :variant="listVariant" />
+      <MatchListGroup
+        v-if="activeMatches.length > 0"
+        :matches="activeMatches"
+        :variant="listVariant"
+      />
     </div>
 
     <UiCard v-else>
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon :name="emptyIcon" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
-          {{ t(`page.team.slug.matches.${variant}.empty`) }}
+          {{ t(`page.team.slug.matches.${tab}.empty`) }}
         </p>
         <p class="text-xs text-dimmed text-pretty">
-          {{ t(`page.team.slug.matches.${variant}.emptyHint`) }}
+          {{ t(`page.team.slug.matches.${tab}.emptyHint`) }}
         </p>
       </div>
     </UiCard>
