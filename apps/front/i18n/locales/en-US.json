@@ -318,6 +318,14 @@
         "contractTo": "to",
         "contractDateUnknown": "Unknown",
         "formerTeams": "Former Teams",
+        "trophies": {
+          "title": "Trophy Cabinet",
+          "empty": "No tournament wins yet.",
+          "emptyHint": "Titles appear here when this player wins an event.",
+          "error": "Could not load this player's trophies. Check your connection and try again.",
+          "retry": "Try Again",
+          "wonOn": "Won {date}"
+        },
         "matches": {
           "sectionTitle": "Matches",
           "live": "Live Now",

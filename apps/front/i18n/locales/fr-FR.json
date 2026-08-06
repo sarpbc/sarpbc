@@ -318,6 +318,14 @@
         "contractTo": "à",
         "contractDateUnknown": "Inconnue",
         "formerTeams": "Anciennes équipes",
+        "trophies": {
+          "title": "Palmarès",
+          "empty": "Aucun tournoi remporté pour le moment.",
+          "emptyHint": "Les titres apparaîtront ici lorsque ce joueur remportera un événement.",
+          "error": "Impossible de charger le palmarès de ce joueur. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "wonOn": "Remporté le {date}"
+        },
         "matches": {
           "sectionTitle": "Matchs",
           "live": "En direct",

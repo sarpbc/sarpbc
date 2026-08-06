@@ -133,6 +133,16 @@ export class TournamentService {
     );
   }
 
+  async getTournamentsWonByPlayer(playerId: string): Promise<Tournament[]> {
+    return this.tournamentRepository.find(
+      { winner: { players: { id: playerId } } },
+      {
+        populate: ["league", "winner", "winner.team"],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+  }
+
   async getTournamentsByTeam(teamId: string): Promise<Tournament[]> {
     const participants = await this.participantRepository.find(
       { team: { id: teamId } },

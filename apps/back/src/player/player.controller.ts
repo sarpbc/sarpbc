@@ -24,6 +24,7 @@ import { CreateContractDto } from "./dto/create-contract.dto";
 import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
 import { MatchService } from "src/tournament/match/match.service";
+import { TournamentService } from "src/tournament/tournament.service";
 
 @Controller("player")
 export class PlayerController {
@@ -31,6 +32,7 @@ export class PlayerController {
     private playerService: PlayerService,
     private contractService: ContractService,
     private matchService: MatchService,
+    private tournamentService: TournamentService,
   ) {}
 
   @Get()
@@ -140,6 +142,18 @@ export class PlayerController {
     }
     const contracts = await this.contractService.getOldTeamsByPlayer(id);
     return { contracts };
+  }
+
+  // --- Trophy endpoints ---
+
+  @Get(":id/trophies")
+  async getTrophies(@Param("id", ParseUUIDPipe) id: string) {
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const trophies = await this.tournamentService.getTournamentsWonByPlayer(id);
+    return { trophies };
   }
 
   // --- Match endpoints ---

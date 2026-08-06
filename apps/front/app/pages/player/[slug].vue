@@ -22,6 +22,13 @@ const playerId = computed(() => player.value?.id ?? "");
 const { data: oldTeams } = await getPlayerOldTeams(playerId);
 
 const {
+  trophies,
+  pending: trophiesPending,
+  error: trophiesError,
+  refresh: refreshTrophies,
+} = usePlayerTrophies(playerId);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -117,6 +124,13 @@ setPageSeo({
           </div>
         </dl>
       </div>
+
+      <PlayerTrophyCabinet
+        :trophies="trophies"
+        :pending="trophiesPending"
+        :has-error="Boolean(trophiesError)"
+        @retry="refreshTrophies()"
+      />
 
       <PlayerMatchesSection
         :upcoming-matches="upcomingMatches"
