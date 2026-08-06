@@ -393,7 +393,16 @@ export class MatchService {
         },
       },
       {
-        populate: ["tournament", "participants.team", "participants.players", "winner"],
+        orderBy: { beginAt: "ASC" },
+        populate: [
+          "tournament",
+          "tournament.league",
+          "participants.team",
+          "participants.players",
+          "results",
+          "results.participant",
+          "winner",
+        ],
       },
     );
   }
