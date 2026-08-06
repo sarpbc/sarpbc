@@ -22,6 +22,15 @@ const playerId = computed(() => player.value?.id ?? "");
 
 const { data: oldTeams } = await getPlayerOldTeams(playerId);
 
+const {
+  live: liveMatches,
+  upcoming: upcomingMatches,
+  past: pastMatches,
+  pending: matchesPending,
+  error: matchesError,
+  refresh: refreshMatches,
+} = usePlayerMatches(playerId);
+
 const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
 
 const formatContractDate = (dateStr: string | null) =>
@@ -52,7 +61,7 @@ setPageSeo({
 
 <template>
   <div class="w-full max-w-5xl flex flex-col items-center px-8 lg:px-0 gap-4 lg:gap-8">
-    <section class="w-full">
+    <section class="w-full flex flex-col gap-6">
       <div class="w-full flex flex-col items-start md:h-18">
         <h1 class="flex text-xl font-semibold">{{ currentPlayer.name }}</h1>
         <div class="flex flex-row items-center gap-2">
@@ -104,7 +113,16 @@ setPageSeo({
         </div>
       </div>
 
-      <div v-if="oldTeams && oldTeams.length > 0" class="w-full flex flex-col mt-6 gap-2">
+      <PlayerMatchesSection
+        :upcoming-matches="upcomingMatches"
+        :past-matches="pastMatches"
+        :live-matches="liveMatches"
+        :pending="matchesPending"
+        :has-error="Boolean(matchesError)"
+        @retry="refreshMatches()"
+      />
+
+      <div v-if="oldTeams && oldTeams.length > 0" class="w-full flex flex-col gap-2">
         <h2 class="text-lg font-semibold">
           {{ t("page.player.slug.formerTeams") }}
         </h2>
