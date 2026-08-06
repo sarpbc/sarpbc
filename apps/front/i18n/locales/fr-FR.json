@@ -308,13 +308,31 @@
         "goBackToHome": "Retour à l'accueil",
         "seoTitleWithName": "{name} - sarpbc.org",
         "seoTitleDefault": "Joueur - sarpbc.org",
-        "seoDescriptionWithName": "Voir le profil et les statistiques de {name}",
-        "seoDescriptionDefault": "Profil du joueur",
+        "seoDescriptionWithName": "Voir le profil, les matchs à venir et les résultats récents de {name}",
+        "seoDescriptionDefault": "Profil du joueur, matchs à venir et résultats récents",
         "currentTeam": "Équipe actuelle",
         "nationality": "Nationalité",
         "age": "Âge",
         "xYears": "{years} ans",
-        "formerTeams": "Anciennes équipes"
+        "formerTeams": "Anciennes équipes",
+        "matches": {
+          "sectionTitle": "Matchs",
+          "live": "En direct",
+          "error": "Impossible de charger les matchs de ce joueur. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "tabs": {
+            "upcoming": "À venir",
+            "past": "Passés"
+          },
+          "upcoming": {
+            "empty": "Aucun match à venir programmé.",
+            "emptyHint": "Le calendrier apparaîtra ici dès qu'un match sera programmé pour ce joueur."
+          },
+          "past": {
+            "empty": "Aucun match terminé pour le moment.",
+            "emptyHint": "Les résultats apparaîtront ici après le premier match de ce joueur."
+          }
+        }
       }
     },
     "teams": {
