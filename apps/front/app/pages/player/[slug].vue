@@ -63,66 +63,68 @@ setPageSeo({
 <template>
   <div class="w-full max-w-5xl flex flex-col items-center px-8 lg:px-0 gap-4 lg:gap-8">
     <section class="w-full flex flex-col gap-6">
-      <div class="w-full flex flex-col items-start md:h-18">
-        <h1 class="text-xl font-semibold tracking-tight">{{ currentPlayer.name }}</h1>
-        <div class="flex flex-row items-center gap-2">
-          <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-          <span class="text-sm text-muted">
-            {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
-          </span>
+      <div class="w-full flex flex-col gap-4">
+        <div class="w-full flex flex-col items-start md:h-18">
+          <h1 class="text-xl font-semibold tracking-tight">{{ currentPlayer.name }}</h1>
+          <div class="flex flex-row items-center gap-2">
+            <FlagIcon :nationality="currentPlayer.nationality" size="md" />
+            <span class="text-sm text-muted">
+              {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="w-full flex flex-row border border-default gap-4 p-4">
-        <PlayerImg
-          :player-name="currentPlayer.name"
-          :img="currentPlayer.imageUrl"
-          size="xl"
-          priority
-        />
-        <dl class="w-full flex flex-col gap-3">
-          <div class="flex flex-row items-center justify-between gap-4">
-            <dt class="text-sm text-muted">{{ t("page.player.slug.age") }}</dt>
-            <dd>
-              <UTooltip
-                v-if="currentPlayer.birthday !== undefined"
-                :content="{
-                  align: 'center',
-                  side: 'top',
-                  sideOffset: 4,
-                }"
-                :text="df.format(new Date(currentPlayer.birthday))"
-              >
-                <span class="text-sm font-medium tabular-nums">
-                  {{
-                    t("page.player.slug.xYears", {
-                      years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
-                    })
-                  }}
+        <div class="w-full flex flex-row border border-default gap-4 p-4">
+          <PlayerImg
+            :player-name="currentPlayer.name"
+            :img="currentPlayer.imageUrl"
+            size="xl"
+            priority
+          />
+          <dl class="w-full flex flex-col gap-3">
+            <div class="flex flex-row items-center justify-between gap-4">
+              <dt class="text-sm text-muted">{{ t("page.player.slug.age") }}</dt>
+              <dd>
+                <UTooltip
+                  v-if="currentPlayer.birthday !== undefined"
+                  :content="{
+                    align: 'center',
+                    side: 'top',
+                    sideOffset: 4,
+                  }"
+                  :text="df.format(new Date(currentPlayer.birthday))"
+                >
+                  <span class="text-sm font-medium tabular-nums">
+                    {{
+                      t("page.player.slug.xYears", {
+                        years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
+                      })
+                    }}
+                  </span>
+                </UTooltip>
+              </dd>
+            </div>
+            <div class="flex flex-row items-center justify-between gap-4">
+              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
+              <dd class="min-w-0 flex justify-end">
+                <ULink
+                  v-if="currentPlayer.team"
+                  :to="$localePath(`/team/${currentPlayer.team.slug}`)"
+                  class="inline-flex items-center gap-2 min-w-0 font-medium hover:underline"
+                >
+                  <TeamImg
+                    :team-name="currentPlayer.team.name"
+                    :image-url="currentPlayer.team.imageUrl"
+                    size="xs"
+                  />
+                  <span class="truncate">{{ currentPlayer.team.name }}</span>
+                </ULink>
+                <span v-else class="text-sm text-muted">
+                  {{ t("page.player.slug.freeAgent") }}
                 </span>
-              </UTooltip>
-            </dd>
-          </div>
-          <div class="flex flex-row items-center justify-between gap-4">
-            <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
-            <dd class="min-w-0 flex justify-end">
-              <ULink
-                v-if="currentPlayer.team"
-                :to="$localePath(`/team/${currentPlayer.team.slug}`)"
-                class="inline-flex items-center gap-2 min-w-0 font-medium hover:underline"
-              >
-                <TeamImg
-                  :team-name="currentPlayer.team.name"
-                  :image-url="currentPlayer.team.imageUrl"
-                  size="xs"
-                />
-                <span class="truncate">{{ currentPlayer.team.name }}</span>
-              </ULink>
-              <span v-else class="text-sm text-muted">
-                {{ t("page.player.slug.freeAgent") }}
-              </span>
-            </dd>
-          </div>
-        </dl>
+              </dd>
+            </div>
+          </dl>
+        </div>
       </div>
 
       <PlayerTrophyCabinet

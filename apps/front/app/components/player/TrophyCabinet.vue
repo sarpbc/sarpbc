@@ -31,6 +31,9 @@ const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
   return dateDf.value.format(new Date(value));
 };
+
+const hasMeta = (trophy: PlayerTrophyListItem) =>
+  Boolean(trophy.leagueName || trophy.serie || trophy.endAt);
 </script>
 
 <template>
@@ -42,10 +45,10 @@ const formatEndDate = (value: Date | string | null) => {
     <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
       <UiCard v-for="index in 3" :key="index">
         <div class="flex items-center gap-3 py-2 px-3">
-          <USkeleton class="size-5 shrink-0" />
-          <div class="flex flex-1 flex-col gap-1">
-            <USkeleton class="h-3 w-40" />
-            <USkeleton class="h-3 w-24" />
+          <USkeleton class="size-10 shrink-0" />
+          <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+            <USkeleton class="h-4 w-3/5 max-w-48" />
+            <USkeleton class="h-3 w-2/5 max-w-32" />
           </div>
         </div>
       </UiCard>
@@ -71,19 +74,23 @@ const formatEndDate = (value: Date | string | null) => {
         v-for="trophy in trophies"
         :key="trophy.id"
         :to="$localePath(`/tournaments/${trophy.id}`)"
-        class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors"
+        class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
       >
-        <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary shrink-0" />
-        <div class="flex-1 min-w-0">
+        <div class="flex size-10 shrink-0 items-center justify-center">
+          <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary" />
+        </div>
+        <div class="min-w-0 flex-1">
           <p class="font-medium truncate">{{ trophy.name }}</p>
-          <p
-            v-if="trophy.leagueName || trophy.serie || trophy.endAt"
-            class="text-sm text-muted truncate"
-          >
+          <p v-if="hasMeta(trophy)" class="text-sm text-muted truncate">
             <span v-if="trophy.leagueName">{{ trophy.leagueName }}</span>
-            <span v-if="trophy.leagueName && trophy.serie" class="mx-1">·</span>
+            <span v-if="trophy.leagueName && trophy.serie" class="mx-1" aria-hidden="true">·</span>
             <span v-if="trophy.serie">{{ trophy.serie }}</span>
-            <span v-if="(trophy.leagueName || trophy.serie) && trophy.endAt" class="mx-1">·</span>
+            <span
+              v-if="(trophy.leagueName || trophy.serie) && trophy.endAt"
+              class="mx-1"
+              aria-hidden="true"
+              >·</span
+            >
             <span v-if="trophy.endAt">
               {{ t("page.player.slug.trophies.wonOn", { date: formatEndDate(trophy.endAt) }) }}
             </span>
