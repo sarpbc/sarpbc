@@ -18,13 +18,13 @@ const activities = computed(() => recentForumActivities.value ?? []);
 <template>
   <div class="w-full flex flex-col">
     <UiRail :title="$t('components.forum.recentPosts')">
-      <!-- Bordered stack matches match-rail UiCard (hub DA — not a one-off). -->
-      <div class="w-full flex flex-col border border-default overflow-hidden">
+      <!-- Same shell as News / match rails: flush-bottom card + row dividers (incl. last). -->
+      <UiCard flush-bottom>
         <UiListItem
-          v-for="(activity, index) in activities"
+          v-for="activity in activities"
           :key="activity.id"
           size="compact"
-          :divider="index < activities.length - 1"
+          divider
           :to="$localePath(`/forum/post/${activity.id}`)"
           :title="activity.title"
           class="text-xs font-normal text-muted"
@@ -33,7 +33,7 @@ const activities = computed(() => recentForumActivities.value ?? []);
           <div class="shrink-0 tabular-nums text-muted">{{ activity.messageCount }}</div>
         </UiListItem>
         <!-- ClientOnly: island is hydrate-on-idle; auth may revalidate after hydrate.
-             border-t (not last-item divider) avoids a double bottom edge before hydrate. -->
+             Last activity keeps its divider as the seam above this row when present. -->
         <ClientOnly>
           <UButton
             v-if="user"
@@ -44,10 +44,10 @@ const activities = computed(() => recentForumActivities.value ?? []);
             size="xs"
             :label="$t('components.forum.createPost')"
             :title="$t('components.forum.createPost')"
-            class="h-row-compact min-h-row-compact w-full rounded-none border-t border-default font-normal"
+            class="h-row-compact min-h-row-compact w-full rounded-none border-b border-default font-normal"
           />
         </ClientOnly>
-      </div>
+      </UiCard>
     </UiRail>
     <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
   </div>

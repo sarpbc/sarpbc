@@ -23,7 +23,8 @@
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
 @theme {
   --spacing-row: 2.75rem; /* 44px — news link, match row, toolbar */
-  --spacing-row-compact: 1.75rem; /* 28px — forum rail, game promo */
+  /* Exact 2/3 of row so 3 forum rails = 2 news rows (hub DA). */
+  --spacing-row-compact: calc(var(--spacing-row) * 2 / 3);
   --spacing-row-header: 3.5rem; /* 56px — page title band */
   --spacing-row-double: 5.5rem; /* 88px — rare 2× cells */
   --spacing-rail-caption: 4.5rem; /* 72px — section label above rail cards */

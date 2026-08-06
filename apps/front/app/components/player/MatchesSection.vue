@@ -83,9 +83,11 @@ function setTab(nextTab: PlayerMatchesTab) {
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-3" :aria-labelledby="headingId">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
+  <section class="w-full flex flex-col gap-1" :aria-labelledby="headingId">
+    <div
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between h-rail-caption pb-1 pl-2"
+    >
+      <h2 :id="headingId" class="text-sm font-medium text-toned">
         {{ t("page.player.slug.matches.sectionTitle") }}
       </h2>
       <div

@@ -108,13 +108,13 @@ Don't mix more than two weights in one view. UI labels default to `text-sm` (14p
 
 Hub lists and rails sit on a **4px base** with a modular **row scale**. Tokens live in `app/assets/css/main.css` (`@theme` → Tailwind spacing). Prefer height utilities: `h-row`, `min-h-row`, `h-row-compact`, …
 
-| Token            | CSS variable             | rem       | px  | Utilities (examples)               | Use                                                          |
-| ---------------- | ------------------------ | --------- | --- | ---------------------------------- | ------------------------------------------------------------ |
-| **row**          | `--spacing-row`          | `2.75rem` | 44  | `h-row`, `min-h-row`               | Default list row, news link band, match row, toolbar         |
-| **row-compact**  | `--spacing-row-compact`  | `1.75rem` | 28  | `h-row-compact`                    | Dense rail rows (forum preview, game promo)                  |
-| **row-header**   | `--spacing-row-header`   | `3.5rem`  | 56  | `h-row-header`, `min-h-row-header` | Page title band (`UiCrossCard`)                              |
-| **row-double**   | `--spacing-row-double`   | `5.5rem`  | 88  | `h-row-double`                     | Rare 2× cells                                                |
-| **rail-caption** | `--spacing-rail-caption` | `4.5rem`  | 72  | `h-rail-caption`                   | Section label above a rail card (`flex-col-reverse` caption) |
+| Token            | CSS variable             | rem                             | px    | Utilities (examples)               | Use                                                          |
+| ---------------- | ------------------------ | ------------------------------- | ----- | ---------------------------------- | ------------------------------------------------------------ |
+| **row**          | `--spacing-row`          | `2.75rem`                       | 44    | `h-row`, `min-h-row`               | Default list row, news link band, match row, toolbar         |
+| **row-compact**  | `--spacing-row-compact`  | `calc(row × 2/3)` (~`1.833rem`) | ~29.3 | `h-row-compact`                    | Dense rail rows — **3 compact = 2 row** (forum vs news)      |
+| **row-header**   | `--spacing-row-header`   | `3.5rem`                        | 56    | `h-row-header`, `min-h-row-header` | Page title band (`UiCrossCard`)                              |
+| **row-double**   | `--spacing-row-double`   | `5.5rem`                        | 88    | `h-row-double`                     | Rare 2× cells                                                |
+| **rail-caption** | `--spacing-rail-caption` | `4.5rem`                        | 72    | `h-rail-caption`                   | Section label above a rail card (`flex-col-reverse` caption) |
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
@@ -149,12 +149,12 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 
 #### `UiListItem` sizes
 
-| `size` prop             | Row utilities                        | Token |
-| ----------------------- | ------------------------------------ | ----- |
-| `compact` (dense rails) | `h-row-compact`, `min-h-row-compact` | 28px  |
-| `default`               | `h-row`, `min-h-row`                 | 44px  |
-| `header`                | `h-row-header`, `min-h-row-header`   | 56px  |
-| `double`                | `h-row-double`, `min-h-row-double`   | 88px  |
+| `size` prop             | Row utilities                        | Token      |
+| ----------------------- | ------------------------------------ | ---------- |
+| `compact` (dense rails) | `h-row-compact`, `min-h-row-compact` | ⅔ of `row` |
+| `default`               | `h-row`, `min-h-row`                 | 44px       |
+| `header`                | `h-row-header`, `min-h-row-header`   | 56px       |
+| `double`                | `h-row-double`, `min-h-row-double`   | 88px       |
 
 Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — include on every row including last when the parent is `flushBottom`). Default slot; override padding via `class` (default `px-2`).
 
@@ -162,7 +162,7 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `UiRail` — caption `h-rail-caption` + `text-toned`, then a bordered card/rows stack in the default slot (same idea as match-rail `UiCard`). Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `UiHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Desktop caption baselines align via shared `h-rail-caption` on every `UiRail`; do not add per-rail `pt-8` or `md:h-18` offsets.
-- **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Only omit `divider` on the last row when a footer below owns the separator (`border-t`) — e.g. forum create button, mobile match “view all”.
+- **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
 - **Don't** put marketing cards in the hub hero/main column.
 
 ---
