@@ -314,6 +314,9 @@
         "nationality": "Nationality",
         "age": "Age",
         "xYears": "{years} years",
+        "freeAgent": "Free agent",
+        "contractTo": "to",
+        "contractDateUnknown": "Unknown",
         "formerTeams": "Former Teams",
         "matches": {
           "sectionTitle": "Matches",
