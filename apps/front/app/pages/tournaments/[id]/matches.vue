@@ -48,18 +48,24 @@ const isFinished = computed(
   () => tournament.value != null && getTournamentStatus(tournament.value) === "finished",
 );
 
-const hasMatches = computed(() => {
-  if (isFinished.value) {
-    return groupedMatches.value.completed.length > 0;
-  }
-  return groupedMatches.value.upcoming.length > 0 || groupedMatches.value.completed.length > 0;
+const displayGroupedMatches = computed(() => {
+  const { upcoming, completed } = groupedMatches.value;
+  return {
+    upcoming: isFinished.value ? [] : upcoming,
+    completed,
+  };
 });
+
+const hasMatches = computed(
+  () =>
+    displayGroupedMatches.value.upcoming.length > 0 ||
+    displayGroupedMatches.value.completed.length > 0,
+);
 
 const showUpcomingSectionTitle = computed(
   () =>
-    !isFinished.value &&
-    groupedMatches.value.upcoming.length > 0 &&
-    groupedMatches.value.completed.length > 0,
+    displayGroupedMatches.value.upcoming.length > 0 &&
+    displayGroupedMatches.value.completed.length > 0,
 );
 
 function formatDayHeader(group: { date: Date | null; dateKey: string }) {
@@ -125,15 +131,12 @@ watch(
       <TournamentHero :tournament="tournament" />
       <TournamentHeader :tournament-id="tournamentId" active-tab="matches" />
       <div v-if="hasMatches" class="flex flex-col gap-4">
-        <section
-          v-if="!isFinished && groupedMatches.upcoming.length > 0"
-          class="flex flex-col gap-2"
-        >
+        <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col gap-2">
           <h2 v-if="showUpcomingSectionTitle" class="text-sm font-medium text-toned pl-1">
             {{ t("page.tournaments.id.matchSections.upcoming") }}
           </h2>
           <div
-            v-for="dayGroup in groupedMatches.upcoming"
+            v-for="dayGroup in displayGroupedMatches.upcoming"
             :key="`upcoming-${dayGroup.dateKey}`"
             class="flex flex-col gap-px"
           >
@@ -156,7 +159,7 @@ watch(
         </section>
 
         <section
-          v-for="dayGroup in groupedMatches.completed"
+          v-for="dayGroup in displayGroupedMatches.completed"
           :key="`completed-${dayGroup.dateKey}`"
           class="flex flex-col gap-px"
         >
