@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import type { Match } from "~/types/matches";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
 const { match } = defineProps<{
   match: Match;
 }>();
+
+const discoveryStatus = computed(() => resolveMatchDiscoveryStatus(match));
 </script>
 
 <template>
@@ -15,8 +18,7 @@ const { match } = defineProps<{
     :participant-a-id="match.participants?.[0]?.id"
     :participant-b-id="match.participants?.[1]?.id"
     :results="match.results"
-    :begin-at="match.beginAt"
-    :end-at="match.endAt"
-    :status="match.status"
+    discovery-source="tournament_hub"
+    :discovery-status="discoveryStatus"
   />
 </template>

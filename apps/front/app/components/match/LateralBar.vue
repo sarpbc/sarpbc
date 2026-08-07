@@ -7,15 +7,6 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
 });
 
 const SOURCE = "lateral_bar" as const;
-const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
-
-function onLiveOrUpcomingClick(matchId: string, status: "live" | "upcoming") {
-  trackMatchRowClicked({ matchId, source: SOURCE, status });
-}
-
-function onResultClick(matchId: string) {
-  trackMatchRowClicked({ matchId, source: SOURCE, status: "finished" });
-}
 </script>
 
 <template>
@@ -26,39 +17,42 @@ function onResultClick(matchId: string) {
     >
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <ULink
+          <MatchDiscoveryLink
             v-for="match in data.live"
             :key="match.id"
-            :to="matchDetailTo(match.id, SOURCE)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="live"
             class="block hover:bg-elevated/50 transition-colors"
-            @click="onLiveOrUpcomingClick(match.id, 'live')"
           >
             <MatchRow :match="match" :live="true" />
-          </ULink>
-          <ULink
+          </MatchDiscoveryLink>
+          <MatchDiscoveryLink
             v-for="match in data.upcoming"
             :key="match.id"
-            :to="matchDetailTo(match.id, SOURCE)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="upcoming"
             class="block hover:bg-elevated/50 transition-colors"
-            @click="onLiveOrUpcomingClick(match.id, 'upcoming')"
           >
             <MatchRow :match="match" />
-          </ULink>
+          </MatchDiscoveryLink>
         </div>
       </UiCard>
     </UiRail>
     <UiRail v-if="results && results.results.length > 0" :title="$t('components.match.results')">
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <ULink
+          <MatchDiscoveryLink
             v-for="match in results.results"
             :key="match.id"
-            :to="matchDetailTo(match.id, SOURCE)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="finished"
             class="block hover:bg-elevated/50 transition-colors"
-            @click="onResultClick(match.id)"
           >
             <MatchResultRow :match="match" />
-          </ULink>
+          </MatchDiscoveryLink>
         </div>
       </UiCard>
     </UiRail>

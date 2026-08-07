@@ -2,9 +2,10 @@
 import type { MatchResult } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
@@ -20,9 +21,8 @@ const {
   winnerParticipantId = null,
   compact = false,
   bracket = false,
-  beginAt = null,
-  endAt = null,
-  status = null,
+  discoverySource,
+  discoveryStatus,
 } = defineProps<{
   matchId: string;
   name?: string;
@@ -36,30 +36,28 @@ const {
   winnerParticipantId?: string | null;
   compact?: boolean;
   bracket?: boolean;
-  beginAt?: Date | string | null;
-  endAt?: Date | string | null;
-  status?: string | null;
+  /** When set with discoveryStatus, CTR instrumentation is enabled. */
+  discoverySource?: MatchDiscoverySource;
+  discoveryStatus?: MatchDiscoveryStatus;
 }>();
 
-const SOURCE = "tournament_hub" as const;
-
-const detailTo = computed(() => matchDetailTo(matchId, SOURCE));
+const detailTo = computed(() => {
+  if (discoverySource) {
+    return matchDetailTo(matchId, discoverySource);
+  }
+  return localePath(`/matches/${matchId}`);
+});
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
 
 function onMatchClick() {
-  let discoveryStatus = resolveMatchDiscoveryStatus({ beginAt, endAt, status });
-  if (
-    discoveryStatus === "upcoming" &&
-    (winnerParticipantId || (results !== undefined && results.length > 0))
-  ) {
-    discoveryStatus = "finished";
+  if (!discoverySource || !discoveryStatus) {
+    return;
   }
-
   trackMatchRowClicked({
     matchId,
-    source: SOURCE,
+    source: discoverySource,
     status: discoveryStatus,
   });
 }

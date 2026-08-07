@@ -2,7 +2,6 @@ import {
   buildMatchDetailTo,
   type MatchDiscoverySource,
   type MatchDiscoveryStatus,
-  parseMatchDiscoverySource,
 } from "~/utils/matchDiscoveryAnalytics";
 
 /**
@@ -49,6 +48,5 @@ export function useMatchDiscoveryAnalytics() {
     matchDetailTo,
     trackMatchRowClicked,
     trackMatchDetailViewed,
-    parseMatchDiscoverySource,
   };
 }

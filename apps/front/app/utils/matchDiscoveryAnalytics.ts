@@ -67,9 +67,9 @@ export function buildMatchDetailTo(
   localePath: (path: string) => string,
   matchId: string,
   source: MatchDiscoverySource,
-): { path: string; query: { from: MatchDiscoverySource } } {
+): { path: string; query: Record<string, MatchDiscoverySource> } {
   return {
     path: localePath(`/matches/${matchId}`),
-    query: { from: source },
+    query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
   };
 }

@@ -12,32 +12,12 @@ const { matches, variant, title, discoverySource } = defineProps<{
 }>();
 
 const { t } = useI18n();
-const localePath = useLocalePath();
-const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const eventGroups = computed(() =>
   groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
 );
 
 const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
-
-function matchLinkTo(matchId: string) {
-  if (discoverySource) {
-    return matchDetailTo(matchId, discoverySource);
-  }
-  return localePath(`/matches/${matchId}`);
-}
-
-function onMatchRowClick(matchId: string) {
-  if (!discoverySource) {
-    return;
-  }
-  trackMatchRowClicked({
-    matchId,
-    source: discoverySource,
-    status: discoveryStatus.value,
-  });
-}
 </script>
 
 <template>
@@ -76,10 +56,20 @@ function onMatchRowClick(matchId: string) {
         :class="variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined"
       >
         <div v-for="match in group.matches" :key="match.id">
-          <ULink
-            :to="matchLinkTo(match.id)"
+          <MatchDiscoveryLink
+            v-if="discoverySource"
+            :match-id="match.id"
+            :source="discoverySource"
+            :status="discoveryStatus"
             class="block hover:bg-elevated/50 transition-colors"
-            @click="onMatchRowClick(match.id)"
+          >
+            <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
+            <MatchResultRow v-else :match="match" />
+          </MatchDiscoveryLink>
+          <ULink
+            v-else
+            :to="$localePath(`/matches/${match.id}`)"
+            class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
             <MatchResultRow v-else :match="match" />
