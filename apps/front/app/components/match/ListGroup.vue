@@ -23,7 +23,7 @@ const eventGroups = computed(() =>
     <div
       v-if="title"
       class="flex items-center gap-2 pl-1"
-      :class="variant === 'live' ? 'sticky top-0 z-10 bg-default py-1' : undefined"
+      :class="variant === 'live' ? 'sticky top-header z-10 bg-default py-1' : undefined"
     >
       <h2
         class="text-sm font-medium"
