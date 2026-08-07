@@ -2,9 +2,11 @@
 import type { MatchResult } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
-const localePath = useLocalePath();
 const { t } = useI18n();
+const localePath = useLocalePath();
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
   matchId,
@@ -19,6 +21,8 @@ const {
   winnerParticipantId = null,
   compact = false,
   bracket = false,
+  discoverySource,
+  discoveryStatus,
 } = defineProps<{
   matchId: string;
   name?: string;
@@ -32,10 +36,31 @@ const {
   winnerParticipantId?: string | null;
   compact?: boolean;
   bracket?: boolean;
+  /** When set with discoveryStatus, CTR instrumentation is enabled. */
+  discoverySource?: MatchDiscoverySource;
+  discoveryStatus?: MatchDiscoveryStatus;
 }>();
+
+const detailTo = computed(() => {
+  if (discoverySource) {
+    return matchDetailTo(matchId, discoverySource);
+  }
+  return localePath(`/matches/${matchId}`);
+});
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
+
+function onMatchClick() {
+  if (!discoverySource || !discoveryStatus) {
+    return;
+  }
+  trackMatchRowClicked({
+    matchId,
+    source: discoverySource,
+    status: discoveryStatus,
+  });
+}
 
 const displayTeamA = computed(() => {
   if (!teamAName) {
@@ -68,7 +93,7 @@ function participantRowClass(participantId: string | undefined): string {
 
 <template>
   <NuxtLink
-    :to="localePath(`/matches/${matchId}`)"
+    :to="detailTo"
     :class="[
       'flex flex-col rounded-sm hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
       bracket
@@ -77,6 +102,7 @@ function participantRowClass(participantId: string | undefined): string {
           ? 'w-64 min-h-16 p-2 bg-muted/70 border border-transparent hover:border-default'
           : 'w-full max-w-xl p-3 bg-muted/70 border border-default',
     ]"
+    @click="onMatchClick"
   >
     <p v-if="name && !bracket" class="text-xs text-dimmed truncate">{{ name }}</p>
 

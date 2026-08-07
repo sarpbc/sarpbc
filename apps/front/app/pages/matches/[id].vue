@@ -2,12 +2,21 @@
 import type { Match, MatchDetailResponse } from "~/types/matches";
 import { getResultParticipantId } from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
+import {
+  MATCH_DISCOVERY_FROM_QUERY,
+  parseMatchDiscoverySource,
+  resolveMatchDiscoveryStatus,
+} from "~/utils/matchDiscoveryAnalytics";
 
 const { t, locale } = useI18n();
 const route = useRoute();
 const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
 const matchId = computed(() => route.params.id as string);
+const { trackMatchDetailViewed } = useMatchDiscoveryAnalytics();
+const discoverySource = computed(() =>
+  parseMatchDiscoverySource(route.query[MATCH_DISCOVERY_FROM_QUERY]),
+);
 
 const {
   data: matchDetail,
@@ -92,21 +101,32 @@ function getScoreColorClass(participantId: string): string {
 }
 
 const matchStatus = computed(() => {
-  if (!match.value) return "upcoming" as const;
-
-  const now = Date.now();
-  const beginAt = match.value.beginAt ? new Date(match.value.beginAt).getTime() : null;
-
-  if (match.value.endAt || match.value.status === "finished") {
-    return "finished" as const;
+  if (!match.value) {
+    return "upcoming" as const;
   }
-
-  if (beginAt !== null && beginAt <= now) {
-    return "live" as const;
-  }
-
-  return "upcoming" as const;
+  return resolveMatchDiscoveryStatus(match.value);
 });
+
+watch(
+  () => {
+    if (!match.value || match.value.id !== matchId.value) {
+      return null;
+    }
+    return `${matchId.value}:${discoverySource.value ?? ""}`;
+  },
+  (key) => {
+    if (!key || !match.value) {
+      return;
+    }
+
+    trackMatchDetailViewed({
+      matchId: matchId.value,
+      status: matchStatus.value,
+      source: discoverySource.value,
+    });
+  },
+  { immediate: true },
+);
 
 const dateTimeFormatter = computed(
   () =>

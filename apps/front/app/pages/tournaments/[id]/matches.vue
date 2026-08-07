@@ -7,6 +7,7 @@ const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 const tournamentId = computed(() => route.params.id as string);
+const SOURCE = "tournament_hub" as const;
 
 const {
   data: tournament,
@@ -127,12 +128,14 @@ watch(
             </h3>
             <UiCard flush-bottom variant="soft" class="w-full">
               <div v-for="match in dayGroup.matches" :key="match.id">
-                <ULink
-                  :to="$localePath(`/matches/${match.id}`)"
+                <MatchDiscoveryLink
+                  :match-id="match.id"
+                  :source="SOURCE"
+                  status="upcoming"
                   class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
                 >
                   <MatchRow :match="match" />
-                </ULink>
+                </MatchDiscoveryLink>
               </div>
             </UiCard>
           </div>
@@ -148,12 +151,14 @@ watch(
           </h3>
           <UiCard flush-bottom variant="soft" class="w-full">
             <div v-for="match in dayGroup.matches" :key="match.id">
-              <ULink
-                :to="$localePath(`/matches/${match.id}`)"
+              <MatchDiscoveryLink
+                :match-id="match.id"
+                :source="SOURCE"
+                status="finished"
                 class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
               >
                 <MatchResultRow :match="match" />
-              </ULink>
+              </MatchDiscoveryLink>
             </div>
           </UiCard>
         </section>

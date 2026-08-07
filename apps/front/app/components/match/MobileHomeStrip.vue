@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const MAX_MATCHES = 5;
+const SOURCE = "home_strip" as const;
 
 const { data, pending } = await useUpcomingMatches();
 
@@ -11,6 +12,10 @@ const matches = computed(() => {
 });
 
 const showRail = computed(() => pending.value || matches.value.length > 0);
+
+function isLive(matchId: string): boolean {
+  return Boolean(data.value?.live.some((m) => m.id === matchId));
+}
 </script>
 
 <template>
@@ -30,18 +35,20 @@ const showRail = computed(() => pending.value || matches.value.length > 0);
             </UiListItem>
           </template>
           <template v-else>
-            <ULink
+            <MatchDiscoveryLink
               v-for="(match, index) in matches"
               :key="match.id"
-              :to="$localePath(`/matches/${match.id}`)"
+              :match-id="match.id"
+              :source="SOURCE"
+              :status="isLive(match.id) ? 'live' : 'upcoming'"
               class="block hover:bg-elevated/50 transition-colors"
             >
               <MatchRow
                 :match="match"
-                :live="data?.live.some((m) => m.id === match.id)"
+                :live="isLive(match.id)"
                 :divider="index < matches.length - 1"
               />
-            </ULink>
+            </MatchDiscoveryLink>
           </template>
         </div>
         <div class="border-t border-default px-3 py-2">
