@@ -20,8 +20,14 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const SOURCE = "tournament_hub" as const;
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.length > 0);
+
+function onMatchClick(matchId: string, status: "live" | "upcoming") {
+  trackMatchRowClicked({ matchId, source: SOURCE, status });
+}
 </script>
 
 <template>
@@ -70,8 +76,9 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         <UiCard flush-bottom class="border-error/30 bg-error/5">
           <div v-for="match in liveMatches" :key="match.id">
             <ULink
-              :to="$localePath(`/matches/${match.id}`)"
+              :to="matchDetailTo(match.id, SOURCE)"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+              @click="onMatchClick(match.id, 'live')"
             >
               <MatchRow :match="match" live />
             </ULink>
@@ -86,8 +93,9 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         <UiCard flush-bottom variant="soft">
           <div v-for="match in upcomingMatches" :key="match.id">
             <ULink
-              :to="$localePath(`/matches/${match.id}`)"
+              :to="matchDetailTo(match.id, SOURCE)"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+              @click="onMatchClick(match.id, 'upcoming')"
             >
               <MatchRow :match="match" />
             </ULink>

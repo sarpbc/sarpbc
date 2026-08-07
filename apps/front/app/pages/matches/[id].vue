@@ -8,6 +8,8 @@ const route = useRoute();
 const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
 const matchId = computed(() => route.params.id as string);
+const { trackMatchDetailViewed, parseMatchDiscoverySource } = useMatchDiscoveryAnalytics();
+const discoverySource = computed(() => parseMatchDiscoverySource(route.query.from));
 
 const {
   data: matchDetail,
@@ -107,6 +109,22 @@ const matchStatus = computed(() => {
 
   return "upcoming" as const;
 });
+
+watch(
+  [matchId, match, discoverySource],
+  ([id, current]) => {
+    if (!current || current.id !== id) {
+      return;
+    }
+
+    trackMatchDetailViewed({
+      matchId: id,
+      status: matchStatus.value,
+      source: discoverySource.value,
+    });
+  },
+  { immediate: true },
+);
 
 const dateTimeFormatter = computed(
   () =>

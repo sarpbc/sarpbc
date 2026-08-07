@@ -5,6 +5,17 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
     return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
   },
 });
+
+const SOURCE = "lateral_bar" as const;
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
+
+function onLiveOrUpcomingClick(matchId: string, status: "live" | "upcoming") {
+  trackMatchRowClicked({ matchId, source: SOURCE, status });
+}
+
+function onResultClick(matchId: string) {
+  trackMatchRowClicked({ matchId, source: SOURCE, status: "finished" });
+}
 </script>
 
 <template>
@@ -18,16 +29,18 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
           <ULink
             v-for="match in data.live"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :to="matchDetailTo(match.id, SOURCE)"
             class="block hover:bg-elevated/50 transition-colors"
+            @click="onLiveOrUpcomingClick(match.id, 'live')"
           >
             <MatchRow :match="match" :live="true" />
           </ULink>
           <ULink
             v-for="match in data.upcoming"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :to="matchDetailTo(match.id, SOURCE)"
             class="block hover:bg-elevated/50 transition-colors"
+            @click="onLiveOrUpcomingClick(match.id, 'upcoming')"
           >
             <MatchRow :match="match" />
           </ULink>
@@ -40,8 +53,9 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
           <ULink
             v-for="match in results.results"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :to="matchDetailTo(match.id, SOURCE)"
             class="block hover:bg-elevated/50 transition-colors"
+            @click="onResultClick(match.id)"
           >
             <MatchResultRow :match="match" />
           </ULink>

@@ -2,9 +2,10 @@
 import type { MatchResult } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
-const localePath = useLocalePath();
 const { t } = useI18n();
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
   matchId,
@@ -19,6 +20,9 @@ const {
   winnerParticipantId = null,
   compact = false,
   bracket = false,
+  beginAt = null,
+  endAt = null,
+  status = null,
 } = defineProps<{
   matchId: string;
   name?: string;
@@ -32,10 +36,33 @@ const {
   winnerParticipantId?: string | null;
   compact?: boolean;
   bracket?: boolean;
+  beginAt?: Date | string | null;
+  endAt?: Date | string | null;
+  status?: string | null;
 }>();
+
+const SOURCE = "tournament_hub" as const;
+
+const detailTo = computed(() => matchDetailTo(matchId, SOURCE));
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
+
+function onMatchClick() {
+  let discoveryStatus = resolveMatchDiscoveryStatus({ beginAt, endAt, status });
+  if (
+    discoveryStatus === "upcoming" &&
+    (winnerParticipantId || (results !== undefined && results.length > 0))
+  ) {
+    discoveryStatus = "finished";
+  }
+
+  trackMatchRowClicked({
+    matchId,
+    source: SOURCE,
+    status: discoveryStatus,
+  });
+}
 
 const displayTeamA = computed(() => {
   if (!teamAName) {
@@ -68,7 +95,7 @@ function participantRowClass(participantId: string | undefined): string {
 
 <template>
   <NuxtLink
-    :to="localePath(`/matches/${matchId}`)"
+    :to="detailTo"
     :class="[
       'flex flex-col rounded-sm hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
       bracket
@@ -77,6 +104,7 @@ function participantRowClass(participantId: string | undefined): string {
           ? 'w-64 min-h-16 p-2 bg-muted/70 border border-transparent hover:border-default'
           : 'w-full max-w-xl p-3 bg-muted/70 border border-default',
     ]"
+    @click="onMatchClick"
   >
     <p v-if="name && !bracket" class="text-xs text-dimmed truncate">{{ name }}</p>
 

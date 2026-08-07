@@ -20,6 +20,8 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const SOURCE = "tournament_hub" as const;
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const latestResults = computed(() => {
   return [...matches]
@@ -79,8 +81,9 @@ const hasResults = computed(() => latestResults.value.length > 0);
     <UiCard v-else-if="hasResults" flush-bottom variant="soft">
       <div v-for="match in latestResults" :key="match.id">
         <ULink
-          :to="$localePath(`/matches/${match.id}`)"
+          :to="matchDetailTo(match.id, SOURCE)"
           class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+          @click="trackMatchRowClicked({ matchId: match.id, source: SOURCE, status: 'finished' })"
         >
           <MatchResultRow :match="match" />
         </ULink>

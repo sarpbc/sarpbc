@@ -7,6 +7,16 @@ const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 const tournamentId = computed(() => route.params.id as string);
+const SOURCE = "tournament_hub" as const;
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
+
+function onUpcomingClick(matchId: string) {
+  trackMatchRowClicked({ matchId, source: SOURCE, status: "upcoming" });
+}
+
+function onFinishedClick(matchId: string) {
+  trackMatchRowClicked({ matchId, source: SOURCE, status: "finished" });
+}
 
 const {
   data: tournament,
@@ -128,8 +138,9 @@ watch(
             <UiCard flush-bottom variant="soft" class="w-full">
               <div v-for="match in dayGroup.matches" :key="match.id">
                 <ULink
-                  :to="$localePath(`/matches/${match.id}`)"
+                  :to="matchDetailTo(match.id, SOURCE)"
                   class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+                  @click="onUpcomingClick(match.id)"
                 >
                   <MatchRow :match="match" />
                 </ULink>
@@ -149,8 +160,9 @@ watch(
           <UiCard flush-bottom variant="soft" class="w-full">
             <div v-for="match in dayGroup.matches" :key="match.id">
               <ULink
-                :to="$localePath(`/matches/${match.id}`)"
+                :to="matchDetailTo(match.id, SOURCE)"
                 class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+                @click="onFinishedClick(match.id)"
               >
                 <MatchResultRow :match="match" />
               </ULink>

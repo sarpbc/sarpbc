@@ -15,5 +15,8 @@ const { match } = defineProps<{
     :participant-a-id="match.participants?.[0]?.id"
     :participant-b-id="match.participants?.[1]?.id"
     :results="match.results"
+    :begin-at="match.beginAt"
+    :end-at="match.endAt"
+    :status="match.status"
   />
 </template>

@@ -1,17 +1,43 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "~/types/matches";
+import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
+import { listVariantToDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
-const { matches, variant, title } = defineProps<{
+const { matches, variant, title, discoverySource } = defineProps<{
   matches: MatchListItem[];
   variant: "live" | "upcoming" | "result";
   title?: string;
+  /** When set, links carry `?from=` and emit `match_row_clicked`. */
+  discoverySource?: MatchDiscoverySource;
 }>();
 
 const { t } = useI18n();
+const localePath = useLocalePath();
+const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const eventGroups = computed(() =>
   groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
 );
+
+const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
+
+function matchLinkTo(matchId: string) {
+  if (discoverySource) {
+    return matchDetailTo(matchId, discoverySource);
+  }
+  return localePath(`/matches/${matchId}`);
+}
+
+function onMatchRowClick(matchId: string) {
+  if (!discoverySource) {
+    return;
+  }
+  trackMatchRowClicked({
+    matchId,
+    source: discoverySource,
+    status: discoveryStatus.value,
+  });
+}
 </script>
 
 <template>
@@ -51,8 +77,9 @@ const eventGroups = computed(() =>
       >
         <div v-for="match in group.matches" :key="match.id">
           <ULink
-            :to="$localePath(`/matches/${match.id}`)"
+            :to="matchLinkTo(match.id)"
             class="block hover:bg-elevated/50 transition-colors"
+            @click="onMatchRowClick(match.id)"
           >
             <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
             <MatchResultRow v-else :match="match" />
