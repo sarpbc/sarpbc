@@ -10,8 +10,9 @@ interface Props {
 const boxClasses = {
   sm: "h-12 w-16",
   md: "h-24 w-36",
-  lg: "h-32 w-48",
-  xl: "h-48 w-64",
+  lg: "h-28 w-40 sm:h-32 sm:w-48",
+  // Shrink on narrow viewports so profile cards stay within the screen.
+  xl: "h-36 w-48 sm:h-44 sm:w-56 md:h-48 md:w-64",
 };
 
 const dimensions = {
@@ -24,8 +25,8 @@ const dimensions = {
 const sizesAttr = {
   sm: "64px",
   md: "144px",
-  lg: "192px",
-  xl: "256px",
+  lg: "(max-width: 640px) 160px, 192px",
+  xl: "(max-width: 640px) 192px, (max-width: 768px) 224px, 256px",
 };
 
 const iconClasses = {
