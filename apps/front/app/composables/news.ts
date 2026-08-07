@@ -5,7 +5,8 @@ export type NewsArticleListItem = {
   slug: string;
   title: string;
   createdAt: string;
-  imageUrl?: string | null;
+  imageUrl: string | null;
+  /** Plain-text teaser from list endpoints; omitted on full article payloads. */
   excerpt?: string;
 };
 
