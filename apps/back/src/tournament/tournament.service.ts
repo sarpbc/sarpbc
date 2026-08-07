@@ -65,6 +65,7 @@ export class TournamentService {
           "matches.winner",
           "participants",
           "participants.team",
+          "participants.players",
           "winner",
           "winner.team",
           "league",

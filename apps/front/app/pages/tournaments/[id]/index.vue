@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import type { UpcomingMatchesResponse } from "~/types/matches";
 import { isPickemTournamentActive } from "~/utils/pickems";
-
-const MATCH_HIGHLIGHTS_LIMIT = 5;
 
 const route = useRoute();
 const { t } = useI18n();
@@ -10,7 +7,12 @@ const { setPageSeo } = useSarpbcSeo();
 
 const tournamentId = computed(() => route.params.id as string);
 
-const tournamentRequest = useAsyncData(
+const {
+  data: tournament,
+  pending,
+  error,
+  refresh,
+} = await useAsyncData(
   () => `tournament-${tournamentId.value}`,
   async () => {
     const result = await getTournamentById(tournamentId.value);
@@ -27,38 +29,6 @@ const tournamentRequest = useAsyncData(
     default: () => null,
   },
 );
-
-const matchHighlightsRequest = useAsyncData<UpcomingMatchesResponse>(
-  () => `tournament-match-highlights-${tournamentId.value}`,
-  () =>
-    getUpcomingMatches({
-      tournamentId: tournamentId.value,
-      limit: MATCH_HIGHLIGHTS_LIMIT,
-    }),
-  {
-    watch: [tournamentId],
-    default: () => ({
-      live: [],
-      upcoming: [],
-      liveTotal: 0,
-      upcomingTotal: 0,
-      total: 0,
-    }),
-  },
-);
-
-const [tournamentState, matchHighlightsState] = await Promise.all([
-  tournamentRequest,
-  matchHighlightsRequest,
-]);
-
-const { data: tournament, pending, error, refresh } = tournamentState;
-const {
-  data: matchHighlights,
-  pending: matchHighlightsPending,
-  error: matchHighlightsError,
-  refresh: refreshMatchHighlights,
-} = matchHighlightsState;
 
 const title = computed(() =>
   tournament.value
@@ -79,8 +49,6 @@ const description = computed(() =>
 const showPickemCta = computed(
   () => tournament.value != null && isPickemTournamentActive(tournament.value),
 );
-
-const tournamentMatches = computed(() => tournament.value?.matches ?? []);
 
 watch(
   [title, description],
@@ -122,20 +90,6 @@ watch(
       <TournamentHero :tournament="tournament" />
       <TournamentHeader :tournament-id="tournamentId" active-tab="overview" />
       <PickemPromoBanner v-if="showPickemCta" :tournament="tournament" variant="homepage" />
-      <TournamentMatchHighlights
-        :tournament-id="tournamentId"
-        :live-matches="matchHighlights.live"
-        :upcoming-matches="matchHighlights.upcoming"
-        :pending="matchHighlightsPending"
-        :has-error="Boolean(matchHighlightsError)"
-        @retry="refreshMatchHighlights()"
-      />
-      <TournamentLatestResults
-        :tournament-id="tournamentId"
-        :matches="tournamentMatches"
-        :pending="pending"
-      />
-      <TournamentParticipants :tournament="tournament" />
       <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-bracket-title">
         <h2 id="tournament-bracket-title" class="text-xl font-semibold tracking-tight text-balance">
           {{ $t("page.tournaments.id.bracketTitle") }}
@@ -144,6 +98,7 @@ watch(
           <TournamentBracket :tournament="tournament" />
         </UCard>
       </section>
+      <TournamentParticipants :tournament="tournament" />
     </template>
   </div>
 </template>
