@@ -47,7 +47,7 @@ const hasTeams = computed(() => teams.value.length > 0);
         :key="team.id"
         size="default"
         :to="$localePath(`/team/${team.slug}`)"
-        class="gap-2 border border-default active:scale-[0.96] touch-manipulation transition-[colors,transform]"
+        class="gap-2 border border-default"
         role="listitem"
       >
         <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="sm" />
