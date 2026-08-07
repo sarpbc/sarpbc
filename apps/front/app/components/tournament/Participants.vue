@@ -51,13 +51,9 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
     </h2>
 
     <div v-if="hasTeams" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="list">
-      <TournamentParticipantTile
-        v-for="entry in participantEntries"
-        :key="entry.team.id"
-        :team="entry.team"
-        :players="entry.players"
-        role="listitem"
-      />
+      <div v-for="entry in participantEntries" :key="entry.team.id" role="listitem">
+        <TournamentParticipantTile :team="entry.team" :players="entry.players" />
+      </div>
     </div>
 
     <UiCard v-else variant="soft">

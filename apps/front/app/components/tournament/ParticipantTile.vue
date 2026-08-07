@@ -53,8 +53,8 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
             :to="$localePath(`/player/${player.slug}`)"
             class="gap-2"
           >
-            <PlayerImg :player-name="player.name" :img="player.imageUrl" size="sm" />
-            <span class="text-sm truncate">{{ player.name }}</span>
+            <FlagIcon :nationality="player.nationality" size="sm" />
+            <span class="text-sm font-medium truncate">{{ player.name }}</span>
           </UiListItem>
         </div>
         <p v-else class="text-sm text-muted">
