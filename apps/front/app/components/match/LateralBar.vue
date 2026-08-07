@@ -5,6 +5,8 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
     return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
   },
 });
+
+const SOURCE = "lateral_bar" as const;
 </script>
 
 <template>
@@ -15,36 +17,42 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
     >
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <ULink
+          <MatchDiscoveryLink
             v-for="match in data.live"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="live"
             class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow :match="match" :live="true" />
-          </ULink>
-          <ULink
+          </MatchDiscoveryLink>
+          <MatchDiscoveryLink
             v-for="match in data.upcoming"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="upcoming"
             class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow :match="match" />
-          </ULink>
+          </MatchDiscoveryLink>
         </div>
       </UiCard>
     </UiRail>
     <UiRail v-if="results && results.results.length > 0" :title="$t('components.match.results')">
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <ULink
+          <MatchDiscoveryLink
             v-for="match in results.results"
             :key="match.id"
-            :to="$localePath(`/matches/${match.id}`)"
+            :match-id="match.id"
+            :source="SOURCE"
+            status="finished"
             class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchResultRow :match="match" />
-          </ULink>
+          </MatchDiscoveryLink>
         </div>
       </UiCard>
     </UiRail>

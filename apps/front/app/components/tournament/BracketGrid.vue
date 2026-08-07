@@ -107,6 +107,8 @@ const connectorPaths = computed(() => {
           :participant-b-id="match.participantBId"
           :results="match.results"
           :winner-participant-id="match.winnerParticipantId"
+          discovery-source="tournament_hub"
+          :discovery-status="match.winnerParticipantId ? 'finished' : 'upcoming'"
         />
       </div>
     </div>

@@ -20,6 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const SOURCE = "tournament_hub" as const;
 
 const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.length > 0);
 </script>
@@ -69,12 +70,14 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         </h3>
         <UiCard flush-bottom class="border-error/30 bg-error/5">
           <div v-for="match in liveMatches" :key="match.id">
-            <ULink
-              :to="$localePath(`/matches/${match.id}`)"
+            <MatchDiscoveryLink
+              :match-id="match.id"
+              :source="SOURCE"
+              status="live"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
               <MatchRow :match="match" live />
-            </ULink>
+            </MatchDiscoveryLink>
           </div>
         </UiCard>
       </section>
@@ -85,12 +88,14 @@ const hasMatches = computed(() => liveMatches.length > 0 || upcomingMatches.leng
         </h3>
         <UiCard flush-bottom variant="soft">
           <div v-for="match in upcomingMatches" :key="match.id">
-            <ULink
-              :to="$localePath(`/matches/${match.id}`)"
+            <MatchDiscoveryLink
+              :match-id="match.id"
+              :source="SOURCE"
+              status="upcoming"
               class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
             >
               <MatchRow :match="match" />
-            </ULink>
+            </MatchDiscoveryLink>
           </div>
         </UiCard>
       </section>

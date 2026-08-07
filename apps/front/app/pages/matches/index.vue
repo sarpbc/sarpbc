@@ -102,6 +102,7 @@ setPageSeo({
           :matches="liveMatches"
           variant="live"
           :title="t('page.matches.sections.live')"
+          discovery-source="matches_list"
           class="mb-4"
         />
 
@@ -111,6 +112,7 @@ setPageSeo({
             :matches="upcomingMatches"
             variant="upcoming"
             :title="t('page.matches.sections.upcoming')"
+            discovery-source="matches_list"
           />
         </template>
 
@@ -118,6 +120,7 @@ setPageSeo({
           v-else-if="pastMatches.length > 0"
           :matches="pastMatches"
           variant="result"
+          discovery-source="matches_list"
         />
 
         <MatchListPagination
