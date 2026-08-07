@@ -474,7 +474,10 @@
         "participants": {
           "title": "Équipes participantes",
           "empty": "Équipes pas encore annoncées.",
-          "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé."
+          "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé.",
+          "openRoster": "Ouvrir le roster de {team}",
+          "viewTeam": "Voir {team}",
+          "rosterEmpty": "Roster pas encore disponible."
         },
         "hero": {
           "teamsCount": "{count} équipe | {count} équipes",

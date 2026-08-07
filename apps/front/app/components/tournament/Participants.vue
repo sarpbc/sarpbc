@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Tournament, TournamentParticipant } from "~/types/tournament";
+import type { Player } from "~/types/player";
 import type { Team } from "~/types/team";
 
 const { tournament } = defineProps<{
@@ -8,14 +9,19 @@ const { tournament } = defineProps<{
 
 const { t } = useI18n();
 
+interface ParticipantEntry {
+  team: Team;
+  players: Player[];
+}
+
 function getParticipantTeam(participant: TournamentParticipant): Team | null {
   return participant.team ?? null;
 }
 
-const teams = computed(() => {
+const participantEntries = computed((): ParticipantEntry[] => {
   const participants = tournament.participants ?? [];
   const seen = new Set<string>();
-  const result: Team[] = [];
+  const result: ParticipantEntry[] = [];
 
   for (const participant of participants) {
     const team = getParticipantTeam(participant);
@@ -23,13 +29,16 @@ const teams = computed(() => {
       continue;
     }
     seen.add(team.id);
-    result.push(team);
+    const players = (participant.players ?? [])
+      .filter((player) => player.slug)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    result.push({ team, players });
   }
 
-  return result.sort((a, b) => a.name.localeCompare(b.name));
+  return result.sort((a, b) => a.team.name.localeCompare(b.team.name));
 });
 
-const hasTeams = computed(() => teams.value.length > 0);
+const hasTeams = computed(() => participantEntries.value.length > 0);
 </script>
 
 <template>
@@ -42,17 +51,13 @@ const hasTeams = computed(() => teams.value.length > 0);
     </h2>
 
     <div v-if="hasTeams" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="list">
-      <UiListItem
-        v-for="team in teams"
-        :key="team.id"
-        size="default"
-        :to="$localePath(`/team/${team.slug}`)"
-        class="gap-2 border border-default"
+      <TournamentParticipantTile
+        v-for="entry in participantEntries"
+        :key="entry.team.id"
+        :team="entry.team"
+        :players="entry.players"
         role="listitem"
-      >
-        <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="sm" />
-        <span class="text-sm font-medium truncate">{{ team.name }}</span>
-      </UiListItem>
+      />
     </div>
 
     <UiCard v-else variant="soft">
