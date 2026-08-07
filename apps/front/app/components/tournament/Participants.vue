@@ -41,17 +41,18 @@ const hasTeams = computed(() => teams.value.length > 0);
       {{ t("page.tournaments.id.participants.title") }}
     </h2>
 
-    <div v-if="hasTeams" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" role="list">
-      <ULink
+    <div v-if="hasTeams" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="list">
+      <UiListItem
         v-for="team in teams"
         :key="team.id"
+        size="default"
         :to="$localePath(`/team/${team.slug}`)"
-        class="flex items-center gap-2 border border-default p-2 hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation min-h-11"
+        class="gap-2 border border-default active:scale-[0.96] touch-manipulation transition-[colors,transform]"
         role="listitem"
       >
         <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="sm" />
         <span class="text-sm font-medium truncate">{{ team.name }}</span>
-      </ULink>
+      </UiListItem>
     </div>
 
     <UiCard v-else variant="soft">
