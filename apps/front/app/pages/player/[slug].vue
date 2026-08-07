@@ -61,29 +61,34 @@ setPageSeo({
 </script>
 
 <template>
-  <div class="w-full max-w-5xl flex flex-col items-center px-8 lg:px-0 gap-4 lg:gap-8">
-    <section class="w-full flex flex-col gap-6">
-      <div class="w-full flex flex-col gap-4">
-        <div class="w-full flex flex-col items-start md:h-18">
-          <h1 class="text-xl font-semibold tracking-tight">{{ currentPlayer.name }}</h1>
-          <div class="flex flex-row items-center gap-2">
+  <div class="w-full max-w-5xl flex min-w-0 flex-col items-center gap-4 lg:gap-8">
+    <section class="w-full min-w-0 flex flex-col gap-6">
+      <div class="w-full min-w-0 flex flex-col gap-4">
+        <div class="w-full min-w-0 flex flex-col items-start md:h-18">
+          <h1 class="text-xl font-semibold tracking-tight text-balance">
+            {{ currentPlayer.name }}
+          </h1>
+          <div class="flex min-w-0 flex-row items-center gap-2">
             <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-            <span class="text-sm text-muted">
+            <span class="truncate text-sm text-muted">
               {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
             </span>
           </div>
         </div>
-        <div class="w-full flex flex-row border border-default gap-4 p-4">
+        <div
+          class="w-full min-w-0 flex flex-col border border-default gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4"
+        >
           <PlayerImg
+            class="mx-auto sm:mx-0"
             :player-name="currentPlayer.name"
             :img="currentPlayer.imageUrl"
             size="xl"
             priority
           />
-          <dl class="w-full flex flex-col gap-3">
-            <div class="flex flex-row items-center justify-between gap-4">
-              <dt class="text-sm text-muted">{{ t("page.player.slug.age") }}</dt>
-              <dd>
+          <dl class="w-full min-w-0 flex flex-col gap-3">
+            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
+              <dd class="min-w-0">
                 <UTooltip
                   v-if="currentPlayer.birthday !== undefined"
                   :content="{
@@ -103,7 +108,7 @@ setPageSeo({
                 </UTooltip>
               </dd>
             </div>
-            <div class="flex flex-row items-center justify-between gap-4">
+            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
               <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
               <dd class="min-w-0 flex justify-end">
                 <ULink
