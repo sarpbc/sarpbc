@@ -15,6 +15,12 @@ const { data: newsPage } = await useAsyncData("homepage-news", () =>
 
 const posts = computed(() => newsPage.value?.data ?? []);
 
+/** Only one homepage thumb for now; later can prefer a DB “display image” flag. */
+const featuredImageArticleId = computed(() => {
+  const withImage = posts.value.find((article) => Boolean(article.imageUrl?.trim()));
+  return withImage?.id ?? null;
+});
+
 const { data: activePickemTournament } = await useLazyAsyncData(
   "active-pickem-tournament",
   async () => {
@@ -36,7 +42,12 @@ const { data: activePickemTournament } = await useLazyAsyncData(
     <UiRail v-if="posts.length" :title="$t('general.news')">
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <NewsRow v-for="article in posts" :key="article.id" :article="article" />
+          <NewsRow
+            v-for="article in posts"
+            :key="article.id"
+            :article="article"
+            :show-image="article.id === featuredImageArticleId"
+          />
         </div>
       </UiCard>
     </UiRail>
