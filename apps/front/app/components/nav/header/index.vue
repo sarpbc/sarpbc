@@ -77,7 +77,7 @@ const items = ref<NavigationMenuItem[]>([
     class="w-full flex flex-col justify-start fixed top-0 z-50 bg-default overflow-hidden lg:overflow-visible border-b border-default"
   >
     <nav
-      class="w-full max-w-7xl px-2 lg:px-0 h-16 flex flex-row items-center justify-between mx-auto"
+      class="w-full max-w-7xl px-2 lg:px-0 h-header flex flex-row items-center justify-between mx-auto"
     >
       <div class="h-full flex flex-row items-center">
         <ULink :to="$localePath('/')" class="flex flex-row flex-1 items-center">
@@ -114,7 +114,7 @@ const items = ref<NavigationMenuItem[]>([
     </nav>
     <div
       v-if="menuOpen"
-      class="fixed inset-x-0 top-16 bottom-0 bg-default lg:hidden overflow-y-auto"
+      class="fixed inset-x-0 top-header bottom-0 bg-default lg:hidden overflow-y-auto"
       @click="handleMobileMenuClick"
     >
       <div

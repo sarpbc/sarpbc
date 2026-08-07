@@ -1,7 +1,8 @@
 <template>
   <main class="w-full min-h-svh flex flex-col items-center">
     <NavHeader />
-    <div class="w-full flex flex-col items-center py-6 md:py-16">
+    <!-- pt-header clears the fixed NavHeader; inner py-* is visual gap below the bar -->
+    <div class="w-full flex flex-col items-center pt-header pb-6 md:pb-16">
       <div class="w-full md:max-w-7xl py-6 md:py-4 px-2 md:px-0">
         <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-4">
           <!-- Match Lateral Bar -->

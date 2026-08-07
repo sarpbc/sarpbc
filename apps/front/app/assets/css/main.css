@@ -22,6 +22,7 @@
 
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
 @theme {
+  --spacing-header: 4rem; /* 64px — fixed NavHeader bar (was h-16) */
   --spacing-row: 2.75rem; /* 44px — news link, match row, toolbar */
   /* Exact 2/3 of row so 3 forum rails = 2 news rows (hub DA). */
   --spacing-row-compact: calc(var(--spacing-row) * 2 / 3);
