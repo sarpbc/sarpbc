@@ -36,7 +36,12 @@ const { data: activePickemTournament } = await useLazyAsyncData(
     <UiRail v-if="posts.length" :title="$t('general.news')">
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
-          <NewsRow v-for="article in posts" :key="article.id" :article="article" />
+          <NewsRow
+            v-for="(article, index) in posts"
+            :key="article.id"
+            :article="article"
+            :priority="index === 0"
+          />
         </div>
       </UiCard>
     </UiRail>
