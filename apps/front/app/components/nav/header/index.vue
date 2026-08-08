@@ -31,30 +31,18 @@ watch(
   },
 );
 
-const items = ref<NavigationMenuItem[]>([
-  {
-    label: t("general.news"),
-    to: localePath("/"),
-  },
-  {
-    label: t("general.tournaments"),
-    to: localePath("/tournaments"),
-  },
+const items = computed<NavigationMenuItem[]>(() => [
   {
     label: t("general.matches"),
     to: localePath("/matches"),
   },
   {
-    label: t("general.players"),
-    to: localePath("/player"),
+    label: t("general.results"),
+    to: { path: localePath("/matches"), query: { tab: "past" } },
   },
   {
-    label: t("general.teams"),
-    to: localePath("/team"),
-  },
-  {
-    label: t("general.forum"),
-    to: localePath("/forum"),
+    label: t("general.tournaments"),
+    to: localePath("/tournaments"),
   },
   {
     label: t("general.games"),
