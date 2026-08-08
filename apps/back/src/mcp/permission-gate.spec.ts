@@ -1,6 +1,6 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { UserService } from "src/user/user.service";
-import { requirePermission, runPermissionGatedTool, runReadTool } from "./permission-gate";
+import type { PatUser } from "src/pat/pat.service";
+import { runReadTool, runWriteTool } from "./permission-gate";
 
 function textContent(result: CallToolResult): string {
   const block = result.content[0];
@@ -10,45 +10,17 @@ function textContent(result: CallToolResult): string {
   return "";
 }
 
+const admin: PatUser = { id: "user-1", email: "admin@test.com", role: "admin" };
+const journalist: PatUser = { id: "user-2", email: "journalist@test.com", role: "journalist" };
+
 describe("permission-gate", () => {
-  const userService = {
-    hasAnyPermission: jest.fn(),
-  } as unknown as UserService;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe("requirePermission", () => {
-    it("returns null when the user has the permission", async () => {
-      (userService.hasAnyPermission as jest.Mock).mockResolvedValue(true);
-
-      const result = await requirePermission(userService, "user-1", "news.manage");
-
-      expect(result).toBeNull();
-      expect(userService.hasAnyPermission).toHaveBeenCalledWith("user-1", ["news.manage"]);
-    });
-
-    it("returns a denial message when the user lacks the permission", async () => {
-      (userService.hasAnyPermission as jest.Mock).mockResolvedValue(false);
-
-      const result = await requirePermission(userService, "user-1", "news.manage");
-
-      expect(result).toBe(
-        "You need the news.manage permission. Ask an admin to update your staff role.",
-      );
-    });
-  });
-
-  describe("runPermissionGatedTool", () => {
-    it("returns isError when permission is denied", async () => {
-      (userService.hasAnyPermission as jest.Mock).mockResolvedValue(false);
-
-      const result = await runPermissionGatedTool(
-        userService,
-        "user-1",
+  describe("runWriteTool", () => {
+    it("returns isError when the role lacks the permission", async () => {
+      const result = await runWriteTool(
+        journalist,
+        "create_match",
         "tournaments.manage",
-        async () => ({ ok: true }),
+        async () => ({ result: { ok: true } }),
       );
 
       expect(result.isError).toBe(true);
@@ -56,13 +28,11 @@ describe("permission-gate", () => {
     });
 
     it("returns JSON content when allowed and handler succeeds", async () => {
-      (userService.hasAnyPermission as jest.Mock).mockResolvedValue(true);
-
-      const result = await runPermissionGatedTool(
-        userService,
-        "user-1",
+      const result = await runWriteTool(
+        admin,
+        "set_match_winner",
         "tournaments.manage",
-        async () => ({ matchId: "match-1" }),
+        async () => ({ result: { matchId: "match-1" }, entityId: "match-1" }),
       );
 
       expect(result.isError).toBeUndefined();
@@ -70,11 +40,9 @@ describe("permission-gate", () => {
     });
 
     it("returns isError when the handler throws", async () => {
-      (userService.hasAnyPermission as jest.Mock).mockResolvedValue(true);
-
-      const result = await runPermissionGatedTool(
-        userService,
-        "user-1",
+      const result = await runWriteTool(
+        admin,
+        "set_match_winner",
         "tournaments.manage",
         async () => {
           throw new Error("Match not found");

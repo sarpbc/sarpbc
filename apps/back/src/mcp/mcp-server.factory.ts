@@ -1,14 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { UserToken } from "src/common/types/usertoken.interface";
+import type { PatUser } from "src/pat/pat.service";
 import { MatchService } from "src/tournament/match/match.service";
 import { NewsService } from "src/news/news.service";
 import { PlayerService } from "src/player/player.service";
-import { RedisService } from "src/redis/redis.service";
 import { SearchService } from "src/search/search.service";
 import { TeamService } from "src/team/team.service";
 import { TournamentService } from "src/tournament/tournament.service";
-import { UserService } from "src/user/user.service";
 import type { McpToolContext } from "./mcp-tool-context";
 import { registerReadTools } from "./tools/read-tools";
 import { registerWriteTools } from "./tools/write-tools";
@@ -22,11 +20,9 @@ export class McpServerFactory {
     private readonly tournamentService: TournamentService,
     private readonly matchService: MatchService,
     private readonly newsService: NewsService,
-    private readonly userService: UserService,
-    private readonly redisService: RedisService,
   ) {}
 
-  createServer(user: UserToken): McpServer {
+  createServer(user: PatUser): McpServer {
     const server = new McpServer(
       {
         name: "sarpbc-staff-mcp",
@@ -43,8 +39,6 @@ export class McpServerFactory {
       tournamentService: this.tournamentService,
       matchService: this.matchService,
       newsService: this.newsService,
-      userService: this.userService,
-      redisService: this.redisService,
     };
 
     registerReadTools(server, ctx);

@@ -1,22 +1,21 @@
-const PUBLIC_BASE = "https://sarpbc.org";
-const ADMIN_BASE = "https://admin.sarpbc.org";
+import { getAdminUrl, getFrontUrl } from "src/common/envirronement/secrets";
 
 export function playerUrl(slug: string): string {
-  return `${PUBLIC_BASE}/player/${slug}`;
+  return `${getFrontUrl()}/player/${slug}`;
 }
 
 export function teamUrl(slug: string): string {
-  return `${PUBLIC_BASE}/team/${slug}`;
+  return `${getFrontUrl()}/team/${slug}`;
 }
 
 export function matchUrl(id: string): string {
-  return `${PUBLIC_BASE}/matches/${id}`;
+  return `${getFrontUrl()}/matches/${id}`;
 }
 
 export function tournamentUrl(id: string): string {
-  return `${PUBLIC_BASE}/tournaments/${id}`;
+  return `${getFrontUrl()}/tournaments/${id}`;
 }
 
 export function adminNewsEditUrl(slug: string): string {
-  return `${ADMIN_BASE}/news/${slug}`;
+  return `${getAdminUrl()}/news/${slug}`;
 }

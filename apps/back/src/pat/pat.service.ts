@@ -3,11 +3,30 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { UserToken } from "src/common/types/usertoken.interface";
-import { isStaffRole } from "src/user/domain/staff-access";
+import { isStaffRole, StaffRole } from "src/user/domain/staff-access";
 import { UserService } from "src/user/user.service";
 import { PersonalAccessToken } from "./domain/personal-access-token.entity";
 
+export interface PatUser extends UserToken {
+  role: StaffRole;
+}
+
+export interface PatTokenSummary {
+  id: string;
+  name: string;
+  createdAt: Date;
+  lastUsedAt: Date | null;
+}
+
+export interface PatTokenCreated {
+  id: string;
+  name: string;
+  createdAt: Date;
+  token: string;
+}
+
 const TOKEN_PREFIX = "sarpbc_pat_";
+const LAST_USED_WRITE_INTERVAL_MS = 60_000;
 
 function hashToken(raw: string): string {
   return createHash("sha256").update(raw).digest("hex");
@@ -26,10 +45,7 @@ export class PatService {
     private readonly em: EntityManager,
   ) {}
 
-  async createToken(
-    userId: string,
-    name: string,
-  ): Promise<{ id: string; name: string; createdAt: Date; token: string }> {
+  async createToken(userId: string, name: string): Promise<PatTokenCreated> {
     const user = await this.userService.findById(userId);
     if (!user || !isStaffRole(user.role)) {
       throw new ForbiddenException(
@@ -53,9 +69,7 @@ export class PatService {
     };
   }
 
-  async listTokens(
-    userId: string,
-  ): Promise<{ id: string; name: string; createdAt: Date; lastUsedAt: Date | null }[]> {
+  async listTokens(userId: string): Promise<PatTokenSummary[]> {
     const tokens = await this.tokenRepository.find(
       { owner: { id: userId }, revokedAt: null },
       { orderBy: { createdAt: "DESC" } },
@@ -84,22 +98,30 @@ export class PatService {
     await this.em.flush();
   }
 
-  async resolveUser(rawToken: string): Promise<UserToken | null> {
+  async resolveUser(rawToken: string): Promise<PatUser | null> {
     const token = await this.tokenRepository.findOne(
       { tokenHash: hashToken(rawToken), revokedAt: null },
       { populate: ["owner"] },
     );
 
-    if (!token) {
+    // Re-check the role on every request so tokens die with staff access.
+    if (!token || !isStaffRole(token.owner.role)) {
       return null;
     }
 
-    token.lastUsedAt = new Date();
-    await this.em.flush();
+    const now = new Date();
+    if (
+      !token.lastUsedAt ||
+      now.getTime() - token.lastUsedAt.getTime() > LAST_USED_WRITE_INTERVAL_MS
+    ) {
+      token.lastUsedAt = now;
+      await this.em.flush();
+    }
 
     return {
       id: token.owner.id,
       email: token.owner.email,
+      role: token.owner.role,
     };
   }
 }

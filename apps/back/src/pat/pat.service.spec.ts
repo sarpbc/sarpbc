@@ -84,7 +84,7 @@ describe("PatService", () => {
       const raw = "sarpbc_pat_testtoken";
       const result = await service.resolveUser(raw);
 
-      expect(result).toEqual({ id: "owner-1", email: "staff@test.com" });
+      expect(result).toEqual({ id: "owner-1", email: "staff@test.com", role: "admin" });
       expect(tokenRepository.findOne).toHaveBeenCalledWith(
         {
           tokenHash: createHash("sha256").update(raw).digest("hex"),
@@ -94,6 +94,22 @@ describe("PatService", () => {
       );
       expect(token.lastUsedAt).toBeInstanceOf(Date);
       expect(em.flush).toHaveBeenCalled();
+    });
+
+    it("skips the lastUsedAt write when it was bumped recently", async () => {
+      const owner = makeStaffUser("owner-1");
+      const recentlyUsed = new Date();
+      const token = {
+        owner,
+        lastUsedAt: recentlyUsed,
+      } as PersonalAccessToken;
+      tokenRepository.findOne.mockResolvedValue(token);
+
+      const result = await service.resolveUser("sarpbc_pat_testtoken");
+
+      expect(result).not.toBeNull();
+      expect(token.lastUsedAt).toBe(recentlyUsed);
+      expect(em.flush).not.toHaveBeenCalled();
     });
 
     it("returns null for unknown tokens", async () => {
@@ -106,6 +122,16 @@ describe("PatService", () => {
       tokenRepository.findOne.mockResolvedValue(null);
 
       await expect(service.resolveUser("sarpbc_pat_revoked")).resolves.toBeNull();
+    });
+
+    it("returns null when the owner is no longer staff", async () => {
+      const owner = makeStaffUser("owner-1");
+      owner.role = null;
+      const token = { owner, lastUsedAt: null } as PersonalAccessToken;
+      tokenRepository.findOne.mockResolvedValue(token);
+
+      await expect(service.resolveUser("sarpbc_pat_demoted")).resolves.toBeNull();
+      expect(em.flush).not.toHaveBeenCalled();
     });
   });
 

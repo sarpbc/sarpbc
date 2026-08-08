@@ -1,5 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import * as z from "zod/v4";
+import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
 import {
   mapMatchListResponse,
@@ -33,17 +33,7 @@ async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
 
 async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.teamService.findBySlug(idOrSlug);
-  if (bySlug) {
-    const withPlayers = await ctx.teamService.getTeamWithPlayers(bySlug.id);
-    return withPlayers ?? bySlug;
-  }
-
-  const byId = await ctx.teamService.getTeamWithPlayers(idOrSlug);
-  if (byId) {
-    return byId;
-  }
-
-  const team = await ctx.teamService.findById(idOrSlug);
+  const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
   if (team) {
     return team;
   }

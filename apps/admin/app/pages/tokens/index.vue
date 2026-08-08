@@ -48,7 +48,6 @@ const columns: TableColumn<PatToken>[] = [
   },
 ];
 
-const tokens = ref<PatToken[]>([]);
 const isCreateModalOpen = ref(false);
 const isRevealModalOpen = ref(false);
 const isRevokeModalOpen = ref(false);
@@ -57,27 +56,17 @@ const isCreating = ref(false);
 const isRevoking = ref(false);
 const newTokenName = ref("");
 const revealedToken = ref<string | null>(null);
-const copiedToken = ref(false);
-const copiedConfig = ref(false);
+const copied = ref<"token" | "config" | null>(null);
 
-const { status, data, refresh, error } = await useLazyAsyncData(
-  "admin-pat-tokens",
-  () => getPatTokens(),
-  {
-    default: () => [] as PatToken[],
-    server: false,
-  },
-);
-
-watch(
+const {
   status,
-  (s) => {
-    if (s === "success" && data.value) {
-      tokens.value = data.value;
-    }
-  },
-  { immediate: true },
-);
+  data: tokens,
+  refresh,
+  error,
+} = await useLazyAsyncData("admin-pat-tokens", () => getPatTokens(), {
+  default: () => [] as PatToken[],
+  server: false,
+});
 
 const mcpConfigSnippet = computed(() => {
   if (!revealedToken.value) {
@@ -99,17 +88,10 @@ function openRevokeModal(token: PatToken) {
 async function copyText(text: string, target: "token" | "config") {
   try {
     await navigator.clipboard.writeText(text);
-    if (target === "token") {
-      copiedToken.value = true;
-      setTimeout(() => {
-        copiedToken.value = false;
-      }, 2000);
-    } else {
-      copiedConfig.value = true;
-      setTimeout(() => {
-        copiedConfig.value = false;
-      }, 2000);
-    }
+    copied.value = target;
+    setTimeout(() => {
+      copied.value = null;
+    }, 2000);
   } catch {
     toast.add({
       title: t("page.tokens.copyFailed"),
@@ -130,8 +112,7 @@ async function confirmCreate() {
     isCreateModalOpen.value = false;
     newTokenName.value = "";
     revealedToken.value = created.token;
-    copiedToken.value = false;
-    copiedConfig.value = false;
+    copied.value = null;
     isRevealModalOpen.value = true;
     await refresh();
   } catch (err) {
@@ -273,16 +254,17 @@ async function confirmRevoke() {
       :dismissible="!isCreating"
     >
       <template #body>
-        <UFormField :label="$t('page.tokens.create.nameLabel')" name="name" required>
-          <UInput
-            v-model="newTokenName"
-            :placeholder="$t('page.tokens.create.namePlaceholder')"
-            :maxlength="100"
-            class="w-full"
-            autofocus
-            @keyup.enter="confirmCreate"
-          />
-        </UFormField>
+        <form @submit.prevent="confirmCreate">
+          <UFormField :label="$t('page.tokens.create.nameLabel')" name="name" required>
+            <UInput
+              v-model="newTokenName"
+              :placeholder="$t('page.tokens.create.namePlaceholder')"
+              :maxlength="100"
+              class="w-full"
+              autofocus
+            />
+          </UFormField>
+        </form>
       </template>
       <template #footer>
         <UButton
@@ -308,7 +290,6 @@ async function confirmRevoke() {
       v-model:open="isRevealModalOpen"
       :title="$t('page.tokens.reveal.title')"
       :dismissible="false"
-      @update:open="(open) => !open && closeRevealModal()"
     >
       <template #body>
         <div class="flex flex-col gap-4">
@@ -324,9 +305,11 @@ async function confirmRevoke() {
                 {{ revealedToken }}
               </code>
               <UButton
-                :icon="copiedToken ? 'i-lucide-copy-check' : 'i-lucide-copy'"
+                :icon="copied === 'token' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
-                  copiedToken ? $t('page.tokens.reveal.copied') : $t('page.tokens.reveal.copy')
+                  copied === 'token'
+                    ? $t('page.tokens.reveal.copied')
+                    : $t('page.tokens.reveal.copy')
                 "
                 variant="soft"
                 class="shrink-0 cursor-pointer"
@@ -344,9 +327,9 @@ async function confirmRevoke() {
                 class="overflow-x-auto rounded border border-default bg-muted p-3 font-mono text-sm whitespace-pre-wrap"
                 >{{ mcpConfigSnippet }}</pre>
               <UButton
-                :icon="copiedConfig ? 'i-lucide-copy-check' : 'i-lucide-copy'"
+                :icon="copied === 'config' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
-                  copiedConfig
+                  copied === 'config'
                     ? $t('page.tokens.reveal.copied')
                     : $t('page.tokens.reveal.copyConfig')
                 "

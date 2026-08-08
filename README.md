@@ -175,7 +175,7 @@ Write tools (staff permission required):
 | Tool                      | Permission           | Description                                 |
 | ------------------------- | -------------------- | ------------------------------------------- |
 | `create_news_draft`       | `news.manage`        | Create a news draft (human must publish)    |
-| `create_match`            | `tournaments.manage` | Create or update a tournament match         |
+| `create_match`            | `tournaments.manage` | Create a tournament match                   |
 | `set_match_winner`        | `tournaments.manage` | Set match winner by participant id          |
 | `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions |
 
