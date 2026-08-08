@@ -30,7 +30,8 @@
     "teams": "Teams",
     "players": "Players",
     "games": "Games",
-    "matches": "Matches"
+    "matches": "Matches",
+    "results": "Results"
   },
   "components": {
     "cookiePopup": {
@@ -42,7 +43,15 @@
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",
       "legalNotice": "Legal Notice",
-      "disclaimer": "sarpbc.org is not affiliated with Rocket League, Psyonix, or Epic Games."
+      "disclaimer": "sarpbc.org is not affiliated with Rocket League, Psyonix, or Epic Games.",
+      "dataSource": "Data & images: Source: Pandascore",
+      "navLabel": "Footer",
+      "socialX": "sarpbc.org on X",
+      "columns": {
+        "explore": "Explore",
+        "community": "Community",
+        "legal": "Legal"
+      }
     },
     "settings": {
       "language": {
@@ -71,7 +80,10 @@
       }
     },
     "header": {
-      "signin": "Sign In"
+      "signin": "Sign In",
+      "home": "Home — News",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
     },
     "input": {
       "search": "Search...",

@@ -1,47 +1,161 @@
+<script lang="ts" setup>
+import type { RouteLocationRaw } from "vue-router";
+
+const { t } = useI18n();
+const localePath = useLocalePath();
+
+type FooterLink = {
+  type: "link";
+  label: string;
+  to: RouteLocationRaw;
+};
+
+type FooterGroup = {
+  type: "group";
+  label: string;
+  links: FooterLink[];
+};
+
+type FooterEntry = FooterLink | FooterGroup;
+
+type FooterColumn = {
+  title: string;
+  entries: FooterEntry[];
+};
+
+const columns = computed<FooterColumn[]>(() => [
+  {
+    title: t("components.footer.columns.explore"),
+    entries: [
+      { type: "link", label: t("general.matches"), to: localePath("/matches") },
+      {
+        type: "link",
+        label: t("general.results"),
+        to: { path: localePath("/matches"), query: { tab: "past" } },
+      },
+      { type: "link", label: t("general.tournaments"), to: localePath("/tournaments") },
+      {
+        type: "group",
+        label: t("general.games"),
+        links: [
+          {
+            type: "link",
+            label: t("page.game.airriddle.title"),
+            to: localePath("/game/airriddle"),
+          },
+          {
+            type: "link",
+            label: t("page.game.pickems.title"),
+            to: localePath("/game/pickems"),
+          },
+        ],
+      },
+      { type: "link", label: t("general.teams"), to: localePath("/team") },
+      { type: "link", label: t("general.players"), to: localePath("/player") },
+    ],
+  },
+  {
+    title: t("components.footer.columns.community"),
+    entries: [
+      { type: "link", label: t("general.news"), to: localePath("/") },
+      { type: "link", label: t("general.forum"), to: localePath("/forum") },
+    ],
+  },
+  {
+    title: t("components.footer.columns.legal"),
+    entries: [
+      { type: "link", label: t("components.footer.about"), to: localePath("/about") },
+      {
+        type: "link",
+        label: t("components.footer.cookiePolicy"),
+        to: localePath("/cookie-policy"),
+      },
+      {
+        type: "link",
+        label: t("components.footer.legalNotice"),
+        to: localePath("/legal-notice"),
+      },
+      {
+        type: "link",
+        label: t("components.footer.privacyPolicy"),
+        to: localePath("/privacy-policy"),
+      },
+      {
+        type: "link",
+        label: t("components.footer.termsOfService"),
+        to: localePath("/terms-of-service"),
+      },
+    ],
+  },
+]);
+</script>
+
 <template>
-  <footer class="w-full flex flex-row border-t border-default py-8 md:py-16">
+  <footer class="w-full border-t border-default py-12 md:py-16">
     <div
-      class="w-full max-w-7xl px-8 mx-auto flex flex-col md:grid grid-cols-3 items-start gap-8 md:gap-4 text-sm"
+      class="w-full max-w-7xl px-8 mx-auto flex flex-col gap-10 lg:grid lg:grid-cols-4 lg:gap-12"
     >
-      <div class="flex flex-col gap-2 col-span-1">
-        <span class="font-semibold text-dimmed"> {{ new Date().getFullYear() }} sarpbc.org </span>
+      <div class="flex flex-col gap-4 max-w-sm lg:col-span-1">
+        <span class="font-semibold text-dimmed">{{ new Date().getFullYear() }} sarpbc.org</span>
 
-        <span class="text-muted text-xs">
+        <p class="text-muted text-xs leading-relaxed">
           {{ $t("components.footer.disclaimer") }}
-        </span>
+        </p>
 
-        <span class="text-muted">
-          Data &amp; images: <span class="italic">Source: Pandascore</span>
-        </span>
-        <ULink
-          to="https://x.com/SARPBCorg"
-          class="h-6!"
-          aria-label="sarpbc.org X / Twitter account"
-        >
-          <UIcon name="i-ri-twitter-x-fill" class="h-6 w-6" />
-        </ULink>
+        <p class="text-muted text-xs">
+          {{ $t("components.footer.dataSource") }}
+        </p>
+
+        <div class="flex flex-row items-center gap-3 pt-1">
+          <ULink
+            to="https://x.com/SARPBCorg"
+            class="inline-flex items-center justify-center size-10 -ml-2"
+            :aria-label="$t('components.footer.socialX')"
+          >
+            <UIcon name="i-ri-twitter-x-fill" class="size-6" />
+          </ULink>
+          <SettingsLanguageSelect />
+          <SettingsThemeSelect />
+        </div>
       </div>
-      <div class="flex flex-col gap-2 col-span-1">
-        <ULink :to="$localePath('/about')" class="text-muted">
-          {{ $t("components.footer.about") }}
-        </ULink>
-        <ULink :to="$localePath('/cookie-policy')" class="text-muted">
-          {{ $t("components.footer.cookiePolicy") }}
-        </ULink>
-        <ULink :to="$localePath('/legal-notice')" class="text-muted">
-          {{ $t("components.footer.legalNotice") }}
-        </ULink>
-        <ULink :to="$localePath('/privacy-policy')" class="text-muted">
-          {{ $t("components.footer.privacyPolicy") }}
-        </ULink>
-        <ULink :to="$localePath('/terms-of-service')" class="text-muted">
-          {{ $t("components.footer.termsOfService") }}
-        </ULink>
-      </div>
-      <div class="flex flex-row-reverse gap-2 col-span-1">
-        <SettingsLanguageSelect />
-        <SettingsThemeSelect />
-      </div>
+
+      <nav
+        class="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-6 text-sm lg:col-span-3"
+        :aria-label="$t('components.footer.navLabel')"
+      >
+        <div v-for="column in columns" :key="column.title" class="flex flex-col gap-3">
+          <h2 class="text-xs font-medium text-highlighted tracking-wide">
+            {{ column.title }}
+          </h2>
+          <ul class="flex flex-col">
+            <template v-for="entry in column.entries" :key="entry.label">
+              <li v-if="entry.type === 'link'">
+                <ULink
+                  :to="entry.to"
+                  class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
+                >
+                  {{ entry.label }}
+                </ULink>
+              </li>
+              <li v-else class="flex flex-col">
+                <span class="inline-flex items-center min-h-10 text-xs font-medium text-dimmed">
+                  {{ entry.label }}
+                </span>
+                <ul class="flex flex-col pl-3 border-l border-default">
+                  <li v-for="link in entry.links" :key="link.label">
+                    <ULink
+                      :to="link.to"
+                      class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
+                    >
+                      {{ link.label }}
+                    </ULink>
+                  </li>
+                </ul>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </nav>
     </div>
   </footer>
 </template>
