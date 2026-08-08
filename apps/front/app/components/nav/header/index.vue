@@ -8,6 +8,18 @@ const route = useRoute();
 
 const menuOpen = ref(false);
 
+const matchesPath = computed(() => localePath("/matches"));
+
+function isMatchesListRoute(): boolean {
+  const current = route.path.replace(/\/$/, "");
+  const target = matchesPath.value.replace(/\/$/, "");
+  return current === target;
+}
+
+const isResultsActive = computed(() => isMatchesListRoute() && route.query.tab === "past");
+
+const isMatchesActive = computed(() => isMatchesListRoute() && route.query.tab !== "past");
+
 function toggleMenu() {
   menuOpen.value = !menuOpen.value;
 }
@@ -31,30 +43,20 @@ watch(
   },
 );
 
-const items = ref<NavigationMenuItem[]>([
+const items = computed<NavigationMenuItem[]>(() => [
   {
-    label: t("general.news"),
-    to: localePath("/"),
+    label: t("general.matches"),
+    to: matchesPath.value,
+    active: isMatchesActive.value,
+  },
+  {
+    label: t("general.results"),
+    to: { path: matchesPath.value, query: { tab: "past" } },
+    active: isResultsActive.value,
   },
   {
     label: t("general.tournaments"),
     to: localePath("/tournaments"),
-  },
-  {
-    label: t("general.matches"),
-    to: localePath("/matches"),
-  },
-  {
-    label: t("general.players"),
-    to: localePath("/player"),
-  },
-  {
-    label: t("general.teams"),
-    to: localePath("/team"),
-  },
-  {
-    label: t("general.forum"),
-    to: localePath("/forum"),
   },
   {
     label: t("general.games"),
@@ -70,6 +72,10 @@ const items = ref<NavigationMenuItem[]>([
     ],
   },
 ]);
+
+const menuToggleLabel = computed(() =>
+  menuOpen.value ? t("components.header.closeMenu") : t("components.header.openMenu"),
+);
 </script>
 
 <template>
@@ -80,7 +86,11 @@ const items = ref<NavigationMenuItem[]>([
       class="w-full max-w-7xl px-2 lg:px-0 h-header flex flex-row items-center justify-between mx-auto"
     >
       <div class="h-full flex flex-row items-center">
-        <ULink :to="$localePath('/')" class="flex flex-row flex-1 items-center">
+        <ULink
+          :to="$localePath('/')"
+          class="flex flex-row flex-1 items-center"
+          :aria-label="$t('components.header.home')"
+        >
           <img
             src="/sarpbc.svg"
             alt="sarpbc.org logo"
@@ -107,14 +117,15 @@ const items = ref<NavigationMenuItem[]>([
         :icon="!menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'"
         color="neutral"
         variant="ghost"
-        class="lg:hidden flex items-center justify-center h-10 w-10 ml-2"
-        aria-label="Open menu"
+        class="md:hidden flex items-center justify-center size-10 ml-2"
+        :aria-label="menuToggleLabel"
+        :aria-expanded="menuOpen"
         @click="toggleMenu()"
       />
     </nav>
     <div
       v-if="menuOpen"
-      class="fixed inset-x-0 top-header bottom-0 bg-default lg:hidden overflow-y-auto"
+      class="fixed inset-x-0 top-header bottom-0 bg-default md:hidden overflow-y-auto"
       @click="handleMobileMenuClick"
     >
       <div
