@@ -1,0 +1,25 @@
+import { Migration } from "@mikro-orm/migrations";
+
+export class Migration20260808090000_personalAccessToken extends Migration {
+  override async up(): Promise<void> {
+    this.addSql(
+      `create table "personal_access_token" ("id" uuid not null default gen_random_uuid(), "owner_id" uuid not null, "name" varchar(255) not null, "token_hash" varchar(255) not null, "created_at" timestamptz not null default now(), "last_used_at" timestamptz null, "revoked_at" timestamptz null, constraint "personal_access_token_pkey" primary key ("id"));`,
+    );
+
+    this.addSql(
+      `alter table "personal_access_token" add constraint "personal_access_token_token_hash_unique" unique ("token_hash");`,
+    );
+
+    this.addSql(
+      `create index "personal_access_token_owner_id_index" on "personal_access_token" ("owner_id");`,
+    );
+
+    this.addSql(
+      `alter table "personal_access_token" add constraint "personal_access_token_owner_id_foreign" foreign key ("owner_id") references "user" ("id") on update cascade on delete cascade;`,
+    );
+  }
+
+  override async down(): Promise<void> {
+    this.addSql(`drop table if exists "personal_access_token" cascade;`);
+  }
+}

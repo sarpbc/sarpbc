@@ -21,6 +21,7 @@ import { NewsModule } from "./news/news.module";
 import { ReplyModule } from "./reply/reply.module";
 import { ImagesModule } from "./images/images.module";
 import { StorageModule } from "./storage/storage.module";
+import { PatModule } from "./pat/pat.module";
 import mikroOrmConfig from "./mikro-orm.config";
 
 @Module({
@@ -54,6 +55,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     ReplyModule,
     ImagesModule,
     StorageModule,
+    PatModule,
   ],
 })
 export class AppModule {}
