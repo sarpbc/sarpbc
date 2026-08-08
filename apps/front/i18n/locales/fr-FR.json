@@ -568,8 +568,7 @@
           "winner": "Victoire de {team}",
           "draw": "Match nul"
         },
-        "gameStatsPlaceholder": "Les statistiques détaillées apparaîtront ici dès qu'elles seront disponibles.",
-        "gameStatsHint": "L'intégration Ballchasing arrive dans une prochaine mise à jour.",
+        "gameStatsPlaceholder": "Les statistiques détaillées ne sont pas disponibles pour ce match.",
         "formRecord": "{wins}V - {losses}D",
         "formEmpty": "Pas assez de matchs récents",
         "formVs": "vs {opponent}",

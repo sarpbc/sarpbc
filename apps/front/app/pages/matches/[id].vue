@@ -420,9 +420,6 @@ function tournamentMatchesPath(tournamentId: string) {
         <p class="text-sm text-muted">
           {{ t("page.match.detail.gameStatsPlaceholder") }}
         </p>
-        <p class="text-xs text-dimmed mt-2">
-          {{ t("page.match.detail.gameStatsHint") }}
-        </p>
       </UiCard>
 
       <!-- Discussion metric: comments per match page view (instrument via analytics later). -->
