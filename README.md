@@ -113,6 +113,72 @@ Optional build arg: `APP_RELEASE` = tag name.
 
 CI on pull requests: lint, format, frontend typecheck and build. See [`.github/workflows/pr.yml`](.github/workflows/pr.yml).
 
+## MCP server
+
+Staff AI assistants can call the SARPBC API through a [Model Context Protocol](https://modelcontextprotocol.io) server mounted on the NestJS backend.
+
+|               |                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| **Endpoint**  | `https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                                        |
+| **Transport** | Stateless Streamable HTTP (`POST` only)                                                                  |
+| **Auth**      | Personal access token from the admin app → **Tokens** (`/tokens`). Send `Authorization: Bearer <token>`. |
+
+### Client configuration
+
+**Claude Desktop** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "sarpbc": {
+      "url": "https://api.sarpbc.org/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_PAT_HERE"
+      }
+    }
+  }
+}
+```
+
+**Cursor** (`.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "sarpbc": {
+      "url": "https://api.sarpbc.org/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_PAT_HERE"
+      }
+    }
+  }
+}
+```
+
+### Tools
+
+Read tools (any valid PAT):
+
+| Tool                   | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `search_players`       | Search players by name                   |
+| `search_teams`         | Search teams by name                     |
+| `get_player`           | Player profile by slug or id             |
+| `get_team`             | Team profile and roster by slug or id    |
+| `get_tournaments`      | List tournaments (`activeOnly`, `limit`) |
+| `get_tournament`       | Tournament detail with matches           |
+| `get_upcoming_matches` | Upcoming and live matches                |
+| `get_match_results`    | Recent finished match results            |
+
+Write tools (staff permission required):
+
+| Tool                      | Permission           | Description                                 |
+| ------------------------- | -------------------- | ------------------------------------------- |
+| `create_news_draft`       | `news.manage`        | Create a news draft (human must publish)    |
+| `create_match`            | `tournaments.manage` | Create or update a tournament match         |
+| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id          |
+| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions |
+
 ## Useful Commands
 
 ```bash
