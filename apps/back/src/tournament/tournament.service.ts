@@ -3,6 +3,7 @@ import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { log } from "evlog";
+import { RedisService } from "src/redis/redis.service";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
@@ -18,6 +19,7 @@ export class TournamentService {
     private readonly syncAllTournamentsUseCase: SyncAllTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
     private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
+    private readonly redisService: RedisService,
     private readonly em: EntityManager,
   ) {}
 
@@ -104,6 +106,8 @@ export class TournamentService {
 
   async syncTournamentFromPandascore(tournamentId: string): Promise<void> {
     await this.syncPandascoreTournamentUseCase.execute(tournamentId);
+    // The cached detail payload is stale after a sync.
+    await this.redisService.delete(`tournament:${tournamentId}`);
   }
 
   @CreateRequestContext()
