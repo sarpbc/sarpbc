@@ -60,7 +60,6 @@ export class TournamentController {
   @Post(":id/sync")
   async syncTournamentFromPandascore(@Param("id") id: string) {
     await this.tournamentService.syncTournamentFromPandascore(id);
-    await this.redisService.delete(`tournament:${id}`);
     return {
       success: true,
     };

@@ -34,7 +34,51 @@
       "tournaments": "Tournaments",
       "pickems": "Pick'ems",
       "forum": "Forum",
+      "tokens": "API Tokens",
       "backToSite": "Back to sarpbc.org"
+    },
+    "tokens": {
+      "title": "API Tokens",
+      "loading": "Loading…",
+      "loadError": "Could not load tokens. Check your connection and try again.",
+      "retry": "Try Again",
+      "tokensCount": "{count} token | {count} tokens",
+      "lastUsedNever": "Never",
+      "copyFailed": "Could not copy to clipboard. Select the text and copy it manually.",
+      "columns": {
+        "name": "Name",
+        "createdAt": "Created",
+        "lastUsedAt": "Last Used"
+      },
+      "empty": {
+        "title": "No API Tokens Yet",
+        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to SARPBC via MCP."
+      },
+      "create": {
+        "title": "Create Token",
+        "button": "Create Token",
+        "nameLabel": "Token Name",
+        "namePlaceholder": "e.g. Cursor on MacBook",
+        "submit": "Create Token",
+        "failed": "Could not create token. Check the name and try again."
+      },
+      "reveal": {
+        "title": "Token Created",
+        "warning": "Copy this token now. You won't be able to see it again.",
+        "tokenLabel": "Your Token",
+        "copy": "Copy Token",
+        "copied": "Copied",
+        "configHint": "MCP Client Configuration",
+        "copyConfig": "Copy Configuration",
+        "dismiss": "Done"
+      },
+      "revoke": {
+        "title": "Revoke Token",
+        "confirm": "Revoke \"{name}\"? The connected assistant will lose access immediately.",
+        "confirmButton": "Revoke Token",
+        "success": "Token revoked",
+        "failed": "Could not revoke token. Try again."
+      }
     },
     "forum": {
       "title": "Forum",

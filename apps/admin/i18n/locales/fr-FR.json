@@ -34,7 +34,51 @@
       "tournaments": "Tournois",
       "pickems": "Pick'ems",
       "forum": "Forum",
+      "tokens": "Jetons API",
       "backToSite": "Retour sur sarpbc.org"
+    },
+    "tokens": {
+      "title": "Jetons API",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les jetons. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "tokensCount": "{count} jeton | {count} jetons",
+      "lastUsedNever": "Jamais",
+      "copyFailed": "Impossible de copier dans le presse-papiers. Sélectionnez le texte et copiez-le manuellement.",
+      "columns": {
+        "name": "Nom",
+        "createdAt": "Créé le",
+        "lastUsedAt": "Dernière utilisation"
+      },
+      "empty": {
+        "title": "Aucun jeton API",
+        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à SARPBC via MCP."
+      },
+      "create": {
+        "title": "Créer un Jeton",
+        "button": "Créer un Jeton",
+        "nameLabel": "Nom du Jeton",
+        "namePlaceholder": "ex. Cursor sur MacBook",
+        "submit": "Créer un Jeton",
+        "failed": "Impossible de créer le jeton. Vérifiez le nom et réessayez."
+      },
+      "reveal": {
+        "title": "Jeton Créé",
+        "warning": "Copiez ce jeton maintenant. Vous ne pourrez plus le consulter ensuite.",
+        "tokenLabel": "Votre Jeton",
+        "copy": "Copier le Jeton",
+        "copied": "Copié",
+        "configHint": "Configuration Client MCP",
+        "copyConfig": "Copier la Configuration",
+        "dismiss": "Terminé"
+      },
+      "revoke": {
+        "title": "Révoquer le Jeton",
+        "confirm": "Révoquer « {name} » ? L'assistant connecté perdra immédiatement l'accès.",
+        "confirmButton": "Révoquer le Jeton",
+        "success": "Jeton révoqué",
+        "failed": "Impossible de révoquer le jeton. Réessayez."
+      }
     },
     "forum": {
       "title": "Forum",

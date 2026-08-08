@@ -355,7 +355,7 @@ export class MatchService {
     return match;
   }
 
-  async setMatchWinner(matchId: string, winnerId: string): Promise<Match | null> {
+  async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
     const match = await this.matchRepository.findOne(
       { id: matchId },
       { populate: ["participants", "winner"] },
