@@ -50,8 +50,12 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
       {{ t("page.tournaments.id.participants.title") }}
     </h2>
 
-    <div v-if="hasTeams" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="list">
-      <div v-for="entry in participantEntries" :key="entry.team.id" role="listitem">
+    <div
+      v-if="hasTeams"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-default"
+      role="list"
+    >
+      <div v-for="entry in participantEntries" :key="entry.team.id" role="listitem" class="min-w-0">
         <TournamentParticipantTile :team="entry.team" :players="entry.players" />
       </div>
     </div>
