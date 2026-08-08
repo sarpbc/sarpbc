@@ -568,8 +568,7 @@
           "winner": "{team} won",
           "draw": "Draw"
         },
-        "gameStatsPlaceholder": "Detailed game stats will appear here once available.",
-        "gameStatsHint": "Ballchasing integration is coming in a future update.",
+        "gameStatsPlaceholder": "Detailed game stats are not available for this match.",
         "formRecord": "{wins}W - {losses}L",
         "formEmpty": "Not enough recent matches",
         "formVs": "vs {opponent}",
