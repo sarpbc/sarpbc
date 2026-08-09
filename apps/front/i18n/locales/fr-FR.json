@@ -222,6 +222,16 @@
     }
   },
   "page": {
+    "hub": {
+      "headers": {
+        "matchesLive": "{count} en direct",
+        "tournamentsNext": "Prochain : {name}",
+        "forumPosts": "{count} publications",
+        "pickemsOpen": "{count} pick'ems ouverts",
+        "playersTotal": "{count} joueurs",
+        "teamsTotal": "{count} équipes"
+      }
+    },
     "home": {
       "seo": {
         "title": "Actus & matchs Rocket League | sarpbc.org",
