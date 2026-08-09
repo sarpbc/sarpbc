@@ -1,6 +1,5 @@
 import type {
   CreateForumPostResult,
-  CreateForumReplyResult,
   ForumPostCreationStatus,
   Post,
   PostPreview,
@@ -122,35 +121,6 @@ export async function createForumPost(data: {
   }
 }
 
-export async function createForumReply(data: {
-  content: string;
-  postId: string;
-  replyToId?: string;
-}): Promise<CreateForumReplyResult> {
-  try {
-    await apiFetch("/replies", {
-      method: "POST",
-      body: data,
-    });
-
-    return { ok: true };
-  } catch (error) {
-    const status = getApiErrorStatus(error);
-    const message = getApiErrorMessage(error);
-    const code = getApiErrorCode(error);
-
-    if (status === 401) {
-      return { ok: false, reason: "unauthorized", message };
-    }
-    if (code === FORUM_ERROR_CODES.REPLY_RATE_LIMITED) {
-      return { ok: false, reason: "rate_limited", message };
-    }
-
-    console.error("Error creating forum reply:", error);
-    return { ok: false, reason: "unknown", message };
-  }
-}
-
 export async function deleteForumPost(postId: string): Promise<boolean> {
   try {
     await apiFetch(`/posts/${postId}`, {
@@ -159,18 +129,6 @@ export async function deleteForumPost(postId: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error deleting forum post:", error);
-    return false;
-  }
-}
-
-export async function deleteForumReply(replyId: string): Promise<boolean> {
-  try {
-    await apiFetch(`/replies/${replyId}`, {
-      method: "DELETE",
-    });
-    return true;
-  } catch (error) {
-    console.error("Error deleting forum reply:", error);
     return false;
   }
 }

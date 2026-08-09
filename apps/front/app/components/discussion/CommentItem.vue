@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Comment, CommentTargetType } from "~/types/discussion";
+import { commentAnchorId } from "~/utils/commentPermalink";
 
 const {
   comment,
@@ -24,11 +25,22 @@ const displayReply = ref(false);
 const isModerating = ref(false);
 const canModerate = computed(() => canModerateComments(user.value));
 
+const permalink = inject<{
+  highlightedCommentId: Ref<string | null>;
+  navigateToComment: (commentId: string) => void;
+}>("commentPermalink");
+
 const authorLabel = computed(() => comment.author.userName);
+const anchorId = computed(() => commentAnchorId(comment.id));
+const isHighlighted = computed(() => permalink?.highlightedCommentId.value === comment.id);
 
 function onCommentCreated() {
   displayReply.value = false;
   emit("changed");
+}
+
+function onPermalinkClick() {
+  permalink?.navigateToComment(comment.id);
 }
 
 async function onHide() {
@@ -65,7 +77,12 @@ async function onDelete() {
 </script>
 
 <template>
-  <article class="w-full flex flex-col gap-3" :aria-label="authorLabel">
+  <article
+    :id="anchorId"
+    class="w-full flex flex-col gap-3 scroll-mt-24 outline-none rounded-sm"
+    :class="{ 'comment-highlight': isHighlighted }"
+    :aria-label="authorLabel"
+  >
     <div class="border border-default rounded-sm">
       <div class="flex flex-row items-center justify-between border-b border-default px-4 h-8">
         <span class="font-medium text-muted text-sm" translate="no">
@@ -92,6 +109,15 @@ async function onDelete() {
               @click="displayReply = !displayReply"
             />
           </ForumSignInPrompt>
+          <UButton
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            icon="i-fluent-link-24-regular"
+            class="p-1! min-h-6 min-w-6 cursor-pointer"
+            :aria-label="$t('components.discussion.permalink')"
+            @click="onPermalinkClick"
+          />
         </div>
         <div v-if="canModerate" class="flex flex-row items-center gap-1">
           <UButton
@@ -144,3 +170,27 @@ async function onDelete() {
     </div>
   </article>
 </template>
+
+<style scoped>
+.comment-highlight {
+  animation: comment-highlight 2s ease-out;
+}
+
+@keyframes comment-highlight {
+  0%,
+  15% {
+    background-color: color-mix(in srgb, var(--ui-color-primary-500) 18%, transparent);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-highlight {
+    animation: none;
+    background-color: color-mix(in srgb, var(--ui-color-primary-500) 12%, transparent);
+  }
+}
+</style>

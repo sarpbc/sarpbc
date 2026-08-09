@@ -1,4 +1,9 @@
-import type { Comment, CommentTargetType, CreateCommentResult } from "~/types/discussion";
+import type {
+  Comment,
+  CommentTargetType,
+  CreateCommentResult,
+  PaginatedComments,
+} from "~/types/discussion";
 import { apiFetch } from "~/utils/apiFetch";
 import {
   FORUM_ERROR_CODES,
@@ -7,20 +12,32 @@ import {
   getApiErrorStatus,
 } from "~/utils/apiError";
 
+const MAX_REFETCH_LIMIT = 100;
+
 export async function getCommentsByTarget(
   targetType: CommentTargetType,
   targetId: string,
-): Promise<Comment[]> {
+  page = 0,
+  limit?: number,
+): Promise<PaginatedComments> {
   try {
-    const res = await apiFetch<{ replies: Comment[] }>("/replies", {
+    return await apiFetch<PaginatedComments>("/replies", {
       method: "GET",
-      query: { targetType, targetId },
+      query: {
+        targetType,
+        targetId,
+        page,
+        ...(limit !== undefined ? { limit } : {}),
+      },
     });
-    return res.replies ?? [];
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw error;
   }
+}
+
+export function refetchLimitForLoadedPages(loadedPages: number, pageSize: number): number {
+  return Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
 }
 
 export async function createComment(data: {

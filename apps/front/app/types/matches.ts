@@ -42,6 +42,7 @@ export interface MatchListItem {
   participants?: MatchListParticipant[];
   results?: MatchResult[];
   tournament: MatchListTournament;
+  commentCount?: number;
 }
 
 export interface UpcomingMatchesResponse {

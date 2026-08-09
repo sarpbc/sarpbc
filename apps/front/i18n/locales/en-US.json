@@ -121,6 +121,10 @@
     "discussion": {
       "heading": "Discussion",
       "subtitle": "Share your take with the community.",
+      "commentCountAria": "{count} comments",
+      "loadMore": "Load More Comments",
+      "loadingMore": "Loading…",
+      "permalink": "Link to Comment",
       "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
       "retry": "Try Again",
