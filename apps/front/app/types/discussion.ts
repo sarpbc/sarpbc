@@ -1,6 +1,14 @@
 export type CommentTargetType = "forumPost" | "newsArticle" | "match";
 
-export type ReplyReportReason = "spam" | "harassment" | "hate_speech" | "off_topic" | "other";
+export const REPLY_REPORT_REASONS = [
+  "spam",
+  "harassment",
+  "hate_speech",
+  "off_topic",
+  "other",
+] as const;
+
+export type ReplyReportReason = (typeof REPLY_REPORT_REASONS)[number];
 
 export interface CommentAuthor {
   id: string;

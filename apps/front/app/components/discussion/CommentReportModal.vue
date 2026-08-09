@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import type { ReplyReportReason } from "~/types/discussion";
+import { REPLY_REPORT_REASONS, type ReplyReportReason } from "~/types/discussion";
 import { reportComment } from "~/composables/discussion";
-
-const REASONS: ReplyReportReason[] = ["spam", "harassment", "hate_speech", "off_topic", "other"];
 
 const open = defineModel<boolean>("open", { required: true });
 
@@ -21,7 +19,7 @@ const selectedReason = ref<ReplyReportReason | null>(null);
 const isSubmitting = ref(false);
 
 const reasonItems = computed(() =>
-  REASONS.map((reason) => ({
+  REPLY_REPORT_REASONS.map((reason) => ({
     label: t(`components.discussion.report.reasons.${reason}`),
     value: reason,
   })),
