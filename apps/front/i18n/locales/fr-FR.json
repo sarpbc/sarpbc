@@ -83,7 +83,8 @@
       "signin": "Se connecter",
       "home": "Accueil — Actualités",
       "openMenu": "Ouvrir le menu",
-      "closeMenu": "Fermer le menu"
+      "closeMenu": "Fermer le menu",
+      "unreadNotifications": "{count} notification non lue | {count} notifications non lues"
     },
     "input": {
       "search": "Rechercher...",
@@ -148,6 +149,26 @@
         "rateLimitDescription": "Vous ne pouvez publier qu'un commentaire par minute. Attendez et réessayez.",
         "signInRequired": "Connectez-vous pour commenter.",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      },
+      "report": {
+        "action": "Signaler",
+        "title": "Signaler le commentaire",
+        "description": "Dites-nous pourquoi ce commentaire doit être examiné. Les signalements sont anonymes pour les autres utilisateurs.",
+        "reasonLegend": "Motif du signalement",
+        "submit": "Envoyer le signalement",
+        "reasons": {
+          "spam": "Spam ou publicité",
+          "harassment": "Harcèlement ou intimidation",
+          "hate_speech": "Discours haineux",
+          "off_topic": "Hors sujet",
+          "other": "Autre"
+        },
+        "messages": {
+          "submitted": "Signalement envoyé",
+          "alreadyReported": "Vous avez déjà signalé ce commentaire",
+          "signInRequired": "Connectez-vous pour signaler des commentaires",
+          "error": "Impossible d'envoyer le signalement. Réessayez."
+        }
       }
     },
     "tournaments": {
@@ -651,8 +672,16 @@
     },
     "profile": {
       "title": "Profil",
+      "description": "Gérez votre profil et vos paramètres sur sarpbc.org.",
       "logout": "Se déconnecter",
-      "openAdmin": "Console Staff"
+      "openAdmin": "Console Staff",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "Aucune notification pour le moment. Quand quelqu'un répond à votre commentaire, cela apparaîtra ici.",
+        "markAllRead": "Tout marquer comme lu",
+        "viewThread": "Voir le fil",
+        "replied": "{user} a répondu sur {target}"
+      }
     },
     "authentication": {
       "login": "Connexion",

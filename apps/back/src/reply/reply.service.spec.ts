@@ -2,12 +2,14 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { QueryOrder } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { ReplyService } from "./reply.service";
+import { ReplyReportRepository } from "./reply-report.repository";
 import { ReplyRepository } from "./reply.repository";
+import { ReplyService } from "./reply.service";
 import { UserService } from "src/user/user.service";
 import { FORUM_ERROR_CODES } from "src/forum/forum.constants";
 import { Reply } from "src/forum/forum.entities";
 import { User } from "src/user/domain/user.entity";
+import { NotificationService } from "src/notification/notification.service";
 import { Match } from "src/tournament/tournament.entities";
 
 describe("ReplyService", () => {
@@ -23,8 +25,15 @@ describe("ReplyService", () => {
     delete: jest.fn(),
     findChildren: jest.fn(),
   };
+  const replyReportRepository = {
+    findByReplyAndReporter: jest.fn(),
+    save: jest.fn(),
+  };
   const userService = {
     findById: jest.fn(),
+  };
+  const notificationService = {
+    createForDirectReply: jest.fn(),
   };
   const em = {
     findOne: jest.fn(),
@@ -35,6 +44,8 @@ describe("ReplyService", () => {
       providers: [
         ReplyService,
         { provide: ReplyRepository, useValue: replyRepository },
+        { provide: ReplyReportRepository, useValue: replyReportRepository },
+        { provide: NotificationService, useValue: notificationService },
         { provide: UserService, useValue: userService },
         { provide: EntityManager, useValue: em },
       ],
@@ -219,6 +230,21 @@ describe("ReplyService", () => {
 
       expect(reply.hiddenAt).toBeInstanceOf(Date);
       expect(replyRepository.save).toHaveBeenCalledWith(reply);
+    });
+  });
+
+  describe("report", () => {
+    it("persists a report via the repository save method", async () => {
+      const reply = makeReply({ id: "r1", author: makeUser("author-1") });
+      replyRepository.findById.mockResolvedValue(reply);
+      replyReportRepository.findByReplyAndReporter.mockResolvedValue(null);
+      userService.findById.mockResolvedValue(makeUser("reporter-1"));
+      replyReportRepository.save.mockResolvedValue(undefined);
+
+      const result = await service.report("r1", "reporter-1", "spam");
+
+      expect(replyReportRepository.save).toHaveBeenCalled();
+      expect(result.reason).toBe("spam");
     });
   });
 });
