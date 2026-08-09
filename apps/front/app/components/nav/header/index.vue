@@ -69,6 +69,10 @@ const items = computed<NavigationMenuItem[]>(() => [
         label: t("page.game.pickems.title"),
         to: localePath("/game/pickems"),
       },
+      {
+        label: t("page.game.career.title"),
+        to: localePath("/game/career"),
+      },
     ],
   },
 ]);

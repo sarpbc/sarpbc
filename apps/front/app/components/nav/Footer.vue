@@ -48,6 +48,11 @@ const columns = computed<FooterColumn[]>(() => [
             label: t("page.game.pickems.title"),
             to: localePath("/game/pickems"),
           },
+          {
+            type: "link",
+            label: t("page.game.career.title"),
+            to: localePath("/game/career"),
+          },
         ],
       },
       { type: "link", label: t("general.teams"), to: localePath("/team") },

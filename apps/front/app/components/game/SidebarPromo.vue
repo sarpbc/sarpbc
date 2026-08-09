@@ -14,6 +14,19 @@
           </UBadge>
         </div>
       </UiListItem>
+      <UiListItem
+        size="compact"
+        :to="$localePath('/game/career')"
+        :title="$t('page.game.career.title')"
+        class="text-xs font-normal text-default border-t border-default"
+      >
+        <div class="min-w-0 flex-1 truncate">{{ $t("page.game.career.title") }}</div>
+        <div class="shrink-0">
+          <UBadge color="primary" variant="soft" class="text-xs">
+            {{ $t("components.game.sidebarPromo.play") }}
+          </UBadge>
+        </div>
+      </UiListItem>
     </div>
   </UiRail>
 </template>
