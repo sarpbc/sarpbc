@@ -11,6 +11,7 @@ import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.c
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
 import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dto";
+import { sortOrderForTarget } from "./reply-target.util";
 
 @Injectable()
 export class ReplyService {
