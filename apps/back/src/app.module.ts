@@ -19,6 +19,7 @@ import { TournamentModule } from "./tournament/tournament.module";
 import { PandascoreModule } from "./pandascore/pandascore.module";
 import { NewsModule } from "./news/news.module";
 import { ReplyModule } from "./reply/reply.module";
+import { ModerationModule } from "./moderation/moderation.module";
 import { ImagesModule } from "./images/images.module";
 import { StorageModule } from "./storage/storage.module";
 import { PatModule } from "./pat/pat.module";
@@ -54,6 +55,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     PandascoreModule,
     NewsModule,
     ReplyModule,
+    ModerationModule,
     ImagesModule,
     StorageModule,
     PatModule,
