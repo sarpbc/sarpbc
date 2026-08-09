@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Match } from "~/types/matches";
+import { PlayerAwardType, type PlayerAwardListItem } from "@sarpbc/types";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -9,6 +10,8 @@ const toast = useToast();
 const tournamentId = computed(() => route.params.id as string);
 const isSyncing = ref(false);
 const settingWinnerMatchId = ref<string | null>(null);
+const assigningMvpPlayerId = ref<string | null>(null);
+const removingAwardId = ref<string | null>(null);
 
 const { data: tournament, refresh: refreshTournament } = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}`,
@@ -19,6 +22,12 @@ const { data: tournament, refresh: refreshTournament } = await useLazyAsyncData(
 const { data: matches, refresh: refreshMatches } = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}-matches`,
   () => getTournamentMatches(tournamentId.value),
+  { server: false, watch: [tournamentId] },
+);
+
+const { data: awards, refresh: refreshAwards } = await useLazyAsyncData(
+  () => `admin-tournament-${tournamentId.value}-awards`,
+  () => getTournamentAwards(tournamentId.value),
   { server: false, watch: [tournamentId] },
 );
 
@@ -35,6 +44,33 @@ const breadcrumbItems = computed(() => [
 const displayMatches = computed(() =>
   (matches.value ?? []).filter((match) => (match.participants?.length ?? 0) >= 2),
 );
+
+const mvpAward = computed(() =>
+  (awards.value ?? []).find((award) => award.awardType === PlayerAwardType.MVP),
+);
+
+const rosterEntries = computed(() => {
+  const participants = tournament.value?.participants ?? [];
+  const entries: Array<{
+    participantId: string;
+    teamName: string;
+    playerId: string;
+    playerName: string;
+  }> = [];
+
+  for (const participant of participants) {
+    for (const player of participant.players ?? []) {
+      entries.push({
+        participantId: participant.id,
+        teamName: participant.team.name,
+        playerId: player.id,
+        playerName: player.name,
+      });
+    }
+  }
+
+  return entries.sort((a, b) => a.playerName.localeCompare(b.playerName));
+});
 
 function matchLabel(match: Match): string {
   const teamA = match.participants?.[0]?.team.name ?? "TBD";
@@ -61,7 +97,7 @@ async function handleRefresh() {
     const success = await syncTournament(tournamentId.value);
     if (success) {
       toast.add({ title: t("page.tournaments.syncTournament"), color: "success" });
-      await Promise.all([refreshTournament(), refreshMatches()]);
+      await Promise.all([refreshTournament(), refreshMatches(), refreshAwards()]);
     }
   } finally {
     isSyncing.value = false;
@@ -78,6 +114,48 @@ async function handleSetWinner(match: Match, participantId: string) {
     }
   } finally {
     settingWinnerMatchId.value = null;
+  }
+}
+
+async function handleAssignMvp(entry: {
+  participantId: string;
+  playerId: string;
+  playerName: string;
+}) {
+  assigningMvpPlayerId.value = entry.playerId;
+  try {
+    const award = await createTournamentAward(tournamentId.value, {
+      participantId: entry.participantId,
+      playerId: entry.playerId,
+      awardType: PlayerAwardType.MVP,
+    });
+    if (award) {
+      toast.add({
+        title: t("page.tournaments.awards.mvpAssigned", { name: entry.playerName }),
+        color: "success",
+      });
+      await refreshAwards();
+    }
+  } finally {
+    assigningMvpPlayerId.value = null;
+  }
+}
+
+async function handleRemoveAward(award: PlayerAwardListItem) {
+  removingAwardId.value = award.id;
+  try {
+    const success = await deleteTournamentAward(tournamentId.value, award.id);
+    if (success) {
+      toast.add({
+        title: t("page.tournaments.awards.removed", {
+          type: t(`page.tournaments.awards.types.${award.awardType}`),
+        }),
+        color: "success",
+      });
+      await refreshAwards();
+    }
+  } finally {
+    removingAwardId.value = null;
   }
 }
 </script>
@@ -114,6 +192,55 @@ async function handleSetWinner(match: Match, participantId: string) {
             {{ new Date(tournament.beginAt).toLocaleDateString() }}
           </p>
         </div>
+
+        <section class="flex flex-col gap-3 border border-default p-4">
+          <div class="flex flex-col gap-1">
+            <h2 class="text-lg font-semibold">{{ $t("page.tournaments.awards.title") }}</h2>
+            <p class="text-sm text-muted">{{ $t("page.tournaments.awards.mvpHint") }}</p>
+          </div>
+
+          <div
+            v-if="mvpAward"
+            class="flex flex-row items-center justify-between gap-4 border border-default p-3"
+          >
+            <div class="min-w-0">
+              <p class="font-medium">
+                {{ $t("page.tournaments.awards.types.mvp") }}:
+                {{ mvpAward.player?.name }}
+              </p>
+              <p v-if="mvpAward.participant?.team?.name" class="text-sm text-muted">
+                {{ mvpAward.participant.team.name }}
+              </p>
+            </div>
+            <UButton
+              size="sm"
+              color="error"
+              variant="soft"
+              :loading="removingAwardId === mvpAward.id"
+              :label="$t('page.tournaments.awards.remove')"
+              @click="handleRemoveAward(mvpAward)"
+            />
+          </div>
+
+          <div v-else-if="rosterEntries.length > 0" class="flex flex-col gap-2">
+            <p class="text-sm text-muted">{{ $t("page.tournaments.awards.assignMvp") }}</p>
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                v-for="entry in rosterEntries"
+                :key="entry.playerId"
+                size="sm"
+                variant="soft"
+                :loading="assigningMvpPlayerId === entry.playerId"
+                :label="`${entry.playerName} (${entry.teamName})`"
+                @click="handleAssignMvp(entry)"
+              />
+            </div>
+          </div>
+
+          <p v-else class="text-sm text-muted">
+            {{ $t("page.tournaments.awards.noRoster") }}
+          </p>
+        </section>
 
         <p class="text-sm text-muted">
           {{
