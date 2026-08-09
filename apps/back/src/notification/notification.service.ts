@@ -1,26 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { Reply } from "../forum/forum.entities";
 import { User } from "../user/domain/user.entity";
-import type { ReplyTargetType } from "../reply/dto/reply-response.dto";
+import { resolveReplyTargetLink } from "../reply/reply-target-link.util";
+import type { ReplyTargetLink } from "../reply/reply-target-link.util";
 import { ReplyNotificationRepository } from "./reply-notification.repository";
 import { ReplyNotification } from "./reply-notification.entity";
-
-export type NotificationDto = {
-  id: string;
-  createdAt: Date;
-  readAt: Date | null;
-  reply: {
-    id: string;
-    content: string;
-    author: {
-      userName: string;
-    };
-  };
-  targetType: ReplyTargetType;
-  targetId: string;
-  targetLabel: string;
-  targetPath: string;
-};
+import type { NotificationDto } from "./dto/notification.dto";
 
 @Injectable()
 export class NotificationService {
@@ -32,13 +17,16 @@ export class NotificationService {
     notification.reply = reply;
     notification.readAt = null;
 
-    await this.notificationRepository.getEntityManager().persist(notification).flush();
+    await this.notificationRepository.save(notification);
   }
 
   async listForUser(userId: string, limit = 30): Promise<NotificationDto[]> {
     const cappedLimit = Math.min(Math.max(limit, 1), 50);
     const notifications = await this.notificationRepository.findForRecipient(userId, cappedLimit);
-    return notifications.map((notification) => this.toDto(notification));
+
+    return notifications
+      .map((notification) => this.toDto(notification))
+      .filter((item): item is NotificationDto => item !== null);
   }
 
   async getUnreadCount(userId: string): Promise<number> {
@@ -50,8 +38,11 @@ export class NotificationService {
     return { marked };
   }
 
-  private toDto(notification: ReplyNotification): NotificationDto {
-    const target = this.resolveTarget(notification.reply);
+  private toDto(notification: ReplyNotification): NotificationDto | null {
+    const target = resolveReplyTargetLink(notification.reply);
+    if (!target) {
+      return null;
+    }
 
     return {
       id: notification.id,
@@ -64,51 +55,18 @@ export class NotificationService {
           userName: notification.reply.author.userName,
         },
       },
+      ...this.targetFields(target),
+    };
+  }
+
+  private targetFields(
+    target: ReplyTargetLink,
+  ): Pick<NotificationDto, "targetType" | "targetId" | "targetLabel" | "targetPath"> {
+    return {
       targetType: target.targetType,
       targetId: target.targetId,
       targetLabel: target.targetLabel,
       targetPath: target.targetPath,
-    };
-  }
-
-  private resolveTarget(reply: Reply): {
-    targetType: ReplyTargetType;
-    targetId: string;
-    targetLabel: string;
-    targetPath: string;
-  } {
-    if (reply.post) {
-      return {
-        targetType: "forumPost",
-        targetId: reply.post.id,
-        targetLabel: reply.post.title,
-        targetPath: `/forum/post/${reply.post.id}`,
-      };
-    }
-
-    if (reply.newsArticle) {
-      return {
-        targetType: "newsArticle",
-        targetId: reply.newsArticle.id,
-        targetLabel: reply.newsArticle.title,
-        targetPath: `/news/${reply.newsArticle.slug}`,
-      };
-    }
-
-    if (reply.match) {
-      return {
-        targetType: "match",
-        targetId: reply.match.id,
-        targetLabel: reply.match.name,
-        targetPath: `/matches/${reply.match.id}`,
-      };
-    }
-
-    return {
-      targetType: "forumPost",
-      targetId: "",
-      targetLabel: "Unknown",
-      targetPath: "/",
     };
   }
 }

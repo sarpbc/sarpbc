@@ -122,15 +122,44 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
     return this.find({ replyTo: { id: replyId } });
   }
 
-  async findRecentForModeration(limit: number): Promise<Reply[]> {
-    return this.find(
-      {},
-      {
-        populate: ["author", "post", "newsArticle", "match"],
-        orderBy: { createdAt: "DESC" },
-        limit,
-      },
+  async findRecentForModeration(
+    limit: number,
+  ): Promise<Array<{ reply: Reply; reportCount: number }>> {
+    type ModerationRow = { id: string; report_count: string };
+
+    const rows = (await this.em.getConnection().execute(`
+        SELECT
+          r.id,
+          COUNT(rr.id) AS report_count
+        FROM reply r
+        LEFT JOIN reply_report rr ON r.id = rr.reply_id
+        GROUP BY r.id
+        ORDER BY COUNT(rr.id) DESC, r.created_at DESC
+        LIMIT ${limit}
+      `)) as ModerationRow[];
+
+    const ids = rows.map((row: ModerationRow) => row.id);
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const replies = await this.find(
+      { id: { $in: ids } },
+      { populate: ["author", "post", "newsArticle", "match"] },
     );
+
+    const replyById = new Map(replies.map((reply) => [reply.id, reply]));
+    const countById = new Map(rows.map((row: ModerationRow) => [row.id, Number(row.report_count)]));
+
+    return ids
+      .map((id: string) => {
+        const reply = replyById.get(id);
+        if (!reply) {
+          return null;
+        }
+        return { reply, reportCount: countById.get(id) ?? 0 };
+      })
+      .filter((item): item is { reply: Reply; reportCount: number } => item !== null);
   }
 
   async deleteByPostId(postId: string): Promise<void> {

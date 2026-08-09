@@ -1,25 +1,9 @@
 import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
-import { Type } from "class-transformer";
-import { IsArray, IsInt, IsOptional, IsUUID, Max, Min } from "class-validator";
 import { AuthGuard } from "../auth/auth.guard";
 import { CurrentUserId } from "../user/decorator/current-user.decorator";
+import { ListNotificationsQueryDto } from "./dto/list-notifications-query.dto";
+import { MarkNotificationsReadDto } from "./dto/mark-notifications-read.dto";
 import { NotificationService } from "./notification.service";
-
-class ListNotificationsQueryDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(50)
-  limit?: number = 30;
-}
-
-class MarkNotificationsReadDto {
-  @IsOptional()
-  @IsArray()
-  @IsUUID("4", { each: true })
-  ids?: string[];
-}
 
 @Controller("notifications")
 @UseGuards(AuthGuard)

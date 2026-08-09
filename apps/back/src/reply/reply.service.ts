@@ -204,7 +204,7 @@ export class ReplyService {
     report.reporter = reporter;
     report.reason = reason;
 
-    await this.replyReportRepository.getEntityManager().persist(report).flush();
+    await this.replyReportRepository.save(report);
 
     return {
       id: report.id,

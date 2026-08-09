@@ -2,6 +2,10 @@ import { EntityRepository } from "@mikro-orm/core";
 import { ReplyNotification } from "./reply-notification.entity";
 
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
+  async save(notification: ReplyNotification): Promise<void> {
+    await this.em.persist(notification).flush();
+  }
+
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
     return this.find(
       { recipient: { id: recipientId } },

@@ -27,10 +27,7 @@ describe("ReplyService", () => {
   };
   const replyReportRepository = {
     findByReplyAndReporter: jest.fn(),
-    getEntityManager: jest.fn(() => ({
-      persist: jest.fn().mockReturnThis(),
-      flush: jest.fn(),
-    })),
+    save: jest.fn(),
   };
   const userService = {
     findById: jest.fn(),
@@ -233,6 +230,21 @@ describe("ReplyService", () => {
 
       expect(reply.hiddenAt).toBeInstanceOf(Date);
       expect(replyRepository.save).toHaveBeenCalledWith(reply);
+    });
+  });
+
+  describe("report", () => {
+    it("persists a report via the repository save method", async () => {
+      const reply = makeReply({ id: "r1", author: makeUser("author-1") });
+      replyRepository.findById.mockResolvedValue(reply);
+      replyReportRepository.findByReplyAndReporter.mockResolvedValue(null);
+      userService.findById.mockResolvedValue(makeUser("reporter-1"));
+      replyReportRepository.save.mockResolvedValue(undefined);
+
+      const result = await service.report("r1", "reporter-1", "spam");
+
+      expect(replyReportRepository.save).toHaveBeenCalled();
+      expect(result.reason).toBe("spam");
     });
   });
 });

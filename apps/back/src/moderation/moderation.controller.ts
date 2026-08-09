@@ -1,19 +1,9 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { Type } from "class-transformer";
-import { IsInt, IsOptional, Max, Min } from "class-validator";
 import { AuthGuard } from "../auth/auth.guard";
 import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../user/user.guard";
+import { ListModerationRepliesQueryDto } from "./dto/list-moderation-replies-query.dto";
 import { ModerationService } from "./moderation.service";
-
-class ListModerationRepliesQueryDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  limit?: number = 50;
-}
 
 @Controller("moderation")
 @UseGuards(AuthGuard, PermissionGuard)
