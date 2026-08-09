@@ -12,8 +12,6 @@ import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
 import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dto";
 
-export const COMMENTS_PAGE_SIZE = 25;
-
 @Injectable()
 export class ReplyService {
   constructor(
@@ -21,27 +19,6 @@ export class ReplyService {
     private readonly userService: UserService,
     private readonly em: EntityManager,
   ) {}
-
-  async findByPostId(postId: string): Promise<Reply[]> {
-    return this.replyRepository.findByPostId(postId);
-  }
-
-  async findByNewsArticleId(newsArticleId: string): Promise<Reply[]> {
-    return this.replyRepository.findByNewsArticleId(newsArticleId);
-  }
-
-  async findByMatchId(matchId: string): Promise<Reply[]> {
-    return this.replyRepository.findByMatchId(matchId);
-  }
-
-  async findByTarget(targetType: ReplyTargetType, targetId: string): Promise<ReplyResponseDto[]> {
-    const result = await this.findByTargetPaginated(targetType, targetId, 0, COMMENTS_PAGE_SIZE);
-    return result.replies;
-  }
-
-  sortOrderForTarget(targetType: ReplyTargetType): "ASC" | "DESC" {
-    return targetType === "forumPost" ? "ASC" : "DESC";
-  }
 
   async findByTargetPaginated(
     targetType: ReplyTargetType,

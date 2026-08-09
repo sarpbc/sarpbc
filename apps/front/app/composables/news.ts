@@ -1,5 +1,3 @@
-import type { Reply } from "~/types/forum";
-
 export type NewsArticleListItem = {
   id: string;
   slug: string;
