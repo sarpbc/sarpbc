@@ -233,7 +233,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see g
 
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
-3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI.
+3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. CI enforces this via `scripts/lint-hub-row-heights.mjs` (wired into `pnpm lint`).
 4. **Primitives first:** `@nuxt/ui` → existing `Ui*` → new `Ui*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.
