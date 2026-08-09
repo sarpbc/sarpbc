@@ -20,34 +20,62 @@ function targetForeignKey(targetType: ReplyTargetType): string {
   }
 }
 
+function targetFilter(targetType: ReplyTargetType, targetId: string, includeHidden = false) {
+  const hiddenFilter = includeHidden ? {} : { hiddenAt: null };
+  switch (targetType) {
+    case "forumPost":
+      return { post: { id: targetId }, ...hiddenFilter };
+    case "newsArticle":
+      return { newsArticle: { id: targetId }, ...hiddenFilter };
+    case "match":
+      return { match: { id: targetId }, ...hiddenFilter };
+    default: {
+      const _exhaustive: never = targetType;
+      return _exhaustive;
+    }
+  }
+}
+
 export class ReplyRepository extends EntityRepository<Reply> implements IReplyRepository {
-  async findByPostId(postId: string, includeHidden = false): Promise<Reply[]> {
+  async findByPostId(
+    postId: string,
+    includeHidden = false,
+    order: "ASC" | "DESC" = "ASC",
+  ): Promise<Reply[]> {
     return this.find(
       {
         post: { id: postId },
         ...(includeHidden ? {} : { hiddenAt: null }),
       },
-      { populate: [...POPULATE] },
+      { populate: [...POPULATE], orderBy: { createdAt: order } },
     );
   }
 
-  async findByNewsArticleId(newsArticleId: string, includeHidden = false): Promise<Reply[]> {
+  async findByNewsArticleId(
+    newsArticleId: string,
+    includeHidden = false,
+    order: "ASC" | "DESC" = "DESC",
+  ): Promise<Reply[]> {
     return this.find(
       {
         newsArticle: { id: newsArticleId },
         ...(includeHidden ? {} : { hiddenAt: null }),
       },
-      { populate: [...POPULATE] },
+      { populate: [...POPULATE], orderBy: { createdAt: order } },
     );
   }
 
-  async findByMatchId(matchId: string, includeHidden = false): Promise<Reply[]> {
+  async findByMatchId(
+    matchId: string,
+    includeHidden = false,
+    order: "ASC" | "DESC" = "DESC",
+  ): Promise<Reply[]> {
     return this.find(
       {
         match: { id: matchId },
         ...(includeHidden ? {} : { hiddenAt: null }),
       },
-      { populate: [...POPULATE] },
+      { populate: [...POPULATE], orderBy: { createdAt: order } },
     );
   }
 
@@ -57,6 +85,13 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
 
   async findLatestByUser(userId: string): Promise<Reply | null> {
     return this.findOne({ author: { id: userId } }, { orderBy: { createdAt: "DESC" } });
+  }
+
+  async countRootsByTarget(targetType: ReplyTargetType, targetId: string): Promise<number> {
+    return this.count({
+      ...targetFilter(targetType, targetId),
+      replyTo: null,
+    });
   }
 
   async countByTargetIds(

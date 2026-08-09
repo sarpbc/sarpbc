@@ -17,6 +17,8 @@ describe("ReplyService", () => {
     findByMatchId: jest.fn(),
     findById: jest.fn(),
     findLatestByUser: jest.fn(),
+    countRootsByTarget: jest.fn(),
+    countByTargetIds: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
     findChildren: jest.fn(),

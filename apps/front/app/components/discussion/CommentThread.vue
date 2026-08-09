@@ -8,25 +8,79 @@ const { targetType, targetId } = defineProps<{
 
 const { t } = useI18n();
 
-const {
-  data: comments,
-  pending,
-  error,
-  refresh,
-} = await useAsyncData<Comment[]>(
-  () => `comments-${targetType}-${targetId}`,
-  () => getCommentsByTarget(targetType, targetId),
-  {
-    watch: [() => targetType, () => targetId],
-    default: () => [],
-  },
-);
+const comments = ref<Comment[]>([]);
+const total = ref(0);
+const page = ref(0);
+const pending = ref(true);
+const loadingMore = ref(false);
+const error = ref<Error | null>(null);
 
-async function onChanged() {
-  await refresh();
+const hasComments = computed(() => comments.value.length > 0);
+const hasMore = computed(() => comments.value.length < total.value);
+
+async function fetchPage(pageToLoad: number, append: boolean) {
+  const result = await getCommentsByTarget(targetType, targetId, pageToLoad, COMMENTS_PAGE_SIZE);
+  total.value = result.total;
+  page.value = pageToLoad;
+  comments.value = append ? [...comments.value, ...result.replies] : result.replies;
 }
 
-const hasComments = computed(() => (comments.value?.length ?? 0) > 0);
+async function loadInitial() {
+  pending.value = true;
+  error.value = null;
+  try {
+    await fetchPage(0, false);
+  } catch (err) {
+    error.value = err instanceof Error ? err : new Error(String(err));
+  } finally {
+    pending.value = false;
+  }
+}
+
+async function loadMore() {
+  if (loadingMore.value || !hasMore.value) {
+    return;
+  }
+
+  loadingMore.value = true;
+  try {
+    await fetchPage(page.value + 1, true);
+  } catch (err) {
+    error.value = err instanceof Error ? err : new Error(String(err));
+  } finally {
+    loadingMore.value = false;
+  }
+}
+
+async function onChanged() {
+  const pagesToLoad = page.value + 1;
+  pending.value = true;
+  error.value = null;
+  try {
+    const merged: Comment[] = [];
+    let latestTotal = 0;
+    for (let p = 0; p < pagesToLoad; p++) {
+      const result = await getCommentsByTarget(targetType, targetId, p, COMMENTS_PAGE_SIZE);
+      latestTotal = result.total;
+      merged.push(...result.replies);
+    }
+    total.value = latestTotal;
+    comments.value = merged;
+    page.value = pagesToLoad - 1;
+  } catch (err) {
+    error.value = err instanceof Error ? err : new Error(String(err));
+  } finally {
+    pending.value = false;
+  }
+}
+
+watch(
+  () => [targetType, targetId] as const,
+  () => {
+    void loadInitial();
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -66,7 +120,7 @@ const hasComments = computed(() => (comments.value?.length ?? 0) > 0);
       <p class="text-sm text-muted">
         {{ t("components.discussion.error") }}
       </p>
-      <UButton variant="outline" @click="refresh()">
+      <UButton variant="outline" @click="loadInitial()">
         {{ t("components.discussion.retry") }}
       </UButton>
     </div>
@@ -80,6 +134,16 @@ const hasComments = computed(() => (comments.value?.length ?? 0) > 0);
         :target-id="targetId"
         @changed="onChanged"
       />
+
+      <div v-if="hasMore" class="flex justify-center pt-2">
+        <UButton variant="outline" :loading="loadingMore" :disabled="loadingMore" @click="loadMore">
+          {{
+            loadingMore
+              ? t("components.discussion.loadingMore")
+              : t("components.discussion.loadMore")
+          }}
+        </UButton>
+      </div>
     </div>
   </section>
 </template>

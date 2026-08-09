@@ -10,6 +10,9 @@ import { Match } from "src/tournament/tournament.entities";
 import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.constants";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
+import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dto";
+
+export const COMMENTS_PAGE_SIZE = 25;
 
 @Injectable()
 export class ReplyService {
@@ -32,24 +35,51 @@ export class ReplyService {
   }
 
   async findByTarget(targetType: ReplyTargetType, targetId: string): Promise<ReplyResponseDto[]> {
-    let replies: Reply[];
+    const result = await this.findByTargetPaginated(targetType, targetId, 0, COMMENTS_PAGE_SIZE);
+    return result.replies;
+  }
+
+  sortOrderForTarget(targetType: ReplyTargetType): "ASC" | "DESC" {
+    return targetType === "forumPost" ? "ASC" : "DESC";
+  }
+
+  async findByTargetPaginated(
+    targetType: ReplyTargetType,
+    targetId: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedRepliesResponseDto> {
+    const order = this.sortOrderForTarget(targetType);
+    const replies = await this.findAllForTarget(targetType, targetId, order);
+    const threaded = this.toThreadedDtos(replies);
+    const total = threaded.length;
+    const offset = page * limit;
+
+    return {
+      replies: threaded.slice(offset, offset + limit),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  private async findAllForTarget(
+    targetType: ReplyTargetType,
+    targetId: string,
+    order: "ASC" | "DESC",
+  ): Promise<Reply[]> {
     switch (targetType) {
       case "forumPost":
-        replies = await this.replyRepository.findByPostId(targetId);
-        break;
+        return this.replyRepository.findByPostId(targetId, false, order);
       case "newsArticle":
-        replies = await this.replyRepository.findByNewsArticleId(targetId);
-        break;
+        return this.replyRepository.findByNewsArticleId(targetId, false, order);
       case "match":
-        replies = await this.replyRepository.findByMatchId(targetId);
-        break;
+        return this.replyRepository.findByMatchId(targetId, false, order);
       default: {
         const _exhaustive: never = targetType;
         throw new BadRequestException(`Unsupported target type: ${_exhaustive}`);
       }
     }
-
-    return this.toThreadedDtos(replies);
   }
 
   async countByTargetIds(

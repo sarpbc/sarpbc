@@ -7,6 +7,7 @@ export interface IReplyRepository {
   findByMatchId(matchId: string, includeHidden?: boolean): Promise<Reply[]>;
   findById(id: string): Promise<Reply | null>;
   findLatestByUser(userId: string): Promise<Reply | null>;
+  countRootsByTarget(targetType: ReplyTargetType, targetId: string): Promise<number>;
   countByTargetIds(targetType: ReplyTargetType, targetIds: string[]): Promise<Map<string, number>>;
   save(reply: Reply): Promise<void>;
   delete(reply: Reply): Promise<void>;
