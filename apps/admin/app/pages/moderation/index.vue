@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import type { ModerationReply } from "~/types/moderation";
+import { getApiErrorMessage } from "~/utils/apiError";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
 const config = useRuntimeConfig();
@@ -16,16 +17,36 @@ const publicSiteUrl = computed(() =>
   String(config.public.publicSiteUrl || "https://sarpbc.org").replace(/\/$/, ""),
 );
 
+const dateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }),
+);
+
 const hidingReplyId = ref<string | null>(null);
 const isDeleteReplyModalOpen = ref(false);
 const replyToDelete = ref<ModerationReply | null>(null);
 const isDeletingReply = ref(false);
 
-const { status, data, refresh } = await useLazyAsyncData(
+const { status, data, error, refresh } = await useLazyAsyncData(
   "admin-moderation-replies",
   () => getModerationReplies(50),
   { server: false },
 );
+
+watch(error, (loadError) => {
+  if (!loadError) {
+    return;
+  }
+
+  toast.add({
+    title: t("page.moderation.loadError"),
+    description: getApiErrorMessage(loadError),
+    color: "error",
+  });
+});
 
 const replies = computed(() => data.value ?? []);
 
@@ -114,9 +135,29 @@ async function confirmDeleteReply() {
           {{ $t("page.moderation.subtitle") }}
         </p>
 
-        <p v-if="status === 'pending'" class="text-sm text-muted">
-          {{ $t("page.moderation.loading") }}
-        </p>
+        <div v-if="status === 'pending'" class="flex flex-col gap-3">
+          <div v-for="n in 3" :key="n" class="flex flex-col gap-3 border border-default p-4">
+            <div class="h-4 w-1/3 animate-pulse rounded-sm bg-elevated" />
+            <div class="h-16 w-full animate-pulse rounded-sm bg-elevated" />
+            <div class="h-4 w-1/2 animate-pulse rounded-sm bg-elevated" />
+          </div>
+        </div>
+
+        <div
+          v-else-if="status === 'error'"
+          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
+        >
+          <p class="text-sm text-muted">
+            {{ getApiErrorMessage(error) ?? $t("page.moderation.loadError") }}
+          </p>
+          <UButton
+            icon="i-fluent-arrow-clockwise-24-regular"
+            :label="$t('page.moderation.retry')"
+            variant="soft"
+            class="cursor-pointer"
+            @click="refresh()"
+          />
+        </div>
 
         <p v-else-if="replies.length === 0" class="text-sm text-muted">
           {{ $t("page.moderation.empty") }}
@@ -133,7 +174,9 @@ async function confirmDeleteReply() {
               <div class="flex flex-row flex-wrap items-center gap-2 text-sm text-muted">
                 <span translate="no">{{ reply.author.userName }}</span>
                 <span>·</span>
-                <span class="tabular-nums">{{ new Date(reply.createdAt).toLocaleString() }}</span>
+                <span class="tabular-nums">{{
+                  dateFormatter.format(new Date(reply.createdAt))
+                }}</span>
                 <UBadge v-if="reply.reportCount > 0" color="error" variant="soft">
                   {{
                     $t("page.moderation.reportedBadge", {

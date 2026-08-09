@@ -20,6 +20,13 @@ const toast = useToast();
 const selectedReason = ref<ReplyReportReason | null>(null);
 const isSubmitting = ref(false);
 
+const reasonItems = computed(() =>
+  REASONS.map((reason) => ({
+    label: t(`components.discussion.report.reasons.${reason}`),
+    value: reason,
+  })),
+);
+
 watch(open, (isOpen) => {
   if (!isOpen) {
     selectedReason.value = null;
@@ -80,23 +87,9 @@ async function submitReport() {
       <p class="text-sm text-muted mb-4">
         {{ $t("components.discussion.report.description") }}
       </p>
-      <fieldset class="flex flex-col gap-2">
-        <legend class="sr-only">{{ $t("components.discussion.report.reasonLegend") }}</legend>
-        <label
-          v-for="reason in REASONS"
-          :key="reason"
-          class="flex items-center gap-2 rounded-sm border border-default px-3 py-2 cursor-pointer hover:bg-elevated"
-        >
-          <input
-            v-model="selectedReason"
-            type="radio"
-            name="report-reason"
-            :value="reason"
-            class="size-4"
-          />
-          <span class="text-sm">{{ $t(`components.discussion.report.reasons.${reason}`) }}</span>
-        </label>
-      </fieldset>
+      <UFormField :label="$t('components.discussion.report.reasonLegend')" name="reason">
+        <URadioGroup v-model="selectedReason" :items="reasonItems" />
+      </UFormField>
     </template>
     <template #footer>
       <UButton

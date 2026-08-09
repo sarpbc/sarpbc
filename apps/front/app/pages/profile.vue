@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AppNotification } from "~/types/notification";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const user = useUser();
 const localePath = useLocalePath();
@@ -53,6 +53,15 @@ async function markAllRead() {
   }
 }
 
+async function viewThread(notification: AppNotification) {
+  if (!notification.readAt) {
+    await markNotificationsRead([notification.id]);
+    await Promise.all([refreshNotifications(), refreshUnreadCount()]);
+  }
+
+  await navigateTo(localePath(notification.targetPath));
+}
+
 const handleLogout = async () => {
   isLoggingOut.value = true;
   try {
@@ -69,7 +78,7 @@ const handleLogout = async () => {
 
 setPageSeo({
   title: `${t("page.profile.title")} | sarpbc.org`,
-  description: "Manage your sarpbc.org profile and settings",
+  description: t("page.profile.description"),
   noIndex: true,
 });
 </script>
@@ -161,11 +170,15 @@ setPageSeo({
           <p class="text-sm text-muted line-clamp-2">{{ notification.reply.content }}</p>
           <div class="flex flex-row items-center justify-between gap-2 text-sm">
             <span class="text-muted tabular-nums">
-              {{ new Date(notification.createdAt).toLocaleString() }}
+              {{ df(locale).format(new Date(notification.createdAt)) }}
             </span>
-            <ULink :to="$localePath(notification.targetPath)" class="text-primary hover:underline">
-              {{ $t("page.profile.notifications.viewThread") }}
-            </ULink>
+            <UButton
+              variant="link"
+              color="primary"
+              :label="$t('page.profile.notifications.viewThread')"
+              class="cursor-pointer p-0"
+              @click="viewThread(notification)"
+            />
           </div>
         </li>
       </ul>

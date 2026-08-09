@@ -115,6 +115,8 @@
       "title": "Comment Moderation",
       "subtitle": "Recent comments across matches, articles, and forum posts. Reported comments appear first.",
       "loading": "Loading…",
+      "loadError": "Could not load comments for moderation.",
+      "retry": "Try Again",
       "empty": "No comments to review.",
       "hide": "Hide",
       "delete": "Delete Comment",

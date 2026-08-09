@@ -672,6 +672,7 @@
     },
     "profile": {
       "title": "Profile",
+      "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
       "openAdmin": "Staff Console",
       "notifications": {
