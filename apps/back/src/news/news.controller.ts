@@ -92,13 +92,6 @@ export class NewsController {
     await this.newsService.setDraftStatus(slug, true);
   }
 
-  @Get(":slug/replies")
-  async findReplies(@Param("slug") slug: string) {
-    const articleId = await this.newsService.findArticleIdBySlug(slug);
-    const replies = await this.replyService.findByTarget("newsArticle", articleId);
-    return { replies };
-  }
-
   @UseGuards(AuthGuard)
   @Post(":slug/replies")
   async createReply(

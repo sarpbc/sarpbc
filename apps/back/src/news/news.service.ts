@@ -6,6 +6,7 @@ import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { excerptFromContent } from "./news-content.util";
 import { UserService } from "src/user/user.service";
+import { ReplyService } from "src/reply/reply.service";
 import slugify from "slugify";
 
 export interface NewsArticleListItemResponse {
@@ -15,6 +16,7 @@ export interface NewsArticleListItemResponse {
   createdAt: Date;
   imageUrl: string | null;
   excerpt: string;
+  commentCount: number;
 }
 
 export interface NewsArticleResponse {
@@ -34,9 +36,10 @@ export class NewsService {
     @InjectRepository(NewsArticle)
     private readonly newsRepository: EntityRepository<NewsArticle>,
     private readonly userService: UserService,
+    private readonly replyService: ReplyService,
   ) {}
 
-  private mapListArticle(article: NewsArticle): NewsArticleListItemResponse {
+  private mapListArticle(article: NewsArticle, commentCount = 0): NewsArticleListItemResponse {
     return {
       id: article.id,
       title: article.title,
@@ -44,6 +47,7 @@ export class NewsService {
       createdAt: article.createdAt,
       imageUrl: article.imageUrl,
       excerpt: excerptFromContent(article.content),
+      commentCount,
     };
   }
 
@@ -134,8 +138,14 @@ export class NewsService {
       { isDraft: false },
       { orderBy: { createdAt: "DESC" }, limit, offset },
     );
+    const commentCounts = await this.replyService.countByTargetIds(
+      "newsArticle",
+      articles.map((article) => article.id),
+    );
     return {
-      data: articles.map((a) => this.mapListArticle(a)),
+      data: articles.map((article) =>
+        this.mapListArticle(article, commentCounts.get(article.id) ?? 0),
+      ),
       total,
       page,
       limit,

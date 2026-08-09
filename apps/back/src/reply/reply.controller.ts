@@ -27,26 +27,12 @@ export class ReplyController {
   /** Unified list: GET /replies?targetType=match&targetId=… */
   @Get()
   async findByTarget(@Query() query: ListRepliesQueryDto) {
-    const replies = await this.replyService.findByTarget(query.targetType, query.targetId);
-    return { replies };
-  }
-
-  @Get("post/:postId")
-  async findByPost(@Param("postId", ParseUUIDPipe) postId: string) {
-    const replies = await this.replyService.findByTarget("forumPost", postId);
-    return { replies };
-  }
-
-  @Get("news/:newsArticleId")
-  async findByNewsArticle(@Param("newsArticleId", ParseUUIDPipe) newsArticleId: string) {
-    const replies = await this.replyService.findByTarget("newsArticle", newsArticleId);
-    return { replies };
-  }
-
-  @Get("match/:matchId")
-  async findByMatch(@Param("matchId", ParseUUIDPipe) matchId: string) {
-    const replies = await this.replyService.findByTarget("match", matchId);
-    return { replies };
+    return this.replyService.findByTargetPaginated(
+      query.targetType,
+      query.targetId,
+      query.page,
+      query.limit,
+    );
   }
 
   @UseGuards(AuthGuard)

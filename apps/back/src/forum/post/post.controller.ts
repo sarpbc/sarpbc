@@ -22,21 +22,30 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { PostCreationStatusDto } from "./dto/post-creation-status.dto";
 import { PostResponse } from "./dto/post-response.dto";
 import { AuthenticatedUserRequest } from "src/common/types/authenticated.interface";
+import { ReplyService } from "src/reply/reply.service";
 
 @Controller("posts")
 @UseInterceptors(ClassSerializerInterceptor)
 export class PostController {
-  constructor(private postService: PostService) {}
+  constructor(
+    private postService: PostService,
+    private replyService: ReplyService,
+  ) {}
 
   @Get()
   async findAll() {
     const posts = await this.postService.find({});
+    const commentCounts = await this.replyService.countByTargetIds(
+      "forumPost",
+      posts.map((post) => post.id),
+    );
     return {
       posts: posts.map((post) => ({
         id: post.id,
         title: post.title,
         author: post.author.userName,
         createdAt: post.createdAt,
+        commentCount: commentCounts.get(post.id) ?? 0,
         topic: {
           id: post.topic.id,
           title: post.topic.title,

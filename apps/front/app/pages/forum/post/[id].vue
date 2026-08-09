@@ -2,7 +2,6 @@
 const route = useRoute();
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const user = useUser();
 
 const postId = computed(() => route.params.id as string);
 
@@ -10,7 +9,6 @@ const {
   data: post,
   pending,
   error,
-  refresh,
 } = await useLazyAsyncData(`forum-post-${postId.value}`, () => getPostById(postId.value));
 
 const title = computed(() =>
@@ -31,16 +29,6 @@ setPageSeo({
   title: title.value,
   description: description.value,
 });
-
-const displayReply = ref(false);
-
-function toggleDisplayReply() {
-  displayReply.value = !displayReply.value;
-}
-
-function refreshPost() {
-  refresh();
-}
 </script>
 
 <template>
@@ -64,7 +52,7 @@ function refreshPost() {
       </UButton>
     </div>
 
-    <section v-else class="mt-18 w-full flex flex-col">
+    <section v-else class="mt-18 w-full flex flex-col gap-8">
       <UiCrossCard class="w-full">
         <div class="w-full flex flex-col">
           <div class="flex flex-row items-center justify-between border-b border-default px-4 py-2">
@@ -84,38 +72,11 @@ function refreshPost() {
             <span class="font-light text-muted text-sm">
               {{ df(locale).format(new Date(post.createdAt)) }}
             </span>
-
-            <div class="flex flex-row items-center gap-1">
-              <ForumSignInPrompt action="reply">
-                <UButton
-                  size="sm"
-                  variant="soft"
-                  :label="$t('components.reply.submit')"
-                  icon="i-fluent-arrow-reply-24-regular"
-                  class="p-1! gap-1! cursor-pointer"
-                  @click="toggleDisplayReply"
-                />
-              </ForumSignInPrompt>
-            </div>
           </div>
         </div>
       </UiCrossCard>
 
-      <div class="flex flex-col mt-8 gap-2">
-        <div v-if="displayReply && user" class="flex flex-col border border-default">
-          <ForumReplyCreate :post-id="postId" @reply-created="refreshPost" />
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <ForumReply
-            v-for="reply in post.replies"
-            :key="reply.id"
-            :reply="reply"
-            :post-id="postId"
-            @reply-created="refreshPost"
-          />
-        </div>
-      </div>
+      <DiscussionCommentThread target-type="forumPost" :target-id="postId" />
     </section>
   </div>
 </template>
