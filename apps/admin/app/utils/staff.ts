@@ -17,6 +17,9 @@ export function permissionForAdminPath(path: string): StaffPermission | "staff" 
   if (withoutLocale === "/forum" || withoutLocale.startsWith("/forum/")) {
     return "forum.moderate";
   }
+  if (withoutLocale === "/moderation" || withoutLocale.startsWith("/moderation/")) {
+    return "forum.moderate";
+  }
   if (withoutLocale === "/players" || withoutLocale.startsWith("/players/")) {
     return "players.manage";
   }

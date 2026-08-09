@@ -22,8 +22,10 @@ const { t, locale } = useI18n();
 const user = useUser();
 const toast = useToast();
 const displayReply = ref(false);
+const displayReport = ref(false);
 const isModerating = ref(false);
 const canModerate = computed(() => canModerateComments(user.value));
+const canReport = computed(() => !!user.value && user.value.id !== comment.author.id);
 
 const permalink = inject<{
   highlightedCommentId: Ref<string | null>;
@@ -118,6 +120,16 @@ async function onDelete() {
             :aria-label="$t('components.discussion.permalink')"
             @click="onPermalinkClick"
           />
+          <UButton
+            v-if="canReport"
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            :label="$t('components.discussion.report.action')"
+            icon="i-fluent-flag-24-regular"
+            class="p-1! gap-1! cursor-pointer min-h-6 min-w-6"
+            @click="displayReport = true"
+          />
         </div>
         <div v-if="canModerate" class="flex flex-row items-center gap-1">
           <UButton
@@ -143,6 +155,8 @@ async function onDelete() {
         </div>
       </div>
     </div>
+
+    <DiscussionCommentReportModal v-model:open="displayReport" :comment-id="comment.id" />
 
     <div v-if="displayReply && user" class="pl-4 md:pl-6">
       <DiscussionCommentComposer

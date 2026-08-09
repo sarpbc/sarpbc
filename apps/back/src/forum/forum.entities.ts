@@ -1,5 +1,7 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { NewsArticle } from "../news/domain/news-article.entity";
+import { ReplyReportRepository } from "../reply/reply-report.repository";
+import type { ReplyReportReason } from "../reply/reply-report-reason";
 import { ReplyRepository } from "../reply/reply.repository";
 import { Match } from "../tournament/tournament.entities";
 import { User } from "../user/domain/user.entity";
@@ -51,6 +53,15 @@ export class Reply {
   replies = new Collection<Reply>(this);
   /** When set, reply is hidden from public lists (admin soft-hide). */
   hiddenAt: Date | null = null;
+  reports = new Collection<ReplyReport>(this);
+}
+
+export class ReplyReport {
+  id!: string;
+  reply!: Reply;
+  reporter!: User;
+  reason!: ReplyReportReason;
+  createdAt: Date = new Date();
 }
 
 export const TopicSchema = defineEntity({
@@ -137,5 +148,26 @@ export const ReplySchema = defineEntity({
     replyTo: p.manyToOne(Reply).nullable(),
     replies: p.oneToMany(Reply).mappedBy("replyTo"),
     hiddenAt: p.datetime().type("timestamptz").nullable(),
+    reports: p.oneToMany(ReplyReport).mappedBy("reply"),
+  },
+});
+
+export const ReplyReportSchema = defineEntity({
+  class: ReplyReport,
+  repository: () => ReplyReportRepository,
+  indexes: [
+    { properties: ["reply", "reporter"], options: { unique: true } },
+    { properties: ["reply"] },
+    { properties: ["createdAt"] },
+  ],
+  properties: {
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    reply: p.manyToOne(Reply),
+    reporter: p.manyToOne(User),
+    reason: p.string(),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
   },
 });

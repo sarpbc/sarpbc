@@ -83,7 +83,8 @@
       "signin": "Sign In",
       "home": "Home — News",
       "openMenu": "Open menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "unreadNotifications": "{count} unread notification | {count} unread notifications"
     },
     "input": {
       "search": "Search...",
@@ -148,6 +149,26 @@
         "rateLimitDescription": "You can only post one comment per minute. Wait and try again.",
         "signInRequired": "Sign in to comment.",
         "moderateError": "Could not moderate this comment. Try again."
+      },
+      "report": {
+        "action": "Report",
+        "title": "Report Comment",
+        "description": "Tell us why this comment should be reviewed. Reports are anonymous to other users.",
+        "reasonLegend": "Report reason",
+        "submit": "Submit Report",
+        "reasons": {
+          "spam": "Spam or advertising",
+          "harassment": "Harassment or bullying",
+          "hate_speech": "Hate speech",
+          "off_topic": "Off topic",
+          "other": "Other"
+        },
+        "messages": {
+          "submitted": "Report submitted",
+          "alreadyReported": "You already reported this comment",
+          "signInRequired": "Sign in to report comments",
+          "error": "Could not submit report. Try again."
+        }
       }
     },
     "tournaments": {
@@ -651,8 +672,16 @@
     },
     "profile": {
       "title": "Profile",
+      "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
-      "openAdmin": "Staff Console"
+      "openAdmin": "Staff Console",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "No notifications yet. When someone replies to your comment, it will show up here.",
+        "markAllRead": "Mark All Read",
+        "viewThread": "View Thread",
+        "replied": "{user} replied on {target}"
+      }
     },
     "authentication": {
       "login": "Login",

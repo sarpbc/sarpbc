@@ -34,6 +34,7 @@
       "tournaments": "Tournois",
       "pickems": "Pick'ems",
       "forum": "Forum",
+      "moderation": "Modération",
       "tokens": "Jetons API",
       "backToSite": "Retour sur sarpbc.org"
     },
@@ -106,6 +107,32 @@
       },
       "messages": {
         "hidden": "Commentaire masqué",
+        "errorTitle": "Impossible de modérer le commentaire",
+        "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      }
+    },
+    "moderation": {
+      "title": "Modération des commentaires",
+      "subtitle": "Commentaires récents sur les matchs, articles et messages du forum. Les commentaires signalés apparaissent en premier.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les commentaires à modérer.",
+      "retry": "Réessayer",
+      "empty": "Aucun commentaire à examiner.",
+      "hide": "Masquer",
+      "delete": "Supprimer le commentaire",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+      "deleteConfirmButton": "Supprimer",
+      "openInAdmin": "Ouvrir dans l'admin",
+      "reportedBadge": "{count} signalement | {count} signalements",
+      "hiddenBadge": "Masqué",
+      "targetTypes": {
+        "forumPost": "Message du forum",
+        "newsArticle": "Article",
+        "match": "Match"
+      },
+      "messages": {
+        "hidden": "Commentaire masqué",
+        "deleted": "Commentaire supprimé",
         "errorTitle": "Impossible de modérer le commentaire",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
       }

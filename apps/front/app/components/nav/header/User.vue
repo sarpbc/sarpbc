@@ -2,11 +2,7 @@
 const { t } = useI18n();
 
 const user = useUser();
-const isClient = ref(false);
-
-onMounted(() => {
-  isClient.value = true;
-});
+const { count: unreadCount } = useUnreadNotificationCount();
 </script>
 
 <template>
@@ -21,9 +17,19 @@ onMounted(() => {
     <ULink
       v-else
       :to="$localePath('/profile')"
-      class="truncate text-muted hover:text-highlighted text-lg lg:text-sm font-semibold lg:font-normal"
+      class="relative truncate text-muted hover:text-highlighted text-lg lg:text-sm font-semibold lg:font-normal"
     >
       {{ `${user.userName}` }}
+      <UBadge
+        v-if="unreadCount > 0"
+        color="error"
+        variant="solid"
+        size="xs"
+        class="absolute -top-1 -right-2 min-w-4 justify-center tabular-nums"
+        :aria-label="t('components.header.unreadNotifications', { count: unreadCount })"
+      >
+        {{ unreadCount > 9 ? "9+" : unreadCount }}
+      </UBadge>
     </ULink>
     <template #fallback>
       <ULink
