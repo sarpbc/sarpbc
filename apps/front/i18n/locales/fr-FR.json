@@ -338,6 +338,15 @@
           "retry": "Réessayer",
           "wonOn": "Remporté le {date}"
         },
+        "awards": {
+          "title": "Récompenses",
+          "error": "Impossible de charger les récompenses de ce joueur. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "awardedOn": "Attribué le {date}",
+          "types": {
+            "mvp": "MVP"
+          }
+        },
         "matches": {
           "sectionTitle": "Matchs",
           "live": "En direct",

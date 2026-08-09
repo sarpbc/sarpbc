@@ -1,0 +1,130 @@
+<script lang="ts" setup>
+import { DateFormatter } from "@internationalized/date";
+import { PlayerAwardType, type PlayerAwardListItem } from "@sarpbc/types";
+
+const {
+  awards,
+  pending = false,
+  hasError = false,
+} = defineProps<{
+  awards: PlayerAwardListItem[];
+  pending?: boolean;
+  hasError?: boolean;
+}>();
+
+const emit = defineEmits<{
+  retry: [];
+}>();
+
+const { t, locale } = useI18n();
+
+const headingId = "player-awards-title";
+
+const dateDf = computed(
+  () =>
+    new DateFormatter(locale.value, {
+      dateStyle: "medium",
+    }),
+);
+
+const formatEndDate = (value: Date | string | null) => {
+  if (!value) return null;
+  return dateDf.value.format(new Date(value));
+};
+
+function awardTypeLabel(awardType: PlayerAwardType): string {
+  switch (awardType) {
+    case PlayerAwardType.MVP:
+      return t("page.player.slug.awards.types.mvp");
+    default: {
+      const _exhaustive: never = awardType;
+      return _exhaustive;
+    }
+  }
+}
+
+const hasMeta = (award: PlayerAwardListItem) =>
+  Boolean(award.tournament.leagueName || award.tournament.serie || award.tournament.endAt);
+</script>
+
+<template>
+  <section :aria-labelledby="headingId">
+    <UiRail>
+      <template #caption>
+        <h2 :id="headingId">
+          {{ t("page.player.slug.awards.title") }}
+        </h2>
+      </template>
+
+      <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
+        <UiCard v-for="index in 2" :key="index">
+          <div class="flex items-center gap-3 py-2 px-3">
+            <USkeleton class="size-10 shrink-0" />
+            <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+              <USkeleton class="h-4 w-3/5 max-w-48" />
+              <USkeleton class="h-3 w-2/5 max-w-32" />
+            </div>
+          </div>
+        </UiCard>
+      </div>
+
+      <UiCard v-else-if="hasError">
+        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
+          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
+          <p class="text-sm text-muted text-pretty">
+            {{ t("page.player.slug.awards.error") }}
+          </p>
+          <UButton variant="outline" color="error" @click="emit('retry')">
+            {{ t("page.player.slug.awards.retry") }}
+          </UButton>
+        </div>
+      </UiCard>
+
+      <div
+        v-else-if="awards.length > 0"
+        class="flex flex-col border border-default divide-y divide-default"
+      >
+        <ULink
+          v-for="award in awards"
+          :key="award.id"
+          :to="$localePath(`/tournaments/${award.tournament.id}`)"
+          class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+        >
+          <div class="flex size-10 shrink-0 items-center justify-center">
+            <UIcon name="i-fluent-star-24-filled" class="text-xl text-primary" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="font-medium truncate">
+              {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.name }}
+            </p>
+            <p v-if="hasMeta(award)" class="text-sm text-muted truncate">
+              <span v-if="award.tournament.leagueName">{{ award.tournament.leagueName }}</span>
+              <span
+                v-if="award.tournament.leagueName && award.tournament.serie"
+                class="mx-1"
+                aria-hidden="true"
+                >·</span
+              >
+              <span v-if="award.tournament.serie">{{ award.tournament.serie }}</span>
+              <span
+                v-if="
+                  (award.tournament.leagueName || award.tournament.serie) && award.tournament.endAt
+                "
+                class="mx-1"
+                aria-hidden="true"
+                >·</span
+              >
+              <span v-if="award.tournament.endAt">
+                {{
+                  t("page.player.slug.awards.awardedOn", {
+                    date: formatEndDate(award.tournament.endAt),
+                  })
+                }}
+              </span>
+            </p>
+          </div>
+        </ULink>
+      </div>
+    </UiRail>
+  </section>
+</template>

@@ -29,6 +29,18 @@ const {
 } = usePlayerTrophies(playerId);
 
 const {
+  awards,
+  hasAwards,
+  pending: awardsPending,
+  error: awardsError,
+  refresh: refreshAwards,
+} = usePlayerAwards(playerId);
+
+const showAwardsSection = computed(
+  () => awardsPending.value || Boolean(awardsError.value) || hasAwards.value,
+);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -137,6 +149,14 @@ setPageSeo({
         :pending="trophiesPending"
         :has-error="Boolean(trophiesError)"
         @retry="refreshTrophies()"
+      />
+
+      <PlayerAwardsSection
+        v-if="showAwardsSection"
+        :awards="awards"
+        :pending="awardsPending"
+        :has-error="Boolean(awardsError)"
+        @retry="refreshAwards()"
       />
 
       <PlayerMatchesSection
