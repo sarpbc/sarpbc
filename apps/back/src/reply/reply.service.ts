@@ -17,6 +17,7 @@ import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.c
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
 import type { ReplyReportReason } from "./reply-report-reason";
+import { NotificationService } from "src/notification/notification.service";
 
 @Injectable()
 export class ReplyService {
@@ -24,6 +25,7 @@ export class ReplyService {
     private readonly replyRepository: ReplyRepository,
     private readonly replyReportRepository: ReplyReportRepository,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
     private readonly em: EntityManager,
   ) {}
 
@@ -131,6 +133,10 @@ export class ReplyService {
     newReply.replyTo = replyTo;
 
     await this.replyRepository.save(newReply);
+
+    if (replyTo && replyTo.author.id !== userId) {
+      await this.notificationService.createForDirectReply(replyTo.author, newReply);
+    }
 
     return this.toDto(newReply, []);
   }

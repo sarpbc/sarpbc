@@ -8,6 +8,7 @@ import { UserService } from "src/user/user.service";
 import { FORUM_ERROR_CODES } from "src/forum/forum.constants";
 import { Reply } from "src/forum/forum.entities";
 import { User } from "src/user/domain/user.entity";
+import { NotificationService } from "src/notification/notification.service";
 import { Match } from "src/tournament/tournament.entities";
 
 describe("ReplyService", () => {
@@ -32,6 +33,9 @@ describe("ReplyService", () => {
   const userService = {
     findById: jest.fn(),
   };
+  const notificationService = {
+    createForDirectReply: jest.fn(),
+  };
   const em = {
     findOne: jest.fn(),
   };
@@ -42,6 +46,7 @@ describe("ReplyService", () => {
         ReplyService,
         { provide: ReplyRepository, useValue: replyRepository },
         { provide: ReplyReportRepository, useValue: replyReportRepository },
+        { provide: NotificationService, useValue: notificationService },
         { provide: UserService, useValue: userService },
         { provide: EntityManager, useValue: em },
       ],
