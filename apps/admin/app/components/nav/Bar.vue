@@ -56,6 +56,12 @@ const links = computed(() => {
       permission: "forum.moderate",
     },
     {
+      label: t("page.nav.moderation"),
+      icon: "i-fluent-shield-24-regular",
+      to: localePath("/moderation"),
+      permission: "forum.moderate",
+    },
+    {
       label: t("page.nav.tokens"),
       icon: "i-fluent-key-24-regular",
       to: localePath("/tokens"),
