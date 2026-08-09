@@ -34,6 +34,7 @@
       "tournaments": "Tournaments",
       "pickems": "Pick'ems",
       "forum": "Forum",
+      "moderation": "Moderation",
       "tokens": "API Tokens",
       "backToSite": "Back to sarpbc.org"
     },
@@ -106,6 +107,30 @@
       },
       "messages": {
         "hidden": "Comment hidden",
+        "errorTitle": "Could not moderate comment",
+        "moderateError": "Could not moderate this comment. Try again."
+      }
+    },
+    "moderation": {
+      "title": "Comment Moderation",
+      "subtitle": "Recent comments across matches, articles, and forum posts. Reported comments appear first.",
+      "loading": "Loading…",
+      "empty": "No comments to review.",
+      "hide": "Hide",
+      "delete": "Delete Comment",
+      "deleteConfirm": "Are you sure you want to delete this comment?",
+      "deleteConfirmButton": "Delete",
+      "openInAdmin": "Open in admin",
+      "reportedBadge": "{count} report | {count} reports",
+      "hiddenBadge": "Hidden",
+      "targetTypes": {
+        "forumPost": "Forum post",
+        "newsArticle": "News article",
+        "match": "Match"
+      },
+      "messages": {
+        "hidden": "Comment hidden",
+        "deleted": "Comment deleted",
         "errorTitle": "Could not moderate comment",
         "moderateError": "Could not moderate this comment. Try again."
       }

@@ -122,6 +122,17 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
     return this.find({ replyTo: { id: replyId } });
   }
 
+  async findRecentForModeration(limit: number): Promise<Reply[]> {
+    return this.find(
+      {},
+      {
+        populate: ["author", "post", "newsArticle", "match"],
+        orderBy: { createdAt: "DESC" },
+        limit,
+      },
+    );
+  }
+
   async deleteByPostId(postId: string): Promise<void> {
     const replies = await this.find({ post: { id: postId } });
     for (const reply of replies) {
