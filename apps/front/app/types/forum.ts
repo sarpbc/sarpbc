@@ -54,10 +54,3 @@ export type CreateForumPostResult =
       message?: string;
     };
 
-export type CreateForumReplyResult =
-  | { ok: true }
-  | {
-      ok: false;
-      reason: "unauthorized" | "rate_limited" | "unknown";
-      message?: string;
-    };
