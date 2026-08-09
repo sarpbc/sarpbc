@@ -132,4 +132,3 @@ export async function deleteForumPost(postId: string): Promise<boolean> {
     return false;
   }
 }
-

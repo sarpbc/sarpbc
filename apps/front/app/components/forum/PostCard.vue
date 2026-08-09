@@ -18,7 +18,9 @@ const { post } = defineProps<Props>();
         <span class="hidden md:flex md:col-span-1 truncate">
           {{ post.author }}
         </span>
-        <div class="flex col-span-2 md:col-span-1 items-center justify-end md:justify-start gap-2 truncate">
+        <div
+          class="flex col-span-2 md:col-span-1 items-center justify-end md:justify-start gap-2 truncate"
+        >
           <DiscussionCommentCount :count="post.commentCount ?? 0" />
           <span class="truncate">
             {{ formatLocaleTimeAgo(new Date(post.createdAt)) }}

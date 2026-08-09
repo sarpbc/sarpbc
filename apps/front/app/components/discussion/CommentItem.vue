@@ -32,9 +32,7 @@ const permalink = inject<{
 
 const authorLabel = computed(() => comment.author.userName);
 const anchorId = computed(() => commentAnchorId(comment.id));
-const isHighlighted = computed(
-  () => permalink?.highlightedCommentId.value === comment.id,
-);
+const isHighlighted = computed(() => permalink?.highlightedCommentId.value === comment.id);
 
 function onCommentCreated() {
   displayReply.value = false;

@@ -182,9 +182,7 @@ describe("ReplyService", () => {
     });
 
     it("returns oldest-first pages for forum posts", async () => {
-      const replies = ["a", "b", "c"].map((id) =>
-        makeReply({ id, post: { id: "p1" } as never }),
-      );
+      const replies = ["a", "b", "c"].map((id) => makeReply({ id, post: { id: "p1" } as never }));
       replyRepository.findByPostId.mockResolvedValue(replies);
 
       const result = await service.findByTargetPaginated("forumPost", "p1", 0, 2);

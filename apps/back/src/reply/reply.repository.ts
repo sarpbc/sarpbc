@@ -103,17 +103,16 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
     }
 
     const column = targetForeignKey(targetType);
-    const knex = this.em.getKnex();
-    const rows = (await knex("reply")
-      .select({ targetId: column })
-      .count("* as count")
-      .whereIn(column, targetIds)
-      .whereNull("hidden_at")
-      .groupBy(column)) as Array<{ targetId: string; count: string | number }>;
+    const placeholders = targetIds.map(() => "?").join(", ");
+    const sql = `SELECT ${column} as target_id, COUNT(*)::int as count FROM reply WHERE ${column} IN (${placeholders}) AND hidden_at IS NULL GROUP BY ${column}`;
+    const rows = (await this.em.getConnection().execute(sql, targetIds)) as Array<{
+      target_id: string;
+      count: number;
+    }>;
 
     const counts = new Map<string, number>();
     for (const row of rows) {
-      counts.set(row.targetId, Number(row.count));
+      counts.set(row.target_id, Number(row.count));
     }
     return counts;
   }

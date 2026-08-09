@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Comment, CommentTargetType } from "~/types/discussion";
+import { commentAnchorId, parseCommentHash } from "~/utils/commentPermalink";
 
 const { targetType, targetId } = defineProps<{
   targetType: CommentTargetType;
