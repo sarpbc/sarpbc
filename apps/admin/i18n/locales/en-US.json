@@ -214,6 +214,14 @@
       "editor": {
         "insertPlayer": "Player Tag",
         "insertTeam": "Team Tag",
+        "insertTable": "Table",
+        "tableAddRowBefore": "Add Row Before",
+        "tableAddRowAfter": "Add Row After",
+        "tableDeleteRow": "Delete Row",
+        "tableAddColumnBefore": "Add Column Before",
+        "tableAddColumnAfter": "Add Column After",
+        "tableDeleteColumn": "Delete Column",
+        "tableDeleteTable": "Delete Table",
         "picker": {
           "titlePlayer": "Insert Player Tag",
           "titleTeam": "Insert Team Tag",
