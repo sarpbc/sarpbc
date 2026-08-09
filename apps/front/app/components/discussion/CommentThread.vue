@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import type { Comment, CommentTargetType } from "~/types/discussion";
-import { commentAnchorId, parseCommentHash } from "~/utils/commentPermalink";
+import type { Comment, CommentTargetType, PaginatedComments } from "~/types/discussion";
+import { parseCommentHash } from "~/utils/commentPermalink";
+import { findCommentInTree } from "~/utils/commentTree";
 
 const { targetType, targetId } = defineProps<{
   targetType: CommentTargetType;
@@ -17,34 +18,41 @@ provide("commentPermalink", {
   navigateToComment,
 });
 
-const comments = ref<Comment[]>([]);
-const total = ref(0);
-const page = ref(0);
-const pending = ref(true);
+const loadedExtraPages = ref(0);
+const appendedReplies = ref<Comment[]>([]);
 const loadingMore = ref(false);
-const error = ref<Error | null>(null);
 
+const {
+  data: pageData,
+  pending,
+  error,
+  refresh,
+} = await useAsyncData<PaginatedComments>(
+  () => `comments-${targetType}-${targetId}`,
+  () => getCommentsByTarget(targetType, targetId, 0),
+  {
+    watch: [() => targetType, () => targetId],
+    default: () => ({ replies: [], total: 0, page: 0, limit: 25 }),
+  },
+);
+
+const comments = computed(() => [...(pageData.value?.replies ?? []), ...appendedReplies.value]);
+const total = computed(() => pageData.value?.total ?? 0);
+const pageSize = computed(() => pageData.value?.limit ?? 25);
 const hasComments = computed(() => comments.value.length > 0);
 const hasMore = computed(() => comments.value.length < total.value);
 
-async function fetchPage(pageToLoad: number, append: boolean) {
-  const result = await getCommentsByTarget(targetType, targetId, pageToLoad, COMMENTS_PAGE_SIZE);
-  total.value = result.total;
-  page.value = pageToLoad;
-  comments.value = append ? [...comments.value, ...result.replies] : result.replies;
+function resetExtraPages() {
+  loadedExtraPages.value = 0;
+  appendedReplies.value = [];
 }
 
-async function loadInitial() {
-  pending.value = true;
-  error.value = null;
-  try {
-    await fetchPage(0, false);
-  } catch (err) {
-    error.value = err instanceof Error ? err : new Error(String(err));
-  } finally {
-    pending.value = false;
-  }
-}
+watch(
+  () => [targetType, targetId] as const,
+  () => {
+    resetExtraPages();
+  },
+);
 
 async function loadMore() {
   if (loadingMore.value || !hasMore.value) {
@@ -53,52 +61,35 @@ async function loadMore() {
 
   loadingMore.value = true;
   try {
-    await fetchPage(page.value + 1, true);
-  } catch (err) {
-    error.value = err instanceof Error ? err : new Error(String(err));
+    const nextPage = loadedExtraPages.value + 1;
+    const result = await getCommentsByTarget(targetType, targetId, nextPage);
+    appendedReplies.value = [...appendedReplies.value, ...result.replies];
+    loadedExtraPages.value = nextPage;
   } finally {
     loadingMore.value = false;
   }
 }
 
 async function onChanged() {
-  const pagesToLoad = page.value + 1;
-  pending.value = true;
-  error.value = null;
-  try {
-    const merged: Comment[] = [];
-    let latestTotal = 0;
-    for (let p = 0; p < pagesToLoad; p++) {
-      const result = await getCommentsByTarget(targetType, targetId, p, COMMENTS_PAGE_SIZE);
-      latestTotal = result.total;
-      merged.push(...result.replies);
-    }
-    total.value = latestTotal;
-    comments.value = merged;
-    page.value = pagesToLoad - 1;
-  } catch (err) {
-    error.value = err instanceof Error ? err : new Error(String(err));
-  } finally {
-    pending.value = false;
-  }
+  const pagesLoaded = loadedExtraPages.value + 1;
+  const limit = refetchLimitForLoadedPages(pagesLoaded, pageSize.value);
+  const result = await getCommentsByTarget(targetType, targetId, 0, limit);
+  pageData.value = result;
+  resetExtraPages();
 }
 
-watch(
-  () => [targetType, targetId] as const,
-  () => {
-    void loadInitial();
-  },
-  { immediate: true },
-);
+function isCommentLoaded(commentId: string): boolean {
+  return findCommentInTree(comments.value, commentId);
+}
 
-async function loadUntilCommentVisible(commentId: string): Promise<boolean> {
-  if (document.getElementById(commentAnchorId(commentId))) {
+async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
+  if (isCommentLoaded(commentId)) {
     return true;
   }
 
   while (comments.value.length < total.value) {
-    await fetchPage(page.value + 1, true);
-    if (document.getElementById(commentAnchorId(commentId))) {
+    await loadMore();
+    if (isCommentLoaded(commentId)) {
       return true;
     }
   }
@@ -112,31 +103,23 @@ async function resolveHashTarget() {
     return;
   }
 
-  await loadUntilCommentVisible(commentId);
+  await loadUntilCommentLoaded(commentId);
   tryScrollFromHash();
-}
-
-function attemptHashNavigation() {
-  void nextTick(() => {
-    void resolveHashTarget();
-  });
 }
 
 watch(
   () => route.hash,
   () => {
-    attemptHashNavigation();
+    void nextTick(() => {
+      void resolveHashTarget();
+    });
   },
 );
 
-watch(comments, () => {
-  if (route.hash) {
-    attemptHashNavigation();
-  }
-});
-
 onMounted(() => {
-  attemptHashNavigation();
+  void nextTick(() => {
+    void resolveHashTarget();
+  });
 });
 </script>
 
@@ -177,7 +160,7 @@ onMounted(() => {
       <p class="text-sm text-muted">
         {{ t("components.discussion.error") }}
       </p>
-      <UButton variant="outline" @click="loadInitial()">
+      <UButton variant="outline" @click="refresh()">
         {{ t("components.discussion.retry") }}
       </UButton>
     </div>

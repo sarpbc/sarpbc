@@ -12,23 +12,32 @@ import {
   getApiErrorStatus,
 } from "~/utils/apiError";
 
-export const COMMENTS_PAGE_SIZE = 25;
+const MAX_REFETCH_LIMIT = 100;
 
 export async function getCommentsByTarget(
   targetType: CommentTargetType,
   targetId: string,
   page = 0,
-  limit = COMMENTS_PAGE_SIZE,
+  limit?: number,
 ): Promise<PaginatedComments> {
   try {
     return await apiFetch<PaginatedComments>("/replies", {
       method: "GET",
-      query: { targetType, targetId, page, limit },
+      query: {
+        targetType,
+        targetId,
+        page,
+        ...(limit !== undefined ? { limit } : {}),
+      },
     });
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw error;
   }
+}
+
+export function refetchLimitForLoadedPages(loadedPages: number, pageSize: number): number {
+  return Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
 }
 
 export async function createComment(data: {
