@@ -214,6 +214,14 @@
       "editor": {
         "insertPlayer": "Tag Joueur",
         "insertTeam": "Tag Équipe",
+        "insertTable": "Tableau",
+        "tableAddRowBefore": "Ajouter une Ligne Avant",
+        "tableAddRowAfter": "Ajouter une Ligne Après",
+        "tableDeleteRow": "Supprimer la Ligne",
+        "tableAddColumnBefore": "Ajouter une Colonne Avant",
+        "tableAddColumnAfter": "Ajouter une Colonne Après",
+        "tableDeleteColumn": "Supprimer la Colonne",
+        "tableDeleteTable": "Supprimer le Tableau",
         "picker": {
           "titlePlayer": "Insérer un Tag Joueur",
           "titleTeam": "Insérer un Tag Équipe",
