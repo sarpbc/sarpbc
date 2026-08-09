@@ -525,7 +525,14 @@
           "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé.",
           "openRoster": "Ouvrir le roster de {team}",
           "viewTeam": "Voir {team}",
-          "rosterEmpty": "Roster pas encore disponible."
+          "rosterEmpty": "Roster pas encore disponible.",
+          "viewAllTeams": "Voir toutes les équipes",
+          "viewAllTeamsCount": "Voir les {count} équipes"
+        },
+        "teams": {
+          "title": "Équipes et rosters",
+          "empty": "Équipes pas encore annoncées.",
+          "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé."
         },
         "hero": {
           "teamsCount": "{count} équipe | {count} équipes",

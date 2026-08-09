@@ -1,61 +1,48 @@
 <script lang="ts" setup>
-import type { Tournament, TournamentParticipant } from "~/types/tournament";
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import type { Tournament } from "~/types/tournament";
+import { buildTournamentParticipantEntries } from "~/utils/tournamentParticipants";
+
+const TEASER_TEAM_LIMIT = 6;
 
 const { tournament } = defineProps<{
   tournament: Tournament;
 }>();
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 
-interface ParticipantEntry {
-  team: Team;
-  players: Player[];
-}
+const teamsTabPath = computed(() => localePath(`/tournaments/${tournament.id}/teams`));
 
-function getParticipantTeam(participant: TournamentParticipant): Team | null {
-  return participant.team ?? null;
-}
-
-const participantEntries = computed((): ParticipantEntry[] => {
-  const participants = tournament.participants ?? [];
-  const seen = new Set<string>();
-  const result: ParticipantEntry[] = [];
-
-  for (const participant of participants) {
-    const team = getParticipantTeam(participant);
-    if (!team?.slug || seen.has(team.id)) {
-      continue;
-    }
-    seen.add(team.id);
-    const players = (participant.players ?? [])
-      .filter((player) => player.slug)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    result.push({ team, players });
-  }
-
-  return result.sort((a, b) => a.team.name.localeCompare(b.team.name));
-});
-
+const participantEntries = computed(() => buildTournamentParticipantEntries(tournament));
+const teaserEntries = computed(() => participantEntries.value.slice(0, TEASER_TEAM_LIMIT));
 const hasTeams = computed(() => participantEntries.value.length > 0);
+const hasMoreTeams = computed(() => participantEntries.value.length > TEASER_TEAM_LIMIT);
 </script>
 
 <template>
   <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-participants-title">
-    <h2
-      id="tournament-participants-title"
-      class="text-xl font-semibold tracking-tight pl-1 text-balance"
-    >
-      {{ t("page.tournaments.id.participants.title") }}
-    </h2>
+    <div class="flex items-center justify-between gap-3 pl-1">
+      <h2
+        id="tournament-participants-title"
+        class="text-xl font-semibold tracking-tight text-balance"
+      >
+        {{ t("page.tournaments.id.participants.title") }}
+      </h2>
+      <ULink
+        v-if="hasTeams"
+        :to="teamsTabPath"
+        class="text-sm text-muted hover:text-default shrink-0"
+      >
+        {{ t("page.tournaments.id.participants.viewAllTeams") }}
+      </ULink>
+    </div>
 
     <div
       v-if="hasTeams"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-default"
       role="list"
     >
-      <div v-for="entry in participantEntries" :key="entry.team.id" role="listitem" class="min-w-0">
+      <div v-for="entry in teaserEntries" :key="entry.team.id" role="listitem" class="min-w-0">
         <TournamentParticipantTile :team="entry.team" :players="entry.players" />
       </div>
     </div>
@@ -71,5 +58,11 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
         </p>
       </div>
     </UiCard>
+
+    <div v-if="hasMoreTeams" class="flex justify-center">
+      <UButton :to="teamsTabPath" variant="soft" color="neutral">
+        {{ t("page.tournaments.id.participants.viewAllTeamsCount", { count: participantEntries.length }) }}
+      </UButton>
+    </div>
   </section>
 </template>
