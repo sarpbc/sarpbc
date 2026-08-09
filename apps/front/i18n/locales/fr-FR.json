@@ -83,7 +83,8 @@
       "signin": "Se connecter",
       "home": "Accueil — Actualités",
       "openMenu": "Ouvrir le menu",
-      "closeMenu": "Fermer le menu"
+      "closeMenu": "Fermer le menu",
+      "unreadNotifications": "{count} notification non lue | {count} notifications non lues"
     },
     "input": {
       "search": "Rechercher...",
@@ -672,7 +673,14 @@
     "profile": {
       "title": "Profil",
       "logout": "Se déconnecter",
-      "openAdmin": "Console Staff"
+      "openAdmin": "Console Staff",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "Aucune notification pour le moment. Quand quelqu'un répond à votre commentaire, cela apparaîtra ici.",
+        "markAllRead": "Tout marquer comme lu",
+        "viewThread": "Voir le fil",
+        "replied": "{user} a répondu sur {target}"
+      }
     },
     "authentication": {
       "login": "Connexion",

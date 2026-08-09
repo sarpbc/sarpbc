@@ -83,7 +83,8 @@
       "signin": "Sign In",
       "home": "Home — News",
       "openMenu": "Open menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "unreadNotifications": "{count} unread notification | {count} unread notifications"
     },
     "input": {
       "search": "Search...",
@@ -672,7 +673,14 @@
     "profile": {
       "title": "Profile",
       "logout": "Logout",
-      "openAdmin": "Staff Console"
+      "openAdmin": "Staff Console",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "No notifications yet. When someone replies to your comment, it will show up here.",
+        "markAllRead": "Mark All Read",
+        "viewThread": "View Thread",
+        "replied": "{user} replied on {target}"
+      }
     },
     "authentication": {
       "login": "Login",
