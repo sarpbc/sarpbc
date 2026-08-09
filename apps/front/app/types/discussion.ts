@@ -1,5 +1,7 @@
 export type CommentTargetType = "forumPost" | "newsArticle" | "match";
 
+export type ReplyReportReason = "spam" | "harassment" | "hate_speech" | "off_topic" | "other";
+
 export interface CommentAuthor {
   id: string;
   userName: string;
@@ -18,5 +20,13 @@ export type CreateCommentResult =
   | {
       ok: false;
       reason: "unauthorized" | "rate_limited" | "unknown";
+      message?: string;
+    };
+
+export type ReportCommentResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "unauthorized" | "already_reported" | "unknown";
       message?: string;
     };

@@ -144,6 +144,26 @@
         "rateLimitDescription": "Vous ne pouvez publier qu'un commentaire par minute. Attendez et réessayez.",
         "signInRequired": "Connectez-vous pour commenter.",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      },
+      "report": {
+        "action": "Signaler",
+        "title": "Signaler le commentaire",
+        "description": "Dites-nous pourquoi ce commentaire doit être examiné. Les signalements sont anonymes pour les autres utilisateurs.",
+        "reasonLegend": "Motif du signalement",
+        "submit": "Envoyer le signalement",
+        "reasons": {
+          "spam": "Spam ou publicité",
+          "harassment": "Harcèlement ou intimidation",
+          "hate_speech": "Discours haineux",
+          "off_topic": "Hors sujet",
+          "other": "Autre"
+        },
+        "messages": {
+          "submitted": "Signalement envoyé",
+          "alreadyReported": "Vous avez déjà signalé ce commentaire",
+          "signInRequired": "Connectez-vous pour signaler des commentaires",
+          "error": "Impossible d'envoyer le signalement. Réessayez."
+        }
       }
     },
     "tournaments": {

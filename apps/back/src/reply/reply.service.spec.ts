@@ -1,8 +1,9 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { ReplyService } from "./reply.service";
+import { ReplyReportRepository } from "./reply-report.repository";
 import { ReplyRepository } from "./reply.repository";
+import { ReplyService } from "./reply.service";
 import { UserService } from "src/user/user.service";
 import { FORUM_ERROR_CODES } from "src/forum/forum.constants";
 import { Reply } from "src/forum/forum.entities";
@@ -21,6 +22,13 @@ describe("ReplyService", () => {
     delete: jest.fn(),
     findChildren: jest.fn(),
   };
+  const replyReportRepository = {
+    findByReplyAndReporter: jest.fn(),
+    getEntityManager: jest.fn(() => ({
+      persist: jest.fn().mockReturnThis(),
+      flush: jest.fn(),
+    })),
+  };
   const userService = {
     findById: jest.fn(),
   };
@@ -33,6 +41,7 @@ describe("ReplyService", () => {
       providers: [
         ReplyService,
         { provide: ReplyRepository, useValue: replyRepository },
+        { provide: ReplyReportRepository, useValue: replyReportRepository },
         { provide: UserService, useValue: userService },
         { provide: EntityManager, useValue: em },
       ],

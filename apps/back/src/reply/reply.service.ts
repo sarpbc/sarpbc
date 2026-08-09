@@ -1,7 +1,13 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { ReplyRepository } from "./reply.repository";
-import { Reply } from "../forum/forum.entities";
+import { ReplyReportRepository } from "./reply-report.repository";
+import { Reply, ReplyReport } from "../forum/forum.entities";
 import { CreateReplyDto } from "./dto/create-reply.dto";
 import { UserService } from "src/user/user.service";
 import { Post } from "src/forum/forum.entities";
@@ -10,11 +16,13 @@ import { Match } from "src/tournament/tournament.entities";
 import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.constants";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
+import type { ReplyReportReason } from "./reply-report-reason";
 
 @Injectable()
 export class ReplyService {
   constructor(
     private readonly replyRepository: ReplyRepository,
+    private readonly replyReportRepository: ReplyReportRepository,
     private readonly userService: UserService,
     private readonly em: EntityManager,
   ) {}
@@ -146,6 +154,47 @@ export class ReplyService {
     }
 
     await this.deleteWithChildren(id);
+  }
+
+  async report(
+    userId: string,
+    replyId: string,
+    reason: ReplyReportReason,
+  ): Promise<{ id: string; reason: ReplyReportReason; createdAt: Date }> {
+    const reply = await this.replyRepository.findById(replyId);
+    if (!reply || reply.hiddenAt) {
+      throw new NotFoundException("Comment not found. It may already be removed.");
+    }
+
+    if (reply.author.id === userId) {
+      throw new BadRequestException("You cannot report your own comment.");
+    }
+
+    const existing = await this.replyReportRepository.findByReplyAndReporter(replyId, userId);
+    if (existing) {
+      throw new ConflictException({
+        message: "You already reported this comment.",
+        code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
+      });
+    }
+
+    const reporter = await this.userService.findById(userId);
+    if (!reporter) {
+      throw new NotFoundException("User not found. Sign in again and try reporting.");
+    }
+
+    const report = new ReplyReport();
+    report.reply = reply;
+    report.reporter = reporter;
+    report.reason = reason;
+
+    await this.replyReportRepository.getEntityManager().persist(report).flush();
+
+    return {
+      id: report.id,
+      reason: report.reason,
+      createdAt: report.createdAt,
+    };
   }
 
   async deleteAllForPost(postId: string): Promise<void> {
