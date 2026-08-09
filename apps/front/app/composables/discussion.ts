@@ -3,6 +3,8 @@ import type {
   CommentTargetType,
   CreateCommentResult,
   PaginatedComments,
+  ReplyReportReason,
+  ReportCommentResult,
 } from "~/types/discussion";
 import { apiFetch } from "~/utils/apiFetch";
 import {
@@ -110,5 +112,32 @@ export async function deleteComment(commentId: string): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting comment:", error);
     return false;
+  }
+}
+
+export async function reportComment(
+  commentId: string,
+  reason: ReplyReportReason,
+): Promise<ReportCommentResult> {
+  try {
+    await apiFetch(`/replies/${commentId}/report`, {
+      method: "POST",
+      body: { reason },
+    });
+    return { ok: true };
+  } catch (error) {
+    const status = getApiErrorStatus(error);
+    const message = getApiErrorMessage(error);
+    const code = getApiErrorCode(error);
+
+    if (status === 401) {
+      return { ok: false, reason: "unauthorized", message };
+    }
+    if (code === FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED) {
+      return { ok: false, reason: "already_reported", message };
+    }
+
+    console.error("Error reporting comment:", error);
+    return { ok: false, reason: "unknown", message };
   }
 }
