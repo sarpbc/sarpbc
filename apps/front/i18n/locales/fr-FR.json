@@ -124,6 +124,7 @@
       "commentCountAria": "{count} commentaires",
       "loadMore": "Charger plus de commentaires",
       "loadingMore": "Chargement…",
+      "permalink": "Lien vers le commentaire",
       "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",

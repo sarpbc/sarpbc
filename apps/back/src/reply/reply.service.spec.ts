@@ -161,6 +161,47 @@ describe("ReplyService", () => {
       expect(result[0].id).toBe("root");
       expect(result[0].replies).toHaveLength(1);
       expect(result[0].replies[0].id).toBe("child");
+      expect(replyRepository.findByMatchId).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("findByTargetPaginated", () => {
+    it("returns newest-first pages for matches", async () => {
+      const replies = ["a", "b", "c", "d"].map((id) =>
+        makeReply({ id, match: { id: "m1" } as Match }),
+      );
+      replyRepository.findByMatchId.mockResolvedValue(replies);
+
+      const page0 = await service.findByTargetPaginated("match", "m1", 0, 2);
+      const page1 = await service.findByTargetPaginated("match", "m1", 1, 2);
+
+      expect(page0.total).toBe(4);
+      expect(page0.replies.map((reply) => reply.id)).toEqual(["a", "b"]);
+      expect(page1.replies.map((reply) => reply.id)).toEqual(["c", "d"]);
+      expect(replyRepository.findByMatchId).toHaveBeenCalledWith("m1", false, "DESC");
+    });
+
+    it("returns oldest-first pages for forum posts", async () => {
+      const replies = ["a", "b", "c"].map((id) =>
+        makeReply({ id, post: { id: "p1" } as never }),
+      );
+      replyRepository.findByPostId.mockResolvedValue(replies);
+
+      const result = await service.findByTargetPaginated("forumPost", "p1", 0, 2);
+
+      expect(result.total).toBe(3);
+      expect(result.replies.map((reply) => reply.id)).toEqual(["a", "b"]);
+      expect(replyRepository.findByPostId).toHaveBeenCalledWith("p1", false, "ASC");
+    });
+
+    it("uses a single repository query per page request", async () => {
+      replyRepository.findByNewsArticleId.mockResolvedValue([
+        makeReply({ id: "only", newsArticle: { id: "n1" } as never }),
+      ]);
+
+      await service.findByTargetPaginated("newsArticle", "n1", 0, 25);
+
+      expect(replyRepository.findByNewsArticleId).toHaveBeenCalledTimes(1);
     });
   });
 

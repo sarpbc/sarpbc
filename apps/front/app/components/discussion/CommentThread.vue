@@ -7,6 +7,14 @@ const { targetType, targetId } = defineProps<{
 }>();
 
 const { t } = useI18n();
+const route = useRoute();
+
+const { highlightedCommentId, navigateToComment, tryScrollFromHash } = useCommentPermalink();
+
+provide("commentPermalink", {
+  highlightedCommentId,
+  navigateToComment,
+});
 
 const comments = ref<Comment[]>([]);
 const total = ref(0);
@@ -81,6 +89,54 @@ watch(
   },
   { immediate: true },
 );
+
+async function loadUntilCommentVisible(commentId: string): Promise<boolean> {
+  if (document.getElementById(commentAnchorId(commentId))) {
+    return true;
+  }
+
+  while (comments.value.length < total.value) {
+    await fetchPage(page.value + 1, true);
+    if (document.getElementById(commentAnchorId(commentId))) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function resolveHashTarget() {
+  const commentId = parseCommentHash(route.hash);
+  if (!commentId) {
+    return;
+  }
+
+  await loadUntilCommentVisible(commentId);
+  tryScrollFromHash();
+}
+
+function attemptHashNavigation() {
+  void nextTick(() => {
+    void resolveHashTarget();
+  });
+}
+
+watch(
+  () => route.hash,
+  () => {
+    attemptHashNavigation();
+  },
+);
+
+watch(comments, () => {
+  if (route.hash) {
+    attemptHashNavigation();
+  }
+});
+
+onMounted(() => {
+  attemptHashNavigation();
+});
 </script>
 
 <template>
