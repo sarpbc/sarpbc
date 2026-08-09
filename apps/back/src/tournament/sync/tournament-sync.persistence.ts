@@ -30,6 +30,10 @@ export class TournamentSyncPersistence {
       pandascoreId: command.pandascoreId,
     });
 
+    if (tournament?.source === "manual") {
+      return tournament;
+    }
+
     let league: League | null = null;
     if (command.league) {
       league = await this.upsertLeague(command.league);
@@ -38,7 +42,10 @@ export class TournamentSyncPersistence {
     if (!tournament) {
       tournament = new Tournament();
       tournament.pandascoreId = command.pandascoreId;
+      tournament.source = "pandascore";
     }
+
+    tournament.source = "pandascore";
 
     tournament.name = command.name;
     tournament.slug = command.slug ?? null;

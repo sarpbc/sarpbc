@@ -28,6 +28,10 @@ export class SyncPandascoreTournamentUseCase {
         throw new Error("Tournament not found");
       }
 
+      if (tournament.source === "manual") {
+        throw new Error("Cannot sync a manual tournament from PandaScore");
+      }
+
       const pandascoreId = tournament.pandascoreId;
       if (!pandascoreId) {
         throw new Error("Tournament does not have a PandaScore ID");
