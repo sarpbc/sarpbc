@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
-import { adminNewsEditUrl, matchUrl } from "../urls";
+import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -125,6 +125,110 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: match.id,
             winnerId,
             url: matchUrl(match.id),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "create_tournament",
+    {
+      description:
+        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool.",
+      inputSchema: {
+        name: z.string().min(1).describe("Tournament display name."),
+        slug: z
+          .string()
+          .min(1)
+          .optional()
+          .describe("Optional URL slug. Generated from the name when omitted."),
+        tier: z.string().optional().describe("Optional competitive tier label (e.g. S-Tier)."),
+        leagueId: z
+          .string()
+          .uuid()
+          .optional()
+          .describe("Optional league UUID from get_tournaments listings."),
+        beginAt: z.string().optional().describe("Start date (YYYY-MM-DD)."),
+        endAt: z.string().optional().describe("End date (YYYY-MM-DD)."),
+        imageUrl: z.string().url().optional().describe("Optional cover image URL."),
+        teamIds: z
+          .array(z.string().uuid())
+          .optional()
+          .describe("Team UUIDs to register as participants. Use search_teams to find ids."),
+      },
+    },
+    async ({ name, slug, tier, leagueId, beginAt, endAt, imageUrl, teamIds }) =>
+      runWriteTool(user, "create_tournament", "tournaments.manage", async () => {
+        const tournament = await ctx.tournamentService.createManual({
+          name,
+          slug,
+          tier,
+          leagueId,
+          beginAt,
+          endAt,
+          imageUrl,
+          teamIds,
+        });
+
+        return {
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            slug: tournament.slug,
+            source: tournament.source,
+            url: tournamentUrl(tournament.id),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "update_tournament",
+    {
+      description:
+        "Update a manual tournament. Requires tournaments.manage. PandaScore-synced tournaments are rejected.",
+      inputSchema: {
+        tournamentId: z.string().min(1).describe("Tournament UUID to update."),
+        name: z.string().min(1).optional().describe("Tournament display name."),
+        slug: z.string().min(1).optional().describe("URL slug."),
+        tier: z.string().optional().describe("Competitive tier label."),
+        leagueId: z
+          .string()
+          .uuid()
+          .nullable()
+          .optional()
+          .describe("League UUID, or null to clear the league."),
+        beginAt: z.string().nullable().optional().describe("Start date (YYYY-MM-DD), or null."),
+        endAt: z.string().nullable().optional().describe("End date (YYYY-MM-DD), or null."),
+        imageUrl: z.string().url().nullable().optional().describe("Cover image URL, or null."),
+        teamIds: z
+          .array(z.string().uuid())
+          .optional()
+          .describe("Replace participating teams with this list of team UUIDs."),
+      },
+    },
+    async ({ tournamentId, name, slug, tier, leagueId, beginAt, endAt, imageUrl, teamIds }) =>
+      runWriteTool(user, "update_tournament", "tournaments.manage", async () => {
+        const tournament = await ctx.tournamentService.updateManual(tournamentId, {
+          name,
+          slug,
+          tier,
+          leagueId,
+          beginAt,
+          endAt,
+          imageUrl,
+          teamIds,
+        });
+
+        return {
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            slug: tournament.slug,
+            source: tournament.source,
+            url: tournamentUrl(tournament.id),
           },
         };
       }),
