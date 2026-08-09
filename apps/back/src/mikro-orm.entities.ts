@@ -17,6 +17,7 @@ import {
   PostSchema,
   PostTranslationSchema,
   ReplySchema,
+  ReplyReportSchema,
 } from "./forum/forum.entities";
 import { ImageSchema } from "./images/domain/image.entity";
 import { NewsArticleSchema } from "./news/domain/news-article.entity";
@@ -54,6 +55,7 @@ export const mikroOrmEntities = [
   PostSchema,
   PostTranslationSchema,
   ReplySchema,
+  ReplyReportSchema,
   NewsArticleSchema,
   PickemChoiceSchema,
   AirRiddleSchema,
