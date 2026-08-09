@@ -16,6 +16,8 @@ import { Match } from "src/tournament/tournament.entities";
 import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.constants";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
+import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dto";
+import { sortOrderForTarget } from "./reply-target.util";
 import type { ReplyReportReason } from "./reply-report-reason";
 import { NotificationService } from "src/notification/notification.service";
 
@@ -29,37 +31,45 @@ export class ReplyService {
     private readonly em: EntityManager,
   ) {}
 
-  async findByPostId(postId: string): Promise<Reply[]> {
-    return this.replyRepository.findByPostId(postId);
+  async findByTargetPaginated(
+    targetType: ReplyTargetType,
+    targetId: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedRepliesResponseDto> {
+    const order = sortOrderForTarget(targetType);
+    const offset = page * limit;
+
+    const [total, roots] = await Promise.all([
+      this.replyRepository.countRootsByTarget(targetType, targetId),
+      this.replyRepository.findByTarget(targetType, targetId, {
+        order,
+        limit,
+        offset,
+        rootsOnly: true,
+      }),
+    ]);
+
+    const rootIds = roots.map((reply) => reply.id);
+    const descendants = await this.replyRepository.findDescendantsForRoots(
+      targetType,
+      targetId,
+      rootIds,
+    );
+
+    return {
+      replies: this.toThreadedDtos([...roots, ...descendants]),
+      total,
+      page,
+      limit,
+    };
   }
 
-  async findByNewsArticleId(newsArticleId: string): Promise<Reply[]> {
-    return this.replyRepository.findByNewsArticleId(newsArticleId);
-  }
-
-  async findByMatchId(matchId: string): Promise<Reply[]> {
-    return this.replyRepository.findByMatchId(matchId);
-  }
-
-  async findByTarget(targetType: ReplyTargetType, targetId: string): Promise<ReplyResponseDto[]> {
-    let replies: Reply[];
-    switch (targetType) {
-      case "forumPost":
-        replies = await this.replyRepository.findByPostId(targetId);
-        break;
-      case "newsArticle":
-        replies = await this.replyRepository.findByNewsArticleId(targetId);
-        break;
-      case "match":
-        replies = await this.replyRepository.findByMatchId(targetId);
-        break;
-      default: {
-        const _exhaustive: never = targetType;
-        throw new BadRequestException(`Unsupported target type: ${_exhaustive}`);
-      }
-    }
-
-    return this.toThreadedDtos(replies);
+  async countByTargetIds(
+    targetType: ReplyTargetType,
+    targetIds: string[],
+  ): Promise<Map<string, number>> {
+    return this.replyRepository.countByTargetIds(targetType, targetIds);
   }
 
   async create(userId: string, createReplyDto: CreateReplyDto): Promise<ReplyResponseDto> {
@@ -204,7 +214,9 @@ export class ReplyService {
   }
 
   async deleteAllForPost(postId: string): Promise<void> {
-    const replies = await this.replyRepository.findByPostId(postId, true);
+    const replies = await this.replyRepository.findByTarget("forumPost", postId, {
+      includeHidden: true,
+    });
     const rootReplies = replies.filter((reply) => !reply.replyTo);
 
     for (const reply of rootReplies) {

@@ -15,6 +15,13 @@ export interface Comment {
   replies: Comment[];
 }
 
+export interface PaginatedComments {
+  replies: Comment[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export type CreateCommentResult =
   | { ok: true; comment: Comment }
   | {

@@ -1,5 +1,3 @@
-import type { Reply } from "~/types/forum";
-
 export type NewsArticleListItem = {
   id: string;
   slug: string;
@@ -8,6 +6,7 @@ export type NewsArticleListItem = {
   imageUrl: string | null;
   /** Plain-text teaser from list endpoints; omitted on full article payloads. */
   excerpt?: string;
+  commentCount?: number;
 };
 
 export type NewsArticle = NewsArticleListItem & {
@@ -151,43 +150,6 @@ export async function unpublishNewsArticle(slug: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error unpublishing news article:", error);
-    return false;
-  }
-}
-
-export async function getNewsArticleReplies(slug: string): Promise<Reply[]> {
-  const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ replies: Reply[] }>(
-      `${config.public.apiBase}/news/${slug}/replies`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
-
-    return res.replies || [];
-  } catch (error) {
-    console.error("Error fetching news article replies:", error);
-    return [];
-  }
-}
-
-export async function createNewsArticleReply(slug: string, content: string): Promise<boolean> {
-  const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ success?: boolean }>(
-      `${config.public.apiBase}/news/${slug}/replies`,
-      {
-        method: "POST",
-        body: { content },
-        credentials: "include",
-      },
-    );
-
-    return res.success ?? false;
-  } catch (error) {
-    console.error("Error creating news article reply:", error);
     return false;
   }
 }
