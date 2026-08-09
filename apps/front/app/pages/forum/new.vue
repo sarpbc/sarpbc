@@ -5,6 +5,7 @@ import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 const localePath = useLocalePath();
 const user = useUser();
@@ -210,6 +211,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           class="cursor-pointer"
           :disabled="!canSubmit"
           :loading="isSubmitting"
+          v-bind="cuelumeAttrs.pressRelease"
         >
           {{ $t("page.forum.new.form.submit") }}
         </UButton>
