@@ -47,3 +47,33 @@ html {
 :root {
   --ui-radius: 0.25rem;
 }
+
+.ProseMirror table {
+  @apply w-full border-collapse my-4 text-sm;
+}
+
+.ProseMirror th {
+  @apply border border-default bg-elevated px-3 py-2 text-left font-medium text-highlighted;
+}
+
+.ProseMirror td {
+  @apply border border-default px-3 py-2;
+}
+
+.ProseMirror tr {
+  @apply border-b border-default;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.ProseMirror .column-resize-handle {
+  @apply bg-primary/40;
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}

@@ -24,6 +24,7 @@
     "@sarpbc/ui": "workspace:*",
     "@sarpbc/utils": "workspace:*",
     "@tiptap/core": "catalog:",
+    "@tiptap/extension-table": "catalog:",
     "@tiptap/pm": "catalog:",
     "@tiptap/vue-3": "catalog:",
     "nuxt": "catalog:",

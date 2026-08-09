@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from "@nuxt/ui";
 import { entityTagEditorExtensions } from "~/utils/editor/entityTagNode";
+import { tableEditorExtensions } from "~/utils/editor/tableExtensions";
 import { useEntityTagEditor } from "~/composables/useEntityTagEditor";
+import { useTableEditor } from "~/composables/useTableEditor";
 import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
 const content = defineModel<string>({ required: true });
 
 const { t } = useI18n();
 const { pickerOpen, pickerKind, entityTagHandlers, insertEntityTag } = useEntityTagEditor();
+const { tableHandlers, tableToolbarItems, shouldShowTableToolbar } = useTableEditor();
+
+const editorExtensions = [...tableEditorExtensions, ...entityTagEditorExtensions];
+const editorHandlers = { ...entityTagHandlers, ...tableHandlers };
 
 const appendToBody = () => document.body;
 const floatingMenuOptions = { strategy: "fixed" as const };
@@ -79,6 +85,11 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
       label: t("page.news.editor.insertTeam"),
       icon: "i-fluent-people-team-24-regular",
     },
+    {
+      kind: "table",
+      label: t("page.news.editor.insertTable"),
+      icon: "i-lucide-table",
+    },
   ],
 ]);
 </script>
@@ -91,8 +102,8 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
     content-type="markdown"
     :class="[newsSurfaceClass, 'h-full flex-1']"
     :ui="{ base: 'sm:px-4' }"
-    :extensions="entityTagEditorExtensions"
-    :handlers="entityTagHandlers"
+    :extensions="editorExtensions"
+    :handlers="editorHandlers"
   >
     <UEditorToolbar
       :editor="editor"
@@ -100,6 +111,14 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
       layout="bubble"
       :append-to="appendToBody"
       :options="floatingMenuOptions"
+    />
+    <UEditorToolbar
+      :editor="editor"
+      :items="tableToolbarItems(editor)"
+      layout="bubble"
+      :append-to="appendToBody"
+      :options="floatingMenuOptions"
+      :should-show="shouldShowTableToolbar"
     />
     <UEditorSuggestionMenu
       :editor="editor"
