@@ -8,6 +8,7 @@ export type NewsArticleListItem = {
   imageUrl: string | null;
   /** Plain-text teaser from list endpoints; omitted on full article payloads. */
   excerpt?: string;
+  commentCount?: number;
 };
 
 export type NewsArticle = NewsArticleListItem & {

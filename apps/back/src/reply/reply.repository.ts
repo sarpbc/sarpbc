@@ -1,8 +1,24 @@
 import { EntityRepository } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
 import { IReplyRepository } from "./domain/reply.repository.interface";
+import type { ReplyTargetType } from "./dto/reply-response.dto";
 
 const POPULATE = ["author", "replyTo", "replyTo.author"] as const;
+
+function targetForeignKey(targetType: ReplyTargetType): string {
+  switch (targetType) {
+    case "forumPost":
+      return "post_id";
+    case "newsArticle":
+      return "news_article_id";
+    case "match":
+      return "match_id";
+    default: {
+      const _exhaustive: never = targetType;
+      return _exhaustive;
+    }
+  }
+}
 
 export class ReplyRepository extends EntityRepository<Reply> implements IReplyRepository {
   async findByPostId(postId: string, includeHidden = false): Promise<Reply[]> {
@@ -41,6 +57,30 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
 
   async findLatestByUser(userId: string): Promise<Reply | null> {
     return this.findOne({ author: { id: userId } }, { orderBy: { createdAt: "DESC" } });
+  }
+
+  async countByTargetIds(
+    targetType: ReplyTargetType,
+    targetIds: string[],
+  ): Promise<Map<string, number>> {
+    if (targetIds.length === 0) {
+      return new Map();
+    }
+
+    const column = targetForeignKey(targetType);
+    const knex = this.em.getKnex();
+    const rows = (await knex("reply")
+      .select({ targetId: column })
+      .count("* as count")
+      .whereIn(column, targetIds)
+      .whereNull("hidden_at")
+      .groupBy(column)) as Array<{ targetId: string; count: string | number }>;
+
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      counts.set(row.targetId, Number(row.count));
+    }
+    return counts;
   }
 
   async save(reply: Reply): Promise<void> {

@@ -121,6 +121,7 @@
     "discussion": {
       "heading": "Discussion",
       "subtitle": "Partagez votre avis avec la communauté.",
+      "commentCountAria": "{count} commentaires",
       "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",

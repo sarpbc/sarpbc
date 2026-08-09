@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import type { MatchListScopeFilters } from "./match-list-filters";
 import { mapMatchListItem } from "./match-list.mapper";
+import { ReplyService } from "src/reply/reply.service";
 
 function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
   return {
@@ -10,9 +11,22 @@ function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchL
   };
 }
 
+function attachCommentCounts<T extends { id: string }>(
+  items: T[],
+  counts: Map<string, number>,
+): Array<T & { commentCount: number }> {
+  return items.map((item) => ({
+    ...item,
+    commentCount: counts.get(item.id) ?? 0,
+  }));
+}
+
 @Controller("matches")
 export class MatchController {
-  constructor(private matchService: MatchService) {}
+  constructor(
+    private matchService: MatchService,
+    private replyService: ReplyService,
+  ) {}
 
   @Get("upcoming")
   async findUpcoming(
@@ -43,9 +57,12 @@ export class MatchController {
       }),
     ]);
 
+    const matchIds = [...upcomingMatches, ...liveMatches].map((match) => match.id);
+    const commentCounts = await this.replyService.countByTargetIds("match", matchIds);
+
     return {
-      upcoming: upcomingMatches.map(mapMatchListItem),
-      live: liveMatches.map(mapMatchListItem),
+      upcoming: attachCommentCounts(upcomingMatches.map(mapMatchListItem), commentCounts),
+      live: attachCommentCounts(liveMatches.map(mapMatchListItem), commentCounts),
       upcomingTotal,
       liveTotal,
       total: upcomingTotal + liveTotal,
@@ -70,8 +87,13 @@ export class MatchController {
       ...scope,
     });
 
+    const commentCounts = await this.replyService.countByTargetIds(
+      "match",
+      results.map((match) => match.id),
+    );
+
     return {
-      results: results.map(mapMatchListItem),
+      results: attachCommentCounts(results.map(mapMatchListItem), commentCounts),
       total,
     };
   }

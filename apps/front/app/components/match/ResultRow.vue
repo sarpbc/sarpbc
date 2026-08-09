@@ -53,9 +53,12 @@ function scoreClass(participantId: string | undefined): string {
       <span class="truncate" :class="teamNameClass(teamA.id)">
         {{ teamA.team.name || $t("components.match.tbd") }}
       </span>
-      <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamA.id)">
-        {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
-      </span>
+      <div class="flex flex-col items-end gap-1">
+        <DiscussionCommentCount :count="match.commentCount ?? 0" />
+        <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamA.id)">
+          {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+        </span>
+      </div>
       <span class="truncate" :class="teamNameClass(teamB.id)">
         {{ teamB.team.name || $t("components.match.tbd") }}
       </span>

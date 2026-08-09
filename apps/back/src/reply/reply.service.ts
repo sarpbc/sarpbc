@@ -52,6 +52,13 @@ export class ReplyService {
     return this.toThreadedDtos(replies);
   }
 
+  async countByTargetIds(
+    targetType: ReplyTargetType,
+    targetIds: string[],
+  ): Promise<Map<string, number>> {
+    return this.replyRepository.countByTargetIds(targetType, targetIds);
+  }
+
   async create(userId: string, createReplyDto: CreateReplyDto): Promise<ReplyResponseDto> {
     const targetCount = [
       createReplyDto.postId,

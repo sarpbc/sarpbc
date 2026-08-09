@@ -121,6 +121,7 @@
     "discussion": {
       "heading": "Discussion",
       "subtitle": "Share your take with the community.",
+      "commentCountAria": "{count} comments",
       "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
       "retry": "Try Again",

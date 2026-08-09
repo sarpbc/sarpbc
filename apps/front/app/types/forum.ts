@@ -10,6 +10,7 @@ export interface PostShort {
   title: string;
   author: string;
   createdAt: Date;
+  commentCount?: number;
   topic?: {
     id: string;
     title: string;

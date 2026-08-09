@@ -59,9 +59,12 @@ const imageUrl = computed(() => {
           {{ excerpt }}
         </p>
       </div>
-      <p class="shrink-0 self-center text-end text-xs font-thin text-muted tabular-nums">
-        {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
-      </p>
+      <div class="flex shrink-0 flex-col items-end gap-1 self-center">
+        <DiscussionCommentCount :count="props.article.commentCount ?? 0" />
+        <p class="text-end text-xs font-thin text-muted tabular-nums">
+          {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
+        </p>
+      </div>
     </div>
   </UiListItem>
 </template>
