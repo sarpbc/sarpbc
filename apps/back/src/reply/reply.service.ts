@@ -27,37 +27,32 @@ export class ReplyService {
     page: number,
     limit: number,
   ): Promise<PaginatedRepliesResponseDto> {
-    const order = this.sortOrderForTarget(targetType);
-    const replies = await this.findAllForTarget(targetType, targetId, order);
-    const threaded = this.toThreadedDtos(replies);
-    const total = threaded.length;
+    const order = sortOrderForTarget(targetType);
     const offset = page * limit;
 
+    const [total, roots] = await Promise.all([
+      this.replyRepository.countRootsByTarget(targetType, targetId),
+      this.replyRepository.findByTarget(targetType, targetId, {
+        order,
+        limit,
+        offset,
+        rootsOnly: true,
+      }),
+    ]);
+
+    const rootIds = roots.map((reply) => reply.id);
+    const descendants = await this.replyRepository.findDescendantsForRoots(
+      targetType,
+      targetId,
+      rootIds,
+    );
+
     return {
-      replies: threaded.slice(offset, offset + limit),
+      replies: this.toThreadedDtos([...roots, ...descendants]),
       total,
       page,
       limit,
     };
-  }
-
-  private async findAllForTarget(
-    targetType: ReplyTargetType,
-    targetId: string,
-    order: "ASC" | "DESC",
-  ): Promise<Reply[]> {
-    switch (targetType) {
-      case "forumPost":
-        return this.replyRepository.findByPostId(targetId, false, order);
-      case "newsArticle":
-        return this.replyRepository.findByNewsArticleId(targetId, false, order);
-      case "match":
-        return this.replyRepository.findByMatchId(targetId, false, order);
-      default: {
-        const _exhaustive: never = targetType;
-        throw new BadRequestException(`Unsupported target type: ${_exhaustive}`);
-      }
-    }
   }
 
   async countByTargetIds(
@@ -164,7 +159,9 @@ export class ReplyService {
   }
 
   async deleteAllForPost(postId: string): Promise<void> {
-    const replies = await this.replyRepository.findByPostId(postId, true);
+    const replies = await this.replyRepository.findByTarget("forumPost", postId, {
+      includeHidden: true,
+    });
     const rootReplies = replies.filter((reply) => !reply.replyTo);
 
     for (const reply of rootReplies) {
