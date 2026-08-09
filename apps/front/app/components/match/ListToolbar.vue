@@ -14,6 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { attrs: cuelumeAttrs } = useCuelume();
 </script>
 
 <template>
@@ -26,6 +27,7 @@ const { t } = useI18n();
           variant="soft"
           :color="tab === item.value ? 'primary' : 'neutral'"
           :to="{ path: $localePath('/matches'), query: getTabQuery(item.value) }"
+          v-bind="cuelumeAttrs.toggle"
         >
           {{ item.label }}
         </UButton>
@@ -49,6 +51,7 @@ const { t } = useI18n();
           color="neutral"
           icon="i-fluent-dismiss-circle-24-regular"
           :aria-label="t('page.matches.filters.clear')"
+          v-bind="cuelumeAttrs.pressRelease"
           @click="emit('clear')"
         />
       </div>

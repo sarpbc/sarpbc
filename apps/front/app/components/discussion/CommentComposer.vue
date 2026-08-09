@@ -20,6 +20,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { attrs: cuelumeAttrs } = useCuelume();
 const user = useUser();
 const toast = useToast();
 const isSubmitting = ref(false);
@@ -153,6 +154,7 @@ function onEnterKey(event: KeyboardEvent) {
         class="w-fit cursor-pointer"
         :loading="isSubmitting"
         :disabled="isSubmitting"
+        v-bind="cuelumeAttrs.pressRelease"
       >
         {{
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")

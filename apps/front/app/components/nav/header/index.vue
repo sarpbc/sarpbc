@@ -2,6 +2,9 @@
 import type { NavigationMenuItem } from "@nuxt/ui";
 
 const { t } = useI18n();
+const { attrs: cuelumeAttrs } = useCuelume();
+
+const navLinkSound = cuelumeAttrs.hoverTick;
 
 const localePath = useLocalePath();
 const route = useRoute();
@@ -48,15 +51,18 @@ const items = computed<NavigationMenuItem[]>(() => [
     label: t("general.matches"),
     to: matchesPath.value,
     active: isMatchesActive.value,
+    ...navLinkSound,
   },
   {
     label: t("general.results"),
     to: { path: matchesPath.value, query: { tab: "past" } },
     active: isResultsActive.value,
+    ...navLinkSound,
   },
   {
     label: t("general.tournaments"),
     to: localePath("/tournaments"),
+    ...navLinkSound,
   },
   {
     label: t("general.games"),
@@ -64,10 +70,12 @@ const items = computed<NavigationMenuItem[]>(() => [
       {
         label: t("page.game.airriddle.title"),
         to: localePath("/game/airriddle"),
+        ...navLinkSound,
       },
       {
         label: t("page.game.pickems.title"),
         to: localePath("/game/pickems"),
+        ...navLinkSound,
       },
     ],
   },
@@ -90,6 +98,7 @@ const menuToggleLabel = computed(() =>
           :to="$localePath('/')"
           class="flex flex-row flex-1 items-center"
           :aria-label="$t('components.header.home')"
+          v-bind="cuelumeAttrs.hoverTick"
         >
           <img
             src="/sarpbc.svg"

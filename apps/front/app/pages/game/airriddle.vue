@@ -8,6 +8,7 @@ import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const posthog = usePostHog();
+const { playCue } = useCuelume();
 
 interface GameAttempt {
   letters: string[];
@@ -238,10 +239,14 @@ async function submitGuess() {
 
     if (isCorrect) {
       gameState.isWon = true;
+      playCue("success");
       posthog?.capture("airriddle_game_won", { attempts: gameState.attempts.length });
     } else if (gameState.attempts.length >= maxAttempts) {
       gameState.isGameOver = true;
+      playCue("error");
       posthog?.capture("airriddle_game_lost", { attempts: gameState.attempts.length });
+    } else {
+      playCue("error");
     }
 
     clearGuess();

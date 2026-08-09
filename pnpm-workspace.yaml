@@ -2,10 +2,9 @@ packages:
   - apps/*
   - packages/*
 
-# Force Nitro/Nuxt h3 v1 — h3@2 from vite-devtools/devframe breaks SSR
-# (event.req.headers.entries is not a function).
 overrides:
   h3: 1.15.11
+  fastify: 5.11.3
   prosemirror-model: 1.25.11
   prosemirror-view: 1.42.1
 
