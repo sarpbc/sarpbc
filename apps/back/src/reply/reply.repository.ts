@@ -1,9 +1,6 @@
-import { EntityRepository, QueryOrder } from "@mikro-orm/core";
+import { EntityRepository, QueryOrder, type EntityKey } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
-import {
-  FindByTargetOptions,
-  IReplyRepository,
-} from "./domain/reply.repository.interface";
+import { FindByTargetOptions, IReplyRepository } from "./domain/reply.repository.interface";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import {
   sortOrderForTarget,
@@ -67,15 +64,13 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
 
     // Card badges: all non-hidden replies per target, including nested replies.
     const groupField = targetGroupByField(targetType);
-    const rows = (await this.createQueryBuilder("r")
-      .select([`${groupField}.id as target_id`, "count(r.id) as count"])
-      .where({ ...targetIdsFilter(targetType, targetIds), hiddenAt: null })
-      .groupBy(`${groupField}.id`)
-      .execute()) as Array<{ target_id: string; count: string | number }>;
+    const countsDict = await this.countBy(groupField as EntityKey<Reply>, {
+      where: { ...targetIdsFilter(targetType, targetIds), hiddenAt: null },
+    });
 
     const counts = new Map<string, number>();
-    for (const row of rows) {
-      counts.set(row.target_id, Number(row.count));
+    for (const [targetId, count] of Object.entries(countsDict)) {
+      counts.set(targetId, count);
     }
     return counts;
   }
