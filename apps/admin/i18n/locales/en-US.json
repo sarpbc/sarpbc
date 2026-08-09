@@ -125,6 +125,18 @@
         "score": "Score",
         "setWinner": "Set Winner",
         "syncScores": "Refresh Scores"
+      },
+      "awards": {
+        "title": "Player Awards",
+        "mvpHint": "Assign one MVP for this tournament. Awards appear on player profiles.",
+        "assignMvp": "Assign MVP to a roster player:",
+        "remove": "Remove Award",
+        "mvpAssigned": "{name} is now MVP",
+        "removed": "{type} award removed",
+        "noRoster": "No roster players found. Sync the tournament to load team rosters first.",
+        "types": {
+          "mvp": "MVP"
+        }
       }
     },
     "pickems": {

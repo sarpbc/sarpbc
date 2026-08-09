@@ -34,6 +34,7 @@ import {
   BracketLinkSchema,
   MatchResultSchema,
 } from "./tournament/tournament.entities";
+import { PlayerAwardSchema } from "./tournament/player-award.entities";
 import { PersonalAccessTokenSchema } from "./pat/domain/personal-access-token.entity";
 import { UserSchema } from "./user/domain/user.entity";
 
@@ -50,6 +51,7 @@ export const mikroOrmEntities = [
   MatchSchema,
   BracketLinkSchema,
   MatchResultSchema,
+  PlayerAwardSchema,
   TopicSchema,
   PostSchema,
   PostTranslationSchema,

@@ -25,6 +25,7 @@ import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
 import { MatchService } from "src/tournament/match/match.service";
 import { TournamentService } from "src/tournament/tournament.service";
+import { PlayerAwardService } from "./player-award.service";
 
 @Controller("player")
 export class PlayerController {
@@ -33,6 +34,7 @@ export class PlayerController {
     private contractService: ContractService,
     private matchService: MatchService,
     private tournamentService: TournamentService,
+    private playerAwardService: PlayerAwardService,
   ) {}
 
   @Get()
@@ -154,6 +156,12 @@ export class PlayerController {
     }
     const trophies = await this.tournamentService.getTournamentsWonByPlayer(id);
     return { trophies };
+  }
+
+  @Get(":id/awards")
+  async getAwards(@Param("id", ParseUUIDPipe) id: string) {
+    const awards = await this.playerAwardService.findByPlayerId(id);
+    return { awards };
   }
 
   // --- Match endpoints ---

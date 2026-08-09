@@ -125,6 +125,18 @@
         "score": "Score",
         "setWinner": "Définir le Vainqueur",
         "syncScores": "Actualiser les Scores"
+      },
+      "awards": {
+        "title": "Récompenses Joueur",
+        "mvpHint": "Attribuez un MVP pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
+        "assignMvp": "Attribuer le MVP à un joueur du roster :",
+        "remove": "Supprimer la Récompense",
+        "mvpAssigned": "{name} est maintenant MVP",
+        "removed": "Récompense {type} supprimée",
+        "noRoster": "Aucun joueur au roster. Synchronisez le tournoi pour charger les rosters d'équipe.",
+        "types": {
+          "mvp": "MVP"
+        }
       }
     },
     "pickems": {

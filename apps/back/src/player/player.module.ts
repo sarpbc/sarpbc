@@ -4,6 +4,7 @@ import { PlayerController } from "./player.controller";
 import { Player, Contract, PlayerPhoto } from "./player.entities";
 import { PlayerService } from "./player.service";
 import { ContractService } from "./contract.service";
+import { PlayerAwardService } from "./player-award.service";
 import { PlayerRepository } from "./player.repository";
 import { ContractRepository } from "./contract.repository";
 import { PlayerPhotoRepository } from "./player-photo.repository";
@@ -13,10 +14,19 @@ import { PLAYER_REPOSITORY } from "./domain/player.repository.interface";
 import { TeamModule } from "../team/team.module";
 import { UserModule } from "src/user/user.module";
 import { TournamentModule } from "src/tournament/tournament.module";
+import { PlayerAward } from "src/tournament/player-award.entities";
+import { Tournament, TournamentParticipant } from "src/tournament/tournament.entities";
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Player, Contract, PlayerPhoto]),
+    MikroOrmModule.forFeature([
+      Player,
+      Contract,
+      PlayerPhoto,
+      PlayerAward,
+      Tournament,
+      TournamentParticipant,
+    ]),
     forwardRef(() => TeamModule),
     forwardRef(() => TournamentModule),
     UserModule,
@@ -25,6 +35,7 @@ import { TournamentModule } from "src/tournament/tournament.module";
   providers: [
     PlayerService,
     ContractService,
+    PlayerAwardService,
     {
       provide: PLAYER_REPOSITORY,
       useExisting: PlayerRepository,
@@ -41,6 +52,7 @@ import { TournamentModule } from "src/tournament/tournament.module";
   exports: [
     PlayerService,
     ContractService,
+    PlayerAwardService,
     PLAYER_REPOSITORY,
     CONTRACT_REPOSITORY,
     PLAYER_PHOTO_REPOSITORY,

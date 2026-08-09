@@ -10,6 +10,10 @@ export enum ContractRole {
   LOANED = "loaned",
 }
 
+export enum PlayerAwardType {
+  MVP = "mvp",
+}
+
 export class Team {
   id!: string;
   name!: string;
