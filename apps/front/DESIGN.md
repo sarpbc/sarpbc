@@ -177,6 +177,19 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 | ~150ms state / ~200ms popover / ~300ms overlay | `transition: all`                          |
 | `transform` + `opacity` only                   | Layout-thrashing anims                     |
 | Honor `prefers-reduced-motion`                 | Ignore reduced-motion                      |
+| Interaction sounds (Cuelume)                   | Play when `prefers-reduced-motion: reduce` |
+
+### Interaction sounds (Cuelume)
+
+Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
+
+| Pattern                  | Attribute convention                 | Use                                     |
+| ------------------------ | ------------------------------------ | --------------------------------------- |
+| Primary press            | `v-bind="cuelumeAttrs.pressRelease"` | Submit / save `UButton`                 |
+| Toggle                   | `v-bind="cuelumeAttrs.toggle"`       | Theme switch, match tab filters         |
+| Nav hover (fine pointer) | `v-bind="cuelumeAttrs.hoverTick"`    | Header / footer `ULink`, nav menu items |
+
+Imperative cues: `const { playCue } = useCuelume()` then `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 
 ---
 

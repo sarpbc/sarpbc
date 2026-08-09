@@ -3,6 +3,7 @@ import type { RouteLocationRaw } from "vue-router";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 type FooterLink = {
   type: "link";
@@ -133,6 +134,7 @@ const columns = computed<FooterColumn[]>(() => [
                 <ULink
                   :to="entry.to"
                   class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
+                  v-bind="cuelumeAttrs.hoverTick"
                 >
                   {{ entry.label }}
                 </ULink>
@@ -146,6 +148,7 @@ const columns = computed<FooterColumn[]>(() => [
                     <ULink
                       :to="link.to"
                       class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
+                      v-bind="cuelumeAttrs.hoverTick"
                     >
                       {{ link.label }}
                     </ULink>

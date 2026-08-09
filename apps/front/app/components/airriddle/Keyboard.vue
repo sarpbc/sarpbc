@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 const { t } = useI18n();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 const {
   disabled = false,
@@ -100,6 +101,7 @@ function onLetterPress(letter: string) {
         :disabled="disabled || !canSubmit"
         :loading="loading"
         :aria-label="t('page.game.airriddle.keyboardEnter')"
+        v-bind="cuelumeAttrs.pressRelease"
         @click="emit('submit')"
       >
         {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.keyboardEnter") }}
