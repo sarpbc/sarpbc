@@ -165,6 +165,26 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
 - **Don't** put marketing cards in the hub hero/main column.
 
+### Hub page headers
+
+Hub list pages share chrome via `UiHubPageHeader` (`app/components/ui/HubPageHeader.vue`):
+
+- Outer shell: `UiCrossCard` + `h-row-header` (56px title band).
+- Inner layout: centered `h1` (`text-xl font-semibold`) + optional `#meta` slot (`text-sm text-muted`).
+
+Vary **inner content** per hub — not the outer chrome:
+
+| Hub | Title | Meta slot (when data is available) |
+| --- | ----- | ---------------------------------- |
+| Matches | `page.matches.title` | `UiBadgeLive` + live count |
+| Tournaments | `page.tournaments.index.title` | Next upcoming event name |
+| Forum | `page.forum.index.pageTitle` | Post count |
+| Pick'ems | `page.game.pickems.title` | Open pick'em count |
+| Players | Letter or directory title | Total player count |
+| Teams | Letter or directory title | Total team count |
+
+Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual — no marketing fluff or eyebrow micro-labels.
+
 ---
 
 ## Motion

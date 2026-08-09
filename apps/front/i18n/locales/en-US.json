@@ -196,6 +196,16 @@
     }
   },
   "page": {
+    "hub": {
+      "headers": {
+        "matchesLive": "{count} live now",
+        "tournamentsNext": "Next: {name}",
+        "forumPosts": "{count} posts",
+        "pickemsOpen": "{count} open pick'ems",
+        "playersTotal": "{count} players",
+        "teamsTotal": "{count} teams"
+      }
+    },
     "home": {
       "seo": {
         "title": "Rocket League news & matches | sarpbc.org",
