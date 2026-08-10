@@ -1,5 +1,6 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
+import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
   limit?: number;
@@ -147,4 +148,53 @@ export async function updateTournament(
     body,
   });
   return res.tournament ?? null;
+}
+
+export async function getTournamentAwards(
+  tournamentId: string,
+): Promise<TournamentAwardListItem[]> {
+  try {
+    const res = await apiFetch<{ awards?: TournamentAwardListItem[] }>(
+      `/tournaments/${tournamentId}/awards`,
+      { method: "GET" },
+    );
+    return res.awards ?? [];
+  } catch (error) {
+    console.error("Error fetching tournament awards:", error);
+    return [];
+  }
+}
+
+export async function createTournamentAward(
+  tournamentId: string,
+  payload: { participantId: string; playerId: string; awardType: PlayerAwardType },
+): Promise<TournamentAwardListItem | null> {
+  try {
+    const res = await apiFetch<{ award?: TournamentAwardListItem }>(
+      `/tournaments/${tournamentId}/awards`,
+      {
+        method: "POST",
+        body: payload,
+      },
+    );
+    return res.award ?? null;
+  } catch (error) {
+    console.error("Error creating tournament award:", error);
+    return null;
+  }
+}
+
+export async function deleteTournamentAward(
+  tournamentId: string,
+  awardId: string,
+): Promise<boolean> {
+  try {
+    await apiFetch(`/tournaments/${tournamentId}/awards/${awardId}`, {
+      method: "DELETE",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting tournament award:", error);
+    return false;
+  }
 }
