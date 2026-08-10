@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {
   PLAYER_AWARD_TYPES,
-  type PlayerAwardType as AwardType,
+  type PlayerAwardType,
   type TournamentAwardListItem,
 } from "@sarpbc/types";
 
@@ -20,7 +20,7 @@ const toast = useToast();
 const assigning = ref(false);
 const removingAwardId = ref<string | null>(null);
 const selectedPlayerId = ref<string | null>(null);
-const selectedAwardType = ref<AwardType | null>(null);
+const selectedAwardType = ref<PlayerAwardType | null>(null);
 
 const { data: awards, refresh: refreshAwards } = await useLazyAsyncData(
   () => `admin-tournament-${props.tournamentId}-awards`,
