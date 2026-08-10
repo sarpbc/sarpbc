@@ -1,5 +1,5 @@
-import { IsEnum, IsUUID } from "class-validator";
-import { PlayerAwardType } from "@sarpbc/types";
+import { IsIn, IsUUID } from "class-validator";
+import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
 
 export class CreatePlayerAwardDto {
   @IsUUID()
@@ -8,6 +8,6 @@ export class CreatePlayerAwardDto {
   @IsUUID()
   playerId!: string;
 
-  @IsEnum(PlayerAwardType)
+  @IsIn(PLAYER_AWARD_TYPES)
   awardType!: PlayerAwardType;
 }

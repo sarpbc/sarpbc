@@ -196,16 +196,18 @@
       },
       "awards": {
         "title": "Récompenses Joueur",
-        "mvpHint": "Attribuez un MVP pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
-        "assignMvp": "Attribuer le MVP",
-        "assignAction": "Attribuer le MVP",
+        "hint": "Attribuez un MVP et un MVP Défensif pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
+        "awardType": "Type de Récompense",
+        "assignAction": "Attribuer la Récompense",
         "selectPlayer": "Sélectionner un joueur du roster",
         "remove": "Supprimer la Récompense",
-        "mvpAssigned": "{name} est maintenant MVP",
+        "assigned": "{name} est maintenant {type}",
         "removed": "Récompense {type} supprimée",
         "noRoster": "Aucun joueur au roster. Synchronisez le tournoi pour charger les rosters d'équipe.",
+        "allAssigned": "Tous les types de récompense sont attribués pour ce tournoi.",
         "types": {
-          "mvp": "MVP"
+          "mvp": "MVP",
+          "defensive_mvp": "MVP Défensif"
         }
       }
     },

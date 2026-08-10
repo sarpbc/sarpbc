@@ -370,7 +370,8 @@
           "retry": "Réessayer",
           "awardedOn": "Attribué le {date}",
           "types": {
-            "mvp": "MVP"
+            "mvp": "MVP",
+            "defensive_mvp": "MVP Défensif"
           }
         },
         "matches": {

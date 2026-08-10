@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import { PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
+import { PlayerAwardTypes, type PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
 
 const {
   awards,
@@ -34,8 +34,10 @@ const formatEndDate = (value: Date | string | null) => {
 
 function awardTypeLabel(awardType: PlayerAwardType): string {
   switch (awardType) {
-    case PlayerAwardType.MVP:
+    case PlayerAwardTypes.MVP:
       return t("page.player.slug.awards.types.mvp");
+    case PlayerAwardTypes.DEFENSIVE_MVP:
+      return t("page.player.slug.awards.types.defensive_mvp");
     default: {
       const _exhaustive: never = awardType;
       return _exhaustive;

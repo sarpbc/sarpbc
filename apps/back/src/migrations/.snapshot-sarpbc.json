@@ -1855,7 +1855,7 @@
           "default": null,
           "comment": null,
           "collation": null,
-          "enumItems": ["mvp"],
+          "enumItems": ["mvp", "defensive_mvp"],
           "mappedType": "enum"
         },
         "created_at": {
@@ -1965,8 +1965,8 @@
       "checks": [
         {
           "name": "player_award_award_type_check",
-          "expression": "\"award_type\" in ('mvp')",
-          "definition": "check (\"award_type\" in ('mvp'))",
+          "expression": "\"award_type\" in ('mvp', 'defensive_mvp')",
+          "definition": "check (\"award_type\" in ('mvp', 'defensive_mvp'))",
           "columnName": "award_type"
         }
       ],

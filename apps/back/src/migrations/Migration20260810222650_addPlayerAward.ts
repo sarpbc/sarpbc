@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20260810221713_addPlayerAward extends Migration {
-  override name = "Migration20260810221713_addPlayerAward";
+export class Migration20260810222650_addPlayerAward extends Migration {
+  override name = "Migration20260810222650_addPlayerAward";
 
   override up(): void | Promise<void> {
     this.addSql(
@@ -21,7 +21,7 @@ export class Migration20260810221713_addPlayerAward extends Migration {
       `alter table "player_award" add constraint "player_award_player_id_foreign" foreign key ("player_id") references "player" ("id") on update cascade;`,
     );
     this.addSql(
-      `alter table "player_award" add constraint "player_award_award_type_check" check ("award_type" in ('mvp'));`,
+      `alter table "player_award" add constraint "player_award_award_type_check" check ("award_type" in ('mvp', 'defensive_mvp'));`,
     );
   }
 

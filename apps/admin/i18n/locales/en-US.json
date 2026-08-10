@@ -196,16 +196,18 @@
       },
       "awards": {
         "title": "Player Awards",
-        "mvpHint": "Assign one MVP for this tournament. Awards appear on player profiles.",
-        "assignMvp": "Assign MVP",
-        "assignAction": "Assign MVP",
+        "hint": "Assign one MVP and one Defensive MVP for this tournament. Awards appear on player profiles.",
+        "awardType": "Award Type",
+        "assignAction": "Assign Award",
         "selectPlayer": "Select a roster player",
         "remove": "Remove Award",
-        "mvpAssigned": "{name} is now MVP",
+        "assigned": "{name} is now {type}",
         "removed": "{type} award removed",
         "noRoster": "No roster players found. Sync the tournament to load team rosters first.",
+        "allAssigned": "All award types are assigned for this tournament.",
         "types": {
-          "mvp": "MVP"
+          "mvp": "MVP",
+          "defensive_mvp": "Defensive MVP"
         }
       }
     },

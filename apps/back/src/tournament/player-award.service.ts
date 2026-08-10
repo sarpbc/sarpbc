@@ -6,17 +6,20 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
-import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
-import type { PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
-import { PlayerAwardType } from "@sarpbc/types";
+import { EntityRepository } from "@mikro-orm/postgresql";
+import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import { PlayerAwardTypes } from "@sarpbc/types";
 import { Player } from "../player/player.entities";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
+import { PlayerAwardRepository } from "./player-award.repository";
 
 function awardLabel(awardType: PlayerAwardType): string {
   switch (awardType) {
-    case PlayerAwardType.MVP:
+    case PlayerAwardTypes.MVP:
       return "MVP";
+    case PlayerAwardTypes.DEFENSIVE_MVP:
+      return "Defensive MVP";
     default: {
       const _exhaustive: never = awardType;
       return _exhaustive;
@@ -28,14 +31,13 @@ function awardLabel(awardType: PlayerAwardType): string {
 export class PlayerAwardService {
   constructor(
     @InjectRepository(PlayerAward)
-    private readonly awardRepository: EntityRepository<PlayerAward>,
+    private readonly awardRepository: PlayerAwardRepository,
     @InjectRepository(Tournament)
     private readonly tournamentRepository: EntityRepository<Tournament>,
     @InjectRepository(TournamentParticipant)
     private readonly participantRepository: EntityRepository<TournamentParticipant>,
     @InjectRepository(Player)
     private readonly playerRepository: EntityRepository<Player>,
-    private readonly em: EntityManager,
   ) {}
 
   async findByPlayerId(playerId: string): Promise<PlayerProfileAward[]> {
@@ -44,14 +46,7 @@ export class PlayerAwardService {
       throw new NotFoundException(`Player with id "${playerId}" not found`);
     }
 
-    const awards = await this.awardRepository.find(
-      { player: { id: playerId } },
-      {
-        populate: ["tournament", "tournament.league"],
-        orderBy: { tournament: { endAt: "DESC" } },
-      },
-    );
-
+    const awards = await this.awardRepository.findByPlayerId(playerId);
     return awards.map((award) => this.toProfileItem(award));
   }
 
@@ -61,14 +56,7 @@ export class PlayerAwardService {
       throw new NotFoundException(`Tournament with id "${tournamentId}" not found`);
     }
 
-    const awards = await this.awardRepository.find(
-      { tournament: { id: tournamentId } },
-      {
-        populate: ["player", "participant", "participant.team"],
-        orderBy: { createdAt: "ASC" },
-      },
-    );
-
+    const awards = await this.awardRepository.findByTournamentId(tournamentId);
     return awards.map((award) => this.toTournamentItem(award));
   }
 
@@ -117,7 +105,7 @@ export class PlayerAwardService {
     });
 
     try {
-      await this.em.persist(award).flush();
+      await this.awardRepository.save(award);
     } catch (error) {
       if (error instanceof UniqueConstraintViolationException) {
         throw new ConflictException(
@@ -132,17 +120,14 @@ export class PlayerAwardService {
   }
 
   async delete(tournamentId: string, awardId: string): Promise<void> {
-    const award = await this.awardRepository.findOne({
-      id: awardId,
-      tournament: { id: tournamentId },
-    });
+    const award = await this.awardRepository.findByTournamentAndId(tournamentId, awardId);
     if (!award) {
       throw new NotFoundException(
         `Award with id "${awardId}" was not found for tournament "${tournamentId}"`,
       );
     }
 
-    await this.em.remove(award).flush();
+    await this.awardRepository.delete(award);
   }
 
   private toProfileItem(award: PlayerAward): PlayerProfileAward {

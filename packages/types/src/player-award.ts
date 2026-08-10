@@ -1,8 +1,12 @@
-export enum PlayerAwardType {
-  MVP = "mvp",
-}
+export const PLAYER_AWARD_TYPES = ["mvp", "defensive_mvp"] as const;
 
-/** Award row for a player profile (tournament context). */
+export type PlayerAwardType = (typeof PLAYER_AWARD_TYPES)[number];
+
+export const PlayerAwardTypes = {
+  MVP: "mvp",
+  DEFENSIVE_MVP: "defensive_mvp",
+} as const satisfies Record<string, PlayerAwardType>;
+
 export interface PlayerProfileAward {
   id: string;
   awardType: PlayerAwardType;
@@ -15,7 +19,6 @@ export interface PlayerProfileAward {
   };
 }
 
-/** Award row for tournament admin (player + roster team context). */
 export interface TournamentAwardListItem {
   id: string;
   awardType: PlayerAwardType;

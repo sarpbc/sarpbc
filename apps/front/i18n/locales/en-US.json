@@ -370,7 +370,8 @@
           "retry": "Try Again",
           "awardedOn": "Awarded {date}",
           "types": {
-            "mvp": "MVP"
+            "mvp": "MVP",
+            "defensive_mvp": "Defensive MVP"
           }
         },
         "matches": {
