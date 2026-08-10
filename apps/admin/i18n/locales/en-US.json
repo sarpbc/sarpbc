@@ -147,6 +147,47 @@
       "matchesCount": "{count} matches",
       "noMatches": "No matches found for this tournament.",
       "noTournaments": "No tournaments found.",
+      "source": {
+        "manual": "Manual",
+        "pandascore": "PandaScore"
+      },
+      "create": {
+        "action": "Create Tournament",
+        "title": "Create Tournament",
+        "subtitle": "Add a tournament that is managed on SARPBC instead of synced from PandaScore.",
+        "saved": "Tournament created"
+      },
+      "edit": {
+        "action": "Edit Tournament",
+        "title": "Edit Tournament",
+        "subtitleManual": "Update tournament details and participating teams.",
+        "subtitlePandascore": "This tournament is synced from PandaScore and cannot be edited here.",
+        "saved": "Tournament saved"
+      },
+      "form": {
+        "name": "Name",
+        "slug": "URL Slug",
+        "slugHint": "Used on the public tournament page. Leave empty to generate from the name.",
+        "slugPlaceholder": "community-cup-2026",
+        "tier": "Tier",
+        "tierPlaceholder": "S-Tier",
+        "league": "League",
+        "leaguePlaceholder": "Select a league",
+        "beginAt": "Start Date",
+        "endAt": "End Date",
+        "imageUrl": "Cover Image URL",
+        "imageUrlPlaceholder": "https://…",
+        "teams": "Participating Teams",
+        "teamsSearch": "Search teams…",
+        "teamsLoading": "Loading teams…",
+        "teamsEmpty": "No teams match your search.",
+        "save": "Save Tournament",
+        "saveFailed": "Could not save tournament. Check the fields and try again.",
+        "errors": {
+          "nameRequired": "Enter a tournament name before saving.",
+          "endBeforeStart": "End date must be on or after the start date."
+        }
+      },
       "match": {
         "status": "Status",
         "score": "Score",

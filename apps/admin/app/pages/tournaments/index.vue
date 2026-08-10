@@ -31,6 +31,10 @@ function tournamentLabel(tournament: Tournament): string {
   return `${league}${year} ${tournament.name}`.trim();
 }
 
+function isManualTournament(tournament: Tournament): boolean {
+  return tournament.source === "manual";
+}
+
 async function handleSyncAdditions() {
   isSyncingAdditions.value = true;
   try {
@@ -64,12 +68,20 @@ async function handleSyncTournament(tournamentId: string) {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        :loading="isSyncingAdditions"
-        icon="i-fluent-arrow-sync-24-regular"
-        :label="$t('page.tournaments.syncAdditions')"
-        @click="handleSyncAdditions"
-      />
+      <div class="flex flex-row gap-2">
+        <UButton
+          variant="soft"
+          icon="i-fluent-add-24-regular"
+          :label="$t('page.tournaments.create.action')"
+          :to="localePath('/tournaments/create')"
+        />
+        <UButton
+          :loading="isSyncingAdditions"
+          icon="i-fluent-arrow-sync-24-regular"
+          :label="$t('page.tournaments.syncAdditions')"
+          @click="handleSyncAdditions"
+        />
+      </div>
     </template>
 
     <DashboardContent>
@@ -86,10 +98,21 @@ async function handleSyncTournament(tournamentId: string) {
           :key="tournament.id"
           class="flex w-full flex-row items-center justify-between gap-4 border border-default p-4"
         >
-          <div class="flex min-w-0 flex-col gap-1">
-            <h2 class="truncate text-lg font-semibold">
-              {{ tournamentLabel(tournament) }}
-            </h2>
+          <div class="flex min-w-0 flex-col gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="truncate text-lg font-semibold">
+                {{ tournamentLabel(tournament) }}
+              </h2>
+              <UBadge
+                :color="isManualTournament(tournament) ? 'primary' : 'neutral'"
+                variant="subtle"
+                :label="
+                  isManualTournament(tournament)
+                    ? $t('page.tournaments.source.manual')
+                    : $t('page.tournaments.source.pandascore')
+                "
+              />
+            </div>
             <p v-if="tournament.beginAt" class="text-sm text-muted">
               {{ new Date(tournament.beginAt).toLocaleDateString() }}
             </p>
@@ -97,12 +120,20 @@ async function handleSyncTournament(tournamentId: string) {
 
           <div class="flex shrink-0 flex-row gap-2">
             <UButton
+              v-if="isManualTournament(tournament)"
+              variant="soft"
+              icon="i-fluent-edit-24-regular"
+              :label="$t('page.tournaments.edit.action')"
+              :to="localePath(`/tournaments/${tournament.id}/edit`)"
+            />
+            <UButton
               variant="soft"
               icon="i-fluent-trophy-24-regular"
               :label="$t('page.tournaments.viewMatches')"
               :to="localePath(`/tournaments/${tournament.id}`)"
             />
             <UButton
+              v-if="!isManualTournament(tournament)"
               variant="soft"
               icon="i-fluent-arrow-sync-24-regular"
               :loading="syncingTournamentId === tournament.id"

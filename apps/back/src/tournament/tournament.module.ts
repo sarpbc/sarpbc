@@ -6,6 +6,7 @@ import { TeamModule } from "../team/team.module";
 import { PlayerModule } from "../player/player.module";
 import { TournamentController } from "./tournament.controller";
 import { TournamentService } from "./tournament.service";
+import { ManualTournamentService } from "./manual-tournament.service";
 import { UserModule } from "src/user/user.module";
 import { RedisModule } from "src/redis/redis.module";
 import { MatchController } from "./match/match.controller";
@@ -36,6 +37,7 @@ import { log } from "evlog";
   controllers: [TournamentController, MatchController],
   providers: [
     TournamentService,
+    ManualTournamentService,
     MatchService,
     LeagueService,
     TournamentCron,
@@ -44,7 +46,7 @@ import { log } from "evlog";
     SyncPandascoreTournamentUseCase,
     SyncPandascoreAdditionsUseCase,
   ],
-  exports: [TournamentService, MatchService, LeagueService],
+  exports: [TournamentService, ManualTournamentService, MatchService, LeagueService],
 })
 export class TournamentModule implements OnModuleInit {
   constructor(

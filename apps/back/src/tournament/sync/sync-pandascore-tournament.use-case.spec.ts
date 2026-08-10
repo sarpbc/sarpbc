@@ -35,6 +35,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
     persistence.findTournamentById.mockResolvedValue({
       id: "t1",
       pandascoreId: 42,
+      source: "pandascore",
     });
     pandascoreGateway.getTournamentById.mockResolvedValue({
       id: 42,
@@ -55,6 +56,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
     persistence.findTournamentById.mockResolvedValue({
       id: "t1",
       pandascoreId: 42,
+      source: "pandascore",
     });
     pandascoreGateway.getTournamentById.mockResolvedValue({
       id: 42,
@@ -76,6 +78,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
       id: "t1",
       pandascoreId: 42,
       hasBracket: false,
+      source: "pandascore",
     });
     pandascoreGateway.getTournamentById.mockResolvedValue({
       id: 42,
@@ -90,5 +93,19 @@ describe("SyncPandascoreTournamentUseCase", () => {
 
     expect(pandascoreGateway.getTournamentBrackets).toHaveBeenCalledWith(42);
     expect(pandascoreGateway.getTournamentMatches).not.toHaveBeenCalled();
+  });
+
+  it("does not sync manual tournaments", async () => {
+    persistence.findTournamentById.mockResolvedValue({
+      id: "manual-1",
+      source: "manual",
+      pandascoreId: null,
+    });
+
+    await expect(useCase.execute("manual-1")).rejects.toThrow(
+      "Cannot sync a manual tournament from PandaScore",
+    );
+
+    expect(pandascoreGateway.getTournamentById).not.toHaveBeenCalled();
   });
 });

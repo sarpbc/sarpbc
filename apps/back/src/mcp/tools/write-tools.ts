@@ -2,12 +2,25 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
-import { adminNewsEditUrl, matchUrl } from "../urls";
+import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
+import { CreateTournamentDto, UpdateTournamentDto } from "src/tournament/dto/create-tournament.dto";
+import { parseDto } from "src/tournament/dto/parse-tournament-dto";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
   score: z.number(),
 });
+
+const tournamentDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+  .optional();
+
+const nullableTournamentDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+  .nullable()
+  .optional();
 
 export function registerWriteTools(server: McpServer, ctx: McpToolContext): void {
   const { user } = ctx;
@@ -125,6 +138,110 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: match.id,
             winnerId,
             url: matchUrl(match.id),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "create_tournament",
+    {
+      description:
+        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool.",
+      inputSchema: {
+        name: z.string().min(1).max(255).describe("Tournament display name."),
+        slug: z
+          .string()
+          .min(1)
+          .max(255)
+          .optional()
+          .describe("Optional URL slug. Generated from the name when omitted."),
+        tier: z
+          .string()
+          .max(50)
+          .optional()
+          .describe("Optional competitive tier label (e.g. S-Tier)."),
+        leagueId: z
+          .string()
+          .uuid()
+          .optional()
+          .describe("Optional league UUID from get_tournaments listings."),
+        beginAt: tournamentDateSchema.describe("Start date (YYYY-MM-DD)."),
+        endAt: tournamentDateSchema.describe("End date (YYYY-MM-DD)."),
+        imageUrl: z.string().url().max(255).optional().describe("Optional cover image URL."),
+        teamIds: z
+          .array(z.string().uuid())
+          .optional()
+          .describe("Team UUIDs to register as participants. Use search_teams to find ids."),
+      },
+    },
+    async (input) =>
+      runWriteTool(user, "create_tournament", "tournaments.manage", async () => {
+        const dto = await parseDto(CreateTournamentDto, input);
+        const tournament = await ctx.manualTournamentService.create(dto);
+
+        return {
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            slug: tournament.slug,
+            source: tournament.source,
+            url: tournamentUrl(tournament.id),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "update_tournament",
+    {
+      description:
+        "Update a manual tournament. Requires tournaments.manage. PandaScore-synced tournaments are rejected.",
+      inputSchema: {
+        tournamentId: z.string().min(1).describe("Tournament UUID to update."),
+        name: z.string().min(1).max(255).optional().describe("Tournament display name."),
+        slug: z.string().min(1).max(255).optional().describe("URL slug."),
+        tier: z
+          .string()
+          .max(50)
+          .nullable()
+          .optional()
+          .describe("Competitive tier label, or null to clear."),
+        leagueId: z
+          .string()
+          .uuid()
+          .nullable()
+          .optional()
+          .describe("League UUID, or null to clear the league."),
+        beginAt: nullableTournamentDateSchema.describe("Start date (YYYY-MM-DD), or null."),
+        endAt: nullableTournamentDateSchema.describe("End date (YYYY-MM-DD), or null."),
+        imageUrl: z
+          .string()
+          .url()
+          .max(255)
+          .nullable()
+          .optional()
+          .describe("Cover image URL, or null."),
+        teamIds: z
+          .array(z.string().uuid())
+          .optional()
+          .describe("Replace participating teams with this list of team UUIDs."),
+      },
+    },
+    async ({ tournamentId, ...input }) =>
+      runWriteTool(user, "update_tournament", "tournaments.manage", async () => {
+        const dto = await parseDto(UpdateTournamentDto, input);
+        const tournament = await ctx.manualTournamentService.update(tournamentId, dto);
+
+        return {
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            slug: tournament.slug,
+            source: tournament.source,
+            url: tournamentUrl(tournament.id),
           },
         };
       }),

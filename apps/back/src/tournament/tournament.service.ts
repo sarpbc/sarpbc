@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
@@ -83,7 +83,7 @@ export class TournamentService {
     });
 
     if (!tournament) {
-      throw new Error("Tournament not found");
+      throw new NotFoundException("Tournament not found");
     }
 
     tournament.pickemsEnabled = pickemsEnabled;

@@ -101,3 +101,50 @@ export async function setMatchWinner(matchId: string, winnerId: string): Promise
     return false;
   }
 }
+
+export interface TournamentLeagueOption {
+  id: string;
+  name: string;
+}
+
+export interface ManualTournamentInput {
+  name: string;
+  slug?: string;
+  tier?: string;
+  leagueId?: string | null;
+  beginAt?: string | null;
+  endAt?: string | null;
+  imageUrl?: string | null;
+  teamIds?: string[];
+}
+
+export async function getTournamentLeagues(): Promise<TournamentLeagueOption[]> {
+  try {
+    const res = await apiFetch<{ leagues?: TournamentLeagueOption[] }>("/tournaments/leagues", {
+      method: "GET",
+    });
+    return res.leagues ?? [];
+  } catch (error) {
+    console.error("Error fetching tournament leagues:", error);
+    return [];
+  }
+}
+
+export async function createTournament(body: ManualTournamentInput): Promise<Tournament | null> {
+  const res = await apiFetch<{ tournament?: Tournament }>("/tournaments", {
+    method: "POST",
+    body,
+  });
+  return res.tournament ?? null;
+}
+
+export async function updateTournament(
+  id: string,
+  body: ManualTournamentInput,
+): Promise<Tournament | null> {
+  const res = await apiFetch<{ tournament?: Tournament }>(`/tournaments/${id}`, {
+    method: "PATCH",
+    body,
+  });
+  return res.tournament ?? null;
+}
