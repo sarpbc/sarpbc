@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-type ListItemSize = "compact" | "default" | "header" | "double";
+type ListItemSize = "compact" | "default" | "header" | "double" | "triple";
 
 defineOptions({ inheritAttrs: false });
 
@@ -26,6 +26,8 @@ function listItemSizeClasses(value: ListItemSize): string {
       return "h-row-header min-h-row-header";
     case "double":
       return "h-row-double min-h-row-double";
+    case "triple":
+      return "h-row-triple min-h-row-triple";
     default: {
       const _exhaustive: never = value;
       return _exhaustive;
@@ -34,7 +36,8 @@ function listItemSizeClasses(value: ListItemSize): string {
 }
 
 const itemClass = computed(() => [
-  "flex w-full items-center px-2",
+  "flex w-full px-2",
+  size === "triple" ? "items-stretch" : "items-center",
   listItemSizeClasses(size),
   divider && "border-b border-default",
   to &&

@@ -81,7 +81,7 @@ async function onDelete() {
 <template>
   <article
     :id="anchorId"
-    class="w-full flex flex-col gap-3 scroll-mt-24 outline-none rounded-sm"
+    class="w-full flex flex-col scroll-mt-24 outline-none rounded-sm"
     :class="{ 'comment-highlight': isHighlighted }"
     :aria-label="authorLabel"
   >
@@ -158,29 +158,36 @@ async function onDelete() {
 
     <DiscussionCommentReportModal v-model:open="displayReport" :comment-id="comment.id" />
 
-    <div v-if="displayReply && user" class="pl-4 md:pl-6">
-      <DiscussionCommentComposer
-        :target-type="targetType"
-        :target-id="targetId"
-        :reply-to-id="comment.id"
-        autofocus
-        @comment-created="onCommentCreated"
-      />
-    </div>
+    <div class="w-full flex flex-col">
+      <div v-if="displayReply && user" class="w-full flex flex-row h-fit">
+        <DiscussionCommentThreadConnector :show-full-connector="true" />
+        <DiscussionCommentComposer
+          class="mt-4 min-w-0 flex-1"
+          :target-type="targetType"
+          :target-id="targetId"
+          :reply-to-id="comment.id"
+          autofocus
+          @comment-created="onCommentCreated"
+        />
+      </div>
 
-    <div
-      v-if="comment.replies?.length"
-      class="flex flex-col gap-3 pl-4 md:pl-6 border-l border-default"
-    >
-      <DiscussionCommentItem
-        v-for="child in comment.replies"
+      <div
+        v-for="(child, index) in comment.replies"
         :key="child.id"
-        :comment="child"
-        :target-type="targetType"
-        :target-id="targetId"
-        :depth="depth + 1"
-        @changed="emit('changed')"
-      />
+        class="w-full flex flex-row h-fit"
+      >
+        <DiscussionCommentThreadConnector
+          :show-full-connector="index !== (comment.replies?.length ?? 0) - 1"
+        />
+        <DiscussionCommentItem
+          class="mt-4 min-w-0 flex-1"
+          :comment="child"
+          :target-type="targetType"
+          :target-id="targetId"
+          :depth="depth + 1"
+          @changed="emit('changed')"
+        />
+      </div>
     </div>
   </article>
 </template>
