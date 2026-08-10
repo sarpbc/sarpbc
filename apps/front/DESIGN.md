@@ -30,7 +30,7 @@ sarpbc has two public design modes. Same tokens and components; different densit
 
 - Shell: `NavHeader` → 12-col grid (match rail | main | forum/game rail) → `NavFooter`.
 - Columns share a **row rhythm** via fixed-height primitives (see [Grid module](#grid-module)). Align with tokens + column wrappers — not ad-hoc `mt-*` / `pt-*` tuning between rails.
-- Signature motif: `UiCrossCard` / `UiCrossLink` (corner crosses) on title bands and primary list links.
+- Signature motif: `UiCrossCard` (corner crosses) on title bands.
 - Homepage (`/`) stays a **news hub**. No marketing hero or pick'em promo as the primary story (product decision 2026-07-30).
 
 ### Marketing (`/about`)
@@ -137,16 +137,16 @@ Shared list/rail components (`UiListItem`, `UiRail`, `UiHubColumn` — epic SAR-
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/ui/` when a pattern repeats 3+ times.
 
-| Primitive     | Role                                                                   |
-| ------------- | ---------------------------------------------------------------------- |
-| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks         |
-| `UiCrossCard` | Hub title band / featured block with corner crosses                    |
-| `UiCrossLink` | Cross-motif link wrapper (e.g. news rows)                              |
-| `UiLink`      | Styled internal link                                                   |
-| `UiListItem`  | Hub list row — fixed row height, optional link + divider               |
-| `UiBadgeLive` | Live status with text + color                                          |
-| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body |
-| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                  |
+| Primitive     | Role                                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks                                           |
+| `UiCrossCard` | Hub title band / featured block with corner crosses                                                      |
+| `UiLink`      | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names); Cuelume `hoverTick` by default |
+| `UiButton`    | `UButton` wrapper with Cuelume `pressRelease` by default (`sound`: `press` \| `toggle` \| `none`)        |
+| `UiListItem`  | Hub list row — fixed row height, optional link + divider                                                 |
+| `UiBadgeLive` | Live status with text + color                                                                            |
+| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body                                   |
+| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                    |
 
 #### `UiListItem` sizes
 
@@ -164,6 +164,7 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `UiRail` — caption `h-rail-caption` + `text-toned`, then a bordered card/rows stack in the default slot (same idea as match-rail `UiCard`). Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `UiHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Desktop caption baselines align via shared `h-rail-caption` on every `UiRail`; do not add per-rail `pt-8` or `md:h-18` offsets.
 - **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
+- **Discussion threads**: Each comment is a bordered block (full column width, same edge as other hub cards). Nested replies use `CommentThreadConnector` + `mt-3` spacing. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
 
 ---
@@ -184,11 +185,11 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 
 Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
 
-| Pattern                  | Attribute convention                 | Use                                     |
-| ------------------------ | ------------------------------------ | --------------------------------------- |
-| Primary press            | `v-bind="cuelumeAttrs.pressRelease"` | Submit / save `UButton`                 |
-| Toggle                   | `v-bind="cuelumeAttrs.toggle"`       | Theme switch, match tab filters         |
-| Nav hover (fine pointer) | `v-bind="cuelumeAttrs.hoverTick"`    | Header / footer `ULink`, nav menu items |
+| Pattern                  | Attribute convention                                                                                                                      | Use                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Primary press            | `UiButton` (default) or `v-bind="cuelumeAttrs.pressRelease"`                                                                              | Submit / save / comment actions |
+| Toggle                   | `UiButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                               | Theme switch, match tab filters |
+| Nav hover (fine pointer) | `UiLink` / `MatchDiscoveryLink` / `UiListItem` (`hoverTick`; no CSS color transition). Cuelume throttles hover cues to 1 / 150ms globally | Header, footer, match rows      |
 
 Imperative cues: `const { playCue } = useCuelume()` then `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 

@@ -20,7 +20,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
 const user = useUser();
 const toast = useToast();
 const isSubmitting = ref(false);
@@ -148,18 +147,17 @@ function onEnterKey(event: KeyboardEvent) {
         />
       </UFormField>
 
-      <UButton
+      <UiButton
         type="submit"
         variant="soft"
         class="w-fit cursor-pointer"
         :loading="isSubmitting"
         :disabled="isSubmitting"
-        v-bind="cuelumeAttrs.pressRelease"
       >
         {{
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")
         }}
-      </UButton>
+      </UiButton>
     </UForm>
   </div>
 </template>

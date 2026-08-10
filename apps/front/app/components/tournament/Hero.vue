@@ -88,7 +88,7 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
           v-if="tournament.league?.imageUrl"
           :src="tournament.league.imageUrl"
           :alt="tournament.league.name"
-          class="size-4 object-contain outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+          class="size-4 object-contain outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
         <p v-if="tournament.league?.name" class="text-sm text-muted text-pretty">
           {{ tournament.league.name }}
@@ -122,12 +122,13 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
       <p v-if="showChampion && championTeam" class="text-sm text-highlighted text-pretty">
         <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
         {{ " " }}
-        <ULink
+        <UiLink
           :to="$localePath(`/team/${championTeam.slug}`)"
-          class="inline-flex items-center min-h-10 font-medium hover:underline"
+          variant="inline"
+          class="inline-flex items-center min-h-10"
         >
           {{ championTeam.name }}
-        </ULink>
+        </UiLink>
       </p>
     </div>
   </UiCrossCard>

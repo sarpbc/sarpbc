@@ -23,7 +23,6 @@ const SOURCE = "lateral_bar" as const;
             :match-id="match.id"
             :source="SOURCE"
             status="live"
-            class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow :match="match" :live="true" />
           </MatchDiscoveryLink>
@@ -33,7 +32,6 @@ const SOURCE = "lateral_bar" as const;
             :match-id="match.id"
             :source="SOURCE"
             status="upcoming"
-            class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow :match="match" />
           </MatchDiscoveryLink>
@@ -49,7 +47,6 @@ const SOURCE = "lateral_bar" as const;
             :match-id="match.id"
             :source="SOURCE"
             status="finished"
-            class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchResultRow :match="match" />
           </MatchDiscoveryLink>

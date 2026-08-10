@@ -95,7 +95,7 @@ function participantRowClass(participantId: string | undefined): string {
   <NuxtLink
     :to="detailTo"
     :class="[
-      'flex flex-col rounded-sm hover:bg-muted transition-colors focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
+      'flex flex-col rounded-sm hover:bg-muted focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
       bracket
         ? 'w-full p-0 bg-muted/70 border-0'
         : compact
@@ -109,7 +109,7 @@ function participantRowClass(participantId: string | undefined): string {
     <template v-if="bracket">
       <div
         :class="[
-          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-[22px] px-1',
+          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-5.5 px-1',
           participantRowClass(participantAId),
         ]"
       >
@@ -123,7 +123,7 @@ function participantRowClass(participantId: string | undefined): string {
       </div>
       <div
         :class="[
-          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-[22px] px-1',
+          'grid grid-cols-[auto_1fr_auto] items-center gap-1 min-h-5.5 px-1',
           participantRowClass(participantBId),
         ]"
       >

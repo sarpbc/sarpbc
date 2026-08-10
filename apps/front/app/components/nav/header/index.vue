@@ -65,19 +65,9 @@ const items = computed<NavigationMenuItem[]>(() => [
     ...navLinkSound,
   },
   {
-    label: t("general.games"),
-    children: [
-      {
-        label: t("page.game.airriddle.title"),
-        to: localePath("/game/airriddle"),
-        ...navLinkSound,
-      },
-      {
-        label: t("page.game.pickems.title"),
-        to: localePath("/game/pickems"),
-        ...navLinkSound,
-      },
-    ],
+    label: t("page.game.airriddle.title"),
+    to: localePath("/game/airriddle"),
+    ...navLinkSound,
   },
 ]);
 

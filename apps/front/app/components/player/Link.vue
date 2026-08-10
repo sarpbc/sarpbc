@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <UButton
+  <UiButton
     :key="player.id"
     :to="$localePath(`/player/${player.slug}`)"
     variant="ghost"
@@ -32,5 +32,5 @@ defineProps<{
       </div>
     </div>
     <FlagIcon v-if="player.nationality" :code="player.nationality" class="w-6 h-4 shrink-0" />
-  </UButton>
+  </UiButton>
 </template>

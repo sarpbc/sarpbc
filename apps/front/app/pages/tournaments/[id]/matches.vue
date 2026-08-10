@@ -149,7 +149,7 @@ watch(
                   :match-id="match.id"
                   :source="SOURCE"
                   status="upcoming"
-                  class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+                  class="block hover:bg-elevated/50 active:scale-[0.96] touch-manipulation"
                 >
                   <MatchRow :match="match" />
                 </MatchDiscoveryLink>
@@ -172,7 +172,7 @@ watch(
                 :match-id="match.id"
                 :source="SOURCE"
                 status="finished"
-                class="block hover:bg-elevated/50 transition-[colors,transform] active:scale-[0.96] touch-manipulation"
+                class="block hover:bg-elevated/50 active:scale-[0.96] touch-manipulation"
               >
                 <MatchResultRow :match="match" />
               </MatchDiscoveryLink>
