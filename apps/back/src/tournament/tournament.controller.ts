@@ -1,18 +1,19 @@
 import { Controller, Get, Param, Query, Post, Body, Put, Patch, UseGuards } from "@nestjs/common";
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
-import { CreateTournamentDto } from "./dto/create-tournament.dto";
-import { UpdateTournamentDto } from "./dto/update-tournament.dto";
+import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
 import { PermissionGuard } from "src/user/user.guard";
 import { TournamentService } from "./tournament.service";
+import { ManualTournamentService } from "./manual-tournament.service";
 import { MatchService } from "./match/match.service";
 
 @Controller("tournaments")
 export class TournamentController {
   constructor(
     private tournamentService: TournamentService,
+    private manualTournamentService: ManualTournamentService,
     private matchService: MatchService,
     private redisService: RedisService,
   ) {}
@@ -39,7 +40,7 @@ export class TournamentController {
 
   @Get("leagues")
   async findLeagues() {
-    const leagues = await this.tournamentService.findLeagues();
+    const leagues = await this.manualTournamentService.findLeagues();
     return { leagues };
   }
 
@@ -47,7 +48,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
   async create(@Body() dto: CreateTournamentDto) {
-    const tournament = await this.tournamentService.createManual(dto);
+    const tournament = await this.manualTournamentService.create(dto);
     return { tournament };
   }
 
@@ -67,7 +68,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateTournamentDto) {
-    const tournament = await this.tournamentService.updateManual(id, dto);
+    const tournament = await this.manualTournamentService.update(id, dto);
     return { tournament };
   }
 

@@ -8,7 +8,7 @@ export type TournamentSource = "pandascore" | "manual";
 export interface Tournament {
   id: string;
   pandascoreId?: number;
-  source?: TournamentSource;
+  source: TournamentSource;
   name: string;
   description?: string;
   slug?: string;

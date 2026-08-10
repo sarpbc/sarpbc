@@ -54,11 +54,14 @@ export function tournamentToFormState(tournament: Tournament): ManualTournamentF
   };
 }
 
-export function buildManualTournamentPayload(state: ManualTournamentFormState) {
+export function buildManualTournamentPayload(
+  state: ManualTournamentFormState,
+  mode: "create" | "update",
+) {
   const payload: {
     name: string;
     slug?: string;
-    tier?: string;
+    tier?: string | null;
     leagueId?: string | null;
     beginAt?: string | null;
     endAt?: string | null;
@@ -74,7 +77,9 @@ export function buildManualTournamentPayload(state: ManualTournamentFormState) {
   }
 
   const trimmedTier = state.tier.trim();
-  if (trimmedTier) {
+  if (mode === "update") {
+    payload.tier = trimmedTier || null;
+  } else if (trimmedTier) {
     payload.tier = trimmedTier;
   }
 

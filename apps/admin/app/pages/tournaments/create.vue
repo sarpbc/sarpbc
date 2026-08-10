@@ -55,7 +55,7 @@ async function handleSubmit() {
 
   isSaving.value = true;
   try {
-    const created = await createTournament(buildManualTournamentPayload(formState.value));
+    const created = await createTournament(buildManualTournamentPayload(formState.value, "create"));
     if (!created) {
       toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
       return;

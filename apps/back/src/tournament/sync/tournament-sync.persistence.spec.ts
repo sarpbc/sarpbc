@@ -34,7 +34,7 @@ describe("TournamentSyncPersistence", () => {
     jest.clearAllMocks();
   });
 
-  it("does not overwrite manual tournaments during PandaScore upsert", async () => {
+  it("rejects upsert when an existing row is source=manual", async () => {
     const manualTournament = {
       id: "manual-1",
       source: "manual",
@@ -43,13 +43,13 @@ describe("TournamentSyncPersistence", () => {
     } as Tournament;
     tournamentRepository.findOne.mockResolvedValue(manualTournament);
 
-    const result = await persistence.upsertTournament({
-      pandascoreId: 99,
-      name: "Updated From PandaScore",
-    });
+    await expect(
+      persistence.upsertTournament({
+        pandascoreId: 99,
+        name: "Updated From PandaScore",
+      }),
+    ).rejects.toThrow(/source=manual/);
 
-    expect(result).toBe(manualTournament);
-    expect(result.name).toBe("Community Cup");
     expect(em.persist).not.toHaveBeenCalled();
     expect(em.flush).not.toHaveBeenCalled();
   });

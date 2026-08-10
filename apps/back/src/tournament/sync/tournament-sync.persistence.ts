@@ -12,6 +12,7 @@ import { Team } from "src/player/player.entities";
 import { League, Tournament, TournamentParticipant } from "../tournament.entities";
 import { LeagueService } from "../league/league.service";
 import { MatchService } from "../match/match.service";
+import { assertPandascoreUpsertAllowed } from "../domain/tournament-source";
 
 @Injectable()
 export class TournamentSyncPersistence {
@@ -30,8 +31,8 @@ export class TournamentSyncPersistence {
       pandascoreId: command.pandascoreId,
     });
 
-    if (tournament?.source === "manual") {
-      return tournament;
+    if (tournament) {
+      assertPandascoreUpsertAllowed(tournament, command.pandascoreId);
     }
 
     let league: League | null = null;

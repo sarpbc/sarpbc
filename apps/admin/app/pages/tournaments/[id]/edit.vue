@@ -76,7 +76,7 @@ async function handleSubmit() {
   try {
     const updated = await updateTournament(
       tournamentId.value,
-      buildManualTournamentPayload(formState.value),
+      buildManualTournamentPayload(formState.value, "update"),
     );
     if (!updated) {
       toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
