@@ -1,11 +1,4 @@
-export const PLAYER_AWARD_TYPES = ["mvp", "defensive_mvp"] as const;
-
-export type PlayerAwardType = (typeof PLAYER_AWARD_TYPES)[number];
-
-export const PlayerAwardTypes = {
-  MVP: "mvp",
-  DEFENSIVE_MVP: "defensive_mvp",
-} as const satisfies Record<string, PlayerAwardType>;
+export type PlayerAwardType = "mvp" | "defensive_mvp";
 
 export interface PlayerProfileAward {
   id: string;
