@@ -28,6 +28,7 @@
   --spacing-row-compact: calc(var(--spacing-row) * 2 / 3);
   --spacing-row-header: 3.5rem; /* 56px — page title band */
   --spacing-row-double: 5.5rem; /* 88px — rare 2× cells */
+  --spacing-row-triple: calc(var(--spacing-row) * 3);
   --spacing-rail-caption: 4.5rem; /* 72px — section label above rail cards */
 }
 

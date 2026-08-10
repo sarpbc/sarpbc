@@ -124,27 +124,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section
-    class="w-full flex flex-col gap-4"
-    :aria-labelledby="hasComments ? 'discussion-heading' : undefined"
-  >
-    <div v-if="hasComments" class="flex flex-col gap-1">
-      <h2 id="discussion-heading" class="text-sm font-medium text-toned pl-1">
-        {{ t("components.discussion.heading") }}
-      </h2>
-      <p class="text-sm text-muted pl-1">
-        {{ t("components.discussion.subtitle") }}
-      </p>
-    </div>
-
-    <div class="border border-default rounded-sm p-4">
-      <DiscussionCommentComposer
-        :target-type="targetType"
-        :target-id="targetId"
-        @comment-created="onChanged"
-      />
-    </div>
-
+  <section class="w-full flex flex-col gap-4" :aria-label="t('components.discussion.heading')">
     <div v-if="pending" class="flex flex-col gap-3" aria-live="polite">
       <div
         v-for="n in 3"
@@ -184,6 +164,14 @@ onMounted(() => {
           }}
         </UButton>
       </div>
+    </div>
+
+    <div class="border border-default rounded-sm p-4">
+      <DiscussionCommentComposer
+        :target-type="targetType"
+        :target-id="targetId"
+        @comment-created="onChanged"
+      />
     </div>
   </section>
 </template>
