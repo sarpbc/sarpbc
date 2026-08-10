@@ -125,20 +125,21 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                 :key="member.contractId"
                 class="flex items-center gap-3"
               >
-                <ULink :to="$localePath(`/player/${member.slug}`)" class="shrink-0">
+                <UiLink :to="$localePath(`/player/${member.slug}`)" class="shrink-0">
                   <PlayerImg
                     :player-name="member.name"
                     :img="member.imageUrl || undefined"
                     size="sm"
                   />
-                </ULink>
+                </UiLink>
                 <div class="flex-1 min-w-0">
-                  <ULink
+                  <UiLink
                     :to="$localePath(`/player/${member.slug}`)"
-                    class="font-medium hover:underline truncate block"
+                    variant="inline"
+                    class="truncate block"
                   >
                     {{ member.name }}
-                  </ULink>
+                  </UiLink>
                   <p v-if="member.role !== 'active'" class="text-sm text-muted">
                     {{ roleLabel(member.role) }}
                   </p>

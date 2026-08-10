@@ -12,6 +12,7 @@ const { matches, variant, title, discoverySource } = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 const eventGroups = computed(() =>
   groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
@@ -41,13 +42,14 @@ const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
 
     <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
       <h3 class="flex text-sm font-medium text-toned h-10.75 items-end">
-        <ULink
+        <UiLink
           v-if="group.tournamentId"
           :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
-          class="hover:text-highlighted h-fit"
+          variant="muted"
+          class="h-fit"
         >
           {{ group.displayName }}
-        </ULink>
+        </UiLink>
         <span v-else>{{ group.displayName }}</span>
       </h3>
       <UiCard
@@ -61,7 +63,6 @@ const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
             :match-id="match.id"
             :source="discoverySource"
             :status="discoveryStatus"
-            class="block hover:bg-elevated/50 transition-colors"
           >
             <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
             <MatchResultRow v-else :match="match" />
@@ -69,7 +70,8 @@ const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
           <ULink
             v-else
             :to="$localePath(`/matches/${match.id}`)"
-            class="block hover:bg-elevated/50 transition-colors"
+            class="block hover:bg-elevated/50"
+            v-bind="cuelumeAttrs.hoverTick"
           >
             <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
             <MatchResultRow v-else :match="match" />

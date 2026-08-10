@@ -3,7 +3,6 @@ import type { RouteLocationRaw } from "vue-router";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 type FooterLink = {
   type: "link";
@@ -11,13 +10,7 @@ type FooterLink = {
   to: RouteLocationRaw;
 };
 
-type FooterGroup = {
-  type: "group";
-  label: string;
-  links: FooterLink[];
-};
-
-type FooterEntry = FooterLink | FooterGroup;
+type FooterEntry = FooterLink;
 
 type FooterColumn = {
   title: string;
@@ -35,22 +28,7 @@ const columns = computed<FooterColumn[]>(() => [
         to: { path: localePath("/matches"), query: { tab: "past" } },
       },
       { type: "link", label: t("general.tournaments"), to: localePath("/tournaments") },
-      {
-        type: "group",
-        label: t("general.games"),
-        links: [
-          {
-            type: "link",
-            label: t("page.game.airriddle.title"),
-            to: localePath("/game/airriddle"),
-          },
-          {
-            type: "link",
-            label: t("page.game.pickems.title"),
-            to: localePath("/game/pickems"),
-          },
-        ],
-      },
+      { type: "link", label: t("page.game.airriddle.title"), to: localePath("/game/airriddle") },
       { type: "link", label: t("general.teams"), to: localePath("/team") },
       { type: "link", label: t("general.players"), to: localePath("/player") },
     ],
@@ -130,30 +108,10 @@ const columns = computed<FooterColumn[]>(() => [
           </h2>
           <ul class="flex flex-col">
             <template v-for="entry in column.entries" :key="entry.label">
-              <li v-if="entry.type === 'link'">
-                <ULink
-                  :to="entry.to"
-                  class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
-                  v-bind="cuelumeAttrs.hoverTick"
-                >
+              <li>
+                <UiLink :to="entry.to" variant="muted" class="inline-flex items-center min-h-10">
                   {{ entry.label }}
-                </ULink>
-              </li>
-              <li v-else class="flex flex-col">
-                <span class="inline-flex items-center min-h-10 text-xs font-medium text-dimmed">
-                  {{ entry.label }}
-                </span>
-                <ul class="flex flex-col pl-3 border-l border-default">
-                  <li v-for="link in entry.links" :key="link.label">
-                    <ULink
-                      :to="link.to"
-                      class="inline-flex items-center min-h-10 text-muted hover:text-highlighted transition-[color] duration-150"
-                      v-bind="cuelumeAttrs.hoverTick"
-                    >
-                      {{ link.label }}
-                    </ULink>
-                  </li>
-                </ul>
+                </UiLink>
               </li>
             </template>
           </ul>

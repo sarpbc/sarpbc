@@ -71,7 +71,7 @@ const formatEndDate = (value: Date | string | null) => {
         v-for="trophy in trophies"
         :key="trophy.id"
         :to="$localePath(`/tournaments/${trophy.id}`)"
-        class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors"
+        class="flex items-center gap-3 p-3 hover:bg-elevated"
       >
         <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary shrink-0" />
         <div class="flex-1 min-w-0">

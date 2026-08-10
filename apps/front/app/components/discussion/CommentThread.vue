@@ -124,54 +124,61 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-4" :aria-label="t('components.discussion.heading')">
+  <section class="w-full flex flex-col gap-3" :aria-label="t('components.discussion.heading')">
     <div v-if="pending" class="flex flex-col gap-3" aria-live="polite">
       <div
         v-for="n in 3"
         :key="n"
-        class="h-24 rounded-sm border border-default bg-elevated/40 animate-pulse"
+        class="h-24 border border-default bg-elevated/40 animate-pulse"
       />
     </div>
 
     <div
       v-else-if="error"
-      class="flex flex-col items-center gap-3 py-8 px-4 text-center border border-default rounded-sm"
+      class="flex flex-col items-center gap-3 border border-default py-8 px-4 text-center"
     >
       <p class="text-sm text-muted">
         {{ t("components.discussion.error") }}
       </p>
-      <UButton variant="outline" @click="refresh()">
+      <UiButton variant="outline" @click="refresh()">
         {{ t("components.discussion.retry") }}
-      </UButton>
+      </UiButton>
     </div>
 
-    <div v-else-if="hasComments" class="flex flex-col gap-4">
-      <DiscussionCommentItem
-        v-for="comment in comments"
-        :key="comment.id"
-        :comment="comment"
-        :target-type="targetType"
-        :target-id="targetId"
-        @changed="onChanged"
-      />
+    <template v-else>
+      <div v-if="hasComments" class="flex flex-col gap-3">
+        <DiscussionCommentItem
+          v-for="comment in comments"
+          :key="comment.id"
+          :comment="comment"
+          :target-type="targetType"
+          :target-id="targetId"
+          @changed="onChanged"
+        />
 
-      <div v-if="hasMore" class="flex justify-center pt-2">
-        <UButton variant="outline" :loading="loadingMore" :disabled="loadingMore" @click="loadMore">
-          {{
-            loadingMore
-              ? t("components.discussion.loadingMore")
-              : t("components.discussion.loadMore")
-          }}
-        </UButton>
+        <div v-if="hasMore" class="flex justify-center pt-1">
+          <UiButton
+            variant="outline"
+            :loading="loadingMore"
+            :disabled="loadingMore"
+            @click="loadMore"
+          >
+            {{
+              loadingMore
+                ? t("components.discussion.loadingMore")
+                : t("components.discussion.loadMore")
+            }}
+          </UiButton>
+        </div>
       </div>
-    </div>
 
-    <div class="border border-default rounded-sm p-4">
-      <DiscussionCommentComposer
-        :target-type="targetType"
-        :target-id="targetId"
-        @comment-created="onChanged"
-      />
-    </div>
+      <div class="border border-default p-3">
+        <DiscussionCommentComposer
+          :target-type="targetType"
+          :target-id="targetId"
+          @comment-created="onChanged"
+        />
+      </div>
+    </template>
   </section>
 </template>

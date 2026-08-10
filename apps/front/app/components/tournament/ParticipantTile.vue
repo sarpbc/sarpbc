@@ -18,7 +18,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
   <UPopover v-model:open="open">
     <button
       type="button"
-      class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-default hover:bg-elevated/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+      class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-default hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
       :aria-label="t('page.tournaments.id.participants.openRoster', { team: team.name })"
       aria-haspopup="dialog"
       :aria-expanded="open"
@@ -35,14 +35,15 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
         role="dialog"
         :aria-labelledby="titleId"
       >
-        <ULink
+        <UiLink
           :id="titleId"
           :to="$localePath(`/team/${team.slug}`)"
-          class="text-sm font-semibold tracking-tight text-highlighted hover:underline"
+          variant="inline"
+          class="text-sm font-semibold tracking-tight"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: team.name })"
         >
           {{ team.name }}
-        </ULink>
+        </UiLink>
 
         <div v-if="players.length" class="flex flex-col">
           <UiListItem

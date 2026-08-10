@@ -41,7 +41,6 @@ function isLive(matchId: string): boolean {
               :match-id="match.id"
               :source="SOURCE"
               :status="isLive(match.id) ? 'live' : 'upcoming'"
-              class="block hover:bg-elevated/50 transition-colors"
             >
               <MatchRow
                 :match="match"
@@ -52,12 +51,9 @@ function isLive(matchId: string): boolean {
           </template>
         </div>
         <div class="border-t border-default px-3 py-2">
-          <ULink
-            :to="$localePath('/matches')"
-            class="text-sm text-muted hover:text-default transition-colors"
-          >
+          <UiLink :to="$localePath('/matches')" variant="muted" class="text-sm">
             {{ $t("components.match.viewAll") }}
-          </ULink>
+          </UiLink>
         </div>
       </UiCard>
     </UiRail>
