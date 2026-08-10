@@ -1,6 +1,6 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
-import type { PlayerAwardListItem, PlayerAwardType } from "@sarpbc/types";
+import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
   limit?: number;
@@ -150,9 +150,11 @@ export async function updateTournament(
   return res.tournament ?? null;
 }
 
-export async function getTournamentAwards(tournamentId: string): Promise<PlayerAwardListItem[]> {
+export async function getTournamentAwards(
+  tournamentId: string,
+): Promise<TournamentAwardListItem[]> {
   try {
-    const res = await apiFetch<{ awards?: PlayerAwardListItem[] }>(
+    const res = await apiFetch<{ awards?: TournamentAwardListItem[] }>(
       `/tournaments/${tournamentId}/awards`,
       { method: "GET" },
     );
@@ -166,9 +168,9 @@ export async function getTournamentAwards(tournamentId: string): Promise<PlayerA
 export async function createTournamentAward(
   tournamentId: string,
   payload: { participantId: string; playerId: string; awardType: PlayerAwardType },
-): Promise<PlayerAwardListItem | null> {
+): Promise<TournamentAwardListItem | null> {
   try {
-    const res = await apiFetch<{ award?: PlayerAwardListItem }>(
+    const res = await apiFetch<{ award?: TournamentAwardListItem }>(
       `/tournaments/${tournamentId}/awards`,
       {
         method: "POST",

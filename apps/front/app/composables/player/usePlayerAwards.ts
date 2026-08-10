@@ -1,10 +1,10 @@
 import type { MaybeRef } from "vue";
-import type { PlayerAwardListItem } from "@sarpbc/types";
+import type { PlayerProfileAward } from "@sarpbc/types";
 
 export function usePlayerAwards(playerId: MaybeRef<string | undefined>) {
   const playerIdRef = toRef(playerId);
 
-  const { data, pending, error, refresh } = useAsyncData<PlayerAwardListItem[]>(
+  const { data, pending, error, refresh } = useAsyncData<PlayerProfileAward[]>(
     () => `player-awards-${playerIdRef.value ?? "unknown"}`,
     async () => (playerIdRef.value ? await getPlayerAwards(playerIdRef.value) : []),
     {

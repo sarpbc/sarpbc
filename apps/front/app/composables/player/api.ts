@@ -1,6 +1,6 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
-import type { PlayerAwardListItem } from "@sarpbc/types";
+import type { PlayerProfileAward } from "@sarpbc/types";
 
 /** Throws on failure so match sections can render their own error state. */
 export async function getPlayerMatches(playerId: string): Promise<Match[]> {
@@ -31,9 +31,9 @@ export async function getPlayerTrophies(playerId: string): Promise<Tournament[]>
 }
 
 /** Throws on failure so awards section can render its own error state. */
-export async function getPlayerAwards(playerId: string): Promise<PlayerAwardListItem[]> {
+export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAward[]> {
   const config = useRuntimeConfig();
-  const res = await $fetch<{ awards?: PlayerAwardListItem[] }>(
+  const res = await $fetch<{ awards?: PlayerProfileAward[] }>(
     `${config.public.apiBase}/player/${playerId}/awards`,
     {
       method: "GET",

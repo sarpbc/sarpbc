@@ -197,7 +197,9 @@
       "awards": {
         "title": "Player Awards",
         "mvpHint": "Assign one MVP for this tournament. Awards appear on player profiles.",
-        "assignMvp": "Assign MVP to a roster player:",
+        "assignMvp": "Assign MVP",
+        "assignAction": "Assign MVP",
+        "selectPlayer": "Select a roster player",
         "remove": "Remove Award",
         "mvpAssigned": "{name} is now MVP",
         "removed": "{type} award removed",

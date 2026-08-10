@@ -21,7 +21,7 @@ import { PermissionGuard } from "src/user/user.guard";
 import { TournamentService } from "./tournament.service";
 import { ManualTournamentService } from "./manual-tournament.service";
 import { MatchService } from "./match/match.service";
-import { PlayerAwardService } from "../player/player-award.service";
+import { PlayerAwardService } from "./player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 
 @Controller("tournaments")

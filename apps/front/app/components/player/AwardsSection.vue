@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import { PlayerAwardType, type PlayerAwardListItem } from "@sarpbc/types";
+import { PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
 
 const {
   awards,
   pending = false,
   hasError = false,
 } = defineProps<{
-  awards: PlayerAwardListItem[];
+  awards: PlayerProfileAward[];
   pending?: boolean;
   hasError?: boolean;
 }>();
@@ -43,8 +43,23 @@ function awardTypeLabel(awardType: PlayerAwardType): string {
   }
 }
 
-const hasMeta = (award: PlayerAwardListItem) =>
-  Boolean(award.tournament.leagueName || award.tournament.serie || award.tournament.endAt);
+function metaParts(award: PlayerProfileAward): string[] {
+  const parts: string[] = [];
+  if (award.tournament.leagueName) {
+    parts.push(award.tournament.leagueName);
+  }
+  if (award.tournament.serie) {
+    parts.push(award.tournament.serie);
+  }
+  if (award.tournament.endAt) {
+    parts.push(
+      t("page.player.slug.awards.awardedOn", {
+        date: formatEndDate(award.tournament.endAt),
+      }),
+    );
+  }
+  return parts;
+}
 </script>
 
 <template>
@@ -97,30 +112,8 @@ const hasMeta = (award: PlayerAwardListItem) =>
             <p class="font-medium truncate">
               {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.name }}
             </p>
-            <p v-if="hasMeta(award)" class="text-sm text-muted truncate">
-              <span v-if="award.tournament.leagueName">{{ award.tournament.leagueName }}</span>
-              <span
-                v-if="award.tournament.leagueName && award.tournament.serie"
-                class="mx-1"
-                aria-hidden="true"
-                >·</span
-              >
-              <span v-if="award.tournament.serie">{{ award.tournament.serie }}</span>
-              <span
-                v-if="
-                  (award.tournament.leagueName || award.tournament.serie) && award.tournament.endAt
-                "
-                class="mx-1"
-                aria-hidden="true"
-                >·</span
-              >
-              <span v-if="award.tournament.endAt">
-                {{
-                  t("page.player.slug.awards.awardedOn", {
-                    date: formatEndDate(award.tournament.endAt),
-                  })
-                }}
-              </span>
+            <p v-if="metaParts(award).length > 0" class="text-sm text-muted truncate">
+              {{ metaParts(award).join(" · ") }}
             </p>
           </div>
         </ULink>

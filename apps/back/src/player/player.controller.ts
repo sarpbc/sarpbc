@@ -25,7 +25,7 @@ import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
 import { MatchService } from "src/tournament/match/match.service";
 import { TournamentService } from "src/tournament/tournament.service";
-import { PlayerAwardService } from "./player-award.service";
+import { PlayerAwardService } from "src/tournament/player-award.service";
 
 @Controller("player")
 export class PlayerController {

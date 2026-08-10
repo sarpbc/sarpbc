@@ -197,7 +197,9 @@
       "awards": {
         "title": "Récompenses Joueur",
         "mvpHint": "Attribuez un MVP pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
-        "assignMvp": "Attribuer le MVP à un joueur du roster :",
+        "assignMvp": "Attribuer le MVP",
+        "assignAction": "Attribuer le MVP",
+        "selectPlayer": "Sélectionner un joueur du roster",
         "remove": "Supprimer la Récompense",
         "mvpAssigned": "{name} est maintenant MVP",
         "removed": "Récompense {type} supprimée",

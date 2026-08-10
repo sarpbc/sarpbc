@@ -5,11 +5,13 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
+import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { EntityManager, EntityRepository } from "@mikro-orm/postgresql";
-import type { PlayerAwardListItem } from "@sarpbc/types";
-import { Player, PlayerAwardType } from "./player.entities";
-import { Tournament, TournamentParticipant } from "../tournament/tournament.entities";
-import { PlayerAward } from "../tournament/player-award.entities";
+import type { PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import { PlayerAwardType } from "@sarpbc/types";
+import { Player } from "../player/player.entities";
+import { Tournament, TournamentParticipant } from "./tournament.entities";
+import { PlayerAward } from "./player-award.entities";
 
 function awardLabel(awardType: PlayerAwardType): string {
   switch (awardType) {
@@ -36,7 +38,7 @@ export class PlayerAwardService {
     private readonly em: EntityManager,
   ) {}
 
-  async findByPlayerId(playerId: string): Promise<PlayerAwardListItem[]> {
+  async findByPlayerId(playerId: string): Promise<PlayerProfileAward[]> {
     const player = await this.playerRepository.findOne({ id: playerId });
     if (!player) {
       throw new NotFoundException(`Player with id "${playerId}" not found`);
@@ -45,15 +47,15 @@ export class PlayerAwardService {
     const awards = await this.awardRepository.find(
       { player: { id: playerId } },
       {
-        populate: ["tournament", "tournament.league", "player", "participant", "participant.team"],
+        populate: ["tournament", "tournament.league"],
         orderBy: { tournament: { endAt: "DESC" } },
       },
     );
 
-    return awards.map((award) => this.toListItem(award));
+    return awards.map((award) => this.toProfileItem(award));
   }
 
-  async findByTournamentId(tournamentId: string): Promise<PlayerAwardListItem[]> {
+  async findByTournamentId(tournamentId: string): Promise<TournamentAwardListItem[]> {
     const tournament = await this.tournamentRepository.findOne({ id: tournamentId });
     if (!tournament) {
       throw new NotFoundException(`Tournament with id "${tournamentId}" not found`);
@@ -62,12 +64,12 @@ export class PlayerAwardService {
     const awards = await this.awardRepository.find(
       { tournament: { id: tournamentId } },
       {
-        populate: ["tournament", "tournament.league", "player", "participant", "participant.team"],
+        populate: ["player", "participant", "participant.team"],
         orderBy: { createdAt: "ASC" },
       },
     );
 
-    return awards.map((award) => this.toListItem(award));
+    return awards.map((award) => this.toTournamentItem(award));
   }
 
   async create(
@@ -75,23 +77,24 @@ export class PlayerAwardService {
     participantId: string,
     playerId: string,
     awardType: PlayerAwardType,
-  ): Promise<PlayerAwardListItem> {
-    const tournament = await this.tournamentRepository.findOne({ id: tournamentId });
+  ): Promise<TournamentAwardListItem> {
+    const [tournament, participant, player] = await Promise.all([
+      this.tournamentRepository.findOne({ id: tournamentId }),
+      this.participantRepository.findOne(
+        { id: participantId, tournament: { id: tournamentId } },
+        { populate: ["players", "team"] },
+      ),
+      this.playerRepository.findOne({ id: playerId }),
+    ]);
+
     if (!tournament) {
       throw new NotFoundException(`Tournament with id "${tournamentId}" not found`);
     }
-
-    const participant = await this.participantRepository.findOne(
-      { id: participantId, tournament: { id: tournamentId } },
-      { populate: ["players", "team"] },
-    );
     if (!participant) {
       throw new NotFoundException(
         `Tournament participant with id "${participantId}" was not found for this tournament`,
       );
     }
-
-    const player = await this.playerRepository.findOne({ id: playerId });
     if (!player) {
       throw new NotFoundException(`Player with id "${playerId}" not found`);
     }
@@ -105,29 +108,6 @@ export class PlayerAwardService {
       );
     }
 
-    const existingForPlayer = await this.awardRepository.findOne({
-      tournament: { id: tournamentId },
-      player: { id: playerId },
-      awardType,
-    });
-    if (existingForPlayer) {
-      throw new ConflictException(
-        `${player.name} already has the ${awardLabel(awardType)} award for ${tournament.name}.`,
-      );
-    }
-
-    if (awardType === PlayerAwardType.MVP) {
-      const existingMvp = await this.awardRepository.findOne({
-        tournament: { id: tournamentId },
-        awardType: PlayerAwardType.MVP,
-      });
-      if (existingMvp) {
-        throw new ConflictException(
-          `${tournament.name} already has an MVP award. Remove the current MVP before assigning another player.`,
-        );
-      }
-    }
-
     const award = this.awardRepository.create({
       tournament,
       participant,
@@ -135,17 +115,20 @@ export class PlayerAwardService {
       awardType,
       createdAt: new Date(),
     });
-    await this.em.persist(award).flush();
 
-    await this.awardRepository.populate(award, [
-      "tournament",
-      "tournament.league",
-      "player",
-      "participant",
-      "participant.team",
-    ]);
+    try {
+      await this.em.persist(award).flush();
+    } catch (error) {
+      if (error instanceof UniqueConstraintViolationException) {
+        throw new ConflictException(
+          `${tournament.name} already has a ${awardLabel(awardType)} award. Remove the current award before assigning another player.`,
+        );
+      }
+      throw error;
+    }
 
-    return this.toListItem(award);
+    await this.awardRepository.populate(award, ["player", "participant", "participant.team"]);
+    return this.toTournamentItem(award);
   }
 
   async delete(tournamentId: string, awardId: string): Promise<void> {
@@ -162,7 +145,7 @@ export class PlayerAwardService {
     await this.em.remove(award).flush();
   }
 
-  private toListItem(award: PlayerAward): PlayerAwardListItem {
+  private toProfileItem(award: PlayerAward): PlayerProfileAward {
     const tournament = award.tournament;
     const league = tournament.league;
 
@@ -176,6 +159,13 @@ export class PlayerAwardService {
         serie: tournament.serie,
         leagueName: league?.name,
       },
+    };
+  }
+
+  private toTournamentItem(award: PlayerAward): TournamentAwardListItem {
+    return {
+      id: award.id,
+      awardType: award.awardType,
       player: {
         id: award.player.id,
         name: award.player.name,

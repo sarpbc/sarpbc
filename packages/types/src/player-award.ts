@@ -2,7 +2,8 @@ export enum PlayerAwardType {
   MVP = "mvp",
 }
 
-export interface PlayerAwardListItem {
+/** Award row for a player profile (tournament context). */
+export interface PlayerProfileAward {
   id: string;
   awardType: PlayerAwardType;
   tournament: {
@@ -12,12 +13,18 @@ export interface PlayerAwardListItem {
     serie?: string | null;
     leagueName?: string;
   };
-  player?: {
+}
+
+/** Award row for tournament admin (player + roster team context). */
+export interface TournamentAwardListItem {
+  id: string;
+  awardType: PlayerAwardType;
+  player: {
     id: string;
     name: string;
     slug: string;
   };
-  participant?: {
+  participant: {
     id: string;
     team?: {
       id: string;

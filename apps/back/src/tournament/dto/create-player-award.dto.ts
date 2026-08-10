@@ -1,5 +1,5 @@
 import { IsEnum, IsUUID } from "class-validator";
-import { PlayerAwardType } from "../../player/player.entities";
+import { PlayerAwardType } from "@sarpbc/types";
 
 export class CreatePlayerAwardDto {
   @IsUUID()
