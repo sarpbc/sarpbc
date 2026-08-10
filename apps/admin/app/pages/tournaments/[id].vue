@@ -88,12 +88,22 @@ async function handleSetWinner(match: Match, participantId: string) {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        :loading="isSyncing"
-        icon="i-fluent-arrow-sync-24-regular"
-        :label="$t('page.tournaments.match.syncScores')"
-        @click="handleRefresh"
-      />
+      <div class="flex flex-row gap-2">
+        <UButton
+          v-if="tournament?.source === 'manual'"
+          variant="soft"
+          icon="i-fluent-edit-24-regular"
+          :label="$t('page.tournaments.edit.action')"
+          :to="localePath(`/tournaments/${tournamentId}/edit`)"
+        />
+        <UButton
+          v-if="tournament?.source !== 'manual'"
+          :loading="isSyncing"
+          icon="i-fluent-arrow-sync-24-regular"
+          :label="$t('page.tournaments.match.syncScores')"
+          @click="handleRefresh"
+        />
+      </div>
     </template>
 
     <DashboardContent>

@@ -1,4 +1,5 @@
 import type { MatchService } from "src/tournament/match/match.service";
+import type { ManualTournamentService } from "src/tournament/manual-tournament.service";
 import type { NewsService } from "src/news/news.service";
 import type { PatUser } from "src/pat/pat.service";
 import type { PlayerService } from "src/player/player.service";
@@ -12,6 +13,7 @@ export interface McpToolContext {
   playerService: PlayerService;
   teamService: TeamService;
   tournamentService: TournamentService;
+  manualTournamentService: ManualTournamentService;
   matchService: MatchService;
   newsService: NewsService;
 }

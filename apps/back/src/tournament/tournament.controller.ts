@@ -1,16 +1,19 @@
-import { Controller, Get, Param, Query, Post, Body, Put, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Query, Post, Body, Put, Patch, UseGuards } from "@nestjs/common";
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
+import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { RequirePermissions } from "src/user/decorator/require-permissions.decorator";
 import { PermissionGuard } from "src/user/user.guard";
 import { TournamentService } from "./tournament.service";
+import { ManualTournamentService } from "./manual-tournament.service";
 import { MatchService } from "./match/match.service";
 
 @Controller("tournaments")
 export class TournamentController {
   constructor(
     private tournamentService: TournamentService,
+    private manualTournamentService: ManualTournamentService,
     private matchService: MatchService,
     private redisService: RedisService,
   ) {}
@@ -35,6 +38,20 @@ export class TournamentController {
     return { tournaments };
   }
 
+  @Get("leagues")
+  async findLeagues() {
+    const leagues = await this.manualTournamentService.findLeagues();
+    return { leagues };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post()
+  async create(@Body() dto: CreateTournamentDto) {
+    const tournament = await this.manualTournamentService.create(dto);
+    return { tournament };
+  }
+
   @Get(":id")
   async findOne(@Param("id") id: string) {
     const cacheKey = `tournament:${id}`;
@@ -44,6 +61,14 @@ export class TournamentController {
     }
     const tournament = await this.tournamentService.findById(id);
     await this.redisService.set(cacheKey, JSON.stringify(tournament), 60); // 60 seconds
+    return { tournament };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body() dto: UpdateTournamentDto) {
+    const tournament = await this.manualTournamentService.update(id, dto);
     return { tournament };
   }
 
