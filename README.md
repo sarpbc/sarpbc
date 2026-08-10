@@ -179,6 +179,8 @@ Write tools (staff permission required):
 | `set_match_winner`        | `tournaments.manage` | Set match winner by participant id          |
 | `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions |
 
+Staff playbook for roster-change news drafts (web verification + `create_news_draft`): [docs/playbooks/roster-change-news.md](docs/playbooks/roster-change-news.md).
+
 ## Useful Commands
 
 ```bash
