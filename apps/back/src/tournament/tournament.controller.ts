@@ -1,4 +1,17 @@
-import { Controller, Get, Param, Query, Post, Body, Put, Patch, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Post,
+  Body,
+  Put,
+  Patch,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
@@ -8,6 +21,8 @@ import { PermissionGuard } from "src/user/user.guard";
 import { TournamentService } from "./tournament.service";
 import { ManualTournamentService } from "./manual-tournament.service";
 import { MatchService } from "./match/match.service";
+import { PlayerAwardService } from "./player-award.service";
+import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 
 @Controller("tournaments")
 export class TournamentController {
@@ -16,6 +31,7 @@ export class TournamentController {
     private manualTournamentService: ManualTournamentService,
     private matchService: MatchService,
     private redisService: RedisService,
+    private playerAwardService: PlayerAwardService,
   ) {}
 
   @Get()
@@ -105,6 +121,33 @@ export class TournamentController {
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
     return { matches };
+  }
+
+  @Get(":id/awards")
+  async getAwardsByTournament(@Param("id") id: string) {
+    const awards = await this.playerAwardService.findByTournamentId(id);
+    return { awards };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post(":id/awards")
+  async createAward(@Param("id") tournamentId: string, @Body() dto: CreatePlayerAwardDto) {
+    const award = await this.playerAwardService.create(
+      tournamentId,
+      dto.participantId,
+      dto.playerId,
+      dto.awardType,
+    );
+    return { award };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Delete(":id/awards/:awardId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAward(@Param("id") tournamentId: string, @Param("awardId") awardId: string) {
+    await this.playerAwardService.delete(tournamentId, awardId);
   }
 
   @RequirePermissions("tournaments.manage")

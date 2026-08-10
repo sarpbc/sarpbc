@@ -1838,6 +1838,168 @@
       "comment": null
     },
     {
+      "name": "player_award",
+      "schema": "public",
+      "columns": {
+        "award_type": {
+          "name": "award_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": ["mvp", "defensive_mvp"],
+          "mappedType": "enum"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": "now()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "gen_random_uuid()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "tournament_id": {
+          "name": "tournament_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "player_award_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": ["tournament_id", "award_type"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "player_award_tournament_id_award_type_unique",
+          "primary": false,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "player_award_award_type_check",
+          "expression": "\"award_type\" in ('mvp', 'defensive_mvp')",
+          "definition": "check (\"award_type\" in ('mvp', 'defensive_mvp'))",
+          "columnName": "award_type"
+        }
+      ],
+      "triggers": [],
+      "foreignKeys": {
+        "player_award_participant_id_foreign": {
+          "columnNames": ["participant_id"],
+          "constraintName": "player_award_participant_id_foreign",
+          "localTableName": "public.player_award",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tournament_participant",
+          "updateRule": "cascade"
+        },
+        "player_award_player_id_foreign": {
+          "columnNames": ["player_id"],
+          "constraintName": "player_award_player_id_foreign",
+          "localTableName": "public.player_award",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.player",
+          "updateRule": "cascade"
+        },
+        "player_award_tournament_id_foreign": {
+          "columnNames": ["tournament_id"],
+          "constraintName": "player_award_tournament_id_foreign",
+          "localTableName": "public.player_award",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tournament",
+          "updateRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
       "name": "player_photo",
       "schema": "public",
       "columns": {

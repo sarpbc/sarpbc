@@ -364,6 +364,16 @@
           "retry": "Try Again",
           "wonOn": "Won {date}"
         },
+        "awards": {
+          "title": "Awards",
+          "error": "Could not load this player's awards. Check your connection and try again.",
+          "retry": "Try Again",
+          "awardedOn": "Awarded {date}",
+          "types": {
+            "mvp": "MVP",
+            "defensive_mvp": "Defensive MVP"
+          }
+        },
         "matches": {
           "sectionTitle": "Matches",
           "live": "Live Now",

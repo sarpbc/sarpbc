@@ -2,6 +2,9 @@ import { Module, OnModuleInit, forwardRef } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
+import { PlayerAward } from "./player-award.entities";
+import { PlayerAwardService } from "./player-award.service";
+import { Player } from "../player/player.entities";
 import { TeamModule } from "../team/team.module";
 import { PlayerModule } from "../player/player.module";
 import { TournamentController } from "./tournament.controller";
@@ -24,7 +27,14 @@ import { log } from "evlog";
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Tournament, Match, TournamentParticipant, League]),
+    MikroOrmModule.forFeature([
+      Tournament,
+      Match,
+      TournamentParticipant,
+      League,
+      PlayerAward,
+      Player,
+    ]),
     forwardRef(() => TeamModule),
     forwardRef(() => PlayerModule),
     UserModule,
@@ -40,13 +50,20 @@ import { log } from "evlog";
     ManualTournamentService,
     MatchService,
     LeagueService,
+    PlayerAwardService,
     TournamentCron,
     TournamentSyncPersistence,
     SyncAllTournamentsUseCase,
     SyncPandascoreTournamentUseCase,
     SyncPandascoreAdditionsUseCase,
   ],
-  exports: [TournamentService, ManualTournamentService, MatchService, LeagueService],
+  exports: [
+    TournamentService,
+    ManualTournamentService,
+    MatchService,
+    LeagueService,
+    PlayerAwardService,
+  ],
 })
 export class TournamentModule implements OnModuleInit {
   constructor(
