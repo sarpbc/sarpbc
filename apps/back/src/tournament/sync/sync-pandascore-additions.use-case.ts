@@ -132,12 +132,32 @@ export class SyncPandascoreAdditionsUseCase {
     log: ReturnType<typeof createLogger>,
     matchDto: MatchDto,
   ): Promise<void> {
-    const tournament = await this.persistence.findTournamentByPandascoreId(matchDto.tournament_id);
+    let tournament = await this.persistence.findTournamentByPandascoreId(matchDto.tournament_id);
     if (!tournament) {
-      log.info(
-        `Skipping match addition because tournament is not stored locally (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
+      const pandaTournament = await this.pandascoreGateway.getTournamentById(
+        matchDto.tournament_id,
       );
-      return;
+      if (!pandaTournament) {
+        log.info(
+          `Skipping match addition because tournament is unknown on PandaScore (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
+        );
+        return;
+      }
+
+      await this.persistence.upsertTournament(
+        PandascoreTournamentMapper.toUpsertCommand(pandaTournament),
+      );
+      tournament = await this.persistence.findTournamentByPandascoreId(matchDto.tournament_id);
+      if (!tournament) {
+        log.warn(
+          `Failed to persist tournament for match addition (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
+        );
+        return;
+      }
+
+      log.info(
+        `Backfilled missing tournament from match addition (tournamentId=${matchDto.tournament_id})`,
+      );
     }
 
     const command = PandascoreMatchMapper.toUpsertCommand(matchDto);
