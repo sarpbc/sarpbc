@@ -4,27 +4,20 @@ import type { RouteLocationRaw } from "vue-router";
 defineOptions({ inheritAttrs: false });
 
 type LinkVariant = "muted" | "inline";
-type LinkSound = "hover" | "none";
 
-const {
-  to,
-  variant = "muted",
-  sound = "hover",
-} = defineProps<{
+const { to, variant = "muted" } = defineProps<{
   to: RouteLocationRaw;
   variant?: LinkVariant;
-  sound?: LinkSound;
 }>();
 
 const attrs = useAttrs();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 function variantClasses(value: LinkVariant): string {
   switch (value) {
     case "muted":
-      return "text-muted hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm";
+      return "text-muted hover:text-highlighted transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm";
     case "inline":
-      return "font-medium text-toned hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+      return "font-medium text-toned hover:underline rounded-sm transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
     default: {
       const exhaustive: never = value;
       return exhaustive;
@@ -34,11 +27,9 @@ function variantClasses(value: LinkVariant): string {
 
 const linkClass = computed(() => [variantClasses(variant), attrs.class]);
 
-const soundAttrs = computed(() => (sound === "hover" ? cuelumeAttrs.hoverTick : {}));
-
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
-  return { ...soundAttrs.value, ...rest };
+  return rest;
 });
 </script>
 

@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
+const { attrs: cuelumeAttrs, pressClass } = useCuelume();
 </script>
 
 <template>
@@ -51,6 +51,7 @@ const { attrs: cuelumeAttrs } = useCuelume();
           color="neutral"
           icon="i-fluent-dismiss-circle-24-regular"
           :aria-label="t('page.matches.filters.clear')"
+          :class="pressClass"
           v-bind="cuelumeAttrs.pressRelease"
           @click="emit('clear')"
         />

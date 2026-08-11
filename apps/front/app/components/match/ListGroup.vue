@@ -12,7 +12,6 @@ const { matches, variant, title, discoverySource } = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 const eventGroups = computed(() =>
   groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
@@ -70,8 +69,7 @@ const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
           <ULink
             v-else
             :to="$localePath(`/matches/${match.id}`)"
-            class="block hover:bg-elevated/50"
-            v-bind="cuelumeAttrs.hoverTick"
+            class="block transition-none hover:bg-elevated/50"
           >
             <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
             <MatchResultRow v-else :match="match" />

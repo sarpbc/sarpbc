@@ -5,7 +5,7 @@ import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const { attrs: cuelumeAttrs } = useCuelume();
+const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
 const localePath = useLocalePath();
 const user = useUser();
@@ -92,6 +92,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 
   isSubmitting.value = true;
+  playCue("loading");
 
   const postId = crypto.randomUUID();
   const createResult = await createForumPost({
@@ -209,6 +210,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           type="submit"
           variant="soft"
           class="cursor-pointer"
+          :class="pressClass"
           :disabled="!canSubmit"
           :loading="isSubmitting"
           v-bind="cuelumeAttrs.pressRelease"

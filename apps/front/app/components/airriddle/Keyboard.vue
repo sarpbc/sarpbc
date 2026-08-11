@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
+const { attrs: cuelumeAttrs, pressClass } = useCuelume();
 
 const {
   disabled = false,
@@ -98,6 +98,7 @@ function onLetterPress(letter: string) {
         type="button"
         color="primary"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center font-mono text-sm font-semibold"
+        :class="pressClass"
         :disabled="disabled || !canSubmit"
         :loading="loading"
         :aria-label="t('page.game.airriddle.keyboardEnter')"

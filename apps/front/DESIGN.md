@@ -137,16 +137,16 @@ Shared list/rail components (`UiListItem`, `UiRail`, `UiHubColumn` — epic SAR-
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/ui/` when a pattern repeats 3+ times.
 
-| Primitive     | Role                                                                                                     |
-| ------------- | -------------------------------------------------------------------------------------------------------- |
-| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks                                           |
-| `UiCrossCard` | Hub title band / featured block with corner crosses                                                      |
-| `UiLink`      | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names); Cuelume `hoverTick` by default |
-| `UiButton`    | `UButton` wrapper with Cuelume `pressRelease` by default (`sound`: `press` \| `toggle` \| `none`)        |
-| `UiListItem`  | Hub list row — fixed row height, optional link + divider                                                 |
-| `UiBadgeLive` | Live status with text + color                                                                            |
-| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body                                   |
-| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                    |
+| Primitive     | Role                                                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks                                                                           |
+| `UiCrossCard` | Hub title band / featured block with corner crosses                                                                                      |
+| `UiLink`      | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names); silent hover (instant color, no Cuelume tick)                  |
+| `UiButton`    | `UButton` wrapper with Cuelume `pressRelease` + press scale by default (`sound`: `press` \| `toggle` \| `none`; `static` disables scale) |
+| `UiListItem`  | Hub list row — fixed row height, optional link + divider                                                                                 |
+| `UiBadgeLive` | Live status with text + color                                                                                                            |
+| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body                                                                   |
+| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                    |
 
 #### `UiListItem` sizes
 
@@ -205,13 +205,14 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 
 Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
 
-| Pattern                  | Attribute convention                                                                                                                      | Use                             |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Primary press            | `UiButton` (default) or `v-bind="cuelumeAttrs.pressRelease"`                                                                              | Submit / save / comment actions |
-| Toggle                   | `UiButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                               | Theme switch, match tab filters |
-| Nav hover (fine pointer) | `UiLink` / `MatchDiscoveryLink` / `UiListItem` (`hoverTick`; no CSS color transition). Cuelume throttles hover cues to 1 / 150ms globally | Header, footer, match rows      |
+| Pattern           | Attribute convention                                                                                                         | Use                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Primary press     | `UiButton` (default) or `v-bind="cuelumeAttrs.pressRelease"` + `pressClass` (scale `0.96`, transform-only — no layout shift) | Submit / save / comment actions |
+| Toggle            | `UiButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                  | Theme switch, match tab filters |
+| Loading           | `playCue("loading")` when user-initiated async work starts (`UiButton` also plays when `:loading` becomes true)              | Login, submit, pick'em save     |
+| Links / list rows | No hover sound. Instant hover (`transition-none`) on match/result rows and `UiLink`                                          | Header, footer, match lists     |
 
-Imperative cues: `const { playCue } = useCuelume()` then `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
+Imperative cues: `const { playCue } = useCuelume()` then `playCue('loading')` / `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 
 ---
 

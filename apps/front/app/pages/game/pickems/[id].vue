@@ -18,6 +18,7 @@ const posthog = usePostHog();
 const toast = useToast();
 const localePath = useLocalePath();
 const user = useUser();
+const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
 const tournamentId = computed(() => route.params.id as string);
 const isSignedIn = computed(() => Boolean(user.value));
@@ -230,6 +231,7 @@ async function pickTeam(matchId: string, participantId: string) {
   }
 
   submittingMatchId.value = matchId;
+  playCue("loading");
   try {
     await updatePickemForMatch(matchId, participantId);
     posthog?.capture("pickem_pick_submitted", {
@@ -407,11 +409,13 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
                 <UButton
                   variant="soft"
                   class="flex items-center justify-center col-span-1 cursor-pointer min-h-10"
+                  :class="pressClass"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
                   "
                   :loading="submittingMatchId === match.id"
                   :color="teamButtonColor(match, match.participants?.[0]?.id)"
+                  v-bind="cuelumeAttrs.pressRelease"
                   @click="pickTeam(match.id, match.participants?.[0]?.id || '')"
                 >
                   {{ match.participants?.[0]?.team.name }}
@@ -425,11 +429,13 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
                 <UButton
                   variant="soft"
                   class="flex items-center justify-center col-span-1 cursor-pointer min-h-10"
+                  :class="pressClass"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
                   "
                   :loading="submittingMatchId === match.id"
                   :color="teamButtonColor(match, match.participants?.[1]?.id)"
+                  v-bind="cuelumeAttrs.pressRelease"
                   @click="pickTeam(match.id, match.participants?.[1]?.id || '')"
                 >
                   {{ match.participants?.[1]?.team.name }}
