@@ -8,6 +8,10 @@ import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import {
+  SyncNewTournamentsResult,
+  SyncNewTournamentsUseCase,
+} from "./sync/sync-new-tournaments.use-case";
 
 @Injectable()
 export class TournamentService {
@@ -19,6 +23,7 @@ export class TournamentService {
     private readonly syncAllTournamentsUseCase: SyncAllTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
     private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
+    private readonly syncNewTournamentsUseCase: SyncNewTournamentsUseCase,
     private readonly redisService: RedisService,
     private readonly em: EntityManager,
   ) {}
@@ -109,9 +114,21 @@ export class TournamentService {
     await this.redisService.delete(`tournament:${tournamentId}`);
   }
 
+  async syncTournamentByPandascoreId(pandascoreId: number): Promise<string> {
+    const tournamentId =
+      await this.syncPandascoreTournamentUseCase.executeByPandascoreId(pandascoreId);
+    await this.redisService.delete(`tournament:${tournamentId}`);
+    return tournamentId;
+  }
+
   @CreateRequestContext()
   async syncPandascoreAdditions(): Promise<void> {
     await this.syncPandascoreAdditionsUseCase.execute();
+  }
+
+  @CreateRequestContext()
+  async syncNewTournamentsFromPandascore(): Promise<SyncNewTournamentsResult> {
+    return this.syncNewTournamentsUseCase.execute();
   }
 
   async getTournamentsByPlayer(playerId: string): Promise<Tournament[]> {

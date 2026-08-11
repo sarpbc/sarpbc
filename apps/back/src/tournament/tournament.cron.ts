@@ -3,7 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { createLogger } from "evlog";
-import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import { SyncNewTournamentsUseCase } from "./sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "./match/match.service";
 
@@ -11,7 +11,7 @@ import { MatchService } from "./match/match.service";
 export class TournamentCron {
   constructor(
     private readonly orm: MikroORM,
-    private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
+    private readonly syncNewTournamentsUseCase: SyncNewTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
     private readonly matchService: MatchService,
   ) {}
@@ -89,8 +89,8 @@ export class TournamentCron {
     });
 
     try {
-      await this.syncPandascoreAdditionsUseCase.execute();
-      log.set({ jobStatus: "completed" });
+      const result = await this.syncNewTournamentsUseCase.execute();
+      log.set({ jobStatus: "completed", sync: result });
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
     } finally {

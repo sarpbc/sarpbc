@@ -11,6 +11,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
@@ -92,8 +94,24 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync/additions")
   async syncPandascoreAdditions() {
-    await this.tournamentService.syncPandascoreAdditions();
-    return { success: true };
+    const sync = await this.tournamentService.syncNewTournamentsFromPandascore();
+    return { success: true, sync };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post("sync/pandascore/:pandascoreId")
+  async syncTournamentByPandascoreId(@Param("pandascoreId", ParseIntPipe) pandascoreId: number) {
+    if (pandascoreId <= 0) {
+      throw new BadRequestException("pandascoreId must be a positive integer");
+    }
+
+    const tournamentId = await this.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+    return {
+      success: true,
+      tournamentId,
+      pandascoreId,
+    };
   }
 
   @RequirePermissions("tournaments.manage")

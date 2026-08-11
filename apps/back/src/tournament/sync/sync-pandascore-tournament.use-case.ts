@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { createLogger } from "evlog";
 import {
   PANDASCORE_GATEWAY,
@@ -61,6 +61,23 @@ export class SyncPandascoreTournamentUseCase {
     } finally {
       log.emit();
     }
+  }
+
+  /**
+   * Import (or refresh) a tournament by its PandaScore ID when it is missing locally.
+   * Returns the local tournament UUID.
+   */
+  async executeByPandascoreId(pandascoreId: number): Promise<string> {
+    const pandaTournament = await this.pandascoreGateway.getTournamentById(pandascoreId);
+    if (!pandaTournament) {
+      throw new NotFoundException(`PandaScore tournament ${pandascoreId} not found`);
+    }
+
+    const tournament = await this.persistence.upsertTournament(
+      PandascoreTournamentMapper.toUpsertCommand(pandaTournament),
+    );
+    await this.execute(tournament.id);
+    return tournament.id;
   }
 
   private async syncTournamentDetails(

@@ -15,14 +15,14 @@ export class SyncAllTournamentsUseCase {
     private readonly persistence: TournamentSyncPersistence,
   ) {}
 
-  async execute(): Promise<void> {
+  async execute(): Promise<string[]> {
     const log = createLogger({ component: SyncAllTournamentsUseCase.name });
+    const newTournamentIds: string[] = [];
 
     try {
       const pandascoreTournaments = await this.pandascoreGateway.getTournaments();
       const existingPandascoreIds = await this.persistence.getKnownTournamentPandascoreIds();
 
-      let newTournamentsFound = 0;
       let participantsCreated = 0;
 
       for (const pandaTournament of pandascoreTournaments) {
@@ -30,9 +30,9 @@ export class SyncAllTournamentsUseCase {
           continue;
         }
 
-        newTournamentsFound += 1;
         const command = PandascoreTournamentMapper.toUpsertCommand(pandaTournament);
-        await this.persistence.upsertTournament(command);
+        const tournament = await this.persistence.upsertTournament(command);
+        newTournamentIds.push(tournament.id);
 
         if (command.expectedRoster) {
           participantsCreated += command.expectedRoster.length;
@@ -42,11 +42,13 @@ export class SyncAllTournamentsUseCase {
       log.set({
         sync: {
           fetched: pandascoreTournaments.length,
-          newTournaments: newTournamentsFound,
+          newTournaments: newTournamentIds.length,
           participants: participantsCreated,
-          skipped: pandascoreTournaments.length - newTournamentsFound,
+          skipped: pandascoreTournaments.length - newTournamentIds.length,
         },
       });
+
+      return newTournamentIds;
     } catch (error) {
       log.error(error instanceof Error ? error : String(error));
       throw error;

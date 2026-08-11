@@ -251,13 +251,13 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "trigger_tournament_sync",
     {
       description:
-        "Trigger a PandaScore sync. Requires tournaments.manage. Pass tournamentId to sync one event, or omit to sync new additions.",
+        "Trigger a PandaScore sync. Requires tournaments.manage. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then run additions.",
       inputSchema: {
         tournamentId: z
           .string()
           .min(1)
           .optional()
-          .describe("Tournament UUID to sync. Omit to run the global additions sync."),
+          .describe("Local tournament UUID to sync. Omit to run the global new-tournament sync."),
       },
     },
     async ({ tournamentId }) =>
@@ -274,11 +274,40 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           };
         }
 
-        await ctx.tournamentService.syncPandascoreAdditions();
+        const sync = await ctx.tournamentService.syncNewTournamentsFromPandascore();
         return {
           result: {
             success: true,
-            scope: "additions",
+            scope: "new_tournaments",
+            sync,
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "sync_pandascore_tournament",
+    {
+      description:
+        "Import or refresh a tournament by its PandaScore numeric ID (e.g. 21623 for EWC 2026 Group A). Requires tournaments.manage. Use when a tournament exists on PandaScore but is missing from sarpbc.",
+      inputSchema: {
+        pandascoreId: z
+          .number()
+          .int()
+          .positive()
+          .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
+      },
+    },
+    async ({ pandascoreId }) =>
+      runWriteTool(user, "sync_pandascore_tournament", "tournaments.manage", async () => {
+        const tournamentId = await ctx.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+        return {
+          entityId: tournamentId,
+          result: {
+            success: true,
+            tournamentId,
+            pandascoreId,
+            url: tournamentUrl(tournamentId),
           },
         };
       }),

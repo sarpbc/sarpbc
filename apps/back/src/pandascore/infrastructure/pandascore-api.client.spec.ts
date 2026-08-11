@@ -66,9 +66,43 @@ describe("PandascoreApiClient", () => {
     const firstCallUrl = String((global.fetch as jest.Mock).mock.calls[0][0]);
     expect(firstCallUrl).toContain("/additions");
     expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
-    expect(firstCallUrl).toContain("videogame%5B%5D=rl");
-    expect(firstCallUrl).toContain("type%5B%5D=match");
-    expect(firstCallUrl).toContain("type%5B%5D=tournament");
+    expect(firstCallUrl).toContain("videogame=rl");
+    expect(firstCallUrl).not.toContain("videogame%5B%5D=");
+    expect(firstCallUrl).toContain("type=match");
+    expect(firstCallUrl).toContain("type=tournament");
+    expect(firstCallUrl).not.toContain("type%5B%5D=");
+  });
+
+  it("getTournaments merges past, upcoming, and running", async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ id: 1, name: "Past" }],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ id: 2, name: "Upcoming" }],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          { id: 2, name: "Upcoming duplicate" },
+          { id: 3, name: "Running" },
+        ],
+      });
+
+    const tournaments = await client.getTournaments();
+
+    expect(tournaments).toEqual([
+      { id: 1, name: "Past" },
+      { id: 2, name: "Upcoming" },
+      { id: 3, name: "Running" },
+    ]);
+
+    const urls = (global.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+    expect(urls[0]).toContain("/rl/tournaments/past");
+    expect(urls[1]).toContain("/rl/tournaments/upcoming");
+    expect(urls[2]).toContain("/rl/tournaments/running");
   });
 
   it("getTournamentById returns null on 404", async () => {
