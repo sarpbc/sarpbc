@@ -55,7 +55,7 @@ function formatDayHeader(group: { date: Date | null }) {
 
     <template v-if="useDateGrouping">
       <div v-for="dayGroup in dateEventGroups" :key="dayGroup.dateKey" class="flex flex-col gap-px">
-        <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
+        <h3 class="flex h-row min-h-row items-end pl-1 text-sm font-medium text-toned">
           {{ formatDayHeader(dayGroup) }}
         </h3>
         <div
@@ -63,7 +63,7 @@ function formatDayHeader(group: { date: Date | null }) {
           :key="`${dayGroup.dateKey}-${group.key}`"
           class="flex flex-col gap-px"
         >
-          <h4 class="flex h-row min-h-row items-end pl-1 text-sm font-medium text-muted">
+          <h4 class="flex h-row min-h-row items-center pl-1 text-xs font-medium text-muted">
             <UiLink
               v-if="group.tournamentId"
               :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
@@ -99,7 +99,7 @@ function formatDayHeader(group: { date: Date | null }) {
 
     <template v-else>
       <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
-        <h3 class="flex h-row min-h-row items-end text-sm font-medium text-toned">
+        <h3 class="flex h-row min-h-row items-center text-sm font-medium text-toned">
           <UiLink
             v-if="group.tournamentId"
             :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"

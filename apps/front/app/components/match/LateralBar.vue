@@ -63,9 +63,9 @@ const upcomingTitle = computed(() => {
         </div>
       </UiCard>
     </UiRail>
-    <!-- Secondary section uses list-group header height (h-10.75) so gap matches main match list rhythm -->
+    <!-- Secondary section uses h-row so gap matches match-list rhythm -->
     <div v-if="results && results.results.length > 0" class="w-full flex flex-col">
-      <h2 class="flex h-10.75 items-end pl-2 text-sm font-medium text-toned">
+      <h2 class="flex h-row min-h-row items-end pl-2 text-sm font-medium text-toned">
         {{ $t("components.match.results") }}
       </h2>
       <UiCard flush-bottom>
