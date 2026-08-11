@@ -1,7 +1,13 @@
-import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { ReplyRepository } from "./reply.repository";
-import { Reply } from "../forum/forum.entities";
+import { ReplyReportRepository } from "./reply-report.repository";
+import { Reply, ReplyReport } from "../forum/forum.entities";
 import { CreateReplyDto } from "./dto/create-reply.dto";
 import { UserService } from "src/user/user.service";
 import { Post } from "src/forum/forum.entities";
@@ -10,46 +16,60 @@ import { Match } from "src/tournament/tournament.entities";
 import { FORUM_ERROR_CODES, REPLY_CREATION_COOLDOWN_MS } from "src/forum/forum.constants";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 import { ReplyResponseDto } from "./dto/reply-response.dto";
+import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dto";
+import { sortOrderForTarget } from "./reply-target.util";
+import type { ReplyReportReason } from "./reply-report-reason";
+import { NotificationService } from "src/notification/notification.service";
 
 @Injectable()
 export class ReplyService {
   constructor(
     private readonly replyRepository: ReplyRepository,
+    private readonly replyReportRepository: ReplyReportRepository,
     private readonly userService: UserService,
+    private readonly notificationService: NotificationService,
     private readonly em: EntityManager,
   ) {}
 
-  async findByPostId(postId: string): Promise<Reply[]> {
-    return this.replyRepository.findByPostId(postId);
+  async findByTargetPaginated(
+    targetType: ReplyTargetType,
+    targetId: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedRepliesResponseDto> {
+    const order = sortOrderForTarget(targetType);
+    const offset = page * limit;
+
+    const [total, roots] = await Promise.all([
+      this.replyRepository.countRootsByTarget(targetType, targetId),
+      this.replyRepository.findByTarget(targetType, targetId, {
+        order,
+        limit,
+        offset,
+        rootsOnly: true,
+      }),
+    ]);
+
+    const rootIds = roots.map((reply) => reply.id);
+    const descendants = await this.replyRepository.findDescendantsForRoots(
+      targetType,
+      targetId,
+      rootIds,
+    );
+
+    return {
+      replies: this.toThreadedDtos([...roots, ...descendants]),
+      total,
+      page,
+      limit,
+    };
   }
 
-  async findByNewsArticleId(newsArticleId: string): Promise<Reply[]> {
-    return this.replyRepository.findByNewsArticleId(newsArticleId);
-  }
-
-  async findByMatchId(matchId: string): Promise<Reply[]> {
-    return this.replyRepository.findByMatchId(matchId);
-  }
-
-  async findByTarget(targetType: ReplyTargetType, targetId: string): Promise<ReplyResponseDto[]> {
-    let replies: Reply[];
-    switch (targetType) {
-      case "forumPost":
-        replies = await this.replyRepository.findByPostId(targetId);
-        break;
-      case "newsArticle":
-        replies = await this.replyRepository.findByNewsArticleId(targetId);
-        break;
-      case "match":
-        replies = await this.replyRepository.findByMatchId(targetId);
-        break;
-      default: {
-        const _exhaustive: never = targetType;
-        throw new BadRequestException(`Unsupported target type: ${_exhaustive}`);
-      }
-    }
-
-    return this.toThreadedDtos(replies);
+  async countByTargetIds(
+    targetType: ReplyTargetType,
+    targetIds: string[],
+  ): Promise<Map<string, number>> {
+    return this.replyRepository.countByTargetIds(targetType, targetIds);
   }
 
   async create(userId: string, createReplyDto: CreateReplyDto): Promise<ReplyResponseDto> {
@@ -124,6 +144,10 @@ export class ReplyService {
 
     await this.replyRepository.save(newReply);
 
+    if (replyTo && replyTo.author.id !== userId) {
+      await this.notificationService.createForDirectReply(replyTo.author, newReply);
+    }
+
     return this.toDto(newReply, []);
   }
 
@@ -148,8 +172,51 @@ export class ReplyService {
     await this.deleteWithChildren(id);
   }
 
+  async report(
+    userId: string,
+    replyId: string,
+    reason: ReplyReportReason,
+  ): Promise<{ id: string; reason: ReplyReportReason; createdAt: Date }> {
+    const reply = await this.replyRepository.findById(replyId);
+    if (!reply || reply.hiddenAt) {
+      throw new NotFoundException("Comment not found. It may already be removed.");
+    }
+
+    if (reply.author.id === userId) {
+      throw new BadRequestException("You cannot report your own comment.");
+    }
+
+    const existing = await this.replyReportRepository.findByReplyAndReporter(replyId, userId);
+    if (existing) {
+      throw new ConflictException({
+        message: "You already reported this comment.",
+        code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
+      });
+    }
+
+    const reporter = await this.userService.findById(userId);
+    if (!reporter) {
+      throw new NotFoundException("User not found. Sign in again and try reporting.");
+    }
+
+    const report = new ReplyReport();
+    report.reply = reply;
+    report.reporter = reporter;
+    report.reason = reason;
+
+    await this.replyReportRepository.save(report);
+
+    return {
+      id: report.id,
+      reason: report.reason,
+      createdAt: report.createdAt,
+    };
+  }
+
   async deleteAllForPost(postId: string): Promise<void> {
-    const replies = await this.replyRepository.findByPostId(postId, true);
+    const replies = await this.replyRepository.findByTarget("forumPost", postId, {
+      includeHidden: true,
+    });
     const rootReplies = replies.filter((reply) => !reply.replyTo);
 
     for (const reply of rootReplies) {

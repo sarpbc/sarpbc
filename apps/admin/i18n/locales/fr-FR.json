@@ -34,6 +34,7 @@
       "tournaments": "Tournois",
       "pickems": "Pick'ems",
       "forum": "Forum",
+      "moderation": "Modération",
       "tokens": "Jetons API",
       "backToSite": "Retour sur sarpbc.org"
     },
@@ -110,6 +111,32 @@
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
       }
     },
+    "moderation": {
+      "title": "Modération des commentaires",
+      "subtitle": "Commentaires récents sur les matchs, articles et messages du forum. Les commentaires signalés apparaissent en premier.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les commentaires à modérer.",
+      "retry": "Réessayer",
+      "empty": "Aucun commentaire à examiner.",
+      "hide": "Masquer",
+      "delete": "Supprimer le commentaire",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+      "deleteConfirmButton": "Supprimer",
+      "openInAdmin": "Ouvrir dans l'admin",
+      "reportedBadge": "{count} signalement | {count} signalements",
+      "hiddenBadge": "Masqué",
+      "targetTypes": {
+        "forumPost": "Message du forum",
+        "newsArticle": "Article",
+        "match": "Match"
+      },
+      "messages": {
+        "hidden": "Commentaire masqué",
+        "deleted": "Commentaire supprimé",
+        "errorTitle": "Impossible de modérer le commentaire",
+        "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      }
+    },
     "tournaments": {
       "title": "Tournois",
       "loading": "Chargement…",
@@ -120,11 +147,68 @@
       "matchesCount": "{count} matchs",
       "noMatches": "Aucun match trouvé pour ce tournoi.",
       "noTournaments": "Aucun tournoi trouvé.",
+      "source": {
+        "manual": "Manuel",
+        "pandascore": "PandaScore"
+      },
+      "create": {
+        "action": "Créer un Tournoi",
+        "title": "Créer un Tournoi",
+        "subtitle": "Ajoutez un tournoi géré sur SARPBC plutôt que synchronisé depuis PandaScore.",
+        "saved": "Tournoi créé"
+      },
+      "edit": {
+        "action": "Modifier le Tournoi",
+        "title": "Modifier le Tournoi",
+        "subtitleManual": "Mettez à jour les détails du tournoi et les équipes participantes.",
+        "subtitlePandascore": "Ce tournoi est synchronisé depuis PandaScore et ne peut pas être modifié ici.",
+        "saved": "Tournoi enregistré"
+      },
+      "form": {
+        "name": "Nom",
+        "slug": "Slug d’URL",
+        "slugHint": "Utilisé sur la page publique du tournoi. Laissez vide pour le générer depuis le nom.",
+        "slugPlaceholder": "community-cup-2026",
+        "tier": "Niveau",
+        "tierPlaceholder": "S-Tier",
+        "league": "Ligue",
+        "leaguePlaceholder": "Sélectionner une ligue",
+        "beginAt": "Date de Début",
+        "endAt": "Date de Fin",
+        "imageUrl": "URL de l’Image de Couverture",
+        "imageUrlPlaceholder": "https://…",
+        "teams": "Équipes Participantes",
+        "teamsSearch": "Rechercher des équipes…",
+        "teamsLoading": "Chargement des équipes…",
+        "teamsEmpty": "Aucune équipe ne correspond à votre recherche.",
+        "save": "Enregistrer le Tournoi",
+        "saveFailed": "Impossible d’enregistrer le tournoi. Vérifiez les champs et réessayez.",
+        "errors": {
+          "nameRequired": "Saisissez un nom de tournoi avant d’enregistrer.",
+          "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début."
+        }
+      },
       "match": {
         "status": "Statut",
         "score": "Score",
         "setWinner": "Définir le Vainqueur",
         "syncScores": "Actualiser les Scores"
+      },
+      "awards": {
+        "title": "Récompenses Joueur",
+        "hint": "Attribuez un MVP et un MVP Défensif pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
+        "awardType": "Type de Récompense",
+        "assignAction": "Attribuer la Récompense",
+        "selectPlayer": "Sélectionner un joueur du roster",
+        "remove": "Supprimer la Récompense",
+        "assigned": "{name} est maintenant {type}",
+        "removed": "Récompense {type} supprimée",
+        "noRoster": "Aucun joueur au roster. Synchronisez le tournoi pour charger les rosters d'équipe.",
+        "allAssigned": "Tous les types de récompense sont attribués pour ce tournoi.",
+        "types": {
+          "mvp": "MVP",
+          "defensive_mvp": "MVP Défensif"
+        }
       }
     },
     "pickems": {
@@ -187,6 +271,14 @@
       "editor": {
         "insertPlayer": "Tag Joueur",
         "insertTeam": "Tag Équipe",
+        "insertTable": "Tableau",
+        "tableAddRowBefore": "Ajouter une Ligne Avant",
+        "tableAddRowAfter": "Ajouter une Ligne Après",
+        "tableDeleteRow": "Supprimer la Ligne",
+        "tableAddColumnBefore": "Ajouter une Colonne Avant",
+        "tableAddColumnAfter": "Ajouter une Colonne Après",
+        "tableDeleteColumn": "Supprimer la Colonne",
+        "tableDeleteTable": "Supprimer le Tableau",
         "picker": {
           "titlePlayer": "Insérer un Tag Joueur",
           "titleTeam": "Insérer un Tag Équipe",

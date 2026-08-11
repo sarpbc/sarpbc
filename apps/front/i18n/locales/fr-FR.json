@@ -83,7 +83,8 @@
       "signin": "Se connecter",
       "home": "Accueil — Actualités",
       "openMenu": "Ouvrir le menu",
-      "closeMenu": "Fermer le menu"
+      "closeMenu": "Fermer le menu",
+      "unreadNotifications": "{count} notification non lue | {count} notifications non lues"
     },
     "input": {
       "search": "Rechercher...",
@@ -121,6 +122,11 @@
     "discussion": {
       "heading": "Discussion",
       "subtitle": "Partagez votre avis avec la communauté.",
+      "commentCountAria": "{count} commentaires",
+      "loadMore": "Charger plus de commentaires",
+      "loadingMore": "Chargement…",
+      "permalink": "Lien vers le commentaire",
+      "moreActions": "Plus d'actions",
       "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer",
@@ -144,6 +150,26 @@
         "rateLimitDescription": "Vous ne pouvez publier qu'un commentaire par minute. Attendez et réessayez.",
         "signInRequired": "Connectez-vous pour commenter.",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
+      },
+      "report": {
+        "action": "Signaler",
+        "title": "Signaler le commentaire",
+        "description": "Dites-nous pourquoi ce commentaire doit être examiné. Les signalements sont anonymes pour les autres utilisateurs.",
+        "reasonLegend": "Motif du signalement",
+        "submit": "Envoyer le signalement",
+        "reasons": {
+          "spam": "Spam ou publicité",
+          "harassment": "Harcèlement ou intimidation",
+          "hate_speech": "Discours haineux",
+          "off_topic": "Hors sujet",
+          "other": "Autre"
+        },
+        "messages": {
+          "submitted": "Signalement envoyé",
+          "alreadyReported": "Vous avez déjà signalé ce commentaire",
+          "signInRequired": "Connectez-vous pour signaler des commentaires",
+          "error": "Impossible d'envoyer le signalement. Réessayez."
+        }
       }
     },
     "tournaments": {
@@ -196,6 +222,16 @@
     }
   },
   "page": {
+    "hub": {
+      "headers": {
+        "matchesLive": "{count} en direct",
+        "tournamentsNext": "Prochain : {name}",
+        "forumPosts": "{count} publications",
+        "pickemsOpen": "{count} pick'ems ouverts",
+        "playersTotal": "{count} joueurs",
+        "teamsTotal": "{count} équipes"
+      }
+    },
     "home": {
       "seo": {
         "title": "Actus & matchs Rocket League | sarpbc.org",
@@ -1081,6 +1117,16 @@
           "retry": "Réessayer",
           "wonOn": "Remporté le {date}"
         },
+        "awards": {
+          "title": "Récompenses",
+          "error": "Impossible de charger les récompenses de ce joueur. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "awardedOn": "Attribué le {date}",
+          "types": {
+            "mvp": "MVP",
+            "defensive_mvp": "MVP Défensif"
+          }
+        },
         "matches": {
           "sectionTitle": "Matchs",
           "live": "En direct",
@@ -1230,7 +1276,7 @@
           "title": "Équipes participantes",
           "empty": "Équipes pas encore annoncées.",
           "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé.",
-          "openRoster": "Ouvrir le roster de {team}",
+          "openRoster": "Afficher le roster de {team}",
           "viewTeam": "Voir {team}",
           "rosterEmpty": "Roster pas encore disponible."
         },
@@ -1390,8 +1436,16 @@
     },
     "profile": {
       "title": "Profil",
+      "description": "Gérez votre profil et vos paramètres sur sarpbc.org.",
       "logout": "Se déconnecter",
-      "openAdmin": "Console Staff"
+      "openAdmin": "Console Staff",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "Aucune notification pour le moment. Quand quelqu'un répond à votre commentaire, cela apparaîtra ici.",
+        "markAllRead": "Tout marquer comme lu",
+        "viewThread": "Voir le fil",
+        "replied": "{user} a répondu sur {target}"
+      }
     },
     "authentication": {
       "login": "Connexion",

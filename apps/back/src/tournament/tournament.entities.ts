@@ -6,6 +6,7 @@ import { LeagueRepository } from "./league/league.repository";
 import { MatchRepository } from "./match/match.repository";
 import { TournamentParticipantRepository } from "./tournament-participant.repository";
 import { TournamentRepository } from "./tournament.repository";
+import type { TournamentSource } from "./domain/tournament-source";
 
 export class League {
   id: string = v4();
@@ -23,6 +24,7 @@ export class League {
 export class Tournament {
   id: string = v4();
   pandascoreId: number | null = null;
+  source: TournamentSource = "pandascore";
   name!: string;
   description: string | null = null;
   slug: string | null = null;
@@ -111,6 +113,7 @@ export const TournamentSchema = defineEntity({
   properties: {
     id: p.string().primary(),
     pandascoreId: p.integer().nullable().unique(),
+    source: p.string().$type<TournamentSource>().default("pandascore"),
     name: p.string(),
     description: p.string().nullable(),
     slug: p.string().nullable(),

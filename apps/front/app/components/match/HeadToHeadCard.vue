@@ -63,12 +63,9 @@ function winnerLabel(winnerTeamId: string | null) {
         class="flex items-center justify-between gap-3 rounded-md bg-elevated/50 px-2.5 py-2 text-sm"
       >
         <div class="flex min-w-0 flex-col gap-0.5">
-          <ULink
-            :to="$localePath(`/matches/${meeting.id}`)"
-            class="truncate font-medium text-highlighted rounded-sm transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
+          <UiLink :to="$localePath(`/matches/${meeting.id}`)" variant="inline" class="truncate">
             {{ meeting.tournamentLabel }}
-          </ULink>
+          </UiLink>
           <span class="truncate text-xs text-muted tabular-nums">
             {{ meetingDate(meeting) }}
           </span>

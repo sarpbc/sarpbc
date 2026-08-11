@@ -180,3 +180,4 @@ When building or reviewing UI under this skill:
 - Source essay: [Building an LLM safe design system (Polar)](https://polar.sh/blog/orbit-llm-safe-design-system)
 - Enforcement patterns: [references/enforcement.md](references/enforcement.md)
 - sarpbc visual rules: `geist-design`
+- sarpbc hub row-height CI guardrail: [apps/front/DESIGN.md](../../../apps/front/DESIGN.md) + `apps/front/scripts/lint-hub-row-heights.mjs`

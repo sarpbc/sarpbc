@@ -2,6 +2,7 @@
 const config = useRuntimeConfig();
 const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 interface RegisterState {
   userName: string;
@@ -121,6 +122,7 @@ function googleLogin() {
             type="submit"
             color="neutral"
             class="w-full flex flex-col items-center cursor-pointer"
+            v-bind="cuelumeAttrs.pressRelease"
           />
         </UForm>
       </div>

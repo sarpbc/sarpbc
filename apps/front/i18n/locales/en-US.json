@@ -83,7 +83,8 @@
       "signin": "Sign In",
       "home": "Home — News",
       "openMenu": "Open menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "unreadNotifications": "{count} unread notification | {count} unread notifications"
     },
     "input": {
       "search": "Search...",
@@ -121,6 +122,11 @@
     "discussion": {
       "heading": "Discussion",
       "subtitle": "Share your take with the community.",
+      "commentCountAria": "{count} comments",
+      "loadMore": "Load More Comments",
+      "loadingMore": "Loading…",
+      "permalink": "Link to Comment",
+      "moreActions": "More Actions",
       "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
       "retry": "Try Again",
@@ -144,6 +150,26 @@
         "rateLimitDescription": "You can only post one comment per minute. Wait and try again.",
         "signInRequired": "Sign in to comment.",
         "moderateError": "Could not moderate this comment. Try again."
+      },
+      "report": {
+        "action": "Report",
+        "title": "Report Comment",
+        "description": "Tell us why this comment should be reviewed. Reports are anonymous to other users.",
+        "reasonLegend": "Report reason",
+        "submit": "Submit Report",
+        "reasons": {
+          "spam": "Spam or advertising",
+          "harassment": "Harassment or bullying",
+          "hate_speech": "Hate speech",
+          "off_topic": "Off topic",
+          "other": "Other"
+        },
+        "messages": {
+          "submitted": "Report submitted",
+          "alreadyReported": "You already reported this comment",
+          "signInRequired": "Sign in to report comments",
+          "error": "Could not submit report. Try again."
+        }
       }
     },
     "tournaments": {
@@ -196,6 +222,16 @@
     }
   },
   "page": {
+    "hub": {
+      "headers": {
+        "matchesLive": "{count} live now",
+        "tournamentsNext": "Next: {name}",
+        "forumPosts": "{count} posts",
+        "pickemsOpen": "{count} open pick'ems",
+        "playersTotal": "{count} players",
+        "teamsTotal": "{count} teams"
+      }
+    },
     "home": {
       "seo": {
         "title": "Rocket League news & matches | sarpbc.org",
@@ -1081,6 +1117,16 @@
           "retry": "Try Again",
           "wonOn": "Won {date}"
         },
+        "awards": {
+          "title": "Awards",
+          "error": "Could not load this player's awards. Check your connection and try again.",
+          "retry": "Try Again",
+          "awardedOn": "Awarded {date}",
+          "types": {
+            "mvp": "MVP",
+            "defensive_mvp": "Defensive MVP"
+          }
+        },
         "matches": {
           "sectionTitle": "Matches",
           "live": "Live Now",
@@ -1230,7 +1276,7 @@
           "title": "Participating Teams",
           "empty": "Teams not announced yet.",
           "emptyHint": "Check back when the tournament roster is confirmed.",
-          "openRoster": "Open {team} roster",
+          "openRoster": "Show {team} roster",
           "viewTeam": "View {team}",
           "rosterEmpty": "Roster not available yet."
         },
@@ -1390,8 +1436,16 @@
     },
     "profile": {
       "title": "Profile",
+      "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
-      "openAdmin": "Staff Console"
+      "openAdmin": "Staff Console",
+      "notifications": {
+        "title": "Notifications",
+        "empty": "No notifications yet. When someone replies to your comment, it will show up here.",
+        "markAllRead": "Mark All Read",
+        "viewThread": "View Thread",
+        "replied": "{user} replied on {target}"
+      }
     },
     "authentication": {
       "login": "Login",

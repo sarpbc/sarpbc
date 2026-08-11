@@ -6,6 +6,7 @@ import {
 } from "src/pandascore/application/ports/pandascore.gateway.port";
 import { PandascoreMatchMapper } from "src/pandascore/application/mappers/pandascore-match.mapper";
 import { PandascoreTournamentMapper } from "src/pandascore/application/mappers/pandascore-tournament.mapper";
+import { assertPandascoreSyncAllowed } from "../domain/tournament-source";
 import { TournamentSyncPersistence } from "./tournament-sync.persistence";
 
 @Injectable()
@@ -27,6 +28,8 @@ export class SyncPandascoreTournamentUseCase {
       if (!tournament) {
         throw new Error("Tournament not found");
       }
+
+      assertPandascoreSyncAllowed(tournament.source);
 
       const pandascoreId = tournament.pandascoreId;
       if (!pandascoreId) {

@@ -10,6 +10,7 @@ export interface PostShort {
   title: string;
   author: string;
   createdAt: Date;
+  commentCount?: number;
   topic?: {
     id: string;
     title: string;
@@ -51,13 +52,5 @@ export type CreateForumPostResult =
   | {
       ok: false;
       reason: "unauthorized" | "rate_limited" | "conflict" | "unknown";
-      message?: string;
-    };
-
-export type CreateForumReplyResult =
-  | { ok: true }
-  | {
-      ok: false;
-      reason: "unauthorized" | "rate_limited" | "unknown";
       message?: string;
     };

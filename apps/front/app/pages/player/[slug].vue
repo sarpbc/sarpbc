@@ -29,6 +29,18 @@ const {
 } = usePlayerTrophies(playerId);
 
 const {
+  awards,
+  hasAwards,
+  pending: awardsPending,
+  error: awardsError,
+  refresh: refreshAwards,
+} = usePlayerAwards(playerId);
+
+const showAwardsSection = computed(
+  () => awardsPending.value || Boolean(awardsError.value) || hasAwards.value,
+);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -64,7 +76,7 @@ setPageSeo({
   <div class="w-full max-w-5xl flex min-w-0 flex-col items-center gap-4 lg:gap-8">
     <section class="w-full min-w-0 flex flex-col gap-6">
       <div class="w-full min-w-0 flex flex-col gap-4">
-        <div class="w-full min-w-0 flex flex-col items-start md:h-18">
+        <div class="w-full min-w-0 flex flex-col items-start md:h-rail-caption">
           <h1 class="text-xl font-semibold tracking-tight text-balance">
             {{ currentPlayer.name }}
           </h1>
@@ -111,10 +123,11 @@ setPageSeo({
             <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
               <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
               <dd class="min-w-0 flex justify-end">
-                <ULink
+                <UiLink
                   v-if="currentPlayer.team"
                   :to="$localePath(`/team/${currentPlayer.team.slug}`)"
-                  class="inline-flex items-center gap-2 min-w-0 font-medium hover:underline"
+                  variant="inline"
+                  class="inline-flex items-center gap-2 min-w-0"
                 >
                   <TeamImg
                     :team-name="currentPlayer.team.name"
@@ -122,7 +135,7 @@ setPageSeo({
                     size="xs"
                   />
                   <span class="truncate">{{ currentPlayer.team.name }}</span>
-                </ULink>
+                </UiLink>
                 <span v-else class="text-sm text-muted">
                   {{ t("page.player.slug.freeAgent") }}
                 </span>
@@ -137,6 +150,14 @@ setPageSeo({
         :pending="trophiesPending"
         :has-error="Boolean(trophiesError)"
         @retry="refreshTrophies()"
+      />
+
+      <PlayerAwardsSection
+        v-if="showAwardsSection"
+        :awards="awards"
+        :pending="awardsPending"
+        :has-error="Boolean(awardsError)"
+        @retry="refreshAwards()"
       />
 
       <PlayerMatchesSection

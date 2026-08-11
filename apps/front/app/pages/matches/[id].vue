@@ -264,25 +264,27 @@ function tournamentMatchesPath(tournamentId: string) {
     <template v-else-if="match">
       <UiCrossCard class="min-h-row-header">
         <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
-          <ULink
+          <UiLink
             v-if="match.tournament"
             :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-            class="text-sm text-muted rounded-sm transition-colors hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            variant="muted"
+            class="text-sm"
           >
             {{ tournamentLabel(match) }}
-          </ULink>
+          </UiLink>
 
           <div
             class="w-full max-w-3xl grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 text-xl md:text-2xl font-bold tracking-tight"
           >
             <div class="min-w-0 justify-self-end text-end">
-              <ULink
+              <UiLink
                 v-if="teamA?.team.slug"
                 :to="$localePath(`/team/${teamA.team.slug}`)"
-                class="inline-block max-w-full truncate rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+                variant="inline"
+                class="inline-block max-w-full truncate active:scale-[0.96]"
               >
                 {{ participantName(teamA) }}
-              </ULink>
+              </UiLink>
               <span v-else class="block truncate">{{ participantName(teamA) }}</span>
             </div>
 
@@ -305,13 +307,14 @@ function tournamentMatchesPath(tournamentId: string) {
             </div>
 
             <div class="min-w-0 justify-self-start text-start">
-              <ULink
+              <UiLink
                 v-if="teamB?.team.slug"
                 :to="$localePath(`/team/${teamB.team.slug}`)"
-                class="inline-block max-w-full truncate rounded-sm transition-[color,transform] hover:text-highlighted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+                variant="inline"
+                class="inline-block max-w-full truncate active:scale-[0.96]"
               >
                 {{ participantName(teamB) }}
-              </ULink>
+              </UiLink>
               <span v-else class="block truncate">{{ participantName(teamB) }}</span>
             </div>
           </div>
@@ -347,7 +350,7 @@ function tournamentMatchesPath(tournamentId: string) {
               <ULink
                 v-if="participant.team.slug"
                 :to="$localePath(`/team/${participant.team.slug}`)"
-                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-[opacity,transform] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
               >
                 <TeamImg
                   :team-name="participant.team.name"

@@ -3,9 +3,12 @@ import type { Match } from "./matches";
 import type { Player } from "./player";
 import type { Team } from "./team";
 
+export type TournamentSource = "pandascore" | "manual";
+
 export interface Tournament {
   id: string;
   pandascoreId?: number;
+  source: TournamentSource;
   name: string;
   description?: string;
   slug?: string;

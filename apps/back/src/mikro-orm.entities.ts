@@ -17,6 +17,7 @@ import {
   PostSchema,
   PostTranslationSchema,
   ReplySchema,
+  ReplyReportSchema,
 } from "./forum/forum.entities";
 import { ImageSchema } from "./images/domain/image.entity";
 import { NewsArticleSchema } from "./news/domain/news-article.entity";
@@ -34,6 +35,8 @@ import {
   BracketLinkSchema,
   MatchResultSchema,
 } from "./tournament/tournament.entities";
+import { PlayerAwardSchema } from "./tournament/player-award.entities";
+import { ReplyNotificationSchema } from "./notification/reply-notification.entity";
 import { PersonalAccessTokenSchema } from "./pat/domain/personal-access-token.entity";
 import { UserSchema } from "./user/domain/user.entity";
 
@@ -50,10 +53,13 @@ export const mikroOrmEntities = [
   MatchSchema,
   BracketLinkSchema,
   MatchResultSchema,
+  PlayerAwardSchema,
   TopicSchema,
   PostSchema,
   PostTranslationSchema,
   ReplySchema,
+  ReplyReportSchema,
+  ReplyNotificationSchema,
   NewsArticleSchema,
   PickemChoiceSchema,
   AirRiddleSchema,

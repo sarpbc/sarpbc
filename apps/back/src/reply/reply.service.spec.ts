@@ -1,28 +1,39 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { QueryOrder } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { ReplyService } from "./reply.service";
+import { ReplyReportRepository } from "./reply-report.repository";
 import { ReplyRepository } from "./reply.repository";
+import { ReplyService } from "./reply.service";
 import { UserService } from "src/user/user.service";
 import { FORUM_ERROR_CODES } from "src/forum/forum.constants";
 import { Reply } from "src/forum/forum.entities";
 import { User } from "src/user/domain/user.entity";
+import { NotificationService } from "src/notification/notification.service";
 import { Match } from "src/tournament/tournament.entities";
 
 describe("ReplyService", () => {
   let service: ReplyService;
   const replyRepository = {
-    findByPostId: jest.fn(),
-    findByNewsArticleId: jest.fn(),
-    findByMatchId: jest.fn(),
+    findByTarget: jest.fn(),
     findById: jest.fn(),
     findLatestByUser: jest.fn(),
+    countRootsByTarget: jest.fn(),
+    countByTargetIds: jest.fn(),
+    findDescendantsForRoots: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
     findChildren: jest.fn(),
   };
+  const replyReportRepository = {
+    findByReplyAndReporter: jest.fn(),
+    save: jest.fn(),
+  };
   const userService = {
     findById: jest.fn(),
+  };
+  const notificationService = {
+    createForDirectReply: jest.fn(),
   };
   const em = {
     findOne: jest.fn(),
@@ -33,6 +44,8 @@ describe("ReplyService", () => {
       providers: [
         ReplyService,
         { provide: ReplyRepository, useValue: replyRepository },
+        { provide: ReplyReportRepository, useValue: replyReportRepository },
+        { provide: NotificationService, useValue: notificationService },
         { provide: UserService, useValue: userService },
         { provide: EntityManager, useValue: em },
       ],
@@ -140,8 +153,8 @@ describe("ReplyService", () => {
     });
   });
 
-  describe("findByTarget", () => {
-    it("threads nested replies for a match", async () => {
+  describe("findByTargetPaginated", () => {
+    it("paginates root replies and threads descendants for a match", async () => {
       const root = makeReply({
         id: "root",
         match: { id: "m1" } as Match,
@@ -151,14 +164,59 @@ describe("ReplyService", () => {
         match: { id: "m1" } as Match,
         replyTo: root,
       });
-      replyRepository.findByMatchId.mockResolvedValue([root, child]);
+      replyRepository.countRootsByTarget.mockResolvedValue(1);
+      replyRepository.findByTarget.mockResolvedValue([root]);
+      replyRepository.findDescendantsForRoots.mockResolvedValue([child]);
 
-      const result = await service.findByTarget("match", "m1");
+      const result = await service.findByTargetPaginated("match", "m1", 0, 25);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("root");
-      expect(result[0].replies).toHaveLength(1);
-      expect(result[0].replies[0].id).toBe("child");
+      expect(result.total).toBe(1);
+      expect(result.replies).toHaveLength(1);
+      expect(result.replies[0].id).toBe("root");
+      expect(result.replies[0].replies).toHaveLength(1);
+      expect(result.replies[0].replies[0].id).toBe("child");
+      expect(replyRepository.findByTarget).toHaveBeenCalledWith("match", "m1", {
+        order: QueryOrder.DESC,
+        limit: 25,
+        offset: 0,
+        rootsOnly: true,
+      });
+      expect(replyRepository.findDescendantsForRoots).toHaveBeenCalledWith("match", "m1", ["root"]);
+    });
+
+    it("uses oldest-first ordering for forum posts", async () => {
+      replyRepository.countRootsByTarget.mockResolvedValue(2);
+      replyRepository.findByTarget.mockResolvedValue([
+        makeReply({ id: "a", post: { id: "p1" } as never }),
+      ]);
+      replyRepository.findDescendantsForRoots.mockResolvedValue([]);
+
+      await service.findByTargetPaginated("forumPost", "p1", 0, 2);
+
+      expect(replyRepository.findByTarget).toHaveBeenCalledWith("forumPost", "p1", {
+        order: QueryOrder.ASC,
+        limit: 2,
+        offset: 0,
+        rootsOnly: true,
+      });
+    });
+
+    it("uses countRootsByTarget for total and does not load all replies", async () => {
+      replyRepository.countRootsByTarget.mockResolvedValue(40);
+      replyRepository.findByTarget.mockResolvedValue([]);
+      replyRepository.findDescendantsForRoots.mockResolvedValue([]);
+
+      const result = await service.findByTargetPaginated("newsArticle", "n1", 1, 10);
+
+      expect(result.total).toBe(40);
+      expect(replyRepository.countRootsByTarget).toHaveBeenCalledWith("newsArticle", "n1");
+      expect(replyRepository.findByTarget).toHaveBeenCalledWith("newsArticle", "n1", {
+        order: QueryOrder.DESC,
+        limit: 10,
+        offset: 10,
+        rootsOnly: true,
+      });
+      expect(replyRepository.findDescendantsForRoots).toHaveBeenCalledWith("newsArticle", "n1", []);
     });
   });
 
@@ -172,6 +230,21 @@ describe("ReplyService", () => {
 
       expect(reply.hiddenAt).toBeInstanceOf(Date);
       expect(replyRepository.save).toHaveBeenCalledWith(reply);
+    });
+  });
+
+  describe("report", () => {
+    it("persists a report via the repository save method", async () => {
+      const reply = makeReply({ id: "r1", author: makeUser("author-1") });
+      replyRepository.findById.mockResolvedValue(reply);
+      replyReportRepository.findByReplyAndReporter.mockResolvedValue(null);
+      userService.findById.mockResolvedValue(makeUser("reporter-1"));
+      replyReportRepository.save.mockResolvedValue(undefined);
+
+      const result = await service.report("r1", "reporter-1", "spam");
+
+      expect(replyReportRepository.save).toHaveBeenCalled();
+      expect(result.reason).toBe("spam");
     });
   });
 });

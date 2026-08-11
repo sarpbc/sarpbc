@@ -9,6 +9,7 @@ const toast = useToast();
 const tournamentId = computed(() => route.params.id as string);
 const isSyncing = ref(false);
 const settingWinnerMatchId = ref<string | null>(null);
+const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 
 const { data: tournament, refresh: refreshTournament } = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}`,
@@ -61,7 +62,11 @@ async function handleRefresh() {
     const success = await syncTournament(tournamentId.value);
     if (success) {
       toast.add({ title: t("page.tournaments.syncTournament"), color: "success" });
-      await Promise.all([refreshTournament(), refreshMatches()]);
+      await Promise.all([
+        refreshTournament(),
+        refreshMatches(),
+        awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
+      ]);
     }
   } finally {
     isSyncing.value = false;
@@ -88,12 +93,22 @@ async function handleSetWinner(match: Match, participantId: string) {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        :loading="isSyncing"
-        icon="i-fluent-arrow-sync-24-regular"
-        :label="$t('page.tournaments.match.syncScores')"
-        @click="handleRefresh"
-      />
+      <div class="flex flex-row gap-2">
+        <UButton
+          v-if="tournament?.source === 'manual'"
+          variant="soft"
+          icon="i-fluent-edit-24-regular"
+          :label="$t('page.tournaments.edit.action')"
+          :to="localePath(`/tournaments/${tournamentId}/edit`)"
+        />
+        <UButton
+          v-if="tournament?.source !== 'manual'"
+          :loading="isSyncing"
+          icon="i-fluent-arrow-sync-24-regular"
+          :label="$t('page.tournaments.match.syncScores')"
+          @click="handleRefresh"
+        />
+      </div>
     </template>
 
     <DashboardContent>
@@ -104,6 +119,13 @@ async function handleSetWinner(match: Match, participantId: string) {
             {{ new Date(tournament.beginAt).toLocaleDateString() }}
           </p>
         </div>
+
+        <TournamentAwardsPanel
+          v-if="tournament"
+          ref="awardsPanel"
+          :tournament-id="tournamentId"
+          :participants="tournament.participants ?? []"
+        />
 
         <p class="text-sm text-muted">
           {{

@@ -1,4 +1,11 @@
-import type { Comment, CommentTargetType, CreateCommentResult } from "~/types/discussion";
+import type {
+  Comment,
+  CommentTargetType,
+  CreateCommentResult,
+  PaginatedComments,
+  ReplyReportReason,
+  ReportCommentResult,
+} from "~/types/discussion";
 import { apiFetch } from "~/utils/apiFetch";
 import {
   FORUM_ERROR_CODES,
@@ -7,20 +14,32 @@ import {
   getApiErrorStatus,
 } from "~/utils/apiError";
 
+const MAX_REFETCH_LIMIT = 100;
+
 export async function getCommentsByTarget(
   targetType: CommentTargetType,
   targetId: string,
-): Promise<Comment[]> {
+  page = 0,
+  limit?: number,
+): Promise<PaginatedComments> {
   try {
-    const res = await apiFetch<{ replies: Comment[] }>("/replies", {
+    return await apiFetch<PaginatedComments>("/replies", {
       method: "GET",
-      query: { targetType, targetId },
+      query: {
+        targetType,
+        targetId,
+        page,
+        ...(limit !== undefined ? { limit } : {}),
+      },
     });
-    return res.replies ?? [];
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw error;
   }
+}
+
+export function refetchLimitForLoadedPages(loadedPages: number, pageSize: number): number {
+  return Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
 }
 
 export async function createComment(data: {
@@ -93,5 +112,32 @@ export async function deleteComment(commentId: string): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting comment:", error);
     return false;
+  }
+}
+
+export async function reportComment(
+  commentId: string,
+  reason: ReplyReportReason,
+): Promise<ReportCommentResult> {
+  try {
+    await apiFetch(`/replies/${commentId}/report`, {
+      method: "POST",
+      body: { reason },
+    });
+    return { ok: true };
+  } catch (error) {
+    const status = getApiErrorStatus(error);
+    const message = getApiErrorMessage(error);
+    const code = getApiErrorCode(error);
+
+    if (status === 401) {
+      return { ok: false, reason: "unauthorized", message };
+    }
+    if (code === FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED) {
+      return { ok: false, reason: "already_reported", message };
+    }
+
+    console.error("Error reporting comment:", error);
+    return { ok: false, reason: "unknown", message };
   }
 }

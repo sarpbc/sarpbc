@@ -38,12 +38,9 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
             size="sm"
           />
           <div class="flex-1 min-w-0">
-            <ULink
-              :to="$localePath(`/team/${contract.team.slug}`)"
-              class="font-medium hover:underline"
-            >
+            <UiLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
               {{ contract.team.name }}
-            </ULink>
+            </UiLink>
             <div class="text-sm text-muted">
               <span>{{ roleLabel(contract.role) }}</span>
               <span class="mx-1" aria-hidden="true">·</span>

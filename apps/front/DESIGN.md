@@ -30,7 +30,7 @@ sarpbc has two public design modes. Same tokens and components; different densit
 
 - Shell: `NavHeader` → 12-col grid (match rail | main | forum/game rail) → `NavFooter`.
 - Columns share a **row rhythm** via fixed-height primitives (see [Grid module](#grid-module)). Align with tokens + column wrappers — not ad-hoc `mt-*` / `pt-*` tuning between rails.
-- Signature motif: `UiCrossCard` / `UiCrossLink` (corner crosses) on title bands and primary list links.
+- Signature motif: `UiCrossCard` (corner crosses) on title bands.
 - Homepage (`/`) stays a **news hub**. No marketing hero or pick'em promo as the primary story (product decision 2026-07-30).
 
 ### Marketing (`/about`)
@@ -114,6 +114,7 @@ Hub lists and rails sit on a **4px base** with a modular **row scale**. Tokens l
 | **row-compact**  | `--spacing-row-compact`  | `calc(row × 2/3)` (~`1.833rem`) | ~29.3 | `h-row-compact`                    | Dense rail rows — **3 compact = 2 row** (forum vs news)      |
 | **row-header**   | `--spacing-row-header`   | `3.5rem`                        | 56    | `h-row-header`, `min-h-row-header` | Page title band (`UiCrossCard`)                              |
 | **row-double**   | `--spacing-row-double`   | `5.5rem`                        | 88    | `h-row-double`                     | Rare 2× cells                                                |
+| **row-triple**   | `--spacing-row-triple`   | `calc(row × 3)` (~`8.25rem`)    | ~132  | `h-row-triple`                     | Featured news row with hero thumb (3× default row)           |
 | **rail-caption** | `--spacing-rail-caption` | `4.5rem`                        | 72    | `h-rail-caption`                   | Section label above a rail card (`flex-col-reverse` caption) |
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
@@ -136,16 +137,16 @@ Shared list/rail components (`UiListItem`, `UiRail`, `UiHubColumn` — epic SAR-
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/ui/` when a pattern repeats 3+ times.
 
-| Primitive     | Role                                                                   |
-| ------------- | ---------------------------------------------------------------------- |
-| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks         |
-| `UiCrossCard` | Hub title band / featured block with corner crosses                    |
-| `UiCrossLink` | Cross-motif link wrapper (e.g. news rows)                              |
-| `UiLink`      | Styled internal link                                                   |
-| `UiListItem`  | Hub list row — fixed row height, optional link + divider               |
-| `UiBadgeLive` | Live status with text + color                                          |
-| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body |
-| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                  |
+| Primitive     | Role                                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| `UiCard`      | Bordered box (`border-default`); `flushBottom` for list stacks                                           |
+| `UiCrossCard` | Hub title band / featured block with corner crosses                                                      |
+| `UiLink`      | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names); Cuelume `hoverTick` by default |
+| `UiButton`    | `UButton` wrapper with Cuelume `pressRelease` by default (`sound`: `press` \| `toggle` \| `none`)        |
+| `UiListItem`  | Hub list row — fixed row height, optional link + divider                                                 |
+| `UiBadgeLive` | Live status with text + color                                                                            |
+| `UiRail`      | Rail section: `h-rail-caption` label band + default slot for card body                                   |
+| `UiHubColumn` | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                    |
 
 #### `UiListItem` sizes
 
@@ -163,7 +164,28 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `UiRail` — caption `h-rail-caption` + `text-toned`, then a bordered card/rows stack in the default slot (same idea as match-rail `UiCard`). Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `UiHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Desktop caption baselines align via shared `h-rail-caption` on every `UiRail`; do not add per-rail `pt-8` or `md:h-18` offsets.
 - **List rows**: `UiListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `UiCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
+- **Discussion threads**: Each comment is a bordered block (full column width, same edge as other hub cards). Nested replies use `CommentThreadConnector` + `mt-3` spacing. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
+
+### Hub page headers
+
+Hub list pages share chrome via `UiHubPageHeader` (`app/components/ui/HubPageHeader.vue`):
+
+- Outer shell: `UiCrossCard` + `h-row-header` (56px title band).
+- Inner layout: centered `h1` (`text-xl font-semibold`) + optional `#meta` slot (`text-sm text-muted`).
+
+Vary **inner content** per hub — not the outer chrome:
+
+| Hub         | Title                          | Meta slot (when data is available) |
+| ----------- | ------------------------------ | ---------------------------------- |
+| Matches     | `page.matches.title`           | `UiBadgeLive` + live count         |
+| Tournaments | `page.tournaments.index.title` | Next upcoming event name           |
+| Forum       | `page.forum.index.pageTitle`   | Post count                         |
+| Pick'ems    | `page.game.pickems.title`      | Open pick'em count                 |
+| Players     | Letter or directory title      | Total player count                 |
+| Teams       | Letter or directory title      | Total team count                   |
+
+Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual — no marketing fluff or eyebrow micro-labels.
 
 ---
 
@@ -177,6 +199,19 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 | ~150ms state / ~200ms popover / ~300ms overlay | `transition: all`                          |
 | `transform` + `opacity` only                   | Layout-thrashing anims                     |
 | Honor `prefers-reduced-motion`                 | Ignore reduced-motion                      |
+| Interaction sounds (Cuelume)                   | Play when `prefers-reduced-motion: reduce` |
+
+### Interaction sounds (Cuelume)
+
+Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
+
+| Pattern                  | Attribute convention                                                                                                                      | Use                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Primary press            | `UiButton` (default) or `v-bind="cuelumeAttrs.pressRelease"`                                                                              | Submit / save / comment actions |
+| Toggle                   | `UiButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                               | Theme switch, match tab filters |
+| Nav hover (fine pointer) | `UiLink` / `MatchDiscoveryLink` / `UiListItem` (`hoverTick`; no CSS color transition). Cuelume throttles hover cues to 1 / 150ms globally | Header, footer, match rows      |
+
+Imperative cues: `const { playCue } = useCuelume()` then `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 
 ---
 
@@ -198,7 +233,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see g
 
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
-3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI.
+3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. CI enforces this via `scripts/lint-hub-row-heights.mjs` (wired into `pnpm lint`).
 4. **Primitives first:** `@nuxt/ui` → existing `Ui*` → new `Ui*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.

@@ -58,6 +58,10 @@ jest.mock("@mikro-orm/core", () => {
         return `${tableName}_${columns.join("_")}_${type}`;
       }
     },
+    QueryOrder: {
+      ASC: "ASC",
+      DESC: "DESC",
+    },
   };
 });
 

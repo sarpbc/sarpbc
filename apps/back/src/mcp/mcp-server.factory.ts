@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { PatUser } from "src/pat/pat.service";
 import { MatchService } from "src/tournament/match/match.service";
+import { ManualTournamentService } from "src/tournament/manual-tournament.service";
 import { NewsService } from "src/news/news.service";
 import { PlayerService } from "src/player/player.service";
 import { SearchService } from "src/search/search.service";
@@ -18,6 +19,7 @@ export class McpServerFactory {
     private readonly playerService: PlayerService,
     private readonly teamService: TeamService,
     private readonly tournamentService: TournamentService,
+    private readonly manualTournamentService: ManualTournamentService,
     private readonly matchService: MatchService,
     private readonly newsService: NewsService,
   ) {}
@@ -37,6 +39,7 @@ export class McpServerFactory {
       playerService: this.playerService,
       teamService: this.teamService,
       tournamentService: this.tournamentService,
+      manualTournamentService: this.manualTournamentService,
       matchService: this.matchService,
       newsService: this.newsService,
     };

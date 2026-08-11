@@ -8,6 +8,7 @@ const route = useRoute();
 const localePath = useLocalePath();
 const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
+const { attrs: cuelumeAttrs } = useCuelume();
 
 interface LoginState {
   email: string;
@@ -158,6 +159,7 @@ function googleLogin() {
             :loading="pending"
             :disabled="pending"
             class="w-full flex flex-col items-center cursor-pointer"
+            v-bind="cuelumeAttrs.pressRelease"
           />
         </UForm>
       </div>
