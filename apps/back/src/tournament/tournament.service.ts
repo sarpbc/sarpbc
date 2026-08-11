@@ -33,7 +33,7 @@ export class TournamentService {
     offset?: number;
     pickems?: boolean;
     activeOnly?: boolean;
-  }): Promise<Tournament[]> {
+  }): Promise<[Tournament[], number]> {
     const where: Record<string, unknown> = {};
     if (typeof pickems === "boolean") {
       where.pickemsEnabled = pickems;
@@ -43,13 +43,12 @@ export class TournamentService {
       where.winner = null;
       where.$or = [{ endAt: null }, { endAt: { $gt: new Date() } }];
     }
-    const tournaments = await this.tournamentRepository.find(where, {
+    return this.tournamentRepository.findAndCount(where, {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
       populate: activeOnly ? ["league"] : ["league", "participants", "participants.team"],
     });
-    return tournaments;
   }
 
   async findById(id: string): Promise<Tournament | null> {

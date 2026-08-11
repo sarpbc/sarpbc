@@ -44,14 +44,14 @@ export class TournamentController {
     const searchLimit = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
 
-    const tournaments = await this.tournamentService.find({
+    const [tournaments, count] = await this.tournamentService.find({
       limit: Math.min(searchLimit, 100),
       offset: searchOffset,
       pickems: pickems ? pickems === "true" : undefined,
       activeOnly: activeOnly === "true",
     });
 
-    return { tournaments };
+    return { tournaments, count };
   }
 
   @Get("leagues")

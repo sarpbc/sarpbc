@@ -4,25 +4,31 @@ import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
   limit?: number;
+  offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<Tournament[]> {
-  const { limit, pickems, activeOnly } = query || {};
+}): Promise<{ tournaments: Tournament[]; total: number }> {
+  const { limit, offset, pickems, activeOnly } = query || {};
   try {
     const params: Record<string, string | number | undefined> = {};
     if (limit !== undefined) params.limit = limit;
+    if (offset !== undefined) params.offset = offset;
     if (pickems !== undefined) params.pickems = pickems ? "true" : "false";
     if (activeOnly) params.activeOnly = "true";
 
-    const res = await apiFetch<{ tournaments?: Tournament[] }>("/tournaments", {
+    const res = await apiFetch<{ tournaments?: Tournament[]; count?: number }>("/tournaments", {
       method: "GET",
       query: params,
     });
 
-    return res.tournaments ?? [];
+    const tournaments = res.tournaments ?? [];
+    return {
+      tournaments,
+      total: res.count ?? tournaments.length,
+    };
   } catch (error) {
     console.error("Error fetching tournaments:", error);
-    return [];
+    return { tournaments: [], total: 0 };
   }
 }
 
