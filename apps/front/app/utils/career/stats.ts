@@ -19,8 +19,10 @@ function getBackgroundBaseStats(background: CareerBackground): CareerStats {
       return { rating: 72, form: 55, morale: 60 };
     case "grinder":
       return { rating: 62, form: 70, morale: 65 };
-    case "lateBloomer":
-      return { rating: 58, form: 60, morale: 78 };
+    case "oneVOne":
+      return { rating: 70, form: 68, morale: 55 };
+    case "freestyler":
+      return { rating: 66, form: 52, morale: 78 };
     default: {
       const _exhaustive: never = background;
       return _exhaustive;

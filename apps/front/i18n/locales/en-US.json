@@ -325,7 +325,7 @@
         },
         "onboarding": {
           "introTitle": "Start Your Career",
-          "introBody": "Create a fictional pro journey. Pick your region, country, playstyle and origin story — then make the calls that shape five seasons.",
+          "introBody": "Create a fictional pro journey. Pick your region, country, playstyle and path — then make the calls that shape five seasons.",
           "playerNameLabel": "Player Name",
           "playerNamePlaceholder": "Your gamertag",
           "regionTitle": "Choose Your Region",
@@ -334,7 +334,7 @@
           "countryBody": "The flag next to your gamertag on broadcast.",
           "roleTitle": "Choose Your Playstyle",
           "roleBody": "How you play shifts your starting stats and how splits unfold.",
-          "backgroundTitle": "Choose Your Origin Story",
+          "backgroundTitle": "Choose Your Path",
           "backgroundBody": "How you got here sets your starting rating, form and morale.",
           "next": "Continue",
           "startCareer": "Start Season 1",
@@ -400,9 +400,13 @@
               "label": "Grinder",
               "description": "Ten thousand hours of training packs. Rating 62 · Form 70 · Morale 65"
             },
-            "lateBloomer": {
-              "label": "Late Bloomer",
-              "description": "Discovered late, nothing to lose. Rating 58 · Form 60 · Morale 78"
+            "oneVOne": {
+              "label": "1v1 Player",
+              "description": "Ranked duelist — mechanics and reads forged in 1s. Rating 70 · Form 68 · Morale 55"
+            },
+            "freestyler": {
+              "label": "Freestyler",
+              "description": "Clips over consistency, flair over free play. Rating 66 · Form 52 · Morale 78"
             }
           }
         },

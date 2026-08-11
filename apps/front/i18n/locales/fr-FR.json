@@ -325,7 +325,7 @@
         },
         "onboarding": {
           "introTitle": "Lancez Votre Carrière",
-          "introBody": "Créez un parcours pro fictif. Choisissez région, pays, style de jeu et parcours d'origine — puis prenez les décisions qui façonnent cinq saisons.",
+          "introBody": "Créez un parcours pro fictif. Choisissez région, pays, style de jeu et parcours — puis prenez les décisions qui façonnent cinq saisons.",
           "playerNameLabel": "Nom de Joueur",
           "playerNamePlaceholder": "Votre pseudo",
           "regionTitle": "Choisissez Votre Région",
@@ -335,7 +335,7 @@
           "roleTitle": "Choisissez Votre Style de Jeu",
           "roleBody": "Votre style ajuste vos stats de départ et le déroulement des splits.",
           "backgroundTitle": "Choisissez Votre Parcours",
-          "backgroundBody": "Votre origine définit rating, forme et moral de départ.",
+          "backgroundBody": "Votre parcours définit rating, forme et moral de départ.",
           "next": "Continuer",
           "startCareer": "Commencer Saison 1",
           "regions": {
@@ -400,9 +400,13 @@
               "label": "Grinder",
               "description": "Dix mille heures de training packs. Rating 62 · Forme 70 · Moral 65"
             },
-            "lateBloomer": {
-              "label": "Révélé sur le tard",
-              "description": "Repéré tardivement, rien à perdre. Rating 58 · Forme 60 · Moral 78"
+            "oneVOne": {
+              "label": "Joueur 1v1",
+              "description": "Duelliste ranked — mécaniques et reads forgés en 1s. Rating 70 · Forme 68 · Moral 55"
+            },
+            "freestyler": {
+              "label": "Freestyler",
+              "description": "Les clips avant la régularité, le style avant le free play. Rating 66 · Forme 52 · Moral 78"
             }
           }
         },

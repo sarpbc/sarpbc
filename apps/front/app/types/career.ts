@@ -15,7 +15,7 @@ export type CareerCountry = (typeof CAREER_COUNTRIES)[CareerRegion][number];
 export const CAREER_ROLES = ["offense", "technical", "defense"] as const;
 export type CareerRole = (typeof CAREER_ROLES)[number];
 
-export const CAREER_BACKGROUNDS = ["prodigy", "grinder", "lateBloomer"] as const;
+export const CAREER_BACKGROUNDS = ["prodigy", "grinder", "oneVOne", "freestyler"] as const;
 export type CareerBackground = (typeof CAREER_BACKGROUNDS)[number];
 
 export interface CareerStats {

@@ -21,11 +21,8 @@ describe("career stats", () => {
   it("combines background base stats with role modifiers", () => {
     expect(getStartingStats("prodigy", "offense")).toEqual({ rating: 75, form: 53, morale: 60 });
     expect(getStartingStats("grinder", "technical")).toEqual({ rating: 62, form: 73, morale: 63 });
-    expect(getStartingStats("lateBloomer", "defense")).toEqual({
-      rating: 56,
-      form: 60,
-      morale: 81,
-    });
+    expect(getStartingStats("oneVOne", "defense")).toEqual({ rating: 68, form: 68, morale: 58 });
+    expect(getStartingStats("freestyler", "offense")).toEqual({ rating: 69, form: 50, morale: 78 });
   });
 
   it("weights the composite score by role", () => {
