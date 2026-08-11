@@ -9,7 +9,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "oxlint .",
+    "lint": "oxlint . && node scripts/lint-hub-row-heights.mjs",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",

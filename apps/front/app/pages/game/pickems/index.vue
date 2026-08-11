@@ -20,13 +20,12 @@ const {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-row-header">
-      <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold">
-          {{ $t("page.game.pickems.title") }}
-        </h1>
-      </div>
-    </UiCrossCard>
+    <UiHubPageHeader>
+      <template #title>{{ $t("page.game.pickems.title") }}</template>
+      <template v-if="tournaments?.length" #meta>
+        <span>{{ t("page.hub.headers.pickemsOpen", { count: tournaments.length }) }}</span>
+      </template>
+    </UiHubPageHeader>
 
     <UiCard v-if="pending && !tournaments?.length" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-2">

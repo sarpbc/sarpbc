@@ -222,6 +222,16 @@
     }
   },
   "page": {
+    "hub": {
+      "headers": {
+        "matchesLive": "{count} en direct",
+        "tournamentsNext": "Prochain : {name}",
+        "forumPosts": "{count} publications",
+        "pickemsOpen": "{count} pick'ems ouverts",
+        "playersTotal": "{count} joueurs",
+        "teamsTotal": "{count} équipes"
+      }
+    },
     "home": {
       "seo": {
         "title": "Actus & matchs Rocket League | sarpbc.org",
@@ -523,7 +533,7 @@
           "title": "Équipes participantes",
           "empty": "Équipes pas encore annoncées.",
           "emptyHint": "Revenez lorsque le roster du tournoi sera confirmé.",
-          "openRoster": "Ouvrir le roster de {team}",
+          "openRoster": "Afficher le roster de {team}",
           "viewTeam": "Voir {team}",
           "rosterEmpty": "Roster pas encore disponible."
         },

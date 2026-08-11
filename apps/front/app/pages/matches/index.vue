@@ -35,13 +35,13 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-row-header">
-      <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold">
-          {{ t("page.matches.title") }}
-        </h1>
-      </div>
-    </UiCrossCard>
+    <UiHubPageHeader>
+      <template #title>{{ t("page.matches.title") }}</template>
+      <template v-if="liveMatches.length > 0" #meta>
+        <UiBadgeLive />
+        <span>{{ t("page.hub.headers.matchesLive", { count: liveMatches.length }) }}</span>
+      </template>
+    </UiHubPageHeader>
 
     <div>
       <MatchListToolbar

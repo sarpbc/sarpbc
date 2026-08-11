@@ -97,13 +97,12 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-row-header">
-      <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold">
-          {{ pageTitle }}
-        </h1>
-      </div>
-    </UiCrossCard>
+    <UiHubPageHeader>
+      <template #title>{{ pageTitle }}</template>
+      <template v-if="totalPlayers > 0" #meta>
+        <span>{{ t("page.hub.headers.playersTotal", { count: totalPlayers }) }}</span>
+      </template>
+    </UiHubPageHeader>
 
     <UiCard>
       <div class="flex flex-wrap gap-1 p-1.5">
