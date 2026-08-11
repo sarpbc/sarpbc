@@ -87,10 +87,15 @@ export class PandascoreApiClient {
   async getTournaments(): Promise<TournamentDto[]> {
     const pastTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/past");
     const upcomingTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/upcoming");
-    const allTournaments = [...pastTournaments, ...upcomingTournaments];
-    return Array.from(
-      new Map(allTournaments.map((tournament) => [tournament.id, tournament])).values(),
-    );
+    const runningTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/running");
+    const allTournaments = [...pastTournaments, ...upcomingTournaments, ...runningTournaments];
+    const byId = new Map<number, TournamentDto>();
+    for (const tournament of allTournaments) {
+      if (!byId.has(tournament.id)) {
+        byId.set(tournament.id, tournament);
+      }
+    }
+    return Array.from(byId.values());
   }
 
   async getTournamentById(tournamentId: number): Promise<TournamentDto | null> {
@@ -169,8 +174,9 @@ export class PandascoreApiClient {
           continue;
         }
         if (Array.isArray(value)) {
+          // PandaScore rejects `key[]=` (HTTP 500). Use repeated keys instead.
           for (const item of value) {
-            url.searchParams.append(`${key}[]`, item);
+            url.searchParams.append(key, item);
           }
         } else {
           url.searchParams.set(key, value);

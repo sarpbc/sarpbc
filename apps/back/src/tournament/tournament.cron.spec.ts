@@ -1,13 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { MikroORM } from "@mikro-orm/postgresql";
 import { TournamentCron } from "./tournament.cron";
-import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import { SyncNewTournamentsUseCase } from "./sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "./match/match.service";
 
 describe("TournamentCron", () => {
   let cron: TournamentCron;
-  const syncPandascoreAdditionsUseCase = { execute: jest.fn() };
+  const syncNewTournamentsUseCase = { execute: jest.fn() };
   const syncPandascoreTournamentUseCase = { execute: jest.fn() };
   const matchService = {
     findLive: jest.fn(),
@@ -19,7 +19,7 @@ describe("TournamentCron", () => {
       providers: [
         TournamentCron,
         { provide: MikroORM, useValue: {} },
-        { provide: SyncPandascoreAdditionsUseCase, useValue: syncPandascoreAdditionsUseCase },
+        { provide: SyncNewTournamentsUseCase, useValue: syncNewTournamentsUseCase },
         { provide: SyncPandascoreTournamentUseCase, useValue: syncPandascoreTournamentUseCase },
         { provide: MatchService, useValue: matchService },
       ],
@@ -29,9 +29,15 @@ describe("TournamentCron", () => {
     jest.clearAllMocks();
   });
 
-  it("syncPandascoreAdditionsDaily delegates to additions use case", async () => {
+  it("syncPandascoreAdditionsDaily delegates to new-tournaments use case", async () => {
+    syncNewTournamentsUseCase.execute.mockResolvedValue({
+      discovered: 0,
+      detailsSynced: 0,
+      detailsFailed: 0,
+    });
+
     await cron.syncPandascoreAdditionsDaily();
-    expect(syncPandascoreAdditionsUseCase.execute).toHaveBeenCalled();
+    expect(syncNewTournamentsUseCase.execute).toHaveBeenCalled();
   });
 
   it("syncLiveTournaments syncs tournaments with live matches", async () => {
