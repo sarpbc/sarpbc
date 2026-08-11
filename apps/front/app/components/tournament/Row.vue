@@ -7,60 +7,73 @@ const { tournament, to } = defineProps<{
 }>();
 
 const localePath = useLocalePath();
+const { t } = useI18n();
 const { formatTournamentPrizepool } = useCurrency();
 
 const href = computed(() => to ?? localePath(`/tournaments/${tournament.id}`));
+
+const showImage = computed(
+  () => tournament.tier === "s" && Boolean(tournament.league?.imageUrl?.trim()),
+);
+
+const displayName = computed(() =>
+  [tournament.league?.name, tournament.name]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part))
+    .join(" "),
+);
+
+const teamsLabel = computed(() => {
+  const count = tournament.participants?.length ?? 0;
+  return `${count} ${t("general.teams").toLocaleLowerCase()}`;
+});
+
+const prizeLabel = computed(
+  () =>
+    formatTournamentPrizepool(tournament.prizepool) || t("components.tournaments.prizepoolOther"),
+);
+
+const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`));
 </script>
 
 <template>
-  <ULink :to="href" class="block group rounded-none border border-default p-2 not-first:-mt-px">
-    <div
-      v-if="tournament.tier === 's' && tournament.league?.imageUrl"
-      class="w-full grid grid-cols-5 items-center"
-    >
-      <img
-        class="w-full max-w-64 col-span-2"
-        :src="tournament.league.imageUrl"
-        :alt="tournament.league?.name ?? tournament.name"
-      />
-      <div class="flex flex-col col-span-3">
-        <h3 class="truncate text-2xl font-semibold">
-          {{ tournament.league?.name }}
-          {{ tournament.name }}
+  <UiListItem
+    :size="showImage ? 'triple' : 'default'"
+    divider
+    :to="href"
+    class="min-w-0 overflow-hidden"
+  >
+    <div v-if="showImage" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
+      <div class="flex h-full w-36 shrink-0 items-center justify-center overflow-hidden">
+        <NuxtImg
+          :src="tournament.league!.imageUrl!"
+          :alt="tournament.league?.name ?? tournament.name"
+          width="144"
+          height="132"
+          sizes="144px"
+          class="max-h-full max-w-full object-contain"
+        />
+      </div>
+      <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
+        <h3 class="truncate text-sm font-medium text-toned">
+          {{ displayName }}
         </h3>
-        <div class="w-full flex flex-row gap-4">
-          <h3 class="col-span-2 truncate">
-            {{ `${tournament.participants?.length} ${$t("general.teams").toLocaleLowerCase()}` }}
-          </h3>
-          <h3 class="col-span-2 truncate">
-            {{
-              formatTournamentPrizepool(tournament.prizepool) ||
-              $t("components.tournaments.prizepoolOther")
-            }}
-          </h3>
-          <h3 class="col-span-1 truncate">
-            {{ $t(`components.tournaments.${tournament.type}`) }}
-          </h3>
+        <div class="flex min-w-0 flex-wrap gap-x-3 text-xs text-muted">
+          <span class="truncate tabular-nums">{{ teamsLabel }}</span>
+          <span class="truncate">{{ prizeLabel }}</span>
+          <span class="truncate">{{ typeLabel }}</span>
         </div>
       </div>
     </div>
-    <div v-else class="w-full grid grid-cols-10 items-center">
-      <h3 class="flex col-span-5 items-center truncate">
-        {{ tournament.league?.name }}
-        {{ tournament.name }}
-      </h3>
-      <h3 class="col-span-2 truncate">
-        {{ `${tournament.participants?.length} ${$t("general.teams").toLocaleLowerCase()}` }}
-      </h3>
-      <h3 class="col-span-2 truncate">
-        {{
-          formatTournamentPrizepool(tournament.prizepool) ||
-          $t("components.tournaments.prizepoolOther")
-        }}
-      </h3>
-      <h3 class="col-span-1 truncate">
-        {{ $t(`components.tournaments.${tournament.type}`) }}
-      </h3>
+
+    <div
+      v-else
+      class="grid w-full min-w-0 grid-cols-10 items-center gap-x-2 text-xs font-medium text-toned"
+    >
+      <h3 class="col-span-5 truncate">{{ displayName }}</h3>
+      <span class="col-span-2 truncate text-muted tabular-nums">{{ teamsLabel }}</span>
+      <span class="col-span-2 truncate text-muted">{{ prizeLabel }}</span>
+      <span class="col-span-1 truncate text-muted">{{ typeLabel }}</span>
     </div>
-  </ULink>
+  </UiListItem>
 </template>

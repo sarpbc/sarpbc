@@ -47,14 +47,14 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
       </div>
     </UiCard>
 
-    <div v-else-if="tournaments && tournaments.length > 0" class="flex flex-col gap-0">
+    <UiCard v-else-if="tournaments && tournaments.length > 0" flush-bottom>
       <TournamentRow
         v-for="tournament in tournaments"
         :key="tournament.id"
         :tournament="tournament"
         :to="localePath(`/game/pickems/${tournament.id}`)"
       />
-    </div>
+    </UiCard>
 
     <UiCard v-else>
       <div class="flex flex-col items-center gap-2 py-12 px-4 text-center">

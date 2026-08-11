@@ -92,6 +92,9 @@
     },
     "match": {
       "todaysMatch": "Matchs d'aujourd'hui",
+      "tomorrowsMatch": "Matchs de demain",
+      "upcomingMatches": "Matchs à venir",
+      "tomorrow": "Demain",
       "results": "Résultats",
       "tbd": "À déterminer",
       "live": "En direct",

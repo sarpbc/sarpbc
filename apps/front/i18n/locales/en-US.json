@@ -92,6 +92,9 @@
     },
     "match": {
       "todaysMatch": "Today's Matches",
+      "tomorrowsMatch": "Tomorrow's Matches",
+      "upcomingMatches": "Upcoming Matches",
+      "tomorrow": "Tomorrow",
       "results": "Results",
       "tbd": "To Be Determined",
       "live": "Live",
