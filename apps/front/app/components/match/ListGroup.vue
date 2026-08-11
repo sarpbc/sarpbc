@@ -61,7 +61,7 @@ function formatDayHeader(group: { date: Date | null }) {
         <div
           v-for="group in dayGroup.events"
           :key="`${dayGroup.dateKey}-${group.key}`"
-          class="flex flex-col"
+          class="flex flex-col gap-px"
         >
           <h4 class="flex h-row min-h-row items-end pl-1 text-xs font-medium text-muted">
             <UiLink
@@ -98,7 +98,7 @@ function formatDayHeader(group: { date: Date | null }) {
     </template>
 
     <template v-else>
-      <div v-for="group in eventGroups" :key="group.key" class="flex flex-col">
+      <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
         <h3 class="flex h-row min-h-row items-end text-sm font-medium text-toned">
           <UiLink
             v-if="group.tournamentId"
