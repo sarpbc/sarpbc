@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { filterMatchesTodayOrTomorrow } from "~/utils/calendarDay";
 import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
 
 const MAX_MATCHES = 5;
@@ -7,19 +8,17 @@ const SOURCE = "home_strip" as const;
 const { t } = useI18n();
 const { data, pending } = await useUpcomingMatches();
 
+const liveMatches = computed(() => data.value?.live ?? []);
+const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
+
 const matches = computed(() => {
-  if (!data.value) {
-    return [];
-  }
-  return [...data.value.live, ...data.value.upcoming].slice(0, MAX_MATCHES);
+  return [...liveMatches.value, ...upcomingMatches.value].slice(0, MAX_MATCHES);
 });
 
 const showRail = computed(() => pending.value || matches.value.length > 0);
 
 const upcomingTitle = computed(() => {
-  const live = data.value?.live ?? [];
-  const upcoming = data.value?.upcoming ?? [];
-  const kind = resolveMatchRailTitleKind(live, upcoming);
+  const kind = resolveMatchRailTitleKind(liveMatches.value, upcomingMatches.value);
 
   switch (kind) {
     case "today":
@@ -36,7 +35,7 @@ const upcomingTitle = computed(() => {
 });
 
 function isLive(matchId: string): boolean {
-  return Boolean(data.value?.live.some((m) => m.id === matchId));
+  return liveMatches.value.some((m) => m.id === matchId);
 }
 </script>
 

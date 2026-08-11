@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { filterMatchesTodayOrTomorrow } from "~/utils/calendarDay";
 import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
 
 const { t } = useI18n();
@@ -11,10 +12,15 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
 
 const SOURCE = "lateral_bar" as const;
 
+const liveMatches = computed(() => data.value?.live ?? []);
+const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
+
+const showUpcomingRail = computed(
+  () => liveMatches.value.length > 0 || upcomingMatches.value.length > 0,
+);
+
 const upcomingTitle = computed(() => {
-  const live = data.value?.live ?? [];
-  const upcoming = data.value?.upcoming ?? [];
-  const kind = resolveMatchRailTitleKind(live, upcoming);
+  const kind = resolveMatchRailTitleKind(liveMatches.value, upcomingMatches.value);
 
   switch (kind) {
     case "today":
@@ -33,14 +39,11 @@ const upcomingTitle = computed(() => {
 
 <template>
   <div class="w-full flex flex-col">
-    <UiRail
-      v-if="data && (data.live.length > 0 || data.upcoming.length > 0)"
-      :title="upcomingTitle"
-    >
+    <UiRail v-if="showUpcomingRail" :title="upcomingTitle">
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="match in data.live"
+            v-for="match in liveMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
@@ -49,7 +52,7 @@ const upcomingTitle = computed(() => {
             <MatchRow :match="match" :live="true" />
           </MatchDiscoveryLink>
           <MatchDiscoveryLink
-            v-for="match in data.upcoming"
+            v-for="match in upcomingMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"

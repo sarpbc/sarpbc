@@ -12,15 +12,6 @@ const hourDf = computed(
     }),
 );
 
-const shortDateDf = computed(
-  () =>
-    new Intl.DateTimeFormat(locale.value, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    }),
-);
-
 const {
   match,
   live = false,
@@ -37,7 +28,11 @@ const {
   showDate?: boolean;
 }>();
 
-const scheduleLabel = computed(() => {
+type ScheduleDisplay =
+  | { kind: "time"; time: string }
+  | { kind: "tomorrow"; label: string; time: string };
+
+const schedule = computed((): ScheduleDisplay | null => {
   const beginAt = parseMatchDate(match.beginAt);
   if (!beginAt) {
     return null;
@@ -45,18 +40,16 @@ const scheduleLabel = computed(() => {
 
   const time = hourDf.value.format(beginAt);
   if (!showDate) {
-    return time;
+    return { kind: "time", time };
   }
 
   const offset = daysFromToday(beginAt);
-  if (offset === 0) {
-    return time;
-  }
   if (offset === 1) {
-    return `${t("components.match.tomorrow")} · ${time}`;
+    return { kind: "tomorrow", label: t("components.match.tomorrow"), time };
   }
 
-  return `${shortDateDf.value.format(beginAt)} · ${time}`;
+  // Today (and any other day when showDate is on outside the rail): time only.
+  return { kind: "time", time };
 });
 </script>
 
@@ -82,11 +75,21 @@ const scheduleLabel = computed(() => {
           }}
         </span>
       </div>
-      <div v-if="!result" class="col-span-1 flex flex-col items-end justify-center gap-1">
+      <div v-if="!result" class="col-span-1 flex flex-col items-end justify-center gap-0.5">
         <DiscussionCommentCount :count="match.commentCount ?? 0" />
         <UiBadgeLive v-if="live" />
-        <span v-else-if="scheduleLabel" class="text-end text-xs text-muted font-thin tabular-nums">
-          {{ scheduleLabel }}
+        <span
+          v-else-if="schedule?.kind === 'tomorrow'"
+          class="flex flex-col items-end text-end text-xs text-muted font-thin tabular-nums leading-tight"
+        >
+          <span>{{ schedule.label }}</span>
+          <span>{{ schedule.time }}</span>
+        </span>
+        <span
+          v-else-if="schedule?.kind === 'time'"
+          class="text-end text-xs text-muted font-thin tabular-nums"
+        >
+          {{ schedule.time }}
         </span>
       </div>
     </div>
