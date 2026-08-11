@@ -1,11 +1,17 @@
 import type { CareerResult, CareerState } from "~/types/career";
-import { CAREER_BACKGROUNDS, CAREER_REGIONS, CAREER_ROLES } from "~/types/career";
+import { CAREER_BACKGROUNDS, CAREER_COUNTRIES, CAREER_REGIONS, CAREER_ROLES } from "~/types/career";
 
 export const CAREER_ACTIVE_STORAGE_KEY = "sarpbc:career-active";
 export const CAREER_RESULTS_STORAGE_KEY = "sarpbc:career-results";
 
+const ALL_COUNTRIES: readonly string[] = Object.values(CAREER_COUNTRIES).flat();
+
 function isValidRegion(value: unknown): value is CareerState["region"] {
   return value === null || (typeof value === "string" && CAREER_REGIONS.includes(value as never));
+}
+
+function isValidCountry(value: unknown): value is CareerState["country"] {
+  return value === null || (typeof value === "string" && ALL_COUNTRIES.includes(value));
 }
 
 function isValidRole(value: unknown): value is CareerState["role"] {
@@ -42,13 +48,15 @@ export function parseCareerState(raw: string | null): CareerState | null {
       typeof state.onboardingStep !== "string" ||
       typeof state.playerName !== "string" ||
       !isValidRegion(state.region) ||
+      !isValidCountry(state.country) ||
       !isValidRole(state.role) ||
       !isValidBackground(state.background) ||
       !isValidStats(state.stats) ||
       typeof state.currentSeason !== "number" ||
-      typeof state.currentTeam !== "string" ||
-      typeof state.eventsThisSeason !== "number" ||
+      typeof state.currentStage !== "string" ||
+      typeof state.currentTeamId !== "string" ||
       !Array.isArray(state.usedEventIds) ||
+      !Array.isArray(state.currentSplits) ||
       !Array.isArray(state.seasonRecords)
     ) {
       return null;

@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import type { CareerEventDefinition } from "~/types/career";
+import type { CareerEventDefinition, CareerStage } from "~/types/career";
 
 const props = defineProps<{
   event: CareerEventDefinition;
-  eventIndex: number;
-  eventTotal: number;
+  stage: CareerStage;
 }>();
 
 const emit = defineEmits<{
@@ -14,18 +13,26 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const eventKey = computed(() => `page.game.career.events.${props.event.id}`);
+
+const stageLabel = computed(() => {
+  switch (props.stage) {
+    case "split1":
+      return t("page.game.career.event.splitDecision", { split: 1 });
+    case "split2":
+      return t("page.game.career.event.splitDecision", { split: 2 });
+    case "worlds":
+      return t("page.game.career.event.worldsDecision");
+    default: {
+      const _exhaustive: never = props.stage;
+      return _exhaustive;
+    }
+  }
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <p class="text-xs font-semibold text-muted tabular-nums">
-      {{
-        t("page.game.career.season.eventProgress", {
-          current: eventIndex,
-          total: eventTotal,
-        })
-      }}
-    </p>
+    <p class="text-xs font-semibold text-muted">{{ stageLabel }}</p>
     <div class="space-y-2">
       <h2 class="text-lg font-semibold tracking-tight">
         {{ t(`${eventKey}.title`) }}

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { applyStatDelta, clampStat, getBackgroundStartingStats } from "~/utils/career/stats";
+import {
+  applyStatDelta,
+  clampStat,
+  computeComposite,
+  getStartingStats,
+} from "~/utils/career/stats";
 
 describe("career stats", () => {
   it("clamps values between 0 and 100", () => {
@@ -13,9 +18,18 @@ describe("career stats", () => {
     expect(result).toEqual({ rating: 60, form: 45, morale: 50 });
   });
 
-  it("returns background starting stats", () => {
-    expect(getBackgroundStartingStats("prodigy").rating).toBe(72);
-    expect(getBackgroundStartingStats("grinder").form).toBe(70);
-    expect(getBackgroundStartingStats("wildcard").morale).toBe(80);
+  it("combines background base stats with role modifiers", () => {
+    expect(getStartingStats("prodigy", "offense")).toEqual({ rating: 75, form: 53, morale: 60 });
+    expect(getStartingStats("grinder", "technical")).toEqual({ rating: 62, form: 73, morale: 63 });
+    expect(getStartingStats("lateBloomer", "defense")).toEqual({
+      rating: 56,
+      form: 60,
+      morale: 81,
+    });
+  });
+
+  it("weights the composite score by role", () => {
+    const stats = { rating: 80, form: 60, morale: 40 };
+    expect(computeComposite(stats, "offense")).toBeGreaterThan(computeComposite(stats, "defense"));
   });
 });

@@ -1,14 +1,16 @@
 <script lang="ts" setup>
 import CareerEnd from "~/components/career/CareerEnd.vue";
 import CareerEventCard from "~/components/career/EventCard.vue";
-import CareerMatchResults from "~/components/career/MatchResults.vue";
 import CareerOffseasonOffer from "~/components/career/OffseasonOffer.vue";
 import CareerOnboarding from "~/components/career/Onboarding.vue";
+import CareerStageResult from "~/components/career/StageResult.vue";
 import CareerStatsBar from "~/components/career/StatsBar.vue";
+import CareerWorldRankings from "~/components/career/WorldRankings.vue";
 import { encodeCareerResultForShare } from "~/composables/useCareerStorage";
 import { useCareerSimulator } from "~/composables/useCareerSimulator";
-import type { CareerPhase } from "~/types/career";
-import { EVENTS_PER_SEASON, TOTAL_SEASONS } from "~/types/career";
+import { getWorldTeamById } from "~/data/career/world";
+import { getTeamRank } from "~/utils/career/simulation";
+import { TOTAL_SEASONS, WORLDS_QUALIFICATION_POINTS } from "~/types/career";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -17,48 +19,27 @@ const localePath = useLocalePath();
 const {
   state,
   hydrated,
-  pendingMatches,
-  pendingPlacement,
   currentEvent,
+  currentTeamName,
+  worldRankings,
+  seasonPoints,
+  qualifiedForWorlds,
+  lastSplit,
   hydrate,
   resetCareer,
   setOnboardingStep,
   setPlayerName,
   setRegion,
+  setCountry,
   setRole,
   setBackground,
   completeOnboarding,
   startSeason,
   resolveEventChoice,
-  finishMatchPhase,
+  continueAfterResult,
   acceptOffer,
   stayWithTeam,
 } = useCareerSimulator();
-
-function assertNever(value: never): never {
-  throw new Error(`Unexpected phase: ${String(value)}`);
-}
-
-function renderPhase(phase: CareerPhase): string {
-  switch (phase) {
-    case "onboarding":
-      return "onboarding";
-    case "season_intro":
-      return "season_intro";
-    case "event":
-      return "event";
-    case "match":
-      return "match";
-    case "offseason":
-      return "offseason";
-    case "career_end":
-      return "career_end";
-    default:
-      return assertNever(phase);
-  }
-}
-
-const activePhase = computed(() => renderPhase(state.value.phase));
 
 const showStats = computed(
   () => state.value.phase !== "onboarding" && state.value.phase !== "career_end",
@@ -66,6 +47,22 @@ const showStats = computed(
 
 const hasActiveCareer = computed(
   () => hydrated.value && state.value.phase !== "onboarding" && state.value.phase !== "career_end",
+);
+
+const currentTeamRank = computed(() =>
+  state.value.currentTeamId ? getTeamRank(worldRankings.value, state.value.currentTeamId) : null,
+);
+
+const offerTeamName = computed(() =>
+  state.value.pendingOfferTeamId
+    ? (getWorldTeamById(state.value.pendingOfferTeamId)?.name ?? state.value.pendingOfferTeamId)
+    : "",
+);
+
+const offerTeamRank = computed(() =>
+  state.value.pendingOfferTeamId
+    ? getTeamRank(worldRankings.value, state.value.pendingOfferTeamId)
+    : null,
 );
 
 onMounted(() => {
@@ -113,87 +110,110 @@ function handleAbandon() {
       </div>
     </UiCard>
 
-    <template v-else>
-      <UiCard v-if="hasActiveCareer" class="p-4">
-        <div class="flex items-center justify-between gap-2">
-          <p class="text-sm font-medium">{{ state.playerName || t("page.game.career.title") }}</p>
-          <UButton size="xs" variant="ghost" color="error" @click="handleAbandon">
-            {{ t("page.game.career.actions.abandon") }}
-          </UButton>
-        </div>
+    <div v-else class="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
+      <div class="flex flex-col gap-4 lg:col-span-2">
+        <UiCard v-if="hasActiveCareer" class="p-4">
+          <div class="flex items-center justify-between gap-2">
+            <p class="min-w-0 truncate text-sm font-medium">
+              {{ state.playerName || t("page.game.career.title") }}
+              <span class="text-muted">· {{ currentTeamName }}</span>
+            </p>
+            <UButton size="xs" variant="ghost" color="error" @click="handleAbandon">
+              {{ t("page.game.career.actions.abandon") }}
+            </UButton>
+          </div>
+        </UiCard>
+
+        <UiCard class="p-4 sm:p-6">
+          <div v-if="showStats" class="mb-6">
+            <CareerStatsBar :stats="state.stats" />
+          </div>
+
+          <CareerOnboarding
+            v-if="state.phase === 'onboarding'"
+            :step="state.onboardingStep"
+            :player-name="state.playerName"
+            :region="state.region"
+            :country="state.country"
+            :role="state.role"
+            :background="state.background"
+            @update:player-name="setPlayerName"
+            @update:step="setOnboardingStep"
+            @select-region="setRegion"
+            @select-country="setCountry"
+            @select-role="setRole"
+            @select-background="setBackground"
+            @complete="completeOnboarding"
+          />
+
+          <div v-else-if="state.phase === 'season_intro'" class="flex flex-col gap-4 text-center">
+            <h2 class="text-lg font-semibold tracking-tight">
+              {{
+                t("page.game.career.season.introTitle", {
+                  season: state.currentSeason,
+                  total: TOTAL_SEASONS,
+                })
+              }}
+            </h2>
+            <p class="text-sm text-muted text-pretty">
+              {{
+                t("page.game.career.season.introBody", {
+                  team: currentTeamName,
+                  rank: currentTeamRank ?? "—",
+                })
+              }}
+            </p>
+            <p class="text-xs text-muted text-pretty">
+              {{
+                t("page.game.career.season.structure", {
+                  points: WORLDS_QUALIFICATION_POINTS,
+                })
+              }}
+            </p>
+            <UButton block @click="startSeason">
+              {{ t("page.game.career.season.begin") }}
+            </UButton>
+          </div>
+
+          <CareerEventCard
+            v-else-if="state.phase === 'event' && currentEvent"
+            :event="currentEvent"
+            :stage="state.currentStage"
+            @choose="resolveEventChoice"
+          />
+
+          <CareerStageResult
+            v-else-if="state.phase === 'stage_result'"
+            :stage="state.currentStage"
+            :split="lastSplit"
+            :worlds-placement="state.currentWorlds"
+            :season-points="seasonPoints"
+            :qualified-for-worlds="qualifiedForWorlds"
+            @continue="continueAfterResult"
+          />
+
+          <CareerOffseasonOffer
+            v-else-if="state.phase === 'offseason' && state.pendingOfferTeamId"
+            :offer-team-name="offerTeamName"
+            :offer-team-rank="offerTeamRank"
+            :current-team-name="currentTeamName"
+            :current-team-rank="currentTeamRank"
+            @accept="acceptOffer"
+            @stay="stayWithTeam"
+          />
+
+          <CareerEnd
+            v-else-if="state.phase === 'career_end' && state.result"
+            :result="state.result"
+            @share="handleShare"
+            @play-again="handlePlayAgain"
+          />
+        </UiCard>
+      </div>
+
+      <UiCard class="p-4">
+        <CareerWorldRankings :teams="worldRankings.teams" :players="worldRankings.players" />
       </UiCard>
-
-      <UiCard class="p-4 sm:p-6">
-        <div v-if="showStats" class="mb-6">
-          <CareerStatsBar :stats="state.stats" />
-        </div>
-
-        <CareerOnboarding
-          v-if="activePhase === 'onboarding'"
-          :step="state.onboardingStep"
-          :player-name="state.playerName"
-          :region="state.region"
-          :role="state.role"
-          :background="state.background"
-          @update:player-name="setPlayerName"
-          @update:step="setOnboardingStep"
-          @select-region="setRegion"
-          @select-role="setRole"
-          @select-background="setBackground"
-          @complete="completeOnboarding"
-        />
-
-        <div v-else-if="activePhase === 'season_intro'" class="flex flex-col gap-4 text-center">
-          <h2 class="text-lg font-semibold tracking-tight">
-            {{
-              t("page.game.career.season.introTitle", {
-                season: state.currentSeason,
-                total: TOTAL_SEASONS,
-              })
-            }}
-          </h2>
-          <p class="text-sm text-muted text-pretty">
-            {{
-              t("page.game.career.season.introBody", {
-                team: state.currentTeam,
-              })
-            }}
-          </p>
-          <UButton block @click="startSeason">
-            {{ t("page.game.career.season.begin") }}
-          </UButton>
-        </div>
-
-        <CareerEventCard
-          v-else-if="activePhase === 'event' && currentEvent"
-          :event="currentEvent"
-          :event-index="state.eventsThisSeason + 1"
-          :event-total="EVENTS_PER_SEASON"
-          @choose="resolveEventChoice"
-        />
-
-        <div v-else-if="activePhase === 'match'" class="flex flex-col gap-4">
-          <CareerMatchResults :matches="pendingMatches" :placement-key="pendingPlacement" />
-          <UButton block @click="finishMatchPhase">
-            {{ t("page.game.career.match.continue") }}
-          </UButton>
-        </div>
-
-        <CareerOffseasonOffer
-          v-else-if="activePhase === 'offseason' && state.pendingOfferTeam"
-          :offer-team="state.pendingOfferTeam"
-          :current-team="state.currentTeam"
-          @accept="acceptOffer"
-          @stay="stayWithTeam"
-        />
-
-        <CareerEnd
-          v-else-if="activePhase === 'career_end' && state.result"
-          :result="state.result"
-          @share="handleShare"
-          @play-again="handlePlayAgain"
-        />
-      </UiCard>
-    </template>
+    </div>
   </section>
 </template>
