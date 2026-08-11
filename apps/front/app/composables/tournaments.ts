@@ -3,15 +3,19 @@ import type { Tournament } from "~/types/tournament";
 
 export async function getAllTournaments(query?: {
   limit?: number;
+  offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<Tournament[]> {
+}): Promise<{ tournaments: Tournament[]; total: number }> {
   const config = useRuntimeConfig();
-  const { limit, pickems, activeOnly } = query || {};
+  const { limit, offset, pickems, activeOnly } = query || {};
   try {
     const url = new URL(`${config.public.apiBase}/tournaments`);
     if (limit !== undefined) {
       url.searchParams.set("limit", String(limit));
+    }
+    if (offset !== undefined) {
+      url.searchParams.set("offset", String(offset));
     }
     if (pickems !== undefined) {
       url.searchParams.set("pickems", pickems ? "true" : "false");
@@ -20,15 +24,19 @@ export async function getAllTournaments(query?: {
       url.searchParams.set("activeOnly", "true");
     }
 
-    const res = await $fetch<{ tournaments?: Tournament[] }>(url.toString(), {
+    const res = await $fetch<{ tournaments?: Tournament[]; count?: number }>(url.toString(), {
       method: "GET",
       credentials: "include",
     });
 
-    return res.tournaments ?? [];
+    const tournaments = res.tournaments ?? [];
+    return {
+      tournaments,
+      total: res.count ?? tournaments.length,
+    };
   } catch (error) {
     console.error("Error fetching tournaments:", error);
-    return [];
+    return { tournaments: [], total: 0 };
   }
 }
 

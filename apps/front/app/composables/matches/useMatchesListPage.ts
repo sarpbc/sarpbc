@@ -47,7 +47,10 @@ export function useMatchesListPage() {
 
   const { data: tournamentsForFilter } = useAsyncData(
     "matches-filter-tournaments",
-    () => getAllTournaments({ limit: 100 }),
+    async () => {
+      const { tournaments } = await getAllTournaments({ limit: 100 });
+      return tournaments;
+    },
     { default: () => [] as Tournament[] },
   );
 

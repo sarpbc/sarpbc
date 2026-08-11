@@ -137,7 +137,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ activeOnly, limit }) =>
       runReadTool(async () => {
-        const tournaments = await ctx.tournamentService.find({
+        const [tournaments] = await ctx.tournamentService.find({
           activeOnly: activeOnly ?? false,
           limit: limit ?? 20,
           offset: 0,

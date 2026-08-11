@@ -147,6 +147,12 @@
       "matchesCount": "{count} matches",
       "noMatches": "No matches found for this tournament.",
       "noTournaments": "No tournaments found.",
+      "columns": {
+        "name": "Tournament",
+        "source": "Source",
+        "beginAt": "Start",
+        "actions": "Actions"
+      },
       "source": {
         "manual": "Manual",
         "pandascore": "PandaScore"
