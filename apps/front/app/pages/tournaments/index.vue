@@ -15,9 +15,7 @@ const nextTournament = computed(() => {
       }
       return new Date(tournament.beginAt).getTime() > now;
     })
-    .sort(
-      (a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime(),
-    )[0];
+    .sort((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime())[0];
 });
 
 setPageSeo({

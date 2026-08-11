@@ -176,14 +176,14 @@ Hub list pages share chrome via `UiHubPageHeader` (`app/components/ui/HubPageHea
 
 Vary **inner content** per hub — not the outer chrome:
 
-| Hub | Title | Meta slot (when data is available) |
-| --- | ----- | ---------------------------------- |
-| Matches | `page.matches.title` | `UiBadgeLive` + live count |
-| Tournaments | `page.tournaments.index.title` | Next upcoming event name |
-| Forum | `page.forum.index.pageTitle` | Post count |
-| Pick'ems | `page.game.pickems.title` | Open pick'em count |
-| Players | Letter or directory title | Total player count |
-| Teams | Letter or directory title | Total team count |
+| Hub         | Title                          | Meta slot (when data is available) |
+| ----------- | ------------------------------ | ---------------------------------- |
+| Matches     | `page.matches.title`           | `UiBadgeLive` + live count         |
+| Tournaments | `page.tournaments.index.title` | Next upcoming event name           |
+| Forum       | `page.forum.index.pageTitle`   | Post count                         |
+| Pick'ems    | `page.game.pickems.title`      | Open pick'em count                 |
+| Players     | Letter or directory title      | Total player count                 |
+| Teams       | Letter or directory title      | Total team count                   |
 
 Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual — no marketing fluff or eyebrow micro-labels.
 

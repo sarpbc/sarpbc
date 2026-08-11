@@ -88,9 +88,7 @@ async function main() {
 
   console.error("lint-hub-row-heights: banned hub row height utilities found:\n");
   for (const violation of violations) {
-    console.error(
-      `  ${violation.file}:${violation.line}  [${violation.rule}]  ${violation.text}`,
-    );
+    console.error(`  ${violation.file}:${violation.line}  [${violation.rule}]  ${violation.text}`);
   }
   console.error(
     "\nUse grid-module tokens (h-row, h-row-compact, h-row-header). See apps/front/DESIGN.md.",

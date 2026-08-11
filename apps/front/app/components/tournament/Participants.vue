@@ -61,7 +61,11 @@ const hasMoreTeams = computed(() => participantEntries.value.length > TEASER_TEA
 
     <div v-if="hasMoreTeams" class="flex justify-center">
       <UButton :to="teamsTabPath" variant="soft" color="neutral">
-        {{ t("page.tournaments.id.participants.viewAllTeamsCount", { count: participantEntries.length }) }}
+        {{
+          t("page.tournaments.id.participants.viewAllTeamsCount", {
+            count: participantEntries.length,
+          })
+        }}
       </UButton>
     </div>
   </section>
