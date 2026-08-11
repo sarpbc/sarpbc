@@ -18,7 +18,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
   <UPopover v-model:open="open" mode="hover" enable-touch :open-delay="80" :close-delay="100">
     <button
       type="button"
-      class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-default hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+      class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-default transition-none hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
       :aria-label="t('page.tournaments.id.participants.openRoster', { team: team.name })"
       aria-haspopup="dialog"
       :aria-expanded="open"

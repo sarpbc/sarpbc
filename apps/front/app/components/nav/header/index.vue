@@ -2,9 +2,6 @@
 import type { NavigationMenuItem } from "@nuxt/ui";
 
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
-
-const navLinkSound = cuelumeAttrs.hoverTick;
 
 const localePath = useLocalePath();
 const route = useRoute();
@@ -51,23 +48,19 @@ const items = computed<NavigationMenuItem[]>(() => [
     label: t("general.matches"),
     to: matchesPath.value,
     active: isMatchesActive.value,
-    ...navLinkSound,
   },
   {
     label: t("general.results"),
     to: { path: matchesPath.value, query: { tab: "past" } },
     active: isResultsActive.value,
-    ...navLinkSound,
   },
   {
     label: t("general.tournaments"),
     to: localePath("/tournaments"),
-    ...navLinkSound,
   },
   {
     label: t("page.game.airriddle.title"),
     to: localePath("/game/airriddle"),
-    ...navLinkSound,
   },
 ]);
 
@@ -86,9 +79,8 @@ const menuToggleLabel = computed(() =>
       <div class="h-full flex flex-row items-center">
         <ULink
           :to="$localePath('/')"
-          class="flex flex-row flex-1 items-center"
+          class="flex flex-row flex-1 items-center transition-none"
           :aria-label="$t('components.header.home')"
-          v-bind="cuelumeAttrs.hoverTick"
         >
           <img
             src="/sarpbc.svg"

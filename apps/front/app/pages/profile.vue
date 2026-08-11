@@ -7,6 +7,7 @@ const user = useUser();
 const localePath = useLocalePath();
 const posthog = usePostHog();
 const config = useRuntimeConfig();
+const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 const { refresh: refreshUnreadCount } = useUnreadNotificationCount();
 
 if (!user.value) {
@@ -45,6 +46,7 @@ async function markAllRead() {
   }
 
   isMarkingRead.value = true;
+  playCue("loading");
   try {
     await markNotificationsRead();
     await Promise.all([refreshNotifications(), refreshUnreadCount()]);
@@ -64,6 +66,7 @@ async function viewThread(notification: AppNotification) {
 
 const handleLogout = async () => {
   isLoggingOut.value = true;
+  playCue("loading");
   try {
     posthog?.capture("user_logged_out");
     posthog?.reset();
@@ -119,15 +122,19 @@ setPageSeo({
           variant="soft"
           :label="$t('page.profile.openAdmin')"
           class="cursor-pointer w-fit"
+          :class="pressClass"
+          v-bind="cuelumeAttrs.pressRelease"
         />
         <UButton
           color="error"
           variant="soft"
           icon="i-fluent-sign-out-24-regular"
           class="cursor-pointer w-fit"
+          :class="pressClass"
           :label="$t('page.profile.logout')"
           :loading="isLoggingOut"
           :disabled="isLoggingOut"
+          v-bind="cuelumeAttrs.pressRelease"
           @click="handleLogout"
         />
       </div>
@@ -147,6 +154,8 @@ setPageSeo({
           :loading="isMarkingRead"
           :disabled="isMarkingRead"
           class="cursor-pointer"
+          :class="pressClass"
+          v-bind="cuelumeAttrs.pressRelease"
           @click="markAllRead"
         />
       </div>

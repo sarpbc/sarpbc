@@ -15,7 +15,6 @@ const {
 }>();
 
 const attrs = useAttrs();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 function listItemSizeClasses(value: ListItemSize): string {
   switch (value) {
@@ -42,7 +41,7 @@ const itemClass = computed(() => [
   listItemSizeClasses(size),
   divider && "border-b border-default",
   to &&
-    "hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
+    "transition-none hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
   attrs.class,
 ]);
 
@@ -53,12 +52,7 @@ const delegatedAttrs = computed(() => {
 </script>
 
 <template>
-  <NuxtLink
-    v-if="to"
-    :to="to"
-    :class="itemClass"
-    v-bind="{ ...cuelumeAttrs.hoverTick, ...delegatedAttrs }"
-  >
+  <NuxtLink v-if="to" :to="to" :class="itemClass" v-bind="delegatedAttrs">
     <slot />
   </NuxtLink>
   <div v-else :class="itemClass" v-bind="delegatedAttrs">

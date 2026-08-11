@@ -105,7 +105,7 @@ function metaParts(award: PlayerProfileAward): string[] {
           v-for="award in awards"
           :key="award.id"
           :to="$localePath(`/tournaments/${award.tournament.id}`)"
-          class="flex items-center gap-3 p-3 hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          class="flex items-center gap-3 p-3 hover:bg-elevated transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
         >
           <div class="flex size-10 shrink-0 items-center justify-center">
             <UIcon name="i-fluent-star-24-filled" class="text-xl text-primary" />

@@ -91,7 +91,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
                 :match-id="match.id"
                 :source="SOURCE"
                 status="upcoming"
-                class="block hover:bg-elevated/50 active:scale-[0.96] touch-manipulation"
+                class="touch-manipulation"
               >
                 <MatchRow :match="match" />
               </MatchDiscoveryLink>
@@ -114,7 +114,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
               :match-id="match.id"
               :source="SOURCE"
               status="finished"
-              class="block hover:bg-elevated/50 active:scale-[0.96] touch-manipulation"
+              class="touch-manipulation"
             >
               <MatchResultRow :match="match" />
             </MatchDiscoveryLink>

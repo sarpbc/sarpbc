@@ -207,6 +207,7 @@ async function submitGuess() {
   }
 
   submitting.value = true;
+  playCue("loading");
 
   try {
     const results = await guessAirRiddle(

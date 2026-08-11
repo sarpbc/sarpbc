@@ -10,16 +10,15 @@ const { matchId, source, status } = defineProps<{
 }>();
 
 const attrs = useAttrs();
-const { attrs: cuelumeAttrs } = useCuelume();
 const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const to = computed(() => matchDetailTo(matchId, source));
 
-const linkClass = computed(() => ["block hover:bg-elevated/50", attrs.class]);
+const linkClass = computed(() => ["block transition-none hover:bg-elevated/50", attrs.class]);
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
-  return { ...cuelumeAttrs.hoverTick, ...rest };
+  return rest;
 });
 
 function onClick() {
