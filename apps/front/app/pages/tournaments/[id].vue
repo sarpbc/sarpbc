@@ -131,8 +131,8 @@ watch(
 .tournament-tab-right-enter-active,
 .tournament-tab-right-leave-active {
   transition:
-    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform var(--duration-normal) var(--ease-emphasized),
+    opacity var(--duration-normal) var(--ease-emphasized);
 }
 
 .tournament-tab-left-enter-from {
@@ -160,7 +160,7 @@ watch(
   .tournament-tab-left-leave-active,
   .tournament-tab-right-enter-active,
   .tournament-tab-right-leave-active {
-    transition: opacity 150ms ease;
+    transition: opacity var(--duration-fast) ease;
   }
 
   .tournament-tab-left-enter-from,

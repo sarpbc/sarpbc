@@ -83,9 +83,9 @@ const startViewTransition = (event: MouseEvent) => {
 }
 
 ::view-transition-new(root) {
-  z-index: 9999;
+  z-index: var(--z-view-transition);
 }
 ::view-transition-old(root) {
-  z-index: 1;
+  z-index: var(--z-base);
 }
 </style>

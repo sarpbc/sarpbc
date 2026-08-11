@@ -1,10 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/*
- * Brand neutral `ink` — same Linear/Resend-dark scale as apps/front.
- * Keep front/admin in sync when adjusting shades.
- */
 @theme static {
   --color-ink-50: #f9fafc;
   --color-ink-100: #f0f2f4;
@@ -19,6 +15,60 @@
   --color-ink-950: #010101;
 }
 
+@theme {
+  --container-news: 848px;
+  --spacing-px: 1px;
+  --spacing-resize-handle: 2px;
+  --radius-scrollbar: 5px;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --ui-radius: 0.25rem;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-scrollbar: 5px;
+  --spacing-px: 1px;
+  --spacing-resize-handle: 2px;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    color-scheme: dark;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    forced-color-adjust: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid HighlightText;
+    outline-offset: 2px;
+  }
+
+  .border,
+  [class*="border-"] {
+    border-color: CanvasText;
+  }
+}
+
 html {
   scrollbar-gutter: stable;
   scrollbar-color: var(--color-neutral-300) transparent;
@@ -28,7 +78,7 @@ html {
 
 ::-webkit-scrollbar {
   width: 8px;
-  transition-duration: 300ms;
+  transition-duration: var(--duration-slow);
 }
 
 ::-webkit-scrollbar-track {
@@ -37,15 +87,11 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-300);
-  border-radius: 5px;
+  border-radius: var(--radius-scrollbar);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-neutral-400);
-}
-
-:root {
-  --ui-radius: 0.25rem;
 }
 
 .ProseMirror table {
@@ -70,10 +116,10 @@ html {
 
 .ProseMirror .column-resize-handle {
   @apply bg-primary/40;
-  bottom: -2px;
+  bottom: calc(var(--spacing-resize-handle) * -1);
   pointer-events: none;
   position: absolute;
-  right: -2px;
+  right: calc(var(--spacing-resize-handle) * -1);
   top: 0;
-  width: 4px;
+  width: calc(var(--spacing-resize-handle) * 2);
 }

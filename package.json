@@ -18,10 +18,13 @@
     "lint:fix": "turbo run lint:fix",
     "fmt": "turbo run fmt",
     "fmt:check": "turbo run fmt:check",
+    "lyse": "lyse audit",
+    "lyse:scope-new": "lyse audit --scope new",
     "test:back": "turbo run test --filter=back",
     "test:front": "turbo run test --filter=front"
   },
   "devDependencies": {
+    "@lyse-labs/lyse": "0.2.0-alpha.6",
     "lefthook": "^2.1.10",
     "only-allow": "^1.2.2",
     "oxfmt": "^0.60.0",

@@ -1,5 +1,7 @@
 ---
 description: sarpbc monorepo hub — read AGENTS.md and load the right skill
+globs:
+  - "**/*"
 alwaysApply: true
 ---
 
