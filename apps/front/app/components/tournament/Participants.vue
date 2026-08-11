@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import type { Tournament, TournamentParticipant } from "~/types/tournament";
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import type { Tournament } from "~/types/tournament";
+import { buildTournamentParticipantEntries } from "~/utils/tournamentParticipants";
 
 const { tournament } = defineProps<{
   tournament: Tournament;
@@ -9,43 +8,15 @@ const { tournament } = defineProps<{
 
 const { t } = useI18n();
 
-interface ParticipantEntry {
-  team: Team;
-  players: Player[];
-}
-
-function getParticipantTeam(participant: TournamentParticipant): Team | null {
-  return participant.team ?? null;
-}
-
-const participantEntries = computed((): ParticipantEntry[] => {
-  const participants = tournament.participants ?? [];
-  const seen = new Set<string>();
-  const result: ParticipantEntry[] = [];
-
-  for (const participant of participants) {
-    const team = getParticipantTeam(participant);
-    if (!team?.slug || seen.has(team.id)) {
-      continue;
-    }
-    seen.add(team.id);
-    const players = (participant.players ?? [])
-      .filter((player) => player.slug)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    result.push({ team, players });
-  }
-
-  return result.sort((a, b) => a.team.name.localeCompare(b.team.name));
-});
-
+const participantEntries = computed(() => buildTournamentParticipantEntries(tournament));
 const hasTeams = computed(() => participantEntries.value.length > 0);
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-3" aria-labelledby="tournament-participants-title">
+  <section class="w-full flex flex-col gap-px" aria-labelledby="tournament-participants-title">
     <h2
       id="tournament-participants-title"
-      class="text-xl font-semibold tracking-tight pl-1 text-balance"
+      class="flex text-sm font-medium text-toned h-10.75 items-end pl-1 text-balance"
     >
       {{ t("page.tournaments.id.participants.title") }}
     </h2>

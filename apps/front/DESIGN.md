@@ -167,6 +167,26 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **Discussion threads**: Each comment is a bordered block (full column width, same edge as other hub cards). Nested replies use `CommentThreadConnector` + `mt-3` spacing. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
 
+### Hub page headers
+
+Hub list pages share chrome via `UiHubPageHeader` (`app/components/ui/HubPageHeader.vue`):
+
+- Outer shell: `UiCrossCard` + `h-row-header` (56px title band).
+- Inner layout: centered `h1` (`text-xl font-semibold`) + optional `#meta` slot (`text-sm text-muted`).
+
+Vary **inner content** per hub — not the outer chrome:
+
+| Hub         | Title                          | Meta slot (when data is available) |
+| ----------- | ------------------------------ | ---------------------------------- |
+| Matches     | `page.matches.title`           | `UiBadgeLive` + live count         |
+| Tournaments | `page.tournaments.index.title` | Next upcoming event name           |
+| Forum       | `page.forum.index.pageTitle`   | Post count                         |
+| Pick'ems    | `page.game.pickems.title`      | Open pick'em count                 |
+| Players     | Letter or directory title      | Total player count                 |
+| Teams       | Letter or directory title      | Total team count                   |
+
+Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual — no marketing fluff or eyebrow micro-labels.
+
 ---
 
 ## Motion
@@ -213,7 +233,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see g
 
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
-3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI.
+3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. CI enforces this via `scripts/lint-hub-row-heights.mjs` (wired into `pnpm lint`).
 4. **Primitives first:** `@nuxt/ui` → existing `Ui*` → new `Ui*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.
