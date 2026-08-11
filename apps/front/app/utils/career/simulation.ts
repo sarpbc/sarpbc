@@ -46,10 +46,10 @@ export function createRng(seed: number): () => number {
 }
 
 function placementFromScore(score: number): CareerPlacement {
-  if (score >= 82) return "winner";
-  if (score >= 73) return "finalist";
-  if (score >= 63) return "top4";
-  if (score >= 52) return "top8";
+  if (score >= 80) return "winner";
+  if (score >= 71) return "finalist";
+  if (score >= 61) return "top4";
+  if (score >= 50) return "top8";
   return "group";
 }
 
@@ -67,7 +67,7 @@ export function simulateSplit(stats: CareerStats, role: CareerRole, seed: number
   const regionals: CareerPlacement[] = [];
   let regionalPoints = 0;
   for (let i = 0; i < REGIONALS_PER_SPLIT; i++) {
-    const placement = placementFromScore(composite * 0.7 + rng() * 30);
+    const placement = placementFromScore(composite * 0.75 + rng() * 30);
     regionals.push(placement);
     regionalPoints += REGIONAL_POINTS[placement];
   }
@@ -75,7 +75,7 @@ export function simulateSplit(stats: CareerStats, role: CareerRole, seed: number
   let major: CareerPlacement | null = null;
   let points = regionalPoints;
   if (regionalPoints >= MAJOR_QUALIFICATION_POINTS) {
-    major = placementFromScore(composite * 0.7 + rng() * 30 - 8);
+    major = placementFromScore(composite * 0.75 + rng() * 30 - 5);
     points += MAJOR_POINTS[major];
   }
 
@@ -90,7 +90,7 @@ export function simulateWorlds(
 ): CareerPlacement {
   const rng = createRng(seed);
   const composite = computeComposite(stats, role);
-  return placementFromScore(composite * 0.7 + rng() * 30 - 12);
+  return placementFromScore(composite * 0.75 + rng() * 30 - 10);
 }
 
 /** Stat drift applied after a split based on how the run went. */

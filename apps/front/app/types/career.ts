@@ -117,6 +117,6 @@ export const TOTAL_SEASONS = 5;
 export const SPLITS_PER_SEASON = 2;
 export const REGIONALS_PER_SPLIT = 3;
 export const MAJOR_QUALIFICATION_POINTS = 10;
-export const WORLDS_QUALIFICATION_POINTS = 30;
+export const WORLDS_QUALIFICATION_POINTS = 42;
 export const MIN_STAT = 0;
 export const MAX_STAT = 100;
