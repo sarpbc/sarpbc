@@ -45,3 +45,9 @@ Desktop.ini
 .fleet/
 .vscode/*
 !.vscode/settings.json
+
+# Lyse local cache / audit artifacts
+
+# Lyse local cache (baseline.json is tracked)
+.lyse/*
+!.lyse/baseline.json

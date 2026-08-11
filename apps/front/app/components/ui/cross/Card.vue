@@ -19,27 +19,50 @@ const { as = "div" } = defineProps<{
 <style scoped>
 @reference "../../../assets/css/main.css";
 
-.bottom-right {
-  @apply before:absolute after:absolute;
-  @apply before:top-[-4px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[5px];
-  @apply after:left-[-4px] after:bg-inverted after:content-[''] after:w-[5px] after:h-[1px];
-}
-
-.bottom-left {
-  @apply before:absolute after:absolute;
-  @apply before:top-[-4px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[5px];
-  @apply after:left-[0px] after:bg-inverted after:content-[''] after:w-[5px] after:h-[1px];
-}
-
-.top-right {
-  @apply before:absolute after:absolute;
-  @apply before:top-[0px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[5px];
-  @apply after:left-[-4px] after:bg-inverted after:content-[''] after:w-[5px] after:h-[1px];
-}
-
+.bottom-right,
+.bottom-left,
+.top-right,
 .top-left {
-  @apply before:absolute after:absolute;
-  @apply before:top-[0px] before:bg-inverted before:content-[''] before:w-[1px] before:h-[5px];
-  @apply after:left-[0px] after:bg-inverted after:content-[''] after:w-[5px] after:h-[1px];
+  --cross: var(--spacing-cross);
+  --hair: var(--spacing-px);
+}
+
+.bottom-right::before,
+.bottom-left::before,
+.top-right::before,
+.top-left::before,
+.bottom-right::after,
+.bottom-left::after,
+.top-right::after,
+.top-left::after {
+  @apply absolute bg-inverted content-[''];
+}
+
+.bottom-right::before,
+.bottom-left::before {
+  top: calc(var(--cross) * -1);
+  width: var(--hair);
+  height: calc(var(--cross) + var(--hair));
+}
+
+.bottom-right::after,
+.top-right::after {
+  left: calc(var(--cross) * -1);
+  width: calc(var(--cross) + var(--hair));
+  height: var(--hair);
+}
+
+.bottom-left::after,
+.top-left::after {
+  left: 0;
+  width: calc(var(--cross) + var(--hair));
+  height: var(--hair);
+}
+
+.top-right::before,
+.top-left::before {
+  top: 0;
+  width: var(--hair);
+  height: calc(var(--cross) + var(--hair));
 }
 </style>

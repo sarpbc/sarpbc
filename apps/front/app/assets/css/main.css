@@ -30,6 +30,62 @@
   --spacing-row-double: 5.5rem; /* 88px — rare 2× cells */
   --spacing-row-triple: calc(var(--spacing-row) * 3);
   --spacing-rail-caption: 4.5rem; /* 72px — section label above rail cards */
+  --spacing-cross: 4px; /* UiCrossCard corner ticks */
+  --spacing-px: 1px;
+  --radius-scrollbar: 5px;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-emphasis: 2s;
+  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-view-transition: 9999;
+}
+
+:root {
+  --ui-radius: 0rem;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-emphasis: 2s;
+  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-scrollbar: 5px;
+  --spacing-cross: 4px;
+  --spacing-px: 1px;
+  --z-view-transition: 9999;
+  --z-base: 1;
+}
+
+/* Color-mode signal for tooling + forced-colors resilience */
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    color-scheme: dark;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    forced-color-adjust: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid HighlightText;
+    outline-offset: 2px;
+  }
+
+  .border,
+  [class*="border-"] {
+    border-color: CanvasText;
+  }
 }
 
 html {
@@ -42,7 +98,7 @@ html {
 
 ::-webkit-scrollbar {
   width: 8px;
-  transition-duration: 300ms;
+  transition-duration: var(--duration-slow);
 }
 
 ::-webkit-scrollbar-track {
@@ -51,7 +107,7 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-neutral-300);
-  border-radius: 5px;
+  border-radius: var(--radius-scrollbar);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -66,8 +122,4 @@ input[type="number"] {
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
-}
-
-:root {
-  --ui-radius: 0rem;
 }

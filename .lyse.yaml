@@ -1,0 +1,25 @@
+# Customized for sarpbc — schema:
+# https://github.com/lyse-labs/lyse/blob/main/docs/guide/configuration.md
+designSystem:
+  componentsModule: "./packages/ui/src"
+  excludePaths:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/scripts/**"
+    - "apps/back/**"
+    - "**/*.generated.{ts,tsx,js,mjs}"
+
+rules:
+  # Nuxt API helpers use get*/create* — not Vue Composition API hooks.
+  naming/hook-prefix: off
+  # Real UI primitives are @nuxt/ui (UButton…); @sarpbc/ui is MDC tags only.
+  components/no-native-shadows: off
+  # NestJS ValidationPipe option is literally `whitelist`.
+  a11y/inclusive-language: off
+  ai-surface/llms-txt-structure: off
+  ai-surface/component-manifest-json: off
+  ai-surface/component-manifest-completeness: off
+  ai-surface/ds-index-exported: off
+  ai-surface/agents-md-quality: off
+  versioning/changelog-present: off
+  versioning/migration-guide-present: off

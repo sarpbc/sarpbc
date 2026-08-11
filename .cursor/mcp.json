@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lyse": {
+      "command": "pnpm",
+      "args": ["exec", "lyse", "mcp"]
+    }
+  }
+}

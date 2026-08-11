@@ -45,8 +45,8 @@ const rejectCookies = () => {
 .cookie-popup-enter-active,
 .cookie-popup-leave-active {
   transition:
-    transform 200ms cubic-bezier(0.175, 0.885, 0.32, 1.1),
-    opacity 200ms ease;
+    transform var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) ease;
 }
 
 .cookie-popup-enter-from,
@@ -58,7 +58,7 @@ const rejectCookies = () => {
 @media (prefers-reduced-motion: reduce) {
   .cookie-popup-enter-active,
   .cookie-popup-leave-active {
-    transition: opacity 150ms ease;
+    transition: opacity var(--duration-fast) ease;
   }
 
   .cookie-popup-enter-from,

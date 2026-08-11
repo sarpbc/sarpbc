@@ -242,7 +242,7 @@ async function onDelete() {
 
 <style scoped>
 .comment-highlight {
-  animation: comment-highlight 2s ease-out;
+  animation: comment-highlight var(--duration-emphasis) ease-out;
 }
 
 @keyframes comment-highlight {
