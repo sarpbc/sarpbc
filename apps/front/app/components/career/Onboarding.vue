@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import {
   CAREER_BACKGROUNDS,
+  CAREER_COUNTRIES,
   CAREER_REGIONS,
   CAREER_ROLES,
   type CareerBackground,
+  type CareerCountry,
   type CareerRegion,
   type CareerRole,
   type OnboardingStep,
@@ -13,6 +15,7 @@ const props = defineProps<{
   step: OnboardingStep;
   playerName: string;
   region: CareerRegion | null;
+  country: CareerCountry | null;
   role: CareerRole | null;
   background: CareerBackground | null;
 }>();
@@ -21,6 +24,7 @@ const emit = defineEmits<{
   "update:playerName": [value: string];
   "update:step": [value: OnboardingStep];
   selectRegion: [value: CareerRegion];
+  selectCountry: [value: CareerCountry];
   selectRole: [value: CareerRole];
   selectBackground: [value: CareerBackground];
   complete: [];
@@ -33,6 +37,10 @@ const localName = computed({
   set: (value: string) => emit("update:playerName", value),
 });
 
+const countriesForRegion = computed<readonly CareerCountry[]>(() =>
+  props.region ? CAREER_COUNTRIES[props.region] : [],
+);
+
 function goTo(step: OnboardingStep) {
   emit("update:step", step);
 }
@@ -42,7 +50,11 @@ function onIntroNext() {
 }
 
 function onRegionNext() {
-  if (props.region) goTo("role");
+  if (props.region) goTo("country");
+}
+
+function onCountryNext() {
+  if (props.country) goTo("role");
 }
 
 function onRoleNext() {
@@ -71,6 +83,7 @@ function onStart() {
           :placeholder="t('page.game.career.onboarding.playerNamePlaceholder')"
           maxlength="24"
           autocomplete="nickname"
+          spellcheck="false"
         />
       </UFormField>
       <UButton block @click="onIntroNext">
@@ -87,15 +100,37 @@ function onStart() {
       </div>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <UButton
-          v-for="region in CAREER_REGIONS"
-          :key="region"
-          :variant="props.region === region ? 'solid' : 'outline'"
-          @click="emit('selectRegion', region)"
+          v-for="regionOption in CAREER_REGIONS"
+          :key="regionOption"
+          :variant="props.region === regionOption ? 'solid' : 'outline'"
+          @click="emit('selectRegion', regionOption)"
         >
-          {{ t(`page.game.career.onboarding.regions.${region}`) }}
+          {{ t(`page.game.career.onboarding.regions.${regionOption}`) }}
         </UButton>
       </div>
       <UButton block :disabled="!region" @click="onRegionNext">
+        {{ t("page.game.career.onboarding.next") }}
+      </UButton>
+    </div>
+
+    <div v-else-if="step === 'country'" class="flex flex-col gap-4">
+      <div class="space-y-2 text-center">
+        <h2 class="text-lg font-semibold tracking-tight">
+          {{ t("page.game.career.onboarding.countryTitle") }}
+        </h2>
+        <p class="text-sm text-muted">{{ t("page.game.career.onboarding.countryBody") }}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <UButton
+          v-for="countryOption in countriesForRegion"
+          :key="countryOption"
+          :variant="props.country === countryOption ? 'solid' : 'outline'"
+          @click="emit('selectCountry', countryOption)"
+        >
+          {{ t(`page.game.career.onboarding.countries.${countryOption}`) }}
+        </UButton>
+      </div>
+      <UButton block :disabled="!country" @click="onCountryNext">
         {{ t("page.game.career.onboarding.next") }}
       </UButton>
     </div>
@@ -107,15 +142,22 @@ function onStart() {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.roleBody") }}</p>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        <UButton
+      <div class="flex flex-col gap-2">
+        <button
           v-for="roleOption in CAREER_ROLES"
           :key="roleOption"
-          :variant="props.role === roleOption ? 'solid' : 'outline'"
+          type="button"
+          class="border border-default p-4 text-left transition-colors hover:bg-elevated"
+          :class="props.role === roleOption ? 'ring-2 ring-primary' : ''"
           @click="emit('selectRole', roleOption)"
         >
-          {{ t(`page.game.career.onboarding.roles.${roleOption}`) }}
-        </UButton>
+          <p class="font-semibold">
+            {{ t(`page.game.career.onboarding.roles.${roleOption}.label`) }}
+          </p>
+          <p class="mt-1 text-sm text-muted">
+            {{ t(`page.game.career.onboarding.roles.${roleOption}.description`) }}
+          </p>
+        </button>
       </div>
       <UButton block :disabled="!role" @click="onRoleNext">
         {{ t("page.game.career.onboarding.next") }}
