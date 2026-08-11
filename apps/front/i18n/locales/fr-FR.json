@@ -321,22 +321,24 @@
       },
       "career": {
         "title": "RL Career",
-        "subtitle": "Cinq saisons. Un héritage. Vos choix façonnent le parcours.",
+        "subtitle": "Cinq saisons, deux majors chacune. Grimpez au classement mondial et visez les Worlds.",
         "seo": {
-          "title": "RL Career — Simulateur de carrière Rocket League",
-          "description": "Construisez une carrière esport fictive sur cinq saisons avec choix narratifs, résultats de matchs et palmarès partageable. Sans compte."
+          "title": "RL Career — Simulateur de Carrière Rocket League",
+          "description": "Construisez une carrière esport Rocket League sur cinq saisons : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
         },
         "onboarding": {
           "introTitle": "Lancez Votre Carrière",
-          "introBody": "Créez un parcours pro fictif sur cinq saisons façon RLCS. Choisissez région, rôle et background — puis assumez les conséquences.",
+          "introBody": "Créez un parcours pro fictif. Choisissez région, pays, style de jeu et parcours — puis prenez les décisions qui façonnent cinq saisons.",
           "playerNameLabel": "Nom de Joueur",
           "playerNamePlaceholder": "Votre pseudo",
           "regionTitle": "Choisissez Votre Région",
-          "regionBody": "D'où passerez-vous des scrims rookie à Worlds ?",
-          "roleTitle": "Choisissez Votre Rôle",
-          "roleBody": "Votre poste influence les événements et les matchs.",
-          "backgroundTitle": "Choisissez Votre Background",
-          "backgroundBody": "Votre origine définit rating, forme et moral de départ.",
+          "regionBody": "Le circuit sur lequel vous jouez — votre première équipe vient d'ici.",
+          "countryTitle": "Choisissez Votre Pays",
+          "countryBody": "Le drapeau affiché à côté de votre pseudo à l'écran.",
+          "roleTitle": "Choisissez Votre Style de Jeu",
+          "roleBody": "Votre style ajuste vos stats de départ et le déroulement des splits.",
+          "backgroundTitle": "Choisissez Votre Parcours",
+          "backgroundBody": "Votre parcours définit rating, forme et moral de départ.",
           "next": "Continuer",
           "startCareer": "Commencer Saison 1",
           "regions": {
@@ -348,24 +350,66 @@
             "mena": "MENA",
             "apac": "Asie-Pacifique"
           },
+          "countries": {
+            "us": "États-Unis",
+            "ca": "Canada",
+            "mx": "Mexique",
+            "fr": "France",
+            "gb": "Royaume-Uni",
+            "de": "Allemagne",
+            "es": "Espagne",
+            "nl": "Pays-Bas",
+            "se": "Suède",
+            "dk": "Danemark",
+            "it": "Italie",
+            "au": "Australie",
+            "nz": "Nouvelle-Zélande",
+            "br": "Brésil",
+            "ar": "Argentine",
+            "cl": "Chili",
+            "pe": "Pérou",
+            "sa": "Arabie saoudite",
+            "ae": "Émirats arabes unis",
+            "ma": "Maroc",
+            "eg": "Égypte",
+            "jp": "Japon",
+            "kr": "Corée du Sud",
+            "sg": "Singapour",
+            "in": "Inde",
+            "za": "Afrique du Sud",
+            "ng": "Nigeria",
+            "ke": "Kenya"
+          },
           "roles": {
-            "striker": "Attaquant",
-            "mid": "Milieu",
-            "def": "Défenseur",
-            "goalie": "Gardien"
+            "offense": {
+              "label": "Offensif",
+              "description": "Premier homme, porteur de balle, finisseur. Mécaniques élevées, forme en dents de scie. Rating +3 · Forme −2"
+            },
+            "technical": {
+              "label": "Technique",
+              "description": "Flip resets et air dribbles à la demande. La régularité avant tout. Forme +3 · Moral −2"
+            },
+            "defense": {
+              "label": "Défensif",
+              "description": "Dernier rempart : saves, dégagements, rotations calmes. Le mental compte davantage. Moral +3 · Rating −2"
+            }
           },
           "backgrounds": {
             "prodigy": {
               "label": "Prodige",
-              "description": "Plafond élevé, forme brute. Rating 72 · Forme 55 · Moral 60"
+              "description": "SSL à quinze ans, brut mais surdoué. Rating 72 · Forme 55 · Moral 60"
             },
             "grinder": {
               "label": "Grinder",
-              "description": "Éthique de travail. Rating 62 · Forme 70 · Moral 65"
+              "description": "Dix mille heures de training packs. Rating 62 · Forme 70 · Moral 65"
             },
-            "wildcard": {
-              "label": "Wildcard",
-              "description": "Flair imprévisible. Rating 58 · Forme 50 · Moral 80"
+            "oneVOne": {
+              "label": "Joueur 1v1",
+              "description": "Duelliste ranked — mécaniques et reads forgés en 1s. Rating 70 · Forme 68 · Moral 55"
+            },
+            "freestyler": {
+              "label": "Freestyler",
+              "description": "Les clips avant la régularité, le style avant le free play. Rating 66 · Forme 52 · Moral 78"
             }
           }
         },
@@ -376,20 +420,50 @@
         },
         "season": {
           "introTitle": "Saison {season} sur {total}",
-          "introBody": "Trois événements, une phase compétitive, puis une décision d'intersaison. Équipe : {team}.",
-          "begin": "Commencer la Saison",
-          "eventProgress": "Événement {current} sur {total}"
+          "recapTitle": "Saison {season}",
+          "introBody": "Vous jouez pour {team} — actuellement n° {rank} mondial.",
+          "structure": "Deux majors cette saison, chacune précédée de trois régionaux. Marquez {points} points ou plus pour vous qualifier aux Worlds.",
+          "begin": "Commencer la Saison"
         },
-        "match": {
-          "title": "Résultats Compétitifs",
-          "subtitle": "Votre saison sur le circuit",
-          "won": "V",
-          "lost": "D",
+        "event": {
+          "splitDecision": "Split {split} — décision avant la course au major",
+          "worldsDecision": "Worlds — une dernière décision"
+        },
+        "results": {
+          "splitTitle": "Résultats du Split {split}",
+          "worldsTitle": "Résultats des Worlds",
+          "regional": "Régional {index}",
+          "major": "Major {split}",
+          "majorNotQualified": "Non qualifié",
+          "seasonPoints": "Points de la saison : {points}",
+          "points": "{points} pts",
+          "worldsQualified": "Qualifié pour les Worlds — une dernière décision à prendre.",
+          "worldsMissed": "Pas assez de points pour les Worlds cette saison.",
+          "worldsPlacementLabel": "Worlds",
+          "worldsNotQualifiedShort": "Non qualifié",
           "continue": "Continuer"
+        },
+        "placements": {
+          "winner": "Champion",
+          "finalist": "Finaliste",
+          "top4": "Top 4",
+          "top8": "Top 8",
+          "group": "Phase de groupes"
+        },
+        "rankings": {
+          "title": "Classement Mondial",
+          "teams": "Équipes",
+          "players": "Joueurs",
+          "you": "Vous",
+          "yourTeam": "Votre équipe"
         },
         "offseason": {
           "title": "Offre d'Intersaison",
-          "body": "{team} veut vous recruter. Acceptez ou restez chez {currentTeam}.",
+          "body": "{team} veut vous recruter pour la saison prochaine.",
+          "currentTeam": "Équipe actuelle",
+          "offerTeam": "Offre",
+          "worldRank": "N° {rank} mondial",
+          "hint": "Consultez le classement mondial avant de décider.",
           "accept": "Accepter l'Offre",
           "stay": "Rester"
         },
@@ -397,7 +471,12 @@
           "title": "Carrière Terminée",
           "finalRating": "Rating Final",
           "palmarès": "Palmarès",
-          "noTrophies": "Pas de trophée majeur — le parcours compte quand même.",
+          "trophies": {
+            "regional": "Titre régional",
+            "major": "Titre de major",
+            "worlds": "Championnat du monde"
+          },
+          "noTrophies": "Pas de trophée — le parcours compte quand même.",
           "seasonRecap": "Récap par Saison",
           "share": "Copier le Lien",
           "shareCopied": "Lien copié",
@@ -407,657 +486,192 @@
         "share": {
           "notFound": "Carrière introuvable",
           "notFoundBody": "Ce résultat est stocké localement sur l'appareil qui a terminé la carrière. Demandez un nouveau lien ou lancez votre propre run.",
-          "startOwn": "Lancer Votre Carrière"
-        },
-        "stages": {
-          "regional": "Ligue Régionale",
-          "playoffs": "Playoffs Régionaux",
-          "majorQualifier": "Qualifier Major",
-          "major": "Major International",
-          "worlds": "RLCS Worlds"
-        },
-        "placements": {
-          "regionalWinner": "Champion Régional",
-          "regionalTop4": "Top 4 Régional",
-          "regionalGroup": "Phase de Groupes Régionale",
-          "majorWinner": "Champion Major",
-          "majorTop4": "Top 4 Major",
-          "majorGroup": "Phase de Groupes Major",
-          "worldsChampion": "Champion du Monde",
-          "worldsFinalist": "Finaliste Worlds",
-          "worldsTop8": "Top 8 Worlds",
-          "worldsGroup": "Phase de Groupes Worlds"
+          "startOwn": "Lancez Votre Carrière"
         },
         "actions": {
-          "newCareer": "Nouvelle Carrière",
-          "resume": "Reprendre",
-          "abandon": "Abandonner",
+          "abandon": "Abandonner la Carrière",
           "abandonConfirm": "Abandonner cette carrière ? La progression sera perdue."
         },
         "events": {
-          "s1-e01": {
-            "title": "Invitation scrim du top",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-01": {
+            "title": "Votre Speedflip Est Dépassé",
+            "description": "Le coach sort les replays : votre speedflip d'engagement perd les 50/50 contre toutes les équipes du top. Refaire sa mémoire musculaire en plein split est risqué, mais ce défaut coûte des buts.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Reconstruire l'engagement de zéro en free play",
+              "b": "Garder l'ancien engagement jusqu'à l'intersaison",
+              "c": "Le bosser discrètement chaque soir après les scrims"
             }
           },
-          "s1-e02": {
-            "title": "Coach veut des reps en plus",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-02": {
+            "title": "La Review Qui Pique",
+            "description": "L'analyste fige l'image sur deux double commits qui ont offert la série. Tout le monde dans la salle sait que c'est vous à l'écran.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Assumer et drill les rotations jusqu'à l'automatisme",
+              "b": "Défendre vos reads — la passe était jouable",
+              "c": "Demander une review d'équipe plutôt qu'un procès"
             }
           },
-          "s1-e03": {
-            "title": "Drame soirée stream",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-03": {
+            "title": "Une Semaine Avant le Premier Régional",
+            "description": "Une semaine libre avant le début du split, et le roster est divisé sur la façon de l'utiliser.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Solo queue en 1v1 dix heures par jour",
+              "b": "Enchaîner un bloc de scrims contre des prétendants",
+              "c": "Prendre de vrais jours de repos et recharger"
             }
           },
-          "s1-e04": {
-            "title": "Rivalité coéquipier",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-04": {
+            "title": "Un Sponsor Veut Vous Voir Streamer",
+            "description": "Une marque de boisson énergisante propose un contrat : quatre soirées de stream par semaine, un bon salaire, top pour les fans — mais ça mange directement les heures d'entraînement.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Signer — la communauté et le salaire comptent",
+              "b": "Refuser jusqu'à la fin de la saison"
             }
           },
-          "s1-e05": {
-            "title": "Chaos jour de patch",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-05": {
+            "title": "La Méta Vient de Changer",
+            "description": "Les meilleures équipes jouent désormais la possession lente et privent l'adversaire de boost. Votre style rapide semble soudain punissable.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Réapprendre votre jeu autour de la nouvelle méta",
+              "b": "Faire confiance à vos fondamentaux et affiner ce qui marche"
             }
           },
-          "s1-e06": {
-            "title": "Scrims communautaires",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-06": {
+            "title": "Votre Coéquipier Tilte",
+            "description": "Après deux blocs de scrims perdus, votre coéquipier whiffe volontairement et flame en vocal. Le premier régional est dans quelques jours.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Organiser une réunion d'équipe et crever l'abcès",
+              "b": "Couper le vocal et bosser vos propres replays"
             }
           },
-          "s1-e07": {
-            "title": "Réunion sponsor",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-07": {
+            "title": "Le Coach Veut un Nouveau Système",
+            "description": "Le coach vous veut en deuxième homme plutôt que dans votre style naturel de premier homme. Les données disent que ça gagne des matchs ; votre instinct n'est pas d'accord.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Adhésion totale — jouer la nouvelle rotation tout le split",
+              "b": "Compromis : nouveau système en scrims, instinct sur scène",
+              "c": "Refuser — vous êtes arrivé ici en jouant à votre façon"
             }
           },
-          "s1-e08": {
-            "title": "Marathon VOD",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-08": {
+            "title": "Votre Manette Rend l'Âme",
+            "description": "Stick drift en plein split. Une nouvelle manette signifie re-régler deadzones et sensibilité aérienne à quelques jours d'un régional.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Changer maintenant et tout re-régler",
+              "b": "La faire tenir jusqu'à la fin du split avec du scotch et des prières"
             }
           },
-          "s1-e09": {
-            "title": "Session ranked",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-09": {
+            "title": "Invitation Freestyle",
+            "description": "Un freestyler célèbre vous invite à une session de clips qui ferait d'énormes vues. Votre coach préférerait vous voir drill la shadow defense.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Tourner les clips — faire grandir votre nom",
+              "b": "Décliner et drill la défense"
             }
           },
-          "s1-e10": {
-            "title": "Soirée cohésion",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-10": {
+            "title": "Bootcamp à l'Étranger",
+            "description": "L'organisation propose un bootcamp de trois semaines dans une autre région : scrims d'élite, zéro distraction — et zéro confort de la maison.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Faire ses valises et grind",
+              "b": "Rester chez soi et garder sa routine"
             }
           },
-          "s1-e11": {
-            "title": "Spotlight analyste",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-11": {
+            "title": "Les Données Disent le Contraire",
+            "description": "Les chiffres de l'analyste montrent que vous challengez trop tôt et brûlez votre boost en défense. Corriger vos reads signifie des semaines d'inconfort.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Faire confiance aux données et retravailler vos challenges",
+              "b": "Faire confiance à votre instinct — les stats ne voient pas tout"
             }
           },
-          "s1-e12": {
-            "title": "Upgrade matériel",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-12": {
+            "title": "Tempête sur les Réseaux",
+            "description": "Après une élimination en phase de groupes, un clip de votre whiff devant le but vide devient viral. Vos mentions sont invivables.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Couper les réseaux jusqu'au major",
+              "b": "Poster un meme autodérisoire et assumer",
+              "c": "Ne rien dire et laisser les prochains matchs répondre"
             }
           },
-          "s1-e13": {
-            "title": "Preview régionale",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-13": {
+            "title": "Ajouter les Démos à Votre Jeu ?",
+            "description": "Le coach suggère des démos et des bumps agressifs sur les suites d'engagement. Ça gagne les duels de boost mais invite le chaos — et crée des ennemis.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Passer en mode bump total",
+              "b": "Rester propre et positionnel"
             }
           },
-          "s1-e14": {
-            "title": "Débat sommeil",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-14": {
+            "title": "Problème de Couche-Tard",
+            "description": "Vos meilleures mécaniques sortent à 2 h du matin, mais les scrims d'équipe sont à midi. Il faut trancher.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Caler votre sommeil sur les horaires de l'équipe",
+              "b": "Continuer à grind la nuit, là où vous êtes au top"
             }
           },
-          "s1-e15": {
-            "title": "Media day rookie",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-15": {
+            "title": "Showmatch Caritatif",
+            "description": "Vous êtes invité à un showmatch caritatif avec des légendes de la communauté le week-end avant un régional. Super ambiance, zéro valeur de préparation.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Le jouer — la communauté vous a tout donné",
+              "b": "Décliner poliment et scrim à la place"
             }
           },
-          "s2-e01": {
-            "title": "Seeding playoffs en jeu",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "split-16": {
+            "title": "Jour de Patch",
+            "description": "Un patch surprise modifie le respawn des pads de boost et les angles d'engagement. Toutes les équipes du monde réapprennent les mêmes détails ce soir.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Labber les nouveaux timings jusqu'à l'automatisme",
+              "b": "S'adapter en jeu — le feeling avant la théorie"
             }
           },
-          "s2-e02": {
-            "title": "Essai remplaçant",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-01": {
+            "title": "Groupe de la Mort",
+            "description": "Le tirage des Worlds vous place contre le n° 1 mondial et le chouchou du public local. Votre semaine de préparation vient de se charger.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Étudier chaque adversaire image par image",
+              "b": "Vous concentrer sur votre jeu — qu'ils s'adaptent à vous"
             }
           },
-          "s2-e03": {
-            "title": "Offre collab contenu",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-02": {
+            "title": "Jet Lag au LAN",
+            "description": "Vous atterrissez à neuf fuseaux horaires de chez vous, trois jours avant votre premier match. Chacun gère ça différemment.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Récupération stricte : sommeil, repas, sessions légères",
+              "b": "Sessions nocturnes dans l'arène pour s'imprégner de la scène"
             }
           },
-          "s2-e04": {
-            "title": "Récupération vol long",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-03": {
+            "title": "Le Trac de la Grande Scène",
+            "description": "Dix mille fans, les casters qui crient votre pseudo. Vos mains tremblent dans la salle d'échauffement.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Sortir tôt et embrasser la foule",
+              "b": "Casque antibruit, vision tunnel jusqu'au match"
             }
           },
-          "s2-e05": {
-            "title": "Shift méta RLCS",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-04": {
+            "title": "Ils Vous Ont Scouté",
+            "description": "La rumeur circule : les favoris ont bâti tout leur plan de jeu pour vous neutraliser.",
             "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
+              "a": "Retravailler vos engagements dans la nuit",
+              "b": "Le prendre comme un compliment et assumer votre style"
             }
           },
-          "s2-e06": {
-            "title": "Demande fan meetup",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-05": {
+            "title": "Marathon Média",
+            "description": "Interviews, photoshoots, contenus pour le broadcast. Une journée entière loin des manettes juste avant le bracket.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Faire le tour complet de la presse — les fans adorent",
+              "b": "Faire le minimum et retourner s'échauffer"
             }
           },
-          "s2-e07": {
-            "title": "Vote capitanat",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
+          "worlds-06": {
+            "title": "Le Pari de l'Engagement",
+            "description": "La veille du bracket, votre coach propose des fake kickoffs pour contrer le premier homme ultra-agressif des favoris. Risque élevé, récompense élevée.",
             "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s2-e08": {
-            "title": "Coaching privé",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s2-e09": {
-            "title": "Drop merch org",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s2-e10": {
-            "title": "Enquête leak scrim",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s2-e11": {
-            "title": "Showmatch charité",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s2-e12": {
-            "title": "Provocation rival",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s2-e13": {
-            "title": "Planning bootcamp",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s2-e14": {
-            "title": "Alerte blessure",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s2-e15": {
-            "title": "Reveal tableau qualifier",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e01": {
-            "title": "Pression qualifier major",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e02": {
-            "title": "Offre scrim international",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s3-e03": {
-            "title": "Critique analyste",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e04": {
-            "title": "Demande flex rôle",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e05": {
-            "title": "Deal stream qualifier",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s3-e06": {
-            "title": "Tension team house",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e07": {
-            "title": "Patch surprise",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e08": {
-            "title": "Check-in mentor",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s3-e09": {
-            "title": "Scout étranger",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e10": {
-            "title": "Leak contenu",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e11": {
-            "title": "Semaine double tournoi",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s3-e12": {
-            "title": "Visite famille",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e13": {
-            "title": "Panne matériel",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s3-e14": {
-            "title": "Baisse moral",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s3-e15": {
-            "title": "Qualifier dernière chance",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e01": {
-            "title": "Stress début LAN",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e02": {
-            "title": "Énergie du public",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s4-e03": {
-            "title": "Problème lumières scène",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e04": {
-            "title": "Presse internationale",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e05": {
-            "title": "Insomnie avant demis",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s4-e06": {
-            "title": "Revanche rival",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e07": {
-            "title": "Rumeur bonus",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e08": {
-            "title": "Débat timeout coach",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s4-e09": {
-            "title": "Pression file merch",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e10": {
-            "title": "Louange desk analyste",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e11": {
-            "title": "Problème voyage",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s4-e12": {
-            "title": "Contre méta trouvé",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e13": {
-            "title": "Tentation célébration",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s4-e14": {
-            "title": "Gestion blessure",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s4-e15": {
-            "title": "Chemin grande finale",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e01": {
-            "title": "Tirage groupes Worlds",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e02": {
-            "title": "Scrims mondiaux",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s5-e03": {
-            "title": "Question héritage",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e04": {
-            "title": "Discours capitaine",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e05": {
-            "title": "Course à la méta",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s5-e06": {
-            "title": "Soutien région",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e07": {
-            "title": "Supercycle média",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e08": {
-            "title": "Rêve de bague",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s5-e09": {
-            "title": "Narratif outsider",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e10": {
-            "title": "Fantôme du choke",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e11": {
-            "title": "Match amitié",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s5-e12": {
-            "title": "Rumeurs retraite",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e13": {
-            "title": "Dernier patch",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
-            }
-          },
-          "s5-e14": {
-            "title": "Vidéo héritage",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Pousser plus fort",
-              "b": "Repos et reset",
-              "c": "Trouver un juste milieu"
-            }
-          },
-          "s5-e15": {
-            "title": "Carrefour de carrière",
-            "description": "Un moment décisif de votre saison exige une décision. Staff, coéquipiers et fans observent votre réaction.",
-            "choices": {
-              "a": "Prendre le chemin audacieux",
-              "b": "Jouer la sécurité"
+              "a": "Tenter les fakes",
+              "b": "Rester sur les speedflips classiques"
             }
           }
         }

@@ -321,22 +321,24 @@
       },
       "career": {
         "title": "RL Career",
-        "subtitle": "Five seasons. One legacy. Your choices shape the run.",
+        "subtitle": "Five seasons, two majors each. Climb the world rankings and chase Worlds.",
         "seo": {
           "title": "RL Career — Text-Based Rocket League Career Simulator",
-          "description": "Build a five-season Rocket League esports career with narrative choices, match results, and a shareable palmarès. No account required."
+          "description": "Build a five-season Rocket League esports career: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
         },
         "onboarding": {
           "introTitle": "Start Your Career",
-          "introBody": "Create a fictional pro journey across five RLCS-flavored seasons. Pick your region, role, and background — then live with the consequences.",
+          "introBody": "Create a fictional pro journey. Pick your region, country, playstyle and path — then make the calls that shape five seasons.",
           "playerNameLabel": "Player Name",
           "playerNamePlaceholder": "Your gamertag",
           "regionTitle": "Choose Your Region",
-          "regionBody": "Where will you grind from rookie scrims to Worlds?",
-          "roleTitle": "Choose Your Role",
-          "roleBody": "Your position shapes how events and matches play out.",
-          "backgroundTitle": "Choose Your Background",
-          "backgroundBody": "Your origin story sets your starting rating, form, and morale.",
+          "regionBody": "The circuit you compete on — your first team plays here.",
+          "countryTitle": "Choose Your Country",
+          "countryBody": "The flag next to your gamertag on broadcast.",
+          "roleTitle": "Choose Your Playstyle",
+          "roleBody": "How you play shifts your starting stats and how splits unfold.",
+          "backgroundTitle": "Choose Your Path",
+          "backgroundBody": "How you got here sets your starting rating, form and morale.",
           "next": "Continue",
           "startCareer": "Start Season 1",
           "regions": {
@@ -348,24 +350,66 @@
             "mena": "MENA",
             "apac": "Asia-Pacific"
           },
+          "countries": {
+            "us": "United States",
+            "ca": "Canada",
+            "mx": "Mexico",
+            "fr": "France",
+            "gb": "United Kingdom",
+            "de": "Germany",
+            "es": "Spain",
+            "nl": "Netherlands",
+            "se": "Sweden",
+            "dk": "Denmark",
+            "it": "Italy",
+            "au": "Australia",
+            "nz": "New Zealand",
+            "br": "Brazil",
+            "ar": "Argentina",
+            "cl": "Chile",
+            "pe": "Peru",
+            "sa": "Saudi Arabia",
+            "ae": "United Arab Emirates",
+            "ma": "Morocco",
+            "eg": "Egypt",
+            "jp": "Japan",
+            "kr": "South Korea",
+            "sg": "Singapore",
+            "in": "India",
+            "za": "South Africa",
+            "ng": "Nigeria",
+            "ke": "Kenya"
+          },
           "roles": {
-            "striker": "Striker",
-            "mid": "Midfielder",
-            "def": "Defender",
-            "goalie": "Goalkeeper"
+            "offense": {
+              "label": "Offensive",
+              "description": "First man, ball-carrier, finisher. Higher mechanics, streakier form. Rating +3 · Form −2"
+            },
+            "technical": {
+              "label": "Technical",
+              "description": "Flip resets and air dribbles on demand. Consistency is everything. Form +3 · Morale −2"
+            },
+            "defense": {
+              "label": "Defensive",
+              "description": "Last line: saves, clears, calm rotations. Mentality matters more. Morale +3 · Rating −2"
+            }
           },
           "backgrounds": {
             "prodigy": {
               "label": "Prodigy",
-              "description": "High ceiling, raw form. Rating 72 · Form 55 · Morale 60"
+              "description": "SSL at fifteen, raw but gifted. Rating 72 · Form 55 · Morale 60"
             },
             "grinder": {
               "label": "Grinder",
-              "description": "Relentless work ethic. Rating 62 · Form 70 · Morale 65"
+              "description": "Ten thousand hours of training packs. Rating 62 · Form 70 · Morale 65"
             },
-            "wildcard": {
-              "label": "Wildcard",
-              "description": "Unpredictable flair. Rating 58 · Form 50 · Morale 80"
+            "oneVOne": {
+              "label": "1v1 Player",
+              "description": "Ranked duelist — mechanics and reads forged in 1s. Rating 70 · Form 68 · Morale 55"
+            },
+            "freestyler": {
+              "label": "Freestyler",
+              "description": "Clips over consistency, flair over free play. Rating 66 · Form 52 · Morale 78"
             }
           }
         },
@@ -376,20 +420,50 @@
         },
         "season": {
           "introTitle": "Season {season} of {total}",
-          "introBody": "Three story beats, a competitive run, then an offseason decision. Your team: {team}.",
-          "begin": "Begin Season",
-          "eventProgress": "Event {current} of {total}"
+          "recapTitle": "Season {season}",
+          "introBody": "You suit up for {team} — currently world No. {rank}.",
+          "structure": "Two majors this season, each fed by three regionals. Earn {points} points or more and you qualify for Worlds.",
+          "begin": "Begin Season"
         },
-        "match": {
-          "title": "Competitive Results",
-          "subtitle": "Your season on the circuit",
-          "won": "W",
-          "lost": "L",
+        "event": {
+          "splitDecision": "Split {split} — decision before the major run",
+          "worldsDecision": "Worlds — one final decision"
+        },
+        "results": {
+          "splitTitle": "Split {split} Results",
+          "worldsTitle": "Worlds Results",
+          "regional": "Regional {index}",
+          "major": "Major {split}",
+          "majorNotQualified": "Not qualified",
+          "seasonPoints": "Season points: {points}",
+          "points": "{points} pts",
+          "worldsQualified": "Qualified for Worlds — one last call to make.",
+          "worldsMissed": "Not enough points for Worlds this season.",
+          "worldsPlacementLabel": "Worlds",
+          "worldsNotQualifiedShort": "Not qualified",
           "continue": "Continue"
+        },
+        "placements": {
+          "winner": "Champion",
+          "finalist": "Finalist",
+          "top4": "Top 4",
+          "top8": "Top 8",
+          "group": "Group stage"
+        },
+        "rankings": {
+          "title": "World Rankings",
+          "teams": "Teams",
+          "players": "Players",
+          "you": "You",
+          "yourTeam": "Your team"
         },
         "offseason": {
           "title": "Offseason Offer",
-          "body": "{team} wants to sign you. You can accept or stay with {currentTeam}.",
+          "body": "{team} wants to sign you for next season.",
+          "currentTeam": "Current team",
+          "offerTeam": "Offer",
+          "worldRank": "World No. {rank}",
+          "hint": "Check the world rankings before you decide.",
           "accept": "Accept Offer",
           "stay": "Stay Put"
         },
@@ -397,7 +471,12 @@
           "title": "Career Complete",
           "finalRating": "Final Rating",
           "palmarès": "Palmarès",
-          "noTrophies": "No major trophies — but the journey still counts.",
+          "trophies": {
+            "regional": "Regional title",
+            "major": "Major title",
+            "worlds": "World Championship"
+          },
+          "noTrophies": "No trophies — but the journey still counts.",
           "seasonRecap": "Season Recap",
           "share": "Copy Share Link",
           "shareCopied": "Link copied",
@@ -409,655 +488,190 @@
           "notFoundBody": "This result is stored locally on the device that finished the career. Ask them to copy the share link again, or start your own run.",
           "startOwn": "Start Your Career"
         },
-        "stages": {
-          "regional": "Regional League",
-          "playoffs": "Regional Playoffs",
-          "majorQualifier": "Major Qualifier",
-          "major": "International Major",
-          "worlds": "RLCS Worlds"
-        },
-        "placements": {
-          "regionalWinner": "Regional Champion",
-          "regionalTop4": "Regional Top 4",
-          "regionalGroup": "Regional Group Stage",
-          "majorWinner": "Major Champion",
-          "majorTop4": "Major Top 4",
-          "majorGroup": "Major Group Stage",
-          "worldsChampion": "World Champion",
-          "worldsFinalist": "Worlds Finalist",
-          "worldsTop8": "Worlds Top 8",
-          "worldsGroup": "Worlds Group Stage"
-        },
         "actions": {
-          "newCareer": "New Career",
-          "resume": "Resume Career",
           "abandon": "Abandon Career",
           "abandonConfirm": "Abandon this career? Progress will be lost."
         },
         "events": {
-          "s1-e01": {
-            "title": "Scrim Invite From a Top Team",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-01": {
+            "title": "Your Speedflip Is Outdated",
+            "description": "The coach pulls up film: your speedflip kickoff loses 50/50s against every top team. Rebuilding muscle memory mid-split is risky, but the flaw is costing goals.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Rebuild the kickoff from scratch in free play",
+              "b": "Keep the old kickoff until the offseason",
+              "c": "Grind it quietly after scrims every night"
             }
           },
-          "s1-e02": {
-            "title": "Coach Wants Extra Reps",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-02": {
+            "title": "The Replay Review Stings",
+            "description": "The analyst freezes the frame on two double commits that gifted the series away. Everyone in the room knows it's you on screen.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Own it and drill rotations until they're automatic",
+              "b": "Defend your reads — the pass was on",
+              "c": "Ask for a full team review instead of a callout"
             }
           },
-          "s1-e03": {
-            "title": "Stream Night Drama",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-03": {
+            "title": "One Week Before the First Regional",
+            "description": "A free week before the split kicks off, and the roster is divided on how to spend it.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Solo-queue 1v1s ten hours a day",
+              "b": "Lock in a full scrim block against contenders",
+              "c": "Take real rest days and recharge"
             }
           },
-          "s1-e04": {
-            "title": "Teammate Rivalry",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-04": {
+            "title": "A Sponsor Wants You Streaming",
+            "description": "An energy-drink brand offers a deal: four stream nights a week, great money, great for the fans — and it eats straight into training hours.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Sign it — the community and the paycheck matter",
+              "b": "Turn it down until the season ends"
             }
           },
-          "s1-e05": {
-            "title": "Patch Day Chaos",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-05": {
+            "title": "The Meta Just Shifted",
+            "description": "Top teams now slow-play possession and starve boost. Your fast-paced style suddenly looks punishable.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Relearn your game around the new meta",
+              "b": "Trust your fundamentals and sharpen what already works"
             }
           },
-          "s1-e06": {
-            "title": "Community Scrims",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-06": {
+            "title": "Your Teammate Is Tilting",
+            "description": "After two lost scrim blocks, your teammate is whiffing on purpose and flaming in voice. The first regional is days away.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Call a team meeting and clear the air",
+              "b": "Mute comms and grind your own replays"
             }
           },
-          "s1-e07": {
-            "title": "Sponsor Meeting",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-07": {
+            "title": "Coach Wants a New System",
+            "description": "The coach wants you playing second man instead of your natural first-man style. The data says it wins games; your gut disagrees.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Full buy-in — run the new rotation all split",
+              "b": "Meet halfway: new system in scrims, instincts on stage",
+              "c": "Refuse — you got here playing your way"
             }
           },
-          "s1-e08": {
-            "title": "VOD Review Marathon",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-08": {
+            "title": "Your Controller Is Giving Out",
+            "description": "Stick drift, mid-split. A new controller means re-tuning deadzones and aerial sensitivity days before a regional.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Swap now and re-tune everything",
+              "b": "Nurse it through the split with tape and prayers"
             }
           },
-          "s1-e09": {
-            "title": "Ranked Grind Session",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-09": {
+            "title": "Freestyle Invitational",
+            "description": "A famous freestyler invites you to a clips session that would pull huge views. Your coach wants you drilling shadow defense instead.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Film the clips — let your name grow",
+              "b": "Skip it and drill defense"
             }
           },
-          "s1-e10": {
-            "title": "Team Bonding Night",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-10": {
+            "title": "Bootcamp Abroad",
+            "description": "The org offers a three-week bootcamp in another region: elite scrims, zero distractions — and zero home comfort.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Pack your bags and grind",
+              "b": "Stay home and keep your routine"
             }
           },
-          "s1-e11": {
-            "title": "Analyst Spotlight",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-11": {
+            "title": "The Data Says Otherwise",
+            "description": "The analyst's numbers show you challenge too early and burn boost on defense. Fixing your reads means weeks of discomfort.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Trust the data and rework your challenges",
+              "b": "Trust your instincts — stats don't see everything"
             }
           },
-          "s1-e12": {
-            "title": "Hardware Upgrade",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-12": {
+            "title": "Social Media Storm",
+            "description": "After a group-stage exit, a clip of your open-net whiff goes viral. Your mentions are unbearable.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Log off until the major",
+              "b": "Post a self-deprecating meme and own it",
+              "c": "Say nothing and let the next games answer"
             }
           },
-          "s1-e13": {
-            "title": "Regional Preview Show",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-13": {
+            "title": "Add Demos to Your Game?",
+            "description": "The coach suggests aggressive demos and bumps on kickoff follow-ups. It wins boost fights but invites chaos — and makes enemies.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Go full bump mode",
+              "b": "Keep it clean and positional"
             }
           },
-          "s1-e14": {
-            "title": "Sleep Schedule Debate",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-14": {
+            "title": "Night Owl Problem",
+            "description": "Your best mechanics show up at 2 a.m., but team scrims run at noon. Something has to give.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Fix your sleep schedule around the team's hours",
+              "b": "Keep grinding nights where you peak"
             }
           },
-          "s1-e15": {
-            "title": "Rookie Media Day",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e01": {
-            "title": "Playoff Seeding on the Line",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e02": {
-            "title": "Substitute Tryout",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s2-e03": {
-            "title": "Content Collab Offer",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e04": {
-            "title": "Long Flight Recovery",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e05": {
-            "title": "Meta Shift in RLCS",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s2-e06": {
-            "title": "Fan Meetup Request",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e07": {
-            "title": "Captaincy Vote",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e08": {
-            "title": "Private Coaching Offer",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s2-e09": {
-            "title": "Org Merch Drop",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e10": {
-            "title": "Scrim Leak Investigation",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s2-e11": {
+          "split-15": {
             "title": "Charity Showmatch",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+            "description": "You're invited to a charity showmatch with community legends the weekend before a regional. Great vibes, zero prep value.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Play it — the community gave you everything",
+              "b": "Politely decline and scrim instead"
             }
           },
-          "s2-e12": {
-            "title": "Rival Team Taunt",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "split-16": {
+            "title": "Patch Day",
+            "description": "A surprise patch tweaks boost pad respawns and kickoff spawn angles. Every team in the world is relearning the same details tonight.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Lab the new timings until they're second nature",
+              "b": "Adapt on the fly — feel over theory"
             }
           },
-          "s2-e13": {
-            "title": "Bootcamp Schedule",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-01": {
+            "title": "Group of Death",
+            "description": "The Worlds draw lands you against the world No. 1 and the host region's crowd favorite. Your prep week just got heavy.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Study every opponent frame by frame",
+              "b": "Focus on your own game — let them adapt to you"
             }
           },
-          "s2-e14": {
-            "title": "Injury Scare",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-02": {
+            "title": "Jet Lag at the LAN",
+            "description": "You land nine time zones from home, three days before your opener. Everyone handles it differently.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Strict recovery: sleep, food, light sessions",
+              "b": "Midnight arena sessions to soak in the stage"
             }
           },
-          "s2-e15": {
-            "title": "Qualifier Draw Reveal",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-03": {
+            "title": "Main Stage Nerves",
+            "description": "Ten thousand fans, casters shouting your gamertag. Your hands are shaking in the warm-up room.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Walk out early and embrace the crowd",
+              "b": "Noise-cancelling on, tunnel vision until game time"
             }
           },
-          "s3-e01": {
-            "title": "Major Qualifier Pressure",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-04": {
+            "title": "They Scouted You",
+            "description": "Word gets around: the favorites built their entire gameplan around shutting you down.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Rework your kickoff plays overnight",
+              "b": "Take it as a compliment and double down on your style"
             }
           },
-          "s3-e02": {
-            "title": "International Scrim Offer",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-05": {
+            "title": "Media Day Marathon",
+            "description": "Interviews, photoshoots, broadcast content. It's a full day off the sticks right before the bracket.",
             "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
+              "a": "Give the full press run — the fans love it",
+              "b": "Do the minimum and get back to warm-ups"
             }
           },
-          "s3-e03": {
-            "title": "Analyst Criticism",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
+          "worlds-06": {
+            "title": "The Kickoff Gamble",
+            "description": "The night before the bracket, your coach proposes fake kickoffs to counter the favorites' hyper-aggressive first man. High risk, high reward.",
             "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e04": {
-            "title": "Role Flex Request",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e05": {
-            "title": "Qualifier Stream Deal",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s3-e06": {
-            "title": "Team House Tension",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e07": {
-            "title": "Surprise Patch Notes",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e08": {
-            "title": "Mentor Check-In",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s3-e09": {
-            "title": "Scout From Abroad",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e10": {
-            "title": "Content Leak",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e11": {
-            "title": "Dual Tournament Week",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s3-e12": {
-            "title": "Family Visit",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e13": {
-            "title": "Equipment Failure",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s3-e14": {
-            "title": "Motivational Slump",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s3-e15": {
-            "title": "Last-Chance Qualifier",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e01": {
-            "title": "LAN Debut Nerves",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e02": {
-            "title": "Crowd Energy",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s4-e03": {
-            "title": "Stage Lighting Issues",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e04": {
-            "title": "International Press",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e05": {
-            "title": "Sleepless Before Semis",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s4-e06": {
-            "title": "Rival Rematch",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e07": {
-            "title": "Signing Bonus Rumor",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e08": {
-            "title": "Coach Timeout Debate",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s4-e09": {
-            "title": "Merch Line Pressure",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e10": {
-            "title": "Analyst Desk Praise",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e11": {
-            "title": "Travel Snag",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s4-e12": {
-            "title": "Meta Counter Found",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e13": {
-            "title": "Team Celebration Temptation",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s4-e14": {
-            "title": "Injury Management",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s4-e15": {
-            "title": "Grand Final Path",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e01": {
-            "title": "Worlds Group Draw",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e02": {
-            "title": "Global Scrims",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s5-e03": {
-            "title": "Legacy Question",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e04": {
-            "title": "Captain Speech",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e05": {
-            "title": "Meta Arms Race",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s5-e06": {
-            "title": "Home Region Support",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e07": {
-            "title": "Media Supercycle",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e08": {
-            "title": "Championship Ring Dreams",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s5-e09": {
-            "title": "Underdog Narrative",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e10": {
-            "title": "Choking Ghosts",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e11": {
-            "title": "Friendship Match",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s5-e12": {
-            "title": "Retirement Rumors",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e13": {
-            "title": "Final Patch Before Knockouts",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
-            }
-          },
-          "s5-e14": {
-            "title": "Team Legacy Video",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Push harder",
-              "b": "Rest and reset",
-              "c": "Find middle ground"
-            }
-          },
-          "s5-e15": {
-            "title": "Career Crossroads",
-            "description": "A pivotal moment in your season demands a decision. Your staff, teammates, and fans are watching how you respond.",
-            "choices": {
-              "a": "Take the bold path",
-              "b": "Play it safe"
+              "a": "Run the fakes",
+              "b": "Stick to standard speedflips"
             }
           }
         }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { CareerResult } from "~/types/career";
+import type { CareerResult, CareerSeasonRecord } from "~/types/career";
 
 const props = defineProps<{
   result: CareerResult;
@@ -18,6 +18,24 @@ function onShare() {
   emit("share");
   toast.add({ title: t("page.game.career.end.shareCopied") });
 }
+
+const trophyCounts = computed(() => {
+  const counts = { regional: 0, major: 0, worlds: 0 };
+  for (const trophy of props.result.trophies) {
+    counts[trophy.type] += 1;
+  }
+  return counts;
+});
+
+const hasTrophies = computed(() => props.result.trophies.length > 0);
+
+function majorSummary(season: CareerSeasonRecord, split: number): string {
+  const record = season.splits.find((entry) => entry.split === split);
+  if (!record) return t("page.game.career.results.majorNotQualified");
+  return record.major
+    ? t(`page.game.career.placements.${record.major}`)
+    : t("page.game.career.results.majorNotQualified");
+}
 </script>
 
 <template>
@@ -28,8 +46,9 @@ function onShare() {
       </h2>
       <p class="text-xl font-bold tracking-tight">{{ result.playerName }}</p>
       <p class="text-sm text-muted">
+        {{ t(`page.game.career.onboarding.countries.${result.country}`) }} ·
         {{ t(`page.game.career.onboarding.regions.${result.region}`) }} ·
-        {{ t(`page.game.career.onboarding.roles.${result.role}`) }}
+        {{ t(`page.game.career.onboarding.roles.${result.role}.label`) }}
       </p>
     </div>
 
@@ -44,13 +63,18 @@ function onShare() {
 
     <div class="space-y-2">
       <h3 class="text-sm font-semibold">{{ t("page.game.career.end.palmarès") }}</h3>
-      <ul v-if="result.trophies.length" class="flex flex-col gap-1">
+      <ul v-if="hasTrophies" class="flex flex-col gap-1">
         <li
-          v-for="(trophy, index) in result.trophies"
-          :key="index"
-          class="border border-default px-3 py-2 text-sm"
+          v-if="trophyCounts.worlds > 0"
+          class="border border-default px-3 py-2 text-sm font-medium"
         >
-          {{ t(trophy) }}
+          {{ trophyCounts.worlds }}× {{ t("page.game.career.end.trophies.worlds") }}
+        </li>
+        <li v-if="trophyCounts.major > 0" class="border border-default px-3 py-2 text-sm">
+          {{ trophyCounts.major }}× {{ t("page.game.career.end.trophies.major") }}
+        </li>
+        <li v-if="trophyCounts.regional > 0" class="border border-default px-3 py-2 text-sm">
+          {{ trophyCounts.regional }}× {{ t("page.game.career.end.trophies.regional") }}
         </li>
       </ul>
       <p v-else class="text-sm text-muted">{{ t("page.game.career.end.noTrophies") }}</p>
@@ -64,13 +88,27 @@ function onShare() {
           :key="season.season"
           class="border border-default p-3 text-sm"
         >
-          <p class="font-medium">
-            {{ t("page.game.career.season.introTitle", { season: season.season, total: 5 }) }}
-            — {{ season.team }}
+          <div class="flex items-center justify-between gap-2">
+            <p class="font-medium">
+              {{ t("page.game.career.season.recapTitle", { season: season.season }) }}
+              — {{ season.teamName }}
+            </p>
+            <p class="shrink-0 text-muted tabular-nums">
+              {{ t("page.game.career.results.points", { points: season.points }) }}
+            </p>
+          </div>
+          <p class="mt-1 text-muted">
+            {{ t("page.game.career.results.major", { split: 1 }) }}: {{ majorSummary(season, 1) }} ·
+            {{ t("page.game.career.results.major", { split: 2 }) }}:
+            {{ majorSummary(season, 2) }}
           </p>
-          <p class="text-muted">{{ t(season.placement) }}</p>
-          <p class="tabular-nums text-muted">
-            {{ t("page.game.career.end.finalRating") }}: {{ season.ratingEnd }}
+          <p class="text-muted">
+            {{ t("page.game.career.results.worldsPlacementLabel") }}:
+            {{
+              season.worlds
+                ? t(`page.game.career.placements.${season.worlds}`)
+                : t("page.game.career.results.worldsNotQualifiedShort")
+            }}
           </p>
         </li>
       </ul>
