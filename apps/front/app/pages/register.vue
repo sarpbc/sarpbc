@@ -2,7 +2,7 @@
 const config = useRuntimeConfig();
 const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
-const { attrs: cuelumeAttrs } = useCuelume();
+const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
 interface RegisterState {
   userName: string;
@@ -18,6 +18,7 @@ const state = reactive<RegisterState>({
 
 async function onSubmit(event: Event) {
   event.preventDefault();
+  playCue("loading");
 
   const res: { success?: boolean } = await $fetch<{
     success?: boolean;
@@ -122,6 +123,7 @@ function googleLogin() {
             type="submit"
             color="neutral"
             class="w-full flex flex-col items-center cursor-pointer"
+            :class="pressClass"
             v-bind="cuelumeAttrs.pressRelease"
           />
         </UForm>

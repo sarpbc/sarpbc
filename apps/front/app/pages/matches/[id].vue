@@ -281,7 +281,7 @@ function tournamentMatchesPath(tournamentId: string) {
                 v-if="teamA?.team.slug"
                 :to="$localePath(`/team/${teamA.team.slug}`)"
                 variant="inline"
-                class="inline-block max-w-full truncate active:scale-[0.96]"
+                class="inline-block max-w-full truncate"
               >
                 {{ participantName(teamA) }}
               </UiLink>
@@ -311,7 +311,7 @@ function tournamentMatchesPath(tournamentId: string) {
                 v-if="teamB?.team.slug"
                 :to="$localePath(`/team/${teamB.team.slug}`)"
                 variant="inline"
-                class="inline-block max-w-full truncate active:scale-[0.96]"
+                class="inline-block max-w-full truncate"
               >
                 {{ participantName(teamB) }}
               </UiLink>
@@ -350,7 +350,7 @@ function tournamentMatchesPath(tournamentId: string) {
               <ULink
                 v-if="participant.team.slug"
                 :to="$localePath(`/team/${participant.team.slug}`)"
-                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.96]"
+                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <TeamImg
                   :team-name="participant.team.name"

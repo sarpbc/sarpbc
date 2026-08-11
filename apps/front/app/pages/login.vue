@@ -8,7 +8,7 @@ const route = useRoute();
 const localePath = useLocalePath();
 const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
-const { attrs: cuelumeAttrs } = useCuelume();
+const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
 interface LoginState {
   email: string;
@@ -52,6 +52,7 @@ async function onSubmit(event: Event) {
   }
 
   pending.value = true;
+  playCue("loading");
 
   try {
     const res: { success?: boolean } = await $fetch<{
@@ -159,6 +160,7 @@ function googleLogin() {
             :loading="pending"
             :disabled="pending"
             class="w-full flex flex-col items-center cursor-pointer"
+            :class="pressClass"
             v-bind="cuelumeAttrs.pressRelease"
           />
         </UForm>

@@ -4,16 +4,20 @@ import { bind, play, setEnabled, setVolume, type SoundName } from "cuelume";
  * Declarative interaction sounds via Cuelume (`data-cuelume-*` on controls).
  * Call `initCuelume()` once on the client (see `app/plugins/cuelume.client.ts`).
  *
+ * Prefer press/release on rare actions (buttons). Do not attach hover ticks to
+ * dense lists or nav — they become noise. Use `playCue("loading")` when
+ * user-initiated async work starts.
+ *
  * @example
  * ```vue
- * <UButton type="submit" v-bind="cuelumeAttrs.pressRelease">Save</UButton>
- * <ULink :to="path" v-bind="cuelumeAttrs.hoverTick">Matches</ULink>
+ * <UiButton type="submit">Save</UiButton>
  * <UButton v-bind="cuelumeAttrs.toggle" @click="toggle">Dark mode</UButton>
  * ```
  *
  * @example
  * ```ts
  * const { playCue } = useCuelume();
+ * playCue("loading");
  * playCue("success");
  * ```
  */
@@ -23,15 +27,15 @@ export const cuelumeAttrs = {
     "data-cuelume-press": "",
     "data-cuelume-release": "",
   },
-  /** Nav links — fine-pointer hover tick (ignored on touch). */
-  hoverTick: {
-    "data-cuelume-hover": "tick",
-  },
   /** Two-state controls (theme, tabs). */
   toggle: {
     "data-cuelume-toggle": "",
   },
 } as const;
+
+/** Transform-only press squash — does not affect layout flow. */
+export const cuelumePressClass =
+  "origin-center active:scale-[0.96] motion-reduce:active:scale-100 [transition-property:transform] duration-100 ease-out motion-reduce:transition-none";
 
 let initialized = false;
 
@@ -63,6 +67,7 @@ export function initCuelume(root?: ParentNode): void {
 export function useCuelume() {
   return {
     attrs: cuelumeAttrs,
+    pressClass: cuelumePressClass,
     playCue(name: SoundName) {
       play(name);
     },
