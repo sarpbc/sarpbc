@@ -1,27 +1,67 @@
 <script lang="ts" setup>
+import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { Tournament } from "~/types/tournament";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
 
-const limit = 50;
+const limit = 25;
+const page = ref(1);
 const isSyncingAdditions = ref(false);
 const syncingTournamentId = ref<string | null>(null);
 
-const { data, status, refresh } = await useLazyAsyncData(
-  "admin-tournaments-list",
-  () => getAllTournaments({ limit }),
-  { server: false },
+const tournaments = ref<Tournament[]>([]);
+const total = ref(0);
+
+const { status, data, refresh } = await useLazyAsyncData(
+  () => `admin-tournaments-list-${page.value}`,
+  () => getAllTournaments({ limit, offset: (page.value - 1) * limit }),
+  {
+    default: () => ({ tournaments: [], total: 0 }),
+    watch: [page],
+    server: false,
+  },
 );
 
-const tournaments = computed(() => data.value ?? []);
+watch(
+  status,
+  (s) => {
+    if (s === "success" && data.value) {
+      tournaments.value = data.value.tournaments;
+      total.value = data.value.total;
+    }
+  },
+  { immediate: true },
+);
 
 const breadcrumbItems = computed(() => [
   {
     label: t("page.tournaments.title"),
   },
 ]);
+
+const columns: TableColumn<Tournament>[] = [
+  {
+    id: "name",
+    header: t("page.tournaments.columns.name"),
+    cell: ({ row }) => tournamentLabel(row.original),
+  },
+  {
+    id: "source",
+    header: t("page.tournaments.columns.source"),
+  },
+  {
+    id: "beginAt",
+    header: t("page.tournaments.columns.beginAt"),
+    cell: ({ row }) =>
+      row.original.beginAt ? new Date(row.original.beginAt).toLocaleDateString() : "-",
+  },
+  {
+    id: "actions",
+    header: t("page.tournaments.columns.actions"),
+  },
+];
 
 function tournamentLabel(tournament: Tournament): string {
   const year = tournament.beginAt
@@ -33,6 +73,11 @@ function tournamentLabel(tournament: Tournament): string {
 
 function isManualTournament(tournament: Tournament): boolean {
   return tournament.source === "manual";
+}
+
+function selectRow(e: Event, row: TableRow<Tournament>) {
+  e.preventDefault();
+  navigateTo(localePath(`/tournaments/${row.original.id}`));
 }
 
 async function handleSyncAdditions() {
@@ -48,7 +93,8 @@ async function handleSyncAdditions() {
   }
 }
 
-async function handleSyncTournament(tournamentId: string) {
+async function handleSyncTournament(e: Event, tournamentId: string) {
+  e.stopPropagation();
   syncingTournamentId.value = tournamentId;
   try {
     const success = await syncTournament(tournamentId);
@@ -59,6 +105,10 @@ async function handleSyncTournament(tournamentId: string) {
   } finally {
     syncingTournamentId.value = null;
   }
+}
+
+async function updatePage(value: number) {
+  page.value = value;
 }
 </script>
 
@@ -85,68 +135,80 @@ async function handleSyncTournament(tournamentId: string) {
     </template>
 
     <DashboardContent>
-      <div class="flex flex-col gap-4">
-        <p v-if="status === 'pending'" class="text-sm text-muted">
-          {{ $t("page.tournaments.loading") }}
-        </p>
-        <p v-else class="text-sm text-muted">
-          {{ $t("page.tournaments.tournamentsCount", { count: tournaments.length }) }}
-        </p>
-
-        <div
-          v-for="tournament in tournaments"
-          :key="tournament.id"
-          class="flex w-full flex-row items-center justify-between gap-4 border border-default p-4"
+      <ClientOnly>
+        <UTable
+          :data="tournaments"
+          :columns="columns"
+          :ui="{
+            base: 'table-fixed border-separate border-spacing-0',
+            thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
+            tbody:
+              '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+            th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
+            td: 'border-b border-muted',
+          }"
+          :loading="status === 'pending'"
+          sticky
+          @select="selectRow"
         >
-          <div class="flex min-w-0 flex-col gap-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="truncate text-lg font-semibold">
-                {{ tournamentLabel(tournament) }}
-              </h2>
-              <UBadge
-                :color="isManualTournament(tournament) ? 'primary' : 'neutral'"
-                variant="subtle"
-                :label="
-                  isManualTournament(tournament)
-                    ? $t('page.tournaments.source.manual')
-                    : $t('page.tournaments.source.pandascore')
-                "
+          <template #source-cell="{ row }">
+            <UBadge
+              :color="isManualTournament(row.original) ? 'primary' : 'neutral'"
+              variant="subtle"
+              :label="
+                isManualTournament(row.original)
+                  ? $t('page.tournaments.source.manual')
+                  : $t('page.tournaments.source.pandascore')
+              "
+            />
+          </template>
+          <template #actions-cell="{ row }">
+            <div class="flex flex-row items-center justify-end gap-1">
+              <UButton
+                v-if="isManualTournament(row.original)"
+                variant="ghost"
+                size="xs"
+                icon="i-fluent-edit-24-regular"
+                :title="$t('page.tournaments.edit.action')"
+                :to="localePath(`/tournaments/${row.original.id}/edit`)"
+                @click.stop
+              />
+              <UButton
+                v-if="!isManualTournament(row.original)"
+                variant="ghost"
+                size="xs"
+                icon="i-fluent-arrow-sync-24-regular"
+                :loading="syncingTournamentId === row.original.id"
+                :title="$t('page.tournaments.syncTournament')"
+                @click="(e) => handleSyncTournament(e, row.original.id)"
               />
             </div>
-            <p v-if="tournament.beginAt" class="text-sm text-muted">
-              {{ new Date(tournament.beginAt).toLocaleDateString() }}
-            </p>
-          </div>
+          </template>
+        </UTable>
 
-          <div class="flex shrink-0 flex-row gap-2">
-            <UButton
-              v-if="isManualTournament(tournament)"
-              variant="soft"
-              icon="i-fluent-edit-24-regular"
-              :label="$t('page.tournaments.edit.action')"
-              :to="localePath(`/tournaments/${tournament.id}/edit`)"
-            />
-            <UButton
-              variant="soft"
-              icon="i-fluent-trophy-24-regular"
-              :label="$t('page.tournaments.viewMatches')"
-              :to="localePath(`/tournaments/${tournament.id}`)"
-            />
-            <UButton
-              v-if="!isManualTournament(tournament)"
-              variant="soft"
-              icon="i-fluent-arrow-sync-24-regular"
-              :loading="syncingTournamentId === tournament.id"
-              :title="$t('page.tournaments.syncTournament')"
-              @click="handleSyncTournament(tournament.id)"
-            />
-          </div>
-        </div>
-
-        <div v-if="status !== 'pending' && tournaments.length === 0" class="text-sm text-muted">
+        <div
+          v-if="status !== 'pending' && tournaments.length === 0"
+          class="py-6 text-sm text-muted"
+        >
           {{ $t("page.tournaments.noTournaments") }}
         </div>
-      </div>
+
+        <div
+          v-else-if="status !== 'pending'"
+          class="mt-4 flex w-full flex-row items-center justify-between gap-4"
+        >
+          <span class="text-muted">
+            {{ t("page.tournaments.tournamentsCount", { count: total }) }}
+          </span>
+          <UPagination
+            v-if="total > limit"
+            :page="page"
+            :total="total"
+            :items-per-page="limit"
+            @update:page="updatePage"
+          />
+        </div>
+      </ClientOnly>
     </DashboardContent>
   </NuxtLayout>
 </template>

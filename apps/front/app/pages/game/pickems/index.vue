@@ -9,13 +9,15 @@ setPageSeo({
 });
 
 const {
-  data: tournaments,
+  data: tournamentsResponse,
   pending,
   error,
   refresh,
 } = await useLazyAsyncData(`tournaments-pickems`, () =>
   getAllTournaments({ limit: 10, pickems: true }),
 );
+
+const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? []);
 </script>
 
 <template>

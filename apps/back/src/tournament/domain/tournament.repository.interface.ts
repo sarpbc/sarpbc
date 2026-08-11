@@ -20,7 +20,7 @@ export interface ITournamentRepository {
     offset?: number;
     pickems?: boolean;
     activeOnly?: boolean;
-  }): Promise<Tournament[]>;
+  }): Promise<[Tournament[], number]>;
   findById(id: string): Promise<Tournament | null>;
   findByPandascoreId(pandascoreId: number): Promise<Tournament | null>;
   findAll(fields?: string[]): Promise<Tournament[]>;

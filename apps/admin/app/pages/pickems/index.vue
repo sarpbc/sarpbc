@@ -16,7 +16,7 @@ const { data, status, refresh } = await useLazyAsyncData(
   { server: false },
 );
 
-const tournaments = computed(() => data.value ?? []);
+const tournaments = computed(() => data.value?.tournaments ?? []);
 
 const breadcrumbItems = computed(() => [
   {

@@ -226,6 +226,7 @@
       "headers": {
         "matchesLive": "{count} live now",
         "tournamentsNext": "Next: {name}",
+        "tournamentsTotal": "{count} tournaments",
         "forumPosts": "{count} posts",
         "pickemsOpen": "{count} open pick'ems",
         "playersTotal": "{count} players",
@@ -507,7 +508,10 @@
     },
     "tournaments": {
       "index": {
-        "title": "Tournaments"
+        "title": "Tournaments",
+        "description": "Browse all {count} Rocket League tournaments, brackets, and schedules on sarpbc.org",
+        "empty": "No tournaments found.",
+        "page": "Page"
       },
       "id": {
         "seoTitle": "{tournamentName} Bracket | sarpbc.org",

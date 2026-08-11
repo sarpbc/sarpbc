@@ -23,7 +23,7 @@ export type PickemPersonalRanking = {
 };
 
 export async function getActivePickemTournaments(limit = 1): Promise<Tournament[]> {
-  const tournaments = await getAllTournaments({
+  const { tournaments } = await getAllTournaments({
     limit: Math.max(limit, 1),
     pickems: true,
     activeOnly: true,
