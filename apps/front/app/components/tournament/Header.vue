@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface Props {
   tournamentId: string;
-  activeTab: "overview" | "matches" | "teams";
+  activeTab: "overview" | "matches";
 }
 
 const { tournamentId, activeTab } = defineProps<Props>();
@@ -20,13 +20,6 @@ const { tournamentId, activeTab } = defineProps<Props>();
       :to="$localePath(`/tournaments/${tournamentId}/matches`)"
       :label="$t('general.matches')"
       :variant="activeTab === 'matches' ? 'solid' : 'soft'"
-      color="neutral"
-      class="w-full items-center justify-center"
-    />
-    <UButton
-      :to="$localePath(`/tournaments/${tournamentId}/teams`)"
-      :label="$t('general.teams')"
-      :variant="activeTab === 'teams' ? 'solid' : 'soft'"
       color="neutral"
       class="w-full items-center justify-center"
     />

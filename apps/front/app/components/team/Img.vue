@@ -59,10 +59,7 @@ const dim = computed(() => dimensions[size]);
       :sizes="sizesAttr[size]"
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
-      :class="[
-        fallbackRadiusClasses[size],
-        'max-h-full max-w-full object-contain outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10',
-      ]"
+      :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
       :style="invertLightmode ? 'filter: invert(1);' : ''"
     />
     <div

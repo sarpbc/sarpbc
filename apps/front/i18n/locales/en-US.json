@@ -533,16 +533,9 @@
           "title": "Participating Teams",
           "empty": "Teams not announced yet.",
           "emptyHint": "Check back when the tournament roster is confirmed.",
-          "openRoster": "Open {team} roster",
+          "openRoster": "Show {team} roster",
           "viewTeam": "View {team}",
-          "rosterEmpty": "Roster not available yet.",
-          "viewAllTeams": "View All Teams",
-          "viewAllTeamsCount": "View All {count} Teams"
-        },
-        "teams": {
-          "title": "Teams & Rosters",
-          "empty": "Teams not announced yet.",
-          "emptyHint": "Check back when the tournament roster is confirmed."
+          "rosterEmpty": "Roster not available yet."
         },
         "hero": {
           "teamsCount": "{count} team | {count} teams",

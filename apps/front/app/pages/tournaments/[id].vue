@@ -1,4 +1,10 @@
 <script lang="ts" setup>
+import {
+  getTournamentTabFromPath,
+  getTournamentTabTransitionName,
+  type TournamentTab,
+} from "~/utils/tournamentTabRoute";
+
 const route = useRoute();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -27,6 +33,25 @@ const {
     default: () => null,
   },
 );
+
+const activeTab = computed<TournamentTab>(() => getTournamentTabFromPath(route.path));
+
+const tabTransitionName = ref("tournament-tab-left");
+
+const tabTransition = computed(() => ({
+  name: tabTransitionName.value,
+}));
+
+onBeforeRouteUpdate((to, from) => {
+  if (to.params.id !== from.params.id) {
+    return;
+  }
+
+  const nextTransition = getTournamentTabTransitionName(from.path, to.path);
+  if (nextTransition) {
+    tabTransitionName.value = nextTransition;
+  }
+});
 
 const title = computed(() =>
   tournament.value
@@ -66,9 +91,6 @@ watch(
           <div class="h-3 w-48 rounded bg-elevated" />
         </div>
       </UiCrossCard>
-      <div class="flex flex-col gap-px border border-default">
-        <USkeleton v-for="index in 4" :key="index" class="h-row w-full" />
-      </div>
     </div>
 
     <UiCard v-else-if="error">
@@ -85,8 +107,67 @@ watch(
 
     <template v-else-if="tournament">
       <TournamentHero :tournament="tournament" />
-      <TournamentHeader :tournament-id="tournamentId" active-tab="teams" />
-      <TournamentTeamsList :tournament="tournament" />
+      <TournamentHeader :tournament-id="tournamentId" :active-tab="activeTab" />
+      <div class="tournament-tab-outlet overflow-hidden">
+        <NuxtPage :transition="tabTransition" />
+      </div>
     </template>
   </div>
 </template>
+
+<style>
+.tournament-tab-outlet {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.tournament-tab-outlet > * {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.tournament-tab-left-enter-active,
+.tournament-tab-left-leave-active,
+.tournament-tab-right-enter-active,
+.tournament-tab-right-leave-active {
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tournament-tab-left-enter-from {
+  opacity: 0;
+  transform: translateX(1.5rem);
+}
+
+.tournament-tab-left-leave-to {
+  opacity: 0;
+  transform: translateX(-1.5rem);
+}
+
+.tournament-tab-right-enter-from {
+  opacity: 0;
+  transform: translateX(-1.5rem);
+}
+
+.tournament-tab-right-leave-to {
+  opacity: 0;
+  transform: translateX(1.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tournament-tab-left-enter-active,
+  .tournament-tab-left-leave-active,
+  .tournament-tab-right-enter-active,
+  .tournament-tab-right-leave-active {
+    transition: opacity 150ms ease;
+  }
+
+  .tournament-tab-left-enter-from,
+  .tournament-tab-left-leave-to,
+  .tournament-tab-right-enter-from,
+  .tournament-tab-right-leave-to {
+    transform: none;
+  }
+}
+</style>

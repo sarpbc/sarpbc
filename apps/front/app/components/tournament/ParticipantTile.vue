@@ -15,7 +15,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
 </script>
 
 <template>
-  <UPopover v-model:open="open">
+  <UPopover v-model:open="open" mode="hover" enable-touch :open-delay="80" :close-delay="100">
     <button
       type="button"
       class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-default hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
