@@ -93,7 +93,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
                 status="upcoming"
                 class="touch-manipulation"
               >
-                <MatchRow :match="match" />
+                <MatchRow :match="match" :show-date="false" />
               </MatchDiscoveryLink>
             </div>
           </UiCard>

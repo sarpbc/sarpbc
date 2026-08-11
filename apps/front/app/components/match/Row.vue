@@ -1,24 +1,56 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "~/types/matches";
-const { locale } = useI18n();
+import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
 
-const hourDf = new Intl.DateTimeFormat(locale.value, {
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const { locale, t } = useI18n();
+
+const hourDf = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+);
 
 const {
   match,
   live = false,
   divider = true,
   result = false,
+  /** When false, always show time only (day headers already provide the date). */
+  showDate = true,
 } = defineProps<{
   match: MatchListItem;
   live?: boolean;
   /** Bottom border between rows. Omit on the last row when a footer owns the separator. */
   divider?: boolean;
   result?: boolean;
+  showDate?: boolean;
 }>();
+
+type ScheduleDisplay =
+  | { kind: "time"; time: string }
+  | { kind: "tomorrow"; label: string; time: string };
+
+const schedule = computed((): ScheduleDisplay | null => {
+  const beginAt = parseMatchDate(match.beginAt);
+  if (!beginAt) {
+    return null;
+  }
+
+  const time = hourDf.value.format(beginAt);
+  if (!showDate) {
+    return { kind: "time", time };
+  }
+
+  const offset = daysFromToday(beginAt);
+  if (offset === 1) {
+    return { kind: "tomorrow", label: t("components.match.tomorrow"), time };
+  }
+
+  // Today (and any other day when showDate is on outside the rail): time only.
+  return { kind: "time", time };
+});
 </script>
 
 <template>
@@ -43,11 +75,21 @@ const {
           }}
         </span>
       </div>
-      <div v-if="!result" class="col-span-1 flex flex-col items-end justify-center gap-1">
+      <div v-if="!result" class="col-span-1 flex flex-col items-end justify-center gap-0.5">
         <DiscussionCommentCount :count="match.commentCount ?? 0" />
         <UiBadgeLive v-if="live" />
-        <span v-else-if="match.beginAt" class="text-end text-xs text-muted font-thin tabular-nums">
-          {{ hourDf.format(new Date(match.beginAt)) }}
+        <span
+          v-else-if="schedule?.kind === 'tomorrow'"
+          class="flex flex-col items-end text-end text-xs text-muted font-thin tabular-nums leading-tight"
+        >
+          <span>{{ schedule.label }}</span>
+          <span>{{ schedule.time }}</span>
+        </span>
+        <span
+          v-else-if="schedule?.kind === 'time'"
+          class="text-end text-xs text-muted font-thin tabular-nums"
+        >
+          {{ schedule.time }}
         </span>
       </div>
     </div>

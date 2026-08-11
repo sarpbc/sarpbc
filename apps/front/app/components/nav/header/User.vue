@@ -11,7 +11,7 @@ const { count: unreadCount } = useUnreadNotificationCount();
       v-if="!user"
       :to="$localePath('/login')"
       variant="muted"
-      class="text-lg lg:text-sm font-semibold lg:font-normal"
+      class="text-lg md:text-sm font-semibold md:font-normal"
     >
       {{ t("components.header.signin") }}
     </UiLink>
@@ -19,7 +19,7 @@ const { count: unreadCount } = useUnreadNotificationCount();
       v-else
       :to="$localePath('/profile')"
       variant="muted"
-      class="relative truncate text-lg lg:text-sm font-semibold lg:font-normal"
+      class="relative truncate text-lg md:text-sm font-semibold md:font-normal"
     >
       {{ `${user.userName}` }}
       <UBadge
@@ -37,7 +37,7 @@ const { count: unreadCount } = useUnreadNotificationCount();
       <UiLink
         :to="$localePath('/login')"
         variant="muted"
-        class="text-lg lg:text-sm font-semibold lg:font-normal"
+        class="text-lg md:text-sm font-semibold md:font-normal"
       >
         {{ t("components.header.signin") }}
       </UiLink>

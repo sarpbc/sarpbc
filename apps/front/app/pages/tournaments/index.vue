@@ -78,25 +78,26 @@ setPageSeo({
       </template>
     </UiHubPageHeader>
 
-    <div
-      v-if="pending && !tournaments.length"
-      class="w-full flex flex-col gap-0"
-      aria-live="polite"
-    >
-      <div
-        v-for="i in 6"
-        :key="i"
-        class="h-16 border-b border-default animate-pulse bg-elevated/40"
-      />
+    <div v-if="pending && !tournaments.length" class="w-full flex flex-col" aria-live="polite">
+      <UiCard flush-bottom>
+        <UiListItem v-for="i in 6" :key="i" size="default" divider>
+          <div class="grid w-full grid-cols-10 items-center gap-x-2">
+            <USkeleton class="col-span-5 h-3 max-w-48" />
+            <USkeleton class="col-span-2 h-3 max-w-16" />
+            <USkeleton class="col-span-2 h-3 max-w-16" />
+            <USkeleton class="col-span-1 h-3 max-w-10" />
+          </div>
+        </UiListItem>
+      </UiCard>
     </div>
 
-    <div v-else-if="tournaments.length" class="w-full flex flex-col gap-0">
+    <UiCard v-else-if="tournaments.length" flush-bottom>
       <TournamentRow
         v-for="tournament in tournaments"
         :key="tournament.id"
         :tournament="tournament"
       />
-    </div>
+    </UiCard>
 
     <UiCard v-else class="p-6">
       <p class="text-sm text-muted">{{ t("page.tournaments.index.empty") }}</p>
