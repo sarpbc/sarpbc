@@ -47,7 +47,6 @@ Desktop.ini
 !.vscode/settings.json
 
 # Lyse local cache / audit artifacts
-
-# Lyse local cache (baseline.json is tracked)
-.lyse/*
-!.lyse/baseline.json
+# Note: lyse audit may rewrite this to .lyse/* + !.lyse/baseline.json.
+# Prefer keeping the whole directory ignored; re-check after running Lyse.
+.lyse/

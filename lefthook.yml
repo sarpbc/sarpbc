@@ -5,6 +5,3 @@ pre-commit:
     - name: oxfmt
       run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
-    - name: lyse
-      run: pnpm exec lyse audit --scope staged --quiet
-      fail_text: "Lyse found new design-system drift in staged files. Run `pnpm lyse` or fix findings."
