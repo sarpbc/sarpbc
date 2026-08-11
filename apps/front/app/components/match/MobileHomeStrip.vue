@@ -1,7 +1,10 @@
 <script lang="ts" setup>
+import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
+
 const MAX_MATCHES = 5;
 const SOURCE = "home_strip" as const;
 
+const { t } = useI18n();
 const { data, pending } = await useUpcomingMatches();
 
 const matches = computed(() => {
@@ -13,6 +16,25 @@ const matches = computed(() => {
 
 const showRail = computed(() => pending.value || matches.value.length > 0);
 
+const upcomingTitle = computed(() => {
+  const live = data.value?.live ?? [];
+  const upcoming = data.value?.upcoming ?? [];
+  const kind = resolveMatchRailTitleKind(live, upcoming);
+
+  switch (kind) {
+    case "today":
+      return t("components.match.todaysMatch");
+    case "tomorrow":
+      return t("components.match.tomorrowsMatch");
+    case "upcoming":
+      return t("components.match.upcomingMatches");
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+});
+
 function isLive(matchId: string): boolean {
   return Boolean(data.value?.live.some((m) => m.id === matchId));
 }
@@ -20,7 +42,7 @@ function isLive(matchId: string): boolean {
 
 <template>
   <div v-if="showRail" class="md:hidden w-full flex flex-col mb-2">
-    <UiRail :title="$t('components.match.todaysMatch')">
+    <UiRail :title="upcomingTitle">
       <UiCard>
         <div class="w-full flex flex-col">
           <template v-if="pending && matches.length === 0">

@@ -111,7 +111,6 @@ setPageSeo({
             v-if="upcomingMatches.length > 0"
             :matches="upcomingMatches"
             variant="upcoming"
-            :title="t('page.matches.sections.upcoming')"
             discovery-source="matches_list"
           />
         </template>

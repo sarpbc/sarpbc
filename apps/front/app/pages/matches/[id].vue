@@ -62,6 +62,13 @@ function participantName(participant?: TournamentParticipant) {
   return participant?.team.name ?? t("page.match.detail.unknownTeam");
 }
 
+function isTbdTeam(participant?: TournamentParticipant): boolean {
+  return !participant?.team?.name?.trim();
+}
+
+/** Both sides unresolved — hide context sections; keep title + comments only. */
+const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
+
 function tournamentLabel(currentMatch: Match) {
   const league = currentMatch.tournament?.league?.name;
   const name = currentMatch.tournament?.name;
@@ -334,96 +341,98 @@ function tournamentMatchesPath(tournamentId: string) {
         </div>
       </UiCrossCard>
 
-      <PickemMatchCta :match="match" :match-status="matchStatus" />
+      <template v-if="!isBothTeamsTbd">
+        <PickemMatchCta :match="match" :match-status="matchStatus" />
 
-      <section class="w-full flex flex-col gap-3">
-        <h2 class="text-sm font-medium text-toned pl-1">
-          {{ t("page.match.detail.sections.rosters") }}
-        </h2>
-        <UiCard class="p-4 md:p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div
+        <section class="w-full flex flex-col gap-3">
+          <h2 class="text-sm font-medium text-toned pl-1">
+            {{ t("page.match.detail.sections.rosters") }}
+          </h2>
+          <UiCard class="p-4 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div
+                v-for="participant in participants"
+                :key="participant.id"
+                class="flex flex-col items-center gap-4 text-center"
+              >
+                <ULink
+                  v-if="participant.team.slug"
+                  :to="$localePath(`/team/${participant.team.slug}`)"
+                  class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <TeamImg
+                    :team-name="participant.team.name"
+                    :image-url="participant.team.imageUrl"
+                    size="md"
+                  />
+                  <span class="max-w-full text-lg font-semibold text-balance">
+                    {{ participant.team.name }}
+                  </span>
+                </ULink>
+                <div v-else class="flex flex-col items-center gap-3">
+                  <TeamImg
+                    :team-name="participant.team.name"
+                    :image-url="participant.team.imageUrl"
+                    size="md"
+                  />
+                  <span class="max-w-full text-lg font-semibold text-balance">
+                    {{ participant.team.name }}
+                  </span>
+                </div>
+
+                <div
+                  v-if="participant.players && participant.players.length > 0"
+                  class="w-full flex flex-wrap justify-center gap-3"
+                >
+                  <PlayerProfile
+                    v-for="player in participant.players"
+                    :key="player.id"
+                    :player="player"
+                    size="md"
+                  />
+                </div>
+                <p v-else class="text-sm text-pretty text-muted">
+                  {{ t("page.match.detail.noRoster") }}
+                </p>
+              </div>
+            </div>
+          </UiCard>
+        </section>
+
+        <section v-if="headToHead && teamA && teamB" class="w-full flex flex-col gap-3">
+          <h2 class="text-sm font-medium text-toned pl-1">
+            {{ t("page.match.detail.sections.headToHead") }}
+          </h2>
+          <MatchHeadToHeadCard
+            :head-to-head="headToHead"
+            :team-a-name="participantName(teamA)"
+            :team-b-name="participantName(teamB)"
+          />
+        </section>
+
+        <section class="w-full flex flex-col gap-3">
+          <h2 class="text-sm font-medium text-toned pl-1">
+            {{ t("page.match.detail.sections.recentForm") }}
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <MatchTeamFormCard
               v-for="participant in participants"
               :key="participant.id"
-              class="flex flex-col items-center gap-4 text-center"
-            >
-              <ULink
-                v-if="participant.team.slug"
-                :to="$localePath(`/team/${participant.team.slug}`)"
-                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <TeamImg
-                  :team-name="participant.team.name"
-                  :image-url="participant.team.imageUrl"
-                  size="md"
-                />
-                <span class="max-w-full text-lg font-semibold text-balance">
-                  {{ participant.team.name }}
-                </span>
-              </ULink>
-              <div v-else class="flex flex-col items-center gap-3">
-                <TeamImg
-                  :team-name="participant.team.name"
-                  :image-url="participant.team.imageUrl"
-                  size="md"
-                />
-                <span class="max-w-full text-lg font-semibold text-balance">
-                  {{ participant.team.name }}
-                </span>
-              </div>
-
-              <div
-                v-if="participant.players && participant.players.length > 0"
-                class="w-full flex flex-wrap justify-center gap-3"
-              >
-                <PlayerProfile
-                  v-for="player in participant.players"
-                  :key="player.id"
-                  :player="player"
-                  size="md"
-                />
-              </div>
-              <p v-else class="text-sm text-pretty text-muted">
-                {{ t("page.match.detail.noRoster") }}
-              </p>
-            </div>
+              :team-name="participant.team.name"
+              :team-form="teamForms[participant.team.id]"
+            />
           </div>
+        </section>
+
+        <UiCard class="p-4 md:p-6">
+          <h2 class="text-sm font-semibold mb-2">
+            {{ t("page.match.detail.sections.gameStats") }}
+          </h2>
+          <p class="text-sm text-muted">
+            {{ t("page.match.detail.gameStatsPlaceholder") }}
+          </p>
         </UiCard>
-      </section>
-
-      <section v-if="headToHead && teamA && teamB" class="w-full flex flex-col gap-3">
-        <h2 class="text-sm font-medium text-toned pl-1">
-          {{ t("page.match.detail.sections.headToHead") }}
-        </h2>
-        <MatchHeadToHeadCard
-          :head-to-head="headToHead"
-          :team-a-name="participantName(teamA)"
-          :team-b-name="participantName(teamB)"
-        />
-      </section>
-
-      <section class="w-full flex flex-col gap-3">
-        <h2 class="text-sm font-medium text-toned pl-1">
-          {{ t("page.match.detail.sections.recentForm") }}
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <MatchTeamFormCard
-            v-for="participant in participants"
-            :key="participant.id"
-            :team-name="participant.team.name"
-            :team-form="teamForms[participant.team.id]"
-          />
-        </div>
-      </section>
-
-      <UiCard class="p-4 md:p-6">
-        <h2 class="text-sm font-semibold mb-2">
-          {{ t("page.match.detail.sections.gameStats") }}
-        </h2>
-        <p class="text-sm text-muted">
-          {{ t("page.match.detail.gameStatsPlaceholder") }}
-        </p>
-      </UiCard>
+      </template>
 
       <!-- Discussion metric: comments per match page view (instrument via analytics later). -->
       <DiscussionCommentThread target-type="match" :target-id="match.id" />

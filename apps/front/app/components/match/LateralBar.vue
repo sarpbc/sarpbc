@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
+
+const { t } = useI18n();
 const { data } = await useUpcomingMatches();
 const { data: results } = await useLazyAsyncData(`matches-results`, () => getMatchesResults(), {
   getCachedData(key, nuxtApp) {
@@ -7,13 +10,32 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
 });
 
 const SOURCE = "lateral_bar" as const;
+
+const upcomingTitle = computed(() => {
+  const live = data.value?.live ?? [];
+  const upcoming = data.value?.upcoming ?? [];
+  const kind = resolveMatchRailTitleKind(live, upcoming);
+
+  switch (kind) {
+    case "today":
+      return t("components.match.todaysMatch");
+    case "tomorrow":
+      return t("components.match.tomorrowsMatch");
+    case "upcoming":
+      return t("components.match.upcomingMatches");
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+});
 </script>
 
 <template>
   <div class="w-full flex flex-col">
     <UiRail
       v-if="data && (data.live.length > 0 || data.upcoming.length > 0)"
-      :title="$t('components.match.todaysMatch')"
+      :title="upcomingTitle"
     >
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
@@ -38,7 +60,11 @@ const SOURCE = "lateral_bar" as const;
         </div>
       </UiCard>
     </UiRail>
-    <UiRail v-if="results && results.results.length > 0" :title="$t('components.match.results')">
+    <!-- Secondary section uses list-group header height (h-10.75) so gap matches main match list rhythm -->
+    <div v-if="results && results.results.length > 0" class="w-full flex flex-col">
+      <h2 class="flex h-10.75 items-end pl-2 text-sm font-medium text-toned">
+        {{ $t("components.match.results") }}
+      </h2>
       <UiCard flush-bottom>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
@@ -52,6 +78,6 @@ const SOURCE = "lateral_bar" as const;
           </MatchDiscoveryLink>
         </div>
       </UiCard>
-    </UiRail>
+    </div>
   </div>
 </template>

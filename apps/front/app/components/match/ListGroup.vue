@@ -2,6 +2,7 @@
 import type { MatchListItem } from "~/types/matches";
 import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
 import { listVariantToDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { formatDayHeaderDate } from "~/utils/dateFormatter";
 
 const { matches, variant, title, discoverySource } = defineProps<{
   matches: MatchListItem[];
@@ -11,13 +12,26 @@ const { matches, variant, title, discoverySource } = defineProps<{
   discoverySource?: MatchDiscoverySource;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const eventGroups = computed(() =>
   groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
 );
 
+const dateEventGroups = computed(() =>
+  groupMatchesByDateThenEvent(matches, t("page.matches.unknownTournament")),
+);
+
 const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
+
+const useDateGrouping = computed(() => variant === "upcoming");
+
+function formatDayHeader(group: { date: Date | null }) {
+  if (!group.date) {
+    return t("page.tournaments.id.matchSections.unknownDate");
+  }
+  return formatDayHeaderDate(group.date, locale.value);
+}
 </script>
 
 <template>
@@ -39,43 +53,91 @@ const discoveryStatus = computed(() => listVariantToDiscoveryStatus(variant));
       </h2>
     </div>
 
-    <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
-      <h3 class="flex text-sm font-medium text-toned h-10.75 items-end">
-        <UiLink
-          v-if="group.tournamentId"
-          :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
-          variant="muted"
-          class="h-fit"
+    <template v-if="useDateGrouping">
+      <div v-for="dayGroup in dateEventGroups" :key="dayGroup.dateKey" class="flex flex-col gap-px">
+        <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
+          {{ formatDayHeader(dayGroup) }}
+        </h3>
+        <div
+          v-for="group in dayGroup.events"
+          :key="`${dayGroup.dateKey}-${group.key}`"
+          class="flex flex-col gap-px"
         >
-          {{ group.displayName }}
-        </UiLink>
-        <span v-else>{{ group.displayName }}</span>
-      </h3>
-      <UiCard
-        flush-bottom
-        class="flex flex-col"
-        :class="variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined"
-      >
-        <div v-for="match in group.matches" :key="match.id">
-          <MatchDiscoveryLink
-            v-if="discoverySource"
-            :match-id="match.id"
-            :source="discoverySource"
-            :status="discoveryStatus"
-          >
-            <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
-            <MatchResultRow v-else :match="match" />
-          </MatchDiscoveryLink>
-          <ULink
-            v-else
-            :to="$localePath(`/matches/${match.id}`)"
-            class="block transition-none hover:bg-elevated/50"
-          >
-            <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
-            <MatchResultRow v-else :match="match" />
-          </ULink>
+          <h4 class="flex items-end pl-1 pt-1 text-xs font-medium text-muted">
+            <UiLink
+              v-if="group.tournamentId"
+              :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
+              variant="muted"
+              class="h-fit"
+            >
+              {{ group.displayName }}
+            </UiLink>
+            <span v-else>{{ group.displayName }}</span>
+          </h4>
+          <UiCard flush-bottom class="flex flex-col">
+            <div v-for="match in group.matches" :key="match.id">
+              <MatchDiscoveryLink
+                v-if="discoverySource"
+                :match-id="match.id"
+                :source="discoverySource"
+                :status="discoveryStatus"
+              >
+                <MatchRow :match="match" :show-date="false" />
+              </MatchDiscoveryLink>
+              <ULink
+                v-else
+                :to="$localePath(`/matches/${match.id}`)"
+                class="block transition-none hover:bg-elevated/50"
+              >
+                <MatchRow :match="match" :show-date="false" />
+              </ULink>
+            </div>
+          </UiCard>
         </div>
-      </UiCard>
-    </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <div v-for="group in eventGroups" :key="group.key" class="flex flex-col gap-px">
+        <h3 class="flex text-sm font-medium text-toned h-10.75 items-end">
+          <UiLink
+            v-if="group.tournamentId"
+            :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
+            variant="muted"
+            class="h-fit"
+          >
+            {{ group.displayName }}
+          </UiLink>
+          <span v-else>{{ group.displayName }}</span>
+        </h3>
+        <UiCard
+          flush-bottom
+          class="flex flex-col"
+          :class="
+            variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined
+          "
+        >
+          <div v-for="match in group.matches" :key="match.id">
+            <MatchDiscoveryLink
+              v-if="discoverySource"
+              :match-id="match.id"
+              :source="discoverySource"
+              :status="discoveryStatus"
+            >
+              <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
+              <MatchResultRow v-else :match="match" />
+            </MatchDiscoveryLink>
+            <ULink
+              v-else
+              :to="$localePath(`/matches/${match.id}`)"
+              class="block transition-none hover:bg-elevated/50"
+            >
+              <MatchRow v-if="variant !== 'result'" :match="match" :live="variant === 'live'" />
+              <MatchResultRow v-else :match="match" />
+            </ULink>
+          </div>
+        </UiCard>
+      </div>
+    </template>
   </section>
 </template>

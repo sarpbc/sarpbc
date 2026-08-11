@@ -38,25 +38,25 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
         <UiLink
           :id="titleId"
           :to="$localePath(`/team/${team.slug}`)"
-          variant="inline"
-          class="text-sm font-semibold tracking-tight"
+          variant="muted"
+          class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: team.name })"
         >
-          {{ team.name }}
+          <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="xs" />
+          <span class="truncate">{{ team.name }}</span>
         </UiLink>
 
-        <div v-if="players.length" class="flex flex-col">
-          <UiListItem
+        <div v-if="players.length" class="flex flex-col gap-1">
+          <UiLink
             v-for="player in players"
             :key="player.id"
-            size="compact"
-            divider
             :to="$localePath(`/player/${player.slug}`)"
-            class="gap-2"
+            variant="muted"
+            class="flex min-h-row-compact items-center gap-2 px-1 text-sm"
           >
             <FlagIcon :nationality="player.nationality" size="sm" />
-            <span class="text-sm font-medium truncate">{{ player.name }}</span>
-          </UiListItem>
+            <span class="truncate">{{ player.name }}</span>
+          </UiLink>
         </div>
         <p v-else class="text-sm text-muted">
           {{ t("page.tournaments.id.participants.rosterEmpty") }}
