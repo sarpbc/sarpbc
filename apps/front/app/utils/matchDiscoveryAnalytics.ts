@@ -3,6 +3,7 @@ export const MATCH_DISCOVERY_FROM_QUERY = "from";
 
 export const MATCH_DISCOVERY_SOURCES = [
   "matches_list",
+  "results_list",
   "home_strip",
   "lateral_bar",
   "tournament_hub",

@@ -140,9 +140,9 @@ onMounted(() => {
       <p class="text-sm text-muted">
         {{ t("components.discussion.error") }}
       </p>
-      <UiButton variant="outline" @click="refresh()">
+      <SButton variant="outline" @click="refresh()">
         {{ t("components.discussion.retry") }}
-      </UiButton>
+      </SButton>
     </div>
 
     <template v-else>
@@ -157,7 +157,7 @@ onMounted(() => {
         />
 
         <div v-if="hasMore" class="flex justify-center pt-1">
-          <UiButton
+          <SButton
             variant="outline"
             :loading="loadingMore"
             :disabled="loadingMore"
@@ -168,7 +168,7 @@ onMounted(() => {
                 ? t("components.discussion.loadingMore")
                 : t("components.discussion.loadMore")
             }}
-          </UiButton>
+          </SButton>
         </div>
       </div>
 

@@ -9,7 +9,6 @@ const { variant = "main", class: className } = defineProps<{
 const variantClass = computed(() => {
   switch (variant) {
     case "rail":
-      // Mobile stack rhythm when rails sit below main; desktop tops align via UiRail captions.
       return "mt-4 md:mt-0";
     case "main":
       return "";

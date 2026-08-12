@@ -72,7 +72,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
       </div>
     </div>
 
-    <UiCard v-else-if="hasError">
+    <SCard v-else-if="hasError">
       <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -82,9 +82,9 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           {{ t("page.team.slug.rosterHistory.retry") }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
-    <UiCard v-else-if="eras.length === 0">
+    <SCard v-else-if="eras.length === 0">
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -94,7 +94,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           {{ t("page.team.slug.rosterHistory.emptyHint") }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
 
     <div v-else class="flex flex-col gap-2">
       <ol class="flex flex-col gap-0 list-none m-0 p-0">
@@ -125,21 +125,21 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                 :key="member.contractId"
                 class="flex items-center gap-3"
               >
-                <UiLink :to="$localePath(`/player/${member.slug}`)" class="shrink-0">
+                <SLink :to="$localePath(`/player/${member.slug}`)" class="shrink-0">
                   <PlayerImg
                     :player-name="member.name"
                     :img="member.imageUrl || undefined"
                     size="sm"
                   />
-                </UiLink>
+                </SLink>
                 <div class="flex-1 min-w-0">
-                  <UiLink
+                  <SLink
                     :to="$localePath(`/player/${member.slug}`)"
                     variant="inline"
                     class="truncate block"
                   >
                     {{ member.name }}
-                  </UiLink>
+                  </SLink>
                   <p v-if="member.role !== 'active'" class="text-sm text-muted">
                     {{ roleLabel(member.role) }}
                   </p>

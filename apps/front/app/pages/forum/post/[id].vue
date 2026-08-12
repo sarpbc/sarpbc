@@ -33,12 +33,12 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col">
-    <UiCrossCard v-if="pending" class="mt-18 h-22.75">
+    <SCrossCard v-if="pending" class="mt-18 h-22.75">
       <div class="size-full flex flex-col justify-center items-center text-muted">
         <UIcon name="i-ep-loading" class="animate-spin size-5.5" />
         {{ $t("page.forum.post.loadingPost") }}
       </div>
-    </UiCrossCard>
+    </SCrossCard>
 
     <div v-else-if="error || !post" class="w-full flex flex-col items-center py-16 text-center">
       <h1 class="text-2xl font-bold text-error mb-4">
@@ -53,7 +53,7 @@ setPageSeo({
     </div>
 
     <section v-else class="mt-18 w-full flex flex-col gap-8">
-      <UiCrossCard class="w-full">
+      <SCrossCard class="w-full">
         <div class="w-full flex flex-col">
           <div class="flex flex-row items-center justify-between border-b border-default px-4 py-2">
             <h1 class="text-lg font-semibold text-toned">
@@ -74,7 +74,7 @@ setPageSeo({
             </span>
           </div>
         </div>
-      </UiCrossCard>
+      </SCrossCard>
 
       <DiscussionCommentThread target-type="forumPost" :target-id="postId" />
     </section>

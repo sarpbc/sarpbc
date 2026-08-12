@@ -94,14 +94,14 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiHubPageHeader>
+    <SHubPageHeader>
       <template #title>{{ pageTitle }}</template>
       <template v-if="totalTeams > 0" #meta>
         <span>{{ t("page.hub.headers.teamsTotal", { count: totalTeams }) }}</span>
       </template>
-    </UiHubPageHeader>
+    </SHubPageHeader>
 
-    <UiCard>
+    <SCard>
       <div class="flex flex-wrap gap-1 p-1.5">
         <UButton
           variant="soft"
@@ -122,7 +122,7 @@ setPageSeo({
           {{ letter }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
     <div v-if="pending" class="w-full flex justify-center py-16">
       <div class="flex items-center gap-3">
@@ -130,13 +130,13 @@ setPageSeo({
       </div>
     </div>
 
-    <UiCard v-else-if="teams.length > 0">
+    <SCard v-else-if="teams.length > 0">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 p-2">
         <TeamLink v-for="team in teams" :key="team.id" :team="team" />
       </div>
-    </UiCard>
+    </SCard>
 
-    <UiCard v-else>
+    <SCard v-else>
       <div class="text-center py-16">
         <UIcon name="i-fluent-shield-dismiss-24-regular" class="text-6xl text-muted mb-4" />
         <p class="text-xl text-muted mb-2">
@@ -150,9 +150,9 @@ setPageSeo({
           }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
 
-    <UiCard v-if="teams.length > 0" class="flex justify-between items-center p-1.5">
+    <SCard v-if="teams.length > 0" class="flex justify-between items-center p-1.5">
       <UButton
         :disabled="!hasPrevious"
         variant="soft"
@@ -175,6 +175,6 @@ setPageSeo({
         {{ t("common.next") }}
         <UIcon name="i-fluent-chevron-right-24-regular" />
       </UButton>
-    </UiCard>
+    </SCard>
   </div>
 </template>

@@ -9,7 +9,7 @@ const { player } = defineProps<Props>();
 </script>
 
 <template>
-  <UiButton
+  <SButton
     class="flex items-center gap-2"
     variant="ghost"
     color="neutral"
@@ -24,5 +24,5 @@ const { player } = defineProps<Props>();
         </span>
       </div>
     </div>
-  </UiButton>
+  </SButton>
 </template>

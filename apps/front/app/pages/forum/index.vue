@@ -14,12 +14,12 @@ const { data: posts } = await useLazyAsyncData("forum-posts", () => getPosts());
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiHubPageHeader>
+    <SHubPageHeader>
       <template #title>{{ t("page.forum.index.pageTitle") }}</template>
       <template v-if="posts?.length" #meta>
         <span>{{ t("page.hub.headers.forumPosts", { count: posts.length }) }}</span>
       </template>
-    </UiHubPageHeader>
+    </SHubPageHeader>
     <div class="w-full flex flex-col gap-2">
       <ForumPostCard v-for="post in posts" :key="post.id" :post="post" />
     </div>

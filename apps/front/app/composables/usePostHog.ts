@@ -12,7 +12,7 @@ type PostHogClient = Pick<PostHog, "capture" | "reset">;
  * - pickem: `pickem_tournament_opened`, `pickem_pick_submitted`, …
  * - discussion: `comment_posted`
  * - match discovery CTR: `match_row_clicked`, `match_detail_viewed`
- *   (see `useMatchDiscoveryAnalytics` — sources: matches_list | home_strip | lateral_bar | tournament_hub)
+ *   (see `useMatchDiscoveryAnalytics` — sources: matches_list | results_list | home_strip | lateral_bar | tournament_hub)
  */
 export function usePostHog(): PostHogClient {
   const { isAccepted } = useCookieConsent();

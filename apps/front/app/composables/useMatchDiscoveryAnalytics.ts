@@ -9,7 +9,7 @@ import {
  * - `match_row_clicked` — { match_id, source, status }
  * - `match_detail_viewed` — { match_id, status, source? }
  *
- * `source`: matches_list | home_strip | lateral_bar | tournament_hub
+ * `source`: matches_list | results_list | home_strip | lateral_bar | tournament_hub
  * Carried to detail via `?from=` (MATCH_DISCOVERY_FROM_QUERY).
  */
 export function useMatchDiscoveryAnalytics() {

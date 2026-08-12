@@ -2,6 +2,7 @@
 import type { HeadToHead } from "~/types/matches";
 
 const { t, locale } = useI18n();
+const localePath = useLocalePath();
 
 const { headToHead, teamAName, teamBName } = defineProps<{
   headToHead: HeadToHead;
@@ -35,12 +36,9 @@ function winnerLabel(winnerTeamId: string | null) {
 </script>
 
 <template>
-  <UiCard class="p-4 md:p-6">
-    <div
-      class="mb-4 flex flex-wrap items-baseline justify-between gap-2 border-b border-default pb-3"
-    >
-      <h3 class="text-sm font-semibold">{{ t("page.match.detail.sections.headToHead") }}</h3>
-      <span v-if="hasMeetings" class="text-sm font-medium text-muted tabular-nums">
+  <SCard flush-bottom class="flex flex-col">
+    <SListItem v-if="hasMeetings" size="default" divider class="min-w-0">
+      <span class="w-full text-xs font-medium text-muted tabular-nums">
         {{
           t("page.match.detail.h2h.record", {
             teamA: teamAName,
@@ -50,23 +48,26 @@ function winnerLabel(winnerTeamId: string | null) {
           })
         }}
       </span>
-    </div>
+    </SListItem>
 
-    <p v-if="!hasMeetings" class="text-sm text-pretty text-muted">
-      {{ t("page.match.detail.h2h.empty") }}
-    </p>
+    <SListItem v-if="!hasMeetings" size="default" divider>
+      <p class="text-xs text-pretty text-muted">
+        {{ t("page.match.detail.h2h.empty") }}
+      </p>
+    </SListItem>
 
-    <ul v-else class="flex flex-col gap-1.5">
-      <li
-        v-for="meeting in headToHead.recentMeetings"
-        :key="meeting.id"
-        class="flex items-center justify-between gap-3 rounded-md bg-elevated/50 px-2.5 py-2 text-sm"
-      >
+    <SListItem
+      v-for="meeting in headToHead.recentMeetings"
+      :key="meeting.id"
+      size="default"
+      divider
+      :to="localePath(`/matches/${meeting.id}`)"
+      class="min-w-0"
+    >
+      <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <div class="flex min-w-0 flex-col gap-0.5">
-          <UiLink :to="$localePath(`/matches/${meeting.id}`)" variant="inline" class="truncate">
-            {{ meeting.tournamentLabel }}
-          </UiLink>
-          <span class="truncate text-xs text-muted tabular-nums">
+          <span class="truncate text-toned">{{ meeting.tournamentLabel }}</span>
+          <span v-if="meetingDate(meeting)" class="truncate text-muted tabular-nums">
             {{ meetingDate(meeting) }}
           </span>
         </div>
@@ -79,11 +80,11 @@ function winnerLabel(winnerTeamId: string | null) {
               })
             }}
           </span>
-          <span v-if="meeting.winnerTeamId" class="text-xs text-muted">
+          <span v-if="meeting.winnerTeamId" class="text-muted">
             {{ t("page.match.detail.h2h.winner", { team: winnerLabel(meeting.winnerTeamId) }) }}
           </span>
         </div>
-      </li>
-    </ul>
-  </UiCard>
+      </div>
+    </SListItem>
+  </SCard>
 </template>

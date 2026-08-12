@@ -32,7 +32,7 @@ setPageSeo({
 
 <template>
   <div v-if="article" class="w-full flex flex-col gap-4">
-    <UiCrossCard class="w-full">
+    <SCrossCard class="w-full">
       <div class="w-full flex flex-col gap-4 p-4">
         <h1 class="text-2xl font-bold tracking-tight text-highlighted">
           {{ article.title }}
@@ -58,7 +58,7 @@ setPageSeo({
           class="news-prose text-muted [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-1 [&_ol]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:text-highlighted [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_table]:text-sm [&_th]:border [&_th]:border-default [&_th]:bg-elevated [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-medium [&_th]:text-highlighted [&_td]:border [&_td]:border-default [&_td]:px-3 [&_td]:py-2 [&_tr]:border-b [&_tr]:border-default"
         />
       </div>
-    </UiCrossCard>
+    </SCrossCard>
 
     <DiscussionCommentThread target-type="newsArticle" :target-id="article.id" />
   </div>

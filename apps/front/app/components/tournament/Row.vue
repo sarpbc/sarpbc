@@ -37,7 +37,7 @@ const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`))
 </script>
 
 <template>
-  <UiListItem
+  <SListItem
     :size="showImage ? 'triple' : 'default'"
     divider
     :to="href"
@@ -75,5 +75,5 @@ const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`))
       <span class="col-span-2 truncate text-muted">{{ prizeLabel }}</span>
       <span class="col-span-1 truncate text-muted">{{ typeLabel }}</span>
     </div>
-  </UiListItem>
+  </SListItem>
 </template>

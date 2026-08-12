@@ -62,7 +62,7 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiHubPageHeader>
+    <SHubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
       <template v-if="nextTournament" #meta>
         <span>
@@ -76,32 +76,32 @@ setPageSeo({
       <template v-else-if="totalTournaments" #meta>
         <span>{{ t("page.hub.headers.tournamentsTotal", { count: totalTournaments }) }}</span>
       </template>
-    </UiHubPageHeader>
+    </SHubPageHeader>
 
     <div v-if="pending && !tournaments.length" class="w-full flex flex-col" aria-live="polite">
-      <UiCard flush-bottom>
-        <UiListItem v-for="i in 6" :key="i" size="default" divider>
+      <SCard flush-bottom>
+        <SListItem v-for="i in 6" :key="i" size="default" divider>
           <div class="grid w-full grid-cols-10 items-center gap-x-2">
             <USkeleton class="col-span-5 h-3 max-w-48" />
             <USkeleton class="col-span-2 h-3 max-w-16" />
             <USkeleton class="col-span-2 h-3 max-w-16" />
             <USkeleton class="col-span-1 h-3 max-w-10" />
           </div>
-        </UiListItem>
-      </UiCard>
+        </SListItem>
+      </SCard>
     </div>
 
-    <UiCard v-else-if="tournaments.length" flush-bottom>
+    <SCard v-else-if="tournaments.length" flush-bottom>
       <TournamentRow
         v-for="tournament in tournaments"
         :key="tournament.id"
         :tournament="tournament"
       />
-    </UiCard>
+    </SCard>
 
-    <UiCard v-else class="p-6">
+    <SCard v-else class="p-6">
       <p class="text-sm text-muted">{{ t("page.tournaments.index.empty") }}</p>
-    </UiCard>
+    </SCard>
 
     <div v-if="totalPages > 1" class="flex flex-row items-center justify-between gap-4 pt-2">
       <UButton

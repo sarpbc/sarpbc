@@ -37,7 +37,7 @@ Prefer dedicated plugins (`eslint-plugin-tailwindcss` / project rules) over frag
 
 ```js
 'project/no-raw-html-layout': 'error',
-// message: Use <Box /> / Ui* primitive instead of <div /> for layout.
+// message: Use <Box /> / S* primitive instead of <div /> for layout.
 ```
 
 Allow exceptions only for documented cases (third-party slots, SVG, portals). Polymorphic `as="nav" | "ul" | "li" | …` preserves a11y.

@@ -22,11 +22,7 @@ const columns = computed<FooterColumn[]>(() => [
     title: t("components.footer.columns.explore"),
     entries: [
       { type: "link", label: t("general.matches"), to: localePath("/matches") },
-      {
-        type: "link",
-        label: t("general.results"),
-        to: { path: localePath("/matches"), query: { tab: "past" } },
-      },
+      { type: "link", label: t("general.results"), to: localePath("/results") },
       { type: "link", label: t("general.tournaments"), to: localePath("/tournaments") },
       { type: "link", label: t("page.game.airriddle.title"), to: localePath("/game/airriddle") },
       { type: "link", label: t("general.teams"), to: localePath("/team") },
@@ -109,9 +105,9 @@ const columns = computed<FooterColumn[]>(() => [
           <ul class="flex flex-col">
             <template v-for="entry in column.entries" :key="entry.label">
               <li>
-                <UiLink :to="entry.to" variant="muted" class="inline-flex items-center min-h-10">
+                <SLink :to="entry.to" variant="muted" class="inline-flex items-center min-h-10">
                   {{ entry.label }}
-                </UiLink>
+                </SLink>
               </li>
             </template>
           </ul>

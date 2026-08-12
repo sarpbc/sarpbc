@@ -113,7 +113,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
     </div>
 
     <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-      <UiCard v-for="index in 3" :key="index">
+      <SCard v-for="index in 3" :key="index">
         <div class="flex items-center gap-3 py-2 px-3">
           <USkeleton class="h-3 w-16 shrink-0" />
           <div class="flex flex-1 flex-col gap-1">
@@ -121,10 +121,10 @@ function formatDateRange(event: TeamEventListItem): string | null {
             <USkeleton class="h-3 w-28" />
           </div>
         </div>
-      </UiCard>
+      </SCard>
     </div>
 
-    <UiCard v-else-if="hasError">
+    <SCard v-else-if="hasError">
       <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -134,7 +134,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
           {{ t("page.team.slug.events.retry") }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
     <div v-else-if="hasEvents" class="flex flex-col gap-4">
       <div v-if="live.length > 0" class="flex flex-col gap-2">
@@ -162,7 +162,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
                 <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
               </p>
             </div>
-            <UiBadgeLive />
+            <SBadgeLive />
           </ULink>
         </div>
       </div>
@@ -209,7 +209,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
       </div>
     </div>
 
-    <UiCard v-else>
+    <SCard v-else>
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon :name="emptyIcon" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -219,6 +219,6 @@ function formatDateRange(event: TeamEventListItem): string | null {
           {{ t(`page.team.slug.events.${tab}.emptyHint`) }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
   </section>
 </template>

@@ -72,15 +72,20 @@ Staff console lives in `apps/admin` (`admin.sarpbc.org`):
 
 ## Custom UI Primitives
 
-Before adding a new primitive, check `app/components/ui/`:
+Before adding a new primitive, check `app/components/s/`:
 
 | Component | Use |
 |-----------|-----|
-| `UiCard` | Bordered container |
-| `UiCrossCard` | Auth/marketing cards with cross motif |
-| `UiBadgeLive` | Live status with redundant text |
-| `UiLink` | Styled internal links |
-| `UiListItem` | Hub list row (`size`: compact/default/header/double; optional `to`, `divider`) |
+| `SCard` | Bordered container |
+| `SCrossCard` | Auth/marketing cards with cross motif |
+| `SBadgeLive` | Live status with redundant text |
+| `SLink` | Styled internal links |
+| `SButton` | `UButton` + Cuelume press sound |
+| `SListItem` | Hub list row (`size`: compact/default/header/double; optional `to`, `divider`) |
+| `SRail` | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
+| `SHubColumn` | Hub grid column (`rail` \| `main`) |
+| `SHubPageHeader` | List-page title band |
+| `SHubPageBody` | Detail-page shell aligned with both sidebar cards |
 
 Extend here when the same pattern appears 3+ times.
 

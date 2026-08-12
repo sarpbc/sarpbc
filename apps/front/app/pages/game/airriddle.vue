@@ -269,15 +269,15 @@ setPageSeo({
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <UiCrossCard class="min-h-row-header">
+    <SCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
         <h1 class="text-xl font-semibold tracking-tight">
           {{ t("page.game.airriddle.title") }}
         </h1>
       </div>
-    </UiCrossCard>
+    </SCrossCard>
 
-    <UiCard v-if="loading" class="relative w-full p-6">
+    <SCard v-if="loading" class="relative w-full p-6">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
@@ -303,10 +303,10 @@ setPageSeo({
           {{ t("page.game.airriddle.loadingChallenge") }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
 
     <template v-else-if="gameState.targetLength > 0">
-      <UiCard class="relative w-full p-4 sm:p-6" @click="focusHiddenInput">
+      <SCard class="relative w-full p-4 sm:p-6" @click="focusHiddenInput">
         <div class="absolute right-3 top-3" @click.stop>
           <AirRiddleHowToPlayPopover />
         </div>
@@ -411,10 +411,10 @@ setPageSeo({
             />
           </div>
         </div>
-      </UiCard>
+      </SCard>
     </template>
 
-    <UiCard v-else class="relative w-full">
+    <SCard v-else class="relative w-full">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
@@ -429,6 +429,6 @@ setPageSeo({
           </p>
         </div>
       </div>
-    </UiCard>
+    </SCard>
   </section>
 </template>

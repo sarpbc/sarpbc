@@ -2,6 +2,7 @@
 import type { TeamForm } from "~/types/matches";
 
 const { t } = useI18n();
+const localePath = useLocalePath();
 
 const { teamName, teamForm } = defineProps<{
   teamName: string;
@@ -12,40 +13,43 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
 </script>
 
 <template>
-  <UiCard class="p-4">
-    <div
-      class="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-default pb-3"
+  <SCard flush-bottom class="flex flex-col">
+    <SListItem size="default" divider class="min-w-0">
+      <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
+        <h3 class="min-w-0 truncate text-toned">{{ teamName }}</h3>
+        <span v-if="teamForm && hasRecentMatches" class="shrink-0 text-muted tabular-nums">
+          {{
+            t("page.match.detail.formRecord", {
+              wins: teamForm.record.wins,
+              losses: teamForm.record.losses,
+            })
+          }}
+        </span>
+      </div>
+    </SListItem>
+
+    <SListItem v-if="!hasRecentMatches" size="default" divider>
+      <p class="text-xs text-pretty text-muted">
+        {{ t("page.match.detail.formEmpty") }}
+      </p>
+    </SListItem>
+
+    <SListItem
+      v-for="recentMatch in teamForm?.recent ?? []"
+      :key="recentMatch.id"
+      size="default"
+      divider
+      :to="localePath(`/matches/${recentMatch.id}`)"
+      class="min-w-0"
     >
-      <h3 class="text-sm font-semibold text-balance">{{ teamName }}</h3>
-      <span
-        v-if="teamForm && hasRecentMatches"
-        class="shrink-0 text-sm font-medium text-muted tabular-nums"
-      >
-        {{
-          t("page.match.detail.formRecord", {
-            wins: teamForm.record.wins,
-            losses: teamForm.record.losses,
-          })
-        }}
-      </span>
-    </div>
-
-    <p v-if="!hasRecentMatches" class="text-sm text-pretty text-muted">
-      {{ t("page.match.detail.formEmpty") }}
-    </p>
-
-    <ul v-else class="flex flex-col gap-1.5">
-      <li
-        v-for="recentMatch in teamForm!.recent"
-        :key="recentMatch.id"
-        class="flex items-center justify-between gap-3 rounded-md bg-elevated/50 px-2.5 py-2 text-sm"
-      >
+      <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <div class="flex min-w-0 items-center gap-2">
           <UBadge
             v-if="recentMatch.outcome"
             :color="recentMatch.outcome === 'win' ? 'success' : 'error'"
             variant="soft"
-            class="shrink-0 tabular-nums"
+            size="sm"
+            class="inline-flex size-5 shrink-0 items-center justify-center p-0"
           >
             {{
               recentMatch.outcome === "win"
@@ -69,7 +73,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
             })
           }}
         </span>
-      </li>
-    </ul>
-  </UiCard>
+      </div>
+    </SListItem>
+  </SCard>
 </template>
