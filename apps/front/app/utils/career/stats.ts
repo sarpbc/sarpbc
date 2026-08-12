@@ -1,5 +1,5 @@
 import type { CareerBackground, CareerRole, CareerStats } from "~/types/career";
-import { MAX_STAT, MIN_STAT } from "~/types/career";
+import { MAX_STAT, MIN_STAT, getSeasonsPastPeak } from "~/types/career";
 
 export function clampStat(value: number): number {
   return Math.max(MIN_STAT, Math.min(MAX_STAT, Math.round(value)));
@@ -47,6 +47,17 @@ function getRoleDelta(role: CareerRole): Partial<CareerStats> {
 
 export function getStartingStats(background: CareerBackground, role: CareerRole): CareerStats {
   return applyStatDelta(getBackgroundBaseStats(background), getRoleDelta(role));
+}
+
+/** Rating and form drop after the five peak seasons. Accelerates each year. */
+export function getAgeDecline(season: number): Partial<CareerStats> {
+  const pastPeak = getSeasonsPastPeak(season);
+  if (pastPeak <= 0) return {};
+  return {
+    rating: -(1 + pastPeak),
+    form: -pastPeak,
+    morale: pastPeak >= 2 ? -1 : 0,
+  };
 }
 
 /** Composite performance score — role shifts how much each stat matters. */

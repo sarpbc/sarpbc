@@ -30,14 +30,14 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     choices: [
       { id: "a", delta: { rating: 4, morale: -2 } },
       { id: "b", delta: { form: 4, rating: -1 } },
-      { id: "c", delta: { morale: 5, form: -2 } },
+      { id: "c", delta: { morale: 5, form: -2 }, destiny: { quit: 1 } },
     ],
   },
   {
     id: "split-04",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -3 } },
+      { id: "a", delta: { morale: 4, form: -3 }, destiny: { streamer: 2 } },
       { id: "b", delta: { form: 2 } },
     ],
   },
@@ -53,8 +53,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-06",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: 1, rating: -1 } },
-      { id: "b", delta: { rating: 3, morale: -3 } },
+      { id: "a", delta: { morale: 4, form: 1, rating: -1 }, destiny: { coach: 2 } },
+      { id: "b", delta: { rating: 3, morale: -3 }, destiny: { quit: 1 } },
     ],
   },
   {
@@ -78,8 +78,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-09",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -2 } },
-      { id: "b", delta: { rating: 2, form: 1 } },
+      { id: "a", delta: { morale: 4, form: -2 }, destiny: { streamer: 2 } },
+      { id: "b", delta: { rating: 2, form: 1 }, destiny: { coach: 1 } },
     ],
   },
   {
@@ -102,8 +102,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-12",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 3, form: 1 } },
-      { id: "b", delta: { morale: 2, form: -2 } },
+      { id: "a", delta: { morale: 3, form: 1 }, destiny: { quit: 2 } },
+      { id: "b", delta: { morale: 2, form: -2 }, destiny: { streamer: 1 } },
       { id: "c", delta: { rating: 2, morale: -1 } },
     ],
   },
@@ -127,7 +127,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-15",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -1 } },
+      { id: "a", delta: { morale: 4, form: -1 }, destiny: { streamer: 1 } },
       { id: "b", delta: { form: 3, morale: -2 } },
     ],
   },
@@ -176,8 +176,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "worlds-05",
     pool: "worlds",
     choices: [
-      { id: "a", delta: { morale: 3, form: -2 } },
-      { id: "b", delta: { form: 2 } },
+      { id: "a", delta: { morale: 3, form: -2 }, destiny: { streamer: 1 } },
+      { id: "b", delta: { form: 2 }, destiny: { quit: 1 } },
     ],
   },
   {
@@ -186,6 +186,36 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     choices: [
       { id: "a", delta: { rating: 3, morale: 1, form: -2 } },
       { id: "b", delta: { form: 3 } },
+    ],
+  },
+  {
+    id: "late-01",
+    pool: "split",
+    minSeason: 5,
+    choices: [
+      { id: "a", delta: { morale: 3, form: -2, rating: -1 }, destiny: { quit: 2 } },
+      { id: "b", delta: { form: 2, morale: -1 }, destiny: { streamer: 2 } },
+      { id: "c", delta: { morale: 2 }, destiny: { coach: 2 } },
+    ],
+  },
+  {
+    id: "late-02",
+    pool: "split",
+    minSeason: 5,
+    choices: [
+      { id: "a", delta: { morale: 4, form: -3 }, destiny: { streamer: 2 } },
+      { id: "b", delta: { form: 2, rating: 1 }, destiny: { coach: 1 } },
+      { id: "c", delta: { morale: 2, form: -1 }, destiny: { quit: 2 } },
+    ],
+  },
+  {
+    id: "late-03",
+    pool: "split",
+    minSeason: 6,
+    choices: [
+      { id: "a", delta: { morale: 3, form: -1 }, destiny: { coach: 2 } },
+      { id: "b", delta: { form: 2 }, destiny: { streamer: 1 } },
+      { id: "c", delta: { morale: 4, rating: -2 }, destiny: { quit: 2 } },
     ],
   },
 ];
@@ -198,8 +228,12 @@ export function pickRandomEvent(
   pool: CareerEventPool,
   usedIds: string[],
   seed: number,
+  season = 1,
 ): CareerEventDefinition {
-  const candidates = getEventsForPool(pool).filter((event) => !usedIds.includes(event.id));
+  const eligible = getEventsForPool(pool).filter((event) => (event.minSeason ?? 1) <= season);
+  const unused = eligible.filter((event) => !usedIds.includes(event.id));
+  const lateUnused = unused.filter((event) => (event.minSeason ?? 1) >= 5);
+  const candidates = lateUnused.length > 0 ? lateUnused : unused.length > 0 ? unused : eligible;
   const available = candidates.length > 0 ? candidates : getEventsForPool(pool);
   const index = Math.abs(seed) % available.length;
   return available[index]!;

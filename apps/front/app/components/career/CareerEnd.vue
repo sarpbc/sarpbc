@@ -46,6 +46,17 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
       </h2>
       <p class="text-xl font-bold tracking-tight">{{ result.playerName }}</p>
       <p class="text-sm text-muted">
+        {{ t(`page.game.career.destiny.${result.destiny}.endLine`) }}
+      </p>
+      <p class="text-sm text-muted">
+        {{
+          t("page.game.career.end.retiredAt", {
+            age: result.retiredAge,
+            seasons: result.seasons.length,
+          })
+        }}
+      </p>
+      <p class="text-sm text-muted">
         {{ t(`page.game.career.onboarding.countries.${result.country}`) }} ·
         {{ t(`page.game.career.onboarding.regions.${result.region}`) }} ·
         {{ t(`page.game.career.onboarding.roles.${result.role}.label`) }}

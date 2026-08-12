@@ -1,5 +1,18 @@
-import type { CareerResult, CareerState } from "~/types/career";
-import { CAREER_BACKGROUNDS, CAREER_COUNTRIES, CAREER_REGIONS, CAREER_ROLES } from "~/types/career";
+import type {
+  CareerDestinyLeanings,
+  CareerResult,
+  CareerRoster,
+  CareerState,
+  CareerWorldState,
+} from "~/types/career";
+import {
+  CAREER_BACKGROUNDS,
+  CAREER_COUNTRIES,
+  CAREER_DESTINIES,
+  CAREER_REGIONS,
+  CAREER_ROLES,
+  ROSTER_SIZE,
+} from "~/types/career";
 
 export const CAREER_ACTIVE_STORAGE_KEY = "sarpbc:career-active";
 export const CAREER_RESULTS_STORAGE_KEY = "sarpbc:career-results";
@@ -34,6 +47,42 @@ function isValidStats(value: unknown): value is CareerState["stats"] {
   );
 }
 
+function isValidDestinyLeanings(value: unknown): value is CareerDestinyLeanings {
+  if (value === null || typeof value !== "object") return false;
+  const leanings = value as CareerDestinyLeanings;
+  return (
+    typeof leanings.quit === "number" &&
+    typeof leanings.streamer === "number" &&
+    typeof leanings.coach === "number"
+  );
+}
+
+function isValidRoster(value: unknown): value is CareerRoster {
+  return (
+    Array.isArray(value) &&
+    value.length === ROSTER_SIZE &&
+    value.every((id) => typeof id === "string")
+  );
+}
+
+function isValidWorld(value: unknown): value is CareerWorldState {
+  if (value === null || typeof value !== "object") return false;
+  const world = value as CareerWorldState;
+  if (typeof world.rosters !== "object" || world.rosters === null) return false;
+  if (typeof world.players !== "object" || world.players === null) return false;
+  if (
+    !Array.isArray(world.freeAgentIds) ||
+    !world.freeAgentIds.every((id) => typeof id === "string")
+  ) {
+    return false;
+  }
+  if (typeof world.nextGeneratedId !== "number") return false;
+  for (const roster of Object.values(world.rosters)) {
+    if (!isValidRoster(roster)) return false;
+  }
+  return true;
+}
+
 export function parseCareerState(raw: string | null): CareerState | null {
   if (!raw) return null;
 
@@ -55,9 +104,15 @@ export function parseCareerState(raw: string | null): CareerState | null {
       typeof state.currentSeason !== "number" ||
       typeof state.currentStage !== "string" ||
       typeof state.currentTeamId !== "string" ||
+      !isValidWorld(state.world) ||
       !Array.isArray(state.usedEventIds) ||
       !Array.isArray(state.currentSplits) ||
-      !Array.isArray(state.seasonRecords)
+      !Array.isArray(state.seasonRecords) ||
+      !Array.isArray(state.pendingOfferTeamIds) ||
+      typeof state.renewalOffered !== "boolean" ||
+      typeof state.isLastChanceOffer !== "boolean" ||
+      typeof state.offseasonDestinyPending !== "boolean" ||
+      !isValidDestinyLeanings(state.destinyLeanings)
     ) {
       return null;
     }
@@ -123,7 +178,12 @@ export function decodeCareerResultFromShare(encoded: string): CareerResult | nul
     const parsed: unknown = JSON.parse(json);
     if (parsed === null || typeof parsed !== "object") return null;
     const result = parsed as CareerResult;
-    if (typeof result.id !== "string" || typeof result.finalRating !== "number") {
+    if (
+      typeof result.id !== "string" ||
+      typeof result.finalRating !== "number" ||
+      typeof result.retiredAge !== "number" ||
+      !CAREER_DESTINIES.includes(result.destiny as never)
+    ) {
       return null;
     }
     return result;
