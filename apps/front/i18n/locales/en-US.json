@@ -691,11 +691,11 @@
       "title": "Profile",
       "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
-      "openAdmin": "Staff Console",
+      "staff": "Staff",
+      "editProfile": "Edit Profile",
+      "actions": "Profile Actions",
       "username": {
-        "title": "Username",
         "label": "Username",
-        "hint": "Shown on comments, pick'ems, and your profile.",
         "save": "Save Username",
         "saving": "Saving…",
         "updated": "Username updated",
@@ -707,9 +707,7 @@
       },
       "notifications": {
         "title": "Notifications",
-        "empty": "No notifications yet. When someone replies to your comment, it will show up here.",
         "markAllRead": "Mark All Read",
-        "viewThread": "View Thread",
         "replied": "{user} replied on {target}"
       }
     },
