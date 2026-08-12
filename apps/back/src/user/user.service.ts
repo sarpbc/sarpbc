@@ -1,4 +1,4 @@
-﻿import { ConflictException, Inject, Injectable } from "@nestjs/common";
+﻿import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { User } from "./domain/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { SignInUserDto } from "./dto/signin-user.dto";
@@ -100,6 +100,24 @@ export class UserService {
     const user = new User(email, userName, null, googleId, avatarUrl ?? null);
 
     await this.userRepository.save(user);
+    return user;
+  }
+
+  async updateUserName(userId: string, userName: string): Promise<User> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (user.userName !== userName) {
+      const taken = await this.userRepository.existsByUserName(userName, userId);
+      if (taken) {
+        throw new ConflictException("This username is already taken. Choose a different name.");
+      }
+      user.userName = userName;
+      await this.userRepository.save(user);
+    }
+
     return user;
   }
 

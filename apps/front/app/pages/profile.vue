@@ -1,11 +1,16 @@
 <script setup lang="ts">
+import * as z from "zod";
+import type { FormSubmitEvent } from "@nuxt/ui";
 import type { AppNotification } from "~/types/notification";
+import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const user = useUser();
 const localePath = useLocalePath();
 const posthog = usePostHog();
+const { identifyUser } = usePostHogIdentity();
+const toast = useToast();
 const config = useRuntimeConfig();
 const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 const { refresh: refreshUnreadCount } = useUnreadNotificationCount();
@@ -16,6 +21,31 @@ if (!user.value) {
 
 const isLoggingOut = ref(false);
 const isMarkingRead = ref(false);
+const isSavingUserName = ref(false);
+
+const usernameSchema = z.object({
+  userName: z
+    .string()
+    .trim()
+    .min(1, t("page.profile.username.validation.minLength"))
+    .max(100, t("page.profile.username.validation.maxLength")),
+});
+
+type UsernameSchema = z.output<typeof usernameSchema>;
+
+const usernameState = reactive<UsernameSchema>({
+  userName: user.value?.userName ?? "",
+});
+
+watch(
+  () => user.value?.userName,
+  (userName) => {
+    if (userName && !isSavingUserName.value) {
+      usernameState.userName = userName;
+    }
+  },
+);
+
 const adminHomeUrl = computed(() => {
   const base = String(config.public.adminUrl || "https://admin.sarpbc.org").replace(/\/$/, "");
   return base;
@@ -38,6 +68,38 @@ function notificationMessage(notification: AppNotification): string {
     user: notification.reply.author.userName,
     target: notification.targetLabel,
   });
+}
+
+async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
+  event.preventDefault();
+  if (isSavingUserName.value) {
+    return;
+  }
+
+  const parsed = usernameSchema.safeParse(usernameState);
+  if (!parsed.success) {
+    return;
+  }
+
+  isSavingUserName.value = true;
+  playCue("loading");
+  try {
+    const updated = await updateUserName(parsed.data.userName);
+    user.value = updated;
+    usernameState.userName = updated.userName;
+    identifyUser(updated);
+    toast.add({
+      title: t("page.profile.username.updated"),
+      color: "success",
+    });
+  } catch (error) {
+    toast.add({
+      title: getApiErrorMessage(error) ?? t("page.profile.username.updateFailed"),
+      color: "error",
+    });
+  } finally {
+    isSavingUserName.value = false;
+  }
 }
 
 async function markAllRead() {
@@ -138,6 +200,50 @@ setPageSeo({
           @click="handleLogout"
         />
       </div>
+    </SCard>
+
+    <SCard v-if="user" class="w-full flex flex-col gap-4 p-4">
+      <h2 class="text-lg font-semibold">
+        {{ $t("page.profile.username.title") }}
+      </h2>
+      <p class="text-sm text-muted">
+        {{ $t("page.profile.username.hint") }}
+      </p>
+      <UForm
+        :schema="usernameSchema"
+        :state="usernameState"
+        class="w-full flex flex-col gap-4"
+        @submit="saveUserName"
+      >
+        <UFormField
+          :label="$t('page.profile.username.label')"
+          name="userName"
+          required
+          class="w-full"
+        >
+          <UInput
+            v-model="usernameState.userName"
+            type="text"
+            autocomplete="username"
+            spellcheck="false"
+            class="w-full"
+            :disabled="isSavingUserName"
+          />
+        </UFormField>
+        <UButton
+          type="submit"
+          color="primary"
+          variant="soft"
+          class="cursor-pointer w-fit"
+          :class="pressClass"
+          :loading="isSavingUserName"
+          :disabled="isSavingUserName"
+          :label="
+            isSavingUserName ? $t('page.profile.username.saving') : $t('page.profile.username.save')
+          "
+          v-bind="cuelumeAttrs.pressRelease"
+        />
+      </UForm>
     </SCard>
 
     <SCard class="w-full flex flex-col gap-4 p-4">

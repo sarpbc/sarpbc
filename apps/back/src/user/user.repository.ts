@@ -27,6 +27,14 @@ export class UserRepository extends EntityRepository<User> implements IUserRepos
     return count > 0;
   }
 
+  async existsByUserName(userName: string, excludeUserId?: string): Promise<boolean> {
+    const where: FilterQuery<User> = excludeUserId
+      ? { userName, id: { $ne: excludeUserId } }
+      : { userName };
+    const count = await this.count(where);
+    return count > 0;
+  }
+
   async save(user: User): Promise<void> {
     await this.em.persist(user).flush();
   }
