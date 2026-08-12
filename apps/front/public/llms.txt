@@ -6,6 +6,17 @@ sarpbc.org is a free Rocket League esports website. It helps fans follow the com
 
 sarpbc.org is an independent fan site and is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League. The site is free for fans; we are not here to extract money from the community.
 
+## Markdown
+
+Every public HTML page also has a Markdown twin. Append `.md` to the path (`/about` → `/about.md`, home → `/index.md`) or send `Accept: text/markdown`. Markdown responses are `noindex`.
+
+- [Home](https://sarpbc.org/index.md)
+- [Matches](https://sarpbc.org/matches.md)
+- [Results](https://sarpbc.org/results.md)
+- [Tournaments](https://sarpbc.org/tournaments.md)
+- [About](https://sarpbc.org/about.md)
+- [French home](https://sarpbc.org/fr/index.md)
+
 ## Site
 
 - [News](https://sarpbc.org/): Latest Rocket League esports news, roster changes, and tournament announcements.
