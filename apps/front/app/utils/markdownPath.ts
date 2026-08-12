@@ -63,18 +63,7 @@ export function isMarkdownEligibleHtmlPath(pathname: string): boolean {
   }
 
   const normalized = pathname.replace(/\/+$/, "") || "/";
-  if (PRIVATE_HTML_PATHS.has(normalized)) {
-    return false;
-  }
-
-  if (normalized === "/dashboard" || normalized.startsWith("/dashboard/")) {
-    return false;
-  }
-  if (normalized === "/fr/dashboard" || normalized.startsWith("/fr/dashboard/")) {
-    return false;
-  }
-
-  return true;
+  return !PRIVATE_HTML_PATHS.has(normalized);
 }
 
 export function htmlPathFromMarkdownPath(pathname: string): string {

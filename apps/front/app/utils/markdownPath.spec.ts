@@ -39,7 +39,6 @@ describe("markdownPath", () => {
     expect(isMarkdownEligibleHtmlPath("/")).toBe(true);
     expect(isMarkdownEligibleHtmlPath("/profile")).toBe(false);
     expect(isMarkdownEligibleHtmlPath("/fr/login")).toBe(false);
-    expect(isMarkdownEligibleHtmlPath("/dashboard/news")).toBe(false);
     expect(isMarkdownEligibleHtmlPath("/about.md")).toBe(false);
     expect(isMarkdownEligibleHtmlPath("/favicon.ico")).toBe(false);
   });
