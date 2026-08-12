@@ -692,6 +692,19 @@
       "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
       "openAdmin": "Staff Console",
+      "username": {
+        "title": "Username",
+        "label": "Username",
+        "hint": "Shown on comments, pick'ems, and your profile.",
+        "save": "Save Username",
+        "saving": "Saving…",
+        "updated": "Username updated",
+        "updateFailed": "Could not update username. Check the name and try again.",
+        "validation": {
+          "minLength": "Enter a username.",
+          "maxLength": "Username must be 100 characters or fewer."
+        }
+      },
       "notifications": {
         "title": "Notifications",
         "empty": "No notifications yet. When someone replies to your comment, it will show up here.",
