@@ -97,7 +97,7 @@ export default defineNuxtConfig({
     preset: "node-server",
   },
 
-  // Staff console is SPA-only (parity with former /dashboard island)
+  // Staff console is SPA-only
   ssr: false,
 
   typescript: {
