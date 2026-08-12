@@ -12,7 +12,7 @@ const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
 const toast = useToast();
 const config = useRuntimeConfig();
-const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
+const { playCue } = useCuelume();
 const { refresh: refreshUnreadCount } = useUnreadNotificationCount();
 
 if (!user.value) {
@@ -22,6 +22,9 @@ if (!user.value) {
 const isLoggingOut = ref(false);
 const isMarkingRead = ref(false);
 const isSavingUserName = ref(false);
+const menuOpen = ref(false);
+const editOpen = ref(false);
+const menuId = "profile-actions-menu";
 
 const usernameSchema = z.object({
   userName: z
@@ -46,6 +49,12 @@ watch(
   },
 );
 
+watch(editOpen, (isOpen) => {
+  if (isOpen) {
+    usernameState.userName = user.value?.userName ?? "";
+  }
+});
+
 const adminHomeUrl = computed(() => {
   const base = String(config.public.adminUrl || "https://admin.sarpbc.org").replace(/\/$/, "");
   return base;
@@ -58,6 +67,8 @@ const { data: notifications, refresh: refreshNotifications } = await useLazyAsyn
   () => getNotifications(30),
   { server: false },
 );
+
+const hasNotifications = computed(() => (notifications.value?.length ?? 0) > 0);
 
 const unreadNotifications = computed(
   () => notifications.value?.filter((notification) => !notification.readAt) ?? [],
@@ -88,6 +99,7 @@ async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
     user.value = updated;
     usernameState.userName = updated.userName;
     identifyUser(updated);
+    editOpen.value = false;
     toast.add({
       title: t("page.profile.username.updated"),
       color: "success",
@@ -117,16 +129,22 @@ async function markAllRead() {
   }
 }
 
-async function viewThread(notification: AppNotification) {
-  if (!notification.readAt) {
-    await markNotificationsRead([notification.id]);
-    await Promise.all([refreshNotifications(), refreshUnreadCount()]);
+async function onNotificationClick(notification: AppNotification) {
+  if (notification.readAt) {
+    return;
   }
 
-  await navigateTo(localePath(notification.targetPath));
+  await markNotificationsRead([notification.id]);
+  await Promise.all([refreshNotifications(), refreshUnreadCount()]);
+}
+
+function openEditProfile() {
+  menuOpen.value = false;
+  editOpen.value = true;
 }
 
 const handleLogout = async () => {
+  menuOpen.value = false;
   isLoggingOut.value = true;
   playCue("loading");
   try {
@@ -150,19 +168,15 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SCrossCard class="h-row-header">
-      <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold">
-          {{ $t("page.profile.title") }}
-        </h1>
-      </div>
-    </SCrossCard>
+    <SHubPageHeader>
+      <template #title>{{ $t("page.profile.title") }}</template>
+    </SHubPageHeader>
 
     <SCard
       v-if="user"
-      class="min-h-22.75 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center p-2 lg:p-4 gap-4"
+      class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2"
     >
-      <div class="flex items-center gap-4">
+      <div class="min-w-0">
         <UUser
           :alt="user.userName"
           :name="user.userName"
@@ -174,129 +188,154 @@ setPageSeo({
         />
       </div>
 
-      <div class="flex flex-row items-center gap-2">
-        <UButton
-          v-if="showStaffConsole"
-          :to="adminHomeUrl"
-          external
-          target="_blank"
-          color="primary"
-          variant="soft"
-          :label="$t('page.profile.openAdmin')"
-          class="cursor-pointer w-fit"
-          :class="pressClass"
-          v-bind="cuelumeAttrs.pressRelease"
+      <UPopover v-model:open="menuOpen">
+        <SButton
+          square
+          variant="ghost"
+          color="neutral"
+          icon="i-fluent-more-vertical-24-regular"
+          class="size-row p-0 justify-center cursor-pointer"
+          sound="press"
+          :aria-label="$t('page.profile.actions')"
+          aria-haspopup="menu"
+          :aria-expanded="menuOpen"
+          :aria-controls="menuId"
         />
-        <UButton
-          color="error"
-          variant="soft"
-          icon="i-fluent-sign-out-24-regular"
-          class="cursor-pointer w-fit"
-          :class="pressClass"
-          :label="$t('page.profile.logout')"
-          :loading="isLoggingOut"
-          :disabled="isLoggingOut"
-          v-bind="cuelumeAttrs.pressRelease"
-          @click="handleLogout"
-        />
-      </div>
+        <template #content>
+          <div
+            :id="menuId"
+            role="menu"
+            class="flex min-w-40 flex-col p-1"
+            :aria-label="$t('page.profile.actions')"
+          >
+            <SButton
+              size="sm"
+              variant="ghost"
+              color="neutral"
+              icon="i-fluent-edit-24-regular"
+              class="justify-start cursor-pointer"
+              sound="press"
+              role="menuitem"
+              :label="$t('page.profile.editProfile')"
+              @click="openEditProfile"
+            />
+            <SButton
+              v-if="showStaffConsole"
+              size="sm"
+              variant="ghost"
+              color="neutral"
+              icon="i-fluent-shield-24-regular"
+              class="justify-start cursor-pointer"
+              sound="press"
+              role="menuitem"
+              :to="adminHomeUrl"
+              external
+              target="_blank"
+              :label="$t('page.profile.staff')"
+              @click="menuOpen = false"
+            />
+            <SButton
+              size="sm"
+              variant="ghost"
+              color="error"
+              icon="i-fluent-sign-out-24-regular"
+              class="justify-start cursor-pointer"
+              sound="press"
+              role="menuitem"
+              :label="$t('page.profile.logout')"
+              :loading="isLoggingOut"
+              :disabled="isLoggingOut"
+              @click="handleLogout"
+            />
+          </div>
+        </template>
+      </UPopover>
     </SCard>
 
-    <SCard v-if="user" class="w-full flex flex-col gap-4 p-4">
-      <h2 class="text-lg font-semibold">
-        {{ $t("page.profile.username.title") }}
-      </h2>
-      <p class="text-sm text-muted">
-        {{ $t("page.profile.username.hint") }}
-      </p>
-      <UForm
-        :schema="usernameSchema"
-        :state="usernameState"
-        class="w-full flex flex-col gap-4"
-        @submit="saveUserName"
-      >
-        <UFormField
-          :label="$t('page.profile.username.label')"
-          name="userName"
-          required
+    <UModal
+      v-if="user"
+      v-model:open="editOpen"
+      :title="$t('page.profile.editProfile')"
+      :dismissible="!isSavingUserName"
+    >
+      <template #body>
+        <UForm
+          id="edit-username-form"
+          :schema="usernameSchema"
+          :state="usernameState"
           class="w-full"
+          @submit="saveUserName"
         >
-          <UInput
-            v-model="usernameState.userName"
-            type="text"
-            autocomplete="username"
-            spellcheck="false"
+          <UFormField
+            :label="$t('page.profile.username.label')"
+            name="userName"
+            required
             class="w-full"
-            :disabled="isSavingUserName"
-          />
-        </UFormField>
-        <UButton
+          >
+            <UInput
+              v-model="usernameState.userName"
+              type="text"
+              autocomplete="username"
+              spellcheck="false"
+              class="w-full"
+              :disabled="isSavingUserName"
+            />
+          </UFormField>
+        </UForm>
+      </template>
+      <template #footer>
+        <SButton
           type="submit"
+          form="edit-username-form"
           color="primary"
           variant="soft"
-          class="cursor-pointer w-fit"
-          :class="pressClass"
+          class="cursor-pointer"
           :loading="isSavingUserName"
           :disabled="isSavingUserName"
           :label="
             isSavingUserName ? $t('page.profile.username.saving') : $t('page.profile.username.save')
           "
-          v-bind="cuelumeAttrs.pressRelease"
         />
-      </UForm>
-    </SCard>
+      </template>
+    </UModal>
 
-    <SCard class="w-full flex flex-col gap-4 p-4">
-      <div class="flex flex-row items-center justify-between gap-2">
-        <h2 class="text-lg font-semibold">
-          {{ $t("page.profile.notifications.title") }}
-        </h2>
-        <UButton
-          v-if="unreadNotifications.length > 0"
-          size="sm"
-          variant="soft"
-          color="neutral"
-          :label="$t('page.profile.notifications.markAllRead')"
-          :loading="isMarkingRead"
-          :disabled="isMarkingRead"
-          class="cursor-pointer"
-          :class="pressClass"
-          v-bind="cuelumeAttrs.pressRelease"
-          @click="markAllRead"
-        />
-      </div>
+    <SRail v-if="hasNotifications">
+      <template #caption>
+        <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
+          <span>{{ $t("page.profile.notifications.title") }}</span>
+          <SButton
+            v-if="unreadNotifications.length > 0"
+            size="xs"
+            variant="ghost"
+            color="neutral"
+            :label="$t('page.profile.notifications.markAllRead')"
+            :loading="isMarkingRead"
+            :disabled="isMarkingRead"
+            class="cursor-pointer"
+            @click="markAllRead"
+          />
+        </div>
+      </template>
 
-      <p v-if="!notifications?.length" class="text-sm text-muted">
-        {{ $t("page.profile.notifications.empty") }}
-      </p>
-
-      <ul v-else class="flex flex-col gap-3">
-        <li
+      <SCard flush-bottom>
+        <SListItem
           v-for="notification in notifications"
           :key="notification.id"
-          class="flex flex-col gap-1 border border-default p-3"
+          divider
+          :to="localePath(notification.targetPath)"
           :class="{ 'bg-elevated': !notification.readAt }"
+          @click="onNotificationClick(notification)"
         >
-          <p class="text-sm">
-            <span class="font-medium" translate="no">
+          <div class="flex w-full min-w-0 items-center justify-between gap-2">
+            <p class="min-w-0 truncate text-sm" translate="no">
               {{ notificationMessage(notification) }}
-            </span>
-          </p>
-          <p class="text-sm text-muted line-clamp-2">{{ notification.reply.content }}</p>
-          <div class="flex flex-row items-center justify-between gap-2 text-sm">
-            <span class="text-muted tabular-nums">
+            </p>
+            <span class="shrink-0 text-xs text-muted tabular-nums">
               {{ df(locale).format(new Date(notification.createdAt)) }}
             </span>
-            <UButton
-              variant="link"
-              color="primary"
-              :label="$t('page.profile.notifications.viewThread')"
-              class="cursor-pointer p-0"
-              @click="viewThread(notification)"
-            />
           </div>
-        </li>
-      </ul>
-    </SCard>
+        </SListItem>
+      </SCard>
+    </SRail>
   </div>
 </template>
