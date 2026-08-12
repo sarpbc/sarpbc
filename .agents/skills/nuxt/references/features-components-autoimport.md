@@ -262,7 +262,7 @@ import { LazyMountainsList, NuxtLink } from '#components'
 // nuxt.config.ts
 export default defineNuxtConfig({
   components: [
-    { path: '~/components/ui', prefix: 'Ui' },
+    { path: '~/components/s', prefix: 'S' }, // sarpbc primitives (SCard, SRail, …)
     { path: '~/components/forms', prefix: 'Form' },
     '~/components', // Default, should come last
   ],

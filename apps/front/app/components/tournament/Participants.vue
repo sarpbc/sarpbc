@@ -31,7 +31,7 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
       </div>
     </div>
 
-    <UiCard v-else variant="soft">
+    <SCard v-else variant="soft">
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -41,6 +41,6 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
           {{ t("page.tournaments.id.participants.emptyHint") }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
   </section>
 </template>

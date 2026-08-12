@@ -66,7 +66,7 @@ function metaParts(award: PlayerProfileAward): string[] {
 
 <template>
   <section :aria-labelledby="headingId">
-    <UiRail>
+    <SRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.awards.title") }}
@@ -74,7 +74,7 @@ function metaParts(award: PlayerProfileAward): string[] {
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <UiCard v-for="index in 2" :key="index">
+        <SCard v-for="index in 2" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
             <USkeleton class="size-10 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -82,10 +82,10 @@ function metaParts(award: PlayerProfileAward): string[] {
               <USkeleton class="h-3 w-2/5 max-w-32" />
             </div>
           </div>
-        </UiCard>
+        </SCard>
       </div>
 
-      <UiCard v-else-if="hasError">
+      <SCard v-else-if="hasError">
         <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
           <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -95,7 +95,7 @@ function metaParts(award: PlayerProfileAward): string[] {
             {{ t("page.player.slug.awards.retry") }}
           </UButton>
         </div>
-      </UiCard>
+      </SCard>
 
       <div
         v-else-if="awards.length > 0"
@@ -120,6 +120,6 @@ function metaParts(award: PlayerProfileAward): string[] {
           </div>
         </ULink>
       </div>
-    </UiRail>
+    </SRail>
   </section>
 </template>

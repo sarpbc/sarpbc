@@ -31,7 +31,7 @@ ui: {
 |-------------|-------|--------|
 | background-100 | `bg-default` | Page, cards |
 | background-200 | `bg-elevated` | Subtle separation only—not general fill |
-| gray-alpha-400 | `border-default` | Card borders (`UiCard`) |
+| gray-alpha-400 | `border-default` | Card borders (`SCard`) |
 
 ### Accents (state only)
 
@@ -85,7 +85,9 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 | row-compact | `--spacing-row-compact` (`calc(row × 2/3)`) | ~29.3 | `h-row-compact` | Forum rail, game promo — 3 compact = 2 news rows |
 | row-header | `--spacing-row-header` (`3.5rem`) | 56 | `h-row-header`, `min-h-row-header` | Page title band |
 | row-double | `--spacing-row-double` (`5.5rem`) | 88 | `h-row-double` | Rare 2× cells |
-| rail-caption | `--spacing-rail-caption` (`4.5rem`) | 72 | `h-rail-caption` | Section label above rail cards |
+| row-triple | `--spacing-row-triple` (`calc(row × 3)`) | ~132 | `h-row-triple` | Featured news row |
+| row-stack | `--spacing-row-stack` (`calc(row × 6)`) | 264 | `min-h-row-stack` | Directory empty/error body |
+| rail-caption | `--spacing-rail-caption` (`4.5rem`) | 72 | `h-rail-caption` | Lead rail only (first in column); section rails use `h-row` |
 
 **Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`.
 

@@ -9,7 +9,8 @@ sarpbc.org is an independent fan site and is not affiliated with, endorsed by, o
 ## Site
 
 - [News](https://sarpbc.org/): Latest Rocket League esports news, roster changes, and tournament announcements.
-- [Matches](https://sarpbc.org/matches): Live, upcoming, and past matches with filters by tournament.
+- [Matches](https://sarpbc.org/matches): Live and upcoming Rocket League matches.
+- [Results](https://sarpbc.org/results): Completed match results.
 - [Tournaments](https://sarpbc.org/tournaments): Ongoing and upcoming tournaments with brackets and schedules.
 - [Players](https://sarpbc.org/player): Professional Rocket League player profiles and career context.
 - [Teams](https://sarpbc.org/team): Team rosters, profiles, and match history.

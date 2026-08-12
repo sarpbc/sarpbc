@@ -85,7 +85,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
             {{ formatDayHeader(dayGroup) }}
           </h3>
-          <UiCard flush-bottom variant="soft" class="w-full">
+          <SCard flush-bottom variant="soft" class="w-full">
             <div v-for="match in dayGroup.matches" :key="match.id">
               <MatchDiscoveryLink
                 :match-id="match.id"
@@ -96,7 +96,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
                 <MatchRow :match="match" :show-date="false" />
               </MatchDiscoveryLink>
             </div>
-          </UiCard>
+          </SCard>
         </div>
       </section>
 
@@ -108,7 +108,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
         <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
           {{ formatDayHeader(dayGroup) }}
         </h3>
-        <UiCard flush-bottom variant="soft" class="w-full">
+        <SCard flush-bottom variant="soft" class="w-full">
           <div v-for="match in dayGroup.matches" :key="match.id">
             <MatchDiscoveryLink
               :match-id="match.id"
@@ -119,13 +119,13 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
               <MatchResultRow :match="match" />
             </MatchDiscoveryLink>
           </div>
-        </UiCard>
+        </SCard>
       </section>
     </div>
-    <UiCard v-else variant="soft" class="w-full">
+    <SCard v-else variant="soft" class="w-full">
       <div class="text-center py-8 text-muted">
         {{ t("page.tournaments.id.noMatches") }}
       </div>
-    </UiCard>
+    </SCard>
   </div>
 </template>

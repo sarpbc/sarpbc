@@ -78,7 +78,7 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
 </script>
 
 <template>
-  <UiCrossCard class="min-h-row-header">
+  <SCrossCard class="min-h-row-header">
     <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
       <div
         v-if="tournament.league?.imageUrl || tournament.league?.name"
@@ -103,7 +103,7 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
         v-if="status || dateRange"
         class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
       >
-        <UiBadgeLive v-if="status === 'live'" />
+        <SBadgeLive v-if="status === 'live'" />
         <span v-else-if="statusLabel">{{ statusLabel }}</span>
         <span v-if="status && dateRange" aria-hidden="true">·</span>
         <span v-if="dateRange" class="tabular-nums">{{ dateRange }}</span>
@@ -122,14 +122,14 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
       <p v-if="showChampion && championTeam" class="text-sm text-highlighted text-pretty">
         <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
         {{ " " }}
-        <UiLink
+        <SLink
           :to="$localePath(`/team/${championTeam.slug}`)"
           variant="inline"
           class="inline-flex items-center min-h-10"
         >
           {{ championTeam.name }}
-        </UiLink>
+        </SLink>
       </p>
     </div>
-  </UiCrossCard>
+  </SCrossCard>
 </template>

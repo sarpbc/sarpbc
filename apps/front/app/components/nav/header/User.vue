@@ -7,15 +7,15 @@ const { count: unreadCount } = useUnreadNotificationCount();
 
 <template>
   <ClientOnly>
-    <UiLink
+    <SLink
       v-if="!user"
       :to="$localePath('/login')"
       variant="muted"
       class="text-lg md:text-sm font-semibold md:font-normal"
     >
       {{ t("components.header.signin") }}
-    </UiLink>
-    <UiLink
+    </SLink>
+    <SLink
       v-else
       :to="$localePath('/profile')"
       variant="muted"
@@ -32,15 +32,15 @@ const { count: unreadCount } = useUnreadNotificationCount();
       >
         {{ unreadCount > 9 ? "9+" : unreadCount }}
       </UBadge>
-    </UiLink>
+    </SLink>
     <template #fallback>
-      <UiLink
+      <SLink
         :to="$localePath('/login')"
         variant="muted"
         class="text-lg md:text-sm font-semibold md:font-normal"
       >
         {{ t("components.header.signin") }}
-      </UiLink>
+      </SLink>
     </template>
   </ClientOnly>
 </template>

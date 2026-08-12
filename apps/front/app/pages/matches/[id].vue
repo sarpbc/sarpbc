@@ -233,209 +233,245 @@ watch(
 function tournamentMatchesPath(tournamentId: string) {
   return `/tournaments/${tournamentId}/matches`;
 }
+
+const scoreboardLabel = computed(() => {
+  const a = participantName(teamA.value);
+  const b = participantName(teamB.value);
+  if (!match.value || matchStatus.value === "upcoming") {
+    return `${a} vs ${b}`;
+  }
+  const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "–") : "–";
+  const scoreB = teamB.value ? (getParticipantScore(match.value, teamB.value.id) ?? "–") : "–";
+  return `${a} ${scoreA} – ${scoreB} ${b}`;
+});
+
+const leagueImageUrl = computed(() => match.value?.tournament?.league?.imageUrl ?? null);
+const leagueName = computed(() => match.value?.tournament?.league?.name ?? null);
+
+const showScheduledAt = computed(
+  () => matchStatus.value === "upcoming" && Boolean(match.value?.beginAt),
+);
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-4">
-    <div v-if="pending" class="w-full flex flex-col gap-4" aria-live="polite">
-      <UiCrossCard class="h-24">
-        <div class="w-full p-4 animate-pulse flex flex-col gap-3">
-          <div class="h-3 w-48 rounded bg-elevated" />
-          <div class="h-8 w-full max-w-md rounded bg-elevated mx-auto" />
-          <div class="h-3 w-32 rounded bg-elevated mx-auto" />
+  <div v-if="pending" aria-live="polite">
+    <SHubPageBody>
+      <SCrossCard class="min-h-row-triple">
+        <div class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5 animate-pulse">
+          <div class="size-8 rounded bg-elevated" />
+          <div
+            class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3"
+          >
+            <div class="h-6 w-28 justify-self-end rounded bg-elevated" />
+            <div class="h-7 w-14 justify-self-center rounded bg-elevated" />
+            <div class="h-6 w-28 justify-self-start rounded bg-elevated" />
+          </div>
         </div>
-      </UiCrossCard>
-      <UiCard class="p-4">
+      </SCrossCard>
+      <div class="flex justify-center gap-2 animate-pulse">
+        <div class="h-3 w-32 rounded bg-elevated" />
+        <div class="h-3 w-12 rounded bg-elevated" />
+      </div>
+      <SCard class="p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
           <div class="h-24 rounded bg-elevated" />
           <div class="h-24 rounded bg-elevated" />
         </div>
-      </UiCard>
-      <UiCard class="p-4">
-        <div class="h-40 rounded bg-elevated animate-pulse" />
-      </UiCard>
+      </SCard>
+    </SHubPageBody>
+  </div>
+
+  <SCard v-else-if="error">
+    <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
+      <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
+      <p class="text-sm text-muted">
+        {{ t("page.match.detail.error") }}
+      </p>
+      <UButton variant="outline" @click="refresh()">
+        {{ t("page.match.detail.retry") }}
+      </UButton>
     </div>
+  </SCard>
 
-    <UiCard v-else-if="error">
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-        <p class="text-sm text-muted">
-          {{ t("page.match.detail.error") }}
-        </p>
-        <UButton variant="outline" @click="refresh()">
-          {{ t("page.match.detail.retry") }}
-        </UButton>
-      </div>
-    </UiCard>
+  <SHubPageBody v-else-if="match">
+    <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
-    <template v-else-if="match">
-      <UiCrossCard class="min-h-row-header">
-        <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
-          <UiLink
-            v-if="match.tournament"
-            :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-            variant="muted"
-            class="text-sm"
-          >
-            {{ tournamentLabel(match) }}
-          </UiLink>
+    <SCrossCard class="min-h-row-triple">
+      <div
+        class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5"
+        role="group"
+        :aria-label="scoreboardLabel"
+      >
+        <img
+          v-if="leagueImageUrl"
+          :src="leagueImageUrl"
+          :alt="leagueName ?? tournamentLabel(match)"
+          class="size-8 object-contain outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+        />
 
-          <div
-            class="w-full max-w-3xl grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 text-xl md:text-2xl font-bold tracking-tight"
-          >
-            <div class="min-w-0 justify-self-end text-end">
-              <UiLink
-                v-if="teamA?.team.slug"
-                :to="$localePath(`/team/${teamA.team.slug}`)"
-                variant="inline"
-                class="inline-block max-w-full truncate"
-              >
-                {{ participantName(teamA) }}
-              </UiLink>
-              <span v-else class="block truncate">{{ participantName(teamA) }}</span>
-            </div>
-
-            <div class="shrink-0 justify-self-center">
-              <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
-                <span
-                  class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
-                  aria-hidden="true"
-                >
-                  <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
-                    {{ teamA ? (getParticipantScore(match, teamA.id) ?? "–") : "–" }}
-                  </span>
-                  <span class="text-muted font-normal text-base">–</span>
-                  <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
-                    {{ teamB ? (getParticipantScore(match, teamB.id) ?? "–") : "–" }}
-                  </span>
-                </span>
-              </template>
-              <span v-else class="text-muted font-normal text-base" aria-hidden="true">vs</span>
-            </div>
-
-            <div class="min-w-0 justify-self-start text-start">
-              <UiLink
-                v-if="teamB?.team.slug"
-                :to="$localePath(`/team/${teamB.team.slug}`)"
-                variant="inline"
-                class="inline-block max-w-full truncate"
-              >
-                {{ participantName(teamB) }}
-              </UiLink>
-              <span v-else class="block truncate">{{ participantName(teamB) }}</span>
-            </div>
+        <div
+          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 text-xl font-bold tracking-tight md:text-2xl"
+        >
+          <div class="min-w-0 justify-self-end text-end">
+            <SLink
+              v-if="teamA?.team.slug"
+              :to="$localePath(`/team/${teamA.team.slug}`)"
+              variant="inline"
+              class="inline-block max-w-full truncate active:scale-[0.96]"
+            >
+              {{ participantName(teamA) }}
+            </SLink>
+            <span v-else class="block truncate">{{ participantName(teamA) }}</span>
           </div>
 
-          <div
-            class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
-          >
-            <UiBadgeLive v-if="matchStatus === 'live'" />
-            <span v-else>{{ statusLabel }}</span>
-            <span v-if="match.numberOfGames" class="tabular-nums">
-              · {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
-            </span>
-            <span v-if="match.beginAt" class="tabular-nums">
-              · {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
-            </span>
+          <div class="shrink-0 justify-self-center" aria-hidden="true">
+            <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
+              <span
+                class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
+              >
+                <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
+                  {{ teamA ? (getParticipantScore(match, teamA.id) ?? "–") : "–" }}
+                </span>
+                <span class="text-muted font-normal text-base">–</span>
+                <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
+                  {{ teamB ? (getParticipantScore(match, teamB.id) ?? "–") : "–" }}
+                </span>
+              </span>
+            </template>
+            <span v-else class="text-muted font-normal text-base">vs</span>
+          </div>
+
+          <div class="min-w-0 justify-self-start text-start">
+            <SLink
+              v-if="teamB?.team.slug"
+              :to="$localePath(`/team/${teamB.team.slug}`)"
+              variant="inline"
+              class="inline-block max-w-full truncate active:scale-[0.96]"
+            >
+              {{ participantName(teamB) }}
+            </SLink>
+            <span v-else class="block truncate">{{ participantName(teamB) }}</span>
           </div>
         </div>
-      </UiCrossCard>
+      </div>
+    </SCrossCard>
 
-      <template v-if="!isBothTeamsTbd">
-        <PickemMatchCta :match="match" :match-status="matchStatus" />
+    <div
+      class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
+    >
+      <SLink
+        v-if="match.tournament"
+        :to="$localePath(tournamentMatchesPath(match.tournament.id))"
+        variant="muted"
+      >
+        {{ tournamentLabel(match) }}
+      </SLink>
+      <template v-if="match.tournament">
+        <span aria-hidden="true">·</span>
+      </template>
+      <SBadgeLive v-if="matchStatus === 'live'" />
+      <span v-else>{{ statusLabel }}</span>
+      <template v-if="match.numberOfGames">
+        <span aria-hidden="true">·</span>
+        <span class="tabular-nums">
+          {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
+        </span>
+      </template>
+      <template v-if="showScheduledAt && match.beginAt">
+        <span aria-hidden="true">·</span>
+        <span class="tabular-nums">
+          {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
+        </span>
+      </template>
+    </div>
 
-        <section class="w-full flex flex-col gap-3">
-          <h2 class="text-sm font-medium text-toned pl-1">
-            {{ t("page.match.detail.sections.rosters") }}
-          </h2>
-          <UiCard class="p-4 md:p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              <div
-                v-for="participant in participants"
-                :key="participant.id"
-                class="flex flex-col items-center gap-4 text-center"
-              >
-                <ULink
-                  v-if="participant.team.slug"
-                  :to="$localePath(`/team/${participant.team.slug}`)"
-                  class="group flex min-h-10 min-w-10 flex-col items-center gap-3 rounded-md p-2 -m-2 touch-manipulation transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <TeamImg
-                    :team-name="participant.team.name"
-                    :image-url="participant.team.imageUrl"
-                    size="md"
-                  />
-                  <span class="max-w-full text-lg font-semibold text-balance">
-                    {{ participant.team.name }}
-                  </span>
-                </ULink>
-                <div v-else class="flex flex-col items-center gap-3">
-                  <TeamImg
-                    :team-name="participant.team.name"
-                    :image-url="participant.team.imageUrl"
-                    size="md"
-                  />
-                  <span class="max-w-full text-lg font-semibold text-balance">
-                    {{ participant.team.name }}
-                  </span>
-                </div>
+    <template v-if="!isBothTeamsTbd">
+      <PickemMatchCta :match="match" :match-status="matchStatus" />
 
-                <div
-                  v-if="participant.players && participant.players.length > 0"
-                  class="w-full flex flex-wrap justify-center gap-3"
-                >
-                  <PlayerProfile
-                    v-for="player in participant.players"
-                    :key="player.id"
-                    :player="player"
-                    size="md"
-                  />
-                </div>
-                <p v-else class="text-sm text-pretty text-muted">
-                  {{ t("page.match.detail.noRoster") }}
-                </p>
-              </div>
-            </div>
-          </UiCard>
-        </section>
-
-        <section v-if="headToHead && teamA && teamB" class="w-full flex flex-col gap-3">
-          <h2 class="text-sm font-medium text-toned pl-1">
-            {{ t("page.match.detail.sections.headToHead") }}
-          </h2>
-          <MatchHeadToHeadCard
-            :head-to-head="headToHead"
-            :team-a-name="participantName(teamA)"
-            :team-b-name="participantName(teamB)"
-          />
-        </section>
-
-        <section class="w-full flex flex-col gap-3">
-          <h2 class="text-sm font-medium text-toned pl-1">
-            {{ t("page.match.detail.sections.recentForm") }}
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <MatchTeamFormCard
+      <SRail :title="t('page.match.detail.sections.rosters')">
+        <SCard class="p-4 md:p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div
               v-for="participant in participants"
               :key="participant.id"
-              :team-name="participant.team.name"
-              :team-form="teamForms[participant.team.id]"
-            />
-          </div>
-        </section>
+              class="flex flex-col items-center gap-4 text-center"
+            >
+              <SLink
+                v-if="participant.team.slug"
+                :to="$localePath(`/team/${participant.team.slug}`)"
+                variant="inline"
+                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90 active:scale-[0.96]"
+              >
+                <TeamImg
+                  :team-name="participant.team.name"
+                  :image-url="participant.team.imageUrl"
+                  size="md"
+                />
+                <span class="max-w-full text-lg font-semibold text-balance">
+                  {{ participant.team.name }}
+                </span>
+              </SLink>
+              <div v-else class="flex flex-col items-center gap-3">
+                <TeamImg
+                  :team-name="participant.team.name"
+                  :image-url="participant.team.imageUrl"
+                  size="md"
+                />
+                <span class="max-w-full text-lg font-semibold text-balance">
+                  {{ participant.team.name }}
+                </span>
+              </div>
 
-        <UiCard class="p-4 md:p-6">
-          <h2 class="text-sm font-semibold mb-2">
-            {{ t("page.match.detail.sections.gameStats") }}
-          </h2>
+              <div
+                v-if="participant.players && participant.players.length > 0"
+                class="w-full flex flex-wrap justify-center gap-3"
+              >
+                <PlayerProfile
+                  v-for="player in participant.players"
+                  :key="player.id"
+                  :player="player"
+                  size="md"
+                />
+              </div>
+              <p v-else class="text-sm text-pretty text-muted">
+                {{ t("page.match.detail.noRoster") }}
+              </p>
+            </div>
+          </div>
+        </SCard>
+      </SRail>
+
+      <SRail
+        v-if="headToHead && teamA && teamB"
+        :title="t('page.match.detail.sections.headToHead')"
+      >
+        <MatchHeadToHeadCard
+          :head-to-head="headToHead"
+          :team-a-name="participantName(teamA)"
+          :team-b-name="participantName(teamB)"
+        />
+      </SRail>
+
+      <SRail :title="t('page.match.detail.sections.recentForm')">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <MatchTeamFormCard
+            v-for="participant in participants"
+            :key="participant.id"
+            :team-name="participant.team.name"
+            :team-form="teamForms[participant.team.id]"
+          />
+        </div>
+      </SRail>
+
+      <SRail :title="t('page.match.detail.sections.gameStats')">
+        <SCard class="p-4 md:p-6">
           <p class="text-sm text-muted">
             {{ t("page.match.detail.gameStatsPlaceholder") }}
           </p>
-        </UiCard>
-      </template>
-
-      <!-- Discussion metric: comments per match page view (instrument via analytics later). -->
-      <DiscussionCommentThread target-type="match" :target-id="match.id" />
+        </SCard>
+      </SRail>
     </template>
-  </div>
+
+    <DiscussionCommentThread target-type="match" :target-id="match.id" />
+  </SHubPageBody>
 </template>

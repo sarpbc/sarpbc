@@ -41,11 +41,11 @@ function isLive(matchId: string): boolean {
 
 <template>
   <div v-if="showRail" class="md:hidden w-full flex flex-col mb-2">
-    <UiRail :title="upcomingTitle">
-      <UiCard>
+    <SRail caption="lead" :title="upcomingTitle">
+      <SCard>
         <div class="w-full flex flex-col">
           <template v-if="pending && matches.length === 0">
-            <UiListItem v-for="i in 3" :key="i" size="default" :divider="i < 3">
+            <SListItem v-for="i in 3" :key="i" size="default" :divider="i < 3">
               <div class="grid w-full grid-cols-3 items-center gap-2">
                 <div class="col-span-2 flex flex-col gap-1">
                   <USkeleton class="h-3 max-w-28" />
@@ -53,7 +53,7 @@ function isLive(matchId: string): boolean {
                 </div>
                 <USkeleton class="col-span-1 h-3 w-10 justify-self-end" />
               </div>
-            </UiListItem>
+            </SListItem>
           </template>
           <template v-else>
             <MatchDiscoveryLink
@@ -72,11 +72,11 @@ function isLive(matchId: string): boolean {
           </template>
         </div>
         <div class="border-t border-default px-3 py-2">
-          <UiLink :to="$localePath('/matches')" variant="muted" class="text-sm">
+          <SLink :to="$localePath('/matches')" variant="muted" class="text-sm">
             {{ $t("components.match.viewAll") }}
-          </UiLink>
+          </SLink>
         </div>
-      </UiCard>
-    </UiRail>
+      </SCard>
+    </SRail>
   </div>
 </template>

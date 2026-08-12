@@ -23,7 +23,7 @@ const rejectCookies = () => {
       v-if="visible"
       class="cookie-popup fixed bottom-4 z-50 max-w-sm w-full left-1/2 -translate-x-1/2 md:right-4 md:left-auto md:translate-x-0"
     >
-      <UiCard variant="subtle" class="bg-default p-2">
+      <SCard variant="subtle" class="bg-default p-2">
         <p class="text-toned text-md mb-4">
           {{ t("components.cookiePopup.description") }}
         </p>
@@ -36,7 +36,7 @@ const rejectCookies = () => {
             {{ t("common.decline") }}
           </UButton>
         </div>
-      </UiCard>
+      </SCard>
     </div>
   </Transition>
 </template>

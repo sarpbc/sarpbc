@@ -30,7 +30,7 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
 </script>
 
 <template>
-  <UiCard class="border border-primary/30 bg-elevated p-4 md:p-5">
+  <SCard class="border border-primary/30 bg-elevated p-4 md:p-5">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex min-w-0 flex-col gap-1.5">
         <div class="flex items-center gap-2">
@@ -55,5 +55,5 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
         {{ ctaLabel }}
       </UButton>
     </div>
-  </UiCard>
+  </SCard>
 </template>
