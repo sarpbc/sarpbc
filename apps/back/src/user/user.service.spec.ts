@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { ConflictException } from "@nestjs/common";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { USER_REPOSITORY } from "./domain/user.repository.interface";
 import { User } from "./domain/user.entity";
@@ -12,6 +12,7 @@ describe("UserService", () => {
     findByGoogleId: jest.fn(),
     findByEmailWithPassword: jest.fn(),
     existsByEmail: jest.fn(),
+    existsByUserName: jest.fn(),
     save: jest.fn(),
   };
 
@@ -53,6 +54,53 @@ describe("UserService", () => {
           userName: "taken",
         }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe("updateUserName", () => {
+    it("updates the username when it is available", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      userRepository.findById.mockResolvedValue(user);
+      userRepository.existsByUserName.mockResolvedValue(false);
+
+      const updated = await service.updateUserName("user-1", "alice2");
+
+      expect(updated.userName).toBe("alice2");
+      expect(userRepository.existsByUserName).toHaveBeenCalledWith("alice2", "user-1");
+      expect(userRepository.save).toHaveBeenCalledWith(user);
+    });
+
+    it("does not persist when the username is unchanged", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      userRepository.findById.mockResolvedValue(user);
+
+      const updated = await service.updateUserName("user-1", "alice");
+
+      expect(updated.userName).toBe("alice");
+      expect(userRepository.existsByUserName).not.toHaveBeenCalled();
+      expect(userRepository.save).not.toHaveBeenCalled();
+    });
+
+    it("throws ConflictException when the username is taken", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      userRepository.findById.mockResolvedValue(user);
+      userRepository.existsByUserName.mockResolvedValue(true);
+
+      await expect(service.updateUserName("user-1", "taken")).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(userRepository.save).not.toHaveBeenCalled();
+    });
+
+    it("throws NotFoundException when the user is missing", async () => {
+      userRepository.findById.mockResolvedValue(null);
+
+      await expect(service.updateUserName("missing", "alice")).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 
