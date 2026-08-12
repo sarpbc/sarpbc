@@ -321,14 +321,21 @@
       },
       "career": {
         "title": "RL Career",
-        "subtitle": "Five seasons, two majors each. Climb the world rankings and chase Worlds.",
+        "subtitle": "Debut at 16. Peak for five seasons, then the league starts pushing you out.",
         "seo": {
           "title": "RL Career — Text-Based Rocket League Career Simulator",
-          "description": "Build a five-season Rocket League esports career: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
+          "description": "Build a Rocket League esports career from age 16: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
+        },
+        "menu": {
+          "title": "Main Menu",
+          "body": "Start a new run from age 16, or pick up where you left off.",
+          "newCareer": "New Career",
+          "continue": "Continue Career",
+          "newCareerConfirm": "Start a new career? Current progress will be lost."
         },
         "onboarding": {
           "introTitle": "Start Your Career",
-          "introBody": "Create a fictional pro journey. Pick your region, country, playstyle and path — then make the calls that shape five seasons.",
+          "introBody": "Create a fictional pro journey. You debut at 16. Peak for five seasons — after that, rating drops and contracts get harder to keep.",
           "playerNameLabel": "Player Name",
           "playerNamePlaceholder": "Your gamertag",
           "regionTitle": "Choose Your Region",
@@ -414,20 +421,25 @@
           }
         },
         "stats": {
+          "age": "Age",
           "rating": "Rating",
           "form": "Form",
           "morale": "Morale"
         },
         "season": {
-          "introTitle": "Season {season} of {total}",
+          "introTitle": "Season {season} · Age {age}",
           "recapTitle": "Season {season}",
           "introBody": "You suit up for {team} — currently world No. {rank}.",
           "structure": "Two majors this season, each fed by three regionals. Earn {points} points or more and you qualify for Worlds.",
+          "declineHint": "Past your peak: rating and form are slipping, and teams are less eager to renew.",
           "begin": "Begin Season"
         },
         "event": {
           "splitDecision": "Split {split} — decision before the major run",
-          "worldsDecision": "Worlds — one final decision"
+          "worldsDecision": "Worlds — one final decision",
+          "outcomeLabel": "Decision result",
+          "continue": "Continue",
+          "destinyLean": "Leans {path}"
         },
         "results": {
           "splitTitle": "Split {split} Results",
@@ -451,24 +463,62 @@
           "group": "Group stage"
         },
         "rankings": {
-          "title": "World Rankings",
-          "teams": "Teams",
-          "players": "Players",
+          "bestTeams": "Best Teams",
+          "bestPlayers": "Best Players",
           "you": "You",
-          "yourTeam": "Your team"
+          "yourTeam": "Your team",
+          "circuitPoints": "Circuit points this season",
+          "playerRating": "Current player rating",
+          "alsoOnRoster": "Also on this roster"
         },
         "offseason": {
-          "title": "Offseason Offer",
-          "body": "{team} wants to sign you for next season.",
-          "currentTeam": "Current team",
-          "offerTeam": "Offer",
+          "title": "Offseason Offers",
+          "body": "No transfer interest this window. | {count} team wants to sign you. | {count} teams want to sign you.",
+          "renewalTitle": "Contract Renewal",
+          "unsignedTitle": "No Contract",
+          "renewalOnlyBody": "{team} will renew. No other club made an offer.",
+          "noRenewalBody": "Your club will not renew. {count} other team is interested. | Your club will not renew. {count} other teams are interested.",
+          "unsignedBody": "No club will sign you for next season.",
+          "unsignedHint": "The window is closed. Retire, or this is the end of the line.",
+          "lastChanceBody": "{team} is the only club still willing to take a chance.",
+          "lastChanceTeam": "Last chance",
+          "noOffer": "No transfer interest",
+          "offerTeam": "Offers",
           "worldRank": "World No. {rank}",
-          "hint": "Check the world rankings before you decide.",
           "accept": "Accept Offer",
-          "stay": "Stay Put"
+          "continue": "Continue",
+          "retire": "Retire",
+          "prompt": {
+            "title": "What's Next?",
+            "body": "The org asks where your head is. The answer sticks with you.",
+            "quit": "Mute Discord. I need a life off the game.",
+            "streamer": "I want a real content schedule next year.",
+            "coach": "I'd rather help the next roster than keep grinding."
+          }
+        },
+        "destiny": {
+          "title": "After the Pro Scene",
+          "body": "The circuit is done. Pick what comes next — your choices this career already lean one way.",
+          "recommended": "Suggested",
+          "quit": {
+            "label": "Walk Away",
+            "description": "Quit ranked, quit Discord, quit the scene. Games and social stay off.",
+            "endLine": "Walked away from games and the scene"
+          },
+          "streamer": {
+            "label": "Go Full-Time Streamer",
+            "description": "Turn the audience into the job: ranked, analysis, and late-night queues on stream.",
+            "endLine": "Went full-time as a streamer"
+          },
+          "coach": {
+            "label": "Become a Coach",
+            "description": "Stay in the building — VODs, timeouts, and the next roster that needs a voice.",
+            "endLine": "Moved into coaching"
+          }
         },
         "end": {
           "title": "Career Complete",
+          "retiredAt": "Retired at {age} · {seasons} seasons",
           "finalRating": "Final Rating",
           "palmarès": "Palmarès",
           "trophies": {
@@ -497,181 +547,382 @@
             "title": "Your Speedflip Is Outdated",
             "description": "The coach pulls up film: your speedflip kickoff loses 50/50s against every top team. Rebuilding muscle memory mid-split is risky, but the flaw is costing goals.",
             "choices": {
-              "a": "Rebuild the kickoff from scratch in free play",
-              "b": "Keep the old kickoff until the offseason",
-              "c": "Grind it quietly after scrims every night"
+              "a": {
+                "label": "Rebuild the kickoff from scratch in free play",
+                "outcome": "You rebuild the kickoff in free play. Mechanics tick up; the extra hours leave you cooked."
+              },
+              "b": {
+                "label": "Keep the old kickoff until the offseason",
+                "outcome": "You keep the old kickoff. Form holds, but the 50/50s stay a problem."
+              },
+              "c": {
+                "label": "Grind it quietly after scrims every night",
+                "outcome": "Nightly extra reps after scrims sharpen the flip. Sleep and morale take the hit."
+              }
             }
           },
           "split-02": {
             "title": "The Replay Review Stings",
             "description": "The analyst freezes the frame on two double commits that gifted the series away. Everyone in the room knows it's you on screen.",
             "choices": {
-              "a": "Own it and drill rotations until they're automatic",
-              "b": "Defend your reads — the pass was on",
-              "c": "Ask for a full team review instead of a callout"
+              "a": {
+                "label": "Own it and drill rotations until they're automatic",
+                "outcome": "You own the double commits and drill rotations. Rating climbs; the callout still stings."
+              },
+              "b": {
+                "label": "Defend your reads — the pass was on",
+                "outcome": "You defend the read. The room stays tense, but you walk out with your head up."
+              },
+              "c": {
+                "label": "Ask for a full team review instead of a callout",
+                "outcome": "A full team review spreads the blame. Everyone leaves sharper, including you."
+              }
             }
           },
           "split-03": {
             "title": "One Week Before the First Regional",
             "description": "A free week before the split kicks off, and the roster is divided on how to spend it.",
             "choices": {
-              "a": "Solo-queue 1v1s ten hours a day",
-              "b": "Lock in a full scrim block against contenders",
-              "c": "Take real rest days and recharge"
+              "a": {
+                "label": "Solo-queue 1v1s ten hours a day",
+                "outcome": "Ten-hour 1v1 blocks pay off. Your mechanics spike; the grind frays the squad."
+              },
+              "b": {
+                "label": "Lock in a full scrim block against contenders",
+                "outcome": "A full scrim week against contenders locks in chemistry and timing."
+              },
+              "c": {
+                "label": "Take real rest days and recharge",
+                "outcome": "Real rest days refill the tank. You show up fresh — and a little less hungry."
+              }
             }
           },
           "split-04": {
             "title": "A Sponsor Wants You Streaming",
             "description": "An energy-drink brand offers a deal: four stream nights a week, great money, great for the fans — and it eats straight into training hours.",
             "choices": {
-              "a": "Sign it — the community and the paycheck matter",
-              "b": "Turn it down until the season ends"
+              "a": {
+                "label": "Sign it — the community and the paycheck matter",
+                "outcome": "Four stream nights a week. The brand loves you; training hours vanish."
+              },
+              "b": {
+                "label": "Turn it down until the season ends",
+                "outcome": "You turn the deal down until the split ends. The sticks stay the priority."
+              }
             }
           },
           "split-05": {
             "title": "The Meta Just Shifted",
             "description": "Top teams now slow-play possession and starve boost. Your fast-paced style suddenly looks punishable.",
             "choices": {
-              "a": "Relearn your game around the new meta",
-              "b": "Trust your fundamentals and sharpen what already works"
+              "a": {
+                "label": "Relearn your game around the new meta",
+                "outcome": "You relearn the slow-play meta. New habits cost form while they settle."
+              },
+              "b": {
+                "label": "Trust your fundamentals and sharpen what already works",
+                "outcome": "You trust your pace and sharpen what already works. Form stays high."
+              }
             }
           },
           "split-06": {
             "title": "Your Teammate Is Tilting",
             "description": "After two lost scrim blocks, your teammate is whiffing on purpose and flaming in voice. The first regional is days away.",
             "choices": {
-              "a": "Call a team meeting and clear the air",
-              "b": "Mute comms and grind your own replays"
+              "a": {
+                "label": "Call a team meeting and clear the air",
+                "outcome": "The meeting clears the air. The roster resets; you spend energy on people, not packs."
+              },
+              "b": {
+                "label": "Mute comms and grind your own replays",
+                "outcome": "You mute comms and grind your own VODs. Mechanics hold; the locker room does not."
+              }
             }
           },
           "split-07": {
             "title": "Coach Wants a New System",
             "description": "The coach wants you playing second man instead of your natural first-man style. The data says it wins games; your gut disagrees.",
             "choices": {
-              "a": "Full buy-in — run the new rotation all split",
-              "b": "Meet halfway: new system in scrims, instincts on stage",
-              "c": "Refuse — you got here playing your way"
+              "a": {
+                "label": "Full buy-in — run the new rotation all split",
+                "outcome": "Full buy-in on second man. The system clicks; your instincts fight it."
+              },
+              "b": {
+                "label": "Meet halfway: new system in scrims, instincts on stage",
+                "outcome": "Halfway: new rotations in scrims, your game on stage. Balanced, a little messy."
+              },
+              "c": {
+                "label": "Refuse — you got here playing your way",
+                "outcome": "You refuse the change. Morale holds. The coach files it away."
+              }
             }
           },
           "split-08": {
             "title": "Your Controller Is Giving Out",
             "description": "Stick drift, mid-split. A new controller means re-tuning deadzones and aerial sensitivity days before a regional.",
             "choices": {
-              "a": "Swap now and re-tune everything",
-              "b": "Nurse it through the split with tape and prayers"
+              "a": {
+                "label": "Swap now and re-tune everything",
+                "outcome": "New controller mid-split. Deadzones feel alien for a week, then lock in."
+              },
+              "b": {
+                "label": "Nurse it through the split with tape and prayers",
+                "outcome": "You nurse the drift with tape. Form holds; every aerial is a coin flip."
+              }
             }
           },
           "split-09": {
             "title": "Freestyle Invitational",
             "description": "A famous freestyler invites you to a clips session that would pull huge views. Your coach wants you drilling shadow defense instead.",
             "choices": {
-              "a": "Film the clips — let your name grow",
-              "b": "Skip it and drill defense"
+              "a": {
+                "label": "Film the clips — let your name grow",
+                "outcome": "The clips session blows up. Your name grows; shadow defense does not."
+              },
+              "b": {
+                "label": "Skip it and drill defense",
+                "outcome": "You skip the invite and drill defense. Quiet work, real gains."
+              }
             }
           },
           "split-10": {
             "title": "Bootcamp Abroad",
             "description": "The org offers a three-week bootcamp in another region: elite scrims, zero distractions — and zero home comfort.",
             "choices": {
-              "a": "Pack your bags and grind",
-              "b": "Stay home and keep your routine"
+              "a": {
+                "label": "Pack your bags and grind",
+                "outcome": "Three weeks abroad, elite scrims, no comfort. Rating and form jump; homesickness hits."
+              },
+              "b": {
+                "label": "Stay home and keep your routine",
+                "outcome": "You keep your home routine. Morale stays even; the reps are familiar."
+              }
             }
           },
           "split-11": {
             "title": "The Data Says Otherwise",
             "description": "The analyst's numbers show you challenge too early and burn boost on defense. Fixing your reads means weeks of discomfort.",
             "choices": {
-              "a": "Trust the data and rework your challenges",
-              "b": "Trust your instincts — stats don't see everything"
+              "a": {
+                "label": "Trust the data and rework your challenges",
+                "outcome": "You rework challenges off the data. Reads improve; the discomfort shows."
+              },
+              "b": {
+                "label": "Trust your instincts — stats don't see everything",
+                "outcome": "You trust your instincts. Form ticks up. The analyst shrugs."
+              }
             }
           },
           "split-12": {
             "title": "Social Media Storm",
             "description": "After a group-stage exit, a clip of your open-net whiff goes viral. Your mentions are unbearable.",
             "choices": {
-              "a": "Log off until the major",
-              "b": "Post a self-deprecating meme and own it",
-              "c": "Say nothing and let the next games answer"
+              "a": {
+                "label": "Log off until the major",
+                "outcome": "You log off until the major. The mentions die. So does the noise that kept you sharp."
+              },
+              "b": {
+                "label": "Post a self-deprecating meme and own it",
+                "outcome": "The meme lands. Chat loves it; the next games still have to answer."
+              },
+              "c": {
+                "label": "Say nothing and let the next games answer",
+                "outcome": "You say nothing. The next series is the only reply that matters."
+              }
             }
           },
           "split-13": {
             "title": "Add Demos to Your Game?",
             "description": "The coach suggests aggressive demos and bumps on kickoff follow-ups. It wins boost fights but invites chaos — and makes enemies.",
             "choices": {
-              "a": "Go full bump mode",
-              "b": "Keep it clean and positional"
+              "a": {
+                "label": "Go full bump mode",
+                "outcome": "Full bump mode. Kickoff fights swing your way; the chaos cuts both directions."
+              },
+              "b": {
+                "label": "Keep it clean and positional",
+                "outcome": "You stay clean and positional. Form and morale hold in the structure."
+              }
             }
           },
           "split-14": {
             "title": "Night Owl Problem",
             "description": "Your best mechanics show up at 2 a.m., but team scrims run at noon. Something has to give.",
             "choices": {
-              "a": "Fix your sleep schedule around the team's hours",
-              "b": "Keep grinding nights where you peak"
+              "a": {
+                "label": "Fix your sleep schedule around the team's hours",
+                "outcome": "Sleep flips to the team's hours. Form climbs; the late-night peak is gone."
+              },
+              "b": {
+                "label": "Keep grinding nights where you peak",
+                "outcome": "You keep grinding at 2 a.m. Mechanics stay elite; the noon scrims suffer."
+              }
             }
           },
           "split-15": {
             "title": "Charity Showmatch",
             "description": "You're invited to a charity showmatch with community legends the weekend before a regional. Great vibes, zero prep value.",
             "choices": {
-              "a": "Play it — the community gave you everything",
-              "b": "Politely decline and scrim instead"
+              "a": {
+                "label": "Play it — the community gave you everything",
+                "outcome": "You play the charity showmatch. The community loves it; prep time is gone."
+              },
+              "b": {
+                "label": "Politely decline and scrim instead",
+                "outcome": "You decline and scrim. Cold, but the regional block is cleaner."
+              }
             }
           },
           "split-16": {
             "title": "Patch Day",
             "description": "A surprise patch tweaks boost pad respawns and kickoff spawn angles. Every team in the world is relearning the same details tonight.",
             "choices": {
-              "a": "Lab the new timings until they're second nature",
-              "b": "Adapt on the fly — feel over theory"
+              "a": {
+                "label": "Lab the new timings until they're second nature",
+                "outcome": "You lab the patch until the new pads are automatic. Rating up, extra hours in."
+              },
+              "b": {
+                "label": "Adapt on the fly — feel over theory",
+                "outcome": "You adapt on the fly. Feel over theory — form holds."
+              }
             }
           },
           "worlds-01": {
             "title": "Group of Death",
             "description": "The Worlds draw lands you against the world No. 1 and the host region's crowd favorite. Your prep week just got heavy.",
             "choices": {
-              "a": "Study every opponent frame by frame",
-              "b": "Focus on your own game — let them adapt to you"
+              "a": {
+                "label": "Study every opponent frame by frame",
+                "outcome": "Frame-by-frame prep on the group of death. You know them; you're also fried."
+              },
+              "b": {
+                "label": "Focus on your own game — let them adapt to you",
+                "outcome": "You focus on your own game. Confidence up, scouting thinner."
+              }
             }
           },
           "worlds-02": {
             "title": "Jet Lag at the LAN",
             "description": "You land nine time zones from home, three days before your opener. Everyone handles it differently.",
             "choices": {
-              "a": "Strict recovery: sleep, food, light sessions",
-              "b": "Midnight arena sessions to soak in the stage"
+              "a": {
+                "label": "Strict recovery: sleep, food, light sessions",
+                "outcome": "Strict recovery. Sleep, food, light sessions. You land in the opener fresh."
+              },
+              "b": {
+                "label": "Midnight arena sessions to soak in the stage",
+                "outcome": "Midnight arena sessions. The stage feels like home; the jet lag does not."
+              }
             }
           },
           "worlds-03": {
             "title": "Main Stage Nerves",
             "description": "Ten thousand fans, casters shouting your gamertag. Your hands are shaking in the warm-up room.",
             "choices": {
-              "a": "Walk out early and embrace the crowd",
-              "b": "Noise-cancelling on, tunnel vision until game time"
+              "a": {
+                "label": "Walk out early and embrace the crowd",
+                "outcome": "You walk out early and let the crowd hit. Nerves turn into fuel."
+              },
+              "b": {
+                "label": "Noise-cancelling on, tunnel vision until game time",
+                "outcome": "Headphones on, tunnel vision. The shake in your hands settles."
+              }
             }
           },
           "worlds-04": {
             "title": "They Scouted You",
             "description": "Word gets around: the favorites built their entire gameplan around shutting you down.",
             "choices": {
-              "a": "Rework your kickoff plays overnight",
-              "b": "Take it as a compliment and double down on your style"
+              "a": {
+                "label": "Rework your kickoff plays overnight",
+                "outcome": "Overnight kickoff rework. They scouted the old you — not this."
+              },
+              "b": {
+                "label": "Take it as a compliment and double down on your style",
+                "outcome": "You double down on your style. Compliment accepted. Adjustments skipped."
+              }
             }
           },
           "worlds-05": {
             "title": "Media Day Marathon",
             "description": "Interviews, photoshoots, broadcast content. It's a full day off the sticks right before the bracket.",
             "choices": {
-              "a": "Give the full press run — the fans love it",
-              "b": "Do the minimum and get back to warm-ups"
+              "a": {
+                "label": "Give the full press run — the fans love it",
+                "outcome": "Full press run. Fans and clips everywhere; the sticks wait."
+              },
+              "b": {
+                "label": "Do the minimum and get back to warm-ups",
+                "outcome": "Minimum media, back to warm-ups. Form holds. The camera crew does not love you."
+              }
             }
           },
           "worlds-06": {
             "title": "The Kickoff Gamble",
             "description": "The night before the bracket, your coach proposes fake kickoffs to counter the favorites' hyper-aggressive first man. High risk, high reward.",
             "choices": {
-              "a": "Run the fakes",
-              "b": "Stick to standard speedflips"
+              "a": {
+                "label": "Run the fakes",
+                "outcome": "Fake kickoffs vs the favorites. High risk, and they bite — or they don't."
+              },
+              "b": {
+                "label": "Stick to standard speedflips",
+                "outcome": "Standard speedflips. No chaos. No surprise either."
+              }
+            }
+          },
+          "late-01": {
+            "title": "The Spark Is Gone",
+            "description": "Another hotel, another scrim block. You catch yourself staring at the desktop instead of queueing. The org still expects a full split.",
+            "choices": {
+              "a": {
+                "label": "Mute Discord and take real days off",
+                "outcome": "You go quiet. The tank refills a little. The scene feels farther away."
+              },
+              "b": {
+                "label": "Turn the slump into content — ranked on stream",
+                "outcome": "The audience shows up. Training time shrinks. The brand of you grows."
+              },
+              "c": {
+                "label": "Sit with the academy stack and run their VODs",
+                "outcome": "You spend the week teaching. Your own mechanics idle; the kids get better."
+              }
+            }
+          },
+          "late-02": {
+            "title": "The Org Wants You On Camera",
+            "description": "Content wants four branded streams a week through the offseason. The coach wants you in the facility. You can't do both.",
+            "choices": {
+              "a": {
+                "label": "Take the stream schedule",
+                "outcome": "Lights, overlays, subs. The facility sees you less. Chat sees you more."
+              },
+              "b": {
+                "label": "Stay in the building and help the next roster",
+                "outcome": "You become the voice in review. Playing time dips; the room listens."
+              },
+              "c": {
+                "label": "Decline both and disappear for a month",
+                "outcome": "Phone on Do Not Disturb. No ranked, no Discord. The silence is the point."
+              }
+            }
+          },
+          "late-03": {
+            "title": "A Rookie Wants Film",
+            "description": "An academy first-year slides into DMs: can you review their VODs? Your own mechanics are slipping and the clock is loud.",
+            "choices": {
+              "a": {
+                "label": "Run the film with them every night",
+                "outcome": "You coach more than you queue. The kid improves. So does the part of you that likes teaching."
+              },
+              "b": {
+                "label": "Review on stream and make it a series",
+                "outcome": "VOD review as content. The series hits. Your own ranked time does not."
+              },
+              "c": {
+                "label": "Pass — you need the hours for yourself, or for nothing",
+                "outcome": "You protect the calendar. The DMs go unanswered. The spark stays dim."
+              }
             }
           }
         }

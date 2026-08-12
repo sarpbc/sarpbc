@@ -49,7 +49,7 @@ const stageLabel = computed(() => {
         class="justify-start text-left"
         @click="emit('choose', choice.id)"
       >
-        {{ t(`${eventKey}.choices.${choice.id}`) }}
+        {{ t(`${eventKey}.choices.${choice.id}.label`) }}
       </UButton>
     </div>
   </div>

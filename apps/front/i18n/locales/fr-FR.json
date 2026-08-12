@@ -321,14 +321,21 @@
       },
       "career": {
         "title": "RL Career",
-        "subtitle": "Cinq saisons, deux majors chacune. Grimpez au classement mondial et visez les Worlds.",
+        "subtitle": "Début à 16 ans. Cinq saisons au sommet, puis le circuit commence à vous pousser vers la sortie.",
         "seo": {
           "title": "RL Career — Simulateur de Carrière Rocket League",
-          "description": "Construisez une carrière esport Rocket League sur cinq saisons : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
+          "description": "Construisez une carrière esport Rocket League dès 16 ans : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
+        },
+        "menu": {
+          "title": "Menu Principal",
+          "body": "Lancez une nouvelle carrière à 16 ans, ou reprenez là où vous vous êtes arrêté.",
+          "newCareer": "Nouvelle Carrière",
+          "continue": "Continuer la Carrière",
+          "newCareerConfirm": "Commencer une nouvelle carrière ? La progression actuelle sera perdue."
         },
         "onboarding": {
           "introTitle": "Lancez Votre Carrière",
-          "introBody": "Créez un parcours pro fictif. Choisissez région, pays, style de jeu et parcours — puis prenez les décisions qui façonnent cinq saisons.",
+          "introBody": "Créez un parcours pro fictif. Vous débutez à 16 ans. Cinq saisons au sommet — ensuite le rating baisse et les renouvellements se font rares.",
           "playerNameLabel": "Nom de Joueur",
           "playerNamePlaceholder": "Votre pseudo",
           "regionTitle": "Choisissez Votre Région",
@@ -414,20 +421,25 @@
           }
         },
         "stats": {
+          "age": "Âge",
           "rating": "Rating",
           "form": "Forme",
           "morale": "Moral"
         },
         "season": {
-          "introTitle": "Saison {season} sur {total}",
+          "introTitle": "Saison {season} · {age} ans",
           "recapTitle": "Saison {season}",
           "introBody": "Vous jouez pour {team} — actuellement n° {rank} mondial.",
           "structure": "Deux majors cette saison, chacune précédée de trois régionaux. Marquez {points} points ou plus pour vous qualifier aux Worlds.",
+          "declineHint": "Après le pic : rating et forme glissent, et les clubs renouvellent moins facilement.",
           "begin": "Commencer la Saison"
         },
         "event": {
           "splitDecision": "Split {split} — décision avant la course au major",
-          "worldsDecision": "Worlds — une dernière décision"
+          "worldsDecision": "Worlds — une dernière décision",
+          "outcomeLabel": "Résultat de la décision",
+          "continue": "Continuer",
+          "destinyLean": "Penche vers {path}"
         },
         "results": {
           "splitTitle": "Résultats du Split {split}",
@@ -451,24 +463,62 @@
           "group": "Phase de groupes"
         },
         "rankings": {
-          "title": "Classement Mondial",
-          "teams": "Équipes",
-          "players": "Joueurs",
+          "bestTeams": "Meilleures Équipes",
+          "bestPlayers": "Meilleurs Joueurs",
           "you": "Vous",
-          "yourTeam": "Votre équipe"
+          "yourTeam": "Votre équipe",
+          "circuitPoints": "Points du circuit cette saison",
+          "playerRating": "Note actuelle du joueur",
+          "alsoOnRoster": "Aussi dans cet effectif"
         },
         "offseason": {
-          "title": "Offre d'Intersaison",
-          "body": "{team} veut vous recruter pour la saison prochaine.",
-          "currentTeam": "Équipe actuelle",
-          "offerTeam": "Offre",
+          "title": "Offres d'Intersaison",
+          "body": "Aucun club n'est intéressé cet hiver. | {count} club veut vous recruter. | {count} clubs veulent vous recruter.",
+          "renewalTitle": "Renouvellement",
+          "unsignedTitle": "Sans Contrat",
+          "renewalOnlyBody": "{team} vous renouvelle. Aucun autre club n'a fait d'offre.",
+          "noRenewalBody": "Votre club ne renouvelle pas. {count} autre club est intéressé. | Votre club ne renouvelle pas. {count} autres clubs sont intéressés.",
+          "unsignedBody": "Aucun club ne vous signera pour la saison prochaine.",
+          "unsignedHint": "Le mercato est fermé. Partez à la retraite, ou c'est la fin de la ligne.",
+          "lastChanceBody": "{team} est le seul club encore prêt à tenter le coup.",
+          "lastChanceTeam": "Dernière chance",
+          "noOffer": "Aucun intérêt en transfert",
+          "offerTeam": "Offres",
           "worldRank": "N° {rank} mondial",
-          "hint": "Consultez le classement mondial avant de décider.",
           "accept": "Accepter l'Offre",
-          "stay": "Rester"
+          "continue": "Continuer",
+          "retire": "Prendre sa Retraite",
+          "prompt": {
+            "title": "Et Après ?",
+            "body": "L'org vous demande où vous en êtes. La réponse reste.",
+            "quit": "Je mute Discord. Il me faut une vie hors du jeu.",
+            "streamer": "Je veux un vrai planning de contenu l'an prochain.",
+            "coach": "Je préfère aider le prochain roster plutôt que continuer à grinder."
+          }
+        },
+        "destiny": {
+          "title": "Après le Circuit Pro",
+          "body": "Le circuit s'arrête. Choisissez la suite — vos décisions de carrière penchent déjà d'un côté.",
+          "recommended": "Suggéré",
+          "quit": {
+            "label": "Tout Quitter",
+            "description": "Plus de ranked, plus de Discord, plus de scène. Jeux et réseaux restent éteints.",
+            "endLine": "A quitté les jeux et la scène"
+          },
+          "streamer": {
+            "label": "Devenir Streamer",
+            "description": "Faire de l'audience le métier : ranked, analyse et files du soir en live.",
+            "endLine": "Est devenu streamer à temps plein"
+          },
+          "coach": {
+            "label": "Devenir Coach",
+            "description": "Rester dans le bâtiment — VODs, timeouts, et le prochain roster qui a besoin d'une voix.",
+            "endLine": "Est passé coach"
+          }
         },
         "end": {
           "title": "Carrière Terminée",
+          "retiredAt": "Retraite à {age} ans · {seasons} saisons",
           "finalRating": "Rating Final",
           "palmarès": "Palmarès",
           "trophies": {
@@ -497,181 +547,382 @@
             "title": "Votre Speedflip Est Dépassé",
             "description": "Le coach sort les replays : votre speedflip d'engagement perd les 50/50 contre toutes les équipes du top. Refaire sa mémoire musculaire en plein split est risqué, mais ce défaut coûte des buts.",
             "choices": {
-              "a": "Reconstruire l'engagement de zéro en free play",
-              "b": "Garder l'ancien engagement jusqu'à l'intersaison",
-              "c": "Le bosser discrètement chaque soir après les scrims"
+              "a": {
+                "label": "Reconstruire l'engagement de zéro en free play",
+                "outcome": "Vous reconstruisez le kickoff en free play. Les mécaniques montent ; les heures en trop vous cuisent."
+              },
+              "b": {
+                "label": "Garder l'ancien engagement jusqu'à l'intersaison",
+                "outcome": "Vous gardez l'ancien kickoff. La forme tient, les 50/50 restent un problème."
+              },
+              "c": {
+                "label": "Le bosser discrètement chaque soir après les scrims",
+                "outcome": "Les reps du soir après les scrims affûtent le flip. Le sommeil et le moral trinquent."
+              }
             }
           },
           "split-02": {
             "title": "La Review Qui Pique",
             "description": "L'analyste fige l'image sur deux double commits qui ont offert la série. Tout le monde dans la salle sait que c'est vous à l'écran.",
             "choices": {
-              "a": "Assumer et drill les rotations jusqu'à l'automatisme",
-              "b": "Défendre vos reads — la passe était jouable",
-              "c": "Demander une review d'équipe plutôt qu'un procès"
+              "a": {
+                "label": "Assumer et drill les rotations jusqu'à l'automatisme",
+                "outcome": "Vous assumez les double commits et drillez les rotations. Le rating monte ; le callout pique encore."
+              },
+              "b": {
+                "label": "Défendre vos reads — la passe était jouable",
+                "outcome": "Vous défendez le read. La pièce reste tendue, mais vous sortez la tête haute."
+              },
+              "c": {
+                "label": "Demander une review d'équipe plutôt qu'un procès",
+                "outcome": "Une review d'équipe complète répartit la faute. Tout le monde ressort plus net, vous compris."
+              }
             }
           },
           "split-03": {
             "title": "Une Semaine Avant le Premier Régional",
             "description": "Une semaine libre avant le début du split, et le roster est divisé sur la façon de l'utiliser.",
             "choices": {
-              "a": "Solo queue en 1v1 dix heures par jour",
-              "b": "Enchaîner un bloc de scrims contre des prétendants",
-              "c": "Prendre de vrais jours de repos et recharger"
+              "a": {
+                "label": "Solo queue en 1v1 dix heures par jour",
+                "outcome": "Des blocs 1v1 de dix heures. Les mécaniques explosent ; le grind fatigue le roster."
+              },
+              "b": {
+                "label": "Enchaîner un bloc de scrims contre des prétendants",
+                "outcome": "Une semaine de scrims contre des contenders cale la chimie et le timing."
+              },
+              "c": {
+                "label": "Prendre de vrais jours de repos et recharger",
+                "outcome": "De vrais jours de repos remplissent le réservoir. Vous arrivez frais — un peu moins affamé."
+              }
             }
           },
           "split-04": {
             "title": "Un Sponsor Veut Vous Voir Streamer",
             "description": "Une marque de boisson énergisante propose un contrat : quatre soirées de stream par semaine, un bon salaire, top pour les fans — mais ça mange directement les heures d'entraînement.",
             "choices": {
-              "a": "Signer — la communauté et le salaire comptent",
-              "b": "Refuser jusqu'à la fin de la saison"
+              "a": {
+                "label": "Signer — la communauté et le salaire comptent",
+                "outcome": "Quatre soirs de stream par semaine. La marque vous adore ; les heures de training disparaissent."
+              },
+              "b": {
+                "label": "Refuser jusqu'à la fin de la saison",
+                "outcome": "Vous refusez jusqu'à la fin du split. Les manettes restent la priorité."
+              }
             }
           },
           "split-05": {
             "title": "La Méta Vient de Changer",
             "description": "Les meilleures équipes jouent désormais la possession lente et privent l'adversaire de boost. Votre style rapide semble soudain punissable.",
             "choices": {
-              "a": "Réapprendre votre jeu autour de la nouvelle méta",
-              "b": "Faire confiance à vos fondamentaux et affiner ce qui marche"
+              "a": {
+                "label": "Réapprendre votre jeu autour de la nouvelle méta",
+                "outcome": "Vous réapprenez le meta possession. Les nouvelles habitudes coûtent de la forme le temps de se caler."
+              },
+              "b": {
+                "label": "Faire confiance à vos fondamentaux et affiner ce qui marche",
+                "outcome": "Vous faites confiance à votre rythme. La forme reste haute."
+              }
             }
           },
           "split-06": {
             "title": "Votre Coéquipier Tilte",
             "description": "Après deux blocs de scrims perdus, votre coéquipier whiffe volontairement et flame en vocal. Le premier régional est dans quelques jours.",
             "choices": {
-              "a": "Organiser une réunion d'équipe et crever l'abcès",
-              "b": "Couper le vocal et bosser vos propres replays"
+              "a": {
+                "label": "Organiser une réunion d'équipe et crever l'abcès",
+                "outcome": "La réunion vide l'abcès. Le roster reset ; l'énergie va aux gens, pas aux packs."
+              },
+              "b": {
+                "label": "Couper le vocal et bosser vos propres replays",
+                "outcome": "Vous mutez les comms et grindez vos VODs. Les mécaniques tiennent ; le vestiaire non."
+              }
             }
           },
           "split-07": {
             "title": "Le Coach Veut un Nouveau Système",
             "description": "Le coach vous veut en deuxième homme plutôt que dans votre style naturel de premier homme. Les données disent que ça gagne des matchs ; votre instinct n'est pas d'accord.",
             "choices": {
-              "a": "Adhésion totale — jouer la nouvelle rotation tout le split",
-              "b": "Compromis : nouveau système en scrims, instinct sur scène",
-              "c": "Refuser — vous êtes arrivé ici en jouant à votre façon"
+              "a": {
+                "label": "Adhésion totale — jouer la nouvelle rotation tout le split",
+                "outcome": "Full buy-in en second man. Le système clique ; vos instincts résistent."
+              },
+              "b": {
+                "label": "Compromis : nouveau système en scrims, instinct sur scène",
+                "outcome": "À mi-chemin : nouvelles rotations en scrims, votre jeu sur scène. Équilibré, un peu sale."
+              },
+              "c": {
+                "label": "Refuser — vous êtes arrivé ici en jouant à votre façon",
+                "outcome": "Vous refusez le changement. Le moral tient. Le coach classe l'affaire."
+              }
             }
           },
           "split-08": {
             "title": "Votre Manette Rend l'Âme",
             "description": "Stick drift en plein split. Une nouvelle manette signifie re-régler deadzones et sensibilité aérienne à quelques jours d'un régional.",
             "choices": {
-              "a": "Changer maintenant et tout re-régler",
-              "b": "La faire tenir jusqu'à la fin du split avec du scotch et des prières"
+              "a": {
+                "label": "Changer maintenant et tout re-régler",
+                "outcome": "Nouvelle manette en plein split. Les deadzones sont étrangères une semaine, puis ça cale."
+              },
+              "b": {
+                "label": "La faire tenir jusqu'à la fin du split avec du scotch et des prières",
+                "outcome": "Vous soignez le drift avec du scotch. La forme tient ; chaque aerial est un pile ou face."
+              }
             }
           },
           "split-09": {
             "title": "Invitation Freestyle",
             "description": "Un freestyler célèbre vous invite à une session de clips qui ferait d'énormes vues. Votre coach préférerait vous voir drill la shadow defense.",
             "choices": {
-              "a": "Tourner les clips — faire grandir votre nom",
-              "b": "Décliner et drill la défense"
+              "a": {
+                "label": "Tourner les clips — faire grandir votre nom",
+                "outcome": "La session clips explose. Votre nom grandit ; la shadow defense non."
+              },
+              "b": {
+                "label": "Décliner et drill la défense",
+                "outcome": "Vous zappez l'invite et drillez la défense. Du travail silencieux, de vrais gains."
+              }
             }
           },
           "split-10": {
             "title": "Bootcamp à l'Étranger",
             "description": "L'organisation propose un bootcamp de trois semaines dans une autre région : scrims d'élite, zéro distraction — et zéro confort de la maison.",
             "choices": {
-              "a": "Faire ses valises et grind",
-              "b": "Rester chez soi et garder sa routine"
+              "a": {
+                "label": "Faire ses valises et grind",
+                "outcome": "Trois semaines à l'étranger, scrims élite, zéro confort. Rating et forme sautent ; le mal du pays aussi."
+              },
+              "b": {
+                "label": "Rester chez soi et garder sa routine",
+                "outcome": "Vous gardez votre routine. Le moral reste stable ; les reps sont familières."
+              }
             }
           },
           "split-11": {
             "title": "Les Données Disent le Contraire",
             "description": "Les chiffres de l'analyste montrent que vous challengez trop tôt et brûlez votre boost en défense. Corriger vos reads signifie des semaines d'inconfort.",
             "choices": {
-              "a": "Faire confiance aux données et retravailler vos challenges",
-              "b": "Faire confiance à votre instinct — les stats ne voient pas tout"
+              "a": {
+                "label": "Faire confiance aux données et retravailler vos challenges",
+                "outcome": "Vous retravaillez les challenges avec les data. Les reads s'améliorent ; le inconfort se voit."
+              },
+              "b": {
+                "label": "Faire confiance à votre instinct — les stats ne voient pas tout",
+                "outcome": "Vous faites confiance à vos instincts. La forme monte. L'analyste hausse les épaules."
+              }
             }
           },
           "split-12": {
             "title": "Tempête sur les Réseaux",
             "description": "Après une élimination en phase de groupes, un clip de votre whiff devant le but vide devient viral. Vos mentions sont invivables.",
             "choices": {
-              "a": "Couper les réseaux jusqu'au major",
-              "b": "Poster un meme autodérisoire et assumer",
-              "c": "Ne rien dire et laisser les prochains matchs répondre"
+              "a": {
+                "label": "Couper les réseaux jusqu'au major",
+                "outcome": "Vous vous déconnectez jusqu'au major. Les mentions meurent. Le bruit qui vous tenait éveillé aussi."
+              },
+              "b": {
+                "label": "Poster un meme autodérisoire et assumer",
+                "outcome": "Le meme passe. Le chat adore ; les prochains matchs doivent encore répondre."
+              },
+              "c": {
+                "label": "Ne rien dire et laisser les prochains matchs répondre",
+                "outcome": "Vous ne dites rien. La prochaine série est la seule réponse qui compte."
+              }
             }
           },
           "split-13": {
             "title": "Ajouter les Démos à Votre Jeu ?",
             "description": "Le coach suggère des démos et des bumps agressifs sur les suites d'engagement. Ça gagne les duels de boost mais invite le chaos — et crée des ennemis.",
             "choices": {
-              "a": "Passer en mode bump total",
-              "b": "Rester propre et positionnel"
+              "a": {
+                "label": "Passer en mode bump total",
+                "outcome": "Full bump. Les fights d'engagement basculent ; le chaos coupe dans les deux sens."
+              },
+              "b": {
+                "label": "Rester propre et positionnel",
+                "outcome": "Vous restez propre et positionnel. Forme et moral tiennent dans la structure."
+              }
             }
           },
           "split-14": {
             "title": "Problème de Couche-Tard",
             "description": "Vos meilleures mécaniques sortent à 2 h du matin, mais les scrims d'équipe sont à midi. Il faut trancher.",
             "choices": {
-              "a": "Caler votre sommeil sur les horaires de l'équipe",
-              "b": "Continuer à grind la nuit, là où vous êtes au top"
+              "a": {
+                "label": "Caler votre sommeil sur les horaires de l'équipe",
+                "outcome": "Le sommeil bascule sur les horaires de l'équipe. La forme monte ; le pic de 2 h du matin disparaît."
+              },
+              "b": {
+                "label": "Continuer à grind la nuit, là où vous êtes au top",
+                "outcome": "Vous continuez à grinder à 2 h. Les mécaniques restent élite ; les scrims de midi trinquent."
+              }
             }
           },
           "split-15": {
             "title": "Showmatch Caritatif",
             "description": "Vous êtes invité à un showmatch caritatif avec des légendes de la communauté le week-end avant un régional. Super ambiance, zéro valeur de préparation.",
             "choices": {
-              "a": "Le jouer — la communauté vous a tout donné",
-              "b": "Décliner poliment et scrim à la place"
+              "a": {
+                "label": "Le jouer — la communauté vous a tout donné",
+                "outcome": "Vous jouez le showmatch caritatif. La communauté adore ; le temps de prep a disparu."
+              },
+              "b": {
+                "label": "Décliner poliment et scrim à la place",
+                "outcome": "Vous déclinez et scrimmez. Froid, mais le bloc régional est plus propre."
+              }
             }
           },
           "split-16": {
             "title": "Jour de Patch",
             "description": "Un patch surprise modifie le respawn des pads de boost et les angles d'engagement. Toutes les équipes du monde réapprennent les mêmes détails ce soir.",
             "choices": {
-              "a": "Labber les nouveaux timings jusqu'à l'automatisme",
-              "b": "S'adapter en jeu — le feeling avant la théorie"
+              "a": {
+                "label": "Labber les nouveaux timings jusqu'à l'automatisme",
+                "outcome": "Vous labez le patch jusqu'à ce que les pads soient automatiques. Rating en hausse, heures en plus."
+              },
+              "b": {
+                "label": "S'adapter en jeu — le feeling avant la théorie",
+                "outcome": "Vous vous adaptez à la volée. Le feeling avant la théorie — la forme tient."
+              }
             }
           },
           "worlds-01": {
             "title": "Groupe de la Mort",
             "description": "Le tirage des Worlds vous place contre le n° 1 mondial et le chouchou du public local. Votre semaine de préparation vient de se charger.",
             "choices": {
-              "a": "Étudier chaque adversaire image par image",
-              "b": "Vous concentrer sur votre jeu — qu'ils s'adaptent à vous"
+              "a": {
+                "label": "Étudier chaque adversaire image par image",
+                "outcome": "Prep image par image sur le groupe de la mort. Vous les connaissez ; vous êtes aussi cuit."
+              },
+              "b": {
+                "label": "Vous concentrer sur votre jeu — qu'ils s'adaptent à vous",
+                "outcome": "Vous vous concentrez sur votre jeu. La confiance monte, le scouting est plus mince."
+              }
             }
           },
           "worlds-02": {
             "title": "Jet Lag au LAN",
             "description": "Vous atterrissez à neuf fuseaux horaires de chez vous, trois jours avant votre premier match. Chacun gère ça différemment.",
             "choices": {
-              "a": "Récupération stricte : sommeil, repas, sessions légères",
-              "b": "Sessions nocturnes dans l'arène pour s'imprégner de la scène"
+              "a": {
+                "label": "Récupération stricte : sommeil, repas, sessions légères",
+                "outcome": "Récup stricte. Sommeil, nourriture, sessions légères. Vous arrivez frais pour l'opener."
+              },
+              "b": {
+                "label": "Sessions nocturnes dans l'arène pour s'imprégner de la scène",
+                "outcome": "Sessions de minuit dans l'arène. La scène devient maison ; le jet lag non."
+              }
             }
           },
           "worlds-03": {
             "title": "Le Trac de la Grande Scène",
             "description": "Dix mille fans, les casters qui crient votre pseudo. Vos mains tremblent dans la salle d'échauffement.",
             "choices": {
-              "a": "Sortir tôt et embrasser la foule",
-              "b": "Casque antibruit, vision tunnel jusqu'au match"
+              "a": {
+                "label": "Sortir tôt et embrasser la foule",
+                "outcome": "Vous sortez tôt et laissez la foule frapper. Le trac devient du carburant."
+              },
+              "b": {
+                "label": "Casque antibruit, vision tunnel jusqu'au match",
+                "outcome": "Casque, vision tunnel. Le tremblement dans les mains se calme."
+              }
             }
           },
           "worlds-04": {
             "title": "Ils Vous Ont Scouté",
             "description": "La rumeur circule : les favoris ont bâti tout leur plan de jeu pour vous neutraliser.",
             "choices": {
-              "a": "Retravailler vos engagements dans la nuit",
-              "b": "Le prendre comme un compliment et assumer votre style"
+              "a": {
+                "label": "Retravailler vos engagements dans la nuit",
+                "outcome": "Rework des kickoffs dans la nuit. Ils ont scouté l'ancien vous — pas celui-là."
+              },
+              "b": {
+                "label": "Le prendre comme un compliment et assumer votre style",
+                "outcome": "Vous doublez sur votre style. Compliment accepté. Ajustements zappés."
+              }
             }
           },
           "worlds-05": {
             "title": "Marathon Média",
             "description": "Interviews, photoshoots, contenus pour le broadcast. Une journée entière loin des manettes juste avant le bracket.",
             "choices": {
-              "a": "Faire le tour complet de la presse — les fans adorent",
-              "b": "Faire le minimum et retourner s'échauffer"
+              "a": {
+                "label": "Faire le tour complet de la presse — les fans adorent",
+                "outcome": "Press run complet. Fans et clips partout ; les manettes attendent."
+              },
+              "b": {
+                "label": "Faire le minimum et retourner s'échauffer",
+                "outcome": "Média minimum, retour aux warm-ups. La forme tient. L'équipe caméra moins."
+              }
             }
           },
           "worlds-06": {
             "title": "Le Pari de l'Engagement",
             "description": "La veille du bracket, votre coach propose des fake kickoffs pour contrer le premier homme ultra-agressif des favoris. Risque élevé, récompense élevée.",
             "choices": {
-              "a": "Tenter les fakes",
-              "b": "Rester sur les speedflips classiques"
+              "a": {
+                "label": "Tenter les fakes",
+                "outcome": "Faux kickoffs contre les favoris. Gros risque — ils mordent, ou pas."
+              },
+              "b": {
+                "label": "Rester sur les speedflips classiques",
+                "outcome": "Speedflips standards. Pas de chaos. Pas de surprise non plus."
+              }
+            }
+          },
+          "late-01": {
+            "title": "L'Étincelle N'y Est Plus",
+            "description": "Encore un hôtel, encore un bloc de scrims. Vous vous surprenez à regarder le bureau au lieu de queue. L'org attend quand même un split complet.",
+            "choices": {
+              "a": {
+                "label": "Muter Discord et prendre de vrais jours off",
+                "outcome": "Vous passez en silence. Le réservoir se remplit un peu. La scène semble plus loin."
+              },
+              "b": {
+                "label": "Transformer le creux en contenu — ranked en stream",
+                "outcome": "L'audience est là. Le training rétrécit. Votre marque grandit."
+              },
+              "c": {
+                "label": "S'asseoir avec l'académie et passer leurs VODs",
+                "outcome": "Vous passez la semaine à enseigner. Vos mécaniques stagnent ; les jeunes progressent."
+              }
+            }
+          },
+          "late-02": {
+            "title": "L'Org Vous Veut À l'Écran",
+            "description": "Le pôle contenu veut quatre streams de marque par semaine. Le coach vous veut au facility. Les deux ne passent pas.",
+            "choices": {
+              "a": {
+                "label": "Prendre le planning de stream",
+                "outcome": "Lumières, overlays, subs. Le facility vous voit moins. Le chat, plus."
+              },
+              "b": {
+                "label": "Rester au building et aider le prochain roster",
+                "outcome": "Vous devenez la voix en review. Le temps de jeu baisse ; la pièce écoute."
+              },
+              "c": {
+                "label": "Refuser les deux et disparaître un mois",
+                "outcome": "Téléphone en Ne pas déranger. Pas de ranked, pas de Discord. Le silence est le but."
+              }
+            }
+          },
+          "late-03": {
+            "title": "Un Rookie Veut du Film",
+            "description": "Un première année d'académie slide en DM : tu peux review mes VODs ? Vos mécaniques glissent et l'horloge est bruyante.",
+            "choices": {
+              "a": {
+                "label": "Passer le film avec eux tous les soirs",
+                "outcome": "Vous coachez plus que vous ne queuez. Le gamin progresse. La partie de vous qui aime enseigner aussi."
+              },
+              "b": {
+                "label": "Reviewer en stream et en faire une série",
+                "outcome": "La VOD review devient du contenu. La série cartonne. Votre ranked, non."
+              },
+              "c": {
+                "label": "Passer — il vous faut les heures, ou plus rien",
+                "outcome": "Vous protégez le calendrier. Les DMs restent sans réponse. L'étincelle reste basse."
+              }
             }
           }
         }

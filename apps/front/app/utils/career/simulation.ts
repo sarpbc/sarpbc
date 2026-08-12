@@ -6,11 +6,22 @@ import type {
   CareerSplitRecord,
   CareerStats,
   CareerTrophy,
+  CareerWorldState,
 } from "~/types/career";
-import { MAJOR_QUALIFICATION_POINTS, REGIONALS_PER_SPLIT } from "~/types/career";
+import {
+  MAJOR_QUALIFICATION_POINTS,
+  REGIONALS_PER_SPLIT,
+  SPLITS_PER_SEASON,
+  USER_ROSTER_ID,
+  getSeasonsPastPeak,
+} from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
 import { WORLD_TEAMS, getWorldTeamsByRegion } from "~/data/career/world";
+import { createRng, hashString } from "~/utils/career/rng";
+import { getRosterStrength } from "~/utils/career/roster";
 import { computeComposite } from "~/utils/career/stats";
+
+export { createRng, hashString } from "~/utils/career/rng";
 
 export const REGIONAL_POINTS: Record<CareerPlacement, number> = {
   winner: 10,
@@ -28,22 +39,13 @@ export const MAJOR_POINTS: Record<CareerPlacement, number> = {
   group: 3,
 };
 
-export function hashString(input: string): number {
-  let hash = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-export function createRng(seed: number): () => number {
-  let localSeed = seed >>> 0 || 1;
-  return () => {
-    localSeed = (Math.imul(localSeed, 1103515245) + 12345) & 0x7fffffff;
-    return localSeed / 0x7fffffff;
-  };
-}
+export const WORLDS_POINTS: Record<CareerPlacement, number> = {
+  winner: 30,
+  finalist: 22,
+  top4: 16,
+  top8: 10,
+  group: 5,
+};
 
 function placementFromScore(score: number): CareerPlacement {
   if (score >= 80) return "winner";
@@ -59,10 +61,20 @@ export interface SplitSimulation {
   points: number;
 }
 
+function blendWithTeam(personal: number, teamStrength: number | undefined): number {
+  if (teamStrength == null) return personal;
+  return personal * 0.55 + teamStrength * 0.45;
+}
+
 /** Simulate one split: three regionals, then the major if enough points were earned. */
-export function simulateSplit(stats: CareerStats, role: CareerRole, seed: number): SplitSimulation {
+export function simulateSplit(
+  stats: CareerStats,
+  role: CareerRole,
+  seed: number,
+  teamStrength?: number,
+): SplitSimulation {
   const rng = createRng(seed);
-  const composite = computeComposite(stats, role);
+  const composite = blendWithTeam(computeComposite(stats, role), teamStrength);
 
   const regionals: CareerPlacement[] = [];
   let regionalPoints = 0;
@@ -87,9 +99,10 @@ export function simulateWorlds(
   stats: CareerStats,
   role: CareerRole,
   seed: number,
+  teamStrength?: number,
 ): CareerPlacement {
   const rng = createRng(seed);
-  const composite = computeComposite(stats, role);
+  const composite = blendWithTeam(computeComposite(stats, role), teamStrength);
   return placementFromScore(composite * 0.75 + rng() * 30 - 10);
 }
 
@@ -120,32 +133,60 @@ export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerSta
   }
 }
 
-/**
- * Living world ratings: every completed split, each fictional team's rating
- * drifts on a seeded random walk so rankings evolve over the career.
- */
-export function computeWorldTeamRatings(careerId: string, stepIndex: number): Map<string, number> {
-  const ratings = new Map<string, number>();
-  for (const team of WORLD_TEAMS) {
-    let rating = team.baseStrength;
-    for (let step = 1; step <= stepIndex; step++) {
-      const rng = createRng(hashString(`${careerId}:${team.id}:${step}`));
-      rating += (rng() - 0.48) * 6;
-    }
-    ratings.set(team.id, Math.max(40, Math.min(99, rating)));
-  }
-  return ratings;
+export function computeCircuitPoints(
+  splits: CareerSplitRecord[],
+  worlds: CareerPlacement | null,
+): number {
+  return computeSeasonPoints(splits) + (worlds ? WORLDS_POINTS[worlds] : 0);
+}
+
+function expectedNpcFullSeasonPoints(baseStrength: number, seed: number): number {
+  const rng = createRng(seed);
+  const t = Math.max(0, Math.min(1, (baseStrength - 55) / 40));
+  const expected = 22 + t ** 1.15 * 72;
+  return Math.max(8, Math.round(expected + (rng() - 0.5) * 10));
+}
+
+/** Simulated circuit points for an NPC team for one season, truncated to how far the player has played. */
+export function simulateNpcCircuitPoints(
+  careerId: string,
+  season: number,
+  teamId: string,
+  strength: number,
+  completedSplits: number,
+  worldsDone: boolean,
+): number {
+  const full = expectedNpcFullSeasonPoints(
+    strength,
+    hashString(`${careerId}:${season}:${teamId}:circuit`),
+  );
+  if (completedSplits <= 0 && !worldsDone) return 0;
+  if (completedSplits === 1 && !worldsDone) return Math.round(full * 0.45);
+  if (completedSplits >= 2 && !worldsDone) return Math.round(full * 0.82);
+  return full;
+}
+
+export interface RankedRosterPlayer {
+  id: string;
+  name: string;
+  rating: number;
+  isUser: boolean;
 }
 
 export interface RankedTeam {
   team: CareerWorldTeam;
+  roster: RankedRosterPlayer[];
+  /** Average of the current 3 roster ratings. */
+  strength: number;
   rating: number;
+  points: number;
   rank: number;
   isPlayerTeam: boolean;
 }
 
 export interface RankedPlayer {
   name: string;
+  teamId: string;
   teamName: string;
   region: CareerRegion;
   rating: number;
@@ -158,48 +199,78 @@ export interface WorldRankings {
   players: RankedPlayer[];
 }
 
+export interface PlayerCircuitInput {
+  name: string;
+  teamId: string | null;
+  rating: number;
+  region: CareerRegion | null;
+  season: number;
+  splits: CareerSplitRecord[];
+  worlds: CareerPlacement | null;
+  previousPoints: number | null;
+}
+
+function rosterPlayerFromId(
+  playerId: string,
+  world: CareerWorldState,
+  player: PlayerCircuitInput,
+): RankedRosterPlayer {
+  if (playerId === USER_ROSTER_ID) {
+    return { id: playerId, name: player.name, rating: player.rating, isUser: true };
+  }
+  const npc = world.players[playerId];
+  return {
+    id: playerId,
+    name: npc?.name ?? playerId,
+    rating: npc?.rating ?? 50,
+    isUser: false,
+  };
+}
+
 export function computeWorldRankings(
   careerId: string,
-  stepIndex: number,
-  player: { name: string; teamId: string | null; rating: number; region: CareerRegion | null },
+  player: PlayerCircuitInput,
+  world: CareerWorldState,
 ): WorldRankings {
-  const ratings = computeWorldTeamRatings(careerId, stepIndex);
+  const completedSplits = player.splits.length;
+  const worldsDone = player.worlds !== null;
+  const usePreviousStandings = completedSplits === 0 && !worldsDone;
+  const rankingSeason = usePreviousStandings ? Math.max(0, player.season - 1) : player.season;
+  const npcSplits = usePreviousStandings ? SPLITS_PER_SEASON : completedSplits;
+  const npcWorlds = usePreviousStandings ? true : worldsDone;
+
+  const playerPoints = usePreviousStandings
+    ? (player.previousPoints ?? 0)
+    : computeCircuitPoints(player.splits, player.worlds);
 
   const teams: RankedTeam[] = WORLD_TEAMS.map((team) => {
-    const worldRating = ratings.get(team.id) ?? team.baseStrength;
     const isPlayerTeam = team.id === player.teamId;
-    const rating = isPlayerTeam ? worldRating * 0.7 + player.rating * 0.3 : worldRating;
-    return { team, rating, rank: 0, isPlayerTeam };
-  }).sort((a, b) => b.rating - a.rating);
+    const rosterIds = world.rosters[team.id] ?? [...team.players];
+    const roster = rosterIds.map((id) => rosterPlayerFromId(id, world, player));
+    const strength =
+      roster.length > 0 ? getRosterStrength(rosterIds, world, player.rating) : team.baseStrength;
+    const points = isPlayerTeam
+      ? playerPoints
+      : simulateNpcCircuitPoints(careerId, rankingSeason, team.id, strength, npcSplits, npcWorlds);
+    return { team, roster, strength, rating: points, points, rank: 0, isPlayerTeam };
+  }).sort((a, b) => b.points - a.points || b.strength - a.strength);
   teams.forEach((entry, index) => {
     entry.rank = index + 1;
   });
 
   const players: RankedPlayer[] = [];
   for (const entry of teams) {
-    const teamRating = entry.rating;
-    entry.team.players.forEach((gamertag, slot) => {
-      const rng = createRng(hashString(`${careerId}:${entry.team.id}:p${slot}`));
+    for (const member of entry.roster) {
       players.push({
-        name: gamertag,
+        name: member.name,
+        teamId: entry.team.id,
         teamName: entry.team.name,
         region: entry.team.region,
-        rating: teamRating + (rng() * 10 - 4),
+        rating: member.rating,
         rank: 0,
-        isUser: false,
+        isUser: member.isUser,
       });
-    });
-  }
-  if (player.teamId !== null && player.region !== null) {
-    const playerTeam = teams.find((entry) => entry.isPlayerTeam);
-    players.push({
-      name: player.name,
-      teamName: playerTeam?.team.name ?? "",
-      region: player.region,
-      rating: player.rating,
-      rank: 0,
-      isUser: true,
-    });
+    }
   }
   players.sort((a, b) => b.rating - a.rating);
   players.forEach((entry, index) => {
@@ -221,39 +292,119 @@ export function pickStartingTeam(region: CareerRegion): string {
 }
 
 /**
- * Offseason offer: the better the season, the higher-ranked the interested team.
- * Returns a team id different from the current team.
+ * Offseason interest: better seasons draw more, and better, teams.
+ * A weak year never attracts a top-4 side.
  */
-export function pickOffseasonOffer(
+export function getTransferBand(
+  seasonPoints: number,
+  currentRank: number,
+): { minRank: number; maxRank: number; maxOffers: number } | null {
+  if (seasonPoints < 15) return null;
+  if (seasonPoints < 28) {
+    return { minRank: Math.max(currentRank, 8), maxRank: 99, maxOffers: 1 };
+  }
+  if (seasonPoints < 42) {
+    return { minRank: Math.max(5, currentRank - 1), maxRank: currentRank + 6, maxOffers: 1 };
+  }
+  if (seasonPoints < 60) {
+    return {
+      minRank: Math.max(3, currentRank - 3),
+      maxRank: Math.max(currentRank + 2, 8),
+      maxOffers: 2,
+    };
+  }
+  return { minRank: 1, maxRank: Math.max(6, currentRank), maxOffers: 3 };
+}
+
+export function pickOffseasonOffers(
   currentTeamId: string,
   seasonPoints: number,
   rankings: WorldRankings,
   seed: number,
-): string {
+): string[] {
+  const currentRank = getTeamRank(rankings, currentTeamId) ?? rankings.teams.length;
+  const band = getTransferBand(seasonPoints, currentRank);
+  if (!band) return [];
+
   const rng = createRng(seed);
-  let minRank: number;
-  let maxRank: number;
-  if (seasonPoints >= 50) {
-    minRank = 1;
-    maxRank = 4;
-  } else if (seasonPoints >= 30) {
-    minRank = 3;
-    maxRank = 8;
-  } else if (seasonPoints >= 15) {
-    minRank = 6;
-    maxRank = 14;
+  const pool = rankings.teams.filter(
+    (entry) =>
+      entry.team.id !== currentTeamId && entry.rank >= band.minRank && entry.rank <= band.maxRank,
+  );
+  if (pool.length === 0) return [];
+
+  let count: number;
+  if (seasonPoints >= 60) {
+    count = rng() < 0.35 ? 3 : rng() < 0.7 ? 2 : 1;
+  } else if (seasonPoints >= 42) {
+    count = rng() < 0.4 ? 2 : 1;
+  } else if (seasonPoints >= 28) {
+    count = rng() < 0.65 ? 1 : 0;
   } else {
-    minRank = 12;
-    maxRank = rankings.teams.length;
+    count = rng() < 0.5 ? 1 : 0;
+  }
+  count = Math.min(count, band.maxOffers, pool.length);
+  if (count <= 0) return [];
+
+  const shuffled = [...pool];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const current = shuffled[i]!;
+    shuffled[i] = shuffled[j]!;
+    shuffled[j] = current;
+  }
+  return shuffled.slice(0, count).map((entry) => entry.team.id);
+}
+
+function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): string {
+  const others = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
+  const weakest = [...others].sort((a, b) => a.points - b.points)[0];
+  return weakest!.team.id;
+}
+
+export interface OffseasonResolution {
+  transferTeamIds: string[];
+  renewalOffered: boolean;
+  lastChanceTeamId: string | null;
+}
+
+/**
+ * Peak years always renew. Transfer interest is 0–3 teams matching the season.
+ * After five seasons, renewal chance falls each year until no team will sign you.
+ */
+export function resolveOffseasonContracts(
+  seasonJustFinished: number,
+  seasonPoints: number,
+  currentTeamId: string,
+  rankings: WorldRankings,
+  seed: number,
+): OffseasonResolution {
+  const rng = createRng(seed);
+  const pastPeak = getSeasonsPastPeak(seasonJustFinished + 1);
+  const transferTeamIds = pickOffseasonOffers(currentTeamId, seasonPoints, rankings, seed);
+
+  if (pastPeak === 0) {
+    return {
+      transferTeamIds,
+      renewalOffered: true,
+      lastChanceTeamId: null,
+    };
   }
 
-  const pool = rankings.teams.filter(
-    (entry) => entry.rank >= minRank && entry.rank <= maxRank && entry.team.id !== currentTeamId,
-  );
-  const fallback = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
-  const candidates = pool.length > 0 ? pool : fallback;
-  const index = Math.floor(rng() * candidates.length);
-  return candidates[index]!.team.id;
+  const performance =
+    seasonPoints >= 42 ? 0.15 : seasonPoints >= 20 ? 0.05 : seasonPoints < 10 ? -0.15 : 0;
+  const renewalChance = Math.max(0.04, 0.72 - pastPeak * 0.14 + performance);
+  const renewalOffered = rng() < renewalChance;
+
+  let lastChanceTeamId: string | null = null;
+  if (!renewalOffered && transferTeamIds.length === 0) {
+    const lastChance = Math.max(0, 0.5 - pastPeak * 0.11);
+    if (rng() < lastChance) {
+      lastChanceTeamId = pickWeakestOtherTeam(currentTeamId, rankings);
+    }
+  }
+
+  return { transferTeamIds, renewalOffered, lastChanceTeamId };
 }
 
 export function computeSeasonPoints(splits: CareerSplitRecord[]): number {
