@@ -240,7 +240,7 @@ const page = computed({
 
 **Correct:**
 ```vue
-<UButton>{{ $t('dashboard.players.save') }}</UButton>
+<UButton>{{ $t('page.players.save') }}</UButton>
 ```
 
 - Use `$localePath()` for internal links (prefix strategy: `prefix_except_default`)

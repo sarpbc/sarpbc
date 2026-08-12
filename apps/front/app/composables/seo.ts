@@ -11,6 +11,8 @@
  * });
  */
 
+import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
+
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
 const DEFAULT_DESCRIPTION =
   "Follow Rocket League esports on sarpbc.org: live RLCS schedules, match results, team and player pages, pick'ems, Air Riddle, and a bilingual community forum.";
@@ -104,9 +106,21 @@ export const useSarpbcSeo = () => {
       href: canonicalUrl,
     });
 
-    // Set canonical and alternate links
+    const pageLinks: Array<Record<string, string>> = [
+      { rel: "canonical", href: canonicalUrl },
+      ...alternateLinks,
+    ];
+
+    if (!noIndex) {
+      pageLinks.push({
+        rel: "alternate",
+        type: "text/markdown",
+        href: `${baseUrl}${markdownPathFromHtmlPath(route.path)}`,
+      });
+    }
+
     useHead({
-      link: [{ rel: "canonical", href: canonicalUrl }, ...alternateLinks],
+      link: pageLinks,
     });
 
     // Set SEO meta tags

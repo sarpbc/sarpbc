@@ -15,8 +15,8 @@ apps/front/
 │   │   ├── nav/         # Header, footer, bar
 │   │   └── …            # Feature components
 │   ├── composables/     # useUser, useFetch wrappers, domain logic
-│   ├── layouts/         # default, dashboard, login
-│   ├── middleware/      # auth.global, admin
+│   ├── layouts/         # default, marketing, login
+│   ├── middleware/      # auth.global
 │   └── pages/           # File-based routing
 ├── i18n/locales/        # en-US.json, fr-FR.json
 └── nuxt.config.ts
