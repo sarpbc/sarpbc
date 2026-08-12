@@ -10,7 +10,7 @@ import { bind, play, setEnabled, setVolume, type SoundName } from "cuelume";
  *
  * @example
  * ```vue
- * <UiButton type="submit">Save</UiButton>
+ * <SButton type="submit">Save</SButton>
  * <UButton v-bind="cuelumeAttrs.toggle" @click="toggle">Dark mode</UButton>
  * ```
  *

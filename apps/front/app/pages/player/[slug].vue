@@ -123,7 +123,7 @@ setPageSeo({
             <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
               <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
               <dd class="min-w-0 flex justify-end">
-                <UiLink
+                <SLink
                   v-if="currentPlayer.team"
                   :to="$localePath(`/team/${currentPlayer.team.slug}`)"
                   variant="inline"
@@ -135,7 +135,7 @@ setPageSeo({
                     size="xs"
                   />
                   <span class="truncate">{{ currentPlayer.team.name }}</span>
-                </UiLink>
+                </SLink>
                 <span v-else class="text-sm text-muted">
                   {{ t("page.player.slug.freeAgent") }}
                 </span>

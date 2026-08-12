@@ -17,10 +17,9 @@ const activities = computed(() => recentForumActivities.value ?? []);
 
 <template>
   <div class="w-full flex flex-col">
-    <UiRail :title="$t('components.forum.recentPosts')">
-      <!-- Same shell as News / match rails: flush-bottom card + row dividers (incl. last). -->
-      <UiCard flush-bottom>
-        <UiListItem
+    <SRail caption="lead" :title="$t('components.forum.recentPosts')">
+      <SCard flush-bottom>
+        <SListItem
           v-for="activity in activities"
           :key="activity.id"
           size="compact"
@@ -31,7 +30,7 @@ const activities = computed(() => recentForumActivities.value ?? []);
         >
           <div class="min-w-0 flex-1 truncate">{{ activity.title }}</div>
           <div class="shrink-0 tabular-nums text-muted">{{ activity.messageCount }}</div>
-        </UiListItem>
+        </SListItem>
         <!-- ClientOnly: island is hydrate-on-idle; auth may revalidate after hydrate.
              Last activity keeps its divider as the seam above this row when present. -->
         <ClientOnly>
@@ -47,8 +46,8 @@ const activities = computed(() => recentForumActivities.value ?? []);
             class="h-row-compact min-h-row-compact w-full rounded-none border-b border-default font-normal"
           />
         </ClientOnly>
-      </UiCard>
-    </UiRail>
+      </SCard>
+    </SRail>
     <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
   </div>
 </template>

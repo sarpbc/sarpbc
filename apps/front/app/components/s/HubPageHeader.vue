@@ -6,7 +6,7 @@ defineSlots<{
 </script>
 
 <template>
-  <UiCrossCard class="h-row-header">
+  <SCrossCard class="h-row-header">
     <div class="w-full flex flex-col justify-center items-center gap-0.5 px-4">
       <h1 class="text-xl font-semibold text-center text-balance">
         <slot name="title" />
@@ -15,5 +15,5 @@ defineSlots<{
         <slot name="meta" />
       </div>
     </div>
-  </UiCrossCard>
+  </SCrossCard>
 </template>

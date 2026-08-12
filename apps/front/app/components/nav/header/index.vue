@@ -9,16 +9,13 @@ const route = useRoute();
 const menuOpen = ref(false);
 
 const matchesPath = computed(() => localePath("/matches"));
+const resultsPath = computed(() => localePath("/results"));
 
-function isMatchesListRoute(): boolean {
+function isExactPath(path: string): boolean {
   const current = route.path.replace(/\/$/, "");
-  const target = matchesPath.value.replace(/\/$/, "");
+  const target = path.replace(/\/$/, "");
   return current === target;
 }
-
-const isResultsActive = computed(() => isMatchesListRoute() && route.query.tab === "past");
-
-const isMatchesActive = computed(() => isMatchesListRoute() && route.query.tab !== "past");
 
 function toggleMenu() {
   menuOpen.value = !menuOpen.value;
@@ -47,12 +44,12 @@ const items = computed<NavigationMenuItem[]>(() => [
   {
     label: t("general.matches"),
     to: matchesPath.value,
-    active: isMatchesActive.value,
+    active: isExactPath(matchesPath.value),
   },
   {
     label: t("general.results"),
-    to: { path: matchesPath.value, query: { tab: "past" } },
-    active: isResultsActive.value,
+    to: resultsPath.value,
+    active: isExactPath(resultsPath.value),
   },
   {
     label: t("general.tournaments"),

@@ -113,7 +113,7 @@ async function onDelete() {
 
         <div class="flex flex-row items-center gap-1">
           <ForumSignInPrompt action="reply">
-            <UiButton
+            <SButton
               size="xs"
               variant="ghost"
               color="neutral"
@@ -126,7 +126,7 @@ async function onDelete() {
           </ForumSignInPrompt>
 
           <UPopover v-model:open="menuOpen">
-            <UiButton
+            <SButton
               size="xs"
               variant="ghost"
               color="neutral"
@@ -145,7 +145,7 @@ async function onDelete() {
                 class="flex min-w-40 flex-col p-1"
                 :aria-label="$t('components.discussion.moreActions')"
               >
-                <UiButton
+                <SButton
                   size="sm"
                   variant="ghost"
                   color="neutral"
@@ -156,7 +156,7 @@ async function onDelete() {
                   :label="$t('components.discussion.permalink')"
                   @click="onPermalinkClick"
                 />
-                <UiButton
+                <SButton
                   v-if="canReport"
                   size="sm"
                   variant="ghost"
@@ -168,7 +168,7 @@ async function onDelete() {
                   :label="$t('components.discussion.report.action')"
                   @click="onReportClick"
                 />
-                <UiButton
+                <SButton
                   v-if="canModerate"
                   size="sm"
                   variant="ghost"
@@ -182,7 +182,7 @@ async function onDelete() {
                   :disabled="isModerating"
                   @click="onHide"
                 />
-                <UiButton
+                <SButton
                   v-if="canModerate"
                   size="sm"
                   variant="ghost"

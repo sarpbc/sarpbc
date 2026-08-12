@@ -12,7 +12,7 @@ const activePlayerCount = computed(
 </script>
 
 <template>
-  <UiButton
+  <SButton
     :key="team.id"
     :to="$localePath(`/team/${team.slug}`)"
     variant="ghost"
@@ -40,5 +40,5 @@ const activePlayerCount = computed(
         activePlayerCount === 1 ? $t("page.players.index.player") : $t("page.players.index.players")
       }}
     </div>
-  </UiButton>
+  </SButton>
 </template>

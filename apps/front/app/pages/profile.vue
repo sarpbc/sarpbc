@@ -88,15 +88,15 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="h-row-header">
+    <SCrossCard class="h-row-header">
       <div class="w-full flex justify-center items-center">
         <h1 class="text-xl font-semibold">
           {{ $t("page.profile.title") }}
         </h1>
       </div>
-    </UiCrossCard>
+    </SCrossCard>
 
-    <UiCard
+    <SCard
       v-if="user"
       class="min-h-22.75 w-full flex flex-col lg:flex-row justify-between items-start lg:items-center p-2 lg:p-4 gap-4"
     >
@@ -138,9 +138,9 @@ setPageSeo({
           @click="handleLogout"
         />
       </div>
-    </UiCard>
+    </SCard>
 
-    <UiCard class="w-full flex flex-col gap-4 p-4">
+    <SCard class="w-full flex flex-col gap-4 p-4">
       <div class="flex flex-row items-center justify-between gap-2">
         <h2 class="text-lg font-semibold">
           {{ $t("page.profile.notifications.title") }}
@@ -191,6 +191,6 @@ setPageSeo({
           </div>
         </li>
       </ul>
-    </UiCard>
+    </SCard>
   </div>
 </template>

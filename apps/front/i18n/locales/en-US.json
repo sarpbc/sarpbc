@@ -227,7 +227,6 @@
   "page": {
     "hub": {
       "headers": {
-        "matchesLive": "{count} live now",
         "tournamentsNext": "Next: {name}",
         "tournamentsTotal": "{count} tournaments",
         "forumPosts": "{count} posts",
@@ -390,7 +389,6 @@
         },
         "matches": {
           "sectionTitle": "Matches",
-          "live": "Live Now",
           "error": "Could not load this player's matches. Check your connection and try again.",
           "retry": "Try Again",
           "tabs": {
@@ -491,7 +489,6 @@
         },
         "matches": {
           "sectionTitle": "Matches",
-          "live": "Live Now",
           "error": "Could not load this team's matches. Check your connection and try again.",
           "retry": "Try Again",
           "tabs": {
@@ -554,40 +551,32 @@
       "title": "Matches",
       "seo": {
         "title": "Matches | sarpbc.org",
-        "description": "Browse live, upcoming, and past Rocket League matches from every tournament on sarpbc.org."
-      },
-      "tabs": {
-        "upcoming": "Upcoming",
-        "past": "Past"
-      },
-      "sections": {
-        "live": "Live Now",
-        "upcoming": "Upcoming"
-      },
-      "filters": {
-        "title": "Filters",
-        "tournament": "Tournament",
-        "allTournaments": "All tournaments",
-        "clear": "Clear Filters",
-        "filteredEmpty": "No matches match this tournament.",
-        "filteredEmptyHint": "Try another tournament or clear the filter to see all matches."
+        "description": "Browse live and upcoming Rocket League matches from every tournament on sarpbc.org."
       },
       "empty": {
         "upcoming": "No live or upcoming matches right now.",
-        "past": "No completed matches to show yet.",
-        "upcomingHint": "Check past results or come back later for new schedules.",
-        "pastHint": "Switch to upcoming matches to see what is scheduled next.",
-        "viewPast": "View Past Matches",
-        "viewUpcoming": "View Upcoming Matches",
+        "upcomingHint": "Check results or come back later for new schedules.",
+        "viewResults": "View Results",
         "viewTournaments": "View Tournaments"
       },
       "error": "Could not load matches. Check your connection and try again.",
       "retry": "Try Again",
       "unknownTournament": "Unknown tournament",
-      "unknownSubTournament": "Unknown event",
-      "pagination": {
-        "page": "Page"
-      }
+      "unknownSubTournament": "Unknown event"
+    },
+    "results": {
+      "title": "Results",
+      "seo": {
+        "title": "Results | sarpbc.org",
+        "description": "Browse completed Rocket League match results from every tournament on sarpbc.org."
+      },
+      "empty": {
+        "title": "No completed matches to show yet.",
+        "hint": "Check upcoming matches to see what is scheduled next.",
+        "viewMatches": "View Matches"
+      },
+      "error": "Could not load results. Check your connection and try again.",
+      "retry": "Try Again"
     },
     "match": {
       "detail": {

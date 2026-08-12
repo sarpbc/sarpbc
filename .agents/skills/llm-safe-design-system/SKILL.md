@@ -112,7 +112,7 @@ backgroundColors: 'background-primary' | 'background-card' | …
 
 You may not adopt StyleX. Apply the same constraints:
 
-- Prefer `@nuxt/ui` / shared `app/components/ui/` primitives over ad-hoc markup
+- Prefer `@nuxt/ui` / shared `app/components/s/` primitives over ad-hoc markup
 - Use **semantic** tokens (`bg-default`, `text-muted`, `border-default`)—not `bg-gray-100` / arbitrary hex
 - Ban or lint: arbitrary values (`p-[17px]`, `text-[#…]`), one-off palette families, raw layout `div`s when a shared primitive exists
 - Missing need → **add a token or component**, don't invent a local gray

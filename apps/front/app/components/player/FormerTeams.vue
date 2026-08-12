@@ -20,7 +20,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
 
 <template>
   <section :aria-labelledby="headingId">
-    <UiRail>
+    <SRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.formerTeams") }}
@@ -38,9 +38,9 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
             size="sm"
           />
           <div class="flex-1 min-w-0">
-            <UiLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
+            <SLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
               {{ contract.team.name }}
-            </UiLink>
+            </SLink>
             <div class="text-sm text-muted">
               <span>{{ roleLabel(contract.role) }}</span>
               <span class="mx-1" aria-hidden="true">·</span>
@@ -53,6 +53,6 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
           </div>
         </div>
       </div>
-    </UiRail>
+    </SRail>
   </section>
 </template>

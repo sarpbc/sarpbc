@@ -1,7 +1,7 @@
 <template>
-  <UiRail :title="$t('components.game.sidebarPromo.heading')">
+  <SRail :title="$t('components.game.sidebarPromo.heading')">
     <div class="w-full border border-default overflow-hidden">
-      <UiListItem
+      <SListItem
         size="compact"
         :to="$localePath('/game/airriddle')"
         :title="$t('page.game.airriddle.title')"
@@ -13,7 +13,7 @@
             {{ $t("components.game.sidebarPromo.play") }}
           </UBadge>
         </div>
-      </UiListItem>
+      </SListItem>
     </div>
-  </UiRail>
+  </SRail>
 </template>

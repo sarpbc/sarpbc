@@ -274,7 +274,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="w-full min-h-row-header">
+    <SCrossCard class="w-full min-h-row-header">
       <div class="w-full flex flex-col items-center justify-center gap-1 px-4 py-3 text-center">
         <h1 class="text-xl font-semibold text-balance">
           <template v-if="tournament">
@@ -304,17 +304,17 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
           {{ t("page.game.pickems.detail.allCaughtUp") }}
         </p>
       </div>
-    </UiCrossCard>
+    </SCrossCard>
 
-    <UiCard v-if="tournamentPending && !tournament" class="p-4" aria-live="polite">
+    <SCard v-if="tournamentPending && !tournament" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-3 animate-pulse">
         <USkeleton class="h-6 w-48 mx-auto" />
         <USkeleton class="h-16 w-full" />
         <USkeleton class="h-16 w-full" />
       </div>
-    </UiCard>
+    </SCard>
 
-    <UiCard v-else-if="tournamentError">
+    <SCard v-else-if="tournamentError">
       <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -324,10 +324,10 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
           {{ t("page.game.pickems.detail.retry") }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
     <template v-else-if="tournament">
-      <UiCard
+      <SCard
         v-if="sessionReady && !isSignedIn"
         class="border border-primary/30 bg-elevated p-4 md:p-5"
       >
@@ -339,7 +339,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
             {{ t("page.game.pickems.detail.signInCta") }}
           </UButton>
         </div>
-      </UiCard>
+      </SCard>
 
       <section
         v-if="showLeaderboard || leaderboardPending || personalRank"
@@ -349,7 +349,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
         <h2 id="pickem-leaderboard-title" class="text-sm font-medium text-toned pl-1">
           {{ t("page.game.pickems.detail.leaderboard.title") }}
         </h2>
-        <UiCard class="p-4">
+        <SCard class="p-4">
           <p v-if="isSignedIn && personalRank" class="text-sm text-muted mb-3">
             <template v-if="personalRank.rank != null">
               {{
@@ -384,10 +384,10 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
           <p v-else class="text-sm text-muted">
             {{ t("page.game.pickems.detail.leaderboard.empty") }}
           </p>
-        </UiCard>
+        </SCard>
       </section>
 
-      <UiCard class="w-full">
+      <SCard class="w-full">
         <div v-if="matchesByDay.length > 0" class="w-full flex flex-col gap-4 p-4">
           <div
             v-for="dayGroup in matchesByDay"
@@ -459,7 +459,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
             {{ t("page.game.pickems.detail.emptyMatches") }}
           </p>
         </div>
-      </UiCard>
+      </SCard>
     </template>
   </div>
 </template>

@@ -14,10 +14,11 @@ const SOURCE = "lateral_bar" as const;
 
 const liveMatches = computed(() => data.value?.live ?? []);
 const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
-
-const showUpcomingRail = computed(
+const hasSchedule = computed(
   () => liveMatches.value.length > 0 || upcomingMatches.value.length > 0,
 );
+const resultMatches = computed(() => results.value?.results ?? []);
+const hasResults = computed(() => resultMatches.value.length > 0);
 
 const upcomingTitle = computed(() => {
   const kind = resolveMatchRailTitleKind(liveMatches.value, upcomingMatches.value);
@@ -39,8 +40,8 @@ const upcomingTitle = computed(() => {
 
 <template>
   <div class="w-full flex flex-col">
-    <UiRail v-if="showUpcomingRail" :title="upcomingTitle">
-      <UiCard flush-bottom>
+    <SRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
+      <SCard flush-bottom>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
             v-for="match in liveMatches"
@@ -61,17 +62,17 @@ const upcomingTitle = computed(() => {
             <MatchRow :match="match" />
           </MatchDiscoveryLink>
         </div>
-      </UiCard>
-    </UiRail>
-    <!-- Secondary section uses h-row so gap matches match-list rhythm -->
-    <div v-if="results && results.results.length > 0" class="w-full flex flex-col">
-      <h2 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
-        {{ $t("components.match.results") }}
-      </h2>
-      <UiCard flush-bottom>
+      </SCard>
+    </SRail>
+    <SRail
+      v-if="hasResults"
+      :caption="hasSchedule ? 'section' : 'lead'"
+      :title="$t('components.match.results')"
+    >
+      <SCard flush-bottom>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="match in results.results"
+            v-for="match in resultMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
@@ -80,7 +81,7 @@ const upcomingTitle = computed(() => {
             <MatchResultRow :match="match" />
           </MatchDiscoveryLink>
         </div>
-      </UiCard>
-    </div>
+      </SCard>
+    </SRail>
   </div>
 </template>

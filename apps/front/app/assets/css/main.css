@@ -22,15 +22,16 @@
 
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
 @theme {
-  --spacing-header: 4rem; /* 64px — fixed NavHeader bar (was h-16) */
-  --spacing-row: 2.75rem; /* 44px — news link, match row, toolbar */
-  /* Exact 2/3 of row so 3 forum rails = 2 news rows (hub DA). */
+  --spacing-header: 4rem; /* 64px — NavHeader bar */
+  --spacing-row: 2.75rem; /* 44px — news / match / toolbar row */
+  /* Exact 2/3 of row so 3 forum rails = 2 news rows. */
   --spacing-row-compact: calc(var(--spacing-row) * 2 / 3);
   --spacing-row-header: 3.5rem; /* 56px — page title band */
-  --spacing-row-double: 5.5rem; /* 88px — rare 2× cells */
+  --spacing-row-double: 5.5rem; /* 88px */
   --spacing-row-triple: calc(var(--spacing-row) * 3);
-  --spacing-rail-caption: 4.5rem; /* 72px — section label above rail cards */
-  --spacing-cross: 4px; /* UiCrossCard corner ticks */
+  --spacing-row-stack: calc(var(--spacing-row) * 6); /* 264px — directory empty/error body */
+  --spacing-rail-caption: 4.5rem; /* 72px — lead rail only (header 56 + gap-4 16); section rails use h-row */
+  --spacing-cross: 4px; /* SCrossCard corner ticks */
   --spacing-px: 1px;
   --radius-scrollbar: 5px;
   --duration-fast: 150ms;

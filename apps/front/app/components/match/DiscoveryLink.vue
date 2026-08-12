@@ -5,23 +5,30 @@ defineOptions({ inheritAttrs: false });
 
 const { matchId, source, status } = defineProps<{
   matchId: string;
-  source: MatchDiscoverySource;
+  source?: MatchDiscoverySource;
   status: MatchDiscoveryStatus;
 }>();
 
 const attrs = useAttrs();
+const localePath = useLocalePath();
+const { attrs: cuelumeAttrs } = useCuelume();
 const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
-const to = computed(() => matchDetailTo(matchId, source));
+const to = computed(() =>
+  source ? matchDetailTo(matchId, source) : localePath(`/matches/${matchId}`),
+);
 
-const linkClass = computed(() => ["block transition-none hover:bg-elevated/50", attrs.class]);
+const linkClass = computed(() => ["block hover:bg-elevated/50", attrs.class]);
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
-  return rest;
+  return { ...cuelumeAttrs.hoverTick, ...rest };
 });
 
 function onClick() {
+  if (!source) {
+    return;
+  }
   trackMatchRowClicked({ matchId, source, status });
 }
 </script>

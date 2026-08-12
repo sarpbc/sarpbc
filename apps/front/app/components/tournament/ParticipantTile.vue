@@ -35,7 +35,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
         role="dialog"
         :aria-labelledby="titleId"
       >
-        <UiLink
+        <SLink
           :id="titleId"
           :to="$localePath(`/team/${team.slug}`)"
           variant="muted"
@@ -44,10 +44,10 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
         >
           <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="xs" />
           <span class="truncate">{{ team.name }}</span>
-        </UiLink>
+        </SLink>
 
         <div v-if="players.length" class="flex flex-col gap-1">
-          <UiLink
+          <SLink
             v-for="player in players"
             :key="player.id"
             :to="$localePath(`/player/${player.slug}`)"
@@ -56,7 +56,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
           >
             <FlagIcon :nationality="player.nationality" size="sm" />
             <span class="truncate">{{ player.name }}</span>
-          </UiLink>
+          </SLink>
         </div>
         <p v-else class="text-sm text-muted">
           {{ t("page.tournaments.id.participants.rosterEmpty") }}

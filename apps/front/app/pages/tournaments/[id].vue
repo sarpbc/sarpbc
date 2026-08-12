@@ -84,16 +84,16 @@ watch(
 <template>
   <div class="w-full flex flex-col gap-4">
     <div v-if="pending" class="w-full flex flex-col gap-4" aria-live="polite">
-      <UiCrossCard class="h-24">
+      <SCrossCard class="h-24">
         <div class="w-full p-4 animate-pulse flex flex-col gap-3 items-center">
           <div class="h-3 w-32 rounded bg-elevated" />
           <div class="h-8 w-full max-w-md rounded bg-elevated" />
           <div class="h-3 w-48 rounded bg-elevated" />
         </div>
-      </UiCrossCard>
+      </SCrossCard>
     </div>
 
-    <UiCard v-else-if="error">
+    <SCard v-else-if="error">
       <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -103,7 +103,7 @@ watch(
           {{ t("page.tournaments.id.retry") }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
     <template v-else-if="tournament">
       <TournamentHero :tournament="tournament" />

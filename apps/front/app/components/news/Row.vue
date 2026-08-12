@@ -5,10 +5,6 @@ const localePath = useLocalePath();
 
 const props = defineProps<{
   article: NewsArticleListItem;
-  /**
-   * Parent decides which row may render a thumb (homepage: first with image).
-   * Later can be driven by a per-article DB flag.
-   */
   showImage?: boolean;
 }>();
 
@@ -21,7 +17,7 @@ const imageUrl = computed(() => {
 </script>
 
 <template>
-  <UiListItem
+  <SListItem
     :size="imageUrl ? 'triple' : 'default'"
     divider
     :to="localePath(`/news/${props.article.slug}`)"
@@ -57,5 +53,5 @@ const imageUrl = computed(() => {
         {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
       </p>
     </div>
-  </UiListItem>
+  </SListItem>
 </template>

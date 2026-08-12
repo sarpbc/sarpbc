@@ -147,7 +147,7 @@ function onEnterKey(event: KeyboardEvent) {
         />
       </UFormField>
 
-      <UiButton
+      <SButton
         type="submit"
         variant="soft"
         class="w-fit cursor-pointer"
@@ -157,7 +157,7 @@ function onEnterKey(event: KeyboardEvent) {
         {{
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")
         }}
-      </UiButton>
+      </SButton>
     </UForm>
   </div>
 </template>

@@ -1,14 +1,23 @@
 <script lang="ts" setup>
-const { currentPage, totalPages, hasPrevious, hasNext, getPageQuery, offset, pageSize } =
-  defineProps<{
-    currentPage: number;
-    totalPages: number;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    getPageQuery: (nextOffset: number) => Record<string, string>;
-    offset: number;
-    pageSize: number;
-  }>();
+const {
+  currentPage,
+  totalPages,
+  hasPrevious,
+  hasNext,
+  getPageQuery,
+  offset,
+  pageSize,
+  basePath = "/matches",
+} = defineProps<{
+  currentPage: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  getPageQuery: (nextOffset: number) => OffsetPageQuery;
+  offset: number;
+  pageSize: number;
+  basePath?: string;
+}>();
 
 const { t } = useI18n();
 
@@ -34,29 +43,32 @@ function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-2">
-    <ULink
-      :disabled="!hasPrevious"
-      :to="{ path: $localePath('/matches'), query: getPageQuery(offset - pageSize) }"
-      as="link"
-      class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
-      @click="scrollToTopOnNavigate($event, hasPrevious)"
-    >
-      {{ t("common.previous") }}
-    </ULink>
+  <SCard>
+    <div class="flex justify-between items-center gap-2 p-2">
+      <ULink
+        :disabled="!hasPrevious"
+        :to="{ path: $localePath(basePath), query: getPageQuery(offset - pageSize) }"
+        as="link"
+        class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
+        @click="scrollToTopOnNavigate($event, hasPrevious)"
+      >
+        {{ t("common.previous") }}
+      </ULink>
 
-    <div class="text-sm text-muted tabular-nums">
-      {{ t("page.matches.pagination.page") }} {{ currentPage }} / {{ totalPages }}
+      <div class="text-sm text-muted tabular-nums">
+        {{ t("common.page") }} {{ currentPage }} / {{ totalPages }}
+      </div>
+
+      <ULink
+        :disabled="!hasNext"
+        variant="ghost"
+        :to="{ path: $localePath(basePath), query: getPageQuery(offset + pageSize) }"
+        as="link"
+        class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
+        @click="scrollToTopOnNavigate($event, hasNext)"
+      >
+        {{ t("common.next") }}
+      </ULink>
     </div>
-
-    <ULink
-      :disabled="!hasNext"
-      variant="ghost"
-      :to="{ path: $localePath('/matches'), query: getPageQuery(offset + pageSize) }"
-      class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
-      @click="scrollToTopOnNavigate($event, hasNext)"
-    >
-      {{ t("common.next") }}
-    </ULink>
-  </div>
+  </SCard>
 </template>

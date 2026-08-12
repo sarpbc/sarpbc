@@ -38,7 +38,7 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
 
 <template>
   <section :aria-labelledby="headingId">
-    <UiRail>
+    <SRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.trophies.title") }}
@@ -46,7 +46,7 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <UiCard v-for="index in 3" :key="index">
+        <SCard v-for="index in 3" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
             <USkeleton class="size-10 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -54,10 +54,10 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
               <USkeleton class="h-3 w-2/5 max-w-32" />
             </div>
           </div>
-        </UiCard>
+        </SCard>
       </div>
 
-      <UiCard v-else-if="hasError">
+      <SCard v-else-if="hasError">
         <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
           <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -67,7 +67,7 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
             {{ t("page.player.slug.trophies.retry") }}
           </UButton>
         </div>
-      </UiCard>
+      </SCard>
 
       <div
         v-else-if="trophies.length > 0"
@@ -104,7 +104,7 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
         </ULink>
       </div>
 
-      <UiCard v-else>
+      <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -114,7 +114,7 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
             {{ t("page.player.slug.trophies.emptyHint") }}
           </p>
         </div>
-      </UiCard>
-    </UiRail>
+      </SCard>
+    </SRail>
   </section>
 </template>

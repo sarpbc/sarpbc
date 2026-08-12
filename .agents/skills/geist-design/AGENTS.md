@@ -64,7 +64,7 @@ Before choosing a solution, identify the real constraint:
 
 ### 1.4 Build for Everyone (`de-accessible-by-default`)
 
-Progressive disclosure: simple default path, advanced options available but not required. Pair color with text/icons for status (e.g. `UiBadgeLive` + label).
+Progressive disclosure: simple default path, advanced options available but not required. Pair color with text/icons for status (e.g. `SBadgeLive` + label).
 
 ### 1.5 Make It Excellent (`de-craft`)
 
@@ -123,7 +123,7 @@ Full mapping: [references/tokens.md](references/tokens.md)
 
 Hierarchy: **borders + tonal surfaces first**, shadows second.
 
-- Cards: `border border-default` (see `UiCard`, `UiCrossCard`)
+- Cards: `border border-default` (see `SCard`, `SCrossCard`)
 - Popovers/menus: default Nuxt UI elevation
 - Avoid heavy shadows on flat dashboard tables
 
@@ -141,7 +141,7 @@ Hierarchy: **borders + tonal surfaces first**, shadows second.
 | Toast | `useToast()` |
 | Error page | `UError` |
 
-Extend shared patterns in `app/components/ui/` when the same layout repeats.
+Extend shared patterns in `app/components/s/` when the same layout repeats.
 
 ---
 

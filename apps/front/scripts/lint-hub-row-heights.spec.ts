@@ -4,6 +4,8 @@ const BANNED_PATTERNS = [
   /\bh-11\.25\b/,
   /\bh-11\.5\b/,
   /\bh-8\.25\b/,
+  /\bh-67(\.\d+)?\b/,
+  /\bmt-11\b/,
   /\bleading-5\.5\b/,
   /\bpy-\[/,
 ];

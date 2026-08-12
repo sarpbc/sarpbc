@@ -105,7 +105,7 @@ function setTab(nextTab: TeamMatchesTab) {
     </div>
 
     <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-      <UiCard v-for="index in 3" :key="index">
+      <SCard v-for="index in 3" :key="index">
         <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
           <div class="col-span-2 flex flex-col gap-1">
             <USkeleton class="h-3 w-24" />
@@ -113,10 +113,10 @@ function setTab(nextTab: TeamMatchesTab) {
           </div>
           <USkeleton class="col-span-1 h-3 w-10 justify-self-end" />
         </div>
-      </UiCard>
+      </SCard>
     </div>
 
-    <UiCard v-else-if="hasError">
+    <SCard v-else-if="hasError">
       <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -126,15 +126,10 @@ function setTab(nextTab: TeamMatchesTab) {
           {{ t("page.team.slug.matches.retry") }}
         </UButton>
       </div>
-    </UiCard>
+    </SCard>
 
     <div v-else-if="hasMatches" class="flex flex-col gap-4">
-      <MatchListGroup
-        v-if="live.length > 0"
-        :matches="live"
-        variant="live"
-        :title="t('page.team.slug.matches.live')"
-      />
+      <MatchListGroup v-if="live.length > 0" :matches="live" variant="live" />
       <MatchListGroup
         v-if="activeMatches.length > 0"
         :matches="activeMatches"
@@ -142,7 +137,7 @@ function setTab(nextTab: TeamMatchesTab) {
       />
     </div>
 
-    <UiCard v-else>
+    <SCard v-else>
       <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
         <UIcon :name="emptyIcon" class="text-3xl text-muted" />
         <p class="text-sm text-muted text-pretty">
@@ -152,6 +147,6 @@ function setTab(nextTab: TeamMatchesTab) {
           {{ t(`page.team.slug.matches.${tab}.emptyHint`) }}
         </p>
       </div>
-    </UiCard>
+    </SCard>
   </section>
 </template>

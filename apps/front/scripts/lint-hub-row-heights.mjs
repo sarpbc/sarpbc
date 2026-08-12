@@ -11,13 +11,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
 
 const SCAN_ROOTS = [path.join(FRONT_ROOT, "app")];
-const ALLOWLIST_SEGMENTS = [`${path.sep}components${path.sep}ui${path.sep}`];
+const ALLOWLIST_SEGMENTS = [`${path.sep}components${path.sep}s${path.sep}`];
 const FILE_EXTENSIONS = new Set([".vue", ".ts", ".tsx", ".js", ".jsx"]);
 
 const RULES = [
   { id: "h-11.25", pattern: /\bh-11\.25\b/ },
   { id: "h-11.5", pattern: /\bh-11\.5\b/ },
   { id: "h-8.25", pattern: /\bh-8\.25\b/ },
+  { id: "h-67", pattern: /\bh-67(\.\d+)?\b/ },
+  { id: "mt-11", pattern: /\bmt-11\b/ },
   { id: "leading-5.5", pattern: /\bleading-5\.5\b/ },
   { id: "py-[", pattern: /\bpy-\[/ },
 ];

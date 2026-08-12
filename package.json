@@ -25,10 +25,11 @@
   },
   "devDependencies": {
     "@lyse-labs/lyse": "0.2.0-alpha.6",
+    "@oxlint/plugins": "1.78.0",
     "lefthook": "^2.1.10",
     "only-allow": "^1.2.2",
     "oxfmt": "^0.60.0",
-    "oxlint": "^1.75.0",
+    "oxlint": "^1.78.0",
     "turbo": "^2.10.8"
   },
   "packageManager": "pnpm@11.17.0"

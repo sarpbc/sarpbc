@@ -8,7 +8,7 @@ alwaysApply: false
 
 Read **`.agents/skills/geist-design/SKILL.md`** (UI work) and **`.agents/skills/nuxt/SKILL.md`** (framework).
 
-- Use `@nuxt/ui` primitives before custom markup; extend `app/components/ui/` when repeating patterns.
+- Use `@nuxt/ui` primitives before custom markup; extend `app/components/s/` (`SCard`, `SRail`, …) when repeating patterns.
 - All user strings in `i18n/locales/en-US.json` + `fr-FR.json`; links via `$localePath()`.
 - Navigation: `NuxtLink` / `ULink`, not buttons. Persist filters/tabs in URL query.
 - Design every state: empty, loading, error. Keyboard + `:focus-visible`. Button keeps label while loading.

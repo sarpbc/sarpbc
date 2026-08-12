@@ -69,7 +69,7 @@ function googleLogin() {
 
 <template>
   <div class="w-full h-full flex flex-col items-center justify-center">
-    <UiCrossCard class="p-4">
+    <SCrossCard class="p-4">
       <div class="w-full flex flex-col items-center justify-center">
         <h1 class="w-fit text-2xl font-bold">
           {{ $t("page.authentication.register") }}
@@ -128,7 +128,7 @@ function googleLogin() {
           />
         </UForm>
       </div>
-    </UiCrossCard>
+    </SCrossCard>
   </div>
 </template>
 

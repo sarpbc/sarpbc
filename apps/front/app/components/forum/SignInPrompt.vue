@@ -18,15 +18,14 @@ const signInLabel = computed(() =>
 
 <template>
   <slot v-if="isSignedIn" />
-  <ULink
+  <SLink
     v-else-if="sessionReady"
     :to="localePath('/login')"
+    variant="muted"
     :class="
-      action === 'create'
-        ? 'w-full h-full flex items-center justify-center text-sm text-primary'
-        : 'text-sm text-primary'
+      action === 'create' ? 'w-full h-full flex items-center justify-center text-sm' : 'text-sm'
     "
   >
     {{ signInLabel }}
-  </ULink>
+  </SLink>
 </template>

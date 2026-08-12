@@ -54,7 +54,7 @@ Unified design-engineering guide for **apps/front** (Nuxt, `@nuxt/ui` v4, Tailwi
 - `geist-typography` — Semantic text roles (`text-sm text-muted`, headings with tight tracking)
 - `geist-surfaces` — Hierarchy via borders and tonal surfaces before heavy shadows
 - `geist-motion` — Motion only when it clarifies change; honor `prefers-reduced-motion`
-- `geist-components` — Prefer `@nuxt/ui` primitives; extend in `app/components/ui/`
+- `geist-components` — Prefer `@nuxt/ui` primitives; extend in `app/components/s/`
 
 ### Interactions (`ui-`)
 
@@ -97,7 +97,7 @@ Unified design-engineering guide for **apps/front** (Nuxt, `@nuxt/ui` v4, Tailwi
 | Nuxt app | `apps/front/app/` |
 | Global UI config | `app/app.config.ts` (`primary: blue`, `neutral: ink`) |
 | Global CSS | `app/assets/css/main.css` (`--ui-radius: 0.25rem`) |
-| Custom primitives | `app/components/ui/` (`Card`, `cross/Card`, `badge/Live`) |
+| Custom primitives | `app/components/s/` (`Card`, `cross/Card`, `badge/Live`) |
 | Hub row-height lint | `apps/front/scripts/lint-hub-row-heights.mjs` — see [DESIGN.md](../../../apps/front/DESIGN.md) |
 | Composables | `app/composables/` |
 | i18n | `i18n/locales/en-US.json`, `fr-FR.json` + `$t()` / `$localePath()` |

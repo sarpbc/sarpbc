@@ -4,7 +4,6 @@ import { getMatchParticipantScore, getResultParticipantId } from "~/types/matche
 
 const { match, divider = true } = defineProps<{
   match: MatchListItem;
-  /** Bottom border between rows. Omit on the last row when a footer owns the separator. */
   divider?: boolean;
 }>();
 
@@ -45,7 +44,7 @@ function scoreClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <UiListItem size="default" :divider="divider" class="min-w-0">
+  <SListItem size="default" :divider="divider" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"
@@ -63,5 +62,5 @@ function scoreClass(participantId: string | undefined): string {
         {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
       </span>
     </div>
-  </UiListItem>
+  </SListItem>
 </template>

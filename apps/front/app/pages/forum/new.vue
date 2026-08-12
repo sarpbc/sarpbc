@@ -136,14 +136,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <UiCrossCard class="w-full h-row-header">
+    <SCrossCard class="w-full h-row-header">
       <div class="w-full flex justify-center items-center">
         <h1 class="text-xl font-semibold text-highlighted">
           {{ $t("page.forum.new.pageTitle") }}
         </h1>
       </div>
-    </UiCrossCard>
-    <UiCard class="p-4">
+    </SCrossCard>
+    <SCard class="p-4">
       <p v-if="creationStatusLoadState === 'loading'" class="text-sm text-muted mb-4">
         {{ $t("page.forum.new.statusLoading") }}
       </p>
@@ -218,6 +218,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           {{ $t("page.forum.new.form.submit") }}
         </UButton>
       </UForm>
-    </UiCard>
+    </SCard>
   </div>
 </template>
