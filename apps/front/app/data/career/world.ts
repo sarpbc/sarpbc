@@ -5,7 +5,7 @@ export interface CareerWorldTeam {
   id: string;
   name: string;
   region: CareerRegion;
-  /** Baseline strength (0–95) used to seed the living world rankings. */
+  /** Baseline strength (0–100) used to seed the living world rankings. */
   baseStrength: number;
   players: readonly [string, string, string];
 }
@@ -16,14 +16,14 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "apex-velocity",
     name: "Apex Velocity",
     region: "na",
-    baseStrength: 91,
+    baseStrength: 92,
     players: ["Skyline", "Torque", "Nitrous"],
   },
   {
     id: "binary-boost",
     name: "Binary Boost",
     region: "na",
-    baseStrength: 86,
+    baseStrength: 87,
     players: ["Cipher", "Overclock", "Pixelate"],
   },
   {
@@ -52,35 +52,35 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "crimson-orbit",
     name: "Crimson Orbit",
     region: "eu",
-    baseStrength: 92,
+    baseStrength: 96,
     players: ["Redline", "Eclipse", "Perigee"],
   },
   {
     id: "flux-horizon",
     name: "Flux Horizon",
     region: "eu",
-    baseStrength: 87,
+    baseStrength: 91,
     players: ["Zenon", "Skyfall", "Mirage"],
   },
   {
     id: "quantum-drift",
     name: "Quantum Drift",
     region: "eu",
-    baseStrength: 81,
+    baseStrength: 85,
     players: ["Qubit", "Entangle", "Photon"],
   },
   {
     id: "vector-storm",
     name: "Vector Storm",
     region: "eu",
-    baseStrength: 74,
+    baseStrength: 77,
     players: ["Tempest", "Magnitude", "Norm"],
   },
   {
     id: "warpfield",
     name: "Warpfield",
     region: "eu",
-    baseStrength: 66,
+    baseStrength: 69,
     players: ["Fold", "Tesseract", "Blink"],
   },
   // South America
@@ -88,21 +88,21 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "solar-flare",
     name: "Solar Flare",
     region: "sam",
-    baseStrength: 84,
+    baseStrength: 86,
     players: ["Corona", "Helios", "Fúria"],
   },
   {
     id: "momentum-ix",
     name: "Momentum IX",
     region: "sam",
-    baseStrength: 76,
+    baseStrength: 78,
     players: ["Impulso", "Vértice", "Rasante"],
   },
   {
     id: "gravity-forge",
     name: "Gravity Forge",
     region: "sam",
-    baseStrength: 67,
+    baseStrength: 70,
     players: ["Ferrão", "Órbita", "Cometa"],
   },
   // Oceania
@@ -110,14 +110,14 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "kinetic-pulse",
     name: "Kinetic Pulse",
     region: "oce",
-    baseStrength: 78,
+    baseStrength: 76,
     players: ["Joule", "Reef", "Outback"],
   },
   {
     id: "zenith-motors",
     name: "Zenith Motors",
     region: "oce",
-    baseStrength: 68,
+    baseStrength: 66,
     players: ["Apogee", "Drover", "Southerly"],
   },
   // Middle East & North Africa
@@ -125,21 +125,21 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "ion-surge",
     name: "Ion Surge",
     region: "mena",
-    baseStrength: 85,
+    baseStrength: 86,
     players: ["Sahar", "Voltra", "Dune"],
   },
   {
     id: "nova-circuit",
     name: "Nova Circuit",
     region: "mena",
-    baseStrength: 75,
+    baseStrength: 78,
     players: ["Mirageh", "Kasbah", "Zephyr"],
   },
   {
     id: "titan-boost",
     name: "Titan Boost",
     region: "mena",
-    baseStrength: 66,
+    baseStrength: 70,
     players: ["Oasis", "Simoom", "Basalt"],
   },
   // Asia-Pacific
@@ -147,21 +147,21 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "hyperlane-fc",
     name: "Hyperlane FC",
     region: "apac",
-    baseStrength: 79,
+    baseStrength: 77,
     players: ["Shinkai", "Bullet", "Kumo"],
   },
   {
     id: "echo-nexus",
     name: "Echo Nexus",
     region: "apac",
-    baseStrength: 71,
+    baseStrength: 69,
     players: ["Hangul", "Resonance", "Typhoon"],
   },
   {
     id: "drift-circuit",
     name: "Drift Circuit",
     region: "apac",
-    baseStrength: 64,
+    baseStrength: 61,
     players: ["Touge", "Monsoon", "Kani"],
   },
   // Sub-Saharan Africa
@@ -169,21 +169,21 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     id: "orbital-fc",
     name: "Orbital FC",
     region: "ssa",
-    baseStrength: 72,
+    baseStrength: 70,
     players: ["Savanna", "Kalahari", "Jozi"],
   },
   {
     id: "rocket-syndicate",
     name: "Rocket Syndicate",
     region: "ssa",
-    baseStrength: 65,
+    baseStrength: 63,
     players: ["Baobab", "Harmattan", "Zambezi"],
   },
   {
     id: "lunar-apex",
     name: "Lunar Apex",
     region: "ssa",
-    baseStrength: 60,
+    baseStrength: 56,
     players: ["Kilima", "Serengeti", "Naira"],
   },
 ] as const;

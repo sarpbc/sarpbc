@@ -7,8 +7,10 @@ import {
   saveCareerResult,
 } from "~/composables/useCareerStorage";
 import { applyStatDelta, getAgeDecline, getStartingStats } from "~/utils/career/stats";
+import { WORLD_STRENGTH_BASELINE, resolveEventOutcome } from "~/utils/career/eventOutcome";
 import {
   createCareerWorld,
+  getRosterPlayerRating,
   getRosterStrength,
   moveUserToTeam,
   tickNpcRatings,
@@ -17,14 +19,21 @@ import {
   computeCircuitPoints,
   computeSeasonPoints,
   computeWorldRankings,
+  createRng,
   deriveTrophies,
   getSplitFeedback,
+  getEventsBeforeStage,
+  getTeamRank,
   getWorldsFeedback,
   hashString,
   pickStartingTeam,
+  qualifiesForWorlds,
   resolveOffseasonContracts,
-  simulateSplit,
-  simulateWorlds,
+  simulateSplitField,
+  simulateWorldsField,
+  snapshotWorldRanking,
+  splitFieldToResult,
+  upsertSplitField,
 } from "~/utils/career/simulation";
 import { pickCareerNickname } from "~/utils/career/nickname";
 import type {
@@ -41,13 +50,15 @@ import type {
   OnboardingStep,
 } from "~/types/career";
 import {
-  WORLDS_QUALIFICATION_POINTS,
+  USER_ROSTER_ID,
   applyDestinyLeanings,
   emptyDestinyLeanings,
   getPlayerAge,
   getRecommendedDestiny,
   getRetiredAge,
   getSeasonsPastPeak,
+  getSplitNumber,
+  SPLITS_PER_SEASON,
 } from "~/types/career";
 
 const OFFSEASON_DESTINY_CHOICES = {
@@ -76,6 +87,10 @@ function createInitialState(): CareerState {
     world: createCareerWorld(id),
     usedEventIds: [],
     currentEventId: null,
+    eventsQueuedForStage: 0,
+    eventsResolvedForStage: 0,
+    pendingSkipRegionals: 0,
+    pendingSkipMajor: false,
     currentSplits: [],
     currentWorlds: null,
     seasonRecords: [],
@@ -193,17 +208,36 @@ export function useCareerSimulator() {
 
   const seasonPoints = computed(() => computeSeasonPoints(state.value.currentSplits));
 
+  const qualifiedForWorlds = computed(() => {
+    if (state.value.currentSplits.length < SPLITS_PER_SEASON) return false;
+    const rank = getTeamRank(worldRankings.value, state.value.currentTeamId);
+    if (rank == null) return false;
+    return qualifiesForWorlds(rank, worldRankings.value.teams.length);
+  });
+
   function startSeason() {
     state.value.currentStage = "split1";
     state.value.currentSplits = [];
     state.value.currentWorlds = null;
-    pickNextEvent("split");
+    startStageEvents();
     persist();
+  }
+
+  function startStageEvents() {
+    state.value.eventsQueuedForStage = getEventsBeforeStage(
+      state.value.id,
+      state.value.currentSeason,
+      state.value.currentStage,
+    );
+    state.value.eventsResolvedForStage = 0;
+    state.value.pendingSkipRegionals = 0;
+    state.value.pendingSkipMajor = false;
+    pickNextEvent(state.value.currentStage === "worlds" ? "worlds" : "split");
   }
 
   function pickNextEvent(pool: "split" | "worlds") {
     const seed = hashString(
-      `${state.value.id}:event:${state.value.currentSeason}:${state.value.currentStage}`,
+      `${state.value.id}:event:${state.value.currentSeason}:${state.value.currentStage}:${state.value.eventsResolvedForStage}`,
     );
     const event = pickRandomEvent(pool, state.value.usedEventIds, seed, state.value.currentSeason);
     state.value.currentEventId = event.id;
@@ -222,7 +256,32 @@ export function useCareerSimulator() {
 
     const destiny = choice.destiny ?? {};
     const before = state.value.stats;
-    const next = applyStatDelta(before, choice.delta);
+    const roster = state.value.world.rosters[state.value.currentTeamId];
+    const lastSeason = state.value.seasonRecords[state.value.seasonRecords.length - 1];
+    const lastSplit =
+      state.value.currentSplits[state.value.currentSplits.length - 1] ?? lastSeason?.splits.at(-1);
+    const resolved = resolveEventOutcome({
+      careerId: state.value.id,
+      eventId,
+      choiceId,
+      season: state.value.currentSeason,
+      authoredDelta: choice.delta,
+      teamStrength: roster
+        ? getRosterStrength(roster, state.value.world, before.rating)
+        : WORLD_STRENGTH_BASELINE,
+      teammateRatings: roster
+        ? roster
+            .filter((playerId) => playerId !== USER_ROSTER_ID)
+            .map((playerId) => getRosterPlayerRating(playerId, state.value.world, before.rating))
+        : [],
+      lastSplitPoints: lastSplit?.points ?? null,
+      missedWorldsLastSeason: lastSeason ? lastSeason.worlds === null : false,
+      quitLeaning: state.value.destinyLeanings.quit,
+    });
+    const rng = createRng(
+      hashString(`${state.value.id}:mythic:${eventId}:${choiceId}:${state.value.currentSeason}`),
+    );
+    const next = applyStatDelta(before, resolved.delta, rng);
     state.value.stats = next;
     state.value.destinyLeanings = applyDestinyLeanings(state.value.destinyLeanings, destiny);
     state.value.lastEventOutcome = {
@@ -234,42 +293,98 @@ export function useCareerSimulator() {
         morale: next.morale - before.morale,
       },
       destiny,
+      ...(resolved.failed ? { failed: true } : {}),
     };
     state.value.phase = "event_result";
     persist();
   }
 
   function continueAfterEventOutcome() {
+    const outcome = state.value.lastEventOutcome;
+    const event = outcome ? getEventById(outcome.eventId) : undefined;
+    const choice = event?.choices.find((entry) => entry.id === outcome?.choiceId);
+    state.value.pendingSkipRegionals = Math.max(
+      state.value.pendingSkipRegionals,
+      choice?.skipRegionals ?? 0,
+    );
+    state.value.pendingSkipMajor = state.value.pendingSkipMajor || (choice?.skipMajor ?? false);
+    state.value.eventsResolvedForStage += 1;
     state.value.currentEventId = null;
     state.value.lastEventOutcome = null;
-    runStageSimulation();
+    if (state.value.eventsResolvedForStage < state.value.eventsQueuedForStage) {
+      pickNextEvent(state.value.currentStage === "worlds" ? "worlds" : "split");
+    } else {
+      runStageSimulation({
+        skipRegionals: state.value.pendingSkipRegionals,
+        skipMajor: state.value.pendingSkipMajor,
+      });
+      state.value.pendingSkipRegionals = 0;
+      state.value.pendingSkipMajor = false;
+    }
     persist();
   }
 
-  function runStageSimulation() {
+  function runStageSimulation(
+    skip: { skipRegionals: number; skipMajor: boolean } = {
+      skipRegionals: 0,
+      skipMajor: false,
+    },
+  ) {
     const stage = state.value.currentStage;
-    const seed = hashString(`${state.value.id}:sim:${state.value.currentSeason}:${stage}`);
-    const roster = state.value.world.rosters[state.value.currentTeamId];
-    const teamStrength = roster
-      ? getRosterStrength(roster, state.value.world, state.value.stats.rating)
-      : undefined;
+    const fieldPlayer = {
+      teamId: state.value.currentTeamId,
+      rating: state.value.stats.rating,
+      stats: state.value.stats,
+      role: state.value.role,
+      skipRegionals: skip.skipRegionals,
+      skipMajor: skip.skipMajor,
+    };
 
     switch (stage) {
       case "split1":
       case "split2": {
-        const sim = simulateSplit(state.value.stats, state.value.role!, seed, teamStrength);
+        const split = getSplitNumber(stage) ?? 1;
+        const field = simulateSplitField(
+          state.value.id,
+          state.value.currentSeason,
+          split,
+          state.value.world,
+          fieldPlayer,
+        );
+        const sim = field.get(state.value.currentTeamId) ?? {
+          regionals: [],
+          major: null,
+          points: 0,
+        };
         state.value.stats = applyStatDelta(state.value.stats, getSplitFeedback(sim));
         const record: CareerSplitRecord = {
-          split: stage === "split1" ? 1 : 2,
+          split,
           regionals: sim.regionals,
           major: sim.major,
           points: sim.points,
         };
         state.value.currentSplits.push(record);
+        state.value.world = {
+          ...state.value.world,
+          splitFields: upsertSplitField(
+            state.value.world.splitFields,
+            splitFieldToResult(state.value.currentSeason, split, field),
+          ),
+        };
         break;
       }
       case "worlds": {
-        const placement = simulateWorlds(state.value.stats, state.value.role!, seed, teamStrength);
+        const qualified = worldRankings.value.teams
+          .filter((entry) => qualifiesForWorlds(entry.rank, worldRankings.value.teams.length))
+          .map((entry) => entry.team.id);
+        const placements = simulateWorldsField(
+          state.value.id,
+          state.value.currentSeason,
+          state.value.world,
+          qualified,
+          fieldPlayer,
+        );
+        const placement = placements.get(state.value.currentTeamId) ?? "group";
         state.value.stats = applyStatDelta(state.value.stats, getWorldsFeedback(placement));
         state.value.currentWorlds = placement;
         break;
@@ -287,7 +402,14 @@ export function useCareerSimulator() {
     state.value.phase = "stage_result";
   }
 
-  const qualifiedForWorlds = computed(() => seasonPoints.value >= WORLDS_QUALIFICATION_POINTS);
+  function goToWorldsOrEndSeason() {
+    if (qualifiedForWorlds.value) {
+      state.value.currentStage = "worlds";
+      startStageEvents();
+    } else {
+      endSeason();
+    }
+  }
 
   function continueAfterResult() {
     const stage = state.value.currentStage;
@@ -295,15 +417,10 @@ export function useCareerSimulator() {
     switch (stage) {
       case "split1":
         state.value.currentStage = "split2";
-        pickNextEvent("split");
+        startStageEvents();
         break;
       case "split2":
-        if (qualifiedForWorlds.value) {
-          state.value.currentStage = "worlds";
-          pickNextEvent("worlds");
-        } else {
-          endSeason();
-        }
+        goToWorldsOrEndSeason();
         break;
       case "worlds":
         endSeason();
@@ -322,17 +439,23 @@ export function useCareerSimulator() {
       teamName: currentTeamName.value,
       splits: [...state.value.currentSplits],
       worlds,
-      points: computeCircuitPoints(state.value.currentSplits, worlds),
+      points: computeCircuitPoints(state.value.currentSplits),
       ratingEnd: state.value.stats.rating,
     };
     state.value.seasonRecords.push(record);
+
+    const rankings = worldRankings.value;
+    state.value.world = {
+      ...state.value.world,
+      rankSnapshot: snapshotWorldRanking(rankings),
+    };
 
     const offerSeed = hashString(`${state.value.id}:offer:${state.value.currentSeason}`);
     const resolution = resolveOffseasonContracts(
       state.value.currentSeason,
       record.points,
       state.value.currentTeamId,
-      worldRankings.value,
+      rankings,
       offerSeed,
     );
     state.value.pendingOfferTeamIds =
@@ -457,6 +580,10 @@ export function useCareerSimulator() {
 
   const playerAge = computed(() => getPlayerAge(state.value.currentSeason));
   const isPastPeak = computed(() => getSeasonsPastPeak(state.value.currentSeason) > 0);
+  const destinyPromptPending = computed(
+    () =>
+      state.value.offseasonDestinyPending && getSeasonsPastPeak(state.value.currentSeason + 1) > 0,
+  );
   const canRetire = computed(
     () =>
       getSeasonsPastPeak(state.value.currentSeason + 1) > 0 ||
@@ -475,6 +602,7 @@ export function useCareerSimulator() {
     lastSplit,
     playerAge,
     isPastPeak,
+    destinyPromptPending,
     canRetire,
     hydrate,
     persist,

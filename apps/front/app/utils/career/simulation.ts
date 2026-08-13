@@ -1,25 +1,31 @@
 import type {
   CareerPlacement,
+  CareerRankSnapshotEntry,
   CareerRegion,
   CareerRole,
   CareerSeasonRecord,
+  CareerSplitFieldResult,
   CareerSplitRecord,
+  CareerStage,
   CareerStats,
   CareerTrophy,
   CareerWorldState,
 } from "~/types/career";
 import {
+  CAREER_REGIONS,
   MAJOR_QUALIFICATION_POINTS,
+  MAX_EVENTS_BEFORE_SPLIT,
   REGIONALS_PER_SPLIT,
-  SPLITS_PER_SEASON,
   USER_ROSTER_ID,
-  WORLDS_QUALIFICATION_POINTS,
+  WORLDS_QUALIFICATION_RANK,
   getSeasonsPastPeak,
+  getSplitStage,
 } from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
 import { WORLD_TEAMS, getWorldTeamsByRegion } from "~/data/career/world";
+import { playSingleElim } from "~/utils/career/brackets";
 import { createRng, hashString } from "~/utils/career/rng";
-import { getRosterStrength } from "~/utils/career/roster";
+import { getRosterMatchStrength, getRosterStrength } from "~/utils/career/roster";
 import { computeComposite } from "~/utils/career/stats";
 
 export { createRng, hashString } from "~/utils/career/rng";
@@ -30,23 +36,40 @@ export const REGIONAL_POINTS: Record<CareerPlacement, number> = {
   top4: 5,
   top8: 3,
   group: 1,
+  unavailable: 0,
 };
 
+/** International majors are worth double a regional finish. */
 export const MAJOR_POINTS: Record<CareerPlacement, number> = {
   winner: 20,
   finalist: 14,
   top4: 10,
   top8: 6,
-  group: 3,
+  group: 2,
+  unavailable: 0,
 };
 
-export const WORLDS_POINTS: Record<CareerPlacement, number> = {
-  winner: 30,
-  finalist: 22,
-  top4: 16,
-  top8: 10,
-  group: 5,
-};
+/** Regional circuit points scale with the region's depth. Majors are unweighted. */
+export function regionalCircuitWeight(region: CareerRegion): number {
+  switch (region) {
+    case "eu":
+      return 1;
+    case "na":
+      return 0.9;
+    case "sam":
+    case "mena":
+      return 0.75;
+    case "oce":
+    case "apac":
+      return 0.55;
+    case "ssa":
+      return 0.5;
+    default: {
+      const _exhaustive: never = region;
+      return _exhaustive;
+    }
+  }
+}
 
 function placementFromScore(score: number): CareerPlacement {
   if (score >= 80) return "winner";
@@ -109,8 +132,9 @@ export function simulateWorlds(
 
 /** Stat drift applied after a split based on how the run went. */
 export function getSplitFeedback(sim: SplitSimulation): Partial<CareerStats> {
-  if (sim.major === "winner") return { rating: 2, morale: 4 };
-  if (sim.major === "finalist" || sim.major === "top4") return { rating: 1, morale: 2 };
+  if (sim.major === "winner") return { rating: 5, morale: 4 };
+  if (sim.major === "finalist" || sim.major === "top4") return { rating: 2, morale: 2 };
+  if (sim.major === "unavailable") return { morale: -2, form: -1 };
   if (sim.major !== null) return { form: 1 };
   return { morale: -3 };
 }
@@ -118,14 +142,16 @@ export function getSplitFeedback(sim: SplitSimulation): Partial<CareerStats> {
 export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerStats> {
   switch (placement) {
     case "winner":
-      return { rating: 3, morale: 5 };
+      return { rating: 5, morale: 5 };
     case "finalist":
-      return { rating: 2, morale: 3 };
+      return { rating: 3, morale: 3 };
     case "top4":
-      return { rating: 1, morale: 2 };
+      return { rating: 2, morale: 2 };
     case "top8":
       return { morale: 1 };
     case "group":
+      return { morale: -2 };
+    case "unavailable":
       return { morale: -2 };
     default: {
       const _exhaustive: never = placement;
@@ -134,41 +160,168 @@ export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerSta
   }
 }
 
-export function computeCircuitPoints(
-  splits: CareerSplitRecord[],
-  worlds: CareerPlacement | null,
+/** Circuit points are split results only. Worlds is prestige, not ranking points. */
+export function computeCircuitPoints(splits: CareerSplitRecord[]): number {
+  return computeSeasonPoints(splits);
+}
+
+export interface FieldPlayer {
+  teamId: string | null;
+  rating: number;
+  stats?: CareerStats;
+  role?: CareerRole | null;
+  skipRegionals?: number;
+  skipMajor?: boolean;
+}
+
+function teamFieldStrength(teamId: string, world: CareerWorldState, player: FieldPlayer): number {
+  const team = WORLD_TEAMS.find((entry) => entry.id === teamId);
+  const rosterIds = world.rosters[teamId] ?? (team ? [...team.players] : []);
+  const rosterStrength = rosterIds.length
+    ? getRosterMatchStrength(rosterIds, world, player)
+    : (team?.baseStrength ?? 50);
+  if (teamId === player.teamId && player.stats && player.role) {
+    return blendWithTeam(computeComposite(player.stats, player.role), rosterStrength);
+  }
+  return rosterStrength;
+}
+
+function eventRng(careerId: string, season: number, key: string): () => number {
+  return createRng(hashString(`${careerId}:sim:${season}:${key}`));
+}
+
+function emptySplitSimulation(): SplitSimulation {
+  return {
+    regionals: Array.from({ length: REGIONALS_PER_SPLIT }, () => "group"),
+    major: null,
+    points: 0,
+  };
+}
+
+function rawRegionalPoints(sim: Pick<SplitSimulation, "regionals">): number {
+  return sim.regionals.reduce((sum, placement) => sum + REGIONAL_POINTS[placement], 0);
+}
+
+export function circuitPointsForSplit(
+  sim: Pick<SplitSimulation, "regionals" | "major">,
+  region: CareerRegion,
 ): number {
-  return computeSeasonPoints(splits) + (worlds ? WORLDS_POINTS[worlds] : 0);
+  const regional = Math.round(rawRegionalPoints(sim) * regionalCircuitWeight(region));
+  const major = sim.major ? MAJOR_POINTS[sim.major] : 0;
+  return regional + major;
 }
 
-function expectedNpcFullSeasonPoints(baseStrength: number, seed: number): number {
-  const rng = createRng(seed);
-  const t = Math.max(0, Math.min(1, (baseStrength - 55) / 40));
-  const expected = 22 + t ** 1.15 * 72;
-  const form = 0.7 + rng() * 0.45;
-  return Math.max(6, Math.round(expected * form));
-}
-
-/** Simulated circuit points for an NPC team for one season, truncated to how far the player has played. */
-export function simulateNpcCircuitPoints(
+/** Play every regional and the major as real brackets. One winner per event. */
+export function simulateSplitField(
   careerId: string,
   season: number,
-  teamId: string,
-  strength: number,
-  completedSplits: number,
-  worldsDone: boolean,
-): number {
-  const full = expectedNpcFullSeasonPoints(
-    strength,
-    hashString(`${careerId}:${season}:${teamId}:circuit`),
-  );
-  if (completedSplits <= 0 && !worldsDone) return 0;
-  if (completedSplits === 1 && !worldsDone) {
-    const pace = 0.28 + createRng(hashString(`${careerId}:${season}:${teamId}:pace`))() * 0.42;
-    return Math.round(full * pace);
+  split: number,
+  world: CareerWorldState,
+  player: FieldPlayer,
+): Map<string, SplitSimulation> {
+  const results = new Map<string, SplitSimulation>();
+  for (const team of WORLD_TEAMS) {
+    results.set(team.id, emptySplitSimulation());
   }
-  if (completedSplits >= 2 && !worldsDone) return Math.round(full * 0.82);
-  return full;
+
+  const stage = getSplitStage(split);
+  const skipRegionals = player.skipRegionals ?? 0;
+  for (const region of CAREER_REGIONS) {
+    for (let regional = 0; regional < REGIONALS_PER_SPLIT; regional++) {
+      const sitOut =
+        player.teamId != null &&
+        skipRegionals > regional &&
+        getWorldTeamsByRegion(region).some((team) => team.id === player.teamId);
+      const field = getWorldTeamsByRegion(region)
+        .filter((team) => !(sitOut && team.id === player.teamId))
+        .map((team) => ({
+          id: team.id,
+          strength: teamFieldStrength(team.id, world, player),
+        }));
+      const placements = playSingleElim(
+        field,
+        eventRng(careerId, season, `${stage}:${region}:r${regional}`),
+      );
+      for (const [teamId, placement] of placements) {
+        const sim = results.get(teamId);
+        if (!sim) continue;
+        sim.regionals[regional] = placement;
+      }
+      if (sitOut && player.teamId) {
+        const sim = results.get(player.teamId);
+        if (sim) sim.regionals[regional] = "unavailable";
+      }
+    }
+  }
+
+  const majorField: { id: string; strength: number }[] = [];
+  for (const [teamId, sim] of results) {
+    const regionalPoints = rawRegionalPoints(sim);
+    if (regionalPoints < MAJOR_QUALIFICATION_POINTS) continue;
+    if (player.skipMajor && teamId === player.teamId) {
+      sim.major = "unavailable";
+      continue;
+    }
+    majorField.push({ id: teamId, strength: teamFieldStrength(teamId, world, player) });
+  }
+  const majorPlacements = playSingleElim(majorField, eventRng(careerId, season, `${stage}:major`));
+  for (const [teamId, placement] of majorPlacements) {
+    const sim = results.get(teamId);
+    if (sim) sim.major = placement;
+  }
+
+  for (const team of WORLD_TEAMS) {
+    const sim = results.get(team.id);
+    if (sim) sim.points = circuitPointsForSplit(sim, team.region);
+  }
+  return results;
+}
+
+export function splitFieldToResult(
+  season: number,
+  split: number,
+  field: Map<string, SplitSimulation>,
+): CareerSplitFieldResult {
+  const points: Record<string, number> = {};
+  for (const [teamId, sim] of field) {
+    points[teamId] = sim.points;
+  }
+  return { season, split, points };
+}
+
+export function upsertSplitField(
+  fields: CareerSplitFieldResult[],
+  next: CareerSplitFieldResult,
+): CareerSplitFieldResult[] {
+  return [
+    ...fields.filter((field) => !(field.season === next.season && field.split === next.split)),
+    next,
+  ];
+}
+
+/** Worlds knockout among the qualified field. Prestige only — no circuit points. */
+export function simulateWorldsField(
+  careerId: string,
+  season: number,
+  world: CareerWorldState,
+  qualifiedTeamIds: readonly string[],
+  player: FieldPlayer,
+): Map<string, CareerPlacement> {
+  const field = qualifiedTeamIds.map((teamId) => ({
+    id: teamId,
+    strength: teamFieldStrength(teamId, world, player),
+  }));
+  return playSingleElim(field, eventRng(careerId, season, "worlds"));
+}
+
+/** Two splits every season. 1–3 decisions before each split; Worlds is one. */
+export function getEventsBeforeStage(careerId: string, season: number, stage: CareerStage): number {
+  if (stage === "worlds") return 1;
+  return 1 + (hashString(`${careerId}:events:${season}:${stage}`) % MAX_EVENTS_BEFORE_SPLIT);
+}
+
+export function qualifiesForWorlds(rank: number, teamCount: number): boolean {
+  return rank <= Math.min(WORLDS_QUALIFICATION_RANK, teamCount);
 }
 
 export interface RankedRosterPlayer {
@@ -183,9 +336,9 @@ export interface RankedTeam {
   roster: RankedRosterPlayer[];
   /** Average of the current 3 roster ratings. */
   strength: number;
-  /** Last completed season's circuit points — the world-ranking seed. */
+  /** Score used to order the table: strength before the year, circuit points after. */
   rating: number;
-  /** Circuit points earned this season. */
+  /** Circuit points this season (regionals scaled by region, majors full). */
   points: number;
   rank: number;
   isPlayerTeam: boolean;
@@ -206,6 +359,10 @@ export interface WorldRankings {
   players: RankedPlayer[];
 }
 
+export function snapshotWorldRanking(rankings: WorldRankings): CareerRankSnapshotEntry[] {
+  return rankings.teams.map((entry) => ({ teamId: entry.team.id, points: entry.points }));
+}
+
 export interface PlayerCircuitInput {
   name: string;
   teamId: string | null;
@@ -215,12 +372,6 @@ export interface PlayerCircuitInput {
   splits: CareerSplitRecord[];
   worlds: CareerPlacement | null;
   previousPoints: number | null;
-}
-
-function isCurrentSeasonComplete(player: PlayerCircuitInput): boolean {
-  if (player.worlds !== null) return true;
-  if (player.splits.length < SPLITS_PER_SEASON) return false;
-  return computeSeasonPoints(player.splits) < WORLDS_QUALIFICATION_POINTS;
 }
 
 function rosterPlayerFromId(
@@ -240,20 +391,59 @@ function rosterPlayerFromId(
   };
 }
 
+function storedSplitPoints(
+  world: CareerWorldState,
+  season: number,
+  split: number,
+): Record<string, number> | null {
+  const field = (world.splitFields ?? []).find(
+    (entry) => entry.season === season && entry.split === split,
+  );
+  return field?.points ?? null;
+}
+
+function npcSplitPointsByTeam(
+  careerId: string,
+  player: PlayerCircuitInput,
+  world: CareerWorldState,
+  split: number,
+): Map<string, number> {
+  const stored = storedSplitPoints(world, player.season, split);
+  if (stored) return new Map(Object.entries(stored));
+
+  const field = simulateSplitField(careerId, player.season, split, world, {
+    teamId: player.teamId,
+    rating: player.rating,
+  });
+  const points = new Map<string, number>();
+  for (const [teamId, sim] of field) {
+    points.set(teamId, sim.points);
+  }
+  return points;
+}
+
 export function computeWorldRankings(
   careerId: string,
   player: PlayerCircuitInput,
   world: CareerWorldState,
 ): WorldRankings {
   const completedSplits = player.splits.length;
-  const worldsDone = player.worlds !== null;
-  const seasonComplete = isCurrentSeasonComplete(player);
-  const rankingSeason = seasonComplete ? player.season : Math.max(0, player.season - 1);
-  const npcSplitsForRank = seasonComplete ? completedSplits : SPLITS_PER_SEASON;
-  const npcWorldsForRank = seasonComplete ? worldsDone : true;
+  const freezeToSnapshot =
+    completedSplits === 0 && world.rankSnapshot != null && world.rankSnapshot.length > 0;
+  const snapshot = freezeToSnapshot ? world.rankSnapshot : null;
+  const snapshotPoints = world.rankSnapshot
+    ? new Map(world.rankSnapshot.map((entry) => [entry.teamId, entry.points]))
+    : null;
+  const snapshotOrder = snapshot
+    ? new Map(snapshot.map((entry, index) => [entry.teamId, index]))
+    : null;
 
-  const yearPlayerPoints = computeCircuitPoints(player.splits, player.worlds);
-  const rankingPlayerPoints = seasonComplete ? yearPlayerPoints : (player.previousPoints ?? 0);
+  const npcSplitCaches: Map<string, number>[] = [];
+  for (let split = 1; split <= completedSplits; split++) {
+    npcSplitCaches.push(npcSplitPointsByTeam(careerId, player, world, split));
+  }
+
+  const yearPlayerPoints = computeCircuitPoints(player.splits);
 
   const teams: RankedTeam[] = WORLD_TEAMS.map((team) => {
     const isPlayerTeam = team.id === player.teamId;
@@ -261,28 +451,30 @@ export function computeWorldRankings(
     const roster = rosterIds.map((id) => rosterPlayerFromId(id, world, player));
     const strength =
       roster.length > 0 ? getRosterStrength(rosterIds, world, player.rating) : team.baseStrength;
-    const rankingPoints = isPlayerTeam
-      ? rankingPlayerPoints
-      : simulateNpcCircuitPoints(
-          careerId,
-          rankingSeason,
-          team.id,
-          strength,
-          npcSplitsForRank,
-          npcWorldsForRank,
-        );
+    const splitPoints = isPlayerTeam
+      ? player.splits.map((record) => record.points)
+      : npcSplitCaches.map((cache) => cache.get(team.id) ?? 0);
     const points = isPlayerTeam
       ? yearPlayerPoints
-      : simulateNpcCircuitPoints(
-          careerId,
-          player.season,
-          team.id,
-          strength,
-          completedSplits,
-          worldsDone,
-        );
-    return { team, roster, strength, rating: rankingPoints, points, rank: 0, isPlayerTeam };
-  }).sort((a, b) => b.rating - a.rating || b.strength - a.strength);
+      : splitPoints.reduce((sum, value) => sum + value, 0);
+    const previous = snapshotPoints
+      ? (snapshotPoints.get(team.id) ?? 0)
+      : isPlayerTeam
+        ? (player.previousPoints ?? 0)
+        : 0;
+    const rankingScore = freezeToSnapshot ? previous : completedSplits === 0 ? strength : points;
+    return { team, roster, strength, rating: rankingScore, points, rank: 0, isPlayerTeam };
+  });
+  if (snapshotOrder) {
+    teams.sort(
+      (a, b) => (snapshotOrder.get(a.team.id) ?? 999) - (snapshotOrder.get(b.team.id) ?? 999),
+    );
+  } else {
+    teams.sort(
+      (a, b) =>
+        b.rating - a.rating || b.strength - a.strength || a.team.id.localeCompare(b.team.id),
+    );
+  }
   teams.forEach((entry, index) => {
     entry.rank = index + 1;
   });
@@ -320,14 +512,83 @@ export function pickStartingTeam(region: CareerRegion): string {
   return weakest!.id;
 }
 
+const ELITE_PLAYER_RANK = 12;
+const STRONG_PLAYER_RANK = 16;
+/** Clubs bid if you are within this of their weakest starter. */
+const TRANSFER_UPGRADE_MARGIN = 2;
+/** Elite bids come from the best interested clubs, not a random mid-table draw. */
+const OFFER_SHORTLIST = 8;
+
+function getUserStanding(rankings: WorldRankings): { rating: number; rank: number } {
+  const user = rankings.players.find((player) => player.isUser);
+  return {
+    rating: user?.rating ?? 0,
+    rank: user?.rank ?? rankings.players.length + 1,
+  };
+}
+
+/** Matching the 8th-best rating counts as elite, even when listed just outside the cut. */
+function marketPlayerRank(
+  rankings: WorldRankings,
+  playerRating: number,
+  playerRank: number,
+): number {
+  const eighthRating = rankings.players[7]?.rating;
+  if (eighthRating !== undefined && playerRating >= eighthRating) {
+    return Math.min(playerRank, 8);
+  }
+  const sixteenthRating = rankings.players[STRONG_PLAYER_RANK - 1]?.rating;
+  if (sixteenthRating !== undefined && playerRating >= sixteenthRating) {
+    return Math.min(playerRank, STRONG_PLAYER_RANK);
+  }
+  return playerRank;
+}
+
+function weakestRosterRating(team: RankedTeam): number {
+  let min = Infinity;
+  for (const member of team.roster) {
+    if (member.rating < min) min = member.rating;
+  }
+  return min;
+}
+
+function teamWantsPlayer(team: RankedTeam, playerRating: number): boolean {
+  return playerRating >= weakestRosterRating(team) - TRANSFER_UPGRADE_MARGIN;
+}
+
+function shuffleTeams(teams: RankedTeam[], rng: () => number): RankedTeam[] {
+  const shuffled = [...teams];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const current = shuffled[i]!;
+    shuffled[i] = shuffled[j]!;
+    shuffled[j] = current;
+  }
+  return shuffled;
+}
+
 /**
- * Offseason interest: better seasons draw more, and better, teams.
- * A weak year never attracts a top-4 side.
+ * Offseason interest. A top individual ranking opens better clubs even after
+ * a quiet circuit year. Mid talent still needs results; a weak year then
+ * never attracts a top-4 side.
  */
 export function getTransferBand(
   seasonPoints: number,
   currentRank: number,
+  playerWorldRank: number,
 ): { minRank: number; maxRank: number; maxOffers: number } | null {
+  const betterMax = Math.max(1, currentRank - 1);
+
+  if (playerWorldRank <= ELITE_PLAYER_RANK) {
+    return { minRank: 1, maxRank: betterMax, maxOffers: 3 };
+  }
+  if (playerWorldRank <= STRONG_PLAYER_RANK) {
+    return {
+      minRank: seasonPoints >= 28 ? 1 : 5,
+      maxRank: betterMax,
+      maxOffers: 2,
+    };
+  }
   if (seasonPoints < 15) return null;
   if (seasonPoints < 28) {
     return { minRank: Math.max(currentRank, 8), maxRank: 99, maxOffers: 1 };
@@ -352,18 +613,29 @@ export function pickOffseasonOffers(
   seed: number,
 ): string[] {
   const currentRank = getTeamRank(rankings, currentTeamId) ?? rankings.teams.length;
-  const band = getTransferBand(seasonPoints, currentRank);
+  const { rating: playerRating, rank: listedRank } = getUserStanding(rankings);
+  const playerWorldRank = marketPlayerRank(rankings, playerRating, listedRank);
+  const band = getTransferBand(seasonPoints, currentRank, playerWorldRank);
   if (!band) return [];
 
-  const rng = createRng(seed);
-  const pool = rankings.teams.filter(
-    (entry) =>
-      entry.team.id !== currentTeamId && entry.rank >= band.minRank && entry.rank <= band.maxRank,
+  const inBand = (entry: RankedTeam): boolean =>
+    entry.team.id !== currentTeamId && entry.rank >= band.minRank && entry.rank <= band.maxRank;
+
+  let pool = rankings.teams.filter(
+    (entry) => inBand(entry) && teamWantsPlayer(entry, playerRating),
   );
+  if (pool.length === 0) {
+    pool = rankings.teams.filter(inBand);
+  }
   if (pool.length === 0) return [];
 
+  const rng = createRng(seed);
   let count: number;
-  if (seasonPoints >= 60) {
+  if (playerWorldRank <= ELITE_PLAYER_RANK) {
+    count = rng() < 0.45 ? 3 : rng() < 0.85 ? 2 : 1;
+  } else if (playerWorldRank <= STRONG_PLAYER_RANK) {
+    count = rng() < 0.55 ? 2 : 1;
+  } else if (seasonPoints >= 60) {
     count = rng() < 0.35 ? 3 : rng() < 0.7 ? 2 : 1;
   } else if (seasonPoints >= 42) {
     count = rng() < 0.4 ? 2 : 1;
@@ -375,14 +647,10 @@ export function pickOffseasonOffers(
   count = Math.min(count, band.maxOffers, pool.length);
   if (count <= 0) return [];
 
-  const shuffled = [...pool];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    const current = shuffled[i]!;
-    shuffled[i] = shuffled[j]!;
-    shuffled[j] = current;
-  }
-  return shuffled.slice(0, count).map((entry) => entry.team.id);
+  const shortlist = [...pool].sort((a, b) => a.rank - b.rank).slice(0, OFFER_SHORTLIST);
+  return shuffleTeams(shortlist, rng)
+    .slice(0, count)
+    .map((entry) => entry.team.id);
 }
 
 function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): string {
@@ -398,7 +666,8 @@ export interface OffseasonResolution {
 }
 
 /**
- * Peak years always renew. Transfer interest is 0–3 teams matching the season.
+ * Peak years always renew. Transfer interest is 0–3 clubs matching rating
+ * versus the field, with season results still gating mid-tier talent.
  * After five seasons, renewal chance falls each year until no team will sign you.
  */
 export function resolveOffseasonContracts(

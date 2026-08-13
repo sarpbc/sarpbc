@@ -9,10 +9,12 @@ const props = defineProps<{
   kind: RankingKind;
   teams?: RankedTeam[];
   players?: RankedPlayer[];
-  highlightTeamId?: string | null;
+  hoveredTeamId: string | null;
 }>();
 
-const hoveredTeamId = defineModel<string | null>("hoveredTeamId", { default: null });
+const emit = defineEmits<{
+  "update:hoveredTeamId": [teamId: string | null];
+}>();
 
 const { t } = useI18n();
 
@@ -44,8 +46,23 @@ const topPlayerKeys = computed(() => {
   return keys;
 });
 
+function setHoveredTeam(teamId: string | null): void {
+  emit("update:hoveredTeamId", teamId);
+}
+
+function onRowLeave(event: MouseEvent, teamId: string): void {
+  const current = event.currentTarget as HTMLElement;
+  const next = event.relatedTarget as Node | null;
+  if (next && current.contains(next)) {
+    return;
+  }
+  if (props.hoveredTeamId === teamId) {
+    emit("update:hoveredTeamId", null);
+  }
+}
+
 const highlightedRosterExtras = computed(() => {
-  const teamId = props.highlightTeamId;
+  const teamId = props.hoveredTeamId;
   if (!teamId) {
     return [];
   }
@@ -71,8 +88,8 @@ const userExtra = computed(() => {
   return user;
 });
 
-const playerListItems = computed((): PlayerListItem[] => {
-  const items: PlayerListItem[] = topPlayers.value.map((entry) => ({ type: "player", entry }));
+const playerFooterItems = computed((): PlayerListItem[] => {
+  const items: PlayerListItem[] = [];
   if (highlightedRosterExtras.value.length > 0) {
     items.push({ type: "divider" });
     for (const entry of highlightedRosterExtras.value) {
@@ -86,15 +103,41 @@ const playerListItems = computed((): PlayerListItem[] => {
 });
 
 const playerTeamEntry = computed(() => props.teams?.find((team) => team.isPlayerTeam) ?? null);
-const playerTeamOutsideTop = computed(
-  () => playerTeamEntry.value !== null && playerTeamEntry.value.rank > topTeams.value.length,
-);
-
-const displayedTeams = computed(() => {
-  if (playerTeamOutsideTop.value && playerTeamEntry.value) {
-    return [...topTeams.value, playerTeamEntry.value];
+const playerTeamFooter = computed(() => {
+  if (!playerTeamEntry.value || playerTeamEntry.value.rank <= topTeams.value.length) {
+    return null;
   }
-  return topTeams.value;
+  return playerTeamEntry.value;
+});
+
+const extraTeams = computed((): RankedTeam[] => {
+  const extras: RankedTeam[] = [];
+  const seen = new Set(topTeams.value.map((entry) => entry.team.id));
+
+  const add = (entry: RankedTeam | undefined): void => {
+    if (!entry || seen.has(entry.team.id)) {
+      return;
+    }
+    seen.add(entry.team.id);
+    extras.push(entry);
+  };
+
+  add(playerTeamFooter.value ?? undefined);
+
+  const hoveredId = props.hoveredTeamId;
+  if (hoveredId) {
+    add((props.teams ?? []).find((entry) => entry.team.id === hoveredId));
+  }
+
+  return extras;
+});
+
+const teamSections = computed(() => {
+  const sections: RankedTeam[][] = [topTeams.value];
+  if (extraTeams.value.length > 0) {
+    sections.push(extraTeams.value);
+  }
+  return sections;
 });
 
 const rankingGridClass =
@@ -120,10 +163,11 @@ const title = computed(() => {
 });
 
 function teamRowClass(entry: RankedTeam): string[] {
-  const highlighted = hoveredTeamId.value === entry.team.id;
+  const highlighted = props.hoveredTeamId === entry.team.id;
   return [
     rankingGridClass,
-    "border-l-2 py-1.5 text-left text-sm",
+    "h-row-compact min-h-row-compact border-b border-default border-l-2 text-left text-sm",
+    "hover:border-l-primary hover:bg-elevated",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isPlayerTeam ? "bg-elevated font-semibold" : "",
@@ -131,10 +175,12 @@ function teamRowClass(entry: RankedTeam): string[] {
 }
 
 function playerRowClass(entry: RankedPlayer): string[] {
-  const highlighted = props.highlightTeamId === entry.teamId;
+  const highlighted = props.hoveredTeamId === entry.teamId;
   return [
     rankingGridClass,
-    "border-b border-default border-l-2 py-1.5 text-sm last:border-b-0",
+    "h-row-compact min-h-row-compact border-b border-default border-l-2 text-sm",
+    "hover:border-l-primary hover:bg-elevated",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isUser ? "bg-elevated font-semibold" : "",
   ];
@@ -146,8 +192,8 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
   if (next && current.contains(next)) {
     return;
   }
-  if (hoveredTeamId.value === teamId) {
-    hoveredTeamId.value = null;
+  if (props.hoveredTeamId === teamId) {
+    emit("update:hoveredTeamId", null);
   }
 }
 </script>
@@ -155,18 +201,24 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
 <template>
   <SRail caption="lead" :title="title">
     <SCard flush-bottom>
-      <ol v-if="kind === 'teams'" class="flex flex-col">
-        <li
-          v-for="entry in displayedTeams"
-          :key="entry.team.id"
-          class="border-b border-default last:border-b-0"
+      <template v-if="kind === 'teams'">
+        <ol
+          v-for="(section, index) in teamSections"
+          :key="index"
+          class="flex flex-col"
+          :class="index > 0 ? 'border-t border-default' : ''"
         >
-          <div
+          <li
+            v-for="entry in section"
+            :key="entry.team.id"
             tabindex="0"
-            :class="teamRowClass(entry)"
-            @mouseenter="hoveredTeamId = entry.team.id"
-            @mouseleave="hoveredTeamId = null"
-            @focusin="hoveredTeamId = entry.team.id"
+            :class="[
+              teamRowClass(entry),
+              index === 0 && extraTeams.length ? 'last:border-b-0' : '',
+            ]"
+            @mouseenter="setHoveredTeam(entry.team.id)"
+            @mouseleave="onRowLeave($event, entry.team.id)"
+            @focusin="setHoveredTeam(entry.team.id)"
             @focusout="onTeamFocusOut($event, entry.team.id)"
           >
             <UTooltip
@@ -177,11 +229,8 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
                 {{ entry.rank }}
               </span>
             </UTooltip>
-            <span class="flex min-w-0 items-center gap-1">
-              <span class="min-w-0 truncate">{{ entry.team.name }}</span>
-              <span v-if="entry.isPlayerTeam" class="shrink-0 text-xs text-primary">
-                · {{ t("page.game.career.rankings.yourTeam") }}
-              </span>
+            <span class="min-w-0 truncate" :class="entry.isPlayerTeam ? 'text-primary' : ''">
+              {{ entry.team.name }}
             </span>
             <span class="block min-w-0 truncate text-muted">
               {{ t(`page.game.career.onboarding.regions.${entry.team.region}`) }}
@@ -194,37 +243,72 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
                 {{ Math.round(entry.points) }}
               </span>
             </UTooltip>
-          </div>
-        </li>
-      </ol>
-
-      <ol v-else class="flex flex-col">
-        <template v-for="item in playerListItems" :key="playerListKey(item)">
-          <li
-            v-if="item.type === 'divider'"
-            class="border-b border-default px-2 py-1.5 text-xs text-muted"
-          >
-            {{ t("page.game.career.rankings.alsoOnRoster") }}
           </li>
-          <li v-else :class="playerRowClass(item.entry)">
+        </ol>
+      </template>
+
+      <template v-else>
+        <ol class="flex flex-col">
+          <li
+            v-for="entry in topPlayers"
+            :key="playerKey(entry)"
+            tabindex="0"
+            :class="[playerRowClass(entry), playerFooterItems.length ? 'last:border-b-0' : '']"
+            @mouseenter="setHoveredTeam(entry.teamId)"
+            @mouseleave="onRowLeave($event, entry.teamId)"
+            @focusin="setHoveredTeam(entry.teamId)"
+            @focusout="onTeamFocusOut($event, entry.teamId)"
+          >
             <span class="block text-right text-xs text-muted tabular-nums">
-              {{ item.entry.rank }}
+              {{ entry.rank }}
             </span>
-            <span class="flex min-w-0 items-center gap-1">
-              <span class="min-w-0 truncate">{{ item.entry.name }}</span>
-              <span v-if="item.entry.isUser" class="shrink-0 text-xs text-primary">
-                · {{ t("page.game.career.rankings.you") }}
-              </span>
+            <span class="min-w-0 truncate" :class="entry.isUser ? 'text-primary' : ''">
+              {{ entry.name }}
             </span>
-            <span class="block min-w-0 truncate text-muted">{{ item.entry.teamName }}</span>
+            <span class="block min-w-0 truncate text-muted">{{ entry.teamName }}</span>
             <UTooltip :text="t('page.game.career.rankings.playerRating')" :content="tooltipContent">
               <span class="block text-right text-xs tabular-nums">
-                {{ Math.round(item.entry.rating) }}
+                {{ Math.round(entry.rating) }}
               </span>
             </UTooltip>
           </li>
-        </template>
-      </ol>
+        </ol>
+        <ol v-if="playerFooterItems.length" class="flex flex-col border-t border-default">
+          <template v-for="item in playerFooterItems" :key="playerListKey(item)">
+            <li
+              v-if="item.type === 'divider'"
+              class="flex h-row-compact min-h-row-compact items-center border-b border-default px-2 text-xs text-muted"
+            >
+              {{ t("page.game.career.rankings.alsoOnRoster") }}
+            </li>
+            <li
+              v-else
+              tabindex="0"
+              :class="playerRowClass(item.entry)"
+              @mouseenter="setHoveredTeam(item.entry.teamId)"
+              @mouseleave="onRowLeave($event, item.entry.teamId)"
+              @focusin="setHoveredTeam(item.entry.teamId)"
+              @focusout="onTeamFocusOut($event, item.entry.teamId)"
+            >
+              <span class="block text-right text-xs text-muted tabular-nums">
+                {{ item.entry.rank }}
+              </span>
+              <span class="min-w-0 truncate" :class="item.entry.isUser ? 'text-primary' : ''">
+                {{ item.entry.name }}
+              </span>
+              <span class="block min-w-0 truncate text-muted">{{ item.entry.teamName }}</span>
+              <UTooltip
+                :text="t('page.game.career.rankings.playerRating')"
+                :content="tooltipContent"
+              >
+                <span class="block text-right text-xs tabular-nums">
+                  {{ Math.round(item.entry.rating) }}
+                </span>
+              </UTooltip>
+            </li>
+          </template>
+        </ol>
+      </template>
     </SCard>
   </SRail>
 </template>

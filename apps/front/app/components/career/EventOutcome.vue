@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { CareerEventOutcome, CareerStats } from "~/types/career";
-import { primaryDestinyLean } from "~/types/career";
 
 const props = defineProps<{
   outcome: CareerEventOutcome;
@@ -14,7 +13,10 @@ const { t } = useI18n();
 
 const eventKey = computed(() => `page.game.career.events.${props.outcome.eventId}`);
 
-const destinyLean = computed(() => primaryDestinyLean(props.outcome.destiny));
+const outcomeCopy = computed(() => {
+  const key = props.outcome.failed ? "failure" : "outcome";
+  return t(`${eventKey.value}.choices.${props.outcome.choiceId}.${key}`);
+});
 
 const statRows = computed(() => {
   const keys: (keyof CareerStats)[] = ["rating", "form", "morale"];
@@ -26,6 +28,17 @@ const statRows = computed(() => {
     .filter((row) => row.value !== 0);
 });
 
+const deltaGridClass = computed(() => {
+  switch (statRows.value.length) {
+    case 1:
+      return "grid-cols-1";
+    case 2:
+      return "grid-cols-2";
+    default:
+      return "grid-cols-3";
+  }
+});
+
 function formatDelta(value: number): string {
   return value > 0 ? `+${value}` : `${value}`;
 }
@@ -33,23 +46,25 @@ function formatDelta(value: number): string {
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="space-y-2 text-center">
-      <p class="text-xs font-semibold text-muted">
-        {{ t("page.game.career.event.outcomeLabel") }}
-      </p>
+    <div class="space-y-2">
       <h2 class="text-lg font-semibold tracking-tight">
         {{ t(`${eventKey}.title`) }}
       </h2>
-      <p class="text-sm font-medium">
-        {{ t(`${eventKey}.choices.${outcome.choiceId}.label`) }}
-      </p>
       <p class="text-sm text-muted text-pretty">
-        {{ t(`${eventKey}.choices.${outcome.choiceId}.outcome`) }}
+        {{ outcomeCopy }}
       </p>
     </div>
 
-    <ul v-if="statRows.length > 0" class="grid grid-cols-3 gap-2">
-      <li v-for="row in statRows" :key="row.stat" class="border border-default p-3 text-center">
+    <ul
+      v-if="statRows.length > 0"
+      class="grid h-[calc(var(--spacing-row-compact)*2)] min-h-[calc(var(--spacing-row-compact)*2)] border border-default divide-x divide-default"
+      :class="deltaGridClass"
+    >
+      <li
+        v-for="row in statRows"
+        :key="row.stat"
+        class="flex flex-col items-center justify-center text-center"
+      >
         <p class="text-xs text-muted">{{ t(`page.game.career.stats.${row.stat}`) }}</p>
         <p
           class="text-lg font-semibold tabular-nums"
@@ -59,14 +74,6 @@ function formatDelta(value: number): string {
         </p>
       </li>
     </ul>
-
-    <p v-if="destinyLean" class="text-center text-xs text-muted">
-      {{
-        t("page.game.career.event.destinyLean", {
-          path: t(`page.game.career.destiny.${destinyLean}.label`),
-        })
-      }}
-    </p>
 
     <UButton block @click="emit('continue')">
       {{ t("page.game.career.event.continue") }}

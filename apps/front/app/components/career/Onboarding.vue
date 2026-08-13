@@ -46,6 +46,7 @@ function goTo(step: OnboardingStep) {
 }
 
 function onIntroNext() {
+  if (!props.playerName.trim()) return;
   goTo("region");
 }
 
@@ -73,22 +74,31 @@ function onStart() {
         <h2 class="text-lg font-semibold tracking-tight">
           {{ t("page.game.career.onboarding.introTitle") }}
         </h2>
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.game.career.onboarding.introBody") }}
-        </p>
+        <p class="text-sm text-muted">{{ t("page.game.career.onboarding.introBody") }}</p>
       </div>
-      <UFormField :label="t('page.game.career.onboarding.playerNameLabel')" name="playerName">
-        <UInput
-          v-model="localName"
-          :placeholder="t('page.game.career.onboarding.playerNamePlaceholder')"
-          maxlength="24"
-          autocomplete="nickname"
-          spellcheck="false"
-        />
-      </UFormField>
-      <UButton block @click="onIntroNext">
-        {{ t("page.game.career.onboarding.next") }}
-      </UButton>
+      <UForm
+        :state="{ playerName: localName }"
+        class="flex w-full flex-col gap-4"
+        @submit="onIntroNext"
+      >
+        <UFormField
+          class="w-full"
+          :label="t('page.game.career.onboarding.playerNameLabel')"
+          name="playerName"
+        >
+          <UInput
+            v-model="localName"
+            class="w-full"
+            :placeholder="t('page.game.career.onboarding.playerNamePlaceholder')"
+            maxlength="24"
+            autocomplete="nickname"
+            spellcheck="false"
+          />
+        </UFormField>
+        <UButton type="submit" block>
+          {{ t("page.game.career.onboarding.next") }}
+        </UButton>
+      </UForm>
     </div>
 
     <div v-else-if="step === 'region'" class="flex flex-col gap-4">

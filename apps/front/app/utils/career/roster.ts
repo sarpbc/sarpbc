@@ -1,9 +1,17 @@
-import type { CareerRegion, CareerRoster, CareerStage, CareerWorldState } from "~/types/career";
+import type {
+  CareerNpcPlayer,
+  CareerRegion,
+  CareerRole,
+  CareerRoster,
+  CareerStage,
+  CareerStats,
+  CareerWorldState,
+} from "~/types/career";
 import { ROSTER_SIZE, USER_ROSTER_ID } from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
 import { WORLD_TEAMS, getWorldTeamById } from "~/data/career/world";
 import { createRng, hashString } from "~/utils/career/rng";
-import { applyStatChange, clampStat } from "~/utils/career/stats";
+import { applyStatChange, clampStat, computePerformance } from "~/utils/career/stats";
 
 export type NpcRatingTick = CareerStage | "season";
 
@@ -65,11 +73,24 @@ function cloneWorld(world: CareerWorldState): CareerWorldState {
     players,
     freeAgentIds: [...world.freeAgentIds],
     nextGeneratedId: world.nextGeneratedId,
+    rankSnapshot: world.rankSnapshot?.map((entry) => ({ ...entry })) ?? null,
+    splitFields: (world.splitFields ?? []).map((field) => ({
+      season: field.season,
+      split: field.split,
+      points: { ...field.points },
+    })),
   };
 }
 
 function emptyCareerWorld(): CareerWorldState {
-  return { rosters: {}, players: {}, freeAgentIds: [], nextGeneratedId: 1 };
+  return {
+    rosters: {},
+    players: {},
+    freeAgentIds: [],
+    nextGeneratedId: 1,
+    rankSnapshot: null,
+    splitFields: [],
+  };
 }
 
 export function getRosterPlayerRating(
@@ -94,6 +115,51 @@ export function getRosterStrength(
   return sum / roster.length;
 }
 
+export interface MatchStrengthUser {
+  rating: number;
+  stats?: CareerStats;
+  role?: CareerRole | null;
+}
+
+function npcStats(player: CareerNpcPlayer): CareerStats {
+  return { rating: player.rating, form: player.form, morale: player.morale };
+}
+
+export function getPlayerMatchStrength(
+  playerId: string,
+  world: CareerWorldState,
+  user: MatchStrengthUser,
+): number {
+  if (playerId === USER_ROSTER_ID) {
+    if (user.stats) return computePerformance(user.stats, user.role);
+    return user.rating;
+  }
+  const npc = world.players[playerId];
+  if (!npc) return 50;
+  return computePerformance(npcStats(npc));
+}
+
+/** Team strength for brackets: rating plus form and morale for every player. */
+export function getRosterMatchStrength(
+  roster: readonly string[],
+  world: CareerWorldState,
+  user: MatchStrengthUser,
+): number {
+  if (roster.length === 0) return 0;
+  const sum = roster.reduce(
+    (total, playerId) => total + getPlayerMatchStrength(playerId, world, user),
+    0,
+  );
+  return sum / roster.length;
+}
+
+function rollNpcFormMorale(rng: () => number): Pick<CareerNpcPlayer, "form" | "morale"> {
+  return {
+    form: clampStat(56 + rng() * 18),
+    morale: clampStat(56 + rng() * 18),
+  };
+}
+
 function npcWalkSpan(tick: NpcRatingTick): number {
   switch (tick) {
     case "split1":
@@ -102,6 +168,21 @@ function npcWalkSpan(tick: NpcRatingTick): number {
       return 1;
     case "season":
       return 2;
+    default: {
+      const _exhaustive: never = tick;
+      return _exhaustive;
+    }
+  }
+}
+
+function npcFormWalkSpan(tick: NpcRatingTick): number {
+  switch (tick) {
+    case "split1":
+    case "split2":
+    case "worlds":
+      return 2;
+    case "season":
+      return 3;
     default: {
       const _exhaustive: never = tick;
       return _exhaustive;
@@ -119,8 +200,9 @@ function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): n
 }
 
 /**
- * Drift every NPC rating one tick. Seeded from career id + season + tick so
- * Best Players reshuffles without a heavy sim. Does not touch the user slot.
+ * Drift every NPC rating, form, and morale one tick. Seeded from career id +
+ * season + tick so Best Players reshuffles without a heavy sim. Does not touch
+ * the user slot.
  */
 export function tickNpcRatings(
   world: CareerWorldState,
@@ -129,11 +211,20 @@ export function tickNpcRatings(
   tick: NpcRatingTick,
 ): CareerWorldState {
   const next = cloneWorld(world);
-  const span = npcWalkSpan(tick);
+  const ratingSpan = npcWalkSpan(tick);
+  const formSpan = npcFormWalkSpan(tick);
   for (const player of Object.values(next.players)) {
     const rng = createRng(hashString(`${careerId}:${season}:${tick}:${player.id}:npc-rating`));
-    const walk = Math.floor(rng() * (span * 2 + 1)) - span;
-    player.rating = applyStatChange(player.rating, walk + npcCareerBias(player.id, season, tick));
+    const ratingWalk = Math.floor(rng() * (ratingSpan * 2 + 1)) - ratingSpan;
+    player.rating = applyStatChange(
+      player.rating,
+      ratingWalk + npcCareerBias(player.id, season, tick),
+      rng,
+    );
+    const formWalk = Math.floor(rng() * (formSpan * 2 + 1)) - formSpan;
+    const moraleWalk = Math.floor(rng() * (formSpan * 2 + 1)) - formSpan;
+    player.form = applyStatChange(player.form, formWalk, rng);
+    player.morale = applyStatChange(player.morale, moraleWalk, rng);
   }
   return next;
 }
@@ -149,6 +240,7 @@ export function createCareerWorld(careerId: string): CareerWorldState {
         id: name,
         name,
         rating: clampStat(team.baseStrength + (rng() * 10 - 4)),
+        ...rollNpcFormMorale(rng),
         region: team.region,
       };
       ids.push(name);
@@ -167,6 +259,7 @@ export function createCareerWorld(careerId: string): CareerWorldState {
       id: name,
       name,
       rating: clampStat(54 + rng() * 16),
+      ...rollNpcFormMorale(rng),
       region,
     };
     world.freeAgentIds.push(name);
@@ -237,6 +330,7 @@ function generateReplacement(
     id,
     name,
     rating: clampStat(rating),
+    ...rollNpcFormMorale(createRng(hashString(`${id}:form`))),
     region,
   };
   return id;

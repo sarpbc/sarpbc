@@ -37,6 +37,32 @@ export type OnboardingStep = "intro" | "region" | "country" | "role" | "backgrou
 
 export type CareerStage = "split1" | "split2" | "worlds";
 
+export function getSplitNumber(stage: CareerStage): number | null {
+  switch (stage) {
+    case "split1":
+      return 1;
+    case "split2":
+      return 2;
+    case "worlds":
+      return null;
+    default: {
+      const _exhaustive: never = stage;
+      return _exhaustive;
+    }
+  }
+}
+
+export function getSplitStage(split: number): CareerStage {
+  switch (split) {
+    case 1:
+      return "split1";
+    case 2:
+      return "split2";
+    default:
+      return "split1";
+  }
+}
+
 export type CareerEventPool = "split" | "worlds";
 
 export const CAREER_DESTINIES = ["quit", "streamer", "coach"] as const;
@@ -73,6 +99,10 @@ export interface CareerEventChoiceDefinition {
   id: string;
   delta: Partial<CareerStats>;
   destiny?: Partial<CareerDestinyLeanings>;
+  /** Sit out this many regionals of the upcoming split (0-indexed from regional 1). */
+  skipRegionals?: number;
+  /** Sit out the upcoming major even if the team qualifies. */
+  skipMajor?: boolean;
 }
 
 export interface CareerEventDefinition {
@@ -87,9 +117,18 @@ export interface CareerEventOutcome {
   choiceId: string;
   delta: Partial<CareerStats>;
   destiny: Partial<CareerDestinyLeanings>;
+  /** When true, show this choice's failure copy instead of the success outcome. */
+  failed?: boolean;
 }
 
-export const CAREER_PLACEMENTS = ["winner", "finalist", "top4", "top8", "group"] as const;
+export const CAREER_PLACEMENTS = [
+  "winner",
+  "finalist",
+  "top4",
+  "top8",
+  "group",
+  "unavailable",
+] as const;
 export type CareerPlacement = (typeof CAREER_PLACEMENTS)[number];
 
 export interface CareerSplitRecord {
@@ -144,7 +183,22 @@ export interface CareerNpcPlayer {
   id: string;
   name: string;
   rating: number;
+  form: number;
+  morale: number;
   region: CareerRegion;
+}
+
+/** Circuit points in world-rank order after the last completed season. */
+export interface CareerRankSnapshotEntry {
+  teamId: string;
+  points: number;
+}
+
+/** Per-team circuit points from one simulated split (regionals + major). */
+export interface CareerSplitFieldResult {
+  season: number;
+  split: number;
+  points: Record<string, number>;
 }
 
 /** Live world: 3-player rosters plus an unsigned pool. Template teams stay in WORLD_TEAMS. */
@@ -153,6 +207,10 @@ export interface CareerWorldState {
   players: Record<string, CareerNpcPlayer>;
   freeAgentIds: string[];
   nextGeneratedId: number;
+  /** Frozen standings for the offseason and next-season intro. Rankings go live after split 1. */
+  rankSnapshot: CareerRankSnapshotEntry[] | null;
+  /** Played split fields so NPC points stay fixed after ratings drift. */
+  splitFields: CareerSplitFieldResult[];
 }
 
 export interface CareerState {
@@ -171,6 +229,12 @@ export interface CareerState {
   world: CareerWorldState;
   usedEventIds: string[];
   currentEventId: string | null;
+  /** How many pre-stage events were rolled for the current split/Worlds. */
+  eventsQueuedForStage: number;
+  /** How many of those events have already been resolved. */
+  eventsResolvedForStage: number;
+  pendingSkipRegionals: number;
+  pendingSkipMajor: boolean;
   currentSplits: CareerSplitRecord[];
   currentWorlds: CareerPlacement | null;
   seasonRecords: CareerSeasonRecord[];
@@ -184,14 +248,17 @@ export interface CareerState {
 }
 
 export const STARTING_AGE = 16;
-export const PEAK_SEASONS = 5;
+/** Seasons 1–7 are ages 16–22. The stay-or-retire prompt starts after that. */
+export const PEAK_SEASONS = 7;
 export const SPLITS_PER_SEASON = 2;
+export const MIN_EVENTS_BEFORE_SPLIT = 1;
+export const MAX_EVENTS_BEFORE_SPLIT = 3;
 export const REGIONALS_PER_SPLIT = 3;
 export const MAJOR_QUALIFICATION_POINTS = 10;
-export const WORLDS_QUALIFICATION_POINTS = 42;
+export const WORLDS_QUALIFICATION_RANK = 16;
 export const MIN_STAT = 0;
-/** Hard ceiling — 95 is near-mythical; 100 is not reachable. */
-export const MAX_STAT = 95;
+/** Hard ceiling. 100 is reachable but gated to roughly 1 career in 1000. */
+export const MAX_STAT = 100;
 
 export function getPlayerAge(season: number): number {
   return STARTING_AGE + season - 1;
@@ -231,8 +298,4 @@ export function getRecommendedDestiny(leanings: CareerDestinyLeanings): CareerDe
     }
   }
   return best;
-}
-
-export function listPositiveDestinyLeans(delta: Partial<CareerDestinyLeanings>): CareerDestiny[] {
-  return CAREER_DESTINIES.filter((destiny) => (delta[destiny] ?? 0) > 0);
 }
