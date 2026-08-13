@@ -21,8 +21,6 @@
       "openTournaments": "Ouvrir les Tournois",
       "openPickems": "Ouvrir les Pick'ems",
       "openForum": "Ouvrir le Forum",
-      "syncTeams": "Synchroniser les Équipes",
-      "syncingTeams": "Synchronisation…",
       "forbidden": "Vous n’avez pas accès à cette section",
       "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin."
     },
@@ -37,6 +35,17 @@
       "moderation": "Modération",
       "tokens": "Jetons API",
       "backToSite": "Retour sur sarpbc.org"
+    },
+    "search": {
+      "placeholder": "Rechercher…",
+      "inputPlaceholder": "Rechercher des équipes, joueurs et tournois",
+      "empty": "Aucune équipe, joueur ou tournoi ne correspond.",
+      "commands": "Commandes",
+      "players": "Joueurs",
+      "teams": "Équipes",
+      "tournaments": "Tournois",
+      "refreshEmptyTournaments": "Actualiser les Tournois Vides",
+      "refreshEmptyTournamentsHint": "Récupérer les matchs des tournois PandaScore qui n’en ont pas"
     },
     "tokens": {
       "title": "Jetons API",
@@ -357,6 +366,8 @@
       "title": "Équipes",
       "teamsCount": "{count} équipes",
       "save": "Enregistrer",
+      "syncPandascore": "Synchroniser les Équipes",
+      "syncingPandascore": "Synchronisation…",
       "columns": {
         "name": "Nom",
         "location": "Localisation"

@@ -8,7 +8,6 @@ const router = useRouter();
 const toast = useToast();
 const user = useUser();
 const pending = ref(false);
-const syncing = ref(false);
 
 const items = [
   {
@@ -22,7 +21,6 @@ const canTeams = computed(() => hasPermission(user.value, "teams.manage"));
 const canTournaments = computed(() => hasPermission(user.value, "tournaments.manage"));
 const canPickems = computed(() => hasPermission(user.value, "pickems.manage"));
 const canForum = computed(() => hasPermission(user.value, "forum.moderate"));
-const canSyncTeams = computed(() => hasPermission(user.value, "teams.manage"));
 
 const hasAnyTool = computed(
   () =>
@@ -55,18 +53,6 @@ async function onLogout() {
     await logout();
   } finally {
     pending.value = false;
-  }
-}
-
-async function onSyncTeams() {
-  if (syncing.value || !canSyncTeams.value) {
-    return;
-  }
-  syncing.value = true;
-  try {
-    await syncTeamFromPandascore();
-  } finally {
-    syncing.value = false;
   }
 }
 </script>
@@ -151,17 +137,6 @@ async function onSyncTeams() {
             color="neutral"
           >
             {{ $t("page.home.openForum") }}
-          </UButton>
-          <UButton
-            v-if="canSyncTeams"
-            icon="i-fluent-arrow-sync-24-regular"
-            color="neutral"
-            variant="outline"
-            :loading="syncing"
-            :disabled="syncing"
-            @click="onSyncTeams"
-          >
-            {{ syncing ? $t("page.home.syncingTeams") : $t("page.home.syncTeams") }}
           </UButton>
         </div>
       </div>

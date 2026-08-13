@@ -29,10 +29,15 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_news_draft",
     {
       description:
-        "Create a news article draft. Requires news.manage. A human must review and publish it in the admin app.",
+        'Create a news article draft in English. Requires news.manage. Write the title and body in English. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. A human must review and publish it in the admin app.',
       inputSchema: {
-        title: z.string().min(1).describe("Article headline."),
-        content: z.string().min(1).describe("Article body (plain text or markdown)."),
+        title: z.string().min(1).describe("English article headline."),
+        content: z
+          .string()
+          .min(1)
+          .describe(
+            'English article body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`.',
+          ),
         imageUrl: z.string().url().optional().describe("Optional cover image URL."),
         slug: z
           .string()

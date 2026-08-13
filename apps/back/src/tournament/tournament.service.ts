@@ -5,6 +5,7 @@ import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { log } from "evlog";
 import { RedisService } from "src/redis/redis.service";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
+import { TournamentRepository } from "./tournament.repository";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
@@ -17,7 +18,7 @@ import {
 export class TournamentService {
   constructor(
     @InjectRepository(Tournament)
-    private readonly tournamentRepository: EntityRepository<Tournament>,
+    private readonly tournamentRepository: TournamentRepository,
     @InjectRepository(TournamentParticipant)
     private readonly participantRepository: EntityRepository<TournamentParticipant>,
     private readonly syncAllTournamentsUseCase: SyncAllTournamentsUseCase,
@@ -54,6 +55,22 @@ export class TournamentService {
       orderBy: { beginAt: "DESC" },
       populate: activeOnly ? ["league"] : ["league", "participants", "participants.team"],
     });
+  }
+
+  async searchByName({
+    name,
+    limit = 25,
+    offset = 0,
+  }: {
+    name: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Tournament[]> {
+    return this.tournamentRepository.searchByName({ name, limit, offset });
+  }
+
+  async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
+    return this.tournamentRepository.findPandascoreWithoutMatches();
   }
 
   async findById(id: string): Promise<Tournament | null> {

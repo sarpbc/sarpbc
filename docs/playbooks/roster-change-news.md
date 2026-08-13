@@ -6,12 +6,12 @@ Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a r
 
 ## Prerequisites
 
-| Requirement | Details |
-| ----------- | ------- |
-| MCP client | Claude Desktop, Cursor, or any client with **web search** and MCP tool use |
-| SARPBC MCP | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`) |
-| Auth | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
-| Permission | `news.manage` on your staff role (required for `create_news_draft`) |
+| Requirement | Details                                                                                            |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| MCP client  | Claude Desktop, Cursor, or any client with **web search** and MCP tool use                         |
+| SARPBC MCP  | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                             |
+| Auth        | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
+| Permission  | `news.manage` on your staff role (required for `create_news_draft`)                                |
 
 Client configuration examples live in the root [README.md](../../README.md#mcp-server).
 
@@ -19,24 +19,24 @@ Client configuration examples live in the root [README.md](../../README.md#mcp-s
 
 **Read** (any valid PAT):
 
-| Tool | Parameters | Returns (summary) |
-| ---- | ---------- | ----------------- |
-| `search_players` | `query` (string, min 1) | Up to 20 players: `id`, `slug`, `name`, `nationality`, `team`, `url` |
-| `search_teams` | `query` (string, min 1) | Up to 20 teams: `id`, `slug`, `name`, `url` |
-| `get_player` | `idOrSlug` (slug or UUID) | Player profile + current team + `url` |
-| `get_team` | `idOrSlug` (slug or UUID) | Team profile, roster, `location`, `url` |
-| `get_tournaments` | `activeOnly?` (boolean), `limit?` (1–100, default 20) | Tournament list with `url` |
-| `get_tournament` | `id` (UUID) | Full tournament detail, matches, participants |
-| `get_upcoming_matches` | `limit?` (1–100, default 20) | Upcoming + live matches |
-| `get_match_results` | `limit?` (1–100, default 20) | Recent finished results |
+| Tool                   | Parameters                                            | Returns (summary)                                                    |
+| ---------------------- | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `search_players`       | `query` (string, min 1)                               | Up to 20 players: `id`, `slug`, `name`, `nationality`, `team`, `url` |
+| `search_teams`         | `query` (string, min 1)                               | Up to 20 teams: `id`, `slug`, `name`, `url`                          |
+| `get_player`           | `idOrSlug` (slug or UUID)                             | Player profile + current team + `url`                                |
+| `get_team`             | `idOrSlug` (slug or UUID)                             | Team profile, roster, `location`, `url`                              |
+| `get_tournaments`      | `activeOnly?` (boolean), `limit?` (1–100, default 20) | Tournament list with `url`                                           |
+| `get_tournament`       | `id` (UUID)                                           | Full tournament detail, matches, participants                        |
+| `get_upcoming_matches` | `limit?` (1–100, default 20)                          | Upcoming + live matches                                              |
+| `get_match_results`    | `limit?` (1–100, default 20)                          | Recent finished results                                              |
 
 **Write** (requires `news.manage`):
 
-| Tool | Parameters | Notes |
-| ---- | ---------- | ----- |
-| `create_news_draft` | `title` (required), `content` (required), `imageUrl?` (URL), `slug?` (optional) | Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the title when omitted. |
+| Tool                | Parameters                                                                      | Notes                                                                                                                                                                                                                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_news_draft` | `title` (required), `content` (required), `imageUrl?` (URL), `slug?` (optional) | Write **English** title and body. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the title when omitted. |
 
-News articles are **single-locale** (one `title` + `content` per article). For bilingual coverage, call `create_news_draft` **twice** — once for English, once for French — with paired slugs and cross-links in the body.
+News articles are **single-locale** (one `title` + `content` per article). The MCP tool drafts in **English**. A French version is optional and only when a staff editor asks for it.
 
 ---
 
@@ -82,12 +82,12 @@ Use the MCP client’s **own web search** — not SARPBC tools. The API has no s
 
 Treat the move as **verified** when you find a **primary source**:
 
-| Tier | Examples | Label in article |
-| ---- | -------- | ---------------- |
-| **Primary** | Official team/player/org account post; team website news page; verified org press release | State as fact; cite the primary link |
-| **Secondary confirmation** | Tournament organizer, league, or publisher reposting the same move with attribution | Fact, cite primary; secondary optional |
-| **Single credible report** | One established esports journalist with track record, no official post yet | **Rumor** until primary appears |
-| **Unverified** | Random account, Discord leak, single screenshot, “sources say” with no outlet | Do **not** draft as fact; escalate to staff or wait |
+| Tier                       | Examples                                                                                  | Label in article                                    |
+| -------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Primary**                | Official team/player/org account post; team website news page; verified org press release | State as fact; cite the primary link                |
+| **Secondary confirmation** | Tournament organizer, league, or publisher reposting the same move with attribution       | Fact, cite primary; secondary optional              |
+| **Single credible report** | One established esports journalist with track record, no official post yet                | **Rumor** until primary appears                     |
+| **Unverified**             | Random account, Discord leak, single screenshot, “sources say” with no outlet             | Do **not** draft as fact; escalate to staff or wait |
 
 ### Verification checklist
 
@@ -116,31 +116,31 @@ Resolve every player and team to SARPBC slugs before drafting. Use returned `url
 
 ### Resolution order
 
-1. **`search_players`** with `query: "<player name>"`  
-   - Pick the match whose `name` and `team` fit the story.  
+1. **`search_players`** with `query: "<player name>"`
+   - Pick the match whose `name` and `team` fit the story.
    - If multiple homonyms, use tournament context or `get_player` on candidates.
 
-2. **`search_teams`** with `query: "<team name>"`  
+2. **`search_teams`** with `query: "<team name>"`
    - Prefer exact name matches; watch for rebrands (old vs new name).
 
-3. **`get_player`** with `idOrSlug: "<slug>"`  
+3. **`get_player`** with `idOrSlug: "<slug>"`
    - Confirm `team` reflects **current DB state** (may lag the announcement — note in draft if outdated).
 
-4. **`get_team`** with `idOrSlug: "<slug>"`  
+4. **`get_team`** with `idOrSlug: "<slug>"`
    - Pull roster for context (“joins a roster that already includes …”).
 
-5. **Tournament context** (optional):  
-   - `get_tournaments` with `activeOnly: true` if the move ties to an ongoing event.  
+5. **Tournament context** (optional):
+   - `get_tournaments` with `activeOnly: true` if the move ties to an ongoing event.
    - `get_tournament` with `id` when you need bracket or participant detail.
 
 ### Handling mismatches
 
-| Situation | Action |
-| --------- | ------ |
-| Player not in index | Draft with plain name; omit `:player{…}` tag. Note in review checklist: “create player profile.” |
-| Wrong team on player record | Draft using announcement facts; flag for staff to update player/team in admin after publish. |
-| Team not in index | Plain team name in prose; flag for staff to create team. |
-| Ambiguous search results | Do not guess. List candidates in a staff note; ask editor to pick slug. |
+| Situation                   | Action                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| Player not in index         | Draft with plain name; omit `:player{…}` tag. Note in review checklist: “create player profile.” |
+| Wrong team on player record | Draft using announcement facts; flag for staff to update player/team in admin after publish.     |
+| Team not in index           | Plain team name in prose; flag for staff to create team.                                         |
+| Ambiguous search results    | Do not guess. List candidates in a staff note; ask editor to pick slug.                          |
 
 ### Entity tags in article body
 
@@ -159,16 +159,16 @@ Syntax: `:player{slug="<slug>" label="<display name>"}` or `:team{slug="<slug>" 
 
 ### SARPBC news style (roster changes)
 
-| Element | Guidance |
-| ------- | -------- |
+| Element           | Guidance                                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **Headline (en)** | Factual, present tense: `[Player] joins [Team]` / `[Player] leaves [Team]` / `[Team] signs [Player]`. Max ~90 characters when possible. |
-| **Headline (fr)** | Natural French esports phrasing: `[Joueur] rejoint [Équipe]` — not literal calques. |
-| **Lead** | Who, what, which team, effective timing if stated — in the first 1–2 sentences. |
-| **Body** | Background (prior team, recent results), tournament impact, what the org said. Short paragraphs. |
-| **Quotes** | Use blockquotes only for **verbatim** text from the primary source. Attribute immediately above or below. |
-| **Sources** | Final paragraph or inline link: “[Team] announced the move on [date](canonical URL).” |
-| **Tone** | Neutral, fan-informed, no hype (“legendary”, “shocking”) unless quoting. |
-| **Markdown** | Headers `##` for sections if needed; `**bold**` for emphasis sparingly; entity tags for resolved slugs. |
+| **Headline (fr)** | Natural French esports phrasing: `[Joueur] rejoint [Équipe]` — not literal calques.                                                     |
+| **Lead**          | Who, what, which team, effective timing if stated — in the first 1–2 sentences.                                                         |
+| **Body**          | Background (prior team, recent results), tournament impact, what the org said. Short paragraphs.                                        |
+| **Quotes**        | Use blockquotes only for **verbatim** text from the primary source. Attribute immediately above or below.                               |
+| **Sources**       | Final paragraph or inline link: “[Team] announced the move on [date](canonical URL).”                                                   |
+| **Tone**          | Neutral, fan-informed, no hype (“legendary”, “shocking”) unless quoting.                                                                |
+| **Markdown**      | Headers `##` for sections if needed; `**bold**` for emphasis sparingly; entity tags for resolved slugs.                                 |
 
 ### Bilingual delivery
 
@@ -292,13 +292,13 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 
 Run this playbook on **2–3 real roster changes** during an active tournament cycle (e.g. RLCS regional / major window). Record metrics per story:
 
-| Metric | How to measure |
-| ------ | -------------- |
-| **Time to draft** | Minutes from editor pasting trigger URL to both `adminEditUrl` links returned |
+| Metric              | How to measure                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| **Time to draft**   | Minutes from editor pasting trigger URL to both `adminEditUrl` links returned           |
 | **Time to publish** | Minutes from announcement timestamp (primary post) to `isDraft: false` on both articles |
-| **Edit burden** | Count of substantive edits in admin (facts, tags, tone) vs typo fixes |
-| **Entity hit rate** | % of players/teams resolved via `search_*` without manual slug lookup |
-| **Source quality** | Primary vs rumor tier on first draft |
+| **Edit burden**     | Count of substantive edits in admin (facts, tags, tone) vs typo fixes                   |
+| **Entity hit rate** | % of players/teams resolved via `search_*` without manual slug lookup                   |
+| **Source quality**  | Primary vs rumor tier on first draft                                                    |
 
 ### Suggested test cases
 

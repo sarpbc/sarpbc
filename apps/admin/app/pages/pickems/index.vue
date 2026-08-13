@@ -8,7 +8,7 @@ const colorMode = useColorMode();
 const isLight = computed(() => colorMode.value === "light");
 
 const enablingTournamentId = ref<string | null>(null);
-const syncingTournamentId = ref<string | null>(null);
+const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const { data, status, refresh } = await useLazyAsyncData(
   "admin-pickems-tournaments",
@@ -33,16 +33,7 @@ function tournamentLabel(tournament: Tournament): string {
 }
 
 async function handleSyncTournament(tournamentId: string) {
-  syncingTournamentId.value = tournamentId;
-  try {
-    const success = await syncTournament(tournamentId);
-    if (success) {
-      toast.add({ title: t("page.pickems.syncTournament"), color: "success" });
-      await refresh();
-    }
-  } finally {
-    syncingTournamentId.value = null;
-  }
+  await runTournamentSync(tournamentId, refresh);
 }
 
 async function handleEnablePickems(tournamentId: string) {
@@ -114,10 +105,11 @@ async function handleEnablePickems(tournamentId: string) {
             />
             <UButton
               variant="soft"
-              icon="i-fluent-arrow-sync-24-regular"
+              :icon="iconFor(tournament.id)"
+              :color="colorFor(tournament.id)"
               :title="$t('page.pickems.syncTournament')"
               :aria-label="$t('page.pickems.syncTournament')"
-              :loading="syncingTournamentId === tournament.id"
+              :loading="syncingId === tournament.id"
               @click="handleSyncTournament(tournament.id)"
             />
             <UButton

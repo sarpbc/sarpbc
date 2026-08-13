@@ -1,10 +1,13 @@
 <template>
   <div class="flex h-dvh w-full flex-col overflow-hidden">
     <div
-      class="flex h-16 w-full shrink-0 flex-row items-center justify-between border-b border-default py-2 pr-4 pl-8"
+      class="flex h-16 w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-default py-2 pr-4 pl-8"
     >
-      <div>
+      <div class="min-w-0">
         <slot name="breadcrumb" />
+      </div>
+      <div class="flex min-w-0 flex-1 justify-center">
+        <NavCommandPalette />
       </div>
       <div class="flex w-fit flex-row gap-2">
         <slot name="action" />

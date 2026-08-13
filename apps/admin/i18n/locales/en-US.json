@@ -21,8 +21,6 @@
       "openTournaments": "Open Tournaments",
       "openPickems": "Open Pick'ems",
       "openForum": "Open Forum",
-      "syncTeams": "Sync Teams",
-      "syncingTeams": "Syncing…",
       "forbidden": "You do not have access to that section",
       "noTools": "No tools are available for your staff role yet. Ask an admin if you need access."
     },
@@ -37,6 +35,17 @@
       "moderation": "Moderation",
       "tokens": "API Tokens",
       "backToSite": "Back to sarpbc.org"
+    },
+    "search": {
+      "placeholder": "Search…",
+      "inputPlaceholder": "Search teams, players, and tournaments",
+      "empty": "No matching teams, players, or tournaments.",
+      "commands": "Commands",
+      "players": "Players",
+      "teams": "Teams",
+      "tournaments": "Tournaments",
+      "refreshEmptyTournaments": "Refresh Empty Tournaments",
+      "refreshEmptyTournamentsHint": "Pull matches for PandaScore tournaments that have none"
     },
     "tokens": {
       "title": "API Tokens",
@@ -357,6 +366,8 @@
       "title": "Teams",
       "teamsCount": "{count} teams",
       "save": "Save",
+      "syncPandascore": "Sync Teams",
+      "syncingPandascore": "Syncing…",
       "columns": {
         "name": "Name",
         "location": "Location"

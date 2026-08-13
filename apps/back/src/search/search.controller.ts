@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { SearchResult } from "./interfaces/search-result.interface";
+import { SearchResult, SearchType } from "./interfaces/search-result.interface";
 import { SearchService } from "./search.service";
 
 @Controller("search")
@@ -9,7 +9,7 @@ export class SearchController {
   @Get()
   async search(
     @Query("q") query: string,
-    @Query("type") type?: "player" | "team" | "all",
+    @Query("type") type?: SearchType,
     @Query("limit") limit?: string,
     @Query("offset") offset?: string,
   ): Promise<SearchResult> {
@@ -51,6 +51,22 @@ export class SearchController {
     const searchOffset = offset ? parseInt(offset, 10) : 0;
 
     return await this.searchService.searchTeams({
+      query,
+      limit: searchLimit,
+      offset: searchOffset,
+    });
+  }
+
+  @Get("tournaments")
+  async searchTournaments(
+    @Query("q") query: string,
+    @Query("limit") limit?: string,
+    @Query("offset") offset?: string,
+  ) {
+    const searchLimit = limit ? parseInt(limit, 10) : 25;
+    const searchOffset = offset ? parseInt(offset, 10) : 0;
+
+    return await this.searchService.searchTournaments({
       query,
       limit: searchLimit,
       offset: searchOffset,

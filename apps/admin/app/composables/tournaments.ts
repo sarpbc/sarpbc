@@ -96,6 +96,14 @@ export async function syncTournamentAdditions(): Promise<boolean> {
   }
 }
 
+export async function getTournamentsWithoutMatches(): Promise<{ id: string; name: string }[]> {
+  const res = await apiFetch<{ tournaments?: { id: string; name: string }[] }>(
+    "/tournaments/without-matches",
+    { method: "GET" },
+  );
+  return res.tournaments ?? [];
+}
+
 export async function setMatchWinner(matchId: string, winnerId: string): Promise<boolean> {
   try {
     await apiFetch(`/tournaments/matches/${matchId}/winner`, {
