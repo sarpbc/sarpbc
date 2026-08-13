@@ -7,9 +7,9 @@ const localePath = useLocalePath();
 const toast = useToast();
 
 const tournamentId = computed(() => route.params.id as string);
-const isSyncing = ref(false);
 const settingWinnerMatchId = ref<string | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
+const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const { data: tournament, refresh: refreshTournament } = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}`,
@@ -57,20 +57,13 @@ function matchScore(match: Match): string {
 }
 
 async function handleRefresh() {
-  isSyncing.value = true;
-  try {
-    const success = await syncTournament(tournamentId.value);
-    if (success) {
-      toast.add({ title: t("page.tournaments.syncTournament"), color: "success" });
-      await Promise.all([
-        refreshTournament(),
-        refreshMatches(),
-        awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
-      ]);
-    }
-  } finally {
-    isSyncing.value = false;
-  }
+  await runTournamentSync(tournamentId.value, async () => {
+    await Promise.all([
+      refreshTournament(),
+      refreshMatches(),
+      awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
+    ]);
+  });
 }
 
 async function handleSetWinner(match: Match, participantId: string) {
@@ -103,8 +96,9 @@ async function handleSetWinner(match: Match, participantId: string) {
         />
         <UButton
           v-if="tournament?.source !== 'manual'"
-          :loading="isSyncing"
-          icon="i-fluent-arrow-sync-24-regular"
+          :loading="syncingId === tournamentId"
+          :icon="iconFor(tournamentId)"
+          :color="colorFor(tournamentId)"
           :label="$t('page.tournaments.match.syncScores')"
           @click="handleRefresh"
         />

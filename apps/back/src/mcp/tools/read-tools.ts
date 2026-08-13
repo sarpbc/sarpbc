@@ -48,7 +48,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     "search_players",
     {
       description:
-        "Search Rocket League players by name. Returns matching players with id, slug, team, and public profile URL.",
+        'Search Rocket League players by name. Returns matching players with id, slug, team, and public profile URL. When drafting news, use the slug in `:player{slug="…" label="…"}`.',
       inputSchema: {
         query: z.string().min(1).describe("Player name or partial name to search for."),
       },
@@ -68,7 +68,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     "search_teams",
     {
       description:
-        "Search Rocket League teams by name. Returns matching teams with id, slug, and public profile URL.",
+        'Search Rocket League teams by name. Returns matching teams with id, slug, and public profile URL. When drafting news, use the slug in `:team{slug="…" label="…"}`.',
       inputSchema: {
         query: z.string().min(1).describe("Team name or partial name to search for."),
       },

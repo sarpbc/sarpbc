@@ -9,7 +9,7 @@ const toast = useToast();
 const limit = 25;
 const page = ref(1);
 const isSyncingAdditions = ref(false);
-const syncingTournamentId = ref<string | null>(null);
+const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const tournaments = ref<Tournament[]>([]);
 const total = ref(0);
@@ -95,16 +95,7 @@ async function handleSyncAdditions() {
 
 async function handleSyncTournament(e: Event, tournamentId: string) {
   e.stopPropagation();
-  syncingTournamentId.value = tournamentId;
-  try {
-    const success = await syncTournament(tournamentId);
-    if (success) {
-      toast.add({ title: t("page.tournaments.syncTournament"), color: "success" });
-      await refresh();
-    }
-  } finally {
-    syncingTournamentId.value = null;
-  }
+  await runTournamentSync(tournamentId, refresh);
 }
 
 async function updatePage(value: number) {
@@ -177,8 +168,9 @@ async function updatePage(value: number) {
                 v-if="!isManualTournament(row.original)"
                 variant="ghost"
                 size="xs"
-                icon="i-fluent-arrow-sync-24-regular"
-                :loading="syncingTournamentId === row.original.id"
+                :icon="iconFor(row.original.id)"
+                :color="colorFor(row.original.id)"
+                :loading="syncingId === row.original.id"
                 :title="$t('page.tournaments.syncTournament')"
                 @click="(e) => handleSyncTournament(e, row.original.id)"
               />
