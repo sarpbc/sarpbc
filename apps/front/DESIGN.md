@@ -142,7 +142,7 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks                                                                           |
 | `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                      |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names); Cuelume `hoverTick` by default                                 |
+| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                                |
 | `SButton`        | `UButton` wrapper with Cuelume `pressRelease` + press scale by default (`sound`: `press` \| `toggle` \| `none`; `static` disables scale) |
 | `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                                 |
 | `SBadgeLive`     | Live status with text + color                                                                                                            |
@@ -170,7 +170,7 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
 - **Match event groups** (`MatchListGroup`): wrap each tournament in `SRail caption="section"` + `SCard flush-bottom`. Upcoming lists group by local day first (`h-row` date caption above the event rails).
 - **Dense data cards** (recent form, head-to-head, results): same `SCard flush-bottom` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells for prose / forms / centered empty states.
-- **Discussion threads**: Each comment is a bordered block (full column width, same edge as other hub cards). Nested replies use `CommentThreadConnector` + `mt-3` spacing. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
+- **Discussion threads**: Wrap the thread in `SCard flush-bottom`. Each comment is a divider row (`border-b`), not an inner bordered box. Nested replies keep `CommentThreadConnector` indent without extra gap or a second card. Composer and load-more are last divider rows. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
 
 ### Hub page headers
@@ -212,12 +212,12 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 
 Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
 
-| Pattern                  | Attribute convention                                                                                                        | Use                             |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Primary press            | `SButton` (default) or `v-bind="cuelumeAttrs.pressRelease"` + `pressClass` (scale `0.96`, transform-only — no layout shift) | Submit / save / comment actions |
-| Toggle                   | `SButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                  | Theme switch                    |
-| Loading                  | `playCue("loading")` when user-initiated async work starts (`SButton` also plays when `:loading` becomes true)              | Login, submit, pick'em save     |
-| Nav hover (fine pointer) | `SLink` / `MatchDiscoveryLink` (`hoverTick`; no CSS color transition). Cuelume throttles hover cues to 1 / 150ms globally   | Header, footer, match rows      |
+| Pattern       | Attribute convention                                                                                                        | Use                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Primary press | `SButton` (default) or `v-bind="cuelumeAttrs.pressRelease"` + `pressClass` (scale `0.96`, transform-only — no layout shift) | Submit / save / comment actions |
+| Toggle        | `SButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                  | Theme switch                    |
+| Loading       | `playCue("loading")` when user-initiated async work starts (`SButton` also plays when `:loading` becomes true)              | Login, submit, pick'em save     |
+| Dense hover   | Do **not** attach hover ticks to `SListItem`, match rows, or nav — they become noise. Press/release on `SButton` only.      | Lists, header, footer           |
 
 Imperative cues: `const { playCue } = useCuelume()` then `playCue('loading')` / `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 

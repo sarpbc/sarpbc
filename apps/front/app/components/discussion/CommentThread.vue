@@ -39,7 +39,6 @@ const {
 const comments = computed(() => [...(pageData.value?.replies ?? []), ...appendedReplies.value]);
 const total = computed(() => pageData.value?.total ?? 0);
 const pageSize = computed(() => pageData.value?.limit ?? 25);
-const hasComments = computed(() => comments.value.length > 0);
 const hasMore = computed(() => comments.value.length < total.value);
 
 function resetExtraPages() {
@@ -124,61 +123,53 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-3" :aria-label="t('components.discussion.heading')">
-    <div v-if="pending" class="flex flex-col gap-3" aria-live="polite">
+  <section class="w-full" :aria-label="t('components.discussion.heading')">
+    <SCard v-if="pending" flush-bottom aria-live="polite">
       <div
         v-for="n in 3"
         :key="n"
-        class="h-24 border border-default bg-elevated/40 animate-pulse"
+        class="h-24 border-b border-default bg-elevated/40 animate-pulse"
       />
-    </div>
+    </SCard>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center gap-3 border border-default py-8 px-4 text-center"
-    >
-      <p class="text-sm text-muted">
-        {{ t("components.discussion.error") }}
-      </p>
-      <SButton variant="outline" @click="refresh()">
-        {{ t("components.discussion.retry") }}
-      </SButton>
-    </div>
+    <SCard v-else-if="error">
+      <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
+        <p class="text-sm text-muted">
+          {{ t("components.discussion.error") }}
+        </p>
+        <SButton variant="outline" @click="refresh()">
+          {{ t("components.discussion.retry") }}
+        </SButton>
+      </div>
+    </SCard>
 
-    <template v-else>
-      <div v-if="hasComments" class="flex flex-col gap-3">
-        <DiscussionCommentItem
-          v-for="comment in comments"
-          :key="comment.id"
-          :comment="comment"
-          :target-type="targetType"
-          :target-id="targetId"
-          @changed="onChanged"
-        />
+    <SCard v-else flush-bottom>
+      <DiscussionCommentItem
+        v-for="comment in comments"
+        :key="comment.id"
+        :comment="comment"
+        :target-type="targetType"
+        :target-id="targetId"
+        @changed="onChanged"
+      />
 
-        <div v-if="hasMore" class="flex justify-center pt-1">
-          <SButton
-            variant="outline"
-            :loading="loadingMore"
-            :disabled="loadingMore"
-            @click="loadMore"
-          >
-            {{
-              loadingMore
-                ? t("components.discussion.loadingMore")
-                : t("components.discussion.loadMore")
-            }}
-          </SButton>
-        </div>
+      <div v-if="hasMore" class="flex justify-center border-b border-default px-3 py-3">
+        <SButton variant="outline" :loading="loadingMore" :disabled="loadingMore" @click="loadMore">
+          {{
+            loadingMore
+              ? t("components.discussion.loadingMore")
+              : t("components.discussion.loadMore")
+          }}
+        </SButton>
       </div>
 
-      <div class="border border-default p-3">
+      <div class="border-b border-default px-3 py-3">
         <DiscussionCommentComposer
           :target-type="targetType"
           :target-id="targetId"
           @comment-created="onChanged"
         />
       </div>
-    </template>
+    </SCard>
   </section>
 </template>

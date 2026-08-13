@@ -95,7 +95,7 @@ async function onDelete() {
     :class="{ 'comment-highlight': isHighlighted }"
     :aria-label="authorLabel"
   >
-    <div class="border border-default bg-default">
+    <div class="border-b border-default">
       <div class="flex flex-row justify-end px-3 pt-2.5 pb-1">
         <span class="font-medium text-sm text-muted" translate="no">
           {{ authorLabel }}
@@ -208,7 +208,7 @@ async function onDelete() {
     <div class="w-full flex flex-col">
       <div v-if="displayReply && user" class="w-full flex flex-row items-stretch">
         <DiscussionCommentThreadConnector :show-full-connector="true" />
-        <div class="mt-3 min-w-0 flex-1 border border-default p-3">
+        <div class="min-w-0 flex-1 border-b border-default px-3 py-3">
           <DiscussionCommentComposer
             :target-type="targetType"
             :target-id="targetId"
@@ -228,7 +228,7 @@ async function onDelete() {
           :show-full-connector="index !== (comment.replies?.length ?? 0) - 1"
         />
         <DiscussionCommentItem
-          class="mt-3 min-w-0 flex-1"
+          class="min-w-0 flex-1"
           :comment="child"
           :target-type="targetType"
           :target-id="targetId"

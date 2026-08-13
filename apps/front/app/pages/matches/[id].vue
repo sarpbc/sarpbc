@@ -2,6 +2,7 @@
 import type { Match, MatchDetailResponse } from "~/types/matches";
 import { getResultParticipantId } from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
+import { matchCalendarPath } from "~/utils/calendar/ics";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   parseMatchDiscoverySource,
@@ -251,6 +252,12 @@ const leagueName = computed(() => match.value?.tournament?.league?.name ?? null)
 const showScheduledAt = computed(
   () => matchStatus.value === "upcoming" && Boolean(match.value?.beginAt),
 );
+
+const showAddToCalendar = computed(
+  () =>
+    Boolean(match.value?.beginAt) &&
+    (matchStatus.value === "upcoming" || matchStatus.value === "live"),
+);
 </script>
 
 <template>
@@ -382,6 +389,12 @@ const showScheduledAt = computed(
         <span class="tabular-nums">
           {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
         </span>
+      </template>
+      <template v-if="showAddToCalendar">
+        <span aria-hidden="true">·</span>
+        <SLink :to="matchCalendarPath(match.id)" variant="muted" external>
+          {{ t("page.match.detail.addToCalendar") }}
+        </SLink>
       </template>
     </div>
 
