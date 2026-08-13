@@ -26,6 +26,12 @@ const columns: TableColumn<NewsArticle>[] = [
     header: t("page.news.columns.author"),
   },
   {
+    id: "languages",
+    header: t("page.news.columns.languages"),
+    cell: ({ row }) =>
+      row.original.hasFrench ? t("page.news.locale.enFr") : t("page.news.locale.enOnly"),
+  },
+  {
     accessorKey: "createdAt",
     header: t("page.news.columns.createdAt"),
     cell: ({ getValue }) => {

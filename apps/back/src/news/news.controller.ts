@@ -13,6 +13,8 @@ import {
 } from "@nestjs/common";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
+import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dto";
+import { parseNewsLocale } from "./news-locale.util";
 import { NewsService } from "./news.service";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 
@@ -42,8 +44,8 @@ export class NewsController {
   }
 
   @Get()
-  findAll(@Query() { page, limit }: PaginationQueryDto) {
-    return this.newsService.findAllPublishedArticle(page, limit);
+  findAll(@Query() { page, limit, locale }: NewsListQueryDto) {
+    return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -54,8 +56,8 @@ export class NewsController {
   }
 
   @Get(":slug")
-  async findOne(@Param("slug") slug: string) {
-    const article = await this.newsService.findOneBySlug(slug);
+  async findOne(@Param("slug") slug: string, @Query() { locale }: NewsLocaleQueryDto) {
+    const article = await this.newsService.findOneBySlug(slug, parseNewsLocale(locale));
     if (!article || article.isDraft) {
       throw new NotFoundException(`News article with slug "${slug}" not found`);
     }
@@ -66,7 +68,7 @@ export class NewsController {
   @RequirePermissions("news.manage")
   @Get("admin/:slug")
   async findOneAdmin(@Param("slug") slug: string) {
-    return this.newsService.findOneBySlug(slug);
+    return this.newsService.findOneAdminBySlug(slug);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

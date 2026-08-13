@@ -5,9 +5,9 @@ const route = useRoute();
 const slug = computed(() => route.params.slug as string);
 
 const { data: article } = await useAsyncData(
-  () => `news-${slug.value}`,
-  () => getNewsArticle(slug.value),
-  { watch: [slug] },
+  () => `news-${slug.value}-${locale.value}`,
+  () => getNewsArticle(slug.value, locale.value),
+  { watch: [slug, locale] },
 );
 
 if (!article.value) {

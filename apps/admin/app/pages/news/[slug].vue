@@ -2,6 +2,8 @@
 import type { TabsItem } from "@nuxt/ui";
 import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
+type NewsEditorLocale = "en" | "fr";
+
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -19,14 +21,33 @@ const items = computed(() => [
   },
 ]);
 
+const editorLocale = ref<NewsEditorLocale>("en");
 const title = ref(article.value?.title ?? "");
+const titleFr = ref(article.value?.titleFr ?? "");
 const articleSlug = ref(article.value?.slug ?? "");
 const content = ref(article.value?.content ?? "");
+const contentFr = ref(article.value?.contentFr ?? "");
 const imageUrl = ref<string | null>(article.value?.imageUrl ?? null);
 const isDraft = ref(article.value?.isDraft ?? true);
 const isSaving = ref(false);
 const isPublishing = ref(false);
 const isModalOpen = ref(false);
+
+const missingFrench = computed(() => !titleFr.value.trim() || !contentFr.value.trim());
+
+const previewTitle = computed(() => {
+  if (editorLocale.value === "fr" && titleFr.value.trim()) {
+    return titleFr.value;
+  }
+  return title.value;
+});
+
+const previewContent = computed(() => {
+  if (editorLocale.value === "fr" && contentFr.value.trim()) {
+    return contentFr.value;
+  }
+  return content.value;
+});
 
 function openSaveModal() {
   isModalOpen.value = true;
@@ -42,6 +63,8 @@ async function saveArticle() {
     const updated = await editNewsArticle(slug, {
       title: title.value,
       content: content.value,
+      titleFr: titleFr.value.trim() || null,
+      contentFr: contentFr.value.trim() || null,
       slug: articleSlug.value.trim(),
       imageUrl: imageUrl.value,
     });
@@ -139,9 +162,6 @@ const tabItems: TabsItem[] = [
 
         <template #body>
           <div class="flex flex-col gap-4">
-            <UFormField :label="$t('page.news.create.titleField')" required>
-              <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
-            </UFormField>
             <UFormField
               :label="$t('page.news.create.slugField')"
               :hint="$t('page.news.create.slugHint')"
@@ -194,18 +214,35 @@ const tabItems: TabsItem[] = [
       }"
     >
       <template #editor>
-        <DashboardContent class="p-0 px-0 py-4">
-          <NewsArticleEditor v-model="content" />
+        <DashboardContent class="flex min-h-0 flex-1 flex-col gap-3 p-0 px-0 py-4">
+          <NewsLocaleSwitch v-model="editorLocale" :missing-french="missingFrench" />
+          <div v-if="editorLocale === 'en'" class="flex min-h-0 flex-1 flex-col gap-3">
+            <UFormField
+              :label="$t('page.news.locale.titleEn')"
+              required
+              :class="[newsSurfaceClass, 'px-4']"
+            >
+              <UInput v-model="title" class="w-full" />
+            </UFormField>
+            <NewsArticleEditor v-model="content" />
+          </div>
+          <div v-if="editorLocale === 'fr'" class="flex min-h-0 flex-1 flex-col gap-3">
+            <UFormField :label="$t('page.news.locale.titleFr')" :class="[newsSurfaceClass, 'px-4']">
+              <UInput v-model="titleFr" class="w-full" />
+            </UFormField>
+            <NewsArticleEditor v-model="contentFr" />
+          </div>
         </DashboardContent>
       </template>
 
       <template #preview>
-        <DashboardContent class="overflow-y-auto py-4">
+        <DashboardContent class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4">
+          <NewsLocaleSwitch v-model="editorLocale" :missing-french="missingFrench" />
           <div :class="[newsSurfaceClass, 'p-4']">
-            <h1 v-if="title" class="mb-4 text-2xl font-bold">
-              {{ title }}
+            <h1 v-if="previewTitle" class="mb-4 text-2xl font-bold">
+              {{ previewTitle }}
             </h1>
-            <NewsMarkdownPreview v-if="content" :value="content" />
+            <NewsMarkdownPreview v-if="previewContent" :value="previewContent" />
             <p v-else class="text-muted italic">
               {{ $t("page.news.create.preview.empty") }}
             </p>

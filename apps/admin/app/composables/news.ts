@@ -7,6 +7,9 @@ export type NewsArticle = {
   createdAt: string;
   isDraft: boolean;
   imageUrl?: string | null;
+  titleFr?: string | null;
+  contentFr?: string | null;
+  hasFrench?: boolean;
 };
 
 export type PaginatedNewsArticles = {
@@ -21,6 +24,8 @@ export async function createNewsArticle(body: {
   content: string;
   slug?: string;
   imageUrl?: string;
+  titleFr?: string | null;
+  contentFr?: string | null;
 }): Promise<NewsArticle | null> {
   try {
     return await apiFetch<NewsArticle>("/news", {
@@ -63,6 +68,8 @@ export async function editNewsArticle(
     content: string;
     slug?: string;
     imageUrl?: string | null;
+    titleFr?: string | null;
+    contentFr?: string | null;
   },
 ): Promise<NewsArticle | null> {
   try {

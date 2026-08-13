@@ -5,6 +5,7 @@ import { NewsArticle } from "./domain/news-article.entity";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { excerptFromContent } from "./news-content.util";
+import { hasFrenchTranslation, localizedNewsFields, type NewsLocale } from "./news-locale.util";
 import { UserService } from "src/user/user.service";
 import { ReplyService } from "src/reply/reply.service";
 import slugify from "slugify";
@@ -30,6 +31,12 @@ export interface NewsArticleResponse {
   imageUrl: string | null;
 }
 
+interface NewsArticleAdminResponse extends NewsArticleResponse {
+  titleFr: string | null;
+  contentFr: string | null;
+  hasFrench: boolean;
+}
+
 @Injectable()
 export class NewsService {
   constructor(
@@ -39,28 +46,43 @@ export class NewsService {
     private readonly replyService: ReplyService,
   ) {}
 
-  private mapListArticle(article: NewsArticle, commentCount = 0): NewsArticleListItemResponse {
+  private mapListArticle(
+    article: NewsArticle,
+    locale: NewsLocale,
+    commentCount = 0,
+  ): NewsArticleListItemResponse {
+    const { title, content } = localizedNewsFields(article, locale);
     return {
       id: article.id,
-      title: article.title,
+      title,
       slug: article.slug,
       createdAt: article.createdAt,
       imageUrl: article.imageUrl,
-      excerpt: excerptFromContent(article.content),
+      excerpt: excerptFromContent(content),
       commentCount,
     };
   }
 
-  private mapArticle(article: NewsArticle): NewsArticleResponse {
+  private mapArticle(article: NewsArticle, locale: NewsLocale): NewsArticleResponse {
+    const { title, content } = localizedNewsFields(article, locale);
     return {
       id: article.id,
       author: article.author.userName,
-      title: article.title,
+      title,
       slug: article.slug,
-      content: article.content,
+      content,
       createdAt: article.createdAt,
       isDraft: article.isDraft,
       imageUrl: article.imageUrl,
+    };
+  }
+
+  private mapAdminArticle(article: NewsArticle): NewsArticleAdminResponse {
+    return {
+      ...this.mapArticle(article, "en-US"),
+      titleFr: article.titleFr,
+      contentFr: article.contentFr,
+      hasFrench: hasFrenchTranslation(article),
     };
   }
 
@@ -92,7 +114,7 @@ export class NewsService {
     }
   }
 
-  async create(dto: CreateNewsArticleDto, userId: string): Promise<NewsArticleResponse> {
+  async create(dto: CreateNewsArticleDto, userId: string): Promise<NewsArticleAdminResponse> {
     const author = await this.userService.findById(userId);
     if (!author) {
       throw new NotFoundException(`User with id "${userId}" not found`);
@@ -114,6 +136,8 @@ export class NewsService {
     const article = this.newsRepository.create({
       title: dto.title,
       content: dto.content,
+      titleFr: dto.titleFr ?? null,
+      contentFr: dto.contentFr ?? null,
       author,
       slug,
       isDraft: true,
@@ -121,12 +145,13 @@ export class NewsService {
       createdAt: new Date(),
     });
     await this.newsRepository.getEntityManager().persist(article).flush();
-    return this.mapArticle(article);
+    return this.mapAdminArticle(article);
   }
 
   async findAllPublishedArticle(
     page: number,
     limit: number,
+    locale: NewsLocale = "en-US",
   ): Promise<{
     data: NewsArticleListItemResponse[];
     total: number;
@@ -144,7 +169,7 @@ export class NewsService {
     );
     return {
       data: articles.map((article) =>
-        this.mapListArticle(article, commentCounts.get(article.id) ?? 0),
+        this.mapListArticle(article, locale, commentCounts.get(article.id) ?? 0),
       ),
       total,
       page,
@@ -156,7 +181,7 @@ export class NewsService {
     page: number,
     limit: number,
   ): Promise<{
-    data: NewsArticleResponse[];
+    data: NewsArticleAdminResponse[];
     total: number;
     page: number;
     limit: number;
@@ -167,19 +192,27 @@ export class NewsService {
       { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset },
     );
     return {
-      data: articles.map((a) => this.mapArticle(a)),
+      data: articles.map((a) => this.mapAdminArticle(a)),
       total,
       page,
       limit,
     };
   }
 
-  async findOneBySlug(slug: string): Promise<NewsArticleResponse> {
+  async findOneBySlug(slug: string, locale: NewsLocale = "en-US"): Promise<NewsArticleResponse> {
     const article = await this.newsRepository.findOne({ slug }, { populate: ["author"] });
     if (!article) {
       throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
     }
-    return this.mapArticle(article);
+    return this.mapArticle(article, locale);
+  }
+
+  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdminResponse> {
+    const article = await this.newsRepository.findOne({ slug }, { populate: ["author"] });
+    if (!article) {
+      throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
+    }
+    return this.mapAdminArticle(article);
   }
 
   async findArticleIdBySlug(slug: string): Promise<string> {
@@ -190,7 +223,7 @@ export class NewsService {
     return article.id;
   }
 
-  async update(slug: string, dto: UpdateNewsArticleDto): Promise<NewsArticleResponse> {
+  async update(slug: string, dto: UpdateNewsArticleDto): Promise<NewsArticleAdminResponse> {
     const article = await this.newsRepository.findOne({ slug }, { populate: ["author"] });
     if (!article) {
       throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
@@ -200,6 +233,12 @@ export class NewsService {
     }
     if (dto.content !== undefined) {
       article.content = dto.content;
+    }
+    if (dto.titleFr !== undefined) {
+      article.titleFr = dto.titleFr;
+    }
+    if (dto.contentFr !== undefined) {
+      article.contentFr = dto.contentFr;
     }
     if (dto.imageUrl !== undefined) {
       article.imageUrl = dto.imageUrl ?? null;
@@ -217,7 +256,7 @@ export class NewsService {
       }
     }
     await this.newsRepository.getEntityManager().flush();
-    return this.mapArticle(article);
+    return this.mapAdminArticle(article);
   }
 
   async setDraftStatus(slug: string, isDraft: boolean) {

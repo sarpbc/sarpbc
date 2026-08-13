@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
+import { emptyToNull } from "../news-locale.util";
 
 export class CreateNewsArticleDto {
   @IsString()
@@ -10,6 +11,19 @@ export class CreateNewsArticleDto {
   @IsString()
   @IsNotEmpty()
   content!: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value != null)
+  @IsString()
+  @MaxLength(255)
+  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
+  titleFr?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value != null)
+  @IsString()
+  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
+  contentFr?: string | null;
 
   @IsOptional()
   @IsUrl({}, { message: "Enter a valid cover image URL." })

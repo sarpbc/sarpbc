@@ -32,11 +32,11 @@ Client configuration examples live in the root [README.md](../../README.md#mcp-s
 
 **Write** (requires `news.manage`):
 
-| Tool                | Parameters                                                                      | Notes                                                                                                                                                                                                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `create_news_draft` | `title` (required), `content` (required), `imageUrl?` (URL), `slug?` (optional) | Write **English** title and body. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the title when omitted. |
+| Tool                | Parameters                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_news_draft` | `title` (required), `content` (required), `titleFr?`, `contentFr?`, `imageUrl?` (URL), `slug?` | Write **English** title and body. Optionally add **French** `titleFr` / `contentFr` on the same article. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the English title when omitted. |
 
-News articles are **single-locale** (one `title` + `content` per article). The MCP tool drafts in **English**. A French version is optional and only when a staff editor asks for it.
+News articles share **one slug**. English `title` + `content` are required. French `titleFr` + `contentFr` are optional on the same draft; `/fr` readers see French when both French fields are filled, otherwise English.
 
 ---
 
@@ -50,7 +50,7 @@ flowchart LR
   C -->|No / partial| E[Label as rumor]
   E --> D
   D --> F[Draft en + fr content]
-  F --> G[create_news_draft × 2]
+  F --> G[create_news_draft]
   G --> H[Human review in admin]
   H --> I[Publish]
 ```
@@ -172,13 +172,7 @@ Syntax: `:player{slug="<slug>" label="<display name>"}` or `:team{slug="<slug>" 
 
 ### Bilingual delivery
 
-Because `create_news_draft` accepts one `title` and one `content` per call:
-
-1. Write **full English** article → `create_news_draft` with English `title` and `slug` (e.g. `zen-joins-karmine-corp`).
-2. Write **full French** article (adapted, not machine-literal) → second `create_news_draft` with French `title` and `slug` (e.g. `zen-rejoint-karmine-corp`).
-3. Add a short **translation note** at the bottom of each article linking to the other slug once both drafts exist.
-
-Staff publish both when ready so en/fr readers each get a native article.
+Call `create_news_draft` **once** with English `title` / `content` and French `titleFr` / `contentFr`. Same slug. Do not create a second article. Adapt French naturally — not a machine-literal translation. Public `/news/<slug>` and `/fr/news/<slug>` share that slug; `/fr` uses French when both French fields are set.
 
 ### Copy-paste prompt template
 
@@ -216,33 +210,24 @@ Paste JSON from get_player / get_team here for accuracy.
    - Same entity tags (slugs are locale-neutral).
    - Source line in French.
 
-3. Call create_news_draft twice via SARPBC MCP:
-   - English: title = English headline, content = English body, slug = {{en-slug}}
-   - French: title = French headline, content = French body, slug = {{fr-slug}}
+3. Call create_news_draft once via SARPBC MCP:
+   - title / content = English headline and body
+   - titleFr / contentFr = French headline and body
+   - slug = {{en-slug}} (shared; /fr uses the same URL)
    - imageUrl only if you have a rights-safe cover image URL (team logo CDN, official press kit). Omit otherwise.
 
-4. Return both adminEditUrl values and a 3-bullet summary for the editor.
+4. Return the adminEditUrl and a 3-bullet summary for the editor.
 ```
 
-### Example `create_news_draft` calls
-
-English:
+### Example `create_news_draft` call
 
 ```json
 {
   "title": "Zen joins Karmine Corp",
   "slug": "zen-joins-karmine-corp",
-  "content": "French Rocket League star :player{slug=\"zen-rl\" label=\"Zen\"} has joined :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, the organization announced Tuesday.\n\nZen previously played for …\n\n> We are thrilled to welcome Zen to KC.\n>\n> — Karmine Corp\n\nKarmine Corp [announced the signing](https://example.com/post) on March 6, 2026.\n\n_French version: [Zen rejoint Karmine Corp](/news/zen-rejoint-karmine-corp)._"
-}
-```
-
-French:
-
-```json
-{
-  "title": "Zen rejoint Karmine Corp",
-  "slug": "zen-rejoint-karmine-corp",
-  "content": "Le joueur français :player{slug=\"zen-rl\" label=\"Zen\"} a rejoint :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, selon l'annonce publiée par l'organisation mardi.\n\n…\n\nKarmine Corp a [confirmé le transfert](https://example.com/post) le 6 mars 2026.\n\n_Version anglaise : [Zen joins Karmine Corp](/news/zen-joins-karmine-corp)._"
+  "titleFr": "Zen rejoint Karmine Corp",
+  "content": "French Rocket League star :player{slug=\"zen-rl\" label=\"Zen\"} has joined :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, the organization announced Tuesday.\n\nZen previously played for …\n\n> We are thrilled to welcome Zen to KC.\n>\n> — Karmine Corp\n\nKarmine Corp [announced the signing](https://example.com/post) on March 6, 2026.",
+  "contentFr": "Le joueur français :player{slug=\"zen-rl\" label=\"Zen\"} a rejoint :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, selon l'annonce publiée par l'organisation mardi.\n\n…\n\nKarmine Corp a [confirmé le transfert](https://example.com/post) le 6 mars 2026."
 }
 ```
 
@@ -271,8 +256,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 
 ### Bilingual
 
-- [ ] English and French drafts both exist with paired slugs
-- [ ] Cross-links between locales work
+- [ ] English and French title/body are both filled on the same article
 - [ ] French reads naturally — not obvious machine translation
 
 ### Presentation
@@ -283,7 +267,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 
 ### Publish
 
-- [ ] Publish **both** locales when the story is ready
+- [ ] Publish when the story is ready (one article serves both locales)
 - [ ] Spot-check public URLs: `https://sarpbc.org/news/<slug>` and `/fr/news/<slug>`
 
 ---

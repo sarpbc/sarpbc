@@ -243,7 +243,17 @@
       "columns": {
         "title": "Title",
         "author": "Author",
-        "createdAt": "Created At"
+        "createdAt": "Created At",
+        "languages": "Languages"
+      },
+      "locale": {
+        "en": "English",
+        "fr": "Français",
+        "enOnly": "EN",
+        "enFr": "EN · FR",
+        "titleEn": "English Title",
+        "titleFr": "French Title",
+        "fallbackHint": "French readers see English until both the French title and body are filled."
       },
       "create": {
         "title": "New Article",
