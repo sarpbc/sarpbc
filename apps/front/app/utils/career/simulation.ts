@@ -13,6 +13,7 @@ import {
   REGIONALS_PER_SPLIT,
   SPLITS_PER_SEASON,
   USER_ROSTER_ID,
+  WORLDS_QUALIFICATION_POINTS,
   getSeasonsPastPeak,
 } from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
@@ -144,7 +145,8 @@ function expectedNpcFullSeasonPoints(baseStrength: number, seed: number): number
   const rng = createRng(seed);
   const t = Math.max(0, Math.min(1, (baseStrength - 55) / 40));
   const expected = 22 + t ** 1.15 * 72;
-  return Math.max(8, Math.round(expected + (rng() - 0.5) * 10));
+  const form = 0.7 + rng() * 0.45;
+  return Math.max(6, Math.round(expected * form));
 }
 
 /** Simulated circuit points for an NPC team for one season, truncated to how far the player has played. */
@@ -161,7 +163,10 @@ export function simulateNpcCircuitPoints(
     hashString(`${careerId}:${season}:${teamId}:circuit`),
   );
   if (completedSplits <= 0 && !worldsDone) return 0;
-  if (completedSplits === 1 && !worldsDone) return Math.round(full * 0.45);
+  if (completedSplits === 1 && !worldsDone) {
+    const pace = 0.28 + createRng(hashString(`${careerId}:${season}:${teamId}:pace`))() * 0.42;
+    return Math.round(full * pace);
+  }
   if (completedSplits >= 2 && !worldsDone) return Math.round(full * 0.82);
   return full;
 }
@@ -178,7 +183,9 @@ export interface RankedTeam {
   roster: RankedRosterPlayer[];
   /** Average of the current 3 roster ratings. */
   strength: number;
+  /** Last completed season's circuit points — the world-ranking seed. */
   rating: number;
+  /** Circuit points earned this season. */
   points: number;
   rank: number;
   isPlayerTeam: boolean;
@@ -210,6 +217,12 @@ export interface PlayerCircuitInput {
   previousPoints: number | null;
 }
 
+function isCurrentSeasonComplete(player: PlayerCircuitInput): boolean {
+  if (player.worlds !== null) return true;
+  if (player.splits.length < SPLITS_PER_SEASON) return false;
+  return computeSeasonPoints(player.splits) < WORLDS_QUALIFICATION_POINTS;
+}
+
 function rosterPlayerFromId(
   playerId: string,
   world: CareerWorldState,
@@ -234,14 +247,13 @@ export function computeWorldRankings(
 ): WorldRankings {
   const completedSplits = player.splits.length;
   const worldsDone = player.worlds !== null;
-  const usePreviousStandings = completedSplits === 0 && !worldsDone;
-  const rankingSeason = usePreviousStandings ? Math.max(0, player.season - 1) : player.season;
-  const npcSplits = usePreviousStandings ? SPLITS_PER_SEASON : completedSplits;
-  const npcWorlds = usePreviousStandings ? true : worldsDone;
+  const seasonComplete = isCurrentSeasonComplete(player);
+  const rankingSeason = seasonComplete ? player.season : Math.max(0, player.season - 1);
+  const npcSplitsForRank = seasonComplete ? completedSplits : SPLITS_PER_SEASON;
+  const npcWorldsForRank = seasonComplete ? worldsDone : true;
 
-  const playerPoints = usePreviousStandings
-    ? (player.previousPoints ?? 0)
-    : computeCircuitPoints(player.splits, player.worlds);
+  const yearPlayerPoints = computeCircuitPoints(player.splits, player.worlds);
+  const rankingPlayerPoints = seasonComplete ? yearPlayerPoints : (player.previousPoints ?? 0);
 
   const teams: RankedTeam[] = WORLD_TEAMS.map((team) => {
     const isPlayerTeam = team.id === player.teamId;
@@ -249,11 +261,28 @@ export function computeWorldRankings(
     const roster = rosterIds.map((id) => rosterPlayerFromId(id, world, player));
     const strength =
       roster.length > 0 ? getRosterStrength(rosterIds, world, player.rating) : team.baseStrength;
+    const rankingPoints = isPlayerTeam
+      ? rankingPlayerPoints
+      : simulateNpcCircuitPoints(
+          careerId,
+          rankingSeason,
+          team.id,
+          strength,
+          npcSplitsForRank,
+          npcWorldsForRank,
+        );
     const points = isPlayerTeam
-      ? playerPoints
-      : simulateNpcCircuitPoints(careerId, rankingSeason, team.id, strength, npcSplits, npcWorlds);
-    return { team, roster, strength, rating: points, points, rank: 0, isPlayerTeam };
-  }).sort((a, b) => b.points - a.points || b.strength - a.strength);
+      ? yearPlayerPoints
+      : simulateNpcCircuitPoints(
+          careerId,
+          player.season,
+          team.id,
+          strength,
+          completedSplits,
+          worldsDone,
+        );
+    return { team, roster, strength, rating: rankingPoints, points, rank: 0, isPlayerTeam };
+  }).sort((a, b) => b.rating - a.rating || b.strength - a.strength);
   teams.forEach((entry, index) => {
     entry.rank = index + 1;
   });
@@ -358,7 +387,7 @@ export function pickOffseasonOffers(
 
 function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): string {
   const others = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
-  const weakest = [...others].sort((a, b) => a.points - b.points)[0];
+  const weakest = [...others].sort((a, b) => b.rank - a.rank)[0];
   return weakest!.team.id;
 }
 

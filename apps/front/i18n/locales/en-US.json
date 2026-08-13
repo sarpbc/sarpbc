@@ -269,7 +269,7 @@
         "playerNotFound": "Player Not Found",
         "submitFailed": "Could not submit your guess. Check your connection and try again.",
         "seo": {
-          "title": "Air Riddle - Guess the Rocket League Player",
+          "title": "Air Riddle: Guess the Rocket League Player",
           "description": "Participate in Air Riddle and guess the Rocket League player in 6 tries. Test your knowledge of RL players and improve your daily score!"
         }
       },
@@ -323,7 +323,7 @@
         "title": "RL Career",
         "subtitle": "Debut at 16. Peak for five seasons, then the league starts pushing you out.",
         "seo": {
-          "title": "RL Career — Text-Based Rocket League Career Simulator",
+          "title": "RL Career: Text-Based Rocket League Career Simulator",
           "description": "Build a Rocket League esports career from age 16: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
         },
         "menu": {
@@ -335,11 +335,11 @@
         },
         "onboarding": {
           "introTitle": "Start Your Career",
-          "introBody": "Create a fictional pro journey. You debut at 16. Peak for five seasons — after that, rating drops and contracts get harder to keep.",
+          "introBody": "Create a fictional pro journey. You debut at 16. Peak for five seasons. After that, rating drops and contracts get harder to keep.",
           "playerNameLabel": "Player Name",
           "playerNamePlaceholder": "Your gamertag",
           "regionTitle": "Choose Your Region",
-          "regionBody": "The circuit you compete on — your first team plays here.",
+          "regionBody": "The circuit you compete on. Your first team plays here.",
           "countryTitle": "Choose Your Country",
           "countryBody": "The flag next to your gamertag on broadcast.",
           "roleTitle": "Choose Your Playstyle",
@@ -412,7 +412,7 @@
             },
             "oneVOne": {
               "label": "1v1 Player",
-              "description": "Ranked duelist — mechanics and reads forged in 1s. Rating 70 · Form 68 · Morale 55"
+              "description": "Ranked duelist: mechanics and reads forged in 1s. Rating 70 · Form 68 · Morale 55"
             },
             "freestyler": {
               "label": "Freestyler",
@@ -429,17 +429,17 @@
         "season": {
           "introTitle": "Season {season} · Age {age}",
           "recapTitle": "Season {season}",
-          "introBody": "You suit up for {team} — currently world No. {rank}.",
+          "introBody": "You suit up for {team}, currently world No. {rank}.",
           "structure": "Two majors this season, each fed by three regionals. Earn {points} points or more and you qualify for Worlds.",
           "declineHint": "Past your peak: rating and form are slipping, and teams are less eager to renew.",
           "begin": "Begin Season"
         },
         "event": {
-          "splitDecision": "Split {split} — decision before the major run",
-          "worldsDecision": "Worlds — one final decision",
+          "splitDecision": "Split {split}: decision before the major run",
+          "worldsDecision": "Worlds: one final decision",
           "outcomeLabel": "Decision result",
           "continue": "Continue",
-          "destinyLean": "Leans {path}"
+          "destinyLean": "This choice leans toward {path}."
         },
         "results": {
           "splitTitle": "Split {split} Results",
@@ -449,7 +449,7 @@
           "majorNotQualified": "Not qualified",
           "seasonPoints": "Season points: {points}",
           "points": "{points} pts",
-          "worldsQualified": "Qualified for Worlds — one last call to make.",
+          "worldsQualified": "Qualified for Worlds. One last call to make.",
           "worldsMissed": "Not enough points for Worlds this season.",
           "worldsPlacementLabel": "Worlds",
           "worldsNotQualifiedShort": "Not qualified",
@@ -468,11 +468,11 @@
           "you": "You",
           "yourTeam": "Your team",
           "circuitPoints": "Circuit points this season",
+          "teamWorldRanking": "Team World Ranking",
           "playerRating": "Current player rating",
           "alsoOnRoster": "Also on this roster"
         },
         "offseason": {
-          "title": "Offseason Offers",
           "body": "No transfer interest this window. | {count} team wants to sign you. | {count} teams want to sign you.",
           "renewalTitle": "Contract Renewal",
           "unsignedTitle": "No Contract",
@@ -481,38 +481,33 @@
           "unsignedBody": "No club will sign you for next season.",
           "unsignedHint": "The window is closed. Retire, or this is the end of the line.",
           "lastChanceBody": "{team} is the only club still willing to take a chance.",
-          "lastChanceTeam": "Last chance",
           "noOffer": "No transfer interest",
-          "offerTeam": "Offers",
+          "currentTeam": "Current Team",
           "worldRank": "World No. {rank}",
           "accept": "Accept Offer",
           "continue": "Continue",
           "retire": "Retire",
           "prompt": {
-            "title": "What's Next?",
-            "body": "The org asks where your head is. The answer sticks with you.",
-            "quit": "Mute Discord. I need a life off the game.",
-            "streamer": "I want a real content schedule next year.",
-            "coach": "I'd rather help the next roster than keep grinding."
+            "title": "Stay or Retire",
+            "body": "Past your peak, the org wants a straight answer.",
+            "quit": "I'm stepping away. I need a life off the game.",
+            "streamer": "I'm hanging up the controller. Time for a real content schedule.",
+            "coach": "Keep me on the roster. I'm not done competing.",
+            "endsCareer": "Ends your career",
+            "playOn": "Play another season"
           }
         },
         "destiny": {
-          "title": "After the Pro Scene",
-          "body": "The circuit is done. Pick what comes next — your choices this career already lean one way.",
-          "recommended": "Suggested",
           "quit": {
-            "label": "Walk Away",
-            "description": "Quit ranked, quit Discord, quit the scene. Games and social stay off.",
+            "leanToward": "walking away from the scene",
             "endLine": "Walked away from games and the scene"
           },
           "streamer": {
-            "label": "Go Full-Time Streamer",
-            "description": "Turn the audience into the job: ranked, analysis, and late-night queues on stream.",
+            "leanToward": "streaming",
             "endLine": "Went full-time as a streamer"
           },
           "coach": {
-            "label": "Become a Coach",
-            "description": "Stay in the building — VODs, timeouts, and the next roster that needs a voice.",
+            "leanToward": "coaching",
             "endLine": "Moved into coaching"
           }
         },
@@ -526,7 +521,21 @@
             "major": "Major title",
             "worlds": "World Championship"
           },
-          "noTrophies": "No trophies — but the journey still counts.",
+          "noTrophies": "No trophies, but the journey still counts.",
+          "nicknames": {
+            "goat": "GOAT",
+            "closer": "The Closer",
+            "iceBlood": "The Ice Blood",
+            "airSurgeon": "The Air Surgeon",
+            "majorHunter": "The Major Machine",
+            "surfaceFox": "The Surface Fox",
+            "theWall": "The Wall",
+            "resetGhost": "The Reset Ghost",
+            "theMic": "The Mic",
+            "sideline": "The Sideline",
+            "walkedOff": "The Civilian",
+            "lanTourist": "LAN Tourist"
+          },
           "seasonRecap": "Season Recap",
           "share": "Copy Share Link",
           "shareCopied": "Link copied",
@@ -570,7 +579,7 @@
                 "outcome": "You own the double commits and drill rotations. Rating climbs; the callout still stings."
               },
               "b": {
-                "label": "Defend your reads — the pass was on",
+                "label": "Defend your reads: the pass was on",
                 "outcome": "You defend the read. The room stays tense, but you walk out with your head up."
               },
               "c": {
@@ -593,16 +602,16 @@
               },
               "c": {
                 "label": "Take real rest days and recharge",
-                "outcome": "Real rest days refill the tank. You show up fresh — and a little less hungry."
+                "outcome": "Real rest days refill the tank. You show up fresh, and a little less hungry."
               }
             }
           },
           "split-04": {
             "title": "A Sponsor Wants You Streaming",
-            "description": "An energy-drink brand offers a deal: four stream nights a week, great money, great for the fans — and it eats straight into training hours.",
+            "description": "An energy-drink brand offers a deal: four stream nights a week, great money, great for the fans, and it eats straight into training hours.",
             "choices": {
               "a": {
-                "label": "Sign it — the community and the paycheck matter",
+                "label": "Sign it: the community and the paycheck matter",
                 "outcome": "Four stream nights a week. The brand loves you; training hours vanish."
               },
               "b": {
@@ -644,7 +653,7 @@
             "description": "The coach wants you playing second man instead of your natural first-man style. The data says it wins games; your gut disagrees.",
             "choices": {
               "a": {
-                "label": "Full buy-in — run the new rotation all split",
+                "label": "Full buy-in: run the new rotation all split",
                 "outcome": "Full buy-in on second man. The system clicks; your instincts fight it."
               },
               "b": {
@@ -652,7 +661,7 @@
                 "outcome": "Halfway: new rotations in scrims, your game on stage. Balanced, a little messy."
               },
               "c": {
-                "label": "Refuse — you got here playing your way",
+                "label": "Refuse: you got here playing your way",
                 "outcome": "You refuse the change. Morale holds. The coach files it away."
               }
             }
@@ -676,7 +685,7 @@
             "description": "A famous freestyler invites you to a clips session that would pull huge views. Your coach wants you drilling shadow defense instead.",
             "choices": {
               "a": {
-                "label": "Film the clips — let your name grow",
+                "label": "Film the clips: let your name grow",
                 "outcome": "The clips session blows up. Your name grows; shadow defense does not."
               },
               "b": {
@@ -687,7 +696,7 @@
           },
           "split-10": {
             "title": "Bootcamp Abroad",
-            "description": "The org offers a three-week bootcamp in another region: elite scrims, zero distractions — and zero home comfort.",
+            "description": "The org offers a three-week bootcamp in another region: elite scrims, zero distractions, and zero home comfort.",
             "choices": {
               "a": {
                 "label": "Pack your bags and grind",
@@ -708,7 +717,7 @@
                 "outcome": "You rework challenges off the data. Reads improve; the discomfort shows."
               },
               "b": {
-                "label": "Trust your instincts — stats don't see everything",
+                "label": "Trust your instincts: stats don't see everything",
                 "outcome": "You trust your instincts. Form ticks up. The analyst shrugs."
               }
             }
@@ -733,7 +742,7 @@
           },
           "split-13": {
             "title": "Add Demos to Your Game?",
-            "description": "The coach suggests aggressive demos and bumps on kickoff follow-ups. It wins boost fights but invites chaos — and makes enemies.",
+            "description": "The coach suggests aggressive demos and bumps on kickoff follow-ups. It wins boost fights but invites chaos, and makes enemies.",
             "choices": {
               "a": {
                 "label": "Go full bump mode",
@@ -764,7 +773,7 @@
             "description": "You're invited to a charity showmatch with community legends the weekend before a regional. Great vibes, zero prep value.",
             "choices": {
               "a": {
-                "label": "Play it — the community gave you everything",
+                "label": "Play it: the community gave you everything",
                 "outcome": "You play the charity showmatch. The community loves it; prep time is gone."
               },
               "b": {
@@ -782,8 +791,8 @@
                 "outcome": "You lab the patch until the new pads are automatic. Rating up, extra hours in."
               },
               "b": {
-                "label": "Adapt on the fly — feel over theory",
-                "outcome": "You adapt on the fly. Feel over theory — form holds."
+                "label": "Adapt on the fly: feel over theory",
+                "outcome": "You adapt on the fly. Feel over theory. Form holds."
               }
             }
           },
@@ -796,7 +805,7 @@
                 "outcome": "Frame-by-frame prep on the group of death. You know them; you're also fried."
               },
               "b": {
-                "label": "Focus on your own game — let them adapt to you",
+                "label": "Focus on your own game: let them adapt to you",
                 "outcome": "You focus on your own game. Confidence up, scouting thinner."
               }
             }
@@ -835,7 +844,7 @@
             "choices": {
               "a": {
                 "label": "Rework your kickoff plays overnight",
-                "outcome": "Overnight kickoff rework. They scouted the old you — not this."
+                "outcome": "Overnight kickoff rework. They scouted the old you, not this."
               },
               "b": {
                 "label": "Take it as a compliment and double down on your style",
@@ -848,7 +857,7 @@
             "description": "Interviews, photoshoots, broadcast content. It's a full day off the sticks right before the bracket.",
             "choices": {
               "a": {
-                "label": "Give the full press run — the fans love it",
+                "label": "Give the full press run: the fans love it",
                 "outcome": "Full press run. Fans and clips everywhere; the sticks wait."
               },
               "b": {
@@ -863,7 +872,7 @@
             "choices": {
               "a": {
                 "label": "Run the fakes",
-                "outcome": "Fake kickoffs vs the favorites. High risk, and they bite — or they don't."
+                "outcome": "Fake kickoffs vs the favorites. High risk, and they bite or they don't."
               },
               "b": {
                 "label": "Stick to standard speedflips",
@@ -880,7 +889,7 @@
                 "outcome": "You go quiet. The tank refills a little. The scene feels farther away."
               },
               "b": {
-                "label": "Turn the slump into content — ranked on stream",
+                "label": "Turn the slump into content: ranked on stream",
                 "outcome": "The audience shows up. Training time shrinks. The brand of you grows."
               },
               "c": {
@@ -920,7 +929,7 @@
                 "outcome": "VOD review as content. The series hits. Your own ranked time does not."
               },
               "c": {
-                "label": "Pass — you need the hours for yourself, or for nothing",
+                "label": "Pass: you need the hours for yourself, or for nothing",
                 "outcome": "You protect the calendar. The DMs go unanswered. The spark stays dim."
               }
             }

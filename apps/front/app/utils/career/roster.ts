@@ -1,9 +1,11 @@
-import type { CareerRegion, CareerRoster, CareerWorldState } from "~/types/career";
+import type { CareerRegion, CareerRoster, CareerStage, CareerWorldState } from "~/types/career";
 import { ROSTER_SIZE, USER_ROSTER_ID } from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
 import { WORLD_TEAMS, getWorldTeamById } from "~/data/career/world";
 import { createRng, hashString } from "~/utils/career/rng";
-import { clampStat } from "~/utils/career/stats";
+import { applyStatChange, clampStat } from "~/utils/career/stats";
+
+export type NpcRatingTick = CareerStage | "season";
 
 const DISPLACE_CLOSE_MARGIN = 3;
 
@@ -90,6 +92,50 @@ export function getRosterStrength(
     0,
   );
   return sum / roster.length;
+}
+
+function npcWalkSpan(tick: NpcRatingTick): number {
+  switch (tick) {
+    case "split1":
+    case "split2":
+    case "worlds":
+      return 1;
+    case "season":
+      return 2;
+    default: {
+      const _exhaustive: never = tick;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Rising / stable / declining lane, hashed from id so stars fade and prospects climb. */
+function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): number {
+  if (tick !== "season") return 0;
+  const lane = hashString(`${playerId}:career-lane`) % 3;
+  if (lane === 0) return season <= 5 ? 1 : 0;
+  if (lane === 1) return 0;
+  return season >= 4 ? -1 : 0;
+}
+
+/**
+ * Drift every NPC rating one tick. Seeded from career id + season + tick so
+ * Best Players reshuffles without a heavy sim. Does not touch the user slot.
+ */
+export function tickNpcRatings(
+  world: CareerWorldState,
+  careerId: string,
+  season: number,
+  tick: NpcRatingTick,
+): CareerWorldState {
+  const next = cloneWorld(world);
+  const span = npcWalkSpan(tick);
+  for (const player of Object.values(next.players)) {
+    const rng = createRng(hashString(`${careerId}:${season}:${tick}:${player.id}:npc-rating`));
+    const walk = Math.floor(rng() * (span * 2 + 1)) - span;
+    player.rating = applyStatChange(player.rating, walk + npcCareerBias(player.id, season, tick));
+  }
+  return next;
 }
 
 export function createCareerWorld(careerId: string): CareerWorldState {

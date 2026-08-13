@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CAREER_PLACEMENTS, REGIONALS_PER_SPLIT, USER_ROSTER_ID } from "~/types/career";
+import { CAREER_PLACEMENTS, MAX_STAT, REGIONALS_PER_SPLIT, USER_ROSTER_ID } from "~/types/career";
 import {
   MAJOR_POINTS,
   REGIONAL_POINTS,
@@ -14,7 +14,12 @@ import {
   simulateSplit,
   simulateWorlds,
 } from "~/utils/career/simulation";
-import { createCareerWorld, getRosterStrength, moveUserToTeam } from "~/utils/career/roster";
+import {
+  createCareerWorld,
+  getRosterStrength,
+  moveUserToTeam,
+  tickNpcRatings,
+} from "~/utils/career/roster";
 import { WORLD_TEAMS, getWorldTeamById } from "~/data/career/world";
 import { getAgeDecline } from "~/utils/career/stats";
 
@@ -110,6 +115,43 @@ describe("career simulation", () => {
     const user = rankings.players.find((player) => player.isUser);
     expect(user?.teamId).toBe(userTeam?.team.id);
     expect(user?.teamName).toBe(userTeam?.team.name);
+  });
+
+  it("shows zero year points before the season starts", () => {
+    const rankings = rankingsWith({ previousPoints: 20 });
+    expect(rankings.teams.every((entry) => entry.points === 0)).toBe(true);
+    const userTeam = rankings.teams.find((entry) => entry.isPlayerTeam);
+    expect(userTeam?.rank).toBeGreaterThan(1);
+  });
+
+  it("keeps last-year world rank while this season's points can trail", () => {
+    const rankings = rankingsWith({
+      previousPoints: 96,
+      splits: [strongSplits[0]!],
+    });
+    const playerTeam = rankings.teams.find((entry) => entry.isPlayerTeam);
+    expect(playerTeam?.points).toBe(38);
+    expect(playerTeam?.rank).toBeLessThanOrEqual(3);
+    const byRankIds = rankings.teams.map((entry) => entry.team.id);
+    const byYearPointsIds = [...rankings.teams]
+      .sort((a, b) => b.points - a.points || a.rank - b.rank)
+      .map((entry) => entry.team.id);
+    expect(byRankIds).not.toEqual(byYearPointsIds);
+    expect(
+      rankings.teams.some(
+        (entry) =>
+          playerTeam !== undefined &&
+          entry.rank > playerTeam.rank &&
+          entry.points > playerTeam.points,
+      ),
+    ).toBe(true);
+  });
+
+  it("awards year points once a split is complete", () => {
+    const rankings = rankingsWith({ splits: [strongSplits[0]!] });
+    expect(rankings.teams.some((entry) => entry.points > 0)).toBe(true);
+    const playerTeam = rankings.teams.find((entry) => entry.isPlayerTeam);
+    expect(playerTeam?.points).toBe(38);
   });
 
   it("starts rookies on the weakest team of their region", () => {
@@ -282,5 +324,81 @@ describe("career rosters", () => {
       (entry) => entry.team.id === "warpfield",
     )?.strength;
     expect(strengthAfter).toBeGreaterThan(strengthBefore ?? 0);
+  });
+});
+
+describe("npc rating drift", () => {
+  function npcRatings(world: ReturnType<typeof createCareerWorld>): Record<string, number> {
+    const ratings: Record<string, number> = {};
+    for (const [id, player] of Object.entries(world.players)) {
+      ratings[id] = player.rating;
+    }
+    return ratings;
+  }
+
+  function npcRankOrder(world: ReturnType<typeof createCareerWorld>): string[] {
+    return computeWorldRankings(
+      "c-drift",
+      {
+        name: "Tester",
+        teamId: null,
+        rating: 70,
+        region: "eu",
+        season: 1,
+        splits: [],
+        worlds: null,
+        previousPoints: 0,
+      },
+      world,
+    )
+      .players.filter((player) => !player.isUser)
+      .map((player) => `${player.name}:${player.teamId}`);
+  }
+
+  it("changes NPC ratings between seasons and is deterministic", () => {
+    const world = createCareerWorld("c-drift");
+    const before = npcRatings(world);
+    const season2 = tickNpcRatings(world, "c-drift", 2, "season");
+    const season2Again = tickNpcRatings(world, "c-drift", 2, "season");
+    const season3 = tickNpcRatings(world, "c-drift", 3, "season");
+
+    expect(npcRatings(season2)).not.toEqual(before);
+    expect(npcRatings(season2)).toEqual(npcRatings(season2Again));
+    expect(npcRatings(season3)).not.toEqual(npcRatings(season2));
+    expect(npcRatings(world)).toEqual(before);
+  });
+
+  it("reshuffles Best Players after season ticks", () => {
+    const world = createCareerWorld("c-drift");
+    const orderBefore = npcRankOrder(world);
+    let next = world;
+    for (let season = 2; season <= 5; season++) {
+      next = tickNpcRatings(next, "c-drift", season, "season");
+    }
+    expect(npcRankOrder(next)).not.toEqual(orderBefore);
+  });
+
+  it("drifts ratings after a split tick so mid-season ranks can move", () => {
+    const world = createCareerWorld("c-drift");
+    const afterSplit = tickNpcRatings(world, "c-drift", 1, "split1");
+    expect(npcRatings(afterSplit)).not.toEqual(npcRatings(world));
+  });
+
+  it("never lets NPC ratings reach 100", () => {
+    let world = createCareerWorld("c-drift");
+    for (const player of Object.values(world.players)) {
+      expect(player.rating).toBeLessThanOrEqual(MAX_STAT);
+    }
+    for (let season = 1; season <= 12; season++) {
+      world = tickNpcRatings(world, "c-drift", season, "split1");
+      world = tickNpcRatings(world, "c-drift", season, "split2");
+      world = tickNpcRatings(world, "c-drift", season, "worlds");
+      world = tickNpcRatings(world, "c-drift", season, "season");
+    }
+    for (const player of Object.values(world.players)) {
+      expect(player.rating).toBeGreaterThanOrEqual(0);
+      expect(player.rating).toBeLessThanOrEqual(MAX_STAT);
+      expect(player.rating).toBeLessThan(100);
+    }
   });
 });

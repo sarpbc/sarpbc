@@ -269,7 +269,7 @@
         "playerNotFound": "Joueur introuvable",
         "submitFailed": "Impossible d'envoyer votre proposition. Vérifiez votre connexion et réessayez.",
         "seo": {
-          "title": "Air Riddle - Devinez le joueur Rocket League",
+          "title": "Air Riddle : Devinez le joueur Rocket League",
           "description": "Participez à Air Riddle et devinez le joueur Rocket League en 6 essais. Testez vos connaissances des joueurs RL et améliorez votre score quotidiennement !"
         }
       },
@@ -323,7 +323,7 @@
         "title": "RL Career",
         "subtitle": "Début à 16 ans. Cinq saisons au sommet, puis le circuit commence à vous pousser vers la sortie.",
         "seo": {
-          "title": "RL Career — Simulateur de Carrière Rocket League",
+          "title": "RL Career : Simulateur de Carrière Rocket League",
           "description": "Construisez une carrière esport Rocket League dès 16 ans : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
         },
         "menu": {
@@ -335,11 +335,11 @@
         },
         "onboarding": {
           "introTitle": "Lancez Votre Carrière",
-          "introBody": "Créez un parcours pro fictif. Vous débutez à 16 ans. Cinq saisons au sommet — ensuite le rating baisse et les renouvellements se font rares.",
+          "introBody": "Créez un parcours pro fictif. Vous débutez à 16 ans. Cinq saisons au sommet. Ensuite le rating baisse et les renouvellements se font rares.",
           "playerNameLabel": "Nom de Joueur",
           "playerNamePlaceholder": "Votre pseudo",
           "regionTitle": "Choisissez Votre Région",
-          "regionBody": "Le circuit sur lequel vous jouez — votre première équipe vient d'ici.",
+          "regionBody": "Le circuit sur lequel vous jouez. Votre première équipe vient d'ici.",
           "countryTitle": "Choisissez Votre Pays",
           "countryBody": "Le drapeau affiché à côté de votre pseudo à l'écran.",
           "roleTitle": "Choisissez Votre Style de Jeu",
@@ -412,7 +412,7 @@
             },
             "oneVOne": {
               "label": "Joueur 1v1",
-              "description": "Duelliste ranked — mécaniques et reads forgés en 1s. Rating 70 · Forme 68 · Moral 55"
+              "description": "Duelliste ranked : mécaniques et reads forgés en 1s. Rating 70 · Forme 68 · Moral 55"
             },
             "freestyler": {
               "label": "Freestyler",
@@ -429,17 +429,17 @@
         "season": {
           "introTitle": "Saison {season} · {age} ans",
           "recapTitle": "Saison {season}",
-          "introBody": "Vous jouez pour {team} — actuellement n° {rank} mondial.",
+          "introBody": "Vous jouez pour {team}, actuellement n° {rank} mondial.",
           "structure": "Deux majors cette saison, chacune précédée de trois régionaux. Marquez {points} points ou plus pour vous qualifier aux Worlds.",
           "declineHint": "Après le pic : rating et forme glissent, et les clubs renouvellent moins facilement.",
           "begin": "Commencer la Saison"
         },
         "event": {
-          "splitDecision": "Split {split} — décision avant la course au major",
-          "worldsDecision": "Worlds — une dernière décision",
+          "splitDecision": "Split {split} : décision avant la course au major",
+          "worldsDecision": "Worlds : une dernière décision",
           "outcomeLabel": "Résultat de la décision",
           "continue": "Continuer",
-          "destinyLean": "Penche vers {path}"
+          "destinyLean": "Ce choix penche vers {path}."
         },
         "results": {
           "splitTitle": "Résultats du Split {split}",
@@ -449,7 +449,7 @@
           "majorNotQualified": "Non qualifié",
           "seasonPoints": "Points de la saison : {points}",
           "points": "{points} pts",
-          "worldsQualified": "Qualifié pour les Worlds — une dernière décision à prendre.",
+          "worldsQualified": "Qualifié pour les Worlds. Une dernière décision à prendre.",
           "worldsMissed": "Pas assez de points pour les Worlds cette saison.",
           "worldsPlacementLabel": "Worlds",
           "worldsNotQualifiedShort": "Non qualifié",
@@ -468,11 +468,11 @@
           "you": "Vous",
           "yourTeam": "Votre équipe",
           "circuitPoints": "Points du circuit cette saison",
+          "teamWorldRanking": "Classement mondial de l'équipe",
           "playerRating": "Note actuelle du joueur",
           "alsoOnRoster": "Aussi dans cet effectif"
         },
         "offseason": {
-          "title": "Offres d'Intersaison",
           "body": "Aucun club n'est intéressé cet hiver. | {count} club veut vous recruter. | {count} clubs veulent vous recruter.",
           "renewalTitle": "Renouvellement",
           "unsignedTitle": "Sans Contrat",
@@ -481,38 +481,33 @@
           "unsignedBody": "Aucun club ne vous signera pour la saison prochaine.",
           "unsignedHint": "Le mercato est fermé. Partez à la retraite, ou c'est la fin de la ligne.",
           "lastChanceBody": "{team} est le seul club encore prêt à tenter le coup.",
-          "lastChanceTeam": "Dernière chance",
           "noOffer": "Aucun intérêt en transfert",
-          "offerTeam": "Offres",
+          "currentTeam": "Équipe Actuelle",
           "worldRank": "N° {rank} mondial",
           "accept": "Accepter l'Offre",
           "continue": "Continuer",
           "retire": "Prendre sa Retraite",
           "prompt": {
-            "title": "Et Après ?",
-            "body": "L'org vous demande où vous en êtes. La réponse reste.",
-            "quit": "Je mute Discord. Il me faut une vie hors du jeu.",
-            "streamer": "Je veux un vrai planning de contenu l'an prochain.",
-            "coach": "Je préfère aider le prochain roster plutôt que continuer à grinder."
+            "title": "Rester ou Partir",
+            "body": "Le pic est derrière vous. L'org veut une réponse claire.",
+            "quit": "Je m'écarte. Il me faut une vie hors du jeu.",
+            "streamer": "Je range la manette. Place à un vrai planning de contenu.",
+            "coach": "Gardez-moi dans le roster. Je n'ai pas fini de jouer.",
+            "endsCareer": "Termine votre carrière",
+            "playOn": "Jouer une saison de plus"
           }
         },
         "destiny": {
-          "title": "Après le Circuit Pro",
-          "body": "Le circuit s'arrête. Choisissez la suite — vos décisions de carrière penchent déjà d'un côté.",
-          "recommended": "Suggéré",
           "quit": {
-            "label": "Tout Quitter",
-            "description": "Plus de ranked, plus de Discord, plus de scène. Jeux et réseaux restent éteints.",
+            "leanToward": "quitter la scène",
             "endLine": "A quitté les jeux et la scène"
           },
           "streamer": {
-            "label": "Devenir Streamer",
-            "description": "Faire de l'audience le métier : ranked, analyse et files du soir en live.",
+            "leanToward": "le streaming",
             "endLine": "Est devenu streamer à temps plein"
           },
           "coach": {
-            "label": "Devenir Coach",
-            "description": "Rester dans le bâtiment — VODs, timeouts, et le prochain roster qui a besoin d'une voix.",
+            "leanToward": "le coaching",
             "endLine": "Est passé coach"
           }
         },
@@ -526,7 +521,21 @@
             "major": "Titre de major",
             "worlds": "Championnat du monde"
           },
-          "noTrophies": "Pas de trophée — le parcours compte quand même.",
+          "noTrophies": "Pas de trophée, le parcours compte quand même.",
+          "nicknames": {
+            "goat": "GOAT",
+            "closer": "Le Finisseur",
+            "iceBlood": "Le Sang-Froid",
+            "airSurgeon": "Le Magicien des Airs",
+            "majorHunter": "L'Éternel Major",
+            "surfaceFox": "Le Renard du Filet",
+            "theWall": "Le Mur",
+            "resetGhost": "Le Fantôme des Ciels",
+            "theMic": "Le Micro",
+            "sideline": "Le Banc",
+            "walkedOff": "Le Civil",
+            "lanTourist": "Le Touriste"
+          },
           "seasonRecap": "Récap par Saison",
           "share": "Copier le Lien",
           "shareCopied": "Lien copié",
@@ -570,7 +579,7 @@
                 "outcome": "Vous assumez les double commits et drillez les rotations. Le rating monte ; le callout pique encore."
               },
               "b": {
-                "label": "Défendre vos reads — la passe était jouable",
+                "label": "Défendre vos reads : la passe était jouable",
                 "outcome": "Vous défendez le read. La pièce reste tendue, mais vous sortez la tête haute."
               },
               "c": {
@@ -593,16 +602,16 @@
               },
               "c": {
                 "label": "Prendre de vrais jours de repos et recharger",
-                "outcome": "De vrais jours de repos remplissent le réservoir. Vous arrivez frais — un peu moins affamé."
+                "outcome": "De vrais jours de repos remplissent le réservoir. Vous arrivez frais, un peu moins affamé."
               }
             }
           },
           "split-04": {
             "title": "Un Sponsor Veut Vous Voir Streamer",
-            "description": "Une marque de boisson énergisante propose un contrat : quatre soirées de stream par semaine, un bon salaire, top pour les fans — mais ça mange directement les heures d'entraînement.",
+            "description": "Une marque de boisson énergisante propose un contrat : quatre soirées de stream par semaine, un bon salaire, top pour les fans, mais ça mange directement les heures d'entraînement.",
             "choices": {
               "a": {
-                "label": "Signer — la communauté et le salaire comptent",
+                "label": "Signer : la communauté et le salaire comptent",
                 "outcome": "Quatre soirs de stream par semaine. La marque vous adore ; les heures de training disparaissent."
               },
               "b": {
@@ -644,7 +653,7 @@
             "description": "Le coach vous veut en deuxième homme plutôt que dans votre style naturel de premier homme. Les données disent que ça gagne des matchs ; votre instinct n'est pas d'accord.",
             "choices": {
               "a": {
-                "label": "Adhésion totale — jouer la nouvelle rotation tout le split",
+                "label": "Adhésion totale : jouer la nouvelle rotation tout le split",
                 "outcome": "Full buy-in en second man. Le système clique ; vos instincts résistent."
               },
               "b": {
@@ -652,7 +661,7 @@
                 "outcome": "À mi-chemin : nouvelles rotations en scrims, votre jeu sur scène. Équilibré, un peu sale."
               },
               "c": {
-                "label": "Refuser — vous êtes arrivé ici en jouant à votre façon",
+                "label": "Refuser : vous êtes arrivé ici en jouant à votre façon",
                 "outcome": "Vous refusez le changement. Le moral tient. Le coach classe l'affaire."
               }
             }
@@ -676,7 +685,7 @@
             "description": "Un freestyler célèbre vous invite à une session de clips qui ferait d'énormes vues. Votre coach préférerait vous voir drill la shadow defense.",
             "choices": {
               "a": {
-                "label": "Tourner les clips — faire grandir votre nom",
+                "label": "Tourner les clips : faire grandir votre nom",
                 "outcome": "La session clips explose. Votre nom grandit ; la shadow defense non."
               },
               "b": {
@@ -687,7 +696,7 @@
           },
           "split-10": {
             "title": "Bootcamp à l'Étranger",
-            "description": "L'organisation propose un bootcamp de trois semaines dans une autre région : scrims d'élite, zéro distraction — et zéro confort de la maison.",
+            "description": "L'organisation propose un bootcamp de trois semaines dans une autre région : scrims d'élite, zéro distraction, et zéro confort de la maison.",
             "choices": {
               "a": {
                 "label": "Faire ses valises et grind",
@@ -708,7 +717,7 @@
                 "outcome": "Vous retravaillez les challenges avec les data. Les reads s'améliorent ; le inconfort se voit."
               },
               "b": {
-                "label": "Faire confiance à votre instinct — les stats ne voient pas tout",
+                "label": "Faire confiance à votre instinct : les stats ne voient pas tout",
                 "outcome": "Vous faites confiance à vos instincts. La forme monte. L'analyste hausse les épaules."
               }
             }
@@ -733,7 +742,7 @@
           },
           "split-13": {
             "title": "Ajouter les Démos à Votre Jeu ?",
-            "description": "Le coach suggère des démos et des bumps agressifs sur les suites d'engagement. Ça gagne les duels de boost mais invite le chaos — et crée des ennemis.",
+            "description": "Le coach suggère des démos et des bumps agressifs sur les suites d'engagement. Ça gagne les duels de boost mais invite le chaos, et crée des ennemis.",
             "choices": {
               "a": {
                 "label": "Passer en mode bump total",
@@ -764,7 +773,7 @@
             "description": "Vous êtes invité à un showmatch caritatif avec des légendes de la communauté le week-end avant un régional. Super ambiance, zéro valeur de préparation.",
             "choices": {
               "a": {
-                "label": "Le jouer — la communauté vous a tout donné",
+                "label": "Le jouer : la communauté vous a tout donné",
                 "outcome": "Vous jouez le showmatch caritatif. La communauté adore ; le temps de prep a disparu."
               },
               "b": {
@@ -782,8 +791,8 @@
                 "outcome": "Vous labez le patch jusqu'à ce que les pads soient automatiques. Rating en hausse, heures en plus."
               },
               "b": {
-                "label": "S'adapter en jeu — le feeling avant la théorie",
-                "outcome": "Vous vous adaptez à la volée. Le feeling avant la théorie — la forme tient."
+                "label": "S'adapter en jeu : le feeling avant la théorie",
+                "outcome": "Vous vous adaptez à la volée. Le feeling avant la théorie. La forme tient."
               }
             }
           },
@@ -796,7 +805,7 @@
                 "outcome": "Prep image par image sur le groupe de la mort. Vous les connaissez ; vous êtes aussi cuit."
               },
               "b": {
-                "label": "Vous concentrer sur votre jeu — qu'ils s'adaptent à vous",
+                "label": "Vous concentrer sur votre jeu : qu'ils s'adaptent à vous",
                 "outcome": "Vous vous concentrez sur votre jeu. La confiance monte, le scouting est plus mince."
               }
             }
@@ -835,7 +844,7 @@
             "choices": {
               "a": {
                 "label": "Retravailler vos engagements dans la nuit",
-                "outcome": "Rework des kickoffs dans la nuit. Ils ont scouté l'ancien vous — pas celui-là."
+                "outcome": "Rework des kickoffs dans la nuit. Ils ont scouté l'ancien vous, pas celui-là."
               },
               "b": {
                 "label": "Le prendre comme un compliment et assumer votre style",
@@ -848,7 +857,7 @@
             "description": "Interviews, photoshoots, contenus pour le broadcast. Une journée entière loin des manettes juste avant le bracket.",
             "choices": {
               "a": {
-                "label": "Faire le tour complet de la presse — les fans adorent",
+                "label": "Faire le tour complet de la presse : les fans adorent",
                 "outcome": "Press run complet. Fans et clips partout ; les manettes attendent."
               },
               "b": {
@@ -863,7 +872,7 @@
             "choices": {
               "a": {
                 "label": "Tenter les fakes",
-                "outcome": "Faux kickoffs contre les favoris. Gros risque — ils mordent, ou pas."
+                "outcome": "Faux kickoffs contre les favoris. Gros risque : ils mordent, ou pas."
               },
               "b": {
                 "label": "Rester sur les speedflips classiques",
@@ -880,7 +889,7 @@
                 "outcome": "Vous passez en silence. Le réservoir se remplit un peu. La scène semble plus loin."
               },
               "b": {
-                "label": "Transformer le creux en contenu — ranked en stream",
+                "label": "Transformer le creux en contenu : ranked en stream",
                 "outcome": "L'audience est là. Le training rétrécit. Votre marque grandit."
               },
               "c": {
@@ -920,7 +929,7 @@
                 "outcome": "La VOD review devient du contenu. La série cartonne. Votre ranked, non."
               },
               "c": {
-                "label": "Passer — il vous faut les heures, ou plus rien",
+                "label": "Passer : il vous faut les heures, ou plus rien",
                 "outcome": "Vous protégez le calendrier. Les DMs restent sans réponse. L'étincelle reste basse."
               }
             }
