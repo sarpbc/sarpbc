@@ -524,6 +524,7 @@
         "notFound": "Tournament not found",
         "error": "Could not load this tournament. Check your connection and try again.",
         "retry": "Try Again",
+        "subscribeCalendar": "Subscribe to Calendar",
         "status": {
           "live": "Live",
           "upcoming": "Upcoming",
@@ -597,6 +598,7 @@
           "finished": "Finished"
         },
         "format": "Bo{count}",
+        "addToCalendar": "Add to Calendar",
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",

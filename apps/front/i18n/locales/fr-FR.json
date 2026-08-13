@@ -524,6 +524,7 @@
         "notFound": "Tournoi introuvable",
         "error": "Impossible de charger ce tournoi. Vérifiez votre connexion et réessayez.",
         "retry": "Réessayer",
+        "subscribeCalendar": "S'abonner au calendrier",
         "status": {
           "live": "En direct",
           "upcoming": "À venir",
@@ -597,6 +598,7 @@
           "finished": "Terminé"
         },
         "format": "Bo{count}",
+        "addToCalendar": "Ajouter au calendrier",
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
