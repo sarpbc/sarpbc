@@ -20,6 +20,7 @@ const localePath = useLocalePath();
             class="size-10 bg-transparent"
           />
         </ULink>
+        <GameLanguageToggle />
       </div>
     </header>
     <div class="w-full flex-1 flex flex-col items-center px-2 md:px-0 py-6">

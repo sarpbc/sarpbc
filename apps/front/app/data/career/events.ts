@@ -3,6 +3,13 @@ import type { CareerEventDefinition, CareerEventPool } from "~/types/career";
 /**
  * Event mechanics only — titles, descriptions and choice labels live in i18n
  * under `page.game.career.events.{id}`.
+ *
+ * Stat deltas: typical choices are ±1 or ±2. ±3 and ±5 are for heavy
+ * training blocks (bootcamp, all-nighters, custom packs). +5 applies in full
+ * under 80.
+ *
+ * Form is freshness. Long hours, all-nighters, and isolation cost form.
+ * Rest, sleep, and match reps restore it. Morale is mood and team vibe.
  */
 export const CAREER_EVENTS: CareerEventDefinition[] = [
   // Split events — one decision before each major run.
@@ -10,17 +17,17 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-01",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 5, form: -3 } },
-      { id: "b", delta: { form: 2 } },
-      { id: "c", delta: { rating: 2, morale: -2 } },
+      { id: "a", delta: { rating: 5, form: -2 } },
+      { id: "b", delta: { form: 1, morale: 1 } },
+      { id: "c", delta: { rating: 2, form: -2 } },
     ],
   },
   {
     id: "split-02",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 4, morale: -2 } },
-      { id: "b", delta: { morale: 3, form: -1 } },
+      { id: "a", delta: { rating: 2, form: -1, morale: -1 } },
+      { id: "b", delta: { morale: 2 } },
       { id: "c", delta: { rating: 2, morale: 1 } },
     ],
   },
@@ -28,16 +35,16 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-03",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 4, morale: -2 } },
-      { id: "b", delta: { form: 4, rating: -1 } },
-      { id: "c", delta: { morale: 5, form: -2 }, destiny: { quit: 1 } },
+      { id: "a", delta: { rating: 5, form: -2, morale: -2 } },
+      { id: "b", delta: { rating: 1, form: 2 } },
+      { id: "c", delta: { form: 2, morale: 1 }, destiny: { quit: 1 } },
     ],
   },
   {
     id: "split-04",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -3 }, destiny: { streamer: 2 } },
+      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
       { id: "b", delta: { form: 2 } },
     ],
   },
@@ -45,40 +52,40 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-05",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 4, form: -3 } },
-      { id: "b", delta: { form: 3 } },
+      { id: "a", delta: { rating: 2, form: -1 } },
+      { id: "b", delta: { form: 1, morale: 1 } },
     ],
   },
   {
     id: "split-06",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: 1, rating: -1 }, destiny: { coach: 2 } },
-      { id: "b", delta: { rating: 3, morale: -3 }, destiny: { quit: 1 } },
+      { id: "a", delta: { morale: 2, rating: -1 }, destiny: { coach: 2 } },
+      { id: "b", delta: { rating: 2, morale: -2 }, destiny: { quit: 1 } },
     ],
   },
   {
     id: "split-07",
     pool: "split",
     choices: [
-      { id: "a", delta: { form: 4, morale: -2 } },
+      { id: "a", delta: { form: 2, morale: -1 } },
       { id: "b", delta: { rating: 1, form: 1, morale: 1 } },
-      { id: "c", delta: { morale: 2, form: -2 } },
+      { id: "c", delta: { morale: 2 } },
     ],
   },
   {
     id: "split-08",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 2, form: -3 } },
-      { id: "b", delta: { form: 1, morale: -1 } },
+      { id: "a", delta: { rating: 2, form: -2 } },
+      { id: "b", delta: { form: -1, morale: -1 } },
     ],
   },
   {
     id: "split-09",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -2 }, destiny: { streamer: 2 } },
+      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 2 } },
       { id: "b", delta: { rating: 2, form: 1 }, destiny: { coach: 1 } },
     ],
   },
@@ -86,7 +93,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-10",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 3, form: 2, morale: -3 } },
+      { id: "a", delta: { rating: 5, form: -1, morale: -2 } },
       { id: "b", delta: { morale: 2 } },
     ],
   },
@@ -94,7 +101,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-11",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 3, form: -1 } },
+      { id: "a", delta: { rating: 2, form: -1 } },
       { id: "b", delta: { morale: 2, form: 1 } },
     ],
   },
@@ -102,8 +109,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-12",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 3, form: 1 }, destiny: { quit: 2 } },
-      { id: "b", delta: { morale: 2, form: -2 }, destiny: { streamer: 1 } },
+      { id: "a", delta: { morale: 2, form: 1 }, destiny: { quit: 2 } },
+      { id: "b", delta: { morale: 2 }, destiny: { streamer: 1 } },
       { id: "c", delta: { rating: 2, morale: -1 } },
     ],
   },
@@ -111,7 +118,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-13",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 3, morale: -1, form: -1 } },
+      { id: "a", delta: { rating: 2, morale: -1, form: -1 } },
       { id: "b", delta: { form: 2, morale: 1 } },
     ],
   },
@@ -119,24 +126,62 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "split-14",
     pool: "split",
     choices: [
-      { id: "a", delta: { form: 4, morale: -1 } },
-      { id: "b", delta: { rating: 3, form: -2, morale: -2 } },
+      { id: "a", delta: { form: 2, morale: -1 } },
+      { id: "b", delta: { rating: 2, form: -2, morale: -1 } },
     ],
   },
   {
     id: "split-15",
     pool: "split",
     choices: [
-      { id: "a", delta: { morale: 4, form: -1 }, destiny: { streamer: 1 } },
-      { id: "b", delta: { form: 3, morale: -2 } },
+      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
+      { id: "b", delta: { form: 2, morale: -1 } },
     ],
   },
   {
     id: "split-16",
     pool: "split",
     choices: [
-      { id: "a", delta: { rating: 4, form: -2 } },
+      { id: "a", delta: { rating: 2, form: -2 } },
       { id: "b", delta: { form: 2, morale: 1 } },
+    ],
+  },
+  {
+    id: "split-17",
+    pool: "split",
+    choices: [
+      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
+      { id: "b", delta: { form: 2, morale: -1 } },
+    ],
+  },
+  {
+    id: "split-18",
+    pool: "split",
+    choices: [
+      { id: "a", delta: { morale: 1, form: -2 } },
+      { id: "b", delta: { form: 2 } },
+      { id: "c", delta: { morale: 2, form: 1 }, destiny: { coach: 1 } },
+    ],
+  },
+  {
+    id: "split-19",
+    pool: "split",
+    choices: [
+      {
+        id: "a",
+        delta: { rating: 5, form: -2, morale: -2 },
+        skipRegionals: 2,
+        skipMajor: true,
+      },
+      { id: "b", delta: { form: 2, morale: 1 } },
+    ],
+  },
+  {
+    id: "split-20",
+    pool: "split",
+    choices: [
+      { id: "a", delta: { rating: 5, form: -2 } },
+      { id: "b", delta: { form: 1, morale: 1 } },
     ],
   },
   // Worlds events — one final decision once qualified.
@@ -144,15 +189,15 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "worlds-01",
     pool: "worlds",
     choices: [
-      { id: "a", delta: { rating: 2, form: 2, morale: -2 } },
-      { id: "b", delta: { morale: 3, form: 1 } },
+      { id: "a", delta: { rating: 2, form: -2, morale: -1 } },
+      { id: "b", delta: { morale: 2, form: 1 } },
     ],
   },
   {
     id: "worlds-02",
     pool: "worlds",
     choices: [
-      { id: "a", delta: { form: 4, morale: -1 } },
+      { id: "a", delta: { form: 2, morale: 1 } },
       { id: "b", delta: { rating: 2, form: -2, morale: 2 } },
     ],
   },
@@ -160,8 +205,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     id: "worlds-03",
     pool: "worlds",
     choices: [
-      { id: "a", delta: { morale: 4 } },
-      { id: "b", delta: { form: 3, morale: -1 } },
+      { id: "a", delta: { morale: 3 } },
+      { id: "b", delta: { form: 2, morale: -1 } },
     ],
   },
   {
@@ -169,14 +214,14 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     pool: "worlds",
     choices: [
       { id: "a", delta: { rating: 3, form: -2 } },
-      { id: "b", delta: { morale: 3, form: 1, rating: -1 } },
+      { id: "b", delta: { morale: 2, form: 1 } },
     ],
   },
   {
     id: "worlds-05",
     pool: "worlds",
     choices: [
-      { id: "a", delta: { morale: 3, form: -2 }, destiny: { streamer: 1 } },
+      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
       { id: "b", delta: { form: 2 }, destiny: { quit: 1 } },
     ],
   },
@@ -185,7 +230,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     pool: "worlds",
     choices: [
       { id: "a", delta: { rating: 3, morale: 1, form: -2 } },
-      { id: "b", delta: { form: 3 } },
+      { id: "b", delta: { form: 2 } },
     ],
   },
   {
@@ -193,8 +238,8 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     pool: "split",
     minSeason: 5,
     choices: [
-      { id: "a", delta: { morale: 3, form: -2, rating: -1 }, destiny: { quit: 2 } },
-      { id: "b", delta: { form: 2, morale: -1 }, destiny: { streamer: 2 } },
+      { id: "a", delta: { morale: 2, form: 1, rating: -1 }, destiny: { quit: 2 } },
+      { id: "b", delta: { morale: 2, form: -1 }, destiny: { streamer: 2 } },
       { id: "c", delta: { morale: 2 }, destiny: { coach: 2 } },
     ],
   },
@@ -203,9 +248,9 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     pool: "split",
     minSeason: 5,
     choices: [
-      { id: "a", delta: { morale: 4, form: -3 }, destiny: { streamer: 2 } },
-      { id: "b", delta: { form: 2, rating: 1 }, destiny: { coach: 1 } },
-      { id: "c", delta: { morale: 2, form: -1 }, destiny: { quit: 2 } },
+      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
+      { id: "b", delta: { morale: 2, rating: -1 }, destiny: { coach: 1 } },
+      { id: "c", delta: { morale: 2, form: 1 }, destiny: { quit: 2 } },
     ],
   },
   {
@@ -213,9 +258,9 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
     pool: "split",
     minSeason: 6,
     choices: [
-      { id: "a", delta: { morale: 3, form: -1 }, destiny: { coach: 2 } },
-      { id: "b", delta: { form: 2 }, destiny: { streamer: 1 } },
-      { id: "c", delta: { morale: 4, rating: -2 }, destiny: { quit: 2 } },
+      { id: "a", delta: { morale: 2, rating: -1 }, destiny: { coach: 2 } },
+      { id: "b", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
+      { id: "c", delta: { form: 1, morale: 1 }, destiny: { quit: 2 } },
     ],
   },
 ];

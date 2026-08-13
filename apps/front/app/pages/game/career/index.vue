@@ -12,7 +12,6 @@ import { encodeCareerResultForShare } from "~/composables/useCareerStorage";
 import { useCareerSimulator } from "~/composables/useCareerSimulator";
 import { getWorldTeamById } from "~/data/career/world";
 import { getTeamRank } from "~/utils/career/simulation";
-import { WORLDS_QUALIFICATION_POINTS } from "~/types/career";
 
 definePageMeta({
   layout: "game",
@@ -32,8 +31,8 @@ const {
   qualifiedForWorlds,
   lastSplit,
   playerAge,
-  isPastPeak,
   canRetire,
+  destinyPromptPending,
   hydrate,
   resetCareer,
   setOnboardingStep,
@@ -88,6 +87,10 @@ const continueName = computed(() => {
 
 const currentTeamRank = computed(() =>
   state.value.currentTeamId ? getTeamRank(worldRankings.value, state.value.currentTeamId) : null,
+);
+
+const currentTeamRegion = computed(
+  () => getWorldTeamById(state.value.currentTeamId)?.region ?? state.value.region,
 );
 
 const offseasonOffers = computed(() =>
@@ -177,8 +180,8 @@ function handleContinue() {
 
       <SHubColumn variant="main" class="order-1 md:order-2 md:col-span-6">
         <div class="flex flex-col gap-4">
-          <SCrossCard v-if="hasActiveCareer" class="min-h-row-header">
-            <div class="flex w-full items-center justify-between gap-2 px-4 py-3">
+          <SCrossCard v-if="hasActiveCareer" class="h-row-header">
+            <div class="flex h-full w-full items-center justify-between gap-2 px-4">
               <p class="min-w-0 truncate text-sm font-medium">
                 {{ state.playerName || t("page.game.career.title") }}
                 <span class="text-muted">· {{ currentTeamName }}</span>
@@ -228,16 +231,6 @@ function handleContinue() {
                   })
                 }}
               </p>
-              <p class="text-xs text-muted text-pretty">
-                {{
-                  t("page.game.career.season.structure", {
-                    points: WORLDS_QUALIFICATION_POINTS,
-                  })
-                }}
-              </p>
-              <p v-if="isPastPeak" class="text-xs text-muted text-pretty">
-                {{ t("page.game.career.season.declineHint") }}
-              </p>
               <UButton block @click="startSeason">
                 {{ t("page.game.career.season.begin") }}
               </UButton>
@@ -247,6 +240,8 @@ function handleContinue() {
               v-else-if="state.phase === 'event' && currentEvent"
               :event="currentEvent"
               :stage="state.currentStage"
+              :decision-index="state.eventsResolvedForStage + 1"
+              :decision-count="state.eventsQueuedForStage"
               @choose="resolveEventChoice"
             />
 
@@ -263,18 +258,21 @@ function handleContinue() {
               :worlds-placement="state.currentWorlds"
               :season-points="seasonPoints"
               :qualified-for-worlds="qualifiedForWorlds"
+              :region="currentTeamRegion"
               @continue="continueAfterResult"
             />
 
             <CareerOffseasonOffer
               v-else-if="state.phase === 'offseason'"
               :offers="offseasonOffers"
+              :current-team-id="state.currentTeamId"
               :current-team-name="currentTeamName"
               :current-team-rank="currentTeamRank"
               :renewal-offered="state.renewalOffered"
               :is-last-chance-offer="state.isLastChanceOffer"
               :can-retire="canRetire"
-              :destiny-prompt-pending="state.offseasonDestinyPending"
+              :destiny-prompt-pending="destinyPromptPending"
+              v-model:hovered-team-id="hoveredTeamId"
               @accept="acceptOffer"
               @stay="stayWithTeam"
               @retire="retireCareer"
@@ -295,7 +293,7 @@ function handleContinue() {
         <CareerWorldRankings
           kind="players"
           :players="worldRankings.players"
-          :highlight-team-id="hoveredTeamId"
+          v-model:hovered-team-id="hoveredTeamId"
         />
       </SHubColumn>
     </div>

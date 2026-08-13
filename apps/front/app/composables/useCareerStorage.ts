@@ -106,6 +106,10 @@ export function parseCareerState(raw: string | null): CareerState | null {
       typeof state.currentTeamId !== "string" ||
       !isValidWorld(state.world) ||
       !Array.isArray(state.usedEventIds) ||
+      typeof state.eventsQueuedForStage !== "number" ||
+      typeof state.eventsResolvedForStage !== "number" ||
+      typeof state.pendingSkipRegionals !== "number" ||
+      typeof state.pendingSkipMajor !== "boolean" ||
       !Array.isArray(state.currentSplits) ||
       !Array.isArray(state.seasonRecords) ||
       !Array.isArray(state.pendingOfferTeamIds) ||

@@ -84,7 +84,10 @@
       "home": "Home — News",
       "openMenu": "Open menu",
       "closeMenu": "Close menu",
-      "unreadNotifications": "{count} unread notification | {count} unread notifications"
+      "unreadNotifications": "{count} unread notification | {count} unread notifications",
+      "language": "Language",
+      "languageEn": "English",
+      "languageFr": "French"
     },
     "input": {
       "search": "Search...",
@@ -321,7 +324,7 @@
       },
       "career": {
         "title": "RL Career",
-        "subtitle": "Debut at 16. Peak for five seasons, then the league starts pushing you out.",
+        "subtitle": "Play a Rocket League esports career from 16 until you retire: events, splits, Worlds, transfers, and a world ranking shaped by your choices.",
         "seo": {
           "title": "RL Career: Text-Based Rocket League Career Simulator",
           "description": "Build a Rocket League esports career from age 16: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
@@ -334,10 +337,10 @@
           "newCareerConfirm": "Start a new career? Current progress will be lost."
         },
         "onboarding": {
-          "introTitle": "Start Your Career",
-          "introBody": "Create a fictional pro journey. You debut at 16. Peak for five seasons. After that, rating drops and contracts get harder to keep.",
           "playerNameLabel": "Player Name",
           "playerNamePlaceholder": "Your gamertag",
+          "introTitle": "Name Your Player",
+          "introBody": "Enter the gamertag you'll compete under. Region, country, and playstyle come next.",
           "regionTitle": "Choose Your Region",
           "regionBody": "The circuit you compete on. Your first team plays here.",
           "countryTitle": "Choose Your Country",
@@ -430,16 +433,13 @@
           "introTitle": "Season {season} · Age {age}",
           "recapTitle": "Season {season}",
           "introBody": "You suit up for {team}, currently world No. {rank}.",
-          "structure": "Two majors this season, each fed by three regionals. Earn {points} points or more and you qualify for Worlds.",
-          "declineHint": "Past your peak: rating and form are slipping, and teams are less eager to renew.",
           "begin": "Begin Season"
         },
         "event": {
-          "splitDecision": "Split {split}: decision before the major run",
-          "worldsDecision": "Worlds: one final decision",
-          "outcomeLabel": "Decision result",
-          "continue": "Continue",
-          "destinyLean": "This choice leans toward {path}."
+          "split": "Split {split}",
+          "worlds": "Worlds",
+          "decision": "Decision {current} of {total}",
+          "continue": "Continue"
         },
         "results": {
           "splitTitle": "Split {split} Results",
@@ -450,7 +450,7 @@
           "seasonPoints": "Season points: {points}",
           "points": "{points} pts",
           "worldsQualified": "Qualified for Worlds. One last call to make.",
-          "worldsMissed": "Not enough points for Worlds this season.",
+          "worldsMissed": "Outside the top 16. No Worlds this season.",
           "worldsPlacementLabel": "Worlds",
           "worldsNotQualifiedShort": "Not qualified",
           "continue": "Continue"
@@ -460,13 +460,12 @@
           "finalist": "Finalist",
           "top4": "Top 4",
           "top8": "Top 8",
-          "group": "Group stage"
+          "group": "Group stage",
+          "unavailable": "Unavailable"
         },
         "rankings": {
           "bestTeams": "Best Teams",
           "bestPlayers": "Best Players",
-          "you": "You",
-          "yourTeam": "Your team",
           "circuitPoints": "Circuit points this season",
           "teamWorldRanking": "Team World Ranking",
           "playerRating": "Current player rating",
@@ -499,15 +498,12 @@
         },
         "destiny": {
           "quit": {
-            "leanToward": "walking away from the scene",
             "endLine": "Walked away from games and the scene"
           },
           "streamer": {
-            "leanToward": "streaming",
             "endLine": "Went full-time as a streamer"
           },
           "coach": {
-            "leanToward": "coaching",
             "endLine": "Moved into coaching"
           }
         },
@@ -558,15 +554,18 @@
             "choices": {
               "a": {
                 "label": "Rebuild the kickoff from scratch in free play",
-                "outcome": "You rebuild the kickoff in free play. Mechanics tick up; the extra hours leave you cooked."
+                "outcome": "A week in free play and the flip finally lands. Kickoff 50s start going your way. Your hands are wrecked.",
+                "failure": "You tear the kickoff down and can't put it back. For days you lose every 50 you used to win on instinct."
               },
               "b": {
                 "label": "Keep the old kickoff until the offseason",
-                "outcome": "You keep the old kickoff. Form holds, but the 50/50s stay a problem."
+                "outcome": "You keep the old flip. The 50s stay a problem, but at least you still have a kickoff you trust.",
+                "failure": "You stick with it and get punished anyway. Opponents wait on the same tell. Nothing feels safe on kickoff."
               },
               "c": {
                 "label": "Grind it quietly after scrims every night",
-                "outcome": "Nightly extra reps after scrims sharpen the flip. Sleep and morale take the hit."
+                "outcome": "Night reps after scrims sharpen the flip. You show up to review looking like you haven't slept.",
+                "failure": "You grind the flip at 1 a.m. and still whiff it in the next scrim. The late nights were for nothing."
               }
             }
           },
@@ -576,15 +575,18 @@
             "choices": {
               "a": {
                 "label": "Own it and drill rotations until they're automatic",
-                "outcome": "You own the double commits and drill rotations. Rating climbs; the callout still stings."
+                "outcome": "You own the double commits and drill rotations until they're boring. The callout still sits in your chest.",
+                "failure": "You drill rotations all week and still double commit in the next series. The room goes quiet again."
               },
               "b": {
                 "label": "Defend your reads: the pass was on",
-                "outcome": "You defend the read. The room stays tense, but you walk out with your head up."
+                "outcome": "You defend the read. The room stays tense. You walk out with your head up, and nobody forgot the clip.",
+                "failure": "You argue the pass was on. Teammates stop calling your name in voice. The next block is icy."
               },
               "c": {
                 "label": "Ask for a full team review instead of a callout",
-                "outcome": "A full team review spreads the blame. Everyone leaves sharper, including you."
+                "outcome": "A full team review spreads the blame. Rotations get a rewrite. Everyone leaves sharper, including you.",
+                "failure": "You ask for a team review and it turns into an hour of finger-pointing. Nobody wants to watch film tomorrow."
               }
             }
           },
@@ -594,15 +596,18 @@
             "choices": {
               "a": {
                 "label": "Solo-queue 1v1s ten hours a day",
-                "outcome": "Ten-hour 1v1 blocks pay off. Your mechanics spike; the grind frays the squad."
+                "outcome": "Ten-hour 1v1 blocks. Your mechanics spike. Your hands are cooked, and in team voice you sound like you haven't talked to anyone in days.",
+                "failure": "Ten hours of 1s and you still can't convert. You show up to scrims slower, and the roster noticed you skipped them."
               },
               "b": {
                 "label": "Lock in a full scrim block against contenders",
-                "outcome": "A full scrim week against contenders locks in chemistry and timing."
+                "outcome": "A full scrim week against contenders. Kickoffs, shadows, and mid-field passes start to feel like one idea.",
+                "failure": "You book the contender block and get farmed. Confidence leaks into the regional week."
               },
               "c": {
                 "label": "Take real rest days and recharge",
-                "outcome": "Real rest days refill the tank. You show up fresh, and a little less hungry."
+                "outcome": "Real rest days. You show up fresh. A little less hungry, but you can actually see the ball.",
+                "failure": "You take the days off and come back rusty. The first scrim back is a mess of mistimed jumps."
               }
             }
           },
@@ -612,11 +617,13 @@
             "choices": {
               "a": {
                 "label": "Sign it: the community and the paycheck matter",
-                "outcome": "Four stream nights a week. The brand loves you; training hours vanish."
+                "outcome": "Four stream nights. Chat learns your name. Your ranked hours shrink to whatever's left after the raid.",
+                "failure": "You sign and the streams flop. You still lose the training nights, and the brand starts asking why the average viewership is a joke."
               },
               "b": {
                 "label": "Turn it down until the season ends",
-                "outcome": "You turn the deal down until the split ends. The sticks stay the priority."
+                "outcome": "You turn the deal down until the split ends. The sticks stay the priority. The brand will still be there.",
+                "failure": "You decline, then spend the week wondering if you should have taken it. Distracted ranked is still ranked."
               }
             }
           },
@@ -626,11 +633,13 @@
             "choices": {
               "a": {
                 "label": "Relearn your game around the new meta",
-                "outcome": "You relearn the slow-play meta. New habits cost form while they settle."
+                "outcome": "You sit in the slow-play. Challenges wait a beat longer. The old demo-hungry you is gone, on purpose.",
+                "failure": "You try to play patient and just… stop challenging. You get scored on from half-field because nobody rotates into the space you left."
               },
               "b": {
                 "label": "Trust your fundamentals and sharpen what already works",
-                "outcome": "You trust your pace and sharpen what already works. Form stays high."
+                "outcome": "You keep your pace and clean up the sloppy challenges. Some teams hate it. Some teams can't live with it.",
+                "failure": "You double down on speed and get farmed by the possession teams. Every overcommit is on the VOD now."
               }
             }
           },
@@ -640,11 +649,13 @@
             "choices": {
               "a": {
                 "label": "Call a team meeting and clear the air",
-                "outcome": "The meeting clears the air. The roster resets; you spend energy on people, not packs."
+                "outcome": "The meeting is ugly, then quiet. Voice is usable again. You spent a night on people instead of packs.",
+                "failure": "The meeting explodes. They mute you for the rest of the night. Regional week starts with a group chat on read."
               },
               "b": {
                 "label": "Mute comms and grind your own replays",
-                "outcome": "You mute comms and grind your own VODs. Mechanics hold; the locker room does not."
+                "outcome": "You mute comms and grind your VODs. Your mechanics hold. Nobody is talking in the server.",
+                "failure": "You mute them and they notice. The next scrim is three people playing 1s in the same lobby."
               }
             }
           },
@@ -654,15 +665,18 @@
             "choices": {
               "a": {
                 "label": "Full buy-in: run the new rotation all split",
-                "outcome": "Full buy-in on second man. The system clicks; your instincts fight it."
+                "outcome": "You play second man all week. Last-back saves start landing. You miss the ball on your stick.",
+                "failure": "You buy in and freeze. First man goes, you hesitate, and the backboard is empty. The old rotation is gone too."
               },
               "b": {
                 "label": "Meet halfway: new system in scrims, instincts on stage",
-                "outcome": "Halfway: new rotations in scrims, your game on stage. Balanced, a little messy."
+                "outcome": "New rotations in scrims, your game on stage. It's messy. It also means you still have a first-man when it counts.",
+                "failure": "You mix systems and nobody knows who's last back. The coach stops calling plays mid-series."
               },
               "c": {
                 "label": "Refuse: you got here playing your way",
-                "outcome": "You refuse the change. Morale holds. The coach files it away."
+                "outcome": "You refuse the change. Kickoffs stay yours. The coach files it, and the analyst's spreadsheet stays red.",
+                "failure": "You refuse, then get exposed on the same overcommit the data flagged. Nobody says 'I told you so.' They don't have to."
               }
             }
           },
@@ -672,11 +686,13 @@
             "choices": {
               "a": {
                 "label": "Swap now and re-tune everything",
-                "outcome": "New controller mid-split. Deadzones feel alien for a week, then lock in."
+                "outcome": "New controller. Deadzones feel alien for two days, then the aerials start sticking again.",
+                "failure": "You swap and spend the regional hunting a deadzone that never feels like home. Easy shots dump."
               },
               "b": {
                 "label": "Nurse it through the split with tape and prayers",
-                "outcome": "You nurse the drift with tape. Form holds; every aerial is a coin flip."
+                "outcome": "Tape on the stick. You know the drift. Every aerial is a coin flip you think you can still call.",
+                "failure": "The drift spikes mid-series. You steer into the ceiling on a kickoff you have hit a thousand times."
               }
             }
           },
@@ -686,11 +702,13 @@
             "choices": {
               "a": {
                 "label": "Film the clips: let your name grow",
-                "outcome": "The clips session blows up. Your name grows; shadow defense does not."
+                "outcome": "The session pops off. Your name is on the thumbnail. Shadow defense is a problem for tomorrow.",
+                "failure": "You show up for clips and brick every reset on stream. The comments are not about the setup."
               },
               "b": {
                 "label": "Skip it and drill defense",
-                "outcome": "You skip the invite and drill defense. Quiet work, real gains."
+                "outcome": "You skip the invite and drill shadows. Quiet night. The next series, you're actually last back.",
+                "failure": "You skip the session and still check the VOD of who replaced you. The defense block is a write-off."
               }
             }
           },
@@ -700,11 +718,13 @@
             "choices": {
               "a": {
                 "label": "Pack your bags and grind",
-                "outcome": "Three weeks abroad, elite scrims, no comfort. Rating and form jump; homesickness hits."
+                "outcome": "Three weeks abroad, elite scrims, hotel Wi-Fi. You come back sharper and a little homesick.",
+                "failure": "The bootcamp is a wash. Jet lag, bad ping in the first week, and you never catch the scrim level."
               },
               "b": {
                 "label": "Stay home and keep your routine",
-                "outcome": "You keep your home routine. Morale stays even; the reps are familiar."
+                "outcome": "You keep your bed, your monitor, your hours. The reps are familiar. You didn't get the other region's reads.",
+                "failure": "You stay home and the routine goes stale. Same lobby, same mistakes, nobody new to punish you."
               }
             }
           },
@@ -714,11 +734,13 @@
             "choices": {
               "a": {
                 "label": "Trust the data and rework your challenges",
-                "outcome": "You rework challenges off the data. Reads improve; the discomfort shows."
+                "outcome": "You wait a beat longer. Boost lasts. You miss the old panic challenge more than you'll admit.",
+                "failure": "You try to wait and just… don't challenge. Balls bounce in from mid because you second-guessed a 50 you had."
               },
               "b": {
                 "label": "Trust your instincts: stats don't see everything",
-                "outcome": "You trust your instincts. Form ticks up. The analyst shrugs."
+                "outcome": "You trust the read in your hands. Some of those early challenges still win games. The spreadsheet stays mad.",
+                "failure": "You ignore the sheet and get caught on the same overcommit, twice, in the same series."
               }
             }
           },
@@ -728,15 +750,18 @@
             "choices": {
               "a": {
                 "label": "Log off until the major",
-                "outcome": "You log off until the major. The mentions die. So does the noise that kept you sharp."
+                "outcome": "You delete the apps until the major. The clip dies. So does the noise that used to keep you sharp.",
+                "failure": "You log off and still hear about it in team voice. Someone sent the clip in the group chat 'as a joke.'"
               },
               "b": {
                 "label": "Post a self-deprecating meme and own it",
-                "outcome": "The meme lands. Chat loves it; the next games still have to answer."
+                "outcome": "The meme lands. Chat quotes it for a day. The next series still has to answer the whiff.",
+                "failure": "You post the meme and the replies are worse. Quote-tweets of the original clip, with your joke under it."
               },
               "c": {
                 "label": "Say nothing and let the next games answer",
-                "outcome": "You say nothing. The next series is the only reply that matters."
+                "outcome": "You say nothing. Queue, scrim, sleep. The next series is the only reply that counts.",
+                "failure": "You stay silent and the clip keeps circulating. In the next opener you're thinking about Twitter, not kickoff."
               }
             }
           },
@@ -746,11 +771,13 @@
             "choices": {
               "a": {
                 "label": "Go full bump mode",
-                "outcome": "Full bump mode. Kickoff fights swing your way; the chaos cuts both directions."
+                "outcome": "You live on the bump. Kickoff fights swing. You also eat a demo you didn't see, every other game.",
+                "failure": "You go bump-hungry and whiff the demo, then the ball. Chaos without the payoff."
               },
               "b": {
                 "label": "Keep it clean and positional",
-                "outcome": "You stay clean and positional. Form and morale hold in the structure."
+                "outcome": "You stay clean and positional. Boost is still there. Nobody is hunting you off kickoff either.",
+                "failure": "You stay clean and get walked through. The other first man bumps you for free and takes the pad."
               }
             }
           },
@@ -760,11 +787,13 @@
             "choices": {
               "a": {
                 "label": "Fix your sleep schedule around the team's hours",
-                "outcome": "Sleep flips to the team's hours. Form climbs; the late-night peak is gone."
+                "outcome": "You flip to the team's clock. Noon scrims feel like games. The 2 a.m. peak is gone.",
+                "failure": "You force the sleep schedule and show up groggy anyway. Worst of both clocks."
               },
               "b": {
                 "label": "Keep grinding nights where you peak",
-                "outcome": "You keep grinding at 2 a.m. Mechanics stay elite; the noon scrims suffer."
+                "outcome": "You keep the 2 a.m. packs. Mechanics stay nasty. You look like a ghost in the noon block.",
+                "failure": "You grind nights and still brick in both lobbies. The noon scrims are a write-off and so is your sleep."
               }
             }
           },
@@ -774,11 +803,13 @@
             "choices": {
               "a": {
                 "label": "Play it: the community gave you everything",
-                "outcome": "You play the charity showmatch. The community loves it; prep time is gone."
+                "outcome": "You play the showmatch. The donation ticker goes stupid. Your regional warm-up is a lobby with casters yelling memes.",
+                "failure": "You play it, drop every aerial on the broadcast, and still lose Saturday to prep you didn't do."
               },
               "b": {
                 "label": "Politely decline and scrim instead",
-                "outcome": "You decline and scrim. Cold, but the regional block is cleaner."
+                "outcome": "You decline and scrim. Cold text to the organizer. The regional block is actually a block.",
+                "failure": "You decline, then watch the showmatch on stream instead of scrimming. You got neither the goodwill nor the reps."
               }
             }
           },
@@ -788,11 +819,82 @@
             "choices": {
               "a": {
                 "label": "Lab the new timings until they're second nature",
-                "outcome": "You lab the patch until the new pads are automatic. Rating up, extra hours in."
+                "outcome": "You lab pads until the new timer is in your hands. Kickoff paths change. You skip a night of sleep to get there.",
+                "failure": "You lab the patch and grout the old timing into the new pads. Double-pads you used to hit are now air."
               },
               "b": {
                 "label": "Adapt on the fly: feel over theory",
-                "outcome": "You adapt on the fly. Feel over theory. Form holds."
+                "outcome": "You queue and feel it out. Some pads surprise you. You don't lose a whole night to a spreadsheet.",
+                "failure": "You 'feel it out' and get beat to every pad in the next series. The other team labbed."
+              }
+            }
+          },
+          "split-17": {
+            "title": "1v1 For Content",
+            "description": "A big streamer DMs you: 1v1 the new 16-year-old prodigy on stream tonight. Last collab did huge numbers. Your coach has a scrim block at the same hour.",
+            "choices": {
+              "a": {
+                "label": "Play the 1v1. The clip will live forever",
+                "outcome": "BO7 on stream. Chat is feral. You get the thumbnail. You miss the scrims, and the prodigy is now in your head.",
+                "failure": "You get cooked on stream. Open-net in OT, their reset, your whiff. The clip is you. The scrims happened without you."
+              },
+              "b": {
+                "label": "Pass. Scrims first",
+                "outcome": "You pass. The streamer books someone else. Your night is three maps of shadow defense with the roster.",
+                "failure": "You skip it and still check the VOD between games. Teammates notice you're half in the scrim."
+              }
+            }
+          },
+          "split-18": {
+            "title": "They Tagged You",
+            "description": "A rival posts your worst clip of the split with a caption that isn't even a joke. It's personal. Your mentions are a dumpster fire.",
+            "choices": {
+              "a": {
+                "label": "Quote-tweet them. Don't let it sit",
+                "outcome": "You quote-tweet them. The timeline loves the fight. In scrims you're still composing the next reply.",
+                "failure": "You reply. They post a worse clip. Your coach mutes the Discord until you log off."
+              },
+              "b": {
+                "label": "Mute the word and queue",
+                "outcome": "You mute the account, queue ranked, and let the next regional answer. The clip is still out there. You're not.",
+                "failure": "You mute them and still refresh the thread. The next scrim block is you playing with one eye on your phone."
+              },
+              "c": {
+                "label": "Let the org post. Stay out of it",
+                "outcome": "The org drops a comeback montage. You stay out of the replies. The clip war is someone else's shift.",
+                "failure": "The org posts a corporate 'we focus on the game' tweet. It reads like a concession. The replies get meaner."
+              }
+            }
+          },
+          "split-19": {
+            "title": "One More Pack",
+            "description": "You're in a groove at 1 a.m. Custom training, then ranked, then another pack. The first regional is in four days. The org already asked you to sleep.",
+            "choices": {
+              "a": {
+                "label": "Keep grinding nights until it clicks",
+                "outcome": "You grind until the sun comes up. The mechanics are there. So is the crash: the org sits you for the first two regionals and the major.",
+                "failure": "You grind through the week and show up unable to aerial. They sit you for two regionals and scratch you from the major. The packs didn't even stick."
+              },
+              "b": {
+                "label": "Close the game. Sleep. Trust the work",
+                "outcome": "You close the game. Two nights of actual sleep. The pack will still be there. So will you, on the server list.",
+                "failure": "You try to sleep and lie there thinking about the pack you didn't finish. You show up groggy anyway."
+              }
+            }
+          },
+          "split-20": {
+            "title": "A Workshop Map With Your Name On It",
+            "description": "A map creator in your Discord offers a custom pack built around the mechanic you keep missing — ceiling resets, or that backboard read. A week of their time. You'd owe them a shoutout, and a week of lab.",
+            "choices": {
+              "a": {
+                "label": "Yes. Lab it until the read is automatic",
+                "outcome": "The pack is nasty. A week later the backboard read is just there. You shout them out. Your usual routine is gone.",
+                "failure": "The pack is built for a mechanic you don't have yet. You grind it anyway and grout bad habits into your hands."
+              },
+              "b": {
+                "label": "Pass. Stick to the packs you know",
+                "outcome": "You thank them and stay on the packs you already hit. No new quirks. No new ceiling either.",
+                "failure": "You pass. Two weeks later a rival is grinding that same creator's pack on stream — and hitting the read you don't have."
               }
             }
           },
@@ -802,11 +904,13 @@
             "choices": {
               "a": {
                 "label": "Study every opponent frame by frame",
-                "outcome": "Frame-by-frame prep on the group of death. You know them; you're also fried."
+                "outcome": "You know their kickoff tells. You also haven't seen sunlight. The group of death is in your laptop.",
+                "failure": "You over-scout and freeze on stage. You wait for a pattern that isn't there, and the opener is gone."
               },
               "b": {
                 "label": "Focus on your own game: let them adapt to you",
-                "outcome": "You focus on your own game. Confidence up, scouting thinner."
+                "outcome": "You scrim your stuff, not theirs. Confidence is up. You will not know their third-man cheat until you see it live.",
+                "failure": "You skip the tape and get cooked by a kickoff they have run in every series this year."
               }
             }
           },
@@ -816,11 +920,13 @@
             "choices": {
               "a": {
                 "label": "Strict recovery: sleep, food, light sessions",
-                "outcome": "Strict recovery. Sleep, food, light sessions. You land in the opener fresh."
+                "outcome": "Sleep, food, light sessions. You land in the opener able to track the ball. You didn't soak the arena at midnight.",
+                "failure": "You force the sleep schedule and still feel like 4 a.m. in the opener. Light sessions weren't enough."
               },
               "b": {
                 "label": "Midnight arena sessions to soak in the stage",
-                "outcome": "Midnight arena sessions. The stage feels like home; the jet lag does not."
+                "outcome": "Midnight in the arena. The stage starts to feel like a server. The jet lag does not care.",
+                "failure": "You hit the midnight sessions and play the opener on no sleep. The stage is loud. Your jump is late."
               }
             }
           },
@@ -830,11 +936,13 @@
             "choices": {
               "a": {
                 "label": "Walk out early and embrace the crowd",
-                "outcome": "You walk out early and let the crowd hit. Nerves turn into fuel."
+                "outcome": "You walk out early. The noise hits, then it turns into fuel. Your hands stop shaking when the countdown starts.",
+                "failure": "You walk out early and the crowd eats you. The shake in your hands is worse on the desk."
               },
               "b": {
                 "label": "Noise-cancelling on, tunnel vision until game time",
-                "outcome": "Headphones on, tunnel vision. The shake in your hands settles."
+                "outcome": "Headphones on. You don't look up until game 1. The shake settles. You also never see the room you're in.",
+                "failure": "You hide in the headphones and still choke the first kickoff. Tunnel vision didn't hide the countdown."
               }
             }
           },
@@ -844,11 +952,13 @@
             "choices": {
               "a": {
                 "label": "Rework your kickoff plays overnight",
-                "outcome": "Overnight kickoff rework. They scouted the old you, not this."
+                "outcome": "Overnight kickoff rework. They taped the old you. This one fake-challenges on the spawn they always overcommit.",
+                "failure": "You rework kickoffs at 4 a.m. and brick the new setup on stage. They still have the old tape, and now this too."
               },
               "b": {
                 "label": "Take it as a compliment and double down on your style",
-                "outcome": "You double down on your style. Compliment accepted. Adjustments skipped."
+                "outcome": "You play your game louder. Compliment accepted. If they built a plan around you, make them use it.",
+                "failure": "You double down and run straight into the trap they built. Every challenge is where they wanted it."
               }
             }
           },
@@ -858,11 +968,13 @@
             "choices": {
               "a": {
                 "label": "Give the full press run: the fans love it",
-                "outcome": "Full press run. Fans and clips everywhere; the sticks wait."
+                "outcome": "Full press run. Clips, photos, a bit that will live on the broadcast. The sticks wait until tonight.",
+                "failure": "You do every interview and go blank on stage the next day. Your hands remember the microphone, not the kickoff."
               },
               "b": {
                 "label": "Do the minimum and get back to warm-ups",
-                "outcome": "Minimum media, back to warm-ups. Form holds. The camera crew does not love you."
+                "outcome": "One interview, back to warm-ups. Form holds. The camera crew does not love you.",
+                "failure": "You duck media and still can't focus in warm-ups. The org is annoyed. You're not sharper for it."
               }
             }
           },
@@ -872,11 +984,13 @@
             "choices": {
               "a": {
                 "label": "Run the fakes",
-                "outcome": "Fake kickoffs vs the favorites. High risk, and they bite or they don't."
+                "outcome": "You run the fakes. If they bite, it's a free ball. If they don't, you're first man in no-man's-land.",
+                "failure": "You run the fake and they don't bite. You're late to everything. The coach stops calling it after game 1."
               },
               "b": {
                 "label": "Stick to standard speedflips",
-                "outcome": "Standard speedflips. No chaos. No surprise either."
+                "outcome": "Standard speedflips. No chaos. They get the kickoff they practiced against. So do you.",
+                "failure": "You stay standard and they still win every 50. No surprise, no answer."
               }
             }
           },
@@ -886,15 +1000,18 @@
             "choices": {
               "a": {
                 "label": "Mute Discord and take real days off",
-                "outcome": "You go quiet. The tank refills a little. The scene feels farther away."
+                "outcome": "You go quiet. The tank refills a little. The scene feels farther away, and that's the point.",
+                "failure": "You take the days off and come back emptier. The desktop is still there. So is the split."
               },
               "b": {
                 "label": "Turn the slump into content: ranked on stream",
-                "outcome": "The audience shows up. Training time shrinks. The brand of you grows."
+                "outcome": "The audience shows up. Ranked is content now. Training time is whatever chat doesn't raid.",
+                "failure": "You stream the slump. Chat farms the whiffs. You still didn't get the reps, and now they're public."
               },
               "c": {
                 "label": "Sit with the academy stack and run their VODs",
-                "outcome": "You spend the week teaching. Your own mechanics idle; the kids get better."
+                "outcome": "You spend the week teaching. Your own mechanics idle. The kids get better, and you remember why this was fun.",
+                "failure": "You review academy VODs and zone out. They don't get better. Neither do you."
               }
             }
           },
@@ -904,15 +1021,18 @@
             "choices": {
               "a": {
                 "label": "Take the stream schedule",
-                "outcome": "Lights, overlays, subs. The facility sees you less. Chat sees you more."
+                "outcome": "Lights, overlay, subs. The facility sees you less. Chat sees you more.",
+                "failure": "You take the streams and the numbers are bad. You're still not in the facility. Nobody's happy."
               },
               "b": {
                 "label": "Stay in the building and help the next roster",
-                "outcome": "You become the voice in review. Playing time dips; the room listens."
+                "outcome": "You become the voice in review. Playing time dips. The room actually listens.",
+                "failure": "You stay to help and they don't want the notes. You're in the building with nothing to do."
               },
               "c": {
                 "label": "Decline both and disappear for a month",
-                "outcome": "Phone on Do Not Disturb. No ranked, no Discord. The silence is the point."
+                "outcome": "Phone on Do Not Disturb. No ranked, no Discord. The silence is the point.",
+                "failure": "You disappear and come back to a roster that already moved on. The month didn't fix the spark."
               }
             }
           },
@@ -922,15 +1042,18 @@
             "choices": {
               "a": {
                 "label": "Run the film with them every night",
-                "outcome": "You coach more than you queue. The kid improves. So does the part of you that likes teaching."
+                "outcome": "You coach more than you queue. The kid improves. So does the part of you that likes teaching.",
+                "failure": "You run film every night and they don't take a single note. Your ranked time is gone."
               },
               "b": {
                 "label": "Review on stream and make it a series",
-                "outcome": "VOD review as content. The series hits. Your own ranked time does not."
+                "outcome": "VOD review as content. The series hits. Your own ranked time does not.",
+                "failure": "The series flops. You're explaining kickoffs to 40 viewers instead of taking them."
               },
               "c": {
                 "label": "Pass: you need the hours for yourself, or for nothing",
-                "outcome": "You protect the calendar. The DMs go unanswered. The spark stays dim."
+                "outcome": "You protect the calendar. The DMs go unanswered. The spark stays dim, but the hours are yours.",
+                "failure": "You pass and then don't use the hours. The DMs sit unread. So does your replay folder."
               }
             }
           }
