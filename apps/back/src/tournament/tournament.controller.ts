@@ -64,6 +64,14 @@ export class TournamentController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
+  @Get("without-matches")
+  async findWithoutMatches() {
+    const tournaments = await this.tournamentService.findPandascoreWithoutMatches();
+    return { tournaments };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post()
   async create(@Body() dto: CreateTournamentDto) {
     const tournament = await this.manualTournamentService.create(dto);

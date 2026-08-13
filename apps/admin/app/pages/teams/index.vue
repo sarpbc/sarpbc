@@ -32,6 +32,7 @@ const isDeleteModalOpen = ref(false);
 const teamToDelete = ref<Team | null>(null);
 const isDeleting = ref(false);
 const isCreating = ref(false);
+const isSyncing = ref(false);
 
 const newTeam = ref({
   name: "",
@@ -121,6 +122,21 @@ async function confirmCreate() {
 async function updatePage(value: number) {
   page.value = value;
 }
+
+async function onSyncTeams() {
+  if (isSyncing.value) {
+    return;
+  }
+  isSyncing.value = true;
+  try {
+    await syncTeamFromPandascore();
+    await refresh();
+  } catch (error) {
+    console.error("Failed to sync teams:", error);
+  } finally {
+    isSyncing.value = false;
+  }
+}
 </script>
 
 <template>
@@ -129,12 +145,24 @@ async function updatePage(value: number) {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        icon="i-fluent-add-24-regular"
-        :label="$t('page.teams.create.title')"
-        class="cursor-pointer"
-        @click="openCreateModal"
-      />
+      <div class="flex flex-row gap-2">
+        <UButton
+          icon="i-fluent-arrow-sync-24-regular"
+          color="neutral"
+          variant="outline"
+          :label="isSyncing ? $t('page.teams.syncingPandascore') : $t('page.teams.syncPandascore')"
+          :loading="isSyncing"
+          :disabled="isSyncing"
+          class="cursor-pointer"
+          @click="onSyncTeams"
+        />
+        <UButton
+          icon="i-fluent-add-24-regular"
+          :label="$t('page.teams.create.title')"
+          class="cursor-pointer"
+          @click="openCreateModal"
+        />
+      </div>
     </template>
 
     <DashboardContent>

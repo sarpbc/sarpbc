@@ -3,9 +3,10 @@ import { SearchController } from "./search.controller";
 import { SearchService } from "./search.service";
 import { PlayerModule } from "../player/player.module";
 import { TeamModule } from "../team/team.module";
+import { TournamentModule } from "../tournament/tournament.module";
 
 @Module({
-  imports: [PlayerModule, TeamModule],
+  imports: [PlayerModule, TeamModule, TournamentModule],
   controllers: [SearchController],
   providers: [SearchService],
   exports: [SearchService],
