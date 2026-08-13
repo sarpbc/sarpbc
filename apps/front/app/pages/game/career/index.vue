@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import CareerDestinyChoice from "~/components/career/DestinyChoice.vue";
 import CareerEnd from "~/components/career/CareerEnd.vue";
 import CareerEventCard from "~/components/career/EventCard.vue";
 import CareerEventOutcome from "~/components/career/EventOutcome.vue";
@@ -35,7 +34,6 @@ const {
   playerAge,
   isPastPeak,
   canRetire,
-  recommendedDestiny,
   hydrate,
   resetCareer,
   setOnboardingStep,
@@ -53,18 +51,13 @@ const {
   acceptOffer,
   stayWithTeam,
   retireCareer,
-  chooseDestiny,
 } = useCareerSimulator();
 
 const onMenu = ref(true);
 const hoveredTeamId = ref<string | null>(null);
 
 const showStats = computed(
-  () =>
-    !onMenu.value &&
-    state.value.phase !== "onboarding" &&
-    state.value.phase !== "career_end" &&
-    state.value.phase !== "destiny",
+  () => !onMenu.value && state.value.phase !== "onboarding" && state.value.phase !== "career_end",
 );
 
 const hasActiveCareer = computed(
@@ -148,7 +141,7 @@ function handleContinue() {
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <SCrossCard class="min-h-row-header">
+    <SCrossCard v-if="onMenu" class="min-h-row-header">
       <div class="flex w-full flex-col items-center justify-center gap-1 py-3 text-center">
         <h1 class="text-xl font-semibold tracking-tight">
           {{ t("page.game.career.title") }}
@@ -164,6 +157,15 @@ function handleContinue() {
       </div>
     </SCard>
 
+    <div v-else-if="onMenu" class="mx-auto w-full max-w-md">
+      <CareerMenu
+        :can-continue="canContinue"
+        :continue-name="continueName"
+        @new-career="handleNewCareer"
+        @continue="handleContinue"
+      />
+    </div>
+
     <div v-else class="flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-4">
       <SHubColumn variant="main" class="order-2 md:order-1 md:col-span-3">
         <CareerWorldRankings
@@ -175,8 +177,8 @@ function handleContinue() {
 
       <SHubColumn variant="main" class="order-1 md:order-2 md:col-span-6">
         <div class="flex flex-col gap-4">
-          <SCard v-if="hasActiveCareer" class="p-4">
-            <div class="flex items-center justify-between gap-2">
+          <SCrossCard v-if="hasActiveCareer" class="min-h-row-header">
+            <div class="flex w-full items-center justify-between gap-2 px-4 py-3">
               <p class="min-w-0 truncate text-sm font-medium">
                 {{ state.playerName || t("page.game.career.title") }}
                 <span class="text-muted">· {{ currentTeamName }}</span>
@@ -185,125 +187,107 @@ function handleContinue() {
                 {{ t("page.game.career.actions.abandon") }}
               </UButton>
             </div>
-          </SCard>
+          </SCrossCard>
 
-          <SCard class="p-4 sm:p-6">
-            <CareerMenu
-              v-if="onMenu"
-              :can-continue="canContinue"
-              :continue-name="continueName"
-              @new-career="handleNewCareer"
-              @continue="handleContinue"
+          <div>
+            <div v-if="showStats" class="mb-6">
+              <CareerStatsBar :stats="state.stats" :age="playerAge" />
+            </div>
+
+            <CareerOnboarding
+              v-if="state.phase === 'onboarding'"
+              :step="state.onboardingStep"
+              :player-name="state.playerName"
+              :region="state.region"
+              :country="state.country"
+              :role="state.role"
+              :background="state.background"
+              @update:player-name="setPlayerName"
+              @update:step="setOnboardingStep"
+              @select-region="setRegion"
+              @select-country="setCountry"
+              @select-role="setRole"
+              @select-background="setBackground"
+              @complete="completeOnboarding"
             />
-            <template v-else>
-              <div v-if="showStats" class="mb-6">
-                <CareerStatsBar :stats="state.stats" :age="playerAge" />
-              </div>
 
-              <CareerOnboarding
-                v-if="state.phase === 'onboarding'"
-                :step="state.onboardingStep"
-                :player-name="state.playerName"
-                :region="state.region"
-                :country="state.country"
-                :role="state.role"
-                :background="state.background"
-                @update:player-name="setPlayerName"
-                @update:step="setOnboardingStep"
-                @select-region="setRegion"
-                @select-country="setCountry"
-                @select-role="setRole"
-                @select-background="setBackground"
-                @complete="completeOnboarding"
-              />
+            <div v-else-if="state.phase === 'season_intro'" class="flex flex-col gap-4 text-center">
+              <h2 class="text-lg font-semibold tracking-tight">
+                {{
+                  t("page.game.career.season.introTitle", {
+                    season: state.currentSeason,
+                    age: playerAge,
+                  })
+                }}
+              </h2>
+              <p class="text-sm text-muted text-pretty">
+                {{
+                  t("page.game.career.season.introBody", {
+                    team: currentTeamName,
+                    rank: currentTeamRank ?? "—",
+                  })
+                }}
+              </p>
+              <p class="text-xs text-muted text-pretty">
+                {{
+                  t("page.game.career.season.structure", {
+                    points: WORLDS_QUALIFICATION_POINTS,
+                  })
+                }}
+              </p>
+              <p v-if="isPastPeak" class="text-xs text-muted text-pretty">
+                {{ t("page.game.career.season.declineHint") }}
+              </p>
+              <UButton block @click="startSeason">
+                {{ t("page.game.career.season.begin") }}
+              </UButton>
+            </div>
 
-              <div
-                v-else-if="state.phase === 'season_intro'"
-                class="flex flex-col gap-4 text-center"
-              >
-                <h2 class="text-lg font-semibold tracking-tight">
-                  {{
-                    t("page.game.career.season.introTitle", {
-                      season: state.currentSeason,
-                      age: playerAge,
-                    })
-                  }}
-                </h2>
-                <p class="text-sm text-muted text-pretty">
-                  {{
-                    t("page.game.career.season.introBody", {
-                      team: currentTeamName,
-                      rank: currentTeamRank ?? "—",
-                    })
-                  }}
-                </p>
-                <p class="text-xs text-muted text-pretty">
-                  {{
-                    t("page.game.career.season.structure", {
-                      points: WORLDS_QUALIFICATION_POINTS,
-                    })
-                  }}
-                </p>
-                <p v-if="isPastPeak" class="text-xs text-muted text-pretty">
-                  {{ t("page.game.career.season.declineHint") }}
-                </p>
-                <UButton block @click="startSeason">
-                  {{ t("page.game.career.season.begin") }}
-                </UButton>
-              </div>
+            <CareerEventCard
+              v-else-if="state.phase === 'event' && currentEvent"
+              :event="currentEvent"
+              :stage="state.currentStage"
+              @choose="resolveEventChoice"
+            />
 
-              <CareerEventCard
-                v-else-if="state.phase === 'event' && currentEvent"
-                :event="currentEvent"
-                :stage="state.currentStage"
-                @choose="resolveEventChoice"
-              />
+            <CareerEventOutcome
+              v-else-if="state.phase === 'event_result' && state.lastEventOutcome"
+              :outcome="state.lastEventOutcome"
+              @continue="continueAfterEventOutcome"
+            />
 
-              <CareerEventOutcome
-                v-else-if="state.phase === 'event_result' && state.lastEventOutcome"
-                :outcome="state.lastEventOutcome"
-                @continue="continueAfterEventOutcome"
-              />
+            <CareerStageResult
+              v-else-if="state.phase === 'stage_result'"
+              :stage="state.currentStage"
+              :split="lastSplit"
+              :worlds-placement="state.currentWorlds"
+              :season-points="seasonPoints"
+              :qualified-for-worlds="qualifiedForWorlds"
+              @continue="continueAfterResult"
+            />
 
-              <CareerStageResult
-                v-else-if="state.phase === 'stage_result'"
-                :stage="state.currentStage"
-                :split="lastSplit"
-                :worlds-placement="state.currentWorlds"
-                :season-points="seasonPoints"
-                :qualified-for-worlds="qualifiedForWorlds"
-                @continue="continueAfterResult"
-              />
+            <CareerOffseasonOffer
+              v-else-if="state.phase === 'offseason'"
+              :offers="offseasonOffers"
+              :current-team-name="currentTeamName"
+              :current-team-rank="currentTeamRank"
+              :renewal-offered="state.renewalOffered"
+              :is-last-chance-offer="state.isLastChanceOffer"
+              :can-retire="canRetire"
+              :destiny-prompt-pending="state.offseasonDestinyPending"
+              @accept="acceptOffer"
+              @stay="stayWithTeam"
+              @retire="retireCareer"
+              @destiny="resolveOffseasonDestiny"
+            />
 
-              <CareerOffseasonOffer
-                v-else-if="state.phase === 'offseason'"
-                :offers="offseasonOffers"
-                :current-team-name="currentTeamName"
-                :current-team-rank="currentTeamRank"
-                :renewal-offered="state.renewalOffered"
-                :is-last-chance-offer="state.isLastChanceOffer"
-                :can-retire="canRetire"
-                :destiny-prompt-pending="state.offseasonDestinyPending"
-                @accept="acceptOffer"
-                @stay="stayWithTeam"
-                @retire="retireCareer"
-                @destiny="resolveOffseasonDestiny"
-              />
-
-              <CareerDestinyChoice
-                v-else-if="state.phase === 'destiny'"
-                :recommended="recommendedDestiny"
-                @choose="chooseDestiny"
-              />
-
-              <CareerEnd
-                v-else-if="state.phase === 'career_end' && state.result"
-                :result="state.result"
-                @share="handleShare"
-                @play-again="handlePlayAgain"
-              />
-            </template>
-          </SCard>
+            <CareerEnd
+              v-else-if="state.phase === 'career_end' && state.result"
+              :result="state.result"
+              @share="handleShare"
+              @play-again="handlePlayAgain"
+            />
+          </div>
         </div>
       </SHubColumn>
 

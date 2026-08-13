@@ -1,15 +1,43 @@
 import type { CareerBackground, CareerRole, CareerStats } from "~/types/career";
 import { MAX_STAT, MIN_STAT, getSeasonsPastPeak } from "~/types/career";
 
+/** Full positive gains below this; each extra point costs more toward MAX_STAT. */
+export const SOFT_STAT_CEILING = 85;
+
 export function clampStat(value: number): number {
   return Math.max(MIN_STAT, Math.min(MAX_STAT, Math.round(value)));
 }
 
+function gainCost(current: number): number {
+  if (current < SOFT_STAT_CEILING) return 1;
+  const t = (current - SOFT_STAT_CEILING) / (MAX_STAT - SOFT_STAT_CEILING);
+  return 1 + 2 * t * t;
+}
+
+/**
+ * Apply a single-stat change. Negative deltas apply in full; positive deltas
+ * shrink as the value approaches MAX_STAT so 90+ is rare and 95 is exceptional.
+ */
+export function applyStatChange(current: number, delta: number): number {
+  if (delta === 0) return clampStat(current);
+  if (delta < 0) return clampStat(current + delta);
+
+  let budget = delta;
+  let value = current;
+  while (budget > 0 && value < MAX_STAT) {
+    const cost = gainCost(value);
+    if (budget + 1e-9 < cost) break;
+    value += 1;
+    budget -= cost;
+  }
+  return clampStat(value);
+}
+
 export function applyStatDelta(stats: CareerStats, delta: Partial<CareerStats>): CareerStats {
   return {
-    rating: clampStat(stats.rating + (delta.rating ?? 0)),
-    form: clampStat(stats.form + (delta.form ?? 0)),
-    morale: clampStat(stats.morale + (delta.morale ?? 0)),
+    rating: applyStatChange(stats.rating, delta.rating ?? 0),
+    form: applyStatChange(stats.form, delta.form ?? 0),
+    morale: applyStatChange(stats.morale, delta.morale ?? 0),
   };
 }
 

@@ -169,9 +169,14 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
             @focusin="hoveredTeamId = entry.team.id"
             @focusout="onTeamFocusOut($event, entry.team.id)"
           >
-            <span class="block text-right text-xs text-muted tabular-nums">
-              {{ entry.rank }}
-            </span>
+            <UTooltip
+              :text="t('page.game.career.rankings.teamWorldRanking')"
+              :content="tooltipContent"
+            >
+              <span class="block text-right text-xs text-muted tabular-nums">
+                {{ entry.rank }}
+              </span>
+            </UTooltip>
             <span class="flex min-w-0 items-center gap-1">
               <span class="min-w-0 truncate">{{ entry.team.name }}</span>
               <span v-if="entry.isPlayerTeam" class="shrink-0 text-xs text-primary">

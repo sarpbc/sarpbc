@@ -5,7 +5,7 @@ export interface CareerWorldTeam {
   id: string;
   name: string;
   region: CareerRegion;
-  /** Baseline strength (0–100) used to seed the living world rankings. */
+  /** Baseline strength (0–95) used to seed the living world rankings. */
   baseStrength: number;
   players: readonly [string, string, string];
 }

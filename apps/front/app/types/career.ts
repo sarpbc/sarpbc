@@ -31,7 +31,6 @@ export type CareerPhase =
   | "event_result"
   | "stage_result"
   | "offseason"
-  | "destiny"
   | "career_end";
 
 export type OnboardingStep = "intro" | "region" | "country" | "role" | "background";
@@ -42,6 +41,27 @@ export type CareerEventPool = "split" | "worlds";
 
 export const CAREER_DESTINIES = ["quit", "streamer", "coach"] as const;
 export type CareerDestiny = (typeof CAREER_DESTINIES)[number];
+
+/** Authored epithet keys. Display copy lives in i18n, not on the result. */
+export const CAREER_NICKNAME_KEYS = [
+  "goat",
+  "closer",
+  "iceBlood",
+  "airSurgeon",
+  "majorHunter",
+  "surfaceFox",
+  "theWall",
+  "resetGhost",
+  "theMic",
+  "sideline",
+  "walkedOff",
+  "lanTourist",
+] as const;
+export type CareerNicknameKey = (typeof CAREER_NICKNAME_KEYS)[number];
+
+export function isCareerNicknameKey(value: unknown): value is CareerNicknameKey {
+  return typeof value === "string" && CAREER_NICKNAME_KEYS.includes(value as never);
+}
 
 export interface CareerDestinyLeanings {
   quit: number;
@@ -110,6 +130,7 @@ export interface CareerResult {
   trophies: CareerTrophy[];
   retiredAge: number;
   destiny: CareerDestiny;
+  nicknameKey: CareerNicknameKey;
   completedAt: string;
 }
 
@@ -169,7 +190,8 @@ export const REGIONALS_PER_SPLIT = 3;
 export const MAJOR_QUALIFICATION_POINTS = 10;
 export const WORLDS_QUALIFICATION_POINTS = 42;
 export const MIN_STAT = 0;
-export const MAX_STAT = 100;
+/** Hard ceiling — 95 is near-mythical; 100 is not reachable. */
+export const MAX_STAT = 95;
 
 export function getPlayerAge(season: number): number {
   return STARTING_AGE + season - 1;
@@ -211,16 +233,6 @@ export function getRecommendedDestiny(leanings: CareerDestinyLeanings): CareerDe
   return best;
 }
 
-export function primaryDestinyLean(delta: Partial<CareerDestinyLeanings>): CareerDestiny | null {
-  const order: CareerDestiny[] = ["coach", "streamer", "quit"];
-  let best: CareerDestiny | null = null;
-  let bestScore = 0;
-  for (const destiny of order) {
-    const value = delta[destiny] ?? 0;
-    if (value > bestScore) {
-      best = destiny;
-      bestScore = value;
-    }
-  }
-  return best;
+export function listPositiveDestinyLeans(delta: Partial<CareerDestinyLeanings>): CareerDestiny[] {
+  return CAREER_DESTINIES.filter((destiny) => (delta[destiny] ?? 0) > 0);
 }

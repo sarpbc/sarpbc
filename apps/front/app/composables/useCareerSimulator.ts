@@ -7,7 +7,12 @@ import {
   saveCareerResult,
 } from "~/composables/useCareerStorage";
 import { applyStatDelta, getAgeDecline, getStartingStats } from "~/utils/career/stats";
-import { createCareerWorld, getRosterStrength, moveUserToTeam } from "~/utils/career/roster";
+import {
+  createCareerWorld,
+  getRosterStrength,
+  moveUserToTeam,
+  tickNpcRatings,
+} from "~/utils/career/roster";
 import {
   computeCircuitPoints,
   computeSeasonPoints,
@@ -21,6 +26,7 @@ import {
   simulateSplit,
   simulateWorlds,
 } from "~/utils/career/simulation";
+import { pickCareerNickname } from "~/utils/career/nickname";
 import type {
   CareerBackground,
   CareerCountry,
@@ -44,11 +50,13 @@ import {
   getSeasonsPastPeak,
 } from "~/types/career";
 
-const OFFSEASON_DESTINY_CHOICES: Record<string, Partial<CareerDestinyLeanings>> = {
+const OFFSEASON_DESTINY_CHOICES = {
   quit: { quit: 2 },
   streamer: { streamer: 2 },
   coach: { coach: 2 },
-};
+} as const satisfies Record<string, Partial<CareerDestinyLeanings>>;
+
+type OffseasonDestinyChoiceId = keyof typeof OFFSEASON_DESTINY_CHOICES;
 
 function createInitialState(): CareerState {
   const id = crypto.randomUUID();
@@ -213,12 +221,18 @@ export function useCareerSimulator() {
     if (!choice) return;
 
     const destiny = choice.destiny ?? {};
-    state.value.stats = applyStatDelta(state.value.stats, choice.delta);
+    const before = state.value.stats;
+    const next = applyStatDelta(before, choice.delta);
+    state.value.stats = next;
     state.value.destinyLeanings = applyDestinyLeanings(state.value.destinyLeanings, destiny);
     state.value.lastEventOutcome = {
       eventId,
       choiceId,
-      delta: choice.delta,
+      delta: {
+        rating: next.rating - before.rating,
+        form: next.form - before.form,
+        morale: next.morale - before.morale,
+      },
       destiny,
     };
     state.value.phase = "event_result";
@@ -264,6 +278,12 @@ export function useCareerSimulator() {
         assertNever(stage);
     }
 
+    state.value.world = tickNpcRatings(
+      state.value.world,
+      state.value.id,
+      state.value.currentSeason,
+      stage,
+    );
     state.value.phase = "stage_result";
   }
 
@@ -329,11 +349,27 @@ export function useCareerSimulator() {
   }
 
   function resolveOffseasonDestiny(choiceId: string) {
-    const delta = OFFSEASON_DESTINY_CHOICES[choiceId];
-    if (!delta) return;
-    state.value.destinyLeanings = applyDestinyLeanings(state.value.destinyLeanings, delta);
+    if (!(choiceId in OFFSEASON_DESTINY_CHOICES)) return;
+    const id = choiceId as OffseasonDestinyChoiceId;
+    state.value.destinyLeanings = applyDestinyLeanings(
+      state.value.destinyLeanings,
+      OFFSEASON_DESTINY_CHOICES[id],
+    );
     state.value.offseasonDestinyPending = false;
-    persist();
+
+    switch (id) {
+      case "quit":
+      case "streamer":
+        retireCareer();
+        return;
+      case "coach":
+        persist();
+        return;
+      default: {
+        const _exhaustive: never = id;
+        return _exhaustive;
+      }
+    }
   }
 
   function acceptOffer(teamId: string) {
@@ -355,16 +391,17 @@ export function useCareerSimulator() {
   }
 
   function retireCareer() {
-    state.value.phase = "destiny";
-    persist();
-  }
-
-  function chooseDestiny(destiny: CareerDestiny) {
-    finishCareer(destiny);
+    finishCareer(getRecommendedDestiny(state.value.destinyLeanings));
   }
 
   function advanceToNextSeason() {
     state.value.currentSeason += 1;
+    state.value.world = tickNpcRatings(
+      state.value.world,
+      state.value.id,
+      state.value.currentSeason,
+      "season",
+    );
     state.value.stats = applyStatDelta(state.value.stats, getAgeDecline(state.value.currentSeason));
     state.value.currentStage = "split1";
     state.value.currentSplits = [];
@@ -379,6 +416,7 @@ export function useCareerSimulator() {
   }
 
   function finishCareer(destiny: CareerDestiny) {
+    const trophies = deriveTrophies(state.value.seasonRecords);
     const result: CareerResult = {
       id: state.value.id,
       playerName: state.value.playerName || "Rookie",
@@ -390,9 +428,15 @@ export function useCareerSimulator() {
       finalForm: state.value.stats.form,
       finalMorale: state.value.stats.morale,
       seasons: [...state.value.seasonRecords],
-      trophies: deriveTrophies(state.value.seasonRecords),
+      trophies,
       retiredAge: getRetiredAge(state.value.seasonRecords.length),
       destiny,
+      nicknameKey: pickCareerNickname({
+        role: state.value.role!,
+        destiny,
+        trophies,
+        seasons: state.value.seasonRecords,
+      }),
       completedAt: new Date().toISOString(),
     };
 
@@ -419,7 +463,6 @@ export function useCareerSimulator() {
       !state.value.renewalOffered ||
       state.value.isLastChanceOffer,
   );
-  const recommendedDestiny = computed(() => getRecommendedDestiny(state.value.destinyLeanings));
 
   return {
     state,
@@ -433,7 +476,6 @@ export function useCareerSimulator() {
     playerAge,
     isPastPeak,
     canRetire,
-    recommendedDestiny,
     hydrate,
     persist,
     resetCareer,
@@ -452,6 +494,5 @@ export function useCareerSimulator() {
     acceptOffer,
     stayWithTeam,
     retireCareer,
-    chooseDestiny,
   };
 }
