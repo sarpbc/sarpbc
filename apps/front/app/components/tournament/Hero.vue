@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
 import type { Team } from "~/types/team";
+import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   formatTournamentDateRange,
   getTournamentStatus,
@@ -75,6 +76,10 @@ const championTeam = computed((): Team | null => {
 });
 
 const showChampion = computed(() => status.value === "finished" && championTeam.value != null);
+
+const showSubscribeCalendar = computed(
+  () => status.value === "live" || status.value === "upcoming",
+);
 </script>
 
 <template>
@@ -107,6 +112,12 @@ const showChampion = computed(() => status.value === "finished" && championTeam.
         <span v-else-if="statusLabel">{{ statusLabel }}</span>
         <span v-if="status && dateRange" aria-hidden="true">·</span>
         <span v-if="dateRange" class="tabular-nums">{{ dateRange }}</span>
+        <template v-if="showSubscribeCalendar">
+          <span v-if="status || dateRange" aria-hidden="true">·</span>
+          <SLink :to="tournamentCalendarPath(tournament.id)" variant="muted" external>
+            {{ t("page.tournaments.id.subscribeCalendar") }}
+          </SLink>
+        </template>
       </div>
 
       <div
