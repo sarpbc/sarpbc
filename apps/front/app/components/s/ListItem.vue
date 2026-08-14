@@ -36,8 +36,8 @@ function listItemSizeClasses(value: ListItemSize): string {
 }
 
 const itemClass = computed(() => [
-  "flex w-full px-2",
-  size === "triple" ? "items-stretch" : "items-center",
+  "flex w-full",
+  size === "triple" ? "p-2 items-stretch" : "px-2 items-center",
   listItemSizeClasses(size),
   divider && "border-b border-default",
   to &&

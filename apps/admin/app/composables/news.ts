@@ -7,6 +7,8 @@ export type NewsArticle = {
   createdAt: string;
   isDraft: boolean;
   imageUrl?: string | null;
+  titleFr?: string | null;
+  contentFr?: string | null;
 };
 
 export type PaginatedNewsArticles = {
@@ -21,6 +23,8 @@ export async function createNewsArticle(body: {
   content: string;
   slug?: string;
   imageUrl?: string;
+  titleFr?: string | null;
+  contentFr?: string | null;
 }): Promise<NewsArticle | null> {
   try {
     return await apiFetch<NewsArticle>("/news", {
@@ -59,10 +63,12 @@ export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | n
 export async function editNewsArticle(
   slug: string,
   body: {
-    title: string;
-    content: string;
+    title?: string;
+    content?: string;
     slug?: string;
     imageUrl?: string | null;
+    titleFr?: string | null;
+    contentFr?: string | null;
   },
 ): Promise<NewsArticle | null> {
   try {
@@ -96,6 +102,18 @@ export async function unpublishNewsArticle(slug: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error unpublishing news article:", error);
+    return false;
+  }
+}
+
+export async function deleteNewsArticle(slug: string): Promise<boolean> {
+  try {
+    await apiFetch(`/news/${slug}`, {
+      method: "DELETE",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting news article:", error);
     return false;
   }
 }

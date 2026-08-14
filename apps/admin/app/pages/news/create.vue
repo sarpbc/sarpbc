@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import type { TabsItem } from "@nuxt/ui";
-import { newsSurfaceClass } from "~/utils/newsEditorLayout";
-
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -17,9 +14,11 @@ const items = [
 ];
 
 const title = ref("");
+const titleFr = ref("");
 const articleSlug = ref("");
 const slugTouched = ref(false);
 const content = ref("");
+const contentFr = ref("");
 const imageUrl = ref<string | null>(null);
 const isSaving = ref(false);
 const isModalOpen = ref(false);
@@ -63,8 +62,10 @@ async function saveArticle() {
     const created = await createNewsArticle({
       title: title.value,
       content: content.value,
-      ...(trimmedSlug ? { slug: trimmedSlug } : {}),
-      ...(imageUrl.value ? { imageUrl: imageUrl.value } : {}),
+      titleFr: titleFr.value.trim() || null,
+      contentFr: contentFr.value.trim() || null,
+      slug: trimmedSlug || undefined,
+      imageUrl: imageUrl.value ?? undefined,
     });
     if (!created) {
       toast.add({
@@ -89,19 +90,6 @@ async function saveArticle() {
     isSaving.value = false;
   }
 }
-
-const tabItems: TabsItem[] = [
-  {
-    label: t("page.news.create.tab.write"),
-    slot: "editor" as const,
-    icon: "i-lucide-pencil",
-  },
-  {
-    label: t("page.news.create.tab.preview"),
-    slot: "preview" as const,
-    icon: "i-lucide-eye",
-  },
-];
 </script>
 
 <template>
@@ -124,8 +112,15 @@ const tabItems: TabsItem[] = [
 
         <template #body>
           <div class="flex flex-col gap-4">
-            <UFormField :label="$t('page.news.create.titleField')" required>
-              <UInput v-model="title" class="w-full" autofocus @keydown.enter="saveArticle" />
+            <UFormField :label="$t('page.news.locale.titleEn')" name="title" required>
+              <UInput v-model="title" class="w-full" />
+            </UFormField>
+            <UFormField
+              :label="$t('page.news.locale.titleFr')"
+              name="titleFr"
+              :hint="$t('page.news.locale.fallbackHint')"
+            >
+              <UInput v-model="titleFr" class="w-full" />
             </UFormField>
             <UFormField
               :label="$t('page.news.create.slugField')"
@@ -152,7 +147,7 @@ const tabItems: TabsItem[] = [
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.create.save')"
             :loading="isSaving"
-            :disabled="!title || !content"
+            :disabled="isSaving"
             class="cursor-pointer"
             @click="saveArticle"
           />
@@ -168,33 +163,11 @@ const tabItems: TabsItem[] = [
       </UModal>
     </template>
 
-    <UTabs
-      :items="tabItems"
-      color="neutral"
-      variant="link"
-      class="flex min-h-0 flex-1 flex-col"
-      :unmount-on-hide="false"
-      :ui="{ root: 'flex flex-col flex-1 min-h-0', content: 'flex-1 min-h-0' }"
-    >
-      <template #editor>
-        <DashboardContent class="p-0 px-0 py-4">
-          <NewsArticleEditor v-model="content" />
-        </DashboardContent>
-      </template>
-
-      <template #preview>
-        <DashboardContent class="overflow-y-auto py-4">
-          <div :class="[newsSurfaceClass, 'p-4']">
-            <h1 v-if="title" class="mb-4 text-2xl font-bold">
-              {{ title }}
-            </h1>
-            <NewsMarkdownPreview v-if="content" :value="content" />
-            <p v-else class="text-muted italic">
-              {{ $t("page.news.create.preview.empty") }}
-            </p>
-          </div>
-        </DashboardContent>
-      </template>
-    </UTabs>
+    <NewsArticleForm
+      v-model:title="title"
+      v-model:title-fr="titleFr"
+      v-model:content="content"
+      v-model:content-fr="contentFr"
+    />
   </NuxtLayout>
 </template>

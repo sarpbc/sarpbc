@@ -214,7 +214,11 @@ export class ReplyService {
   }
 
   async deleteAllForPost(postId: string): Promise<void> {
-    const replies = await this.replyRepository.findByTarget("forumPost", postId, {
+    await this.deleteAllForTarget("forumPost", postId);
+  }
+
+  async deleteAllForTarget(targetType: ReplyTargetType, targetId: string): Promise<void> {
+    const replies = await this.replyRepository.findByTarget(targetType, targetId, {
       includeHidden: true,
     });
     const rootReplies = replies.filter((reply) => !reply.replyTo);

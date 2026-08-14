@@ -6,6 +6,8 @@ export class NewsArticle {
   slug!: string;
   title!: string;
   content!: string;
+  titleFr: string | null = null;
+  contentFr: string | null = null;
   author!: User;
   createdAt: Date = new Date();
   updatedAt: Date | null = null;
@@ -21,6 +23,8 @@ export const NewsArticleSchema = defineEntity({
     slug: p.string().length(255).unique(),
     title: p.string().length(255).index(),
     content: p.text(),
+    titleFr: p.string().length(255).nullable(),
+    contentFr: p.text().nullable(),
     author: p.manyToOne(User).index(),
     createdAt: p
       .datetime()

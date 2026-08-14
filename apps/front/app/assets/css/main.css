@@ -97,6 +97,14 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   transition-duration: var(--duration-slow);
