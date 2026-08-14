@@ -211,6 +211,7 @@ export default defineNuxtConfig({
 
   experimental: {
     writeEarlyHints: false,
+    viewTransition: true,
   },
 
   vite: {

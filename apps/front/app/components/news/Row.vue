@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { NewsArticleListItem } from "~/composables/news";
+import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 
 const localePath = useLocalePath();
 
@@ -26,6 +27,7 @@ const imageUrl = computed(() => {
     <div v-if="imageUrl" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
       <div
         class="aspect-video h-full shrink-0 self-stretch overflow-hidden bg-elevated ring-1 ring-black/10 dark:ring-white/10"
+        :style="{ viewTransitionName: newsCoverTransitionName(props.article.slug) }"
       >
         <NuxtImg
           :src="imageUrl"
