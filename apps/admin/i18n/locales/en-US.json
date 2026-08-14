@@ -251,6 +251,7 @@
         "fr": "Français",
         "enOnly": "EN",
         "enFr": "EN · FR",
+        "tabs": "Article language",
         "titleEn": "English Title",
         "titleFr": "French Title",
         "fallbackHint": "French readers see English until both the French title and body are filled."
@@ -266,11 +267,9 @@
         "saveFailed": "Could not save article. Check the title, slug, and content, then try again.",
         "cancel": "Cancel",
         "placeholder": "Start writing the article content…",
-        "tab": {
-          "write": "Write",
-          "preview": "Preview"
-        },
         "preview": {
+          "show": "Preview",
+          "hide": "Hide Preview",
           "empty": "Nothing to preview yet. Start writing to see the rendered output."
         }
       },
@@ -283,6 +282,17 @@
         "published": "Article published",
         "unpublished": "Article unpublished",
         "publishFailed": "Could not update publish state. Try again."
+      },
+      "actions": {
+        "menu": "Article actions",
+        "editName": "Edit Title",
+        "renameTitle": "Edit Title",
+        "renamed": "Title saved",
+        "renameFailed": "Could not save the title. Try again.",
+        "delete": "Delete Article",
+        "deleteConfirm": "Delete “{title}”? This cannot be undone.",
+        "deleted": "Article deleted",
+        "deleteFailed": "Could not delete the article. Try again."
       },
       "cover": {
         "label": "Cover Image",

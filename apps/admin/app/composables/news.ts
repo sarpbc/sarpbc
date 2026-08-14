@@ -9,7 +9,6 @@ export type NewsArticle = {
   imageUrl?: string | null;
   titleFr?: string | null;
   contentFr?: string | null;
-  hasFrench?: boolean;
 };
 
 export type PaginatedNewsArticles = {
@@ -64,8 +63,8 @@ export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | n
 export async function editNewsArticle(
   slug: string,
   body: {
-    title: string;
-    content: string;
+    title?: string;
+    content?: string;
     slug?: string;
     imageUrl?: string | null;
     titleFr?: string | null;
@@ -103,6 +102,18 @@ export async function unpublishNewsArticle(slug: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error unpublishing news article:", error);
+    return false;
+  }
+}
+
+export async function deleteNewsArticle(slug: string): Promise<boolean> {
+  try {
+    await apiFetch(`/news/${slug}`, {
+      method: "DELETE",
+    });
+    return true;
+  } catch (error) {
+    console.error("Error deleting news article:", error);
     return false;
   }
 }

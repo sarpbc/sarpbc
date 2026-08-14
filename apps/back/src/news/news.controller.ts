@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -92,6 +93,14 @@ export class NewsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async unpublish(@Param("slug") slug: string) {
     await this.newsService.setDraftStatus(slug, true);
+  }
+
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("news.manage")
+  @Delete(":slug")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param("slug") slug: string) {
+    await this.newsService.delete(slug);
   }
 
   @UseGuards(AuthGuard)

@@ -64,7 +64,6 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: article.id,
             title: article.title,
             slug: article.slug,
-            hasFrench: article.hasFrench,
             isDraft: article.isDraft,
             adminEditUrl: adminNewsEditUrl(article.slug),
             note: "Draft created. A staff member must review and publish it in the admin app.",

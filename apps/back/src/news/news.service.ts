@@ -31,7 +31,7 @@ export interface NewsArticleResponse {
   imageUrl: string | null;
 }
 
-interface NewsArticleAdminResponse extends NewsArticleResponse {
+export interface NewsArticleAdminResponse extends NewsArticleResponse {
   titleFr: string | null;
   contentFr: string | null;
   hasFrench: boolean;
@@ -266,5 +266,14 @@ export class NewsService {
     }
     article.isDraft = isDraft;
     await this.newsRepository.getEntityManager().flush();
+  }
+
+  async delete(slug: string): Promise<void> {
+    const article = await this.newsRepository.findOne({ slug });
+    if (!article) {
+      throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
+    }
+    await this.replyService.deleteAllForTarget("newsArticle", article.id);
+    await this.newsRepository.getEntityManager().remove(article).flush();
   }
 }

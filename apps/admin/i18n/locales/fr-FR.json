@@ -251,6 +251,7 @@
         "fr": "Français",
         "enOnly": "EN",
         "enFr": "EN · FR",
+        "tabs": "Langue de l’article",
         "titleEn": "Titre anglais",
         "titleFr": "Titre français",
         "fallbackHint": "Les lecteurs français voient l’anglais tant que le titre et le corps français ne sont pas tous les deux remplis."
@@ -266,11 +267,9 @@
         "saveFailed": "Impossible d’enregistrer l’article. Vérifiez le titre, le slug et le contenu, puis réessayez.",
         "cancel": "Annuler",
         "placeholder": "Commencez à écrire le contenu de l’article…",
-        "tab": {
-          "write": "Écrire",
-          "preview": "Aperçu"
-        },
         "preview": {
+          "show": "Aperçu",
+          "hide": "Fermer l’aperçu",
           "empty": "Rien à prévisualiser pour l’instant. Commencez à écrire pour voir le rendu."
         }
       },
@@ -283,6 +282,17 @@
         "published": "Article publié",
         "unpublished": "Article dépublié",
         "publishFailed": "Impossible de mettre à jour l’état de publication. Réessayez."
+      },
+      "actions": {
+        "menu": "Actions de l’article",
+        "editName": "Modifier le Titre",
+        "renameTitle": "Modifier le Titre",
+        "renamed": "Titre enregistré",
+        "renameFailed": "Impossible d’enregistrer le titre. Réessayez.",
+        "delete": "Supprimer l’Article",
+        "deleteConfirm": "Supprimer « {title} » ? Cette action est irréversible.",
+        "deleted": "Article supprimé",
+        "deleteFailed": "Impossible de supprimer l’article. Réessayez."
       },
       "cover": {
         "label": "Image de couverture",

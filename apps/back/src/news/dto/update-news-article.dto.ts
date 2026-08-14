@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
-import { emptyToNull } from "../news-locale.util";
+import { emptyToNull } from "./empty-to-null";
 
 export class UpdateNewsArticleDto {
   @IsOptional()

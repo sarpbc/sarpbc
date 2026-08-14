@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import type { TabsItem } from "@nuxt/ui";
-import { newsSurfaceClass } from "~/utils/newsEditorLayout";
-
-type NewsEditorLocale = "en" | "fr";
-
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -18,7 +13,6 @@ const items = [
   },
 ];
 
-const editorLocale = ref<NewsEditorLocale>("en");
 const title = ref("");
 const titleFr = ref("");
 const articleSlug = ref("");
@@ -28,22 +22,6 @@ const contentFr = ref("");
 const imageUrl = ref<string | null>(null);
 const isSaving = ref(false);
 const isModalOpen = ref(false);
-
-const missingFrench = computed(() => !titleFr.value.trim() || !contentFr.value.trim());
-
-const previewTitle = computed(() => {
-  if (editorLocale.value === "fr" && titleFr.value.trim()) {
-    return titleFr.value;
-  }
-  return title.value;
-});
-
-const previewContent = computed(() => {
-  if (editorLocale.value === "fr" && contentFr.value.trim()) {
-    return contentFr.value;
-  }
-  return content.value;
-});
 
 function suggestSlug(value: string) {
   return value
@@ -112,19 +90,6 @@ async function saveArticle() {
     isSaving.value = false;
   }
 }
-
-const tabItems: TabsItem[] = [
-  {
-    label: t("page.news.create.tab.write"),
-    slot: "editor" as const,
-    icon: "i-lucide-pencil",
-  },
-  {
-    label: t("page.news.create.tab.preview"),
-    slot: "preview" as const,
-    icon: "i-lucide-eye",
-  },
-];
 </script>
 
 <template>
@@ -147,6 +112,16 @@ const tabItems: TabsItem[] = [
 
         <template #body>
           <div class="flex flex-col gap-4">
+            <UFormField :label="$t('page.news.locale.titleEn')" name="title" required>
+              <UInput v-model="title" class="w-full" />
+            </UFormField>
+            <UFormField
+              :label="$t('page.news.locale.titleFr')"
+              name="titleFr"
+              :hint="$t('page.news.locale.fallbackHint')"
+            >
+              <UInput v-model="titleFr" class="w-full" />
+            </UFormField>
             <UFormField
               :label="$t('page.news.create.slugField')"
               :hint="$t('page.news.create.slugHint')"
@@ -172,7 +147,7 @@ const tabItems: TabsItem[] = [
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.create.save')"
             :loading="isSaving"
-            :disabled="!title || !content"
+            :disabled="isSaving"
             class="cursor-pointer"
             @click="saveArticle"
           />
@@ -188,50 +163,11 @@ const tabItems: TabsItem[] = [
       </UModal>
     </template>
 
-    <UTabs
-      :items="tabItems"
-      color="neutral"
-      variant="link"
-      class="flex min-h-0 flex-1 flex-col"
-      :unmount-on-hide="false"
-      :ui="{ root: 'flex flex-col flex-1 min-h-0', content: 'flex-1 min-h-0' }"
-    >
-      <template #editor>
-        <DashboardContent class="flex min-h-0 flex-1 flex-col gap-3 p-0 px-0 py-4">
-          <NewsLocaleSwitch v-model="editorLocale" :missing-french="missingFrench" />
-          <div v-if="editorLocale === 'en'" class="flex min-h-0 flex-1 flex-col gap-3">
-            <UFormField
-              :label="$t('page.news.locale.titleEn')"
-              required
-              :class="[newsSurfaceClass, 'px-4']"
-            >
-              <UInput v-model="title" class="w-full" />
-            </UFormField>
-            <NewsArticleEditor v-model="content" />
-          </div>
-          <div v-if="editorLocale === 'fr'" class="flex min-h-0 flex-1 flex-col gap-3">
-            <UFormField :label="$t('page.news.locale.titleFr')" :class="[newsSurfaceClass, 'px-4']">
-              <UInput v-model="titleFr" class="w-full" />
-            </UFormField>
-            <NewsArticleEditor v-model="contentFr" />
-          </div>
-        </DashboardContent>
-      </template>
-
-      <template #preview>
-        <DashboardContent class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4">
-          <NewsLocaleSwitch v-model="editorLocale" :missing-french="missingFrench" />
-          <div :class="[newsSurfaceClass, 'p-4']">
-            <h1 v-if="previewTitle" class="mb-4 text-2xl font-bold">
-              {{ previewTitle }}
-            </h1>
-            <NewsMarkdownPreview v-if="previewContent" :value="previewContent" />
-            <p v-else class="text-muted italic">
-              {{ $t("page.news.create.preview.empty") }}
-            </p>
-          </div>
-        </DashboardContent>
-      </template>
-    </UTabs>
+    <NewsArticleForm
+      v-model:title="title"
+      v-model:title-fr="titleFr"
+      v-model:content="content"
+      v-model:content-fr="contentFr"
+    />
   </NuxtLayout>
 </template>

@@ -30,8 +30,9 @@ const config: Config = {
   moduleNameMapper: {
     "^src/(.*)$": "<rootDir>/$1",
     "^uuid$": "<rootDir>/../test/mocks/uuid.ts",
+    "^@sarpbc/utils$": "<rootDir>/../../../packages/utils/src/index.ts",
   },
-  transformIgnorePatterns: ["node_modules/(?!uuid/)"],
+  transformIgnorePatterns: ["node_modules/(?!uuid|@sarpbc/)"],
   // Coverage runs are memory-heavy; cap workers locally (CI can override).
   maxWorkers: process.env.CI ? "50%" : 2,
 };

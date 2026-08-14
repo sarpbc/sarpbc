@@ -39,14 +39,14 @@ const imageUrl = computed(() => {
         />
       </div>
       <h2
-        class="min-w-0 flex-1 self-center text-xs font-medium leading-snug text-toned line-clamp-5"
+        class="min-w-0 flex-1 self-center text-base font-semibold leading-snug tracking-tight text-highlighted line-clamp-5"
       >
         {{ props.article.title }}
       </h2>
     </div>
 
     <div v-else class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-xs font-medium text-toned">
+      <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-highlighted">
         {{ props.article.title }}
       </h2>
       <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
