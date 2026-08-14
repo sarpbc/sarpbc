@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const HOMEPAGE_NEWS_LIMIT = 20;
 
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 setPageSeo({
@@ -9,8 +9,10 @@ setPageSeo({
   description: t("page.home.seo.description"),
 });
 
-const { data: newsPage } = await useAsyncData("homepage-news", () =>
-  getNewsArticles(0, HOMEPAGE_NEWS_LIMIT),
+const { data: newsPage } = await useAsyncData(
+  () => `homepage-news-${locale.value}`,
+  () => getNewsArticles(0, HOMEPAGE_NEWS_LIMIT, locale.value),
+  { watch: [locale] },
 );
 
 const posts = computed(() => newsPage.value?.data ?? []);

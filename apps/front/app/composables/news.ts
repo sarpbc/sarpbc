@@ -41,13 +41,17 @@ export async function createNewsArticle(body: {
   }
 }
 
-export async function getNewsArticles(page = 0, limit = 10): Promise<PaginatedNewsArticles> {
+export async function getNewsArticles(
+  page = 0,
+  limit = 10,
+  locale?: string,
+): Promise<PaginatedNewsArticles> {
   const config = useRuntimeConfig();
   try {
     const res = await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
       method: "GET",
       credentials: "include",
-      query: { page, limit },
+      query: { page, limit, locale },
     });
 
     return res;
@@ -73,12 +77,13 @@ export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<Pagina
   }
 }
 
-export async function getNewsArticle(slug: string): Promise<NewsArticle | null> {
+export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();
   try {
     const res = await $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
       method: "GET",
       credentials: "include",
+      query: { locale },
     });
 
     return res;

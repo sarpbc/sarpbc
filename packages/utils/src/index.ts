@@ -19,3 +19,14 @@ export {
   selectActiveRosterPlayers,
 } from "./team-roster";
 export { isStaffUser, hasPermission, canModerateComments } from "./staff";
+export {
+  NEWS_LOCALE_QUERY,
+  parseNewsLocale,
+  hasFrenchTranslation,
+  localizedNewsFields,
+  type NewsLocaleQuery,
+  type NewsLocale,
+  type NewsTranslationFields,
+  type NewsLocalizableFields,
+  type LocalizedNewsFields,
+} from "./news-locale";

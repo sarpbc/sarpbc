@@ -172,12 +172,12 @@ Read tools (any valid PAT):
 
 Write tools (staff permission required):
 
-| Tool                      | Permission           | Description                                                                |
-| ------------------------- | -------------------- | -------------------------------------------------------------------------- |
-| `create_news_draft`       | `news.manage`        | English news draft using `:player` / `:team` MDC tags (human must publish) |
-| `create_match`            | `tournaments.manage` | Create a tournament match                                                  |
-| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id                                         |
-| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions                                |
+| Tool                      | Permission           | Description                                                              |
+| ------------------------- | -------------------- | ------------------------------------------------------------------------ |
+| `create_news_draft`       | `news.manage`        | EN/FR news draft using `:player` / `:team` MDC tags (human must publish) |
+| `create_match`            | `tournaments.manage` | Create a tournament match                                                |
+| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id                                       |
+| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions                              |
 
 Staff playbook for roster-change news drafts (web verification + `create_news_draft`): [docs/playbooks/roster-change-news.md](docs/playbooks/roster-change-news.md).
 

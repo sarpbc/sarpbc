@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
+import { emptyToNull } from "./empty-to-null";
 
 export class UpdateNewsArticleDto {
   @IsOptional()
@@ -12,6 +13,19 @@ export class UpdateNewsArticleDto {
   @IsString()
   @IsNotEmpty()
   content?: string;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value != null)
+  @IsString()
+  @MaxLength(255)
+  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
+  titleFr?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value != null)
+  @IsString()
+  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
+  contentFr?: string | null;
 
   @IsOptional()
   @ValidateIf((_, value) => value !== null)

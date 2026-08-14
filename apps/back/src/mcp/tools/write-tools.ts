@@ -29,7 +29,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_news_draft",
     {
       description:
-        'Create a news article draft in English. Requires news.manage. Write the title and body in English. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. A human must review and publish it in the admin app.',
+        'Create a news article draft. Requires news.manage. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. A human must review and publish it in the admin app.',
       inputSchema: {
         title: z.string().min(1).describe("English article headline."),
         content: z
@@ -38,17 +38,26 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .describe(
             'English article body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`.',
           ),
+        titleFr: z.string().min(1).optional().describe("Optional French headline."),
+        contentFr: z
+          .string()
+          .min(1)
+          .optional()
+          .describe("Optional French body in markdown. Use the same player/team tags as English."),
         imageUrl: z.string().url().optional().describe("Optional cover image URL."),
         slug: z
           .string()
           .min(1)
           .optional()
-          .describe("Optional URL slug. Generated from the title when omitted."),
+          .describe("Optional URL slug. Generated from the English title when omitted."),
       },
     },
-    async ({ title, content, imageUrl, slug }) =>
+    async ({ title, content, titleFr, contentFr, imageUrl, slug }) =>
       runWriteTool(user, "create_news_draft", "news.manage", async () => {
-        const article = await ctx.newsService.create({ title, content, imageUrl, slug }, user.id);
+        const article = await ctx.newsService.create(
+          { title, content, titleFr, contentFr, imageUrl, slug },
+          user.id,
+        );
         return {
           entityId: article.id,
           result: {
