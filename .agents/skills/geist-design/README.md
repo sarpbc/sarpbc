@@ -7,7 +7,7 @@ Skill unifié pour Cursor : [Geist](https://vercel.com/design) + [Design Enginee
 | Fichier | Rôle |
 |---------|------|
 | `SKILL.md` | Point d'entrée — quand l'utiliser, checklist, liens |
-| `AGENTS.md` | Guide complet pour les agents (règles + exemples) |
+| `GUIDE.md` | Guide complet pour les agents (règles + exemples) — **on demand** (Cursor auto-injecte `AGENTS.md` dans les skills) |
 | `references/tokens.md` | Geist → Tailwind / Nuxt UI |
 | `references/nuxt-sarpbc.md` | Conventions du repo front |
 
@@ -22,13 +22,13 @@ Skill unifié pour Cursor : [Geist](https://vercel.com/design) + [Design Enginee
 | `.cursor/rules/frontend-ui.mdc` | Fichiers `apps/front/**` → geist-design + nuxt |
 | `.cursor/rules/backend-nestjs.mdc` | Fichiers `apps/back/**` → nestjs-best-practices |
 
+### Contexte Cursor (tokens)
+
+Cursor injecte automatiquement tout fichier nommé `AGENTS.md` sous `.agents/skills/` à **chaque** session (~50k+ tokens). Les guides complets sont donc nommés **`GUIDE.md`** et chargés via `SKILL.md` ou les règles `.mdc` scoped (`backend-nestjs`, `frontend-ui`) uniquement quand nécessaire.
+
 ### À la demande
 
 Mentionnez le skill explicitement : « utilise geist-design pour cette page ».
-
-### Ancienne config à retirer (si présente)
-
-Si une règle workspace charge **en entier** `.agents/skills/nestjs-best-practices/AGENTS.md` en permanence, vous pouvez la **désactiver** : le backend est couvert par `backend-nestjs.mdc` (fichiers `apps/back/**` seulement), ce qui évite de charger ~40 règles NestJS lors d’un travail UI.
 
 ## Skills complémentaires
 

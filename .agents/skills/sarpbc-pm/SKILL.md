@@ -24,7 +24,7 @@ Expert PM lens for **SARPBC.org**: gaming communities, esports platforms, fan en
 
 ## Workflow
 
-1. Read **[AGENTS.md](AGENTS.md)** — principles, grilling framework, ticket templates.
+1. Read **[GUIDE.md](GUIDE.md)** — principles, grilling framework, ticket templates.
 2. **Verify reality** — grep pages under `apps/front/app/pages/`, backend modules under `apps/back/src/` before assuming work is open.
 3. **Grill** — challenge every ticket; lock decisions before creating issues.
 4. **Output** — product analysis, ticket audit, roadmap, ready-to-implement tickets.
@@ -41,8 +41,8 @@ Expert PM lens for **SARPBC.org**: gaming communities, esports platforms, fan en
 
 ## Commands
 
-- `/grilling` or `/grill-me` on scope → run **Grilling Framework** in AGENTS.md
+- `/grilling` or `/grill-me` on scope → run **Grilling Framework** in GUIDE.md
 - "Audit backlog" → Backlog Review Process + compare to codebase
 - "Create Linear issues" → Ticket Generation Rules + Linear MCP `save_issue`
 
-Full guide: [AGENTS.md](AGENTS.md)
+Full guide: [GUIDE.md](GUIDE.md)

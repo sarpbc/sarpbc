@@ -1,7 +1,7 @@
 #!/usr/bin/env npx ts-node
 
 /**
- * Build script for generating AGENTS.md from individual rule files
+ * Build script for generating GUIDE.md from individual rule files
  *
  * Usage: npx ts-node scripts/build-agents.ts
  *
@@ -9,7 +9,7 @@
  * 1. Reads all rule files from the rules/ directory
  * 2. Parses YAML frontmatter for metadata
  * 3. Groups rules by category based on filename prefix
- * 4. Generates a consolidated AGENTS.md file
+ * 4. Generates a consolidated GUIDE.md file
  */
 
 import * as fs from 'fs';
@@ -263,7 +263,7 @@ ${metadata.abstract}
 }
 
 function main() {
-  console.log('Building AGENTS.md...\n');
+  console.log('Building GUIDE.md...\n');
 
   const metadata = readMetadata();
   console.log(`Version: ${metadata.version}`);
@@ -289,10 +289,10 @@ function main() {
 
   const agentsMd = generateAgentsMd(rules, metadata);
 
-  const outputPath = path.join(__dirname, '..', 'AGENTS.md');
+  const outputPath = path.join(__dirname, '..', 'GUIDE.md');
   fs.writeFileSync(outputPath, agentsMd);
 
-  console.log(`Generated AGENTS.md (${agentsMd.length} bytes)`);
+  console.log(`Generated GUIDE.md (${agentsMd.length} bytes)`);
   console.log(`Output: ${outputPath}`);
 }
 
