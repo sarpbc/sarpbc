@@ -108,7 +108,7 @@ Stack-specific patterns: [nuxt-sarpbc.md](references/nuxt-sarpbc.md)
 
 ## How to Use
 
-1. Read **AGENTS.md** for the full rule set with incorrect/correct examples.
+1. Read **GUIDE.md** for the full rule set with incorrect/correct examples (on demand).
 2. For token mapping (Geist → Tailwind / Nuxt UI): [tokens.md](references/tokens.md).
 3. For page/component work in this repo: [nuxt-sarpbc.md](references/nuxt-sarpbc.md).
 4. Pair with `nuxt` skill for framework APIs and `nestjs-best-practices` for backend structure.
@@ -128,4 +128,4 @@ Stack-specific patterns: [nuxt-sarpbc.md](references/nuxt-sarpbc.md)
 
 ## Full Compiled Document
 
-For the complete guide: **AGENTS.md**
+For the complete guide: **GUIDE.md**

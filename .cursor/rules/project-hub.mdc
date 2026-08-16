@@ -9,7 +9,7 @@ alwaysApply: true
 
 Monorepo: `apps/front` (Nuxt 4) + `apps/back` (NestJS). pnpm only.
 
-Before non-trivial work, read **[AGENTS.md](../AGENTS.md)** at the repo root and load the relevant skill from `.agents/skills/`:
+Before non-trivial work, read **[AGENTS.md](../AGENTS.md)** at the repo root and load the relevant **`SKILL.md`** from `.agents/skills/` (not `GUIDE.md` — those are on-demand references):
 
 - UI / copy / a11y → `geist-design`
 - Design-system constraints for agents / UI drift → `llm-safe-design-system`

@@ -146,4 +146,4 @@ Toast copy: specific, no period, from i18n where possible.
 
 - **nuxt skill** — `useFetch`, routing, SSR hydration
 - **nestjs-best-practices** — API validation, DTOs, exception filters
-- **geist-design AGENTS.md** — copy, a11y, visual rules
+- **geist-design GUIDE.md** — copy, a11y, visual rules

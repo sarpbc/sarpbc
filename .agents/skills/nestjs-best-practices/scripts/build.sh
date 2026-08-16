@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build script for generating AGENTS.md
+# Build script for generating GUIDE.md
 # Usage: ./build.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
