@@ -15,4 +15,4 @@ Read **`.agents/skills/geist-design/SKILL.md`** (UI work) and **`.agents/skills/
 - API: `$fetch` to `runtimeConfig.public.apiBase` with `credentials: 'include'`.
 - Toasts: specific outcome, no trailing period (see geist-design copy rules).
 
-Details: `.agents/skills/geist-design/AGENTS.md`, `references/nuxt-sarpbc.md`
+Details on demand: `.agents/skills/geist-design/GUIDE.md`, `references/nuxt-sarpbc.md`

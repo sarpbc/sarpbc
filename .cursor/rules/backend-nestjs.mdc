@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Backend (apps/back)
 
-Read **`.agents/skills/nestjs-best-practices/SKILL.md`** then **`AGENTS.md`** in that folder for full rules.
+Read **`.agents/skills/nestjs-best-practices/SKILL.md`**. Load **`rules/<topic>.md`** as needed; **`GUIDE.md`** only for a full audit (not loaded by default).
 
 - Organize by **feature modules**; constructor injection; no service locator.
 - Validate all input with DTOs + global `ValidationPipe` (`whitelist`, `transform`).
