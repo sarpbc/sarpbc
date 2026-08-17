@@ -18,7 +18,7 @@ export const ReplyNotificationSchema = defineEntity({
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     recipient: p.manyToOne(User),
-    reply: p.manyToOne(Reply),
+    reply: p.manyToOne(Reply).deleteRule("cascade"),
     readAt: p.datetime().type("timestamptz").nullable(),
     createdAt: p
       .datetime()

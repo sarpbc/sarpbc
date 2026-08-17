@@ -2809,7 +2809,8 @@
           "localTableName": "public.reply_notification",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.reply",
-          "updateRule": "cascade"
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
         }
       },
       "comment": null
@@ -2947,7 +2948,8 @@
           "localTableName": "public.reply_report",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.reply",
-          "updateRule": "cascade"
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
         },
         "reply_report_reporter_id_foreign": {
           "columnNames": ["reporter_id"],

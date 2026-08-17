@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { QueryOrder } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
@@ -230,6 +230,36 @@ describe("ReplyService", () => {
 
       expect(reply.hiddenAt).toBeInstanceOf(Date);
       expect(replyRepository.save).toHaveBeenCalledWith(reply);
+    });
+  });
+
+  describe("delete", () => {
+    it("deletes a reply after removing children", async () => {
+      const reply = makeReply({ id: "r1" });
+      replyRepository.findById.mockResolvedValue(reply);
+      replyRepository.findChildren.mockResolvedValue([]);
+      replyRepository.delete.mockResolvedValue(undefined);
+
+      await service.delete("r1");
+
+      expect(replyRepository.findChildren).toHaveBeenCalledWith("r1");
+      expect(replyRepository.delete).toHaveBeenCalledWith(reply);
+    });
+
+    it("maps a remaining foreign-key violation to ConflictException", async () => {
+      const reply = makeReply({ id: "r1" });
+      replyRepository.findById.mockResolvedValue(reply);
+      replyRepository.findChildren.mockResolvedValue([]);
+      const fkError = Object.assign(
+        new Error('update or delete on table "reply" violates foreign key constraint'),
+        {
+          name: "ForeignKeyConstraintViolationException",
+          code: "23503",
+        },
+      );
+      replyRepository.delete.mockRejectedValue(fkError);
+
+      await expect(service.delete("r1")).rejects.toBeInstanceOf(ConflictException);
     });
   });
 

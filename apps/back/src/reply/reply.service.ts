@@ -21,6 +21,14 @@ import { sortOrderForTarget } from "./reply-target.util";
 import type { ReplyReportReason } from "./reply-report-reason";
 import { NotificationService } from "src/notification/notification.service";
 
+function isForeignKeyViolation(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const candidate = error as { name?: string; code?: string };
+  return candidate.name === "ForeignKeyConstraintViolationException" || candidate.code === "23503";
+}
+
 @Injectable()
 export class ReplyService {
   constructor(
@@ -169,7 +177,11 @@ export class ReplyService {
       throw new NotFoundException("Comment not found. It may already be removed.");
     }
 
-    await this.deleteWithChildren(id);
+    try {
+      await this.deleteWithChildren(id);
+    } catch (error) {
+      this.rethrowDeleteConstraint(error);
+    }
   }
 
   async report(
@@ -224,7 +236,11 @@ export class ReplyService {
     const rootReplies = replies.filter((reply) => !reply.replyTo);
 
     for (const reply of rootReplies) {
-      await this.deleteWithChildren(reply.id);
+      try {
+        await this.deleteWithChildren(reply.id);
+      } catch (error) {
+        this.rethrowDeleteConstraint(error);
+      }
     }
   }
 
@@ -238,6 +254,15 @@ export class ReplyService {
         "Parent comment belongs to a different page. Refresh and try again.",
       );
     }
+  }
+
+  private rethrowDeleteConstraint(error: unknown): never {
+    if (isForeignKeyViolation(error)) {
+      throw new ConflictException(
+        "This comment could not be deleted because it is still referenced. Hide it instead.",
+      );
+    }
+    throw error;
   }
 
   private async deleteWithChildren(replyId: string): Promise<void> {
