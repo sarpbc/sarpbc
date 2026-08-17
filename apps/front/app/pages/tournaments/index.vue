@@ -1,7 +1,10 @@
 <script lang="ts" setup>
+import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
+
 const { t } = useI18n();
 const route = useRoute();
 const { setPageSeo } = useSarpbcSeo();
+const { setJsonLd } = useStructuredData();
 
 const TOURNAMENTS_PER_PAGE = 20;
 
@@ -58,6 +61,20 @@ setPageSeo({
   title: `${t("page.tournaments.index.title")} | sarpbc.org`,
   description: t("page.tournaments.index.description", { count: totalTournaments.value }),
 });
+
+const tournamentsJsonLd = computed(() => {
+  if (pending.value && tournaments.value.length === 0) {
+    return null;
+  }
+
+  return buildTournamentItemList({
+    tournaments: tournaments.value,
+    total: totalTournaments.value,
+    positionOffset: offset.value,
+  });
+});
+
+setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
 </script>
 
 <template>

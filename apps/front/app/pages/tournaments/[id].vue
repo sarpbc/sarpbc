@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { buildTournamentSportsEvent } from "~/utils/structuredData/tournamentSportsEvent";
 import {
   getTournamentTabFromPath,
   getTournamentTabTransitionName,
@@ -8,6 +9,7 @@ import {
 const route = useRoute();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+const { setJsonLd } = useStructuredData();
 
 const tournamentId = computed(() => route.params.id as string);
 
@@ -79,6 +81,19 @@ watch(
   },
   { immediate: true },
 );
+
+const tournamentJsonLd = computed(() => {
+  if (!tournament.value) {
+    return null;
+  }
+
+  return buildTournamentSportsEvent(tournament.value, {
+    includeContext: true,
+    includeCompetitors: true,
+  });
+});
+
+setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
 </script>
 
 <template>
