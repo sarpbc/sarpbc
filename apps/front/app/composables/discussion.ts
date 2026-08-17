@@ -97,7 +97,7 @@ export async function createComment(data: {
 
 export async function hideComment(commentId: string): Promise<boolean> {
   try {
-    await apiFetch(`/replies/${commentId}/hide`, { method: "PATCH" });
+    await apiFetch(`/replies/${commentId}/hide`, { method: "PATCH", body: {} });
     return true;
   } catch (error) {
     console.error("Error hiding comment:", error);

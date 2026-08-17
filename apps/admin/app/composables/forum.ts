@@ -53,6 +53,7 @@ export async function hideForumReply(replyId: string): Promise<boolean> {
   try {
     await apiFetch(`/replies/${replyId}/hide`, {
       method: "PATCH",
+      body: {},
     });
     return true;
   } catch (error) {
