@@ -86,6 +86,7 @@ export async function publishNewsArticle(slug: string): Promise<boolean> {
   try {
     await apiFetch(`/news/${slug}/publish`, {
       method: "PATCH",
+      body: {},
     });
     return true;
   } catch (error) {
@@ -98,6 +99,7 @@ export async function unpublishNewsArticle(slug: string): Promise<boolean> {
   try {
     await apiFetch(`/news/${slug}/unpublish`, {
       method: "PATCH",
+      body: {},
     });
     return true;
   } catch (error) {

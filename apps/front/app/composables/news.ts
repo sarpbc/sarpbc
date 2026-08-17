@@ -135,6 +135,7 @@ export async function publishNewsArticle(slug: string): Promise<boolean> {
     await $fetch(`${config.public.apiBase}/news/${slug}/publish`, {
       method: "PATCH",
       credentials: "include",
+      body: {},
     });
 
     return true;
@@ -150,6 +151,7 @@ export async function unpublishNewsArticle(slug: string): Promise<boolean> {
     await $fetch(`${config.public.apiBase}/news/${slug}/unpublish`, {
       method: "PATCH",
       credentials: "include",
+      body: {},
     });
 
     return true;

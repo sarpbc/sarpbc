@@ -162,7 +162,7 @@ export const ReplyReportSchema = defineEntity({
   ],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    reply: p.manyToOne(Reply),
+    reply: p.manyToOne(Reply).deleteRule("cascade"),
     reporter: p.manyToOne(User),
     reason: p.string(),
     createdAt: p
