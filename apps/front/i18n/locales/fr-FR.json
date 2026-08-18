@@ -84,7 +84,10 @@
       "home": "Accueil — Actualités",
       "openMenu": "Ouvrir le menu",
       "closeMenu": "Fermer le menu",
-      "unreadNotifications": "{count} notification non lue | {count} notifications non lues"
+      "unreadNotifications": "{count} notification non lue | {count} notifications non lues",
+      "language": "Langue",
+      "languageEn": "Anglais",
+      "languageFr": "Français"
     },
     "input": {
       "search": "Rechercher...",
@@ -269,7 +272,7 @@
         "playerNotFound": "Joueur introuvable",
         "submitFailed": "Impossible d'envoyer votre proposition. Vérifiez votre connexion et réessayez.",
         "seo": {
-          "title": "Air Riddle - Devinez le joueur Rocket League",
+          "title": "Air Riddle : Devinez le joueur Rocket League",
           "description": "Participez à Air Riddle et devinez le joueur Rocket League en 6 essais. Testez vos connaissances des joueurs RL et améliorez votre score quotidiennement !"
         }
       },
@@ -316,6 +319,743 @@
             "noRankYet": "Faites vos picks et attendez les résultats pour apparaître au classement.",
             "points": "{points} pts",
             "empty": "Aucun pick scoré pour l'instant. Le classement apparaît après les matchs."
+          }
+        }
+      },
+      "career": {
+        "title": "RL Career",
+        "subtitle": "Vivez une carrière esport Rocket League de 16 ans jusqu'à la retraite : événements, splits, Worlds, transferts, et un classement mondial à votre image.",
+        "seo": {
+          "title": "RL Career : Simulateur de Carrière Rocket League",
+          "description": "Construisez une carrière esport Rocket League dès 16 ans : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
+        },
+        "menu": {
+          "title": "Menu Principal",
+          "body": "Lancez une nouvelle carrière à 16 ans, ou reprenez là où vous vous êtes arrêté.",
+          "newCareer": "Nouvelle Carrière",
+          "continue": "Continuer la Carrière",
+          "newCareerConfirm": "Commencer une nouvelle carrière ? La progression actuelle sera perdue."
+        },
+        "onboarding": {
+          "playerNameLabel": "Nom de Joueur",
+          "playerNamePlaceholder": "Votre pseudo",
+          "introTitle": "Nommez Votre Joueur",
+          "introBody": "Saisissez le pseudo sous lequel vous allez jouer. Région, pays et style de jeu viennent ensuite.",
+          "regionTitle": "Choisissez Votre Région",
+          "regionBody": "Le circuit sur lequel vous jouez. Votre première équipe vient d'ici.",
+          "countryTitle": "Choisissez Votre Pays",
+          "countryBody": "Le drapeau affiché à côté de votre pseudo à l'écran.",
+          "roleTitle": "Choisissez Votre Style de Jeu",
+          "roleBody": "Votre style ajuste vos stats de départ et le déroulement des splits.",
+          "backgroundTitle": "Choisissez Votre Parcours",
+          "backgroundBody": "Votre parcours définit rating, forme et moral de départ.",
+          "next": "Continuer",
+          "startCareer": "Commencer Saison 1",
+          "regions": {
+            "na": "Amérique du Nord",
+            "eu": "Europe",
+            "oce": "Océanie",
+            "sam": "Amérique du Sud",
+            "ssa": "Afrique subsaharienne",
+            "mena": "MENA",
+            "apac": "Asie-Pacifique"
+          },
+          "countries": {
+            "us": "États-Unis",
+            "ca": "Canada",
+            "mx": "Mexique",
+            "fr": "France",
+            "gb": "Royaume-Uni",
+            "de": "Allemagne",
+            "es": "Espagne",
+            "nl": "Pays-Bas",
+            "se": "Suède",
+            "dk": "Danemark",
+            "it": "Italie",
+            "au": "Australie",
+            "nz": "Nouvelle-Zélande",
+            "br": "Brésil",
+            "ar": "Argentine",
+            "cl": "Chili",
+            "pe": "Pérou",
+            "sa": "Arabie saoudite",
+            "ae": "Émirats arabes unis",
+            "ma": "Maroc",
+            "eg": "Égypte",
+            "jp": "Japon",
+            "kr": "Corée du Sud",
+            "sg": "Singapour",
+            "in": "Inde",
+            "za": "Afrique du Sud",
+            "ng": "Nigeria",
+            "ke": "Kenya"
+          },
+          "roles": {
+            "offense": {
+              "label": "Offensif",
+              "description": "Premier homme, porteur de balle, finisseur. Mécaniques élevées, forme en dents de scie. Rating +3 · Forme −2"
+            },
+            "technical": {
+              "label": "Technique",
+              "description": "Flip resets et air dribbles à la demande. La régularité avant tout. Forme +3 · Moral −2"
+            },
+            "defense": {
+              "label": "Défensif",
+              "description": "Dernier rempart : saves, dégagements, rotations calmes. Le mental compte davantage. Moral +3 · Rating −2"
+            }
+          },
+          "backgrounds": {
+            "prodigy": {
+              "label": "Prodige",
+              "description": "SSL à quinze ans, brut mais surdoué. Rating 72 · Forme 55 · Moral 60"
+            },
+            "grinder": {
+              "label": "Grinder",
+              "description": "Dix mille heures de training packs. Rating 62 · Forme 70 · Moral 65"
+            },
+            "oneVOne": {
+              "label": "Joueur 1v1",
+              "description": "Duelliste ranked : mécaniques et reads forgés en 1s. Rating 70 · Forme 68 · Moral 55"
+            },
+            "freestyler": {
+              "label": "Freestyler",
+              "description": "Les clips avant la régularité, le style avant le free play. Rating 66 · Forme 52 · Moral 78"
+            }
+          }
+        },
+        "stats": {
+          "age": "Âge",
+          "rating": "Rating",
+          "form": "Forme",
+          "morale": "Moral"
+        },
+        "season": {
+          "introTitle": "Saison {season} · {age} ans",
+          "recapTitle": "Saison {season}",
+          "introBody": "Vous jouez pour {team}, actuellement n° {rank} mondial.",
+          "begin": "Commencer la Saison"
+        },
+        "event": {
+          "split": "Split {split}",
+          "worlds": "Worlds",
+          "decision": "Décision {current} sur {total}",
+          "continue": "Continuer"
+        },
+        "results": {
+          "splitTitle": "Résultats du Split {split}",
+          "worldsTitle": "Résultats des Worlds",
+          "regional": "Régional {index}",
+          "major": "Major {split}",
+          "majorNotQualified": "Non qualifié",
+          "seasonPoints": "Points de la saison : {points}",
+          "points": "{points} pts",
+          "worldsQualified": "Qualifié pour les Worlds. Une dernière décision à prendre.",
+          "worldsMissed": "Hors du top 16. Pas de Worlds cette saison.",
+          "worldsPlacementLabel": "Worlds",
+          "worldsNotQualifiedShort": "Non qualifié",
+          "continue": "Continuer"
+        },
+        "placements": {
+          "winner": "Champion",
+          "finalist": "Finaliste",
+          "top4": "Top 4",
+          "top8": "Top 8",
+          "group": "Phase de groupes",
+          "unavailable": "Indisponible"
+        },
+        "rankings": {
+          "bestTeams": "Meilleures Équipes",
+          "bestPlayers": "Meilleurs Joueurs",
+          "circuitPoints": "Points du circuit cette saison",
+          "teamWorldRanking": "Classement mondial de l'équipe",
+          "playerRating": "Note actuelle du joueur",
+          "alsoOnRoster": "Aussi dans cet effectif"
+        },
+        "offseason": {
+          "body": "Aucun club n'est intéressé cet hiver. | {count} club veut vous recruter. | {count} clubs veulent vous recruter.",
+          "renewalTitle": "Renouvellement",
+          "unsignedTitle": "Sans Contrat",
+          "renewalOnlyBody": "{team} vous renouvelle. Aucun autre club n'a fait d'offre.",
+          "noRenewalBody": "Votre club ne renouvelle pas. {count} autre club est intéressé. | Votre club ne renouvelle pas. {count} autres clubs sont intéressés.",
+          "unsignedBody": "Aucun club ne vous signera pour la saison prochaine.",
+          "unsignedHint": "Le mercato est fermé. Partez à la retraite, ou c'est la fin de la ligne.",
+          "lastChanceBody": "{team} est le seul club encore prêt à tenter le coup.",
+          "noOffer": "Aucun intérêt en transfert",
+          "currentTeam": "Équipe Actuelle",
+          "worldRank": "N° {rank} mondial",
+          "accept": "Accepter l'Offre",
+          "continue": "Continuer",
+          "retire": "Prendre sa Retraite",
+          "prompt": {
+            "title": "Rester ou Partir",
+            "body": "Le pic est derrière vous. L'org veut une réponse claire.",
+            "quit": "Je m'écarte. Il me faut une vie hors du jeu.",
+            "streamer": "Je range la manette. Place à un vrai planning de contenu.",
+            "coach": "Gardez-moi dans le roster. Je n'ai pas fini de jouer.",
+            "endsCareer": "Termine votre carrière",
+            "playOn": "Jouer une saison de plus"
+          }
+        },
+        "destiny": {
+          "quit": {
+            "endLine": "A quitté les jeux et la scène"
+          },
+          "streamer": {
+            "endLine": "Est devenu streamer à temps plein"
+          },
+          "coach": {
+            "endLine": "Est passé coach"
+          }
+        },
+        "end": {
+          "title": "Carrière Terminée",
+          "retiredAt": "Retraite à {age} ans · {seasons} saisons",
+          "finalRating": "Rating Final",
+          "palmarès": "Palmarès",
+          "trophies": {
+            "regional": "Titre régional",
+            "major": "Titre de major",
+            "worlds": "Championnat du monde"
+          },
+          "noTrophies": "Pas de trophée, le parcours compte quand même.",
+          "nicknames": {
+            "goat": "GOAT",
+            "closer": "Le Finisseur",
+            "iceBlood": "Le Sang-Froid",
+            "airSurgeon": "Le Magicien des Airs",
+            "majorHunter": "L'Éternel Major",
+            "surfaceFox": "Le Renard du Filet",
+            "theWall": "Le Mur",
+            "resetGhost": "Le Fantôme des Ciels",
+            "theMic": "Le Micro",
+            "sideline": "Le Banc",
+            "walkedOff": "Le Civil",
+            "lanTourist": "Le Touriste"
+          },
+          "seasonRecap": "Récap par Saison",
+          "share": "Copier le Lien",
+          "shareCopied": "Lien copié",
+          "playAgain": "Nouvelle Carrière",
+          "viewShared": "Carrière Partagée"
+        },
+        "share": {
+          "notFound": "Carrière introuvable",
+          "notFoundBody": "Ce résultat est stocké localement sur l'appareil qui a terminé la carrière. Demandez un nouveau lien ou lancez votre propre run.",
+          "startOwn": "Lancez Votre Carrière"
+        },
+        "actions": {
+          "abandon": "Abandonner la Carrière",
+          "abandonConfirm": "Abandonner cette carrière ? La progression sera perdue."
+        },
+        "events": {
+          "split-01": {
+            "title": "Votre Speedflip Est Dépassé",
+            "description": "Le coach sort les replays : votre speedflip d'engagement perd les 50/50 contre toutes les équipes du top. Refaire sa mémoire musculaire en plein split est risqué, mais ce défaut coûte des buts.",
+            "choices": {
+              "a": {
+                "label": "Reconstruire l'engagement de zéro en free play",
+                "outcome": "Une semaine en free play et le flip finit par passer. Les 50 d'engagement basculent. Vos mains sont cuites.",
+                "failure": "Vous démontez le kickoff et n'arrivez plus à le reconstruire. Pendant des jours vous perdez tous les 50 que vous gagniez au feeling."
+              },
+              "b": {
+                "label": "Garder l'ancien engagement jusqu'à l'intersaison",
+                "outcome": "Vous gardez l'ancien flip. Les 50 restent un problème, mais au moins vous avez encore un kickoff en qui vous croyez.",
+                "failure": "Vous le gardez et vous vous faites punir quand même. Les adversaires attendent le même tell. Plus rien n'est sûr à l'engagement."
+              },
+              "c": {
+                "label": "Le bosser discrètement chaque soir après les scrims",
+                "outcome": "Les reps du soir après les scrims affûtent le flip. Vous arrivez en review avec une tête de pas-dormi.",
+                "failure": "Vous grindez le flip à 1 h du matin et vous le loupez quand même au scrim suivant. Les nuits n'ont servi à rien."
+              }
+            }
+          },
+          "split-02": {
+            "title": "La Review Qui Pique",
+            "description": "L'analyste fige l'image sur deux double commits qui ont offert la série. Tout le monde dans la salle sait que c'est vous à l'écran.",
+            "choices": {
+              "a": {
+                "label": "Assumer et drill les rotations jusqu'à l'automatisme",
+                "outcome": "Vous assumez les double commits et drillez les rotations jusqu'à l'ennui. Le callout reste dans la poitrine.",
+                "failure": "Vous drillez toute la semaine et vous double-committez encore la série suivante. La salle se tait à nouveau."
+              },
+              "b": {
+                "label": "Défendre vos reads : la passe était jouable",
+                "outcome": "Vous défendez le read. La pièce reste tendue. Vous sortez la tête haute, et personne n'a oublié le clip.",
+                "failure": "Vous argumentez que la passe était jouable. Les coéquipiers arrêtent de vous appeler en vocal. Le bloc suivant est glacial."
+              },
+              "c": {
+                "label": "Demander une review d'équipe plutôt qu'un procès",
+                "outcome": "Une review d'équipe répartit la faute. Les rotations sont réécrites. Tout le monde ressort plus net, vous compris.",
+                "failure": "Vous demandez une review d'équipe et ça tourne à l'heure de règlements de comptes. Plus personne ne veut de film demain."
+              }
+            }
+          },
+          "split-03": {
+            "title": "Une Semaine Avant le Premier Régional",
+            "description": "Une semaine libre avant le début du split, et le roster est divisé sur la façon de l'utiliser.",
+            "choices": {
+              "a": {
+                "label": "Solo queue en 1v1 dix heures par jour",
+                "outcome": "Des blocs 1v1 de dix heures. Les mécaniques explosent. Les mains sont cuites. En vocal d'équipe, on dirait que vous n'avez parlé à personne depuis des jours.",
+                "failure": "Dix heures de 1s et vous ne convertissez toujours pas. Vous arrivez aux scrims plus lent, et le roster a vu que vous les avez zappés."
+              },
+              "b": {
+                "label": "Enchaîner un bloc de scrims contre des prétendants",
+                "outcome": "Une semaine de scrims contre des contenders. Kickoffs, shadows et passes milieu deviennent une seule idée.",
+                "failure": "Vous réservez le bloc contenders et vous vous faites farmer. La confiance fuit vers la semaine de régional."
+              },
+              "c": {
+                "label": "Prendre de vrais jours de repos et recharger",
+                "outcome": "De vrais jours de repos. Vous arrivez frais. Un peu moins affamé, mais vous voyez enfin la balle.",
+                "failure": "Vous prenez les jours off et vous revenez rouillé. Le premier scrim est un festival de sauts à contretemps."
+              }
+            }
+          },
+          "split-04": {
+            "title": "Un Sponsor Veut Vous Voir Streamer",
+            "description": "Une marque de boisson énergisante propose un contrat : quatre soirées de stream par semaine, un bon salaire, top pour les fans, mais ça mange directement les heures d'entraînement.",
+            "choices": {
+              "a": {
+                "label": "Signer : la communauté et le salaire comptent",
+                "outcome": "Quatre soirs de stream. Le chat apprend votre nom. Le ranked, c'est ce qu'il reste après le raid.",
+                "failure": "Vous signez et les streams floppent. Vous perdez quand même les soirs de training, et la marque demande pourquoi l'audience est une blague."
+              },
+              "b": {
+                "label": "Refuser jusqu'à la fin de la saison",
+                "outcome": "Vous refusez jusqu'à la fin du split. Les manettes restent la priorité. La marque sera encore là.",
+                "failure": "Vous refusez, puis vous passez la semaine à vous demander si vous auriez dû signer. Du ranked distrait, c'est encore du ranked."
+              }
+            }
+          },
+          "split-05": {
+            "title": "La Méta Vient de Changer",
+            "description": "Les meilleures équipes jouent désormais la possession lente et privent l'adversaire de boost. Votre style rapide semble soudain punissable.",
+            "choices": {
+              "a": {
+                "label": "Réapprendre votre jeu autour de la nouvelle méta",
+                "outcome": "Vous vous asseyez dans le jeu lent. Les challenges attendent un temps. L'ancien vous, celui des démos, est parti — exprès.",
+                "failure": "Vous essayez de jouer patient et vous arrêtez juste de challenger. Vous prenez des buts de la médiane parce que personne ne tourne dans l'espace que vous avez laissé."
+              },
+              "b": {
+                "label": "Faire confiance à vos fondamentaux et affiner ce qui marche",
+                "outcome": "Vous gardez votre rythme et nettoyez les challenges sales. Certaines équipes détestent ça. D'autres ne savent pas vivre avec.",
+                "failure": "Vous doublez sur la vitesse et les équipes possession vous farm. Chaque overcommit est sur le VOD maintenant."
+              }
+            }
+          },
+          "split-06": {
+            "title": "Votre Coéquipier Tilte",
+            "description": "Après deux blocs de scrims perdus, votre coéquipier whiffe volontairement et flame en vocal. Le premier régional est dans quelques jours.",
+            "choices": {
+              "a": {
+                "label": "Organiser une réunion d'équipe et crever l'abcès",
+                "outcome": "La réunion est moche, puis calme. Le vocal redevient utilisable. Vous avez passé une soirée sur les gens, pas sur les packs.",
+                "failure": "La réunion explose. Ils vous mute pour le reste de la soirée. La semaine de régional commence avec un groupe en lu sans réponse."
+              },
+              "b": {
+                "label": "Couper le vocal et bosser vos propres replays",
+                "outcome": "Vous mutez les comms et grindez vos VODs. Vos mécaniques tiennent. Plus personne ne parle sur le serveur.",
+                "failure": "Vous les mutez et ils le voient. Le scrim suivant, c'est trois personnes qui jouent des 1s dans le même lobby."
+              }
+            }
+          },
+          "split-07": {
+            "title": "Le Coach Veut un Nouveau Système",
+            "description": "Le coach vous veut en deuxième homme plutôt que dans votre style naturel de premier homme. Les données disent que ça gagne des matchs ; votre instinct n'est pas d'accord.",
+            "choices": {
+              "a": {
+                "label": "Adhésion totale : jouer la nouvelle rotation tout le split",
+                "outcome": "Vous jouez second man toute la semaine. Les saves last-back commencent à rentrer. Vous ratez la balle au bout de votre stick.",
+                "failure": "Vous achetez le système et vous figez. Le premier homme part, vous hésitez, le backboard est vide. L'ancienne rotation n'est plus là non plus."
+              },
+              "b": {
+                "label": "Compromis : nouveau système en scrims, instinct sur scène",
+                "outcome": "Nouvelles rotations en scrims, votre jeu sur scène. C'est sale. Ça veut aussi dire que vous avez encore un premier homme quand ça compte.",
+                "failure": "Vous mélangez les systèmes et plus personne ne sait qui est last back. Le coach arrête d'appeler des plays en plein série."
+              },
+              "c": {
+                "label": "Refuser : vous êtes arrivé ici en jouant à votre façon",
+                "outcome": "Vous refusez le changement. Les kickoffs restent les vôtres. Le coach classe, et le tableur de l'analyste reste rouge.",
+                "failure": "Vous refusez, puis vous vous faites exposer sur le même overcommit que les data avaient flag. Personne ne dit « je te l'avais dit ». Pas besoin."
+              }
+            }
+          },
+          "split-08": {
+            "title": "Votre Manette Rend l'Âme",
+            "description": "Stick drift en plein split. Une nouvelle manette signifie re-régler deadzones et sensibilité aérienne à quelques jours d'un régional.",
+            "choices": {
+              "a": {
+                "label": "Changer maintenant et tout re-régler",
+                "outcome": "Nouvelle manette. Les deadzones sont étrangères deux jours, puis les aerials recommencent à coller.",
+                "failure": "Vous changez et passez le régional à chasser une deadzone qui ne devient jamais maison. Les tirs faciles tombent."
+              },
+              "b": {
+                "label": "La faire tenir jusqu'à la fin du split avec du scotch et des prières",
+                "outcome": "Du scotch sur le stick. Vous connaissez le drift. Chaque aerial est un pile ou face que vous croyez encore pouvoir appeler.",
+                "failure": "Le drift explose en plein série. Vous partez dans le plafond sur un kickoff que vous avez mis mille fois."
+              }
+            }
+          },
+          "split-09": {
+            "title": "Invitation Freestyle",
+            "description": "Un freestyler célèbre vous invite à une session de clips qui ferait d'énormes vues. Votre coach préférerait vous voir drill la shadow defense.",
+            "choices": {
+              "a": {
+                "label": "Tourner les clips : faire grandir votre nom",
+                "outcome": "La session explose. Votre nom est sur la miniature. La shadow defense, c'est pour demain.",
+                "failure": "Vous venez pour les clips et vous briquez chaque reset en stream. Les commentaires ne parlent pas du setup."
+              },
+              "b": {
+                "label": "Décliner et drill la défense",
+                "outcome": "Vous zappez l'invite et drillez les shadows. Soirée silencieuse. La série suivante, vous êtes vraiment last back.",
+                "failure": "Vous zappez la session et vous regardez quand même le VOD de celui qui vous a remplacé. Le bloc défense est un write-off."
+              }
+            }
+          },
+          "split-10": {
+            "title": "Bootcamp à l'Étranger",
+            "description": "L'organisation propose un bootcamp de trois semaines dans une autre région : scrims d'élite, zéro distraction, et zéro confort de la maison.",
+            "choices": {
+              "a": {
+                "label": "Faire ses valises et grind",
+                "outcome": "Trois semaines à l'étranger, scrims élite, Wi-Fi d'hôtel. Vous rentrez plus net, un peu en mal du pays.",
+                "failure": "Le bootcamp est un flop. Jet lag, mauvais ping la première semaine, vous n'attrapez jamais le niveau des scrims."
+              },
+              "b": {
+                "label": "Rester chez soi et garder sa routine",
+                "outcome": "Vous gardez votre lit, votre écran, vos horaires. Les reps sont familières. Vous n'avez pas les reads de l'autre région.",
+                "failure": "Vous restez et la routine s'étiole. Même lobby, mêmes erreurs, personne de nouveau pour vous punir."
+              }
+            }
+          },
+          "split-11": {
+            "title": "Les Données Disent le Contraire",
+            "description": "Les chiffres de l'analyste montrent que vous challengez trop tôt et brûlez votre boost en défense. Corriger vos reads signifie des semaines d'inconfort.",
+            "choices": {
+              "a": {
+                "label": "Faire confiance aux données et retravailler vos challenges",
+                "outcome": "Vous attendez un temps de plus. Le boost dure. Vous ratez l'ancien challenge de panique plus que vous ne l'admettrez.",
+                "failure": "Vous essayez d'attendre et vous ne challengez plus. Des balles rentrent du milieu parce que vous avez douté d'un 50 que vous aviez."
+              },
+              "b": {
+                "label": "Faire confiance à votre instinct : les stats ne voient pas tout",
+                "outcome": "Vous faites confiance au read dans vos mains. Certains challenges trop tôt gagnent encore des matchs. Le tableur reste en colère.",
+                "failure": "Vous ignorez la feuille et vous vous faites prendre sur le même overcommit, deux fois, dans la même série."
+              }
+            }
+          },
+          "split-12": {
+            "title": "Tempête sur les Réseaux",
+            "description": "Après une élimination en phase de groupes, un clip de votre whiff devant le but vide devient viral. Vos mentions sont invivables.",
+            "choices": {
+              "a": {
+                "label": "Couper les réseaux jusqu'au major",
+                "outcome": "Vous supprimez les apps jusqu'au major. Le clip meurt. Le bruit qui vous tenait éveillé aussi.",
+                "failure": "Vous vous déconnectez et vous en entendez quand même parler en vocal. Quelqu'un a envoyé le clip dans le groupe « pour rire »."
+              },
+              "b": {
+                "label": "Poster un meme autodérisoire et assumer",
+                "outcome": "Le meme passe. Le chat le quote un jour. La prochaine série doit encore répondre au whiff.",
+                "failure": "Vous postez le meme et les réponses sont pires. Des quote-tweets du clip original, avec votre blague en dessous."
+              },
+              "c": {
+                "label": "Ne rien dire et laisser les prochains matchs répondre",
+                "outcome": "Vous ne dites rien. Queue, scrim, dodo. La prochaine série est la seule réponse qui compte.",
+                "failure": "Vous restez silencieux et le clip continue de tourner. À l'opener suivant, vous pensez à Twitter, pas au kickoff."
+              }
+            }
+          },
+          "split-13": {
+            "title": "Ajouter les Démos à Votre Jeu ?",
+            "description": "Le coach suggère des démos et des bumps agressifs sur les suites d'engagement. Ça gagne les duels de boost mais invite le chaos, et crée des ennemis.",
+            "choices": {
+              "a": {
+                "label": "Passer en mode bump total",
+                "outcome": "Vous vivez sur le bump. Les fights d'engagement basculent. Vous prenez aussi une démo que vous n'avez pas vue, un match sur deux.",
+                "failure": "Vous partez en chasse de bump, vous loupez la démo, puis la balle. Du chaos sans la paye."
+              },
+              "b": {
+                "label": "Rester propre et positionnel",
+                "outcome": "Vous restez propre et positionnel. Le boost est encore là. Personne ne vous chasse non plus à l'engagement.",
+                "failure": "Vous restez propre et on vous marche dessus. L'autre premier homme vous bump gratuitement et prend le pad."
+              }
+            }
+          },
+          "split-14": {
+            "title": "Problème de Couche-Tard",
+            "description": "Vos meilleures mécaniques sortent à 2 h du matin, mais les scrims d'équipe sont à midi. Il faut trancher.",
+            "choices": {
+              "a": {
+                "label": "Caler votre sommeil sur les horaires de l'équipe",
+                "outcome": "Vous basculez sur l'horloge de l'équipe. Les scrims de midi ressemblent à des matchs. Le pic de 2 h a disparu.",
+                "failure": "Vous forcez le sommeil et vous arrivez groggy quand même. Le pire des deux horloges."
+              },
+              "b": {
+                "label": "Continuer à grind la nuit, là où vous êtes au top",
+                "outcome": "Vous gardez les packs de 2 h. Les mécaniques restent sales. Vous avez une tête de fantôme au bloc de midi.",
+                "failure": "Vous grindez la nuit et vous briquez dans les deux lobbies. Les scrims de midi sont un write-off, le sommeil aussi."
+              }
+            }
+          },
+          "split-15": {
+            "title": "Showmatch Caritatif",
+            "description": "Vous êtes invité à un showmatch caritatif avec des légendes de la communauté le week-end avant un régional. Super ambiance, zéro valeur de préparation.",
+            "choices": {
+              "a": {
+                "label": "Le jouer : la communauté vous a tout donné",
+                "outcome": "Vous jouez le showmatch. Le ticker des dons part en vrille. Votre échauffement de régional, c'est un lobby avec des casters qui hurlent des memes.",
+                "failure": "Vous le jouez, vous droppez chaque aerial à l'antenne, et vous perdez quand même le samedi de prep que vous n'avez pas fait."
+              },
+              "b": {
+                "label": "Décliner poliment et scrim à la place",
+                "outcome": "Vous déclinez et scrimmez. Message froid à l'orga. Le bloc régional est vraiment un bloc.",
+                "failure": "Vous déclinez, puis vous regardez le showmatch en stream au lieu de scrimmer. Ni le goodwill, ni les reps."
+              }
+            }
+          },
+          "split-16": {
+            "title": "Jour de Patch",
+            "description": "Un patch surprise modifie le respawn des pads de boost et les angles d'engagement. Toutes les équipes du monde réapprennent les mêmes détails ce soir.",
+            "choices": {
+              "a": {
+                "label": "Travailler les nouveaux timings jusqu'à l'automatisme",
+                "outcome": "Vous labez les pads jusqu'à ce que le nouveau timer soit dans les mains. Les trajectoires d'engagement changent. Vous sautez une nuit de sommeil pour y arriver.",
+                "failure": "Vous labez le patch et vous incrustez l'ancien timing dans les nouveaux pads. Les double-pads que vous mettiez sont maintenant de l'air."
+              },
+              "b": {
+                "label": "S'adapter en jeu : le feeling avant la théorie",
+                "outcome": "Vous queuez et vous sentez. Certains pads vous surprennent. Vous ne perdez pas une nuit entière sur un tableur.",
+                "failure": "Vous « sentez » et vous vous faites battre sur chaque pad la série suivante. L'autre équipe a labbé."
+              }
+            }
+          },
+          "split-17": {
+            "title": "1v1 Pour le Contenu",
+            "description": "Un gros streamer vous DM : 1v1 le nouveau prodige de 16 ans en stream ce soir. La dernière collab a fait des gros chiffres. Votre coach a un bloc de scrims à la même heure.",
+            "choices": {
+              "a": {
+                "label": "Jouer le 1v1. Le clip vivra pour toujours",
+                "outcome": "BO7 en stream. Le chat est feral. Vous avez la miniature. Vous ratez les scrims, et le prodige est maintenant dans votre tête.",
+                "failure": "Vous vous faites cuire en stream. Cage ouverte en OT, son reset, votre whiff. Le clip, c'est vous. Les scrims se sont faits sans vous."
+              },
+              "b": {
+                "label": "Passer. Les scrims d'abord",
+                "outcome": "Vous passez. Le streamer book quelqu'un d'autre. Votre soirée, c'est trois maps de shadow defense avec le roster.",
+                "failure": "Vous zappez et vous checkez quand même le VOD entre les games. Les coéquipiers voient que vous n'êtes qu'à moitié dans le scrim."
+              }
+            }
+          },
+          "split-18": {
+            "title": "Ils Vous Ont Tagué",
+            "description": "Un rival poste votre pire clip du split avec une légende qui n'est même pas une blague. C'est personnel. Vos mentions sont une poubelle en feu.",
+            "choices": {
+              "a": {
+                "label": "Les quote-tweeter. Ne pas laisser passer",
+                "outcome": "Vous les quote-tweetez. Le timeline adore le clash. En scrims, vous composez encore la réponse suivante.",
+                "failure": "Vous répondez. Ils postent un pire clip. Votre coach mute le Discord jusqu'à ce que vous vous déconnectiez."
+              },
+              "b": {
+                "label": "Muter le mot et queue",
+                "outcome": "Vous mutez le compte, vous queuez ranked, et vous laissez le prochain régional répondre. Le clip est toujours dehors. Pas vous.",
+                "failure": "Vous les mutez et vous rafraîchissez quand même le thread. Le bloc de scrims suivant, vous jouez avec un œil sur le téléphone."
+              },
+              "c": {
+                "label": "Laisser l'org poster. Rester en dehors",
+                "outcome": "L'org drop une montage de comeback. Vous restez hors des réponses. La guerre de clips, c'est le shift de quelqu'un d'autre.",
+                "failure": "L'org poste un tweet corporate « on se concentre sur le jeu ». Ça se lit comme une capitulation. Les réponses deviennent plus sales."
+              }
+            }
+          },
+          "split-19": {
+            "title": "Encore Un Pack",
+            "description": "Vous êtes dans le flow à 1 h du matin. Custom training, puis ranked, puis encore un pack. Le premier régional est dans quatre jours. L'org vous a déjà demandé de dormir.",
+            "choices": {
+              "a": {
+                "label": "Continuer à grind la nuit jusqu'à ce que ça clique",
+                "outcome": "Vous grindez jusqu'au lever du soleil. Les mécaniques sont là. Le crash aussi : l'org vous met sur le banc pour les deux premiers régionaux et le major.",
+                "failure": "Vous grindez toute la semaine et vous arrivez incapable de faire un aerial. Ils vous mettent sur le banc deux régionaux et vous rayent du major. Les packs n'ont même pas pris."
+              },
+              "b": {
+                "label": "Fermer le jeu. Dormir. Faire confiance au travail",
+                "outcome": "Vous fermez le jeu. Deux nuits de vrai sommeil. Le pack sera encore là. Vous aussi, sur la server list.",
+                "failure": "Vous essayez de dormir et vous restez allongé à penser au pack que vous n'avez pas fini. Vous arrivez groggy quand même."
+              }
+            }
+          },
+          "split-20": {
+            "title": "Une Map Workshop À Votre Nom",
+            "description": "Un créateur de map dans votre Discord propose un pack custom autour de la mécanique que vous loupez — les ceiling resets, ou ce read de backboard. Une semaine de son temps. Vous lui devrez un shoutout, et une semaine d'entraînement.",
+            "choices": {
+              "a": {
+                "label": "Oui. S'entraîner jusqu'à ce que le read soit automatique",
+                "outcome": "Le pack est sale. Une semaine plus tard, le read de backboard est juste là. Vous le shoutout. Votre routine habituelle a disparu.",
+                "failure": "Le pack est fait pour une mécanique que vous n'avez pas encore. Vous le grindez quand même et vous incrustez de mauvaises habitudes dans les mains."
+              },
+              "b": {
+                "label": "Passer. Rester sur les packs que vous connaissez",
+                "outcome": "Vous le remerciez et vous restez sur les packs que vous mettez déjà. Pas de nouveaux tics. Pas de nouveau plafond non plus.",
+                "failure": "Vous passez. Deux semaines plus tard, un rival grinde le pack de ce même créateur en stream — et met le read que vous n'avez pas."
+              }
+            }
+          },
+          "worlds-01": {
+            "title": "Groupe de la Mort",
+            "description": "Le tirage des Worlds vous place contre le n° 1 mondial et le chouchou du public local. Votre semaine de préparation vient de se charger.",
+            "choices": {
+              "a": {
+                "label": "Étudier chaque adversaire image par image",
+                "outcome": "Vous connaissez leurs tells d'engagement. Vous n'avez pas vu le soleil non plus. Le groupe de la mort est dans votre laptop.",
+                "failure": "Vous over-scoutez et vous figez sur scène. Vous attendez un pattern qui n'est pas là, et l'opener est plié."
+              },
+              "b": {
+                "label": "Vous concentrer sur votre jeu : qu'ils s'adaptent à vous",
+                "outcome": "Vous scrimmez votre jeu, pas le leur. La confiance monte. Vous ne connaîtrez leur cheat de troisième homme que en live.",
+                "failure": "Vous zappez la bande et vous vous faites cuire par un kickoff qu'ils sortent dans chaque série de l'année."
+              }
+            }
+          },
+          "worlds-02": {
+            "title": "Jet Lag au LAN",
+            "description": "Vous atterrissez à neuf fuseaux horaires de chez vous, trois jours avant votre premier match. Chacun gère ça différemment.",
+            "choices": {
+              "a": {
+                "label": "Récupération stricte : sommeil, repas, sessions légères",
+                "outcome": "Sommeil, nourriture, sessions légères. Vous arrivez à l'opener capable de suivre la balle. Vous n'avez pas imprégné l'arène à minuit.",
+                "failure": "Vous forcez le sommeil et vous vous sentez encore 4 h du matin à l'opener. Les sessions légères n'ont pas suffi."
+              },
+              "b": {
+                "label": "Sessions nocturnes dans l'arène pour s'imprégner de la scène",
+                "outcome": "Minuit dans l'arène. La scène commence à ressembler à un serveur. Le jet lag s'en fiche.",
+                "failure": "Vous faites les sessions de minuit et vous jouez l'opener sans sommeil. La scène est bruyante. Votre saut est en retard."
+              }
+            }
+          },
+          "worlds-03": {
+            "title": "Le Trac de la Grande Scène",
+            "description": "Dix mille fans, les casters qui crient votre pseudo. Vos mains tremblent dans la salle d'échauffement.",
+            "choices": {
+              "a": {
+                "label": "Sortir tôt et embrasser la foule",
+                "outcome": "Vous sortez tôt. Le bruit frappe, puis ça devient du carburant. Vos mains s'arrêtent de trembler quand le countdown part.",
+                "failure": "Vous sortez tôt et la foule vous mange. Le tremblement est pire sur le desk."
+              },
+              "b": {
+                "label": "Casque antibruit, vision tunnel jusqu'au match",
+                "outcome": "Casque. Vous ne levez pas les yeux avant le game 1. Le tremblement se calme. Vous ne voyez pas non plus la salle dans laquelle vous êtes.",
+                "failure": "Vous vous cachez dans le casque et vous chokez quand même le premier kickoff. La vision tunnel n'a pas caché le countdown."
+              }
+            }
+          },
+          "worlds-04": {
+            "title": "Ils Vous Ont Scouté",
+            "description": "La rumeur circule : les favoris ont bâti tout leur plan de jeu pour vous neutraliser.",
+            "choices": {
+              "a": {
+                "label": "Retravailler vos engagements dans la nuit",
+                "outcome": "Rework des kickoffs dans la nuit. Ils ont tapé l'ancien vous. Celui-là fake-challenge sur le spawn où ils overcommitent toujours.",
+                "failure": "Vous reworkez les kickoffs à 4 h du matin et vous briquez le nouveau setup sur scène. Ils ont encore l'ancienne bande, et maintenant ça aussi."
+              },
+              "b": {
+                "label": "Le prendre comme un compliment et assumer votre style",
+                "outcome": "Vous jouez votre jeu plus fort. Compliment accepté. S'ils ont bâti un plan autour de vous, forcez-les à s'en servir.",
+                "failure": "Vous doublez et vous foncez dans le piège qu'ils ont construit. Chaque challenge est pile où ils le voulaient."
+              }
+            }
+          },
+          "worlds-05": {
+            "title": "Marathon Média",
+            "description": "Interviews, photoshoots, contenus pour le broadcast. Une journée entière loin des manettes juste avant le bracket.",
+            "choices": {
+              "a": {
+                "label": "Faire le tour complet de la presse : les fans adorent",
+                "outcome": "Press run complet. Clips, photos, un bit qui vivra sur le broadcast. Les manettes attendent ce soir.",
+                "failure": "Vous faites toutes les interviews et vous partez blank sur scène le lendemain. Vos mains se souviennent du micro, pas du kickoff."
+              },
+              "b": {
+                "label": "Faire le minimum et retourner s'échauffer",
+                "outcome": "Une interview, retour aux warm-ups. La forme tient. L'équipe caméra ne vous adore pas.",
+                "failure": "Vous zappez les médias et vous n'arrivez pas à vous concentrer en warm-up non plus. L'org est agacée. Vous n'êtes pas plus net."
+              }
+            }
+          },
+          "worlds-06": {
+            "title": "Le Pari de l'Engagement",
+            "description": "La veille du bracket, votre coach propose des fake kickoffs pour contrer le premier homme ultra-agressif des favoris. Risque élevé, récompense élevée.",
+            "choices": {
+              "a": {
+                "label": "Tenter les fakes",
+                "outcome": "Vous sortez les fakes. S'ils mordent, balle gratuite. S'ils ne mordent pas, vous êtes premier homme nulle part.",
+                "failure": "Vous sortez le fake et ils ne mordent pas. Vous êtes en retard sur tout. Le coach arrête d'appeler ça après le game 1."
+              },
+              "b": {
+                "label": "Rester sur les speedflips classiques",
+                "outcome": "Speedflips standards. Pas de chaos. Ils ont le kickoff contre lequel ils ont trainé. Vous aussi.",
+                "failure": "Vous restez standard et ils gagnent quand même tous les 50. Pas de surprise, pas de réponse."
+              }
+            }
+          },
+          "late-01": {
+            "title": "L'Étincelle N'y Est Plus",
+            "description": "Encore un hôtel, encore un bloc de scrims. Vous vous surprenez à regarder le bureau au lieu de queue. L'org attend quand même un split complet.",
+            "choices": {
+              "a": {
+                "label": "Muter Discord et prendre de vrais jours off",
+                "outcome": "Vous passez en silence. Le réservoir se remplit un peu. La scène semble plus loin, et c'est le but.",
+                "failure": "Vous prenez les jours off et vous revenez plus vide. Le bureau est toujours là. Le split aussi."
+              },
+              "b": {
+                "label": "Transformer le creux en contenu : ranked en stream",
+                "outcome": "L'audience est là. Le ranked est du contenu. Le training, c'est ce que le chat ne raid pas.",
+                "failure": "Vous streamez le creux. Le chat farme les whiffs. Vous n'avez toujours pas les reps, et maintenant elles sont publiques."
+              },
+              "c": {
+                "label": "S'asseoir avec l'académie et passer leurs VODs",
+                "outcome": "Vous passez la semaine à enseigner. Vos mécaniques stagnent. Les jeunes progressent, et vous vous souvenez pourquoi c'était fun.",
+                "failure": "Vous review les VODs d'académie et vous décrochez. Ils ne progressent pas. Vous non plus."
+              }
+            }
+          },
+          "late-02": {
+            "title": "L'Org Vous Veut À l'Écran",
+            "description": "Le pôle contenu veut quatre streams de marque par semaine. Le coach vous veut au facility. Les deux ne passent pas.",
+            "choices": {
+              "a": {
+                "label": "Prendre le planning de stream",
+                "outcome": "Lumières, overlay, subs. Le facility vous voit moins. Le chat, plus.",
+                "failure": "Vous prenez les streams et les chiffres sont mauvais. Vous n'êtes toujours pas au facility. Personne n'est content."
+              },
+              "b": {
+                "label": "Rester au building et aider le prochain roster",
+                "outcome": "Vous devenez la voix en review. Le temps de jeu baisse. La pièce écoute vraiment.",
+                "failure": "Vous restez pour aider et ils ne veulent pas des notes. Vous êtes dans le building sans rien à faire."
+              },
+              "c": {
+                "label": "Refuser les deux et disparaître un mois",
+                "outcome": "Téléphone en Ne pas déranger. Pas de ranked, pas de Discord. Le silence est le but.",
+                "failure": "Vous disparaissez et vous revenez sur un roster qui a déjà avancé. Le mois n'a pas réparé l'étincelle."
+              }
+            }
+          },
+          "late-03": {
+            "title": "Un Rookie Veut du Film",
+            "description": "Un première année d'académie slide en DM : tu peux review mes VODs ? Vos mécaniques glissent et l'horloge est bruyante.",
+            "choices": {
+              "a": {
+                "label": "Passer le film avec eux tous les soirs",
+                "outcome": "Vous coachez plus que vous ne queuez. Le gamin progresse. La partie de vous qui aime enseigner aussi.",
+                "failure": "Vous passez le film tous les soirs et ils ne prennent pas une seule note. Votre temps de ranked a disparu."
+              },
+              "b": {
+                "label": "Reviewer en stream et en faire une série",
+                "outcome": "La VOD review devient du contenu. La série cartonne. Votre ranked, non.",
+                "failure": "La série floppe. Vous expliquez des kickoffs à 40 viewers au lieu de les prendre."
+              },
+              "c": {
+                "label": "Passer : il vous faut les heures, ou plus rien",
+                "outcome": "Vous protégez le calendrier. Les DMs restent sans réponse. L'étincelle reste basse, mais les heures sont à vous.",
+                "failure": "Vous passez et vous n'utilisez pas les heures. Les DMs restent en lu. Le dossier replay aussi."
+              }
+            }
           }
         }
       }

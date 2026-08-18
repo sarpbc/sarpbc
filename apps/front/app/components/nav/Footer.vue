@@ -25,6 +25,8 @@ const columns = computed<FooterColumn[]>(() => [
       { type: "link", label: t("general.results"), to: localePath("/results") },
       { type: "link", label: t("general.tournaments"), to: localePath("/tournaments") },
       { type: "link", label: t("page.game.airriddle.title"), to: localePath("/game/airriddle") },
+      { type: "link", label: t("page.game.pickems.title"), to: localePath("/game/pickems") },
+      { type: "link", label: t("page.game.career.title"), to: localePath("/game/career") },
       { type: "link", label: t("general.teams"), to: localePath("/team") },
       { type: "link", label: t("general.players"), to: localePath("/player") },
     ],
