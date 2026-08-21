@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service";
 import { UserModule } from "../user/user.module";
 import { JwtModule } from "@nestjs/jwt";
 import { AuthController } from "./auth.controller";
+import { AuthGuard } from "./auth.guard";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 
 @Module({
@@ -20,7 +21,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, AuthGuard],
   controllers: [AuthController],
   exports: [AuthService],
 })
