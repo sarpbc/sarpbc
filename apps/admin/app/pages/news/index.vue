@@ -236,7 +236,6 @@ async function updatePage(value: number) {
         icon="i-fluent-add-24-regular"
         :label="$t('page.news.create.title')"
         :to="localePath('/news/create')"
-        class="cursor-pointer"
       />
     </template>
     <DashboardContent>
@@ -247,8 +246,7 @@ async function updatePage(value: number) {
           :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody:
-              '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
             th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
             td: 'border-b border-muted',
           }"
@@ -264,7 +262,6 @@ async function updatePage(value: number) {
                   size="xs"
                   icon="i-fluent-more-vertical-24-regular"
                   :aria-label="$t('page.news.actions.menu')"
-                  class="cursor-pointer"
                 />
               </UDropdownMenu>
             </div>
@@ -307,7 +304,6 @@ async function updatePage(value: number) {
             :loading="isRenaming"
             :disabled="isRenaming"
             :label="$t('page.news.actions.editName')"
-            class="cursor-pointer"
             @click="saveTitle"
           />
           <UButton
@@ -315,7 +311,6 @@ async function updatePage(value: number) {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isRenaming"
-            class="cursor-pointer"
             @click="isRenameModalOpen = false"
           />
         </template>
@@ -340,7 +335,6 @@ async function updatePage(value: number) {
             color="error"
             :loading="isDeleting"
             :label="$t('page.news.actions.delete')"
-            class="cursor-pointer"
             @click="confirmDelete"
           />
           <UButton
@@ -348,7 +342,6 @@ async function updatePage(value: number) {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isDeleting"
-            class="cursor-pointer"
             @click="isDeleteModalOpen = false"
           />
         </template>

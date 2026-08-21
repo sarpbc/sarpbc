@@ -116,7 +116,12 @@ Hub lists and rails sit on a **4px base** with a modular **row scale**. Tokens l
 | **row-double**   | `--spacing-row-double`   | `5.5rem`                        | 88    | `h-row-double`                     | Rare 2× cells                                                            |
 | **row-triple**   | `--spacing-row-triple`   | `calc(row × 3)` (~`8.25rem`)    | ~132  | `h-row-triple`                     | Featured news row with hero thumb (3× default row)                       |
 | **row-stack**    | `--spacing-row-stack`    | `calc(row × 6)` (`16.5rem`)     | 264   | `min-h-row-stack`                  | Directory empty/error body                                               |
+| **card-s**       | `--spacing-card-s`       | `calc(row × 4 + 1px)`           | 177   | `min-h-card-s`                     | Small padded card (`SCard size="s"`)                                     |
+| **card-m**       | `--spacing-card-m`       | `calc(row × 6 + 1px)`           | 265   | `min-h-card-m`                     | Medium padded card (`SCard size="m"`)                                    |
+| **card-l**       | `--spacing-card-l`       | `calc(row × 8 + 1px)`           | 353   | `min-h-card-l`                     | Large padded card / forms (`SCard size="l"`)                             |
 | **rail-caption** | `--spacing-rail-caption` | `4.5rem`                        | 72    | `h-rail-caption`                   | **Lead** rail only (first in a hub column); = page title 56 + `gap-4` 16 |
+
+Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row` plus **1px**. Even multiples also land on compact rail rows (3 compact = 2 row). The extra pixel is the padded card’s bottom border — flush list cards only have a top border, with the last row’s `border-b` closing the box. `SCard size` applies the matching `min-h-card-*` and `h-row-snap`, which rounds extra growth to `n × row-double + 1px`. List cards (`flushBottom` + `SListItem`) stay content-sized — they are already exact row stacks.
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
@@ -140,7 +145,7 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 
 | Primitive        | Role                                                                                                                                     |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks                                                                           |
+| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid               |
 | `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                      |
 | `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                                |
 | `SButton`        | `UButton` wrapper with Cuelume `pressRelease` + press scale by default (`sound`: `press` \| `toggle` \| `none`; `static` disables scale) |
@@ -162,6 +167,18 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 
 Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — include on every row including last when the parent is `flushBottom`). Default slot; override padding via `class` (default `px-2`).
 
+#### `SCard` sizes
+
+Padded bodies (forms, prose, empty states) — not list stacks.
+
+| `size` prop | Utilities                    | Token         |
+| ----------- | ---------------------------- | ------------- |
+| `s`         | `min-h-card-s`, `h-row-snap` | 4 × row + 1px |
+| `m`         | `min-h-card-m`, `h-row-snap` | 6 × row + 1px |
+| `l`         | `min-h-card-l`, `h-row-snap` | 8 × row + 1px |
+
+Omit `size` on `flushBottom` list cards. Prefer `size="l"` over `min-h-row-triple` on forms.
+
 ### Rails & list rows
 
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `SRail` — caption `flex-col-reverse pb-1 pl-2` + `text-toned`, then bordered card/rows in the default slot. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`). Stacked rails and mid-page blocks keep default `caption="section"` (44px / `h-row`). Forum row titles use `text-muted`.
@@ -169,7 +186,7 @@ Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — 
 - **Detail page bodies**: wrap main-column detail pages in `SHubPageBody` (`SRail caption="lead"` + `gap-4` body). Keep `#caption` empty when used only for rail alignment (match detail). Put the scoreboard / hero / sections in the default slot; secondary meta (tournament, status, format) belongs under the hero card, not in the caption band. Caption is flush above the first body child (no gap) so card tops line up with sidebar cards. Use `captionAlign="center"` (default) or `start` for left labels when caption content is present.
 - **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
 - **Match event groups** (`MatchListGroup`): wrap each tournament in `SRail caption="section"` + `SCard flush-bottom`. Upcoming lists group by local day first (`h-row` date caption above the event rails).
-- **Dense data cards** (recent form, head-to-head, results): same `SCard flush-bottom` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells for prose / forms / centered empty states.
+- **Dense data cards** (recent form, head-to-head, results): same `SCard flush-bottom` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells (`size="s"` \| `"m"` \| `"l"`) for prose / forms / centered empty states.
 - **Discussion threads**: Wrap the thread in `SCard flush-bottom`. Each comment is a divider row (`border-b`), not an inner bordered box. Nested replies keep `CommentThreadConnector` indent without extra gap or a second card. Composer and load-more are last divider rows. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
 

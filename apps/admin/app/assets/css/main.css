@@ -28,7 +28,7 @@
 }
 
 :root {
-  --ui-radius: 0.25rem;
+  --ui-radius: 0rem;
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;

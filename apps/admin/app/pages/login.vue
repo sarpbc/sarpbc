@@ -102,7 +102,7 @@ function googleLogin() {
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           color="neutral"
-          class="w-full flex flex-row justify-center cursor-pointer text-highlighted"
+          class="w-full flex flex-row justify-center text-highlighted"
           size="lg"
           variant="outline"
           @click="googleLogin"
@@ -140,7 +140,7 @@ function googleLogin() {
             type="submit"
             :loading="pending"
             :disabled="pending"
-            class="w-full flex flex-col items-center cursor-pointer"
+            class="w-full flex flex-col items-center"
           />
         </UForm>
       </div>

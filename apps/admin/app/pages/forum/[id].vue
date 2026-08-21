@@ -120,7 +120,6 @@ async function hideReply(reply: Reply) {
         variant="soft"
         icon="i-fluent-delete-24-regular"
         :label="$t('page.forum.delete.postTitle')"
-        class="cursor-pointer"
         @click="isDeletePostModalOpen = true"
       />
     </template>
@@ -168,7 +167,6 @@ async function hideReply(reply: Reply) {
                 :label="$t('page.forum.hide')"
                 :loading="hidingReplyId === reply.id"
                 :disabled="hidingReplyId !== null"
-                class="cursor-pointer"
                 @click="hideReply(reply)"
               />
               <UButton
@@ -176,7 +174,6 @@ async function hideReply(reply: Reply) {
                 variant="ghost"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.forum.delete.replyTitle')"
-                class="cursor-pointer"
                 @click="openDeleteReplyModal(reply)"
               />
             </div>
@@ -207,7 +204,6 @@ async function hideReply(reply: Reply) {
             color="error"
             :loading="isDeletingPost"
             :label="$t('page.forum.delete.confirmButton')"
-            class="cursor-pointer"
             @click="confirmDeletePost"
           />
           <UButton
@@ -215,7 +211,6 @@ async function hideReply(reply: Reply) {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isDeletingPost"
-            class="cursor-pointer"
             @click="isDeletePostModalOpen = false"
           />
         </template>
@@ -234,7 +229,6 @@ async function hideReply(reply: Reply) {
             color="error"
             :loading="isDeletingReply"
             :label="$t('page.forum.delete.confirmButton')"
-            class="cursor-pointer"
             @click="confirmDeleteReply"
           />
           <UButton
@@ -242,7 +236,6 @@ async function hideReply(reply: Reply) {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isDeletingReply"
-            class="cursor-pointer"
             @click="isDeleteReplyModalOpen = false"
           />
         </template>

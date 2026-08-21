@@ -153,13 +153,11 @@ async function onSyncTeams() {
           :label="isSyncing ? $t('page.teams.syncingPandascore') : $t('page.teams.syncPandascore')"
           :loading="isSyncing"
           :disabled="isSyncing"
-          class="cursor-pointer"
           @click="onSyncTeams"
         />
         <UButton
           icon="i-fluent-add-24-regular"
           :label="$t('page.teams.create.title')"
-          class="cursor-pointer"
           @click="openCreateModal"
         />
       </div>
@@ -173,8 +171,7 @@ async function onSyncTeams() {
           :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody:
-              '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
             th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
             td: 'border-b border-muted',
           }"
@@ -188,7 +185,6 @@ async function onSyncTeams() {
               color="error"
               variant="ghost"
               size="xs"
-              class="cursor-pointer"
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
@@ -231,7 +227,6 @@ async function onSyncTeams() {
           :label="$t('page.teams.create.save')"
           :loading="isCreating"
           :disabled="!newTeam.name"
-          class="cursor-pointer"
           @click="confirmCreate"
         />
         <UButton
@@ -239,7 +234,6 @@ async function onSyncTeams() {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isCreating"
-          class="cursor-pointer"
           @click="isCreateModalOpen = false"
         />
       </template>
@@ -265,7 +259,6 @@ async function onSyncTeams() {
           color="error"
           :label="$t('page.teams.delete.confirm_button')"
           :loading="isDeleting"
-          class="cursor-pointer"
           @click="confirmDelete"
         />
         <UButton
@@ -273,7 +266,6 @@ async function onSyncTeams() {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isDeleting"
-          class="cursor-pointer"
           @click="isDeleteModalOpen = false"
         />
       </template>

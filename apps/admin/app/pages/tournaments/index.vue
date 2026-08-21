@@ -133,8 +133,7 @@ async function updatePage(value: number) {
           :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody:
-              '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
             th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
             td: 'border-b border-muted',
           }"

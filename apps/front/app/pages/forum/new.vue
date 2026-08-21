@@ -143,17 +143,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </h1>
       </div>
     </SCrossCard>
-    <SCard class="p-4">
+    <SCard size="l" class="p-4">
       <p v-if="creationStatusLoadState === 'loading'" class="text-sm text-muted mb-4">
         {{ $t("page.forum.new.statusLoading") }}
       </p>
       <p v-else-if="creationStatusLoadState === 'error'" class="text-sm text-error mb-4">
         {{ $t("page.forum.new.statusLoadError") }}
       </p>
-      <p v-else-if="rateLimitMessage" class="text-sm text-muted mb-4">
+      <p v-else-if="rateLimitMessage" class="text-sm text-muted">
         {{ rateLimitMessage }}
       </p>
-      <UForm :schema="schema" :state="state" class="w-full space-y-4" @submit="onSubmit">
+      <UForm v-else :schema="schema" :state="state" class="w-full space-y-4" @submit="onSubmit">
         <UFormField
           :label="$t('page.forum.new.form.title')"
           name="title"
@@ -179,9 +179,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             <UBadge
               v-for="topic in topics"
               :key="topic.id"
+              as="button"
+              type="button"
               variant="soft"
               size="lg"
               :color="state.topicId === topic.id ? 'primary' : 'neutral'"
+              :disabled="!canSubmit"
               :class="canSubmit ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
               @click="canSubmit && (state.topicId = topic.id)"
             >
@@ -206,17 +209,16 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           />
         </UFormField>
 
-        <UButton
+        <SButton
           type="submit"
-          variant="soft"
-          class="cursor-pointer"
+          variant="solid"
           :class="pressClass"
           :disabled="!canSubmit"
           :loading="isSubmitting"
           v-bind="cuelumeAttrs.pressRelease"
         >
           {{ $t("page.forum.new.form.submit") }}
-        </UButton>
+        </SButton>
       </UForm>
     </SCard>
   </div>

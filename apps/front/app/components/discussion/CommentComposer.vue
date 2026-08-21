@@ -150,7 +150,7 @@ function onEnterKey(event: KeyboardEvent) {
       <SButton
         type="submit"
         variant="soft"
-        class="w-fit cursor-pointer"
+        class="w-fit"
         :loading="isSubmitting"
         :disabled="isSubmitting"
       >

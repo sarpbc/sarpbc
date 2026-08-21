@@ -106,8 +106,7 @@ async function confirmDelete() {
             :ui="{
               base: 'table-fixed border-separate border-spacing-0',
               thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-              tbody:
-                '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+              tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
               th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
               td: 'border-b border-muted',
             }"
@@ -122,7 +121,6 @@ async function confirmDelete() {
                 size="xs"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.forum.delete.postTitle')"
-                class="cursor-pointer"
                 @click="(e) => openDeleteModal(e, row.original)"
               />
             </template>
@@ -149,7 +147,6 @@ async function confirmDelete() {
             color="error"
             :loading="isDeleting"
             :label="$t('page.forum.delete.confirmButton')"
-            class="cursor-pointer"
             @click="confirmDelete"
           />
           <UButton
@@ -157,7 +154,6 @@ async function confirmDelete() {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isDeleting"
-            class="cursor-pointer"
             @click="isDeleteModalOpen = false"
           />
         </template>

@@ -172,7 +172,7 @@ function isTeamSelected(teamId: string): boolean {
           <label
             v-for="team in filteredTeams"
             :key="team.id"
-            class="flex cursor-pointer items-center gap-2 text-sm"
+            class="flex items-center gap-2 text-sm"
           >
             <UCheckbox
               :model-value="isTeamSelected(team.id)"
