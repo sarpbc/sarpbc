@@ -3,12 +3,14 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { FastifyRequest } from "fastify";
 import { UserToken } from "src/common/types/usertoken.interface";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
+    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,9 +26,17 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get<string>("jwt_token"),
       });
 
-      request.user = payload;
+      const user = await this.userService.findById(payload.id);
+      if (!user) {
+        throw new UnauthorizedException("Invalid or expired token");
+      }
+
+      request.user = { id: user.id, email: user.email };
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException("Invalid or expired token");
     }
   }
