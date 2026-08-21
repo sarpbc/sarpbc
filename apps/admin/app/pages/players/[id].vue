@@ -245,7 +245,6 @@ const contractModalTitle = computed(() =>
         :label="$t('page.players.save')"
         :loading="isSavingPlayer"
         :disabled="!playerForm.name"
-        class="cursor-pointer"
         @click="savePlayer"
       />
     </template>
@@ -287,7 +286,6 @@ const contractModalTitle = computed(() =>
               icon="i-fluent-add-24-regular"
               size="sm"
               :label="$t('page.players.contracts.create.title')"
-              class="cursor-pointer"
               @click="openCreateContractModal"
             />
           </div>
@@ -309,7 +307,6 @@ const contractModalTitle = computed(() =>
                   icon="i-fluent-edit-24-regular"
                   variant="ghost"
                   size="xs"
-                  class="cursor-pointer"
                   @click="openEditContractModal(row.original)"
                 />
                 <UButton
@@ -317,7 +314,6 @@ const contractModalTitle = computed(() =>
                   color="error"
                   variant="ghost"
                   size="xs"
-                  class="cursor-pointer"
                   @click="openDeleteContractModal(row.original)"
                 />
               </div>
@@ -364,7 +360,6 @@ const contractModalTitle = computed(() =>
           :label="$t('page.players.contracts.save')"
           :loading="isSavingContract"
           :disabled="!contractForm.teamId || !contractForm.startDate"
-          class="cursor-pointer"
           @click="saveContract"
         />
         <UButton
@@ -372,7 +367,6 @@ const contractModalTitle = computed(() =>
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isSavingContract"
-          class="cursor-pointer"
           @click="isContractModalOpen = false"
         />
       </template>
@@ -398,7 +392,6 @@ const contractModalTitle = computed(() =>
           color="error"
           :label="$t('page.players.contracts.delete.confirm_button')"
           :loading="isDeletingContract"
-          class="cursor-pointer"
           @click="confirmDeleteContract"
         />
         <UButton
@@ -406,7 +399,6 @@ const contractModalTitle = computed(() =>
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isDeletingContract"
-          class="cursor-pointer"
           @click="isDeleteContractModalOpen = false"
         />
       </template>

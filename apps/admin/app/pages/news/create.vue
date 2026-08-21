@@ -106,7 +106,6 @@ async function saveArticle() {
         <UButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.news.create.save')"
-          class="cursor-pointer"
           @click="openSaveModal"
         />
 
@@ -148,7 +147,6 @@ async function saveArticle() {
             :label="$t('page.news.create.save')"
             :loading="isSaving"
             :disabled="isSaving"
-            class="cursor-pointer"
             @click="saveArticle"
           />
           <UButton
@@ -156,7 +154,6 @@ async function saveArticle() {
             variant="subtle"
             :label="$t('page.news.create.cancel')"
             :disabled="isSaving"
-            class="cursor-pointer"
             @click="isModalOpen = false"
           />
         </template>
