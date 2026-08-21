@@ -1,13 +1,25 @@
 <script setup lang="ts">
+import { buildOrganization } from "~/utils/structuredData/organization";
+import { buildWebSite } from "~/utils/structuredData/webSite";
+import { homepageNewsHeadingLevel } from "~/utils/homepageNewsHeadingLevel";
+
 const HOMEPAGE_NEWS_LIMIT = 20;
 
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+const { setJsonLd } = useStructuredData();
 
 setPageSeo({
   title: t("page.home.seo.title"),
   description: t("page.home.seo.description"),
 });
+
+setJsonLd("ld-json-organization", () => buildOrganization());
+setJsonLd("ld-json-website", () =>
+  buildWebSite({
+    description: t("page.home.seo.description"),
+  }),
+);
 
 const { data: newsPage } = await useAsyncData(
   () => `homepage-news-${locale.value}`,
@@ -48,6 +60,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
             :key="article.id"
             :article="article"
             :show-image="article.id === featuredImageArticleId"
+            :heading-level="homepageNewsHeadingLevel(article.id, featuredImageArticleId)"
           />
         </div>
       </SCard>

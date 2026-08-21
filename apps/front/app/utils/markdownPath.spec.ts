@@ -13,6 +13,7 @@ describe("markdownPath", () => {
     expect(markdownPathFromHtmlPath("/fr")).toBe("/fr/index.md");
     expect(markdownPathFromHtmlPath("/fr/")).toBe("/fr/index.md");
     expect(markdownPathFromHtmlPath("/about")).toBe("/about.md");
+    expect(markdownPathFromHtmlPath("/contact")).toBe("/contact.md");
     expect(markdownPathFromHtmlPath("/news/foo")).toBe("/news/foo.md");
     expect(markdownPathFromHtmlPath("/fr/matches")).toBe("/fr/matches.md");
   });
@@ -21,6 +22,7 @@ describe("markdownPath", () => {
     expect(htmlPathFromMarkdownPath("/index.md")).toBe("/");
     expect(htmlPathFromMarkdownPath("/fr/index.md")).toBe("/fr");
     expect(htmlPathFromMarkdownPath("/about.md")).toBe("/about");
+    expect(htmlPathFromMarkdownPath("/contact.md")).toBe("/contact");
     expect(htmlPathFromMarkdownPath("/news/foo.md")).toBe("/news/foo");
   });
 
@@ -37,6 +39,7 @@ describe("markdownPath", () => {
   it("skips private and asset html paths for markdown", () => {
     expect(isMarkdownEligibleHtmlPath("/matches")).toBe(true);
     expect(isMarkdownEligibleHtmlPath("/")).toBe(true);
+    expect(isMarkdownEligibleHtmlPath("/contact")).toBe(true);
     expect(isMarkdownEligibleHtmlPath("/profile")).toBe(false);
     expect(isMarkdownEligibleHtmlPath("/fr/login")).toBe(false);
     expect(isMarkdownEligibleHtmlPath("/about.md")).toBe(false);

@@ -47,6 +47,11 @@ const columns = computed<FooterColumn[]>(() => [
       },
       {
         type: "link",
+        label: t("components.footer.contact"),
+        to: localePath("/contact"),
+      },
+      {
+        type: "link",
         label: t("components.footer.legalNotice"),
         to: localePath("/legal-notice"),
       },
