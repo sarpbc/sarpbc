@@ -4,10 +4,18 @@ import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 
 const localePath = useLocalePath();
 
-const props = defineProps<{
-  article: NewsArticleListItem;
-  showImage?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    article: NewsArticleListItem;
+    showImage?: boolean;
+    headingLevel?: "h1" | "h2";
+  }>(),
+  {
+    headingLevel: "h2",
+  },
+);
+
+const titleHeadingTag = computed(() => props.headingLevel);
 
 const imageUrl = computed(() => {
   if (!props.showImage) {
@@ -40,17 +48,21 @@ const imageUrl = computed(() => {
           class="h-full w-full object-cover"
         />
       </div>
-      <h2
+      <component
+        :is="titleHeadingTag"
         class="min-w-0 flex-1 self-center text-base font-semibold leading-snug tracking-tight text-highlighted line-clamp-5"
       >
         {{ props.article.title }}
-      </h2>
+      </component>
     </div>
 
     <div v-else class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-highlighted">
+      <component
+        :is="titleHeadingTag"
+        class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-highlighted"
+      >
         {{ props.article.title }}
-      </h2>
+      </component>
       <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
         {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
       </p>

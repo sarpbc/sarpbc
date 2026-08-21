@@ -90,6 +90,26 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- About -->
+  <url>
+    <loc>https://sarpbc.org/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sarpbc.org/about" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sarpbc.org/fr/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sarpbc.org/about" />
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://sarpbc.org/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sarpbc.org/contact" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://sarpbc.org/fr/contact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sarpbc.org/contact" />
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
   <!-- Legal pages -->
   <url>
     <loc>https://sarpbc.org/cookie-policy</loc>
