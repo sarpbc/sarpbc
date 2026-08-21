@@ -19,5 +19,13 @@ export default defineContentConfig({
         description: z.string().min(1),
       }),
     }),
+    contact: defineCollection({
+      type: "page",
+      source: "contact/**/*.md",
+      schema: z.object({
+        title: z.string().min(1),
+        description: z.string().min(1),
+      }),
+    }),
   },
 });
