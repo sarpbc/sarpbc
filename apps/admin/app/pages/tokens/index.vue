@@ -165,7 +165,6 @@ async function confirmRevoke() {
       <UButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tokens.create.button')"
-        class="cursor-pointer"
         @click="openCreateModal"
       />
     </template>
@@ -187,7 +186,6 @@ async function confirmRevoke() {
             icon="i-fluent-arrow-clockwise-24-regular"
             :label="$t('page.tokens.retry')"
             variant="soft"
-            class="cursor-pointer"
             @click="refresh()"
           />
         </div>
@@ -212,7 +210,6 @@ async function confirmRevoke() {
             <UButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.tokens.create.button')"
-              class="cursor-pointer"
               @click="openCreateModal"
             />
           </div>
@@ -238,7 +235,6 @@ async function confirmRevoke() {
                   size="xs"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.tokens.revoke.title')"
-                  class="cursor-pointer"
                   @click="openRevokeModal(row.original)"
                 />
               </template>
@@ -272,7 +268,6 @@ async function confirmRevoke() {
           :label="$t('page.tokens.create.submit')"
           :loading="isCreating"
           :disabled="!newTokenName.trim()"
-          class="cursor-pointer"
           @click="confirmCreate"
         />
         <UButton
@@ -280,7 +275,6 @@ async function confirmRevoke() {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isCreating"
-          class="cursor-pointer"
           @click="isCreateModalOpen = false"
         />
       </template>
@@ -312,7 +306,7 @@ async function confirmRevoke() {
                     : $t('page.tokens.reveal.copy')
                 "
                 variant="soft"
-                class="shrink-0 cursor-pointer"
+                class="shrink-0"
                 @click="revealedToken && copyText(revealedToken, 'token')"
               />
             </div>
@@ -335,7 +329,7 @@ async function confirmRevoke() {
                 "
                 variant="soft"
                 size="sm"
-                class="self-start cursor-pointer"
+                class="self-start"
                 @click="copyText(mcpConfigSnippet, 'config')"
               />
             </div>
@@ -343,11 +337,7 @@ async function confirmRevoke() {
         </div>
       </template>
       <template #footer>
-        <UButton
-          :label="$t('page.tokens.reveal.dismiss')"
-          class="cursor-pointer"
-          @click="closeRevealModal"
-        />
+        <UButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
       </template>
     </UModal>
 
@@ -371,7 +361,6 @@ async function confirmRevoke() {
           color="error"
           :label="$t('page.tokens.revoke.confirmButton')"
           :loading="isRevoking"
-          class="cursor-pointer"
           @click="confirmRevoke"
         />
         <UButton
@@ -379,7 +368,6 @@ async function confirmRevoke() {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isRevoking"
-          class="cursor-pointer"
           @click="isRevokeModalOpen = false"
         />
       </template>

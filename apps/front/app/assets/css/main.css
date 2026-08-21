@@ -30,9 +30,13 @@
   --spacing-row-double: 5.5rem; /* 88px */
   --spacing-row-triple: calc(var(--spacing-row) * 3);
   --spacing-row-stack: calc(var(--spacing-row) * 6); /* 264px — directory empty/error body */
+  --spacing-px: 1px;
+  /* Padded cards add 1px so the extra bottom border matches flush list stacks (rows + top border only). */
+  --spacing-card-s: calc(var(--spacing-row) * 4 + var(--spacing-px)); /* 177px */
+  --spacing-card-m: calc(var(--spacing-row-stack) + var(--spacing-px)); /* 265px */
+  --spacing-card-l: calc(var(--spacing-row) * 8 + var(--spacing-px)); /* 353px */
   --spacing-rail-caption: 4.5rem; /* 72px — lead rail only (header 56 + gap-4 16); section rails use h-row */
   --spacing-cross: 4px; /* SCrossCard corner ticks */
-  --spacing-px: 1px;
   --radius-scrollbar: 5px;
   --duration-fast: 150ms;
   --duration-normal: 200ms;
@@ -87,6 +91,14 @@
   [class*="border-"] {
     border-color: CanvasText;
   }
+}
+
+/* Snap used height to n × row-double + 1px (the extra bottom border vs flush list cards). Chromium-only; named min-h-card-* is the fallback. */
+@utility h-row-snap {
+  height: calc-size(
+    auto,
+    round(up, size - var(--spacing-px), var(--spacing-row-double)) + var(--spacing-px)
+  );
 }
 
 html {

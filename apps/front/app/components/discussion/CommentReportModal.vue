@@ -95,7 +95,6 @@ async function submitReport() {
         :label="$t('components.discussion.report.submit')"
         :loading="isSubmitting"
         :disabled="!selectedReason || isSubmitting"
-        class="cursor-pointer"
         @click="submitReport"
       />
       <UButton
@@ -103,7 +102,6 @@ async function submitReport() {
         variant="subtle"
         :label="$t('common.cancel')"
         :disabled="isSubmitting"
-        class="cursor-pointer"
         @click="open = false"
       />
     </template>

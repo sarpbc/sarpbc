@@ -154,7 +154,6 @@ async function updatePage(value: number) {
       <UButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.players.create.title')"
-        class="cursor-pointer"
         @click="openCreateModal"
       />
     </template>
@@ -167,8 +166,7 @@ async function updatePage(value: number) {
           :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody:
-              '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:cursor-pointer [&>tr]:hover:!bg-transparent',
+            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
             th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
             td: 'border-b border-muted',
           }"
@@ -182,7 +180,6 @@ async function updatePage(value: number) {
               color="error"
               variant="ghost"
               size="xs"
-              class="cursor-pointer"
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
@@ -234,7 +231,6 @@ async function updatePage(value: number) {
           :label="$t('page.players.create.save')"
           :loading="isCreating"
           :disabled="!newPlayer.name"
-          class="cursor-pointer"
           @click="confirmCreate"
         />
         <UButton
@@ -242,7 +238,6 @@ async function updatePage(value: number) {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isCreating"
-          class="cursor-pointer"
           @click="isCreateModalOpen = false"
         />
       </template>
@@ -268,7 +263,6 @@ async function updatePage(value: number) {
           color="error"
           :label="$t('page.players.delete.confirm_button')"
           :loading="isDeleting"
-          class="cursor-pointer"
           @click="confirmDelete"
         />
         <UButton
@@ -276,7 +270,6 @@ async function updatePage(value: number) {
           variant="subtle"
           :label="$t('common.cancel')"
           :disabled="isDeleting"
-          class="cursor-pointer"
           @click="isDeleteModalOpen = false"
         />
       </template>

@@ -87,9 +87,12 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 | row-double | `--spacing-row-double` (`5.5rem`) | 88 | `h-row-double` | Rare 2× cells |
 | row-triple | `--spacing-row-triple` (`calc(row × 3)`) | ~132 | `h-row-triple` | Featured news row |
 | row-stack | `--spacing-row-stack` (`calc(row × 6)`) | 264 | `min-h-row-stack` | Directory empty/error body |
+| card-s | `--spacing-card-s` (`calc(row × 4 + 1px)`) | 177 | `min-h-card-s` | Small padded card |
+| card-m | `--spacing-card-m` (`calc(row × 6 + 1px)`) | 265 | `min-h-card-m` | Medium padded card |
+| card-l | `--spacing-card-l` (`calc(row × 8 + 1px)`) | 353 | `min-h-card-l` | Large padded card / forms |
 | rail-caption | `--spacing-rail-caption` (`4.5rem`) | 72 | `h-rail-caption` | Lead rail only (first in column); section rails use `h-row` |
 
-**Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`.
+**Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`. Padded cards: `SCard size="s"` \| `"m"` \| `"l"` (even row multiples + 1px hairline + `h-row-snap`). List stacks omit `size`.
 
 ## Radius
 

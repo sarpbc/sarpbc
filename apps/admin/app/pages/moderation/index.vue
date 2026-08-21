@@ -154,7 +154,6 @@ async function confirmDeleteReply() {
             icon="i-fluent-arrow-clockwise-24-regular"
             :label="$t('page.moderation.retry')"
             variant="soft"
-            class="cursor-pointer"
             @click="refresh()"
           />
         </div>
@@ -195,7 +194,6 @@ async function confirmDeleteReply() {
                   :label="$t('page.moderation.hide')"
                   :loading="hidingReplyId === reply.id"
                   :disabled="hidingReplyId !== null || !!reply.hiddenAt"
-                  class="cursor-pointer"
                   @click="hideReply(reply)"
                 />
                 <UButton
@@ -203,7 +201,6 @@ async function confirmDeleteReply() {
                   variant="ghost"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.moderation.delete')"
-                  class="cursor-pointer"
                   @click="openDeleteReplyModal(reply)"
                 />
               </div>
@@ -246,7 +243,6 @@ async function confirmDeleteReply() {
             color="error"
             :loading="isDeletingReply"
             :label="$t('page.moderation.deleteConfirmButton')"
-            class="cursor-pointer"
             @click="confirmDeleteReply"
           />
           <UButton
@@ -254,7 +250,6 @@ async function confirmDeleteReply() {
             variant="subtle"
             :label="$t('common.cancel')"
             :disabled="isDeletingReply"
-            class="cursor-pointer"
             @click="isDeleteReplyModalOpen = false"
           />
         </template>

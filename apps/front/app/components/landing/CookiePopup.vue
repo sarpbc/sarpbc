@@ -29,10 +29,10 @@ const rejectCookies = () => {
         </p>
 
         <div class="flex justify-start space-x-2">
-          <UButton color="primary" class="cursor-pointer" @click="acceptCookies">
+          <UButton color="primary" @click="acceptCookies">
             {{ t("common.accept") }}
           </UButton>
-          <UButton variant="ghost" color="neutral" class="cursor-pointer" @click="rejectCookies">
+          <UButton variant="ghost" color="neutral" @click="rejectCookies">
             {{ t("common.decline") }}
           </UButton>
         </div>

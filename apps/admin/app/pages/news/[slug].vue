@@ -108,7 +108,6 @@ async function togglePublish() {
         variant="outline"
         :loading="isPublishing"
         :disabled="isPublishing || isSaving"
-        class="cursor-pointer"
         @click="togglePublish"
       >
         {{ isDraft ? $t("page.news.edit.publish") : $t("page.news.edit.unpublish") }}
@@ -121,7 +120,6 @@ async function togglePublish() {
         <UButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.news.edit.save')"
-          class="cursor-pointer"
           @click="openSaveModal"
         />
 
@@ -163,7 +161,6 @@ async function togglePublish() {
             :label="$t('page.news.edit.save')"
             :loading="isSaving"
             :disabled="isSaving"
-            class="cursor-pointer"
             @click="saveArticle"
           />
           <UButton
@@ -171,7 +168,6 @@ async function togglePublish() {
             variant="subtle"
             :label="$t('page.news.create.cancel')"
             :disabled="isSaving"
-            class="cursor-pointer"
             @click="isModalOpen = false"
           />
         </template>

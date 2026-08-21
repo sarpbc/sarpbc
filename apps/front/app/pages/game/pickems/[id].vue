@@ -408,7 +408,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
               <div class="grid grid-cols-3 items-center justify-between gap-2">
                 <UButton
                   variant="soft"
-                  class="flex items-center justify-center col-span-1 cursor-pointer min-h-10"
+                  class="flex items-center justify-center col-span-1 min-h-10"
                   :class="pressClass"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
@@ -428,7 +428,7 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
                 </div>
                 <UButton
                   variant="soft"
-                  class="flex items-center justify-center col-span-1 cursor-pointer min-h-10"
+                  class="flex items-center justify-center col-span-1 min-h-10"
                   :class="pressClass"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending

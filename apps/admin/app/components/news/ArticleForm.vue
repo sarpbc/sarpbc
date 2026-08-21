@@ -38,7 +38,6 @@ const preview = computed(() =>
               ? 'rounded-none border-b-2 border-highlighted text-highlighted'
               : 'rounded-none border-b-2 border-transparent text-muted'
           "
-          class="cursor-pointer"
           @click="editorLocale = 'en'"
         >
           {{ $t("page.news.locale.en") }}
@@ -54,7 +53,6 @@ const preview = computed(() =>
               ? 'rounded-none border-b-2 border-highlighted text-highlighted'
               : 'rounded-none border-b-2 border-transparent text-muted'
           "
-          class="cursor-pointer"
           @click="editorLocale = 'fr'"
         >
           {{ $t("page.news.locale.fr") }}
@@ -75,7 +73,6 @@ const preview = computed(() =>
           :aria-label="
             previewing ? $t('page.news.create.preview.hide') : $t('page.news.create.preview.show')
           "
-          class="cursor-pointer"
           @click="previewing = !previewing"
         />
       </UTooltip>
