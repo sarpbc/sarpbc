@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import * as Redis from "ioredis";
+import { log } from "evlog";
 import { env } from "process";
 
 @Injectable()
@@ -12,10 +13,18 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       port: parseInt(env.REDIS_PORT || "6379", 10),
       password: env.REDIS_PASSWORD || undefined,
     });
+
+    this.client.on("error", (error: Error) => {
+      log.error({
+        component: RedisService.name,
+        message: "Redis connection error",
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    });
   }
 
-  onModuleDestroy() {
-    this.client.quit();
+  async onModuleDestroy(): Promise<void> {
+    await this.client.quit();
   }
 
   async set(key: string, otp: string, ttlInSeconds: number): Promise<void> {
