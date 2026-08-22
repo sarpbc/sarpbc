@@ -1,0 +1,35 @@
+<script setup lang="ts">
+import type { TournamentParticipant } from "~/types/tournament";
+
+const { t } = useI18n();
+
+const { participant, score, winner } = defineProps<{
+  participant: TournamentParticipant | undefined;
+  score: number | null;
+  winner: boolean | undefined;
+}>();
+
+function getScoreColorClass(): string {
+  if (winner === undefined) return "text-muted";
+  return winner ? "text-success" : "text-error";
+}
+</script>
+
+<template>
+  <div v-if="participant?.team.slug" class="flex flex-col items-center justify-center">
+    <SLink
+      :to="$localePath(`/team/${participant.team.slug}`)"
+      variant="muted"
+      class="flex flex-col items-center justify-center w-fit"
+    >
+      <TeamImg
+        :team-name="participant.team.name"
+        :image-url="participant.team.imageUrl"
+        size="md"
+      />
+      {{ participant.team.name }}
+      <span v-if="score !== null" :class="getScoreColorClass()">{{ score }}</span>
+    </SLink>
+  </div>
+  <span v-else class="block truncate">{{ t("page.match.detail.unknownTeam") }}</span>
+</template>

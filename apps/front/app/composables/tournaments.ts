@@ -1,5 +1,13 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
+import { parseMatchResults } from "~/utils/parseMatchResult";
+
+function parseMatch(match: Match): Match {
+  return {
+    ...match,
+    results: parseMatchResults(match.results),
+  };
+}
 
 export async function getAllTournaments(query?: {
   limit?: number;
@@ -78,7 +86,7 @@ export async function getTournamentMatches(tournamentId: string) {
       credentials: "include",
     });
 
-    return res.matches ?? [];
+    return (res.matches ?? []).map(parseMatch);
   } catch (error) {
     console.error("Error fetching tournament matches:", error);
     return [];

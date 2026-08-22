@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { getResultParticipantId } from "~/types/matches";
+import { getMatchParticipantScore } from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
-import { matchCalendarPath } from "~/utils/calendar/ics";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
 } from "~/utils/matchDiscoveryAnalytics";
+import { getApiErrorStatus } from "~/utils/apiError";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -30,12 +30,7 @@ const {
     try {
       return await getMatchById(matchId.value);
     } catch (err: unknown) {
-      const statusCode =
-        err && typeof err === "object" && "statusCode" in err
-          ? (err as { statusCode?: number }).statusCode
-          : undefined;
-
-      if (statusCode === 404) {
+      if (getApiErrorStatus(err) === 404) {
         throw createError({
           statusCode: 404,
           message: t("page.match.detail.notFound"),
@@ -77,11 +72,7 @@ function tournamentLabel(currentMatch: Match) {
 }
 
 function getParticipantScore(currentMatch: Match, participantId: string): number | null {
-  if (!currentMatch.results?.length) return null;
-  const result = currentMatch.results.find(
-    (r) => getResultParticipantId(r.participant) === participantId,
-  );
-  return result?.score ?? null;
+  return getMatchParticipantScore(currentMatch.results, participantId);
 }
 
 const winnerParticipantId = computed(() => {
@@ -100,12 +91,6 @@ const winnerParticipantId = computed(() => {
 
   return scoreA > scoreB ? teamA.value.id : teamB.value.id;
 });
-
-function getScoreColorClass(participantId: string): string {
-  const winnerId = winnerParticipantId.value;
-  if (!winnerId) return "text-muted";
-  return winnerId === participantId ? "text-success" : "text-error";
-}
 
 const matchStatus = computed(() => {
   if (!match.value) {
@@ -142,21 +127,6 @@ const dateTimeFormatter = computed(
       timeStyle: "short",
     }),
 );
-
-const statusLabel = computed(() => {
-  switch (matchStatus.value) {
-    case "live":
-      return t("page.match.detail.status.live");
-    case "finished":
-      return t("page.match.detail.status.finished");
-    case "upcoming":
-      return t("page.match.detail.status.upcoming");
-    default: {
-      const _exhaustive: never = matchStatus.value;
-      return _exhaustive;
-    }
-  }
-});
 
 const seoTitle = computed(() => {
   if (!match.value || !teamA.value || !teamB.value) {
@@ -224,15 +194,11 @@ watch(
     setPageSeo({
       title: seoTitle.value,
       description: seoDescription.value,
-      ...(match.value ? { image: getMatchOgImageUrl(matchId.value) } : {}),
+      image: match.value ? getMatchOgImageUrl(matchId.value) : undefined,
     });
   },
   { immediate: true },
 );
-
-function tournamentMatchesPath(tournamentId: string) {
-  return `/tournaments/${tournamentId}/matches`;
-}
 
 const scoreboardLabel = computed(() => {
   const a = participantName(teamA.value);
@@ -240,23 +206,10 @@ const scoreboardLabel = computed(() => {
   if (!match.value || matchStatus.value === "upcoming") {
     return `${a} vs ${b}`;
   }
-  const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "–") : "–";
-  const scoreB = teamB.value ? (getParticipantScore(match.value, teamB.value.id) ?? "–") : "–";
-  return `${a} ${scoreA} – ${scoreB} ${b}`;
+  const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "-") : "-";
+  const scoreB = teamB.value ? (getParticipantScore(match.value, teamB.value.id) ?? "-") : "-";
+  return `${a} ${scoreA} - ${scoreB} ${b}`;
 });
-
-const leagueImageUrl = computed(() => match.value?.tournament?.league?.imageUrl ?? null);
-const leagueName = computed(() => match.value?.tournament?.league?.name ?? null);
-
-const showScheduledAt = computed(
-  () => matchStatus.value === "upcoming" && Boolean(match.value?.beginAt),
-);
-
-const showAddToCalendar = computed(
-  () =>
-    Boolean(match.value?.beginAt) &&
-    (matchStatus.value === "upcoming" || matchStatus.value === "live"),
-);
 </script>
 
 <template>
@@ -302,99 +255,27 @@ const showAddToCalendar = computed(
   <SHubPageBody v-else-if="match">
     <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
-    <SCrossCard class="min-h-row-triple">
+    <SCrossCard class="min-h-card-s">
       <div
-        class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5"
-        role="group"
-        :aria-label="scoreboardLabel"
+        class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center text-xl font-semibold tracking-tight"
       >
-        <img
-          v-if="leagueImageUrl"
-          :src="leagueImageUrl"
-          :alt="leagueName ?? tournamentLabel(match)"
+        <MatchTeamResult
+          :participant="teamA"
+          :score="teamA ? getParticipantScore(match, teamA.id) : null"
+          :winner="teamA ? winnerParticipantId === teamA.id : undefined"
+          class="min-w-0"
         />
 
-        <div
-          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 text-xl font-bold tracking-tight md:text-2xl"
-        >
-          <div class="min-w-0 justify-self-end text-end">
-            <SLink
-              v-if="teamA?.team.slug"
-              :to="$localePath(`/team/${teamA.team.slug}`)"
-              variant="inline"
-              class="inline-block max-w-full truncate active:scale-[0.96]"
-            >
-              {{ participantName(teamA) }}
-            </SLink>
-            <span v-else class="block truncate">{{ participantName(teamA) }}</span>
-          </div>
+        <MatchInformation :match="match" :match-status="matchStatus" />
 
-          <div class="shrink-0 justify-self-center" aria-hidden="true">
-            <template v-if="matchStatus === 'finished' || matchStatus === 'live'">
-              <span
-                class="inline-flex items-baseline gap-1.5 font-mono text-2xl tabular-nums md:text-3xl"
-              >
-                <span :class="teamA ? getScoreColorClass(teamA.id) : 'text-muted'">
-                  {{ teamA ? (getParticipantScore(match, teamA.id) ?? "–") : "–" }}
-                </span>
-                <span class="text-muted font-normal text-base">–</span>
-                <span :class="teamB ? getScoreColorClass(teamB.id) : 'text-muted'">
-                  {{ teamB ? (getParticipantScore(match, teamB.id) ?? "–") : "–" }}
-                </span>
-              </span>
-            </template>
-            <span v-else class="text-muted font-normal text-base">vs</span>
-          </div>
-
-          <div class="min-w-0 justify-self-start text-start">
-            <SLink
-              v-if="teamB?.team.slug"
-              :to="$localePath(`/team/${teamB.team.slug}`)"
-              variant="inline"
-              class="inline-block max-w-full truncate active:scale-[0.96]"
-            >
-              {{ participantName(teamB) }}
-            </SLink>
-            <span v-else class="block truncate">{{ participantName(teamB) }}</span>
-          </div>
-        </div>
+        <MatchTeamResult
+          :participant="teamB"
+          :score="teamB ? getParticipantScore(match, teamB.id) : null"
+          :winner="teamB ? winnerParticipantId === teamB.id : undefined"
+          class="min-w-0"
+        />
       </div>
     </SCrossCard>
-
-    <div
-      class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
-    >
-      <SLink
-        v-if="match.tournament"
-        :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-        variant="muted"
-      >
-        {{ tournamentLabel(match) }}
-      </SLink>
-      <template v-if="match.tournament">
-        <span aria-hidden="true">·</span>
-      </template>
-      <SBadgeLive v-if="matchStatus === 'live'" />
-      <span v-else>{{ statusLabel }}</span>
-      <template v-if="match.numberOfGames">
-        <span aria-hidden="true">·</span>
-        <span class="tabular-nums">
-          {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
-        </span>
-      </template>
-      <template v-if="showScheduledAt && match.beginAt">
-        <span aria-hidden="true">·</span>
-        <span class="tabular-nums">
-          {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
-        </span>
-      </template>
-      <template v-if="showAddToCalendar">
-        <span aria-hidden="true">·</span>
-        <SLink :to="matchCalendarPath(match.id)" variant="muted" external>
-          {{ t("page.match.detail.addToCalendar") }}
-        </SLink>
-      </template>
-    </div>
 
     <template v-if="!isBothTeamsTbd">
       <PickemMatchCta :match="match" :match-status="matchStatus" />
@@ -410,14 +291,9 @@ const showAddToCalendar = computed(
               <SLink
                 v-if="participant.team.slug"
                 :to="$localePath(`/team/${participant.team.slug}`)"
-                variant="inline"
+                variant="muted"
                 class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90 active:scale-[0.96]"
               >
-                <TeamImg
-                  :team-name="participant.team.name"
-                  :image-url="participant.team.imageUrl"
-                  size="md"
-                />
                 <span class="max-w-full text-lg font-semibold text-balance">
                   {{ participant.team.name }}
                 </span>

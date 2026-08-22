@@ -1,15 +1,22 @@
 import type {
   MatchDetailResponse,
+  MatchListItem,
   MatchResultsResponse,
   UpcomingMatchesResponse,
 } from "~/types/matches";
+import { parseMatchResults } from "~/utils/parseMatchResult";
+
+function parseMatchListItem(item: MatchListItem): MatchListItem {
+  return {
+    ...item,
+    results: parseMatchResults(item.results),
+  };
+}
 
 export type MatchesListQuery = {
   limit?: number;
   offset?: number;
-  /** User-facing tournament filter — League id in the API. */
   leagueId?: string;
-  /** Sub-event filter — Tournament id in the API. */
   tournamentId?: string;
 };
 
@@ -41,12 +48,15 @@ export async function getUpcomingMatches(
     credentials: "include",
   });
 
+  const live = (res.live ?? []).map(parseMatchListItem);
+  const upcoming = (res.upcoming ?? []).map(parseMatchListItem);
+
   return {
-    live: res.live ?? [],
-    upcoming: res.upcoming ?? [],
-    liveTotal: res.liveTotal ?? res.live?.length ?? 0,
-    upcomingTotal: res.upcomingTotal ?? res.upcoming?.length ?? 0,
-    total: res.total ?? (res.live?.length ?? 0) + (res.upcoming?.length ?? 0),
+    live,
+    upcoming,
+    liveTotal: res.liveTotal ?? live.length,
+    upcomingTotal: res.upcomingTotal ?? upcoming.length,
+    total: res.total ?? live.length + upcoming.length,
   };
 }
 
@@ -56,7 +66,7 @@ export async function getMatchesResults(query?: MatchesListQuery): Promise<Match
     credentials: "include",
   });
 
-  const results = res.results ?? [];
+  const results = (res.results ?? []).map(parseMatchListItem);
 
   return {
     results,
@@ -66,8 +76,16 @@ export async function getMatchesResults(query?: MatchesListQuery): Promise<Match
 
 export async function getMatchById(id: string): Promise<MatchDetailResponse> {
   const config = useRuntimeConfig();
-  return $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`, {
+  const response = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`, {
     method: "GET",
     credentials: "include",
   });
+
+  return {
+    ...response,
+    match: {
+      ...response.match,
+      results: parseMatchResults(response.match.results),
+    },
+  };
 }
