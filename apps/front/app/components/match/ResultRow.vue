@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "~/types/matches";
-import { getMatchParticipantScore, getResultParticipantId } from "~/types/matches";
+import { getMatchParticipantScore } from "~/types/matches";
 
 const { match, divider = true } = defineProps<{
   match: MatchListItem;
@@ -17,10 +17,10 @@ const winnerParticipantId = computed(() => {
 
   const [first, second] = match.results;
   if (first!.score > second!.score) {
-    return getResultParticipantId(first!.participant);
+    return first!.participant;
   }
   if (second!.score > first!.score) {
-    return getResultParticipantId(second!.participant);
+    return second!.participant;
   }
 
   return null;

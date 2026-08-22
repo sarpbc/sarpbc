@@ -1,5 +1,6 @@
 import type { MatchDetailResponse } from "~/types/matches";
-import { getResultParticipantId } from "~/types/matches";
+import { getMatchParticipantScore } from "~/types/matches";
+import { parseMatchResults } from "~/utils/parseMatchResult";
 
 function escapeXml(value: string): string {
   return value
@@ -36,15 +37,7 @@ function getParticipantScore(
   match: MatchDetailResponse["match"],
   participantId: string,
 ): number | null {
-  if (!match.results?.length) {
-    return null;
-  }
-
-  const result = match.results.find(
-    (entry) => getResultParticipantId(entry.participant) === participantId,
-  );
-
-  return result?.score ?? null;
+  return getMatchParticipantScore(match.results, participantId);
 }
 
 function buildTournamentLabel(match: MatchDetailResponse["match"]): string {
@@ -135,7 +128,14 @@ export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResp
   const config = useRuntimeConfig();
 
   try {
-    return await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
+    const response = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
+    return {
+      ...response,
+      match: {
+        ...response.match,
+        results: parseMatchResults(response.match.results),
+      },
+    };
   } catch (error: unknown) {
     const statusCode = getFetchStatusCode(error);
     if (statusCode === 404) {

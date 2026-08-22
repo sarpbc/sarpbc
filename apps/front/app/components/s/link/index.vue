@@ -15,9 +15,9 @@ const attrs = useAttrs();
 function variantClasses(value: LinkVariant): string {
   switch (value) {
     case "muted":
-      return "text-muted hover:text-highlighted transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm";
+      return "text-muted hover:text-highlighted transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm cursor-default";
     case "inline":
-      return "font-medium text-toned hover:underline rounded-sm transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+      return "font-medium text-toned hover:underline rounded-sm transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-default";
     default: {
       const exhaustive: never = value;
       return exhaustive;

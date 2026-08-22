@@ -1,12 +1,8 @@
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 
 export interface MatchResult {
-  participant: string | { id: string };
+  participant: string;
   score: number;
-}
-
-export function getResultParticipantId(participant: MatchResult["participant"]): string {
-  return typeof participant === "string" ? participant : participant.id;
 }
 
 export function getMatchParticipantScore(
@@ -17,9 +13,7 @@ export function getMatchParticipantScore(
     return null;
   }
 
-  const result = results.find(
-    (entry) => getResultParticipantId(entry.participant) === participantId,
-  );
+  const result = results.find((entry) => entry.participant === participantId);
 
   return result?.score ?? null;
 }
@@ -137,3 +131,5 @@ export interface Match {
   tournament: Tournament;
   previousMatches?: BracketLink[];
 }
+
+export type MatchStatus = "upcoming" | "live" | "finished";
