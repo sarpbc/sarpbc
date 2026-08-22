@@ -67,7 +67,6 @@ function isTbdTeam(participant?: TournamentParticipant): boolean {
   return !participant?.team?.name?.trim();
 }
 
-/** Both sides unresolved — hide context sections; keep title + comments only. */
 const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
 
 function tournamentLabel(currentMatch: Match) {
@@ -313,7 +312,6 @@ const showAddToCalendar = computed(
           v-if="leagueImageUrl"
           :src="leagueImageUrl"
           :alt="leagueName ?? tournamentLabel(match)"
-          class="size-8 object-contain outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
 
         <div
@@ -455,7 +453,7 @@ const showAddToCalendar = computed(
       </SRail>
 
       <SRail
-        v-if="headToHead && teamA && teamB"
+        v-if="matchStatus !== 'finished' && headToHead && teamA && teamB"
         :title="t('page.match.detail.sections.headToHead')"
       >
         <MatchHeadToHeadCard
@@ -465,7 +463,7 @@ const showAddToCalendar = computed(
         />
       </SRail>
 
-      <SRail :title="t('page.match.detail.sections.recentForm')">
+      <SRail v-if="matchStatus !== 'finished'" :title="t('page.match.detail.sections.recentForm')">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <MatchTeamFormCard
             v-for="participant in participants"
