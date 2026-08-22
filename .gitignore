@@ -45,8 +45,3 @@ Desktop.ini
 .fleet/
 .vscode/*
 !.vscode/settings.json
-
-# Lyse local cache / audit artifacts
-# Note: lyse audit may rewrite this to .lyse/* + !.lyse/baseline.json.
-# Prefer keeping the whole directory ignored; re-check after running Lyse.
-.lyse/
