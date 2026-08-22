@@ -22,12 +22,12 @@
     "test:front": "turbo run test --filter=front"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.78.0",
+    "@oxlint/plugins": "1.79.0",
     "lefthook": "^2.1.10",
     "only-allow": "^1.2.2",
-    "oxfmt": "^0.60.0",
-    "oxlint": "^1.78.0",
-    "turbo": "^2.10.8"
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "turbo": "^2.10.11"
   },
   "packageManager": "pnpm@11.22.0"
 }
