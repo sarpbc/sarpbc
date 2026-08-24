@@ -3,6 +3,7 @@ import { RedisService } from "./redis.service";
 const mockRedisClient = {
   quit: jest.fn().mockResolvedValue("OK"),
   on: jest.fn(),
+  ping: jest.fn().mockResolvedValue("PONG"),
 };
 
 jest.mock("ioredis", () => ({
@@ -25,5 +26,10 @@ describe("RedisService", () => {
   it("awaits quit on module destroy", async () => {
     await service.onModuleDestroy();
     expect(mockRedisClient.quit).toHaveBeenCalled();
+  });
+
+  it("pings the redis client", async () => {
+    await expect(service.ping()).resolves.toBe("PONG");
+    expect(mockRedisClient.ping).toHaveBeenCalled();
   });
 });
