@@ -1,5 +1,5 @@
-import { Injectable, Inject, forwardRef, NotFoundException } from "@nestjs/common";
-import { TeamService } from "../team/team.service";
+import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import { ITeamRepository, TEAM_REPOSITORY } from "../team/domain/team.repository.interface";
 import { Player, PlayerPhoto } from "./player.entities";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
 import { CreatePlayerDto } from "./dto/create-player.dto";
@@ -20,8 +20,8 @@ export class PlayerService {
     private readonly playerPhotoRepository: IPlayerPhotoRepository,
     @Inject(CONTRACT_REPOSITORY)
     private readonly contractRepository: IContractRepository,
-    @Inject(forwardRef(() => TeamService))
-    private readonly teamService: TeamService,
+    @Inject(TEAM_REPOSITORY)
+    private readonly teamRepository: ITeamRepository,
   ) {}
 
   async find(options: Partial<PlayerSearchProps>): Promise<Player[]> {
@@ -85,7 +85,7 @@ export class PlayerService {
     player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
 
     if (dto.teamId) {
-      const team = await this.teamService.findById(dto.teamId);
+      const team = await this.teamRepository.findById(dto.teamId);
       if (team) {
         player.team = team;
       }
@@ -122,7 +122,7 @@ export class PlayerService {
       if (dto.teamId === null) {
         player.team = null;
       } else {
-        const team = await this.teamService.findById(dto.teamId);
+        const team = await this.teamRepository.findById(dto.teamId);
         if (team) {
           player.team = team;
         }
@@ -151,7 +151,7 @@ export class PlayerService {
 
   async assignToTeam(playerId: string, teamId: string): Promise<Player | null> {
     const player = await this.playerRepository.findById(playerId);
-    const team = await this.teamService.findById(teamId);
+    const team = await this.teamRepository.findById(teamId);
 
     if (player && team) {
       player.team = team;

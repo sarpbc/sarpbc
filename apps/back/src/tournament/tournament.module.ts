@@ -1,12 +1,10 @@
-import { Module, OnModuleInit, forwardRef } from "@nestjs/common";
+import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
 import { PlayerAwardService } from "./player-award.service";
 import { Player } from "../player/player.entities";
-import { TeamModule } from "../team/team.module";
-import { PlayerModule } from "../player/player.module";
 import { TournamentController } from "./tournament.controller";
 import { TournamentService } from "./tournament.service";
 import { ManualTournamentService } from "./manual-tournament.service";
@@ -36,8 +34,6 @@ import { log } from "evlog";
       PlayerAward,
       Player,
     ]),
-    forwardRef(() => TeamModule),
-    forwardRef(() => PlayerModule),
     UserModule,
     PandascoreModule,
     RedisModule,
