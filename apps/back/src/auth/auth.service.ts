@@ -27,7 +27,6 @@ export class AuthService {
   private googleRedirectUri: string;
   private front_url: string;
   private admin_url: string;
-  private oauthClient;
 
   constructor(
     private configService: ConfigService,
@@ -40,8 +39,10 @@ export class AuthService {
     this.googleRedirectUri = this.configService.get<string>("google_redirect_uri")!;
     this.front_url = this.configService.get<string>("front_url")!;
     this.admin_url = this.configService.get<string>("admin_url")!;
+  }
 
-    this.oauthClient = new google.auth.OAuth2(
+  private createOAuthClient() {
+    return new google.auth.OAuth2(
       this.googleClientId,
       this.googleClientSecret,
       this.googleRedirectUri,
@@ -86,12 +87,13 @@ export class AuthService {
   }
 
   async handleGoogleCallback(code: string): Promise<string> {
-    const { tokens } = await this.oauthClient.getToken(code);
-    this.oauthClient.setCredentials(tokens);
+    const oauthClient = this.createOAuthClient();
+    const { tokens } = await oauthClient.getToken(code);
+    oauthClient.setCredentials(tokens);
 
     const oauth2 = google.oauth2("v2");
     const { data: profile } = await oauth2.userinfo.get({
-      auth: this.oauthClient,
+      auth: oauthClient,
     });
 
     if (!profile || !profile.email || !profile.name || !profile.id) {
@@ -160,7 +162,7 @@ export class AuthService {
   }
 
   getGoogleAuthUrl(returnTo: OAuthReturnTo = "front"): string {
-    return this.oauthClient.generateAuthUrl({
+    return this.createOAuthClient().generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
       scope: ["profile", "email"],
