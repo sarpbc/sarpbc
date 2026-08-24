@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { BadRequestException } from "@nestjs/common";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
@@ -21,6 +22,28 @@ const nullableTournamentDateSchema = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
   .nullable()
   .optional();
+
+export function requireNewsUpdateFields(fields: {
+  title?: string;
+  content?: string;
+  titleFr?: string | null;
+  contentFr?: string | null;
+  imageUrl?: string | null;
+  slug?: string;
+}): void {
+  if (
+    fields.title === undefined &&
+    fields.content === undefined &&
+    fields.titleFr === undefined &&
+    fields.contentFr === undefined &&
+    fields.imageUrl === undefined &&
+    fields.slug === undefined
+  ) {
+    throw new BadRequestException(
+      "Provide at least one field to update (title, content, titleFr, contentFr, imageUrl, or slug).",
+    );
+  }
+}
 
 export function registerWriteTools(server: McpServer, ctx: McpToolContext): void {
   const { user } = ctx;
@@ -67,6 +90,77 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             isDraft: article.isDraft,
             adminEditUrl: adminNewsEditUrl(article.slug),
             note: "Draft created. A staff member must review and publish it in the admin app.",
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "update_news_article",
+    {
+      description:
+        'Update an existing news article. Requires news.manage. Pass only the fields to change. Pass null for titleFr, contentFr, or imageUrl to clear them. Does not publish — a human must review and publish in the admin app. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}`.',
+      inputSchema: {
+        idOrSlug: z.string().min(1).describe("Current article slug or UUID."),
+        title: z.string().min(1).max(255).optional().describe("Updated English headline."),
+        content: z
+          .string()
+          .min(1)
+          .optional()
+          .describe(
+            'Updated English body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`.',
+          ),
+        titleFr: z
+          .string()
+          .min(1)
+          .max(255)
+          .nullable()
+          .optional()
+          .describe("Updated French headline, or null to clear."),
+        contentFr: z
+          .string()
+          .min(1)
+          .nullable()
+          .optional()
+          .describe("Updated French body in markdown, or null to clear."),
+        imageUrl: z
+          .string()
+          .url()
+          .nullable()
+          .optional()
+          .describe("Updated cover image URL, or null to clear."),
+        slug: z
+          .string()
+          .min(1)
+          .max(255)
+          .optional()
+          .describe("New URL slug. Leave omitted to keep the current slug."),
+      },
+    },
+    async ({ idOrSlug, title, content, titleFr, contentFr, imageUrl, slug }) =>
+      runWriteTool(user, "update_news_article", "news.manage", async () => {
+        requireNewsUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug });
+
+        const current = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
+        const article = await ctx.newsService.update(current.slug, {
+          title,
+          content,
+          titleFr,
+          contentFr,
+          imageUrl,
+          slug,
+        });
+
+        return {
+          entityId: article.id,
+          result: {
+            id: article.id,
+            title: article.title,
+            slug: article.slug,
+            isDraft: article.isDraft,
+            hasFrench: article.hasFrench,
+            adminEditUrl: adminNewsEditUrl(article.slug),
+            note: "Article updated. Publishing remains a human action in the admin app.",
           },
         };
       }),

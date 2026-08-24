@@ -170,14 +170,22 @@ Read tools (any valid PAT):
 | `get_upcoming_matches` | Upcoming and live matches                |
 | `get_match_results`    | Recent finished match results            |
 
+News tools (`news.manage`):
+
+| Tool                  | Description                                                              |
+| --------------------- | ------------------------------------------------------------------------ |
+| `list_news_articles`  | List articles including drafts                                           |
+| `get_news_article`    | Full EN/FR article by slug or id                                         |
+| `create_news_draft`   | EN/FR news draft using `:player` / `:team` MDC tags (human must publish) |
+| `update_news_article` | Patch an existing article (does not publish)                             |
+
 Write tools (staff permission required):
 
-| Tool                      | Permission           | Description                                                              |
-| ------------------------- | -------------------- | ------------------------------------------------------------------------ |
-| `create_news_draft`       | `news.manage`        | EN/FR news draft using `:player` / `:team` MDC tags (human must publish) |
-| `create_match`            | `tournaments.manage` | Create a tournament match                                                |
-| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id                                       |
-| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions                              |
+| Tool                      | Permission           | Description                                 |
+| ------------------------- | -------------------- | ------------------------------------------- |
+| `create_match`            | `tournaments.manage` | Create a tournament match                   |
+| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id          |
+| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions |
 
 Staff playbook for roster-change news drafts (web verification + `create_news_draft`): [docs/playbooks/roster-change-news.md](docs/playbooks/roster-change-news.md).
 
