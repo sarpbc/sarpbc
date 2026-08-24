@@ -11,6 +11,7 @@ import { ConfigModule } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { RedisModule } from "./redis/redis.module";
+import { HealthModule } from "./health/health.module";
 import configuration from "./config/configuration";
 import { ScheduleModule } from "@nestjs/schedule";
 import { GameModule } from "./game/game.module";
@@ -53,6 +54,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     ForumModule,
     TournamentModule,
     RedisModule,
+    HealthModule,
     PandascoreModule,
     NewsModule,
     ReplyModule,
