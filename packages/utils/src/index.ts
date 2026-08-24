@@ -6,6 +6,12 @@ export {
   type ApiErrorBody,
 } from "./api-error";
 export {
+  NEWS_EXCERPT_MAX_LENGTH,
+  NEWS_SEO_DESCRIPTION_MAX_LENGTH,
+  excerptFromNewsContent,
+  newsContentToPlainText,
+} from "./news-content";
+export {
   NEWS_ENTITY_TAG_PATTERN,
   parseNewsEntityTag,
   serializeNewsEntityTag,
