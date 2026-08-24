@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { ExecutionContext, Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
 import { EvlogModule } from "evlog/nestjs";
-import { ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { PostHogModule } from "./posthog/posthog.module";
 import { UserModule } from "./user/user.module";
 import { AuthModule } from "./auth/auth.module";
@@ -32,13 +33,20 @@ import mikroOrmConfig from "./mikro-orm.config";
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     EvlogModule.forRoot(),
-    ThrottlerModule.forRoot([
-      {
-        name: "default",
-        ttl: 60_000,
-        limit: 100,
+    ThrottlerModule.forRoot({
+      skipIf: (context: ExecutionContext) => {
+        const request = context.switchToHttp().getRequest<{ ip?: string }>();
+        const ip = request.ip;
+        return ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
       },
-    ]),
+      throttlers: [
+        {
+          name: "default",
+          ttl: 60_000,
+          limit: 100,
+        },
+      ],
+    }),
     PostHogModule,
     MikroOrmModule.forRoot({
       ...mikroOrmConfig,
@@ -64,6 +72,12 @@ import mikroOrmConfig from "./mikro-orm.config";
     StorageModule,
     PatModule,
     McpModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

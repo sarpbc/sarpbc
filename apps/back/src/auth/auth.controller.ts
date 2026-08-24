@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from "@nestjs/common";
-import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { Throttle } from "@nestjs/throttler";
 import { useLogger } from "evlog/nestjs";
 import { AuthGuard } from "./auth.guard";
 import { AuthService } from "./auth.service";
@@ -9,7 +9,6 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { PostHogService } from "src/posthog/posthog.service";
 
-@UseGuards(ThrottlerGuard)
 @Controller("auth")
 export class AuthController {
   constructor(
