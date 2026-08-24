@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { MikroORM } from "@mikro-orm/core";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import { AirRiddleRepository } from "./airriddle.repository";
-import { PlayerService } from "src/player/player.service";
-import { AirRiddleResultEnum } from "./enum/airriddle-result.enum";
 import { Cron } from "@nestjs/schedule";
+import { createLogger } from "evlog";
 import { DateTime } from "luxon";
+import { PlayerService } from "src/player/player.service";
 import { AirRiddle } from "./domain/airriddle.entity";
+import { AirRiddleRepository } from "./airriddle.repository";
+import { AirRiddleResultEnum } from "./enum/airriddle-result.enum";
 
 @Injectable()
 export class AirRiddleService {
@@ -79,23 +80,36 @@ export class AirRiddleService {
   })
   @CreateRequestContext()
   async createAirRiddle(): Promise<AirRiddle | null> {
-    const todayStart = this.getTodayStart();
-    const todayAirRiddle = await this.airRiddleRepository.findTodaysRiddle(todayStart);
-    if (todayAirRiddle) {
+    const log = createLogger({
+      component: AirRiddleService.name,
+      job: "createAirRiddle",
+    });
+
+    try {
+      const todayStart = this.getTodayStart();
+      const todayAirRiddle = await this.airRiddleRepository.findTodaysRiddle(todayStart);
+      if (todayAirRiddle) {
+        return null;
+      }
+
+      const randomPlayer = await this.playerService.getRandomPlayer();
+      if (randomPlayer === null) {
+        log.set({ skipped: true, reason: "no_player" });
+        return null;
+      }
+
+      const airRiddle = new AirRiddle();
+      airRiddle.playerId = randomPlayer.id;
+      airRiddle.playerName = randomPlayer.name;
+
+      await this.airRiddleRepository.save(airRiddle);
+      return airRiddle;
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
       return null;
+    } finally {
+      log.emit();
     }
-
-    const randomPlayer = await this.playerService.getRandomPlayer();
-    if (randomPlayer === null) {
-      throw new Error("No player found");
-    }
-
-    const airRiddle = new AirRiddle();
-    airRiddle.playerId = randomPlayer.id;
-    airRiddle.playerName = randomPlayer.name;
-
-    await this.airRiddleRepository.save(airRiddle);
-    return airRiddle;
   }
 
   private checkGuess(guess: string, answer: string): AirRiddleResultEnum[] {

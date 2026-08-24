@@ -62,6 +62,7 @@ jest.mock("@mikro-orm/core", () => {
       ASC: "ASC",
       DESC: "DESC",
     },
+    MikroORM: class MikroORM {},
   };
 });
 
