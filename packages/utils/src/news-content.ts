@@ -1,4 +1,4 @@
-import { parseNewsEntityTag } from "./news-entity-tag";
+import { parseNewsEntityTag } from "./news-entity-tag.ts";
 
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;

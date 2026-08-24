@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": true,
+    "rewriteRelativeImportExtensions": false,
     "types": ["jest", "node"]
   },
   "include": ["src/**/*", "test/**/*"],
