@@ -4,6 +4,18 @@ import { roleHasPermission, StaffPermission } from "src/user/domain/staff-access
 import { extractErrorMessage, jsonToolResult, toolErrorResult } from "./tool-result";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
+function denyIfMissingPermission(
+  user: PatUser,
+  permission: StaffPermission,
+): CallToolResult | null {
+  if (!roleHasPermission(user.role, permission)) {
+    return toolErrorResult(
+      `You need the ${permission} permission. Ask an admin to update your staff role.`,
+    );
+  }
+  return null;
+}
+
 export async function runReadTool(handler: () => Promise<unknown>): Promise<CallToolResult> {
   try {
     const result = await handler();
@@ -13,16 +25,27 @@ export async function runReadTool(handler: () => Promise<unknown>): Promise<Call
   }
 }
 
+export async function runStaffReadTool(
+  user: PatUser,
+  permission: StaffPermission,
+  handler: () => Promise<unknown>,
+): Promise<CallToolResult> {
+  const denied = denyIfMissingPermission(user, permission);
+  if (denied) {
+    return denied;
+  }
+  return runReadTool(handler);
+}
+
 export async function runWriteTool(
   user: PatUser,
   toolName: string,
   permission: StaffPermission,
   handler: () => Promise<{ result: unknown; entityId?: string }>,
 ): Promise<CallToolResult> {
-  if (!roleHasPermission(user.role, permission)) {
-    return toolErrorResult(
-      `You need the ${permission} permission. Ask an admin to update your staff role.`,
-    );
+  const denied = denyIfMissingPermission(user, permission);
+  if (denied) {
+    return denied;
   }
 
   try {
