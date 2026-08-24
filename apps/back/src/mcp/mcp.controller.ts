@@ -1,4 +1,5 @@
 import { Controller, Delete, Get, HttpCode, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { SkipThrottle } from "@nestjs/throttler";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { log } from "evlog";
@@ -15,6 +16,7 @@ const METHOD_NOT_ALLOWED_BODY = {
   id: null,
 };
 
+@SkipThrottle()
 @Controller("mcp")
 @UseGuards(PatAuthGuard)
 export class McpController {

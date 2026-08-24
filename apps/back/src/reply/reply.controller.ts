@@ -12,7 +12,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { Throttle } from "@nestjs/throttler";
 import { ReplyService } from "./reply.service";
 import { AuthGuard } from "../auth/auth.guard";
 import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
@@ -45,7 +45,7 @@ export class ReplyController {
     return { reply };
   }
 
-  @UseGuards(AuthGuard, ThrottlerGuard)
+  @UseGuards(AuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(":id/report")
   @HttpCode(HttpStatus.CREATED)
