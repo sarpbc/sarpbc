@@ -1,4 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PlayerController } from "./player.controller";
 import { Player, Contract, PlayerPhoto } from "./player.entities";
@@ -10,15 +10,15 @@ import { PlayerPhotoRepository } from "./player-photo.repository";
 import { CONTRACT_REPOSITORY } from "./domain/contract.repository.interface";
 import { PLAYER_PHOTO_REPOSITORY } from "./domain/player-photo.repository.interface";
 import { PLAYER_REPOSITORY } from "./domain/player.repository.interface";
-import { TeamModule } from "../team/team.module";
+import { TeamPersistenceModule } from "../team/team-persistence.module";
 import { UserModule } from "src/user/user.module";
 import { TournamentModule } from "src/tournament/tournament.module";
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([Player, Contract, PlayerPhoto]),
-    forwardRef(() => TeamModule),
-    forwardRef(() => TournamentModule),
+    TeamPersistenceModule,
+    TournamentModule,
     UserModule,
   ],
   controllers: [PlayerController],
