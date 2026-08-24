@@ -62,7 +62,7 @@ watch(open, (isOpen) => {
       class="inline-flex items-center rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       translate="no"
     >
-      @{{ label }}
+      {{ label }}
     </NuxtLink>
 
     <template #content>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseNewsEntityTag, serializeNewsEntityTag } from "@sarpbc/utils";
+import { newsContentToPlainText, parseNewsEntityTag, serializeNewsEntityTag } from "@sarpbc/utils";
 
 describe("news entity tag", () => {
   it("round-trips a player tag", () => {
@@ -45,5 +45,15 @@ describe("news entity tag", () => {
   it("returns null for invalid syntax", () => {
     expect(parseNewsEntityTag(":player{slug=bad}")).toBeNull();
     expect(parseNewsEntityTag(':player{slug="x"}')).toBeNull();
+  });
+});
+
+describe("newsContentToPlainText", () => {
+  it("uses entity labels instead of MDC syntax", () => {
+    expect(
+      newsContentToPlainText(
+        ':team{slug="team-falcons-rl" label="Team Falcons"} qualified for Worlds.',
+      ),
+    ).toBe("Team Falcons qualified for Worlds.");
   });
 });

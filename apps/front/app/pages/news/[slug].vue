@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NEWS_SEO_DESCRIPTION_MAX_LENGTH, excerptFromNewsContent } from "@sarpbc/utils";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 
 const { locale, t } = useI18n();
@@ -19,17 +20,27 @@ if (!article.value) {
   });
 }
 
-const contentPlain = article.value.content
-  .replace(/[#>*_`[\]()!\\-]/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
+const seoTitle = computed(() => t("page.news.seoTitle", { title: article.value?.title ?? "" }));
 
-setPageSeo({
-  title: `${article.value.title} | sarpbc.org`,
-  description:
-    contentPlain.slice(0, 160) || "Read the latest Rocket League esports news on sarpbc.org",
-  image: article.value.imageUrl ?? undefined,
+const seoDescription = computed(() => {
+  const excerpt = excerptFromNewsContent(
+    article.value?.content ?? "",
+    NEWS_SEO_DESCRIPTION_MAX_LENGTH,
+  );
+  return excerpt || t("page.news.seoDescriptionDefault");
 });
+
+watch(
+  [seoTitle, seoDescription, () => article.value?.imageUrl],
+  () => {
+    setPageSeo({
+      title: seoTitle.value,
+      description: seoDescription.value,
+      image: article.value?.imageUrl ?? undefined,
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>

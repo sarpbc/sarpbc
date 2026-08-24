@@ -322,7 +322,9 @@
       }
     },
     "news": {
-      "articleNotFound": "Article introuvable"
+      "articleNotFound": "Article introuvable",
+      "seoTitle": "{title} | sarpbc.org",
+      "seoDescriptionDefault": "Retrouvez l'actualité esport Rocket League sur sarpbc.org"
     },
     "players": {
       "index": {
