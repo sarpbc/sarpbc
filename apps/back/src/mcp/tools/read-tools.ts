@@ -3,17 +3,21 @@ import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
 import {
   mapMatchListResponse,
+  mapNewsAdminArticle,
+  mapNewsListItem,
   mapPlayerSummary,
   mapTeamSummary,
   mapTournamentDetail,
   mapTournamentListItem,
 } from "../mappers";
 import type { McpToolContext } from "../mcp-tool-context";
-import { runReadTool } from "../permission-gate";
+import { runReadTool, runStaffReadTool } from "../permission-gate";
 
 const SEARCH_LIMIT = 20;
 const DEFAULT_MATCH_LIMIT = 20;
 const MAX_MATCH_LIMIT = 100;
+const DEFAULT_NEWS_LIMIT = 20;
+const MAX_NEWS_LIMIT = 100;
 
 async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.playerService.findBySlug(idOrSlug);
@@ -44,6 +48,8 @@ async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
 }
 
 export function registerReadTools(server: McpServer, ctx: McpToolContext): void {
+  const { user } = ctx;
+
   server.registerTool(
     "search_players",
     {
@@ -227,6 +233,50 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           results: results.map(mapMatchListResponse),
           total,
         };
+      }),
+  );
+
+  server.registerTool(
+    "list_news_articles",
+    {
+      description:
+        "List news articles including drafts. Requires news.manage. Returns titles and slugs without full body — use get_news_article before editing.",
+      inputSchema: {
+        page: z.number().int().min(0).optional().describe("0-based page index (default 0)."),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(MAX_NEWS_LIMIT)
+          .optional()
+          .describe(`Page size (default ${DEFAULT_NEWS_LIMIT}, max ${MAX_NEWS_LIMIT}).`),
+      },
+    },
+    async ({ page, limit }) =>
+      runStaffReadTool(user, "news.manage", async () => {
+        const result = await ctx.newsService.findAll(page ?? 0, limit ?? DEFAULT_NEWS_LIMIT);
+        return {
+          data: result.data.map(mapNewsListItem),
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+        };
+      }),
+  );
+
+  server.registerTool(
+    "get_news_article",
+    {
+      description:
+        "Get a news article by slug or UUID, including unpublished drafts and both English and French fields. Requires news.manage. Use this before update_news_article.",
+      inputSchema: {
+        idOrSlug: z.string().min(1).describe("Article slug (e.g. zen-joins-karmine-corp) or UUID."),
+      },
+    },
+    async ({ idOrSlug }) =>
+      runStaffReadTool(user, "news.manage", async () => {
+        const article = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
+        return mapNewsAdminArticle(article);
       }),
   );
 }

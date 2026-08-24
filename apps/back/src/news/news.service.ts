@@ -215,6 +215,22 @@ export class NewsService {
     return this.mapAdminArticle(article);
   }
 
+  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdminResponse> {
+    const bySlug = await this.newsRepository.findOne({ slug: idOrSlug }, { populate: ["author"] });
+    if (bySlug) {
+      return this.mapAdminArticle(bySlug);
+    }
+
+    const byId = await this.newsRepository.findOne({ id: idOrSlug }, { populate: ["author"] });
+    if (byId) {
+      return this.mapAdminArticle(byId);
+    }
+
+    throw new NotFoundException(
+      `News article "${idOrSlug}" was not found. Use list_news_articles to find the correct slug or id.`,
+    );
+  }
+
   async findArticleIdBySlug(slug: string): Promise<string> {
     const article = await this.newsRepository.findOne({ slug });
     if (!article) {

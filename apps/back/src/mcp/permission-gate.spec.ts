@@ -1,6 +1,6 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { PatUser } from "src/pat/pat.service";
-import { runReadTool, runWriteTool } from "./permission-gate";
+import { runReadTool, runStaffReadTool, runWriteTool } from "./permission-gate";
 
 function textContent(result: CallToolResult): string {
   const block = result.content[0];
@@ -51,6 +51,26 @@ describe("permission-gate", () => {
 
       expect(result.isError).toBe(true);
       expect(textContent(result)).toBe("Match not found");
+    });
+  });
+
+  describe("runStaffReadTool", () => {
+    it("returns isError when the role lacks the permission", async () => {
+      const result = await runStaffReadTool(journalist, "tournaments.manage", async () => ({
+        ok: true,
+      }));
+
+      expect(result.isError).toBe(true);
+      expect(textContent(result)).toContain("tournaments.manage");
+    });
+
+    it("returns JSON content when the role has the permission", async () => {
+      const result = await runStaffReadTool(journalist, "news.manage", async () => ({
+        slug: "zen-joins-karmine-corp",
+      }));
+
+      expect(result.isError).toBeUndefined();
+      expect(textContent(result)).toContain("zen-joins-karmine-corp");
     });
   });
 

@@ -2,7 +2,7 @@
 
 **Linear:** [SAR-127](https://linear.app/sarpbc/issue/SAR-127/roster-change-news-agent-workflow-client-side-research-mcp-drafting)
 
-Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the SARPBC MCP server supplies entity data and `create_news_draft`. **Humans always review and publish** in the admin app.
+Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the SARPBC MCP server supplies entity data and `create_news_draft` / `update_news_article`. **Humans always review and publish** in the admin app.
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@ Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a r
 | MCP client  | Claude Desktop, Cursor, or any client with **web search** and MCP tool use                         |
 | SARPBC MCP  | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                             |
 | Auth        | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
-| Permission  | `news.manage` on your staff role (required for `create_news_draft`)                                |
+| Permission  | `news.manage` on your staff role (required for news list/get/create/update tools)                  |
 
 Client configuration examples live in the root [README.md](../../README.md#mcp-server).
 
@@ -30,11 +30,14 @@ Client configuration examples live in the root [README.md](../../README.md#mcp-s
 | `get_upcoming_matches` | `limit?` (1–100, default 20)                          | Upcoming + live matches                                              |
 | `get_match_results`    | `limit?` (1–100, default 20)                          | Recent finished results                                              |
 
-**Write** (requires `news.manage`):
+**News** (requires `news.manage`):
 
-| Tool                | Parameters                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `create_news_draft` | `title` (required), `content` (required), `titleFr?`, `contentFr?`, `imageUrl?` (URL), `slug?` | Write **English** title and body. Optionally add **French** `titleFr` / `contentFr` on the same article. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the English title when omitted. |
+| Tool                  | Parameters                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_news_articles`  | `page?` (0-based, default 0), `limit?` (1–100, default 20)                                     | Includes drafts. Titles/slugs only — call `get_news_article` for full body.                                                                                                                                                                                                                                                                                                                                    |
+| `get_news_article`    | `idOrSlug` (slug or UUID)                                                                      | Full EN/FR fields, `isDraft`, `adminEditUrl`. Use before editing.                                                                                                                                                                                                                                                                                                                                              |
+| `create_news_draft`   | `title` (required), `content` (required), `titleFr?`, `contentFr?`, `imageUrl?` (URL), `slug?` | Write **English** title and body. Optionally add **French** `titleFr` / `contentFr` on the same article. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the English title when omitted. |
+| `update_news_article` | `idOrSlug` (required), `title?`, `content?`, `titleFr?`, `contentFr?`, `imageUrl?`, `slug?`    | Patch only the fields to change. Pass `null` for `titleFr`, `contentFr`, or `imageUrl` to clear them. Does **not** publish. Same player/team MDC tags as create.                                                                                                                                                                                                                                               |
 
 News articles share **one slug**. English `title` + `content` are required. French `titleFr` + `contentFr` are optional on the same draft; `/fr` readers see French when both French fields are filled, otherwise English.
 
@@ -232,6 +235,18 @@ Paste JSON from get_player / get_team here for accuracy.
 ```
 
 The tool response includes `adminEditUrl` — open that link for human review.
+
+### Revising a draft
+
+If the editor asks for changes before publish, call `get_news_article` with the slug, then `update_news_article` with only the fields that changed. Do not create a second article. Do not publish via MCP.
+
+```json
+{
+  "idOrSlug": "zen-joins-karmine-corp",
+  "content": "…revised English body…",
+  "contentFr": "…corps français révisé…"
+}
+```
 
 ---
 

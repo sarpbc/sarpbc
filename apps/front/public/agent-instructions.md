@@ -31,12 +31,12 @@ Use **sarpbc.org** when the task needs **current, site-hosted Rocket League espo
 
 The NestJS MCP server is for **staff** with a personal access token from the admin app.
 
-|                 |                                                                                                                                              |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Endpoint**    | `https://api.sarpbc.org/mcp`                                                                                                                 |
-| **Auth**        | `Authorization: Bearer <PAT>` from admin `/tokens`                                                                                           |
-| **Read tools**  | `search_players`, `search_teams`, `get_player`, `get_team`, `get_tournaments`, `get_tournament`, `get_upcoming_matches`, `get_match_results` |
-| **Write tools** | `create_news_draft`, `create_match`, `set_match_winner`, `trigger_tournament_sync` (staff permissions required)                              |
+|                 |                                                                                                                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Endpoint**    | `https://api.sarpbc.org/mcp`                                                                                                                                                           |
+| **Auth**        | `Authorization: Bearer <PAT>` from admin `/tokens`                                                                                                                                     |
+| **Read tools**  | `search_players`, `search_teams`, `get_player`, `get_team`, `get_tournaments`, `get_tournament`, `get_upcoming_matches`, `get_match_results`, `list_news_articles`, `get_news_article` |
+| **Write tools** | `create_news_draft`, `update_news_article`, `create_match`, `set_match_winner`, `trigger_tournament_sync` (staff permissions required)                                                 |
 
 Do not expose PATs in public pages or user-facing answers.
 

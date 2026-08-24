@@ -1,7 +1,8 @@
 import type { Player, Team } from "src/player/player.entities";
 import type { Match, Tournament } from "src/tournament/tournament.entities";
+import type { NewsArticleAdminResponse } from "src/news/news.service";
 import { mapMatchListItem } from "src/tournament/match/match-list.mapper";
-import { matchUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
+import { adminNewsEditUrl, matchUrl, newsUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
 
 export function mapPlayerSummary(player: Player) {
   return {
@@ -75,5 +76,29 @@ export function mapMatchListResponse(match: Match) {
   return {
     ...mapMatchListItem(match),
     url: matchUrl(match.id),
+  };
+}
+
+export function mapNewsListItem(article: NewsArticleAdminResponse) {
+  return {
+    id: article.id,
+    title: article.title,
+    titleFr: article.titleFr,
+    slug: article.slug,
+    isDraft: article.isDraft,
+    hasFrench: article.hasFrench,
+    imageUrl: article.imageUrl,
+    createdAt: article.createdAt,
+    author: article.author,
+    adminEditUrl: adminNewsEditUrl(article.slug),
+    url: newsUrl(article.slug),
+  };
+}
+
+export function mapNewsAdminArticle(article: NewsArticleAdminResponse) {
+  return {
+    ...mapNewsListItem(article),
+    content: article.content,
+    contentFr: article.contentFr,
   };
 }
