@@ -1,11 +1,8 @@
-import { Module, forwardRef, OnModuleInit } from "@nestjs/common";
+import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TeamController } from "./team.controller";
 import { TeamService } from "./team.service";
-import { Team } from "../player/player.entities";
-import { TeamRepository } from "./team.repository";
-import { TEAM_REPOSITORY } from "./domain/team.repository.interface";
-import { MikroOrmModule } from "@mikro-orm/nestjs";
+import { TeamPersistenceModule } from "./team-persistence.module";
 import { PlayerModule } from "../player/player.module";
 import { UserModule } from "src/user/user.module";
 import { PandascoreModule } from "src/pandascore/pandascore.module";
@@ -15,23 +12,16 @@ import { log } from "evlog";
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Team]),
-    forwardRef(() => PlayerModule),
-    forwardRef(() => TournamentModule),
+    TeamPersistenceModule,
+    PlayerModule,
+    TournamentModule,
     UserModule,
     PandascoreModule,
     ConfigModule,
   ],
   controllers: [TeamController],
-  providers: [
-    TeamService,
-    SyncPandascoreTeamsUseCase,
-    {
-      provide: TEAM_REPOSITORY,
-      useExisting: TeamRepository,
-    },
-  ],
-  exports: [TeamService, TEAM_REPOSITORY],
+  providers: [TeamService, SyncPandascoreTeamsUseCase],
+  exports: [TeamService, TeamPersistenceModule],
 })
 export class TeamModule implements OnModuleInit {
   constructor(

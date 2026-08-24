@@ -3,9 +3,8 @@ import {
   NotFoundException,
   UnprocessableEntityException,
   Inject,
-  forwardRef,
 } from "@nestjs/common";
-import { TeamService } from "../team/team.service";
+import { ITeamRepository, TEAM_REPOSITORY } from "../team/domain/team.repository.interface";
 import { Contract, ContractRole } from "./player.entities";
 import { CreateContractDto } from "./dto/create-contract.dto";
 import { UpdateContractDto } from "./dto/update-contract.dto";
@@ -21,8 +20,8 @@ export class ContractService {
     private readonly contractRepository: IContractRepository,
     @Inject(PLAYER_REPOSITORY)
     private readonly playerRepository: IPlayerRepository,
-    @Inject(forwardRef(() => TeamService))
-    private readonly teamService: TeamService,
+    @Inject(TEAM_REPOSITORY)
+    private readonly teamRepository: ITeamRepository,
   ) {}
 
   async getContractsByPlayer(playerId: string): Promise<Contract[]> {
@@ -38,7 +37,7 @@ export class ContractService {
   }
 
   async getContractsByTeam(teamId: string): Promise<Contract[]> {
-    const team = await this.teamService.findById(teamId);
+    const team = await this.teamRepository.findById(teamId);
     if (!team) {
       throw new NotFoundException(`Team with id "${teamId}" not found`);
     }
@@ -86,7 +85,7 @@ export class ContractService {
       throw new NotFoundException(`Player with id "${playerId}" not found`);
     }
 
-    const team = await this.teamService.findById(dto.teamId);
+    const team = await this.teamRepository.findById(dto.teamId);
     if (!team) {
       throw new UnprocessableEntityException(`Team with id "${dto.teamId}" not found`);
     }
@@ -109,7 +108,7 @@ export class ContractService {
     }
 
     if (dto.teamId) {
-      const team = await this.teamService.findById(dto.teamId);
+      const team = await this.teamRepository.findById(dto.teamId);
       if (!team) {
         throw new UnprocessableEntityException(`Team with id "${dto.teamId}" not found`);
       }

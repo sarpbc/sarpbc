@@ -1,4 +1,4 @@
-﻿import { Injectable, Inject, forwardRef, NotFoundException } from "@nestjs/common";
+﻿import { Injectable, Inject, NotFoundException } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { PlayerService } from "../player/player.service";
 import { Team } from "../player/player.entities";
@@ -15,9 +15,7 @@ export class TeamService {
     @Inject(TEAM_REPOSITORY)
     private readonly teamRepository: ITeamRepository,
     private readonly em: EntityManager,
-    @Inject(forwardRef(() => ContractService))
     private readonly contractService: ContractService,
-    @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
     private readonly syncPandascoreTeamsUseCase: SyncPandascoreTeamsUseCase,
   ) {}
