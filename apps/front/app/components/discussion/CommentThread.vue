@@ -124,12 +124,10 @@ onMounted(() => {
 
 <template>
   <section class="w-full" :aria-label="t('components.discussion.heading')">
-    <SCard v-if="pending" flush-bottom aria-live="polite">
-      <div
-        v-for="n in 3"
-        :key="n"
-        class="h-24 border-b border-default bg-elevated/40 animate-pulse"
-      />
+    <SCard v-if="pending" aria-live="polite">
+      <div class="flex flex-col gap-row py-3">
+        <div v-for="n in 3" :key="n" class="h-row-double bg-elevated/40 animate-pulse" />
+      </div>
     </SCard>
 
     <SCard v-else-if="error">
@@ -143,32 +141,39 @@ onMounted(() => {
       </div>
     </SCard>
 
-    <SCard v-else flush-bottom>
-      <DiscussionCommentItem
-        v-for="comment in comments"
-        :key="comment.id"
-        :comment="comment"
-        :target-type="targetType"
-        :target-id="targetId"
-        @changed="onChanged"
-      />
-
-      <div v-if="hasMore" class="flex justify-center border-b border-default px-3 py-3">
-        <SButton variant="outline" :loading="loadingMore" :disabled="loadingMore" @click="loadMore">
-          {{
-            loadingMore
-              ? t("components.discussion.loadingMore")
-              : t("components.discussion.loadMore")
-          }}
-        </SButton>
-      </div>
-
-      <div class="border-b border-default px-3 py-3">
-        <DiscussionCommentComposer
+    <SCard v-else>
+      <div class="flex flex-col gap-row py-3">
+        <DiscussionCommentItem
+          v-for="comment in comments"
+          :key="comment.id"
+          :comment="comment"
           :target-type="targetType"
           :target-id="targetId"
-          @comment-created="onChanged"
+          @changed="onChanged"
         />
+
+        <div v-if="hasMore" class="flex justify-center px-3">
+          <SButton
+            variant="outline"
+            :loading="loadingMore"
+            :disabled="loadingMore"
+            @click="loadMore"
+          >
+            {{
+              loadingMore
+                ? t("components.discussion.loadingMore")
+                : t("components.discussion.loadMore")
+            }}
+          </SButton>
+        </div>
+
+        <div class="px-3">
+          <DiscussionCommentComposer
+            :target-type="targetType"
+            :target-id="targetId"
+            @comment-created="onChanged"
+          />
+        </div>
       </div>
     </SCard>
   </section>
