@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@mikro-orm/nestjs";
 import { EntityRepository } from "@mikro-orm/postgresql";
 import { NewsArticle } from "./domain/news-article.entity";
@@ -10,6 +15,34 @@ import { UserService } from "src/user/user.service";
 import { ReplyService } from "src/reply/reply.service";
 import { sanitizeNewsHtml, sanitizePlainText } from "src/common/html/sanitize-user-html";
 import slugify from "slugify";
+
+/** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
+export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
+
+export interface NewsSitemapEntry {
+  slug: string;
+  lastmod: string;
+}
+
+export interface NewsSitemapMetaResponse {
+  total: number;
+  chunkSize: number;
+  chunkCount: number;
+}
+
+export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
+  chunk: number;
+  data: NewsSitemapEntry[];
+}
+
+/**
+ * Oldest published article first (`createdAt ASC`, then `id ASC`).
+ * Chunk 0 is a stable archive; only the last chunk grows when a new article is published.
+ * Per-URL lastmod is still `updatedAt ?? createdAt` so edits are visible to crawlers.
+ */
+export function newsSitemapChunkCount(total: number): number {
+  return Math.max(1, Math.ceil(Math.max(total, 0) / NEWS_SITEMAP_CHUNK_SIZE));
+}
 
 export interface NewsArticleListItemResponse {
   id: string;
@@ -175,6 +208,47 @@ export class NewsService {
       total,
       page,
       limit,
+    };
+  }
+
+  async findPublishedSitemapMeta(): Promise<NewsSitemapMetaResponse> {
+    const total = await this.newsRepository.count({ isDraft: false });
+    return {
+      total,
+      chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
+      chunkCount: newsSitemapChunkCount(total),
+    };
+  }
+
+  async findPublishedSitemapChunk(chunk: number): Promise<NewsSitemapChunkResponse> {
+    if (!Number.isInteger(chunk) || chunk < 0) {
+      throw new BadRequestException("Sitemap chunk must be a non-negative integer.");
+    }
+
+    const offset = chunk * NEWS_SITEMAP_CHUNK_SIZE;
+    const [articles, total] = await this.newsRepository.findAndCount(
+      { isDraft: false },
+      {
+        fields: ["id", "slug", "createdAt", "updatedAt"],
+        orderBy: { createdAt: "ASC", id: "ASC" },
+        limit: NEWS_SITEMAP_CHUNK_SIZE,
+        offset,
+      },
+    );
+    const chunkCount = newsSitemapChunkCount(total);
+    if (chunk >= chunkCount) {
+      throw new NotFoundException(`News sitemap chunk ${chunk} was not found.`);
+    }
+
+    return {
+      total,
+      chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
+      chunkCount,
+      chunk,
+      data: articles.map((article) => ({
+        slug: article.slug,
+        lastmod: (article.updatedAt ?? article.createdAt).toISOString(),
+      })),
     };
   }
 

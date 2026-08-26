@@ -31,7 +31,7 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://sarpbc.org/sitemap.xml
+Sitemap: https://sarpbc.org/sitemap_index.xml
 
 # LLM-friendly content description
 # See: https://sarpbc.org/llms.txt
