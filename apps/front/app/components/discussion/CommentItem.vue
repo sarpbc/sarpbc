@@ -2,16 +2,10 @@
 import type { Comment, CommentTargetType } from "~/types/discussion";
 import { commentAnchorId } from "~/utils/commentPermalink";
 
-const {
-  comment,
-  targetType,
-  targetId,
-  depth = 0,
-} = defineProps<{
+const { comment, targetType, targetId } = defineProps<{
   comment: Comment;
   targetType: CommentTargetType;
   targetId: string;
-  depth?: number;
 }>();
 
 const emit = defineEmits<{
@@ -37,6 +31,9 @@ const authorLabel = computed(() => comment.author.userName);
 const anchorId = computed(() => commentAnchorId(comment.id));
 const isHighlighted = computed(() => permalink?.highlightedCommentId.value === comment.id);
 const menuId = computed(() => `comment-menu-${comment.id}`);
+const replies = computed(() => comment.replies ?? []);
+const hasReplies = computed(() => replies.value.length > 0);
+const lastReplyIndex = computed(() => replies.value.length - 1);
 
 function onCommentCreated() {
   displayReply.value = false;
@@ -95,22 +92,21 @@ async function onDelete() {
     :class="{ 'comment-highlight': isHighlighted }"
     :aria-label="authorLabel"
   >
-    <div class="border-b border-default">
-      <div class="flex flex-row justify-end px-3 pt-2.5 pb-1">
-        <span class="font-medium text-sm text-muted" translate="no">
+    <div class="flex flex-col">
+      <div class="flex h-row-compact min-h-row-compact items-center justify-between gap-2 px-3">
+        <span class="truncate font-medium text-sm text-muted" translate="no">
           {{ authorLabel }}
+        </span>
+        <span class="shrink-0 text-xs text-muted tabular-nums">
+          {{ df(locale).format(new Date(comment.createdAt)) }}
         </span>
       </div>
 
-      <div class="text-toned whitespace-pre-wrap leading-relaxed px-3 pb-2 text-sm text-pretty">
+      <div class="text-toned whitespace-pre-wrap leading-relaxed px-3 pb-1 text-sm text-pretty">
         {{ comment.content }}
       </div>
 
-      <div class="flex flex-row items-center justify-between gap-2 px-2 pb-1.5">
-        <span class="text-xs text-muted tabular-nums px-1">
-          {{ df(locale).format(new Date(comment.createdAt)) }}
-        </span>
-
+      <div class="flex flex-row items-center justify-end gap-2 px-2">
         <div class="flex flex-row items-center gap-1">
           <ForumSignInPrompt action="reply">
             <SButton
@@ -203,10 +199,10 @@ async function onDelete() {
 
     <DiscussionCommentReportModal v-model:open="displayReport" :comment-id="comment.id" />
 
-    <div class="w-full flex flex-col">
-      <div v-if="displayReply && user" class="w-full flex flex-row items-stretch">
-        <DiscussionCommentThreadConnector :show-full-connector="true" />
-        <div class="min-w-0 flex-1 border-b border-default px-3 py-3">
+    <div v-if="displayReply || hasReplies" class="flex w-full flex-col">
+      <div v-if="displayReply && user" class="flex w-full flex-row items-stretch">
+        <DiscussionCommentThreadConnector :is-last="!hasReplies" />
+        <div class="min-w-0 flex-1 px-3 py-1">
           <DiscussionCommentComposer
             :target-type="targetType"
             :target-id="targetId"
@@ -218,19 +214,16 @@ async function onDelete() {
       </div>
 
       <div
-        v-for="(child, index) in comment.replies"
+        v-for="(child, index) in replies"
         :key="child.id"
-        class="w-full flex flex-row items-stretch"
+        class="flex w-full flex-row items-stretch"
       >
-        <DiscussionCommentThreadConnector
-          :show-full-connector="index !== (comment.replies?.length ?? 0) - 1"
-        />
+        <DiscussionCommentThreadConnector :is-last="index === lastReplyIndex" />
         <DiscussionCommentItem
           class="min-w-0 flex-1"
           :comment="child"
           :target-type="targetType"
           :target-id="targetId"
-          :depth="depth + 1"
           @changed="emit('changed')"
         />
       </div>
