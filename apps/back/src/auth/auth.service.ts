@@ -6,13 +6,7 @@ import { SignInUserDto } from "src/user/dto/signin-user.dto";
 import { ConfigService } from "@nestjs/config";
 import { google } from "googleapis";
 import { User } from "src/user/domain/user.entity";
-import { UserToken } from "src/common/types/usertoken.interface";
-import {
-  ACCESS_TOKEN_EXPIRES_IN,
-  REFRESH_TOKEN_EXPIRES_IN,
-  type AuthTokenPair,
-  type AuthTokenType,
-} from "./auth-cookies";
+import { signAuthTokenPair, verifyAuthToken, type AuthTokenPair } from "./auth-cookies";
 
 export interface GoogleIdTokenPayload {
   sub: string;
@@ -26,10 +20,6 @@ export interface GoogleIdTokenPayload {
 }
 
 export type OAuthReturnTo = "front" | "admin";
-
-interface SignedTokenPayload extends UserToken {
-  typ: AuthTokenType;
-}
 
 @Injectable()
 export class AuthService {
@@ -61,57 +51,15 @@ export class AuthService {
     );
   }
 
-  private async signToken(user: Pick<User, "id" | "email">, typ: AuthTokenType): Promise<string> {
-    const payload: SignedTokenPayload = {
+  signTokenPair(user: Pick<User, "id" | "email">): Promise<AuthTokenPair> {
+    return signAuthTokenPair(this.jwtService, this.jwtToken, {
       id: user.id,
       email: user.email,
-      typ,
-    };
-
-    return this.jwtService.signAsync(payload, {
-      secret: this.jwtToken,
-      expiresIn: typ === "access" ? ACCESS_TOKEN_EXPIRES_IN : REFRESH_TOKEN_EXPIRES_IN,
     });
   }
 
-  async signTokenPair(user: Pick<User, "id" | "email">): Promise<AuthTokenPair> {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.signToken(user, "access"),
-      this.signToken(user, "refresh"),
-    ]);
-    return { accessToken, refreshToken };
-  }
-
-  async verifyAccessToken(token: string): Promise<UserToken | null> {
-    try {
-      const payload = await this.jwtService.verifyAsync<SignedTokenPayload>(token, {
-        secret: this.jwtToken,
-      });
-      if (payload.typ !== "access" || !payload.id) {
-        return null;
-      }
-      return { id: payload.id, email: payload.email };
-    } catch {
-      return null;
-    }
-  }
-
-  async verifyRefreshToken(token: string): Promise<UserToken | null> {
-    try {
-      const payload = await this.jwtService.verifyAsync<SignedTokenPayload>(token, {
-        secret: this.jwtToken,
-      });
-      if (payload.typ !== "refresh" || !payload.id) {
-        return null;
-      }
-      return { id: payload.id, email: payload.email };
-    } catch {
-      return null;
-    }
-  }
-
   async refreshSession(refreshToken: string): Promise<AuthTokenPair | null> {
-    const payload = await this.verifyRefreshToken(refreshToken);
+    const payload = await verifyAuthToken(this.jwtService, this.jwtToken, refreshToken, "refresh");
     if (!payload) {
       return null;
     }

@@ -23,7 +23,7 @@ import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
 import { UpdateTeamContractDto } from "./dto/update-team-contract.dto";
-import { ListTeamsQueryDto } from "src/common/dto/list-directory-query.dto";
+import { ListDirectoryQueryDto } from "src/common/dto/list-directory-query.dto";
 import { mapTeam } from "../player/player.mapper";
 import { mapTournament } from "../tournament/tournament.mapper";
 
@@ -36,7 +36,7 @@ export class TeamController {
   ) {}
 
   @Get()
-  async find(@Query() query: ListTeamsQueryDto) {
+  async find(@Query() query: ListDirectoryQueryDto) {
     const [teams, count] = await this.teamService.findAndCount({
       name: query.name,
       start: query.start,
@@ -61,7 +61,7 @@ export class TeamController {
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const team = await this.teamService.findBySlug(slug);
-    return { team: team ? mapTeam(team) : team };
+    return { team: team ? mapTeam(team) : null };
   }
 
   @RequirePermissions("teams.manage")
@@ -143,7 +143,7 @@ export class TeamController {
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
-    return { team: team ? mapTeam(team) : team };
+    return { team: team ? mapTeam(team) : null };
   }
 
   @RequirePermissions("teams.manage")

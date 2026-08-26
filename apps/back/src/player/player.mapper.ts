@@ -33,11 +33,7 @@ export interface TeamResponse {
   players: PlayerResponse[];
 }
 
-export function mapTeamSummary(team: Team | null | undefined): TeamSummaryResponse | null {
-  if (!team?.id) {
-    return null;
-  }
-
+export function mapTeamSummary(team: Team): TeamSummaryResponse {
   return {
     id: team.id,
     name: team.name,
@@ -60,7 +56,7 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     lastName: player.lastName,
     imageUrl: player.imageUrl,
     role: player.role,
-    team: mapTeamSummary(player.team),
+    team: player.team ? mapTeamSummary(player.team) : null,
     ...(options?.includePhotos ? { photos: photos.map((photo) => photo.url) } : {}),
   };
 }

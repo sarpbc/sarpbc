@@ -23,7 +23,7 @@ import { UpdatePlayerDto } from "./dto/update-player.dto";
 import { CreateContractDto } from "./dto/create-contract.dto";
 import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
-import { ListPlayersQueryDto } from "src/common/dto/list-directory-query.dto";
+import { ListDirectoryQueryDto } from "src/common/dto/list-directory-query.dto";
 import { mapPlayer } from "./player.mapper";
 import { mapTournament } from "src/tournament/tournament.mapper";
 import { MatchService } from "src/tournament/match/match.service";
@@ -41,7 +41,7 @@ export class PlayerController {
   ) {}
 
   @Get()
-  async find(@Query() query: ListPlayersQueryDto) {
+  async find(@Query() query: ListDirectoryQueryDto) {
     const [players, count] = await this.playerService.findAndCount({
       name: query.name,
       start: query.start,
@@ -66,13 +66,13 @@ export class PlayerController {
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const player = await this.playerService.findBySlug(slug);
-    return { player: player ? mapPlayer(player, { includePhotos: true }) : player };
+    return { player: player ? mapPlayer(player, { includePhotos: true }) : null };
   }
 
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
-    return { player: player ? mapPlayer(player) : player };
+    return { player: player ? mapPlayer(player) : null };
   }
 
   @RequirePermissions("players.manage")

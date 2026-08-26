@@ -1,8 +1,7 @@
 import type { TournamentSource } from "./domain/tournament-source";
 import { collectionItems } from "../common/serialization/collection-items";
-import { mapPlayer } from "../player/player.mapper";
+import { mapPlayer, mapTeamSummary, type TeamSummaryResponse } from "../player/player.mapper";
 import type { Player } from "../player/player.entities";
-import type { Team } from "../player/player.entities";
 import {
   BracketLink,
   League,
@@ -21,17 +20,9 @@ export interface LeagueResponse {
   imageUrl: string | null;
 }
 
-export interface TournamentTeamResponse {
-  id: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  location: string | null;
-}
-
 export interface TournamentParticipantResponse {
   id: string;
-  team: TournamentTeamResponse;
+  team: TeamSummaryResponse;
   players: ReturnType<typeof mapPlayer>[];
   createdAt: Date;
   updatedAt: Date;
@@ -105,20 +96,10 @@ function mapLeague(league: League | null | undefined): LeagueResponse | null {
   };
 }
 
-function mapParticipantTeam(team: Team): TournamentTeamResponse {
-  return {
-    id: team.id,
-    name: team.name,
-    slug: team.slug,
-    imageUrl: team.imageUrl,
-    location: team.location,
-  };
-}
-
 function mapParticipant(participant: TournamentParticipant): TournamentParticipantResponse {
   return {
     id: participant.id,
-    team: mapParticipantTeam(participant.team),
+    team: mapTeamSummary(participant.team),
     players: collectionItems<Player>(participant.players).map((player) => mapPlayer(player)),
     createdAt: participant.createdAt,
     updatedAt: participant.updatedAt,

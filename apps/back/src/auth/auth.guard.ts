@@ -6,17 +6,12 @@ import { UserToken } from "src/common/types/usertoken.interface";
 import { UserService } from "src/user/user.service";
 import {
   ACCESS_TOKEN_COOKIE,
-  ACCESS_TOKEN_EXPIRES_IN,
   REFRESH_TOKEN_COOKIE,
-  REFRESH_TOKEN_EXPIRES_IN,
-  accessTokenCookieOptions,
-  refreshTokenCookieOptions,
+  setAuthCookies,
+  signAuthTokenPair,
+  verifyAuthToken,
   type AuthTokenType,
 } from "./auth-cookies";
-
-interface SignedTokenPayload extends UserToken {
-  typ?: AuthTokenType;
-}
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -51,64 +46,27 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException("Invalid or expired token");
     }
 
-    await this.rotateCookies(reply, refreshUser);
+    const tokens = await signAuthTokenPair(this.jwtService, this.jwtSecret(), refreshUser);
+    setAuthCookies(reply, tokens, this.configService.get<boolean>("production"));
     request.user = refreshUser;
     return true;
   }
 
-  private jwtSecret(): string | undefined {
-    return this.configService.get<string>("jwt_token");
+  private jwtSecret(): string {
+    return this.configService.get<string>("jwt_token")!;
   }
 
   private async userFromToken(token: string, typ: AuthTokenType): Promise<UserToken | null> {
-    try {
-      const payload = await this.jwtService.verifyAsync<SignedTokenPayload>(token, {
-        secret: this.jwtSecret(),
-      });
-      if (payload.typ !== typ || !payload.id) {
-        return null;
-      }
-
-      const user = await this.userService.findById(payload.id);
-      if (!user) {
-        return null;
-      }
-
-      return { id: user.id, email: user.email };
-    } catch {
+    const payload = await verifyAuthToken(this.jwtService, this.jwtSecret(), token, typ);
+    if (!payload) {
       return null;
     }
-  }
 
-  private async rotateCookies(reply: FastifyReply, user: UserToken): Promise<void> {
-    const secret = this.jwtSecret();
-    const production = this.configService.get<boolean>("production");
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { ...user, typ: "access" satisfies AuthTokenType },
-        {
-          secret,
-          expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-        },
-      ),
-      this.jwtService.signAsync(
-        { ...user, typ: "refresh" satisfies AuthTokenType },
-        {
-          secret,
-          expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-        },
-      ),
-    ]);
-
-    if (typeof reply.setCookie !== "function") {
-      return;
+    const user = await this.userService.findById(payload.id);
+    if (!user) {
+      return null;
     }
 
-    reply.setCookie(ACCESS_TOKEN_COOKIE, accessToken, accessTokenCookieOptions(production, true));
-    reply.setCookie(
-      REFRESH_TOKEN_COOKIE,
-      refreshToken,
-      refreshTokenCookieOptions(production, true),
-    );
+    return { id: user.id, email: user.email };
   }
 }

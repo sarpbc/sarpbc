@@ -1,5 +1,5 @@
-const PLAINTEXT_STRIP =
-  /<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>|<!--[\s\S]*?-->|<[^>]+>/gi;
+const DANGEROUS_BLOCKS =
+  /<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>|<!--[\s\S]*?-->/gi;
 
 const NEWS_ALLOWED_TAGS = new Set([
   "p",
@@ -48,17 +48,16 @@ function isSafeUrl(value: string): boolean {
   );
 }
 
+function stripDangerousBlocks(value: string): string {
+  return value.replace(DANGEROUS_BLOCKS, "");
+}
+
 export function sanitizePlainText(value: string): string {
-  return value.replace(PLAINTEXT_STRIP, "");
+  return stripDangerousBlocks(value).replace(/<[^>]+>/g, "");
 }
 
 export function sanitizeNewsHtml(value: string): string {
-  const withoutDanger = value
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<!--[\s\S]*?-->/g, "");
-
-  return withoutDanger.replace(
+  return stripDangerousBlocks(value).replace(
     /<\/?([a-zA-Z][\w:-]*)\b([^>]*)>/g,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();

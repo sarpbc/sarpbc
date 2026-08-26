@@ -1,3 +1,8 @@
+import type { CookieSerializeOptions } from "@fastify/cookie";
+import type { JwtService } from "@nestjs/jwt";
+import type { FastifyReply } from "fastify";
+import type { UserToken } from "src/common/types/usertoken.interface";
+
 export const ACCESS_TOKEN_COOKIE = "access_token";
 export const REFRESH_TOKEN_COOKIE = "refresh_token";
 
@@ -14,8 +19,14 @@ export interface AuthTokenPair {
   refreshToken: string;
 }
 
-function baseCookieOptions(production: boolean | undefined): Record<string, unknown> {
-  const cookieOptions: Record<string, unknown> = {
+export interface SignedTokenPayload extends UserToken {
+  typ: AuthTokenType;
+}
+
+type JwtSigner = Pick<JwtService, "signAsync" | "verifyAsync">;
+
+function cookieOptions(production: boolean | undefined, maxAge?: number): CookieSerializeOptions {
+  const options: CookieSerializeOptions = {
     httpOnly: true,
     secure: Boolean(production),
     sameSite: "lax",
@@ -23,33 +34,70 @@ function baseCookieOptions(production: boolean | undefined): Record<string, unkn
   };
 
   if (production) {
-    cookieOptions.domain = ".sarpbc.org";
+    options.domain = ".sarpbc.org";
+  }
+  if (maxAge !== undefined) {
+    options.maxAge = maxAge;
   }
 
-  return cookieOptions;
+  return options;
 }
 
-export function authCookieOptions(
+export function setAuthCookies(
+  reply: FastifyReply,
+  tokens: AuthTokenPair,
   production: boolean | undefined,
-  maxAgeSeconds: number | false,
-): Record<string, unknown> {
-  const cookieOptions = baseCookieOptions(production);
-  if (maxAgeSeconds !== false) {
-    cookieOptions.maxAge = maxAgeSeconds;
+): void {
+  reply.setCookie(
+    ACCESS_TOKEN_COOKIE,
+    tokens.accessToken,
+    cookieOptions(production, ACCESS_TOKEN_TTL_SECONDS),
+  );
+  reply.setCookie(
+    REFRESH_TOKEN_COOKIE,
+    tokens.refreshToken,
+    cookieOptions(production, REFRESH_TOKEN_TTL_SECONDS),
+  );
+}
+
+export function clearAuthCookies(reply: FastifyReply, production: boolean | undefined): void {
+  const options = cookieOptions(production);
+  reply.clearCookie(ACCESS_TOKEN_COOKIE, options);
+  reply.clearCookie(REFRESH_TOKEN_COOKIE, options);
+}
+
+export async function signAuthTokenPair(
+  jwtService: JwtSigner,
+  secret: string,
+  user: UserToken,
+): Promise<AuthTokenPair> {
+  const [accessToken, refreshToken] = await Promise.all([
+    jwtService.signAsync(
+      { id: user.id, email: user.email, typ: "access" satisfies AuthTokenType },
+      { secret, expiresIn: ACCESS_TOKEN_EXPIRES_IN },
+    ),
+    jwtService.signAsync(
+      { id: user.id, email: user.email, typ: "refresh" satisfies AuthTokenType },
+      { secret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
+    ),
+  ]);
+
+  return { accessToken, refreshToken };
+}
+
+export async function verifyAuthToken(
+  jwtService: JwtSigner,
+  secret: string,
+  token: string,
+  typ: AuthTokenType,
+): Promise<UserToken | null> {
+  try {
+    const payload = await jwtService.verifyAsync<SignedTokenPayload>(token, { secret });
+    if (payload.typ !== typ || !payload.id) {
+      return null;
+    }
+    return { id: payload.id, email: payload.email };
+  } catch {
+    return null;
   }
-  return cookieOptions;
-}
-
-export function accessTokenCookieOptions(
-  production: boolean | undefined,
-  includeMaxAge = true,
-): Record<string, unknown> {
-  return authCookieOptions(production, includeMaxAge ? ACCESS_TOKEN_TTL_SECONDS : false);
-}
-
-export function refreshTokenCookieOptions(
-  production: boolean | undefined,
-  includeMaxAge = true,
-): Record<string, unknown> {
-  return authCookieOptions(production, includeMaxAge ? REFRESH_TOKEN_TTL_SECONDS : false);
 }
