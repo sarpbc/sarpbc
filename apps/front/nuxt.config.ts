@@ -188,6 +188,8 @@ export default defineNuxtConfig({
     "/fr/legal-notice": contentSwr,
     "/cookie-policy": contentSwr,
     "/fr/cookie-policy": contentSwr,
+    "/": listHubSwr,
+    "/fr": listHubSwr,
     "/matches": listHubSwr,
     "/fr/matches": listHubSwr,
     "/tournaments": listHubSwr,
