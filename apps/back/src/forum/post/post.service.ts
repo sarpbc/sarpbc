@@ -19,6 +19,7 @@ import {
   POST_CREATION_COOLDOWN_HOURS,
   POST_CREATION_COOLDOWN_MS,
 } from "../forum.constants";
+import { sanitizePlainText } from "src/common/html/sanitize-user-html";
 
 interface PostCreationEligibility {
   canCreate: boolean;
@@ -136,8 +137,8 @@ export class PostService {
 
     const newPost = new Post();
     newPost.id = createPostDto.id;
-    newPost.title = createPostDto.title;
-    newPost.content = createPostDto.content;
+    newPost.title = sanitizePlainText(createPostDto.title);
+    newPost.content = sanitizePlainText(createPostDto.content);
     newPost.topic = topic;
     newPost.author = user;
     newPost.postType = PostType.DISCUSSION;
@@ -149,8 +150,8 @@ export class PostService {
         const t = new PostTranslation();
         t.post = newPost;
         t.locale = tr.locale;
-        t.title = tr.title;
-        t.content = tr.content;
+        t.title = sanitizePlainText(tr.title);
+        t.content = sanitizePlainText(tr.content);
         await this.postRepository.saveTranslation(t);
       }
     }

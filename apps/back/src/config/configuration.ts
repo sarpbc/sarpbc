@@ -27,6 +27,16 @@ export default () => ({
   pandascore_api_token: getPandaScoreApiToken(),
   pandascore_sync_on_boot: process.env.PANDASCORE_SYNC_ON_BOOT === "true",
   production: process.env.NODE_ENV === "production",
+  port: Number(process.env.PORT ?? 4001),
+  redis: {
+    host: process.env.REDIS_HOST || "redis",
+    port: Number(process.env.REDIS_PORT ?? 6379),
+    password: process.env.REDIS_PASSWORD || undefined,
+  },
+  posthog: {
+    token: process.env.POSTHOG_PROJECT_TOKEN,
+    host: process.env.POSTHOG_HOST || "https://eu.i.posthog.com",
+  },
   cloudflare_account_id: getCloudflareAccountId(),
   cloudflare_api_token: getCloudflareApiToken(),
   cloudflare_account_hash: getCloudflareAccountHash(),

@@ -8,6 +8,13 @@ import { SignInUserDto } from "src/user/dto/signin-user.dto";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { PostHogService } from "src/posthog/posthog.service";
+import {
+  ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE,
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+  type AuthTokenPair,
+} from "./auth-cookies";
 
 @Controller("auth")
 export class AuthController {
@@ -17,33 +24,28 @@ export class AuthController {
     private posthog: PostHogService,
   ) {}
 
-  private accessTokenCookieOptions(includeMaxAge = true): Record<string, unknown> {
-    const production = this.configService.get<boolean>("production");
-
-    const cookieOptions: Record<string, unknown> = {
-      httpOnly: true,
-      secure: production,
-      sameSite: "lax",
-      path: "/",
-    };
-
-    if (includeMaxAge) {
-      cookieOptions.maxAge = 30 * 24 * 60 * 60;
-    }
-
-    if (production) {
-      cookieOptions.domain = ".sarpbc.org";
-    }
-
-    return cookieOptions;
+  private production(): boolean | undefined {
+    return this.configService.get<boolean>("production");
   }
 
-  private setAccessTokenCookie(res: FastifyReply, access_token: string) {
-    res.setCookie("access_token", access_token, this.accessTokenCookieOptions(true));
+  private setAuthCookies(res: FastifyReply, tokens: AuthTokenPair) {
+    const production = this.production();
+    res.setCookie(
+      ACCESS_TOKEN_COOKIE,
+      tokens.accessToken,
+      accessTokenCookieOptions(production, true),
+    );
+    res.setCookie(
+      REFRESH_TOKEN_COOKIE,
+      tokens.refreshToken,
+      refreshTokenCookieOptions(production, true),
+    );
   }
 
-  private clearAccessTokenCookie(res: FastifyReply) {
-    res.clearCookie("access_token", this.accessTokenCookieOptions(false));
+  private clearAuthCookies(res: FastifyReply) {
+    const production = this.production();
+    res.clearCookie(ACCESS_TOKEN_COOKIE, accessTokenCookieOptions(production, false));
+    res.clearCookie(REFRESH_TOKEN_COOKIE, refreshTokenCookieOptions(production, false));
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -53,9 +55,9 @@ export class AuthController {
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {
-    const access_token = await this.authService.signIn(userData);
+    const tokens = await this.authService.signIn(userData);
 
-    this.setAccessTokenCookie(res, access_token);
+    this.setAuthCookies(res, tokens);
 
     const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
     const sessionId = req.headers["x-posthog-session-id"] as string | undefined;
@@ -67,8 +69,33 @@ export class AuthController {
 
   @Get("logout")
   logout(@Res() res: FastifyReply) {
-    this.clearAccessTokenCookie(res);
+    this.clearAuthCookies(res);
     return res.send({ success: true });
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post("refresh")
+  async refresh(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
+    if (!refreshToken) {
+      this.clearAuthCookies(res);
+      return res.code(401).send({
+        statusCode: 401,
+        message: "Missing auth token in cookie",
+      });
+    }
+
+    const tokens = await this.authService.refreshSession(refreshToken);
+    if (!tokens) {
+      this.clearAuthCookies(res);
+      return res.code(401).send({
+        statusCode: 401,
+        message: "Invalid or expired token",
+      });
+    }
+
+    this.setAuthCookies(res, tokens);
+    return res.code(200).send({ success: true });
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -78,9 +105,9 @@ export class AuthController {
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {
-    const access_token = await this.authService.signUp(userData);
+    const tokens = await this.authService.signUp(userData);
 
-    this.setAccessTokenCookie(res, access_token);
+    this.setAuthCookies(res, tokens);
 
     const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
     const sessionId = req.headers["x-posthog-session-id"] as string | undefined;
@@ -92,7 +119,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get("profile")
-  getProfile(@Request() req: any) {
+  getProfile(@Request() req: FastifyRequest & { user?: unknown }) {
     return req.user;
   }
 
@@ -117,9 +144,9 @@ export class AuthController {
     );
 
     try {
-      const access_token = await this.authService.handleGoogleCallback(code);
+      const tokens = await this.authService.handleGoogleCallback(code);
 
-      this.setAccessTokenCookie(res, access_token);
+      this.setAuthCookies(res, tokens);
 
       return res.code(302).redirect(returnUrl);
     } catch (error) {

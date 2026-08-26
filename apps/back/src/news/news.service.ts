@@ -8,6 +8,7 @@ import { excerptFromContent } from "./news-content.util";
 import { hasFrenchTranslation, localizedNewsFields, type NewsLocale } from "./news-locale.util";
 import { UserService } from "src/user/user.service";
 import { ReplyService } from "src/reply/reply.service";
+import { sanitizeNewsHtml, sanitizePlainText } from "src/common/html/sanitize-user-html";
 import slugify from "slugify";
 
 export interface NewsArticleListItemResponse {
@@ -134,10 +135,10 @@ export class NewsService {
     }
 
     const article = this.newsRepository.create({
-      title: dto.title,
-      content: dto.content,
-      titleFr: dto.titleFr ?? null,
-      contentFr: dto.contentFr ?? null,
+      title: sanitizePlainText(dto.title),
+      content: sanitizeNewsHtml(dto.content),
+      titleFr: dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null,
+      contentFr: dto.contentFr != null ? sanitizeNewsHtml(dto.contentFr) : null,
       author,
       slug,
       isDraft: true,
@@ -245,16 +246,16 @@ export class NewsService {
       throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
     }
     if (dto.title !== undefined) {
-      article.title = dto.title;
+      article.title = sanitizePlainText(dto.title);
     }
     if (dto.content !== undefined) {
-      article.content = dto.content;
+      article.content = sanitizeNewsHtml(dto.content);
     }
     if (dto.titleFr !== undefined) {
-      article.titleFr = dto.titleFr;
+      article.titleFr = dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null;
     }
     if (dto.contentFr !== undefined) {
-      article.contentFr = dto.contentFr;
+      article.contentFr = dto.contentFr != null ? sanitizeNewsHtml(dto.contentFr) : null;
     }
     if (dto.imageUrl !== undefined) {
       article.imageUrl = dto.imageUrl ?? null;
