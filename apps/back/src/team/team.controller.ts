@@ -23,6 +23,9 @@ import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
 import { UpdateTeamContractDto } from "./dto/update-team-contract.dto";
+import { ListDirectoryQueryDto } from "src/common/dto/list-directory-query.dto";
+import { mapTeam } from "../player/player.mapper";
+import { mapTournament } from "../tournament/tournament.mapper";
 
 @Controller("team")
 export class TeamController {
@@ -33,24 +36,16 @@ export class TeamController {
   ) {}
 
   @Get()
-  async find(
-    @Query("name") name?: string,
-    @Query("start") start?: string,
-    @Query("limit") limit?: string,
-    @Query("offset") offset?: string,
-  ) {
-    const searchLimit = limit ? parseInt(limit, 10) : 25;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-
+  async find(@Query() query: ListDirectoryQueryDto) {
     const [teams, count] = await this.teamService.findAndCount({
-      name,
-      start,
-      limit: Math.min(searchLimit, 100),
-      offset: searchOffset,
+      name: query.name,
+      start: query.start,
+      limit: query.limit,
+      offset: query.offset,
     });
 
     return {
-      teams,
+      teams: teams.map((team) => mapTeam(team)),
       count,
     };
   }
@@ -60,13 +55,13 @@ export class TeamController {
   @Post()
   async create(@Body() dto: CreateTeamDto) {
     const team = await this.teamService.createFromDto(dto);
-    return { team };
+    return { team: mapTeam(team) };
   }
 
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const team = await this.teamService.findBySlug(slug);
-    return { team };
+    return { team: team ? mapTeam(team) : null };
   }
 
   @RequirePermissions("teams.manage")
@@ -84,7 +79,7 @@ export class TeamController {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
     const trophies = await this.tournamentService.getTournamentsWonByTeam(id);
-    return { trophies };
+    return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/tournaments")
@@ -94,7 +89,7 @@ export class TeamController {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
     const tournaments = await this.tournamentService.getTournamentsByTeam(id);
-    return { tournaments };
+    return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/former-players")
@@ -148,7 +143,7 @@ export class TeamController {
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
-    return { team };
+    return { team: team ? mapTeam(team) : null };
   }
 
   @RequirePermissions("teams.manage")
@@ -156,7 +151,7 @@ export class TeamController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateTeamDto) {
     const team = await this.teamService.update(id, dto);
-    return { team };
+    return { team: mapTeam(team) };
   }
 
   @RequirePermissions("teams.manage")

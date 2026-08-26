@@ -5,6 +5,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { AuthController } from "./auth.controller";
 import { AuthGuard } from "./auth.guard";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ACCESS_TOKEN_EXPIRES_IN } from "./auth-cookies";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>("jwt_token"),
         signOptions: {
-          expiresIn: "30d",
+          expiresIn: ACCESS_TOKEN_EXPIRES_IN,
         },
       }),
       inject: [ConfigService],

@@ -3,6 +3,7 @@ import { useUser } from "~/composables/state";
 import { getProfile } from "~/composables/user";
 
 const ACCESS_TOKEN_COOKIE = "access_token";
+const REFRESH_TOKEN_COOKIE = "refresh_token";
 
 /**
  * Global authentication middleware
@@ -41,7 +42,8 @@ export default defineNuxtRouteMiddleware(async () => {
   if (import.meta.server) {
     const event = useRequestEvent();
     const accessToken = event ? getCookie(event, ACCESS_TOKEN_COOKIE) : undefined;
-    if (!accessToken) {
+    const refreshToken = event ? getCookie(event, REFRESH_TOKEN_COOKIE) : undefined;
+    if (!accessToken && !refreshToken) {
       user.value = null;
       return;
     }

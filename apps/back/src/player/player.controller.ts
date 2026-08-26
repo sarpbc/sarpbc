@@ -23,6 +23,9 @@ import { UpdatePlayerDto } from "./dto/update-player.dto";
 import { CreateContractDto } from "./dto/create-contract.dto";
 import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
+import { ListDirectoryQueryDto } from "src/common/dto/list-directory-query.dto";
+import { mapPlayer } from "./player.mapper";
+import { mapTournament } from "src/tournament/tournament.mapper";
 import { MatchService } from "src/tournament/match/match.service";
 import { TournamentService } from "src/tournament/tournament.service";
 import { PlayerAwardService } from "src/tournament/player-award.service";
@@ -38,24 +41,16 @@ export class PlayerController {
   ) {}
 
   @Get()
-  async find(
-    @Query("name") name?: string,
-    @Query("start") start?: string,
-    @Query("limit") limit?: string,
-    @Query("offset") offset?: string,
-  ) {
-    const searchLimit = limit ? parseInt(limit, 10) : 25;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-
+  async find(@Query() query: ListDirectoryQueryDto) {
     const [players, count] = await this.playerService.findAndCount({
-      name,
-      start,
-      limit: Math.min(searchLimit, 100),
-      offset: searchOffset,
+      name: query.name,
+      start: query.start,
+      limit: query.limit,
+      offset: query.offset,
     });
 
     return {
-      players,
+      players: players.map((player) => mapPlayer(player)),
       count,
     };
   }
@@ -65,19 +60,19 @@ export class PlayerController {
   @Post()
   async create(@Body() dto: CreatePlayerDto) {
     const player = await this.playerService.create(dto);
-    return { player };
+    return { player: mapPlayer(player) };
   }
 
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const player = await this.playerService.findBySlug(slug);
-    return { player };
+    return { player: player ? mapPlayer(player, { includePhotos: true }) : null };
   }
 
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
-    return { player };
+    return { player: player ? mapPlayer(player) : null };
   }
 
   @RequirePermissions("players.manage")
@@ -85,7 +80,7 @@ export class PlayerController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdatePlayerDto) {
     const player = await this.playerService.update(id, dto);
-    return { player };
+    return { player: mapPlayer(player) };
   }
 
   @RequirePermissions("players.manage")
@@ -155,7 +150,7 @@ export class PlayerController {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
     const trophies = await this.tournamentService.getTournamentsWonByPlayer(id);
-    return { trophies };
+    return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/awards")
@@ -205,6 +200,6 @@ export class PlayerController {
   @Patch(":id/photo/:photoId/set-profile")
   async setProfilePhoto(@Param("id") id: string, @Param("photoId") photoId: string) {
     const player = await this.playerService.setProfilePhoto(id, photoId);
-    return { player };
+    return { player: mapPlayer(player) };
   }
 }

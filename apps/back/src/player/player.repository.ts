@@ -41,9 +41,14 @@ export class PlayerRepository extends EntityRepository<Player> implements IPlaye
   }
 
   async getRandomPlayer(): Promise<Player | null> {
-    const players = await this.findAll();
-    if (players.length === 0) return null;
-    return players[Math.floor(Math.random() * players.length)];
+    const rows = (await this.em
+      .getConnection()
+      .execute("SELECT id FROM player ORDER BY random() LIMIT 1")) as Array<{ id: string }>;
+    const id = rows[0]?.id;
+    if (!id) {
+      return null;
+    }
+    return this.findById(id);
   }
 
   async save(player: Player): Promise<void> {

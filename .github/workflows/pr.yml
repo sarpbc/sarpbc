@@ -123,6 +123,14 @@ jobs:
           FRONT_URL: http://localhost:4000
           ADMIN_URL: http://localhost:4002
 
+      - name: E2E smoke
+        run: pnpm --filter back test:e2e
+        env:
+          PANDASCORE_API_TOKEN: test-token
+          JWT_KEY: test-jwt-key
+          FRONT_URL: http://localhost:4000
+          ADMIN_URL: http://localhost:4002
+
   frontend:
     name: Frontend typecheck and build
     needs: changes

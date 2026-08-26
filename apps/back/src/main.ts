@@ -1,10 +1,9 @@
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
-import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { initLogger } from "evlog";
 import { AppModule } from "./app.module";
-import cookie from "@fastify/cookie";
-import multipart from "@fastify/multipart";
+import { configureApp } from "./configure-app";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -28,31 +27,10 @@ initLogger({
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
 
-  app.enableCors({
-    origin: [
-      "http://localhost:4000",
-      "http://localhost:4001",
-      "http://localhost:4002",
-      "https://sarpbc.org",
-      "https://www.sarpbc.org",
-      "https://admin.sarpbc.org",
-    ],
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-  });
+  await configureApp(app);
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-
-  await app.register(multipart, {
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-    },
-  });
-  await app.register(cookie);
-
-  app.enableShutdownHooks();
-
-  const port = process.env.PORT ?? 4001;
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>("port") ?? 4001;
 
   await app.listen(port, "0.0.0.0");
 }

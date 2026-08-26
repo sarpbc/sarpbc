@@ -52,12 +52,23 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
   const config = useRuntimeConfig();
   const url = new URL(`${config.public.apiBase}/tournaments/${id}`);
 
-  const res = await $fetch<{ tournament?: Tournament }>(url.toString(), {
-    method: "GET",
-    credentials: "include",
-  });
+  try {
+    const res = await $fetch<{ tournament?: Tournament }>(url.toString(), {
+      method: "GET",
+      credentials: "include",
+    });
 
-  return res.tournament ?? null;
+    return res.tournament ?? null;
+  } catch (error: unknown) {
+    const statusCode =
+      typeof error === "object" && error !== null && "statusCode" in error
+        ? (error as { statusCode?: number }).statusCode
+        : undefined;
+    if (statusCode === 404) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function syncTournament(tournamentId: string): Promise<boolean> {

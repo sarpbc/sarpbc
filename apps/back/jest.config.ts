@@ -31,6 +31,7 @@ const config: Config = {
     "^src/(.*)$": "<rootDir>/$1",
     "^uuid$": "<rootDir>/../test/mocks/uuid.ts",
     "^@sarpbc/utils$": "<rootDir>/../../../packages/utils/src/index.ts",
+    "^@sarpbc/types$": "<rootDir>/../../../packages/types/src/index.ts",
   },
   transformIgnorePatterns: ["node_modules/(?!uuid|@sarpbc/)"],
   // Coverage runs are memory-heavy; cap workers locally (CI can override).

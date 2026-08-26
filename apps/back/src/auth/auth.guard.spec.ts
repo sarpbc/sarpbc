@@ -10,10 +10,12 @@ describe("AuthGuard", () => {
   let guard: AuthGuard;
   const jwtService = {
     verifyAsync: jest.fn(),
+    signAsync: jest.fn().mockResolvedValue("rotated-token"),
   };
   const userService = {
     findById: jest.fn(),
   };
+  const setCookie = jest.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,7 +24,17 @@ describe("AuthGuard", () => {
         { provide: JwtService, useValue: jwtService },
         {
           provide: ConfigService,
-          useValue: { get: jest.fn().mockReturnValue("secret") },
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === "jwt_token") {
+                return "secret";
+              }
+              if (key === "production") {
+                return false;
+              }
+              return undefined;
+            }),
+          },
         },
         { provide: UserService, useValue: userService },
       ],
@@ -30,12 +42,14 @@ describe("AuthGuard", () => {
 
     guard = module.get(AuthGuard);
     jest.clearAllMocks();
+    jwtService.signAsync.mockResolvedValue("rotated-token");
   });
 
   const createContext = (cookies?: Record<string, string>): ExecutionContext =>
     ({
       switchToHttp: () => ({
         getRequest: () => ({ cookies }),
+        getResponse: () => ({ setCookie }),
       }),
     }) as ExecutionContext;
 
@@ -44,13 +58,16 @@ describe("AuthGuard", () => {
   });
 
   it("returns true and attaches user from DB when token is valid", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "access" });
     userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
     const request: { cookies: Record<string, string>; user?: unknown } = {
       cookies: { access_token: "valid-token" },
     };
     const context = {
-      switchToHttp: () => ({ getRequest: () => request }),
+      switchToHttp: () => ({
+        getRequest: () => request,
+        getResponse: () => ({ setCookie }),
+      }),
     } as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
@@ -58,13 +75,16 @@ describe("AuthGuard", () => {
   });
 
   it("attaches current DB email when JWT email is stale", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "old@b.com" });
+    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "old@b.com", typ: "access" });
     userService.findById.mockResolvedValue({ id: "user-1", email: "new@b.com" });
     const request: { cookies: Record<string, string>; user?: unknown } = {
       cookies: { access_token: "valid-token" },
     };
     const context = {
-      switchToHttp: () => ({ getRequest: () => request }),
+      switchToHttp: () => ({
+        getRequest: () => request,
+        getResponse: () => ({ setCookie }),
+      }),
     } as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
@@ -72,10 +92,37 @@ describe("AuthGuard", () => {
   });
 
   it("throws when user is missing from DB", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "access" });
     userService.findById.mockResolvedValue(null);
     const context = createContext({ access_token: "valid-token" });
 
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it("rotates cookies from a valid refresh token when access is missing", async () => {
+    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "refresh" });
+    userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+    const request: { cookies: Record<string, string>; user?: unknown } = {
+      cookies: { refresh_token: "refresh-token" },
+    };
+    const context = {
+      switchToHttp: () => ({
+        getRequest: () => request,
+        getResponse: () => ({ setCookie }),
+      }),
+    } as ExecutionContext;
+
+    await expect(guard.canActivate(context)).resolves.toBe(true);
+    expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });
+    expect(setCookie).toHaveBeenCalledWith(
+      "access_token",
+      "rotated-token",
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(setCookie).toHaveBeenCalledWith(
+      "refresh_token",
+      "rotated-token",
+      expect.objectContaining({ httpOnly: true }),
+    );
   });
 });
