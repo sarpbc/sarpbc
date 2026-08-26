@@ -20,6 +20,7 @@ import { PaginatedRepliesResponseDto } from "./dto/paginated-replies-response.dt
 import { sortOrderForTarget } from "./reply-target.util";
 import type { ReplyReportReason } from "./reply-report-reason";
 import { NotificationService } from "src/notification/notification.service";
+import { sanitizePlainText } from "src/common/html/sanitize-user-html";
 
 function isForeignKeyViolation(error: unknown): boolean {
   if (typeof error !== "object" || error === null) {
@@ -106,7 +107,7 @@ export class ReplyService {
     }
 
     const newReply = new Reply();
-    newReply.content = createReplyDto.content.trim();
+    newReply.content = sanitizePlainText(createReplyDto.content.trim());
     newReply.author = user;
     newReply.hiddenAt = null;
 

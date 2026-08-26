@@ -89,13 +89,16 @@ describe("AuthService", () => {
       );
     });
 
-    it("returns a JWT when credentials are valid", async () => {
+    it("returns a token pair when credentials are valid", async () => {
       userService.signIn.mockResolvedValue(
         Object.assign(new User("a@b.com", "alice", "hash"), { id: "user-1" }),
       );
 
-      await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toBe("jwt-token");
-      expect(jwtService.signAsync).toHaveBeenCalled();
+      await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toEqual({
+        accessToken: "jwt-token",
+        refreshToken: "jwt-token",
+      });
+      expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -173,8 +176,8 @@ describe("AuthService", () => {
       releaseGetToken();
 
       await expect(Promise.all([first, second])).resolves.toEqual([
-        "jwt-user-google-a",
-        "jwt-user-google-b",
+        { accessToken: "jwt-user-google-a", refreshToken: "jwt-user-google-a" },
+        { accessToken: "jwt-user-google-b", refreshToken: "jwt-user-google-b" },
       ]);
       expect(userService.createGoogleUser).toHaveBeenCalledWith(
         "a@example.com",

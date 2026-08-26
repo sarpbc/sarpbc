@@ -4,9 +4,19 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/../tsconfig.spec.json"
+      }
+    ]
   },
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
   "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/../src/$1"
-  }
+    "^src/(.*)$": "<rootDir>/../src/$1",
+    "^uuid$": "<rootDir>/mocks/uuid.ts",
+    "^@sarpbc/utils$": "<rootDir>/../../../packages/utils/src/index.ts",
+    "^@sarpbc/types$": "<rootDir>/../../../packages/types/src/index.ts"
+  },
+  "transformIgnorePatterns": ["node_modules/(?!uuid|@sarpbc/)"]
 }

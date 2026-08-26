@@ -5,6 +5,8 @@ import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { SignInUserDto } from "src/user/dto/signin-user.dto";
 import { ConfigService } from "@nestjs/config";
 import { google } from "googleapis";
+import { User } from "src/user/domain/user.entity";
+import { signAuthTokenPair, verifyAuthToken, type AuthTokenPair } from "./auth-cookies";
 
 export interface GoogleIdTokenPayload {
   sub: string;
@@ -49,7 +51,28 @@ export class AuthService {
     );
   }
 
-  async signIn(userData: SignInUserDto): Promise<string> {
+  signTokenPair(user: Pick<User, "id" | "email">): Promise<AuthTokenPair> {
+    return signAuthTokenPair(this.jwtService, this.jwtToken, {
+      id: user.id,
+      email: user.email,
+    });
+  }
+
+  async refreshSession(refreshToken: string): Promise<AuthTokenPair | null> {
+    const payload = await verifyAuthToken(this.jwtService, this.jwtToken, refreshToken, "refresh");
+    if (!payload) {
+      return null;
+    }
+
+    const user = await this.userService.findById(payload.id);
+    if (!user) {
+      return null;
+    }
+
+    return this.signTokenPair(user);
+  }
+
+  async signIn(userData: SignInUserDto): Promise<AuthTokenPair> {
     const user = await this.userService.signIn(userData);
     if (!user) {
       throw new UnauthorizedException(
@@ -57,36 +80,15 @@ export class AuthService {
       );
     }
 
-    const payload = {
-      id: user.id,
-      email: user.email,
-    };
-
-    const access_token = await this.jwtService.signAsync(payload, {
-      secret: this.jwtToken,
-      expiresIn: "30d",
-    });
-
-    return access_token;
+    return this.signTokenPair(user);
   }
 
-  async signUp(userData: CreateUserDto): Promise<string> {
+  async signUp(userData: CreateUserDto): Promise<AuthTokenPair> {
     const newUser = await this.userService.create(userData);
-
-    const payload = {
-      id: newUser.id,
-      email: newUser.email,
-    };
-
-    const access_token = await this.jwtService.signAsync(payload, {
-      secret: this.jwtToken,
-      expiresIn: "30d",
-    });
-
-    return access_token;
+    return this.signTokenPair(newUser);
   }
 
-  async handleGoogleCallback(code: string): Promise<string> {
+  async handleGoogleCallback(code: string): Promise<AuthTokenPair> {
     const oauthClient = this.createOAuthClient();
     const { tokens } = await oauthClient.getToken(code);
     oauthClient.setCredentials(tokens);
@@ -123,17 +125,7 @@ export class AuthService {
       }
     }
 
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-    };
-
-    const access_token = await this.jwtService.signAsync(tokenPayload, {
-      secret: this.jwtToken,
-      expiresIn: "30d",
-    });
-
-    return access_token;
+    return this.signTokenPair(user);
   }
 
   getFrontUrl(): string {

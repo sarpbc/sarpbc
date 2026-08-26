@@ -1,5 +1,5 @@
 import { ExecutionContext, Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { EvlogModule } from "evlog/nestjs";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { PostHogModule } from "./posthog/posthog.module";
@@ -14,6 +14,8 @@ import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
 import configuration from "./config/configuration";
+import { validateEnv } from "./config/env.validation";
+import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 import { ScheduleModule } from "@nestjs/schedule";
 import { GameModule } from "./game/game.module";
 import { ForumModule } from "./forum/forum.module";
@@ -31,7 +33,15 @@ import mikroOrmConfig from "./mikro-orm.config";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+      validate: validateEnv,
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: true,
+      },
+    }),
     EvlogModule.forRoot(),
     ThrottlerModule.forRoot({
       skipIf: (context: ExecutionContext) => {
@@ -77,6 +87,10 @@ import mikroOrmConfig from "./mikro-orm.config";
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
     },
   ],
 })

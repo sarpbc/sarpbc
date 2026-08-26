@@ -1,17 +1,18 @@
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
 @Injectable()
 export class PostHogService implements OnModuleDestroy {
   private readonly client: PostHog | null;
 
-  constructor() {
-    const token = process.env.POSTHOG_PROJECT_TOKEN;
-    const enabled = process.env.NODE_ENV === "production" && !!token;
+  constructor(configService: ConfigService) {
+    const token = configService.get<string>("posthog.token");
+    const enabled = configService.get<boolean>("production") === true && Boolean(token);
 
     this.client = enabled
       ? new PostHog(token!, {
-          host: process.env.POSTHOG_HOST || "https://eu.i.posthog.com",
+          host: configService.get<string>("posthog.host") || "https://eu.i.posthog.com",
           flushAt: 1,
           flushInterval: 0,
         })

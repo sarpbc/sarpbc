@@ -13,6 +13,7 @@ import {
   HttpStatus,
   BadRequestException,
   ParseIntPipe,
+  NotFoundException,
 } from "@nestjs/common";
 import { RedisService } from "../redis/redis.service";
 import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
@@ -25,6 +26,8 @@ import { ManualTournamentService } from "./manual-tournament.service";
 import { MatchService } from "./match/match.service";
 import { PlayerAwardService } from "./player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
+import { ListTournamentsQueryDto } from "src/common/dto/list-directory-query.dto";
+import { mapTournament } from "./tournament.mapper";
 
 @Controller("tournaments")
 export class TournamentController {
@@ -37,23 +40,18 @@ export class TournamentController {
   ) {}
 
   @Get()
-  async find(
-    @Query("limit") limit?: string,
-    @Query("offset") offset?: string,
-    @Query("pickems") pickems?: string,
-    @Query("activeOnly") activeOnly?: string,
-  ) {
-    const searchLimit = limit ? parseInt(limit, 10) : 20;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-
+  async find(@Query() query: ListTournamentsQueryDto) {
     const [tournaments, count] = await this.tournamentService.find({
-      limit: Math.min(searchLimit, 100),
-      offset: searchOffset,
-      pickems: pickems ? pickems === "true" : undefined,
-      activeOnly: activeOnly === "true",
+      limit: query.limit,
+      offset: query.offset,
+      pickems: query.pickems,
+      activeOnly: query.activeOnly === true,
     });
 
-    return { tournaments, count };
+    return {
+      tournaments: tournaments.map((tournament) => mapTournament(tournament)),
+      count,
+    };
   }
 
   @Get("leagues")
@@ -75,7 +73,7 @@ export class TournamentController {
   @Post()
   async create(@Body() dto: CreateTournamentDto) {
     const tournament = await this.manualTournamentService.create(dto);
-    return { tournament };
+    return { tournament: mapTournament(tournament) };
   }
 
   @Get(":id")
@@ -86,8 +84,12 @@ export class TournamentController {
       return { tournament: JSON.parse(cached) };
     }
     const tournament = await this.tournamentService.findById(id);
-    await this.redisService.set(cacheKey, JSON.stringify(tournament), 60); // 60 seconds
-    return { tournament };
+    if (!tournament) {
+      throw new NotFoundException(`Tournament with id "${id}" not found`);
+    }
+    const mapped = mapTournament(tournament, { includeMatches: true });
+    await this.redisService.set(cacheKey, JSON.stringify(mapped), 60);
+    return { tournament: mapped };
   }
 
   @RequirePermissions("tournaments.manage")
@@ -95,7 +97,7 @@ export class TournamentController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateTournamentDto) {
     const tournament = await this.manualTournamentService.update(id, dto);
-    return { tournament };
+    return { tournament: mapTournament(tournament) };
   }
 
   @RequirePermissions("tournaments.manage")
@@ -199,7 +201,7 @@ export class TournamentController {
   @Get("player/:playerId")
   async getTournamentsByPlayer(@Param("playerId") playerId: string) {
     const tournaments = await this.tournamentService.getTournamentsByPlayer(playerId);
-    return { tournaments };
+    return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get("matches/player/:playerId")
