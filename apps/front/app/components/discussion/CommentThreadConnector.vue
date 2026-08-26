@@ -6,10 +6,10 @@ const { isLast = false } = defineProps<{
 </script>
 
 <template>
-  <div class="flex w-4 shrink-0 flex-col self-stretch" aria-hidden="true">
+  <div class="flex w-6 shrink-0 flex-col self-stretch" aria-hidden="true">
     <div class="relative h-row-compact w-full shrink-0">
       <div
-        class="absolute inset-x-0 top-0 h-full border-b border-default"
+        class="absolute top-0 left-0 h-1/2 w-full border-b border-default"
         :class="{ 'border-l': isLast }"
       />
       <div v-if="!isLast" class="absolute inset-y-0 left-0 border-l border-default" />

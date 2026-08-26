@@ -2,10 +2,16 @@
 import type { Comment, CommentTargetType } from "~/types/discussion";
 import { commentAnchorId } from "~/utils/commentPermalink";
 
-const { comment, targetType, targetId } = defineProps<{
+const {
+  comment,
+  targetType,
+  targetId,
+  nested = false,
+} = defineProps<{
   comment: Comment;
   targetType: CommentTargetType;
   targetId: string;
+  nested?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -93,7 +99,10 @@ async function onDelete() {
     :aria-label="authorLabel"
   >
     <div class="flex flex-col">
-      <div class="flex h-row-compact min-h-row-compact items-center justify-between gap-2 px-3">
+      <div
+        class="flex h-row-compact min-h-row-compact items-center justify-between gap-2"
+        :class="nested ? 'pr-3 pl-1' : 'px-3'"
+      >
         <span class="truncate font-medium text-sm text-muted" translate="no">
           {{ authorLabel }}
         </span>
@@ -102,7 +111,10 @@ async function onDelete() {
         </span>
       </div>
 
-      <div class="text-toned whitespace-pre-wrap leading-relaxed px-3 pb-1 text-sm text-pretty">
+      <div
+        class="text-toned whitespace-pre-wrap leading-relaxed pb-1 text-sm text-pretty"
+        :class="nested ? 'pr-3 pl-1' : 'px-3'"
+      >
         {{ comment.content }}
       </div>
 
@@ -202,7 +214,7 @@ async function onDelete() {
     <div v-if="displayReply || hasReplies" class="flex w-full flex-col">
       <div v-if="displayReply && user" class="flex w-full flex-row items-stretch">
         <DiscussionCommentThreadConnector :is-last="!hasReplies" />
-        <div class="min-w-0 flex-1 px-3 py-1">
+        <div class="min-w-0 flex-1 py-1 pr-3 pl-1">
           <DiscussionCommentComposer
             :target-type="targetType"
             :target-id="targetId"
@@ -221,6 +233,7 @@ async function onDelete() {
         <DiscussionCommentThreadConnector :is-last="index === lastReplyIndex" />
         <DiscussionCommentItem
           class="min-w-0 flex-1"
+          nested
           :comment="child"
           :target-type="targetType"
           :target-id="targetId"
