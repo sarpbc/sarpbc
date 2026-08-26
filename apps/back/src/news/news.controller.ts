@@ -7,6 +7,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -47,6 +48,16 @@ export class NewsController {
   @Get()
   findAll(@Query() { page, limit, locale }: NewsListQueryDto) {
     return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale));
+  }
+
+  @Get("sitemap")
+  findSitemapMeta() {
+    return this.newsService.findPublishedSitemapMeta();
+  }
+
+  @Get("sitemap/:chunk")
+  findSitemapChunk(@Param("chunk", ParseIntPipe) chunk: number) {
+    return this.newsService.findPublishedSitemapChunk(chunk);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

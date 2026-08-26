@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { buildPagesUrlset, buildSitemapIndex, newsSitemapPath } from "./sitemap";
 
 const frontRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const publicDir = join(frontRoot, "public");
@@ -66,10 +67,23 @@ describe("contact content", () => {
   });
 });
 
-describe("sitemap.xml", () => {
-  const sitemap = readPublic("sitemap.xml");
+describe("robots.txt", () => {
+  it("points crawlers at the sitemap index", () => {
+    expect(readPublic("robots.txt")).toContain("Sitemap: https://sarpbc.org/sitemap_index.xml");
+  });
+});
 
+describe("sitemap index", () => {
+  it("lists the pages urlset and a news chunk", () => {
+    const index = buildSitemapIndex(1);
+    expect(index).toContain("<loc>https://sarpbc.org/sitemaps/pages.xml</loc>");
+    expect(index).toContain(`<loc>https://sarpbc.org${newsSitemapPath(0)}</loc>`);
+  });
+});
+
+describe("pages sitemap", () => {
   it("includes about and contact trust pages", () => {
+    const sitemap = buildPagesUrlset();
     expect(sitemap).toContain("<loc>https://sarpbc.org/about</loc>");
     expect(sitemap).toContain("<loc>https://sarpbc.org/contact</loc>");
     expect(sitemap).toContain('href="https://sarpbc.org/fr/about"');
