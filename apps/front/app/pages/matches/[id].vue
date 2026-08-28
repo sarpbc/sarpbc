@@ -349,14 +349,6 @@ const scoreboardLabel = computed(() => {
           />
         </div>
       </SRail>
-
-      <SRail :title="t('page.match.detail.sections.gameStats')">
-        <SCard class="p-4 md:p-6">
-          <p class="text-sm text-muted">
-            {{ t("page.match.detail.gameStatsPlaceholder") }}
-          </p>
-        </SCard>
-      </SRail>
     </template>
 
     <DiscussionCommentThread target-type="match" :target-id="match.id" />

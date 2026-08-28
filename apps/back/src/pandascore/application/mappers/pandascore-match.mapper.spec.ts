@@ -44,6 +44,31 @@ describe("PandascoreMatchMapper", () => {
       opponentSlugs: ["team-vitality"],
       results: [{ teamPandascoreId: 7, score: 4 }],
       previousMatches: [{ type: "winner", matchPandascoreId: 88 }],
+      officialStreams: [],
     });
+  });
+
+  it("maps official streams from streams_list", () => {
+    const dto = {
+      id: 1,
+      tournament_id: 2,
+      name: "Semi",
+      opponents: [],
+      results: [],
+      previous_matches: [],
+      streams_list: [
+        {
+          official: true,
+          main: true,
+          language: "en",
+          embed_url: "https://player.twitch.tv/?channel=rlcs",
+          raw_url: "https://www.twitch.tv/rocketleague",
+        },
+      ],
+    } as unknown as MatchDto;
+
+    expect(PandascoreMatchMapper.toUpsertCommand(dto).officialStreams).toEqual([
+      { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },
+    ]);
   });
 });
