@@ -218,6 +218,7 @@ export class TournamentSyncPersistence {
           match_id: previousMatch.matchPandascoreId,
         })),
         results,
+        officialStreams: command.officialStreams,
       });
       matchesCreated += 1;
     }

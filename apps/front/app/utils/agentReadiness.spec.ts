@@ -68,8 +68,14 @@ describe("contact content", () => {
 });
 
 describe("robots.txt", () => {
+  const robotsTxt = readPublic("robots.txt");
+
   it("points crawlers at the sitemap index", () => {
-    expect(readPublic("robots.txt")).toContain("Sitemap: https://sarpbc.org/sitemap_index.xml");
+    expect(robotsTxt).toContain("Sitemap: https://sarpbc.org/sitemap_index.xml");
+  });
+
+  it("declares Content Signals for search, AI input, and training", () => {
+    expect(robotsTxt).toMatch(/Content-signal:\s*search=yes,\s*ai-input=yes,\s*ai-train=no/i);
   });
 });
 

@@ -1,3 +1,4 @@
+import type { OfficialMatchStream } from "./domain/official-match-stream";
 import type { TournamentSource } from "./domain/tournament-source";
 import { collectionItems } from "../common/serialization/collection-items";
 import { mapPlayer, mapTeamSummary, type TeamSummaryResponse } from "../player/player.mapper";
@@ -54,6 +55,7 @@ export interface TournamentMatchResponse {
   winner: TournamentParticipantResponse | null;
   results: TournamentMatchResultResponse[];
   previousMatches: TournamentBracketLinkResponse[];
+  officialStreams: OfficialMatchStream[];
 }
 
 export interface TournamentResponse {
@@ -135,6 +137,7 @@ function mapMatch(match: Match): TournamentMatchResponse {
     previousMatches: collectionItems<BracketLink>(match.previousMatches).map((link) =>
       mapBracketLink(link, match.id),
     ),
+    officialStreams: match.officialStreams ?? [],
   };
 }
 

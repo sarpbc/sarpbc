@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Match, MatchStatus } from "~/types/matches";
 import { matchCalendarPath } from "~/utils/calendar/ics";
+import { pickOfficialStreamUrl } from "~/utils/officialStream";
 
 const { t, locale } = useI18n();
 
@@ -28,11 +29,17 @@ function tournamentLabel(currentMatch: Match) {
   return name ?? t("page.match.detail.unknownTournament");
 }
 
-const showScheduledAt = computed(() => matchStatus === "upcoming" && Boolean(match.beginAt));
-
 const showAddToCalendar = computed(
   () => Boolean(match.beginAt) && (matchStatus === "upcoming" || matchStatus === "live"),
 );
+
+const watchStreamUrl = computed(() => {
+  if (matchStatus === "finished") {
+    return null;
+  }
+
+  return pickOfficialStreamUrl(match.officialStreams, locale.value);
+});
 
 const statusLabel = computed(() => {
   switch (matchStatus) {
@@ -72,6 +79,17 @@ const statusLabel = computed(() => {
     </template>
     <SBadgeLive v-if="matchStatus === 'live'" />
     <span v-else class="font-normal text-toned">{{ statusLabel }}</span>
+    <template v-if="watchStreamUrl">
+      <SLink
+        :to="watchStreamUrl"
+        variant="muted"
+        external
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ t("page.match.detail.watchStream") }}
+      </SLink>
+    </template>
     <template v-if="showAddToCalendar">
       <SLink :to="matchCalendarPath(match.id)" variant="muted" external>
         {{ t("page.match.detail.addToCalendar") }}

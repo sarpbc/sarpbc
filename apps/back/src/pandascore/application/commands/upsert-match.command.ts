@@ -1,3 +1,5 @@
+import type { OfficialMatchStream } from "src/tournament/domain/official-match-stream";
+
 export interface UpsertMatchResultCommand {
   teamPandascoreId: number;
   score: number;
@@ -20,4 +22,5 @@ export interface UpsertMatchCommand {
   opponentSlugs: string[];
   results: UpsertMatchResultCommand[];
   previousMatches: UpsertMatchPreviousMatchCommand[];
+  officialStreams: OfficialMatchStream[];
 }

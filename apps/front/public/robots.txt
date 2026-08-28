@@ -29,6 +29,7 @@ User-agent: Applebot-Extended
 Allow: /
 
 User-agent: *
+Content-signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 
 Sitemap: https://sarpbc.org/sitemap_index.xml

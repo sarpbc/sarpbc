@@ -1,5 +1,6 @@
 import { UpsertMatchCommand } from "../commands/upsert-match.command";
 import { MatchDto } from "../../infrastructure/dto/match.dto";
+import { mapOfficialMatchStreams } from "./official-match-streams";
 
 export class PandascoreMatchMapper {
   static toUpsertCommand(dto: MatchDto): UpsertMatchCommand {
@@ -31,6 +32,7 @@ export class PandascoreMatchMapper {
         type: previousMatch.type,
         matchPandascoreId: previousMatch.match_id,
       })),
+      officialStreams: mapOfficialMatchStreams(dto.streams_list),
     };
   }
 }

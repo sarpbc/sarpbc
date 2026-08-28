@@ -1,4 +1,5 @@
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
+import type { OfficialMatchStream } from "~/utils/officialStream";
 
 export interface MatchResult {
   participant: string;
@@ -130,6 +131,7 @@ export interface Match {
   updatedAt: Date;
   tournament: Tournament;
   previousMatches?: BracketLink[];
+  officialStreams?: OfficialMatchStream[];
 }
 
 export type MatchStatus = "upcoming" | "live" | "finished";

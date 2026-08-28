@@ -602,10 +602,10 @@
         },
         "format": "Bo{count}",
         "addToCalendar": "Add to Calendar",
+        "watchStream": "Watch Stream",
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
-          "gameStats": "Game Stats",
           "headToHead": "Head-to-Head"
         },
         "h2h": {
@@ -615,7 +615,6 @@
           "winner": "{team} won",
           "draw": "Draw"
         },
-        "gameStatsPlaceholder": "Detailed game stats are not available for this match.",
         "formRecord": "{wins}W - {losses}L",
         "formEmpty": "Not enough recent matches",
         "formVs": "vs {opponent}",

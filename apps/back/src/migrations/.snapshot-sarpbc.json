@@ -733,6 +733,23 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "official_streams": {
+          "name": "official_streams",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "pandascore_id": {
           "name": "pandascore_id",
           "type": "int",
