@@ -123,12 +123,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="w-full" :aria-label="t('components.discussion.heading')">
-    <SCard v-if="pending" aria-live="polite">
-      <div class="flex flex-col gap-row py-3">
-        <div v-for="n in 3" :key="n" class="h-row-double bg-elevated/40 animate-pulse" />
-      </div>
-    </SCard>
+  <section class="w-full flex flex-col gap-4" :aria-label="t('components.discussion.heading')">
+    <div v-if="pending" class="flex flex-col gap-4" aria-live="polite">
+      <div
+        v-for="n in 3"
+        :key="n"
+        class="h-24 border border-default bg-elevated/40 animate-pulse"
+      />
+    </div>
 
     <SCard v-else-if="error">
       <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
@@ -141,8 +143,8 @@ onMounted(() => {
       </div>
     </SCard>
 
-    <SCard v-else>
-      <div class="flex flex-col gap-row py-3">
+    <template v-else>
+      <div v-if="comments.length" class="flex flex-col gap-4">
         <DiscussionCommentItem
           v-for="comment in comments"
           :key="comment.id"
@@ -152,7 +154,7 @@ onMounted(() => {
           @changed="onChanged"
         />
 
-        <div v-if="hasMore" class="flex justify-center px-3">
+        <div v-if="hasMore" class="flex justify-center">
           <SButton
             variant="outline"
             :loading="loadingMore"
@@ -166,15 +168,15 @@ onMounted(() => {
             }}
           </SButton>
         </div>
-
-        <div class="px-3">
-          <DiscussionCommentComposer
-            :target-type="targetType"
-            :target-id="targetId"
-            @comment-created="onChanged"
-          />
-        </div>
       </div>
-    </SCard>
+
+      <SCard class="p-3">
+        <DiscussionCommentComposer
+          :target-type="targetType"
+          :target-id="targetId"
+          @comment-created="onChanged"
+        />
+      </SCard>
+    </template>
   </section>
 </template>
