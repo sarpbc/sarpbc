@@ -2,16 +2,10 @@
 import type { Comment, CommentTargetType } from "~/types/discussion";
 import { commentAnchorId } from "~/utils/commentPermalink";
 
-const {
-  comment,
-  targetType,
-  targetId,
-  nested = false,
-} = defineProps<{
+const { comment, targetType, targetId } = defineProps<{
   comment: Comment;
   targetType: CommentTargetType;
   targetId: string;
-  nested?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -95,14 +89,10 @@ async function onDelete() {
   <article
     :id="anchorId"
     class="w-full flex flex-col scroll-mt-24 outline-none"
-    :class="{ 'comment-highlight': isHighlighted }"
     :aria-label="authorLabel"
   >
-    <div class="flex flex-col">
-      <div
-        class="flex h-row-compact min-h-row-compact items-center justify-between gap-2"
-        :class="nested ? 'pr-3 pl-1' : 'px-3'"
-      >
+    <div class="border border-default" :class="{ 'comment-highlight': isHighlighted }">
+      <div class="flex h-8 flex-row items-center justify-between border-b border-default px-3">
         <span class="truncate font-medium text-sm text-muted" translate="no">
           {{ authorLabel }}
         </span>
@@ -111,101 +101,98 @@ async function onDelete() {
         </span>
       </div>
 
-      <div
-        class="text-toned whitespace-pre-wrap leading-relaxed pb-1 text-sm text-pretty"
-        :class="nested ? 'pr-3 pl-1' : 'px-3'"
-      >
+      <div class="text-toned whitespace-pre-wrap leading-relaxed px-3 py-2.5 text-sm text-pretty">
         {{ comment.content }}
       </div>
 
-      <div class="flex flex-row items-center justify-end gap-2 px-2">
-        <div class="flex flex-row items-center gap-1">
-          <ForumSignInPrompt action="reply">
-            <SButton
-              size="xs"
-              variant="ghost"
-              color="neutral"
-              :label="$t('components.discussion.reply')"
-              icon="i-fluent-arrow-reply-24-regular"
-              sound="press"
-              @click="displayReply = !displayReply"
-            />
-          </ForumSignInPrompt>
+      <div class="flex flex-row items-center justify-end gap-1 border-t border-default px-2 py-1">
+        <ForumSignInPrompt action="reply">
+          <SButton
+            size="xs"
+            variant="ghost"
+            color="neutral"
+            :label="$t('components.discussion.reply')"
+            icon="i-fluent-arrow-reply-24-regular"
+            sound="press"
+            @click="displayReply = !displayReply"
+          />
+        </ForumSignInPrompt>
 
-          <UPopover v-model:open="menuOpen">
-            <SButton
-              size="xs"
-              variant="ghost"
-              color="neutral"
-              icon="i-fluent-more-horizontal-24-regular"
-              sound="press"
+        <UPopover v-model:open="menuOpen">
+          <SButton
+            square
+            size="xs"
+            variant="ghost"
+            color="neutral"
+            icon="i-fluent-more-horizontal-24-regular"
+            class="justify-center"
+            sound="press"
+            :aria-label="$t('components.discussion.moreActions')"
+            aria-haspopup="menu"
+            :aria-expanded="menuOpen"
+            :aria-controls="menuId"
+          />
+          <template #content>
+            <div
+              :id="menuId"
+              role="menu"
+              class="flex min-w-40 flex-col p-1"
               :aria-label="$t('components.discussion.moreActions')"
-              aria-haspopup="menu"
-              :aria-expanded="menuOpen"
-              :aria-controls="menuId"
-            />
-            <template #content>
-              <div
-                :id="menuId"
-                role="menu"
-                class="flex min-w-40 flex-col p-1"
-                :aria-label="$t('components.discussion.moreActions')"
-              >
-                <SButton
-                  size="sm"
-                  variant="ghost"
-                  color="neutral"
-                  icon="i-fluent-link-24-regular"
-                  class="justify-start"
-                  sound="press"
-                  role="menuitem"
-                  :label="$t('components.discussion.permalink')"
-                  @click="onPermalinkClick"
-                />
-                <SButton
-                  v-if="canReport"
-                  size="sm"
-                  variant="ghost"
-                  color="neutral"
-                  icon="i-fluent-flag-24-regular"
-                  class="justify-start"
-                  sound="press"
-                  role="menuitem"
-                  :label="$t('components.discussion.report.action')"
-                  @click="onReportClick"
-                />
-                <SButton
-                  v-if="canModerate"
-                  size="sm"
-                  variant="ghost"
-                  color="neutral"
-                  icon="i-fluent-eye-off-24-regular"
-                  class="justify-start"
-                  sound="press"
-                  role="menuitem"
-                  :label="$t('components.discussion.hide')"
-                  :loading="isModerating"
-                  :disabled="isModerating"
-                  @click="onHide"
-                />
-                <SButton
-                  v-if="canModerate"
-                  size="sm"
-                  variant="ghost"
-                  color="error"
-                  icon="i-fluent-delete-24-regular"
-                  class="justify-start"
-                  sound="press"
-                  role="menuitem"
-                  :label="$t('components.discussion.delete')"
-                  :loading="isModerating"
-                  :disabled="isModerating"
-                  @click="onDelete"
-                />
-              </div>
-            </template>
-          </UPopover>
-        </div>
+            >
+              <SButton
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="i-fluent-link-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('components.discussion.permalink')"
+                @click="onPermalinkClick"
+              />
+              <SButton
+                v-if="canReport"
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="i-fluent-flag-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('components.discussion.report.action')"
+                @click="onReportClick"
+              />
+              <SButton
+                v-if="canModerate"
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="i-fluent-eye-off-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('components.discussion.hide')"
+                :loading="isModerating"
+                :disabled="isModerating"
+                @click="onHide"
+              />
+              <SButton
+                v-if="canModerate"
+                size="sm"
+                variant="ghost"
+                color="error"
+                icon="i-fluent-delete-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('components.discussion.delete')"
+                :loading="isModerating"
+                :disabled="isModerating"
+                @click="onDelete"
+              />
+            </div>
+          </template>
+        </UPopover>
       </div>
     </div>
 
@@ -214,7 +201,7 @@ async function onDelete() {
     <div v-if="displayReply || hasReplies" class="flex w-full flex-col">
       <div v-if="displayReply && user" class="flex w-full flex-row items-stretch">
         <DiscussionCommentThreadConnector :is-last="!hasReplies" />
-        <div class="min-w-0 flex-1 py-1 pr-3 pl-1">
+        <div class="mt-4 min-w-0 flex-1 border border-default p-3">
           <DiscussionCommentComposer
             :target-type="targetType"
             :target-id="targetId"
@@ -232,8 +219,7 @@ async function onDelete() {
       >
         <DiscussionCommentThreadConnector :is-last="index === lastReplyIndex" />
         <DiscussionCommentItem
-          class="min-w-0 flex-1"
-          nested
+          class="mt-4 min-w-0 flex-1"
           :comment="child"
           :target-type="targetType"
           :target-id="targetId"
