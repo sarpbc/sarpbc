@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20260828120000_addMatchOfficialStreams extends Migration {
-  override name = "Migration20260828120000_addMatchOfficialStreams";
+export class Migration20260828175628_addMatchOfficialStreams extends Migration {
+  override name = "Migration20260828175628_addMatchOfficialStreams";
 
   override up(): void | Promise<void> {
     this.addSql(`alter table "match" add "official_streams" jsonb not null default '[]';`);
