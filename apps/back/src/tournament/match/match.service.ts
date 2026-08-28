@@ -8,6 +8,7 @@ import { TournamentRepository } from "../tournament.repository";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import { deriveWinnerParticipantId } from "./derive-match-winner";
 import { PickemService } from "../../game/pickem/pickem.service";
+import type { OfficialMatchStream } from "../domain/official-match-stream";
 
 const RECENT_FORM_LIMIT = 5;
 
@@ -240,6 +241,7 @@ export class MatchService {
       pandascoreId?: number;
       previous_matches?: { type: "winner" | "loser"; match_id: number }[];
       results?: { participantId: string | null; score: number }[];
+      officialStreams?: OfficialMatchStream[];
     },
   ): Promise<Match> {
     const tournament = await this.tournamentRepository.findOne({
@@ -279,6 +281,9 @@ export class MatchService {
     match.endAt = matchData.endAt ?? null;
     match.status = matchData.status ?? null;
     match.numberOfGames = matchData.numberOfGames ?? null;
+    if (matchData.officialStreams !== undefined) {
+      match.officialStreams = matchData.officialStreams;
+    }
 
     match.participants.removeAll();
     for (const participant of participants) {

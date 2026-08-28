@@ -602,10 +602,10 @@
         },
         "format": "Bo{count}",
         "addToCalendar": "Ajouter au calendrier",
+        "watchStream": "Regarder le stream",
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
-          "gameStats": "Stats de jeu",
           "headToHead": "Face-à-face"
         },
         "h2h": {
@@ -615,7 +615,6 @@
           "winner": "Victoire de {team}",
           "draw": "Match nul"
         },
-        "gameStatsPlaceholder": "Les statistiques détaillées ne sont pas disponibles pour ce match.",
         "formRecord": "{wins}V - {losses}D",
         "formEmpty": "Pas assez de matchs récents",
         "formVs": "vs {opponent}",

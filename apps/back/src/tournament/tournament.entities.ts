@@ -6,6 +6,7 @@ import { LeagueRepository } from "./league/league.repository";
 import { MatchRepository } from "./match/match.repository";
 import { TournamentParticipantRepository } from "./tournament-participant.repository";
 import { TournamentRepository } from "./tournament.repository";
+import type { OfficialMatchStream } from "./domain/official-match-stream";
 import type { TournamentSource } from "./domain/tournament-source";
 
 export class League {
@@ -82,6 +83,7 @@ export class Match {
   numberOfGames: number | null = null;
   previousMatches = new Collection<BracketLink>(this);
   results = new Collection<MatchResult>(this);
+  officialStreams: OfficialMatchStream[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   tournament!: Tournament;
@@ -171,6 +173,7 @@ export const MatchSchema = defineEntity({
     numberOfGames: p.integer().nullable(),
     previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
     results: p.oneToMany(MatchResult).mappedBy("match"),
+    officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
