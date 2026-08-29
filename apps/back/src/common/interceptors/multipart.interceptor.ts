@@ -16,20 +16,8 @@ interface StoredFilesByField {
   [fieldname: string]: Storage.MultipartFile[];
 }
 
-type MultipartFormFieldValue = string | number | boolean | null;
-
 interface MultipartFormFields {
-  [fieldname: string]: MultipartFormFieldValue;
-}
-
-function asFormFieldValue(value: unknown): MultipartFormFieldValue {
-  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return value;
-  }
-  if (value == null) {
-    return null;
-  }
-  return String(value);
+  [fieldname: string]: string;
 }
 
 export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
@@ -45,7 +33,7 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
 
       for await (const part of req.parts()) {
         if (part.type !== "file") {
-          body[part.fieldname] = asFormFieldValue(part.value);
+          body[part.fieldname] = part.value == null ? "" : String(part.value);
           continue;
         }
 
