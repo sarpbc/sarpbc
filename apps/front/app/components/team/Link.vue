@@ -19,15 +19,12 @@ const activePlayerCount = computed(
     color="neutral"
     as="link"
   >
-    <div class="size-10 flex items-center justify-center overflow-hidden shrink-0">
-      <img
-        v-if="team.imageUrl"
-        :src="team.imageUrl"
-        :alt="team.name"
-        class="max-w-full max-h-full object-contain"
-      />
-      <UIcon v-else name="i-fluent-shield-question-24-regular" class="text-2xl text-muted" />
-    </div>
+    <TeamImg
+      :team-name="team.name"
+      :image-url="team.imageUrl"
+      :dark-mode-image-url="team.darkModeImageUrl"
+      size="sm"
+    />
     <div class="flex-1 min-w-0">
       <div class="font-medium truncate">{{ team.name }}</div>
       <div v-if="team.location" class="text-sm text-muted truncate">

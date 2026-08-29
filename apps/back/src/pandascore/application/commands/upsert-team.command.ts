@@ -4,4 +4,5 @@ export interface UpsertTeamCommand {
   slug: string;
   location?: string;
   imageUrl?: string;
+  darkModeImageUrl?: string;
 }

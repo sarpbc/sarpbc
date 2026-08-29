@@ -103,6 +103,8 @@ const connectorPaths = computed(() => {
           :team-b-name="match.teamB?.name"
           :team-a-image-url="match.teamA?.imageUrl"
           :team-b-image-url="match.teamB?.imageUrl"
+          :team-a-dark-mode-image-url="match.teamA?.darkModeImageUrl"
+          :team-b-dark-mode-image-url="match.teamB?.darkModeImageUrl"
           :participant-a-id="match.participantAId"
           :participant-b-id="match.participantBId"
           :results="match.results"

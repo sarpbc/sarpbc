@@ -28,5 +28,6 @@ export class TeamDto {
   modified_at!: string;
   acronym!: string;
   image_url!: string;
+  dark_mode_image_url!: string | null;
   current_videogame!: TeamVideogameDto;
 }

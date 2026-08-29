@@ -35,6 +35,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
           <TeamImg
             :team-name="contract.team.name"
             :image-url="contract.team.imageUrl ?? undefined"
+            :dark-mode-image-url="contract.team.darkModeImageUrl ?? undefined"
             size="sm"
           />
           <div class="flex-1 min-w-0">

@@ -9,6 +9,7 @@ export class PandascoreTeamMapper {
       slug: dto.slug,
       location: dto.location,
       imageUrl: dto.image_url,
+      darkModeImageUrl: dto.dark_mode_image_url ?? undefined,
     };
   }
 
@@ -17,12 +18,14 @@ export class PandascoreTeamMapper {
     name: string;
     slug: string;
     image_url?: string;
+    dark_mode_image_url?: string | null;
   }): UpsertTeamCommand {
     return {
       pandascoreId: currentTeam.id,
       name: currentTeam.name,
       slug: currentTeam.slug,
       imageUrl: currentTeam.image_url,
+      darkModeImageUrl: currentTeam.dark_mode_image_url ?? undefined,
     };
   }
 }

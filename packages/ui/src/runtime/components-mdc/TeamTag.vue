@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Team } from "@sarpbc/types";
-import { selectActiveRosterPlayers } from "@sarpbc/utils";
+import { selectActiveRosterPlayers, resolveThemedLogoUrl } from "@sarpbc/utils";
 import { fetchWithEntityTagCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
@@ -20,6 +20,11 @@ const team = ref<Team | null>(null);
 const href = computed(() => teamHref(props.slug));
 
 const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
+
+const colorMode = useColorMode();
+const logoSrc = computed(() =>
+  resolveThemedLogoUrl(team.value?.imageUrl, team.value?.darkModeImageUrl, colorMode.value),
+);
 
 async function loadTeam() {
   if (team.value || pending.value) {
@@ -78,11 +83,10 @@ watch(open, (isOpen) => {
       <div v-else-if="team" class="flex w-72 flex-col gap-3 p-3">
         <div class="flex items-center gap-3">
           <UAvatar
-            :src="team.imageUrl ?? undefined"
+            :src="logoSrc"
             :alt="team.name"
             size="md"
             icon="i-fluent-people-team-24-regular"
-            class="dark:invert"
           />
           <p class="truncate font-semibold text-highlighted" translate="no">
             {{ team.name }}

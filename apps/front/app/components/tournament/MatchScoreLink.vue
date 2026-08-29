@@ -15,6 +15,8 @@ const {
   teamBName,
   teamAImageUrl,
   teamBImageUrl,
+  teamADarkModeImageUrl,
+  teamBDarkModeImageUrl,
   participantAId,
   participantBId,
   results,
@@ -30,6 +32,8 @@ const {
   teamBName?: string;
   teamAImageUrl?: string;
   teamBImageUrl?: string;
+  teamADarkModeImageUrl?: string;
+  teamBDarkModeImageUrl?: string;
   participantAId?: string;
   participantBId?: string;
   results?: MatchResult[];
@@ -116,6 +120,7 @@ function participantRowClass(participantId: string | undefined): string {
         <TeamImg
           :team-name="teamAName ?? $t('components.match.tbd')"
           :image-url="teamAImageUrl"
+          :dark-mode-image-url="teamADarkModeImageUrl"
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
@@ -130,6 +135,7 @@ function participantRowClass(participantId: string | undefined): string {
         <TeamImg
           :team-name="teamBName ?? $t('components.match.tbd')"
           :image-url="teamBImageUrl"
+          :dark-mode-image-url="teamBDarkModeImageUrl"
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
