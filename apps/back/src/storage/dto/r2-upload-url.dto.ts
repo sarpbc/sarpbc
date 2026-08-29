@@ -1,6 +1,13 @@
 import { IsIn, IsOptional, IsString, MaxLength } from "class-validator";
 
-const ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+const ALLOWED_CONTENT_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/pjpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+] as const;
 
 export class R2UploadUrlDto {
   @IsString()

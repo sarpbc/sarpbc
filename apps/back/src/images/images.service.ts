@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
+import { createLogger } from "evlog";
+import { currentEnvironment } from "../common/request-log-context";
 import { Image } from "./domain/image.entity";
 import { ImageRepository } from "./images.repository";
 
@@ -37,10 +39,18 @@ export class ImagesService {
     }
   }
 
-  async getUploadUrl(): Promise<UploadUrlResponse> {
-    this.ensureCredentials();
+  async getUploadUrl(userId?: string, userEmail?: string): Promise<UploadUrlResponse> {
+    const log = createLogger({
+      component: ImagesService.name,
+      action: "getUploadUrl",
+      environment: currentEnvironment(),
+      userId,
+      userEmail,
+    });
 
     try {
+      this.ensureCredentials();
+
       const form = new FormData();
       form.append("requireSignedURLs", "false");
 
@@ -56,36 +66,70 @@ export class ImagesService {
         },
       );
 
+      log.set({ imageId: response.data.result.id });
       return {
         uploadURL: response.data.result.uploadURL,
         imageId: response.data.result.id,
       };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new InternalServerErrorException(
-          `Cloudflare API error (${error.response?.status}): ${JSON.stringify(error.response?.data) || error.message}`,
-        );
+      if (error instanceof InternalServerErrorException) {
+        log.error(error);
+        throw error;
       }
-      throw error;
+
+      const axiosError = error instanceof AxiosError ? error : undefined;
+      log.set({
+        cloudflareStatus: axiosError?.response?.status,
+      });
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw new InternalServerErrorException(
+        "Cloudflare could not issue an upload URL. Try again in a moment.",
+      );
+    } finally {
+      log.emit();
     }
   }
 
-  async saveImage(imageId: string): Promise<ImageResponse> {
-    this.ensureCredentials();
+  async saveImage(imageId: string, userId?: string, userEmail?: string): Promise<ImageResponse> {
+    const log = createLogger({
+      component: ImagesService.name,
+      action: "saveImage",
+      environment: currentEnvironment(),
+      userId,
+      userEmail,
+      imageId,
+    });
 
-    const url = `https://imagedelivery.net/${this.accountHash}/${imageId}/public`;
+    try {
+      this.ensureCredentials();
 
-    const image = new Image();
-    image.imageId = imageId;
-    image.url = url;
+      const url = `https://imagedelivery.net/${this.accountHash}/${imageId}/public`;
 
-    const saved = await this.imageRepository.save(image);
+      const image = new Image();
+      image.imageId = imageId;
+      image.url = url;
 
-    return {
-      id: saved.id,
-      imageId: saved.imageId,
-      url: saved.url,
-      createdAt: saved.createdAt,
-    };
+      const saved = await this.imageRepository.save(image);
+      log.set({ storedImageId: saved.id, imageUrl: saved.url });
+
+      return {
+        id: saved.id,
+        imageId: saved.imageId,
+        url: saved.url,
+        createdAt: saved.createdAt,
+      };
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        log.error(error);
+        throw error;
+      }
+
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw new InternalServerErrorException(
+        "The image uploaded, but saving its record failed. Try uploading again.",
+      );
+    } finally {
+      log.emit();
+    }
   }
 }

@@ -3,19 +3,51 @@ export type R2UploadResponse = {
   key: string;
 };
 
+export type CoverUploadContext = {
+  articleSlug?: string;
+  articleTitle?: string;
+};
+
+type NestErrorBody = {
+  message?: string | string[];
+  statusCode?: number;
+};
+
+function messageFromNestBody(responseText: string): string | undefined {
+  try {
+    const parsed = JSON.parse(responseText) as NestErrorBody;
+    if (Array.isArray(parsed.message)) {
+      const joined = parsed.message.filter((item) => item.trim().length > 0).join(" ");
+      return joined.length > 0 ? joined : undefined;
+    }
+    if (typeof parsed.message === "string" && parsed.message.trim().length > 0) {
+      return parsed.message.trim();
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
 export function useR2Upload() {
   const config = useRuntimeConfig();
   const progress = ref(0);
   const isUploading = ref(false);
   const error = ref<string | null>(null);
 
-  async function uploadFile(file: File): Promise<string> {
+  async function uploadFile(file: File, context: CoverUploadContext = {}): Promise<string> {
     isUploading.value = true;
     progress.value = 0;
     error.value = null;
 
     const formData = new FormData();
     formData.append("file", file);
+    if (context.articleSlug) {
+      formData.append("articleSlug", context.articleSlug);
+    }
+    if (context.articleTitle) {
+      formData.append("articleTitle", context.articleTitle);
+    }
 
     try {
       const publicUrl = await new Promise<string>((resolve, reject) => {
@@ -38,7 +70,19 @@ export function useR2Upload() {
             return;
           }
 
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          const serverMessage = messageFromNestBody(xhr.responseText);
+          if (xhr.status >= 500) {
+            reject(
+              new Error(
+                serverMessage && serverMessage !== "Internal server error"
+                  ? serverMessage
+                  : "server",
+              ),
+            );
+            return;
+          }
+
+          reject(new Error(serverMessage ?? `Upload failed with status ${xhr.status}`));
         });
 
         xhr.addEventListener("error", () => {

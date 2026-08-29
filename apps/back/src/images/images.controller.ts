@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
+import type { FastifyRequest } from "fastify";
 import { AuthGuard } from "../auth/auth.guard";
 import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../user/user.guard";
@@ -12,13 +13,13 @@ export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
   @Post("upload-url")
-  async getUploadUrl() {
-    return this.imagesService.getUploadUrl();
+  async getUploadUrl(@Req() request: FastifyRequest) {
+    return this.imagesService.getUploadUrl(request.user?.id, request.user?.email);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async saveImage(@Body() dto: SaveImageDto) {
-    return this.imagesService.saveImage(dto.imageId);
+  async saveImage(@Body() dto: SaveImageDto, @Req() request: FastifyRequest) {
+    return this.imagesService.saveImage(dto.imageId, request.user?.id, request.user?.email);
   }
 }

@@ -301,7 +301,8 @@
         "replace": "Remplacer la couverture",
         "remove": "Supprimer la couverture",
         "progress": "Envoi en cours… {percent}%",
-        "uploadFailed": "Impossible d’envoyer l’image de couverture. Vérifiez le type de fichier et réessayez."
+        "uploadFailed": "Impossible d’envoyer l’image de couverture",
+        "uploadServerError": "Le serveur n’a pas pu enregistrer cette image. Réessayez, ou choisissez un JPEG, PNG, WebP ou GIF plus léger"
       },
       "editor": {
         "insertPlayer": "Tag Joueur",

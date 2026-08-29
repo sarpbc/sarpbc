@@ -301,7 +301,8 @@
         "replace": "Replace Cover",
         "remove": "Remove Cover",
         "progress": "Uploading… {percent}%",
-        "uploadFailed": "Could not upload cover image. Check the file type and try again."
+        "uploadFailed": "Could not upload cover image",
+        "uploadServerError": "The server could not store this image. Try again, or pick a smaller JPEG, PNG, WebP, or GIF"
       },
       "editor": {
         "insertPlayer": "Player Tag",
