@@ -10,7 +10,17 @@ const envSchema = z.object({
   POSTHOG_HOST: z.string().optional(),
 });
 
-export function validateEnv(config: Record<string, unknown>): Record<string, unknown> {
+export interface ProcessEnv {
+  NODE_ENV?: string;
+  PORT?: string;
+  REDIS_HOST?: string;
+  REDIS_PORT?: string;
+  REDIS_PASSWORD?: string;
+  POSTHOG_PROJECT_TOKEN?: string;
+  POSTHOG_HOST?: string;
+}
+
+export function validateEnv(config: ProcessEnv) {
   const parsed = envSchema.safeParse(config);
   if (!parsed.success) {
     const message = parsed.error.issues

@@ -2,6 +2,10 @@ import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
+export interface PostHogProperties {
+  [key: string]: string | number | boolean | null;
+}
+
 @Injectable()
 export class PostHogService implements OnModuleDestroy {
   private readonly client: PostHog | null;
@@ -22,18 +26,20 @@ export class PostHogService implements OnModuleDestroy {
   capture(params: {
     distinctId: string | undefined;
     event: string;
-    properties?: Record<string, unknown>;
+    properties?: PostHogProperties;
     sessionId?: string | undefined;
   }): void {
     if (!this.client || !params.distinctId) return;
 
+    const properties: PostHogProperties = { ...params.properties };
+    if (params.sessionId) {
+      properties.$session_id = params.sessionId;
+    }
+
     this.client.capture({
       distinctId: params.distinctId,
       event: params.event,
-      properties: {
-        ...(params.sessionId ? { $session_id: params.sessionId } : {}),
-        ...params.properties,
-      },
+      properties,
     });
   }
 

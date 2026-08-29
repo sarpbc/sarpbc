@@ -123,6 +123,11 @@ const dayHeaderDf = computed(
     }),
 );
 
+interface PickemDayGroup {
+  date: Date;
+  matches: Match[];
+}
+
 const matchesByDay = computed(() => {
   if (!tournament.value?.matches) return [];
 
@@ -130,25 +135,19 @@ const matchesByDay = computed(() => {
     (m) => m.participants?.length === 2 && m.beginAt,
   );
 
-  const grouped = validMatches.reduce(
-    (acc, match) => {
-      const matchDate = new Date(match.beginAt!);
-      const dayKey = matchDate.toDateString();
+  const grouped = new Map<string, PickemDayGroup>();
+  for (const match of validMatches) {
+    const matchDate = new Date(match.beginAt!);
+    const dayKey = matchDate.toDateString();
+    const existing = grouped.get(dayKey);
+    if (existing) {
+      existing.matches.push(match);
+    } else {
+      grouped.set(dayKey, { date: matchDate, matches: [match] });
+    }
+  }
 
-      if (!acc[dayKey]) {
-        acc[dayKey] = {
-          date: matchDate,
-          matches: [] as Match[],
-        };
-      }
-
-      acc[dayKey].matches.push(match);
-      return acc;
-    },
-    {} as Record<string, { date: Date; matches: Match[] }>,
-  );
-
-  return Object.values(grouped)
+  return [...grouped.values()]
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map((group) => ({
       ...group,

@@ -42,8 +42,13 @@ const totalPages = computed(() => Math.ceil(totalTeams.value / TEAMS_PER_PAGE));
 const hasPrevious = computed(() => offset.value > 0);
 const hasNext = computed(() => offset.value + TEAMS_PER_PAGE < totalTeams.value);
 
+interface HubListQuery {
+  offset: string;
+  start?: string;
+}
+
 const previousPageQuery = computed(() => {
-  const query: Record<string, string> = {
+  const query: HubListQuery = {
     offset: Math.max(0, offset.value - TEAMS_PER_PAGE).toString(),
   };
   if (start.value) {
@@ -53,7 +58,7 @@ const previousPageQuery = computed(() => {
 });
 
 const nextPageQuery = computed(() => {
-  const query: Record<string, string> = {
+  const query: HubListQuery = {
     offset: (offset.value + TEAMS_PER_PAGE).toString(),
   };
   if (start.value) {
@@ -63,7 +68,7 @@ const nextPageQuery = computed(() => {
 });
 
 const getLetterQuery = (letter: string) => {
-  const query: Record<string, string> = {
+  const query: HubListQuery = {
     offset: "0",
   };
   if (letter && letter !== "ALL") {

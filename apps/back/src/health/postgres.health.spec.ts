@@ -1,5 +1,3 @@
-import { EntityManager } from "@mikro-orm/postgresql";
-import { HealthIndicatorService } from "@nestjs/terminus";
 import { PostgresHealthIndicator } from "./postgres.health";
 
 describe("PostgresHealthIndicator", () => {
@@ -18,10 +16,7 @@ describe("PostgresHealthIndicator", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
-    indicator = new PostgresHealthIndicator(
-      em as unknown as EntityManager,
-      healthIndicatorService as unknown as HealthIndicatorService,
-    );
+    indicator = new PostgresHealthIndicator(em as never, healthIndicatorService as never);
   });
 
   it("is up when SELECT 1 succeeds", async () => {

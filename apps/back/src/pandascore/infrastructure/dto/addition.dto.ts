@@ -1,6 +1,6 @@
 import { MatchDto } from "./match.dto";
 import { TeamDto } from "./team.dto";
-import { LeagueDto, PlayerDto, TournamentDto } from "./tournament.dto";
+import { LeagueDto, PlayerDto, SerieDto, TournamentDto } from "./tournament.dto";
 
 export type PandascoreAdditionType =
   | "league"
@@ -22,6 +22,6 @@ export type PandascoreAdditionDto =
   | (PandascoreAdditionBase & { type: "team"; object: TeamDto })
   | (PandascoreAdditionBase & { type: "player"; object: PlayerDto })
   | (PandascoreAdditionBase & { type: "league"; object: LeagueDto })
-  | (PandascoreAdditionBase & { type: "serie"; object: Record<string, unknown> });
+  | (PandascoreAdditionBase & { type: "serie"; object: SerieDto });
 
 export type PandascoreAdditionsListDto = PandascoreAdditionDto[];

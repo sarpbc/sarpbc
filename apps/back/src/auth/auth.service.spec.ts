@@ -125,14 +125,19 @@ describe("AuthService", () => {
       });
       let getTokenStarted = 0;
 
-      const profiles: Record<string, { id: string; email: string; name: string }> = {
+      interface OAuthClientCredentials {
+        access_token?: string;
+      }
+
+      const profiles = {
         "code-a": { id: "google-a", email: "a@example.com", name: "Alice" },
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
-      };
+      } as const;
 
-      (google.auth.OAuth2 as unknown as jest.Mock).mockImplementation(() => {
+      const oauth2Mock: jest.Mock = google.auth.OAuth2 as never;
+      oauth2Mock.mockImplementation(() => {
         const client = {
-          credentials: {} as { access_token?: string },
+          credentials: {} as OAuthClientCredentials,
           getToken: jest.fn(async (code: string) => {
             getTokenStarted += 1;
             await holdGetToken;
@@ -146,11 +151,12 @@ describe("AuthService", () => {
         return client;
       });
 
-      (google.oauth2 as unknown as jest.Mock).mockReturnValue({
+      const oauth2ApiMock: jest.Mock = google.oauth2 as never;
+      oauth2ApiMock.mockReturnValue({
         userinfo: {
-          get: jest.fn(async ({ auth }: { auth: { credentials: { access_token?: string } } }) => {
+          get: jest.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
             const code = auth.credentials.access_token;
-            const profile = code ? profiles[code] : undefined;
+            const profile = code === "code-a" || code === "code-b" ? profiles[code] : undefined;
             if (!profile) {
               throw new Error(`Unknown Google token ${code}`);
             }

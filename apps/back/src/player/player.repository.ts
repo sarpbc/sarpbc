@@ -3,9 +3,13 @@ import { Player } from "./player.entities";
 import { IPlayerRepository } from "./domain/player.repository.interface";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
 
+interface PlayerNameFilter {
+  name?: { $ilike: string };
+}
+
 export class PlayerRepository extends EntityRepository<Player> implements IPlayerRepository {
   async search({ name, limit = 25, offset = 0 }: Partial<PlayerSearchProps>): Promise<Player[]> {
-    const where: Record<string, any> = {};
+    const where: PlayerNameFilter = {};
     if (name) {
       where.name = { $ilike: `%${name}%` };
     }
@@ -18,7 +22,7 @@ export class PlayerRepository extends EntityRepository<Player> implements IPlaye
     limit = 25,
     offset = 0,
   }: Partial<PlayerSearchProps>): Promise<[Player[], number]> {
-    const where: Record<string, any> = {};
+    const where: PlayerNameFilter = {};
     if (name) {
       where.name = { $ilike: `%${name}%` };
     }

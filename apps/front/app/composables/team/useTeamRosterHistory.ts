@@ -124,10 +124,15 @@ function sameRoster(a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean
   );
 }
 
+interface RosterMemberDiff {
+  joined: TeamRosterEraMember[];
+  left: TeamRosterEraMember[];
+}
+
 function diffMembers(
   previous: TeamRosterEraMember[] | null,
   current: TeamRosterEraMember[],
-): { joined: TeamRosterEraMember[]; left: TeamRosterEraMember[] } {
+): RosterMemberDiff {
   if (!previous) {
     return { joined: current, left: [] };
   }

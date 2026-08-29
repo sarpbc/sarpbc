@@ -17,15 +17,15 @@ export function sendXml(event: H3Event, xml: string): string {
   return xml;
 }
 
-function rethrowSitemapFetchError(error: unknown): never {
-  const statusCode = getFetchStatusCode(error);
+function rethrowSitemapFetchError(cause: unknown): never {
+  const statusCode = getFetchStatusCode(cause);
   if (statusCode === 404) {
     throw createError({ statusCode: 404, statusMessage: "News sitemap chunk not found" });
   }
   throw createError({
     statusCode: 502,
     statusMessage: "Could not load news sitemap",
-    cause: error,
+    cause,
   });
 }
 
@@ -34,8 +34,8 @@ export async function handleSitemapIndex(event: H3Event): Promise<string> {
   let meta: NewsSitemapMetaResponse;
   try {
     meta = await $fetch<NewsSitemapMetaResponse>(`${config.public.apiBase}/news/sitemap`);
-  } catch (error: unknown) {
-    rethrowSitemapFetchError(error);
+  } catch (cause) {
+    rethrowSitemapFetchError(cause);
   }
   return sendXml(event, buildSitemapIndex(meta.chunkCount));
 }
@@ -59,8 +59,8 @@ export async function handleNewsSitemapChunk(
     response = await $fetch<NewsSitemapChunkResponse>(
       `${config.public.apiBase}/news/sitemap/${chunk}`,
     );
-  } catch (error: unknown) {
-    rethrowSitemapFetchError(error);
+  } catch (cause) {
+    rethrowSitemapFetchError(cause);
   }
   return sendXml(event, buildNewsUrlset(response.data));
 }

@@ -3,8 +3,8 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { log } from "evlog";
 
 @Catch()
-export class AllExceptionsFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost): void {
+export class AllExceptionsFilter implements ExceptionFilter<Error | HttpException> {
+  catch(exception: Error | HttpException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest<FastifyRequest>();
@@ -17,9 +17,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       const body =
-        typeof exceptionResponse === "string"
-          ? { statusCode: status, message: exceptionResponse }
-          : exceptionResponse;
+        exceptionResponse instanceof Object
+          ? exceptionResponse
+          : { statusCode: status, message: exceptionResponse };
 
       void response.status(status).send(body);
       return;

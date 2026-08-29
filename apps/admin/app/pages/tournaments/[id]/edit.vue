@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { getApiErrorMessage } from "~/utils/apiError";
+
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -49,19 +51,6 @@ const [{ data: leagues }, { data: teamsData, status: teamsStatus }] = await Prom
 const teams = computed(() => teamsData.value?.teams ?? []);
 const isManual = computed(() => tournament.value?.source === "manual");
 
-function getErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "data" in error) {
-    const data = (error as { data?: { message?: string | string[] } }).data;
-    if (Array.isArray(data?.message)) {
-      return data.message.join(" ");
-    }
-    if (typeof data?.message === "string") {
-      return data.message;
-    }
-  }
-  return t("page.tournaments.form.saveFailed");
-}
-
 async function handleSubmit() {
   const validationError = validateManualTournamentForm(formState.value);
   if (validationError) {
@@ -88,7 +77,10 @@ async function handleSubmit() {
     formState.value = tournamentToFormState(updated);
   } catch (error) {
     console.error("Failed to update tournament:", error);
-    toast.add({ title: getErrorMessage(error), color: "error" });
+    toast.add({
+      title: getApiErrorMessage(error) ?? t("page.tournaments.form.saveFailed"),
+      color: "error",
+    });
   } finally {
     isSaving.value = false;
   }

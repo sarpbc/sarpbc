@@ -10,6 +10,25 @@ const OG_IMAGE_HEIGHT = 630;
 
 type OgImageMime = "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/avif";
 
+interface PageSeoMeta {
+  title: string;
+  ogTitle: string;
+  ogSiteName: string;
+  description: string;
+  ogDescription: string;
+  ogUrl: string;
+  ogImage: string;
+  ogImageWidth: number;
+  ogImageHeight: number;
+  ogImageType?: OgImageMime;
+  ogType: "website";
+  twitterCard: "summary" | "summary_large_image";
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
+  robots: "noindex, nofollow" | "index, follow";
+}
+
 export const useSarpbcSeo = () => {
   const { locales } = useI18n();
   const route = useRoute();
@@ -105,7 +124,7 @@ export const useSarpbcSeo = () => {
       link: pageLinks,
     });
 
-    useSeoMeta({
+    const seoMeta: PageSeoMeta = {
       title,
       ogTitle: title,
       ogSiteName: DEFAULT_SITE_NAME,
@@ -115,14 +134,17 @@ export const useSarpbcSeo = () => {
       ogImage: image,
       ogImageWidth: OG_IMAGE_WIDTH,
       ogImageHeight: OG_IMAGE_HEIGHT,
-      ...(imageType ? { ogImageType: imageType } : {}),
       ogType: "website",
       twitterCard,
       twitterTitle: title,
       twitterDescription: description,
       twitterImage: image,
       robots: noIndex ? "noindex, nofollow" : "index, follow",
-    });
+    };
+    if (imageType) {
+      seoMeta.ogImageType = imageType;
+    }
+    useSeoMeta(seoMeta);
   };
 
   const getCanonicalUrl = () => {

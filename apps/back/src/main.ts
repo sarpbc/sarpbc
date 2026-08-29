@@ -7,22 +7,24 @@ import { configureApp } from "./configure-app";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-initLogger({
-  env: { service: "sarpbc-back" },
-  ...(isProduction
-    ? {
-        sampling: {
-          rates: {
-            info: 5,
-            warn: 50,
-            debug: 0,
-            error: 100,
-          },
-          keep: [{ duration: 1000 }, { status: 400 }],
-        },
-      }
-    : {}),
-});
+if (isProduction) {
+  initLogger({
+    env: { service: "sarpbc-back" },
+    sampling: {
+      rates: {
+        info: 5,
+        warn: 50,
+        debug: 0,
+        error: 100,
+      },
+      keep: [{ duration: 1000 }, { status: 400 }],
+    },
+  });
+} else {
+  initLogger({
+    env: { service: "sarpbc-back" },
+  });
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());

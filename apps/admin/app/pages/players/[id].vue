@@ -74,14 +74,7 @@ async function savePlayer() {
   if (!playerForm.value.name) return;
   isSavingPlayer.value = true;
   try {
-    const body: {
-      name: string;
-      firstName?: string;
-      lastName?: string;
-      nationality?: string;
-      birthday?: string;
-      imageUrl?: string;
-    } = { name: playerForm.value.name };
+    const body: UpdatePlayerDto = { name: playerForm.value.name };
     if (playerForm.value.firstName) body.firstName = playerForm.value.firstName;
     if (playerForm.value.lastName) body.lastName = playerForm.value.lastName;
     if (playerForm.value.nationality) body.nationality = playerForm.value.nationality;

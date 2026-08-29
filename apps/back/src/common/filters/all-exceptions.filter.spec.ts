@@ -11,7 +11,7 @@ describe("AllExceptionsFilter", () => {
         getResponse: () => ({ sent, status: jest.fn().mockReturnThis(), send }),
         getRequest: () => ({ url: "/news", method: "GET" }),
       }),
-    } as unknown as ArgumentsHost;
+    } as ArgumentsHost;
   }
 
   it("preserves HttpException response bodies", () => {

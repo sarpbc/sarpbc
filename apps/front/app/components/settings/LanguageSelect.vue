@@ -15,10 +15,11 @@ const { locale, setLocale, t } = useI18n();
 const selectedLanguage = ref(locale.value);
 
 async function handleLanguageChange(payload: boolean | string | number | undefined) {
-  if (typeof payload !== "string") {
+  const selected = languages.find((language) => language.value === payload);
+  if (!selected) {
     return;
   }
-  await setLocale(payload as Locale);
+  await setLocale(selected.value);
   window.location.reload();
 }
 </script>

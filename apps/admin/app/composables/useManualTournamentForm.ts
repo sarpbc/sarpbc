@@ -1,4 +1,5 @@
 import type { Tournament } from "~/types/tournament";
+import type { ManualTournamentInput } from "./tournaments";
 
 export interface ManualTournamentFormState {
   name: string;
@@ -58,16 +59,7 @@ export function buildManualTournamentPayload(
   state: ManualTournamentFormState,
   mode: "create" | "update",
 ) {
-  const payload: {
-    name: string;
-    slug?: string;
-    tier?: string | null;
-    leagueId?: string | null;
-    beginAt?: string | null;
-    endAt?: string | null;
-    imageUrl?: string | null;
-    teamIds?: string[];
-  } = {
+  const payload: ManualTournamentInput = {
     name: state.name.trim(),
   };
 

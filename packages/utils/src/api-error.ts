@@ -1,36 +1,51 @@
+import * as z from "zod";
+
 export interface ApiErrorBody {
   message?: string | string[];
   code?: string;
   statusCode?: number;
 }
 
-function asRecord(error: unknown): Record<string, unknown> | null {
-  if (typeof error !== "object" || error === null) return null;
-  return error as Record<string, unknown>;
+const apiErrorMessageSchema = z.union([z.string(), z.array(z.string())]);
+
+const apiErrorBodySchema = z.object({
+  message: apiErrorMessageSchema.optional(),
+  code: z.string().optional(),
+  statusCode: z.number().optional(),
+});
+
+const apiErrorSchema = z.object({
+  statusCode: z.number().optional(),
+  status: z.number().optional(),
+  data: apiErrorBodySchema.optional(),
+  message: apiErrorMessageSchema.optional(),
+  code: z.string().optional(),
+});
+
+export function getApiErrorStatus(cause: unknown): number | undefined {
+  const parsed = apiErrorSchema.safeParse(cause);
+  if (!parsed.success) return undefined;
+
+  return parsed.data.statusCode ?? parsed.data.status;
 }
 
-export function getApiErrorStatus(error: unknown): number | undefined {
-  const record = asRecord(error);
-  if (!record) return undefined;
+export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
+  const parsed = apiErrorSchema.safeParse(cause);
+  if (!parsed.success) return undefined;
 
-  const status = record.statusCode ?? record.status;
-  return typeof status === "number" ? status : undefined;
-}
-
-export function getApiErrorBody(error: unknown): ApiErrorBody | undefined {
-  const record = asRecord(error);
-  if (!record) return undefined;
-
-  const data = record.data;
-  if (typeof data === "object" && data !== null) {
-    return data as ApiErrorBody;
+  if (parsed.data.data) {
+    return parsed.data.data;
   }
 
-  return record as ApiErrorBody;
+  return {
+    message: parsed.data.message,
+    code: parsed.data.code,
+    statusCode: parsed.data.statusCode,
+  };
 }
 
-export function getApiErrorMessage(error: unknown): string | undefined {
-  const body = getApiErrorBody(error);
+export function getApiErrorMessage(cause: unknown): string | undefined {
+  const body = getApiErrorBody(cause);
   if (!body?.message) return undefined;
 
   if (Array.isArray(body.message)) {
@@ -40,6 +55,6 @@ export function getApiErrorMessage(error: unknown): string | undefined {
   return body.message;
 }
 
-export function getApiErrorCode(error: unknown): string | undefined {
-  return getApiErrorBody(error)?.code;
+export function getApiErrorCode(cause: unknown): string | undefined {
+  return getApiErrorBody(cause)?.code;
 }

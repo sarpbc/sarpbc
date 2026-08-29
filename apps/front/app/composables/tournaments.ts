@@ -1,6 +1,7 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 import { parseMatchResults } from "~/utils/parseMatchResult";
+import { getApiErrorStatus } from "~/utils/apiError";
 
 function parseMatch(match: Match): Match {
   return {
@@ -59,15 +60,11 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
     });
 
     return res.tournament ?? null;
-  } catch (error: unknown) {
-    const statusCode =
-      typeof error === "object" && error !== null && "statusCode" in error
-        ? (error as { statusCode?: number }).statusCode
-        : undefined;
-    if (statusCode === 404) {
+  } catch (cause) {
+    if (getApiErrorStatus(cause) === 404) {
       return null;
     }
-    throw error;
+    throw cause;
   }
 }
 

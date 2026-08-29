@@ -1,9 +1,9 @@
 export type TournamentTab = "overview" | "matches";
 
-const TAB_ORDER: Record<TournamentTab, number> = {
+const TAB_ORDER = {
   overview: 0,
   matches: 1,
-};
+} as const;
 
 export function getTournamentTabFromPath(path: string): TournamentTab {
   return path.endsWith("/matches") ? "matches" : "overview";

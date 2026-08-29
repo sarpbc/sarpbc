@@ -96,6 +96,6 @@ export async function getPickemPersonalRanking(
   );
 }
 
-export function pickemApiErrorMessage(error: unknown, fallback: string): string {
-  return getApiErrorMessage(error) ?? fallback;
+export function pickemApiErrorMessage(cause: unknown, fallback: string): string {
+  return getApiErrorMessage(cause) ?? fallback;
 }

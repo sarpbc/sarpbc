@@ -10,7 +10,16 @@ import {
 } from "@nestjs/common";
 import { MultipartValue } from "@fastify/multipart";
 import { FastifyRequest } from "fastify";
+import type { Storage } from "../../global";
 import { getFileFromPart, MultipartOptions, validateFile } from "../utils/file.util";
+
+interface StoredFilesByField {
+  [fieldname: string]: Storage.MultipartFile[];
+}
+
+interface MultipartFormFields {
+  [fieldname: string]: string | number | boolean | null;
+}
 
 export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
@@ -20,8 +29,8 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
       if (!req.isMultipart())
         throw new HttpException("The request should be a form-data", HttpStatus.BAD_REQUEST);
 
-      const files: Record<string, any[]> = {};
-      const body: Record<string, any> = {};
+      const files: StoredFilesByField = {};
+      const body: MultipartFormFields = {};
 
       for await (const part of req.parts()) {
         if (part.type !== "file") {

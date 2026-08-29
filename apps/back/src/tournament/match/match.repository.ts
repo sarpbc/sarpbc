@@ -1,6 +1,17 @@
-import { EntityRepository, FilterQuery } from "@mikro-orm/core";
+import { EntityRepository } from "@mikro-orm/core";
 import { Match } from "../tournament.entities";
 import type { MatchListQueryOptions, MatchListScopeFilters } from "./match-list-filters";
+
+interface MatchTournamentScopeFilter {
+  id?: string;
+  league?: { id: string };
+}
+
+interface MatchListFilter {
+  beginAt?: { $gte?: Date; $lte?: Date };
+  endAt?: null | { $ne: null };
+  tournament?: MatchTournamentScopeFilter;
+}
 
 const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;
 
@@ -225,7 +236,7 @@ export class MatchRepository extends EntityRepository<Match> {
     );
   }
 
-  private buildUpcomingQuery(todayOnly: boolean): FilterQuery<Match> {
+  private buildUpcomingQuery(todayOnly: boolean): MatchListFilter {
     const now = new Date();
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
@@ -233,7 +244,7 @@ export class MatchRepository extends EntityRepository<Match> {
     return todayOnly ? { beginAt: { $gte: now, $lte: endOfDay } } : { beginAt: { $gte: now } };
   }
 
-  private buildLiveQuery(todayOnly: boolean): FilterQuery<Match> {
+  private buildLiveQuery(todayOnly: boolean): MatchListFilter {
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
@@ -243,30 +254,26 @@ export class MatchRepository extends EntityRepository<Match> {
       : { beginAt: { $lte: now }, endAt: null };
   }
 
-  private mergeScopeFilters(
-    base: FilterQuery<Match>,
-    scope: MatchListScopeFilters,
-  ): FilterQuery<Match> {
+  private mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters): MatchListFilter {
     const tournamentFilter = this.buildTournamentFilter(scope);
     if (!tournamentFilter) {
       return base;
     }
 
-    return {
-      ...(base as Record<string, unknown>),
-      tournament: tournamentFilter,
-    } as FilterQuery<Match>;
+    const query: MatchListFilter = { ...base };
+    query.tournament = tournamentFilter;
+    return query;
   }
 
   private buildTournamentFilter(
     scope: MatchListScopeFilters,
-  ): { id?: string; league?: { id: string } } | undefined {
+  ): MatchTournamentScopeFilter | undefined {
     const { tournamentId, leagueId } = scope;
     if (!tournamentId && !leagueId) {
       return undefined;
     }
 
-    const filter: { id?: string; league?: { id: string } } = {};
+    const filter: MatchTournamentScopeFilter = {};
     if (tournamentId) {
       filter.id = tournamentId;
     }

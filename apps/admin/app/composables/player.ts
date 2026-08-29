@@ -33,6 +33,13 @@ export type UpdatePlayerContractDto = {
   endDate?: string | null;
 };
 
+type PlayerListParams = {
+  limit: number;
+  offset?: number;
+  start?: string;
+  name?: string;
+};
+
 export async function getAllPlayers(query?: {
   limit?: number;
   search?: string;
@@ -40,7 +47,7 @@ export async function getAllPlayers(query?: {
   start?: string;
 }): Promise<{ players: Player[]; total: number }> {
   try {
-    const params: Record<string, string | number | undefined> = {
+    const params: PlayerListParams = {
       limit: query?.limit ?? 50,
     };
     if (query?.offset && query.offset > 0) params.offset = query.offset;

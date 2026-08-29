@@ -7,6 +7,11 @@ export interface NewsEntityTag {
   raw: string;
 }
 
+interface NewsEntityTagAttrs {
+  slug?: string;
+  label?: string;
+}
+
 /** Matches `:player{...}` or `:team{...}` at the start of a string. */
 export const NEWS_ENTITY_TAG_PATTERN = /^:(player|team)\{([^}]*)\}/;
 
@@ -20,13 +25,18 @@ function escapeAttrValue(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
-function parseAttrs(rawAttrs: string): Record<string, string> {
-  const attrs: Record<string, string> = {};
+function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
+  const attrs: NewsEntityTagAttrs = {};
   for (const match of rawAttrs.matchAll(ATTR_PATTERN)) {
     const key = match[1];
     const value = match[2];
-    if (key && value != null) {
-      attrs[key] = unescapeAttrValue(value);
+    if (value == null) {
+      continue;
+    }
+    if (key === "slug") {
+      attrs.slug = unescapeAttrValue(value);
+    } else if (key === "label") {
+      attrs.label = unescapeAttrValue(value);
     }
   }
   return attrs;

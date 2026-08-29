@@ -3,9 +3,13 @@ import type { Team } from "../player/player.entities";
 import { ITeamRepository } from "./domain/team.repository.interface";
 import { TeamSearchProps } from "./interfaces/search-team-props";
 
+interface TeamNameFilter {
+  name?: { $ilike: string };
+}
+
 export class TeamRepository extends EntityRepository<Team> implements ITeamRepository {
   async search({ name, limit = 25, offset = 0 }: Partial<TeamSearchProps>): Promise<Team[]> {
-    const where: Record<string, any> = {};
+    const where: TeamNameFilter = {};
     if (name) {
       where.name = { $ilike: `%${name}%` };
     }
@@ -18,7 +22,7 @@ export class TeamRepository extends EntityRepository<Team> implements ITeamRepos
     limit = 25,
     offset = 0,
   }: Partial<TeamSearchProps>): Promise<[Team[], number]> {
-    const where: Record<string, any> = {};
+    const where: TeamNameFilter = {};
     if (start) {
       where.name = { $ilike: `${start}%` };
     }

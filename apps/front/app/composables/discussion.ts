@@ -16,6 +16,21 @@ import {
 
 const MAX_REFETCH_LIMIT = 100;
 
+interface GetCommentsQuery {
+  targetType: CommentTargetType;
+  targetId: string;
+  page: number;
+  limit?: number;
+}
+
+interface CreateReplyBody {
+  content: string;
+  postId?: string;
+  newsArticleId?: string;
+  matchId?: string;
+  replyToId?: string;
+}
+
 export async function getCommentsByTarget(
   targetType: CommentTargetType,
   targetId: string,
@@ -23,14 +38,17 @@ export async function getCommentsByTarget(
   limit?: number,
 ): Promise<PaginatedComments> {
   try {
+    const query: GetCommentsQuery = {
+      targetType,
+      targetId,
+      page,
+    };
+    if (limit !== undefined) {
+      query.limit = limit;
+    }
     return await apiFetch<PaginatedComments>("/replies", {
       method: "GET",
-      query: {
-        targetType,
-        targetId,
-        page,
-        ...(limit !== undefined ? { limit } : {}),
-      },
+      query,
     });
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -48,7 +66,7 @@ export async function createComment(data: {
   targetId: string;
   replyToId?: string;
 }): Promise<CreateCommentResult> {
-  const body: Record<string, string> = {
+  const body: CreateReplyBody = {
     content: data.content,
   };
 

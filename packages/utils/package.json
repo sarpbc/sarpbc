@@ -17,7 +17,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sarpbc/types": "workspace:*"
+    "@sarpbc/types": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "catalog:"

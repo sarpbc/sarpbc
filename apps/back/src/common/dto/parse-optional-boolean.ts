@@ -1,4 +1,4 @@
-export function parseOptionalBoolean({ value }: { value: unknown }): unknown {
+export function parseOptionalBoolean({ value }: { value: string | boolean | null | undefined }) {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }

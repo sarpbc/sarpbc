@@ -46,7 +46,7 @@ export function mapTeamSummary(team: Team): TeamSummaryResponse {
 export function mapPlayer(player: Player, options?: { includePhotos?: boolean }): PlayerResponse {
   const photos = options?.includePhotos ? collectionItems<PlayerPhoto>(player.photos) : [];
 
-  return {
+  const response: PlayerResponse = {
     id: player.id,
     name: player.name,
     slug: player.slug,
@@ -57,8 +57,11 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     imageUrl: player.imageUrl,
     role: player.role,
     team: player.team ? mapTeamSummary(player.team) : null,
-    ...(options?.includePhotos ? { photos: photos.map((photo) => photo.url) } : {}),
   };
+  if (options?.includePhotos) {
+    response.photos = photos.map((photo) => photo.url);
+  }
+  return response;
 }
 
 export function mapTeam(team: Team): TeamResponse {

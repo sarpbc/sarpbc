@@ -1,16 +1,22 @@
 // MikroORM v7 is ESM-only; Jest runs in CJS. Mock ORM modules so unit tests can load
 // entity files and Nest modules without native ESM interop or a live database.
-function createPropertyBuilder() {
-  const builder: Record<string | symbol, unknown> = {};
-  const proxy = new Proxy(builder, {
-    get(target, property) {
-      if (property === "$type") {
-        return () => proxy;
-      }
+interface MikroCollectionOwner {}
+interface MikroEntityManager {}
+interface MikroDecoratorTarget {}
 
-      return () => proxy;
+function createPropertyBuilder() {
+  const proxy = new Proxy(
+    {},
+    {
+      get(_target, property) {
+        if (property === "$type") {
+          return () => proxy;
+        }
+
+        return () => proxy;
+      },
     },
-  });
+  );
 
   return proxy;
 }
@@ -27,7 +33,7 @@ jest.mock("@mikro-orm/core", () => {
     Collection: class Collection<T> {
       private readonly items: T[];
 
-      constructor(_owner?: unknown, items: T[] = []) {
+      constructor(_owner?: MikroCollectionOwner, items: T[] = []) {
         this.items = [...items];
       }
 
@@ -51,7 +57,7 @@ jest.mock("@mikro-orm/core", () => {
     defineEntity: jest.fn((metadata) => metadata),
     p: propertyBuilders,
     RequestContext: {
-      create: (_em: unknown, cb: () => unknown) => cb(),
+      create: (_em: MikroEntityManager, cb: () => void) => cb(),
     },
     UnderscoreNamingStrategy: class UnderscoreNamingStrategy {
       indexName(tableName: string, columns: string[], type: string): string {
@@ -79,7 +85,7 @@ const decorator = () => () => undefined;
 jest.mock("@mikro-orm/decorators/legacy", () => ({
   CreateRequestContext: () => {
     return (
-      _target: unknown,
+      _target: MikroDecoratorTarget,
       _propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => descriptor;

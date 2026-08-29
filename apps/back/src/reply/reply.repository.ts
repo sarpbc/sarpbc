@@ -25,18 +25,17 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
       rootsOnly = false,
     } = options;
 
-    return this.find(
-      {
-        ...targetFilter(targetType, targetId, includeHidden),
-        ...(rootsOnly ? { replyTo: null } : {}),
-      },
-      {
-        populate: [...POPULATE],
-        orderBy: { createdAt: order },
-        ...(limit !== undefined ? { limit } : {}),
-        ...(offset !== undefined ? { offset } : {}),
-      },
-    );
+    const where = targetFilter(targetType, targetId, includeHidden);
+    if (rootsOnly) {
+      where.replyTo = null;
+    }
+
+    return this.find(where, {
+      populate: [...POPULATE],
+      orderBy: { createdAt: order },
+      limit,
+      offset,
+    });
   }
 
   async findById(id: string): Promise<Reply | null> {

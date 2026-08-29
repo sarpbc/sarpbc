@@ -21,13 +21,21 @@ import { sortOrderForTarget } from "./reply-target.util";
 import type { ReplyReportReason } from "./reply-report-reason";
 import { NotificationService } from "src/notification/notification.service";
 import { sanitizePlainText } from "src/common/html/sanitize-user-html";
+import * as z from "zod";
 
-function isForeignKeyViolation(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) {
+const ForeignKeyViolationSchema = z.object({
+  name: z.string().optional(),
+  code: z.string().optional(),
+});
+
+function isForeignKeyViolation(cause: unknown): boolean {
+  const parsed = ForeignKeyViolationSchema.safeParse(cause);
+  if (!parsed.success) {
     return false;
   }
-  const candidate = error as { name?: string; code?: string };
-  return candidate.name === "ForeignKeyConstraintViolationException" || candidate.code === "23503";
+  return (
+    parsed.data.name === "ForeignKeyConstraintViolationException" || parsed.data.code === "23503"
+  );
 }
 
 @Injectable()
@@ -257,13 +265,13 @@ export class ReplyService {
     }
   }
 
-  private rethrowDeleteConstraint(error: unknown): never {
-    if (isForeignKeyViolation(error)) {
+  private rethrowDeleteConstraint(cause: unknown): never {
+    if (isForeignKeyViolation(cause)) {
       throw new ConflictException(
         "This comment could not be deleted because it is still referenced. Hide it instead.",
       );
     }
-    throw error;
+    throw cause;
   }
 
   private async deleteWithChildren(replyId: string): Promise<void> {

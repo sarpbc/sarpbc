@@ -3,7 +3,7 @@ import { getMatchParticipantScore } from "~/types/matches";
 import type { BracketLink } from "~/types/tournament";
 
 export function resolvePreviousMatchId(previousMatch: BracketLink["previousMatch"]): string {
-  return typeof previousMatch === "string" ? previousMatch : previousMatch.id;
+  return previousMatch instanceof Object ? previousMatch.id : previousMatch;
 }
 
 export function getMatchWinnerParticipantId(match: Match): string | null {

@@ -6,12 +6,12 @@ import { randomUUID } from "node:crypto";
 
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
-const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {
+const CONTENT_TYPE_EXTENSIONS = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
   "image/gif": "gif",
-};
+} as const;
 
 export interface R2UploadUrlResponse {
   uploadUrl: string;
@@ -87,9 +87,13 @@ export class R2Service {
   }
 
   private extensionForContentType(contentType: string, filename?: string): string {
-    const fromType = CONTENT_TYPE_EXTENSIONS[contentType];
-    if (fromType) {
-      return fromType;
+    if (
+      contentType === "image/jpeg" ||
+      contentType === "image/png" ||
+      contentType === "image/webp" ||
+      contentType === "image/gif"
+    ) {
+      return CONTENT_TYPE_EXTENSIONS[contentType];
     }
     if (filename) {
       const match = filename.toLowerCase().match(/\.([a-z0-9]+)$/);

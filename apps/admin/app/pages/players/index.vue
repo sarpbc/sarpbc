@@ -56,7 +56,7 @@ const { status, data, refresh } = await useLazyAsyncData(
   () => `admin-players-${page.value}`,
   async () => getAllPlayers({ limit, offset: (page.value - 1) * limit }),
   {
-    default: () => ({ players: [], total: 0 }) as { players: Player[]; total: number },
+    default: () => ({ players: [], total: 0 }),
     watch: [page],
     server: false,
   },
@@ -115,14 +115,7 @@ async function confirmCreate() {
   if (!newPlayer.value.name) return;
   isCreating.value = true;
   try {
-    const body: {
-      name: string;
-      firstName?: string;
-      lastName?: string;
-      nationality?: string;
-      birthday?: string;
-      imageUrl?: string;
-    } = { name: newPlayer.value.name };
+    const body: CreatePlayerDto = { name: newPlayer.value.name };
     if (newPlayer.value.firstName) body.firstName = newPlayer.value.firstName;
     if (newPlayer.value.lastName) body.lastName = newPlayer.value.lastName;
     if (newPlayer.value.nationality) body.nationality = newPlayer.value.nationality;
