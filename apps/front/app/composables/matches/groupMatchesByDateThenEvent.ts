@@ -9,8 +9,7 @@ export type MatchDateEventGroup = {
 };
 
 /**
- * Group upcoming list matches by local calendar day, then by tournament event.
- * Days without a beginAt go last under dateKey "__unknown__".
+ * Days without a beginAt go last under dateKey `"__unknown__"`.
  */
 export function groupMatchesByDateThenEvent(
   matches: MatchListItem[],

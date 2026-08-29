@@ -107,10 +107,6 @@ export function splitDoubleEliminationMatches(matches: Match[]): {
   return { upper, lower };
 }
 
-/**
- * Combined lower + finals grid: progression columns on the left, cross-bracket finals
- * on the right (up to 5 columns total, Liquipedia-like placement).
- */
 export function buildDoubleEliminationCombinedLayout(
   lowerMatches: Match[],
   upperIds: Set<string>,
@@ -201,10 +197,6 @@ export function buildDoubleEliminationCombinedLayout(
   return finalizeSectionLayout(lowerMatches, layoutMatches, maxColumn);
 }
 
-/**
- * Single double-elim grid: lower/finals progression plus upper matches aligned above
- * the lower rounds they feed (Liquipedia-style placement).
- */
 export function buildUnifiedDoubleEliminationLayout(
   upperMatches: Match[],
   lowerMatches: Match[],

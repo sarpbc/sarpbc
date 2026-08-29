@@ -5,10 +5,6 @@ import { STAFF_PERMISSIONS_KEY } from "./decorator/require-permissions.decorator
 import { StaffPermission } from "./domain/staff-access";
 import { UserService } from "./user.service";
 
-/**
- * Requires any of the permissions set via @RequirePermissions().
- * Permissions are granted by the user's pre-configured staff role.
- */
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(

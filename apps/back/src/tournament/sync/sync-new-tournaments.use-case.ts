@@ -11,11 +11,8 @@ export interface SyncNewTournamentsResult {
 }
 
 /**
- * Discovers tournaments missing from the local DB (past/upcoming/running),
- * syncs their details/matches, then runs the incremental additions feed.
- *
- * Additions alone are not enough: PandaScore often omits tournament creations
- * from the videogame-filtered feed, so a reconcile pass is required.
+ * PandaScore often omits tournament creations from the videogame-filtered
+ * additions feed, so a full reconcile pass is required first.
  */
 @Injectable()
 export class SyncNewTournamentsUseCase {

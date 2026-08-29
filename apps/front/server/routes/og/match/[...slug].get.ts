@@ -2,9 +2,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { buildMatchOgSvg, fetchMatchDetailForOg } from "../../../utils/match-og";
 
 /**
- * Serves match Open Graph images.
- * - GET /og/match/:id.png → PNG card
- * - GET /og/match/:id.svg → 301 → .png (legacy crawler URLs)
+ * GET /og/match/:id.svg → 301 to .png (legacy crawler URLs).
  */
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname;

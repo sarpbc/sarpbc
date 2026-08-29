@@ -19,9 +19,6 @@ export function isActiveRosterPlayer(player: { role?: string | null }): boolean 
   return !isTeamStaffRole(player.role);
 }
 
-/**
- * Active lineup for a team page: exclude coaches/staff, then cap at 3.
- */
 export function selectActiveRosterPlayers<T extends { role?: string | null }>(
   players: T[],
   limit: number = ACTIVE_ROSTER_LIMIT,

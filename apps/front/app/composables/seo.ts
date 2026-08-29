@@ -1,16 +1,3 @@
-/**
- * SEO composable for setting page-specific meta tags, canonical URLs, and alternate links
- *
- * @example
- * // In a page component:
- * const { setPageSeo } = useSarpbcSeo();
- * setPageSeo({
- *   title: "Player Name | sarpbc.org",
- *   description: "View player statistics and match history",
- *   image: "https://sarpbc.org/custom-image.png"
- * });
- */
-
 import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
@@ -66,9 +53,6 @@ export const useSarpbcSeo = () => {
     return undefined;
   };
 
-  /**
-   * Set page-specific SEO meta tags, canonical URL, and alternate links
-   */
   const setPageSeo = (opts?: {
     title?: string;
     description?: string;
@@ -83,11 +67,10 @@ export const useSarpbcSeo = () => {
     const noIndex = opts?.noIndex ?? false;
     const twitterCard = opts?.twitterCard ?? "summary_large_image";
 
-    // Get canonical URL for og:url (remove /fr prefix)
+    // Canonicals are unprefixed; `/fr` is the locale prefix, not part of the path.
     const cleanPath = route.path.replace(/^\/fr/, "");
     const canonicalUrl = `${baseUrl}${cleanPath}`;
 
-    // Build alternate language links
     const availableLocales = locales.value as Array<{
       code: string;
       language: string;
@@ -99,7 +82,6 @@ export const useSarpbcSeo = () => {
       href: loc.code === "en" ? `${baseUrl}${cleanPath}` : `${baseUrl}/${loc.code}${cleanPath}`,
     }));
 
-    // Add x-default for English
     alternateLinks.push({
       rel: "alternate" as const,
       hreflang: "x-default",
@@ -123,7 +105,6 @@ export const useSarpbcSeo = () => {
       link: pageLinks,
     });
 
-    // Set SEO meta tags
     useSeoMeta({
       title,
       ogTitle: title,
@@ -144,9 +125,6 @@ export const useSarpbcSeo = () => {
     });
   };
 
-  /**
-   * Get current canonical URL
-   */
   const getCanonicalUrl = () => {
     const cleanPath = route.path.replace(/^\/fr/, "");
     return `${baseUrl}${cleanPath}`;

@@ -2,7 +2,7 @@ import type { StaffPermission } from "~/types/user";
 
 export { isStaffUser, hasPermission, canModerateComments } from "@sarpbc/utils";
 
-/** Map admin SPA path prefixes to required permissions. Home is staff-only. */
+/** Home (`/`) is staff-only — any staff role, no specific permission. */
 export function permissionForAdminPath(path: string): StaffPermission | "staff" | null {
   const normalized = path.replace(/\/$/, "") || "/";
   const withoutLocale = normalized.replace(/^\/fr(?=\/|$)/, "") || "/";

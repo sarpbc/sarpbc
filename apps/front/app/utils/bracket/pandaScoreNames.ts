@@ -6,8 +6,7 @@ export type BracketRoundParse = {
 };
 
 /**
- * Parses PandaScore-style match names into bracket section and optional grid column.
- * Replaces separate section/column heuristics with one taxonomy.
+ * PandaScore match names encode section and column when feeder links are omitted.
  */
 export function parseBracketRoundFromName(name: string | undefined): BracketRoundParse | null {
   const normalized = name?.trim().toLowerCase() ?? "";

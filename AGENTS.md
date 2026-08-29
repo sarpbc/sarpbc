@@ -102,6 +102,7 @@ Each skill contains the authoritative guidance for its domain.
 - Avoid unrelated refactors.
 - Remove dead code instead of leaving unused paths.
 - Keep implementations simple.
+- Comments explain edge cases only (traps, invariants, third-party quirks). Code already says what it does; if a comment is required to understand the code, rename or simplify instead.
 
 ---
 

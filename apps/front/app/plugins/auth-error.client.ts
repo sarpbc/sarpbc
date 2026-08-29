@@ -1,6 +1,4 @@
 /**
- * Surfaces OAuth / auth redirect errors from `?authError=` (set by Nest Google callback).
- *
  * Do not call `useI18n()` here — vue-i18n requires a component setup instance.
  * Use `nuxtApp.$i18n` from `@nuxtjs/i18n` instead.
  */

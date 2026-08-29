@@ -91,8 +91,6 @@ export class PlayerController {
     await this.playerService.delete(id);
   }
 
-  // --- Contract endpoints ---
-
   @Get(":id/contract")
   async getContracts(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
@@ -141,8 +139,6 @@ export class PlayerController {
     return { contracts };
   }
 
-  // --- Trophy endpoints ---
-
   @Get(":id/trophies")
   async getTrophies(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
@@ -159,8 +155,6 @@ export class PlayerController {
     return { awards };
   }
 
-  // --- Match endpoints ---
-
   @Get(":id/matches")
   async getMatches(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
@@ -170,8 +164,6 @@ export class PlayerController {
     const matches = await this.matchService.getMatchesByPlayer(id);
     return { matches };
   }
-
-  // --- Photo endpoints ---
 
   @Get(":id/photo")
   async getPhotos(@Param("id") id: string) {

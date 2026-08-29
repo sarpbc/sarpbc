@@ -58,9 +58,6 @@ export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
   };
 }
 
-/**
- * Serialize an entity tag to markdown/MDC inline syntax.
- */
 export function serializeNewsEntityTag(input: {
   kind: NewsEntityTagKind;
   slug: string;
