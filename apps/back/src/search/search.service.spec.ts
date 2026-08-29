@@ -12,9 +12,9 @@ describe("SearchService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SearchService(
-      playerService as unknown as PlayerService,
-      teamService as unknown as TeamService,
-      tournamentService as unknown as TournamentService,
+      playerService as PlayerService,
+      teamService as TeamService,
+      tournamentService as TournamentService,
     );
   });
 

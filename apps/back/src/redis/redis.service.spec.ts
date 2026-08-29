@@ -26,7 +26,7 @@ describe("RedisService", () => {
             return undefined;
         }
       }),
-    } as unknown as ConfigService);
+    } as ConfigService);
     jest.clearAllMocks();
     service.onModuleInit();
   });

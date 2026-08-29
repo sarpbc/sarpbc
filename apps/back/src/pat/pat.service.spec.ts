@@ -23,8 +23,8 @@ describe("PatService", () => {
   beforeEach(() => {
     service = new PatService(
       tokenRepository as never,
-      userService as unknown as UserService,
-      em as unknown as EntityManager,
+      userService as UserService,
+      em as EntityManager,
     );
     jest.clearAllMocks();
     em.persist.mockReturnValue(em);

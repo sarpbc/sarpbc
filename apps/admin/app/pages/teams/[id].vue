@@ -63,11 +63,7 @@ async function saveTeam() {
   if (!teamForm.value.name) return;
   isSavingTeam.value = true;
   try {
-    const body: {
-      name: string;
-      location?: string;
-      imageUrl?: string;
-    } = { name: teamForm.value.name };
+    const body: UpdateTeamDto = { name: teamForm.value.name };
     if (teamForm.value.location) body.location = teamForm.value.location;
     if (teamForm.value.imageUrl) body.imageUrl = teamForm.value.imageUrl;
     const updated = await updateTeam(teamId, body);

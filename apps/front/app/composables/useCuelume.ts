@@ -17,14 +17,14 @@ export const cuelumePressClass =
 let initialized = false;
 
 function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") {
+  if (!import.meta.client) {
     return false;
   }
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 export function initCuelume(root?: ParentNode): void {
-  if (initialized || typeof window === "undefined") {
+  if (initialized || !import.meta.client) {
     return;
   }
 

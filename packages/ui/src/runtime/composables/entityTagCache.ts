@@ -6,9 +6,9 @@ export function fetchWithEntityTagCache<T>(key: string, fetcher: () => Promise<T
     return existing as Promise<T>;
   }
 
-  const pending = fetcher().catch((error: unknown) => {
+  const pending = fetcher().catch((cause) => {
     cache.delete(key);
-    throw error;
+    throw cause;
   });
   cache.set(key, pending);
   return pending;

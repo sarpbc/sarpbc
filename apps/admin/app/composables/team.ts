@@ -1,6 +1,25 @@
 import type { ContractRole, TeamContract } from "~/types/contract";
 import type { Team } from "~/types/team";
 
+export type CreateTeamDto = {
+  name: string;
+  location?: string;
+  imageUrl?: string;
+};
+
+export type UpdateTeamDto = {
+  name?: string;
+  location?: string;
+  imageUrl?: string;
+};
+
+type TeamListParams = {
+  limit: number;
+  offset?: number;
+  start?: string;
+  name?: string;
+};
+
 export async function getAllTeams(query?: {
   limit?: number;
   search?: string;
@@ -8,7 +27,7 @@ export async function getAllTeams(query?: {
   start?: string;
 }): Promise<{ teams: Team[]; total: number }> {
   try {
-    const params: Record<string, string | number | undefined> = {
+    const params: TeamListParams = {
       limit: query?.limit ?? 50,
     };
     if (query?.offset && query.offset > 0) params.offset = query.offset;
@@ -39,11 +58,7 @@ export async function getTeamById(id: string): Promise<Team | null> {
   }
 }
 
-export async function createTeam(body: {
-  name: string;
-  location?: string;
-  imageUrl?: string;
-}): Promise<Team | null> {
+export async function createTeam(body: CreateTeamDto): Promise<Team | null> {
   try {
     const res = await apiFetch<{ team?: Team }>("/team", {
       method: "POST",
@@ -56,14 +71,7 @@ export async function createTeam(body: {
   }
 }
 
-export async function updateTeam(
-  id: string,
-  body: {
-    name?: string;
-    location?: string;
-    imageUrl?: string;
-  },
-): Promise<Team | null> {
+export async function updateTeam(id: string, body: UpdateTeamDto): Promise<Team | null> {
   try {
     const res = await apiFetch<{ team?: Team }>(`/team/${id}`, {
       method: "PATCH",

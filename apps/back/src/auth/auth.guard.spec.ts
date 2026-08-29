@@ -3,8 +3,19 @@ import { UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ExecutionContext } from "@nestjs/common";
+import { UserToken } from "src/common/types/usertoken.interface";
 import { UserService } from "src/user/user.service";
 import { AuthGuard } from "./auth.guard";
+
+interface AuthGuardTestCookies {
+  access_token?: string;
+  refresh_token?: string;
+}
+
+interface AuthGuardTestRequest {
+  cookies?: AuthGuardTestCookies;
+  user?: UserToken;
+}
 
 describe("AuthGuard", () => {
   let guard: AuthGuard;
@@ -45,7 +56,7 @@ describe("AuthGuard", () => {
     jwtService.signAsync.mockResolvedValue("rotated-token");
   });
 
-  const createContext = (cookies?: Record<string, string>): ExecutionContext =>
+  const createContext = (cookies?: AuthGuardTestCookies): ExecutionContext =>
     ({
       switchToHttp: () => ({
         getRequest: () => ({ cookies }),
@@ -60,7 +71,7 @@ describe("AuthGuard", () => {
   it("returns true and attaches user from DB when token is valid", async () => {
     jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "access" });
     userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-    const request: { cookies: Record<string, string>; user?: unknown } = {
+    const request: AuthGuardTestRequest = {
       cookies: { access_token: "valid-token" },
     };
     const context = {
@@ -77,7 +88,7 @@ describe("AuthGuard", () => {
   it("attaches current DB email when JWT email is stale", async () => {
     jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "old@b.com", typ: "access" });
     userService.findById.mockResolvedValue({ id: "user-1", email: "new@b.com" });
-    const request: { cookies: Record<string, string>; user?: unknown } = {
+    const request: AuthGuardTestRequest = {
       cookies: { access_token: "valid-token" },
     };
     const context = {
@@ -102,7 +113,7 @@ describe("AuthGuard", () => {
   it("rotates cookies from a valid refresh token when access is missing", async () => {
     jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "refresh" });
     userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-    const request: { cookies: Record<string, string>; user?: unknown } = {
+    const request: AuthGuardTestRequest = {
       cookies: { refresh_token: "refresh-token" },
     };
     const context = {

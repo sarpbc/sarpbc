@@ -18,8 +18,8 @@ describe("RedisHealthIndicator", () => {
     jest.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
     indicator = new RedisHealthIndicator(
-      redis as unknown as RedisService,
-      healthIndicatorService as unknown as HealthIndicatorService,
+      redis as RedisService,
+      healthIndicatorService as HealthIndicatorService,
     );
   });
 

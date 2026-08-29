@@ -40,6 +40,13 @@ interface GetPlayersResponseDto {
   count?: number;
 }
 
+interface PlayerListParams {
+  limit: number;
+  offset?: number;
+  start?: string;
+  name?: string;
+}
+
 interface PlayerMutationResponseDto {
   player: Player;
 }
@@ -78,9 +85,9 @@ export function usePlayer() {
   }
 
   function getAllPlayers(query?: MaybeRef<GetAllPlayersQueryDto | undefined>) {
-    const params = computed<Record<string, string | number | undefined>>(() => {
+    const params = computed(() => {
       const q = toValue(query);
-      const value: Record<string, string | number | undefined> = {
+      const value: PlayerListParams = {
         limit: q?.limit ?? 50,
       };
       if (q?.offset && q.offset > 0) value.offset = q.offset;

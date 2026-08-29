@@ -1,3 +1,22 @@
+const CURRENCY_CODES = {
+  "United State Dollar": "USD",
+  "United States Dollar": "USD",
+  "US Dollar": "USD",
+  Dollar: "USD",
+  Euro: "EUR",
+  "British Pound": "GBP",
+  Pound: "GBP",
+  "Japanese Yen": "JPY",
+  Yen: "JPY",
+} as const;
+
+function currencyCodeFor(name: string): string {
+  for (const [label, code] of Object.entries(CURRENCY_CODES)) {
+    if (label === name) return code;
+  }
+  return "USD";
+}
+
 export function formatPrizepool(prizepool: string | undefined | null): string {
   if (!prizepool) return "";
 
@@ -7,20 +26,7 @@ export function formatPrizepool(prizepool: string | undefined | null): string {
   const amount = parseFloat(parts[0] || "0");
   if (isNaN(amount)) return prizepool;
 
-  const currencyMap: Record<string, string> = {
-    "United State Dollar": "USD",
-    "United States Dollar": "USD",
-    "US Dollar": "USD",
-    Dollar: "USD",
-    Euro: "EUR",
-    "British Pound": "GBP",
-    Pound: "GBP",
-    "Japanese Yen": "JPY",
-    Yen: "JPY",
-  };
-
-  const currencyString = parts.slice(1).join(" ");
-  const currencyCode = currencyMap[currencyString] || "USD";
+  const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
 
   try {
     return new Intl.NumberFormat("en-US", {
@@ -45,20 +51,7 @@ export function createCurrencyFormatter(locale: string = "en-US") {
       const amount = parseFloat(parts[0] || "0");
       if (isNaN(amount)) return prizepool;
 
-      const currencyMap: Record<string, string> = {
-        "United State Dollar": "USD",
-        "United States Dollar": "USD",
-        "US Dollar": "USD",
-        Dollar: "USD",
-        Euro: "EUR",
-        "British Pound": "GBP",
-        Pound: "GBP",
-        "Japanese Yen": "JPY",
-        Yen: "JPY",
-      };
-
-      const currencyString = parts.slice(1).join(" ");
-      const currencyCode = currencyMap[currencyString] || "USD";
+      const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
 
       try {
         return new Intl.NumberFormat(locale, {

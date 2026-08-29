@@ -22,15 +22,17 @@ import type { BracketLayoutMatch, BracketSectionLayout } from "./types";
 const MAX_DOUBLE_ELIM_COMBINED_COLUMNS = 5;
 const UPPER_TO_LOWER_ROW_GAP = 2;
 
+export interface DoubleEliminationSplit {
+  upper: Match[];
+  lower: Match[];
+}
+
 /**
  * PandaScore double-elim split: upper bracket stays isolated; lower progression and
  * cross-bracket finals share the combined grid. Match names are used when PandaScore
  * omits feeder links (common for lower round 1).
  */
-export function splitDoubleEliminationMatches(matches: Match[]): {
-  upper: Match[];
-  lower: Match[];
-} {
+export function splitDoubleEliminationMatches(matches: Match[]): DoubleEliminationSplit {
   const matchIds = new Set(matches.map((match) => match.id));
   const matchById = new Map(matches.map((match) => [match.id, match]));
   const lowerIds = new Set<string>();

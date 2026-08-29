@@ -10,7 +10,7 @@ export interface PlayerTrophyListItem {
 }
 
 export function toPlayerTrophyListItem(tournament: Tournament): PlayerTrophyListItem {
-  const league = typeof tournament.league === "object" ? tournament.league : undefined;
+  const league = tournament.league instanceof Object ? tournament.league : undefined;
 
   return {
     id: tournament.id,

@@ -19,10 +19,10 @@ describe("TournamentController.findOne", () => {
 
   beforeEach(() => {
     controller = new TournamentController(
-      tournamentService as unknown as TournamentService,
+      tournamentService as TournamentService,
       {} as ManualTournamentService,
       {} as MatchService,
-      redisService as unknown as RedisService,
+      redisService as RedisService,
       {} as PlayerAwardService,
     );
     jest.clearAllMocks();

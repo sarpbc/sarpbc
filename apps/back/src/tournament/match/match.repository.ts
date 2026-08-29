@@ -2,6 +2,11 @@ import { EntityRepository, FilterQuery } from "@mikro-orm/core";
 import { Match } from "../tournament.entities";
 import type { MatchListQueryOptions, MatchListScopeFilters } from "./match-list-filters";
 
+interface MatchTournamentScopeFilter {
+  id?: string;
+  league?: { id: string };
+}
+
 const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;
 
 const DETAIL_POPULATE = [
@@ -253,20 +258,20 @@ export class MatchRepository extends EntityRepository<Match> {
     }
 
     return {
-      ...(base as Record<string, unknown>),
+      ...base,
       tournament: tournamentFilter,
     } as FilterQuery<Match>;
   }
 
   private buildTournamentFilter(
     scope: MatchListScopeFilters,
-  ): { id?: string; league?: { id: string } } | undefined {
+  ): MatchTournamentScopeFilter | undefined {
     const { tournamentId, leagueId } = scope;
     if (!tournamentId && !leagueId) {
       return undefined;
     }
 
-    const filter: { id?: string; league?: { id: string } } = {};
+    const filter: MatchTournamentScopeFilter = {};
     if (tournamentId) {
       filter.id = tournamentId;
     }

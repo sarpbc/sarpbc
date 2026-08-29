@@ -17,6 +17,13 @@ export async function getTeamFromSlug(slug: string): Promise<Team | null> {
   }
 }
 
+interface TeamListParams {
+  limit: number;
+  offset?: number;
+  start?: string;
+  name?: string;
+}
+
 export async function getAllTeams(query?: {
   limit?: number;
   search?: string;
@@ -25,7 +32,7 @@ export async function getAllTeams(query?: {
 }): Promise<{ teams: Team[]; total: number }> {
   const config = useRuntimeConfig();
   try {
-    const params: Record<string, string | number | undefined> = {
+    const params: TeamListParams = {
       limit: query?.limit || 50,
     };
 

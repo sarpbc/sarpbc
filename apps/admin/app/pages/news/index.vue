@@ -78,7 +78,7 @@ const { status, data, refresh } = await useLazyAsyncData(
   () => `admin-news-articles-${page.value}-search`,
   async () => getNewsArticlesAdmin(page.value * limit, limit),
   {
-    default: () => ({ data: [], total: 0 }) as { data: NewsArticle[]; total: number },
+    default: () => ({ data: [], total: 0 }),
     watch: [page],
     server: false,
   },

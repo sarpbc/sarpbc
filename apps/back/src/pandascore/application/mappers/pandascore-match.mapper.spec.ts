@@ -65,7 +65,7 @@ describe("PandascoreMatchMapper", () => {
           raw_url: "https://www.twitch.tv/rocketleague",
         },
       ],
-    } as unknown as MatchDto;
+    } as MatchDto;
 
     expect(PandascoreMatchMapper.toUpsertCommand(dto).officialStreams).toEqual([
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },

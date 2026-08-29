@@ -6,8 +6,17 @@ import { TournamentDto } from "./dto/tournament.dto";
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
+export interface PandascoreQueryParams {
+  page?: string;
+  per_page?: string;
+  sort?: string;
+  since?: string;
+  type?: PandascoreAdditionType[];
+  videogame?: string[];
+}
+
 export interface PandascoreRequestOptions {
-  params?: Record<string, string | string[] | undefined>;
+  params?: PandascoreQueryParams;
   paginate?: boolean;
   perPage?: number;
   rateLimitMs?: number;
@@ -63,7 +72,7 @@ export class PandascoreApiClient {
   }
 
   async listAdditions(params: ListAdditionsClientParams = {}): Promise<PandascoreAdditionsListDto> {
-    const query: Record<string, string | string[] | undefined> = {
+    const query: PandascoreQueryParams = {
       page: String(params.page ?? 1),
       per_page: String(params.perPage ?? 100),
       sort: params.sort ?? "modified_at",

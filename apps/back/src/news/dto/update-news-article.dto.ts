@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
 import { emptyToNull } from "./empty-to-null";
+import { trimIncomingString } from "src/common/dto/trim-incoming-string";
 
 export class UpdateNewsArticleDto {
   @IsOptional()
@@ -31,13 +32,13 @@ export class UpdateNewsArticleDto {
   @ValidateIf((_, value) => value !== null)
   @IsUrl({}, { message: "Enter a valid cover image URL." })
   @MaxLength(255)
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(trimIncomingString)
   imageUrl?: string | null;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: "Enter a slug, or leave the field unchanged." })
   @MaxLength(255)
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(trimIncomingString)
   slug?: string;
 }

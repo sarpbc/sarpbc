@@ -1,6 +1,12 @@
 import { EntityRepository } from "@mikro-orm/core";
 import { ReplyNotification } from "./reply-notification.entity";
 
+interface ReplyNotificationReadFilter {
+  recipient: { id: string };
+  readAt: null;
+  id?: { $in: string[] };
+}
+
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
   async save(notification: ReplyNotification): Promise<void> {
     await this.em.persist(notification).flush();
@@ -25,11 +31,13 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
   }
 
   async markRead(recipientId: string, ids?: string[]): Promise<number> {
-    const where = {
+    const where: ReplyNotificationReadFilter = {
       recipient: { id: recipientId },
       readAt: null,
-      ...(ids?.length ? { id: { $in: ids } } : {}),
     };
+    if (ids?.length) {
+      where.id = { $in: ids };
+    }
 
     const notifications = await this.find(where);
     const now = new Date();

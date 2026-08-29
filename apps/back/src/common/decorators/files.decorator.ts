@@ -1,13 +1,14 @@
-import type { Storage } from "../../global";
+import type { FastifyRequest } from "fastify";
 
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { FastifyRequest } from "fastify";
+
+type FilesDecoratorData = undefined;
 
 export const Files = createParamDecorator(
   async (
-    _data: unknown,
+    _data: FilesDecoratorData,
     ctx: ExecutionContext,
-  ): Promise<null | Record<string, Storage.MultipartFile[]>> => {
+  ): Promise<null | FastifyRequest["storedFiles"]> => {
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
     return req.storedFiles;
   },

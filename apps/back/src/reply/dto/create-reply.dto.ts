@@ -11,13 +11,14 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from "class-validator";
+import { trimIncomingString } from "src/common/dto/trim-incoming-string";
 
 @ValidatorConstraint({ name: "exactlyOneReplyTarget", async: false })
 export class ExactlyOneReplyTargetConstraint implements ValidatorConstraintInterface {
-  validate(_: unknown, args: ValidationArguments): boolean {
+  validate(_value: string, args: ValidationArguments): boolean {
     const dto = args.object as CreateReplyDto;
     const targets = [dto.postId, dto.newsArticleId, dto.matchId].filter(
-      (id): id is string => typeof id === "string" && id.length > 0,
+      (id) => id !== undefined && id !== null && id !== "",
     );
     return targets.length === 1;
   }
@@ -28,7 +29,7 @@ export class ExactlyOneReplyTargetConstraint implements ValidatorConstraintInter
 }
 
 export class CreateReplyDto {
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(trimIncomingString)
   @IsNotEmpty({ message: "Comment cannot be empty. Write something before posting." })
   @IsString()
   @MaxLength(2048, {

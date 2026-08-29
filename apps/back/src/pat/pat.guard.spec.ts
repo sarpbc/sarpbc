@@ -1,7 +1,16 @@
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { PatAuthGuard } from "./pat.guard";
-import { PatService } from "./pat.service";
+import { PatService, PatUser } from "./pat.service";
+
+interface PatGuardTestHeaders {
+  authorization?: string;
+}
+
+interface PatGuardTestRequest {
+  headers: PatGuardTestHeaders;
+  user?: PatUser;
+}
 
 describe("PatAuthGuard", () => {
   let guard: PatAuthGuard;
@@ -18,8 +27,8 @@ describe("PatAuthGuard", () => {
     jest.clearAllMocks();
   });
 
-  const createContext = (headers: Record<string, string> = {}): ExecutionContext => {
-    const request: { headers: Record<string, string>; user?: unknown } = { headers };
+  const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
+    const request: PatGuardTestRequest = { headers };
     return {
       switchToHttp: () => ({ getRequest: () => request }),
     } as ExecutionContext;
@@ -31,7 +40,7 @@ describe("PatAuthGuard", () => {
 
   it("attaches the resolved user for a valid bearer token", async () => {
     patService.resolveUser.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-    const request: { headers: Record<string, string>; user?: unknown } = {
+    const request: PatGuardTestRequest = {
       headers: { authorization: "Bearer sarpbc_pat_valid" },
     };
     const context = {

@@ -11,10 +11,7 @@ import {
   ValidateIf,
 } from "class-validator";
 import { Transform } from "class-transformer";
-
-function trimString({ value }: { value: unknown }): unknown {
-  return typeof value === "string" ? value.trim() : value;
-}
+import { trimIncomingString } from "src/common/dto/trim-incoming-string";
 
 /** Shared write fields for create + update (update adds null clears). */
 export class TournamentManualWriteDto {
@@ -22,13 +19,13 @@ export class TournamentManualWriteDto {
   @IsString()
   @IsNotEmpty({ message: "Enter a slug, or leave empty to generate one from the name." })
   @MaxLength(255)
-  @Transform(trimString)
+  @Transform(trimIncomingString)
   slug?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(50)
-  @Transform(trimString)
+  @Transform(trimIncomingString)
   tier?: string | null;
 
   @IsOptional()
@@ -50,7 +47,7 @@ export class TournamentManualWriteDto {
   @ValidateIf((_, value) => value !== null && value !== "")
   @IsUrl({}, { message: "Enter a valid image URL." })
   @MaxLength(255)
-  @Transform(trimString)
+  @Transform(trimIncomingString)
   imageUrl?: string | null;
 
   @IsOptional()
@@ -64,7 +61,7 @@ export class CreateTournamentDto extends TournamentManualWriteDto {
   @IsString()
   @IsNotEmpty({ message: "Enter a tournament name." })
   @MaxLength(255)
-  @Transform(trimString)
+  @Transform(trimIncomingString)
   name!: string;
 }
 
@@ -73,6 +70,6 @@ export class UpdateTournamentDto extends TournamentManualWriteDto {
   @IsString()
   @IsNotEmpty({ message: "Enter a tournament name." })
   @MaxLength(255)
-  @Transform(trimString)
+  @Transform(trimIncomingString)
   name?: string;
 }

@@ -1,3 +1,4 @@
+import * as z from "zod";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
 export const AIR_RIDDLE_STORAGE_KEY = "sarpbc:air-riddle";
@@ -17,7 +18,25 @@ export interface AirRiddleStoredState {
   answer?: string;
 }
 
-const RESULT_VALUES = new Set<string>(Object.values(AirRiddleResultEnum));
+const AIR_RIDDLE_RESULTS = [
+  AirRiddleResultEnum.CORRECT,
+  AirRiddleResultEnum.MISPLACED,
+  AirRiddleResultEnum.INCORRECT,
+] as const;
+
+const airRiddleAttemptSchema = z.object({
+  letters: z.array(z.string()),
+  results: z.array(z.enum(AIR_RIDDLE_RESULTS)).optional(),
+});
+
+const airRiddleStoredStateSchema = z.object({
+  date: z.string(),
+  targetLength: z.number(),
+  attempts: z.array(airRiddleAttemptSchema),
+  isWon: z.boolean(),
+  isGameOver: z.boolean(),
+  answer: z.string().optional(),
+});
 
 /** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
 export function getAirRiddleDateKey(now = new Date()): string {
@@ -29,35 +48,6 @@ export function getAirRiddleDateKey(now = new Date()): string {
   }).format(now);
 }
 
-function isValidResult(value: unknown): value is AirRiddleResultEnum {
-  return typeof value === "string" && RESULT_VALUES.has(value);
-}
-
-function isValidAttempt(value: unknown, targetLength: number): value is AirRiddleStoredAttempt {
-  if (value === null || typeof value !== "object") {
-    return false;
-  }
-
-  const attempt = value as AirRiddleStoredAttempt;
-  if (
-    !Array.isArray(attempt.letters) ||
-    attempt.letters.length !== targetLength ||
-    !attempt.letters.every((letter) => typeof letter === "string")
-  ) {
-    return false;
-  }
-
-  if (attempt.results === undefined) {
-    return true;
-  }
-
-  return (
-    Array.isArray(attempt.results) &&
-    attempt.results.length === targetLength &&
-    attempt.results.every(isValidResult)
-  );
-}
-
 export function parseAirRiddleStoredState(
   raw: string | null,
   today: string,
@@ -67,43 +57,27 @@ export function parseAirRiddleStoredState(
   }
 
   try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed === null || typeof parsed !== "object") {
+    const parsed = airRiddleStoredStateSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) {
       return null;
     }
 
-    const state = parsed as Partial<AirRiddleStoredState>;
-    if (
-      state.date !== today ||
-      typeof state.targetLength !== "number" ||
-      state.targetLength <= 0 ||
-      !Array.isArray(state.attempts) ||
-      typeof state.isWon !== "boolean" ||
-      typeof state.isGameOver !== "boolean"
-    ) {
+    const state = parsed.data;
+    if (state.date !== today || state.targetLength <= 0 || state.attempts.length > 6) {
       return null;
     }
 
-    if (state.attempts.length > 6) {
+    const attemptsMatchLength = state.attempts.every((attempt) => {
+      if (attempt.letters.length !== state.targetLength) {
+        return false;
+      }
+      return attempt.results === undefined || attempt.results.length === state.targetLength;
+    });
+    if (!attemptsMatchLength) {
       return null;
     }
 
-    if (!state.attempts.every((attempt) => isValidAttempt(attempt, state.targetLength!))) {
-      return null;
-    }
-
-    if (state.answer !== undefined && typeof state.answer !== "string") {
-      return null;
-    }
-
-    return {
-      date: state.date,
-      targetLength: state.targetLength,
-      attempts: state.attempts,
-      isWon: state.isWon,
-      isGameOver: state.isGameOver,
-      answer: state.answer,
-    };
+    return state;
   } catch {
     return null;
   }

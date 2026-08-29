@@ -19,8 +19,8 @@ describe("PostgresHealthIndicator", () => {
     jest.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
     indicator = new PostgresHealthIndicator(
-      em as unknown as EntityManager,
-      healthIndicatorService as unknown as HealthIndicatorService,
+      em as EntityManager,
+      healthIndicatorService as HealthIndicatorService,
     );
   });
 

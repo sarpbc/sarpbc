@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
 import { emptyToNull } from "./empty-to-null";
+import { trimIncomingString } from "src/common/dto/trim-incoming-string";
 
 export class CreateNewsArticleDto {
   @IsString()
@@ -28,13 +29,13 @@ export class CreateNewsArticleDto {
   @IsOptional()
   @IsUrl({}, { message: "Enter a valid cover image URL." })
   @MaxLength(255)
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(trimIncomingString)
   imageUrl?: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: "Enter a slug, or leave empty to generate one from the title." })
   @MaxLength(255)
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(trimIncomingString)
   slug?: string;
 }

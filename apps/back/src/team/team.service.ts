@@ -1,4 +1,5 @@
 ﻿import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import * as z from "zod";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { PlayerService } from "../player/player.service";
 import { Team } from "../player/player.entities";
@@ -47,8 +48,10 @@ export class TeamService {
     slug?: string,
     pandascoreId?: number,
   ): Promise<Team> {
-    const dto: CreateTeamDto =
-      typeof nameOrDto === "string" ? { name: nameOrDto, location, imageUrl, slug } : nameOrDto;
+    const parsedName = z.string().safeParse(nameOrDto);
+    const dto: CreateTeamDto = parsedName.success
+      ? { name: parsedName.data, location, imageUrl, slug }
+      : nameOrDto;
 
     const team = new Team();
     team.name = dto.name;
