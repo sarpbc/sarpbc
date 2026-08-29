@@ -1,6 +1,11 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { parseMatchResults } from "~/utils/parseMatchResult";
+
+const MATCH_OG_FONT_FAMILY = "Inter";
+const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
 
 function escapeXml(value: string): string {
   return value
@@ -79,7 +84,6 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
     });
   }
 
-  // Prefer fonts Resvg can resolve on typical hosts (Arial / Consolas).
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -89,13 +93,38 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect x="48" y="48" width="1104" height="534" rx="24" fill="#18181b" stroke="#27272a"/>
-  <text x="600" y="120" fill="#a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="28" text-anchor="middle">${escapeXml(tournament)}</text>
-  <text x="600" y="290" fill="#fafafa" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamAName)}</text>
-  <text x="600" y="360" fill="#3b82f6" font-family="Consolas, monospace" font-size="44" font-weight="700" text-anchor="middle">${escapeXml(centerLine)}</text>
-  <text x="600" y="430" fill="#fafafa" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamBName)}</text>
-  <text x="600" y="500" fill="#a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
-  <text x="600" y="560" fill="#71717a" font-family="Arial, Helvetica, sans-serif" font-size="22" text-anchor="middle">sarpbc.org</text>
+  <text x="600" y="120" fill="#a1a1aa" font-family="${MATCH_OG_FONT_FAMILY}" font-size="28" text-anchor="middle">${escapeXml(tournament)}</text>
+  <text x="600" y="290" fill="#fafafa" font-family="${MATCH_OG_FONT_FAMILY}" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamAName)}</text>
+  <text x="600" y="360" fill="#3b82f6" font-family="${MATCH_OG_FONT_FAMILY}" font-size="44" font-weight="700" text-anchor="middle">${escapeXml(centerLine)}</text>
+  <text x="600" y="430" fill="#fafafa" font-family="${MATCH_OG_FONT_FAMILY}" font-size="56" font-weight="700" text-anchor="middle">${escapeXml(teamBName)}</text>
+  <text x="600" y="500" fill="#a1a1aa" font-family="${MATCH_OG_FONT_FAMILY}" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
+  <text x="600" y="560" fill="#71717a" font-family="${MATCH_OG_FONT_FAMILY}" font-size="22" text-anchor="middle">sarpbc.org</text>
 </svg>`;
+}
+
+export function resolveMatchOgFontFiles(): string[] {
+  const dirs = [
+    join(process.cwd(), "public", "fonts", "og"),
+    join(process.cwd(), "apps", "front", "public", "fonts", "og"),
+  ];
+
+  for (const dir of dirs) {
+    const files = MATCH_OG_FONT_FILES.map((name) => join(dir, name));
+    if (files.every((file) => existsSync(file))) {
+      return files;
+    }
+  }
+
+  throw new Error(`Match OG fonts missing (looked in: ${dirs.join(", ")})`);
+}
+
+export function getMatchOgResvgFontOptions() {
+  return {
+    fontFiles: resolveMatchOgFontFiles(),
+    // Alpine runtime images have no system fonts; Resvg drops <text> when none resolve.
+    loadSystemFonts: false,
+    defaultFontFamily: MATCH_OG_FONT_FAMILY,
+  };
 }
 
 export function getFetchStatusCode(error: unknown): number | undefined {
