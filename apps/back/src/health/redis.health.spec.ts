@@ -1,5 +1,3 @@
-import { HealthIndicatorService } from "@nestjs/terminus";
-import { RedisService } from "../redis/redis.service";
 import { RedisHealthIndicator } from "./redis.health";
 
 describe("RedisHealthIndicator", () => {
@@ -17,10 +15,7 @@ describe("RedisHealthIndicator", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
-    indicator = new RedisHealthIndicator(
-      redis as RedisService,
-      healthIndicatorService as HealthIndicatorService,
-    );
+    indicator = new RedisHealthIndicator(redis as never, healthIndicatorService as never);
   });
 
   it("is up when ping returns PONG", async () => {

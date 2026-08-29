@@ -1,5 +1,4 @@
 import { PandascoreMatchMapper } from "./pandascore-match.mapper";
-import { MatchDto } from "../../infrastructure/dto/match.dto";
 
 describe("PandascoreMatchMapper", () => {
   it("maps match dto to upsert command", () => {
@@ -28,7 +27,7 @@ describe("PandascoreMatchMapper", () => {
       ],
       results: [{ team_id: 7, score: 4 }],
       previous_matches: [{ type: "winner", match_id: 88 }],
-    } as MatchDto;
+    } as never;
 
     const command = PandascoreMatchMapper.toUpsertCommand(dto);
 
@@ -65,7 +64,7 @@ describe("PandascoreMatchMapper", () => {
           raw_url: "https://www.twitch.tv/rocketleague",
         },
       ],
-    } as MatchDto;
+    } as never;
 
     expect(PandascoreMatchMapper.toUpsertCommand(dto).officialStreams).toEqual([
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },

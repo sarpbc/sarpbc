@@ -134,7 +134,8 @@ describe("AuthService", () => {
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
       } as const;
 
-      (google.auth.OAuth2 as jest.Mock).mockImplementation(() => {
+      const oauth2Mock: jest.Mock = google.auth.OAuth2 as never;
+      oauth2Mock.mockImplementation(() => {
         const client = {
           credentials: {} as OAuthClientCredentials,
           getToken: jest.fn(async (code: string) => {
@@ -150,7 +151,8 @@ describe("AuthService", () => {
         return client;
       });
 
-      (google.oauth2 as jest.Mock).mockReturnValue({
+      const oauth2ApiMock: jest.Mock = google.oauth2 as never;
+      oauth2ApiMock.mockReturnValue({
         userinfo: {
           get: jest.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
             const code = auth.credentials.access_token;

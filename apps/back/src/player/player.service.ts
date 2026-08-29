@@ -1,5 +1,4 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import * as z from "zod";
 import { ITeamRepository, TEAM_REPOSITORY } from "../team/domain/team.repository.interface";
 import { Player, PlayerPhoto } from "./player.entities";
 import { PlayerSearchProps } from "./interfaces/search-player-props";
@@ -62,19 +61,19 @@ export class PlayerService {
     imageUrl?: string,
     slug?: string,
   ): Promise<Player> {
-    const parsedName = z.string().safeParse(nameOrDto);
-    const dto: CreatePlayerDto = parsedName.success
-      ? {
-          name: parsedName.data,
-          teamId,
-          firstName,
-          lastName,
-          birthday,
-          nationality,
-          imageUrl,
-          slug,
-        }
-      : nameOrDto;
+    const dto: CreatePlayerDto =
+      nameOrDto instanceof Object
+        ? nameOrDto
+        : {
+            name: nameOrDto,
+            teamId,
+            firstName,
+            lastName,
+            birthday,
+            nationality,
+            imageUrl,
+            slug,
+          };
 
     const player = new Player();
     player.name = dto.name;

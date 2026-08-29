@@ -1,5 +1,4 @@
 import { RedisService } from "./redis.service";
-import { ConfigService } from "@nestjs/config";
 
 const mockRedisClient = {
   quit: jest.fn().mockResolvedValue("OK"),
@@ -26,7 +25,7 @@ describe("RedisService", () => {
             return undefined;
         }
       }),
-    } as ConfigService);
+    } as never);
     jest.clearAllMocks();
     service.onModuleInit();
   });

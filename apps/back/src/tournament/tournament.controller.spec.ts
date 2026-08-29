@@ -1,10 +1,5 @@
 import { NotFoundException } from "@nestjs/common";
-import { RedisService } from "src/redis/redis.service";
 import { TournamentController } from "./tournament.controller";
-import { TournamentService } from "./tournament.service";
-import { ManualTournamentService } from "./manual-tournament.service";
-import { MatchService } from "./match/match.service";
-import { PlayerAwardService } from "./player-award.service";
 import { Tournament } from "./tournament.entities";
 
 describe("TournamentController.findOne", () => {
@@ -19,11 +14,11 @@ describe("TournamentController.findOne", () => {
 
   beforeEach(() => {
     controller = new TournamentController(
-      tournamentService as TournamentService,
-      {} as ManualTournamentService,
-      {} as MatchService,
-      redisService as RedisService,
-      {} as PlayerAwardService,
+      tournamentService as never,
+      {} as never,
+      {} as never,
+      redisService as never,
+      {} as never,
     );
     jest.clearAllMocks();
   });

@@ -1,4 +1,4 @@
-import { EntityRepository, QueryOrder, type EntityKey, type FindOptions } from "@mikro-orm/core";
+import { EntityRepository, QueryOrder, type EntityKey } from "@mikro-orm/core";
 import { Reply } from "../forum/forum.entities";
 import { FindByTargetOptions, IReplyRepository } from "./domain/reply.repository.interface";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
@@ -30,18 +30,12 @@ export class ReplyRepository extends EntityRepository<Reply> implements IReplyRe
       where.replyTo = null;
     }
 
-    const findOptions: FindOptions<Reply> = {
+    return this.find(where, {
       populate: [...POPULATE],
       orderBy: { createdAt: order },
-    };
-    if (limit !== undefined) {
-      findOptions.limit = limit;
-    }
-    if (offset !== undefined) {
-      findOptions.offset = offset;
-    }
-
-    return this.find(where, findOptions);
+      limit,
+      offset,
+    });
   }
 
   async findById(id: string): Promise<Reply | null> {
