@@ -12,8 +12,8 @@ function hasTournamentWinner(tournament: Tournament): boolean {
   if (tournament.winnerId) return true;
   const winner = tournament.winner;
   if (winner == null) return false;
-  if (typeof winner === "string") return winner.length > 0;
-  return Boolean(winner.id);
+  if (winner instanceof Object) return Boolean(winner.id);
+  return winner.length > 0;
 }
 
 export function isPickemTournamentActive(tournament: Tournament, now = Date.now()): boolean {

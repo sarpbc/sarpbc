@@ -90,7 +90,7 @@ describe("matchToCalendarEvent", () => {
         { id: "p2", team: { name: "BDS" } },
       ],
       tournament: { id: "t1", name: "Major", league: { id: "l1", name: "RLCS" } },
-    } as unknown as Match;
+    } as Match;
 
     expect(matchToCalendarEvent(match, stamp)).toEqual({
       uid: "match-m1@sarpbc.org",

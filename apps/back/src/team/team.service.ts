@@ -48,7 +48,7 @@ export class TeamService {
     pandascoreId?: number,
   ): Promise<Team> {
     const dto: CreateTeamDto =
-      typeof nameOrDto === "string" ? { name: nameOrDto, location, imageUrl, slug } : nameOrDto;
+      nameOrDto instanceof Object ? nameOrDto : { name: nameOrDto, location, imageUrl, slug };
 
     const team = new Team();
     team.name = dto.name;

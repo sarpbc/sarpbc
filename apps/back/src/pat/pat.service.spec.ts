@@ -1,8 +1,6 @@
 import { createHash } from "node:crypto";
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
-import { EntityManager } from "@mikro-orm/postgresql";
 import { User } from "src/user/domain/user.entity";
-import { UserService } from "src/user/user.service";
 import { PersonalAccessToken } from "./domain/personal-access-token.entity";
 import { PatService } from "./pat.service";
 
@@ -21,11 +19,7 @@ describe("PatService", () => {
   };
 
   beforeEach(() => {
-    service = new PatService(
-      tokenRepository as never,
-      userService as unknown as UserService,
-      em as unknown as EntityManager,
-    );
+    service = new PatService(tokenRepository as never, userService as never, em as never);
     jest.clearAllMocks();
     em.persist.mockReturnValue(em);
     em.flush.mockResolvedValue(undefined);

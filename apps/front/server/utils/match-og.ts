@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { parseMatchResults } from "~/utils/parseMatchResult";
@@ -127,30 +128,17 @@ export function getMatchOgResvgFontOptions() {
   };
 }
 
-export function getFetchStatusCode(error: unknown): number | undefined {
-  if (!error || typeof error !== "object") {
-    return undefined;
-  }
+const fetchStatusCodeSchema = z.union([
+  z.object({ statusCode: z.number() }).transform((value) => value.statusCode),
+  z.object({ status: z.number() }).transform((value) => value.status),
+  z
+    .object({ response: z.object({ status: z.number() }) })
+    .transform((value) => value.response.status),
+]);
 
-  if ("statusCode" in error && typeof error.statusCode === "number") {
-    return error.statusCode;
-  }
-
-  if ("status" in error && typeof error.status === "number") {
-    return error.status;
-  }
-
-  if (
-    "response" in error &&
-    error.response &&
-    typeof error.response === "object" &&
-    "status" in error.response &&
-    typeof error.response.status === "number"
-  ) {
-    return error.response.status;
-  }
-
-  return undefined;
+export function getFetchStatusCode(cause: unknown): number | undefined {
+  const parsed = fetchStatusCodeSchema.safeParse(cause);
+  return parsed.success ? parsed.data : undefined;
 }
 
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
@@ -165,8 +153,8 @@ export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResp
         results: parseMatchResults(response.match.results),
       },
     };
-  } catch (error: unknown) {
-    const statusCode = getFetchStatusCode(error);
+  } catch (cause) {
+    const statusCode = getFetchStatusCode(cause);
     if (statusCode === 404) {
       throw createError({ statusCode: 404, statusMessage: "Match not found" });
     }
@@ -174,7 +162,7 @@ export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResp
     throw createError({
       statusCode: 502,
       statusMessage: "Could not load match for OG image",
-      cause: error,
+      cause,
     });
   }
 }

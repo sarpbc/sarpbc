@@ -24,7 +24,7 @@ const pending = ref(false);
 
 function safeRedirectTarget(): string {
   const raw = route.query.redirect;
-  if (typeof raw !== "string" || !raw.startsWith("/") || raw.startsWith("//")) {
+  if (Array.isArray(raw) || raw == null || !raw.startsWith("/") || raw.startsWith("//")) {
     return localePath("/");
   }
   return raw;

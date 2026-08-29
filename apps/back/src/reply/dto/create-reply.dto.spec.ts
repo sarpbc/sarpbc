@@ -2,8 +2,16 @@ import { validate } from "class-validator";
 import { plainToInstance } from "class-transformer";
 import { CreateReplyDto } from "./create-reply.dto";
 
+interface CreateReplyDtoPlain {
+  content?: string;
+  postId?: string;
+  newsArticleId?: string;
+  matchId?: string;
+  replyToId?: string;
+}
+
 describe("CreateReplyDto", () => {
-  async function validateDto(plain: Record<string, unknown>) {
+  async function validateDto(plain: CreateReplyDtoPlain) {
     const dto = plainToInstance(CreateReplyDto, plain);
     return validate(dto);
   }

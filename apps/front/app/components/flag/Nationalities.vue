@@ -17,8 +17,19 @@ const sizeClasses = {
   lg: "w-6 h-4",
 };
 
+interface StringLookup {
+  readonly [key: string]: string;
+}
+
+function lookupStringMap(map: StringLookup, key: string): string | undefined {
+  for (const [entryKey, value] of Object.entries(map)) {
+    if (entryKey === key) return value;
+  }
+  return undefined;
+}
+
 const getContinent = (countryCode: string): string => {
-  const continentMap: Record<string, string> = {
+  const continentMap = {
     // Europe
     AD: "EU",
     AL: "EU",
@@ -210,8 +221,8 @@ const getContinent = (countryCode: string): string => {
     TO: "OC",
     TV: "OC",
     VU: "OC",
-  };
-  return continentMap[countryCode.toUpperCase()] || "UNKNOWN";
+  } as const;
+  return lookupStringMap(continentMap, countryCode.toUpperCase()) ?? "UNKNOWN";
 };
 
 const flagToDisplay = computed(() => {
@@ -257,16 +268,16 @@ const flagToDisplay = computed(() => {
 
   const mostCommonContinent = Object.entries(continentCounts).sort(([, a], [, b]) => b - a)[0]?.[0];
 
-  const continentFlags: Record<string, string> = {
+  const continentFlags = {
     EU: "eu",
     NA: "us",
     SA: "br",
     AS: "cn",
     AF: "za",
     OC: "au",
-  };
+  } as const;
 
-  return mostCommonContinent ? continentFlags[mostCommonContinent] || null : null;
+  return mostCommonContinent ? lookupStringMap(continentFlags, mostCommonContinent) || null : null;
 });
 
 const tooltipText = computed(() => {

@@ -62,8 +62,9 @@ export class PlayerService {
     slug?: string,
   ): Promise<Player> {
     const dto: CreatePlayerDto =
-      typeof nameOrDto === "string"
-        ? {
+      nameOrDto instanceof Object
+        ? nameOrDto
+        : {
             name: nameOrDto,
             teamId,
             firstName,
@@ -72,8 +73,7 @@ export class PlayerService {
             nationality,
             imageUrl,
             slug,
-          }
-        : nameOrDto;
+          };
 
     const player = new Player();
     player.name = dto.name;

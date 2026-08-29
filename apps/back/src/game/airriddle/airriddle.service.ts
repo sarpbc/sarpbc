@@ -113,7 +113,7 @@ export class AirRiddleService {
   }
 
   private checkGuess(guess: string, answer: string): AirRiddleResultEnum[] {
-    const results: AirRiddleResultEnum[] = new Array(guess.length);
+    const results: AirRiddleResultEnum[] = Array.from({ length: guess.length });
     const answerLetters: (string | null)[] = answer.split("");
 
     for (let i = 0; i < guess.length; i++) {

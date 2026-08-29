@@ -1,30 +1,51 @@
 import { QueryOrder } from "@mikro-orm/core";
 import type { ReplyTargetType } from "./dto/reply-response.dto";
 
+export interface ReplyTargetFilter {
+  post?: { id: string };
+  newsArticle?: { id: string };
+  match?: { id: string };
+  hiddenAt?: null;
+  replyTo?: null;
+}
+
+export interface ReplyTargetIdsFilter {
+  post?: { $in: string[] };
+  newsArticle?: { $in: string[] };
+  match?: { $in: string[] };
+}
+
 export function targetFilter(
   targetType: ReplyTargetType,
   targetId: string,
   includeHidden = false,
-): Record<string, unknown> {
-  const hiddenFilter = includeHidden ? {} : { hiddenAt: null };
+): ReplyTargetFilter {
+  const filter: ReplyTargetFilter = {};
   switch (targetType) {
     case "forumPost":
-      return { post: { id: targetId }, ...hiddenFilter };
+      filter.post = { id: targetId };
+      break;
     case "newsArticle":
-      return { newsArticle: { id: targetId }, ...hiddenFilter };
+      filter.newsArticle = { id: targetId };
+      break;
     case "match":
-      return { match: { id: targetId }, ...hiddenFilter };
+      filter.match = { id: targetId };
+      break;
     default: {
       const _exhaustive: never = targetType;
       return _exhaustive;
     }
   }
+  if (!includeHidden) {
+    filter.hiddenAt = null;
+  }
+  return filter;
 }
 
 export function targetIdsFilter(
   targetType: ReplyTargetType,
   targetIds: string[],
-): Record<string, unknown> {
+): ReplyTargetIdsFilter {
   switch (targetType) {
     case "forumPost":
       return { post: { $in: targetIds } };

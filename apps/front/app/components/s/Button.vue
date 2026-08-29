@@ -12,7 +12,7 @@ const { sound = "press", static: isStatic = false } = defineProps<{
 const attrs = useAttrs();
 const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
-function soundAttrs(value: ButtonSound): Record<string, string> {
+function soundAttrs(value: ButtonSound) {
   switch (value) {
     case "press":
       return cuelumeAttrs.pressRelease;

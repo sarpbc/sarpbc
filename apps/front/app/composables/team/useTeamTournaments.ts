@@ -32,9 +32,9 @@ function timeOf(value: Date | string | null | undefined): number {
 }
 
 function toEventListItem(tournament: Tournament, teamId: string, now: number): TeamEventListItem {
-  const league = typeof tournament.league === "object" ? tournament.league : undefined;
-  const winner = typeof tournament.winner === "object" ? tournament.winner : undefined;
-  const winnerTeamId = winner && typeof winner.team === "object" ? winner.team.id : undefined;
+  const league = tournament.league instanceof Object ? tournament.league : undefined;
+  const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
+  const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
   const status = getTournamentStatus(tournament, now);
 
   return {

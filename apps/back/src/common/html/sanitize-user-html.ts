@@ -31,12 +31,12 @@ const NEWS_ALLOWED_TAGS = new Set([
   "caption",
 ]);
 
-const NEWS_ALLOWED_ATTRS: Record<string, ReadonlySet<string>> = {
+const NEWS_ALLOWED_ATTRS = {
   a: new Set(["href", "title", "rel", "target"]),
   img: new Set(["src", "alt", "title", "width", "height"]),
   td: new Set(["colspan", "rowspan"]),
   th: new Set(["colspan", "rowspan"]),
-};
+} as const;
 
 function isSafeUrl(value: string): boolean {
   const trimmed = value.trim().toLowerCase();
@@ -68,7 +68,10 @@ export function sanitizeNewsHtml(value: string): string {
         return `</${name}>`;
       }
 
-      const allowed = NEWS_ALLOWED_ATTRS[name];
+      const allowed =
+        name === "a" || name === "img" || name === "td" || name === "th"
+          ? NEWS_ALLOWED_ATTRS[name]
+          : undefined;
       if (!allowed) {
         return `<${name}>`;
       }

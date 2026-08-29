@@ -125,7 +125,7 @@ export interface TournamentLeagueOption {
 export interface ManualTournamentInput {
   name: string;
   slug?: string;
-  tier?: string;
+  tier?: string | null;
   leagueId?: string | null;
   beginAt?: string | null;
   endAt?: string | null;

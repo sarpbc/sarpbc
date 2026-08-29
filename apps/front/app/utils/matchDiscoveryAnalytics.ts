@@ -13,13 +13,27 @@ export type MatchDiscoverySource = (typeof MATCH_DISCOVERY_SOURCES)[number];
 
 export type MatchDiscoveryStatus = "live" | "upcoming" | "finished";
 
-const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
+export type MatchDiscoveryQueryValue = string | (string | null)[] | null | undefined;
 
-export function isMatchDiscoverySource(value: unknown): value is MatchDiscoverySource {
-  return typeof value === "string" && SOURCE_SET.has(value);
+export interface MatchDiscoveryDetailTo {
+  path: string;
+  query: { from: MatchDiscoverySource };
 }
 
-export function parseMatchDiscoverySource(value: unknown): MatchDiscoverySource | null {
+const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
+
+export function isMatchDiscoverySource(
+  value: MatchDiscoveryQueryValue,
+): value is MatchDiscoverySource {
+  if (value == null || Array.isArray(value)) {
+    return false;
+  }
+  return SOURCE_SET.has(value);
+}
+
+export function parseMatchDiscoverySource(
+  value: MatchDiscoveryQueryValue,
+): MatchDiscoverySource | null {
   if (Array.isArray(value)) {
     return parseMatchDiscoverySource(value[0]);
   }
@@ -68,7 +82,7 @@ export function buildMatchDetailTo(
   localePath: (path: string) => string,
   matchId: string,
   source: MatchDiscoverySource,
-): { path: string; query: Record<string, MatchDiscoverySource> } {
+): MatchDiscoveryDetailTo {
   return {
     path: localePath(`/matches/${matchId}`),
     query: { [MATCH_DISCOVERY_FROM_QUERY]: source },

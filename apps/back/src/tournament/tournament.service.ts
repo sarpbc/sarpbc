@@ -14,6 +14,12 @@ import {
   SyncNewTournamentsUseCase,
 } from "./sync/sync-new-tournaments.use-case";
 
+interface TournamentListFilter {
+  pickemsEnabled?: boolean;
+  winner?: null;
+  $or?: Array<{ endAt: null } | { endAt: { $gt: Date } }>;
+}
+
 @Injectable()
 export class TournamentService {
   constructor(
@@ -40,8 +46,8 @@ export class TournamentService {
     pickems?: boolean;
     activeOnly?: boolean;
   }): Promise<[Tournament[], number]> {
-    const where: Record<string, unknown> = {};
-    if (typeof pickems === "boolean") {
+    const where: TournamentListFilter = {};
+    if (pickems === true || pickems === false) {
       where.pickemsEnabled = pickems;
     }
     if (activeOnly) {

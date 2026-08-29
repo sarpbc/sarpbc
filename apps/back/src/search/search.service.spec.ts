@@ -1,7 +1,4 @@
 import { SearchService } from "./search.service";
-import { PlayerService } from "../player/player.service";
-import { TeamService } from "../team/team.service";
-import { TournamentService } from "../tournament/tournament.service";
 
 describe("SearchService", () => {
   const playerService = { find: jest.fn() };
@@ -12,9 +9,9 @@ describe("SearchService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SearchService(
-      playerService as unknown as PlayerService,
-      teamService as unknown as TeamService,
-      tournamentService as unknown as TournamentService,
+      playerService as never,
+      teamService as never,
+      tournamentService as never,
     );
   });
 

@@ -44,7 +44,7 @@ const { status, data, refresh } = await useLazyAsyncData(
   () => `admin-teams-${page.value}`,
   async () => getAllTeams({ limit, offset: (page.value - 1) * limit }),
   {
-    default: () => ({ teams: [], total: 0 }) as { teams: Team[]; total: number },
+    default: () => ({ teams: [], total: 0 }),
     watch: [page],
     server: false,
   },
@@ -100,11 +100,7 @@ async function confirmCreate() {
   if (!newTeam.value.name) return;
   isCreating.value = true;
   try {
-    const body: {
-      name: string;
-      location?: string;
-      imageUrl?: string;
-    } = { name: newTeam.value.name };
+    const body: CreateTeamDto = { name: newTeam.value.name };
     if (newTeam.value.location) body.location = newTeam.value.location;
     if (newTeam.value.imageUrl) body.imageUrl = newTeam.value.imageUrl;
     const created = await createTeam(body);

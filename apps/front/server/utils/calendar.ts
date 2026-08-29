@@ -27,18 +27,18 @@ export function parseIcsSlug(pathname: string): string | null {
 }
 
 function rethrowMappedFetchError(
-  error: unknown,
+  cause: unknown,
   notFoundMessage: string,
   badGatewayMessage: string,
 ): never {
-  const statusCode = getFetchStatusCode(error);
+  const statusCode = getFetchStatusCode(cause);
   if (statusCode === 404) {
     throw createError({ statusCode: 404, statusMessage: notFoundMessage });
   }
   throw createError({
     statusCode: 502,
     statusMessage: badGatewayMessage,
-    cause: error,
+    cause,
   });
 }
 
@@ -48,8 +48,8 @@ export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
     const res = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
     return res.match;
-  } catch (error: unknown) {
-    rethrowMappedFetchError(error, "Match not found", "Could not load match for calendar");
+  } catch (cause) {
+    rethrowMappedFetchError(cause, "Match not found", "Could not load match for calendar");
   }
 }
 
@@ -66,9 +66,9 @@ export async function fetchTournamentForCalendar(
       $fetch<TournamentResponse>(`${config.public.apiBase}/tournaments/${id}`),
       $fetch<TournamentMatchesResponse>(`${config.public.apiBase}/tournaments/${id}/matches`),
     ]);
-  } catch (error: unknown) {
+  } catch (cause) {
     rethrowMappedFetchError(
-      error,
+      cause,
       "Tournament not found",
       "Could not load tournament for calendar",
     );

@@ -8,8 +8,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   const toast = useToast();
   const i18n = nuxtApp.$i18n as { t: (key: string) => string };
 
-  const showAuthError = (code: unknown) => {
-    if (typeof code !== "string" || !code) {
+  const showAuthError = (code: string | (string | null)[] | null | undefined) => {
+    if (Array.isArray(code) || code == null || code === "") {
       return;
     }
 

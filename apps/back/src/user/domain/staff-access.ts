@@ -38,11 +38,11 @@ void _staffRoleParity;
 /** Compile-time link proving `@sarpbc/utils` resolves in the Nest graph. */
 export type NestLinkedApiErrorBody = ApiErrorBody;
 
-export const ROLE_PERMISSIONS: Record<StaffRole, readonly StaffPermission[]> = {
+export const ROLE_PERMISSIONS = {
   admin: STAFF_PERMISSIONS,
   journalist: ["news.manage", "images.manage"],
   moderator: ["forum.moderate"],
-};
+} as const satisfies { readonly [Role in StaffRole]: readonly StaffPermission[] };
 
 export function isStaffRole(value: string | null | undefined): value is StaffRole {
   return value === "admin" || value === "moderator" || value === "journalist";

@@ -147,7 +147,7 @@ export function mapTournament(
 ): TournamentResponse {
   const includeMatches = options?.includeMatches ?? false;
 
-  return {
+  const mapped: TournamentResponse = {
     id: tournament.id,
     pandascoreId: tournament.pandascoreId,
     source: tournament.source,
@@ -171,8 +171,9 @@ export function mapTournament(
     participants: collectionItems<TournamentParticipant>(tournament.participants).map(
       mapParticipant,
     ),
-    ...(includeMatches
-      ? { matches: collectionItems<Match>(tournament.matches).map(mapMatch) }
-      : {}),
   };
+  if (includeMatches) {
+    mapped.matches = collectionItems<Match>(tournament.matches).map(mapMatch);
+  }
+  return mapped;
 }

@@ -70,7 +70,7 @@ const metaItems = computed(() => {
 
 const championTeam = computed((): Team | null => {
   const winner = tournament.winner;
-  if (!winner || typeof winner === "string") return null;
+  if (!winner || !(winner instanceof Object)) return null;
   if (!("team" in winner) || !winner.team?.slug) return null;
   return winner.team;
 });
