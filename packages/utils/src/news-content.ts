@@ -13,7 +13,7 @@ function replaceEntityTagsWithLabels(content: string): string {
 }
 
 /**
- * Turn news markdown (including `:player` / `:team` MDC tags) into readable plain text.
+ * Turn `:player` / `:team` MDC tags into their labels before stripping markdown.
  */
 export function newsContentToPlainText(content: string): string {
   const withLabels = replaceEntityTagsWithLabels(content);

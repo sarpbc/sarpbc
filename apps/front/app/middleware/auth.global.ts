@@ -6,8 +6,6 @@ const ACCESS_TOKEN_COOKIE = "access_token";
 const REFRESH_TOKEN_COOKIE = "refresh_token";
 
 /**
- * Global authentication middleware
- * Resolves session once per app load.
  * `undefined` = unknown, `null` = guest, `User` = authenticated.
  *
  * SSR skips the profile request when the httpOnly access_token cookie is absent.

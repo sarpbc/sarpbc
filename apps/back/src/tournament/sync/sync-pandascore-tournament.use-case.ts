@@ -63,10 +63,6 @@ export class SyncPandascoreTournamentUseCase {
     }
   }
 
-  /**
-   * Import (or refresh) a tournament by its PandaScore ID when it is missing locally.
-   * Returns the local tournament UUID.
-   */
   async executeByPandascoreId(pandascoreId: number): Promise<string> {
     const pandaTournament = await this.pandascoreGateway.getTournamentById(pandascoreId);
     if (!pandaTournament) {

@@ -1,0 +1,37 @@
+---
+description: Comments explain edge cases only — code already says what it does
+alwaysApply: true
+---
+
+# Comments
+
+Code names and structure tell **what** happens. A comment is justified only when it records something the next reader cannot infer: a trap, an invariant, a third-party quirk, or a deliberate non-obvious choice.
+
+If the code needs a comment to be understood, rename, extract, or simplify first. Do not add a comment instead.
+
+## Keep
+
+- Why a branch exists (SWR stamps `user = null`, PandaScore `key[]=` 500s)
+- Surprising contracts (`undefined` vs `null` for session; omitted `role` means leave unchanged)
+- Magic that looks like a bug (skip cross-zone connectors; fold ICS at 75 octets)
+
+```ts
+// PandaScore rejects `key[]=` (HTTP 500). Use repeated keys instead.
+```
+
+## Remove
+
+- Narration (`// Set SEO meta tags`, `/** Get current canonical URL */`)
+- Section banners (`// --- Trophy endpoints ---`)
+- JSDoc that restates the name, type, or body
+- Commented-out code
+- Catalogs that duplicate call sites (event-name lists)
+
+```ts
+// ❌ BAD
+/** Resolve the winning participant from match scores. */
+export function deriveWinnerParticipantId(results: ResultLike[]): string | null {
+
+// ✅ GOOD — no comment; the signature is the documentation
+export function deriveWinnerParticipantId(results: ResultLike[]): string | null {
+```

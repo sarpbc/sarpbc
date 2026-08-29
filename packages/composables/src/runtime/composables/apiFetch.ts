@@ -1,6 +1,5 @@
 /**
- * Custom fetch wrapper that automatically handles SSR cookie forwarding
- * Use this instead of $fetch for authenticated API calls
+ * Forwards SSR request cookies. Use instead of `$fetch` for authenticated API calls.
  */
 export const apiFetch = async <T>(
   url: string,

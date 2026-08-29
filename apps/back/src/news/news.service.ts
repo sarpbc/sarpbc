@@ -35,11 +35,6 @@ export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
   data: NewsSitemapEntry[];
 }
 
-/**
- * Oldest published article first (`createdAt ASC`, then `id ASC`).
- * Chunk 0 is a stable archive; only the last chunk grows when a new article is published.
- * Per-URL lastmod is still `updatedAt ?? createdAt` so edits are visible to crawlers.
- */
 export function newsSitemapChunkCount(total: number): number {
   return Math.max(1, Math.ceil(Math.max(total, 0) / NEWS_SITEMAP_CHUNK_SIZE));
 }
@@ -220,6 +215,10 @@ export class NewsService {
     };
   }
 
+  /**
+   * Chunk 0 is a stable archive (oldest first); only the last chunk grows.
+   * Per-URL lastmod is `updatedAt ?? createdAt` so edits stay visible to crawlers.
+   */
   async findPublishedSitemapChunk(chunk: number): Promise<NewsSitemapChunkResponse> {
     if (!Number.isInteger(chunk) || chunk < 0) {
       throw new BadRequestException("Sitemap chunk must be a non-negative integer.");

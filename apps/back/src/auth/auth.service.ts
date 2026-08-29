@@ -137,7 +137,7 @@ export class AuthService {
   }
 
   /**
-   * Resolve post-OAuth redirect URL. Only `front` | `admin` are allowed (no open redirects).
+   * Only `front` | `admin` are allowed — anything else would be an open redirect.
    */
   resolveOAuthReturnUrl(returnTo: string | undefined): string {
     if (returnTo === "admin") {

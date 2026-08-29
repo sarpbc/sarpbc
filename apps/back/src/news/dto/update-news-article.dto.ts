@@ -34,7 +34,6 @@ export class UpdateNewsArticleDto {
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   imageUrl?: string | null;
 
-  /** Optional URL slug. Normalized server-side. */
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: "Enter a slug, or leave the field unchanged." })

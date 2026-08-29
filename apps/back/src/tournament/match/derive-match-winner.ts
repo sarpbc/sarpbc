@@ -5,10 +5,6 @@ export type ResultLike = {
   score: number;
 };
 
-/**
- * Derive the winning participant from match scores.
- * Returns null on missing scores, ties, or fewer than two scored participants.
- */
 export function deriveWinnerParticipantId(results: ResultLike[]): string | null {
   const scored = results.filter((r) => r.participantId);
   if (scored.length < 2) {

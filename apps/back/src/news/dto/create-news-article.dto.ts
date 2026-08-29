@@ -31,7 +31,6 @@ export class CreateNewsArticleDto {
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   imageUrl?: string;
 
-  /** Optional URL slug. Normalized server-side; defaults from title when omitted. */
   @IsOptional()
   @IsString()
   @IsNotEmpty({ message: "Enter a slug, or leave empty to generate one from the title." })

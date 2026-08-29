@@ -26,7 +26,6 @@ import { ReportReplyDto } from "./dto/report-reply.dto";
 export class ReplyController {
   constructor(private replyService: ReplyService) {}
 
-  /** Unified list: GET /replies?targetType=match&targetId=… */
   @Get()
   async findByTarget(@Query() query: ListRepliesQueryDto) {
     return this.replyService.findByTargetPaginated(

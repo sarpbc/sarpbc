@@ -10,7 +10,7 @@ const {
 } = defineProps<{
   size?: ListItemSize;
   to?: string;
-  /** Bottom border. Use on every row including last when the parent is `flushBottom`. */
+  /** Required on the last row when the parent Card is `flushBottom`. */
   divider?: boolean;
 }>();
 

@@ -5,10 +5,8 @@ export class UserDto {
   email!: string;
   userName!: string;
   avatarUrl?: string;
-  /** Assigned staff role, when any. */
   role?: StaffRole;
-  /** Permissions granted by the role (empty / omitted for members). */
   permissions?: StaffPermission[];
-  /** Convenience: true when role is admin (full staff). */
+  /** Derived from `role === "admin"`, not a separate assignment. */
   admin?: boolean;
 }

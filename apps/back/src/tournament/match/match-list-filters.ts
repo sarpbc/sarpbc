@@ -1,6 +1,4 @@
 /**
- * List filters for match endpoints.
- *
  * Domain mapping (user-facing vs API):
  * - User "tournament" (e.g. RLCS) → `leagueId`
  * - Sub-events (e.g. Spring Major) → `tournamentId` (not exposed on /matches list UI)

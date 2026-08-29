@@ -101,8 +101,7 @@ export class PickemService {
   }
 
   /**
-   * Score unscored picks for a finished match. Idempotent via `scored`.
-   * Derives and persists winner from results when the relation is missing.
+   * Idempotent via `scored`. Derives and persists winner from results when the relation is missing.
    */
   async validateMatchResult(matchId: string): Promise<{ updated: number }> {
     const match = await this.em.findOne(
@@ -154,9 +153,7 @@ export class PickemService {
     return { updated: picks.length };
   }
 
-  /**
-   * Best-effort auto-score after a match finishes. Never throws to callers.
-   */
+  /** Never throws — auto-score after a match finishes is best-effort. */
   async tryValidateMatchResult(matchId: string): Promise<void> {
     try {
       await this.validateMatchResult(matchId);

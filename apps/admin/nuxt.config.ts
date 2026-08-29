@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import { dirname } from "node:path";
 import { createRequire } from "node:module";
 

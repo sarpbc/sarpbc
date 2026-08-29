@@ -3,7 +3,6 @@ import type { MatchListItem } from "~/types/matches";
 export type MatchEventGroup = {
   key: string;
   tournamentId?: string;
-  /** league.name + serie + tournament.name (stage), e.g. "RLCS Major Paris 2026 Playoffs" */
   displayName: string;
   matches: MatchListItem[];
 };

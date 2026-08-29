@@ -1,5 +1,4 @@
 /**
- * Pick a logo URL for the current color mode.
  * PandaScore: use `dark_mode_image_url` in dark mode when present, else `image_url`.
  */
 export function resolveThemedLogoUrl(

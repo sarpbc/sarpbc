@@ -1,4 +1,4 @@
-/** RFC 5545 ICS builder. Fold at 75 octets; escape TEXT values. */
+/** RFC 5545: fold lines at 75 octets; escape TEXT values. */
 
 export const ICS_PROD_ID = "-//sarpbc.org//EN";
 export const SITE_ORIGIN = "https://sarpbc.org";

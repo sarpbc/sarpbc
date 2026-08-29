@@ -70,7 +70,6 @@ export async function syncTeamFromPandascore(): Promise<void> {
   }
 }
 
-/** Throws on failure so roster history can render its own error state. */
 export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
   const config = useRuntimeConfig();
   const res = await $fetch<{ contracts?: TeamContract[] }>(
@@ -83,7 +82,6 @@ export async function getTeamContracts(teamId: string): Promise<TeamContract[]> 
 
   return res.contracts ?? [];
 }
-/** Throws on failure so trophy section can render its own error state. */
 export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   const config = useRuntimeConfig();
   const res = await $fetch<{ trophies?: Tournament[] }>(
@@ -97,7 +95,6 @@ export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   return res.trophies ?? [];
 }
 
-/** Throws on failure so event sections can render their own error state. */
 export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
   const config = useRuntimeConfig();
   const res = await $fetch<{ tournaments?: Tournament[] }>(
@@ -111,7 +108,6 @@ export async function getTeamTournaments(teamId: string): Promise<Tournament[]> 
   return res.tournaments ?? [];
 }
 
-/** Throws on failure so match sections can render their own error state. */
 export async function getTeamMatches(teamId: string): Promise<Match[]> {
   const config = useRuntimeConfig();
   const res = await $fetch<{ matches?: Match[] }>(
