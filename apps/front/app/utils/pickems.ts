@@ -46,7 +46,6 @@ export type PickemPickState = {
   scored: boolean;
 };
 
-/** Open (not locked) matches that the user has not picked yet. Sorted by beginAt ascending. */
 export function getUnpickedOpenMatches(
   matches: Match[],
   picks: Map<string, PickemPickState> | null | undefined,

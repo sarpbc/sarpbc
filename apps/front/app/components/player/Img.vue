@@ -11,7 +11,6 @@ const boxClasses = {
   sm: "h-12 w-16",
   md: "h-24 w-36",
   lg: "h-28 w-40 sm:h-32 sm:w-48",
-  // Shrink on narrow viewports so profile cards stay within the screen.
   xl: "h-36 w-48 sm:h-44 sm:w-56 md:h-48 md:w-64",
 };
 

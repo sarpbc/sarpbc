@@ -1,7 +1,4 @@
-/**
- * League entity shared across apps.
- * `tournaments` is loosely typed here so apps can refine with local Tournament shapes.
- */
+/** `tournaments` is loosely typed so apps can refine with local Tournament shapes. */
 export interface League {
   id: string;
   pandascoreId: number;

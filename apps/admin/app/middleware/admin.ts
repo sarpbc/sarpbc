@@ -1,10 +1,6 @@
 import { useUser } from "~/composables/state";
 import { hasPermission, isStaffUser, permissionForAdminPath } from "~/utils/staff";
 
-/**
- * Staff-only middleware for the console.
- * Guests → /login. Staff without the route permission → home with ?forbidden=1.
- */
 export default defineNuxtRouteMiddleware((to) => {
   const path = to.path.replace(/\/$/, "") || "/";
   if (path === "/login" || path === "/fr/login") {

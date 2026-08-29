@@ -6,12 +6,6 @@ type MatchWithBeginAt = {
   beginAt?: Date | string | null;
 };
 
-/**
- * Resolve the lateral/home match rail caption from live + upcoming matches.
- * - Live matches or any match today → today
- * - Otherwise earliest known scheduled day is tomorrow → tomorrow
- * - Else (later days / unknown dates) → upcoming
- */
 export function resolveMatchRailTitleKind(
   live: MatchWithBeginAt[],
   upcoming: MatchWithBeginAt[],

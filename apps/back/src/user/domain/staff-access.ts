@@ -38,7 +38,6 @@ void _staffRoleParity;
 /** Compile-time link proving `@sarpbc/utils` resolves in the Nest graph. */
 export type NestLinkedApiErrorBody = ApiErrorBody;
 
-/** Pre-configured role → permission matrix. Edit here to change what a role can do. */
 export const ROLE_PERMISSIONS: Record<StaffRole, readonly StaffPermission[]> = {
   admin: STAFF_PERMISSIONS,
   journalist: ["news.manage", "images.manage"],

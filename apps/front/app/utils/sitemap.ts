@@ -27,7 +27,6 @@ export interface StaticSitemapPage {
   priority: string;
 }
 
-/** Hub and marketing URLs previously stored in public/sitemap.xml. */
 export const STATIC_SITEMAP_PAGES: readonly StaticSitemapPage[] = [
   { path: "/", lastmod: "2026-01-12", changefreq: "daily", priority: "1.0" },
   { path: "/game/airriddle", lastmod: "2026-01-12", changefreq: "weekly", priority: "0.9" },

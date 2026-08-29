@@ -1,11 +1,6 @@
 /**
  * MikroORM entity registry — single manifest for CLI and runtime.
  *
- * Layout convention:
- * - Feature barrels (`*.entities.ts`) for domains with multiple related entities
- *   (forum, player, team, tournament).
- * - Single `*.entity.ts` files for standalone entities (user, news, image, games).
- *
  * Datetime conventions (schema `.type()`):
  * - `timestamptz` — instants (createdAt, updatedAt, beginAt, endAt)
  * - `date` — calendar-only fields (birthday, contract dates)

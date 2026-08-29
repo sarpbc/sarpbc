@@ -92,7 +92,6 @@ export class SerieDto {
   winner_type!: string;
   modified_at!: string;
   league_id!: number;
-  // season: any | null;
   full_name!: string;
 }
 
