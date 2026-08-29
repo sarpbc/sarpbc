@@ -1,5 +1,9 @@
 import { Resvg } from "@resvg/resvg-js";
-import { buildMatchOgSvg, fetchMatchDetailForOg } from "../../../utils/match-og";
+import {
+  buildMatchOgSvg,
+  fetchMatchDetailForOg,
+  getMatchOgResvgFontOptions,
+} from "../../../utils/match-og";
 
 /**
  * GET /og/match/:id.svg → 301 to .png (legacy crawler URLs).
@@ -27,6 +31,7 @@ export default defineEventHandler(async (event) => {
       mode: "width",
       value: 1200,
     },
+    font: getMatchOgResvgFontOptions(),
   });
   const pngBuffer = resvg.render().asPng();
 

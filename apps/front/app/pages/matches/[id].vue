@@ -185,7 +185,7 @@ const seoDescription = computed(() => {
 
 function getMatchOgImageUrl(id: string): string {
   const origin = new URL(getCanonicalUrl()).origin;
-  return `${origin}/og/match/${id}.png`;
+  return `${origin}/og/match/${id}.png?v=2`;
 }
 
 watch(
