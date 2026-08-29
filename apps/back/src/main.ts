@@ -7,9 +7,14 @@ import { configureApp } from "./configure-app";
 
 const isProduction = process.env.NODE_ENV === "production";
 
+const loggerEnv = {
+  service: "sarpbc-back",
+  environment: process.env.NODE_ENV ?? "development",
+};
+
 if (isProduction) {
   initLogger({
-    env: { service: "sarpbc-back" },
+    env: loggerEnv,
     sampling: {
       rates: {
         info: 5,
@@ -22,7 +27,7 @@ if (isProduction) {
   });
 } else {
   initLogger({
-    env: { service: "sarpbc-back" },
+    env: loggerEnv,
   });
 }
 

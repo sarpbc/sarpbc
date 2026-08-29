@@ -1,11 +1,26 @@
 <script lang="ts" setup>
 const imageUrl = defineModel<string | null>("imageUrl", { default: null });
 
+const props = defineProps<{
+  articleSlug?: string;
+  articleTitle?: string;
+}>();
+
 const { t } = useI18n();
 const toast = useToast();
 const { uploadFile, progress, isUploading, error } = useR2Upload();
 
 const fileInput = ref<HTMLInputElement | null>(null);
+
+const displayError = computed(() => {
+  if (!error.value || isUploading.value) {
+    return null;
+  }
+  if (error.value === "server") {
+    return t("page.news.cover.uploadServerError");
+  }
+  return error.value;
+});
 
 function openFilePicker() {
   fileInput.value?.click();
@@ -20,10 +35,18 @@ async function onFileChange(event: Event) {
   }
 
   try {
-    imageUrl.value = await uploadFile(file);
-  } catch {
+    imageUrl.value = await uploadFile(file, {
+      articleSlug: props.articleSlug,
+      articleTitle: props.articleTitle,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
     toast.add({
       title: t("page.news.cover.uploadFailed"),
+      description:
+        message === "server" || message.length === 0
+          ? t("page.news.cover.uploadServerError")
+          : message,
       color: "error",
     });
   }
@@ -39,7 +62,7 @@ function clearCover() {
     <input
       ref="fileInput"
       type="file"
-      accept="image/jpeg,image/png,image/webp,image/gif"
+      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
       class="hidden"
       @change="onFileChange"
     />
@@ -84,8 +107,8 @@ function clearCover() {
     <p v-if="isUploading" class="text-sm text-muted">
       {{ $t("page.news.cover.progress", { percent: progress }) }}
     </p>
-    <p v-if="error && !isUploading" class="text-sm text-error">
-      {{ error }}
+    <p v-if="displayError" class="text-sm text-error">
+      {{ displayError }}
     </p>
   </div>
 </template>

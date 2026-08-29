@@ -150,7 +150,11 @@ async function togglePublish() {
               />
             </UFormField>
             <UFormField :label="$t('page.news.cover.label')">
-              <NewsCoverUpload v-model:image-url="imageUrl" />
+              <NewsCoverUpload
+                v-model:image-url="imageUrl"
+                :article-slug="articleSlug"
+                :article-title="title"
+              />
             </UFormField>
           </div>
         </template>
