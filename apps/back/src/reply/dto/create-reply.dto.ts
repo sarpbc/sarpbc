@@ -11,7 +11,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from "class-validator";
-import { trimIncomingString } from "src/common/dto/trim-incoming-string";
+import { trimIncomingString } from "../../common/dto/trim-incoming-string";
 
 @ValidatorConstraint({ name: "exactlyOneReplyTarget", async: false })
 export class ExactlyOneReplyTargetConstraint implements ValidatorConstraintInterface {

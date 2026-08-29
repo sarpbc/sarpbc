@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Length } from "class-validator";
 import { Transform } from "class-transformer";
-import { trimIncomingString } from "src/common/dto/trim-incoming-string";
+import { trimIncomingString } from "../../common/dto/trim-incoming-string";
 
 export class UpdateProfileDto {
   @Transform(trimIncomingString)

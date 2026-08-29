@@ -11,7 +11,7 @@ import {
   ValidateIf,
 } from "class-validator";
 import { Transform } from "class-transformer";
-import { trimIncomingString } from "src/common/dto/trim-incoming-string";
+import { trimIncomingString } from "../../common/dto/trim-incoming-string";
 
 /** Shared write fields for create + update (update adds null clears). */
 export class TournamentManualWriteDto {

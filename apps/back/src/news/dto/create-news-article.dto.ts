@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
 import { Transform } from "class-transformer";
 import { emptyToNull } from "./empty-to-null";
-import { trimIncomingString } from "src/common/dto/trim-incoming-string";
+import { trimIncomingString } from "../../common/dto/trim-incoming-string";
 
 export class CreateNewsArticleDto {
   @IsString()
