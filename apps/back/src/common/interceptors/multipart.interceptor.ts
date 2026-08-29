@@ -8,7 +8,6 @@ import {
   NestInterceptor,
   Type,
 } from "@nestjs/common";
-import { MultipartValue } from "@fastify/multipart";
 import { FastifyRequest } from "fastify";
 import type { Storage } from "../../global";
 import { getFileFromPart, MultipartOptions, validateFile } from "../utils/file.util";
@@ -17,8 +16,20 @@ interface StoredFilesByField {
   [fieldname: string]: Storage.MultipartFile[];
 }
 
+type MultipartFormFieldValue = string | number | boolean | null;
+
 interface MultipartFormFields {
-  [fieldname: string]: string | number | boolean | null;
+  [fieldname: string]: MultipartFormFieldValue;
+}
+
+function asFormFieldValue(value: unknown): MultipartFormFieldValue {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return value;
+  }
+  if (value == null) {
+    return null;
+  }
+  return String(value);
 }
 
 export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
@@ -34,7 +45,7 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
 
       for await (const part of req.parts()) {
         if (part.type !== "file") {
-          body[part.fieldname] = (part as MultipartValue).value;
+          body[part.fieldname] = asFormFieldValue(part.value);
           continue;
         }
 
