@@ -10,21 +10,29 @@ export class MultipartOptions {
   ) {}
 }
 
+export function canonicalImageContentType(contentType: string): string {
+  const normalized = contentType.toLowerCase().split(";")[0]?.trim() ?? "";
+  if (normalized === "image/jpg" || normalized === "image/pjpeg") {
+    return "image/jpeg";
+  }
+  return normalized;
+}
+
 export const getFileFromPart = async (part: MultipartFile): Promise<Storage.MultipartFile> => {
   const buffer = await part.toBuffer();
   return {
     buffer,
     size: buffer.byteLength,
     filename: part.filename,
-    mimetype: part.mimetype,
+    mimetype: canonicalImageContentType(part.mimetype),
     fieldname: part.fieldname,
   };
 };
 
-export const validateFile = (
+export const validateFile = async (
   file: Storage.MultipartFile,
   options: MultipartOptions,
-): string | void => {
+): Promise<string | void> => {
   const validators: FileValidator[] = [];
 
   if (options.maxFileSize)
@@ -32,7 +40,7 @@ export const validateFile = (
   if (options.fileType) validators.push(new FileTypeValidator({ fileType: options.fileType }));
 
   for (const validator of validators) {
-    if (validator.isValid(file)) continue;
+    if (await validator.isValid(file)) continue;
 
     return validator.buildErrorMessage(file);
   }

@@ -14,6 +14,10 @@ declare module "fastify" {
   interface FastifyRequest {
     storedFiles: Record<string, Storage.MultipartFile[]>;
     body: unknown;
+    user?: {
+      id: string;
+      email: string;
+    };
   }
 
   interface FastifyReply {

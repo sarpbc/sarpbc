@@ -3,6 +3,9 @@ import { ConfigService } from "@nestjs/config";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
+import { createLogger } from "evlog";
+import { currentEnvironment } from "../common/request-log-context";
+import { canonicalImageContentType } from "../common/utils/file.util";
 
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -22,6 +25,14 @@ export interface R2UploadUrlResponse {
 export interface R2UploadResponse {
   publicUrl: string;
   key: string;
+}
+
+export interface NewsCoverUploadContext {
+  userId?: string;
+  userEmail?: string;
+  articleSlug?: string;
+  articleTitle?: string;
+  size?: number;
 }
 
 @Injectable()
@@ -108,19 +119,20 @@ export class R2Service {
     contentType: string,
     filename?: string,
   ): Promise<R2UploadUrlResponse> {
-    if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
+    const canonicalType = canonicalImageContentType(contentType);
+    if (!ALLOWED_CONTENT_TYPES.has(canonicalType)) {
       throw new BadRequestException(
         "Cover image must be JPEG, PNG, WebP, or GIF. Choose a supported file type.",
       );
     }
 
-    const extension = this.extensionForContentType(contentType, filename);
+    const extension = this.extensionForContentType(canonicalType, filename);
     const key = `news/covers/${randomUUID()}.${extension}`;
     const client = this.getClient();
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
-      ContentType: contentType,
+      ContentType: canonicalType,
     });
 
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
@@ -134,29 +146,63 @@ export class R2Service {
     buffer: Buffer,
     contentType: string,
     filename?: string,
+    context: NewsCoverUploadContext = {},
   ): Promise<R2UploadResponse> {
-    if (!ALLOWED_CONTENT_TYPES.has(contentType)) {
-      throw new BadRequestException(
-        "Cover image must be JPEG, PNG, WebP, or GIF. Choose a supported file type.",
+    const canonicalType = canonicalImageContentType(contentType);
+    const log = createLogger({
+      component: R2Service.name,
+      action: "uploadNewsCover",
+      environment: currentEnvironment(),
+      userId: context.userId,
+      userEmail: context.userEmail,
+      articleSlug: context.articleSlug,
+      articleTitle: context.articleTitle,
+      imageFilename: filename,
+      imageContentType: canonicalType,
+      imageDeclaredContentType: contentType,
+      imageSize: context.size ?? buffer.byteLength,
+      bucket: this.bucket,
+    });
+
+    try {
+      if (!ALLOWED_CONTENT_TYPES.has(canonicalType)) {
+        throw new BadRequestException(
+          "Cover image must be JPEG, PNG, WebP, or GIF. Choose a supported file type.",
+        );
+      }
+
+      const extension = this.extensionForContentType(canonicalType, filename);
+      const key = `news/covers/${randomUUID()}.${extension}`;
+      const client = this.getClient();
+
+      await client.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: buffer,
+          ContentType: canonicalType,
+        }),
       );
+
+      const publicBase = this.publicBaseUrl.replace(/\/$/, "");
+      const publicUrl = `${publicBase}/${key}`;
+      log.set({ key, stored: true });
+      return { publicUrl, key };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        "Cover image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
+      );
+    } finally {
+      log.emit();
     }
-
-    const extension = this.extensionForContentType(contentType, filename);
-    const key = `news/covers/${randomUUID()}.${extension}`;
-    const client = this.getClient();
-
-    await client.send(
-      new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: contentType,
-      }),
-    );
-
-    const publicBase = this.publicBaseUrl.replace(/\/$/, "");
-    const publicUrl = `${publicBase}/${key}`;
-
-    return { publicUrl, key };
   }
 }
