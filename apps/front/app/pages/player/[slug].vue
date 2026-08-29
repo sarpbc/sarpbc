@@ -132,6 +132,7 @@ setPageSeo({
                   <TeamImg
                     :team-name="currentPlayer.team.name"
                     :image-url="currentPlayer.team.imageUrl"
+                    :dark-mode-image-url="currentPlayer.team.darkModeImageUrl"
                     size="xs"
                   />
                   <span class="truncate">{{ currentPlayer.team.name }}</span>

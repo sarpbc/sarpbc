@@ -54,6 +54,7 @@ export class TeamService {
     team.name = dto.name;
     team.location = dto.location ?? null;
     team.imageUrl = dto.imageUrl ?? null;
+    team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
     team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
     team.pandascoreId = pandascoreId ?? null;
     await this.teamRepository.save(team);
@@ -69,6 +70,7 @@ export class TeamService {
     if (dto.name !== undefined) team.name = dto.name;
     if (dto.location !== undefined) team.location = dto.location;
     if (dto.imageUrl !== undefined) team.imageUrl = dto.imageUrl;
+    if (dto.darkModeImageUrl !== undefined) team.darkModeImageUrl = dto.darkModeImageUrl;
     if (dto.slug !== undefined) team.slug = dto.slug;
 
     await this.teamRepository.save(team);

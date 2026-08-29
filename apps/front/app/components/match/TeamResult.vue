@@ -25,6 +25,7 @@ function getScoreColorClass(): string {
       <TeamImg
         :team-name="participant.team.name"
         :image-url="participant.team.imageUrl"
+        :dark-mode-image-url="participant.team.darkModeImageUrl"
         size="md"
       />
       {{ participant.team.name }}

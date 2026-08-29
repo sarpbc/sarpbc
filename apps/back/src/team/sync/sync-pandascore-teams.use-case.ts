@@ -47,6 +47,7 @@ export class SyncPandascoreTeamsUseCase {
           team.slug = teamSlug;
           team.name = teamCommand.name;
           team.imageUrl = teamCommand.imageUrl ?? null;
+          team.darkModeImageUrl = teamCommand.darkModeImageUrl ?? null;
           team.pandascoreId = teamCommand.pandascoreId ?? null;
           em.persist(team);
           createdTeams.set(teamSlug, team);

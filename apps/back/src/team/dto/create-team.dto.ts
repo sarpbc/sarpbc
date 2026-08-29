@@ -15,5 +15,9 @@ export class CreateTeamDto {
 
   @IsOptional()
   @IsString()
+  darkModeImageUrl?: string;
+
+  @IsOptional()
+  @IsString()
   slug?: string;
 }

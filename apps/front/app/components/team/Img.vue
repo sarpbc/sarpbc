@@ -1,7 +1,10 @@
 <script lang="ts" setup>
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
+
 interface Props {
   teamName: string;
   imageUrl?: string;
+  darkModeImageUrl?: string;
   size?: "xs" | "sm" | "md" | "lg";
   /** Use for above-the-fold / LCP images */
   priority?: boolean;
@@ -42,17 +45,24 @@ const fallbackRadiusClasses = {
   lg: "rounded-lg",
 };
 
-const { teamName, imageUrl, size = "md", priority = false } = defineProps<Props>();
+const {
+  teamName,
+  imageUrl,
+  darkModeImageUrl,
+  size = "md",
+  priority = false,
+} = defineProps<Props>();
 
-const invertLightmode = computed(() => imageUrl !== undefined && imageUrl.includes("lightmode"));
+const colorMode = useColorMode();
+const src = computed(() => resolveThemedLogoUrl(imageUrl, darkModeImageUrl, colorMode.value));
 const dim = computed(() => dimensions[size]);
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
     <NuxtImg
-      v-if="imageUrl"
-      :src="imageUrl"
+      v-if="src"
+      :src="src"
       :alt="`${teamName} logo`"
       :width="dim.width"
       :height="dim.height"
@@ -60,7 +70,6 @@ const dim = computed(() => dimensions[size]);
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
       :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
-      :style="invertLightmode ? 'filter: invert(1);' : ''"
     />
     <div
       v-else

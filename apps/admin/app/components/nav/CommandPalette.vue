@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { hasPermission } from "~/utils/staff";
 import type { Player } from "~/types/player";
 import type { Team } from "~/types/team";
@@ -8,6 +9,7 @@ import type { Tournament } from "~/types/tournament";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
+const colorMode = useColorMode();
 
 const open = ref(false);
 const searchTerm = ref("");
@@ -103,16 +105,19 @@ function teamItems(): CommandPaletteItem[] {
   if (!canTeams.value) {
     return [];
   }
-  return results.value.teams.map((team: Team) => ({
-    id: `team-${team.id}`,
-    label: team.name,
-    suffix: team.location ?? undefined,
-    icon: "i-fluent-people-team-24-regular",
-    avatar: team.imageUrl ? { src: team.imageUrl, alt: team.name } : undefined,
-    onSelect() {
-      closeAndGo(`/teams/${team.id}`);
-    },
-  }));
+  return results.value.teams.map((team: Team) => {
+    const src = resolveThemedLogoUrl(team.imageUrl, team.darkModeImageUrl, colorMode.value);
+    return {
+      id: `team-${team.id}`,
+      label: team.name,
+      suffix: team.location ?? undefined,
+      icon: "i-fluent-people-team-24-regular",
+      avatar: src ? { src, alt: team.name } : undefined,
+      onSelect() {
+        closeAndGo(`/teams/${team.id}`);
+      },
+    };
+  });
 }
 
 function tournamentItems(): CommandPaletteItem[] {

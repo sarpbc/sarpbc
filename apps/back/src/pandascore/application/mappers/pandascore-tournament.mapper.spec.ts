@@ -97,6 +97,7 @@ describe("PandascoreTournamentMapper", () => {
             slug: "team-vitality",
             location: "FR",
             imageUrl: "https://example.com/vitality.png",
+            darkModeImageUrl: undefined,
           },
           players: [
             {

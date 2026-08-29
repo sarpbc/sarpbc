@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Player, Team } from "@sarpbc/types";
-import type { NewsEntityTagKind } from "@sarpbc/utils";
+import { resolveThemedLogoUrl, type NewsEntityTagKind } from "@sarpbc/utils";
 
 const props = defineProps<{
   kind: NewsEntityTagKind;
@@ -13,6 +13,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const colorMode = useColorMode();
 
 const query = ref("");
 const pending = ref(false);
@@ -79,6 +80,13 @@ function onSelect(item: Player | Team) {
 function close() {
   emit("update:open", false);
 }
+
+function itemLogoSrc(item: Player | Team) {
+  if (props.kind === "team") {
+    return resolveThemedLogoUrl(item.imageUrl, (item as Team).darkModeImageUrl, colorMode.value);
+  }
+  return item.imageUrl ?? undefined;
+}
 </script>
 
 <template>
@@ -107,13 +115,12 @@ function close() {
               @click="onSelect(item)"
             >
               <UAvatar
-                :src="item.imageUrl ?? undefined"
+                :src="itemLogoSrc(item)"
                 :alt="item.name"
                 size="sm"
                 :icon="
                   kind === 'team' ? 'i-fluent-people-team-24-regular' : 'i-fluent-person-24-regular'
                 "
-                :class="kind === 'team' ? 'dark:invert' : undefined"
               />
               <span class="truncate" translate="no">{{ item.name }}</span>
             </UButton>

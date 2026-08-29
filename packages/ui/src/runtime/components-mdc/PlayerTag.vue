@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Player } from "@sarpbc/types";
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { fetchWithEntityTagCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
@@ -17,6 +18,15 @@ const error = ref(false);
 const player = ref<Player | null>(null);
 
 const href = computed(() => playerHref(props.slug));
+
+const colorMode = useColorMode();
+const teamLogoSrc = computed(() =>
+  resolveThemedLogoUrl(
+    player.value?.team?.imageUrl,
+    player.value?.team?.darkModeImageUrl,
+    colorMode.value,
+  ),
+);
 
 const fullName = computed(() => {
   if (!player.value) {
@@ -101,7 +111,7 @@ watch(open, (isOpen) => {
 
         <div v-if="player.team" class="flex items-center gap-2 border-t border-default pt-2">
           <UAvatar
-            :src="player.team.imageUrl ?? undefined"
+            :src="teamLogoSrc"
             :alt="player.team.name"
             size="xs"
             icon="i-fluent-people-team-24-regular"

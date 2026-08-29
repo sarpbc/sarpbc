@@ -24,6 +24,7 @@ export {
   isTeamStaffRole,
   selectActiveRosterPlayers,
 } from "./team-roster.ts";
+export { resolveThemedLogoUrl } from "./themed-logo.ts";
 export { isStaffUser, hasPermission, canModerateComments } from "./staff.ts";
 export {
   NEWS_LOCALE_QUERY,

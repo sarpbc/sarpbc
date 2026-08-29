@@ -23,6 +23,7 @@ export interface RocketLeaguePlayerDto {
     slug: string;
     acronym?: string;
     image_url?: string;
+    dark_mode_image_url?: string | null;
   };
   first_name?: string;
   id: number;
