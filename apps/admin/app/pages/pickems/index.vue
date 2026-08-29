@@ -1,11 +1,11 @@
 <script lang="ts" setup>
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import type { Tournament } from "~/types/tournament";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
 const colorMode = useColorMode();
-const isLight = computed(() => colorMode.value === "light");
 
 const enablingTournamentId = ref<string | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
@@ -30,6 +30,15 @@ function tournamentLabel(tournament: Tournament): string {
     : new Date().getFullYear();
   const league = tournament.league?.name ? `${tournament.league.name} ` : "";
   return `${league}${year} ${tournament.name}`.trim();
+}
+
+function teamLogoSrc(
+  team: { imageUrl?: string | null; darkModeImageUrl?: string | null } | null | undefined,
+) {
+  if (!team) {
+    return undefined;
+  }
+  return resolveThemedLogoUrl(team.imageUrl, team.darkModeImageUrl, colorMode.value);
 }
 
 async function handleSyncTournament(tournamentId: string) {
@@ -81,15 +90,10 @@ async function handleEnablePickems(tournamentId: string) {
                 class="size-fit"
               >
                 <img
-                  v-if="participant.team?.imageUrl"
-                  :src="participant.team.imageUrl"
+                  v-if="teamLogoSrc(participant.team)"
+                  :src="teamLogoSrc(participant.team)"
                   :alt="participant.team.name"
                   class="size-4"
-                  :style="
-                    !isLight && participant.team.imageUrl.includes('lightmode')
-                      ? 'filter: invert(1);'
-                      : ''
-                  "
                 />
               </div>
             </div>

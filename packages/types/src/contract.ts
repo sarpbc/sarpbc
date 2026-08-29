@@ -11,6 +11,7 @@ export interface PlayerContract {
     name: string;
     slug: string;
     imageUrl: string | null;
+    darkModeImageUrl: string | null;
     location: string | null;
     pandascoreId: number | null;
   };

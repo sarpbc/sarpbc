@@ -102,6 +102,7 @@ export class TournamentSyncPersistence {
     team.name = command.name;
     team.location = command.location ?? null;
     team.imageUrl = command.imageUrl ?? null;
+    team.darkModeImageUrl = command.darkModeImageUrl ?? null;
     if (command.pandascoreId != null) {
       team.pandascoreId = command.pandascoreId;
     }

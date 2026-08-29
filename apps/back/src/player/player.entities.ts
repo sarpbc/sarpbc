@@ -16,6 +16,7 @@ export class Team {
   players = new Collection<Player>(this);
   location: string | null = null;
   imageUrl: string | null = null;
+  darkModeImageUrl: string | null = null;
   slug!: string;
   pandascoreId: number | null = null;
 }
@@ -63,6 +64,7 @@ export const TeamSchema = defineEntity({
     players: p.oneToMany(Player).mappedBy("team"),
     location: p.string().nullable(),
     imageUrl: p.string().nullable(),
+    darkModeImageUrl: p.string().nullable(),
     slug: p.string(),
     pandascoreId: p.integer().nullable(),
   },

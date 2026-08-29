@@ -6,5 +6,6 @@ export interface Team {
   players: Player[];
   location?: string;
   imageUrl?: string;
+  darkModeImageUrl?: string;
   slug: string;
 }

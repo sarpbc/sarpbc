@@ -24,7 +24,12 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
       :aria-expanded="open"
       :aria-controls="dialogId"
     >
-      <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="sm" />
+      <TeamImg
+        :team-name="team.name"
+        :image-url="team.imageUrl"
+        :dark-mode-image-url="team.darkModeImageUrl"
+        size="sm"
+      />
       <span class="text-sm font-medium truncate">{{ team.name }}</span>
     </button>
 
@@ -42,7 +47,12 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
           class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: team.name })"
         >
-          <TeamImg :team-name="team.name" :image-url="team.imageUrl" size="xs" />
+          <TeamImg
+            :team-name="team.name"
+            :image-url="team.imageUrl"
+            :dark-mode-image-url="team.darkModeImageUrl"
+            size="xs"
+          />
           <span class="truncate">{{ team.name }}</span>
         </SLink>
 

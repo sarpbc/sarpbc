@@ -106,12 +106,12 @@ setPageSeo({
     <section v-else-if="team" class="w-full flex flex-col gap-6">
       <div class="w-full flex flex-col">
         <div class="w-full flex flex-row items-center gap-2 md:h-18 justify-start">
-          <img
-            v-if="team.imageUrl"
-            :src="team.imageUrl"
-            :alt="`${team.name} logo`"
-            class="size-12"
-            :style="team.imageUrl.includes('lightmode') ? 'filter: invert(1);' : ''"
+          <TeamImg
+            :team-name="team.name"
+            :image-url="team.imageUrl"
+            :dark-mode-image-url="team.darkModeImageUrl"
+            size="md"
+            priority
           />
           <div class="h-full flex flex-col">
             <h1 class="flex text-xl font-semibold">{{ team.name }}</h1>

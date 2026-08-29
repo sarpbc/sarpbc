@@ -294,6 +294,12 @@ const scoreboardLabel = computed(() => {
                 variant="muted"
                 class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90 active:scale-[0.96]"
               >
+                <TeamImg
+                  :team-name="participant.team.name"
+                  :image-url="participant.team.imageUrl"
+                  :dark-mode-image-url="participant.team.darkModeImageUrl"
+                  size="md"
+                />
                 <span class="max-w-full text-lg font-semibold text-balance">
                   {{ participant.team.name }}
                 </span>
@@ -302,6 +308,7 @@ const scoreboardLabel = computed(() => {
                 <TeamImg
                   :team-name="participant.team.name"
                   :image-url="participant.team.imageUrl"
+                  :dark-mode-image-url="participant.team.darkModeImageUrl"
                   size="md"
                 />
                 <span class="max-w-full text-lg font-semibold text-balance">
