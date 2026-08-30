@@ -91,59 +91,95 @@ function formatDateRange(event: TeamEventListItem): string | null {
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-3" :aria-labelledby="headingId">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <h2 :id="headingId" class="text-lg font-semibold tracking-tight pl-1">
-        {{ t("page.team.slug.events.sectionTitle") }}
-      </h2>
-      <div class="flex gap-1" role="tablist" :aria-label="t('page.team.slug.events.sectionTitle')">
-        <UButton
-          v-for="item in tabItems"
-          :key="item.value"
-          role="tab"
-          :aria-selected="tab === item.value"
-          variant="soft"
-          size="sm"
-          :color="tab === item.value ? 'primary' : 'neutral'"
-          @click="setTab(item.value)"
-        >
-          {{ item.label }}
-        </UButton>
-      </div>
-    </div>
-
-    <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-      <SCard v-for="index in 3" :key="index">
-        <div class="flex items-center gap-3 py-2 px-3">
-          <USkeleton class="h-3 w-16 shrink-0" />
-          <div class="flex flex-1 flex-col gap-1">
-            <USkeleton class="h-3 w-40" />
-            <USkeleton class="h-3 w-28" />
+  <section :aria-labelledby="headingId">
+    <SRail>
+      <template #caption>
+        <div class="flex w-full items-center justify-between gap-2">
+          <h2 :id="headingId">
+            {{ t("page.team.slug.events.sectionTitle") }}
+          </h2>
+          <div
+            class="flex gap-1"
+            role="tablist"
+            :aria-label="t('page.team.slug.events.sectionTitle')"
+          >
+            <UButton
+              v-for="item in tabItems"
+              :key="item.value"
+              role="tab"
+              :aria-selected="tab === item.value"
+              variant="soft"
+              size="sm"
+              :color="tab === item.value ? 'primary' : 'neutral'"
+              @click="setTab(item.value)"
+            >
+              {{ item.label }}
+            </UButton>
           </div>
         </div>
-      </SCard>
-    </div>
+      </template>
 
-    <SCard v-else-if="hasError">
-      <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.team.slug.events.error") }}
-        </p>
-        <UButton variant="outline" color="error" @click="emit('retry')">
-          {{ t("page.team.slug.events.retry") }}
-        </UButton>
+      <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
+        <SCard v-for="index in 3" :key="index">
+          <div class="flex items-center gap-3 py-2 px-3">
+            <USkeleton class="h-3 w-16 shrink-0" />
+            <div class="flex flex-1 flex-col gap-1">
+              <USkeleton class="h-3 w-40" />
+              <USkeleton class="h-3 w-28" />
+            </div>
+          </div>
+        </SCard>
       </div>
-    </SCard>
 
-    <div v-else-if="hasEvents" class="flex flex-col gap-4">
-      <div v-if="live.length > 0" class="flex flex-col gap-2">
-        <h3 class="text-sm font-semibold text-muted pl-1">
-          {{ t("page.team.slug.events.live") }}
-        </h3>
-        <div class="flex flex-col border border-default divide-y divide-default">
+      <SCard v-else-if="hasError">
+        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
+          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
+          <p class="text-sm text-muted text-pretty">
+            {{ t("page.team.slug.events.error") }}
+          </p>
+          <UButton variant="outline" color="error" @click="emit('retry')">
+            {{ t("page.team.slug.events.retry") }}
+          </UButton>
+        </div>
+      </SCard>
+
+      <div v-else-if="hasEvents" class="flex flex-col gap-4">
+        <div v-if="live.length > 0" class="flex flex-col gap-2">
+          <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
+            {{ t("page.team.slug.events.live") }}
+          </h3>
+          <div class="flex flex-col border border-default divide-y divide-default">
+            <ULink
+              v-for="event in live"
+              :key="event.id"
+              :to="$localePath(`/tournaments/${event.id}`)"
+              class="flex items-center gap-3 p-3 hover:bg-elevated"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="font-medium truncate">{{ event.name }}</p>
+                <p class="text-sm text-muted truncate">
+                  <span v-if="event.leagueName">{{ event.leagueName }}</span>
+                  <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
+                  <span v-if="event.serie">{{ event.serie }}</span>
+                  <span
+                    v-if="(event.leagueName || event.serie) && formatDateRange(event)"
+                    class="mx-1"
+                    >·</span
+                  >
+                  <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
+                </p>
+              </div>
+              <SBadgeLive />
+            </ULink>
+          </div>
+        </div>
+
+        <div
+          v-if="activeEvents.length > 0"
+          class="flex flex-col border border-default divide-y divide-default"
+        >
           <ULink
-            v-for="event in live"
+            v-for="event in activeEvents"
             :key="event.id"
             :to="$localePath(`/tournaments/${event.id}`)"
             class="flex items-center gap-3 p-3 hover:bg-elevated"
@@ -162,63 +198,37 @@ function formatDateRange(event: TeamEventListItem): string | null {
                 <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
               </p>
             </div>
-            <SBadgeLive />
+            <div class="flex shrink-0 items-center gap-2">
+              <span v-if="tab === 'upcoming'" class="text-xs font-medium text-muted">
+                {{ statusLabel(event.status) }}
+              </span>
+              <UBadge
+                v-if="tab === 'past' && event.isWinner"
+                color="primary"
+                variant="subtle"
+                size="sm"
+              >
+                {{ t("page.team.slug.events.winner") }}
+              </UBadge>
+              <span v-else-if="tab === 'past'" class="text-xs font-medium text-dimmed">
+                {{ statusLabel(event.status) }}
+              </span>
+            </div>
           </ULink>
         </div>
       </div>
 
-      <div
-        v-if="activeEvents.length > 0"
-        class="flex flex-col border border-default divide-y divide-default"
-      >
-        <ULink
-          v-for="event in activeEvents"
-          :key="event.id"
-          :to="$localePath(`/tournaments/${event.id}`)"
-          class="flex items-center gap-3 p-3 hover:bg-elevated"
-        >
-          <div class="flex-1 min-w-0">
-            <p class="font-medium truncate">{{ event.name }}</p>
-            <p class="text-sm text-muted truncate">
-              <span v-if="event.leagueName">{{ event.leagueName }}</span>
-              <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
-              <span v-if="event.serie">{{ event.serie }}</span>
-              <span v-if="(event.leagueName || event.serie) && formatDateRange(event)" class="mx-1"
-                >·</span
-              >
-              <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
-            </p>
-          </div>
-          <div class="flex shrink-0 items-center gap-2">
-            <span v-if="tab === 'upcoming'" class="text-xs font-medium text-muted">
-              {{ statusLabel(event.status) }}
-            </span>
-            <UBadge
-              v-if="tab === 'past' && event.isWinner"
-              color="primary"
-              variant="subtle"
-              size="sm"
-            >
-              {{ t("page.team.slug.events.winner") }}
-            </UBadge>
-            <span v-else-if="tab === 'past'" class="text-xs font-medium text-dimmed">
-              {{ statusLabel(event.status) }}
-            </span>
-          </div>
-        </ULink>
-      </div>
-    </div>
-
-    <SCard v-else>
-      <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-        <UIcon :name="emptyIcon" class="text-3xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ t(`page.team.slug.events.${tab}.empty`) }}
-        </p>
-        <p class="text-xs text-dimmed text-pretty">
-          {{ t(`page.team.slug.events.${tab}.emptyHint`) }}
-        </p>
-      </div>
-    </SCard>
+      <SCard v-else>
+        <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
+          <UIcon :name="emptyIcon" class="text-3xl text-muted" />
+          <p class="text-sm text-muted text-pretty">
+            {{ t(`page.team.slug.events.${tab}.empty`) }}
+          </p>
+          <p class="text-xs text-dimmed text-pretty">
+            {{ t(`page.team.slug.events.${tab}.emptyHint`) }}
+          </p>
+        </div>
+      </SCard>
+    </SRail>
   </section>
 </template>

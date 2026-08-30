@@ -548,6 +548,41 @@
         "playersCount": "{count} player | {count} players",
         "statistics": "Statistics",
         "teamStatisticsComingSoon": "Team statistics coming soon...",
+        "tabs": {
+          "label": "Team profile sections",
+          "info": "Info",
+          "matches": "Matches",
+          "events": "Events",
+          "trophies": "Trophies"
+        },
+        "roster": {
+          "empty": "No players currently listed.",
+          "emptyHint": "The active lineup appears here once contracts are recorded for this team.",
+          "age": "{years} yo"
+        },
+        "faq": {
+          "title": "Frequently Asked Questions",
+          "roster": {
+            "question": "Who plays for {name}?",
+            "answerWithPlayers": "{name}'s current roster includes {players}.",
+            "answerEmpty": "{name} does not currently have a listed roster."
+          },
+          "rank": {
+            "question": "What is {name}'s current world rank?",
+            "answerUnknown": "We don't have a world ranking for {name} on record."
+          },
+          "upcoming": {
+            "question": "Upcoming matches for {name}?",
+            "answerWithMatches": "{name}'s upcoming matches: {matches}.",
+            "answerNone": "{name} has no upcoming matches scheduled.",
+            "matchLive": "live vs {opponent}",
+            "matchLiveWithEvent": "live vs {opponent} at {event}",
+            "matchVs": "vs {opponent} on {date}",
+            "matchVsWithEvent": "vs {opponent} at {event} on {date}",
+            "unknownOpponent": "TBD",
+            "dateTbd": "TBD"
+          }
+        },
         "rosterHistory": {
           "title": "Roster History",
           "current": "Current",

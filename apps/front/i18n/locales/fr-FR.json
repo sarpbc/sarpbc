@@ -548,6 +548,41 @@
         "playersCount": "{count} joueur | {count} joueurs",
         "statistics": "Statistiques",
         "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
+        "tabs": {
+          "label": "Sections du profil équipe",
+          "info": "Infos",
+          "matches": "Matchs",
+          "events": "Événements",
+          "trophies": "Trophées"
+        },
+        "roster": {
+          "empty": "Aucun joueur n'est actuellement listé.",
+          "emptyHint": "L'effectif actuel apparaîtra ici dès que des contrats seront enregistrés pour cette équipe.",
+          "age": "{years} ans"
+        },
+        "faq": {
+          "title": "Questions fréquentes",
+          "roster": {
+            "question": "Qui joue pour {name} ?",
+            "answerWithPlayers": "L'effectif actuel de {name} comprend {players}.",
+            "answerEmpty": "{name} n'a actuellement aucun joueur listé."
+          },
+          "rank": {
+            "question": "Quel est le classement mondial actuel de {name} ?",
+            "answerUnknown": "Nous n'avons pas de classement mondial pour {name} dans nos archives."
+          },
+          "upcoming": {
+            "question": "Quels sont les prochains matchs de {name} ?",
+            "answerWithMatches": "Prochains matchs de {name} : {matches}.",
+            "answerNone": "{name} n'a aucun match à venir programmé.",
+            "matchLive": "en direct contre {opponent}",
+            "matchLiveWithEvent": "en direct contre {opponent} à {event}",
+            "matchVs": "contre {opponent} le {date}",
+            "matchVsWithEvent": "contre {opponent} à {event} le {date}",
+            "unknownOpponent": "à confirmer",
+            "dateTbd": "date à confirmer"
+          }
+        },
         "rosterHistory": {
           "title": "Historique de l'effectif",
           "current": "Actuel",

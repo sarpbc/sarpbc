@@ -5,7 +5,7 @@ interface Props {
   teamName: string;
   imageUrl?: string;
   darkModeImageUrl?: string;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
   priority?: boolean;
 }
@@ -15,6 +15,7 @@ const boxClasses = {
   sm: "size-10",
   md: "size-16",
   lg: "size-24",
+  xl: "size-24 sm:h-auto sm:min-h-0 sm:w-32 md:w-40 sm:self-stretch",
 };
 
 const dimensions = {
@@ -22,6 +23,7 @@ const dimensions = {
   sm: { width: 40, height: 40 },
   md: { width: 64, height: 64 },
   lg: { width: 96, height: 96 },
+  xl: { width: 160, height: 160 },
 };
 
 const sizesAttr = {
@@ -29,6 +31,7 @@ const sizesAttr = {
   sm: "40px",
   md: "64px",
   lg: "96px",
+  xl: "(max-width: 640px) 96px, (max-width: 768px) 128px, 160px",
 };
 
 const iconClasses = {
@@ -36,6 +39,7 @@ const iconClasses = {
   sm: "size-5",
   md: "size-8",
   lg: "size-10",
+  xl: "size-12",
 };
 
 const fallbackRadiusClasses = {
@@ -43,6 +47,7 @@ const fallbackRadiusClasses = {
   sm: "rounded-sm",
   md: "rounded-md",
   lg: "rounded-lg",
+  xl: "rounded-lg",
 };
 
 const {
