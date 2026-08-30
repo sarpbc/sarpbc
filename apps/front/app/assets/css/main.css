@@ -77,6 +77,12 @@
   }
 }
 
+@layer base {
+  a {
+    cursor: default;
+  }
+}
+
 @media (forced-colors: active) {
   :root {
     forced-color-adjust: none;

@@ -58,17 +58,14 @@ const dim = computed(() => dimensions[size]);
       :sizes="sizesAttr[size]"
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
-      :class="[
-        fallbackRadiusClasses[size],
-        'h-full w-full object-cover ring-1 ring-black/10 dark:ring-white/10',
-      ]"
+      :class="[fallbackRadiusClasses[size], 'h-full w-full object-cover']"
     />
     <div
       v-else
       :class="[
         boxClasses[size],
         fallbackRadiusClasses[size],
-        'flex items-center justify-center bg-elevated ring-1 ring-black/10 dark:ring-white/10',
+        'flex items-center justify-center bg-elevated',
       ]"
     >
       <UIcon name="i-fluent-image-24-regular" :class="[iconClasses[size], 'text-muted']" />

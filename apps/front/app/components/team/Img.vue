@@ -76,7 +76,7 @@ const dim = computed(() => dimensions[size]);
       :class="[
         boxClasses[size],
         fallbackRadiusClasses[size],
-        'flex items-center justify-center bg-elevated outline -outline-offset-1 outline-neutral-50/10',
+        'flex items-center justify-center bg-elevated',
       ]"
     >
       <UIcon name="i-fluent-people-team-24-regular" :class="[iconClasses[size], 'text-muted']" />

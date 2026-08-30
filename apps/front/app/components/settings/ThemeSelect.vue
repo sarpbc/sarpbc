@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const colorMode = useColorMode();
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 const nextTheme = computed(() => (colorMode.value === "dark" ? "light" : "dark"));
 
@@ -59,7 +58,6 @@ const startViewTransition = (event: MouseEvent) => {
       "
       size="md"
       :aria-label="themeAriaLabel"
-      v-bind="cuelumeAttrs.toggle"
       @click="startViewTransition"
     />
 

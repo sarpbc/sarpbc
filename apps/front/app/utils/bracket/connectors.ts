@@ -46,6 +46,9 @@ export function toLayoutMatch(
     participantBId: match.participants?.[1]?.id,
     results: match.results,
     winnerParticipantId: getMatchWinnerParticipantId(match),
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    status: match.status,
   };
 }
 

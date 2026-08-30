@@ -31,9 +31,6 @@ const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
   return dateDf.value.format(new Date(value));
 };
-
-const hasMeta = (trophy: PlayerTrophyListItem) =>
-  Boolean(trophy.leagueName || trophy.serie || trophy.endAt);
 </script>
 
 <template>
@@ -83,23 +80,14 @@ const hasMeta = (trophy: PlayerTrophyListItem) =>
             <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary" />
           </div>
           <div class="min-w-0 flex-1">
-            <p class="font-medium truncate">{{ trophy.name }}</p>
-            <p v-if="hasMeta(trophy)" class="text-sm text-muted truncate">
-              <span v-if="trophy.leagueName">{{ trophy.leagueName }}</span>
-              <span v-if="trophy.leagueName && trophy.serie" class="mx-1" aria-hidden="true"
-                >·</span
-              >
-              <span v-if="trophy.serie">{{ trophy.serie }}</span>
-              <span
-                v-if="(trophy.leagueName || trophy.serie) && trophy.endAt"
-                class="mx-1"
-                aria-hidden="true"
-                >·</span
-              >
-              <span v-if="trophy.endAt">
-                {{ t("page.player.slug.trophies.wonOn", { date: formatEndDate(trophy.endAt) }) }}
-              </span>
-            </p>
+            <p class="text-sm font-medium text-highlighted truncate">{{ trophy.displayName }}</p>
+            <time
+              v-if="trophy.endAt"
+              :datetime="new Date(trophy.endAt).toISOString()"
+              class="text-xs text-dimmed tabular-nums truncate"
+            >
+              {{ formatEndDate(trophy.endAt) }}
+            </time>
           </div>
         </ULink>
       </div>

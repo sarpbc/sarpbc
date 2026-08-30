@@ -16,6 +16,59 @@
     },
     "cancel": "Annuler"
   },
+  "nationalities": {
+    "demonym": {
+      "AR": "argentin",
+      "AT": "autrichien",
+      "AU": "australien",
+      "BE": "belge",
+      "BR": "brésilien",
+      "CA": "canadien",
+      "CH": "suisse",
+      "CL": "chilien",
+      "CN": "chinois",
+      "CO": "colombien",
+      "CZ": "tchèque",
+      "DE": "allemand",
+      "DK": "danois",
+      "EE": "estonien",
+      "ES": "espagnol",
+      "FI": "finlandais",
+      "FR": "français",
+      "GB": "britannique",
+      "GR": "grec",
+      "HR": "croate",
+      "HU": "hongrois",
+      "IE": "irlandais",
+      "IL": "israélien",
+      "IN": "indien",
+      "IT": "italien",
+      "JP": "japonais",
+      "KR": "sud-coréen",
+      "LT": "lituanien",
+      "LV": "letton",
+      "MX": "mexicain",
+      "NL": "néerlandais",
+      "NO": "norvégien",
+      "NZ": "néo-zélandais",
+      "PE": "péruvien",
+      "PH": "philippin",
+      "PL": "polonais",
+      "PT": "portugais",
+      "RO": "roumain",
+      "RS": "serbe",
+      "RU": "russe",
+      "SA": "saoudien",
+      "SE": "suédois",
+      "SI": "slovène",
+      "SK": "slovaque",
+      "TR": "turc",
+      "UA": "ukrainien",
+      "US": "américain",
+      "UY": "uruguayen",
+      "ZA": "sud-africain"
+    }
+  },
   "newsTag": {
     "loading": "Chargement…",
     "error": "Impossible de charger le profil. Réessayez plus tard.",
@@ -377,8 +430,7 @@
           "empty": "Aucun tournoi remporté pour le moment.",
           "emptyHint": "Les titres apparaîtront ici lorsque ce joueur remportera un événement.",
           "error": "Impossible de charger le palmarès de ce joueur. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
-          "wonOn": "Remporté le {date}"
+          "retry": "Réessayer"
         },
         "awards": {
           "title": "Récompenses",
@@ -405,6 +457,52 @@
           "past": {
             "empty": "Aucun match terminé pour le moment.",
             "emptyHint": "Les résultats apparaîtront ici après le premier match de ce joueur."
+          }
+        },
+        "tabs": {
+          "label": "Sections du profil joueur",
+          "info": "Infos",
+          "matches": "Matchs",
+          "events": "Événements",
+          "trophies": "Trophées"
+        },
+        "events": {
+          "sectionTitle": "Événements",
+          "error": "Impossible de charger les événements de ce joueur. Vérifiez votre connexion et réessayez.",
+          "retry": "Réessayer",
+          "live": "En direct",
+          "winner": "Vainqueur",
+          "tabs": {
+            "upcoming": "À venir",
+            "past": "Passés"
+          },
+          "upcoming": {
+            "empty": "Aucun événement à venir.",
+            "emptyHint": "Les événements apparaîtront ici lorsque ce joueur sera inscrit à un tournoi."
+          },
+          "past": {
+            "empty": "Aucun événement passé pour le moment.",
+            "emptyHint": "Les tournois terminés auxquels ce joueur a participé apparaîtront ici."
+          }
+        },
+        "faq": {
+          "title": "Questions fréquentes",
+          "who": {
+            "question": "Qui est {name} ?",
+            "answerWithTeam": "{name} est un joueur professionnel {nationality} de Rocket League qui évolue actuellement chez {team}.",
+            "answerWithTeamGeneric": "{name} est un joueur professionnel de Rocket League qui évolue actuellement chez {team}.",
+            "answerFreeAgent": "{name} est un joueur professionnel {nationality} de Rocket League actuellement agent libre.",
+            "answerFreeAgentGeneric": "{name} est un joueur professionnel de Rocket League actuellement agent libre."
+          },
+          "age": {
+            "question": "Quel âge a {name} ?",
+            "answerWithAge": "{name} a {age} ans.",
+            "answerUnknown": "Nous n'avons pas la date de naissance de {name} dans nos archives."
+          },
+          "trophies": {
+            "question": "Quels tournois {name} a-t-il remportés ?",
+            "answerWithWins": "{name} a remporté {count} titre(s), dont {titles}.",
+            "answerNone": "{name} n'a pas encore remporté de titre de tournoi dans nos archives."
           }
         }
       }
@@ -468,8 +566,7 @@
           "empty": "Aucun tournoi remporté pour le moment.",
           "emptyHint": "Les titres apparaîtront ici lorsque cette équipe remportera un événement.",
           "error": "Impossible de charger le palmarès de cette équipe. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
-          "wonOn": "Remporté le {date}"
+          "retry": "Réessayer"
         },
         "events": {
           "sectionTitle": "Événements",

@@ -34,7 +34,7 @@ const imageUrl = computed(() => {
   >
     <div v-if="imageUrl" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
       <div
-        class="aspect-video h-full shrink-0 self-stretch overflow-hidden bg-elevated ring-1 ring-black/10 dark:ring-white/10"
+        class="aspect-video h-full shrink-0 self-stretch overflow-hidden bg-elevated"
         :style="{ viewTransitionName: newsCoverTransitionName(props.article.slug) }"
       >
         <NuxtImg

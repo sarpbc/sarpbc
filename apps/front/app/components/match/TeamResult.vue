@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import type { MatchStatus } from "~/types/matches";
+import { shouldShowMatchScores } from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
 
 const { t } = useI18n();
 
-const { participant, score, winner } = defineProps<{
+const { participant, score, winner, matchStatus } = defineProps<{
   participant: TournamentParticipant | undefined;
   score: number | null;
   winner: boolean | undefined;
+  matchStatus: MatchStatus;
 }>();
 
 function getScoreColorClass(): string {
@@ -29,7 +32,11 @@ function getScoreColorClass(): string {
         size="md"
       />
       {{ participant.team.name }}
-      <span v-if="score !== null" :class="getScoreColorClass()">{{ score }}</span>
+      <span
+        v-if="shouldShowMatchScores(matchStatus) && score !== null"
+        :class="getScoreColorClass()"
+        >{{ score }}</span
+      >
     </SLink>
   </div>
   <span v-else class="block truncate">{{ t("page.match.detail.unknownTeam") }}</span>

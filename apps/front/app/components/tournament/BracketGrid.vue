@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { BracketSectionLayout } from "~/utils/tournamentBracket";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import {
   BRACKET_COLUMN_GAP,
   BRACKET_MATCH_HEIGHT,
@@ -56,6 +57,14 @@ const connectorPaths = computed(() => {
     })
     .filter((path): path is NonNullable<typeof path> => path !== null);
 });
+
+function bracketMatchStatus(match: (typeof layout.matches)[number]) {
+  return resolveMatchDiscoveryStatus({
+    endAt: match.endAt,
+    beginAt: match.beginAt,
+    status: match.status,
+  });
+}
 </script>
 
 <template>
@@ -109,8 +118,9 @@ const connectorPaths = computed(() => {
           :participant-b-id="match.participantBId"
           :results="match.results"
           :winner-participant-id="match.winnerParticipantId"
+          :match-status="bracketMatchStatus(match)"
           discovery-source="tournament_hub"
-          :discovery-status="match.winnerParticipantId ? 'finished' : 'upcoming'"
+          :discovery-status="bracketMatchStatus(match)"
         />
       </div>
     </div>

@@ -19,7 +19,7 @@ const tileClass = computed(() => {
     return "bg-warning text-white";
   }
   if (result === AirRiddleResultEnum.INCORRECT) {
-    return "bg-default text-highlighted";
+    return "bg-elevated text-highlighted";
   }
   if (variant === "current" && letter) {
     return "bg-default text-highlighted";

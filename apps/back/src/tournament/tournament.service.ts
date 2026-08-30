@@ -160,11 +160,25 @@ export class TournamentService {
         players: { id: playerId },
       },
       {
-        populate: ["tournament"],
+        populate: [
+          "tournament",
+          "tournament.league",
+          "tournament.winner",
+          "tournament.winner.team",
+          "tournament.winner.players",
+        ],
       },
     );
 
-    return participants.map((participant) => participant.tournament);
+    const tournamentsById = new Map<string, Tournament>();
+    for (const participant of participants) {
+      const tournament = participant.tournament;
+      if (tournament && !tournamentsById.has(tournament.id)) {
+        tournamentsById.set(tournament.id, tournament);
+      }
+    }
+
+    return [...tournamentsById.values()];
   }
 
   async getTournamentsWonByTeam(teamId: string): Promise<Tournament[]> {

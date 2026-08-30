@@ -4,12 +4,11 @@ import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.v
 import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
 import AirRiddleTile from "~/components/airriddle/Tile.vue";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
+import { deriveAirRiddleLetterStatuses } from "~/utils/airRiddleLetterStatus";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const posthog = usePostHog();
-const { playCue } = useCuelume();
-
 interface GameAttempt {
   letters: string[];
   results?: AirRiddleResultEnum[];
@@ -77,6 +76,8 @@ const tileSize = computed(() => (isMobile.value ? "2.75rem" : "3.5rem"));
 const tileGridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, ${tileSize.value})`,
 }));
+
+const letterStatuses = computed(() => deriveAirRiddleLetterStatuses(gameState.attempts));
 
 function focusHiddenInput() {
   if (isMobile.value || !canType.value) {
@@ -207,7 +208,6 @@ async function submitGuess() {
   }
 
   submitting.value = true;
-  playCue("loading");
 
   try {
     const results = await guessAirRiddle(
@@ -240,14 +240,10 @@ async function submitGuess() {
 
     if (isCorrect) {
       gameState.isWon = true;
-      playCue("success");
       posthog?.capture("airriddle_game_won", { attempts: gameState.attempts.length });
     } else if (gameState.attempts.length >= maxAttempts) {
       gameState.isGameOver = true;
-      playCue("error");
       posthog?.capture("airriddle_game_lost", { attempts: gameState.attempts.length });
-    } else {
-      playCue("error");
     }
 
     clearGuess();
@@ -277,7 +273,7 @@ setPageSeo({
       </div>
     </SCrossCard>
 
-    <SCard v-if="loading" class="relative w-full p-6">
+    <SCard v-if="loading" class="relative h-row-snap w-full p-6">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
@@ -306,7 +302,7 @@ setPageSeo({
     </SCard>
 
     <template v-else-if="gameState.targetLength > 0">
-      <SCard class="relative w-full p-4 sm:p-6" @click="focusHiddenInput">
+      <SCard class="relative flex h-row-snap w-full flex-col p-4 sm:p-6" @click="focusHiddenInput">
         <div class="absolute right-3 top-3" @click.stop>
           <AirRiddleHowToPlayPopover />
         </div>
@@ -321,7 +317,7 @@ setPageSeo({
           tabindex="-1"
         />
 
-        <div class="flex flex-col items-center gap-6">
+        <div class="flex min-h-0 flex-1 flex-col items-center justify-between gap-6">
           <div class="w-full text-center" aria-live="polite" aria-atomic="true">
             <div v-if="gameState.isWon" class="text-success">
               <p class="text-xl font-bold tracking-tight">
@@ -405,6 +401,7 @@ setPageSeo({
               :disabled="!canType"
               :can-submit="canSubmit"
               :loading="submitting"
+              :letter-statuses="letterStatuses"
               @letter="onKeyboardLetter"
               @backspace="onKeyboardBackspace"
               @submit="submitGuess"

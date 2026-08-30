@@ -80,7 +80,7 @@ Before adding a new primitive, check `app/components/s/`:
 | `SCrossCard` | Auth/marketing cards with cross motif |
 | `SBadgeLive` | Live status with redundant text |
 | `SLink` | Styled internal links |
-| `SButton` | `UButton` + Cuelume press sound |
+| `SButton` | Thin `UButton` wrapper |
 | `SListItem` | Hub list row (`size`: compact/default/header/double; optional `to`, `divider`) |
 | `SRail` | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
 | `SHubColumn` | Hub grid column (`rail` \| `main`) |
@@ -88,6 +88,22 @@ Before adding a new primitive, check `app/components/s/`:
 | `SHubPageBody` | Detail-page shell aligned with both sidebar cards |
 
 Extend here when the same pattern appears 3+ times.
+
+## Tournament display names
+
+PandaScore maps to our `Tournament` model as:
+
+- `serie` — event identity (e.g. `Paris 2026`, `Boston Major: Open 2 2026`, or a weak year like `2025`)
+- `name` — stage within the event (e.g. `Playoffs`, `Group Stage`)
+- `league.name` — competition umbrella (e.g. `RLCS Major`, `RLCS EU`)
+
+User-facing event titles must go through `tournamentEventDisplayName()` in `apps/front/app/utils/tournamentEventDisplayName.ts`:
+
+- Prefix `league.name` when `serie` omits it (e.g. `Paris 2026` → `RLCS Major Paris 2026`)
+- When `serie` is year-only, join league + year (e.g. `2025` → `FIFAe World Cup 2025`)
+- Never use raw `tournament.name` alone for event titles — it is usually a stage name
+
+Trophy cabinets, player FAQ highlights, and similar lists should reuse `displayName` from `usePlayerTrophies` / `useTeamTrophies`, not `serie` or `name` directly.
 
 ## i18n Checklist
 

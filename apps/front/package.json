@@ -36,7 +36,6 @@
     "@tiptap/pm": "catalog:",
     "@tiptap/vue-3": "catalog:",
     "@vueuse/core": "^14.3.0",
-    "cuelume": "^0.2.2",
     "evlog": "catalog:",
     "motion-v": "^2.3.0",
     "nuxt": "catalog:",

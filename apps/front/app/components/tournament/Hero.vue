@@ -93,7 +93,7 @@ const showSubscribeCalendar = computed(
           v-if="tournament.league?.imageUrl"
           :src="tournament.league.imageUrl"
           :alt="tournament.league.name"
-          class="size-4 object-contain outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+          class="size-4 object-contain"
         />
         <p v-if="tournament.league?.name" class="text-sm text-muted text-pretty">
           {{ tournament.league.name }}
