@@ -7,7 +7,6 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const user = useUser();
-const pending = ref(false);
 
 const items = [
   {
@@ -43,18 +42,6 @@ onMounted(() => {
     void router.replace({ path: route.path, query });
   }
 });
-
-async function onLogout() {
-  if (pending.value) {
-    return;
-  }
-  pending.value = true;
-  try {
-    await logout();
-  } finally {
-    pending.value = false;
-  }
-}
 </script>
 
 <template>
@@ -62,21 +49,17 @@ async function onLogout() {
     <template #breadcrumb>
       <UBreadcrumb :items="items" />
     </template>
-    <template #action>
-      <UButton
-        color="neutral"
-        variant="outline"
-        :loading="pending"
-        :disabled="pending"
-        @click="onLogout"
-      >
-        {{ pending ? $t("page.home.loggingOut") : $t("page.home.logout") }}
-      </UButton>
-    </template>
-
     <DashboardContent>
       <div class="mx-auto max-w-3xl py-8">
-        <p class="text-sm font-medium text-muted">{{ $t("page.home.brand") }}</p>
+        <img
+          src="/sarpbc.svg"
+          :alt="$t('page.home.logoAlt')"
+          width="48"
+          height="48"
+          decoding="async"
+          class="size-12 bg-transparent"
+        />
+        <p class="mt-3 text-sm font-medium text-muted">{{ $t("page.home.brand") }}</p>
         <h1 class="mt-1 text-2xl font-bold tracking-tight">
           {{ $t("page.home.title") }}
         </h1>

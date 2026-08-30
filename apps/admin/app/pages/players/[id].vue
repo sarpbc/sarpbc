@@ -283,17 +283,10 @@ const contractModalTitle = computed(() =>
             />
           </div>
 
-          <UTable
-            :data="contracts"
-            :columns="contractColumns"
-            :ui="{
-              base: 'table-fixed border-separate border-spacing-0',
-              thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-              tbody: '[&>tr]:last:[&>td]:border-b-0',
-              th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
-              td: 'border-b border-muted',
-            }"
-          >
+          <UTable :data="contracts" :columns="contractColumns">
+            <template #empty>
+              {{ $t("page.players.contracts.empty") }}
+            </template>
             <template #actions-cell="{ row }">
               <div class="flex flex-row gap-1">
                 <UButton
@@ -312,10 +305,6 @@ const contractModalTitle = computed(() =>
               </div>
             </template>
           </UTable>
-
-          <p v-if="contracts.length === 0" class="mt-2 text-sm text-muted">
-            {{ $t("page.players.contracts.empty") }}
-          </p>
         </div>
       </div>
     </DashboardContent>

@@ -10,6 +10,7 @@
   "page": {
     "home": {
       "brand": "sarpbc.org Admin",
+      "logoAlt": "Logo sarpbc.org",
       "title": "Console Staff",
       "subtitle": "Actualités, joueurs, équipes, tournois, pick'ems et modération du forum sont ici.",
       "signedInAs": "Connecté en tant que",
@@ -34,7 +35,9 @@
       "forum": "Forum",
       "moderation": "Modération",
       "tokens": "Jetons API",
-      "backToSite": "Retour sur sarpbc.org"
+      "admin": "Admin",
+      "openMenu": "Ouvrir la navigation",
+      "backToSite": "Retour au site"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -239,6 +242,7 @@
     },
     "news": {
       "title": "Articles",
+      "empty": "Aucun article trouvé.",
       "articlesCount": "{count} articles",
       "columns": {
         "title": "Titre",
@@ -326,6 +330,7 @@
     },
     "players": {
       "title": "Joueurs",
+      "empty": "Aucun joueur trouvé.",
       "playersCount": "{count} joueurs",
       "save": "Enregistrer",
       "columns": {
@@ -385,6 +390,7 @@
     },
     "teams": {
       "title": "Équipes",
+      "empty": "Aucune équipe trouvée.",
       "teamsCount": "{count} équipes",
       "save": "Enregistrer",
       "syncPandascore": "Synchroniser les Équipes",
