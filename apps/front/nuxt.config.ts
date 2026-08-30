@@ -13,7 +13,6 @@ function apiOrigin(base: string): string | undefined {
 
 const apiOriginUrl = apiOrigin(apiBase);
 
-const listHubSwr = { swr: 60 } as const;
 const contentSwr = { swr: 300 } as const;
 const isProduction = process.env.NODE_ENV === "production";
 const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
@@ -188,16 +187,6 @@ export default defineNuxtConfig({
     "/fr/legal-notice": contentSwr,
     "/cookie-policy": contentSwr,
     "/fr/cookie-policy": contentSwr,
-    "/": listHubSwr,
-    "/fr": listHubSwr,
-    "/matches": listHubSwr,
-    "/fr/matches": listHubSwr,
-    "/tournaments": listHubSwr,
-    "/fr/tournaments": listHubSwr,
-    "/player": listHubSwr,
-    "/fr/player": listHubSwr,
-    "/team": listHubSwr,
-    "/fr/team": listHubSwr,
   },
 
   runtimeConfig: {
