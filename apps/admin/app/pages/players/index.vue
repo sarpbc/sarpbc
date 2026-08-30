@@ -156,17 +156,13 @@ async function updatePage(value: number) {
         <UTable
           :data="players"
           :columns="columns"
-          :ui="{
-            base: 'table-fixed border-separate border-spacing-0',
-            thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
-            th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
-            td: 'border-b border-muted',
-          }"
           sticky
           :loading="status === 'pending'"
           @select="selectRow"
         >
+          <template #empty>
+            {{ $t("page.players.empty") }}
+          </template>
           <template #actions-cell="{ row }">
             <UButton
               icon="i-fluent-delete-24-regular"

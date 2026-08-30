@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-dvh w-full flex-col overflow-hidden">
     <div
-      class="flex h-16 w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-default py-2 pr-4 pl-8"
+      class="flex h-header w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-default py-2 pr-4 pl-8"
     >
       <div class="min-w-0">
         <slot name="breadcrumb" />

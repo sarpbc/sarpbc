@@ -130,17 +130,13 @@ async function updatePage(value: number) {
         <UTable
           :data="tournaments"
           :columns="columns"
-          :ui="{
-            base: 'table-fixed border-separate border-spacing-0',
-            thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-            tbody: '[&>tr]:last:[&>td]:border-b-0 [&>tr]:hover:!bg-transparent',
-            th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
-            td: 'border-b border-muted',
-          }"
           :loading="status === 'pending'"
           sticky
           @select="selectRow"
         >
+          <template #empty>
+            {{ $t("page.tournaments.noTournaments") }}
+          </template>
           <template #source-cell="{ row }">
             <UBadge
               :color="isManualTournament(row.original) ? 'primary' : 'neutral'"
@@ -178,14 +174,7 @@ async function updatePage(value: number) {
         </UTable>
 
         <div
-          v-if="status !== 'pending' && tournaments.length === 0"
-          class="py-6 text-sm text-muted"
-        >
-          {{ $t("page.tournaments.noTournaments") }}
-        </div>
-
-        <div
-          v-else-if="status !== 'pending'"
+          v-if="status !== 'pending' && tournaments.length > 0"
           class="mt-4 flex w-full flex-row items-center justify-between gap-4"
         >
           <span class="text-muted">

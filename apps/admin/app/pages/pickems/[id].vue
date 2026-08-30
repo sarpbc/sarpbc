@@ -48,17 +48,22 @@ const breadcrumbItems = computed(() => [
         </p>
 
         <div
-          v-for="match in displayMatches"
-          :key="match.id"
-          class="flex w-full flex-row items-center justify-between border border-default p-4"
+          v-if="displayMatches.length > 0"
+          class="divide-y divide-default border-y border-default"
         >
-          <h2 class="text-lg font-semibold">
-            {{ match.participants?.[0]?.team.name }} vs
-            {{ match.participants?.[1]?.team.name }}
-          </h2>
+          <div
+            v-for="match in displayMatches"
+            :key="match.id"
+            class="flex min-h-row w-full flex-row items-center py-2"
+          >
+            <p class="truncate text-sm font-medium text-highlighted">
+              {{ match.participants?.[0]?.team.name }} vs
+              {{ match.participants?.[1]?.team.name }}
+            </p>
+          </div>
         </div>
 
-        <div v-if="status !== 'pending' && displayMatches.length === 0" class="text-sm text-muted">
+        <div v-else-if="status !== 'pending'" class="py-8 text-center text-sm text-muted">
           {{ $t("page.pickems.noMatches") }}
         </div>
       </div>

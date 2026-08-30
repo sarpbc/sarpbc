@@ -87,14 +87,21 @@ function googleLogin() {
 </script>
 
 <template>
-  <div class="w-full min-h-svh flex flex-col items-center justify-center px-4">
-    <div class="w-full max-w-sm border border-default bg-elevated p-6">
-      <div class="w-full flex flex-col items-center justify-center">
-        <p class="text-sm font-medium text-muted mb-1">{{ $t("page.home.brand") }}</p>
-        <h1 class="w-fit text-2xl font-bold tracking-tight">
+  <div class="flex h-full w-full flex-col items-center justify-center">
+    <SCrossCard class="p-4">
+      <div class="flex w-full flex-col items-center justify-center">
+        <img
+          src="/sarpbc.svg"
+          :alt="$t('page.home.logoAlt')"
+          width="48"
+          height="48"
+          decoding="async"
+          class="size-12 bg-transparent"
+        />
+        <h1 class="mt-2 w-fit text-2xl font-bold">
           {{ $t("page.authentication.login") }}
         </h1>
-        <p class="text-sm text-muted mt-2 mb-6 text-center">
+        <p class="mt-2 mb-6 w-fit text-center text-sm font-light text-muted">
           {{ $t("page.authentication.staffOnly") }}
         </p>
 
@@ -102,7 +109,7 @@ function googleLogin() {
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           color="neutral"
-          class="w-full flex flex-row justify-center text-highlighted"
+          class="flex w-full flex-row justify-center text-highlighted"
           size="lg"
           variant="outline"
           @click="googleLogin"
@@ -110,7 +117,7 @@ function googleLogin() {
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
+        <UForm :state="state" class="h-fit w-80" method="post" @submit="onSubmit">
           <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
             <UInput
               v-model="state.email"
@@ -140,10 +147,10 @@ function googleLogin() {
             type="submit"
             :loading="pending"
             :disabled="pending"
-            class="w-full flex flex-col items-center"
+            class="flex w-full flex-col items-center"
           />
         </UForm>
       </div>
-    </div>
+    </SCrossCard>
   </div>
 </template>

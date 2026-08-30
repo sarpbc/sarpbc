@@ -215,19 +215,7 @@ async function confirmRevoke() {
           </div>
 
           <ClientOnly>
-            <UTable
-              v-if="tokens.length > 0"
-              :data="tokens"
-              :columns="columns"
-              :ui="{
-                base: 'table-fixed border-separate border-spacing-0',
-                thead: '[&>tr]:bg-muted [&>tr]:after:content-none [&>tr:nth-child(2)]:h-0',
-                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                th: 'first:rounded-l-lg last:rounded-r-lg border-y border-muted first:border-l last:border-r',
-                td: 'border-b border-muted',
-              }"
-              sticky
-            >
+            <UTable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
               <template #actions-cell="{ row }">
                 <UButton
                   color="error"

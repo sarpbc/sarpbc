@@ -130,28 +130,29 @@ async function handleSetWinner(match: Match, participantId: string) {
         </p>
 
         <div
-          v-for="match in displayMatches"
-          :key="match.id"
-          class="flex w-full flex-col gap-3 border border-default p-4"
+          v-if="displayMatches.length > 0"
+          class="divide-y divide-default border-y border-default"
         >
-          <div class="flex flex-row items-start justify-between gap-4">
-            <div class="flex min-w-0 flex-col gap-1">
-              <h2 class="text-lg font-semibold">{{ matchLabel(match) }}</h2>
+          <div
+            v-for="match in displayMatches"
+            :key="match.id"
+            class="flex w-full flex-col gap-2 py-2 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div class="flex min-w-0 flex-col gap-0.5">
+              <p class="truncate text-sm font-medium text-highlighted">{{ matchLabel(match) }}</p>
               <p class="text-sm text-muted">
                 {{ $t("page.tournaments.match.status") }}:
                 {{ match.status ?? "unknown" }}
-              </p>
-              <p class="text-sm">
-                {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
+                · {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
               </p>
             </div>
 
-            <div class="flex shrink-0 flex-col gap-2">
+            <div class="flex shrink-0 flex-row flex-wrap gap-1">
               <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
-                size="sm"
-                variant="soft"
+                size="xs"
+                variant="ghost"
                 :loading="settingWinnerMatchId === match.id"
                 :label="`${$t('page.tournaments.match.setWinner')}: ${participant.team.name}`"
                 @click="handleSetWinner(match, participant.id)"
@@ -160,7 +161,7 @@ async function handleSetWinner(match: Match, participantId: string) {
           </div>
         </div>
 
-        <div v-if="displayMatches.length === 0" class="text-sm text-muted">
+        <div v-else-if="matches" class="py-8 text-center text-sm text-muted">
           {{ $t("page.tournaments.noMatches") }}
         </div>
       </div>

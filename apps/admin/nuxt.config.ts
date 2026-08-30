@@ -25,7 +25,9 @@ const prosemirrorAliases = Object.fromEntries(
 const apiBase =
   process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
 const publicSiteUrl =
-  process.env.NUXT_PUBLIC_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "https://sarpbc.org";
+  process.env.NUXT_PUBLIC_PUBLIC_SITE_URL ||
+  process.env.PUBLIC_SITE_URL ||
+  (process.env.NODE_ENV === "production" ? "https://sarpbc.org" : "http://localhost:4000");
 
 function apiOrigin(base: string): string | undefined {
   try {
