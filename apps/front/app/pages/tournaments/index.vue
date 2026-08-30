@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { Tournament } from "~/types/tournament";
 import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
 
 const { t } = useI18n();
@@ -8,21 +9,32 @@ const { setJsonLd } = useStructuredData();
 
 const TOURNAMENTS_PER_PAGE = 20;
 
+interface TournamentsIndexPayload {
+  tournaments: Tournament[];
+  total: number;
+  fetchedAt: number;
+}
+
 const offset = computed(() => {
   const param = route.query.offset as string;
   return param ? parseInt(param, 10) : 0;
 });
 
-const { data: tournamentsResponse, pending } = await useLazyAsyncData(
+const { data: tournamentsResponse, pending } = await useAsyncData<TournamentsIndexPayload>(
   () => `tournaments-index-${offset.value}`,
-  () =>
-    getAllTournaments({
+  async () => {
+    const result = await getAllTournaments({
       limit: TOURNAMENTS_PER_PAGE,
       offset: offset.value,
-    }),
+    });
+    return { ...result, fetchedAt: Date.now() };
+  },
   {
-    default: () => ({ tournaments: [], total: 0 }),
+    default: () => ({ tournaments: [], total: 0, fetchedAt: 0 }),
     watch: [offset],
+    getCachedData(key, nuxtApp) {
+      return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+    },
   },
 );
 
@@ -30,7 +42,7 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
 const totalTournaments = computed(() => tournamentsResponse.value?.total ?? 0);
 
 const nextTournament = computed(() => {
-  const now = Date.now();
+  const now = tournamentsResponse.value?.fetchedAt ?? 0;
   return tournaments.value
     .filter((tournament) => {
       if (!tournament.beginAt) {
