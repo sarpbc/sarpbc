@@ -12,7 +12,6 @@ const posthog = usePostHog();
 const { identifyUser } = usePostHogIdentity();
 const toast = useToast();
 const config = useRuntimeConfig();
-const { playCue } = useCuelume();
 const { refresh: refreshUnreadCount } = useUnreadNotificationCount();
 
 if (!user.value) {
@@ -93,7 +92,6 @@ async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
   }
 
   isSavingUserName.value = true;
-  playCue("loading");
   try {
     const updated = await updateUserName(parsed.data.userName);
     user.value = updated;
@@ -120,7 +118,6 @@ async function markAllRead() {
   }
 
   isMarkingRead.value = true;
-  playCue("loading");
   try {
     await markNotificationsRead();
     await Promise.all([refreshNotifications(), refreshUnreadCount()]);
@@ -146,7 +143,6 @@ function openEditProfile() {
 const handleLogout = async () => {
   menuOpen.value = false;
   isLoggingOut.value = true;
-  playCue("loading");
   try {
     posthog?.capture("user_logged_out");
     posthog?.reset();

@@ -2,8 +2,15 @@ import type { BracketLink, Tournament, TournamentParticipant } from "./tournamen
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
 export interface MatchResult {
-  participant: string;
+  participant: string | { id: string };
   score: number;
+}
+
+function resolveMatchResultParticipantId(participant: MatchResult["participant"]): string | null {
+  if (typeof participant === "string") {
+    return participant;
+  }
+  return participant.id ?? null;
 }
 
 export function getMatchParticipantScore(
@@ -14,7 +21,9 @@ export function getMatchParticipantScore(
     return null;
   }
 
-  const result = results.find((entry) => entry.participant === participantId);
+  const result = results.find(
+    (entry) => resolveMatchResultParticipantId(entry.participant) === participantId,
+  );
 
   return result?.score ?? null;
 }
@@ -135,3 +144,17 @@ export interface Match {
 }
 
 export type MatchStatus = "upcoming" | "live" | "finished";
+
+export function shouldShowMatchScores(status: MatchStatus): boolean {
+  return status === "live" || status === "finished";
+}
+
+export function displayMatchScore(score: number | null, status: MatchStatus): string | null {
+  if (!shouldShowMatchScores(status)) {
+    return null;
+  }
+  if (score === null) {
+    return "–";
+  }
+  return String(score);
+}

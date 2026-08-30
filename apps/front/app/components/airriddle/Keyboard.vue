@@ -1,15 +1,18 @@
 <script lang="ts" setup>
+import type { AirRiddleLetterStatus } from "~/utils/airRiddleLetterStatus";
+
 const { t } = useI18n();
-const { attrs: cuelumeAttrs, pressClass } = useCuelume();
 
 const {
   disabled = false,
   canSubmit = false,
   loading = false,
+  letterStatuses = {},
 } = defineProps<{
   disabled?: boolean;
   canSubmit?: boolean;
   loading?: boolean;
+  letterStatuses?: Record<string, AirRiddleLetterStatus>;
 }>();
 
 const emit = defineEmits<{
@@ -32,6 +35,25 @@ function onLetterPress(letter: string) {
   }
   emit("letter", letter);
 }
+
+function keyClass(letter: string): string {
+  const status = letterStatuses[letter.toUpperCase()];
+  switch (status) {
+    case "correct":
+      return "bg-success text-white";
+    case "misplaced":
+      return "bg-warning text-white";
+    case "incorrect":
+      return "bg-elevated text-highlighted";
+    case "unused":
+    case undefined:
+      return "";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
 </script>
 
 <template>
@@ -48,6 +70,7 @@ function onLetterPress(letter: string) {
         variant="soft"
         color="neutral"
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold uppercase sm:max-w-11"
+        :class="keyClass(letter)"
         :disabled="disabled"
         :aria-label="letter"
         @click="onLetterPress(letter)"
@@ -64,6 +87,7 @@ function onLetterPress(letter: string) {
         variant="soft"
         color="neutral"
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold tabular-nums sm:max-w-11"
+        :class="keyClass(digit)"
         :disabled="disabled"
         :aria-label="digit"
         @click="onLetterPress(digit)"
@@ -98,11 +122,9 @@ function onLetterPress(letter: string) {
         type="button"
         color="primary"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center font-mono text-sm font-semibold"
-        :class="pressClass"
         :disabled="disabled || !canSubmit"
         :loading="loading"
         :aria-label="t('page.game.airriddle.keyboardEnter')"
-        v-bind="cuelumeAttrs.pressRelease"
         @click="emit('submit')"
       >
         {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.keyboardEnter") }}

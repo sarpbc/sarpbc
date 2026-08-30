@@ -27,10 +27,53 @@ describe("toPlayerTrophyListItem", () => {
     expect(item).toEqual({
       id: "tournament-1",
       name: "World Championship",
+      displayName: "RLCS 2026 Season",
       endAt: new Date("2026-06-15T18:00:00.000Z"),
       leagueName: "RLCS",
       serie: "2026 Season",
     });
+  });
+
+  it("builds a full event name for RLCS Major Paris playoffs", () => {
+    const item = toPlayerTrophyListItem(
+      makeTournament({
+        id: "tournament-paris",
+        name: "Playoffs",
+        endAt: new Date("2026-05-24T18:00:00.000Z"),
+        serie: "Paris 2026",
+        league: { id: "league-1", name: "RLCS Major", createdAt: NOW, updatedAt: NOW },
+      }),
+    );
+
+    expect(item.displayName).toBe("RLCS Major Paris 2026");
+  });
+
+  it("prefixes league for colon-formatted serie names", () => {
+    const item = toPlayerTrophyListItem(
+      makeTournament({
+        id: "tournament-boston",
+        name: "Playoffs",
+        endAt: new Date("2026-01-18T21:20:00.000Z"),
+        serie: "Boston Major: Open 2 2026",
+        league: { id: "league-1", name: "RLCS EU", createdAt: NOW, updatedAt: NOW },
+      }),
+    );
+
+    expect(item.displayName).toBe("RLCS EU Boston Major: Open 2 2026");
+  });
+
+  it("joins league and year-only serie", () => {
+    const item = toPlayerTrophyListItem(
+      makeTournament({
+        id: "tournament-fifae",
+        name: "Playoffs",
+        endAt: new Date("2025-12-19T00:00:00.000Z"),
+        serie: "2025",
+        league: { id: "league-1", name: "FIFAe World Cup", createdAt: NOW, updatedAt: NOW },
+      }),
+    );
+
+    expect(item.displayName).toBe("FIFAe World Cup 2025");
   });
 
   it("ignores bare league id strings", () => {
@@ -46,6 +89,7 @@ describe("toPlayerTrophyListItem", () => {
     expect(item).toEqual({
       id: "tournament-2",
       name: "World Championship",
+      displayName: "World Championship",
       endAt: null,
       leagueName: undefined,
       serie: null,

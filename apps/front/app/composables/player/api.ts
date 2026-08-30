@@ -40,3 +40,16 @@ export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAw
 
   return res.awards ?? [];
 }
+
+export async function getPlayerTournaments(playerId: string): Promise<Tournament[]> {
+  const config = useRuntimeConfig();
+  const res = await $fetch<{ tournaments?: Tournament[] }>(
+    `${config.public.apiBase}/player/${playerId}/tournaments`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  return res.tournaments ?? [];
+}

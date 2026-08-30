@@ -7,16 +7,12 @@ interface Props {
 }
 
 const { player, size = "md" } = defineProps<Props>();
-
-const { attrs: cuelumeAttrs, pressClass } = useCuelume();
 </script>
 
 <template>
   <ULink
     :to="$localePath(`/player/${player.slug}`)"
     class="flex w-fit flex-col items-center gap-1.5 rounded-md p-2 touch-manipulation transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-    :class="pressClass"
-    v-bind="cuelumeAttrs.pressRelease"
   >
     <PlayerImg :player-name="player.name" :img="player.imageUrl" :size="size" />
     <div class="flex w-full min-w-0 flex-row items-center justify-center gap-1">

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { MatchResult } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import type { MatchResult, MatchStatus } from "~/types/matches";
+import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
 import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
@@ -23,6 +23,7 @@ const {
   winnerParticipantId = null,
   compact = false,
   bracket = false,
+  matchStatus,
   discoverySource,
   discoveryStatus,
 } = defineProps<{
@@ -40,6 +41,7 @@ const {
   winnerParticipantId?: string | null;
   compact?: boolean;
   bracket?: boolean;
+  matchStatus: MatchStatus;
   /** When set with discoveryStatus, CTR instrumentation is enabled. */
   discoverySource?: MatchDiscoverySource;
   discoveryStatus?: MatchDiscoveryStatus;
@@ -54,6 +56,11 @@ const detailTo = computed(() => {
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
+
+const displayScoreA = computed(() => displayMatchScore(scoreA.value, matchStatus));
+const displayScoreB = computed(() => displayMatchScore(scoreB.value, matchStatus));
+
+const showScores = computed(() => displayScoreA.value !== null || displayScoreB.value !== null);
 
 function onMatchClick() {
   if (!discoverySource || !discoveryStatus) {
@@ -124,7 +131,9 @@ function participantRowClass(participantId: string | undefined): string {
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
-        <span class="tabular-nums font-semibold text-xs">{{ scoreA ?? "–" }}</span>
+        <span v-if="showScores" class="tabular-nums font-semibold text-xs">{{
+          displayScoreA
+        }}</span>
       </div>
       <div
         :class="[
@@ -139,7 +148,9 @@ function participantRowClass(participantId: string | undefined): string {
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
-        <span class="tabular-nums font-semibold text-xs">{{ scoreB ?? "–" }}</span>
+        <span v-if="showScores" class="tabular-nums font-semibold text-xs">{{
+          displayScoreB
+        }}</span>
       </div>
     </template>
 
@@ -154,7 +165,7 @@ function participantRowClass(participantId: string | undefined): string {
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamA }}</span>
         </div>
         <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
-          {{ scoreA ?? "–" }}
+          <template v-if="showScores">{{ displayScoreA }}</template>
         </span>
       </div>
       <div
@@ -167,7 +178,7 @@ function participantRowClass(participantId: string | undefined): string {
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamB }}</span>
         </div>
         <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
-          {{ scoreB ?? "–" }}
+          <template v-if="showScores">{{ displayScoreB }}</template>
         </span>
       </div>
     </template>

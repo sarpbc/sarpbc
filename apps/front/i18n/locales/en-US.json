@@ -16,6 +16,59 @@
     },
     "cancel": "Cancel"
   },
+  "nationalities": {
+    "demonym": {
+      "AR": "Argentine",
+      "AT": "Austrian",
+      "AU": "Australian",
+      "BE": "Belgian",
+      "BR": "Brazilian",
+      "CA": "Canadian",
+      "CH": "Swiss",
+      "CL": "Chilean",
+      "CN": "Chinese",
+      "CO": "Colombian",
+      "CZ": "Czech",
+      "DE": "German",
+      "DK": "Danish",
+      "EE": "Estonian",
+      "ES": "Spanish",
+      "FI": "Finnish",
+      "FR": "French",
+      "GB": "British",
+      "GR": "Greek",
+      "HR": "Croatian",
+      "HU": "Hungarian",
+      "IE": "Irish",
+      "IL": "Israeli",
+      "IN": "Indian",
+      "IT": "Italian",
+      "JP": "Japanese",
+      "KR": "South Korean",
+      "LT": "Lithuanian",
+      "LV": "Latvian",
+      "MX": "Mexican",
+      "NL": "Dutch",
+      "NO": "Norwegian",
+      "NZ": "New Zealand",
+      "PE": "Peruvian",
+      "PH": "Filipino",
+      "PL": "Polish",
+      "PT": "Portuguese",
+      "RO": "Romanian",
+      "RS": "Serbian",
+      "RU": "Russian",
+      "SA": "Saudi",
+      "SE": "Swedish",
+      "SI": "Slovenian",
+      "SK": "Slovak",
+      "TR": "Turkish",
+      "UA": "Ukrainian",
+      "US": "American",
+      "UY": "Uruguayan",
+      "ZA": "South African"
+    }
+  },
   "newsTag": {
     "loading": "Loading…",
     "error": "Could not load profile. Try again later.",
@@ -377,8 +430,7 @@
           "empty": "No tournament wins yet.",
           "emptyHint": "Titles appear here when this player wins an event.",
           "error": "Could not load this player's trophies. Check your connection and try again.",
-          "retry": "Try Again",
-          "wonOn": "Won {date}"
+          "retry": "Try Again"
         },
         "awards": {
           "title": "Awards",
@@ -405,6 +457,52 @@
           "past": {
             "empty": "No completed matches yet.",
             "emptyHint": "Results appear here once this player plays a match."
+          }
+        },
+        "tabs": {
+          "label": "Player profile sections",
+          "info": "Info",
+          "matches": "Matches",
+          "events": "Events",
+          "trophies": "Trophies"
+        },
+        "events": {
+          "sectionTitle": "Events",
+          "error": "Could not load this player's events. Check your connection and try again.",
+          "retry": "Try Again",
+          "live": "Live Now",
+          "winner": "Winner",
+          "tabs": {
+            "upcoming": "Upcoming",
+            "past": "Past"
+          },
+          "upcoming": {
+            "empty": "No upcoming events.",
+            "emptyHint": "Events appear here when this player is entered in a tournament."
+          },
+          "past": {
+            "empty": "No past events yet.",
+            "emptyHint": "Finished tournaments this player entered will show up here."
+          }
+        },
+        "faq": {
+          "title": "Frequently Asked Questions",
+          "who": {
+            "question": "Who is {name}?",
+            "answerWithTeam": "{name} is a {nationality} Rocket League esports player currently competing for {team}.",
+            "answerWithTeamGeneric": "{name} is a Rocket League esports player currently competing for {team}.",
+            "answerFreeAgent": "{name} is a {nationality} Rocket League esports player currently listed as a free agent.",
+            "answerFreeAgentGeneric": "{name} is a Rocket League esports player currently listed as a free agent."
+          },
+          "age": {
+            "question": "How old is {name}?",
+            "answerWithAge": "{name} is {age} years old.",
+            "answerUnknown": "We don't have {name}'s date of birth on record."
+          },
+          "trophies": {
+            "question": "What tournaments has {name} won?",
+            "answerWithWins": "{name} has won {count} tournament title(s), including {titles}.",
+            "answerNone": "{name} has not won a tournament title on record yet."
           }
         }
       }
@@ -468,8 +566,7 @@
           "empty": "No tournament wins yet.",
           "emptyHint": "Titles appear here when this team wins an event.",
           "error": "Could not load this team's trophies. Check your connection and try again.",
-          "retry": "Try Again",
-          "wonOn": "Won {date}"
+          "retry": "Try Again"
         },
         "events": {
           "sectionTitle": "Events",

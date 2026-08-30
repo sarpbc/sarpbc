@@ -155,6 +155,16 @@ export class PlayerController {
     return { awards };
   }
 
+  @Get(":id/tournaments")
+  async getTournaments(@Param("id", ParseUUIDPipe) id: string) {
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const tournaments = await this.tournamentService.getTournamentsByPlayer(id);
+    return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
+  }
+
   @Get(":id/matches")
   async getMatches(@Param("id") id: string) {
     const player = await this.playerService.findById(id);

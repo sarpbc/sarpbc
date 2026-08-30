@@ -27,6 +27,9 @@ export interface BracketLayoutMatch {
   participantBId?: string;
   results?: MatchResult[];
   winnerParticipantId: string | null;
+  beginAt?: Date;
+  endAt?: Date;
+  status?: string;
 }
 
 export interface BracketConnector {
