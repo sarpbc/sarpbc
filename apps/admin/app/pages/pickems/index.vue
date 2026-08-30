@@ -74,60 +74,65 @@ async function handleEnablePickems(tournamentId: string) {
           {{ $t("page.pickems.tournamentsCount", { count: tournaments.length }) }}
         </p>
 
-        <div
-          v-for="tournament in tournaments"
-          :key="tournament.id"
-          class="flex w-full flex-row items-center justify-between gap-4 border border-default p-4"
-        >
-          <div class="flex min-w-0 flex-col gap-1">
-            <h2 class="truncate text-lg font-semibold">
-              {{ tournamentLabel(tournament) }}
-            </h2>
-            <div v-if="tournament.participants?.length" class="flex flex-row gap-1">
-              <div
-                v-for="participant in tournament.participants"
-                :key="participant.id"
-                class="size-fit"
-              >
-                <img
-                  v-if="teamLogoSrc(participant.team)"
-                  :src="teamLogoSrc(participant.team)"
-                  :alt="participant.team.name"
-                  class="size-4"
-                />
+        <div v-if="tournaments.length > 0" class="divide-y divide-default border-y border-default">
+          <div
+            v-for="tournament in tournaments"
+            :key="tournament.id"
+            class="flex min-h-row w-full flex-row items-center justify-between gap-4 py-2"
+          >
+            <div class="flex min-w-0 flex-col gap-0.5">
+              <p class="truncate text-sm font-medium text-highlighted">
+                {{ tournamentLabel(tournament) }}
+              </p>
+              <div v-if="tournament.participants?.length" class="flex flex-row gap-1">
+                <div
+                  v-for="participant in tournament.participants"
+                  :key="participant.id"
+                  class="size-fit"
+                >
+                  <img
+                    v-if="teamLogoSrc(participant.team)"
+                    :src="teamLogoSrc(participant.team)"
+                    :alt="participant.team.name"
+                    class="size-4"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="flex shrink-0 flex-row gap-2">
-            <UButton
-              variant="soft"
-              icon="i-fluent-arrow-expand-24-regular"
-              :title="$t('page.pickems.expand')"
-              :aria-label="$t('page.pickems.expand')"
-              :to="localePath(`/pickems/${tournament.id}`)"
-            />
-            <UButton
-              variant="soft"
-              :icon="iconFor(tournament.id)"
-              :color="colorFor(tournament.id)"
-              :title="$t('page.pickems.syncTournament')"
-              :aria-label="$t('page.pickems.syncTournament')"
-              :loading="syncingId === tournament.id"
-              @click="handleSyncTournament(tournament.id)"
-            />
-            <UButton
-              variant="soft"
-              icon="i-fluent-predictions-24-regular"
-              :title="$t('page.pickems.enablePickems')"
-              :aria-label="$t('page.pickems.enablePickems')"
-              :loading="enablingTournamentId === tournament.id"
-              @click="handleEnablePickems(tournament.id)"
-            />
+            <div class="flex shrink-0 flex-row gap-1">
+              <UButton
+                variant="ghost"
+                size="xs"
+                icon="i-fluent-arrow-expand-24-regular"
+                :title="$t('page.pickems.expand')"
+                :aria-label="$t('page.pickems.expand')"
+                :to="localePath(`/pickems/${tournament.id}`)"
+              />
+              <UButton
+                variant="ghost"
+                size="xs"
+                :icon="iconFor(tournament.id)"
+                :color="colorFor(tournament.id)"
+                :title="$t('page.pickems.syncTournament')"
+                :aria-label="$t('page.pickems.syncTournament')"
+                :loading="syncingId === tournament.id"
+                @click="handleSyncTournament(tournament.id)"
+              />
+              <UButton
+                variant="ghost"
+                size="xs"
+                icon="i-fluent-predictions-24-regular"
+                :title="$t('page.pickems.enablePickems')"
+                :aria-label="$t('page.pickems.enablePickems')"
+                :loading="enablingTournamentId === tournament.id"
+                @click="handleEnablePickems(tournament.id)"
+              />
+            </div>
           </div>
         </div>
 
-        <div v-if="status !== 'pending' && tournaments.length === 0" class="text-sm text-muted">
+        <div v-else-if="status !== 'pending'" class="py-8 text-center text-sm text-muted">
           {{ $t("page.pickems.noTournaments") }}
         </div>
       </div>

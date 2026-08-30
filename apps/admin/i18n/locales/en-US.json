@@ -10,6 +10,7 @@
   "page": {
     "home": {
       "brand": "sarpbc.org Admin",
+      "logoAlt": "sarpbc.org logo",
       "title": "Staff Console",
       "subtitle": "News, players, teams, tournaments, pick'ems, and forum moderation live here.",
       "signedInAs": "Signed in as",
@@ -34,7 +35,9 @@
       "forum": "Forum",
       "moderation": "Moderation",
       "tokens": "API Tokens",
-      "backToSite": "Back to sarpbc.org"
+      "admin": "Admin",
+      "openMenu": "Open navigation",
+      "backToSite": "Back to Site"
     },
     "search": {
       "placeholder": "Search…",
@@ -239,6 +242,7 @@
     },
     "news": {
       "title": "Articles",
+      "empty": "No articles found.",
       "articlesCount": "{count} articles",
       "columns": {
         "title": "Title",
@@ -326,6 +330,7 @@
     },
     "players": {
       "title": "Players",
+      "empty": "No players found.",
       "playersCount": "{count} players",
       "save": "Save",
       "columns": {
@@ -385,6 +390,7 @@
     },
     "teams": {
       "title": "Teams",
+      "empty": "No teams found.",
       "teamsCount": "{count} teams",
       "save": "Save",
       "syncPandascore": "Sync Teams",

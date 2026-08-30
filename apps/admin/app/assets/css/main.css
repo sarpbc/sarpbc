@@ -17,6 +17,9 @@
 
 @theme {
   --container-news: 848px;
+  --spacing-header: 4rem;
+  --spacing-row: 2.75rem;
+  --spacing-cross: 4px;
   --spacing-px: 1px;
   --spacing-resize-handle: 2px;
   --radius-scrollbar: 5px;

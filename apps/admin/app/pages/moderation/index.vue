@@ -13,9 +13,7 @@ const breadcrumbItems = [
   },
 ];
 
-const publicSiteUrl = computed(() =>
-  String(config.public.publicSiteUrl || "https://sarpbc.org").replace(/\/$/, ""),
-);
+const publicSiteUrl = computed(() => String(config.public.publicSiteUrl).replace(/\/$/, ""));
 
 const dateFormatter = computed(
   () =>
