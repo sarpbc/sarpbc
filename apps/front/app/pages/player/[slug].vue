@@ -127,127 +127,129 @@ setPageSeo({
 
 <template>
   <SHubPageBody>
-    <SCard size="s" class="flex w-full min-w-0 flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4">
-      <PlayerImg
-        class="mx-auto shrink-0 sm:mx-0"
-        :player-name="currentPlayer.name"
-        :img="currentPlayer.imageUrl"
-        size="xl"
-        priority
-      />
-      <div class="w-full min-w-0 flex flex-col gap-3">
-        <div class="flex min-w-0 flex-col items-start gap-1">
-          <h1 class="text-xl font-semibold tracking-tight text-balance">
-            {{ currentPlayer.name }}
-          </h1>
-          <div class="flex min-w-0 flex-row items-center gap-2">
-            <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-            <span class="truncate text-sm text-muted">
-              {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
-            </span>
-          </div>
-        </div>
-        <dl class="w-full min-w-0 flex flex-col gap-3">
-          <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
-            <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
-            <dd class="min-w-0">
-              <UTooltip
-                v-if="currentPlayer.birthday !== undefined"
-                :content="{
-                  align: 'center',
-                  side: 'top',
-                  sideOffset: 4,
-                }"
-                :text="df.format(new Date(currentPlayer.birthday))"
-              >
-                <span class="text-sm font-medium tabular-nums">
-                  {{
-                    t("page.player.slug.xYears", {
-                      years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
-                    })
-                  }}
-                </span>
-              </UTooltip>
-            </dd>
-          </div>
-          <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
-            <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
-            <dd class="min-w-0 flex justify-end">
-              <SLink
-                v-if="currentPlayer.team"
-                :to="$localePath(`/team/${currentPlayer.team.slug}`)"
-                variant="inline"
-                class="inline-flex items-center gap-2 min-w-0"
-              >
-                <TeamImg
-                  :team-name="currentPlayer.team.name"
-                  :image-url="currentPlayer.team.imageUrl"
-                  :dark-mode-image-url="currentPlayer.team.darkModeImageUrl"
-                  size="xs"
-                />
-                <span class="truncate">{{ currentPlayer.team.name }}</span>
-              </SLink>
-              <span v-else class="text-sm text-muted">
-                {{ t("page.player.slug.freeAgent") }}
+    <div class="w-full flex min-w-0 flex-col">
+      <SCard size="m" class="flex w-full min-w-0 flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4">
+        <PlayerImg
+          class="mx-auto shrink-0 sm:mx-0"
+          :player-name="currentPlayer.name"
+          :img="currentPlayer.imageUrl"
+          size="xl"
+          priority
+        />
+        <div class="w-full min-w-0 flex flex-col gap-3 sm:justify-between">
+          <div class="flex min-w-0 flex-col items-start gap-1">
+            <h1 class="text-xl font-semibold tracking-tight text-balance">
+              {{ currentPlayer.name }}
+            </h1>
+            <div class="flex min-w-0 flex-row items-center gap-2">
+              <FlagIcon :nationality="currentPlayer.nationality" size="md" />
+              <span class="truncate text-sm text-muted">
+                {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
               </span>
-            </dd>
+            </div>
           </div>
-        </dl>
+          <dl class="w-full min-w-0 flex flex-col gap-3">
+            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
+              <dd class="min-w-0">
+                <UTooltip
+                  v-if="currentPlayer.birthday !== undefined"
+                  :content="{
+                    align: 'center',
+                    side: 'top',
+                    sideOffset: 4,
+                  }"
+                  :text="df.format(new Date(currentPlayer.birthday))"
+                >
+                  <span class="text-sm font-medium tabular-nums">
+                    {{
+                      t("page.player.slug.xYears", {
+                        years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
+                      })
+                    }}
+                  </span>
+                </UTooltip>
+              </dd>
+            </div>
+            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
+              <dd class="min-w-0 flex justify-end">
+                <SLink
+                  v-if="currentPlayer.team"
+                  :to="$localePath(`/team/${currentPlayer.team.slug}`)"
+                  variant="inline"
+                  class="inline-flex items-center gap-2 min-w-0"
+                >
+                  <TeamImg
+                    :team-name="currentPlayer.team.name"
+                    :image-url="currentPlayer.team.imageUrl"
+                    :dark-mode-image-url="currentPlayer.team.darkModeImageUrl"
+                    size="xs"
+                  />
+                  <span class="truncate">{{ currentPlayer.team.name }}</span>
+                </SLink>
+                <span v-else class="text-sm text-muted">
+                  {{ t("page.player.slug.freeAgent") }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </SCard>
+
+      <div class="flex h-row min-h-row w-full items-center gap-2 -mb-px">
+        <UButton
+          v-for="item in tabItems"
+          :key="item.value"
+          :label="item.label"
+          :variant="tab === item.value ? 'solid' : 'soft'"
+          color="neutral"
+          class="w-full items-center justify-center"
+          @click="setTab(item.value)"
+        />
       </div>
-    </SCard>
 
-    <div class="w-full flex flex-row gap-2">
-      <UButton
-        v-for="item in tabItems"
-        :key="item.value"
-        :label="item.label"
-        :variant="tab === item.value ? 'solid' : 'soft'"
-        color="neutral"
-        class="w-full items-center justify-center"
-        @click="setTab(item.value)"
+      <template v-if="tab === 'info'">
+        <PlayerFormerTeams v-if="oldTeams && oldTeams.length > 0" :contracts="oldTeams" />
+        <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
+      </template>
+
+      <PlayerMatchesSection
+        v-else-if="tab === 'matches'"
+        :upcoming-matches="upcomingMatches"
+        :past-matches="pastMatches"
+        :live-matches="liveMatches"
+        :pending="matchesPending"
+        :has-error="Boolean(matchesError)"
+        @retry="refreshMatches()"
       />
+
+      <PlayerEventsSection
+        v-else-if="tab === 'events'"
+        :upcoming-events="upcomingEvents"
+        :past-events="pastEvents"
+        :live-events="liveEvents"
+        :pending="eventsPending"
+        :has-error="Boolean(eventsError)"
+        @retry="refreshEvents()"
+      />
+
+      <template v-else>
+        <PlayerTrophyCabinet
+          :trophies="trophies"
+          :pending="trophiesPending"
+          :has-error="Boolean(trophiesError)"
+          @retry="refreshTrophies()"
+        />
+
+        <PlayerAwardsSection
+          v-if="showAwardsSection"
+          :awards="awards"
+          :pending="awardsPending"
+          :has-error="Boolean(awardsError)"
+          @retry="refreshAwards()"
+        />
+      </template>
     </div>
-
-    <template v-if="tab === 'info'">
-      <PlayerFormerTeams v-if="oldTeams && oldTeams.length > 0" :contracts="oldTeams" />
-      <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
-    </template>
-
-    <PlayerMatchesSection
-      v-else-if="tab === 'matches'"
-      :upcoming-matches="upcomingMatches"
-      :past-matches="pastMatches"
-      :live-matches="liveMatches"
-      :pending="matchesPending"
-      :has-error="Boolean(matchesError)"
-      @retry="refreshMatches()"
-    />
-
-    <PlayerEventsSection
-      v-else-if="tab === 'events'"
-      :upcoming-events="upcomingEvents"
-      :past-events="pastEvents"
-      :live-events="liveEvents"
-      :pending="eventsPending"
-      :has-error="Boolean(eventsError)"
-      @retry="refreshEvents()"
-    />
-
-    <template v-else>
-      <PlayerTrophyCabinet
-        :trophies="trophies"
-        :pending="trophiesPending"
-        :has-error="Boolean(trophiesError)"
-        @retry="refreshTrophies()"
-      />
-
-      <PlayerAwardsSection
-        v-if="showAwardsSection"
-        :awards="awards"
-        :pending="awardsPending"
-        :has-error="Boolean(awardsError)"
-        @retry="refreshAwards()"
-      />
-    </template>
   </SHubPageBody>
 </template>
