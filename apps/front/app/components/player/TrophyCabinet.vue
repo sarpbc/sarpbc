@@ -42,17 +42,17 @@ const formatEndDate = (value: Date | string | null) => {
         </h2>
       </template>
 
-      <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index">
-          <div class="flex items-center gap-3 py-2 px-3">
-            <USkeleton class="size-10 shrink-0" />
-            <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-              <USkeleton class="h-4 w-3/5 max-w-48" />
+      <SCard v-if="pending" flush-bottom aria-live="polite">
+        <SListItem v-for="index in 3" :key="index" divider>
+          <div class="flex w-full min-w-0 items-center gap-2">
+            <USkeleton class="size-5 shrink-0" />
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+              <USkeleton class="h-3.5 w-3/5 max-w-48" />
               <USkeleton class="h-3 w-2/5 max-w-32" />
             </div>
           </div>
-        </SCard>
-      </div>
+        </SListItem>
+      </SCard>
 
       <SCard v-else-if="hasError">
         <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
@@ -66,31 +66,31 @@ const formatEndDate = (value: Date | string | null) => {
         </div>
       </SCard>
 
-      <div
-        v-else-if="trophies.length > 0"
-        class="flex flex-col border border-default divide-y divide-default"
-      >
-        <ULink
+      <SCard v-else-if="trophies.length > 0" flush-bottom>
+        <SListItem
           v-for="trophy in trophies"
           :key="trophy.id"
+          divider
           :to="$localePath(`/tournaments/${trophy.id}`)"
-          class="flex items-center gap-3 p-3 hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          class="min-w-0"
         >
-          <div class="flex size-10 shrink-0 items-center justify-center">
-            <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary" />
+          <div class="flex w-full min-w-0 items-center gap-2">
+            <UIcon name="i-fluent-trophy-24-regular" class="size-5 shrink-0 text-primary" />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium leading-none text-highlighted">
+                {{ trophy.displayName }}
+              </p>
+              <time
+                v-if="trophy.endAt"
+                :datetime="new Date(trophy.endAt).toISOString()"
+                class="block truncate text-xs leading-none text-dimmed tabular-nums"
+              >
+                {{ formatEndDate(trophy.endAt) }}
+              </time>
+            </div>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-highlighted truncate">{{ trophy.displayName }}</p>
-            <time
-              v-if="trophy.endAt"
-              :datetime="new Date(trophy.endAt).toISOString()"
-              class="text-xs text-dimmed tabular-nums truncate"
-            >
-              {{ formatEndDate(trophy.endAt) }}
-            </time>
-          </div>
-        </ULink>
-      </div>
+        </SListItem>
+      </SCard>
 
       <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">

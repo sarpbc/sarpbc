@@ -11,7 +11,7 @@ const boxClasses = {
   sm: "h-12 w-16",
   md: "h-24 w-36",
   lg: "h-28 w-40 sm:h-32 sm:w-48",
-  xl: "h-36 w-48 sm:h-44 sm:w-56 md:h-48 md:w-64",
+  xl: "h-36 w-48 sm:h-auto sm:min-h-0 sm:w-56 md:w-64 sm:self-stretch",
 };
 
 const dimensions = {
