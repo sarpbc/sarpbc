@@ -75,19 +75,14 @@ const formatEndDate = (value: Date | string | null) => {
       >
         <UIcon name="i-fluent-trophy-24-regular" class="text-xl text-primary shrink-0" />
         <div class="flex-1 min-w-0">
-          <p class="font-medium truncate">{{ trophy.name }}</p>
-          <p
-            v-if="trophy.leagueName || trophy.serie || trophy.endAt"
-            class="text-sm text-muted truncate"
+          <p class="text-sm font-medium text-highlighted truncate">{{ trophy.displayName }}</p>
+          <time
+            v-if="trophy.endAt"
+            :datetime="new Date(trophy.endAt).toISOString()"
+            class="text-xs text-dimmed tabular-nums truncate"
           >
-            <span v-if="trophy.leagueName">{{ trophy.leagueName }}</span>
-            <span v-if="trophy.leagueName && trophy.serie" class="mx-1">·</span>
-            <span v-if="trophy.serie">{{ trophy.serie }}</span>
-            <span v-if="(trophy.leagueName || trophy.serie) && trophy.endAt" class="mx-1">·</span>
-            <span v-if="trophy.endAt">
-              {{ t("page.team.slug.trophies.wonOn", { date: formatEndDate(trophy.endAt) }) }}
-            </span>
-          </p>
+            {{ formatEndDate(trophy.endAt) }}
+          </time>
         </div>
       </ULink>
     </div>

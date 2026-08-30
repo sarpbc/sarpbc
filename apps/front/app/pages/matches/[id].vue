@@ -263,6 +263,7 @@ const scoreboardLabel = computed(() => {
           :participant="teamA"
           :score="teamA ? getParticipantScore(match, teamA.id) : null"
           :winner="teamA ? winnerParticipantId === teamA.id : undefined"
+          :match-status="matchStatus"
           class="min-w-0"
         />
 
@@ -272,6 +273,7 @@ const scoreboardLabel = computed(() => {
           :participant="teamB"
           :score="teamB ? getParticipantScore(match, teamB.id) : null"
           :winner="teamB ? winnerParticipantId === teamB.id : undefined"
+          :match-status="matchStatus"
           class="min-w-0"
         />
       </div>
@@ -292,7 +294,7 @@ const scoreboardLabel = computed(() => {
                 v-if="participant.team.slug"
                 :to="$localePath(`/team/${participant.team.slug}`)"
                 variant="muted"
-                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90 active:scale-[0.96]"
+                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90"
               >
                 <TeamImg
                   :team-name="participant.team.name"

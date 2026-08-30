@@ -10,7 +10,7 @@ const toneClass = computed(() => {
     case "warning":
       return "bg-warning text-white";
     case "accented":
-      return "bg-default text-highlighted";
+      return "bg-elevated text-highlighted";
     default: {
       const _exhaustive: never = tone;
       return _exhaustive;

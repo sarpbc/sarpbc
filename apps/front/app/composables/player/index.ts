@@ -4,4 +4,5 @@ export * from "./usePlayerAwards";
 export * from "./usePlayerContract";
 export * from "./usePlayerMatches";
 export * from "./usePlayerPhoto";
+export * from "./usePlayerTournaments";
 export * from "./usePlayerTrophies";

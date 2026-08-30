@@ -1,9 +1,11 @@
 import type { MaybeRef } from "vue";
 import type { Tournament } from "~/types/tournament";
+import { tournamentEventDisplayName } from "~/utils/tournamentEventDisplayName";
 
 export interface PlayerTrophyListItem {
   id: string;
   name: string;
+  displayName: string;
   endAt: Date | string | null;
   leagueName?: string;
   serie?: string | null;
@@ -11,13 +13,20 @@ export interface PlayerTrophyListItem {
 
 export function toPlayerTrophyListItem(tournament: Tournament): PlayerTrophyListItem {
   const league = tournament.league instanceof Object ? tournament.league : undefined;
+  const leagueName = league?.name;
+  const serie = tournament.serie ?? null;
 
   return {
     id: tournament.id,
     name: tournament.name,
+    displayName: tournamentEventDisplayName({
+      name: tournament.name,
+      leagueName,
+      serie,
+    }),
     endAt: tournament.endAt ?? null,
-    leagueName: league?.name,
-    serie: tournament.serie ?? null,
+    leagueName,
+    serie,
   };
 }
 

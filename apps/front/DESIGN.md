@@ -143,18 +143,18 @@ Shared list/rail components (`SListItem`, `SRail`, `SHubColumn` — epic SAR-85)
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times.
 
-| Primitive        | Role                                                                                                                                     |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid               |
-| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                      |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                                |
-| `SButton`        | `UButton` wrapper with Cuelume `pressRelease` + press scale by default (`sound`: `press` \| `toggle` \| `none`; `static` disables scale) |
-| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                                 |
-| `SBadgeLive`     | Live status with text + color                                                                                                            |
-| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)                           |
-| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                    |
-| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                                |
-| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                                    |
+| Primitive        | Role                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid |
+| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                        |
+| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                  |
+| `SButton`        | Thin `UButton` wrapper for shared submit patterns                                                                          |
+| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                   |
+| `SBadgeLive`     | Live status with text + color                                                                                              |
+| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)             |
+| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                      |
+| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                  |
+| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                      |
 
 #### `SListItem` sizes
 
@@ -223,20 +223,6 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 | ~150ms state / ~200ms popover / ~300ms overlay | `transition: all`                          |
 | `transform` + `opacity` only                   | Layout-thrashing anims                     |
 | Honor `prefers-reduced-motion`                 | Ignore reduced-motion                      |
-| Interaction sounds (Cuelume)                   | Play when `prefers-reduced-motion: reduce` |
-
-### Interaction sounds (Cuelume)
-
-Pilot UI feedback via [Cuelume](https://cuelume-site.pages.dev/) — Web Audio cues, no audio files. Initialized in `app/plugins/cuelume.client.ts` after hydration; **disabled entirely** when `prefers-reduced-motion: reduce`.
-
-| Pattern       | Attribute convention                                                                                                        | Use                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Primary press | `SButton` (default) or `v-bind="cuelumeAttrs.pressRelease"` + `pressClass` (scale `0.96`, transform-only — no layout shift) | Submit / save / comment actions |
-| Toggle        | `SButton sound="toggle"` or `v-bind="cuelumeAttrs.toggle"`                                                                  | Theme switch                    |
-| Loading       | `playCue("loading")` when user-initiated async work starts (`SButton` also plays when `:loading` becomes true)              | Login, submit, pick'em save     |
-| Dense hover   | Do **not** attach hover ticks to `SListItem`, match rows, or nav — they become noise. Press/release on `SButton` only.      | Lists, header, footer           |
-
-Imperative cues: `const { playCue } = useCuelume()` then `playCue('loading')` / `playCue('success')` / `playCue('error')` (e.g. Air Riddle guess feedback). See `app/composables/useCuelume.ts`.
 
 ---
 

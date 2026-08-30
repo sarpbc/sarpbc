@@ -5,7 +5,6 @@ import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const { attrs: cuelumeAttrs, pressClass, playCue } = useCuelume();
 
 const localePath = useLocalePath();
 const user = useUser();
@@ -92,7 +91,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 
   isSubmitting.value = true;
-  playCue("loading");
 
   const postId = crypto.randomUUID();
   const createResult = await createForumPost({
@@ -185,7 +183,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               size="lg"
               :color="state.topicId === topic.id ? 'primary' : 'neutral'"
               :disabled="!canSubmit"
-              :class="canSubmit ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
+              :class="canSubmit ? undefined : 'cursor-not-allowed opacity-60'"
               @click="canSubmit && (state.topicId = topic.id)"
             >
               {{ topic.title }}
@@ -209,14 +207,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           />
         </UFormField>
 
-        <SButton
-          type="submit"
-          variant="solid"
-          :class="pressClass"
-          :disabled="!canSubmit"
-          :loading="isSubmitting"
-          v-bind="cuelumeAttrs.pressRelease"
-        >
+        <SButton type="submit" variant="solid" :disabled="!canSubmit" :loading="isSubmitting">
           {{ $t("page.forum.new.form.submit") }}
         </SButton>
       </UForm>
