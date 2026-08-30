@@ -103,7 +103,7 @@ User-facing event titles must go through `tournamentEventDisplayName()` in `apps
 - When `serie` is year-only, join league + year (e.g. `2025` → `FIFAe World Cup 2025`)
 - Never use raw `tournament.name` alone for event titles — it is usually a stage name
 
-Trophy cabinets, player FAQ highlights, and similar lists should reuse `displayName` from `usePlayerTrophies` / `useTeamTrophies`, not `serie` or `name` directly.
+Trophy cabinets, player and team FAQ highlights, and similar lists should reuse `displayName` from `usePlayerTrophies` / `useTeamTrophies`, not `serie` or `name` directly.
 
 ## i18n Checklist
 
