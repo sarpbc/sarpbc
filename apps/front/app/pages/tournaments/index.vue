@@ -12,7 +12,6 @@ const TOURNAMENTS_PER_PAGE = 20;
 interface TournamentsIndexPayload {
   tournaments: Tournament[];
   total: number;
-  fetchedAt: number;
 }
 
 const offset = computed(() => {
@@ -27,10 +26,10 @@ const { data: tournamentsResponse, pending } = await useAsyncData<TournamentsInd
       limit: TOURNAMENTS_PER_PAGE,
       offset: offset.value,
     });
-    return { ...result, fetchedAt: Date.now() };
+    return result;
   },
   {
-    default: () => ({ tournaments: [], total: 0, fetchedAt: 0 }),
+    default: () => ({ tournaments: [], total: 0 }),
     watch: [offset],
     getCachedData(key, nuxtApp) {
       return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
@@ -40,18 +39,6 @@ const { data: tournamentsResponse, pending } = await useAsyncData<TournamentsInd
 
 const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? []);
 const totalTournaments = computed(() => tournamentsResponse.value?.total ?? 0);
-
-const nextTournament = computed(() => {
-  const now = tournamentsResponse.value?.fetchedAt ?? 0;
-  return tournaments.value
-    .filter((tournament) => {
-      if (!tournament.beginAt) {
-        return false;
-      }
-      return new Date(tournament.beginAt).getTime() > now;
-    })
-    .sort((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime())[0];
-});
 
 const currentPage = computed(() => Math.floor(offset.value / TOURNAMENTS_PER_PAGE) + 1);
 const totalPages = computed(() =>
@@ -93,18 +80,6 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
   <div class="w-full flex flex-col gap-4">
     <SHubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
-      <template v-if="nextTournament" #meta>
-        <span>
-          {{
-            t("page.hub.headers.tournamentsNext", {
-              name: `${nextTournament.league?.name ?? ""} ${nextTournament.name}`.trim(),
-            })
-          }}
-        </span>
-      </template>
-      <template v-else-if="totalTournaments" #meta>
-        <span>{{ t("page.hub.headers.tournamentsTotal", { count: totalTournaments }) }}</span>
-      </template>
     </SHubPageHeader>
 
     <div v-if="pending && !tournaments.length" class="w-full flex flex-col" aria-live="polite">

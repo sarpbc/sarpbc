@@ -40,7 +40,5 @@ const showCta = computed(() => {
 </script>
 
 <template>
-  <section v-if="showCta" class="w-full flex flex-col gap-3">
-    <PickemPromoBanner :tournament="match.tournament" variant="match" />
-  </section>
+  <PickemPromoBanner v-if="showCta" :tournament="match.tournament" variant="match" />
 </template>
