@@ -215,28 +215,30 @@ const scoreboardLabel = computed(() => {
 <template>
   <div v-if="pending" aria-live="polite">
     <SHubPageBody>
-      <SCrossCard class="min-h-row-triple">
-        <div class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5 animate-pulse">
-          <div class="size-8 rounded bg-elevated" />
+      <div class="w-full flex min-w-0 flex-col">
+        <SCrossCard class="min-h-row-triple">
           <div
-            class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3"
+            class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5 animate-pulse"
           >
-            <div class="h-6 w-28 justify-self-end rounded bg-elevated" />
-            <div class="h-7 w-14 justify-self-center rounded bg-elevated" />
-            <div class="h-6 w-28 justify-self-start rounded bg-elevated" />
+            <div class="size-8 rounded bg-elevated" />
+            <div
+              class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3"
+            >
+              <div class="h-6 w-28 justify-self-end rounded bg-elevated" />
+              <div class="h-7 w-14 justify-self-center rounded bg-elevated" />
+              <div class="h-6 w-28 justify-self-start rounded bg-elevated" />
+            </div>
           </div>
-        </div>
-      </SCrossCard>
-      <div class="flex justify-center gap-2 animate-pulse">
-        <div class="h-3 w-32 rounded bg-elevated" />
-        <div class="h-3 w-12 rounded bg-elevated" />
+        </SCrossCard>
+        <SRail>
+          <SCard class="p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-px animate-pulse">
+              <div class="h-24 rounded bg-elevated" />
+              <div class="h-24 rounded bg-elevated" />
+            </div>
+          </SCard>
+        </SRail>
       </div>
-      <SCard class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-          <div class="h-24 rounded bg-elevated" />
-          <div class="h-24 rounded bg-elevated" />
-        </div>
-      </SCard>
     </SHubPageBody>
   </div>
 
@@ -253,113 +255,98 @@ const scoreboardLabel = computed(() => {
   </SCard>
 
   <SHubPageBody v-else-if="match">
-    <h1 class="sr-only">{{ scoreboardLabel }}</h1>
+    <div class="w-full flex min-w-0 flex-col">
+      <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
-    <SCrossCard class="min-h-card-s">
-      <div
-        class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center text-xl font-semibold tracking-tight"
-      >
-        <MatchTeamResult
-          :participant="teamA"
-          :score="teamA ? getParticipantScore(match, teamA.id) : null"
-          :winner="teamA ? winnerParticipantId === teamA.id : undefined"
-          :match-status="matchStatus"
-          class="min-w-0"
-        />
+      <SCrossCard class="min-h-row-triple">
+        <div
+          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center text-xl font-semibold tracking-tight"
+        >
+          <MatchTeamResult
+            :participant="teamA"
+            :score="teamA ? getParticipantScore(match, teamA.id) : null"
+            :winner="teamA ? winnerParticipantId === teamA.id : undefined"
+            :match-status="matchStatus"
+            class="min-w-0"
+          />
 
-        <MatchInformation :match="match" :match-status="matchStatus" />
+          <MatchInformation :match="match" :match-status="matchStatus" />
 
-        <MatchTeamResult
-          :participant="teamB"
-          :score="teamB ? getParticipantScore(match, teamB.id) : null"
-          :winner="teamB ? winnerParticipantId === teamB.id : undefined"
-          :match-status="matchStatus"
-          class="min-w-0"
-        />
-      </div>
-    </SCrossCard>
-
-    <template v-if="!isBothTeamsTbd">
-      <PickemMatchCta :match="match" :match-status="matchStatus" />
-
-      <SRail :title="t('page.match.detail.sections.rosters')">
-        <SCard class="p-4 md:p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div
-              v-for="participant in participants"
-              :key="participant.id"
-              class="flex flex-col items-center gap-4 text-center"
-            >
-              <SLink
-                v-if="participant.team.slug"
-                :to="$localePath(`/team/${participant.team.slug}`)"
-                variant="muted"
-                class="group flex min-h-10 min-w-10 flex-col items-center gap-3 p-2 -m-2 touch-manipulation hover:opacity-90"
-              >
-                <TeamImg
-                  :team-name="participant.team.name"
-                  :image-url="participant.team.imageUrl"
-                  :dark-mode-image-url="participant.team.darkModeImageUrl"
-                  size="md"
-                />
-                <span class="max-w-full text-lg font-semibold text-balance">
-                  {{ participant.team.name }}
-                </span>
-              </SLink>
-              <div v-else class="flex flex-col items-center gap-3">
-                <TeamImg
-                  :team-name="participant.team.name"
-                  :image-url="participant.team.imageUrl"
-                  :dark-mode-image-url="participant.team.darkModeImageUrl"
-                  size="md"
-                />
-                <span class="max-w-full text-lg font-semibold text-balance">
-                  {{ participant.team.name }}
-                </span>
-              </div>
-
-              <div
-                v-if="participant.players && participant.players.length > 0"
-                class="w-full flex flex-wrap justify-center gap-3"
-              >
-                <PlayerProfile
-                  v-for="player in participant.players"
-                  :key="player.id"
-                  :player="player"
-                  size="md"
-                />
-              </div>
-              <p v-else class="text-sm text-pretty text-muted">
-                {{ t("page.match.detail.noRoster") }}
-              </p>
-            </div>
-          </div>
-        </SCard>
-      </SRail>
-
-      <SRail
-        v-if="matchStatus !== 'finished' && headToHead && teamA && teamB"
-        :title="t('page.match.detail.sections.headToHead')"
-      >
-        <MatchHeadToHeadCard
-          :head-to-head="headToHead"
-          :team-a-name="participantName(teamA)"
-          :team-b-name="participantName(teamB)"
-        />
-      </SRail>
-
-      <SRail v-if="matchStatus !== 'finished'" :title="t('page.match.detail.sections.recentForm')">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <MatchTeamFormCard
-            v-for="participant in participants"
-            :key="participant.id"
-            :team-name="participant.team.name"
-            :team-form="teamForms[participant.team.id]"
+          <MatchTeamResult
+            :participant="teamB"
+            :score="teamB ? getParticipantScore(match, teamB.id) : null"
+            :winner="teamB ? winnerParticipantId === teamB.id : undefined"
+            :match-status="matchStatus"
+            class="min-w-0"
           />
         </div>
-      </SRail>
-    </template>
+      </SCrossCard>
 
-    <DiscussionCommentThread target-type="match" :target-id="match.id" />
+      <template v-if="!isBothTeamsTbd">
+        <PickemMatchCta :match="match" :match-status="matchStatus" />
+
+        <SRail :title="t('page.match.detail.sections.rosters')">
+          <SCard class="h-row-snap">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+              <div v-for="participant in participants" :key="participant.id" class="flex flex-col">
+                <h3 class="sr-only">{{ participant.team.name }}</h3>
+                <div
+                  v-if="participant.players && participant.players.length > 0"
+                  class="flex w-full flex-col items-center"
+                >
+                  <PlayerProfile
+                    v-for="player in participant.players"
+                    :key="player.id"
+                    :player="player"
+                    size="md"
+                  />
+                </div>
+                <SListItem v-else size="default" divider>
+                  <p class="text-sm text-pretty text-muted">
+                    {{ t("page.match.detail.noRoster") }}
+                  </p>
+                </SListItem>
+              </div>
+            </div>
+          </SCard>
+        </SRail>
+
+        <SRail
+          v-if="matchStatus !== 'finished' && headToHead && teamA && teamB"
+          :title="t('page.match.detail.sections.headToHead')"
+        >
+          <MatchHeadToHeadCard
+            :head-to-head="headToHead"
+            :team-a-name="participantName(teamA)"
+            :team-b-name="participantName(teamB)"
+          />
+        </SRail>
+
+        <SRail
+          v-if="matchStatus !== 'finished'"
+          :title="t('page.match.detail.sections.recentForm')"
+        >
+          <SCard>
+            <div class="grid grid-cols-1 items-stretch md:grid-cols-2">
+              <MatchTeamFormCard
+                v-for="(participant, index) in participants"
+                :key="participant.id"
+                :class="
+                  index === 0
+                    ? 'max-md:border-b max-md:border-default md:border-r md:border-default'
+                    : undefined
+                "
+                :team-name="participant.team.name"
+                :team-form="teamForms[participant.team.id]"
+              />
+            </div>
+          </SCard>
+        </SRail>
+      </template>
+
+      <SRail :title="t('components.discussion.heading')">
+        <DiscussionCommentThread target-type="match" :target-id="match.id" />
+      </SRail>
+    </div>
   </SHubPageBody>
 </template>

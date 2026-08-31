@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getPickOutcome,
-  getUnpickedOpenMatches,
-  isMatchLockedForPickem,
-  isPickemTournamentActive,
-  type PickemPickState,
-} from "./pickems";
+import { getPickOutcome, isMatchLockedForPickem, isPickemTournamentActive } from "./pickems";
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 
@@ -119,24 +113,6 @@ describe("isMatchLockedForPickem", () => {
         now,
       ),
     ).toBe(false);
-  });
-});
-
-describe("getUnpickedOpenMatches", () => {
-  const now = Date.parse("2026-07-17T12:00:00.000Z");
-
-  it("returns only open matches without picks, sorted by beginAt", () => {
-    const matches = [
-      match({ id: "later", beginAt: new Date("2026-07-17T16:00:00.000Z") }),
-      match({ id: "soon", beginAt: new Date("2026-07-17T14:00:00.000Z") }),
-      match({ id: "started", beginAt: new Date("2026-07-17T10:00:00.000Z") }),
-      match({ id: "picked", beginAt: new Date("2026-07-17T15:00:00.000Z") }),
-    ];
-    const picks = new Map<string, PickemPickState>([
-      ["picked", { pickedParticipant: "p1", points: null, scored: false }],
-    ]);
-
-    expect(getUnpickedOpenMatches(matches, picks, now).map((m) => m.id)).toEqual(["soon", "later"]);
   });
 });
 

@@ -281,8 +281,6 @@
   "page": {
     "hub": {
       "headers": {
-        "tournamentsNext": "Prochain : {name}",
-        "tournamentsTotal": "{count} tournois",
         "forumPosts": "{count} publications",
         "pickemsOpen": "{count} pick'ems ouverts",
         "playersTotal": "{count} joueurs",
@@ -331,13 +329,11 @@
         "title": "Pick'ems",
         "description": "Faites vos prédictions !",
         "banner": {
-          "title": "Les pick'ems sont ouverts",
-          "description": "Prédisez les résultats des matchs pour {tournament} et affrontez la communauté.",
+          "title": "Les pick'ems sont ouverts pour {event}",
           "cta": "Rejoindre le pick'em"
         },
         "matchCta": {
           "title": "Prédire ce match",
-          "description": "Soumettez votre pick'em avant le début de la série.",
           "cta": "Faire mon pick"
         },
         "list": {
@@ -348,9 +344,6 @@
         "detail": {
           "title": "Pick'em {tournament}",
           "seoTitle": "Pick'em {tournament}",
-          "remaining": "{count} pick restant | {count} picks restants",
-          "jumpToNext": "Aller au suivant",
-          "allCaughtUp": "Vous êtes à jour sur les picks ouverts.",
           "signInPrompt": "Connectez-vous pour enregistrer vos picks et monter au classement.",
           "signInCta": "Se connecter",
           "pickSaved": "Pick enregistré",
@@ -358,18 +351,17 @@
           "error": "Impossible de charger ce pick'em. Vérifiez votre connexion et réessayez.",
           "retry": "Réessayer",
           "emptyMatches": "Aucun match n'est encore disponible pour ce pick'em.",
-          "outcome": {
-            "correct": "Correct · +{points}",
-            "incorrect": "Incorrect",
-            "pending": "Pick enregistré",
-            "locked": "Verrouillé"
+          "openMatch": "Voir {teamA} – {teamB}",
+          "tabs": {
+            "pickem": "Pick'em",
+            "leaderboard": "Classement"
           },
           "leaderboard": {
             "title": "Classement",
             "yourRank": "Votre rang : #{rank} sur {total} · {points} pts",
             "noRankYet": "Faites vos picks et attendez les résultats pour apparaître au classement.",
             "points": "{points} pts",
-            "empty": "Aucun pick scoré pour l'instant. Le classement apparaît après les matchs."
+            "empty": "Le classement apparaît après les matchs."
           }
         }
       }
@@ -727,11 +719,6 @@
         "retry": "Réessayer",
         "unknownTeam": "À déterminer",
         "unknownTournament": "Tournoi inconnu",
-        "status": {
-          "live": "En direct",
-          "upcoming": "À venir",
-          "finished": "Terminé"
-        },
         "format": "Bo{count}",
         "addToCalendar": "Ajouter au calendrier",
         "watchStream": "Regarder le stream",

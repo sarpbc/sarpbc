@@ -168,85 +168,122 @@ setPageSeo({
       <template #title>{{ $t("page.profile.title") }}</template>
     </SHubPageHeader>
 
-    <SCard
-      v-if="user"
-      class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2"
-    >
-      <div class="min-w-0">
-        <UUser
-          :alt="user.userName"
-          :name="user.userName"
-          :description="user.email"
-          :avatar="{
-            src: user.avatarUrl || undefined,
-          }"
-          size="xl"
-        />
-      </div>
+    <div v-if="user" class="w-full flex flex-col">
+      <SCard class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2">
+        <div class="min-w-0">
+          <UUser
+            :alt="user.userName"
+            :name="user.userName"
+            :description="user.email"
+            :avatar="{
+              src: user.avatarUrl || undefined,
+            }"
+            size="xl"
+          />
+        </div>
 
-      <UPopover v-model:open="menuOpen">
-        <SButton
-          square
-          variant="ghost"
-          color="neutral"
-          icon="i-fluent-more-vertical-24-regular"
-          class="size-row p-0 justify-center"
-          sound="press"
-          :aria-label="$t('page.profile.actions')"
-          aria-haspopup="menu"
-          :aria-expanded="menuOpen"
-          :aria-controls="menuId"
-        />
-        <template #content>
-          <div
-            :id="menuId"
-            role="menu"
-            class="flex min-w-40 flex-col p-1"
+        <UPopover v-model:open="menuOpen">
+          <SButton
+            square
+            variant="ghost"
+            color="neutral"
+            icon="i-fluent-more-vertical-24-regular"
+            class="size-row p-0 justify-center"
+            sound="press"
             :aria-label="$t('page.profile.actions')"
-          >
+            aria-haspopup="menu"
+            :aria-expanded="menuOpen"
+            :aria-controls="menuId"
+          />
+          <template #content>
+            <div
+              :id="menuId"
+              role="menu"
+              class="flex min-w-40 flex-col p-1"
+              :aria-label="$t('page.profile.actions')"
+            >
+              <SButton
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="i-fluent-edit-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('page.profile.editProfile')"
+                @click="openEditProfile"
+              />
+              <SButton
+                v-if="showStaffConsole"
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="i-fluent-shield-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :to="adminHomeUrl"
+                external
+                target="_blank"
+                :label="$t('page.profile.staff')"
+                @click="menuOpen = false"
+              />
+              <SButton
+                size="sm"
+                variant="ghost"
+                color="error"
+                icon="i-fluent-sign-out-24-regular"
+                class="justify-start"
+                sound="press"
+                role="menuitem"
+                :label="$t('page.profile.logout')"
+                :loading="isLoggingOut"
+                :disabled="isLoggingOut"
+                @click="handleLogout"
+              />
+            </div>
+          </template>
+        </UPopover>
+      </SCard>
+
+      <SRail v-if="hasNotifications">
+        <template #caption>
+          <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
+            <h2>{{ $t("page.profile.notifications.title") }}</h2>
             <SButton
-              size="sm"
+              v-if="unreadNotifications.length > 0"
+              size="xs"
               variant="ghost"
               color="neutral"
-              icon="i-fluent-edit-24-regular"
-              class="justify-start"
-              sound="press"
-              role="menuitem"
-              :label="$t('page.profile.editProfile')"
-              @click="openEditProfile"
-            />
-            <SButton
-              v-if="showStaffConsole"
-              size="sm"
-              variant="ghost"
-              color="neutral"
-              icon="i-fluent-shield-24-regular"
-              class="justify-start"
-              sound="press"
-              role="menuitem"
-              :to="adminHomeUrl"
-              external
-              target="_blank"
-              :label="$t('page.profile.staff')"
-              @click="menuOpen = false"
-            />
-            <SButton
-              size="sm"
-              variant="ghost"
-              color="error"
-              icon="i-fluent-sign-out-24-regular"
-              class="justify-start"
-              sound="press"
-              role="menuitem"
-              :label="$t('page.profile.logout')"
-              :loading="isLoggingOut"
-              :disabled="isLoggingOut"
-              @click="handleLogout"
+              :label="$t('page.profile.notifications.markAllRead')"
+              :loading="isMarkingRead"
+              :disabled="isMarkingRead"
+              @click="markAllRead"
             />
           </div>
         </template>
-      </UPopover>
-    </SCard>
+
+        <SCard flush-bottom>
+          <SListItem
+            v-for="notification in notifications"
+            :key="notification.id"
+            divider
+            :to="localePath(notification.targetPath)"
+            :class="{ 'bg-elevated': !notification.readAt }"
+            @click="onNotificationClick(notification)"
+          >
+            <div class="flex w-full min-w-0 items-center justify-between gap-2">
+              <p class="min-w-0 truncate text-sm" translate="no">
+                {{ notificationMessage(notification) }}
+              </p>
+              <span class="shrink-0 text-xs text-muted tabular-nums">
+                {{ df(locale).format(new Date(notification.createdAt)) }}
+              </span>
+            </div>
+          </SListItem>
+        </SCard>
+      </SRail>
+    </div>
 
     <UModal
       v-if="user"
@@ -293,43 +330,5 @@ setPageSeo({
         />
       </template>
     </UModal>
-
-    <SRail v-if="hasNotifications">
-      <template #caption>
-        <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
-          <span>{{ $t("page.profile.notifications.title") }}</span>
-          <SButton
-            v-if="unreadNotifications.length > 0"
-            size="xs"
-            variant="ghost"
-            color="neutral"
-            :label="$t('page.profile.notifications.markAllRead')"
-            :loading="isMarkingRead"
-            :disabled="isMarkingRead"
-            @click="markAllRead"
-          />
-        </div>
-      </template>
-
-      <SCard flush-bottom>
-        <SListItem
-          v-for="notification in notifications"
-          :key="notification.id"
-          divider
-          :to="localePath(notification.targetPath)"
-          :class="{ 'bg-elevated': !notification.readAt }"
-          @click="onNotificationClick(notification)"
-        >
-          <div class="flex w-full min-w-0 items-center justify-between gap-2">
-            <p class="min-w-0 truncate text-sm" translate="no">
-              {{ notificationMessage(notification) }}
-            </p>
-            <span class="shrink-0 text-xs text-muted tabular-nums">
-              {{ df(locale).format(new Date(notification.createdAt)) }}
-            </span>
-          </div>
-        </SListItem>
-      </SCard>
-    </SRail>
   </div>
 </template>

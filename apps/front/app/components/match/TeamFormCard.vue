@@ -13,8 +13,8 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
 </script>
 
 <template>
-  <SCard flush-bottom class="flex flex-col">
-    <SListItem size="default" divider class="min-w-0">
+  <div class="flex h-full min-w-0 flex-col divide-y divide-default">
+    <SListItem size="default" class="min-w-0 shrink-0">
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <h3 class="min-w-0 truncate text-toned">{{ teamName }}</h3>
         <span v-if="teamForm && hasRecentMatches" class="shrink-0 text-muted tabular-nums">
@@ -28,8 +28,8 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
       </div>
     </SListItem>
 
-    <SListItem v-if="!hasRecentMatches" size="default" divider>
-      <p class="text-xs text-pretty text-muted">
+    <SListItem v-if="!hasRecentMatches" size="default" class="min-w-0 shrink-0">
+      <p class="min-w-0 truncate text-xs text-muted">
         {{ t("page.match.detail.formEmpty") }}
       </p>
     </SListItem>
@@ -38,7 +38,6 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
       v-for="recentMatch in teamForm?.recent ?? []"
       :key="recentMatch.id"
       size="default"
-      divider
       :to="localePath(`/matches/${recentMatch.id}`)"
       class="min-w-0"
     >
@@ -75,5 +74,5 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
         </span>
       </div>
     </SListItem>
-  </SCard>
+  </div>
 </template>

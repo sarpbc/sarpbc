@@ -46,18 +46,6 @@ export type PickemPickState = {
   scored: boolean;
 };
 
-export function getUnpickedOpenMatches(
-  matches: Match[],
-  picks: Map<string, PickemPickState> | null | undefined,
-  now = Date.now(),
-): Match[] {
-  return matches
-    .filter((match) => match.participants?.length === 2 && match.beginAt)
-    .filter((match) => !isMatchLockedForPickem(match, now))
-    .filter((match) => !picks?.has(match.id))
-    .sort((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime());
-}
-
 export function getPickOutcome(
   match: Match,
   pick: PickemPickState | undefined,

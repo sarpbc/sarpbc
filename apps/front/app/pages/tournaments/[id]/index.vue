@@ -32,16 +32,17 @@ const showPickemCta = computed(
 <template>
   <div v-if="tournament" class="w-full flex flex-col gap-4">
     <PickemPromoBanner v-if="showPickemCta" :tournament="tournament" variant="homepage" />
-    <section class="w-full flex flex-col gap-px" aria-labelledby="tournament-bracket-title">
-      <h2
-        id="tournament-bracket-title"
-        class="flex text-sm font-medium text-toned h-10.75 items-end pl-1 text-balance"
-      >
-        {{ $t("page.tournaments.id.bracketTitle") }}
-      </h2>
-      <UCard variant="soft" class="w-full" :ui="{ body: 'p-2 overflow-x-auto' }">
-        <TournamentBracket :tournament="tournament" />
-      </UCard>
+    <section class="w-full" aria-labelledby="tournament-bracket-title">
+      <SRail>
+        <template #caption>
+          <h2 id="tournament-bracket-title">
+            {{ $t("page.tournaments.id.bracketTitle") }}
+          </h2>
+        </template>
+        <SCard class="overflow-x-auto p-2">
+          <TournamentBracket :tournament="tournament" />
+        </SCard>
+      </SRail>
     </section>
     <TournamentParticipants :tournament="tournament" />
   </div>
