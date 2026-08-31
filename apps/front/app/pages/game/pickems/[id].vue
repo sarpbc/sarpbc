@@ -1,15 +1,22 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import type { Match } from "~/types/matches";
-import type { PickemPickState } from "~/utils/pickems";
+import {
+  displayMatchScore,
+  getMatchParticipantScore,
+  shouldShowMatchScores,
+  type Match,
+} from "~/types/matches";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import {
   getPickOutcome,
   getTournamentDisplayName,
-  getUnpickedOpenMatches,
   isMatchLockedForPickem,
+  type PickemPickState,
 } from "~/utils/pickems";
 
 const LEADERBOARD_TOP = 10;
+
+type PickemDetailTab = "pickem" | "leaderboard";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -102,23 +109,11 @@ watch(
   { immediate: true },
 );
 
-const pickemDf = computed(
+const pickemTimeDf = computed(
   () =>
     new DateFormatter(locale.value, {
-      month: "short",
-      day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }),
-);
-
-const dayHeaderDf = computed(
-  () =>
-    new DateFormatter(locale.value, {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
     }),
 );
 
@@ -156,22 +151,28 @@ const matchesByDay = computed(() => {
     }));
 });
 
-const allValidMatches = computed(() => matchesByDay.value.flatMap((g) => g.matches));
-
-const unpickedOpenMatches = computed(() =>
-  getUnpickedOpenMatches(allValidMatches.value, picks.value),
+const activeTab = computed<PickemDetailTab>(() =>
+  route.query.tab === "leaderboard" ? "leaderboard" : "pickem",
 );
-
-const remainingCount = computed(() => unpickedOpenMatches.value.length);
-const nextUnpickedId = computed(() => unpickedOpenMatches.value[0]?.id ?? null);
 
 const topLeaderboard = computed(() => (leaderboard.value ?? []).slice(0, LEADERBOARD_TOP));
 const hasScoredPicks = computed(() =>
   [...(picks.value?.values() ?? [])].some((pick) => pick.scored),
 );
-const showLeaderboard = computed(
-  () => (leaderboard.value?.length ?? 0) > 0 || (personalRank.value?.total ?? 0) > 0,
-);
+
+function tabTo(tab: PickemDetailTab) {
+  const path = localePath(`/game/pickems/${tournamentId.value}`);
+  switch (tab) {
+    case "pickem":
+      return { path };
+    case "leaderboard":
+      return { path, query: { tab: "leaderboard" } };
+    default: {
+      const _exhaustive: never = tab;
+      return _exhaustive;
+    }
+  }
+}
 
 const submittingMatchId = ref<string | null>(null);
 
@@ -182,11 +183,34 @@ function loginRedirectPath() {
   };
 }
 
-function scrollToNextUnpicked() {
-  const id = nextUnpickedId.value;
-  if (!id || !import.meta.client) return;
-  const el = document.getElementById(`pickem-match-${id}`);
-  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+function matchScoreLabel(match: Match): string | null {
+  const status = resolveMatchDiscoveryStatus(match);
+  if (!shouldShowMatchScores(status)) return null;
+
+  const scoreA = displayMatchScore(
+    getMatchParticipantScore(match.results, match.participants?.[0]?.id),
+    status,
+  );
+  const scoreB = displayMatchScore(
+    getMatchParticipantScore(match.results, match.participants?.[1]?.id),
+    status,
+  );
+  if (scoreA == null && scoreB == null) return null;
+  return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
+}
+
+function matchCenterPrimary(match: Match): string | null {
+  const score = matchScoreLabel(match);
+  if (score) return score;
+  if (!match.beginAt) return null;
+  return pickemTimeDf.value.format(new Date(match.beginAt));
+}
+
+function openMatchLabel(match: Match): string {
+  return t("page.game.pickems.detail.openMatch", {
+    teamA: match.participants?.[0]?.team.name ?? t("components.match.tbd"),
+    teamB: match.participants?.[1]?.team.name ?? t("components.match.tbd"),
+  });
 }
 
 function teamButtonColor(
@@ -201,23 +225,6 @@ function teamButtonColor(
   if (outcome === "correct") return "success";
   if (outcome === "incorrect") return "error";
   return "primary";
-}
-
-function outcomeLabel(match: Match): string | null {
-  const pick = picks.value?.get(match.id);
-  const outcome = getPickOutcome(match, pick);
-  switch (outcome) {
-    case "correct":
-      return t("page.game.pickems.detail.outcome.correct", { points: pick?.points ?? 5 });
-    case "incorrect":
-      return t("page.game.pickems.detail.outcome.incorrect");
-    case "pending":
-      return isMatchLockedForPickem(match)
-        ? t("page.game.pickems.detail.outcome.locked")
-        : t("page.game.pickems.detail.outcome.pending");
-    default:
-      return isMatchLockedForPickem(match) ? t("page.game.pickems.detail.outcome.locked") : null;
-  }
 }
 
 async function pickTeam(matchId: string, participantId: string) {
@@ -257,51 +264,37 @@ onMounted(() => {
 const trackedResults = ref(false);
 const trackedLeaderboard = ref(false);
 
-watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
+watch(hasScoredPicks, (scored) => {
   if (scored && !trackedResults.value) {
     trackedResults.value = true;
     posthog?.capture("pickem_results_viewed", { tournament_id: tournamentId.value });
   }
-  if (leaderboardVisible && !trackedLeaderboard.value) {
-    trackedLeaderboard.value = true;
-    posthog?.capture("pickem_leaderboard_viewed", { tournament_id: tournamentId.value });
-  }
 });
+
+watch(
+  activeTab,
+  (tab) => {
+    if (tab === "leaderboard" && !trackedLeaderboard.value) {
+      trackedLeaderboard.value = true;
+      posthog?.capture("pickem_leaderboard_viewed", { tournament_id: tournamentId.value });
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SCrossCard class="w-full min-h-row-header">
-      <div class="w-full flex flex-col items-center justify-center gap-1 px-4 py-3 text-center">
-        <h1 class="text-xl font-semibold text-balance">
-          <template v-if="tournament">
-            {{ t("page.game.pickems.detail.title", { tournament: displayName }) }}
-          </template>
-          <template v-else>
-            {{ t("page.game.pickems.title") }}
-          </template>
-        </h1>
-        <p
-          v-if="tournament && sessionReady && isSignedIn && remainingCount > 0"
-          class="text-sm text-muted"
-        >
-          {{ t("page.game.pickems.detail.remaining", { count: remainingCount }) }}
-          <button
-            type="button"
-            class="ml-1 text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
-            @click="scrollToNextUnpicked"
-          >
-            {{ t("page.game.pickems.detail.jumpToNext") }}
-          </button>
-        </p>
-        <p
-          v-else-if="tournament && sessionReady && isSignedIn && remainingCount === 0"
-          class="text-sm text-muted"
-        >
-          {{ t("page.game.pickems.detail.allCaughtUp") }}
-        </p>
-      </div>
-    </SCrossCard>
+    <SHubPageHeader>
+      <template #title>
+        <template v-if="tournament">
+          {{ t("page.game.pickems.detail.title", { tournament: displayName }) }}
+        </template>
+        <template v-else>
+          {{ t("page.game.pickems.title") }}
+        </template>
+      </template>
+    </SHubPageHeader>
 
     <SCard v-if="tournamentPending && !tournament" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-3 animate-pulse">
@@ -338,28 +331,46 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
         </div>
       </SCard>
 
+      <div class="w-full flex flex-row gap-2">
+        <UButton
+          :to="tabTo('pickem')"
+          :label="t('page.game.pickems.detail.tabs.pickem')"
+          :variant="activeTab === 'pickem' ? 'solid' : 'soft'"
+          color="neutral"
+          class="w-full items-center justify-center"
+        />
+        <UButton
+          :to="tabTo('leaderboard')"
+          :label="t('page.game.pickems.detail.tabs.leaderboard')"
+          :variant="activeTab === 'leaderboard' ? 'solid' : 'soft'"
+          color="neutral"
+          class="w-full items-center justify-center"
+        />
+      </div>
+
       <section
-        v-if="showLeaderboard || leaderboardPending || personalRank"
-        class="w-full flex flex-col gap-3"
+        v-if="activeTab === 'leaderboard'"
+        class="w-full"
         aria-labelledby="pickem-leaderboard-title"
       >
-        <h2 id="pickem-leaderboard-title" class="text-sm font-medium text-toned pl-1">
-          {{ t("page.game.pickems.detail.leaderboard.title") }}
+        <h2 id="pickem-leaderboard-title" class="sr-only">
+          {{ t("page.game.pickems.detail.tabs.leaderboard") }}
         </h2>
         <SCard class="p-4">
-          <p v-if="isSignedIn && personalRank" class="text-sm text-muted mb-3">
-            <template v-if="personalRank.rank != null">
-              {{
-                t("page.game.pickems.detail.leaderboard.yourRank", {
-                  rank: personalRank.rank,
-                  total: personalRank.total,
-                  points: personalRank.points,
-                })
-              }}
-            </template>
-            <template v-else>
-              {{ t("page.game.pickems.detail.leaderboard.noRankYet") }}
-            </template>
+          <p v-if="isSignedIn && personalRank?.rank != null" class="text-sm text-muted mb-3">
+            {{
+              t("page.game.pickems.detail.leaderboard.yourRank", {
+                rank: personalRank.rank,
+                total: personalRank.total,
+                points: personalRank.points,
+              })
+            }}
+          </p>
+          <p
+            v-else-if="isSignedIn && personalRank && topLeaderboard.length > 0"
+            class="text-sm text-muted mb-3"
+          >
+            {{ t("page.game.pickems.detail.leaderboard.noRankYet") }}
           </p>
           <div v-if="leaderboardPending && topLeaderboard.length === 0" class="flex flex-col gap-2">
             <USkeleton v-for="i in 3" :key="i" class="h-6 w-full" />
@@ -384,28 +395,35 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
         </SCard>
       </section>
 
-      <SCard class="w-full">
-        <div v-if="matchesByDay.length > 0" class="w-full flex flex-col gap-4 p-4">
-          <div
-            v-for="dayGroup in matchesByDay"
-            :key="dayGroup.date.toDateString()"
-            class="w-full flex flex-col gap-2"
-          >
-            <div class="flex items-center justify-center py-2">
-              <h2 class="text-lg font-medium">
-                {{ dayHeaderDf.format(dayGroup.date) }}
-              </h2>
-            </div>
-            <div
+      <SCard v-else-if="matchesByDay.length === 0">
+        <div class="flex flex-col items-center gap-2 py-12 px-4 text-center">
+          <p class="text-sm text-muted text-pretty">
+            {{ t("page.game.pickems.detail.emptyMatches") }}
+          </p>
+        </div>
+      </SCard>
+
+      <div v-else class="w-full flex flex-col">
+        <div
+          v-for="dayGroup in matchesByDay"
+          :key="dayGroup.date.toDateString()"
+          class="w-full flex flex-col"
+        >
+          <h2 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
+            {{ formatDayHeaderDate(dayGroup.date, locale) }}
+          </h2>
+          <SCard flush-bottom>
+            <SListItem
               v-for="match in dayGroup.matches"
               :id="`pickem-match-${match.id}`"
               :key="match.id"
-              class="w-full flex flex-col gap-1 border border-default p-2"
+              size="default"
+              divider
             >
-              <div class="grid grid-cols-3 items-center justify-between gap-2">
+              <div class="grid w-full grid-cols-3 items-stretch gap-2">
                 <UButton
-                  variant="soft"
-                  class="flex items-center justify-center col-span-1 min-h-10"
+                  variant="ghost"
+                  class="w-full justify-center truncate"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
                   "
@@ -415,15 +433,21 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
                 >
                   {{ match.participants?.[0]?.team.name }}
                 </UButton>
-                <div class="flex flex-col items-center justify-evenly col-span-1 text-sm">
-                  <span v-if="match.beginAt" class="tabular-nums text-muted">
-                    {{ pickemDf.format(new Date(match.beginAt)) }}
+                <NuxtLink
+                  :to="localePath(`/matches/${match.id}`)"
+                  class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                  :aria-label="openMatchLabel(match)"
+                >
+                  <span v-if="matchCenterPrimary(match)" class="tabular-nums">
+                    {{ matchCenterPrimary(match) }}
                   </span>
-                  <span class="text-muted">vs</span>
-                </div>
+                  <span v-if="match.numberOfGames" class="tabular-nums">
+                    {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
+                  </span>
+                </NuxtLink>
                 <UButton
-                  variant="soft"
-                  class="flex items-center justify-center col-span-1 min-h-10"
+                  variant="ghost"
+                  class="w-full justify-center truncate"
                   :disabled="
                     isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
                   "
@@ -434,25 +458,10 @@ watch([hasScoredPicks, showLeaderboard], ([scored, leaderboardVisible]) => {
                   {{ match.participants?.[1]?.team.name }}
                 </UButton>
               </div>
-              <p
-                v-if="outcomeLabel(match)"
-                class="text-xs text-center text-muted"
-                :class="{
-                  'text-success': getPickOutcome(match, picks?.get(match.id)) === 'correct',
-                  'text-error': getPickOutcome(match, picks?.get(match.id)) === 'incorrect',
-                }"
-              >
-                {{ outcomeLabel(match) }}
-              </p>
-            </div>
-          </div>
+            </SListItem>
+          </SCard>
         </div>
-        <div v-else class="flex flex-col items-center gap-2 py-12 px-4 text-center">
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.game.pickems.detail.emptyMatches") }}
-          </p>
-        </div>
-      </SCard>
+      </div>
     </template>
   </div>
 </template>

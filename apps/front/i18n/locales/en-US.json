@@ -281,8 +281,6 @@
   "page": {
     "hub": {
       "headers": {
-        "tournamentsNext": "Next: {name}",
-        "tournamentsTotal": "{count} tournaments",
         "forumPosts": "{count} posts",
         "pickemsOpen": "{count} open pick'ems",
         "playersTotal": "{count} players",
@@ -331,13 +329,11 @@
         "title": "Pick'ems",
         "description": "Make your predictions!",
         "banner": {
-          "title": "Pick'ems Are Open",
-          "description": "Predict match outcomes for {tournament} and compete with the community.",
+          "title": "Pick'ems are open for {event}",
           "cta": "Join Pick'em"
         },
         "matchCta": {
           "title": "Predict This Match",
-          "description": "Submit your pick'em pick before this series starts.",
           "cta": "Make Pick"
         },
         "list": {
@@ -348,9 +344,6 @@
         "detail": {
           "title": "{tournament} Pick'em",
           "seoTitle": "{tournament} Pick'em",
-          "remaining": "{count} pick left | {count} picks left",
-          "jumpToNext": "Jump to next",
-          "allCaughtUp": "You're all caught up on open picks.",
           "signInPrompt": "Sign in to save your picks and climb the leaderboard.",
           "signInCta": "Sign In",
           "pickSaved": "Pick saved",
@@ -358,18 +351,17 @@
           "error": "Could not load this pick'em. Check your connection and try again.",
           "retry": "Try Again",
           "emptyMatches": "No matches are available for this pick'em yet.",
-          "outcome": {
-            "correct": "Correct · +{points}",
-            "incorrect": "Incorrect",
-            "pending": "Pick saved",
-            "locked": "Locked"
+          "openMatch": "View {teamA} vs {teamB}",
+          "tabs": {
+            "pickem": "Pick'em",
+            "leaderboard": "Leaderboard"
           },
           "leaderboard": {
             "title": "Leaderboard",
             "yourRank": "Your rank: #{rank} of {total} · {points} pts",
             "noRankYet": "Make picks and wait for results to appear on the leaderboard.",
             "points": "{points} pts",
-            "empty": "No scored picks yet. Rankings appear after matches finish."
+            "empty": "Rankings appear after matches finish."
           }
         }
       }
@@ -727,11 +719,6 @@
         "retry": "Try Again",
         "unknownTeam": "TBD",
         "unknownTournament": "Unknown tournament",
-        "status": {
-          "live": "Live",
-          "upcoming": "Upcoming",
-          "finished": "Finished"
-        },
         "format": "Bo{count}",
         "addToCalendar": "Add to Calendar",
         "watchStream": "Watch Stream",
