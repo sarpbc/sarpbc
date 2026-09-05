@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from "@nuxt/ui";
 import { entityTagEditorExtensions } from "~/utils/editor/entityTagNode";
+import { TweetTagNode } from "~/utils/editor/tweetTagNode";
 import { tableEditorExtensions } from "~/utils/editor/tableExtensions";
 import { useEntityTagEditor } from "~/composables/useEntityTagEditor";
+import { useTweetTagEditor } from "~/composables/useTweetTagEditor";
 import { useTableEditor } from "~/composables/useTableEditor";
 import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
@@ -10,10 +12,11 @@ const content = defineModel<string>({ required: true });
 
 const { t } = useI18n();
 const { pickerOpen, pickerKind, entityTagHandlers, insertEntityTag } = useEntityTagEditor();
+const { tweetPickerOpen, tweetTagHandlers, insertTweetTag } = useTweetTagEditor();
 const { tableHandlers, tableToolbarItems, shouldShowTableToolbar } = useTableEditor();
 
-const editorExtensions = [...tableEditorExtensions, ...entityTagEditorExtensions];
-const editorHandlers = { ...entityTagHandlers, ...tableHandlers };
+const editorExtensions = [...tableEditorExtensions, ...entityTagEditorExtensions, TweetTagNode];
+const editorHandlers = { ...entityTagHandlers, ...tweetTagHandlers, ...tableHandlers };
 
 const appendToBody = () => document.body;
 const floatingMenuOptions = { strategy: "fixed" as const };
@@ -86,6 +89,11 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
       icon: "i-fluent-people-team-24-regular",
     },
     {
+      kind: "tweetTag",
+      label: t("page.news.editor.insertTweet"),
+      icon: "i-ri-twitter-x-fill",
+    },
+    {
       kind: "table",
       label: t("page.news.editor.insertTable"),
       icon: "i-lucide-table",
@@ -130,4 +138,5 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
   </UEditor>
 
   <NewsEntityTagPicker v-model:open="pickerOpen" :kind="pickerKind" @select="insertEntityTag" />
+  <NewsTweetTagPicker v-model:open="tweetPickerOpen" @select="insertTweetTag" />
 </template>

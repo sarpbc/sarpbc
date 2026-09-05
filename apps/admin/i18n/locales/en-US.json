@@ -311,7 +311,15 @@
       "editor": {
         "insertPlayer": "Player Tag",
         "insertTeam": "Team Tag",
+        "insertTweet": "X Post",
         "insertTable": "Table",
+        "tweet": {
+          "title": "Insert X Post",
+          "urlLabel": "Post URL",
+          "urlPlaceholder": "https://x.com/user/status/…",
+          "urlInvalid": "Paste a full X post URL (x.com/…/status/…).",
+          "insert": "Insert Post"
+        },
         "tableAddRowBefore": "Add Row Before",
         "tableAddRowAfter": "Add Row After",
         "tableDeleteRow": "Delete Row",
@@ -465,6 +473,9 @@
     "error": "Could not load profile. Try again later.",
     "viewProfile": "View profile",
     "roster": "Roster",
-    "noTeam": "No current team"
+    "noTeam": "No current team",
+    "viewOnX": "View on X",
+    "tweetUnavailable": "This X post could not be loaded. Open it on X",
+    "tweetOnX": "Post by {name} on X"
   }
 }

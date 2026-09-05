@@ -1,4 +1,5 @@
 import { parseNewsEntityTag } from "./news-entity-tag.ts";
+import { stripNewsTweetTags } from "./news-tweet-tag.ts";
 
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;
@@ -16,7 +17,7 @@ function replaceEntityTagsWithLabels(content: string): string {
  * Turn `:player` / `:team` MDC tags into their labels before stripping markdown.
  */
 export function newsContentToPlainText(content: string): string {
-  const withLabels = replaceEntityTagsWithLabels(content);
+  const withLabels = replaceEntityTagsWithLabels(stripNewsTweetTags(content));
 
   return withLabels
     .replace(/```[\s\S]*?```/g, " ")

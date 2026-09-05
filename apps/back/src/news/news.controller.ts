@@ -19,6 +19,8 @@ import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dt
 import { parseNewsLocale } from "./news-locale.util";
 import { NewsService } from "./news.service";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
+import { TweetEmbedQueryDto } from "./dto/tweet-embed-query.dto";
+import { TweetEmbedService } from "./tweet-embed.service";
 
 import { AuthGuard } from "../auth/auth.guard";
 import { CurrentUserId } from "../user/decorator/current-user.decorator";
@@ -32,6 +34,7 @@ export class NewsController {
   constructor(
     private readonly newsService: NewsService,
     private readonly replyService: ReplyService,
+    private readonly tweetEmbedService: TweetEmbedService,
   ) {}
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -58,6 +61,11 @@ export class NewsController {
   @Get("sitemap/:chunk")
   findSitemapChunk(@Param("chunk", ParseIntPipe) chunk: number) {
     return this.newsService.findPublishedSitemapChunk(chunk);
+  }
+
+  @Get("embed/tweet")
+  embedTweet(@Query() { url }: TweetEmbedQueryDto) {
+    return this.tweetEmbedService.embed(url);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
