@@ -90,6 +90,7 @@ export default defineNuxtConfig({
       map: {
         player: "SarpPlayerTag",
         team: "SarpTeamTag",
+        tweet: "SarpTweetTag",
       },
     },
   },

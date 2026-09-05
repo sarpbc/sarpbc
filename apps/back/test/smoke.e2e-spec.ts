@@ -13,6 +13,7 @@ import { UserService } from "../src/user/user.service";
 import { PostHogService } from "../src/posthog/posthog.service";
 import { NewsController } from "../src/news/news.controller";
 import { NewsService } from "../src/news/news.service";
+import { TweetEmbedService } from "../src/news/tweet-embed.service";
 import { ReplyService } from "../src/reply/reply.service";
 import { MatchController } from "../src/tournament/match/match.controller";
 import { MatchService } from "../src/tournament/match/match.service";
@@ -89,6 +90,7 @@ describe("API smoke (e2e)", () => {
           useValue: { capture: jest.fn(), flush: jest.fn().mockResolvedValue(undefined) },
         },
         { provide: NewsService, useValue: newsService },
+        TweetEmbedService,
         { provide: ReplyService, useValue: { countByTargetIds: jest.fn() } },
         { provide: MatchService, useValue: matchService },
         { provide: APP_GUARD, useClass: ThrottlerGuard },

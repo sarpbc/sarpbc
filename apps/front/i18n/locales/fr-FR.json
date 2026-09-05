@@ -74,7 +74,10 @@
     "error": "Impossible de charger le profil. Réessayez plus tard.",
     "viewProfile": "Voir le profil",
     "roster": "Effectif",
-    "noTeam": "Aucune équipe actuelle"
+    "noTeam": "Aucune équipe actuelle",
+    "viewOnX": "Voir sur X",
+    "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
+    "tweetOnX": "Post de {name} sur X"
   },
   "general": {
     "news": "Actualités",

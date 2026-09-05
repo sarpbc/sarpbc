@@ -311,7 +311,15 @@
       "editor": {
         "insertPlayer": "Tag Joueur",
         "insertTeam": "Tag Équipe",
+        "insertTweet": "Post X",
         "insertTable": "Tableau",
+        "tweet": {
+          "title": "Insérer un post X",
+          "urlLabel": "URL du post",
+          "urlPlaceholder": "https://x.com/user/status/…",
+          "urlInvalid": "Collez l’URL complète d’un post X (x.com/…/status/…).",
+          "insert": "Insérer le post"
+        },
         "tableAddRowBefore": "Ajouter une Ligne Avant",
         "tableAddRowAfter": "Ajouter une Ligne Après",
         "tableDeleteRow": "Supprimer la Ligne",
@@ -465,6 +473,9 @@
     "error": "Impossible de charger le profil. Réessayez plus tard.",
     "viewProfile": "Voir le profil",
     "roster": "Effectif",
-    "noTeam": "Aucune équipe actuelle"
+    "noTeam": "Aucune équipe actuelle",
+    "viewOnX": "Voir sur X",
+    "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
+    "tweetOnX": "Post de {name} sur X"
   }
 }

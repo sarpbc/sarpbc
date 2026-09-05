@@ -13,6 +13,14 @@ describe("news-content.util", () => {
     ).toBe("Team Falcons beat jstn 4-3.");
   });
 
+  it("drops tweet tags from excerpts", () => {
+    expect(
+      stripMarkdownToPlain(
+        'Comm retired.\n\n:tweet{url="https://x.com/RL_Comm/status/2095971934320071030"}\n\nHe will attend Worlds.',
+      ),
+    ).toBe("Comm retired. He will attend Worlds.");
+  });
+
   it("keeps hyphenated scores", () => {
     expect(stripMarkdownToPlain("a 4-0 sweep")).toBe("a 4-0 sweep");
   });
