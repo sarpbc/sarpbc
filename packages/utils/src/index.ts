@@ -19,6 +19,15 @@ export {
   type NewsEntityTagKind,
 } from "./news-entity-tag.ts";
 export {
+  parseNewsTweetTag,
+  parseTweetUrl,
+  serializeNewsTweetTag,
+  stripNewsTweetTags,
+  type NewsTweetTag,
+  type ParsedTweetUrl,
+  type TweetEmbed,
+} from "./news-tweet-tag.ts";
+export {
   ACTIVE_ROSTER_LIMIT,
   isActiveRosterPlayer,
   isTeamStaffRole,

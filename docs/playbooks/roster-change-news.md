@@ -32,12 +32,12 @@ Client configuration examples live in the root [README.md](../../README.md#mcp-s
 
 **News** (requires `news.manage`):
 
-| Tool                  | Parameters                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `list_news_articles`  | `page?` (0-based, default 0), `limit?` (1–100, default 20)                                     | Includes drafts. Titles/slugs only — call `get_news_article` for full body.                                                                                                                                                                                                                                                                                                                                    |
-| `get_news_article`    | `idOrSlug` (slug or UUID)                                                                      | Full EN/FR fields, `isDraft`, `adminEditUrl`. Use before editing.                                                                                                                                                                                                                                                                                                                                              |
-| `create_news_draft`   | `title` (required), `content` (required), `titleFr?`, `contentFr?`, `imageUrl?` (URL), `slug?` | Write **English** title and body. Optionally add **French** `titleFr` / `contentFr` on the same article. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the English title when omitted. |
-| `update_news_article` | `idOrSlug` (required), `title?`, `content?`, `titleFr?`, `contentFr?`, `imageUrl?`, `slug?`    | Patch only the fields to change. Pass `null` for `titleFr`, `contentFr`, or `imageUrl` to clear them. Does **not** publish. Same player/team MDC tags as create.                                                                                                                                                                                                                                               |
+| Tool                  | Parameters                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_news_articles`  | `page?` (0-based, default 0), `limit?` (1–100, default 20)                                     | Includes drafts. Titles/slugs only — call `get_news_article` for full body.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `get_news_article`    | `idOrSlug` (slug or UUID)                                                                      | Full EN/FR fields, `isDraft`, `adminEditUrl`. Use before editing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `create_news_draft`   | `title` (required), `content` (required), `titleFr?`, `contentFr?`, `imageUrl?` (URL), `slug?` | Write **English** title and body. Optionally add **French** `titleFr` / `contentFr` on the same article. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` (resolve slugs with `search_players` / `search_teams`). When the primary source is an X post, put `:tweet{url="https://x.com/…/status/…"}` on its own line in **both** bodies. Creates a **draft** (`isDraft: true`). Returns `adminEditUrl` for review. Slug is generated from the English title when omitted. |
+| `update_news_article` | `idOrSlug` (required), `title?`, `content?`, `titleFr?`, `contentFr?`, `imageUrl?`, `slug?`    | Patch only the fields to change. Pass `null` for `titleFr`, `contentFr`, or `imageUrl` to clear them. Does **not** publish. Same player/team MDC tags as create.                                                                                                                                                                                                                                                                                                                                                                      |
 
 News articles share **one slug**. English `title` + `content` are required. French `titleFr` + `contentFr` are optional on the same draft; `/fr` readers see French when both French fields are filled, otherwise English.
 
@@ -156,6 +156,14 @@ After resolving slugs, embed MDC entity tags so the public site renders profile 
 
 Syntax: `:player{slug="<slug>" label="<display name>"}` or `:team{slug="<slug>" label="<display name>"}`. Labels may include spaces; escape double quotes in labels as `\"`.
 
+When the primary source is an X/Twitter post, embed it as a block (same tag in English and French):
+
+```markdown
+:tweet{url="https://x.com/RL_Comm/status/2095971934320071030"}
+```
+
+Do not paraphrase the post _instead of_ embedding it. Keep a short lead, then the tweet, then context.
+
 ---
 
 ## 4. Drafting
@@ -168,7 +176,7 @@ Syntax: `:player{slug="<slug>" label="<display name>"}` or `:team{slug="<slug>" 
 | **Headline (fr)** | Natural French esports phrasing: `[Joueur] rejoint [Équipe]` — not literal calques.                                                     |
 | **Lead**          | Who, what, which team, effective timing if stated — in the first 1–2 sentences.                                                         |
 | **Body**          | Background (prior team, recent results), tournament impact, what the org said. Short paragraphs.                                        |
-| **Quotes**        | Use blockquotes only for **verbatim** text from the primary source. Attribute immediately above or below.                               |
+| **Quotes**        | Use `:tweet{url="…"}` for X posts. Blockquotes only for **verbatim** text from a non-X source.                                          |
 | **Sources**       | Final paragraph or inline link: “[Team] announced the move on [date](canonical URL).”                                                   |
 | **Tone**          | Neutral, fan-informed, no hype (“legendary”, “shocking”) unless quoting.                                                                |
 | **Markdown**      | Headers `##` for sections if needed; `**bold**` for emphasis sparingly; entity tags for resolved slugs.                                 |
@@ -202,16 +210,16 @@ Paste JSON from get_player / get_team here for accuracy.
    - Headline: factual, present tense, no "Rumor:" unless facts are unverified.
    - Lead with who joined/left whom.
    - One paragraph of context (prior team, roster fit, active tournament if relevant).
-   - Blockquote only if the primary source includes a verbatim quote.
+   - Blockquote only if the primary source is not an X post and includes a verbatim quote.
    - Use :player{slug="…" label="…"} and :team{slug="…" label="…"} for resolved slugs.
-   - End with a source line linking to the primary URL.
+   - If the primary source is an X post, put :tweet{url="https://x.com/…/status/…"} on its own line (same URL in French).
+   - End with a source line only when the canonical URL is not already the tweet embed.
    - Do not invent stats or quotes.
 
 2. Write the FRENCH article (markdown):
    - Adapt naturally for fr-FR readers; do not word-for-word translate idioms.
    - Same structure and facts as English.
-   - Same entity tags (slugs are locale-neutral).
-   - Source line in French.
+   - Same entity tags (slugs are locale-neutral) and the same :tweet{url="…"} line.
 
 3. Call create_news_draft once via SARPBC MCP:
    - title / content = English headline and body
@@ -229,8 +237,8 @@ Paste JSON from get_player / get_team here for accuracy.
   "title": "Zen joins Karmine Corp",
   "slug": "zen-joins-karmine-corp",
   "titleFr": "Zen rejoint Karmine Corp",
-  "content": "French Rocket League star :player{slug=\"zen-rl\" label=\"Zen\"} has joined :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, the organization announced Tuesday.\n\nZen previously played for …\n\n> We are thrilled to welcome Zen to KC.\n>\n> — Karmine Corp\n\nKarmine Corp [announced the signing](https://example.com/post) on March 6, 2026.",
-  "contentFr": "Le joueur français :player{slug=\"zen-rl\" label=\"Zen\"} a rejoint :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, selon l'annonce publiée par l'organisation mardi.\n\n…\n\nKarmine Corp a [confirmé le transfert](https://example.com/post) le 6 mars 2026."
+  "content": "French Rocket League star :player{slug=\"zen-rl\" label=\"Zen\"} has joined :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, the organization announced Tuesday.\n\n:tweet{url=\"https://x.com/KarmineCorp/status/123\"}\n\nZen previously played for …",
+  "contentFr": "Le joueur français :player{slug=\"zen-rl\" label=\"Zen\"} a rejoint :team{slug=\"karmine-corp\" label=\"Karmine Corp\"}, selon l'annonce publiée par l'organisation mardi.\n\n:tweet{url=\"https://x.com/KarmineCorp/status/123\"}\n\nZen jouait auparavant pour …"
 }
 ```
 
@@ -266,6 +274,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 ### SARPBC data
 
 - [ ] `:player` / `:team` tags use correct slugs (preview in admin)
+- [ ] `:tweet` cards render (or fallback link if X is unavailable)
 - [ ] Player/team admin records updated if MCP data was stale (manual step in admin — out of MCP scope for SAR-127)
 - [ ] No broken internal links
 
@@ -323,7 +332,7 @@ After three trials, note:
 
 ## Out of scope (SAR-127)
 
-- Twitter/X API, RSS, scrapers, scheduled monitoring
+- Twitter/X **API**, RSS, scrapers, scheduled monitoring (oEmbed display of a pasted post URL is in scope)
 - Auto-publish or MCP publish tool
 - Updating roster/contract **data** via MCP (admin UI remains source of truth for DB updates)
 
@@ -331,5 +340,5 @@ After three trials, note:
 
 - [README — MCP server](../../README.md#mcp-server)
 - MCP implementation: `apps/back/src/mcp/tools/read-tools.ts`, `apps/back/src/mcp/tools/write-tools.ts`
-- Entity tag syntax: `packages/utils/src/news-entity-tag.ts`
+- Entity tag syntax: `packages/utils/src/news-entity-tag.ts`, tweet tags: `packages/utils/src/news-tweet-tag.ts`
 - Admin news editor: `apps/admin/app/pages/news/`

@@ -172,12 +172,12 @@ Read tools (any valid PAT):
 
 News tools (`news.manage`):
 
-| Tool                  | Description                                                              |
-| --------------------- | ------------------------------------------------------------------------ |
-| `list_news_articles`  | List articles including drafts                                           |
-| `get_news_article`    | Full EN/FR article by slug or id                                         |
-| `create_news_draft`   | EN/FR news draft using `:player` / `:team` MDC tags (human must publish) |
-| `update_news_article` | Patch an existing article (does not publish)                             |
+| Tool                  | Description                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| `list_news_articles`  | List articles including drafts                                                      |
+| `get_news_article`    | Full EN/FR article by slug or id                                                    |
+| `create_news_draft`   | EN/FR news draft using `:player` / `:team` / `:tweet` MDC tags (human must publish) |
+| `update_news_article` | Patch an existing article (does not publish)                                        |
 
 Write tools (staff permission required):
 

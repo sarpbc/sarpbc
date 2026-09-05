@@ -56,4 +56,12 @@ describe("newsContentToPlainText", () => {
       ),
     ).toBe("Team Falcons qualified for Worlds.");
   });
+
+  it("drops tweet tags from excerpts", () => {
+    expect(
+      newsContentToPlainText(
+        'Comm retired.\n\n:tweet{url="https://x.com/RL_Comm/status/2095971934320071030"}\n\nHe will attend Worlds.',
+      ),
+    ).toBe("Comm retired. He will attend Worlds.");
+  });
 });
