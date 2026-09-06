@@ -15,9 +15,12 @@ import { UserService } from "src/user/user.service";
 import { ReplyService } from "src/reply/reply.service";
 import { sanitizeNewsHtml, sanitizePlainText } from "src/common/html/sanitize-user-html";
 import slugify from "slugify";
+import type { NewsType } from "@sarpbc/types";
+import { isoWeekUtcRange } from "@sarpbc/utils";
 
 /** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
 export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
+export const NEWS_WEEK_SHORTS_LIMIT = 100;
 
 export interface NewsSitemapEntry {
   slug: string;
@@ -47,6 +50,7 @@ export interface NewsArticleListItemResponse {
   imageUrl: string | null;
   excerpt: string;
   commentCount: number;
+  type: NewsType;
 }
 
 export interface NewsArticleResponse {
@@ -58,12 +62,20 @@ export interface NewsArticleResponse {
   createdAt: Date;
   isDraft: boolean;
   imageUrl: string | null;
+  type: NewsType;
 }
 
 export interface NewsArticleAdminResponse extends NewsArticleResponse {
   titleFr: string | null;
   contentFr: string | null;
   hasFrench: boolean;
+}
+
+export interface NewsWeekResponse {
+  week: string;
+  start: Date;
+  end: Date;
+  items: NewsArticleResponse[];
 }
 
 @Injectable()
@@ -89,6 +101,7 @@ export class NewsService {
       imageUrl: article.imageUrl,
       excerpt: excerptFromContent(content),
       commentCount,
+      type: article.type,
     };
   }
 
@@ -103,6 +116,7 @@ export class NewsService {
       createdAt: article.createdAt,
       isDraft: article.isDraft,
       imageUrl: article.imageUrl,
+      type: article.type,
     };
   }
 
@@ -171,6 +185,7 @@ export class NewsService {
       slug,
       isDraft: true,
       imageUrl: dto.imageUrl ?? null,
+      type: dto.type ?? "short",
       createdAt: new Date(),
     });
     await this.newsRepository.getEntityManager().persist(article).flush();
@@ -181,6 +196,7 @@ export class NewsService {
     page: number,
     limit: number,
     locale: NewsLocale = "en-US",
+    type?: NewsType,
   ): Promise<{
     data: NewsArticleListItemResponse[];
     total: number;
@@ -188,10 +204,10 @@ export class NewsService {
     limit: number;
   }> {
     const offset = page * limit;
-    const [articles, total] = await this.newsRepository.findAndCount(
-      { isDraft: false },
-      { orderBy: { createdAt: "DESC" }, limit, offset },
-    );
+    const orderBy = { createdAt: "DESC" as const };
+    const [articles, total] = type
+      ? await this.newsRepository.findAndCount({ isDraft: false, type }, { orderBy, limit, offset })
+      : await this.newsRepository.findAndCount({ isDraft: false }, { orderBy, limit, offset });
     const commentCounts = await this.replyService.countByTargetIds(
       "newsArticle",
       articles.map((article) => article.id),
@@ -203,6 +219,34 @@ export class NewsService {
       total,
       page,
       limit,
+    };
+  }
+
+  async findPublishedShortsByWeek(
+    week: string,
+    locale: NewsLocale = "en-US",
+  ): Promise<NewsWeekResponse> {
+    const range = isoWeekUtcRange(week);
+    if (!range) {
+      throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
+    }
+    const articles = await this.newsRepository.find(
+      {
+        isDraft: false,
+        type: "short",
+        createdAt: { $gte: range.start, $lt: range.end },
+      },
+      {
+        populate: ["author"],
+        orderBy: { createdAt: "DESC" },
+        limit: NEWS_WEEK_SHORTS_LIMIT,
+      },
+    );
+    return {
+      week,
+      start: range.start,
+      end: range.end,
+      items: articles.map((article) => this.mapArticle(article, locale)),
     };
   }
 
@@ -344,6 +388,9 @@ export class NewsService {
         await this.assertSlugAvailable(nextSlug, article.id);
         article.slug = nextSlug;
       }
+    }
+    if (dto.type !== undefined) {
+      article.type = dto.type;
     }
     await this.newsRepository.getEntityManager().flush();
     return this.mapAdminArticle(article);

@@ -284,6 +284,7 @@
   "page": {
     "hub": {
       "headers": {
+        "newsTotal": "{count} actualités",
         "forumPosts": "{count} publications",
         "pickemsOpen": "{count} pick'ems ouverts",
         "playersTotal": "{count} joueurs",
@@ -291,6 +292,11 @@
       }
     },
     "home": {
+      "latest": "Dernières actus",
+      "latestShort": "Short : {title}",
+      "thisWeek": "Cette semaine",
+      "shortNewsCount": "{n} short | {n} shorts",
+      "allNews": "Toutes les actus",
       "seo": {
         "title": "Actus & matchs Rocket League | sarpbc.org",
         "description": "Réunir l'écosystème de l'esport Rocket League en un seul endroit."
@@ -372,7 +378,18 @@
     "news": {
       "articleNotFound": "Article introuvable",
       "seoTitle": "{title} | sarpbc.org",
-      "seoDescriptionDefault": "Retrouvez l'actualité esport Rocket League sur sarpbc.org"
+      "seoDescriptionDefault": "Retrouvez l'actualité esport Rocket League sur sarpbc.org",
+      "readingTime": "{minutes} min de lecture",
+      "commentCount": "{n} commentaire | {n} commentaires",
+      "empty": "Pas encore d’actualité. Revenez bientôt.",
+      "error": "Impossible de charger les actualités. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "week": {
+        "title": "Cette semaine",
+        "range": "{start} – {end}",
+        "seoTitle": "Shorts de la semaine | sarpbc.org",
+        "seoDescription": "Suivez les shorts Rocket League de la semaine dans un fil unique."
+      }
     },
     "players": {
       "index": {

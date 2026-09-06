@@ -1,4 +1,5 @@
 import { defineEntity, p } from "@mikro-orm/core";
+import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
 import { User } from "../../user/domain/user.entity";
 
 export class NewsArticle {
@@ -13,11 +14,12 @@ export class NewsArticle {
   updatedAt: Date | null = null;
   isDraft: boolean = true;
   imageUrl: string | null = null;
+  type: NewsType = "short";
 }
 
 export const NewsArticleSchema = defineEntity({
   class: NewsArticle,
-  indexes: [{ properties: ["title"] }, { properties: ["author"] }],
+  indexes: [{ properties: ["title"] }, { properties: ["author"] }, { properties: ["type"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     slug: p.string().length(255).unique(),
@@ -37,5 +39,9 @@ export const NewsArticleSchema = defineEntity({
       .onUpdate(() => new Date()),
     isDraft: p.boolean().default(true),
     imageUrl: p.string().length(255).nullable(),
+    type: p
+      .enum([...NEWS_TYPES])
+      .columnType("text")
+      .default("short"),
   },
 });

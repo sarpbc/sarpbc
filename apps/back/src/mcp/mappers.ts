@@ -90,6 +90,7 @@ export function mapNewsListItem(article: NewsArticleAdminResponse) {
     imageUrl: article.imageUrl,
     createdAt: article.createdAt,
     author: article.author,
+    type: article.type,
     adminEditUrl: adminNewsEditUrl(article.slug),
     url: newsUrl(article.slug),
   };

@@ -284,6 +284,7 @@
   "page": {
     "hub": {
       "headers": {
+        "newsTotal": "{count} stories",
         "forumPosts": "{count} posts",
         "pickemsOpen": "{count} open pick'ems",
         "playersTotal": "{count} players",
@@ -291,6 +292,11 @@
       }
     },
     "home": {
+      "latest": "Latest",
+      "latestShort": "Short: {title}",
+      "thisWeek": "This week",
+      "shortNewsCount": "{n} short | {n} shorts",
+      "allNews": "All news",
       "seo": {
         "title": "Rocket League news & matches | sarpbc.org",
         "description": "Bringing the competitive Rocket League ecosystem into one place."
@@ -372,7 +378,18 @@
     "news": {
       "articleNotFound": "Article not found",
       "seoTitle": "{title} | sarpbc.org",
-      "seoDescriptionDefault": "Read the latest Rocket League esports news on sarpbc.org"
+      "seoDescriptionDefault": "Read the latest Rocket League esports news on sarpbc.org",
+      "readingTime": "{minutes} min read",
+      "commentCount": "{n} comment | {n} comments",
+      "empty": "No news yet. Check back soon.",
+      "error": "Could not load news. Check your connection and try again.",
+      "retry": "Try Again",
+      "week": {
+        "title": "This week",
+        "range": "{start} – {end}",
+        "seoTitle": "This week's short news | sarpbc.org",
+        "seoDescription": "Follow this week's Rocket League short news as a live thread."
+      }
     },
     "players": {
       "index": {

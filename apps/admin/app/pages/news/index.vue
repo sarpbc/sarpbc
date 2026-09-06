@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { NewsType } from "@sarpbc/types";
 import type { DropdownMenuItem, TableColumn, TableRow } from "@nuxt/ui";
 import { hasFrenchTranslation } from "@sarpbc/utils";
 
@@ -37,6 +38,14 @@ const columns: TableColumn<NewsArticle>[] = [
       })
         ? t("page.news.locale.enFr")
         : t("page.news.locale.enOnly"),
+  },
+  {
+    accessorKey: "type",
+    header: t("page.news.columns.format"),
+    cell: ({ getValue }) => {
+      const value = getValue() as NewsType | undefined;
+      return value === "article" ? t("page.news.type.article") : t("page.news.type.short");
+    },
   },
   {
     accessorKey: "createdAt",

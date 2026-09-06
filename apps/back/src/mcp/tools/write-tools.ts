@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { BadRequestException } from "@nestjs/common";
+import { NEWS_TYPES } from "@sarpbc/types";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
@@ -30,6 +31,7 @@ export function requireNewsUpdateFields(fields: {
   contentFr?: string | null;
   imageUrl?: string | null;
   slug?: string;
+  type?: (typeof NEWS_TYPES)[number];
 }): void {
   if (
     fields.title === undefined &&
@@ -37,10 +39,11 @@ export function requireNewsUpdateFields(fields: {
     fields.titleFr === undefined &&
     fields.contentFr === undefined &&
     fields.imageUrl === undefined &&
-    fields.slug === undefined
+    fields.slug === undefined &&
+    fields.type === undefined
   ) {
     throw new BadRequestException(
-      "Provide at least one field to update (title, content, titleFr, contentFr, imageUrl, or slug).",
+      "Provide at least one field to update (title, content, titleFr, contentFr, imageUrl, slug, or type).",
     );
   }
 }
@@ -75,12 +78,18 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .optional()
           .describe("Optional URL slug. Generated from the English title when omitted."),
+        type: z
+          .enum(NEWS_TYPES)
+          .optional()
+          .describe(
+            "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories). Defaults to short.",
+          ),
       },
     },
-    async ({ title, content, titleFr, contentFr, imageUrl, slug }) =>
+    async ({ title, content, titleFr, contentFr, imageUrl, slug, type }) =>
       runWriteTool(user, "create_news_draft", "news.manage", async () => {
         const article = await ctx.newsService.create(
-          { title, content, titleFr, contentFr, imageUrl, slug },
+          { title, content, titleFr, contentFr, imageUrl, slug, type },
           user.id,
         );
         return {
@@ -90,6 +99,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             title: article.title,
             slug: article.slug,
             isDraft: article.isDraft,
+            type: article.type,
             adminEditUrl: adminNewsEditUrl(article.slug),
             note: "Draft created. A staff member must review and publish it in the admin app.",
           },
@@ -137,11 +147,17 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .max(255)
           .optional()
           .describe("New URL slug. Leave omitted to keep the current slug."),
+        type: z
+          .enum(NEWS_TYPES)
+          .optional()
+          .describe(
+            "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).",
+          ),
       },
     },
-    async ({ idOrSlug, title, content, titleFr, contentFr, imageUrl, slug }) =>
+    async ({ idOrSlug, title, content, titleFr, contentFr, imageUrl, slug, type }) =>
       runWriteTool(user, "update_news_article", "news.manage", async () => {
-        requireNewsUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug });
+        requireNewsUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug, type });
 
         const current = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
         const article = await ctx.newsService.update(current.slug, {
@@ -151,6 +167,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           contentFr,
           imageUrl,
           slug,
+          type,
         });
 
         return {
@@ -161,6 +178,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             slug: article.slug,
             isDraft: article.isDraft,
             hasFrench: article.hasFrench,
+            type: article.type,
             adminEditUrl: adminNewsEditUrl(article.slug),
             note: "Article updated. Publishing remains a human action in the admin app.",
           },
