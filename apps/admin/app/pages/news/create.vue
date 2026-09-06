@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { NewsType } from "@sarpbc/types";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -20,6 +21,7 @@ const slugTouched = ref(false);
 const content = ref("");
 const contentFr = ref("");
 const imageUrl = ref<string | null>(null);
+const articleType = ref<NewsType>("short");
 const isSaving = ref(false);
 const isModalOpen = ref(false);
 
@@ -66,6 +68,7 @@ async function saveArticle() {
       contentFr: contentFr.value.trim() || null,
       slug: trimmedSlug || undefined,
       imageUrl: imageUrl.value ?? undefined,
+      type: articleType.value,
     });
     if (!created) {
       toast.add({
@@ -133,6 +136,26 @@ async function saveArticle() {
                 autocomplete="off"
                 @update:model-value="onSlugInput"
                 @keydown.enter="saveArticle"
+              />
+            </UFormField>
+            <UFormField :label="$t('page.news.type.label')" name="type">
+              <URadioGroup
+                v-model="articleType"
+                variant="list"
+                :items="[
+                  {
+                    value: 'short',
+                    label: $t('page.news.type.shortLabel'),
+                    description: $t('page.news.type.shortDescription'),
+                  },
+                  {
+                    value: 'article',
+                    label: $t('page.news.type.articleLabel'),
+                    description: $t('page.news.type.articleDescription'),
+                  },
+                ]"
+                value-key="value"
+                label-key="label"
               />
             </UFormField>
             <UFormField :label="$t('page.news.cover.label')">

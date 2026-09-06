@@ -1,3 +1,5 @@
+import type { NewsType } from "@sarpbc/types";
+
 export type NewsArticle = {
   id: string;
   slug: string;
@@ -6,6 +8,7 @@ export type NewsArticle = {
   content: string;
   createdAt: string;
   isDraft: boolean;
+  type: NewsType;
   imageUrl?: string | null;
   titleFr?: string | null;
   contentFr?: string | null;
@@ -25,6 +28,7 @@ export async function createNewsArticle(body: {
   imageUrl?: string;
   titleFr?: string | null;
   contentFr?: string | null;
+  type?: NewsType;
 }): Promise<NewsArticle | null> {
   try {
     return await apiFetch<NewsArticle>("/news", {
@@ -69,6 +73,7 @@ export async function editNewsArticle(
     imageUrl?: string | null;
     titleFr?: string | null;
     contentFr?: string | null;
+    type?: NewsType;
   },
 ): Promise<NewsArticle | null> {
   try {

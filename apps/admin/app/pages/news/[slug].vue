@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { NewsType } from "@sarpbc/types";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -22,6 +23,7 @@ const articleSlug = ref(article.value?.slug ?? "");
 const content = ref(article.value?.content ?? "");
 const contentFr = ref(article.value?.contentFr ?? "");
 const imageUrl = ref<string | null>(article.value?.imageUrl ?? null);
+const articleType = ref<NewsType>(article.value?.type ?? "short");
 const isDraft = ref(article.value?.isDraft ?? true);
 const isSaving = ref(false);
 const isPublishing = ref(false);
@@ -45,6 +47,7 @@ async function saveArticle() {
       contentFr: contentFr.value.trim() || null,
       slug: articleSlug.value.trim(),
       imageUrl: imageUrl.value,
+      type: articleType.value,
     });
     if (!updated) {
       toast.add({
@@ -147,6 +150,26 @@ async function togglePublish() {
                 spellcheck="false"
                 autocomplete="off"
                 @keydown.enter="saveArticle"
+              />
+            </UFormField>
+            <UFormField :label="$t('page.news.type.label')" name="type">
+              <URadioGroup
+                v-model="articleType"
+                variant="list"
+                :items="[
+                  {
+                    value: 'short',
+                    label: $t('page.news.type.shortLabel'),
+                    description: $t('page.news.type.shortDescription'),
+                  },
+                  {
+                    value: 'article',
+                    label: $t('page.news.type.articleLabel'),
+                    description: $t('page.news.type.articleDescription'),
+                  },
+                ]"
+                value-key="value"
+                label-key="label"
               />
             </UFormField>
             <UFormField :label="$t('page.news.cover.label')">

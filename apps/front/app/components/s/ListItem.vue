@@ -7,11 +7,14 @@ const {
   size = "default",
   to,
   divider = false,
+  dividerTop = false,
 } = defineProps<{
   size?: ListItemSize;
   to?: string;
   /** Required on the last row when the parent Card is `flushBottom`. */
   divider?: boolean;
+  /** Top rule when the parent Card is `flushTop` — stays inside the row height. */
+  dividerTop?: boolean;
 }>();
 
 const attrs = useAttrs();
@@ -37,9 +40,10 @@ function listItemSizeClasses(value: ListItemSize): string {
 
 const itemClass = computed(() => [
   "flex w-full",
-  size === "triple" ? "p-2 items-stretch" : "px-2 items-center",
+  size === "triple" || size === "double" ? "p-2 items-stretch" : "px-2 items-center",
   listItemSizeClasses(size),
   divider && "border-b border-default",
+  dividerTop && "border-t border-default",
   to &&
     "transition-none hover:bg-elevated/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
   attrs.class,

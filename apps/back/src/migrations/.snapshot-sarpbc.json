@@ -1254,6 +1254,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'short'",
+          "comment": null,
+          "collation": null,
+          "enumItems": ["short", "article"],
+          "mappedType": "enum"
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamptz(6)",
@@ -1304,9 +1321,24 @@
           "keyName": "news_article_title_index",
           "primary": false,
           "unique": false
+        },
+        {
+          "columnNames": ["type"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "news_article_type_index",
+          "primary": false,
+          "unique": false
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "news_article_type_check",
+          "expression": "\"type\" in ('short', 'article')",
+          "definition": "check (\"type\" in ('short', 'article'))",
+          "columnName": "type"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {
         "news_article_author_id_foreign": {

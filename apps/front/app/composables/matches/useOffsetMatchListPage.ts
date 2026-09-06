@@ -1,5 +1,6 @@
 export type OffsetPageQuery = {
   offset?: string;
+  type?: string;
 };
 
 export const MATCH_LIST_PAGE_SIZE = 20;

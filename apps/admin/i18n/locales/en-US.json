@@ -248,7 +248,8 @@
         "title": "Title",
         "author": "Author",
         "createdAt": "Created At",
-        "languages": "Languages"
+        "languages": "Languages",
+        "format": "Format"
       },
       "locale": {
         "en": "English",
@@ -259,6 +260,15 @@
         "titleEn": "English Title",
         "titleFr": "French Title",
         "fallbackHint": "French readers see English until both the French title and body are filled."
+      },
+      "type": {
+        "label": "Format",
+        "short": "Short",
+        "article": "Article",
+        "shortLabel": "Short news",
+        "articleLabel": "Article",
+        "shortDescription": "Follow the scene: results, rosters, announcements.",
+        "articleDescription": "Understand the scene: analysis, context, stories."
       },
       "create": {
         "title": "New Article",

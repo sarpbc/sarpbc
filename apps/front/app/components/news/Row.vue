@@ -1,38 +1,46 @@
 <script lang="ts" setup>
+import type { NewsType } from "@sarpbc/types";
 import type { NewsArticleListItem } from "~/composables/news";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
+import { resolveNewsType } from "~/utils/newsTypeQuery";
 
 const localePath = useLocalePath();
 
-const props = withDefaults(
-  defineProps<{
-    article: NewsArticleListItem;
-    showImage?: boolean;
-    headingLevel?: "h1" | "h2";
-  }>(),
-  {
-    headingLevel: "h2",
-  },
-);
+const props = defineProps<{
+  article: NewsArticleListItem;
+  dividerTop?: boolean;
+}>();
 
-const titleHeadingTag = computed(() => props.headingLevel);
+const newsType = computed(() => resolveNewsType(props.article.type));
+const imageUrl = computed(() => props.article.imageUrl?.trim() || null);
 
-const imageUrl = computed(() => {
-  if (!props.showImage) {
-    return null;
+const rowSize = computed(() => {
+  const type: NewsType = newsType.value;
+  switch (type) {
+    case "short":
+      return "default" as const;
+    case "article":
+      return imageUrl.value ? ("double" as const) : ("default" as const);
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
-  return props.article.imageUrl?.trim() || null;
 });
 </script>
 
 <template>
   <SListItem
-    :size="imageUrl ? 'triple' : 'default'"
+    :size="rowSize"
     divider
+    :divider-top="props.dividerTop"
     :to="localePath(`/news/${props.article.slug}`)"
     class="min-w-0 overflow-hidden"
   >
-    <div v-if="imageUrl" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
+    <div
+      v-if="newsType === 'article' && imageUrl"
+      class="flex h-full w-full min-w-0 items-stretch gap-x-3"
+    >
       <div
         class="aspect-video h-full shrink-0 self-stretch overflow-hidden bg-elevated"
         :style="{ viewTransitionName: newsCoverTransitionName(props.article.slug) }"
@@ -40,29 +48,32 @@ const imageUrl = computed(() => {
         <NuxtImg
           :src="imageUrl"
           alt=""
-          width="234"
-          height="132"
-          sizes="234px"
-          loading="eager"
-          fetchpriority="high"
+          width="128"
+          height="72"
+          sizes="128px"
+          loading="lazy"
           class="h-full w-full object-cover"
         />
       </div>
-      <component
-        :is="titleHeadingTag"
-        class="min-w-0 flex-1 self-center text-base font-semibold leading-snug tracking-tight text-highlighted line-clamp-5"
-      >
-        {{ props.article.title }}
-      </component>
+      <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
+        <h2
+          class="min-w-0 text-base font-semibold leading-snug tracking-tight text-default line-clamp-2"
+        >
+          {{ props.article.title }}
+        </h2>
+        <p v-if="props.article.excerpt" class="min-w-0 text-xs text-toned line-clamp-1">
+          {{ props.article.excerpt }}
+        </p>
+        <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
+          {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
+        </p>
+      </div>
     </div>
 
     <div v-else class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <component
-        :is="titleHeadingTag"
-        class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-highlighted"
-      >
+      <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-default">
         {{ props.article.title }}
-      </component>
+      </h2>
       <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
         {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
       </p>
