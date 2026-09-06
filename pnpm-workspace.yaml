@@ -4,9 +4,9 @@ packages:
 
 overrides:
   h3: 1.15.11
-  fastify: 5.11.3
+  fastify: 5.12.3
   prosemirror-model: 1.25.11
-  prosemirror-view: 1.42.1
+  prosemirror-view: 1.42.3
 
 allowBuilds:
   "@nestjs/core": true
@@ -23,33 +23,33 @@ allowBuilds:
 
 catalog:
   typescript: ^6.0.3
-  "@types/node": ^26.1.1
-  nuxt: ^4.5.1
-  vue: ^3.5.40
-  vue-router: ^5.2.0
-  vue-i18n: ^11.4.7
-  "@nuxt/ui": ^4.10.0
-  "@nuxtjs/i18n": ^10.5.0
-  "@tiptap/core": ^3.28.0
-  "@tiptap/extension-table": ^3.28.0
-  "@tiptap/pm": ^3.28.0
-  "@tiptap/vue-3": ^3.28.0
-  vue-tsc: ^3.3.8
-  "@iconify-json/fluent": ^1.2.53
-  "@iconify-json/lucide": ^1.2.118
-  "@iconify-json/logos": ^1.2.11
-  evlog: ^2.22.3
-  "@nestjs/common": ^11.1.28
-  "@nestjs/core": ^11.1.28
-  "@nestjs/platform-fastify": ^11.1.28
-  "@nestjs/testing": ^11.1.28
-  "@mikro-orm/cli": ^7.1.7
-  "@mikro-orm/core": ^7.1.7
-  "@mikro-orm/decorators": ^7.1.7
-  "@mikro-orm/entity-generator": ^7.1.7
-  "@mikro-orm/migrations": ^7.1.7
-  "@mikro-orm/postgresql": ^7.1.7
-  "@mikro-orm/seeder": ^7.1.7
+  "@types/node": ^26.4.1
+  nuxt: ^4.5.2
+  vue: ^3.5.42
+  vue-router: ^5.3.1
+  vue-i18n: ^11.4.10
+  "@nuxt/ui": ^4.11.0
+  "@nuxtjs/i18n": ^10.6.0
+  "@tiptap/core": ^3.31.3
+  "@tiptap/extension-table": ^3.31.3
+  "@tiptap/pm": ^3.31.3
+  "@tiptap/vue-3": ^3.31.3
+  vue-tsc: ^3.3.11
+  "@iconify-json/fluent": ^1.2.57
+  "@iconify-json/lucide": ^1.2.129
+  "@iconify-json/logos": ^1.2.13
+  evlog: ^2.28.1
+  "@nestjs/common": ^11.2.3
+  "@nestjs/core": ^11.2.3
+  "@nestjs/platform-fastify": ^11.2.3
+  "@nestjs/testing": ^11.2.3
+  "@mikro-orm/cli": ^7.1.15
+  "@mikro-orm/core": ^7.1.15
+  "@mikro-orm/decorators": ^7.1.15
+  "@mikro-orm/entity-generator": ^7.1.15
+  "@mikro-orm/migrations": ^7.1.15
+  "@mikro-orm/postgresql": ^7.1.15
+  "@mikro-orm/seeder": ^7.1.15
 
 minimumReleaseAgeExclude:
   - "@nuxt/kit@4.5.0"
