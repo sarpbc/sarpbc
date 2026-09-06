@@ -248,7 +248,8 @@
         "title": "Titre",
         "author": "Auteur",
         "createdAt": "Créé le",
-        "languages": "Langues"
+        "languages": "Langues",
+        "format": "Format"
       },
       "locale": {
         "en": "English",
@@ -259,6 +260,15 @@
         "titleEn": "Titre anglais",
         "titleFr": "Titre français",
         "fallbackHint": "Les lecteurs français voient l’anglais tant que le titre et le corps français ne sont pas tous les deux remplis."
+      },
+      "type": {
+        "label": "Format",
+        "short": "Short",
+        "article": "Article",
+        "shortLabel": "Short",
+        "articleLabel": "Article",
+        "shortDescription": "Suivre la scène : résultats, rosters, annonces.",
+        "articleDescription": "Comprendre la scène : analyses, contexte, récits."
       },
       "create": {
         "title": "Nouvel Article",

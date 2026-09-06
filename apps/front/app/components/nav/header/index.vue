@@ -8,8 +8,16 @@ const route = useRoute();
 
 const menuOpen = ref(false);
 
+const homePath = computed(() => localePath("/"));
 const matchesPath = computed(() => localePath("/matches"));
 const resultsPath = computed(() => localePath("/results"));
+
+function isNewsSection(): boolean {
+  if (isExactPath(homePath.value)) {
+    return true;
+  }
+  return /(?:^|\/)news(?:\/|$)/.test(route.path);
+}
 
 function isExactPath(path: string): boolean {
   const current = route.path.replace(/\/$/, "");
@@ -41,6 +49,11 @@ watch(
 );
 
 const items = computed<NavigationMenuItem[]>(() => [
+  {
+    label: t("general.news"),
+    to: homePath.value,
+    active: isNewsSection(),
+  },
   {
     label: t("general.matches"),
     to: matchesPath.value,

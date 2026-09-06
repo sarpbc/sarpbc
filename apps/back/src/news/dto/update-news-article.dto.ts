@@ -1,5 +1,14 @@
-import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, ValidateIf } from "class-validator";
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  ValidateIf,
+} from "class-validator";
 import { Transform } from "class-transformer";
+import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
 import { emptyToNull } from "./empty-to-null";
 import { trimIncomingString } from "../../common/dto/trim-incoming-string";
 
@@ -41,4 +50,8 @@ export class UpdateNewsArticleDto {
   @MaxLength(255)
   @Transform(trimIncomingString)
   slug?: string;
+
+  @IsOptional()
+  @IsIn(NEWS_TYPES)
+  type?: NewsType;
 }

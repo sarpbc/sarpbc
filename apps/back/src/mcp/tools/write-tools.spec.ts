@@ -13,4 +13,8 @@ describe("requireNewsUpdateFields", () => {
   it("accepts a null clear for French or image fields", () => {
     expect(() => requireNewsUpdateFields({ titleFr: null, imageUrl: null })).not.toThrow();
   });
+
+  it("accepts a type-only update", () => {
+    expect(() => requireNewsUpdateFields({ type: "article" })).not.toThrow();
+  });
 });

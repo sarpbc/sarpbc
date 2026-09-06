@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { isoWeekIdFromDate } from "@sarpbc/utils";
 import { buildOrganization } from "~/utils/structuredData/organization";
 import { buildWebSite } from "~/utils/structuredData/webSite";
-import { homepageNewsHeadingLevel } from "~/utils/homepageNewsHeadingLevel";
 
 const HOMEPAGE_NEWS_LIMIT = 20;
 
@@ -21,18 +21,41 @@ setJsonLd("ld-json-website", () =>
   }),
 );
 
-const { data: newsPage } = await useAsyncData(
-  () => `homepage-news-${locale.value}`,
-  () => getNewsArticles(0, HOMEPAGE_NEWS_LIMIT, locale.value),
-  { watch: [locale] },
-);
+const currentWeekId = isoWeekIdFromDate(new Date());
+const articleLimit = ref(HOMEPAGE_NEWS_LIMIT);
 
-const posts = computed(() => newsPage.value?.data ?? []);
+const [{ data: weekPage }, { data: articlesPage, pending: articlesPending }] = await Promise.all([
+  useAsyncData(
+    () => `homepage-week-${locale.value}-${currentWeekId}`,
+    () => getNewsWeek(currentWeekId, locale.value),
+    { watch: [locale] },
+  ),
+  useAsyncData(
+    () => `homepage-articles-${locale.value}-${articleLimit.value}`,
+    () => getNewsArticles(0, articleLimit.value, locale.value, "article"),
+    { watch: [locale, articleLimit] },
+  ),
+]);
 
-const featuredImageArticleId = computed(() => {
-  const withImage = posts.value.find((article) => Boolean(article.imageUrl?.trim()));
-  return withImage?.id ?? null;
+const week = computed(() => {
+  const value = weekPage.value;
+  if (!value || value.items.length === 0) {
+    return null;
+  }
+  return value;
 });
+
+const articles = computed(() => articlesPage.value?.data ?? []);
+const hasMoreArticles = computed(() => (articlesPage.value?.total ?? 0) > articles.value.length);
+const hasArticlesColumn = computed(() => articles.value.length > 0 || hasMoreArticles.value);
+const hasNewsColumn = computed(() => Boolean(week.value) || hasArticlesColumn.value);
+
+function loadMoreArticles() {
+  if (!hasMoreArticles.value || articlesPending.value) {
+    return;
+  }
+  articleLimit.value += HOMEPAGE_NEWS_LIMIT;
+}
 
 const { data: activePickemTournament } = await useLazyAsyncData(
   "active-pickem-tournament",
@@ -44,26 +67,47 @@ const { data: activePickemTournament } = await useLazyAsyncData(
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-2">
-    <PickemPromoBanner
-      v-if="activePickemTournament"
-      :tournament="activePickemTournament"
-      variant="homepage"
-      class="mb-2"
-    />
+  <div class="w-full flex flex-col">
     <MatchMobileHomeStrip />
-    <SRail v-if="posts.length" caption="lead" :title="$t('general.news')">
-      <SCard flush-bottom>
-        <div class="w-full flex flex-col">
-          <NewsRow
-            v-for="article in posts"
-            :key="article.id"
-            :article="article"
-            :show-image="article.id === featuredImageArticleId"
-            :heading-level="homepageNewsHeadingLevel(article.id, featuredImageArticleId)"
-          />
-        </div>
-      </SCard>
-    </SRail>
+    <div class="w-full flex flex-col" :class="{ 'gap-4': Boolean(activePickemTournament) }">
+      <PickemPromoBanner
+        v-if="activePickemTournament"
+        :tournament="activePickemTournament"
+        variant="homepage"
+      />
+      <SRail
+        v-if="hasNewsColumn"
+        :caption="activePickemTournament ? 'none' : 'lead'"
+        :title="week || activePickemTournament ? undefined : $t('page.home.latest')"
+      >
+        <SCard v-if="week" flush-bottom>
+          <NewsWeekRow :week="week" />
+        </SCard>
+        <SRail
+          v-if="hasArticlesColumn"
+          :caption="week ? 'section' : 'none'"
+          :title="week ? $t('page.home.latest') : undefined"
+        >
+          <SCard flush-bottom :flush-top="Boolean(week)">
+            <NewsRow
+              v-for="(article, index) in articles"
+              :key="article.id"
+              :article="article"
+              :divider-top="Boolean(week) && index === 0"
+            />
+            <SListItem v-if="hasMoreArticles" divider>
+              <button
+                type="button"
+                class="flex h-full w-full items-center text-left text-sm font-medium text-muted hover:text-highlighted"
+                :disabled="articlesPending"
+                @click="loadMoreArticles"
+              >
+                {{ $t("page.home.allNews") }}
+              </button>
+            </SListItem>
+          </SCard>
+        </SRail>
+      </SRail>
+    </div>
   </div>
 </template>

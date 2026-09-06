@@ -1,9 +1,12 @@
+import type { NewsType } from "@sarpbc/types";
+
 export type NewsArticleListItem = {
   id: string;
   slug: string;
   title: string;
   createdAt: string;
   imageUrl: string | null;
+  type: NewsType;
   /** Plain-text teaser from list endpoints; omitted on full article payloads. */
   excerpt?: string;
   commentCount?: number;
@@ -22,11 +25,19 @@ export type PaginatedNewsArticles = {
   limit: number;
 };
 
+export type NewsWeek = {
+  week: string;
+  start: string;
+  end: string;
+  items: NewsArticle[];
+};
+
 export async function createNewsArticle(body: {
   title: string;
   content: string;
   slug?: string;
   imageUrl?: string;
+  type?: NewsType;
 }): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();
   try {
@@ -45,19 +56,40 @@ export async function getNewsArticles(
   page = 0,
   limit = 10,
   locale?: string,
+  type?: NewsType,
 ): Promise<PaginatedNewsArticles> {
   const config = useRuntimeConfig();
   try {
-    const res = await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
-      method: "GET",
-      credentials: "include",
-      query: { page, limit, locale },
-    });
+    const res = type
+      ? await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
+          method: "GET",
+          credentials: "include",
+          query: { page, limit, locale, type },
+        })
+      : await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
+          method: "GET",
+          credentials: "include",
+          query: { page, limit, locale },
+        });
 
     return res;
   } catch (error) {
     console.error("Error fetching news articles:", error);
     return { data: [], total: 0, page, limit };
+  }
+}
+
+export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek | null> {
+  const config = useRuntimeConfig();
+  try {
+    return await $fetch<NewsWeek>(`${config.public.apiBase}/news/weeks/${week}`, {
+      method: "GET",
+      credentials: "include",
+      query: { locale },
+    });
+  } catch (error) {
+    console.error("Error fetching news week:", error);
+    return null;
   }
 }
 
@@ -114,6 +146,7 @@ export async function editNewsArticle(
     title: string;
     content: string;
     slug?: string;
+    type?: NewsType;
   },
 ): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();

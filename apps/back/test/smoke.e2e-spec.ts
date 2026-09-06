@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { NotFoundException } from "@nestjs/common";
+import { NotFoundException, BadRequestException } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
@@ -39,6 +39,17 @@ describe("API smoke (e2e)", () => {
       total: 1,
       page: 0,
       limit: 25,
+    }),
+    findPublishedShortsByWeek: jest.fn(async (week: string) => {
+      if (week === "2026-W99") {
+        throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
+      }
+      return {
+        week,
+        start: new Date("2026-08-31T00:00:00.000Z"),
+        end: new Date("2026-09-07T00:00:00.000Z"),
+        items: [],
+      };
     }),
   };
   const matchService = {
@@ -129,6 +140,22 @@ describe("API smoke (e2e)", () => {
 
   it("rejects non-whitelisted news query params", async () => {
     await request(app.getHttpServer()).get("/news?foo=bar").expect(400);
+  });
+
+  it("accepts a news type filter", async () => {
+    await request(app.getHttpServer()).get("/news?type=short").expect(200);
+  });
+
+  it("rejects an invalid news type filter", async () => {
+    await request(app.getHttpServer()).get("/news?type=brief").expect(400);
+  });
+
+  it("lists short news for an ISO week", async () => {
+    await request(app.getHttpServer()).get("/news/weeks/2026-W36").expect(200);
+  });
+
+  it("rejects a malformed ISO week id", async () => {
+    await request(app.getHttpServer()).get("/news/weeks/2026-W99").expect(400);
   });
 
   it("returns match detail 200 and 404", async () => {

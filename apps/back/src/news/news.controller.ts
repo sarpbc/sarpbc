@@ -49,8 +49,8 @@ export class NewsController {
   }
 
   @Get()
-  findAll(@Query() { page, limit, locale }: NewsListQueryDto) {
-    return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale));
+  findAll(@Query() { page, limit, locale, type }: NewsListQueryDto) {
+    return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale), type);
   }
 
   @Get("sitemap")
@@ -66,6 +66,11 @@ export class NewsController {
   @Get("embed/tweet")
   embedTweet(@Query() { url }: TweetEmbedQueryDto) {
     return this.tweetEmbedService.embed(url);
+  }
+
+  @Get("weeks/:week")
+  findWeek(@Param("week") week: string, @Query() { locale }: NewsLocaleQueryDto) {
+    return this.newsService.findPublishedShortsByWeek(week, parseNewsLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

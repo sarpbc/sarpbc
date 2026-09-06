@@ -11,6 +11,15 @@ export {
   excerptFromNewsContent,
   newsContentToPlainText,
 } from "./news-content.ts";
+export { readingTimeMinutes } from "./news-reading-time.ts";
+export {
+  ISO_WEEK_ID_PATTERN,
+  formatIsoWeekId,
+  isoWeekIdFromDate,
+  isoWeekUtcRange,
+  parseIsoWeekId,
+  type IsoWeekId,
+} from "./iso-week.ts";
 export {
   NEWS_ENTITY_TAG_PATTERN,
   parseNewsEntityTag,

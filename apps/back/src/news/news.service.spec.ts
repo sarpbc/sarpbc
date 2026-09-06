@@ -119,3 +119,82 @@ describe("NewsService sitemap", () => {
     });
   });
 });
+
+describe("NewsService findAllPublishedArticle", () => {
+  let service: NewsService;
+  const newsRepository = {
+    findAndCount: jest.fn(),
+  };
+  const replyService = {
+    countByTargetIds: jest.fn(),
+  };
+
+  beforeEach(() => {
+    service = new NewsService(newsRepository as never, {} as never, replyService as never);
+    jest.clearAllMocks();
+    replyService.countByTargetIds.mockResolvedValue(new Map());
+  });
+
+  it("filters published articles by type when provided", async () => {
+    newsRepository.findAndCount.mockResolvedValue([[], 0]);
+
+    await service.findAllPublishedArticle(0, 20, "en-US", "article");
+
+    expect(newsRepository.findAndCount).toHaveBeenCalledWith(
+      { isDraft: false, type: "article" },
+      { orderBy: { createdAt: "DESC" }, limit: 20, offset: 0 },
+    );
+  });
+
+  it("omits type from the filter when listing the mixed feed", async () => {
+    newsRepository.findAndCount.mockResolvedValue([[], 0]);
+
+    await service.findAllPublishedArticle(0, 20, "en-US");
+
+    expect(newsRepository.findAndCount).toHaveBeenCalledWith(
+      { isDraft: false },
+      { orderBy: { createdAt: "DESC" }, limit: 20, offset: 0 },
+    );
+  });
+});
+
+describe("NewsService findPublishedShortsByWeek", () => {
+  let service: NewsService;
+  const newsRepository = {
+    find: jest.fn(),
+  };
+
+  beforeEach(() => {
+    service = new NewsService(newsRepository as never, {} as never, {} as never);
+    jest.clearAllMocks();
+  });
+
+  it("rejects an invalid ISO week id", async () => {
+    await expect(service.findPublishedShortsByWeek("2026-W99")).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(newsRepository.find).not.toHaveBeenCalled();
+  });
+
+  it("loads published shorts in that UTC week newest first", async () => {
+    newsRepository.find.mockResolvedValue([]);
+
+    await service.findPublishedShortsByWeek("2026-W36", "en-US");
+
+    expect(newsRepository.find).toHaveBeenCalledWith(
+      {
+        isDraft: false,
+        type: "short",
+        createdAt: {
+          $gte: new Date("2026-08-31T00:00:00.000Z"),
+          $lt: new Date("2026-09-07T00:00:00.000Z"),
+        },
+      },
+      {
+        populate: ["author"],
+        orderBy: { createdAt: "DESC" },
+        limit: 100,
+      },
+    );
+  });
+});
