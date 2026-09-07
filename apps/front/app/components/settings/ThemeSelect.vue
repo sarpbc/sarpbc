@@ -13,7 +13,9 @@ const switchTheme = () => {
 };
 
 const startViewTransition = (event: MouseEvent) => {
-  if (!document.startViewTransition) {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!document.startViewTransition || reducedMotion) {
     switchTheme();
     return;
   }
@@ -29,19 +31,30 @@ const startViewTransition = (event: MouseEvent) => {
     switchTheme();
   });
 
-  transition.ready.then(() => {
-    const duration = 600;
-    document.documentElement.animate(
-      {
-        clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
-      },
-      {
-        duration: duration,
-        easing: "cubic-bezier(.76,.32,.29,.99)",
-        pseudoElement: "::view-transition-new(root)",
-      },
-    );
+  const failSafe = window.setTimeout(() => {
+    transition.skipTransition();
+  }, 800);
+
+  void transition.finished.finally(() => {
+    window.clearTimeout(failSafe);
   });
+
+  void transition.ready
+    .then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
+        },
+        {
+          duration: 600,
+          easing: "cubic-bezier(.76,.32,.29,.99)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    })
+    .catch(() => {
+      transition.skipTransition();
+    });
 };
 </script>
 

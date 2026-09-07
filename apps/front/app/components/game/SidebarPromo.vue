@@ -1,6 +1,6 @@
 <template>
   <SRail :title="$t('components.game.sidebarPromo.heading')">
-    <div class="w-full border border-default overflow-hidden">
+    <div class="w-full overflow-hidden border-x border-b border-default">
       <SListItem
         size="compact"
         :to="$localePath('/game/airriddle')"

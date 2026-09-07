@@ -8,10 +8,10 @@ interface Props {
 }
 
 const boxClasses = {
-  sm: "h-12 w-16",
-  md: "h-24 w-36",
-  lg: "h-28 w-40 sm:h-32 sm:w-48",
-  xl: "h-36 w-48 sm:h-auto sm:min-h-0 sm:w-56 md:w-64 sm:self-stretch",
+  sm: "h-12 w-16 shrink-0",
+  md: "h-24 w-36 shrink-0",
+  lg: "aspect-3/2 w-full min-w-0",
+  xl: "h-36 w-48 shrink-0 sm:h-auto sm:min-h-0 sm:w-56 md:w-64 sm:self-stretch",
 };
 
 const dimensions = {
@@ -24,7 +24,7 @@ const dimensions = {
 const sizesAttr = {
   sm: "64px",
   md: "144px",
-  lg: "(max-width: 640px) 160px, 192px",
+  lg: "(max-width: 639px) 30vw, 192px",
   xl: "(max-width: 640px) 192px, (max-width: 768px) 224px, 256px",
 };
 
@@ -48,7 +48,7 @@ const dim = computed(() => dimensions[size]);
 </script>
 
 <template>
-  <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
+  <div :class="[boxClasses[size], 'flex items-center justify-center overflow-hidden']">
     <NuxtImg
       v-if="img"
       :src="img"

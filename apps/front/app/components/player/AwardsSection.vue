@@ -73,7 +73,7 @@ function metaParts(award: PlayerProfileAward): string[] {
         </h2>
       </template>
 
-      <SCard v-if="pending" flush-bottom aria-live="polite">
+      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
         <SListItem v-for="index in 2" :key="index" divider>
           <div class="flex w-full min-w-0 items-center gap-2">
             <USkeleton class="size-5 shrink-0" />
@@ -97,7 +97,7 @@ function metaParts(award: PlayerProfileAward): string[] {
         </div>
       </SCard>
 
-      <SCard v-else-if="awards.length > 0" flush-bottom>
+      <SCard v-else-if="awards.length > 0" flush-bottom flush-top>
         <SListItem
           v-for="award in awards"
           :key="award.id"

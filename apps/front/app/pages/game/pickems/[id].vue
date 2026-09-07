@@ -96,6 +96,12 @@ const displayName = computed(() =>
   tournament.value ? getTournamentDisplayName(tournament.value) : "",
 );
 
+const pageTitle = computed(() =>
+  tournament.value
+    ? t("page.game.pickems.detail.title", { tournament: displayName.value })
+    : t("page.game.pickems.title"),
+);
+
 watch(
   [displayName, tournament],
   () => {
@@ -284,19 +290,34 @@ watch(
 </script>
 
 <template>
-  <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
-      <template #title>
-        <template v-if="tournament">
-          {{ t("page.game.pickems.detail.title", { tournament: displayName }) }}
-        </template>
-        <template v-else>
-          {{ t("page.game.pickems.title") }}
-        </template>
-      </template>
-    </SHubPageHeader>
+  <SHubPageBody caption-align="start">
+    <template #caption>
+      <div class="flex w-full min-w-0 flex-col gap-1">
+        <h1 class="min-w-0 truncate">
+          {{ pageTitle }}
+        </h1>
+        <div v-if="tournament" class="flex w-full gap-2">
+          <UButton
+            :to="tabTo('pickem')"
+            :label="t('page.game.pickems.detail.tabs.pickem')"
+            :variant="activeTab === 'pickem' ? 'solid' : 'soft'"
+            color="neutral"
+            size="sm"
+            class="min-w-0 flex-1 items-center justify-center"
+          />
+          <UButton
+            :to="tabTo('leaderboard')"
+            :label="t('page.game.pickems.detail.tabs.leaderboard')"
+            :variant="activeTab === 'leaderboard' ? 'solid' : 'soft'"
+            color="neutral"
+            size="sm"
+            class="min-w-0 flex-1 items-center justify-center"
+          />
+        </div>
+      </div>
+    </template>
 
-    <SCard v-if="tournamentPending && !tournament" class="p-4" aria-live="polite">
+    <SCard v-if="tournamentPending && !tournament" class="min-h-row-triple p-4" aria-live="polite">
       <div class="flex flex-col gap-3 animate-pulse">
         <USkeleton class="h-6 w-48 mx-auto" />
         <USkeleton class="h-16 w-full" />
@@ -304,8 +325,10 @@ watch(
       </div>
     </SCard>
 
-    <SCard v-else-if="tournamentError">
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
+    <SCard v-else-if="tournamentError" class="min-h-row-triple">
+      <div
+        class="flex min-h-row-triple flex-col items-center justify-center gap-3 px-4 text-center"
+      >
         <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
         <p class="text-sm text-muted text-pretty">
           {{ t("page.game.pickems.detail.error") }}
@@ -317,37 +340,6 @@ watch(
     </SCard>
 
     <template v-else-if="tournament">
-      <SCard
-        v-if="sessionReady && !isSignedIn"
-        class="border border-primary/30 bg-elevated p-4 md:p-5"
-      >
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p class="text-sm text-pretty text-muted">
-            {{ t("page.game.pickems.detail.signInPrompt") }}
-          </p>
-          <UButton :to="loginRedirectPath()" color="primary">
-            {{ t("page.game.pickems.detail.signInCta") }}
-          </UButton>
-        </div>
-      </SCard>
-
-      <div class="w-full flex flex-row gap-2">
-        <UButton
-          :to="tabTo('pickem')"
-          :label="t('page.game.pickems.detail.tabs.pickem')"
-          :variant="activeTab === 'pickem' ? 'solid' : 'soft'"
-          color="neutral"
-          class="w-full items-center justify-center"
-        />
-        <UButton
-          :to="tabTo('leaderboard')"
-          :label="t('page.game.pickems.detail.tabs.leaderboard')"
-          :variant="activeTab === 'leaderboard' ? 'solid' : 'soft'"
-          color="neutral"
-          class="w-full items-center justify-center"
-        />
-      </div>
-
       <section
         v-if="activeTab === 'leaderboard'"
         class="w-full"
@@ -356,7 +348,18 @@ watch(
         <h2 id="pickem-leaderboard-title" class="sr-only">
           {{ t("page.game.pickems.detail.tabs.leaderboard") }}
         </h2>
-        <SCard class="p-4">
+        <SCard class="flex min-h-row-triple flex-col p-4" flush-top>
+          <div
+            v-if="sessionReady && !isSignedIn"
+            class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <p class="text-sm text-pretty text-muted">
+              {{ t("page.game.pickems.detail.signInPrompt") }}
+            </p>
+            <UButton :to="loginRedirectPath()" color="primary">
+              {{ t("page.game.pickems.detail.signInCta") }}
+            </UButton>
+          </div>
           <p v-if="isSignedIn && personalRank?.rank != null" class="text-sm text-muted mb-3">
             {{
               t("page.game.pickems.detail.leaderboard.yourRank", {
@@ -389,14 +392,25 @@ watch(
               </span>
             </li>
           </ol>
-          <p v-else class="text-sm text-muted">
+          <p v-else class="m-auto text-sm text-muted">
             {{ t("page.game.pickems.detail.leaderboard.empty") }}
           </p>
         </SCard>
       </section>
 
-      <SCard v-else-if="matchesByDay.length === 0">
-        <div class="flex flex-col items-center gap-2 py-12 px-4 text-center">
+      <SCard v-else-if="matchesByDay.length === 0" class="flex min-h-row-triple flex-col">
+        <div
+          v-if="sessionReady && !isSignedIn"
+          class="flex flex-col gap-3 border-b border-default p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p class="text-sm text-pretty text-muted">
+            {{ t("page.game.pickems.detail.signInPrompt") }}
+          </p>
+          <UButton :to="loginRedirectPath()" color="primary">
+            {{ t("page.game.pickems.detail.signInCta") }}
+          </UButton>
+        </div>
+        <div class="flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
           <p class="text-sm text-muted text-pretty">
             {{ t("page.game.pickems.detail.emptyMatches") }}
           </p>
@@ -404,6 +418,19 @@ watch(
       </SCard>
 
       <div v-else class="w-full flex flex-col">
+        <SCard
+          v-if="sessionReady && !isSignedIn"
+          class="border border-primary/30 bg-elevated p-4 md:p-5"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-pretty text-muted">
+              {{ t("page.game.pickems.detail.signInPrompt") }}
+            </p>
+            <UButton :to="loginRedirectPath()" color="primary">
+              {{ t("page.game.pickems.detail.signInCta") }}
+            </UButton>
+          </div>
+        </SCard>
         <div
           v-for="dayGroup in matchesByDay"
           :key="dayGroup.date.toDateString()"
@@ -412,7 +439,7 @@ watch(
           <h2 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
             {{ formatDayHeaderDate(dayGroup.date, locale) }}
           </h2>
-          <SCard flush-bottom>
+          <SCard flush-bottom flush-top>
             <SListItem
               v-for="match in dayGroup.matches"
               :id="`pickem-match-${match.id}`"
@@ -463,5 +490,5 @@ watch(
         </div>
       </div>
     </template>
-  </div>
+  </SHubPageBody>
 </template>

@@ -180,6 +180,8 @@ export default defineNuxtConfig({
     "/fr/register": { appLayout: "login" },
     "/about": { appLayout: "marketing", ...contentSwr },
     "/fr/about": { appLayout: "marketing", ...contentSwr },
+    "/brand": { appLayout: "marketing", ...contentSwr },
+    "/fr/brand": { appLayout: "marketing", ...contentSwr },
     "/privacy-policy": contentSwr,
     "/fr/privacy-policy": contentSwr,
     "/terms-of-service": contentSwr,

@@ -78,8 +78,39 @@
 }
 
 @layer base {
-  a {
-    cursor: default;
+  a:not([aria-disabled="true"]):not([disabled]),
+  button:enabled,
+  input:enabled:is(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="color"],
+      [type="range"],
+      [type="image"]
+    ),
+  select:enabled,
+  summary,
+  label {
+    cursor: pointer;
+  }
+
+  input:enabled:not(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="color"],
+      [type="range"],
+      [type="image"],
+      [type="hidden"]
+    ),
+  textarea:enabled {
+    cursor: text;
   }
 }
 
