@@ -92,7 +92,9 @@ describe("pages sitemap", () => {
     const sitemap = buildPagesUrlset();
     expect(sitemap).toContain("<loc>https://sarpbc.org/about</loc>");
     expect(sitemap).toContain("<loc>https://sarpbc.org/contact</loc>");
+    expect(sitemap).toContain("<loc>https://sarpbc.org/brand</loc>");
     expect(sitemap).toContain('href="https://sarpbc.org/fr/about"');
     expect(sitemap).toContain('href="https://sarpbc.org/fr/contact"');
+    expect(sitemap).toContain('href="https://sarpbc.org/fr/brand"');
   });
 });

@@ -2,6 +2,7 @@ export const uiComponentDefaults = {
   select: {
     content: {
       bodyLock: false,
+      disableOutsidePointerEvents: false,
     },
   },
   selectMenu: {

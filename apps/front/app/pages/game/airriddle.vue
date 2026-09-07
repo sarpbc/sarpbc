@@ -348,7 +348,16 @@ setPageSeo({
             </div>
           </div>
 
-          <div class="flex w-full justify-center">
+          <div class="relative flex w-full justify-center">
+            <p
+              v-if="error"
+              class="pointer-events-none absolute inset-x-0 bottom-full z-10 flex justify-center"
+              role="alert"
+            >
+              <span class="border border-default bg-elevated px-3 py-1 text-sm text-error">
+                {{ t(`page.game.airriddle.${error}`) }}
+              </span>
+            </p>
             <div class="inline-flex flex-col border-l border-t border-default">
               <div
                 v-for="(attempt, attemptIndex) in gameState.attempts"
@@ -391,10 +400,6 @@ setPageSeo({
               </div>
             </div>
           </div>
-
-          <p v-if="error" class="w-full text-center text-sm text-error" role="alert">
-            {{ t(`page.game.airriddle.${error}`) }}
-          </p>
 
           <div v-if="isMobile && !gameState.isWon && !gameState.isGameOver" class="w-full">
             <AirRiddleKeyboard

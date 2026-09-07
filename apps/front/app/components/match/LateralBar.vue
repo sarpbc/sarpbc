@@ -40,8 +40,8 @@ const upcomingTitle = computed(() => {
 
 <template>
   <div class="w-full flex flex-col">
-    <SRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
-      <SCard flush-bottom>
+    <SRail v-if="hasSchedule" caption="lead" divided :title="upcomingTitle">
+      <SCard flush-bottom flush-top>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
             v-for="match in liveMatches"
@@ -67,9 +67,10 @@ const upcomingTitle = computed(() => {
     <SRail
       v-if="hasResults"
       :caption="hasSchedule ? 'section' : 'lead'"
+      divided
       :title="$t('components.match.results')"
     >
-      <SCard flush-bottom>
+      <SCard flush-bottom flush-top>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
             v-for="match in resultMatches"

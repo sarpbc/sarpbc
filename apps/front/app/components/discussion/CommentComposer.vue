@@ -149,7 +149,8 @@ function onEnterKey(event: KeyboardEvent) {
 
       <SButton
         type="submit"
-        variant="soft"
+        color="neutral"
+        variant="solid"
         class="w-fit"
         :loading="isSubmitting"
         :disabled="isSubmitting"

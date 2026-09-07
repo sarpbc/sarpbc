@@ -6,6 +6,7 @@ const {
   title,
   caption = "section",
   captionAlign = "start",
+  divided = false,
   class: className,
 } = defineProps<{
   title?: string;
@@ -16,8 +17,12 @@ const {
    */
   caption?: RailCaption;
   captionAlign?: CaptionAlign;
+  /** Extra in-row hairline on a lead caption. Section captions are always divided. */
+  divided?: boolean;
   class?: string;
 }>();
+
+const captionDivided = computed(() => caption === "section" || divided);
 
 const captionHeightClass = computed(() => {
   switch (caption) {
@@ -54,6 +59,7 @@ const captionAlignClass = computed(() => {
       v-if="caption !== 'none'"
       :class="[
         'flex flex-col-reverse pb-1 text-sm font-medium text-toned',
+        captionDivided && 'border-b border-default',
         captionHeightClass,
         captionAlignClass,
       ]"

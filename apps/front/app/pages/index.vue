@@ -88,12 +88,12 @@ const { data: activePickemTournament } = await useLazyAsyncData(
           :caption="week ? 'section' : 'none'"
           :title="week ? $t('page.home.latest') : undefined"
         >
-          <SCard flush-bottom :flush-top="Boolean(week)">
+          <SCard flush-bottom flush-top>
             <NewsRow
               v-for="(article, index) in articles"
               :key="article.id"
               :article="article"
-              :divider-top="Boolean(week) && index === 0"
+              :divider-top="!week && index === 0"
             />
             <SListItem v-if="hasMoreArticles" divider>
               <button

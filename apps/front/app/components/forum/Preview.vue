@@ -37,13 +37,12 @@ const activities = computed(() => recentForumActivities.value ?? []);
           <UButton
             v-if="user"
             :to="localePath('/forum/new')"
-            icon="i-fluent-add-24-regular"
-            color="primary"
-            variant="soft"
+            color="neutral"
+            variant="solid"
             size="xs"
             :label="$t('components.forum.createPost')"
             :title="$t('components.forum.createPost')"
-            class="h-row-compact min-h-row-compact w-full rounded-none border-b border-default font-normal"
+            class="h-row-compact min-h-row-compact w-full justify-center rounded-none border-b border-default font-normal"
           />
         </ClientOnly>
       </SCard>

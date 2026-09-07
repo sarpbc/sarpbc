@@ -42,7 +42,7 @@ const formatEndDate = (value: Date | string | null) => {
         </h2>
       </template>
 
-      <SCard v-if="pending" flush-bottom aria-live="polite">
+      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
         <SListItem v-for="index in 3" :key="index" divider>
           <div class="flex w-full min-w-0 items-center gap-2">
             <USkeleton class="size-5 shrink-0" />
@@ -66,7 +66,7 @@ const formatEndDate = (value: Date | string | null) => {
         </div>
       </SCard>
 
-      <SCard v-else-if="trophies.length > 0" flush-bottom>
+      <SCard v-else-if="trophies.length > 0" flush-bottom flush-top>
         <SListItem
           v-for="trophy in trophies"
           :key="trophy.id"

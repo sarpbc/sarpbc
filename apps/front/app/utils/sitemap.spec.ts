@@ -43,8 +43,10 @@ describe("buildPagesUrlset", () => {
     const xml = buildPagesUrlset();
     expect(xml).toContain("<loc>https://sarpbc.org/about</loc>");
     expect(xml).toContain("<loc>https://sarpbc.org/contact</loc>");
+    expect(xml).toContain("<loc>https://sarpbc.org/brand</loc>");
     expect(xml).toContain('href="https://sarpbc.org/fr/about"');
     expect(xml).toContain('href="https://sarpbc.org/fr/contact"');
+    expect(xml).toContain('href="https://sarpbc.org/fr/brand"');
   });
 });
 

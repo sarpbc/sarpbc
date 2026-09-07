@@ -47,12 +47,13 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
       </div>
     </SCard>
 
-    <SCard v-else-if="tournaments && tournaments.length > 0" flush-bottom>
+    <SCard v-else-if="tournaments && tournaments.length > 0" flush-bottom flush-top>
       <TournamentRow
-        v-for="tournament in tournaments"
+        v-for="(tournament, index) in tournaments"
         :key="tournament.id"
         :tournament="tournament"
         :to="localePath(`/game/pickems/${tournament.id}`)"
+        :divider-top="index === 0"
       />
     </SCard>
 

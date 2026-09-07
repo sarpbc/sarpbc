@@ -139,7 +139,7 @@ const menuToggleLabel = computed(() =>
           orientation="vertical"
           class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"
         />
-        <div class="w-full flex flex-row justify-start pl-2.5 pt-2">
+        <div class="w-full flex flex-row flex-wrap items-center justify-start gap-3 pl-2.5 pt-2">
           <NavHeaderUser />
         </div>
       </div>

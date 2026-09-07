@@ -61,6 +61,7 @@ Unified design-engineering guide for **apps/front** (Nuxt, `@nuxt/ui` v4, Tailwi
 - `ui-keyboard` — All flows keyboard-operable; visible `:focus-visible` rings
 - `ui-hit-targets` — ≥24px desktop, ≥44px mobile; expand small visual targets
 - `ui-links` — `NuxtLink` / `ULink` for navigation, never button-for-link
+- `ui-cursor` — pointer on links, buttons, and clickable inputs; `cursor: text` on text fields; disabled stays default / not-allowed
 - `ui-url-state` — Filters, tabs, pagination in URL (`useRoute().query`)
 - `ui-optimistic` — Optimistic UI where safe; rollback + clear error on failure
 - `ui-loading` — Keep button label during load; skeleton delay ~150–300ms

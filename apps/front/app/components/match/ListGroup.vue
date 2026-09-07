@@ -84,6 +84,7 @@ function discoveryStatusFor(matchId: string) {
 
         <SCard
           flush-bottom
+          flush-top
           class="flex flex-col"
           :class="
             variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined

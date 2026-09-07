@@ -1,9 +1,14 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
 
-const { tournament, to } = defineProps<{
+const {
+  tournament,
+  to,
+  dividerTop = false,
+} = defineProps<{
   tournament: Tournament;
   to?: string;
+  dividerTop?: boolean;
 }>();
 
 const localePath = useLocalePath();
@@ -40,6 +45,7 @@ const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`))
   <SListItem
     :size="showImage ? 'triple' : 'default'"
     divider
+    :divider-top="dividerTop"
     :to="href"
     class="min-w-0 overflow-hidden"
   >

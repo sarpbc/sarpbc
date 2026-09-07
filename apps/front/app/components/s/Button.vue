@@ -10,7 +10,7 @@ const delegatedAttrs = computed(() => {
 </script>
 
 <template>
-  <UButton v-bind="delegatedAttrs">
+  <UButton v-bind="delegatedAttrs" :class="attrs.class">
     <slot />
   </UButton>
 </template>

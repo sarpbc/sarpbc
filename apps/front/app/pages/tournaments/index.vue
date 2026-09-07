@@ -83,8 +83,8 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
     </SHubPageHeader>
 
     <div v-if="pending && !tournaments.length" class="w-full flex flex-col" aria-live="polite">
-      <SCard flush-bottom>
-        <SListItem v-for="i in 6" :key="i" size="default" divider>
+      <SCard flush-bottom flush-top>
+        <SListItem v-for="i in 6" :key="i" size="default" divider :divider-top="i === 1">
           <div class="grid w-full grid-cols-10 items-center gap-x-2">
             <USkeleton class="col-span-5 h-3 max-w-48" />
             <USkeleton class="col-span-2 h-3 max-w-16" />
@@ -95,11 +95,12 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
       </SCard>
     </div>
 
-    <SCard v-else-if="tournaments.length" flush-bottom>
+    <SCard v-else-if="tournaments.length" flush-bottom flush-top>
       <TournamentRow
-        v-for="tournament in tournaments"
+        v-for="(tournament, index) in tournaments"
         :key="tournament.id"
         :tournament="tournament"
+        :divider-top="index === 0"
       />
     </SCard>
 

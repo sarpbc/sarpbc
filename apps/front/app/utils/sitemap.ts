@@ -39,6 +39,7 @@ export const STATIC_SITEMAP_PAGES: readonly StaticSitemapPage[] = [
   { path: "/register", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.7" },
   { path: "/about", lastmod: "2026-08-21", changefreq: "monthly", priority: "0.5" },
   { path: "/contact", lastmod: "2026-08-21", changefreq: "monthly", priority: "0.5" },
+  { path: "/brand", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.5" },
   { path: "/cookie-policy", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
   { path: "/legal-notice", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
   { path: "/privacy-policy", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },

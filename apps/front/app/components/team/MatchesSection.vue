@@ -112,7 +112,7 @@ function setTab(nextTab: TeamMatchesTab) {
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index">
+        <SCard v-for="index in 3" :key="index" flush-top>
           <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
             <div class="col-span-2 flex flex-col gap-1">
               <USkeleton class="h-3 w-24" />
@@ -123,7 +123,7 @@ function setTab(nextTab: TeamMatchesTab) {
         </SCard>
       </div>
 
-      <SCard v-else-if="hasError">
+      <SCard v-else-if="hasError" flush-top>
         <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
           <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -144,7 +144,7 @@ function setTab(nextTab: TeamMatchesTab) {
         />
       </div>
 
-      <SCard v-else>
+      <SCard v-else flush-top>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

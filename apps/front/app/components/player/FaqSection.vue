@@ -78,9 +78,9 @@ const headingId = "player-faq-title";
           {{ t("page.player.slug.faq.title") }}
         </h2>
       </template>
-      <SCard class="divide-y divide-default">
+      <SCard flush-top class="divide-y divide-default">
         <details v-for="(item, index) in faqItems" :key="index" class="group px-4 py-3">
-          <summary class="cursor-default text-sm font-medium text-highlighted marker:content-none">
+          <summary class="text-sm font-medium text-highlighted marker:content-none">
             <span class="flex items-center justify-between gap-3">
               {{ item.question }}
               <UIcon
