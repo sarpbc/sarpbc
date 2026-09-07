@@ -263,7 +263,7 @@ setPageSeo({
           </div>
         </template>
 
-        <SCard flush-bottom>
+        <SCard flush-bottom flush-top>
           <SListItem
             v-for="notification in notifications"
             :key="notification.id"
@@ -320,8 +320,8 @@ setPageSeo({
         <SButton
           type="submit"
           form="edit-username-form"
-          color="primary"
-          variant="soft"
+          color="neutral"
+          variant="solid"
           :loading="isSavingUserName"
           :disabled="isSavingUserName"
           :label="

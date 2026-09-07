@@ -108,12 +108,14 @@ async function onDelete() {
       <div class="flex flex-row items-center justify-end gap-1 border-t border-default px-2 py-1">
         <ForumSignInPrompt action="reply">
           <SButton
+            square
             size="xs"
             variant="ghost"
             color="neutral"
-            :label="$t('components.discussion.reply')"
             icon="i-fluent-arrow-reply-24-regular"
+            class="justify-center"
             sound="press"
+            :aria-label="$t('components.discussion.reply')"
             @click="displayReply = !displayReply"
           />
         </ForumSignInPrompt>

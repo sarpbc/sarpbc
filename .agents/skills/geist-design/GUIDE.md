@@ -201,6 +201,7 @@ const page = computed({
 
 | Rule | Implementation |
 |------|----------------|
+| Pointer on interactives | Links, buttons, and clickable inputs use `cursor: pointer` (`main.css`). Text fields (`input` type text/email/password, `textarea`) use `cursor: text`. Do not restore Geist/Linear `cursor: default` on `<a>`. Disabled: `disabled:cursor-not-allowed` or default. |
 | Don't block paste | Never `@paste.prevent` on inputs |
 | Ellipsis for in-progress | `{{ $t('common.saving') }}` → `"Saving…"` in locale file |
 | Confirm destructive | `UModal` confirm or undo window |
