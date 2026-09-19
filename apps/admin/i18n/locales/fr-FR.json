@@ -28,6 +28,7 @@
     "nav": {
       "home": "Tableau de bord",
       "articles": "Articles",
+      "media": "Médias",
       "players": "Joueurs",
       "teams": "Équipes",
       "tournaments": "Tournois",
@@ -38,6 +39,35 @@
       "admin": "Admin",
       "openMenu": "Ouvrir la navigation",
       "backToSite": "Retour au site"
+    },
+    "media": {
+      "title": "Bibliothèque Média",
+      "subtitle": "Images envoyées avec attribution de source pour les articles et couvertures.",
+      "noAttribution": "Aucune attribution enregistrée",
+      "columns": {
+        "preview": "Aperçu",
+        "source": "Source",
+        "sourceUrl": "Lien source",
+        "uploadedAt": "Envoyée le"
+      },
+      "fields": {
+        "source": "Source",
+        "sourcePlaceholder": "Rocket League, nom du photographe…",
+        "sourceUrl": "Lien source",
+        "sourceUrlPlaceholder": "https://…"
+      },
+      "attribution": {
+        "required": "Indiquez la source et le lien source avant l’envoi"
+      },
+      "picker": {
+        "title": "Choisir dans la bibliothèque",
+        "open": "Parcourir la bibliothèque",
+        "loading": "Chargement des médias…",
+        "empty": "Aucune image dans la bibliothèque. Envoyez-en une avec attribution.",
+        "previous": "Précédent",
+        "next": "Suivant",
+        "page": "Page {current} sur {total}"
+      }
     },
     "search": {
       "placeholder": "Rechercher…",
