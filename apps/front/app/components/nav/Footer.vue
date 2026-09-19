@@ -50,6 +50,11 @@ const columns = computed<FooterColumn[]>(() => [
         label: t("components.footer.socialGitHub"),
         to: "https://github.com/sarpbc/sarpbc",
       },
+      {
+        type: "link",
+        label: t("components.footer.contribute"),
+        to: "https://github.com/sarpbc/sarpbc/blob/main/CONTRIBUTING.md",
+      },
     ],
   },
   {

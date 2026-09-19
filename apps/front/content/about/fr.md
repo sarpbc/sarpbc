@@ -93,7 +93,7 @@ sarpbc.org est construit avec la même exigence qu'un produit professionnel : un
 
 Nous croyons que l'ouverture et la collaboration peuvent contribuer à construire de meilleurs produits.
 
-À terme, nous souhaitons ouvrir certaines parties de sarpbc.org afin de favoriser la transparence, permettre les contributions et construire un projet qui évolue avec sa communauté.
+Le site est construit avec la communauté ; le code source de l'application est disponible sous licence Apache-2.0 sur GitHub pour la transparence et les contributions.
 
 ---
 
