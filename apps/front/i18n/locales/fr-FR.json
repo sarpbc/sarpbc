@@ -387,8 +387,6 @@
           "description": "Construisez une carrière esport Rocket League dès 16 ans : régionaux, majors, Worlds, offres de transfert et classement mondial vivant. Sans compte."
         },
         "menu": {
-          "title": "Menu Principal",
-          "body": "Lancez une nouvelle carrière à 16 ans, ou reprenez là où vous vous êtes arrêté.",
           "newCareer": "Nouvelle Carrière",
           "continue": "Continuer la Carrière",
           "newCareerConfirm": "Commencer une nouvelle carrière ? La progression actuelle sera perdue."

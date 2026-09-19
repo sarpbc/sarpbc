@@ -387,8 +387,6 @@
           "description": "Build a Rocket League esports career from age 16: regionals, majors, Worlds, transfer offers and a living world ranking. No account required."
         },
         "menu": {
-          "title": "Main Menu",
-          "body": "Start a new run from age 16, or pick up where you left off.",
           "newCareer": "New Career",
           "continue": "Continue Career",
           "newCareerConfirm": "Start a new career? Current progress will be lost."

@@ -1,4 +1,11 @@
-import { getSeasonsPastPeak, type CareerStats } from "~/types/career";
+import {
+  getSeasonsPastPeak,
+  USER_ROSTER_ID,
+  type CareerEventChoiceDefinition,
+  type CareerState,
+  type CareerStats,
+} from "~/types/career";
+import { getRosterPlayerRating, getRosterStrength } from "~/utils/career/roster";
 import { createRng, hashString } from "~/utils/career/rng";
 
 /** Typical live roster strength across the world field. */
@@ -90,6 +97,38 @@ function malusSeed(context: EventOutcomeContext): number {
   return hashString(
     `${context.careerId}:event-fail:${context.eventId}:${context.choiceId}:${context.season}`,
   );
+}
+
+export function buildEventOutcomeContext(
+  state: CareerState,
+  choice: CareerEventChoiceDefinition,
+): EventOutcomeContext {
+  const eventId = state.currentEventId;
+  if (!eventId) throw new Error("No active event");
+
+  const roster = state.world.rosters[state.currentTeamId];
+  const lastSeason = state.seasonRecords[state.seasonRecords.length - 1];
+  const lastSplit =
+    state.currentSplits[state.currentSplits.length - 1] ?? lastSeason?.splits.at(-1);
+
+  return {
+    careerId: state.id,
+    eventId,
+    choiceId: choice.id,
+    season: state.currentSeason,
+    authoredDelta: choice.delta,
+    teamStrength: roster
+      ? getRosterStrength(roster, state.world, state.stats.rating)
+      : WORLD_STRENGTH_BASELINE,
+    teammateRatings: roster
+      ? roster
+          .filter((playerId) => playerId !== USER_ROSTER_ID)
+          .map((playerId) => getRosterPlayerRating(playerId, state.world, state.stats.rating))
+      : [],
+    lastSplitPoints: lastSplit?.points ?? null,
+    missedWorldsLastSeason: lastSeason ? lastSeason.worlds === null : false,
+    quitLeaning: state.destinyLeanings.quit,
+  };
 }
 
 export function resolveEventOutcome(

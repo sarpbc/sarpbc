@@ -26,11 +26,12 @@ import {
   qualifiesForWorlds,
   regionalCircuitWeight,
   resolveOffseasonContracts,
-  simulateSplit,
   simulateSplitField,
-  simulateWorlds,
   simulateWorldsField,
   snapshotWorldRanking,
+  splitFieldToResult,
+  upsertSplitField,
+  type FieldPlayer,
 } from "~/utils/career/simulation";
 import {
   createCareerWorld,
@@ -44,6 +45,16 @@ import { getAgeDecline } from "~/utils/career/stats";
 
 const strongStats = { rating: 95, form: 95, morale: 95 };
 const weakStats = { rating: 30, form: 30, morale: 30 };
+
+function testFieldPlayer(overrides: Partial<FieldPlayer> = {}): FieldPlayer {
+  return {
+    teamId: null,
+    rating: 70,
+    stats: strongStats,
+    role: "offense",
+    ...overrides,
+  };
+}
 
 const strongSplits = [
   {
@@ -72,7 +83,24 @@ function rankingsWith(overrides: {
   const careerId = overrides.careerId ?? "career-1";
   const teamId = overrides.teamId ?? "phantom-drive";
   const rating = overrides.rating ?? 82;
-  const world = moveUserToTeam(createCareerWorld(careerId), teamId, null, rating, 1);
+  let world = moveUserToTeam(createCareerWorld(careerId), teamId, null, rating, 1);
+  const splits = [...(overrides.splits ?? [])];
+  for (const splitRecord of splits) {
+    const field = simulateSplitField(
+      careerId,
+      overrides.season ?? 1,
+      splitRecord.split,
+      world,
+      testFieldPlayer({ teamId, rating, stats: { rating, form: 60, morale: 60 } }),
+    );
+    world = {
+      ...world,
+      splitFields: upsertSplitField(
+        world.splitFields,
+        splitFieldToResult(overrides.season ?? 1, splitRecord.split, field),
+      ),
+    };
+  }
   return computeWorldRankings(
     careerId,
     {
@@ -81,7 +109,7 @@ function rankingsWith(overrides: {
       rating,
       region: "na",
       season: overrides.season ?? 1,
-      splits: [...(overrides.splits ?? [])],
+      splits,
       worlds: overrides.worlds ?? null,
       previousPoints: overrides.previousPoints ?? null,
     },
@@ -90,43 +118,6 @@ function rankingsWith(overrides: {
 }
 
 describe("career simulation", () => {
-  it("simulates a split with three regionals and consistent points", () => {
-    const sim = simulateSplit(strongStats, "offense", 42);
-    expect(sim.regionals).toHaveLength(REGIONALS_PER_SPLIT);
-    const regionalPoints = sim.regionals.reduce(
-      (sum, placement) => sum + REGIONAL_POINTS[placement],
-      0,
-    );
-    const expected = regionalPoints + (sim.major ? MAJOR_POINTS[sim.major] : 0);
-    expect(sim.points).toBe(expected);
-  });
-
-  it("does not qualify weak teams for the major", () => {
-    const sim = simulateSplit(weakStats, "defense", 7);
-    expect(sim.major).toBeNull();
-  });
-
-  it("lets form and morale change the same seed's result", () => {
-    const seed = 42;
-    const hot = simulateSplit({ rating: 72, form: 90, morale: 85 }, "offense", seed);
-    const cold = simulateSplit({ rating: 72, form: 35, morale: 30 }, "offense", seed);
-    expect(hot.points).toBeGreaterThan(cold.points);
-  });
-
-  it("is deterministic for a given seed", () => {
-    expect(simulateSplit(strongStats, "technical", 99)).toEqual(
-      simulateSplit(strongStats, "technical", 99),
-    );
-    expect(simulateWorlds(strongStats, "technical", 99)).toBe(
-      simulateWorlds(strongStats, "technical", 99),
-    );
-  });
-
-  it("returns a valid worlds placement", () => {
-    const placement = simulateWorlds(strongStats, "offense", 3);
-    expect(CAREER_PLACEMENTS).toContain(placement);
-  });
-
   it("awards double circuit points for the same major finish", () => {
     for (const placement of CAREER_PLACEMENTS) {
       if (placement === "unavailable") continue;
@@ -157,7 +148,7 @@ describe("career simulation", () => {
   it("gives a unique winner per regional and at most one major winner", () => {
     const careerId = "career-bracket";
     const world = createCareerWorld(careerId);
-    const field = simulateSplitField(careerId, 1, 1, world, { teamId: null, rating: 70 });
+    const field = simulateSplitField(careerId, 1, 1, world, testFieldPlayer());
     const regions = [...new Set(WORLD_TEAMS.map((team) => team.region))];
     for (const region of regions) {
       const ids = getWorldTeamsByRegion(region).map((team) => team.id);
@@ -175,8 +166,7 @@ describe("career simulation", () => {
     const teamId = "warpfield";
     const world = moveUserToTeam(createCareerWorld(careerId), teamId, null, 82, 1);
     const field = simulateSplitField(careerId, 1, 1, world, {
-      teamId,
-      rating: 82,
+      ...testFieldPlayer({ teamId, rating: 82 }),
       skipRegionals: 2,
       skipMajor: true,
     });
@@ -197,10 +187,7 @@ describe("career simulation", () => {
     const careerId = "career-worlds-bracket";
     const world = createCareerWorld(careerId);
     const qualified = WORLD_TEAMS.slice(0, WORLDS_QUALIFICATION_RANK).map((team) => team.id);
-    const placements = simulateWorldsField(careerId, 1, world, qualified, {
-      teamId: null,
-      rating: 70,
-    });
+    const placements = simulateWorldsField(careerId, 1, world, qualified, testFieldPlayer());
     const winners = [...placements.entries()].filter(([, placement]) => placement === "winner");
     expect(winners).toHaveLength(1);
     expect(placements.size).toBe(qualified.length);
@@ -534,7 +521,41 @@ describe("career simulation", () => {
     const careerId = "career-rank-lock";
     const originId = "warpfield";
     const rating = 82;
-    const world = moveUserToTeam(createCareerWorld(careerId), originId, null, rating, 1);
+    let world = moveUserToTeam(createCareerWorld(careerId), originId, null, rating, 1);
+    world.splitFields = [
+      {
+        season: 1,
+        split: 1,
+        points: Object.fromEntries(
+          WORLD_TEAMS.map((team) => [
+            team.id,
+            team.id === "crimson-orbit"
+              ? 42
+              : team.id === "apex-velocity"
+                ? 40
+                : team.id === originId
+                  ? 38
+                  : 22,
+          ]),
+        ),
+      },
+      {
+        season: 1,
+        split: 2,
+        points: Object.fromEntries(
+          WORLD_TEAMS.map((team) => [
+            team.id,
+            team.id === "crimson-orbit"
+              ? 42
+              : team.id === "apex-velocity"
+                ? 38
+                : team.id === originId
+                  ? 35
+                  : 20,
+          ]),
+        ),
+      },
+    ];
     const player = {
       name: "Tester" as const,
       teamId: originId,

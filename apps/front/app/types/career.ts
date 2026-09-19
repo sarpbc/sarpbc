@@ -25,6 +25,7 @@ export interface CareerStats {
 }
 
 export type CareerPhase =
+  | "menu"
   | "onboarding"
   | "season_intro"
   | "event"
@@ -58,8 +59,9 @@ export function getSplitStage(split: number): CareerStage {
       return "split1";
     case 2:
       return "split2";
-    default:
-      return "split1";
+    default: {
+      throw new Error(`Invalid split number: ${split}`);
+    }
   }
 }
 
@@ -216,6 +218,8 @@ export interface CareerWorldState {
 export interface CareerState {
   id: string;
   phase: CareerPhase;
+  /** When phase is menu, Continue resumes this phase. */
+  resumePhase: CareerPhase | null;
   onboardingStep: OnboardingStep;
   playerName: string;
   region: CareerRegion | null;
