@@ -15,7 +15,23 @@ export interface ImageResponse {
   id: string;
   imageId: string;
   url: string;
+  source: string | null;
+  sourceUrl: string | null;
   createdAt: Date;
+}
+
+export interface ImageListResponse {
+  data: ImageResponse[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface SaveR2ImageInput {
+  key: string;
+  url: string;
+  source: string;
+  sourceUrl: string;
 }
 
 @Injectable()
@@ -37,6 +53,17 @@ export class ImagesService {
     if (!this.accountId || !this.apiToken || !this.accountHash) {
       throw new InternalServerErrorException("Cloudflare credentials are not configured");
     }
+  }
+
+  private mapImage(image: Image): ImageResponse {
+    return {
+      id: image.id,
+      imageId: image.imageId,
+      url: image.url,
+      source: image.source,
+      sourceUrl: image.sourceUrl,
+      createdAt: image.createdAt,
+    };
   }
 
   async getUploadUrl(userId?: string, userEmail?: string): Promise<UploadUrlResponse> {
@@ -90,7 +117,13 @@ export class ImagesService {
     }
   }
 
-  async saveImage(imageId: string, userId?: string, userEmail?: string): Promise<ImageResponse> {
+  async saveImage(
+    imageId: string,
+    source?: string,
+    sourceUrl?: string,
+    userId?: string,
+    userEmail?: string,
+  ): Promise<ImageResponse> {
     const log = createLogger({
       component: ImagesService.name,
       action: "saveImage",
@@ -108,16 +141,13 @@ export class ImagesService {
       const image = new Image();
       image.imageId = imageId;
       image.url = url;
+      image.source = source ?? null;
+      image.sourceUrl = sourceUrl ?? null;
 
       const saved = await this.imageRepository.save(image);
       log.set({ storedImageId: saved.id, imageUrl: saved.url });
 
-      return {
-        id: saved.id,
-        imageId: saved.imageId,
-        url: saved.url,
-        createdAt: saved.createdAt,
-      };
+      return this.mapImage(saved);
     } catch (error) {
       if (error instanceof InternalServerErrorException) {
         log.error(error);
@@ -131,5 +161,50 @@ export class ImagesService {
     } finally {
       log.emit();
     }
+  }
+
+  async saveR2Image(
+    input: SaveR2ImageInput,
+    userId?: string,
+    userEmail?: string,
+  ): Promise<ImageResponse> {
+    const log = createLogger({
+      component: ImagesService.name,
+      action: "saveR2Image",
+      environment: currentEnvironment(),
+      userId,
+      userEmail,
+      imageKey: input.key,
+    });
+
+    try {
+      const image = new Image();
+      image.imageId = input.key;
+      image.url = input.url;
+      image.source = input.source;
+      image.sourceUrl = input.sourceUrl;
+
+      const saved = await this.imageRepository.save(image);
+      log.set({ storedImageId: saved.id, imageUrl: saved.url });
+
+      return this.mapImage(saved);
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      throw new InternalServerErrorException(
+        "The image uploaded, but saving its record failed. Try uploading again.",
+      );
+    } finally {
+      log.emit();
+    }
+  }
+
+  async findAll(page: number, limit: number): Promise<ImageListResponse> {
+    const [images, total] = await this.imageRepository.findPage(page, limit);
+    return {
+      data: images.map((image) => this.mapImage(image)),
+      total,
+      page,
+      limit,
+    };
   }
 }

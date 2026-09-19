@@ -1,11 +1,16 @@
+import type { MediaImage } from "~/composables/images";
+
 export type R2UploadResponse = {
   publicUrl: string;
   key: string;
+  image: MediaImage;
 };
 
 export type CoverUploadContext = {
   articleSlug?: string;
   articleTitle?: string;
+  source: string;
+  sourceUrl: string;
 };
 
 type NestErrorBody = {
@@ -35,13 +40,15 @@ export function useR2Upload() {
   const isUploading = ref(false);
   const error = ref<string | null>(null);
 
-  async function uploadFile(file: File, context: CoverUploadContext = {}): Promise<string> {
+  async function uploadFile(file: File, context: CoverUploadContext): Promise<R2UploadResponse> {
     isUploading.value = true;
     progress.value = 0;
     error.value = null;
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("source", context.source.trim());
+    formData.append("sourceUrl", context.sourceUrl.trim());
     if (context.articleSlug) {
       formData.append("articleSlug", context.articleSlug);
     }
@@ -50,7 +57,7 @@ export function useR2Upload() {
     }
 
     try {
-      const publicUrl = await new Promise<string>((resolve, reject) => {
+      const response = await new Promise<R2UploadResponse>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.upload.addEventListener("progress", (event) => {
@@ -63,7 +70,7 @@ export function useR2Upload() {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const parsed = JSON.parse(xhr.responseText) as R2UploadResponse;
-              resolve(parsed.publicUrl);
+              resolve(parsed);
             } catch {
               reject(new Error("Upload succeeded but the server response was invalid."));
             }
@@ -99,7 +106,7 @@ export function useR2Upload() {
       });
 
       progress.value = 100;
-      return publicUrl;
+      return response;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Image upload failed";
       error.value = message;
