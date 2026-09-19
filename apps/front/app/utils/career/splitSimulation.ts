@@ -82,7 +82,6 @@ export function circuitPointsForSplit(
   return regional + major;
 }
 
-/** Stat drift applied after a split based on how the run went. */
 export function getSplitFeedback(sim: SplitSimulation): Partial<CareerStats> {
   if (sim.major === "winner") return { rating: 5, morale: 4 };
   if (sim.major === "finalist" || sim.major === "top4") return { rating: 2, morale: 2 };
@@ -112,7 +111,6 @@ export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerSta
   }
 }
 
-/** Play every regional and the major as real brackets. One winner per event. */
 export function simulateSplitField(
   careerId: string,
   season: number,
@@ -200,7 +198,6 @@ export function upsertSplitField(
   ];
 }
 
-/** Worlds knockout among the qualified field. Prestige only — no circuit points. */
 export function simulateWorldsField(
   careerId: string,
   season: number,
@@ -215,7 +212,6 @@ export function simulateWorldsField(
   return playSingleElim(field, eventRng(careerId, season, "worlds"));
 }
 
-/** Two splits every season. 1–3 decisions before each split; Worlds is one. */
 export function getEventsBeforeStage(careerId: string, season: number, stage: CareerStage): number {
   if (stage === "worlds") return 1;
   return 1 + (hashString(`${careerId}:events:${season}:${stage}`) % MAX_EVENTS_BEFORE_SPLIT);

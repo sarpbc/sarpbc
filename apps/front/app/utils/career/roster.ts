@@ -139,7 +139,6 @@ export function getPlayerMatchStrength(
   return computePerformance(npcStats(npc));
 }
 
-/** Team strength for brackets: rating plus form and morale for every player. */
 export function getRosterMatchStrength(
   roster: readonly string[],
   world: CareerWorldState,
@@ -199,11 +198,6 @@ function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): n
   return season >= 4 ? -1 : 0;
 }
 
-/**
- * Drift every NPC rating, form, and morale one tick. Seeded from career id +
- * season + tick so Best Players reshuffles without a heavy sim. Does not touch
- * the user slot.
- */
 export function tickNpcRatings(
   world: CareerWorldState,
   careerId: string,
@@ -415,10 +409,6 @@ function fillVacancy(
   world.rosters[teamId] = asRoster([...remaining, incoming]);
 }
 
-/**
- * Put the user on `toTeamId` (exactly 3 slots). If they already have a club,
- * that roster is refilled so it stays at 3.
- */
 export function moveUserToTeam(
   world: CareerWorldState,
   toTeamId: string,

@@ -9,7 +9,6 @@ export const REGIONAL_POINTS: Record<CareerPlacement, number> = {
   unavailable: 0,
 };
 
-/** International majors are worth double a regional finish. */
 export const MAJOR_POINTS: Record<CareerPlacement, number> = {
   winner: 20,
   finalist: 14,
@@ -19,7 +18,6 @@ export const MAJOR_POINTS: Record<CareerPlacement, number> = {
   unavailable: 0,
 };
 
-/** Regional circuit points scale with the region's depth. Majors are unweighted. */
 export function regionalCircuitWeight(region: CareerRegion): number {
   switch (region) {
     case "eu":
@@ -45,7 +43,6 @@ export function computeSeasonPoints(splits: CareerSplitRecord[]): number {
   return splits.reduce((sum, split) => sum + split.points, 0);
 }
 
-/** Circuit points are split results only. Worlds is prestige, not ranking points. */
 export function computeCircuitPoints(splits: CareerSplitRecord[]): number {
   return computeSeasonPoints(splits);
 }

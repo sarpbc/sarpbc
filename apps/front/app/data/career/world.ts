@@ -5,13 +5,11 @@ export interface CareerWorldTeam {
   id: string;
   name: string;
   region: CareerRegion;
-  /** Baseline strength (0–100) used to seed the living world rankings. */
   baseStrength: number;
   players: readonly [string, string, string];
 }
 
 export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
-  // North America
   {
     id: "apex-velocity",
     name: "Apex Velocity",
@@ -47,7 +45,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 65,
     players: ["Packet", "Latency", "Bandwidth"],
   },
-  // Europe
   {
     id: "crimson-orbit",
     name: "Crimson Orbit",
@@ -83,7 +80,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 69,
     players: ["Fold", "Tesseract", "Blink"],
   },
-  // South America
   {
     id: "solar-flare",
     name: "Solar Flare",
@@ -105,7 +101,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 70,
     players: ["Ferrão", "Órbita", "Cometa"],
   },
-  // Oceania
   {
     id: "kinetic-pulse",
     name: "Kinetic Pulse",
@@ -120,7 +115,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 66,
     players: ["Apogee", "Drover", "Southerly"],
   },
-  // Middle East & North Africa
   {
     id: "ion-surge",
     name: "Ion Surge",
@@ -142,7 +136,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 70,
     players: ["Oasis", "Simoom", "Basalt"],
   },
-  // Asia-Pacific
   {
     id: "hyperlane-fc",
     name: "Hyperlane FC",
@@ -164,7 +157,6 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
     baseStrength: 61,
     players: ["Touge", "Monsoon", "Kani"],
   },
-  // Sub-Saharan Africa
   {
     id: "orbital-fc",
     name: "Orbital FC",

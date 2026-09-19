@@ -21,11 +21,8 @@ export interface RankedRosterPlayer {
 export interface RankedTeam {
   team: CareerWorldTeam;
   roster: RankedRosterPlayer[];
-  /** Average of the current 3 roster ratings. */
   strength: number;
-  /** Score used to order the table: strength before the year, circuit points after. */
   rating: number;
-  /** Circuit points this season (regionals scaled by region, majors full). */
   points: number;
   rank: number;
   isPlayerTeam: boolean;
@@ -87,7 +84,7 @@ function storedSplitPoints(
   return field?.points ?? null;
 }
 
-/** Aggregate NPC split points from persisted fields only — never simulate on read. */
+/** Rankings read path must not simulate — aggregate splitFields only. */
 function npcSplitPointsByTeam(
   player: PlayerCircuitInput,
   world: CareerWorldState,
@@ -181,7 +178,6 @@ export function getTeamRank(rankings: WorldRankings, teamId: string): number | n
   return rankings.teams.find((entry) => entry.team.id === teamId)?.rank ?? null;
 }
 
-/** Rookies start on the weakest team of their region. */
 export function pickStartingTeam(region: CareerRegion): string {
   const teams = getWorldTeamsByRegion(region);
   const weakest = [...teams].sort((a, b) => a.baseStrength - b.baseStrength)[0];

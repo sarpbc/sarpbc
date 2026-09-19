@@ -8,7 +8,6 @@ import {
 import { getRosterPlayerRating, getRosterStrength } from "~/utils/career/roster";
 import { createRng, hashString } from "~/utils/career/rng";
 
-/** Typical live roster strength across the world field. */
 export const WORLD_STRENGTH_BASELINE = 75;
 
 const MAX_FAILURE_CHANCE = 0.45;
@@ -42,10 +41,6 @@ function gapChance(gap: number, scale: number, cap: number): number {
   return Math.min(cap, Math.max(0, gap) / scale);
 }
 
-/**
- * Chance a choice picks up extra malus. Young stars on strong teams stay low;
- * past-peak players on weak, struggling rosters fail much more often.
- */
 export function computeEventFailureChance(context: EventOutcomeContext): number {
   const pastPeak = getSeasonsPastPeak(context.season);
   let chance = 0.02;

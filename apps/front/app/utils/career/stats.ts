@@ -26,21 +26,12 @@ export function clampStat(value: number): number {
   return Math.max(MIN_STAT, Math.min(MAX_STAT, Math.round(value)));
 }
 
-/**
- * Quadratic cost from 80. Capped at 5 so a +5 can still buy a point in the
- * 90s; 100 stays behind the mythic roll.
- */
 function gainCost(current: number): number {
   if (current < SOFT_STAT_CEILING) return 1;
   const over = current - SOFT_STAT_CEILING;
   return Math.min(5, 1 + (over * over) / 50);
 }
 
-/**
- * Apply a single-stat change. Negative deltas apply in full. Positive deltas
- * of +1 through +5 land in full under 80, then shrink so 94–96 is already rare,
- * 97–99 is elite, and 100 needs both a large raw gain at 99 and a 5% roll.
- */
 export function applyStatChange(
   current: number,
   delta: number,
@@ -112,7 +103,6 @@ export function getStartingStats(background: CareerBackground, role: CareerRole)
   return applyStatDelta(getBackgroundBaseStats(background), getRoleDelta(role));
 }
 
-/** Rating and form drop after the peak seasons (age 22). Accelerates each year. */
 export function getAgeDecline(season: number): Partial<CareerStats> {
   const pastPeak = getSeasonsPastPeak(season);
   if (pastPeak <= 0) return {};
@@ -123,7 +113,6 @@ export function getAgeDecline(season: number): Partial<CareerStats> {
   };
 }
 
-/** Composite performance score — role shifts how much each stat matters. */
 export function computeComposite(stats: CareerStats, role: CareerRole): number {
   switch (role) {
     case "offense":
@@ -139,7 +128,6 @@ export function computeComposite(stats: CareerStats, role: CareerRole): number {
   }
 }
 
-/** Match strength for a player. NPCs have no role, so form/morale share a flat split. */
 export function computePerformance(stats: CareerStats, role?: CareerRole | null): number {
   if (role) return computeComposite(stats, role);
   return stats.rating * 0.5 + stats.form * 0.3 + stats.morale * 0.2;

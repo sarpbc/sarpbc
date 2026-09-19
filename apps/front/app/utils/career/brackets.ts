@@ -37,10 +37,6 @@ function placementForLosers(winnersAdvancing: number): CareerPlacement {
   return "group";
 }
 
-/**
- * Single-elimination bracket. Byes pad to the next power of two.
- * Exactly one winner when the field is non-empty.
- */
 export function playSingleElim(
   teams: readonly BracketEntrant[],
   rng: () => number,

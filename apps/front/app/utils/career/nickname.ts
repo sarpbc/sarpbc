@@ -85,7 +85,6 @@ function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
   }
 }
 
-/** Pick one authored epithet from how the career actually went. */
 export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKey {
   const tier = classifyNickname(input);
   switch (tier) {

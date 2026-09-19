@@ -5,9 +5,7 @@ import { getTeamRank } from "~/utils/career/rankings";
 
 const ELITE_PLAYER_RANK = 12;
 const STRONG_PLAYER_RANK = 16;
-/** Clubs bid if you are within this of their weakest starter. */
 const TRANSFER_UPGRADE_MARGIN = 2;
-/** Elite bids come from the best interested clubs, not a random mid-table draw. */
 const OFFER_SHORTLIST = 8;
 
 function getUserStanding(rankings: WorldRankings): { rating: number; rank: number } {
@@ -58,11 +56,6 @@ function shuffleTeams(teams: RankedTeam[], rng: () => number): RankedTeam[] {
   return shuffled;
 }
 
-/**
- * Offseason interest. A top individual ranking opens better clubs even after
- * a quiet circuit year. Mid talent still needs results; a weak year then
- * never attracts a top-4 side.
- */
 export function getTransferBand(
   seasonPoints: number,
   currentRank: number,
@@ -156,11 +149,6 @@ export interface OffseasonResolution {
   lastChanceTeamId: string | null;
 }
 
-/**
- * Peak years always renew. Transfer interest is 0–3 clubs matching rating
- * versus the field, with season results still gating mid-tier talent.
- * After five seasons, renewal chance falls each year until no team will sign you.
- */
 export function resolveOffseasonContracts(
   seasonJustFinished: number,
   seasonPoints: number,

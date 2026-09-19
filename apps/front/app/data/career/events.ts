@@ -1,18 +1,6 @@
 import type { CareerEventDefinition, CareerEventPool } from "~/types/career";
 
-/**
- * Event mechanics only — titles, descriptions and choice labels live in i18n
- * under `page.game.career.events.{id}`.
- *
- * Stat deltas: typical choices are ±1 or ±2. ±3 and ±5 are for heavy
- * training blocks (bootcamp, all-nighters, custom packs). +5 applies in full
- * under 80.
- *
- * Form is freshness. Long hours, all-nighters, and isolation cost form.
- * Rest, sleep, and match reps restore it. Morale is mood and team vibe.
- */
 export const CAREER_EVENTS: CareerEventDefinition[] = [
-  // Split events — one decision before each major run.
   {
     id: "split-01",
     pool: "split",
@@ -184,7 +172,6 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
       { id: "b", delta: { form: 1, morale: 1 } },
     ],
   },
-  // Worlds events — one final decision once qualified.
   {
     id: "worlds-01",
     pool: "worlds",

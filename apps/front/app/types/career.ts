@@ -70,7 +70,6 @@ export type CareerEventPool = "split" | "worlds";
 export const CAREER_DESTINIES = ["quit", "streamer", "coach"] as const;
 export type CareerDestiny = (typeof CAREER_DESTINIES)[number];
 
-/** Authored epithet keys. Display copy lives in i18n, not on the result. */
 export const CAREER_NICKNAME_KEYS = [
   "goat",
   "closer",
@@ -101,9 +100,8 @@ export interface CareerEventChoiceDefinition {
   id: string;
   delta: Partial<CareerStats>;
   destiny?: Partial<CareerDestinyLeanings>;
-  /** Sit out this many regionals of the upcoming split (0-indexed from regional 1). */
+  /** skipRegionals is 0-indexed from regional 1. */
   skipRegionals?: number;
-  /** Sit out the upcoming major even if the team qualifies. */
   skipMajor?: boolean;
 }
 
@@ -119,7 +117,6 @@ export interface CareerEventOutcome {
   choiceId: string;
   delta: Partial<CareerStats>;
   destiny: Partial<CareerDestinyLeanings>;
-  /** When true, show this choice's failure copy instead of the success outcome. */
   failed?: boolean;
 }
 
@@ -136,7 +133,6 @@ export type CareerPlacement = (typeof CAREER_PLACEMENTS)[number];
 export interface CareerSplitRecord {
   split: number;
   regionals: CareerPlacement[];
-  /** `null` when the team failed to qualify for the major. */
   major: CareerPlacement | null;
   points: number;
 }
@@ -151,7 +147,6 @@ export interface CareerSeasonRecord {
   teamId: string;
   teamName: string;
   splits: CareerSplitRecord[];
-  /** `null` when the team missed Worlds qualification. */
   worlds: CareerPlacement | null;
   points: number;
   ratingEnd: number;
@@ -190,20 +185,17 @@ export interface CareerNpcPlayer {
   region: CareerRegion;
 }
 
-/** Circuit points in world-rank order after the last completed season. */
 export interface CareerRankSnapshotEntry {
   teamId: string;
   points: number;
 }
 
-/** Per-team circuit points from one simulated split (regionals + major). */
 export interface CareerSplitFieldResult {
   season: number;
   split: number;
   points: Record<string, number>;
 }
 
-/** Live world: 3-player rosters plus an unsigned pool. Template teams stay in WORLD_TEAMS. */
 export interface CareerWorldState {
   rosters: Record<string, CareerRoster>;
   players: Record<string, CareerNpcPlayer>;
@@ -233,9 +225,7 @@ export interface CareerState {
   world: CareerWorldState;
   usedEventIds: string[];
   currentEventId: string | null;
-  /** How many pre-stage events were rolled for the current split/Worlds. */
   eventsQueuedForStage: number;
-  /** How many of those events have already been resolved. */
   eventsResolvedForStage: number;
   pendingSkipRegionals: number;
   pendingSkipMajor: boolean;
