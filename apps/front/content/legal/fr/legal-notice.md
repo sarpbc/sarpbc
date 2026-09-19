@@ -34,6 +34,8 @@ Le site sarpbc.org est hébergé par :
 
 Le contenu original de ce site web, y compris le texte, les graphiques, les logos et les logiciels développés par sarpbc.org, est la propriété de sarpbc.org et est protégé par les lois sur la propriété intellectuelle. Les images de joueurs et autres contenus tiers appartiennent à leurs propriétaires respectifs.
 
+Le code source de l'application est disponible sous [licence Apache 2.0](https://github.com/sarpbc/sarpbc/blob/main/LICENSE) sur GitHub.
+
 Rocket League est une marque déposée de Psyonix LLC, filiale d'Epic Games, Inc. sarpbc.org n'est pas affilié à, approuvé par ou sponsorisé par Psyonix LLC, Epic Games, Inc. ou Rocket League.
 
 ## Données Personnelles

@@ -93,7 +93,7 @@ sarpbc.org is built with the same standards as a professional product: a simple,
 
 We believe openness and collaboration can help build better products.
 
-Over time, we want to open parts of sarpbc.org to encourage transparency, enable contributions, and build a project that evolves with its community.
+The site is built with community input; the application source is available under Apache-2.0 on GitHub for transparency and contributions.
 
 ---
 

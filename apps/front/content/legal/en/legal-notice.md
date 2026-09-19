@@ -34,6 +34,8 @@ The website sarpbc.org is hosted by:
 
 The original content of this website, including text, graphics, logos, and software developed by sarpbc.org, is the property of sarpbc.org and is protected by intellectual property laws. Player images and other third-party content belong to their respective owners.
 
+The application source code is available under the [Apache License 2.0](https://github.com/sarpbc/sarpbc/blob/main/LICENSE) on GitHub.
+
 Rocket League is a trademark of Psyonix LLC, a subsidiary of Epic Games, Inc. sarpbc.org is not affiliated with, endorsed by, or sponsored by Psyonix LLC, Epic Games, Inc., or Rocket League.
 
 ## Personal Data
