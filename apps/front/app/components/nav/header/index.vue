@@ -68,23 +68,6 @@ const items = computed<NavigationMenuItem[]>(() => [
     label: t("general.tournaments"),
     to: localePath("/tournaments"),
   },
-  {
-    label: t("general.games"),
-    children: [
-      {
-        label: t("page.game.airriddle.title"),
-        to: localePath("/game/airriddle"),
-      },
-      {
-        label: t("page.game.pickems.title"),
-        to: localePath("/game/pickems"),
-      },
-      {
-        label: t("page.game.career.title"),
-        to: localePath("/game/career"),
-      },
-    ],
-  },
 ]);
 
 const menuToggleLabel = computed(() =>
