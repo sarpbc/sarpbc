@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
 const IMPORTS_TYPES = path.join(FRONT_ROOT, ".nuxt/types/imports.d.ts");
-const OUTPUT = path.join(FRONT_ROOT, ".oxlintrc.globals.json");
+const OUTPUT = path.join(FRONT_ROOT, ".oxlintrc.generated.json");
 
 const VUE_MACROS = [
   "defineEmits",
@@ -75,4 +75,12 @@ const globals = Object.fromEntries(
     .map((name) => [name, "readonly"]),
 );
 
-writeFileSync(OUTPUT, `${JSON.stringify({ globals }, null, 2)}\n`);
+const config = {
+  extends: ["../../.oxlintrc.json"],
+  globals,
+  rules: {
+    "no-undef": "error",
+  },
+};
+
+writeFileSync(OUTPUT, `${JSON.stringify(config, null, 2)}\n`);

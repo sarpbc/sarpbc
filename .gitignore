@@ -11,7 +11,7 @@ yarn.lock
 dist/
 build/
 .nuxt/
-apps/front/.oxlintrc.globals.json
+apps/front/.oxlintrc.generated.json
 .output/
 .nitro/
 .next/
