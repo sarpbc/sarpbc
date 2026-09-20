@@ -13,7 +13,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { attrs: cuelumeAttrs } = useCuelume();
 
 const eventKey = computed(() => `page.game.career.events.${props.event.id}`);
 
@@ -61,7 +60,6 @@ const decisionLabel = computed(() => {
         :key="choice.id"
         type="button"
         class="w-full border-b border-default px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-        v-bind="cuelumeAttrs.pressRelease"
         @click="emit('choose', choice.id)"
       >
         {{ t(`${eventKey}.choices.${choice.id}.label`) }}
