@@ -18,12 +18,13 @@ const activities = computed(() => recentForumActivities.value ?? []);
 <template>
   <div class="w-full flex flex-col">
     <SRail caption="lead" :title="$t('components.forum.recentPosts')">
-      <SCard flush-bottom>
+      <SCard flush-bottom flush-top>
         <SListItem
-          v-for="activity in activities"
+          v-for="(activity, index) in activities"
           :key="activity.id"
           size="compact"
           divider
+          :divider-top="index === 0"
           :to="$localePath(`/forum/post/${activity.id}`)"
           :title="activity.title"
           class="text-xs font-normal text-muted"

@@ -84,35 +84,23 @@ function setTab(nextTab: PlayerMatchesTab) {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <SRail caption="plain">
       <template #caption>
-        <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
             {{ t("page.player.slug.matches.sectionTitle") }}
           </h2>
-          <div
-            class="flex gap-1"
-            role="tablist"
+          <SSegmented
+            :model-value="tab"
+            :items="tabItems"
             :aria-label="t('page.player.slug.matches.sectionTitle')"
-          >
-            <UButton
-              v-for="item in tabItems"
-              :key="item.value"
-              role="tab"
-              :aria-selected="tab === item.value"
-              variant="soft"
-              size="sm"
-              :color="tab === item.value ? 'primary' : 'neutral'"
-              @click="setTab(item.value)"
-            >
-              {{ item.label }}
-            </UButton>
-          </div>
+            @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
+          />
         </div>
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index" flush-top>
+        <SCard v-for="index in 3" :key="index">
           <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
             <div class="col-span-2 flex flex-col gap-1">
               <USkeleton class="h-3 w-24" />
@@ -123,16 +111,8 @@ function setTab(nextTab: PlayerMatchesTab) {
         </SCard>
       </div>
 
-      <SCard v-else-if="hasError" flush-top>
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.player.slug.matches.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.player.slug.matches.retry") }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError">
+        <SErrorState :message="t('page.player.slug.matches.error')" @retry="emit('retry')" />
       </SCard>
 
       <div v-else-if="hasMatches" class="flex flex-col gap-4">
@@ -144,7 +124,7 @@ function setTab(nextTab: PlayerMatchesTab) {
         />
       </div>
 
-      <SCard v-else flush-top>
+      <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

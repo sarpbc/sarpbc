@@ -15,16 +15,16 @@ const { setJsonLd } = useStructuredData();
 const route = useRoute();
 const slug = computed(() => route.params.slug as string);
 
-const { data: article } = await useAsyncData(
+const { data: article, error: articleError } = await useAsyncData(
   () => `news-${slug.value}-${locale.value}`,
   () => getNewsArticle(slug.value, locale.value),
   { watch: [slug, locale] },
 );
 
 if (!article.value) {
-  throw createError({
-    statusCode: 404,
-    message: t("page.news.articleNotFound"),
+  throwEntityLoadError(articleError.value, {
+    notFound: t("page.news.articleNotFound"),
+    failed: t("page.news.error"),
   });
 }
 

@@ -85,16 +85,8 @@ function metaParts(award: PlayerProfileAward): string[] {
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="hasError">
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.player.slug.awards.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.player.slug.awards.retry") }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError" flush-top>
+        <SErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
       </SCard>
 
       <SCard v-else-if="awards.length > 0" flush-bottom flush-top>

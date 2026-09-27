@@ -5,16 +5,12 @@ import type { ContractRole, TeamContract } from "~/types/contract";
 
 export async function getTeamFromSlug(slug: string): Promise<Team | null> {
   const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/slug/${slug}`, {
-      method: "GET",
-      credentials: "include",
-    });
+  const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/slug/${slug}`, {
+    method: "GET",
+    credentials: "include",
+  });
 
-    return res.team || null;
-  } catch {
-    return null;
-  }
+  return res.team || null;
 }
 
 interface TeamListParams {
@@ -31,38 +27,28 @@ export async function getAllTeams(query?: {
   start?: string;
 }): Promise<{ teams: Team[]; total: number }> {
   const config = useRuntimeConfig();
-  try {
-    const params: TeamListParams = {
-      limit: query?.limit || 50,
-    };
+  const params: TeamListParams = {
+    limit: query?.limit || 50,
+  };
 
-    if (query?.offset && query.offset > 0) {
-      params.offset = query.offset;
-    }
-
-    if (query?.start) {
-      params.start = query.start;
-    } else if (query?.search) {
-      params.name = query.search;
-    }
-
-    const res = await $fetch<{ teams?: Team[]; count?: number }>(`${config.public.apiBase}/team`, {
-      method: "GET",
-      credentials: "include",
-      params,
-    });
-
-    const teams = res.teams || [];
-    const total = res.count ?? teams.length;
-
-    return {
-      teams,
-      total,
-    };
-  } catch (error) {
-    console.error("Error fetching teams:", error);
-    return { teams: [], total: 0 };
+  if (query?.offset && query.offset > 0) {
+    params.offset = query.offset;
   }
+
+  if (query?.start) {
+    params.start = query.start;
+  } else if (query?.search) {
+    params.name = query.search;
+  }
+
+  const res = await $fetch<{ teams?: Team[]; count?: number }>(`${config.public.apiBase}/team`, {
+    method: "GET",
+    credentials: "include",
+    params,
+  });
+
+  const teams = res.teams || [];
+  return { teams, total: res.count ?? teams.length };
 }
 
 export async function syncTeamFromPandascore(): Promise<void> {

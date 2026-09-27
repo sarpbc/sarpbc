@@ -75,19 +75,11 @@ const memberNames = (members: TeamRosterEra["members"]) =>
         </div>
       </div>
 
-      <SCard v-else-if="hasError">
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.team.slug.rosterHistory.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.team.slug.rosterHistory.retry") }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError" flush-top>
+        <SErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
       </SCard>
 
-      <SCard v-else-if="eras.length === 0">
+      <SCard v-else-if="eras.length === 0" flush-top>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

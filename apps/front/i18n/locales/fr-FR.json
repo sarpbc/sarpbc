@@ -14,7 +14,8 @@
       "benched": "Remplaçant",
       "loaned": "Prêté"
     },
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "retry": "Réessayer"
   },
   "nationalities": {
     "demonym": {
@@ -73,7 +74,6 @@
     "loading": "Chargement…",
     "error": "Impossible de charger le profil. Réessayez plus tard.",
     "viewProfile": "Voir le profil",
-    "roster": "Effectif",
     "noTeam": "Aucune équipe actuelle",
     "viewOnX": "Voir sur X",
     "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
@@ -195,7 +195,6 @@
       "moreActions": "Plus d'actions",
       "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "inputTitle": "Commentaire",
       "inputPlaceholder": "Écrire un commentaire…",
       "submit": "Publier",
@@ -306,7 +305,10 @@
       "seo": {
         "title": "Actus & matchs Rocket League | sarpbc.org",
         "description": "Réunir l'écosystème de l'esport Rocket League en un seul endroit."
-      }
+      },
+      "empty": "Aucune actu publiée pour le moment.",
+      "emptyHint": "Les prochaines actus apparaîtront ici.",
+      "error": "Impossible de charger les actus. Vérifiez votre connexion et réessayez."
     },
     "game": {
       "airriddle": {
@@ -332,7 +334,6 @@
         "wrongPosition": "Mauvaise position",
         "notInWord": "Pas dans le mot",
         "failedToLoad": "Échec du chargement du défi d'aujourd'hui",
-        "tryAgainLater": "Veuillez réessayer plus tard.",
         "playerNotFound": "Joueur introuvable",
         "submitFailed": "Impossible d'envoyer votre proposition. Vérifiez votre connexion et réessayez.",
         "seo": {
@@ -353,8 +354,7 @@
         },
         "list": {
           "empty": "Aucun tournoi pick'em n'est ouvert pour le moment. Revenez pendant le prochain événement.",
-          "error": "Impossible de charger les pick'ems. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer"
+          "error": "Impossible de charger les pick'ems. Vérifiez votre connexion et réessayez."
         },
         "detail": {
           "title": "Pick'em {tournament}",
@@ -364,7 +364,6 @@
           "pickSaved": "Pick enregistré",
           "pickFailed": "Impossible d'enregistrer le pick. Actualisez et réessayez.",
           "error": "Impossible de charger ce pick'em. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "emptyMatches": "Aucun match n'est encore disponible pour ce pick'em.",
           "openMatch": "Voir {teamA} – {teamB}",
           "tabs": {
@@ -1144,7 +1143,8 @@
         "noPlayersFound": "Aucun joueur trouvé",
         "showing": "Affichage",
         "of": "sur",
-        "page": "Page"
+        "page": "Page",
+        "error": "Impossible de charger les joueurs. Vérifiez votre connexion et réessayez."
       },
       "letter": {
         "title": "Joueurs commençant par {letter} - sarpbc.org",
@@ -1182,13 +1182,11 @@
           "title": "Palmarès",
           "empty": "Aucun tournoi remporté pour le moment.",
           "emptyHint": "Les titres apparaîtront ici lorsque ce joueur remportera un événement.",
-          "error": "Impossible de charger le palmarès de ce joueur. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer"
+          "error": "Impossible de charger le palmarès de ce joueur. Vérifiez votre connexion et réessayez."
         },
         "awards": {
           "title": "Récompenses",
           "error": "Impossible de charger les récompenses de ce joueur. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "awardedOn": "Attribué le {date}",
           "types": {
             "mvp": "MVP",
@@ -1198,7 +1196,6 @@
         "matches": {
           "sectionTitle": "Matchs",
           "error": "Impossible de charger les matchs de ce joueur. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "tabs": {
             "upcoming": "À venir",
             "past": "Passés"
@@ -1222,7 +1219,6 @@
         "events": {
           "sectionTitle": "Événements",
           "error": "Impossible de charger les événements de ce joueur. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "live": "En direct",
           "winner": "Vainqueur",
           "tabs": {
@@ -1272,7 +1268,8 @@
         "noTeamsFound": "Aucune équipe trouvée",
         "showing": "Affichage",
         "of": "sur",
-        "page": "Page"
+        "page": "Page",
+        "error": "Impossible de charger les équipes. Vérifiez votre connexion et réessayez."
       },
       "letter": {
         "title": "Équipes commençant par {letter} - sarpbc.org",
@@ -1289,7 +1286,6 @@
     "team": {
       "slug": {
         "loadingTeam": "Chargement de l'équipe...",
-        "errorLoadingTeam": "Erreur lors du chargement de l'équipe",
         "failedToLoadTeamData": "Échec du chargement des données de l'équipe",
         "teamNotFound": "Équipe introuvable",
         "seoTitleWithName": "{name} - sarpbc.org",
@@ -1346,20 +1342,17 @@
           "showLess": "Voir moins",
           "empty": "Aucun historique d'effectif pour le moment.",
           "emptyHint": "Les compositions apparaîtront ici dès que des contrats seront enregistrés pour cette équipe.",
-          "error": "Impossible de charger l'historique de l'effectif de cette équipe. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer"
+          "error": "Impossible de charger l'historique de l'effectif de cette équipe. Vérifiez votre connexion et réessayez."
         },
         "trophies": {
           "title": "Palmarès",
           "empty": "Aucun tournoi remporté pour le moment.",
           "emptyHint": "Les titres apparaîtront ici lorsque cette équipe remportera un événement.",
-          "error": "Impossible de charger le palmarès de cette équipe. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer"
+          "error": "Impossible de charger le palmarès de cette équipe. Vérifiez votre connexion et réessayez."
         },
         "events": {
           "sectionTitle": "Événements",
           "error": "Impossible de charger les événements de cette équipe. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "live": "En direct",
           "winner": "Vainqueur",
           "tabs": {
@@ -1378,7 +1371,6 @@
         "matches": {
           "sectionTitle": "Matchs",
           "error": "Impossible de charger les matchs de cette équipe. Vérifiez votre connexion et réessayez.",
-          "retry": "Réessayer",
           "tabs": {
             "upcoming": "À venir",
             "past": "Passés"
@@ -1399,7 +1391,8 @@
         "title": "Tournois",
         "description": "Parcourez les {count} tournois Rocket League, brackets et calendriers sur sarpbc.org",
         "empty": "Aucun tournoi trouvé.",
-        "page": "Page"
+        "page": "Page",
+        "error": "Impossible de charger les tournois. Vérifiez votre connexion et réessayez."
       },
       "id": {
         "seoTitle": "Bracket de {tournamentName} | sarpbc.org",
@@ -1411,7 +1404,6 @@
         "noMatches": "Aucun match disponible pour ce tournoi.",
         "notFound": "Tournoi introuvable",
         "error": "Impossible de charger ce tournoi. Vérifiez votre connexion et réessayez.",
-        "retry": "Réessayer",
         "subscribeCalendar": "S'abonner au calendrier",
         "status": {
           "live": "En direct",
@@ -1449,7 +1441,6 @@
         "viewTournaments": "Voir les tournois"
       },
       "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "unknownTournament": "Tournoi inconnu",
       "unknownSubTournament": "Épreuve inconnue"
     },
@@ -1464,8 +1455,7 @@
         "hint": "Consultez les matchs à venir pour voir la suite du calendrier.",
         "viewMatches": "Voir les matchs"
       },
-      "error": "Impossible de charger les résultats. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer"
+      "error": "Impossible de charger les résultats. Vérifiez votre connexion et réessayez."
     },
     "match": {
       "detail": {
@@ -1477,7 +1467,6 @@
         "seoDescriptionDefault": "Consultez les détails du match, la forme récente et les rosters sur sarpbc.org.",
         "notFound": "Match introuvable",
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
-        "retry": "Réessayer",
         "unknownTeam": "À déterminer",
         "unknownTournament": "Tournoi inconnu",
         "format": "Bo{count}",
@@ -1552,7 +1541,9 @@
         "allTopics": "Tous les sujets",
         "filterByTopic": "Filtrer par sujet",
         "searchPosts": "Rechercher des posts...",
-        "clearFilters": "Effacer les filtres"
+        "clearFilters": "Effacer les filtres",
+        "error": "Impossible de charger le forum. Vérifiez votre connexion et réessayez.",
+        "emptyHint": "Lancez la première discussion de la communauté."
       },
       "new": {
         "title": "Créer un nouveau post",
@@ -1585,8 +1576,6 @@
         "statusLoadError": "Impossible de vérifier vos limites de publication. Actualisez la page et réessayez."
       },
       "post": {
-        "loadingPost": "Chargement du post...",
-        "errorLoadingPost": "Erreur lors du chargement du post",
         "failedToLoadPostData": "Échec du chargement des données du post",
         "postNotFound": "Post introuvable",
         "postCouldNotBeFound": "Le post n'a pas pu être trouvé.",

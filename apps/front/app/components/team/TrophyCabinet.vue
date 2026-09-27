@@ -54,16 +54,8 @@ const formatEndDate = (value: Date | string | null) => {
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="hasError">
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.team.slug.trophies.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.team.slug.trophies.retry") }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError" flush-top>
+        <SErrorState :message="t('page.team.slug.trophies.error')" @retry="emit('retry')" />
       </SCard>
 
       <SCard v-else-if="trophies.length > 0" flush-bottom flush-top>
@@ -92,7 +84,7 @@ const formatEndDate = (value: Date | string | null) => {
         </SListItem>
       </SCard>
 
-      <SCard v-else>
+      <SCard v-else flush-top>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

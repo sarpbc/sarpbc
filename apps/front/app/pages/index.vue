@@ -24,7 +24,10 @@ setJsonLd("ld-json-website", () =>
 const currentWeekId = isoWeekIdFromDate(new Date());
 const articleLimit = ref(HOMEPAGE_NEWS_LIMIT);
 
-const [{ data: weekPage }, { data: articlesPage, pending: articlesPending }] = await Promise.all([
+const [
+  { data: weekPage },
+  { data: articlesPage, pending: articlesPending, error: articlesError, refresh: refreshArticles },
+] = await Promise.all([
   useAsyncData(
     () => `homepage-week-${locale.value}-${currentWeekId}`,
     () => getNewsWeek(currentWeekId, locale.value),
@@ -107,6 +110,25 @@ const { data: activePickemTournament } = await useLazyAsyncData(
             </SListItem>
           </SCard>
         </SRail>
+      </SRail>
+      <SRail
+        v-else
+        :caption="activePickemTournament ? 'none' : 'lead'"
+        :title="activePickemTournament ? undefined : $t('page.home.latest')"
+      >
+        <SCard class="flex min-h-row-stack h-row-grid items-center">
+          <SErrorState
+            v-if="articlesError"
+            :message="$t('page.home.error')"
+            @retry="refreshArticles()"
+          />
+          <SEmptyState
+            v-else
+            icon="i-fluent-news-24-regular"
+            :title="$t('page.home.empty')"
+            :hint="$t('page.home.emptyHint')"
+          />
+        </SCard>
       </SRail>
     </div>
   </div>

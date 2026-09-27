@@ -1,22 +1,13 @@
 <script lang="ts" setup>
-const {
-  currentPage,
-  totalPages,
-  hasPrevious,
-  hasNext,
-  getPageQuery,
-  offset,
-  pageSize,
-  basePath = "/matches",
-} = defineProps<{
+import type { RouteLocationRaw } from "vue-router";
+
+const { currentPage, totalPages, hasPrevious, hasNext, previousTo, nextTo } = defineProps<{
   currentPage: number;
   totalPages: number;
   hasPrevious: boolean;
   hasNext: boolean;
-  getPageQuery: (nextOffset: number) => OffsetPageQuery;
-  offset: number;
-  pageSize: number;
-  basePath?: string;
+  previousTo: RouteLocationRaw;
+  nextTo: RouteLocationRaw;
 }>();
 
 const { t } = useI18n();
@@ -43,13 +34,13 @@ function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
 </script>
 
 <template>
-  <SCard>
-    <div class="flex justify-between items-center gap-2 p-2">
+  <SCard class="flex h-row items-center">
+    <nav class="flex w-full items-center justify-between gap-2 px-2" :aria-label="t('common.page')">
       <ULink
         :disabled="!hasPrevious"
-        :to="{ path: $localePath(basePath), query: getPageQuery(offset - pageSize) }"
+        :to="previousTo"
         as="link"
-        class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
+        class="flex flex-row items-center gap-1 text-sm font-medium text-muted enabled:hover:text-highlighted disabled:cursor-default"
         @click="scrollToTopOnNavigate($event, hasPrevious)"
       >
         {{ t("common.previous") }}
@@ -61,14 +52,13 @@ function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
 
       <ULink
         :disabled="!hasNext"
-        variant="ghost"
-        :to="{ path: $localePath(basePath), query: getPageQuery(offset + pageSize) }"
+        :to="nextTo"
         as="link"
-        class="text-muted enabled:hover:text-highlighted disabled:cursor-default text-sm font-medium flex flex-row gap-1 items-center"
+        class="flex flex-row items-center gap-1 text-sm font-medium text-muted enabled:hover:text-highlighted disabled:cursor-default"
         @click="scrollToTopOnNavigate($event, hasNext)"
       >
         {{ t("common.next") }}
       </ULink>
-    </div>
+    </nav>
   </SCard>
 </template>

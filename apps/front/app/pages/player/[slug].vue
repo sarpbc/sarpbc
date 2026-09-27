@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
+import type { LocationQuery } from "vue-router";
 
 type PlayerProfileTab = "info" | "matches" | "events" | "trophies";
 
@@ -13,10 +14,13 @@ const slug = computed(() => route.params.slug as string);
 const { getPlayerFromSlug } = usePlayer();
 const { getPlayerOldTeams } = usePlayerContract();
 
-const { data: player } = await getPlayerFromSlug(slug);
+const { data: player, error: playerError } = await getPlayerFromSlug(slug);
 
 if (!player.value) {
-  throw createError({ statusCode: 404, message: "Player not found" });
+  throwEntityLoadError(playerError.value, {
+    notFound: t("page.player.slug.playerNotFound"),
+    failed: t("page.player.slug.failedToLoadPlayerData"),
+  });
 }
 
 const currentPlayer = computed(() => player.value!);
@@ -63,13 +67,14 @@ const {
 
 const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
 
-const tab = computed<PlayerProfileTab>(() => {
-  const value = route.query.tab;
+function parsePlayerTab(value: LocationQuery[string] | number): PlayerProfileTab {
   if (value === "matches" || value === "events" || value === "trophies") {
     return value;
   }
   return "info";
-});
+}
+
+const tab = computed<PlayerProfileTab>(() => parsePlayerTab(route.query.tab));
 
 const tabItems = computed(() => [
   { value: "info" as const, label: t("page.player.slug.tabs.info") },
@@ -128,86 +133,89 @@ setPageSeo({
 <template>
   <SHubPageBody>
     <div class="w-full flex min-w-0 flex-col">
-      <SCard size="m" class="flex w-full min-w-0 flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4">
-        <PlayerImg
-          class="mx-auto shrink-0 sm:mx-0"
-          :player-name="currentPlayer.name"
-          :img="currentPlayer.imageUrl"
-          size="xl"
-          priority
-        />
-        <div class="w-full min-w-0 flex flex-col gap-3 sm:justify-between">
-          <div class="flex min-w-0 flex-col items-start gap-1">
-            <h1 class="text-xl font-semibold tracking-tight text-balance">
-              {{ currentPlayer.name }}
-            </h1>
-            <div class="flex min-w-0 flex-row items-center gap-2">
-              <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-              <span class="truncate text-sm text-muted">
-                {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
-              </span>
-            </div>
-          </div>
-          <dl class="w-full min-w-0 flex flex-col gap-3">
-            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
-              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
-              <dd class="min-w-0">
-                <UTooltip
-                  v-if="currentPlayer.birthday !== undefined"
-                  :content="{
-                    align: 'center',
-                    side: 'top',
-                    sideOffset: 4,
-                  }"
-                  :text="df.format(new Date(currentPlayer.birthday))"
-                >
-                  <span class="text-sm font-medium tabular-nums">
-                    {{
-                      t("page.player.slug.xYears", {
-                        years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
-                      })
-                    }}
-                  </span>
-                </UTooltip>
-              </dd>
-            </div>
-            <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
-              <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
-              <dd class="min-w-0 flex justify-end">
-                <SLink
-                  v-if="currentPlayer.team"
-                  :to="$localePath(`/team/${currentPlayer.team.slug}`)"
-                  variant="inline"
-                  class="inline-flex items-center gap-2 min-w-0"
-                >
-                  <TeamImg
-                    :team-name="currentPlayer.team.name"
-                    :image-url="currentPlayer.team.imageUrl"
-                    :dark-mode-image-url="currentPlayer.team.darkModeImageUrl"
-                    size="xs"
-                  />
-                  <span class="truncate">{{ currentPlayer.team.name }}</span>
-                </SLink>
-                <span v-else class="text-sm text-muted">
-                  {{ t("page.player.slug.freeAgent") }}
+      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+        <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
+        <div
+          class="flex h-row-grid w-full min-w-0 flex-col gap-3 border-t border-default p-3 sm:flex-row sm:gap-4 sm:p-4"
+        >
+          <PlayerImg
+            class="mx-auto shrink-0 sm:mx-0"
+            :player-name="currentPlayer.name"
+            :img="currentPlayer.imageUrl"
+            size="xl"
+            priority
+          />
+          <div class="w-full min-w-0 flex flex-col gap-3 sm:justify-between">
+            <div class="flex min-w-0 flex-col items-start gap-1">
+              <h1 class="text-xl font-semibold tracking-tight text-balance">
+                {{ currentPlayer.name }}
+              </h1>
+              <div class="flex min-w-0 flex-row items-center gap-2">
+                <FlagIcon :nationality="currentPlayer.nationality" size="md" />
+                <span class="truncate text-sm text-muted">
+                  {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
                 </span>
-              </dd>
+              </div>
             </div>
-          </dl>
+            <dl class="w-full min-w-0 flex flex-col gap-3">
+              <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+                <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
+                <dd class="min-w-0">
+                  <UTooltip
+                    v-if="currentPlayer.birthday !== undefined"
+                    :content="{
+                      align: 'center',
+                      side: 'top',
+                      sideOffset: 4,
+                    }"
+                    :text="df.format(new Date(currentPlayer.birthday))"
+                  >
+                    <span class="text-sm font-medium tabular-nums">
+                      {{
+                        t("page.player.slug.xYears", {
+                          years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
+                        })
+                      }}
+                    </span>
+                  </UTooltip>
+                </dd>
+              </div>
+              <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+                <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
+                <dd class="min-w-0 flex justify-end">
+                  <SLink
+                    v-if="currentPlayer.team"
+                    :to="$localePath(`/team/${currentPlayer.team.slug}`)"
+                    variant="inline"
+                    class="inline-flex items-center gap-2 min-w-0 text-sm font-medium"
+                  >
+                    <TeamImg
+                      :team-name="currentPlayer.team.name"
+                      :image-url="currentPlayer.team.imageUrl"
+                      :dark-mode-image-url="currentPlayer.team.darkModeImageUrl"
+                      size="xs"
+                    />
+                    <span class="truncate">{{ currentPlayer.team.name }}</span>
+                  </SLink>
+                  <span v-else class="text-sm text-muted">
+                    {{ t("page.player.slug.freeAgent") }}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
         </div>
-      </SCard>
-
-      <div class="flex h-row min-h-row w-full items-center gap-2 -mb-px">
-        <UButton
-          v-for="item in tabItems"
-          :key="item.value"
-          :label="item.label"
-          :variant="tab === item.value ? 'solid' : 'soft'"
+        <UTabs
+          :model-value="tab"
+          :items="tabItems"
+          :content="false"
           color="neutral"
-          class="w-full items-center justify-center"
-          @click="setTab(item.value)"
+          variant="link"
+          class="w-full"
+          :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
+          @update:model-value="setTab(parsePlayerTab($event))"
         />
-      </div>
+      </SCard>
 
       <template v-if="tab === 'info'">
         <PlayerFormerTeams v-if="oldTeams && oldTeams.length > 0" :contracts="oldTeams" />

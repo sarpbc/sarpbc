@@ -325,18 +325,8 @@ watch(
       </div>
     </SCard>
 
-    <SCard v-else-if="tournamentError" class="min-h-row-triple">
-      <div
-        class="flex min-h-row-triple flex-col items-center justify-center gap-3 px-4 text-center"
-      >
-        <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.game.pickems.detail.error") }}
-        </p>
-        <UButton variant="outline" @click="refreshTournament()">
-          {{ t("page.game.pickems.detail.retry") }}
-        </UButton>
-      </div>
+    <SCard v-else-if="tournamentError" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.game.pickems.detail.error')" @retry="refreshTournament()" />
     </SCard>
 
     <template v-else-if="tournament">

@@ -36,7 +36,7 @@ function winnerLabel(winnerTeamId: string | null) {
 </script>
 
 <template>
-  <SCard flush-bottom class="flex flex-col">
+  <SCard flush-bottom flush-top class="flex flex-col">
     <SListItem v-if="hasMeetings" size="default" divider class="min-w-0">
       <span class="w-full text-xs font-medium text-muted tabular-nums">
         {{

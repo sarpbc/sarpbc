@@ -42,7 +42,7 @@ const rowSize = computed(() => {
       class="flex h-full w-full min-w-0 items-stretch gap-x-3"
     >
       <div
-        class="aspect-video h-full shrink-0 self-stretch overflow-hidden bg-elevated"
+        class="h-full w-24 shrink-0 self-stretch overflow-hidden bg-elevated sm:w-32"
         :style="{ viewTransitionName: newsCoverTransitionName(props.article.slug) }"
       >
         <NuxtImg
@@ -50,18 +50,21 @@ const rowSize = computed(() => {
           alt=""
           width="128"
           height="72"
-          sizes="128px"
+          sizes="96px sm:128px"
           loading="lazy"
           class="h-full w-full object-cover"
         />
       </div>
       <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
         <h2
-          class="min-w-0 text-base font-semibold leading-snug tracking-tight text-default line-clamp-2"
+          class="min-w-0 text-base font-semibold leading-snug tracking-tight text-default line-clamp-2 sm:line-clamp-1"
         >
           {{ props.article.title }}
         </h2>
-        <p v-if="props.article.excerpt" class="min-w-0 text-xs text-toned line-clamp-1">
+        <p
+          v-if="props.article.excerpt"
+          class="min-w-0 text-xs text-toned line-clamp-1 max-sm:hidden"
+        >
           {{ props.article.excerpt }}
         </p>
         <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
