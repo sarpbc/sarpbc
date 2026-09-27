@@ -92,35 +92,23 @@ function formatDateRange(event: PlayerEventListItem): string | null {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <SRail caption="plain">
       <template #caption>
-        <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
             {{ t("page.player.slug.events.sectionTitle") }}
           </h2>
-          <div
-            class="flex gap-1"
-            role="tablist"
+          <SSegmented
+            :model-value="tab"
+            :items="tabItems"
             :aria-label="t('page.player.slug.events.sectionTitle')"
-          >
-            <UButton
-              v-for="item in tabItems"
-              :key="item.value"
-              role="tab"
-              :aria-selected="tab === item.value"
-              variant="soft"
-              size="sm"
-              :color="tab === item.value ? 'primary' : 'neutral'"
-              @click="setTab(item.value)"
-            >
-              {{ item.label }}
-            </UButton>
-          </div>
+            @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
+          />
         </div>
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index" flush-top>
+        <SCard v-for="index in 3" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
             <USkeleton class="h-3 w-16 shrink-0" />
             <div class="flex flex-1 flex-col gap-1">
@@ -131,16 +119,8 @@ function formatDateRange(event: PlayerEventListItem): string | null {
         </SCard>
       </div>
 
-      <SCard v-else-if="hasError" flush-top>
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.player.slug.events.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.player.slug.events.retry") }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError">
+        <SErrorState :message="t('page.player.slug.events.error')" @retry="emit('retry')" />
       </SCard>
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">
@@ -176,8 +156,7 @@ function formatDateRange(event: PlayerEventListItem): string | null {
 
         <div
           v-if="activeEvents.length > 0"
-          class="flex flex-col divide-y divide-default border-default"
-          :class="live.length > 0 ? 'border' : 'border-x border-b'"
+          class="flex flex-col border border-default divide-y divide-default"
         >
           <ULink
             v-for="event in activeEvents"
@@ -219,7 +198,7 @@ function formatDateRange(event: PlayerEventListItem): string | null {
         </div>
       </div>
 
-      <SCard v-else flush-top>
+      <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

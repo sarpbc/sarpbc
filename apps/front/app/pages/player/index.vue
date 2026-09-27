@@ -17,7 +17,12 @@ const start = computed(() => {
   return param?.toUpperCase() || "";
 });
 
-const { data: playersResponse, pending } = getAllPlayers(
+const {
+  data: playersResponse,
+  pending,
+  error,
+  refresh,
+} = getAllPlayers(
   computed(() => ({
     limit: PLAYERS_PER_PAGE,
     offset: offset.value,
@@ -27,11 +32,6 @@ const { data: playersResponse, pending } = getAllPlayers(
 
 const players = computed(() => playersResponse.value?.players || []);
 const totalPlayers = computed(() => playersResponse.value?.total || 0);
-
-const allLetters = computed(() => {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  return [...letters, "123"];
-});
 
 const currentPage = computed(() => Math.floor(offset.value / PLAYERS_PER_PAGE) + 1);
 const totalPages = computed(() => Math.ceil(totalPlayers.value / PLAYERS_PER_PAGE));
@@ -109,84 +109,45 @@ setPageSeo({
       </template>
     </SHubPageHeader>
 
-    <SCard>
-      <div class="flex flex-wrap gap-1 p-1.5">
-        <UButton
-          variant="soft"
-          :color="!start ? 'primary' : 'neutral'"
-          :to="{ path: $localePath('/player'), query: getLetterQuery('') }"
-          class="h-6 p-0! px-2! flex justify-center items-center"
-        >
-          {{ t("common.all") || "ALL" }}
-        </UButton>
-        <UButton
-          v-for="letter in allLetters"
-          :key="letter"
-          variant="soft"
-          :color="start === letter ? 'primary' : 'neutral'"
-          :to="{ path: $localePath('/player'), query: getLetterQuery(letter) }"
-          class="size-6 p-0! flex justify-center items-center"
-        >
-          {{ letter }}
-        </UButton>
+    <SLetterFilter
+      :active="start"
+      :to="(letter) => ({ path: $localePath('/player'), query: getLetterQuery(letter) })"
+    />
+
+    <SCard v-if="pending" class="flex min-h-row-stack h-row-grid" aria-live="polite">
+      <div class="grid w-full grid-cols-1 content-start gap-1 p-2 md:grid-cols-2 lg:grid-cols-4">
+        <USkeleton v-for="index in 8" :key="index" class="h-10" />
       </div>
     </SCard>
 
-    <div v-if="pending" class="w-full flex justify-center py-16">
-      <div class="flex items-center gap-3">
-        <div class="animate-spin rounded-full size-6 border-b-2 border-primary" />
-      </div>
-    </div>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.players.index.error')" @retry="refresh()" />
+    </SCard>
 
-    <SCard v-else-if="players.length > 0">
+    <SCard v-else-if="players.length > 0" class="h-row-grid">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 p-2">
         <PlayerLink v-for="player in players" :key="player.id" :player="player" />
       </div>
     </SCard>
 
-    <SCard v-else>
-      <div class="text-center py-16">
-        <UIcon name="i-fluent-person-delete-24-regular" class="text-6xl text-muted mb-4" />
-        <p class="text-xl text-muted mb-2">
-          {{ t("page.players.index.noPlayersFound") }}
-        </p>
-        <p v-if="start" class="text-sm text-muted mb-4">
-          {{
-            t("page.players.letter.noPlayersStartingWith", {
-              letter: start,
-            })
-          }}
-        </p>
-      </div>
+    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
+      <SEmptyState
+        icon="i-fluent-person-delete-24-regular"
+        :title="t('page.players.index.noPlayersFound')"
+        :hint="
+          start ? t('page.players.letter.noPlayersStartingWith', { letter: start }) : undefined
+        "
+      />
     </SCard>
 
-    <SCard v-if="players.length > 0">
-      <div class="flex justify-between items-center p-2">
-        <UButton
-          :disabled="!hasPrevious"
-          variant="outline"
-          :to="{ path: $localePath('/player'), query: previousPageQuery }"
-          as="link"
-        >
-          <UIcon name="i-fluent-chevron-left-24-regular" />
-          {{ t("common.previous") }}
-        </UButton>
-
-        <div class="text-sm text-muted">
-          {{ t("page.players.index.page") }} {{ currentPage }} /
-          {{ totalPages }}
-        </div>
-
-        <UButton
-          :disabled="!hasNext"
-          variant="outline"
-          :to="{ path: $localePath('/player'), query: nextPageQuery }"
-          as="link"
-        >
-          {{ t("common.next") }}
-          <UIcon name="i-fluent-chevron-right-24-regular" />
-        </UButton>
-      </div>
-    </SCard>
+    <SPagination
+      v-if="totalPages > 1"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      :has-previous="hasPrevious"
+      :has-next="hasNext"
+      :previous-to="{ path: $localePath('/player'), query: previousPageQuery }"
+      :next-to="{ path: $localePath('/player'), query: nextPageQuery }"
+    />
   </div>
 </template>

@@ -80,7 +80,7 @@ const menuToggleLabel = computed(() =>
     class="w-full flex flex-col justify-start fixed top-0 z-50 bg-default overflow-hidden lg:overflow-visible border-b border-default"
   >
     <nav
-      class="w-full max-w-7xl px-2 lg:px-0 h-header flex flex-row items-center justify-between mx-auto"
+      class="w-full max-w-7xl px-2 xl:px-0 h-header flex flex-row items-center justify-between mx-auto"
     >
       <div class="h-full flex flex-row items-center">
         <ULink

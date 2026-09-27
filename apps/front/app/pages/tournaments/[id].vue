@@ -108,21 +108,14 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
       </SCrossCard>
     </div>
 
-    <SCard v-else-if="error">
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.tournaments.id.error") }}
-        </p>
-        <UButton variant="outline" @click="refresh()">
-          {{ t("page.tournaments.id.retry") }}
-        </UButton>
-      </div>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.tournaments.id.error')" @retry="refresh()" />
     </SCard>
 
     <template v-else-if="tournament">
-      <TournamentHero :tournament="tournament" />
-      <TournamentHeader :tournament-id="tournamentId" :active-tab="activeTab" />
+      <TournamentHero :tournament="tournament">
+        <TournamentHeader :tournament-id="tournamentId" :active-tab="activeTab" />
+      </TournamentHero>
       <div class="tournament-tab-outlet overflow-hidden">
         <NuxtPage :transition="tabTransition" />
       </div>

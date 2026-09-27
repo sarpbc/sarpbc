@@ -6,7 +6,9 @@ export interface MatchResult {
   score: number;
 }
 
-function resolveMatchResultParticipantId(participant: MatchResult["participant"]): string | null {
+export function resolveMatchResultParticipantId(
+  participant: MatchResult["participant"],
+): string | null {
   if (typeof participant === "string") {
     return participant;
   }

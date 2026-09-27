@@ -92,30 +92,18 @@ function formatDateRange(event: TeamEventListItem): string | null {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <SRail caption="plain">
       <template #caption>
-        <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
             {{ t("page.team.slug.events.sectionTitle") }}
           </h2>
-          <div
-            class="flex gap-1"
-            role="tablist"
+          <SSegmented
+            :model-value="tab"
+            :items="tabItems"
             :aria-label="t('page.team.slug.events.sectionTitle')"
-          >
-            <UButton
-              v-for="item in tabItems"
-              :key="item.value"
-              role="tab"
-              :aria-selected="tab === item.value"
-              variant="soft"
-              size="sm"
-              :color="tab === item.value ? 'primary' : 'neutral'"
-              @click="setTab(item.value)"
-            >
-              {{ item.label }}
-            </UButton>
-          </div>
+            @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
+          />
         </div>
       </template>
 
@@ -132,15 +120,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
       </div>
 
       <SCard v-else-if="hasError">
-        <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-          <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" />
-          <p class="text-sm text-muted text-pretty">
-            {{ t("page.team.slug.events.error") }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t("page.team.slug.events.retry") }}
-          </UButton>
-        </div>
+        <SErrorState :message="t('page.team.slug.events.error')" @retry="emit('retry')" />
       </SCard>
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">

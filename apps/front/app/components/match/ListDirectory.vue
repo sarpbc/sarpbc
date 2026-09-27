@@ -44,9 +44,6 @@ const titleKey = computed(() =>
 const errorKey = computed(() =>
   kind === "schedule" ? "page.matches.error" : "page.results.error",
 );
-const retryKey = computed(() =>
-  kind === "schedule" ? "page.matches.retry" : "page.results.retry",
-);
 const listVariant = computed(() => (kind === "schedule" ? "upcoming" : "result"));
 const discoverySource = computed((): MatchDiscoverySource =>
   kind === "schedule" ? "matches_list" : "results_list",
@@ -92,16 +89,8 @@ const hasMatches = computed(() => matches.length > 0);
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="hasError">
-        <div class="flex min-h-row-stack flex-col items-center justify-center gap-3">
-          <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-          <p class="text-sm text-muted">
-            {{ t(errorKey) }}
-          </p>
-          <UButton variant="outline" color="error" @click="emit('retry')">
-            {{ t(retryKey) }}
-          </UButton>
-        </div>
+      <SCard v-else-if="hasError" class="flex min-h-row-stack h-row-grid items-center">
+        <SErrorState :message="t(errorKey)" @retry="emit('retry')" />
       </SCard>
 
       <template v-else-if="hasMatches">
@@ -112,16 +101,20 @@ const hasMatches = computed(() => matches.length > 0);
           :discovery-source="discoverySource"
         />
 
-        <MatchListPagination
+        <SPagination
           v-if="totalMatches > MATCH_LIST_PAGE_SIZE"
-          :base-path="basePath"
           :current-page="currentPage"
           :total-pages="totalPages"
           :has-previous="hasPrevious"
           :has-next="hasNext"
-          :get-page-query="getPageQuery"
-          :offset="offset"
-          :page-size="MATCH_LIST_PAGE_SIZE"
+          :previous-to="{
+            path: $localePath(basePath),
+            query: getPageQuery(offset - MATCH_LIST_PAGE_SIZE),
+          }"
+          :next-to="{
+            path: $localePath(basePath),
+            query: getPageQuery(offset + MATCH_LIST_PAGE_SIZE),
+          }"
           class="mt-row"
         />
       </template>

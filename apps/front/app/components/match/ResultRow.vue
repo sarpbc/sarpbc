@@ -1,10 +1,16 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
 
-const { match, divider = true } = defineProps<{
+const {
+  match,
+  divider = true,
+  dividerTop = false,
+} = defineProps<{
   match: MatchListItem;
   divider?: boolean;
+  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
+  dividerTop?: boolean;
 }>();
 
 const teamA = computed(() => match.participants?.[0]);
@@ -17,10 +23,10 @@ const winnerParticipantId = computed(() => {
 
   const [first, second] = match.results;
   if (first!.score > second!.score) {
-    return first!.participant;
+    return resolveMatchResultParticipantId(first!.participant);
   }
   if (second!.score > first!.score) {
-    return second!.participant;
+    return resolveMatchResultParticipantId(second!.participant);
   }
 
   return null;
@@ -44,7 +50,7 @@ function scoreClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider" class="min-w-0">
+  <SListItem size="default" :divider="divider" :divider-top="dividerTop" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"

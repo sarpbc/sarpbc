@@ -14,7 +14,8 @@
       "benched": "Benched",
       "loaned": "Loaned"
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry"
   },
   "nationalities": {
     "demonym": {
@@ -73,7 +74,6 @@
     "loading": "Loading…",
     "error": "Could not load profile. Try again later.",
     "viewProfile": "View profile",
-    "roster": "Roster",
     "noTeam": "No current team",
     "viewOnX": "View on X",
     "tweetUnavailable": "This X post could not be loaded. Open it on X",
@@ -195,7 +195,6 @@
       "moreActions": "More Actions",
       "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
-      "retry": "Try Again",
       "inputTitle": "Comment",
       "inputPlaceholder": "Write a comment…",
       "submit": "Post",
@@ -306,7 +305,10 @@
       "seo": {
         "title": "Rocket League news & matches | sarpbc.org",
         "description": "Bringing the competitive Rocket League ecosystem into one place."
-      }
+      },
+      "empty": "No news published yet.",
+      "emptyHint": "New stories will show up here.",
+      "error": "Couldn't load the news. Check your connection and try again."
     },
     "game": {
       "airriddle": {
@@ -332,7 +334,6 @@
         "wrongPosition": "Wrong position",
         "notInWord": "Not in word",
         "failedToLoad": "Failed to load today's challenge",
-        "tryAgainLater": "Please try again later.",
         "playerNotFound": "Player Not Found",
         "submitFailed": "Could not submit your guess. Check your connection and try again.",
         "seo": {
@@ -353,8 +354,7 @@
         },
         "list": {
           "empty": "No pick'em tournaments are open right now. Check back during the next event.",
-          "error": "Could not load pick'em tournaments. Check your connection and try again.",
-          "retry": "Try Again"
+          "error": "Could not load pick'em tournaments. Check your connection and try again."
         },
         "detail": {
           "title": "{tournament} Pick'em",
@@ -364,7 +364,6 @@
           "pickSaved": "Pick saved",
           "pickFailed": "Could not save pick. Refresh and try again.",
           "error": "Could not load this pick'em. Check your connection and try again.",
-          "retry": "Try Again",
           "emptyMatches": "No matches are available for this pick'em yet.",
           "openMatch": "View {teamA} vs {teamB}",
           "tabs": {
@@ -1144,7 +1143,8 @@
         "noPlayersFound": "No players found",
         "showing": "Showing",
         "of": "of",
-        "page": "Page"
+        "page": "Page",
+        "error": "Couldn't load players. Check your connection and try again."
       },
       "letter": {
         "title": "Players starting with {letter} - sarpbc.org",
@@ -1182,13 +1182,11 @@
           "title": "Trophy Cabinet",
           "empty": "No tournament wins yet.",
           "emptyHint": "Titles appear here when this player wins an event.",
-          "error": "Could not load this player's trophies. Check your connection and try again.",
-          "retry": "Try Again"
+          "error": "Could not load this player's trophies. Check your connection and try again."
         },
         "awards": {
           "title": "Awards",
           "error": "Could not load this player's awards. Check your connection and try again.",
-          "retry": "Try Again",
           "awardedOn": "Awarded {date}",
           "types": {
             "mvp": "MVP",
@@ -1198,7 +1196,6 @@
         "matches": {
           "sectionTitle": "Matches",
           "error": "Could not load this player's matches. Check your connection and try again.",
-          "retry": "Try Again",
           "tabs": {
             "upcoming": "Upcoming",
             "past": "Past"
@@ -1222,7 +1219,6 @@
         "events": {
           "sectionTitle": "Events",
           "error": "Could not load this player's events. Check your connection and try again.",
-          "retry": "Try Again",
           "live": "Live Now",
           "winner": "Winner",
           "tabs": {
@@ -1272,7 +1268,8 @@
         "noTeamsFound": "No teams found",
         "showing": "Showing",
         "of": "of",
-        "page": "Page"
+        "page": "Page",
+        "error": "Couldn't load teams. Check your connection and try again."
       },
       "letter": {
         "title": "Teams starting with {letter} - sarpbc.org",
@@ -1289,7 +1286,6 @@
     "team": {
       "slug": {
         "loadingTeam": "Loading team...",
-        "errorLoadingTeam": "Error Loading Team",
         "failedToLoadTeamData": "Failed to load team data",
         "teamNotFound": "Team Not Found",
         "seoTitleWithName": "{name} - sarpbc.org",
@@ -1346,20 +1342,17 @@
           "showLess": "Show Less",
           "empty": "No roster history yet.",
           "emptyHint": "Lineups appear here once player contracts are recorded for this team.",
-          "error": "Could not load this team's roster history. Check your connection and try again.",
-          "retry": "Try Again"
+          "error": "Could not load this team's roster history. Check your connection and try again."
         },
         "trophies": {
           "title": "Trophy Cabinet",
           "empty": "No tournament wins yet.",
           "emptyHint": "Titles appear here when this team wins an event.",
-          "error": "Could not load this team's trophies. Check your connection and try again.",
-          "retry": "Try Again"
+          "error": "Could not load this team's trophies. Check your connection and try again."
         },
         "events": {
           "sectionTitle": "Events",
           "error": "Could not load this team's events. Check your connection and try again.",
-          "retry": "Try Again",
           "live": "Live Now",
           "winner": "Winner",
           "tabs": {
@@ -1378,7 +1371,6 @@
         "matches": {
           "sectionTitle": "Matches",
           "error": "Could not load this team's matches. Check your connection and try again.",
-          "retry": "Try Again",
           "tabs": {
             "upcoming": "Upcoming",
             "past": "Past"
@@ -1399,7 +1391,8 @@
         "title": "Tournaments",
         "description": "Browse all {count} Rocket League tournaments, brackets, and schedules on sarpbc.org",
         "empty": "No tournaments found.",
-        "page": "Page"
+        "page": "Page",
+        "error": "Couldn't load tournaments. Check your connection and try again."
       },
       "id": {
         "seoTitle": "{tournamentName} Bracket | sarpbc.org",
@@ -1411,7 +1404,6 @@
         "noMatches": "No matches available for this tournament.",
         "notFound": "Tournament not found",
         "error": "Could not load this tournament. Check your connection and try again.",
-        "retry": "Try Again",
         "subscribeCalendar": "Subscribe to Calendar",
         "status": {
           "live": "Live",
@@ -1449,7 +1441,6 @@
         "viewTournaments": "View Tournaments"
       },
       "error": "Could not load matches. Check your connection and try again.",
-      "retry": "Try Again",
       "unknownTournament": "Unknown tournament",
       "unknownSubTournament": "Unknown event"
     },
@@ -1464,8 +1455,7 @@
         "hint": "Check upcoming matches to see what is scheduled next.",
         "viewMatches": "View Matches"
       },
-      "error": "Could not load results. Check your connection and try again.",
-      "retry": "Try Again"
+      "error": "Could not load results. Check your connection and try again."
     },
     "match": {
       "detail": {
@@ -1477,7 +1467,6 @@
         "seoDescriptionDefault": "View match details, team form, and roster on sarpbc.org.",
         "notFound": "Match not found",
         "error": "Could not load this match. Check your connection and try again.",
-        "retry": "Try Again",
         "unknownTeam": "TBD",
         "unknownTournament": "Unknown tournament",
         "format": "Bo{count}",
@@ -1552,7 +1541,9 @@
         "allTopics": "All Topics",
         "filterByTopic": "Filter by topic",
         "searchPosts": "Search posts...",
-        "clearFilters": "Clear filters"
+        "clearFilters": "Clear filters",
+        "error": "Couldn't load the forum. Check your connection and try again.",
+        "emptyHint": "Start the first community discussion."
       },
       "new": {
         "title": "Create New Post",
@@ -1585,8 +1576,6 @@
         "statusLoadError": "Could not verify posting limits. Refresh the page and try again."
       },
       "post": {
-        "loadingPost": "Loading post...",
-        "errorLoadingPost": "Error Loading Post",
         "failedToLoadPostData": "Failed to load post data",
         "postNotFound": "Post Not Found",
         "postCouldNotBeFound": "The post could not be found.",

@@ -35,6 +35,7 @@ useHead({
 <template>
   <UApp :toaster="appConfig.toaster" :locale="uiLocale" :scroll-body="false">
     <UTheme :props="uiComponentDefaults">
+      <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>

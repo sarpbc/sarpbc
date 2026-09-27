@@ -13,34 +13,41 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
 </script>
 
 <template>
-  <section class="w-full flex flex-col gap-px" aria-labelledby="tournament-participants-title">
-    <h2
-      id="tournament-participants-title"
-      class="flex text-sm font-medium text-toned h-10.75 items-end pl-1 text-balance"
-    >
-      {{ t("page.tournaments.id.participants.title") }}
-    </h2>
+  <section class="w-full" aria-labelledby="tournament-participants-title">
+    <SRail>
+      <template #caption>
+        <h2 id="tournament-participants-title" class="text-balance">
+          {{ t("page.tournaments.id.participants.title") }}
+        </h2>
+      </template>
 
-    <div
-      v-if="hasTeams"
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-default"
-      role="list"
-    >
-      <div v-for="entry in participantEntries" :key="entry.team.id" role="listitem" class="min-w-0">
-        <TournamentParticipantTile :team="entry.team" :players="entry.players" />
+      <!-- Tiles overhang by 1px under the clipped frame so an incomplete last row keeps a closed box. -->
+      <div
+        v-if="hasTeams"
+        class="grid grid-cols-1 overflow-hidden border-x border-b border-default sm:grid-cols-2 lg:grid-cols-3"
+        role="list"
+      >
+        <div
+          v-for="entry in participantEntries"
+          :key="entry.team.id"
+          role="listitem"
+          class="-mr-px -mb-px min-w-0"
+        >
+          <TournamentParticipantTile :team="entry.team" :players="entry.players" />
+        </div>
       </div>
-    </div>
 
-    <SCard v-else variant="soft">
-      <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-        <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ t("page.tournaments.id.participants.empty") }}
-        </p>
-        <p class="text-xs text-dimmed text-pretty">
-          {{ t("page.tournaments.id.participants.emptyHint") }}
-        </p>
-      </div>
-    </SCard>
+      <SCard v-else flush-top variant="soft">
+        <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
+          <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
+          <p class="text-sm text-muted text-pretty">
+            {{ t("page.tournaments.id.participants.empty") }}
+          </p>
+          <p class="text-xs text-dimmed text-pretty">
+            {{ t("page.tournaments.id.participants.emptyHint") }}
+          </p>
+        </div>
+      </SCard>
+    </SRail>
   </section>
 </template>

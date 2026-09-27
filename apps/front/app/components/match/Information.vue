@@ -29,7 +29,9 @@ function tournamentLabel(currentMatch: Match) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center text-sm text-default text-pretty">
+  <div
+    class="flex max-w-32 flex-col items-center justify-center text-center text-xs text-default text-pretty sm:max-w-40 sm:text-sm lg:max-w-none"
+  >
     <SLink
       v-if="match.tournament"
       :to="$localePath(tournamentMatchesPath(match.tournament.id))"
@@ -38,7 +40,7 @@ function tournamentLabel(currentMatch: Match) {
     >
       {{ tournamentLabel(match) }}
     </SLink>
-    <span v-if="match.beginAt" class="tabular-nums text-lg">
+    <span v-if="match.beginAt" class="tabular-nums text-sm lg:text-lg">
       {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
     </span>
     <div

@@ -125,6 +125,8 @@ Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row` plu
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
+**Free-height blocks** (hero cards, profile cards, error/empty cards) that sit in the main column get `h-row-grid`: it rounds the used height, borders included, up to a whole number of `row`s so every block below still lands on the sidebar row lines. Error and empty cards use `flex min-h-row-stack h-row-grid items-center` around `SErrorState` / `SEmptyState`.
+
 Legacy → target (migrations under SAR-85):
 
 | Avoid                          | Prefer                                                |
@@ -143,18 +145,23 @@ Shared list/rail components (`SListItem`, `SRail`, `SHubColumn` — epic SAR-85)
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times.
 
-| Primitive        | Role                                                                                                                       |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid |
-| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                        |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                  |
-| `SButton`        | Thin `UButton` wrapper for shared submit patterns                                                                          |
-| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                   |
-| `SBadgeLive`     | Live status with text + color                                                                                              |
-| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)             |
-| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                      |
-| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                  |
-| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                      |
+| Primitive        | Role                                                                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid         |
+| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                |
+| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                          |
+| `SButton`        | Thin `UButton` wrapper for shared submit patterns                                                                                  |
+| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                           |
+| `SBadgeLive`     | Live status with text + color                                                                                                      |
+| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)                     |
+| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                              |
+| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                          |
+| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                              |
+| `SErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list     |
+| `SEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                           |
+| `SPagination`    | Previous / page / next bar on one `h-row`                                                                                          |
+| `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                            |
+| `SSegmented`     | Mutually exclusive views of one list (e.g. upcoming / past), placed in the section caption. Underline tabs are for navigation only |
 
 #### `SListItem` sizes
 
@@ -181,7 +188,7 @@ Omit `size` on `flushBottom` list cards. Prefer `size="l"` over `min-h-row-tripl
 
 ### Rails & list rows
 
-- **Rails** (match lateral, forum preview, game promo): wrap each section in `SRail` — caption `flex-col-reverse pb-1 pl-2` + `text-toned`, then bordered card/rows in the default slot. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`). Lead captions keep the following card’s `border-t` as the hairline after 72px. Section captions (`h-row`) own an in-row `border-b`; their list cards are `flush-top` so the hairline stays inside the 44px slot. Forum row titles use `text-muted`.
+- **Rails** (match lateral, forum preview, game promo): wrap each section in `SRail` — caption `flex-col-reverse pb-1 pl-2` + `text-toned`, then bordered card/rows in the default slot. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`). Lead captions keep the hairline after 72px out of the caption itself (an in-caption rule shifts the label and card 1px above neighbouring columns). List cards under a lead caption are `flush-top` with `divider-top` on the first row, so row stacks start on the same pixel in every column (3 compact forum rows = 1 double news row = 2 match rows); padded cards keep their own `border-t`. Below `md` there is no sidebar to align with: lead captions shrink to `h-row`, and an empty lead caption (`SHubPageBody` without `#caption`) is hidden. Section captions (`h-row`) own an in-row `border-b`; their list cards are `flush-top` so the hairline stays inside the 44px slot. When the content below brings its own captions (grouped match lists) or free-standing bordered cards, use `caption="plain"` (same band, no hairline) so no rule floats over empty space. Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `SHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Do not add per-rail `pt-8` or `md:h-18` offsets.
 - **Detail page bodies**: wrap main-column detail pages in `SHubPageBody` (`SRail caption="lead"` + `gap-4` body). Keep `#caption` empty when used only for rail alignment (match detail). Put the scoreboard / hero / sections in the default slot; secondary meta (tournament, status, format) belongs under the hero card, not in the caption band. Caption is flush above the first body child (no gap) so card tops line up with sidebar cards. Use `captionAlign="center"` (default) or `start` for left labels when caption content is present.
 - **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). After `SHubPageHeader` (or any stack where the card would otherwise add `border-t`), also `flush-top` and put `divider-top` on the first row — card `border-t` sits 1px above the row fill. Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.

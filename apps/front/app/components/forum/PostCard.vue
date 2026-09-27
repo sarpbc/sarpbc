@@ -9,24 +9,23 @@ const { post } = defineProps<Props>();
 </script>
 
 <template>
-  <ULink :to="$localePath(`/forum/post/${post.id}`)" class="block group border border-default p-2">
-    <div class="w-full grid grid-cols-10 items-center gap-1">
-      <h3 class="col-span-7 md:col-span-6 truncate">
-        {{ post.title }}
-      </h3>
-      <div class="grid grid-cols-2 col-span-3 md:col-span-4 text-sm gap-1 items-center text-start">
-        <span class="hidden md:flex md:col-span-1 truncate">
-          {{ post.author }}
-        </span>
-        <div
-          class="flex col-span-2 md:col-span-1 items-center justify-end md:justify-start gap-2 truncate"
-        >
-          <DiscussionCommentCount :count="post.commentCount ?? 0" />
-          <span class="truncate">
-            {{ formatLocaleTimeAgo(new Date(post.createdAt)) }}
-          </span>
-        </div>
-      </div>
-    </div>
-  </ULink>
+  <SListItem
+    size="default"
+    divider
+    :to="$localePath(`/forum/post/${post.id}`)"
+    class="min-w-0 gap-3"
+  >
+    <h3 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+      {{ post.title }}
+    </h3>
+    <span class="hidden w-32 shrink-0 truncate text-xs text-muted sm:block">
+      {{ post.author }}
+    </span>
+    <span class="flex w-10 shrink-0 justify-end">
+      <DiscussionCommentCount :count="post.commentCount ?? 0" />
+    </span>
+    <span class="w-24 shrink-0 truncate text-end text-xs text-muted tabular-nums sm:w-28">
+      {{ formatLocaleTimeAgo(new Date(post.createdAt)) }}
+    </span>
+  </SListItem>
 </template>

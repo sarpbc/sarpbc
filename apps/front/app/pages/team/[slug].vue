@@ -9,10 +9,13 @@ const router = useRouter();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
-const { team, teamId, pending, error } = await useTeamByRouteSlug();
+const { team, teamId, pending, error, refresh } = await useTeamByRouteSlug();
 
-if (!team.value && !error.value) {
-  throw createError({ statusCode: 404, message: t("page.team.slug.teamNotFound") });
+if (!team.value) {
+  throwEntityLoadError(error.value, {
+    notFound: t("page.team.slug.teamNotFound"),
+    failed: t("page.team.slug.failedToLoadTeamData"),
+  });
 }
 
 const {
@@ -150,41 +153,39 @@ setPageSeo({
       </div>
     </div>
 
-    <div v-else-if="error" class="w-full flex flex-col items-center py-16 text-center">
-      <h1 class="text-2xl font-bold text-error mb-4">
-        {{ t("page.team.slug.errorLoadingTeam") }}
-      </h1>
-      <p class="text-muted">
-        {{ error.message || t("page.team.slug.failedToLoadTeamData") }}
-      </p>
-    </div>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
+    </SCard>
 
     <div v-else-if="team" class="w-full flex min-w-0 flex-col">
-      <SCard flush-bottom class="flex w-full min-w-0 flex-col">
-        <div
-          class="flex h-row-double min-h-row-double w-full min-w-0 flex-row items-center gap-3 px-3"
-        >
-          <TeamImg
-            class="shrink-0"
-            :team-name="team.name"
-            :image-url="team.imageUrl"
-            :dark-mode-image-url="team.darkModeImageUrl"
-            size="md"
-            priority
-          />
-          <div class="flex min-w-0 flex-col items-start gap-1">
-            <h1 class="text-xl font-semibold tracking-tight text-balance">
-              {{ team.name }}
-            </h1>
-            <FlagNationalities
-              v-if="teamNationalities.length > 0"
-              :nationalities="teamNationalities"
+      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+        <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
+        <div class="flex h-row-grid w-full min-w-0 flex-col border-t border-default">
+          <div
+            class="flex h-row-double min-h-row-double w-full min-w-0 flex-row items-center gap-3 px-3"
+          >
+            <TeamImg
+              class="shrink-0"
+              :team-name="team.name"
+              :image-url="team.imageUrl"
+              :dark-mode-image-url="team.darkModeImageUrl"
               size="md"
-              :fallback-to-continent="true"
+              priority
             />
+            <div class="flex min-w-0 flex-col items-start gap-1">
+              <h1 class="text-xl font-semibold tracking-tight text-balance">
+                {{ team.name }}
+              </h1>
+              <FlagNationalities
+                v-if="teamNationalities.length > 0"
+                :nationalities="teamNationalities"
+                size="md"
+                :fallback-to-continent="true"
+              />
+            </div>
           </div>
+          <TeamRosterSection :players="activeRoster" class="flex-1" />
         </div>
-        <TeamRosterSection :players="activeRoster" />
         <UTabs
           v-model="active"
           :items="tabItems"
@@ -192,7 +193,7 @@ setPageSeo({
           color="neutral"
           variant="link"
           class="w-full"
-          :ui="{ list: 'border-t mb-0' }"
+          :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
         />
       </SCard>
 

@@ -49,17 +49,12 @@ export async function getTopics(): Promise<Topic[]> {
 
 export async function getPosts(): Promise<PostShort[]> {
   const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<{ posts: PostShort[] }>(`${config.public.apiBase}/posts`, {
-      method: "GET",
-      credentials: "include",
-    });
+  const res = await $fetch<{ posts: PostShort[] }>(`${config.public.apiBase}/posts`, {
+    method: "GET",
+    credentials: "include",
+  });
 
-    return res.posts || [];
-  } catch (error) {
-    console.error("Error fetching forum posts:", error);
-    return [];
-  }
+  return res.posts || [];
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
@@ -72,8 +67,10 @@ export async function getPostById(id: string): Promise<Post | null> {
 
     return res.post || null;
   } catch (error) {
-    console.error("Error fetching forum post:", error);
-    return null;
+    if (getApiErrorStatus(error) === 404) {
+      return null;
+    }
+    throw error;
   }
 }
 

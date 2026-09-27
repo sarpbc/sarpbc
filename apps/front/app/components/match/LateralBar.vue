@@ -40,26 +40,26 @@ const upcomingTitle = computed(() => {
 
 <template>
   <div class="w-full flex flex-col">
-    <SRail v-if="hasSchedule" caption="lead" divided :title="upcomingTitle">
+    <SRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
       <SCard flush-bottom flush-top>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="match in liveMatches"
+            v-for="(match, index) in liveMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
             status="live"
           >
-            <MatchRow :match="match" :live="true" />
+            <MatchRow :match="match" :live="true" :divider-top="index === 0" />
           </MatchDiscoveryLink>
           <MatchDiscoveryLink
-            v-for="match in upcomingMatches"
+            v-for="(match, index) in upcomingMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
             status="upcoming"
           >
-            <MatchRow :match="match" />
+            <MatchRow :match="match" :divider-top="liveMatches.length === 0 && index === 0" />
           </MatchDiscoveryLink>
         </div>
       </SCard>
@@ -67,19 +67,18 @@ const upcomingTitle = computed(() => {
     <SRail
       v-if="hasResults"
       :caption="hasSchedule ? 'section' : 'lead'"
-      divided
       :title="$t('components.match.results')"
     >
       <SCard flush-bottom flush-top>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="match in resultMatches"
+            v-for="(match, index) in resultMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
             status="finished"
           >
-            <MatchResultRow :match="match" />
+            <MatchResultRow :match="match" :divider-top="!hasSchedule && index === 0" />
           </MatchDiscoveryLink>
         </div>
       </SCard>

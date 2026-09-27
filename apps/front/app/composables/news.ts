@@ -59,24 +59,11 @@ export async function getNewsArticles(
   type?: NewsType,
 ): Promise<PaginatedNewsArticles> {
   const config = useRuntimeConfig();
-  try {
-    const res = type
-      ? await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
-          method: "GET",
-          credentials: "include",
-          query: { page, limit, locale, type },
-        })
-      : await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
-          method: "GET",
-          credentials: "include",
-          query: { page, limit, locale },
-        });
-
-    return res;
-  } catch (error) {
-    console.error("Error fetching news articles:", error);
-    return { data: [], total: 0, page, limit };
-  }
+  return $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
+    method: "GET",
+    credentials: "include",
+    query: type ? { page, limit, locale, type } : { page, limit, locale },
+  });
 }
 
 export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek | null> {
@@ -111,18 +98,11 @@ export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<Pagina
 
 export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {
   const config = useRuntimeConfig();
-  try {
-    const res = await $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
-      method: "GET",
-      credentials: "include",
-      query: { locale },
-    });
-
-    return res;
-  } catch (error) {
-    console.error("Error fetching news article:", error);
-    return null;
-  }
+  return $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
+    method: "GET",
+    credentials: "include",
+    query: { locale },
+  });
 }
 
 export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | null> {

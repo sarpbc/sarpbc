@@ -14,7 +14,7 @@ defineSlots<{
 
 <template>
   <SRail caption="lead" :caption-align="captionAlign" :class="className">
-    <template #caption>
+    <template v-if="$slots.caption" #caption>
       <slot name="caption" />
     </template>
     <div class="w-full flex flex-col gap-4">

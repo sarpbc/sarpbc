@@ -19,7 +19,12 @@ const offset = computed(() => {
   return param ? parseInt(param, 10) : 0;
 });
 
-const { data: tournamentsResponse, pending } = await useAsyncData<TournamentsIndexPayload>(
+const {
+  data: tournamentsResponse,
+  pending,
+  error,
+  refresh,
+} = await useAsyncData<TournamentsIndexPayload>(
   () => `tournaments-index-${offset.value}`,
   async () => {
     const result = await getAllTournaments({
@@ -104,35 +109,22 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
       />
     </SCard>
 
-    <SCard v-else class="p-6">
-      <p class="text-sm text-muted">{{ t("page.tournaments.index.empty") }}</p>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.tournaments.index.error')" @retry="refresh()" />
     </SCard>
 
-    <div v-if="totalPages > 1" class="flex flex-row items-center justify-between gap-4 pt-2">
-      <UButton
-        :disabled="!hasPrevious"
-        variant="outline"
-        :to="{ path: $localePath('/tournaments'), query: previousPageQuery }"
-        as="link"
-      >
-        <UIcon name="i-fluent-chevron-left-24-regular" />
-        {{ t("common.previous") }}
-      </UButton>
+    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
+      <SEmptyState icon="i-fluent-trophy-24-regular" :title="t('page.tournaments.index.empty')" />
+    </SCard>
 
-      <div class="text-sm text-muted">
-        {{ t("page.tournaments.index.page") }} {{ currentPage }} /
-        {{ totalPages }}
-      </div>
-
-      <UButton
-        :disabled="!hasNext"
-        variant="outline"
-        :to="{ path: $localePath('/tournaments'), query: nextPageQuery }"
-        as="link"
-      >
-        {{ t("common.next") }}
-        <UIcon name="i-fluent-chevron-right-24-regular" />
-      </UButton>
-    </div>
+    <SPagination
+      v-if="totalPages > 1"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      :has-previous="hasPrevious"
+      :has-next="hasNext"
+      :previous-to="{ path: $localePath('/tournaments'), query: previousPageQuery }"
+      :next-to="{ path: $localePath('/tournaments'), query: nextPageQuery }"
+    />
   </div>
 </template>

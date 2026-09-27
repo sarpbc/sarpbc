@@ -88,9 +88,9 @@ const columns = computed<FooterColumn[]>(() => [
 <template>
   <footer class="w-full border-t border-default py-12 md:py-16">
     <div
-      class="w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-8 text-start"
+      class="w-full max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-8 px-2 xl:px-0 text-start"
     >
-      <div class="flex flex-col gap-4 px-4">
+      <div class="col-span-2 flex flex-col gap-4 md:col-span-1">
         <p class="text-muted text-xs leading-relaxed">
           {{ $t("components.footer.disclaimer") }}
         </p>
@@ -106,7 +106,7 @@ const columns = computed<FooterColumn[]>(() => [
       </div>
 
       <nav class="contents text-sm" :aria-label="$t('components.footer.navLabel')">
-        <div v-for="column in columns" :key="column.title" class="flex flex-col gap-3 px-4">
+        <div v-for="column in columns" :key="column.title" class="flex flex-col gap-3">
           <h2 class="text-xs font-medium text-highlighted tracking-wide">
             {{ column.title }}
           </h2>

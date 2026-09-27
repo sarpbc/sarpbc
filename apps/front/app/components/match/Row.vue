@@ -17,12 +17,15 @@ const {
   match,
   live = false,
   divider = true,
+  dividerTop = false,
   /** When false, always show time only (day headers already provide the date). */
   showDate = true,
 } = defineProps<{
   match: MatchListItem;
   live?: boolean;
   divider?: boolean;
+  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
+  dividerTop?: boolean;
   showDate?: boolean;
 }>();
 
@@ -76,15 +79,17 @@ function liveScoreClass(score: number | null, other: number | null): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider">
+  <SListItem size="default" :divider="divider" :divider-top="dividerTop">
     <div
       class="grid w-full items-center gap-x-2"
-      :class="showLiveScore ? 'grid-cols-[minmax(0,1fr)_auto_auto]' : 'grid-cols-3'"
+      :class="
+        showLiveScore ? 'grid-cols-[minmax(0,1fr)_auto_auto]' : 'grid-cols-[minmax(0,1fr)_auto]'
+      "
     >
       <div
         v-if="match.participants"
         class="flex min-w-0 flex-col gap-0.5 truncate text-xs font-medium"
-        :class="[live ? 'text-toned' : 'text-dimmed', showLiveScore ? undefined : 'col-span-2']"
+        :class="live ? 'text-toned' : 'text-dimmed'"
       >
         <span class="truncate">
           {{
