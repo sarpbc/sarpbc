@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+/* Workspace packages resolve through node_modules, which Tailwind's auto-detection skips. */
+@source "../../../../../packages/ui/src/runtime";
 
 /*
  * Brand neutral `ink` — Linear/Resend-dark cool charcoal (OKLCH hue ~255).
@@ -136,6 +138,11 @@
     auto,
     round(up, size - var(--spacing-px), var(--spacing-row-double)) + var(--spacing-px)
   );
+}
+
+/* Snap a full-border block under a lead caption to whole rows so content growth never pushes later blocks off the rail grid. Chromium-only; falls back to content height. */
+@utility h-row-grid {
+  height: calc-size(auto, round(up, size, var(--spacing-row)));
 }
 
 html {

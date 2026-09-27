@@ -9,6 +9,7 @@ const {
   data: post,
   pending,
   error,
+  refresh,
 } = await useLazyAsyncData(`forum-post-${postId.value}`, () => getPostById(postId.value));
 
 const title = computed(() =>
@@ -32,44 +33,49 @@ setPageSeo({
 </script>
 
 <template>
-  <div class="w-full flex flex-col">
-    <SCrossCard v-if="pending" class="mt-18 h-22.75">
-      <div class="size-full flex flex-col justify-center items-center text-muted">
-        <UIcon name="i-ep-loading" class="animate-spin size-5.5" />
-        {{ $t("page.forum.post.loadingPost") }}
+  <SHubPageBody>
+    <SCrossCard v-if="pending" class="min-h-row-triple" aria-live="polite">
+      <div class="flex w-full flex-col gap-3 p-3">
+        <USkeleton class="h-4 w-48" />
+        <USkeleton class="h-3 w-full" />
+        <USkeleton class="h-3 w-2/3" />
       </div>
     </SCrossCard>
 
-    <div v-else-if="error || !post" class="w-full flex flex-col items-center py-16 text-center">
-      <h1 class="text-2xl font-bold text-error mb-4">
-        {{ $t("page.forum.post.errorLoadingPost") }}
-      </h1>
-      <p class="text-muted mb-6">
-        {{ $t("page.forum.post.failedToLoadPostData") }}
-      </p>
-      <UButton to="/forum">
-        {{ $t("page.forum.post.goBackToForum") }}
-      </UButton>
-    </div>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
+    </SCard>
 
-    <section v-else class="mt-18 w-full flex flex-col gap-8">
-      <SCrossCard class="w-full">
-        <div class="w-full flex flex-col">
-          <div class="flex flex-row items-center justify-between border-b border-default px-4 py-2">
-            <h1 class="text-lg font-semibold text-toned">
+    <SCard v-else-if="!post" class="flex min-h-row-stack h-row-grid items-center">
+      <SEmptyState
+        icon="i-fluent-chat-dismiss-24-regular"
+        :title="t('page.forum.post.postNotFound')"
+        :hint="t('page.forum.post.postCouldNotBeFound')"
+      >
+        <UButton variant="outline" color="neutral" :to="$localePath('/forum')">
+          {{ t("page.forum.post.goBackToForum") }}
+        </UButton>
+      </SEmptyState>
+    </SCard>
+
+    <template v-else>
+      <SCrossCard class="h-row-grid">
+        <div class="flex w-full flex-col">
+          <div class="flex h-row items-center justify-between gap-3 border-b border-default px-3">
+            <h1 class="truncate text-base font-semibold text-toned">
               {{ post.title }}
             </h1>
-
-            <span class="font-medium text-muted text-sm">
+            <span class="shrink-0 text-sm font-medium text-muted">
               {{ post.author }}
             </span>
           </div>
 
-          <div class="text-toned whitespace-pre-wrap leading-relaxed p-4">
+          <div class="whitespace-pre-wrap p-3 leading-relaxed text-toned">
             {{ post.content }}
           </div>
-          <div class="flex flex-row items-center justify-between border-t border-default px-4 h-8">
-            <span class="font-light text-muted text-sm">
+
+          <div class="flex h-row items-center border-t border-default px-3">
+            <span class="text-sm font-light text-muted">
               {{ df(locale).format(new Date(post.createdAt)) }}
             </span>
           </div>
@@ -77,6 +83,6 @@ setPageSeo({
       </SCrossCard>
 
       <DiscussionCommentThread target-type="forumPost" :target-id="postId" />
-    </section>
-  </div>
+    </template>
+  </SHubPageBody>
 </template>

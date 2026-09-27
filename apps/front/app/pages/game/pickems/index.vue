@@ -35,16 +35,8 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
       </div>
     </SCard>
 
-    <SCard v-else-if="error">
-      <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-        <p class="text-sm text-muted text-pretty">
-          {{ $t("page.game.pickems.list.error") }}
-        </p>
-        <UButton variant="outline" @click="refresh()">
-          {{ $t("page.game.pickems.list.retry") }}
-        </UButton>
-      </div>
+    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="$t('page.game.pickems.list.error')" @retry="refresh()" />
     </SCard>
 
     <SCard v-else-if="tournaments && tournaments.length > 0" flush-bottom flush-top>

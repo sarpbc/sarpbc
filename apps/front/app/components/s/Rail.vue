@@ -1,34 +1,39 @@
 <script setup lang="ts">
-type RailCaption = "lead" | "section" | "none";
+type RailCaption = "lead" | "section" | "plain" | "none";
 type CaptionAlign = "start" | "center";
 
 const {
   title,
   caption = "section",
   captionAlign = "start",
-  divided = false,
   class: className,
 } = defineProps<{
   title?: string;
   /**
-   * `lead` — first rail in a hub column (72px); aligns with `SHubPageHeader` + gap.
+   * `lead` — first rail in a hub column (72px from `md`); aligns with `SHubPageHeader` + gap.
    * `section` — stacked rails / mid-page blocks (44px / `h-row`).
+   * `plain` — 44px band without the hairline, for content that brings its own captions or bordered cards.
    * `none` — no caption band; use after a `h-row-header` + `gap-4` page header.
    */
   caption?: RailCaption;
   captionAlign?: CaptionAlign;
-  /** Extra in-row hairline on a lead caption. Section captions are always divided. */
-  divided?: boolean;
   class?: string;
 }>();
 
-const captionDivided = computed(() => caption === "section" || divided);
+const slots = useSlots();
+
+// Single-column mobile has no sidebar to align with: an empty lead band is dead space.
+const hideEmptyLeadOnMobile = computed(
+  () => caption === "lead" && !title && !slots.caption && !slots.title,
+);
 
 const captionHeightClass = computed(() => {
   switch (caption) {
     case "lead":
-      return "h-rail-caption";
+      return "h-row md:h-rail-caption";
     case "section":
+      return "h-row border-b border-default";
+    case "plain":
       return "h-row";
     case "none":
       return "";
@@ -58,8 +63,8 @@ const captionAlignClass = computed(() => {
     <div
       v-if="caption !== 'none'"
       :class="[
-        'flex flex-col-reverse pb-1 text-sm font-medium text-toned',
-        captionDivided && 'border-b border-default',
+        'flex-col-reverse pb-1 text-sm font-medium text-toned',
+        hideEmptyLeadOnMobile ? 'hidden md:flex' : 'flex',
         captionHeightClass,
         captionAlignClass,
       ]"

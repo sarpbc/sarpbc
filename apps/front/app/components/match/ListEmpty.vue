@@ -30,23 +30,14 @@ const secondaryLabel = computed(() =>
 </script>
 
 <template>
-  <SCard class="min-h-row-stack">
-    <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-      <UIcon :name="iconName" class="text-4xl text-muted" />
-      <p class="text-sm text-muted">
-        {{ message }}
-      </p>
-      <p class="text-xs text-dimmed">
-        {{ hint }}
-      </p>
-      <div class="flex flex-wrap items-center justify-center gap-2">
-        <UButton color="primary" class="min-h-9" :to="localePath('/tournaments')">
-          {{ t("page.matches.empty.viewTournaments") }}
-        </UButton>
-        <UButton variant="outline" color="neutral" class="min-h-9" :to="secondaryTo">
-          {{ secondaryLabel }}
-        </UButton>
-      </div>
-    </div>
+  <SCard class="flex min-h-row-stack h-row-grid items-center">
+    <SEmptyState :icon="iconName" :title="message" :hint="hint">
+      <UButton color="primary" :to="localePath('/tournaments')">
+        {{ t("page.matches.empty.viewTournaments") }}
+      </UButton>
+      <UButton variant="outline" color="neutral" :to="secondaryTo">
+        {{ secondaryLabel }}
+      </UButton>
+    </SEmptyState>
   </SCard>
 </template>

@@ -74,7 +74,7 @@ const emptyRows = computed(() => {
 const tileSize = computed(() => (isMobile.value ? "2.75rem" : "3.5rem"));
 
 const tileGridStyle = computed(() => ({
-  gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, ${tileSize.value})`,
+  gridTemplateColumns: `repeat(${Math.max(targetLength.value, 1)}, minmax(0, ${tileSize.value}))`,
 }));
 
 const letterStatuses = computed(() => deriveAirRiddleLetterStatuses(gameState.attempts));
@@ -169,10 +169,8 @@ function restoreGameState(length: number) {
   answer.value = stored.answer;
 }
 
-onMounted(async () => {
-  window.addEventListener("keydown", onPhysicalKeydown);
-  window.addEventListener("paste", onPaste);
-
+async function loadTodayRiddle() {
+  loading.value = true;
   try {
     const length = await getTodayAirRiddleLength();
     gameState.targetLength = length;
@@ -185,6 +183,12 @@ onMounted(async () => {
     loading.value = false;
     focusHiddenInput();
   }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", onPhysicalKeydown);
+  window.addEventListener("paste", onPaste);
+  void loadTodayRiddle();
 });
 
 onUnmounted(() => {
@@ -358,11 +362,11 @@ setPageSeo({
                 {{ t(`page.game.airriddle.${error}`) }}
               </span>
             </p>
-            <div class="inline-flex flex-col border-l border-t border-default">
+            <div class="flex w-full max-w-fit flex-col border-l border-t border-default">
               <div
                 v-for="(attempt, attemptIndex) in gameState.attempts"
                 :key="attemptIndex"
-                class="inline-grid gap-0"
+                class="grid gap-0"
                 :style="tileGridStyle"
               >
                 <AirRiddleTile
@@ -375,7 +379,7 @@ setPageSeo({
 
               <div
                 v-if="!gameState.isWon && !gameState.isGameOver"
-                class="inline-grid gap-0"
+                class="grid gap-0"
                 :style="tileGridStyle"
               >
                 <AirRiddleTile
@@ -389,7 +393,7 @@ setPageSeo({
               <div
                 v-for="rowIndex in emptyRows"
                 :key="`empty-${rowIndex}`"
-                class="inline-grid gap-0"
+                class="grid gap-0"
                 :style="tileGridStyle"
               >
                 <AirRiddleTile
@@ -416,21 +420,11 @@ setPageSeo({
       </SCard>
     </template>
 
-    <SCard v-else class="relative w-full">
+    <SCard v-else class="relative flex min-h-row-stack h-row-grid w-full items-center">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
-      <div class="flex flex-col items-center gap-4 px-4 py-10 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="size-8 text-error" />
-        <div class="space-y-1">
-          <p class="text-lg font-semibold text-error">
-            {{ t("page.game.airriddle.failedToLoad") }}
-          </p>
-          <p class="text-sm text-muted">
-            {{ t("page.game.airriddle.tryAgainLater") }}
-          </p>
-        </div>
-      </div>
+      <SErrorState :message="t('page.game.airriddle.failedToLoad')" @retry="loadTodayRiddle()" />
     </SCard>
   </section>
 </template>

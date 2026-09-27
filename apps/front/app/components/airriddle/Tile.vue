@@ -32,7 +32,7 @@ const displayLetter = computed(() => letter.toUpperCase());
 
 <template>
   <div
-    class="flex size-11 items-center justify-center border-r border-b border-default font-mono text-lg font-bold tabular-nums select-none sm:size-14 sm:text-2xl"
+    class="flex aspect-square w-full min-w-0 items-center justify-center border-r border-b border-default font-mono text-base font-bold tabular-nums select-none sm:text-2xl"
     :class="tileClass"
     aria-hidden="true"
   >

@@ -18,7 +18,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
     </p>
 
     <template v-else-if="bracketView.format === 'flat-stage'">
-      <div class="flex flex-col gap-2">
+      <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
         <TournamentFlatMatchRow
           v-for="match in bracketView.flatMatches"
           :key="match.id"
@@ -39,7 +39,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
         <h2 class="text-sm font-semibold text-muted">
           {{ group.round }}
         </h2>
-        <div class="flex flex-col gap-2">
+        <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
           <TournamentFlatMatchRow v-for="match in group.matches" :key="match.id" :match="match" />
         </div>
       </section>
@@ -50,7 +50,10 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
         v-if="bracketView.doubleEliminationLayout"
         :layout="bracketView.doubleEliminationLayout"
       />
-      <div v-if="bracketView.lowerBracketFlatMatches.length" class="flex flex-col gap-2">
+      <div
+        v-if="bracketView.lowerBracketFlatMatches.length"
+        class="grid grid-cols-2 gap-2 xl:grid-cols-3"
+      >
         <TournamentFlatMatchRow
           v-for="match in bracketView.lowerBracketFlatMatches"
           :key="match.id"

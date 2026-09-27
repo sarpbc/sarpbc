@@ -3,9 +3,15 @@ import type { Comment, CommentTargetType, PaginatedComments } from "~/types/disc
 import { parseCommentHash } from "~/utils/commentPermalink";
 import { findCommentInTree } from "~/utils/commentTree";
 
-const { targetType, targetId } = defineProps<{
+const {
+  targetType,
+  targetId,
+  flushTop = false,
+} = defineProps<{
   targetType: CommentTargetType;
   targetId: string;
+  /** Sits under an `SRail` section caption, which already draws the top hairline. */
+  flushTop?: boolean;
 }>();
 
 const { t } = useI18n();
@@ -124,7 +130,12 @@ onMounted(() => {
 
 <template>
   <section class="w-full flex flex-col gap-4" :aria-label="t('components.discussion.heading')">
-    <div v-if="pending" class="flex flex-col gap-4" aria-live="polite">
+    <div
+      v-if="pending"
+      class="flex flex-col gap-4"
+      :class="{ '-mt-px': flushTop }"
+      aria-live="polite"
+    >
       <div
         v-for="n in 3"
         :key="n"
@@ -132,19 +143,13 @@ onMounted(() => {
       />
     </div>
 
-    <SCard v-else-if="error">
-      <div class="flex flex-col items-center gap-3 py-8 px-4 text-center">
-        <p class="text-sm text-muted">
-          {{ t("components.discussion.error") }}
-        </p>
-        <SButton variant="outline" @click="refresh()">
-          {{ t("components.discussion.retry") }}
-        </SButton>
-      </div>
+    <SCard v-else-if="error" :flush-top="flushTop">
+      <SErrorState :message="t('components.discussion.error')" @retry="refresh()" />
     </SCard>
 
     <template v-else>
-      <div v-if="comments.length" class="flex flex-col gap-4">
+      <!-- Boxed comments overlap the caption hairline rather than stacking a second rule. -->
+      <div v-if="comments.length" class="flex flex-col gap-4" :class="{ '-mt-px': flushTop }">
         <DiscussionCommentItem
           v-for="comment in comments"
           :key="comment.id"
@@ -170,7 +175,10 @@ onMounted(() => {
         </div>
       </div>
 
-      <SCard class="p-3">
+      <SCard
+        :flush-top="flushTop && !comments.length"
+        class="flex min-h-row h-row-grid items-center px-3 py-2"
+      >
         <DiscussionCommentComposer
           :target-type="targetType"
           :target-id="targetId"

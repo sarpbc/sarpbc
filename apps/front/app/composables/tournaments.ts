@@ -18,35 +18,27 @@ export async function getAllTournaments(query?: {
 }): Promise<{ tournaments: Tournament[]; total: number }> {
   const config = useRuntimeConfig();
   const { limit, offset, pickems, activeOnly } = query || {};
-  try {
-    const url = new URL(`${config.public.apiBase}/tournaments`);
-    if (limit !== undefined) {
-      url.searchParams.set("limit", String(limit));
-    }
-    if (offset !== undefined) {
-      url.searchParams.set("offset", String(offset));
-    }
-    if (pickems !== undefined) {
-      url.searchParams.set("pickems", pickems ? "true" : "false");
-    }
-    if (activeOnly) {
-      url.searchParams.set("activeOnly", "true");
-    }
-
-    const res = await $fetch<{ tournaments?: Tournament[]; count?: number }>(url.toString(), {
-      method: "GET",
-      credentials: "include",
-    });
-
-    const tournaments = res.tournaments ?? [];
-    return {
-      tournaments,
-      total: res.count ?? tournaments.length,
-    };
-  } catch (error) {
-    console.error("Error fetching tournaments:", error);
-    return { tournaments: [], total: 0 };
+  const url = new URL(`${config.public.apiBase}/tournaments`);
+  if (limit !== undefined) {
+    url.searchParams.set("limit", String(limit));
   }
+  if (offset !== undefined) {
+    url.searchParams.set("offset", String(offset));
+  }
+  if (pickems !== undefined) {
+    url.searchParams.set("pickems", pickems ? "true" : "false");
+  }
+  if (activeOnly) {
+    url.searchParams.set("activeOnly", "true");
+  }
+
+  const res = await $fetch<{ tournaments?: Tournament[]; count?: number }>(url.toString(), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const tournaments = res.tournaments ?? [];
+  return { tournaments, total: res.count ?? tournaments.length };
 }
 
 export async function getTournamentById(id: string): Promise<Tournament | null> {

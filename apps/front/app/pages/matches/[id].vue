@@ -231,7 +231,7 @@ const scoreboardLabel = computed(() => {
           </div>
         </SCrossCard>
         <SRail>
-          <SCard class="p-4">
+          <SCard flush-top class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-px animate-pulse">
               <div class="h-24 rounded bg-elevated" />
               <div class="h-24 rounded bg-elevated" />
@@ -242,30 +242,24 @@ const scoreboardLabel = computed(() => {
     </SHubPageBody>
   </div>
 
-  <SCard v-else-if="error">
-    <div class="flex flex-col items-center gap-3 py-12 px-4 text-center">
-      <UIcon name="i-fluent-warning-24-regular" class="text-4xl text-muted" />
-      <p class="text-sm text-muted">
-        {{ t("page.match.detail.error") }}
-      </p>
-      <UButton variant="outline" @click="refresh()">
-        {{ t("page.match.detail.retry") }}
-      </UButton>
-    </div>
-  </SCard>
+  <SHubPageBody v-else-if="error">
+    <SCard class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.match.detail.error')" @retry="refresh()" />
+    </SCard>
+  </SHubPageBody>
 
   <SHubPageBody v-else-if="match">
     <div class="w-full flex min-w-0 flex-col">
       <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
-      <SCrossCard class="min-h-row-triple">
+      <SCrossCard class="min-h-row-triple h-row-grid">
         <div
-          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center text-xl font-semibold tracking-tight"
+          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 px-2 py-4 text-base font-semibold tracking-tight sm:gap-x-4 sm:px-4 md:py-0 lg:text-xl"
         >
           <MatchTeamResult
             :participant="teamA"
             :score="teamA ? getParticipantScore(match, teamA.id) : null"
-            :winner="teamA ? winnerParticipantId === teamA.id : undefined"
+            :winner="teamA && winnerParticipantId ? winnerParticipantId === teamA.id : undefined"
             :match-status="matchStatus"
             class="min-w-0"
           />
@@ -275,7 +269,7 @@ const scoreboardLabel = computed(() => {
           <MatchTeamResult
             :participant="teamB"
             :score="teamB ? getParticipantScore(match, teamB.id) : null"
-            :winner="teamB ? winnerParticipantId === teamB.id : undefined"
+            :winner="teamB && winnerParticipantId ? winnerParticipantId === teamB.id : undefined"
             :match-status="matchStatus"
             class="min-w-0"
           />
@@ -286,29 +280,7 @@ const scoreboardLabel = computed(() => {
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
         <SRail :title="t('page.match.detail.sections.rosters')">
-          <SCard class="h-row-snap">
-            <div class="grid grid-cols-1 md:grid-cols-2">
-              <div v-for="participant in participants" :key="participant.id" class="flex flex-col">
-                <h3 class="sr-only">{{ participant.team.name }}</h3>
-                <div
-                  v-if="participant.players && participant.players.length > 0"
-                  class="flex w-full flex-col items-center"
-                >
-                  <PlayerProfile
-                    v-for="player in participant.players"
-                    :key="player.id"
-                    :player="player"
-                    size="md"
-                  />
-                </div>
-                <SListItem v-else size="default" divider>
-                  <p class="text-sm text-pretty text-muted">
-                    {{ t("page.match.detail.noRoster") }}
-                  </p>
-                </SListItem>
-              </div>
-            </div>
-          </SCard>
+          <MatchRosterTable :participants="participants" />
         </SRail>
 
         <SRail
@@ -326,7 +298,7 @@ const scoreboardLabel = computed(() => {
           v-if="matchStatus !== 'finished'"
           :title="t('page.match.detail.sections.recentForm')"
         >
-          <SCard>
+          <SCard flush-top>
             <div class="grid grid-cols-1 items-stretch md:grid-cols-2">
               <MatchTeamFormCard
                 v-for="(participant, index) in participants"
@@ -345,7 +317,7 @@ const scoreboardLabel = computed(() => {
       </template>
 
       <SRail :title="t('components.discussion.heading')">
-        <DiscussionCommentThread target-type="match" :target-id="match.id" />
+        <DiscussionCommentThread target-type="match" :target-id="match.id" flush-top />
       </SRail>
     </div>
   </SHubPageBody>
