@@ -28,6 +28,7 @@
     "nav": {
       "home": "Dashboard",
       "articles": "Articles",
+      "media": "Media",
       "players": "Players",
       "teams": "Teams",
       "tournaments": "Tournaments",
@@ -38,6 +39,35 @@
       "admin": "Admin",
       "openMenu": "Open navigation",
       "backToSite": "Back to Site"
+    },
+    "media": {
+      "title": "Media Library",
+      "subtitle": "Uploaded images with source attribution for articles and covers.",
+      "noAttribution": "No attribution recorded",
+      "columns": {
+        "preview": "Preview",
+        "source": "Source",
+        "sourceUrl": "Source Link",
+        "uploadedAt": "Uploaded"
+      },
+      "fields": {
+        "source": "Source",
+        "sourcePlaceholder": "Rocket League, photographer name…",
+        "sourceUrl": "Source Link",
+        "sourceUrlPlaceholder": "https://…"
+      },
+      "attribution": {
+        "required": "Enter the source and source link before uploading"
+      },
+      "picker": {
+        "title": "Choose from Media Library",
+        "open": "Browse Library",
+        "loading": "Loading media…",
+        "empty": "No images in the library yet. Upload one with source attribution.",
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      }
     },
     "search": {
       "placeholder": "Search…",

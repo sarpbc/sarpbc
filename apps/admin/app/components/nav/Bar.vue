@@ -36,6 +36,12 @@ const links = computed(() => {
       permission: "news.manage",
     },
     {
+      label: t("page.nav.media"),
+      icon: "i-fluent-image-24-regular",
+      to: localePath("/media"),
+      permission: "images.manage",
+    },
+    {
       label: t("page.nav.players"),
       icon: "i-fluent-person-24-regular",
       to: localePath("/players"),
