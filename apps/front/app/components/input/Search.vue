@@ -30,6 +30,7 @@ defineExpose({
   <UInput
     ref="inputRef"
     :placeholder="t('components.input.search')"
+    :aria-label="t('components.input.search')"
     :model-value="props.search"
     icon="i-fluent-search-24-regular"
     variant="soft"

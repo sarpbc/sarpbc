@@ -15,7 +15,10 @@
       "loaned": "Loaned"
     },
     "cancel": "Cancel",
-    "retry": "Retry"
+    "retry": "Retry",
+    "filterByLetter": "Filter by letter",
+    "close": "Close",
+    "loading": "Loading..."
   },
   "nationalities": {
     "demonym": {
@@ -90,7 +93,8 @@
   },
   "components": {
     "cookiePopup": {
-      "description": "Do you accept analytics cookies in addition to the essential ones? You can change your mind at any time."
+      "description": "Do you accept analytics cookies in addition to the essential ones? You can change your mind at any time.",
+      "label": "Cookie preferences"
     },
     "footer": {
       "about": "About",
@@ -151,7 +155,8 @@
     },
     "input": {
       "search": "Search...",
-      "noResult": "No results found"
+      "noResult": "No results found",
+      "searching": "Searching..."
     },
     "match": {
       "todaysMatch": "Today's Matches",
@@ -308,7 +313,8 @@
       },
       "empty": "No news published yet.",
       "emptyHint": "New stories will show up here.",
-      "error": "Couldn't load the news. Check your connection and try again."
+      "error": "Couldn't load the news. Check your connection and try again.",
+      "loadMore": "Load more"
     },
     "game": {
       "airriddle": {
@@ -339,6 +345,11 @@
         "seo": {
           "title": "Air Riddle: Guess the Rocket League Player",
           "description": "Participate in Air Riddle and guess the Rocket League player in 6 tries. Test your knowledge of RL players and improve your daily score!"
+        },
+        "result": {
+          "correct": "correct position",
+          "misplaced": "wrong position",
+          "incorrect": "not in the word"
         }
       },
       "pickems": {
@@ -1425,7 +1436,8 @@
         "hero": {
           "teamsCount": "{count} team | {count} teams",
           "champion": "Champion:"
-        }
+        },
+        "sections": "Tournament sections"
       }
     },
     "matches": {

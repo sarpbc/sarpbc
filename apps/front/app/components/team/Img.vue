@@ -61,12 +61,16 @@ const {
 const colorMode = useColorMode();
 const src = computed(() => resolveThemedLogoUrl(imageUrl, darkModeImageUrl, colorMode.value));
 const dim = computed(() => dimensions[size]);
+const failed = ref(false);
+watch(src, () => {
+  failed.value = false;
+});
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
     <NuxtImg
-      v-if="src"
+      v-if="src && !failed"
       :src="src"
       :alt="`${teamName} logo`"
       :width="dim.width"
@@ -75,6 +79,7 @@ const dim = computed(() => dimensions[size]);
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
       :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
+      @error="failed = true"
     />
     <div
       v-else

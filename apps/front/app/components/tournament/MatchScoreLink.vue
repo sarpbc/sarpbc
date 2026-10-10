@@ -115,7 +115,7 @@ function participantRowClass(participantId: string | undefined): string {
     ]"
     @click="onMatchClick"
   >
-    <p v-if="name && !bracket" class="text-xs text-dimmed truncate">{{ name }}</p>
+    <p v-if="name && !bracket" class="text-xs text-muted truncate">{{ name }}</p>
 
     <template v-if="bracket">
       <div

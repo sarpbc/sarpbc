@@ -7,6 +7,7 @@ const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const { identifyUser } = usePostHogIdentity();
 const user = useUser();
+const colorMode = useColorMode();
 
 watch(
   user,
@@ -24,6 +25,10 @@ useHead({
   meta: [
     { charset: "utf-8" },
     { name: "viewport", content: "width=device-width, initial-scale=1" },
+    {
+      name: "theme-color",
+      content: computed(() => (colorMode.value === "dark" ? "#010101" : "#ffffff")),
+    },
   ],
   link: [{ rel: "icon", href: "/favicon.ico" }],
   htmlAttrs: {

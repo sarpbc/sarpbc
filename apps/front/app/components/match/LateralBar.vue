@@ -11,8 +11,11 @@ const { data: results } = await useLazyAsyncData(`matches-results`, () => getMat
 });
 
 const SOURCE = "lateral_bar" as const;
+const MAX_LIVE_MATCHES = 5;
 
 const liveMatches = computed(() => data.value?.live ?? []);
+const visibleLiveMatches = computed(() => liveMatches.value.slice(0, MAX_LIVE_MATCHES));
+const hasHiddenLive = computed(() => liveMatches.value.length > MAX_LIVE_MATCHES);
 const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
 const hasSchedule = computed(
   () => liveMatches.value.length > 0 || upcomingMatches.value.length > 0,
@@ -44,7 +47,7 @@ const upcomingTitle = computed(() => {
       <SCard flush-bottom flush-top>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="(match, index) in liveMatches"
+            v-for="(match, index) in visibleLiveMatches"
             :key="match.id"
             :match-id="match.id"
             :source="SOURCE"
@@ -52,6 +55,14 @@ const upcomingTitle = computed(() => {
           >
             <MatchRow :match="match" :live="true" :divider-top="index === 0" />
           </MatchDiscoveryLink>
+          <SListItem
+            v-if="hasHiddenLive"
+            :to="$localePath('/matches')"
+            divider
+            class="text-xs font-medium text-muted hover:text-highlighted"
+          >
+            {{ $t("components.match.viewAll") }}
+          </SListItem>
           <MatchDiscoveryLink
             v-for="(match, index) in upcomingMatches"
             :key="match.id"

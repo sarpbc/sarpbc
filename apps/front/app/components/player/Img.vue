@@ -46,12 +46,19 @@ const fallbackRadiusClasses = {
 const { playerName, img = undefined, size, priority = false } = defineProps<Props>();
 
 const dim = computed(() => dimensions[size]);
+const failed = ref(false);
+watch(
+  () => img,
+  () => {
+    failed.value = false;
+  },
+);
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex items-center justify-center overflow-hidden']">
     <NuxtImg
-      v-if="img"
+      v-if="img && !failed"
       :src="img"
       :alt="playerName"
       :width="dim.width"
@@ -60,6 +67,7 @@ const dim = computed(() => dimensions[size]);
       :loading="priority ? 'eager' : 'lazy'"
       :fetchpriority="priority ? 'high' : undefined"
       :class="[fallbackRadiusClasses[size], 'h-full w-full object-cover']"
+      @error="failed = true"
     />
     <div
       v-else

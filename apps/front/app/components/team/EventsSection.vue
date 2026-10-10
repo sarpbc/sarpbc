@@ -190,7 +190,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
               >
                 {{ t("page.team.slug.events.winner") }}
               </UBadge>
-              <span v-else-if="tab === 'past'" class="text-xs font-medium text-dimmed">
+              <span v-else-if="tab === 'past'" class="text-xs font-medium text-muted">
                 {{ statusLabel(event.status) }}
               </span>
             </div>
@@ -204,7 +204,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
           <p class="text-sm text-muted text-pretty">
             {{ t(`page.team.slug.events.${tab}.empty`) }}
           </p>
-          <p class="text-xs text-dimmed text-pretty">
+          <p class="text-xs text-muted text-pretty">
             {{ t(`page.team.slug.events.${tab}.emptyHint`) }}
           </p>
         </div>
