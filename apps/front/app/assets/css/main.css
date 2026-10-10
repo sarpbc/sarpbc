@@ -23,7 +23,8 @@
 }
 
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
-@theme {
+/* `static`: scoped SFC styles read these via var() and Tailwind would otherwise tree-shake them. */
+@theme static {
   --spacing-header: 4rem; /* 64px — NavHeader bar */
   --spacing-row: 2.75rem; /* 44px — news / match / toolbar row */
   /* Exact 2/3 of row so 3 forum rails = 2 news rows. */
@@ -44,23 +45,12 @@
   --duration-normal: 200ms;
   --duration-slow: 300ms;
   --duration-emphasis: 2s;
-  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
   --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --z-view-transition: 9999;
 }
 
 :root {
   --ui-radius: 0rem;
-  --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-slow: 300ms;
-  --duration-emphasis: 2s;
-  --ease-standard: cubic-bezier(0.175, 0.885, 0.32, 1.1);
-  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
-  --radius-scrollbar: 5px;
-  --spacing-cross: 4px;
-  --spacing-px: 1px;
-  --z-view-transition: 9999;
   --z-base: 1;
 }
 
@@ -80,6 +70,20 @@
 }
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   a:not([aria-disabled="true"]):not([disabled]),
   button:enabled,
   input:enabled:is(

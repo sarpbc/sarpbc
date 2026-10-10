@@ -23,7 +23,7 @@ const latest = computed(() => props.week.items[0] ?? null);
       <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-default">
         {{ t("page.home.latestShort", { title: latest.title }) }}
       </h2>
-      <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
+      <p class="shrink-0 text-xs font-normal text-muted tabular-nums">
         {{ formatLocaleTimeAgo(new Date(latest.createdAt)) }}
       </p>
     </div>

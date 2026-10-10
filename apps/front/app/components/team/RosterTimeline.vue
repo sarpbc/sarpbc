@@ -85,7 +85,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           <p class="text-sm text-muted text-pretty">
             {{ t("page.team.slug.rosterHistory.empty") }}
           </p>
-          <p class="text-xs text-dimmed text-pretty">
+          <p class="text-xs text-muted text-pretty">
             {{ t("page.team.slug.rosterHistory.emptyHint") }}
           </p>
         </div>

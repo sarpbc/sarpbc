@@ -1,37 +1,26 @@
 <script setup lang="ts">
-import type { TabsItem } from "@nuxt/ui";
-
-interface Props {
+const { tournamentId, activeTab } = defineProps<{
   tournamentId: string;
   activeTab: "overview" | "matches";
-}
-
-const { tournamentId, activeTab } = defineProps<Props>();
+}>();
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const tabItems = computed<TabsItem[]>(() => [
-  { value: "overview", label: t("common.overview") },
-  { value: "matches", label: t("general.matches") },
+const tabItems = computed(() => [
+  {
+    to: localePath(`/tournaments/${tournamentId}`),
+    label: t("common.overview"),
+    active: activeTab === "overview",
+  },
+  {
+    to: localePath(`/tournaments/${tournamentId}/matches`),
+    label: t("general.matches"),
+    active: activeTab === "matches",
+  },
 ]);
-
-function onTabChange(value: string | number) {
-  const path =
-    value === "matches" ? `/tournaments/${tournamentId}/matches` : `/tournaments/${tournamentId}`;
-  navigateTo(localePath(path));
-}
 </script>
 
 <template>
-  <UTabs
-    :model-value="activeTab"
-    :items="tabItems"
-    :content="false"
-    color="neutral"
-    variant="link"
-    class="w-full"
-    :ui="{ list: 'h-row items-center border-t border-b-0 py-0 mb-0' }"
-    @update:model-value="onTabChange"
-  />
+  <STabNav :items="tabItems" :aria-label="t('page.tournaments.id.sections')" />
 </template>

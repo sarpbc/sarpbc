@@ -27,6 +27,9 @@ const startViewTransition = (event: MouseEvent) => {
     Math.max(y, window.innerHeight - y),
   );
 
+  const root = document.documentElement;
+  root.classList.add("theme-transition");
+
   const transition = document.startViewTransition(() => {
     switchTheme();
   });
@@ -37,17 +40,18 @@ const startViewTransition = (event: MouseEvent) => {
 
   void transition.finished.finally(() => {
     window.clearTimeout(failSafe);
+    root.classList.remove("theme-transition");
   });
 
   void transition.ready
     .then(() => {
-      document.documentElement.animate(
+      root.animate(
         {
           clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
         },
         {
-          duration: 600,
-          easing: "cubic-bezier(.76,.32,.29,.99)",
+          duration: 400,
+          easing: "cubic-bezier(0.77, 0, 0.175, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );
@@ -61,7 +65,7 @@ const startViewTransition = (event: MouseEvent) => {
 <template>
   <ClientOnly>
     <UButton
-      class="rounded-full w-fit"
+      class="w-fit"
       variant="ghost"
       color="neutral"
       :icon="
@@ -76,7 +80,6 @@ const startViewTransition = (event: MouseEvent) => {
 
     <template #fallback>
       <UButton
-        class="rounded-full"
         icon="i-fluent-weather-moon-24-regular"
         size="md"
         color="neutral"
@@ -87,16 +90,17 @@ const startViewTransition = (event: MouseEvent) => {
 </template>
 
 <style>
-::view-transition-old(root),
-::view-transition-new(root) {
+/* Scoped to the theme switch: route view transitions keep Nuxt's default root crossfade. */
+.theme-transition::view-transition-old(root),
+.theme-transition::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-::view-transition-new(root) {
+.theme-transition::view-transition-new(root) {
   z-index: var(--z-view-transition);
 }
-::view-transition-old(root) {
+.theme-transition::view-transition-old(root) {
   z-index: var(--z-base);
 }
 </style>

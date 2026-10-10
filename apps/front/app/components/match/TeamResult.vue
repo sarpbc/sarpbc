@@ -15,7 +15,7 @@ const { participant, score, winner, matchStatus } = defineProps<{
 function getScoreColorClass(): string {
   if (matchStatus === "live") return "text-highlighted";
   if (winner === undefined) return "text-muted";
-  return winner ? "text-success" : "text-error";
+  return winner ? "text-success font-bold" : "text-muted";
 }
 </script>
 
@@ -23,7 +23,7 @@ function getScoreColorClass(): string {
   <div v-if="participant?.team.slug" class="flex flex-col items-center justify-center">
     <SLink
       :to="$localePath(`/team/${participant.team.slug}`)"
-      variant="muted"
+      variant="inline"
       class="flex max-w-full flex-col items-center justify-center text-center text-balance break-words"
     >
       <TeamImg

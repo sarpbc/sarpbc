@@ -36,13 +36,32 @@ function onLetterPress(letter: string) {
   emit("letter", letter);
 }
 
+function keyLabel(letter: string): string {
+  const status = letterStatuses[letter.toUpperCase()];
+  switch (status) {
+    case "correct":
+      return `${letter}, ${t("page.game.airriddle.result.correct")}`;
+    case "misplaced":
+      return `${letter}, ${t("page.game.airriddle.result.misplaced")}`;
+    case "incorrect":
+      return `${letter}, ${t("page.game.airriddle.result.incorrect")}`;
+    case "unused":
+    case undefined:
+      return letter;
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
 function keyClass(letter: string): string {
   const status = letterStatuses[letter.toUpperCase()];
   switch (status) {
     case "correct":
-      return "bg-success text-white";
+      return "bg-success text-ink-950";
     case "misplaced":
-      return "bg-warning text-white";
+      return "bg-warning text-ink-950";
     case "incorrect":
       return "bg-elevated text-highlighted";
     case "unused":
@@ -72,7 +91,7 @@ function keyClass(letter: string): string {
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold uppercase sm:max-w-11"
         :class="keyClass(letter)"
         :disabled="disabled"
-        :aria-label="letter"
+        :aria-label="keyLabel(letter)"
         @click="onLetterPress(letter)"
       >
         {{ letter }}
@@ -89,7 +108,7 @@ function keyClass(letter: string): string {
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-semibold tabular-nums sm:max-w-11"
         :class="keyClass(digit)"
         :disabled="disabled"
-        :aria-label="digit"
+        :aria-label="keyLabel(digit)"
         @click="onLetterPress(digit)"
       >
         {{ digit }}
@@ -112,7 +131,7 @@ function keyClass(letter: string): string {
         type="button"
         variant="soft"
         color="neutral"
-        icon="i-lucide-delete"
+        icon="i-fluent-backspace-24-regular"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center"
         :aria-label="t('page.game.airriddle.keyboardBackspace')"
         :disabled="disabled"

@@ -146,11 +146,18 @@ setPageSeo({
 
 <template>
   <SHubPageBody>
-    <div v-if="pending" class="w-full flex justify-center py-16">
-      <div class="flex items-center gap-3 text-muted">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-        {{ t("page.team.slug.loadingTeam") }}
-      </div>
+    <div v-if="pending" class="w-full flex min-w-0 flex-col" aria-live="polite">
+      <span class="sr-only">{{ t("page.team.slug.loadingTeam") }}</span>
+      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+        <div class="flex min-h-row-stack w-full items-center gap-4 p-4 animate-pulse">
+          <div class="size-16 shrink-0 bg-elevated" />
+          <div class="flex flex-col gap-2">
+            <div class="h-6 w-48 bg-elevated" />
+            <div class="h-4 w-24 bg-elevated" />
+          </div>
+        </div>
+        <div class="h-row border-t border-default" />
+      </SCard>
     </div>
 
     <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">

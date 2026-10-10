@@ -19,25 +19,26 @@ const rejectCookies = () => {
 
 <template>
   <Transition name="cookie-popup">
-    <div
+    <section
       v-if="visible"
+      :aria-label="t('components.cookiePopup.label')"
       class="cookie-popup fixed bottom-4 z-50 max-w-sm w-full left-1/2 -translate-x-1/2 md:right-4 md:left-auto md:translate-x-0"
     >
-      <SCard variant="subtle" class="bg-default p-2">
-        <p class="text-toned text-md mb-4">
+      <SCard class="bg-default p-2">
+        <p class="text-toned text-sm mb-4">
           {{ t("components.cookiePopup.description") }}
         </p>
 
         <div class="flex justify-start space-x-2">
-          <UButton color="primary" @click="acceptCookies">
+          <UButton variant="outline" color="neutral" @click="acceptCookies">
             {{ t("common.accept") }}
           </UButton>
-          <UButton variant="ghost" color="neutral" @click="rejectCookies">
+          <UButton variant="outline" color="neutral" @click="rejectCookies">
             {{ t("common.decline") }}
           </UButton>
         </div>
       </SCard>
-    </div>
+    </section>
   </Transition>
 </template>
 
@@ -45,7 +46,7 @@ const rejectCookies = () => {
 .cookie-popup-enter-active,
 .cookie-popup-leave-active {
   transition:
-    transform var(--duration-normal) var(--ease-standard),
+    transform var(--duration-normal) var(--ease-emphasized),
     opacity var(--duration-normal) ease;
 }
 

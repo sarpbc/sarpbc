@@ -15,7 +15,10 @@
       "loaned": "Prêté"
     },
     "cancel": "Annuler",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "filterByLetter": "Filtrer par lettre",
+    "close": "Fermer",
+    "loading": "Chargement..."
   },
   "nationalities": {
     "demonym": {
@@ -90,7 +93,8 @@
   },
   "components": {
     "cookiePopup": {
-      "description": "Acceptez-vous les cookies analytiques en plus des cookies essentiels? Vous pouvez changer d'avis à tout moment."
+      "description": "Acceptez-vous les cookies analytiques en plus des cookies essentiels ? Vous pouvez changer d'avis à tout moment.",
+      "label": "Préférences de cookies"
     },
     "footer": {
       "about": "À propos",
@@ -151,7 +155,8 @@
     },
     "input": {
       "search": "Rechercher...",
-      "noResult": "Aucun résultat"
+      "noResult": "Aucun résultat",
+      "searching": "Recherche..."
     },
     "match": {
       "todaysMatch": "Matchs d'aujourd'hui",
@@ -308,7 +313,8 @@
       },
       "empty": "Aucune actu publiée pour le moment.",
       "emptyHint": "Les prochaines actus apparaîtront ici.",
-      "error": "Impossible de charger les actus. Vérifiez votre connexion et réessayez."
+      "error": "Impossible de charger les actus. Vérifiez votre connexion et réessayez.",
+      "loadMore": "Voir plus"
     },
     "game": {
       "airriddle": {
@@ -339,6 +345,11 @@
         "seo": {
           "title": "Air Riddle : Devinez le joueur Rocket League",
           "description": "Participez à Air Riddle et devinez le joueur Rocket League en 6 essais. Testez vos connaissances des joueurs RL et améliorez votre score quotidiennement !"
+        },
+        "result": {
+          "correct": "bonne position",
+          "misplaced": "mauvaise position",
+          "incorrect": "absente du mot"
         }
       },
       "pickems": {
@@ -1425,7 +1436,8 @@
         "hero": {
           "teamsCount": "{count} équipe | {count} équipes",
           "champion": "Champion :"
-        }
+        },
+        "sections": "Sections du tournoi"
       }
     },
     "matches": {

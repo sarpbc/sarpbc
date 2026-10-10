@@ -14,14 +14,17 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
 
 <template>
   <SCard class="flex h-row items-center overflow-x-auto">
-    <nav class="flex w-full min-w-max items-center gap-px px-1.5" :aria-label="t('common.all')">
+    <nav
+      class="flex w-full min-w-max items-center gap-px px-1.5"
+      :aria-label="t('common.filterByLetter')"
+    >
       <UButton
         variant="soft"
         size="xs"
         :color="!active ? 'primary' : 'neutral'"
         :to="to('')"
         :aria-current="!active ? 'page' : undefined"
-        class="h-7 shrink-0 justify-center px-2"
+        class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
       >
         {{ t("common.all") }}
       </UButton>
@@ -33,7 +36,7 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
         :color="active === letter ? 'primary' : 'neutral'"
         :to="to(letter)"
         :aria-current="active === letter ? 'page' : undefined"
-        class="h-7 min-w-6 flex-1 justify-center px-0.5"
+        class="h-7 min-w-6 flex-1 justify-center px-0.5 pointer-coarse:h-10 pointer-coarse:min-w-10"
       >
         {{ letter }}
       </UButton>

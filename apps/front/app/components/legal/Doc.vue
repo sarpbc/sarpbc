@@ -40,7 +40,7 @@ watch(
 <template>
   <div class="w-full flex flex-col">
     <h1
-      class="flex text-xl font-semibold h-16 justify-center items-center md:justify-start md:items-start"
+      class="flex text-xl font-semibold tracking-tight h-16 justify-center items-center md:justify-start md:items-start"
     >
       {{ doc?.title }}
     </h1>

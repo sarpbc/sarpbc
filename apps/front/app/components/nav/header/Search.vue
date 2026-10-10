@@ -4,43 +4,51 @@ import type { Team } from "~/types/team";
 
 const { t } = useI18n();
 
-const isFocused = ref(false);
 const inputRef = useTemplateRef("inputRef");
 
 const open = ref(false);
 const search = ref("");
+const searching = ref(false);
 
 const teamList = ref<Team[]>([]);
 const playerList = ref<Player[]>([]);
 
+const DEBOUNCE_MS = 150;
+
 let searchTimeout: NodeJS.Timeout | null = null;
+let latestRequest = 0;
 
-async function updateSearch(value: string) {
-  search.value = value;
-
+function resetResults() {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
+  latestRequest++;
+  searching.value = false;
+  teamList.value = [];
+  playerList.value = [];
+}
+
+function updateSearch(value: string) {
+  search.value = value;
 
   if (search.value.length === 0) {
-    teamList.value = [];
-    playerList.value = [];
+    resetResults();
   } else {
-    searchTimeout = setTimeout(async () => {
-      await refreshSearch();
-    }, 300);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searching.value = true;
+    searchTimeout = setTimeout(refreshSearch, DEBOUNCE_MS);
   }
 
   handleFocus();
 }
 
 function handleFocus() {
-  isFocused.value = true;
   open.value = teamList.value.length > 0 || playerList.value.length > 0 || search.value.length > 0;
 }
 
 function handleBlur(): void {
-  isFocused.value = false;
   open.value = false;
 }
 
@@ -50,26 +58,26 @@ function handleMouseDown(event: MouseEvent): void {
 
 function handleLinkClick(event: MouseEvent): void {
   const target = event.target as HTMLElement;
-  const link = target.closest("a");
-  if (link) {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
+  if (target.closest("a")) {
     search.value = "";
-    teamList.value = [];
-    playerList.value = [];
+    resetResults();
     open.value = false;
     inputRef.value?.blur();
   }
 }
 
 async function refreshSearch() {
+  const request = ++latestRequest;
   const { teams, players } = await searchTeamsAndPlayers({
     query: search.value,
   });
+  // A newer keystroke or a cleared field owns the results now.
+  if (request !== latestRequest) {
+    return;
+  }
   teamList.value = teams;
   playerList.value = players;
+  searching.value = false;
 }
 </script>
 
@@ -79,7 +87,7 @@ async function refreshSearch() {
       <InputSearch
         ref="inputRef"
         :search="search"
-        :class="`${isFocused ? 'md:w-64' : 'md:w-48'} transition-all`"
+        class="md:w-48 lg:w-64"
         @update:search="updateSearch"
         @focus="handleFocus"
         @blur="handleBlur"
@@ -98,8 +106,9 @@ async function refreshSearch() {
         <div
           v-if="search.length > 0 && teamList.length === 0 && playerList.length === 0"
           class="text-muted text-sm text-center py-4"
+          :role="searching ? 'status' : undefined"
         >
-          {{ t("components.input.noResult") }}
+          {{ searching ? t("components.input.searching") : t("components.input.noResult") }}
         </div>
       </div>
     </template>

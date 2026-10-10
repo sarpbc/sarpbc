@@ -41,6 +41,14 @@ function handleMobileMenuClick(event: MouseEvent) {
   }
 }
 
+watch(menuOpen, (open) => {
+  document.documentElement.classList.toggle("overflow-hidden", open);
+});
+
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove("overflow-hidden");
+});
+
 watch(
   () => route.fullPath,
   () => {
@@ -90,7 +98,7 @@ const menuToggleLabel = computed(() =>
         >
           <img
             src="/sarpbc.svg"
-            alt="sarpbc.org logo"
+            alt=""
             width="48"
             height="48"
             fetchpriority="high"
@@ -120,25 +128,39 @@ const menuToggleLabel = computed(() =>
         @click="toggleMenu()"
       />
     </nav>
-    <div
-      v-if="menuOpen"
-      class="fixed inset-x-0 top-header bottom-0 bg-default md:hidden overflow-y-auto"
-      @click="handleMobileMenuClick"
-    >
+    <Transition name="menu">
       <div
-        class="w-full max-w-7xl px-9 mx-auto flex flex-col items-center justify-start gap-1.5 pt-6 pb-12 min-h-full"
+        v-if="menuOpen"
+        class="fixed inset-x-0 top-header bottom-0 bg-default md:hidden overflow-y-auto overscroll-contain"
+        @click="handleMobileMenuClick"
       >
-        <UNavigationMenu
-          :items="items"
-          color="neutral"
-          variant="link"
-          orientation="vertical"
-          class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"
-        />
-        <div class="w-full flex flex-row flex-wrap items-center justify-start gap-3 pl-2.5 pt-2">
-          <NavHeaderUser />
+        <div
+          class="w-full max-w-7xl px-9 mx-auto flex flex-col items-center justify-start gap-1.5 pt-6 pb-12 min-h-full"
+        >
+          <UNavigationMenu
+            :items="items"
+            color="neutral"
+            variant="link"
+            orientation="vertical"
+            class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"
+          />
+          <div class="w-full flex flex-row flex-wrap items-center justify-start gap-3 pl-2.5 pt-2">
+            <NavHeaderUser />
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </header>
 </template>
+
+<style scoped>
+.menu-enter-active,
+.menu-leave-active {
+  transition: opacity var(--duration-normal) ease-out;
+}
+
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
+}
+</style>
