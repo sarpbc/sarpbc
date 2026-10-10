@@ -21,7 +21,7 @@ const tileClass = computed(() => {
     case AirRiddleResultEnum.CORRECT:
       return "bg-success text-ink-950";
     case AirRiddleResultEnum.MISPLACED:
-      return "bg-warning text-ink-950 underline decoration-2 underline-offset-4";
+      return "bg-warning text-ink-950";
     case AirRiddleResultEnum.INCORRECT:
       return "bg-elevated text-highlighted";
     default:
