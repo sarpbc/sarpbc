@@ -15,7 +15,7 @@ const { participant, score, winner, matchStatus } = defineProps<{
 function getScoreColorClass(): string {
   if (matchStatus === "live") return "text-highlighted";
   if (winner === undefined) return "text-muted";
-  return winner ? "text-success font-bold" : "text-muted";
+  return winner ? "text-success font-bold" : "text-error";
 }
 </script>
 

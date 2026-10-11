@@ -46,7 +46,7 @@ function scoreClass(participantId: string | undefined): string {
     return "text-toned";
   }
 
-  return winnerParticipantId.value === participantId ? "text-success" : "text-muted";
+  return winnerParticipantId.value === participantId ? "text-success" : "text-error";
 }
 </script>
 
