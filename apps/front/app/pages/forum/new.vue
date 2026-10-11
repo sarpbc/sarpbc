@@ -136,7 +136,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   <div class="w-full flex flex-col gap-4">
     <SCrossCard class="w-full h-row-header">
       <div class="w-full flex justify-center items-center">
-        <h1 class="text-xl font-semibold text-highlighted">
+        <h1 class="text-xl font-semibold tracking-tight text-highlighted">
           {{ $t("page.forum.new.pageTitle") }}
         </h1>
       </div>

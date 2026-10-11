@@ -34,7 +34,7 @@ const [
     { watch: [locale] },
   ),
   useAsyncData(
-    () => `homepage-articles-${locale.value}-${articleLimit.value}`,
+    () => `homepage-articles-${locale.value}`,
     () => getNewsArticles(0, articleLimit.value, locale.value, "article"),
     { watch: [locale, articleLimit] },
   ),
@@ -101,11 +101,17 @@ const { data: activePickemTournament } = await useLazyAsyncData(
             <SListItem v-if="hasMoreArticles" divider>
               <button
                 type="button"
-                class="flex h-full w-full items-center text-left text-sm font-medium text-muted hover:text-highlighted"
+                class="flex h-full w-full items-center gap-2 text-left text-sm font-medium text-muted hover:text-highlighted disabled:cursor-default"
                 :disabled="articlesPending"
                 @click="loadMoreArticles"
               >
-                {{ $t("page.home.allNews") }}
+                <UIcon
+                  v-if="articlesPending"
+                  name="i-fluent-arrow-clockwise-24-regular"
+                  class="size-4 motion-safe:animate-spin"
+                  aria-hidden="true"
+                />
+                {{ articlesPending ? $t("common.loading") : $t("page.home.loadMore") }}
               </button>
             </SListItem>
           </SCard>

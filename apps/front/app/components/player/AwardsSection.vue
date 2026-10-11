@@ -105,7 +105,7 @@ function metaParts(award: PlayerProfileAward): string[] {
               </p>
               <p
                 v-if="metaParts(award).length > 0"
-                class="truncate text-xs leading-none text-dimmed"
+                class="truncate text-xs leading-none text-muted"
               >
                 {{ metaParts(award).join(" · ") }}
               </p>

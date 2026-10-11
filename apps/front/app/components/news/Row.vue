@@ -67,7 +67,7 @@ const rowSize = computed(() => {
         >
           {{ props.article.excerpt }}
         </p>
-        <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
+        <p class="shrink-0 text-xs font-normal text-muted tabular-nums">
           {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
         </p>
       </div>
@@ -77,7 +77,7 @@ const rowSize = computed(() => {
       <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-default">
         {{ props.article.title }}
       </h2>
-      <p class="shrink-0 text-xs font-thin text-muted tabular-nums">
+      <p class="shrink-0 text-xs font-normal text-muted tabular-nums">
         {{ formatLocaleTimeAgo(new Date(props.article.createdAt)) }}
       </p>
     </div>

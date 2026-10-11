@@ -119,7 +119,7 @@ const headingId = "team-faq-title";
             <span class="flex items-center justify-between gap-3">
               {{ item.question }}
               <UIcon
-                name="i-lucide-chevron-down"
+                name="i-fluent-chevron-down-24-regular"
                 class="size-4 shrink-0 text-muted transition-transform group-open:rotate-180"
               />
             </span>

@@ -2,7 +2,6 @@
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const config = useRuntimeConfig();
-const toast = useToast();
 const { t } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
@@ -20,6 +19,7 @@ const state = reactive<LoginState>({
 });
 
 const pending = ref(false);
+const errorMessage = ref<string | null>(null);
 
 function safeRedirectTarget(): string {
   const raw = route.query.redirect;
@@ -51,6 +51,7 @@ async function onSubmit(event: Event) {
   }
 
   pending.value = true;
+  errorMessage.value = null;
 
   try {
     const res: { success?: boolean } = await $fetch<{
@@ -78,15 +79,9 @@ async function onSubmit(event: Event) {
       return;
     }
 
-    toast.add({
-      title: t("page.authentication.errors.loginFailed"),
-      color: "error",
-    });
+    errorMessage.value = t("page.authentication.errors.loginFailed");
   } catch (error) {
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed"),
-      color: "error",
-    });
+    errorMessage.value = getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed");
   } finally {
     pending.value = false;
   }
@@ -98,18 +93,15 @@ function googleLogin() {
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col items-center justify-center">
-    <SCrossCard class="p-4">
+  <div class="w-full h-full flex flex-col items-center justify-center px-2">
+    <SCrossCard class="w-full max-w-88 p-4">
       <div class="w-full flex flex-col items-center justify-center">
-        <h1 class="w-fit text-2xl font-bold">
+        <h1 class="w-fit text-xl font-semibold tracking-tight">
           {{ $t("page.authentication.login") }}
         </h1>
-        <div class="w-fit flex flex-row text-s font-light text-muted mt-2 mb-6">
+        <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-6">
           {{ $t("page.authentication.noAccount") }}&nbsp;
-          <ULink
-            class="text-s font-light text-primary hover:text-primary"
-            :to="$localePath('/register')"
-          >
+          <ULink class="text-sm text-primary hover:underline" :to="$localePath('/register')">
             {{ $t("page.authentication.register") }}
           </ULink>
           .
@@ -127,7 +119,7 @@ function googleLogin() {
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-80 h-fit" method="post" @submit="onSubmit">
+        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
           <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
             <UInput
               v-model="state.email"
@@ -150,6 +142,10 @@ function googleLogin() {
               class="w-full"
             />
           </UFormField>
+
+          <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
+            {{ errorMessage }}
+          </p>
 
           <UButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"

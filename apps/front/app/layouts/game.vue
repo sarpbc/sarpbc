@@ -13,7 +13,7 @@ const localePath = useLocalePath();
         >
           <img
             src="/sarpbc.svg"
-            alt="sarpbc.org logo"
+            alt=""
             width="40"
             height="40"
             decoding="async"

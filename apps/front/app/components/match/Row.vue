@@ -55,6 +55,9 @@ const schedule = computed((): ScheduleDisplay | null => {
 const teamA = computed(() => match.participants?.[0]);
 const teamB = computed(() => match.participants?.[1]);
 
+const teamAName = computed(() => teamA.value?.team.name ?? t("components.match.tbd"));
+const teamBName = computed(() => teamB.value?.team.name ?? t("components.match.tbd"));
+
 const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
 const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
 
@@ -69,6 +72,20 @@ const showLiveBadge = computed(() => {
 });
 
 const showLiveScore = computed(() => live && !showLiveBadge.value);
+
+const FLASH_MS = 2000;
+const scoreChanged = ref(false);
+let flashTimer: ReturnType<typeof setTimeout> | undefined;
+
+watch([scoreA, scoreB], () => {
+  scoreChanged.value = true;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => {
+    scoreChanged.value = false;
+  }, FLASH_MS);
+});
+
+onBeforeUnmount(() => clearTimeout(flashTimer));
 
 function liveScoreClass(score: number | null, other: number | null): string {
   if (score === null || other === null || score === other) {
@@ -89,31 +106,14 @@ function liveScoreClass(score: number | null, other: number | null): string {
       <div
         v-if="match.participants"
         class="flex min-w-0 flex-col gap-0.5 truncate text-xs font-medium"
-        :class="live ? 'text-toned' : 'text-dimmed'"
+        :class="live ? 'text-toned' : 'text-muted'"
       >
-        <span class="truncate">
-          {{
-            match.participants.length > 0
-              ? match.participants[0]?.team.name
-              : $t("components.match.tbd")
-          }}
-        </span>
-        <span class="truncate">
-          {{
-            match.participants.length > 1
-              ? match.participants[1]?.team.name
-              : $t("components.match.tbd")
-          }}
-        </span>
+        <span class="truncate" :title="teamAName">{{ teamAName }}</span>
+        <span class="truncate" :title="teamBName">{{ teamBName }}</span>
       </div>
 
       <div v-if="showLiveScore" class="flex items-center justify-center" aria-hidden="true">
-        <span class="relative flex size-2">
-          <span
-            class="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-error opacity-75"
-          />
-          <span class="relative inline-flex size-2 rounded-full bg-error" />
-        </span>
+        <SBadgeLiveDot />
       </div>
 
       <div class="flex flex-col items-end justify-center gap-1">
@@ -121,6 +121,8 @@ function liveScoreClass(score: number | null, other: number | null): string {
         <div
           v-if="showLiveScore"
           class="flex flex-col items-end gap-0.5 text-xs font-semibold tabular-nums"
+          :class="{ 'score-flash': scoreChanged }"
+          aria-live="polite"
           :aria-label="`${scoreA ?? '–'} – ${scoreB ?? '–'}`"
         >
           <span :class="liveScoreClass(scoreA, scoreB)" aria-hidden="true">
@@ -133,14 +135,14 @@ function liveScoreClass(score: number | null, other: number | null): string {
         <SBadgeLive v-else-if="showLiveBadge" />
         <span
           v-else-if="schedule?.kind === 'tomorrow'"
-          class="flex flex-col items-end text-end text-xs text-muted font-thin tabular-nums leading-tight"
+          class="flex flex-col items-end text-end text-xs text-muted font-normal tabular-nums leading-tight"
         >
           <span>{{ schedule.label }}</span>
           <span>{{ schedule.time }}</span>
         </span>
         <span
           v-else-if="schedule?.kind === 'time'"
-          class="text-end text-xs text-muted font-thin tabular-nums"
+          class="text-end text-xs text-muted font-normal tabular-nums"
         >
           {{ schedule.time }}
         </span>
@@ -148,3 +150,27 @@ function liveScoreClass(score: number | null, other: number | null): string {
     </div>
   </SListItem>
 </template>
+
+<style scoped>
+.score-flash {
+  animation: score-flash var(--duration-emphasis) ease-out;
+}
+
+@keyframes score-flash {
+  0%,
+  15% {
+    background-color: color-mix(in srgb, var(--ui-color-primary-500) 18%, transparent);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-flash {
+    animation: none;
+    background-color: color-mix(in srgb, var(--ui-color-primary-500) 12%, transparent);
+  }
+}
+</style>

@@ -8,12 +8,7 @@ const { t } = useI18n();
     color="error"
     class="text-xs w-fit shrink-0 whitespace-nowrap flex items-center gap-2"
   >
-    <span class="relative flex size-2">
-      <span
-        class="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-error opacity-75"
-      ></span>
-      <span class="relative inline-flex size-2 rounded-full bg-error"></span>
-    </span>
+    <SBadgeLiveDot />
     {{ t("components.match.live") }}
   </UBadge>
 </template>

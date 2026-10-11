@@ -75,7 +75,7 @@ setPageSeo({
           </div>
 
           <div class="flex h-row items-center border-t border-default px-3">
-            <span class="text-sm font-light text-muted">
+            <span class="text-sm font-normal text-muted">
               {{ df(locale).format(new Date(post.createdAt)) }}
             </span>
           </div>

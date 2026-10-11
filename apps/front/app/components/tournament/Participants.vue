@@ -43,7 +43,7 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
           <p class="text-sm text-muted text-pretty">
             {{ t("page.tournaments.id.participants.empty") }}
           </p>
-          <p class="text-xs text-dimmed text-pretty">
+          <p class="text-xs text-muted text-pretty">
             {{ t("page.tournaments.id.participants.emptyHint") }}
           </p>
         </div>

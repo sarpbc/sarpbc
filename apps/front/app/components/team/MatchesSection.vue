@@ -130,7 +130,7 @@ function setTab(nextTab: TeamMatchesTab) {
           <p class="text-sm text-muted text-pretty">
             {{ t(`page.team.slug.matches.${tab}.empty`) }}
           </p>
-          <p class="text-xs text-dimmed text-pretty">
+          <p class="text-xs text-muted text-pretty">
             {{ t(`page.team.slug.matches.${tab}.emptyHint`) }}
           </p>
         </div>

@@ -25,6 +25,8 @@ const loading = ref(true);
 const submitting = ref(false);
 const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
+const revealedAttempt = ref<number | undefined>(undefined);
+const REVEAL_STAGGER_MS = 60;
 const answer = ref<string | undefined>(undefined);
 const hiddenInputRef = useTemplateRef("hiddenInputRef");
 const isMobile = useMediaQuery("(max-width: 639px)");
@@ -233,6 +235,7 @@ async function submitGuess() {
       letters: currentGuess.value.split(""),
       results: results.result,
     });
+    revealedAttempt.value = gameState.attempts.length - 1;
 
     const isCorrect = results.result.every(
       (result: AirRiddleResultEnum) => result === AirRiddleResultEnum.CORRECT,
@@ -343,10 +346,10 @@ setPageSeo({
               <p class="text-sm font-semibold text-muted tabular-nums">
                 {{ statusMessage }}
               </p>
-              <p class="mt-1 text-xs text-dimmed">
+              <p class="mt-1 text-xs text-muted">
                 {{ t("page.game.airriddle.subtitle") }}
               </p>
-              <p v-if="!isMobile" class="mt-1 text-xs text-dimmed">
+              <p v-if="!isMobile" class="mt-1 text-xs text-muted">
                 {{ t("page.game.airriddle.desktopHint") }}
               </p>
             </div>
@@ -374,6 +377,9 @@ setPageSeo({
                   :key="`${attemptIndex}-${letterIndex}`"
                   :letter="letter"
                   :result="attempt.results?.[letterIndex]"
+                  :reveal-delay="
+                    attemptIndex === revealedAttempt ? letterIndex * REVEAL_STAGGER_MS : undefined
+                  "
                 />
               </div>
 

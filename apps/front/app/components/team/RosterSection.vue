@@ -40,7 +40,7 @@ const headingId = "team-roster-title";
       <p class="text-sm text-muted text-pretty">
         {{ t("page.team.slug.roster.empty") }}
       </p>
-      <p class="text-xs text-dimmed text-pretty">
+      <p class="text-xs text-muted text-pretty">
         {{ t("page.team.slug.roster.emptyHint") }}
       </p>
     </div>

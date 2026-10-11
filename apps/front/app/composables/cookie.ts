@@ -28,7 +28,7 @@ export const useCookieConsent = () => {
     }
   }
 
-  const visible = useState<boolean>("cookieConsentVisible", () => choiceCookie.value === null);
+  const visible = useState<boolean>("cookieConsentVisible", () => !choiceCookie.value);
 
   const open = () => {
     visible.value = true;

@@ -75,7 +75,7 @@ const formatEndDate = (value: Date | string | null) => {
               <time
                 v-if="trophy.endAt"
                 :datetime="new Date(trophy.endAt).toISOString()"
-                class="block truncate text-xs leading-none text-dimmed tabular-nums"
+                class="block truncate text-xs leading-none text-muted tabular-nums"
               >
                 {{ formatEndDate(trophy.endAt) }}
               </time>
@@ -90,7 +90,7 @@ const formatEndDate = (value: Date | string | null) => {
           <p class="text-sm text-muted text-pretty">
             {{ t("page.player.slug.trophies.empty") }}
           </p>
-          <p class="text-xs text-dimmed text-pretty">
+          <p class="text-xs text-muted text-pretty">
             {{ t("page.player.slug.trophies.emptyHint") }}
           </p>
         </div>
