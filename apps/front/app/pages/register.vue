@@ -66,18 +66,15 @@ function googleLogin() {
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col items-center justify-center">
-    <SCrossCard class="p-4">
+  <div class="w-full h-full flex flex-col items-center justify-center px-2">
+    <SCrossCard class="w-full max-w-88 p-4">
       <div class="w-full flex flex-col items-center justify-center">
-        <h1 class="w-fit text-2xl font-bold">
+        <h1 class="w-fit text-xl font-semibold tracking-tight">
           {{ $t("page.authentication.register") }}
         </h1>
-        <div class="w-fit flex flex-row text-s font-light text-muted mt-2 mb-12">
+        <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-12">
           {{ $t("page.authentication.alreadyHaveAnAccount") }}&nbsp;
-          <ULink
-            class="text-s font-light text-primary hover:text-primary"
-            :to="$localePath('/login')"
-          >
+          <ULink class="text-sm text-primary hover:underline" :to="$localePath('/login')">
             {{ $t("page.authentication.login") }}
           </ULink>
           .
@@ -95,7 +92,7 @@ function googleLogin() {
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-80 h-fit" method="post" @submit="onSubmit">
+        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
           <UFormField
             :label="$t('page.authentication.userName')"
             name="userName"

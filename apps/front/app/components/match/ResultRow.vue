@@ -32,12 +32,13 @@ const winnerParticipantId = computed(() => {
   return null;
 });
 
+/** Winner reads heavier and brighter, so the result never relies on colour alone. */
 function teamNameClass(participantId: string | undefined): string {
   if (!participantId) {
-    return "text-dimmed";
+    return "text-muted";
   }
 
-  return winnerParticipantId.value === participantId ? "text-muted" : "text-dimmed";
+  return winnerParticipantId.value === participantId ? "text-default font-semibold" : "text-muted";
 }
 
 function scoreClass(participantId: string | undefined): string {

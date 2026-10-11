@@ -46,17 +46,54 @@ function handlePlayAgain() {
   resetCareer();
 }
 
-function handleAbandon() {
-  if (window.confirm(t("page.game.career.actions.abandonConfirm"))) {
-    returnToMenu();
+type PendingConfirm = "abandon" | "newCareer";
+
+const pendingConfirm = ref<PendingConfirm | undefined>(undefined);
+const confirmOpen = computed({
+  get: () => pendingConfirm.value !== undefined,
+  set: (open) => {
+    if (!open) pendingConfirm.value = undefined;
+  },
+});
+
+const confirmCopy = computed(() => {
+  switch (pendingConfirm.value) {
+    case "abandon":
+      return {
+        title: t("page.game.career.actions.abandonConfirm"),
+        action: t("page.game.career.actions.abandon"),
+      };
+    case "newCareer":
+      return {
+        title: t("page.game.career.menu.newCareerConfirm"),
+        action: t("page.game.career.menu.newCareer"),
+      };
+    case undefined:
+      return { title: "", action: "" };
+    default: {
+      const exhaustive: never = pendingConfirm.value;
+      return exhaustive;
+    }
   }
+});
+
+function handleAbandon() {
+  pendingConfirm.value = "abandon";
 }
 
 function handleNewCareer() {
-  if (canContinue.value && !window.confirm(t("page.game.career.menu.newCareerConfirm"))) {
+  if (canContinue.value) {
+    pendingConfirm.value = "newCareer";
     return;
   }
   startOnboarding();
+}
+
+function confirmPending() {
+  const confirmed = pendingConfirm.value;
+  pendingConfirm.value = undefined;
+  if (confirmed === "abandon") returnToMenu();
+  else if (confirmed === "newCareer") startOnboarding();
 }
 
 function handleContinue() {
@@ -107,5 +144,17 @@ function handleContinue() {
       @play-again="handlePlayAgain"
       @abandon="handleAbandon"
     />
+
+    <UModal v-model:open="confirmOpen" :title="confirmCopy.title">
+      <template #footer>
+        <UButton color="error" :label="confirmCopy.action" @click="confirmPending" />
+        <UButton
+          color="neutral"
+          variant="subtle"
+          :label="t('common.cancel')"
+          @click="confirmOpen = false"
+        />
+      </template>
+    </UModal>
   </section>
 </template>

@@ -104,7 +104,7 @@ setJsonLd("ld-json-news-article", () => {
 
     <SCard v-else class="w-full flex flex-col gap-4 p-4">
       <div class="flex w-full flex-col gap-1">
-        <h1 class="text-4xl font-bold tracking-tight text-highlighted">
+        <h1 class="text-3xl font-semibold tracking-tight text-highlighted md:text-4xl text-balance">
           {{ article.title }}
         </h1>
         <div class="flex w-full flex-row items-center justify-between gap-3 text-xs text-muted">
