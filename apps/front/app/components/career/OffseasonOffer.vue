@@ -77,7 +77,6 @@ function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
   return [
     "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2",
     "hover:border-l-primary hover:bg-elevated",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
     withBottomBorder ? "border-b border-default" : "",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
   ];
@@ -86,7 +85,6 @@ function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
 const retireRowClass = [
   "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2 border-l-transparent",
   "hover:bg-elevated",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
 ];
 
 function onRowLeave(event: MouseEvent, teamId: string): void {
@@ -138,7 +136,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           v-for="choice in destinyPromptChoices"
           :key="choice.id"
           type="button"
-          class="w-full border-b border-default px-3 py-3 text-left last:border-b-0 touch-manipulation transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          class="w-full border-b border-default px-3 py-3 text-left last:border-b-0 touch-manipulation transition-colors hover:bg-elevated"
           @click="emit('destiny', choice.id)"
         >
           <span class="block text-sm">

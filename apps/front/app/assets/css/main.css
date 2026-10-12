@@ -51,12 +51,17 @@
 
 :root {
   --ui-radius: 0rem;
+  --ui-bg-inverted-pressed: color-mix(in oklch, var(--ui-bg-inverted) 90%, var(--color-ink-950));
+  --ui-news-link: var(--color-blue-600);
+  --ui-news-link-hover: var(--color-blue-700);
   --z-base: 1;
 }
 
 /* Color-mode signal for tooling + forced-colors resilience */
 .dark {
   color-scheme: dark;
+  --ui-news-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
+  --ui-news-link-hover: var(--color-blue-400);
 }
 
 .light {
@@ -118,6 +123,51 @@
   textarea:enabled {
     cursor: text;
   }
+}
+
+:where(input:not([type="hidden"]), textarea, select, [role="combobox"], [contenteditable="true"]) {
+  outline: 1px solid var(--ui-border);
+  outline-offset: -1px;
+}
+
+@media (hover: hover) {
+  :where(
+    input:enabled:not([type="hidden"]),
+    textarea:enabled,
+    select:enabled,
+    [role="combobox"]:not([disabled]):not([aria-disabled="true"]),
+    [contenteditable="true"]
+  ):hover {
+    outline-color: var(--ui-border-accented);
+  }
+}
+
+:where(
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  [tabindex],
+  [contenteditable="true"]
+):focus-visible {
+  outline: 1px solid var(--ui-primary);
+  outline-offset: -1px;
+  --tw-ring-shadow: 0 0 transparent;
+  --tw-ring-offset-shadow: 0 0 transparent;
+  --tw-inset-ring-shadow: 0 0 transparent;
+}
+
+.news-prose :where(p, li, td) a {
+  border-bottom: 0;
+  color: var(--ui-news-link);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.news-prose :where(p, li, td) a:hover {
+  color: var(--ui-news-link-hover);
 }
 
 @media (forced-colors: active) {
