@@ -54,25 +54,38 @@ watch(open, (isOpen) => {
 </script>
 
 <template>
-  <UPopover v-model:open="open" mode="hover" :open-delay="0" :close-delay="100">
+  <UPopover
+    v-model:open="open"
+    mode="hover"
+    :open-delay="0"
+    :close-delay="100"
+    :ui="{ content: 'rounded-none border border-default ring-0 shadow-sm overflow-hidden' }"
+  >
     <NuxtLink
       :to="href"
       :target="opensInNewTab ? '_blank' : undefined"
       :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
-      class="rounded-sm font-semibold! text-default! transition-none hover:text-highlighted! focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       translate="no"
     >
       {{ label }}
     </NuxtLink>
 
     <template #content>
-      <div v-if="pending" class="flex w-72 flex-col gap-3 p-3">
-        <div class="flex items-center gap-3">
+      <div v-if="pending" class="flex w-72 flex-col" aria-busy="true">
+        <div class="flex items-center gap-3 px-3 py-2">
           <USkeleton class="size-10 shrink-0 rounded-none" />
           <USkeleton class="h-4 w-32" />
         </div>
-        <div class="grid grid-cols-3 gap-2">
-          <USkeleton v-for="index in 3" :key="index" class="aspect-3/2 w-full rounded-none" />
+        <div class="grid grid-cols-3 border-t border-default">
+          <div
+            v-for="index in 3"
+            :key="index"
+            class="flex min-w-0 flex-col gap-2 border-r border-default p-2 last:border-r-0"
+          >
+            <USkeleton class="aspect-3/2 w-full rounded-none" />
+            <USkeleton class="mx-auto h-4 w-12 rounded-none" />
+          </div>
         </div>
       </div>
 
@@ -80,8 +93,8 @@ watch(open, (isOpen) => {
         {{ t("newsTag.error") }}
       </div>
 
-      <div v-else-if="team" class="flex w-72 flex-col gap-3 p-3">
-        <div class="flex items-center gap-3">
+      <div v-else-if="team" class="flex w-72 flex-col">
+        <div class="flex min-w-0 items-center gap-3 px-3 py-2">
           <div
             class="flex size-10 shrink-0 items-center justify-center"
             :class="{ 'bg-elevated': !logoSrc }"
@@ -94,13 +107,17 @@ watch(open, (isOpen) => {
           </p>
         </div>
 
-        <ul v-if="roster.length > 0" class="grid grid-cols-3 gap-2">
-          <li v-for="rosterPlayer in roster" :key="rosterPlayer.id" class="min-w-0">
+        <ul v-if="roster.length > 0" class="grid grid-cols-3 border-t border-default">
+          <li
+            v-for="rosterPlayer in roster"
+            :key="rosterPlayer.id"
+            class="min-w-0 border-r border-default last:border-r-0"
+          >
             <NuxtLink
               :to="playerHref(rosterPlayer.slug)"
               :target="opensInNewTab ? '_blank' : undefined"
               :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
-              class="flex flex-col gap-1 text-muted transition-none hover:text-highlighted"
+              class="flex h-full min-w-0 flex-col gap-2 p-2 text-muted transition-none hover:bg-elevated hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
               <div
                 class="flex aspect-3/2 w-full items-center justify-center overflow-hidden bg-elevated"
@@ -108,7 +125,7 @@ watch(open, (isOpen) => {
                 <img
                   v-if="rosterPlayer.imageUrl"
                   :src="rosterPlayer.imageUrl"
-                  :alt="rosterPlayer.name"
+                  alt=""
                   class="size-full object-cover"
                 />
                 <UIcon v-else name="i-fluent-person-24-regular" class="size-5 text-muted" />

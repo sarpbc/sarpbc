@@ -69,7 +69,7 @@ watch(open, (isOpen) => {
       :to="href"
       :target="opensInNewTab ? '_blank' : undefined"
       :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
-      class="rounded-sm font-semibold! text-default! transition-none hover:text-highlighted! focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       translate="no"
     >
       {{ label }}

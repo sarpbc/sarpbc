@@ -106,7 +106,7 @@ function participantRowClass(participantId: string | undefined): string {
   <NuxtLink
     :to="detailTo"
     :class="[
-      'flex flex-col rounded-sm transition-none hover:bg-muted focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-primary',
+      'flex flex-col rounded-sm transition-none hover:bg-muted',
       bracket
         ? 'w-full p-0 bg-muted/70 border-0'
         : compact

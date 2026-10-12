@@ -44,8 +44,7 @@ const itemClass = computed(() => [
   listItemSizeClasses(size),
   divider && "border-b border-default",
   dividerTop && "border-t border-default",
-  to &&
-    "transition-none hover:bg-elevated/50 active:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
+  to && "transition-none hover:bg-elevated/50 active:bg-elevated",
   attrs.class,
 ]);
 
