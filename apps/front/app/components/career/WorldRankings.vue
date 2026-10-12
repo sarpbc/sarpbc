@@ -168,7 +168,6 @@ function teamRowClass(entry: RankedTeam): string[] {
     rankingGridClass,
     "h-row-compact min-h-row-compact border-b border-default border-l-2 text-left text-sm",
     "hover:border-l-primary hover:bg-elevated",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isPlayerTeam ? "bg-elevated font-semibold" : "",
   ];
@@ -180,7 +179,6 @@ function playerRowClass(entry: RankedPlayer): string[] {
     rankingGridClass,
     "h-row-compact min-h-row-compact border-b border-default border-l-2 text-sm",
     "hover:border-l-primary hover:bg-elevated",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isUser ? "bg-elevated font-semibold" : "",
   ];

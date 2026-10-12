@@ -121,7 +121,7 @@ function onEnterKey(event: KeyboardEvent) {
 
 <template>
   <div class="w-full">
-    <ForumSignInPrompt v-if="sessionReady && !isSignedIn" action="reply" />
+    <ForumSignInPrompt v-if="sessionReady && !isSignedIn" action="reply" class="inline-flex py-2" />
     <UForm
       v-else-if="isSignedIn"
       :schema="schema"
@@ -134,6 +134,7 @@ function onEnterKey(event: KeyboardEvent) {
         name="content"
         required
         class="w-full"
+        :ui="{ labelWrapper: 'h-row items-end pb-1', container: 'mt-0' }"
       >
         <UTextarea
           ref="contentInput"
@@ -151,7 +152,7 @@ function onEnterKey(event: KeyboardEvent) {
         type="submit"
         color="neutral"
         variant="solid"
-        class="w-fit"
+        class="w-fit self-end px-4"
         :loading="isSubmitting"
         :disabled="isSubmitting"
       >

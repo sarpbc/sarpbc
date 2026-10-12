@@ -16,6 +16,7 @@ const {
 
 const { t } = useI18n();
 const route = useRoute();
+const user = useUser();
 
 const { highlightedCommentId, navigateToComment, tryScrollFromHash } = useCommentPermalink();
 
@@ -177,7 +178,8 @@ onMounted(() => {
 
       <SCard
         :flush-top="flushTop && !comments.length"
-        class="flex min-h-row h-row-grid items-center px-3 py-2"
+        class="min-h-row h-row-grid px-3"
+        :class="{ 'pb-3': user }"
       >
         <DiscussionCommentComposer
           :target-type="targetType"

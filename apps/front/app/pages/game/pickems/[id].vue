@@ -452,7 +452,7 @@ watch(
                 </UButton>
                 <NuxtLink
                   :to="localePath(`/matches/${match.id}`)"
-                  class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+                  class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default"
                   :aria-label="openMatchLabel(match)"
                 >
                   <span v-if="matchCenterPrimary(match)" class="tabular-nums">

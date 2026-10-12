@@ -1,4 +1,4 @@
-﻿# sarpbc front — Design
+# sarpbc front — Design
 
 Human-facing design reference for **`apps/front`** (public site). Use this when shipping UI by hand. Agents should prefer [`.agents/skills/geist-design/`](../../.agents/skills/geist-design/) and still honor the rules here.
 
@@ -86,6 +86,10 @@ Color signals **state** (live, error, success) — not decoration. One primary a
 
 Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay consistent; don't mix soft Geist-style radii into hub chrome.
 
+Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and Nuxt UI components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
+
+Inline news links use `--ui-news-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-news-link-hover`; it does not underline the text. Article cards connect directly to the discussion composer with a single shared border.
+
 ---
 
 ## Typography
@@ -126,6 +130,8 @@ Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row` plu
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
 **Free-height blocks** (hero cards, profile cards, error/empty cards) that sit in the main column get `h-row-grid`: it rounds the used height, borders included, up to a whole number of `row`s so every block below still lands on the sidebar row lines. Error and empty cards use `flex min-h-row-stack h-row-grid items-center` around `SErrorState` / `SEmptyState`.
+
+Padded content keeps its position at the top when the card snaps taller; extra grid space belongs at the bottom. Discussion composers use a `h-row` label band so the textarea starts on the next match-row boundary. Submit actions align right with `px-4`. Button presses change the background only; do not scale them.
 
 Legacy → target (migrations under SAR-85):
 
@@ -191,7 +197,7 @@ Omit `size` on `flushBottom` list cards. Prefer `size="l"` over `min-h-row-tripl
 - **Rails** (match lateral, forum preview, game promo): wrap each section in `SRail` — caption `flex-col-reverse pb-1 pl-2` + `text-toned`, then bordered card/rows in the default slot. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`). Lead captions keep the hairline after 72px out of the caption itself (an in-caption rule shifts the label and card 1px above neighbouring columns). List cards under a lead caption are `flush-top` with `divider-top` on the first row, so row stacks start on the same pixel in every column (3 compact forum rows = 1 double news row = 2 match rows); padded cards keep their own `border-t`. Below `md` there is no sidebar to align with: lead captions shrink to `h-row`, and an empty lead caption (`SHubPageBody` without `#caption`) is hidden. Section captions (`h-row`) own an in-row `border-b`; their list cards are `flush-top` so the hairline stays inside the 44px slot. When the content below brings its own captions (grouped match lists) or free-standing bordered cards, use `caption="plain"` (same band, no hairline) so no rule floats over empty space. Forum row titles use `text-muted`.
 - **Hub columns**: `layouts/default.vue` wraps columns in `SHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Do not add per-rail `pt-8` or `md:h-18` offsets.
 - **Detail page bodies**: wrap main-column detail pages in `SHubPageBody` (`SRail caption="lead"` + `gap-4` body). Keep `#caption` empty when used only for rail alignment (match detail). Put the scoreboard / hero / sections in the default slot; secondary meta (tournament, status, format) belongs under the hero card, not in the caption band. Caption is flush above the first body child (no gap) so card tops line up with sidebar cards. Use `captionAlign="center"` (default) or `start` for left labels when caption content is present.
-- **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). After `SHubPageHeader` (or any stack where the card would otherwise add `border-t`), also `flush-top` and put `divider-top` on the first row — card `border-t` sits 1px above the row fill. Optional footers (forum create post, mobile match “view all”) are extra rows with their own `border-b`, not a `border-t` on a full-border wrapper.
+- **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). After `SHubPageHeader` (or any stack where the card would otherwise add `border-t`), also `flush-top` and put `divider-top` on the first row — card `border-t` sits 1px above the row fill. The mobile match “view all” footer is an extra row with its own `border-b`. The forum Create Post button sits outside the list card at full width and owns its top and bottom borders; the last conversation replaces its bottom divider with 1px of padding to preserve text alignment.
 - **Match event groups** (`MatchListGroup`): wrap each tournament in `SRail caption="section"` + `SCard flush-bottom flush-top`. Upcoming lists and pick’em days group by local day first (`h-row` date caption, no `border-b` — the event rail caption owns the hairline).
 - **Dense data cards** (recent form, head-to-head, results): same `SCard flush-bottom` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells (`size="s"` \| `"m"` \| `"l"`) for prose / forms / centered empty states.
 - **Discussion threads**: Each comment is a discrete bordered box (header / body / actions), not a divider row in a flush card. Nested replies use `CommentThreadConnector` L-shaped branches with `mt-4` so the elbow meets the child header (`h-8`). Root comments stack with `gap-4`. Composer is its own `SCard`. Primary action is Reply; permalink / report / moderation live in a more-actions popover.

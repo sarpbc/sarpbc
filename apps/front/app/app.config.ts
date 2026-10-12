@@ -12,8 +12,15 @@ export default defineAppConfig({
     },
     button: {
       slots: {
-        base: "active:scale-[0.97] transition-[color,background-color,border-color,transform] duration-(--duration-fast) ease-out motion-reduce:active:scale-100",
+        base: "transition-colors duration-(--duration-fast) ease-out active:transition-none",
       },
+      compoundVariants: [
+        {
+          color: "neutral",
+          variant: "solid",
+          class: "active:bg-(--ui-bg-inverted-pressed)",
+        },
+      ],
     },
     breadcrumb: {
       variants: {
