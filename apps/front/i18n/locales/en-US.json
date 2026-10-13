@@ -93,8 +93,10 @@
   },
   "components": {
     "cookiePopup": {
-      "description": "Do you accept analytics cookies in addition to the essential ones? You can change your mind at any time.",
-      "label": "Cookie preferences"
+      "description": "Do you agree to let PostHog measure your navigation and record your session (pages, clicks, scrolling and mouse movements) to improve the site? Text and inputs are masked, and tracking is not linked to your account. You can decline or withdraw your consent at any time.",
+      "label": "Cookie preferences",
+      "learnMore": "Learn more about tracking",
+      "manage": "Manage My Preferences"
     },
     "footer": {
       "about": "About",

@@ -1,19 +1,23 @@
 <script setup lang="ts">
 const { t } = useI18n();
-const { visible, close, setChoice } = useCookieConsent();
-const { identifyUser, clearIdentity } = usePostHogIdentity();
-const user = useUser();
+const localePath = useLocalePath();
+const { visible, close, setChoice, hasChoice } = useCookieConsent();
+
+// SWR HTML can contain the banner despite a saved browser choice.
+onMounted(() => {
+  if (hasChoice()) {
+    close();
+  }
+});
 
 const acceptCookies = () => {
   setChoice("accepted");
   close();
-  identifyUser(user.value);
 };
 
 const rejectCookies = () => {
   setChoice("rejected");
   close();
-  clearIdentity();
 };
 </script>
 
@@ -28,6 +32,10 @@ const rejectCookies = () => {
         <p class="text-toned text-sm mb-4">
           {{ t("components.cookiePopup.description") }}
         </p>
+
+        <ULink :to="localePath('/cookie-policy')" class="text-sm underline mb-4 block">
+          {{ t("components.cookiePopup.learnMore") }}
+        </ULink>
 
         <div class="flex justify-start space-x-2">
           <UButton variant="solid" color="neutral" @click="acceptCookies">

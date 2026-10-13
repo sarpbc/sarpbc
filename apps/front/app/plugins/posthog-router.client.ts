@@ -1,29 +1,52 @@
-import { loadPostHogClient } from "~/utils/posthog-client";
+import {
+  getLoadedPostHogClient,
+  loadPostHogClient,
+  setPostHogConsent,
+} from "~/utils/posthog-client";
 
 export default defineNuxtPlugin(() => {
   const router = useRouter();
-  const { isAccepted } = useCookieConsent();
+  const { choice, isAccepted } = useCookieConsent();
   const config = useRuntimeConfig();
+  let lastPageview: string | null = null;
 
-  const capturePageview = () => {
-    if (!isAccepted()) {
+  const capturePageview = (fullPath = router.currentRoute.value.fullPath) => {
+    const client = getLoadedPostHogClient();
+    if (!isAccepted() || !client?.has_opted_in_capturing() || lastPageview === fullPath) {
       return;
     }
 
-    void loadPostHogClient(config.public.posthog).then((client) => {
-      client?.capture("$pageview");
+    lastPageview = fullPath;
+    const path = fullPath.split(/[?#]/)[0];
+    client.capture("$pageview", {
+      $current_url: `${window.location.origin}${path}`,
+      page_path: path,
     });
   };
 
-  router.isReady().then(() => {
-    capturePageview();
-  });
+  watch(
+    choice,
+    () => {
+      const accepted = isAccepted();
+      setPostHogConsent(accepted);
+      lastPageview = null;
+      if (!accepted) {
+        return;
+      }
 
-  router.afterEach((to, from) => {
-    if (to.fullPath === from.fullPath) {
+      void loadPostHogClient(config.public.posthog).then(async () => {
+        await router.isReady();
+        capturePageview();
+      });
+    },
+    { immediate: true, flush: "sync" },
+  );
+
+  router.afterEach((to, from, failure) => {
+    if (failure || to.fullPath === from.fullPath) {
       return;
     }
 
-    capturePageview();
+    capturePageview(to.fullPath);
   });
 });

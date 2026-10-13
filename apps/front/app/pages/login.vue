@@ -6,7 +6,6 @@ const { t } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
 const posthog = usePostHog();
-const { identifyUser } = usePostHogIdentity();
 
 interface LoginState {
   email: string;
@@ -71,7 +70,6 @@ async function onSubmit(event: Event) {
       user.value = profile;
 
       if (profile) {
-        identifyUser(profile);
         posthog?.capture("user_logged_in");
       }
 
