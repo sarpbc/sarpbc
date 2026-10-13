@@ -16,22 +16,10 @@ import { MultipartInterceptor } from "../common/interceptors/multipart.intercept
 import { RequirePermissions } from "../user/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../user/user.guard";
 import type { Storage } from "../global";
-import { R2UploadUrlDto } from "./dto/r2-upload-url.dto";
+import { R2UploadDto, R2UploadUrlDto } from "./dto/r2-upload-url.dto";
 import { R2Service } from "./r2.service";
 
 const MAX_COVER_BYTES = 5 * 1024 * 1024;
-
-function optionalFormField(body: unknown, field: string): string | undefined {
-  if (!body || typeof body !== "object") {
-    return undefined;
-  }
-  const value = (body as Record<string, unknown>)[field];
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : undefined;
-}
 
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("images.manage")
@@ -41,7 +29,7 @@ export class StorageController {
 
   @Post("upload-url")
   createUploadUrl(@Body() dto: R2UploadUrlDto) {
-    return this.r2Service.createNewsCoverUploadUrl(dto.contentType, dto.filename);
+    return this.r2Service.createImageUploadUrl(dto.contentType, dto.filename, dto.target);
   }
 
   @Post("upload")
@@ -52,20 +40,22 @@ export class StorageController {
       fileType: /^image\/(jpeg|png|webp|gif)$/,
     }),
   )
-  uploadCover(
+  uploadImage(
     @Files() files: Record<string, Storage.MultipartFile[]> | null,
     @Req() request: FastifyRequest,
+    @Body() dto: R2UploadDto,
   ) {
     const file = files?.file?.[0];
     if (!file) {
       throw new BadRequestException("Choose a cover image file to upload.");
     }
 
-    return this.r2Service.uploadNewsCover(file.buffer, file.mimetype, file.filename, {
+    return this.r2Service.uploadImage(file.buffer, file.mimetype, file.filename, {
+      target: dto.target,
       userId: request.user?.id,
       userEmail: request.user?.email,
-      articleSlug: optionalFormField(request.body, "articleSlug"),
-      articleTitle: optionalFormField(request.body, "articleTitle"),
+      articleSlug: dto.articleSlug,
+      articleTitle: dto.articleTitle,
       size: file.size,
     });
   }

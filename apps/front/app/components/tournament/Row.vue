@@ -17,9 +17,8 @@ const { formatTournamentPrizepool } = useCurrency();
 
 const href = computed(() => to ?? localePath(`/tournaments/${tournament.id}`));
 
-const showImage = computed(
-  () => tournament.tier === "s" && Boolean(tournament.league?.imageUrl?.trim()),
-);
+const imageUrl = computed(() => tournament.imageUrl?.trim() || tournament.league?.imageUrl?.trim());
+const showImage = computed(() => tournament.tier === "s" && Boolean(imageUrl.value));
 
 const displayName = computed(() =>
   [tournament.league?.name, tournament.name]
@@ -52,8 +51,8 @@ const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`))
     <div v-if="showImage" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
       <div class="flex h-full w-36 shrink-0 items-center justify-center overflow-hidden">
         <NuxtImg
-          :src="tournament.league!.imageUrl!"
-          :alt="tournament.league?.name ?? tournament.name"
+          :src="imageUrl!"
+          :alt="displayName"
           width="144"
           height="132"
           sizes="144px"

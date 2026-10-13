@@ -41,6 +41,26 @@ describe("buildTournamentItemList", () => {
     expect(JSON.stringify(list)).not.toContain("SportsEvent");
   });
 
+  it("links to tournament detail pages using the league name and configured origin", () => {
+    const list = buildTournamentItemList({
+      tournaments: [
+        tournament({
+          name: "Group A",
+          league: { name: "Esports World Cup" } as Tournament["league"],
+        }),
+      ],
+      total: 1,
+      origin: "https://example.com",
+    });
+
+    expect(list.itemListElement[0]).toEqual({
+      "@type": "ListItem",
+      position: 1,
+      name: "Esports World Cup Group A",
+      url: "https://example.com/tournaments/t1",
+    });
+  });
+
   it("emits an empty item list without Offer schema", () => {
     const list = buildTournamentItemList({
       tournaments: [],

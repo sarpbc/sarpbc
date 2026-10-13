@@ -15,6 +15,7 @@ interface Props {
 const { tournament } = defineProps<Props>();
 const { t, locale, te } = useI18n();
 const { formatTournamentPrizepool } = useCurrency();
+const imageUrl = computed(() => tournament.imageUrl?.trim() || tournament.league?.imageUrl);
 
 const status = computed(() => getTournamentStatus(tournament));
 
@@ -87,13 +88,13 @@ const showSubscribeCalendar = computed(
     <div class="w-full flex flex-col">
       <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
         <div
-          v-if="tournament.league?.imageUrl || tournament.league?.name"
+          v-if="imageUrl || tournament.league?.name"
           class="flex items-center justify-center gap-2"
         >
           <img
-            v-if="tournament.league?.imageUrl"
-            :src="tournament.league.imageUrl"
-            :alt="tournament.league.name"
+            v-if="imageUrl"
+            :src="imageUrl"
+            :alt="tournament.name"
             class="size-4 object-contain"
           />
           <p v-if="tournament.league?.name" class="text-sm text-muted text-pretty">

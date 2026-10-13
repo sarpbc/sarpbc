@@ -7,6 +7,15 @@
       "loaned": "Prêté"
     }
   },
+  "imageUpload": {
+    "hint": "JPEG, PNG, WebP ou GIF, jusqu’à 5 Mo",
+    "upload": "Importer une Image",
+    "replace": "Remplacer l’Image",
+    "remove": "Retirer l’Image",
+    "progress": "Import en cours… {percent}%",
+    "uploadFailed": "Impossible d’importer l’image",
+    "uploadServerError": "Le serveur n’a pas pu enregistrer cette image. Réessayez ou choisissez un fichier JPEG, PNG, WebP ou GIF plus petit"
+  },
   "page": {
     "home": {
       "brand": "sarpbc.org Admin",
@@ -179,7 +188,7 @@
         "action": "Modifier le Tournoi",
         "title": "Modifier le Tournoi",
         "subtitleManual": "Mettez à jour les détails du tournoi et les équipes participantes.",
-        "subtitlePandascore": "Ce tournoi est synchronisé depuis PandaScore et ne peut pas être modifié ici.",
+        "subtitlePandascore": "Vous pouvez modifier l’image. Les autres informations sont synchronisées depuis PandaScore. Votre image est conservée lors des synchronisations.",
         "saved": "Tournoi enregistré"
       },
       "form": {
@@ -193,7 +202,8 @@
         "leaguePlaceholder": "Sélectionner une ligue",
         "beginAt": "Date de Début",
         "endAt": "Date de Fin",
-        "imageUrl": "URL de l’Image de Couverture",
+        "image": "Image du Tournoi",
+        "imageUrl": "URL de l’Image",
         "imageUrlPlaceholder": "https://…",
         "teams": "Équipes Participantes",
         "teamsSearch": "Rechercher des équipes…",
@@ -309,14 +319,7 @@
         "deleteFailed": "Impossible de supprimer l’article. Réessayez."
       },
       "cover": {
-        "label": "Image de couverture",
-        "upload": "Ajouter une couverture",
-        "uploading": "Envoi en cours…",
-        "replace": "Remplacer la couverture",
-        "remove": "Supprimer la couverture",
-        "progress": "Envoi en cours… {percent}%",
-        "uploadFailed": "Impossible d’envoyer l’image de couverture",
-        "uploadServerError": "Le serveur n’a pas pu enregistrer cette image. Réessayez, ou choisissez un JPEG, PNG, WebP ou GIF plus léger"
+        "label": "Image de couverture"
       },
       "editor": {
         "insertPlayer": "Tag Joueur",

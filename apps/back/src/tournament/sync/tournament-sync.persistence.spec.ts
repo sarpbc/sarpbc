@@ -71,4 +71,19 @@ describe("TournamentSyncPersistence", () => {
       }),
     );
   });
+
+  it("keeps locally managed artwork when PandaScore updates tournament details", async () => {
+    const tournament = Object.assign(new Tournament(), {
+      source: "pandascore",
+      pandascoreId: 42,
+      name: "Old name",
+      imageUrl: "https://cdn.example/ewc.png",
+    });
+    tournamentRepository.findOne.mockResolvedValue(tournament);
+
+    const synced = await persistence.upsertTournament({ pandascoreId: 42, name: "Group A" });
+
+    expect(synced.name).toBe("Group A");
+    expect(synced.imageUrl).toBe("https://cdn.example/ewc.png");
+  });
 });
