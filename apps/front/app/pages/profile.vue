@@ -9,7 +9,6 @@ const { setPageSeo } = useSarpbcSeo();
 const user = useUser();
 const localePath = useLocalePath();
 const posthog = usePostHog();
-const { identifyUser } = usePostHogIdentity();
 const toast = useToast();
 const config = useRuntimeConfig();
 const { refresh: refreshUnreadCount } = useUnreadNotificationCount();
@@ -96,7 +95,6 @@ async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
     const updated = await updateUserName(parsed.data.userName);
     user.value = updated;
     usernameState.userName = updated.userName;
-    identifyUser(updated);
     editOpen.value = false;
     toast.add({
       title: t("page.profile.username.updated"),
@@ -145,7 +143,6 @@ const handleLogout = async () => {
   isLoggingOut.value = true;
   try {
     posthog?.capture("user_logged_out");
-    posthog?.reset();
     await logout();
   } catch (error) {
     console.error("Logout error:", error);

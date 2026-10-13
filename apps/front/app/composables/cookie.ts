@@ -1,34 +1,22 @@
 export type CookieChoice = "accepted" | "rejected";
 
-const COOKIE_NAME = "cookieConsent";
-
-function readLegacyChoice(): CookieChoice | null {
-  if (!import.meta.client) {
-    return null;
-  }
-
-  const value = localStorage.getItem(COOKIE_NAME);
-  if (value === "accepted" || value === "rejected") {
-    return value;
-  }
-
-  return null;
-}
+// Previous cookie consent did not cover session replay.
+const COOKIE_NAME = "analyticsConsent";
 
 export const useCookieConsent = () => {
   const choiceCookie = useCookie<CookieChoice | null>(COOKIE_NAME, {
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: 60 * 60 * 24 * 180,
     sameSite: "lax",
   });
-
-  if (import.meta.client && !choiceCookie.value) {
-    const legacyChoice = readLegacyChoice();
-    if (legacyChoice) {
-      choiceCookie.value = legacyChoice;
-    }
-  }
-
-  const visible = useState<boolean>("cookieConsentVisible", () => !choiceCookie.value);
+  const choice = useState<CookieChoice | null>(COOKIE_NAME, () => choiceCookie.value ?? null);
+  watch(
+    choiceCookie,
+    (value) => {
+      choice.value = value ?? null;
+    },
+    { immediate: import.meta.client, flush: "sync" },
+  );
+  const visible = useState<boolean>("cookieConsentVisible", () => !choice.value);
 
   const open = () => {
     visible.value = true;
@@ -39,7 +27,7 @@ export const useCookieConsent = () => {
   };
 
   const getChoice = (): CookieChoice | null => {
-    const value = choiceCookie.value;
+    const value = choice.value;
     if (value === "accepted" || value === "rejected") {
       return value;
     }
@@ -52,13 +40,12 @@ export const useCookieConsent = () => {
   const isAccepted = () => getChoice() === "accepted";
 
   const setChoice = (value: CookieChoice) => {
+    choice.value = value;
     choiceCookie.value = value;
-    if (import.meta.client) {
-      localStorage.setItem(COOKIE_NAME, value);
-    }
   };
 
   return {
+    choice: readonly(choice),
     visible: visible as Ref<boolean>,
     open,
     close,

@@ -93,8 +93,10 @@
   },
   "components": {
     "cookiePopup": {
-      "description": "Acceptez-vous les cookies analytiques en plus des cookies essentiels ? Vous pouvez changer d'avis à tout moment.",
-      "label": "Préférences de cookies"
+      "description": "Acceptez-vous que PostHog mesure votre navigation et enregistre votre session (pages, clics, défilement et mouvements de souris) pour améliorer le site ? Les textes et saisies sont masqués, et le suivi n'est pas lié à votre compte. Vous pouvez refuser ou retirer votre accord à tout moment.",
+      "label": "Préférences de cookies",
+      "learnMore": "En savoir plus sur le suivi",
+      "manage": "Modifier Mes Préférences"
     },
     "footer": {
       "about": "À propos",

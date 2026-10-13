@@ -1,10 +1,10 @@
 ---
 title: "Cookie Policy"
 description: "Learn about how we use cookies on our website, including PostHog analytics and other tracking technologies."
-lastUpdated: "September 4, 2025"
+lastUpdated: "October 13, 2026"
 ---
 
-_Last updated: September 4, 2025_
+_Last updated: October 13, 2026_
 
 ## What Are Cookies?
 
@@ -24,7 +24,10 @@ These cookies are necessary for the website to function properly. They enable ba
 
 We use analytics cookies to understand how visitors interact with our website. These cookies help us analyze website traffic, measure the effectiveness of our content, and improve our services.
 
-- We use PostHog (EU) for product analytics. Anonymous usage events may be collected without linking them to your account. If you accept analytics cookies, we may identify your session with your account so we can understand signed-in usage. You can change this choice at any time.
+- With your prior consent, we use PostHog (EU) to measure page views, clicks, feature usage and scrolling, and to record and replay your session, including mouse movements and touch interactions. These measurements help us understand how the site is used and improve its usability.
+- Tracking uses a random identifier kept in your browser's session storage. We do not associate it with your account, username or email address. A random identifier provides pseudonymization, not absolute anonymity.
+- Text and inputs are masked in recordings. URL query parameters and fragments are removed from tracking. Network request and response bodies and console logs are not recorded.
+- If you decline or have not yet given consent, PostHog tracking and session recording do not start. Withdrawing consent stops tracking and recording for the remainder of your visit; it does not automatically delete data already sent.
 
 ## Managing Your Cookie Preferences
 
@@ -32,11 +35,12 @@ You have several options for managing cookies on our website:
 
 - Adjust your browser settings to block or delete cookies
 - Use our cookie consent popup to accept or decline non-essential cookies
+- Use the "Manage My Preferences" button on this page to change your choice at any time
 - Use third-party tools like browser extensions to manage tracking
 
 ## Cookie Retention
 
-Essential cookies are stored for the duration of your session or until you clear your browser data. Analytics cookies are typically stored for up to 24 months to help us understand long-term usage patterns.
+The cookie remembering your tracking choice is kept for six months. The PostHog visit identifier is kept in the tab's session storage and disappears when the tab closes. A new tracking session starts after thirty minutes of inactivity. Session recordings are retained for thirty days. Navigation event retention is configured in the PostHog project settings.
 
 ## Changes to This Policy
 
