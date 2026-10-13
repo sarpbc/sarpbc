@@ -1,10 +1,10 @@
 ---
 title: "Politique de Confidentialité"
 description: "Découvrez comment nous collectons, utilisons et protégeons vos informations personnelles en conformité avec le RGPD et les lois françaises sur la protection des données."
-lastUpdated: "4 septembre 2025"
+lastUpdated: "13 octobre 2026"
 ---
 
-_Dernière mise à jour: 4 septembre 2025_
+_Dernière mise à jour: 13 octobre 2026_
 
 ## Introduction
 
@@ -50,6 +50,7 @@ Nous traitons vos données personnelles sur la base de :
 Nous pouvons partager vos données avec :
 
 - Les fournisseurs d'analyses (PostHog) pour l'analyse du site web
+- Avec votre accord préalable, PostHog (UE) reçoit des événements de navigation et des enregistrements de session pour améliorer l'ergonomie du site. Les textes et saisies sont masqués, les paramètres d'URL sont retirés, et le suivi n'est pas lié à votre compte. Vous pouvez retirer cet accord depuis la page de politique des cookies. Le retrait arrête la collecte future ; pour demander la suppression de données déjà collectées, contactez-nous.
 - Les fournisseurs d'hébergement pour le fonctionnement du site web
 - Les forces de l'ordre ou les autorités réglementaires lorsque requis par la loi
 

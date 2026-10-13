@@ -5,17 +5,7 @@ import { uiComponentDefaults } from "~/config/ui-component-defaults";
 const appConfig = useAppConfig();
 const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const { identifyUser } = usePostHogIdentity();
-const user = useUser();
 const colorMode = useColorMode();
-
-watch(
-  user,
-  (profile) => {
-    identifyUser(profile);
-  },
-  { immediate: true },
-);
 
 const uiLocale = computed(() => (locale.value.toLowerCase().startsWith("fr") ? fr : en));
 

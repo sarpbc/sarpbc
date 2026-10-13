@@ -1,10 +1,10 @@
 ---
 title: "Privacy Policy"
 description: "Learn how we collect, use, and protect your personal information in compliance with GDPR and French data protection laws."
-lastUpdated: "September 4, 2025"
+lastUpdated: "October 13, 2026"
 ---
 
-_Last updated: September 4, 2025_
+_Last updated: October 13, 2026_
 
 ## Introduction
 
@@ -50,6 +50,7 @@ We process your personal data based on:
 We may share your data with:
 
 - Analytics providers (PostHog) for website analysis
+- With your prior consent, PostHog (EU) receives navigation events and session recordings to improve the site's usability. Text and inputs are masked, URL query parameters are removed, and tracking is not linked to your account. You can withdraw consent from the cookie policy page. Withdrawal stops future collection; contact us to request deletion of data already collected.
 - Hosting providers for website operation
 - Law enforcement or regulatory authorities when required by law
 
