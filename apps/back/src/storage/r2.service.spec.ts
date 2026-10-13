@@ -41,7 +41,8 @@ describe("R2Service", () => {
   });
 
   it("stores a jpg declared as image/jpg", async () => {
-    const result = await service.uploadNewsCover(Buffer.from("jpeg"), "image/jpg", "cover.jpg", {
+    const result = await service.uploadImage(Buffer.from("jpeg"), "image/jpg", "cover.jpg", {
+      target: "news",
       userId: "user-1",
       userEmail: "editor@sarpbc.org",
       articleSlug: "vitality-win",
@@ -52,7 +53,8 @@ describe("R2Service", () => {
     expect(result.publicUrl).toContain(result.key);
     expect(createLogger).toHaveBeenCalledWith(
       expect.objectContaining({
-        action: "uploadNewsCover",
+        action: "uploadImage",
+        target: "news",
         userId: "user-1",
         userEmail: "editor@sarpbc.org",
         articleSlug: "vitality-win",
@@ -68,7 +70,7 @@ describe("R2Service", () => {
 
   it("rejects unsupported types before calling R2", async () => {
     await expect(
-      service.uploadNewsCover(Buffer.from("x"), "application/pdf", "doc.pdf"),
+      service.uploadImage(Buffer.from("x"), "application/pdf", "doc.pdf", { target: "tournament" }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(sendSpy).not.toHaveBeenCalled();
   });
@@ -77,7 +79,8 @@ describe("R2Service", () => {
     sendSpy.mockRejectedValue(new Error("AccessDenied"));
 
     await expect(
-      service.uploadNewsCover(Buffer.from("jpeg"), "image/jpeg", "cover.jpg", {
+      service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "cover.jpg", {
+        target: "news",
         userId: "user-1",
         articleSlug: "vitality-win",
       }),
@@ -85,5 +88,20 @@ describe("R2Service", () => {
 
     expect(logger.error).toHaveBeenCalled();
     expect(logger.emit).toHaveBeenCalled();
+  });
+
+  it("stores tournament artwork separately from news covers", async () => {
+    const buffer = Buffer.from("png");
+    const result = await service.uploadImage(buffer, "image/png", "ewc.png", {
+      target: "tournament",
+    });
+
+    expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/);
+    expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
+    expect(sendSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({ Key: result.key, Body: buffer, ContentType: "image/png" }),
+      }),
+    );
   });
 });

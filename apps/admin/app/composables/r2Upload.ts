@@ -3,7 +3,8 @@ export type R2UploadResponse = {
   key: string;
 };
 
-export type CoverUploadContext = {
+export type ImageUploadContext = {
+  target: "news" | "tournament";
   articleSlug?: string;
   articleTitle?: string;
 };
@@ -35,13 +36,14 @@ export function useR2Upload() {
   const isUploading = ref(false);
   const error = ref<string | null>(null);
 
-  async function uploadFile(file: File, context: CoverUploadContext = {}): Promise<string> {
+  async function uploadFile(file: File, context: ImageUploadContext): Promise<string> {
     isUploading.value = true;
     progress.value = 0;
     error.value = null;
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("target", context.target);
     if (context.articleSlug) {
       formData.append("articleSlug", context.articleSlug);
     }

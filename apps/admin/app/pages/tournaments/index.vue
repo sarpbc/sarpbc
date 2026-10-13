@@ -151,7 +151,6 @@ async function updatePage(value: number) {
           <template #actions-cell="{ row }">
             <div class="flex flex-row items-center justify-end gap-1">
               <UButton
-                v-if="isManualTournament(row.original)"
                 variant="ghost"
                 size="xs"
                 icon="i-fluent-edit-24-regular"

@@ -88,7 +88,7 @@ async function handleSetWinner(match: Match, participantId: string) {
     <template #action>
       <div class="flex flex-row gap-2">
         <UButton
-          v-if="tournament?.source === 'manual'"
+          v-if="tournament"
           variant="soft"
           icon="i-fluent-edit-24-regular"
           :label="$t('page.tournaments.edit.action')"

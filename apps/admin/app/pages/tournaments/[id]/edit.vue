@@ -10,6 +10,7 @@ const tournamentId = computed(() => route.params.id as string);
 const formState = ref(createEmptyTournamentFormState());
 const slugAuto = ref(false);
 const isSaving = ref(false);
+const isUploading = ref(false);
 
 const { data: tournament, status } = await useLazyAsyncData(
   () => `admin-tournament-edit-${tournamentId.value}`,
@@ -52,7 +53,8 @@ const teams = computed(() => teamsData.value?.teams ?? []);
 const isManual = computed(() => tournament.value?.source === "manual");
 
 async function handleSubmit() {
-  const validationError = validateManualTournamentForm(formState.value);
+  if (!tournament.value || isSaving.value || isUploading.value) return;
+  const validationError = isManual.value ? validateManualTournamentForm(formState.value) : null;
   if (validationError) {
     toast.add({
       title: t(`page.tournaments.form.errors.${validationError}`),
@@ -65,7 +67,9 @@ async function handleSubmit() {
   try {
     const updated = await updateTournament(
       tournamentId.value,
-      buildManualTournamentPayload(formState.value, "update"),
+      isManual.value
+        ? buildManualTournamentPayload(formState.value, "update")
+        : { imageUrl: formState.value.imageUrl.trim() || null },
     );
     if (!updated) {
       toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
@@ -101,11 +105,12 @@ async function handleSubmit() {
           :to="localePath(`/tournaments/${tournamentId}`)"
         />
         <UButton
-          v-if="isManual"
+          v-if="tournament"
           type="button"
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.form.save')"
           :loading="isSaving"
+          :disabled="isUploading"
           @click="handleSubmit"
         />
       </div>
@@ -149,6 +154,14 @@ async function handleSubmit() {
             :leagues="leagues ?? []"
             :teams="teams"
             :teams-pending="teamsStatus === 'pending'"
+            :image-disabled="isSaving"
+            @update:uploading="isUploading = $event"
+          />
+          <TournamentImageField
+            v-else
+            v-model="formState.imageUrl"
+            :disabled="isSaving"
+            @update:uploading="isUploading = $event"
           />
         </template>
       </div>

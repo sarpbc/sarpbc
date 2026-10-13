@@ -167,6 +167,7 @@ describe("buildTournamentSportsEvent", () => {
     expect(event.url).toBe(tournamentCanonicalUrl("rlcs-worlds"));
     expect(event.name).toBe("RLCS World Championship");
     expect(event.sport).toBe("Rocket League");
+    expect(event.image).toBe("https://cdn.example/worlds.png");
     expect(event.startDate).toBe("2026-09-01T12:00:00.000Z");
     expect(event.endDate).toBe("2026-09-07T22:00:00.000Z");
     expect(event.eventStatus).toBe(`${SCHEMA_ORG}/EventScheduled`);

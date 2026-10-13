@@ -1,4 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
+import type { UpdateTournamentDto } from "../dto/create-tournament.dto";
 
 export const TOURNAMENT_SOURCES = ["pandascore", "manual"] as const;
 
@@ -8,12 +9,29 @@ export function isTournamentSource(value: string): value is TournamentSource {
   return (TOURNAMENT_SOURCES as readonly string[]).includes(value);
 }
 
-/** HTTP/MCP write path: only manual tournaments are editable. */
-export function assertManualTournamentWritable(source: TournamentSource, action: string): void {
-  if (source !== "manual") {
-    throw new BadRequestException(
-      `This tournament is synced from PandaScore and cannot be ${action}. Create a manual tournament instead.`,
-    );
+export function assertTournamentUpdateAllowed(
+  source: TournamentSource,
+  patch: UpdateTournamentDto,
+): void {
+  switch (source) {
+    case "manual":
+      return;
+    case "pandascore": {
+      const { imageUrl, ...syncedFields } = patch;
+      if (
+        imageUrl !== undefined &&
+        Object.values(syncedFields).every((value) => value === undefined)
+      ) {
+        return;
+      }
+      throw new BadRequestException(
+        "Only the image can be edited on a PandaScore tournament. Send imageUrl alone, or null to clear it.",
+      );
+    }
+    default: {
+      const exhaustive: never = source;
+      return exhaustive;
+    }
   }
 }
 

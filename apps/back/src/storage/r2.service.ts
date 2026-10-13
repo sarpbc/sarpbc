@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { createLogger } from "evlog";
 import { currentEnvironment } from "../common/request-log-context";
 import { canonicalImageContentType } from "../common/utils/file.util";
+import { IMAGE_PREFIXES, type ImageUploadTarget } from "./image-target";
 
 const ALLOWED_CONTENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -27,7 +28,8 @@ export interface R2UploadResponse {
   key: string;
 }
 
-export interface NewsCoverUploadContext {
+export interface ImageUploadContext {
+  target: ImageUploadTarget;
   userId?: string;
   userEmail?: string;
   articleSlug?: string;
@@ -115,9 +117,10 @@ export class R2Service {
     return "bin";
   }
 
-  async createNewsCoverUploadUrl(
+  async createImageUploadUrl(
     contentType: string,
-    filename?: string,
+    filename: string | undefined,
+    target: ImageUploadTarget,
   ): Promise<R2UploadUrlResponse> {
     const canonicalType = canonicalImageContentType(contentType);
     if (!ALLOWED_CONTENT_TYPES.has(canonicalType)) {
@@ -127,7 +130,7 @@ export class R2Service {
     }
 
     const extension = this.extensionForContentType(canonicalType, filename);
-    const key = `news/covers/${randomUUID()}.${extension}`;
+    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${extension}`;
     const client = this.getClient();
     const command = new PutObjectCommand({
       Bucket: this.bucket,
@@ -142,16 +145,17 @@ export class R2Service {
     return { uploadUrl, publicUrl, key };
   }
 
-  async uploadNewsCover(
+  async uploadImage(
     buffer: Buffer,
     contentType: string,
-    filename?: string,
-    context: NewsCoverUploadContext = {},
+    filename: string | undefined,
+    context: ImageUploadContext,
   ): Promise<R2UploadResponse> {
     const canonicalType = canonicalImageContentType(contentType);
     const log = createLogger({
       component: R2Service.name,
-      action: "uploadNewsCover",
+      action: "uploadImage",
+      target: context.target,
       environment: currentEnvironment(),
       userId: context.userId,
       userEmail: context.userEmail,
@@ -172,7 +176,7 @@ export class R2Service {
       }
 
       const extension = this.extensionForContentType(canonicalType, filename);
-      const key = `news/covers/${randomUUID()}.${extension}`;
+      const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${extension}`;
       const client = this.getClient();
 
       await client.send(

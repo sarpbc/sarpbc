@@ -325,7 +325,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "update_tournament",
     {
       description:
-        "Update a manual tournament. Requires tournaments.manage. PandaScore-synced tournaments are rejected.",
+        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send imageUrl alone; all other fields are managed by the sync. Pass null to clear the image. Manual tournaments accept all listed fields.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
@@ -369,6 +369,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             name: tournament.name,
             slug: tournament.slug,
             source: tournament.source,
+            imageUrl: tournament.imageUrl,
             url: tournamentUrl(tournament.id),
           },
         };

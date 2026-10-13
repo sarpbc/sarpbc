@@ -7,6 +7,15 @@
       "loaned": "Loaned"
     }
   },
+  "imageUpload": {
+    "hint": "JPEG, PNG, WebP or GIF, up to 5 MB",
+    "upload": "Upload Image",
+    "replace": "Replace Image",
+    "remove": "Remove Image",
+    "progress": "Uploading… {percent}%",
+    "uploadFailed": "Could not upload image",
+    "uploadServerError": "The server could not store this image. Try again, or pick a smaller JPEG, PNG, WebP, or GIF"
+  },
   "page": {
     "home": {
       "brand": "sarpbc.org Admin",
@@ -179,7 +188,7 @@
         "action": "Edit Tournament",
         "title": "Edit Tournament",
         "subtitleManual": "Update tournament details and participating teams.",
-        "subtitlePandascore": "This tournament is synced from PandaScore and cannot be edited here.",
+        "subtitlePandascore": "You can change the image. Other details are synced from PandaScore. Your image is kept when the tournament syncs.",
         "saved": "Tournament saved"
       },
       "form": {
@@ -193,7 +202,8 @@
         "leaguePlaceholder": "Select a league",
         "beginAt": "Start Date",
         "endAt": "End Date",
-        "imageUrl": "Cover Image URL",
+        "image": "Tournament Image",
+        "imageUrl": "Image URL",
         "imageUrlPlaceholder": "https://…",
         "teams": "Participating Teams",
         "teamsSearch": "Search teams…",
@@ -309,14 +319,7 @@
         "deleteFailed": "Could not delete the article. Try again."
       },
       "cover": {
-        "label": "Cover Image",
-        "upload": "Upload Cover",
-        "uploading": "Uploading…",
-        "replace": "Replace Cover",
-        "remove": "Remove Cover",
-        "progress": "Uploading… {percent}%",
-        "uploadFailed": "Could not upload cover image",
-        "uploadServerError": "The server could not store this image. Try again, or pick a smaller JPEG, PNG, WebP, or GIF"
+        "label": "Cover Image"
       },
       "editor": {
         "insertPlayer": "Player Tag",
