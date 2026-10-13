@@ -155,7 +155,7 @@ export async function createTournament(body: ManualTournamentInput): Promise<Tou
 
 export async function updateTournament(
   id: string,
-  body: ManualTournamentInput,
+  body: Partial<ManualTournamentInput>,
 ): Promise<Tournament | null> {
   const res = await apiFetch<{ tournament?: Tournament }>(`/tournaments/${id}`, {
     method: "PATCH",

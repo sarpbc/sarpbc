@@ -46,6 +46,7 @@ export function mapTournamentListItem(tournament: Tournament) {
     name: tournament.name,
     slug: tournament.slug,
     source: tournament.source,
+    imageUrl: tournament.imageUrl,
     serie: tournament.serie,
     beginAt: tournament.beginAt,
     endAt: tournament.endAt,

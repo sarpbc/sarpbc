@@ -8,6 +8,7 @@ const toast = useToast();
 const formState = ref(createEmptyTournamentFormState());
 const slugAuto = ref(true);
 const isSaving = ref(false);
+const isUploading = ref(false);
 
 const breadcrumbItems = computed(() => [
   {
@@ -33,6 +34,7 @@ const [{ data: leagues }, { data: teamsData, status: teamsStatus }] = await Prom
 const teams = computed(() => teamsData.value?.teams ?? []);
 
 async function handleSubmit() {
+  if (isSaving.value || isUploading.value) return;
   const validationError = validateManualTournamentForm(formState.value);
   if (validationError) {
     toast.add({
@@ -75,6 +77,7 @@ async function handleSubmit() {
         icon="i-fluent-save-24-regular"
         :label="$t('page.tournaments.form.save')"
         :loading="isSaving"
+        :disabled="isUploading"
         @click="handleSubmit"
       />
     </template>
@@ -96,6 +99,8 @@ async function handleSubmit() {
           :leagues="leagues ?? []"
           :teams="teams"
           :teams-pending="teamsStatus === 'pending'"
+          :image-disabled="isSaving"
+          @update:uploading="isUploading = $event"
         />
       </div>
     </DashboardContent>

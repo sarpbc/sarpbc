@@ -12,7 +12,7 @@ import { Team } from "src/player/player.entities";
 import { Match, MatchResult, Tournament, TournamentParticipant } from "./tournament.entities";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { LeagueService } from "./league/league.service";
-import { assertManualTournamentWritable } from "./domain/tournament-source";
+import { assertTournamentUpdateAllowed } from "./domain/tournament-source";
 
 @Injectable()
 export class ManualTournamentService {
@@ -64,21 +64,23 @@ export class ManualTournamentService {
       if (!tournament) {
         throw new NotFoundException(`Tournament with id "${id}" was not found.`);
       }
-      assertManualTournamentWritable(tournament.source, "edited manually");
+      assertTournamentUpdateAllowed(tournament.source, dto);
 
       this.applyPatch(tournament, dto);
-      await this.applyLeaguePatch(tournament, dto.leagueId);
-      this.assertDateOrder(
-        tournament.beginAt?.toISOString() ?? null,
-        tournament.endAt?.toISOString() ?? null,
-      );
+      if (tournament.source === "manual") {
+        await this.applyLeaguePatch(tournament, dto.leagueId);
+        this.assertDateOrder(
+          tournament.beginAt?.toISOString() ?? null,
+          tournament.endAt?.toISOString() ?? null,
+        );
 
-      if (dto.slug !== undefined) {
-        tournament.slug = await this.resolveUpdateSlug(dto.slug, tournament.id);
-      }
+        if (dto.slug !== undefined) {
+          tournament.slug = await this.resolveUpdateSlug(dto.slug, tournament.id);
+        }
 
-      if (dto.teamIds !== undefined) {
-        await this.syncParticipants(em, tournament, dto.teamIds);
+        if (dto.teamIds !== undefined) {
+          await this.syncParticipants(em, tournament, dto.teamIds);
+        }
       }
 
       await em.flush();

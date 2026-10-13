@@ -9,11 +9,13 @@ const props = defineProps<{
   teams: Team[];
   teamsPending?: boolean;
   slugAuto?: boolean;
+  imageDisabled?: boolean;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [ManualTournamentFormState];
   "update:slugAuto": [boolean];
+  "update:uploading": [boolean];
 }>();
 
 const { t } = useI18n();
@@ -21,6 +23,11 @@ const { t } = useI18n();
 const state = computed({
   get: () => props.modelValue,
   set: (value) => emit("update:modelValue", value),
+});
+
+const imageUrl = computed({
+  get: () => props.modelValue.imageUrl,
+  set: (value: string) => updateField("imageUrl", value),
 });
 
 const leagueOptions = computed(() =>
@@ -143,17 +150,11 @@ function isTeamSelected(teamId: string): boolean {
       </UFormField>
     </div>
 
-    <UFormField :label="$t('page.tournaments.form.imageUrl')" name="imageUrl">
-      <UInput
-        :model-value="state.imageUrl"
-        type="url"
-        class="w-full"
-        spellcheck="false"
-        autocomplete="off"
-        :placeholder="$t('page.tournaments.form.imageUrlPlaceholder')"
-        @update:model-value="updateField('imageUrl', $event)"
-      />
-    </UFormField>
+    <TournamentImageField
+      v-model="imageUrl"
+      :disabled="imageDisabled"
+      @update:uploading="emit('update:uploading', $event)"
+    />
 
     <UFormField :label="$t('page.tournaments.form.teams')" name="teamIds">
       <div class="flex flex-col gap-3 border border-default p-4">

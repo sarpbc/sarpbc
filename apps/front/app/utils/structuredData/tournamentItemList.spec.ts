@@ -3,8 +3,6 @@ import type { Tournament } from "~/types/tournament";
 import { SCHEMA_ORG } from "./jsonLd";
 import { buildTournamentItemList } from "./tournamentItemList";
 
-const NOW = Date.parse("2026-08-17T12:00:00.000Z");
-
 function tournament(overrides: Partial<Tournament> = {}): Tournament {
   return {
     id: "t1",
@@ -24,7 +22,6 @@ describe("buildTournamentItemList", () => {
       ],
       total: 42,
       positionOffset: 20,
-      now: NOW,
     });
 
     expect(list["@context"]).toBe(SCHEMA_ORG);
@@ -34,16 +31,39 @@ describe("buildTournamentItemList", () => {
     expect(list.itemListElement).toHaveLength(2);
     expect(list.itemListElement[0]?.position).toBe(21);
     expect(list.itemListElement[1]?.position).toBe(22);
-    expect(list.itemListElement[0]?.item["@type"]).toBe("SportsEvent");
-    expect(list.itemListElement[0]?.item["@context"]).toBeUndefined();
-    expect(list.itemListElement[0]?.item.name).toBe("Open 1");
+    expect(list.itemListElement[0]).toEqual({
+      "@type": "ListItem",
+      position: 21,
+      name: "Open 1",
+      url: "https://sarpbc.org/tournaments/a",
+    });
+    expect(JSON.stringify(list)).not.toContain("SportsEvent");
+  });
+
+  it("links to tournament detail pages using the league name and configured origin", () => {
+    const list = buildTournamentItemList({
+      tournaments: [
+        tournament({
+          name: "Group A",
+          league: { name: "Esports World Cup" } as Tournament["league"],
+        }),
+      ],
+      total: 1,
+      origin: "https://example.com",
+    });
+
+    expect(list.itemListElement[0]).toEqual({
+      "@type": "ListItem",
+      position: 1,
+      name: "Esports World Cup Group A",
+      url: "https://example.com/tournaments/t1",
+    });
   });
 
   it("emits an empty item list without Offer schema", () => {
     const list = buildTournamentItemList({
       tournaments: [],
       total: 0,
-      now: NOW,
     });
     const serialized = JSON.stringify(list);
 
