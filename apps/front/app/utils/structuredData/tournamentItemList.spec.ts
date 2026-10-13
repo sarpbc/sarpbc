@@ -17,7 +17,7 @@ describe("buildTournamentItemList", () => {
   it("wraps the current page in ItemList and uses the API total", () => {
     const list = buildTournamentItemList({
       tournaments: [
-        tournament({ id: "a", name: "Open 1" }),
+        tournament({ id: "a", name: "Open 1", league: { name: "RLCS" } as Tournament["league"] }),
         tournament({ id: "b", name: "Open 2" }),
       ],
       total: 42,
@@ -34,9 +34,10 @@ describe("buildTournamentItemList", () => {
     expect(list.itemListElement[0]).toEqual({
       "@type": "ListItem",
       position: 21,
-      name: "Open 1",
+      name: "RLCS Open 1",
       url: "https://sarpbc.org/tournaments/a",
     });
+    expect(list.itemListElement[1]?.url).toBe("https://sarpbc.org/tournaments/b");
     expect(JSON.stringify(list)).not.toContain("SportsEvent");
   });
 
@@ -70,5 +71,19 @@ describe("buildTournamentItemList", () => {
     expect(list.itemListElement).toEqual([]);
     expect(serialized).not.toContain("Offer");
     expect(serialized).not.toContain("priceCurrency");
+  });
+
+  it("links to detail pages on the configured origin without embedding events", () => {
+    const list = buildTournamentItemList({
+      tournaments: [tournament()],
+      total: 1,
+      origin: "https://example.com",
+      name: "Tournois Rocket League",
+    });
+
+    expect(list.url).toBe("https://example.com/tournaments");
+    expect(list.name).toBe("Tournois Rocket League");
+    expect(list.itemListElement[0]?.url).toBe("https://example.com/tournaments/t1");
+    expect(list.itemListElement[0]).not.toHaveProperty("item");
   });
 });

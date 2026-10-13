@@ -65,12 +65,12 @@ export interface SportsEventLd extends JsonLdNode {
   description?: string;
   award?: string;
   competitor?: SportsTeamLd[];
+  performer?: SportsTeamLd[];
   additionalProperty?: PropertyValueLd[];
 }
 
 export interface BuildTournamentSportsEventOptions {
   includeContext?: boolean;
-  includeCompetitors?: boolean;
   origin?: string;
   now?: number;
 }
@@ -226,7 +226,8 @@ function competitorFromTournament(
 
   for (const participant of tournament.participants ?? []) {
     const team = participant.team;
-    if (!team?.slug || teams.has(team.id)) {
+    const name = team?.name?.trim();
+    if (!name || teams.has(team.id)) {
       continue;
     }
 
@@ -234,8 +235,8 @@ function competitorFromTournament(
       team.id,
       compactJsonLd({
         "@type": "SportsTeam",
-        name: team.name,
-        url: `${origin}/team/${team.slug}`,
+        name,
+        url: team.slug ? `${origin}/team/${team.slug}` : undefined,
       }),
     );
   }
@@ -316,6 +317,7 @@ export function buildTournamentSportsEvent(
     resolveStructuredDataUrl(tournament.imageUrl, origin) ??
     resolveStructuredDataUrl(tournament.league?.imageUrl, origin);
   const organizerName = tournament.league?.name?.trim();
+  const competitors = competitorFromTournament(tournament, origin);
 
   const event = compactJsonLd<SportsEventLd>({
     "@type": "SportsEvent",
@@ -344,9 +346,8 @@ export function buildTournamentSportsEvent(
       status,
     }),
     award: prizepool,
-    competitor: options.includeCompetitors
-      ? competitorFromTournament(tournament, origin)
-      : undefined,
+    competitor: competitors,
+    performer: competitors,
     additionalProperty: additionalProperties(prizepool, format),
   });
 

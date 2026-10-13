@@ -89,7 +89,6 @@ const tournamentJsonLd = computed(() => {
 
   return buildTournamentSportsEvent(tournament.value, {
     includeContext: true,
-    includeCompetitors: true,
   });
 });
 

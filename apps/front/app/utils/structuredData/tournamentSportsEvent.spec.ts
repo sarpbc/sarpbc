@@ -159,7 +159,6 @@ describe("buildTournamentSportsEvent", () => {
   it("builds a SportsEvent with prize pool as award text, not an Offer", () => {
     const event = buildTournamentSportsEvent(upcoming, {
       now: NOW,
-      includeCompetitors: true,
     });
     const serialized = JSON.stringify(event);
 
@@ -181,6 +180,10 @@ describe("buildTournamentSportsEvent", () => {
       { "@type": "PropertyValue", name: "Format", value: "LAN" },
     ]);
     expect(event.competitor?.map((team) => team.name)).toEqual(["BDS", "Vitality"]);
+    expect(event.performer).toEqual([
+      { "@type": "SportsTeam", name: "BDS", url: "https://sarpbc.org/team/bds" },
+      { "@type": "SportsTeam", name: "Vitality", url: "https://sarpbc.org/team/vitality" },
+    ]);
     expect(serialized).not.toContain('"Offer"');
     expect(serialized).not.toContain('"offers"');
     expect(serialized).not.toContain('"price"');
@@ -198,11 +201,58 @@ describe("buildTournamentSportsEvent", () => {
     expect(event.organizer).toBeUndefined();
     expect(event.image).toBeUndefined();
     expect(event.competitor).toBeUndefined();
+    expect(event).not.toHaveProperty("performer");
     expect(event.additionalProperty).toBeUndefined();
     expect(event.location).toEqual({
       "@type": "VirtualLocation",
       url: "https://sarpbc.org/tournaments/rlcs-worlds",
     });
+  });
+
+  it("deduplicates performers and omits teams without a name", () => {
+    const participant = upcoming.participants![0]!;
+    const event = buildTournamentSportsEvent(
+      tournament({
+        participants: [
+          participant,
+          { ...participant, id: "duplicate" },
+          { ...participant, id: "unnamed", team: { ...participant.team, id: "t3", name: " " } },
+        ],
+      }),
+      { now: NOW },
+    );
+
+    expect(event.performer).toEqual([
+      { "@type": "SportsTeam", name: "Vitality", url: "https://sarpbc.org/team/vitality" },
+    ]);
+    expect(event.competitor).toEqual(event.performer);
+  });
+
+  it("includes a known performer without inventing a team URL when its slug is missing", () => {
+    const participant = upcoming.participants![0]!;
+    const event = buildTournamentSportsEvent(
+      tournament({
+        participants: [
+          { ...participant, team: { ...participant.team, name: " Vitality ", slug: "" } },
+        ],
+      }),
+      { origin: "https://example.com", now: NOW },
+    );
+
+    expect(event.performer).toEqual([{ "@type": "SportsTeam", name: "Vitality" }]);
+  });
+
+  it("omits performers when participants are empty or unnamed", () => {
+    const participant = upcoming.participants![0]!;
+    for (const participants of [
+      [],
+      [{ ...participant, team: { ...participant.team, name: " " } }],
+    ]) {
+      const event = buildTournamentSportsEvent(tournament({ participants }), { now: NOW });
+
+      expect(event).not.toHaveProperty("performer");
+      expect(event).not.toHaveProperty("competitor");
+    }
   });
 
   it("includes @context, champion, and league image on detail payloads", () => {
