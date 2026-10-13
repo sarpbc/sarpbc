@@ -1,12 +1,13 @@
 import type { Tournament } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/calendar/ics";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
-import { buildTournamentSportsEvent, type SportsEventLd } from "./tournamentSportsEvent";
+import { tournamentCanonicalUrl, tournamentDisplayName } from "./tournamentSportsEvent";
 
 export interface ListItemLd extends JsonLdNode {
   "@type": "ListItem";
   position: number;
-  item: SportsEventLd;
+  name: string;
+  url: string;
 }
 
 export interface ItemListLd extends JsonLdNode {
@@ -22,7 +23,6 @@ export interface BuildTournamentItemListOptions {
   total: number;
   positionOffset?: number;
   origin?: string;
-  now?: number;
   name?: string;
 }
 
@@ -41,10 +41,8 @@ export function buildTournamentItemList(options: BuildTournamentItemListOptions)
       compactJsonLd({
         "@type": "ListItem",
         position: positionOffset + index + 1,
-        item: buildTournamentSportsEvent(tournament, {
-          origin,
-          now: options.now,
-        }),
+        name: tournamentDisplayName(tournament),
+        url: tournamentCanonicalUrl(tournament.id, origin),
       }),
     ),
   });
