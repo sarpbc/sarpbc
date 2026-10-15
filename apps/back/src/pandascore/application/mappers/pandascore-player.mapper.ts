@@ -4,6 +4,7 @@ import { PlayerDto } from "../../infrastructure/dto/tournament.dto";
 export class PandascorePlayerMapper {
   static toUpsertCommand(dto: PlayerDto, teamSlug?: string): UpsertPlayerCommand {
     return {
+      pandascoreId: dto.id,
       name: dto.name,
       slug: dto.slug,
       firstName: dto.first_name,
@@ -17,6 +18,7 @@ export class PandascorePlayerMapper {
   }
 
   static fromRocketLeaguePlayer(dto: {
+    id: number;
     name: string;
     slug: string;
     first_name?: string;
@@ -28,6 +30,7 @@ export class PandascorePlayerMapper {
     current_team?: { slug: string };
   }): UpsertPlayerCommand {
     return {
+      pandascoreId: dto.id,
       name: dto.name,
       slug: dto.slug,
       firstName: dto.first_name,

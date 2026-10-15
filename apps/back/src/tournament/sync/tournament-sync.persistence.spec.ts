@@ -1,3 +1,4 @@
+import { Player } from "src/player/player.entities";
 import { Tournament } from "../tournament.entities";
 import { TournamentSyncPersistence } from "./tournament-sync.persistence";
 
@@ -85,5 +86,50 @@ describe("TournamentSyncPersistence", () => {
 
     expect(synced.name).toBe("Group A");
     expect(synced.imageUrl).toBe("https://cdn.example/ewc.png");
+  });
+  it("keeps an edited slug when the PandaScore id already matches a player", async () => {
+    const player = Object.assign(new Player(), { slug: "zen", pandascoreId: 29079, name: "zen" });
+    em.findOne.mockResolvedValueOnce(player);
+
+    const synced = await persistence.upsertPlayer({
+      pandascoreId: 29079,
+      name: "zen",
+      slug: "zen-aidan-hui",
+      firstName: "Alexis",
+    });
+
+    expect(synced).toBe(player);
+    expect(synced.slug).toBe("zen");
+    expect(synced.firstName).toBe("Alexis");
+  });
+
+  it("adopts a player stored by slug before PandaScore ids were recorded", async () => {
+    const player = Object.assign(new Player(), { slug: "zen-aidan-hui", pandascoreId: null });
+    em.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(player);
+
+    const synced = await persistence.upsertPlayer({
+      pandascoreId: 29079,
+      name: "zen",
+      slug: "zen-aidan-hui",
+    });
+
+    expect(synced).toBe(player);
+    expect(synced.pandascoreId).toBe(29079);
+    expect(em.findOne).toHaveBeenNthCalledWith(2, Player, {
+      slug: "zen-aidan-hui",
+      pandascoreId: null,
+    });
+  });
+
+  it("suffixes the slug of a new player when another player already holds it", async () => {
+    em.findOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(Object.assign(new Player(), { slug: "zen", pandascoreId: 1 }));
+
+    const created = await persistence.upsertPlayer({ pandascoreId: 2, name: "zen", slug: "zen" });
+
+    expect(created.slug).toBe("zen-2");
+    expect(created.pandascoreId).toBe(2);
   });
 });
