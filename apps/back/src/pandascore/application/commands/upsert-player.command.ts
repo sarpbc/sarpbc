@@ -1,4 +1,5 @@
 export interface UpsertPlayerCommand {
+  pandascoreId: number;
   name: string;
   slug: string;
   firstName?: string;

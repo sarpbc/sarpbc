@@ -103,6 +103,7 @@ describe("PandascoreTournamentMapper", () => {
           },
           players: [
             {
+              pandascoreId: 100,
               name: "Zen",
               slug: "zen",
               firstName: "Alex",

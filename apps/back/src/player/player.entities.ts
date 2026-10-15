@@ -33,6 +33,7 @@ export class Player {
   /** PandaScore role (e.g. "Coach"); null for standard roster players. */
   role: string | null = null;
   slug!: string;
+  pandascoreId: number | null = null;
   contracts = new Collection<Contract>(this);
   photos = new Collection<PlayerPhoto>(this);
 }
@@ -85,6 +86,7 @@ export const PlayerSchema = defineEntity({
     imageUrl: p.string().nullable(),
     role: p.string().nullable(),
     slug: p.string(),
+    pandascoreId: p.integer().nullable().unique(),
     contracts: p.oneToMany(Contract).mappedBy("player"),
     photos: p.oneToMany(PlayerPhoto).mappedBy("player"),
   },
