@@ -100,7 +100,7 @@ export class TournamentDto {
   name!: string;
   type!: string;
   matches!: MatchDto[];
-  country!: string;
+  country!: string | null;
   slug!: string;
   begin_at!: string;
   detailed_stats!: boolean;

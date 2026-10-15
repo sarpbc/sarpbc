@@ -47,6 +47,7 @@ describe("TournamentController.findOne", () => {
       winner: null,
       winnerType: null,
       type: null,
+      country: null,
       prizepool: null,
       imageUrl: null,
       league: null,

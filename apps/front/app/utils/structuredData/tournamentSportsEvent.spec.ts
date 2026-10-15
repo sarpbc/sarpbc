@@ -3,8 +3,7 @@ import type { Tournament } from "~/types/tournament";
 import { SCHEMA_ORG } from "./jsonLd";
 import {
   buildTournamentSportsEvent,
-  eventAttendanceModeUrl,
-  eventLocation,
+  eventVenue,
   formatLabel,
   getTournamentChampionTeam,
   resolveStructuredDataUrl,
@@ -58,16 +57,6 @@ describe("sportsEventStatusUrl", () => {
   });
 });
 
-describe("eventAttendanceModeUrl", () => {
-  it("maps online, LAN, and mixed formats", () => {
-    expect(eventAttendanceModeUrl("online")).toBe(`${SCHEMA_ORG}/OnlineEventAttendanceMode`);
-    expect(eventAttendanceModeUrl("offline")).toBe(`${SCHEMA_ORG}/OfflineEventAttendanceMode`);
-    expect(eventAttendanceModeUrl("online/offline")).toBe(`${SCHEMA_ORG}/MixedEventAttendanceMode`);
-    expect(eventAttendanceModeUrl("swiss")).toBeUndefined();
-    expect(eventAttendanceModeUrl(undefined)).toBeUndefined();
-  });
-});
-
 describe("formatLabel", () => {
   it("uses English format labels for schema text", () => {
     expect(formatLabel("online")).toBe("Online");
@@ -77,27 +66,38 @@ describe("formatLabel", () => {
   });
 });
 
-describe("eventLocation", () => {
-  it("uses a virtual location for online and unknown formats", () => {
-    expect(eventLocation("online", "https://sarpbc.org/tournaments/1")).toEqual({
-      "@type": "VirtualLocation",
-      url: "https://sarpbc.org/tournaments/1",
+describe("eventVenue", () => {
+  const url = "https://sarpbc.org/tournaments/1";
+  const online = {
+    eventAttendanceMode: `${SCHEMA_ORG}/OnlineEventAttendanceMode`,
+    location: { "@type": "VirtualLocation", url },
+  };
+  const germany = {
+    "@type": "Place",
+    name: "Germany",
+    address: { "@type": "PostalAddress", addressCountry: "DE" },
+  };
+
+  it("uses an online venue for online and unknown formats", () => {
+    expect(eventVenue("online", "DE", url)).toEqual(online);
+    expect(eventVenue(undefined, null, url)).toEqual(online);
+    expect(eventVenue("swiss", "DE", url)).toEqual(online);
+  });
+
+  it("uses a country place for LAN events and both locations for mixed events", () => {
+    expect(eventVenue("offline", "de", url)).toEqual({
+      eventAttendanceMode: `${SCHEMA_ORG}/OfflineEventAttendanceMode`,
+      location: germany,
     });
-    expect(eventLocation(undefined, "https://sarpbc.org/tournaments/1")).toEqual({
-      "@type": "VirtualLocation",
-      url: "https://sarpbc.org/tournaments/1",
+    expect(eventVenue("online/offline", "DE", url)).toEqual({
+      eventAttendanceMode: `${SCHEMA_ORG}/MixedEventAttendanceMode`,
+      location: [{ "@type": "VirtualLocation", url }, germany],
     });
   });
 
-  it("uses a LAN place for offline events and both for mixed", () => {
-    expect(eventLocation("offline", "https://sarpbc.org/tournaments/1")).toEqual({
-      "@type": "Place",
-      name: "LAN",
-    });
-    expect(eventLocation("online/offline", "https://sarpbc.org/tournaments/1")).toEqual([
-      { "@type": "VirtualLocation", url: "https://sarpbc.org/tournaments/1" },
-      { "@type": "Place", name: "LAN" },
-    ]);
+  it("falls back to the online venue when a LAN has no valid country", () => {
+    expect(eventVenue("offline", null, url)).toEqual(online);
+    expect(eventVenue("online/offline", "Europe", url)).toEqual(online);
   });
 });
 
@@ -128,6 +128,7 @@ describe("buildTournamentSportsEvent", () => {
     endAt: new Date("2026-09-07T22:00:00.000Z"),
     prizepool: "100000 United States Dollar",
     type: "offline",
+    country: "DE",
     imageUrl: "https://cdn.example/worlds.png",
     league: {
       id: "rlcs",
@@ -172,6 +173,11 @@ describe("buildTournamentSportsEvent", () => {
     expect(event.endDate).toBe("2026-09-07T22:00:00.000Z");
     expect(event.eventStatus).toBe(`${SCHEMA_ORG}/EventScheduled`);
     expect(event.eventAttendanceMode).toBe(`${SCHEMA_ORG}/OfflineEventAttendanceMode`);
+    expect(event.location).toEqual({
+      "@type": "Place",
+      name: "Germany",
+      address: { "@type": "PostalAddress", addressCountry: "DE" },
+    });
     expect(event.award).toBe("$100,000");
     expect(event.description).toContain("Prize pool: $100,000");
     expect(event.description).toContain("Format: LAN");
@@ -196,7 +202,7 @@ describe("buildTournamentSportsEvent", () => {
     expect(event.startDate).toBeUndefined();
     expect(event.endDate).toBeUndefined();
     expect(event.eventStatus).toBeUndefined();
-    expect(event.eventAttendanceMode).toBeUndefined();
+    expect(event.eventAttendanceMode).toBe(`${SCHEMA_ORG}/OnlineEventAttendanceMode`);
     expect(event.award).toBeUndefined();
     expect(event.organizer).toBeUndefined();
     expect(event.image).toBeUndefined();

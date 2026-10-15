@@ -34,9 +34,15 @@ export interface VirtualLocationLd extends JsonLdNode {
   url: string;
 }
 
+export interface PostalAddressLd extends JsonLdNode {
+  "@type": "PostalAddress";
+  addressCountry: string;
+}
+
 export interface PlaceLd extends JsonLdNode {
   "@type": "Place";
   name: string;
+  address: PostalAddressLd;
 }
 
 export interface PropertyValueLd extends JsonLdNode {
@@ -50,6 +56,11 @@ export type SportsEventLocationLd =
   | PlaceLd
   | Array<VirtualLocationLd | PlaceLd>;
 
+export interface SportsEventVenueLd {
+  eventAttendanceMode: string;
+  location: SportsEventLocationLd;
+}
+
 export interface SportsEventLd extends JsonLdNode {
   "@type": "SportsEvent";
   url: string;
@@ -58,8 +69,8 @@ export interface SportsEventLd extends JsonLdNode {
   startDate?: string;
   endDate?: string;
   eventStatus?: string;
-  eventAttendanceMode?: string;
-  location?: SportsEventLocationLd;
+  eventAttendanceMode: string;
+  location: SportsEventLocationLd;
   organizer?: SportsOrganizationLd;
   image?: string;
   description?: string;
@@ -141,25 +152,6 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
   }
 }
 
-export function eventAttendanceModeUrl(type: string | undefined): string | undefined {
-  if (!type || !isTournamentFormat(type)) {
-    return undefined;
-  }
-
-  switch (type) {
-    case "online":
-      return `${SCHEMA_ORG}/OnlineEventAttendanceMode`;
-    case "offline":
-      return `${SCHEMA_ORG}/OfflineEventAttendanceMode`;
-    case "online/offline":
-      return `${SCHEMA_ORG}/MixedEventAttendanceMode`;
-    default: {
-      const _exhaustive: never = type;
-      return _exhaustive;
-    }
-  }
-}
-
 export function formatLabel(type: string | undefined): string | undefined {
   if (!type || !isTournamentFormat(type)) {
     return undefined;
@@ -181,22 +173,55 @@ function virtualLocation(url: string): VirtualLocationLd {
   return { "@type": "VirtualLocation", url };
 }
 
-function lanPlace(): PlaceLd {
-  return { "@type": "Place", name: "LAN" };
+const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
+
+function countryPlace(country: string | null | undefined): PlaceLd | undefined {
+  const code = country?.trim().toUpperCase();
+  if (!code || !/^[A-Z]{2}$/.test(code)) {
+    return undefined;
+  }
+
+  return {
+    "@type": "Place",
+    name: COUNTRY_NAMES.of(code) ?? code,
+    address: { "@type": "PostalAddress", addressCountry: code },
+  };
 }
 
-export function eventLocation(type: string | undefined, url: string): SportsEventLocationLd {
-  if (!type || !isTournamentFormat(type)) {
-    return virtualLocation(url);
+function onlineVenue(url: string): SportsEventVenueLd {
+  return {
+    eventAttendanceMode: `${SCHEMA_ORG}/OnlineEventAttendanceMode`,
+    location: virtualLocation(url),
+  };
+}
+
+// Google treats an event without eventAttendanceMode as offline and rejects a
+// VirtualLocation there, and it rejects a Place without an address. So the mode
+// and location are always emitted together, falling back to the online venue
+// (every event is streamed) when no country is known.
+export function eventVenue(
+  type: string | undefined,
+  country: string | null | undefined,
+  url: string,
+): SportsEventVenueLd {
+  const place = countryPlace(country);
+  if (!type || !isTournamentFormat(type) || !place) {
+    return onlineVenue(url);
   }
 
   switch (type) {
     case "online":
-      return virtualLocation(url);
+      return onlineVenue(url);
     case "offline":
-      return lanPlace();
+      return {
+        eventAttendanceMode: `${SCHEMA_ORG}/OfflineEventAttendanceMode`,
+        location: place,
+      };
     case "online/offline":
-      return [virtualLocation(url), lanPlace()];
+      return {
+        eventAttendanceMode: `${SCHEMA_ORG}/MixedEventAttendanceMode`,
+        location: [virtualLocation(url), place],
+      };
     default: {
       const _exhaustive: never = type;
       return _exhaustive;
@@ -318,6 +343,7 @@ export function buildTournamentSportsEvent(
     resolveStructuredDataUrl(tournament.league?.imageUrl, origin);
   const organizerName = tournament.league?.name?.trim();
   const competitors = competitorFromTournament(tournament, origin);
+  const venue = eventVenue(tournament.type, tournament.country, url);
 
   const event = compactJsonLd<SportsEventLd>({
     "@type": "SportsEvent",
@@ -328,8 +354,8 @@ export function buildTournamentSportsEvent(
     startDate: toIsoDate(tournament.beginAt),
     endDate: toIsoDate(tournament.endAt),
     eventStatus: sportsEventStatusUrl(status),
-    eventAttendanceMode: eventAttendanceModeUrl(tournament.type),
-    location: eventLocation(tournament.type, url),
+    eventAttendanceMode: venue.eventAttendanceMode,
+    location: venue.location,
     organizer: organizerName
       ? compactJsonLd({
           "@type": "SportsOrganization",

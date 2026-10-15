@@ -30,6 +30,7 @@ export interface Tournament {
   matches?: Match[];
   participants?: TournamentParticipant[];
   type?: string;
+  country?: string | null;
   hasBracket?: boolean;
   pickemsEnabled?: boolean;
 }
