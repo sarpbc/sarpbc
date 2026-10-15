@@ -72,58 +72,31 @@ export class SyncPandascoreTeamsUseCase {
           playerCommand.slug,
         );
 
-        if (!existingPlayer) {
-          const newPlayer = new Player();
-          newPlayer.name = playerCommand.name;
-          newPlayer.firstName = playerCommand.firstName ?? null;
-          newPlayer.lastName = playerCommand.lastName ?? null;
-          newPlayer.birthday = playerCommand.birthday ?? null;
-          newPlayer.nationality = playerCommand.nationality ?? null;
-          newPlayer.imageUrl = playerCommand.imageUrl ?? null;
-          newPlayer.role = playerCommand.role ?? null;
-          newPlayer.slug = await availablePlayerSlug(
+        const player = existingPlayer ?? new Player();
+        if (existingPlayer) {
+          playersUpdated += 1;
+        } else {
+          player.slug = await availablePlayerSlug(
             em,
             playerCommand.pandascoreId,
             playerCommand.slug,
           );
-          newPlayer.pandascoreId = playerCommand.pandascoreId;
-
-          if (playerCommand.teamSlug) {
-            const team = createdTeams.get(playerCommand.teamSlug);
-            if (team) {
-              newPlayer.team = team;
-            }
-          }
-
-          em.persist(newPlayer);
           playersCreated += 1;
-        } else {
-          let changed = false;
-
-          if (existingPlayer.pandascoreId !== playerCommand.pandascoreId) {
-            existingPlayer.pandascoreId = playerCommand.pandascoreId;
-            changed = true;
-          }
-
-          if (playerCommand.teamSlug) {
-            const team = createdTeams.get(playerCommand.teamSlug);
-            if (team && existingPlayer.team?.id !== team.id) {
-              existingPlayer.team = team;
-              changed = true;
-            }
-          }
-
-          const nextRole = playerCommand.role ?? null;
-          if (existingPlayer.role !== nextRole) {
-            existingPlayer.role = nextRole;
-            changed = true;
-          }
-
-          if (changed) {
-            em.persist(existingPlayer);
-            playersUpdated += 1;
-          }
         }
+
+        player.pandascoreId = playerCommand.pandascoreId;
+        player.name = playerCommand.name;
+        player.firstName = playerCommand.firstName ?? null;
+        player.lastName = playerCommand.lastName ?? null;
+        player.birthday = playerCommand.birthday ?? null;
+        player.nationality = playerCommand.nationality ?? null;
+        player.imageUrl = playerCommand.imageUrl ?? null;
+        player.role = playerCommand.role ?? null;
+        player.team = playerCommand.teamSlug
+          ? (createdTeams.get(playerCommand.teamSlug) ?? null)
+          : null;
+
+        em.persist(player);
       }
 
       await em.flush();

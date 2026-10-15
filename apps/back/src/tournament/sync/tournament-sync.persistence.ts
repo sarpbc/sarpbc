@@ -147,29 +147,27 @@ export class TournamentSyncPersistence {
   async upsertTournamentParticipant(
     tournament: Tournament,
     command: UpsertTournamentParticipantCommand,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const team = await this.upsertTeam(command.team);
 
-    const existingParticipant = await this.em.findOne(TournamentParticipant, {
-      tournament,
-      team,
-    });
+    const existingParticipant = await this.em.findOne(
+      TournamentParticipant,
+      { tournament, team },
+      { populate: ["players"] },
+    );
 
-    if (existingParticipant) {
-      return false;
-    }
-
-    const participant = new TournamentParticipant();
+    const participant = existingParticipant ?? new TournamentParticipant();
     participant.tournament = tournament;
     participant.team = team;
 
+    const players: Player[] = [];
     for (const playerCommand of command.players) {
-      const player = await this.upsertPlayer(playerCommand, team);
-      participant.players.add(player);
+      // Finished tournaments are re-synced too: an old roster must not move players back.
+      players.push(await this.upsertPlayer(playerCommand, existingParticipant ? undefined : team));
     }
+    participant.players.set(players);
 
     this.em.persist(participant);
-    return true;
   }
 
   async upsertMatchesForTournament(
