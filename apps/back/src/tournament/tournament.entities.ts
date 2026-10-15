@@ -36,6 +36,7 @@ export class Tournament {
   winner: TournamentParticipant | null = null;
   winnerType: string | null = null;
   type: string | null = null;
+  country: string | null = null;
   prizepool: string | null = null;
   imageUrl: string | null = null;
   league: League | null = null;
@@ -126,6 +127,7 @@ export const TournamentSchema = defineEntity({
     winner: p.manyToOne(TournamentParticipant).nullable(),
     winnerType: p.string().nullable(),
     type: p.string().nullable(),
+    country: p.string().nullable(),
     prizepool: p.string().nullable(),
     imageUrl: p.string().nullable(),
     league: p.manyToOne(League).nullable(),

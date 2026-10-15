@@ -71,6 +71,7 @@ export interface TournamentResponse {
   endAt: Date | null;
   winnerType: string | null;
   type: string | null;
+  country: string | null;
   prizepool: string | null;
   imageUrl: string | null;
   pickemsEnabled: boolean;
@@ -160,6 +161,7 @@ export function mapTournament(
     endAt: tournament.endAt,
     winnerType: tournament.winnerType,
     type: tournament.type,
+    country: tournament.country,
     prizepool: tournament.prizepool,
     imageUrl: tournament.imageUrl,
     pickemsEnabled: tournament.pickemsEnabled,
