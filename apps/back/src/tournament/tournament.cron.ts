@@ -6,6 +6,7 @@ import { createLogger } from "evlog";
 import { SyncNewTournamentsUseCase } from "./sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "./match/match.service";
+import { TournamentService } from "./tournament.service";
 
 @Injectable()
 export class TournamentCron {
@@ -14,14 +15,15 @@ export class TournamentCron {
     private readonly syncNewTournamentsUseCase: SyncNewTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
     private readonly matchService: MatchService,
+    private readonly tournamentService: TournamentService,
   ) {}
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   @CreateRequestContext()
-  async syncLiveTournaments() {
+  async syncActiveTournaments() {
     const log = createLogger({
       component: TournamentCron.name,
-      job: "syncLiveTournaments",
+      job: "syncActiveTournaments",
     });
 
     try {
@@ -36,15 +38,10 @@ export class TournamentCron {
         minutesAgo: 15,
       });
 
-      const allMatches = [...liveMatches, ...recentlyEndedMatches];
+      const activeTournamentIds = await this.tournamentService.findPandascoreActiveIds();
 
-      if (allMatches.length === 0) {
-        log.set({ matches: { live: 0, recentlyEnded: 0, tournaments: 0 } });
-        return;
-      }
-
-      const tournamentIds = new Set<string>();
-      for (const match of allMatches) {
+      const tournamentIds = new Set<string>(activeTournamentIds);
+      for (const match of [...liveMatches, ...recentlyEndedMatches]) {
         if (match.tournament?.id) {
           tournamentIds.add(match.tournament.id);
         }
@@ -54,9 +51,16 @@ export class TournamentCron {
         matches: {
           live: liveMatches.length,
           recentlyEnded: recentlyEndedMatches.length,
-          tournaments: tournamentIds.size,
+        },
+        tournaments: {
+          active: activeTournamentIds.length,
+          total: tournamentIds.size,
         },
       });
+
+      if (tournamentIds.size === 0) {
+        return;
+      }
 
       let synced = 0;
       let failed = 0;

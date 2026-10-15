@@ -18,7 +18,7 @@ import { TournamentCron } from "./tournament.cron";
 import { TournamentSyncPersistence } from "./sync/tournament-sync.persistence";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
-import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
+import { SyncPandascoreIncidentsUseCase } from "./sync/sync-pandascore-incidents.use-case";
 import { SyncNewTournamentsUseCase } from "./sync/sync-new-tournaments.use-case";
 import { PickemModule } from "src/game/pickem/pickem.module";
 import { ReplyModule } from "src/reply/reply.module";
@@ -52,7 +52,7 @@ import { log } from "evlog";
     TournamentSyncPersistence,
     SyncAllTournamentsUseCase,
     SyncPandascoreTournamentUseCase,
-    SyncPandascoreAdditionsUseCase,
+    SyncPandascoreIncidentsUseCase,
     SyncNewTournamentsUseCase,
   ],
   exports: [

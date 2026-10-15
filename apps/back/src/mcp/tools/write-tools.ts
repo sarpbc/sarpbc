@@ -380,7 +380,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "trigger_tournament_sync",
     {
       description:
-        "Trigger a PandaScore sync. Requires tournaments.manage. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then run additions.",
+        "Trigger a PandaScore sync. Requires tournaments.manage. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then apply PandaScore incidents (creations and updates).",
       inputSchema: {
         tournamentId: z
           .string()

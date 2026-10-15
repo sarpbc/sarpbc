@@ -8,11 +8,15 @@ import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentRepository } from "./tournament.repository";
 import { SyncAllTournamentsUseCase } from "./sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
-import { SyncPandascoreAdditionsUseCase } from "./sync/sync-pandascore-additions.use-case";
 import {
   SyncNewTournamentsResult,
   SyncNewTournamentsUseCase,
 } from "./sync/sync-new-tournaments.use-case";
+
+const HOUR_MS = 60 * 60 * 1000;
+const ACTIVE_LOOKAHEAD_MS = 24 * HOUR_MS;
+const ACTIVE_MAX_DURATION_MS = 7 * 24 * HOUR_MS;
+const ACTIVE_GRACE_AFTER_END_MS = 6 * HOUR_MS;
 
 interface TournamentListFilter {
   pickemsEnabled?: boolean;
@@ -29,7 +33,6 @@ export class TournamentService {
     private readonly participantRepository: EntityRepository<TournamentParticipant>,
     private readonly syncAllTournamentsUseCase: SyncAllTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
-    private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
     private readonly syncNewTournamentsUseCase: SyncNewTournamentsUseCase,
     private readonly redisService: RedisService,
     private readonly em: EntityManager,
@@ -77,6 +80,19 @@ export class TournamentService {
 
   async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
     return this.tournamentRepository.findPandascoreWithoutMatches();
+  }
+
+  /**
+   * Tournaments starting within the next day or still running. Their matches are
+   * often created or scheduled on PandaScore after the tournament is discovered.
+   */
+  async findPandascoreActiveIds(now: Date = new Date()): Promise<string[]> {
+    const tournaments = await this.tournamentRepository.findPandascoreActive({
+      beginsBefore: new Date(now.getTime() + ACTIVE_LOOKAHEAD_MS),
+      beganAfter: new Date(now.getTime() - ACTIVE_MAX_DURATION_MS),
+      endsAfter: new Date(now.getTime() - ACTIVE_GRACE_AFTER_END_MS),
+    });
+    return tournaments.map((tournament) => tournament.id);
   }
 
   async findById(id: string): Promise<Tournament | null> {
@@ -142,11 +158,6 @@ export class TournamentService {
       await this.syncPandascoreTournamentUseCase.executeByPandascoreId(pandascoreId);
     await this.redisService.delete(`tournament:${tournamentId}`);
     return tournamentId;
-  }
-
-  @CreateRequestContext()
-  async syncPandascoreAdditions(): Promise<void> {
-    await this.syncPandascoreAdditionsUseCase.execute();
   }
 
   @CreateRequestContext()

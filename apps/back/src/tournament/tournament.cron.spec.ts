@@ -4,6 +4,7 @@ import { TournamentCron } from "./tournament.cron";
 import { SyncNewTournamentsUseCase } from "./sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "./match/match.service";
+import { TournamentService } from "./tournament.service";
 
 describe("TournamentCron", () => {
   let cron: TournamentCron;
@@ -13,6 +14,7 @@ describe("TournamentCron", () => {
     findLive: jest.fn(),
     findRecentlyEnded: jest.fn(),
   };
+  const tournamentService = { findPandascoreActiveIds: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,11 +24,15 @@ describe("TournamentCron", () => {
         { provide: SyncNewTournamentsUseCase, useValue: syncNewTournamentsUseCase },
         { provide: SyncPandascoreTournamentUseCase, useValue: syncPandascoreTournamentUseCase },
         { provide: MatchService, useValue: matchService },
+        { provide: TournamentService, useValue: tournamentService },
       ],
     }).compile();
 
     cron = module.get(TournamentCron);
     jest.clearAllMocks();
+    matchService.findLive.mockResolvedValue([]);
+    matchService.findRecentlyEnded.mockResolvedValue([]);
+    tournamentService.findPandascoreActiveIds.mockResolvedValue([]);
   });
 
   it("syncPandascoreAdditionsDaily delegates to new-tournaments use case", async () => {
@@ -40,12 +46,32 @@ describe("TournamentCron", () => {
     expect(syncNewTournamentsUseCase.execute).toHaveBeenCalled();
   });
 
-  it("syncLiveTournaments syncs tournaments with live matches", async () => {
+  it("syncActiveTournaments syncs tournaments with live matches", async () => {
     matchService.findLive.mockResolvedValue([{ tournament: { id: "tournament-1" } }]);
-    matchService.findRecentlyEnded.mockResolvedValue([]);
 
-    await cron.syncLiveTournaments();
+    await cron.syncActiveTournaments();
 
     expect(syncPandascoreTournamentUseCase.execute).toHaveBeenCalledWith("tournament-1");
+  });
+
+  it("syncActiveTournaments syncs active tournaments that have no match yet", async () => {
+    tournamentService.findPandascoreActiveIds.mockResolvedValue(["empty-playoffs"]);
+
+    await cron.syncActiveTournaments();
+
+    expect(syncPandascoreTournamentUseCase.execute).toHaveBeenCalledWith("empty-playoffs");
+  });
+
+  it("syncActiveTournaments syncs each tournament once and continues after a failure", async () => {
+    tournamentService.findPandascoreActiveIds.mockResolvedValue(["tournament-1", "tournament-2"]);
+    matchService.findLive.mockResolvedValue([{ tournament: { id: "tournament-1" } }]);
+    syncPandascoreTournamentUseCase.execute
+      .mockRejectedValueOnce(new Error("PandaScore down"))
+      .mockResolvedValueOnce(undefined);
+
+    await cron.syncActiveTournaments();
+
+    expect(syncPandascoreTournamentUseCase.execute).toHaveBeenCalledTimes(2);
+    expect(syncPandascoreTournamentUseCase.execute).toHaveBeenCalledWith("tournament-2");
   });
 });
