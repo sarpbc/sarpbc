@@ -2,9 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import { createLogger } from "evlog";
 import {
   PANDASCORE_GATEWAY,
-  PandascoreAdditionDto,
   PandascoreGateway,
+  PandascoreIncidentDto,
 } from "src/pandascore/application/ports/pandascore.gateway.port";
+import { PandascoreIncidentPlayerDto } from "src/pandascore/infrastructure/dto/incident.dto";
 import { PandascoreMatchMapper } from "src/pandascore/application/mappers/pandascore-match.mapper";
 import { PandascoreTournamentMapper } from "src/pandascore/application/mappers/pandascore-tournament.mapper";
 import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
@@ -21,7 +22,7 @@ const ROCKET_LEAGUE_VIDEOGAME = "rl";
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
-export class SyncPandascoreAdditionsUseCase {
+export class SyncPandascoreIncidentsUseCase {
   constructor(
     @Inject(PANDASCORE_GATEWAY)
     private readonly pandascoreGateway: PandascoreGateway,
@@ -31,38 +32,40 @@ export class SyncPandascoreAdditionsUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    const log = createLogger({ component: SyncPandascoreAdditionsUseCase.name });
+    const log = createLogger({ component: SyncPandascoreIncidentsUseCase.name });
 
     try {
       const since = await this.resolveSinceCursor();
       log.set({ since: since.toISOString() });
 
-      const additions = await this.pandascoreGateway.listAdditions({
+      const incidents = await this.pandascoreGateway.listIncidents({
         since,
         videogame: [ROCKET_LEAGUE_VIDEOGAME],
         sort: "modified_at",
         perPage: 100,
       });
 
-      if (additions.length === 0) {
+      if (incidents.length === 0) {
         await this.syncCursorRepository.setLastSyncAt(new Date());
-        log.set({ additions: { total: 0, processed: 0, failed: 0 } });
+        log.set({ incidents: { total: 0, processed: 0, failed: 0 } });
         return;
       }
 
       let latestModifiedAt = since;
       let failed = 0;
 
-      for (const addition of additions) {
+      for (const incident of incidents) {
         try {
-          await this.processAddition(log, addition);
+          await this.processIncident(log, incident);
+          // Team and player upserts only persist; without this the last one of a run is lost.
+          await this.persistence.flush();
         } catch (error) {
           failed += 1;
-          log.set({ additionType: addition.type, additionId: addition.id });
+          log.set({ incidentType: incident.type, incidentId: incident.id });
           log.error(error instanceof Error ? error : new Error(String(error)));
         }
 
-        const modifiedAt = new Date(addition.modified_at);
+        const modifiedAt = new Date(incident.modified_at);
         if (modifiedAt > latestModifiedAt) {
           latestModifiedAt = modifiedAt;
         }
@@ -70,9 +73,9 @@ export class SyncPandascoreAdditionsUseCase {
 
       await this.syncCursorRepository.setLastSyncAt(latestModifiedAt);
       log.set({
-        additions: {
-          total: additions.length,
-          processed: additions.length - failed,
+        incidents: {
+          total: incidents.length,
+          processed: incidents.length - failed,
           failed,
         },
       });
@@ -92,43 +95,55 @@ export class SyncPandascoreAdditionsUseCase {
     return new Date(Date.now() - DEFAULT_LOOKBACK_MS);
   }
 
-  private async processAddition(
+  private async processIncident(
     log: ReturnType<typeof createLogger>,
-    addition: PandascoreAdditionDto,
+    incident: PandascoreIncidentDto,
   ): Promise<void> {
-    switch (addition.type) {
+    if (incident.change_type === "deletion") {
+      log.info(`Skipping ${incident.type} deletion (id=${incident.id})`);
+      return;
+    }
+
+    switch (incident.type) {
       case "tournament":
         await this.persistence.upsertTournament(
-          PandascoreTournamentMapper.toUpsertCommand(addition.object),
+          PandascoreTournamentMapper.toUpsertCommand(incident.object),
         );
         break;
       case "match":
-        await this.processMatchAddition(log, addition.object);
+        await this.processMatchIncident(log, incident.object);
         break;
       case "team":
-        await this.persistence.upsertTeam(PandascoreTeamMapper.toUpsertCommand(addition.object));
+        await this.persistence.upsertTeam(PandascoreTeamMapper.toUpsertCommand(incident.object));
         break;
       case "player":
-        await this.persistence.upsertPlayer(
-          PandascorePlayerMapper.toUpsertCommand(addition.object),
-        );
+        await this.processPlayerIncident(incident.object);
         break;
       case "league":
         await this.persistence.upsertLeague(
-          PandascoreLeagueMapper.toUpsertCommand(addition.object),
+          PandascoreLeagueMapper.toUpsertCommand(incident.object),
         );
         break;
       case "serie":
-        log.info(`Skipping serie addition (id=${addition.id})`);
+        log.info(`Skipping serie incident (id=${incident.id})`);
         break;
       default: {
-        const _exhaustive: never = addition;
-        log.warn(`Unhandled PandaScore addition type: ${String(_exhaustive)}`);
+        const _exhaustive: never = incident;
+        log.warn(`Unhandled PandaScore incident type: ${String(_exhaustive)}`);
       }
     }
   }
 
-  private async processMatchAddition(
+  private async processPlayerIncident(playerDto: PandascoreIncidentPlayerDto): Promise<void> {
+    const team = playerDto.current_team
+      ? await this.persistence.upsertTeam(
+          PandascoreTeamMapper.fromCurrentTeam(playerDto.current_team),
+        )
+      : null;
+    await this.persistence.upsertPlayer(PandascorePlayerMapper.toUpsertCommand(playerDto), team);
+  }
+
+  private async processMatchIncident(
     log: ReturnType<typeof createLogger>,
     matchDto: MatchDto,
   ): Promise<void> {
@@ -139,7 +154,7 @@ export class SyncPandascoreAdditionsUseCase {
       );
       if (!pandaTournament) {
         log.info(
-          `Skipping match addition because tournament is unknown on PandaScore (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
+          `Skipping match incident because tournament is unknown on PandaScore (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
         );
         return;
       }
@@ -150,13 +165,13 @@ export class SyncPandascoreAdditionsUseCase {
       tournament = await this.persistence.findTournamentByPandascoreId(matchDto.tournament_id);
       if (!tournament) {
         log.warn(
-          `Failed to persist tournament for match addition (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
+          `Failed to persist tournament for match incident (matchId=${matchDto.id}, tournamentId=${matchDto.tournament_id})`,
         );
         return;
       }
 
       log.info(
-        `Backfilled missing tournament from match addition (tournamentId=${matchDto.tournament_id})`,
+        `Backfilled missing tournament from match incident (tournamentId=${matchDto.tournament_id})`,
       );
     }
 

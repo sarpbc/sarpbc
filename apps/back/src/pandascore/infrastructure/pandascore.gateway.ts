@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import {
-  ListAdditionsParams,
+  ListIncidentsParams,
   PandascoreGateway,
 } from "../application/ports/pandascore.gateway.port";
-import { PandascoreAdditionsListDto } from "./dto/addition.dto";
+import { PandascoreIncidentsListDto } from "./dto/incident.dto";
 import { MatchDto } from "./dto/match.dto";
 import { TournamentDto } from "./dto/tournament.dto";
 import { PandascoreApiClient } from "./pandascore-api.client";
@@ -12,8 +12,8 @@ import { PandascoreApiClient } from "./pandascore-api.client";
 export class PandascoreGatewayImpl implements PandascoreGateway {
   constructor(private readonly apiClient: PandascoreApiClient) {}
 
-  listAdditions(params: ListAdditionsParams = {}): Promise<PandascoreAdditionsListDto> {
-    return this.apiClient.listAdditions(params);
+  listIncidents(params: ListIncidentsParams = {}): Promise<PandascoreIncidentsListDto> {
+    return this.apiClient.listIncidents(params);
   }
 
   getTournaments(): Promise<TournamentDto[]> {

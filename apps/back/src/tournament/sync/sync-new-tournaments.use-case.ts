@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { createLogger } from "evlog";
 import { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
-import { SyncPandascoreAdditionsUseCase } from "./sync-pandascore-additions.use-case";
+import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
 export interface SyncNewTournamentsResult {
@@ -12,14 +12,14 @@ export interface SyncNewTournamentsResult {
 
 /**
  * PandaScore often omits tournament creations from the videogame-filtered
- * additions feed, so a full reconcile pass is required first.
+ * incidents feed, so a full reconcile pass is required first.
  */
 @Injectable()
 export class SyncNewTournamentsUseCase {
   constructor(
     private readonly syncAllTournamentsUseCase: SyncAllTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
-    private readonly syncPandascoreAdditionsUseCase: SyncPandascoreAdditionsUseCase,
+    private readonly syncPandascoreIncidentsUseCase: SyncPandascoreIncidentsUseCase,
   ) {}
 
   async execute(): Promise<SyncNewTournamentsResult> {
@@ -42,7 +42,7 @@ export class SyncNewTournamentsUseCase {
         }
       }
 
-      await this.syncPandascoreAdditionsUseCase.execute();
+      await this.syncPandascoreIncidentsUseCase.execute();
 
       const result: SyncNewTournamentsResult = {
         discovered: newTournamentIds.length,
