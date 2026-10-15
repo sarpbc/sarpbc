@@ -8,6 +8,7 @@ import { UpsertTeamCommand } from "src/pandascore/application/commands/upsert-te
 import { UpsertTournamentCommand } from "src/pandascore/application/commands/upsert-tournament.command";
 import { UpsertTournamentParticipantCommand } from "src/pandascore/application/commands/upsert-tournament-participant.command";
 import { Player } from "src/player/player.entities";
+import { availablePlayerSlug, findPandascorePlayer } from "src/player/find-pandascore-player";
 import { Team } from "src/player/player.entities";
 import { League, Tournament, TournamentParticipant } from "../tournament.entities";
 import { LeagueService } from "../league/league.service";
@@ -113,13 +114,14 @@ export class TournamentSyncPersistence {
   }
 
   async upsertPlayer(command: UpsertPlayerCommand, team?: Team): Promise<Player> {
-    let player = await this.em.findOne(Player, { slug: command.slug });
+    let player = await findPandascorePlayer(this.em, command.pandascoreId, command.slug);
 
     if (!player) {
       player = new Player();
-      player.slug = command.slug;
+      player.slug = await availablePlayerSlug(this.em, command.pandascoreId, command.slug);
     }
 
+    player.pandascoreId = command.pandascoreId;
     player.name = command.name;
     player.firstName = command.firstName ?? null;
     player.lastName = command.lastName ?? null;

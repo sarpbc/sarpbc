@@ -8,6 +8,7 @@ import { PandascorePlayerMapper } from "src/pandascore/application/mappers/panda
 import { PandascoreTeamMapper } from "src/pandascore/application/mappers/pandascore-team.mapper";
 import { createLogger } from "evlog";
 import { Player } from "src/player/player.entities";
+import { availablePlayerSlug, findPandascorePlayer } from "src/player/find-pandascore-player";
 import { Team } from "src/player/player.entities";
 
 @Injectable()
@@ -65,7 +66,11 @@ export class SyncPandascoreTeamsUseCase {
         }
 
         const playerCommand = PandascorePlayerMapper.fromRocketLeaguePlayer(pandaPlayer);
-        const existingPlayer = await em.findOne(Player, { slug: playerCommand.slug });
+        const existingPlayer = await findPandascorePlayer(
+          em,
+          playerCommand.pandascoreId,
+          playerCommand.slug,
+        );
 
         if (!existingPlayer) {
           const newPlayer = new Player();
@@ -76,7 +81,12 @@ export class SyncPandascoreTeamsUseCase {
           newPlayer.nationality = playerCommand.nationality ?? null;
           newPlayer.imageUrl = playerCommand.imageUrl ?? null;
           newPlayer.role = playerCommand.role ?? null;
-          newPlayer.slug = playerCommand.slug;
+          newPlayer.slug = await availablePlayerSlug(
+            em,
+            playerCommand.pandascoreId,
+            playerCommand.slug,
+          );
+          newPlayer.pandascoreId = playerCommand.pandascoreId;
 
           if (playerCommand.teamSlug) {
             const team = createdTeams.get(playerCommand.teamSlug);
@@ -89,6 +99,11 @@ export class SyncPandascoreTeamsUseCase {
           playersCreated += 1;
         } else {
           let changed = false;
+
+          if (existingPlayer.pandascoreId !== playerCommand.pandascoreId) {
+            existingPlayer.pandascoreId = playerCommand.pandascoreId;
+            changed = true;
+          }
 
           if (playerCommand.teamSlug) {
             const team = createdTeams.get(playerCommand.teamSlug);
