@@ -41,7 +41,7 @@ describe("PandascoreApiClient", () => {
     ).rejects.toThrow("PandaScore API token not configured");
   });
 
-  it("listAdditions builds query params and paginates", async () => {
+  it("listIncidents builds query params and paginates", async () => {
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
         ok: true,
@@ -53,18 +53,18 @@ describe("PandascoreApiClient", () => {
       });
 
     const since = new Date("2025-01-01T00:00:00Z");
-    const additions = await client.listAdditions({
+    const incidents = await client.listIncidents({
       since,
       videogame: ["rl"],
       type: ["match", "tournament"],
       perPage: 1,
     });
 
-    expect(additions).toHaveLength(1);
+    expect(incidents).toHaveLength(1);
     expect(global.fetch).toHaveBeenCalledTimes(2);
 
     const firstCallUrl = String((global.fetch as jest.Mock).mock.calls[0][0]);
-    expect(firstCallUrl).toContain("/additions");
+    expect(firstCallUrl).toContain("/incidents");
     expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
     expect(firstCallUrl).toContain("videogame=rl");
     expect(firstCallUrl).not.toContain("videogame%5B%5D=");

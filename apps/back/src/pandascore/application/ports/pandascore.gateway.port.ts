@@ -1,17 +1,17 @@
 import {
-  PandascoreAdditionDto,
-  PandascoreAdditionType,
-  PandascoreAdditionsListDto,
-} from "../../infrastructure/dto/addition.dto";
+  PandascoreIncidentDto,
+  PandascoreIncidentType,
+  PandascoreIncidentsListDto,
+} from "../../infrastructure/dto/incident.dto";
 import { MatchDto } from "../../infrastructure/dto/match.dto";
 import { TournamentDto } from "../../infrastructure/dto/tournament.dto";
 import { TeamDto } from "../../infrastructure/dto/team.dto";
 import { PlayerDto } from "../../infrastructure/dto/tournament.dto";
 import { LeagueDto } from "../../infrastructure/dto/tournament.dto";
 
-export interface ListAdditionsParams {
+export interface ListIncidentsParams {
   since?: Date;
-  type?: PandascoreAdditionType[];
+  type?: PandascoreIncidentType[];
   videogame?: string[];
   page?: number;
   perPage?: number;
@@ -19,7 +19,7 @@ export interface ListAdditionsParams {
 }
 
 export interface PandascoreGateway {
-  listAdditions(params?: ListAdditionsParams): Promise<PandascoreAdditionsListDto>;
+  listIncidents(params?: ListIncidentsParams): Promise<PandascoreIncidentsListDto>;
   getTournaments(): Promise<TournamentDto[]>;
   getTournamentById(tournamentId: number): Promise<TournamentDto | null>;
   getTournamentBrackets(tournamentId: number): Promise<MatchDto[]>;
@@ -49,9 +49,9 @@ export interface PandascoreGateway {
 export const PANDASCORE_GATEWAY = Symbol("PANDASCORE_GATEWAY");
 
 export type {
-  PandascoreAdditionDto,
-  PandascoreAdditionType,
-  PandascoreAdditionsListDto,
+  PandascoreIncidentDto,
+  PandascoreIncidentType,
+  PandascoreIncidentsListDto,
   TournamentDto,
   MatchDto,
   TeamDto,

@@ -42,6 +42,26 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     );
   }
 
+  async findPandascoreActive({
+    beginsBefore,
+    beganAfter,
+    endsAfter,
+  }: {
+    beginsBefore: Date;
+    beganAfter: Date;
+    endsAfter: Date;
+  }): Promise<Pick<Tournament, "id">[]> {
+    return this.find(
+      {
+        source: "pandascore",
+        pandascoreId: { $ne: null },
+        beginAt: { $lte: beginsBefore, $gte: beganAfter },
+        $or: [{ endAt: null }, { endAt: { $gte: endsAfter } }],
+      },
+      { fields: ["id"] },
+    );
+  }
+
   async findAllTournaments(fields?: string[]): Promise<Tournament[]> {
     const opts: any = {};
     if (fields) opts.fields = fields;

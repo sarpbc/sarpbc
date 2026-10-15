@@ -1,4 +1,4 @@
-import { Player } from "src/player/player.entities";
+import { Player, Team } from "src/player/player.entities";
 import { Tournament } from "../tournament.entities";
 import { TournamentSyncPersistence } from "./tournament-sync.persistence";
 
@@ -131,5 +131,35 @@ describe("TournamentSyncPersistence", () => {
 
     expect(created.slug).toBe("zen-2");
     expect(created.pandascoreId).toBe(2);
+  });
+
+  it("moves a player to the given team and detaches them when the team is null", async () => {
+    const oldTeam = Object.assign(new Team(), { slug: "bigodes-rl" });
+    const newTeam = Object.assign(new Team(), { slug: "team-secret-rl" });
+    const player = Object.assign(new Player(), {
+      slug: "drufinho",
+      pandascoreId: 1,
+      team: oldTeam,
+    });
+    em.findOne.mockResolvedValue(player);
+
+    await persistence.upsertPlayer(
+      { pandascoreId: 1, name: "Drufinho", slug: "drufinho" },
+      newTeam,
+    );
+    expect(player.team).toBe(newTeam);
+
+    await persistence.upsertPlayer({ pandascoreId: 1, name: "Drufinho", slug: "drufinho" }, null);
+    expect(player.team).toBeNull();
+  });
+
+  it("keeps the player's team when no team is given", async () => {
+    const team = Object.assign(new Team(), { slug: "bigodes-rl" });
+    const player = Object.assign(new Player(), { slug: "drufinho", pandascoreId: 1, team });
+    em.findOne.mockResolvedValue(player);
+
+    await persistence.upsertPlayer({ pandascoreId: 1, name: "Drufinho", slug: "drufinho" });
+
+    expect(player.team).toBe(team);
   });
 });

@@ -113,7 +113,8 @@ export class TournamentSyncPersistence {
     return team;
   }
 
-  async upsertPlayer(command: UpsertPlayerCommand, team?: Team): Promise<Player> {
+  /** `team: null` detaches the player (free agent); `undefined` keeps the current team. */
+  async upsertPlayer(command: UpsertPlayerCommand, team?: Team | null): Promise<Player> {
     let player = await findPandascorePlayer(this.em, command.pandascoreId, command.slug);
 
     if (!player) {
@@ -131,12 +132,16 @@ export class TournamentSyncPersistence {
     if (command.role !== undefined) {
       player.role = command.role;
     }
-    if (team) {
+    if (team !== undefined) {
       player.team = team;
     }
 
     this.em.persist(player);
     return player;
+  }
+
+  async flush(): Promise<void> {
+    await this.em.flush();
   }
 
   async upsertTournamentParticipant(

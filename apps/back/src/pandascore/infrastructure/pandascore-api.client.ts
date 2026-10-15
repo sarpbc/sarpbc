@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PandascoreAdditionType, PandascoreAdditionsListDto } from "./dto/addition.dto";
+import { PandascoreIncidentType, PandascoreIncidentsListDto } from "./dto/incident.dto";
 import { MatchDto } from "./dto/match.dto";
 import { TournamentDto } from "./dto/tournament.dto";
 import { PandascoreApiError } from "./pandascore-api.errors";
@@ -11,7 +11,7 @@ export interface PandascoreQueryParams {
   per_page?: string;
   sort?: string;
   since?: string;
-  type?: PandascoreAdditionType[];
+  type?: PandascoreIncidentType[];
   videogame?: string[];
 }
 
@@ -45,9 +45,9 @@ export interface RocketLeaguePlayerDto {
   slug: string;
 }
 
-export interface ListAdditionsClientParams {
+export interface ListIncidentsClientParams {
   since?: Date;
-  type?: PandascoreAdditionType[];
+  type?: PandascoreIncidentType[];
   videogame?: string[];
   page?: number;
   perPage?: number;
@@ -71,7 +71,7 @@ export class PandascoreApiClient {
     this.apiToken = apiToken;
   }
 
-  async listAdditions(params: ListAdditionsClientParams = {}): Promise<PandascoreAdditionsListDto> {
+  async listIncidents(params: ListIncidentsClientParams = {}): Promise<PandascoreIncidentsListDto> {
     const query: PandascoreQueryParams = {
       page: String(params.page ?? 1),
       per_page: String(params.perPage ?? 100),
@@ -88,7 +88,7 @@ export class PandascoreApiClient {
       query.videogame = params.videogame;
     }
 
-    return this.paginateAll<PandascoreAdditionsListDto[number]>("/additions", {
+    return this.paginateAll<PandascoreIncidentsListDto[number]>("/incidents", {
       params: query,
       perPage: params.perPage ?? 100,
     });
