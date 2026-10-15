@@ -1,6 +1,8 @@
 import { Player, Team } from "src/player/player.entities";
-import { Tournament } from "../tournament.entities";
+import { Tournament, TournamentParticipant } from "../tournament.entities";
 import { TournamentSyncPersistence } from "./tournament-sync.persistence";
+
+type EntityClass = typeof Team | typeof Player | typeof TournamentParticipant;
 
 describe("TournamentSyncPersistence", () => {
   let persistence: TournamentSyncPersistence;
@@ -161,5 +163,65 @@ describe("TournamentSyncPersistence", () => {
     await persistence.upsertPlayer({ pandascoreId: 1, name: "Drufinho", slug: "drufinho" });
 
     expect(player.team).toBe(team);
+  });
+
+  it("creates a participant whose players join the team", async () => {
+    const tournament = new Tournament();
+    const team = Object.assign(new Team(), { slug: "team-secret-rl" });
+    const player = Object.assign(new Player(), { slug: "drufinho", pandascoreId: 1, team: null });
+    em.findOne.mockImplementation((entity: EntityClass) => {
+      if (entity === Team) return team;
+      if (entity === Player) return player;
+      return null;
+    });
+
+    await persistence.upsertTournamentParticipant(tournament, {
+      team: { name: "Team Secret", slug: "team-secret-rl" },
+      players: [{ pandascoreId: 1, name: "Drufinho", slug: "drufinho" }],
+    });
+
+    const participant = em.persist.mock.calls
+      .map(([entity]: [unknown]) => entity)
+      .find((entity) => entity instanceof TournamentParticipant) as TournamentParticipant;
+    expect(participant.tournament).toBe(tournament);
+    expect(participant.players.getItems()).toEqual([player]);
+    expect(player.team).toBe(team);
+  });
+
+  it("reconciles an existing participant's players with the latest roster", async () => {
+    const tournament = new Tournament();
+    const oldTeam = Object.assign(new Team(), { slug: "bigodes-rl" });
+    const team = Object.assign(new Team(), { slug: "team-secret-rl" });
+    const kept = Object.assign(new Player(), { slug: "kept", pandascoreId: 1, team });
+    const benched = Object.assign(new Player(), { slug: "benched", pandascoreId: 2, team });
+    const substitute = Object.assign(new Player(), { slug: "sub", pandascoreId: 3, team: oldTeam });
+    const participant = Object.assign(new TournamentParticipant(), { tournament, team });
+    participant.players.set([kept, benched]);
+    const playersById = new Map([
+      [1, kept],
+      [3, substitute],
+    ]);
+    em.findOne.mockImplementation((entity: EntityClass, where: { pandascoreId?: number }) => {
+      if (entity === Team) return team;
+      if (entity === TournamentParticipant) return participant;
+      if (entity === Player) return playersById.get(where.pandascoreId ?? -1) ?? null;
+      return null;
+    });
+
+    await persistence.upsertTournamentParticipant(tournament, {
+      team: { name: "Team Secret", slug: "team-secret-rl" },
+      players: [
+        { pandascoreId: 1, name: "kept", slug: "kept" },
+        { pandascoreId: 3, name: "sub", slug: "sub" },
+      ],
+    });
+
+    expect(participant.players.getItems()).toEqual([kept, substitute]);
+    expect(substitute.team).toBe(oldTeam);
+    expect(em.findOne).toHaveBeenCalledWith(
+      TournamentParticipant,
+      { tournament, team },
+      { populate: ["players"] },
+    );
   });
 });

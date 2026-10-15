@@ -45,6 +45,10 @@ jest.mock("@mikro-orm/core", () => {
         this.items.push(...items);
       }
 
+      set(items: T[]): void {
+        this.items.splice(0, this.items.length, ...items);
+      }
+
       count(): number {
         return this.items.length;
       }
