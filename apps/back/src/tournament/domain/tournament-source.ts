@@ -1,5 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
-import type { UpdateTournamentDto } from "../dto/create-tournament.dto";
+import { InvalidInputError } from "../../common/domain/errors";
 
 export const TOURNAMENT_SOURCES = ["pandascore", "manual"] as const;
 
@@ -11,7 +10,16 @@ export function isTournamentSource(value: string): value is TournamentSource {
 
 export function assertTournamentUpdateAllowed(
   source: TournamentSource,
-  patch: UpdateTournamentDto,
+  patch: {
+    imageUrl?: string | null;
+    name?: string;
+    slug?: string;
+    tier?: string | null;
+    leagueId?: string | null;
+    beginAt?: string | null;
+    endAt?: string | null;
+    teamIds?: string[];
+  },
 ): void {
   switch (source) {
     case "manual":
@@ -24,7 +32,7 @@ export function assertTournamentUpdateAllowed(
       ) {
         return;
       }
-      throw new BadRequestException(
+      throw new InvalidInputError(
         "Only the image can be edited on a PandaScore tournament. Send imageUrl alone, or null to clear it.",
       );
     }

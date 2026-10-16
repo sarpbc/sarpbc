@@ -1,4 +1,4 @@
-import type { OfficialMatchStream } from "src/tournament/domain/official-match-stream";
+import type { OfficialMatchStream } from "../../../tournament/domain/official-match-stream";
 
 export interface UpsertMatchResultCommand {
   teamPandascoreId: number;
@@ -20,6 +20,7 @@ export interface UpsertMatchCommand {
   status?: string;
   numberOfGames?: number;
   opponentSlugs: string[];
+  opponentPandascoreIds?: number[];
   results: UpsertMatchResultCommand[];
   previousMatches: UpsertMatchPreviousMatchCommand[];
   officialStreams: OfficialMatchStream[];

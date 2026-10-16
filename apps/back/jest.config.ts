@@ -12,12 +12,11 @@ const config: Config = {
       },
     ],
   },
-  // Coverage only on code we actually unit-test today — not the whole Nest app (~200 files).
   collectCoverageFrom: [
     "pandascore/**/*.(t|j)s",
-    "tournament/sync/**/*.(t|j)s",
-    "tournament/tournament.cron.ts",
-    "auth/auth.guard.ts",
+    "tournament/application/sync/**/*.(t|j)s",
+    "tournament/infrastructure/jobs/tournament.cron.ts",
+    "auth/infrastructure/http/auth.guard.ts",
     "!**/*.spec.ts",
     "!**/*.module.ts",
     "!**/dto/**",

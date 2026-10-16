@@ -26,7 +26,7 @@ Bring your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). S
 
 ## Contributing
 
-- Feature modules under `src/`; validate input with DTOs.
+- Feature modules use `domain`, `application`, and `infrastructure` layers. See [Backend architecture](ARCHITECTURE.md).
 - HTTP errors should be actionable for the Nuxt UI.
 - Run `pnpm --filter back test` before opening a PR.
 

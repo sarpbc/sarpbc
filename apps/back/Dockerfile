@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
 RUN pnpm --filter ./apps/back run build \
   && test -f /app/apps/back/dist/mikro-orm.config.js \
   && test -f /app/apps/back/dist/main.js \
-  && test -d /app/apps/back/dist/migrations \
+  && test -d /app/apps/back/dist/infrastructure/database/migrations \
   && chmod +x /app/apps/back/entrypoint.sh
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \

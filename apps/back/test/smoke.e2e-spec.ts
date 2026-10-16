@@ -6,20 +6,20 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import request from "supertest";
-import { AuthController } from "../src/auth/auth.controller";
-import { AuthService } from "../src/auth/auth.service";
-import { AuthGuard } from "../src/auth/auth.guard";
-import { UserService } from "../src/user/user.service";
-import { PostHogService } from "../src/posthog/posthog.service";
-import { NewsController } from "../src/news/news.controller";
-import { NewsService } from "../src/news/news.service";
-import { TweetEmbedService } from "../src/news/tweet-embed.service";
-import { ReplyService } from "../src/reply/reply.service";
-import { MatchController } from "../src/tournament/match/match.controller";
-import { MatchService } from "../src/tournament/match/match.service";
-import { AllExceptionsFilter } from "../src/common/filters/all-exceptions.filter";
+import { AuthController } from "../src/auth/infrastructure/http/auth.controller";
+import { authServiceProvider } from "../src/auth/infrastructure/auth.module";
+import { AuthGuard } from "../src/auth/infrastructure/http/auth.guard";
+import { UserService } from "../src/user/application/user.service";
+import { PostHogService } from "../src/infrastructure/telemetry/posthog.service";
+import { NewsController } from "../src/news/infrastructure/http/news.controller";
+import { NewsService } from "../src/news/application/news.service";
+import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
+import { ReplyService } from "../src/reply/application/reply.service";
+import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
+import { MatchService } from "../src/tournament/application/match/match.service";
+import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
 import { configureApp } from "../src/configure-app";
-import { User } from "../src/user/domain/user.entity";
+import { User } from "../src/user/domain/user";
 
 describe("API smoke (e2e)", () => {
   let app: NestFastifyApplication;
@@ -77,23 +77,20 @@ describe("API smoke (e2e)", () => {
       ],
       controllers: [AuthController, NewsController, MatchController],
       providers: [
-        AuthService,
+        authServiceProvider,
         AuthGuard,
         JwtService,
         {
           provide: ConfigService,
-          useValue: {
-            get: (key: string) => {
-              if (key === "jwt_token") return "test-jwt-key-for-e2e";
-              if (key === "production") return false;
-              if (key === "google_client_secret") return "secret";
-              if (key === "google_client_id") return "client-id";
-              if (key === "google_redirect_uri") return "http://localhost/callback";
-              if (key === "front_url") return "http://localhost:4000";
-              if (key === "admin_url") return "http://localhost:4002";
-              return undefined;
-            },
-          },
+          useValue: new ConfigService({
+            jwt_token: "test-jwt-key-for-e2e",
+            production: false,
+            google_client_secret: "secret",
+            google_client_id: "client-id",
+            google_redirect_uri: "http://localhost/callback",
+            front_url: "http://localhost:4000",
+            admin_url: "http://localhost:4002",
+          }),
         },
         { provide: UserService, useValue: userService },
         {
@@ -101,7 +98,7 @@ describe("API smoke (e2e)", () => {
           useValue: { capture: jest.fn(), flush: jest.fn().mockResolvedValue(undefined) },
         },
         { provide: NewsService, useValue: newsService },
-        TweetEmbedService,
+        { provide: TweetEmbedService, useValue: { embed: jest.fn() } },
         { provide: ReplyService, useValue: { countByTargetIds: jest.fn() } },
         { provide: MatchService, useValue: matchService },
         { provide: APP_GUARD, useClass: ThrottlerGuard },

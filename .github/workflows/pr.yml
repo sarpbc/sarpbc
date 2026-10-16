@@ -115,6 +115,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Typecheck
+        run: pnpm --filter back typecheck
+
+      - name: Architecture and HTTP contracts
+        run: |
+          pnpm --filter back test:architecture
+          pnpm --filter back test:contracts
+
       - name: Test
         run: pnpm --filter back test
         env:
@@ -130,6 +138,9 @@ jobs:
           JWT_KEY: test-jwt-key
           FRONT_URL: http://localhost:4000
           ADMIN_URL: http://localhost:4002
+
+      - name: Real PostgreSQL and Redis integration
+        run: pnpm --filter back test:integration
 
   frontend:
     name: Frontend typecheck and build
