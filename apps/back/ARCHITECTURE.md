@@ -62,4 +62,4 @@ pnpm --filter back test:integration
 
 The architecture check resolves imports, including type imports, aliases, and reexports. Its tests deliberately introduce forbidden dependencies. The HTTP fixture records routes, status overrides, guards, and permissions; behavior tests verify response content separately.
 
-Integration verification builds the real application and uses disposable PostgreSQL and Redis containers. It compares generated SQL mappings with the schema fixture and exercises real adapters and transaction rollback. Unit tests and mocked HTTP smoke tests alone do not establish SQL atomicity or Redis semantics.
+Integration verification builds the real application and uses disposable PostgreSQL and Redis containers. It rebuilds the database with the existing MikroORM migrations, checks that no migration or schema change remains pending, and exercises real adapters and transaction rollback. A second migration run must apply nothing. Unit tests and mocked HTTP smoke tests alone do not establish SQL atomicity or Redis semantics.

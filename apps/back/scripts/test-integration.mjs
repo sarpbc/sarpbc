@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -44,19 +43,6 @@ async function container(service, image, port, environment, readiness) {
     }
   }
   throw new Error(`${service} did not become ready within 30 seconds`);
-}
-
-function normalizeSchema(sql) {
-  return [
-    ...new Set(
-      sql
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter(Boolean),
-    ),
-  ]
-    .sort()
-    .join("\n");
 }
 
 async function check(name, work) {
@@ -164,11 +150,17 @@ try {
   const { PickemChoice } = rows("game/pickem/infrastructure/persistence/pickem.entity");
   const { PatService } = rows("pat/application/pat.service");
 
-  await check("generated PostgreSQL schema matches the physical mapping contract", async () => {
-    const expected = readFileSync(resolve(root, "test/contracts/database-schema.sql"), "utf8");
-    assert.equal(normalizeSchema(await orm.schema.getCreateSchemaSQL()), normalizeSchema(expected));
-    await orm.schema.create();
+  await check("MikroORM migrations rebuild PostgreSQL with no pending schema changes", async () => {
+    orm.config.get("migrations").snapshot = false;
+    const migrator = orm.migrator;
+    const pending = await migrator.getPending();
+    assert(pending.length > 0, "the fresh database has migrations to apply");
+    const applied = await migrator.up();
+    assert.equal(applied.length, pending.length);
+    assert.deepEqual(await migrator.getPending(), []);
+    assert.equal(await migrator.checkSchema(), false);
     assert.equal((await orm.schema.getUpdateSchemaSQL()).trim(), "");
+    assert.deepEqual(await migrator.up(), []);
   });
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
