@@ -17,13 +17,13 @@
     "mikro:migrate:prod": "mikro-orm migration:up --config ./dist/mikro-orm.config.js",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
-    "test:cov": "vitest run --project unit --coverage",
+    "test:cov": "pnpm run build && vitest run --coverage",
     "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc -p tsconfig.build.json --noEmit --incremental false",
     "typecheck:tests": "tsc -p tsconfig.spec.json --incremental false",
     "test:architecture": "node --test scripts/check-architecture.test.mjs && node scripts/check-architecture.mjs",
     "test:contracts": "node scripts/check-http-contract.mjs",
-    "test:integration": "pnpm run build && node scripts/test-integration.mjs"
+    "test:integration": "pnpm run build && vitest run --project integration"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1127.0",

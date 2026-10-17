@@ -39,17 +39,23 @@ Integration tests rebuild a fresh PostgreSQL database through these migrations a
 
 ## Tests
 
-Vitest runs the unit and HTTP smoke tests as separate projects. SWC preserves the NestJS decorator metadata used by the HTTP tests.
+Vitest runs unit, HTTP smoke, and PostgreSQL/Redis integration tests as separate projects. SWC preserves the NestJS decorator metadata used by the HTTP tests.
 
 ```bash
 pnpm --filter back test
 pnpm --filter back test:watch
 pnpm --filter back test:cov
 pnpm --filter back test:e2e
+pnpm --filter back test:integration
 pnpm --filter back typecheck:tests
 ```
 
-`test:integration` builds the backend and verifies it against disposable PostgreSQL and Redis containers.
+`test:integration` builds the migrations and verifies the backend against disposable PostgreSQL and Redis containers. `test:cov` runs all projects and combines their coverage of the TypeScript sources. Both commands require Docker.
+
+Coverage includes business rules, use cases, HTTP controllers, guards, repositories, transactions, cache adapters, and integrations. It excludes tests, type declarations, DTOs, Nest modules, ORM schema declarations, migrations, the entrypoint, and the ORM configuration and entity registry. Migrations still run in the integration tests.
+
+The HTML report is written to `coverage/index.html`, with totals in `coverage/coverage-summary.json`.
+CI requires at least 70% line and statement coverage across the combined projects.
 
 ## Contributing
 

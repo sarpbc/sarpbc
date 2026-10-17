@@ -5,29 +5,47 @@ export default defineConfig({
   plugins: [swc.vite({ module: { type: "es6" } })],
   test: {
     environment: "node",
-    setupFiles: ["./test/vitest.setup.ts"],
     maxWorkers: 2,
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["src/**/*.spec.ts"] },
+        test: {
+          name: "unit",
+          include: ["src/**/*.spec.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
       },
       {
         extends: true,
-        test: { name: "e2e", include: ["test/**/*.e2e-spec.ts"] },
+        test: {
+          name: "e2e",
+          include: ["test/**/*.e2e-spec.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: { name: "integration", include: ["test/**/*.integration-spec.mjs"] },
       },
     ],
     coverage: {
       provider: "v8",
       reportsDirectory: "./coverage",
-      include: [
-        "src/pandascore/**/*.ts",
-        "src/tournament/application/sync/**/*.ts",
-        "src/tournament/infrastructure/jobs/tournament.cron.ts",
-        "src/auth/infrastructure/http/auth.guard.ts",
+      include: ["src/**/*.ts"],
+      exclude: [
+        "src/**/*.spec.ts",
+        "src/**/*.d.ts",
+        "src/**/*.module.ts",
+        "src/**/dto/**",
+        "src/**/migrations/**",
+        "src/**/*.entity.ts",
+        "src/**/*.entities.ts",
+        "src/main.ts",
+        "src/mikro-orm.config.ts",
+        "src/mikro-orm.entities.ts",
       ],
-      exclude: ["**/*.spec.ts", "**/*.module.ts", "**/dto/**", "**/*.command.ts"],
-      reporter: ["text", "html", "lcov"],
+      reporter: ["text", "html", "lcov", "json-summary"],
+      thresholds: { lines: 70, statements: 70 },
     },
   },
 });
