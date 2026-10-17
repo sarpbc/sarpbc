@@ -3,6 +3,8 @@
 # Monorepo context: always build from repository root (--file apps/back/Dockerfile).
 FROM node:24.22.0-bookworm-slim AS base
 
+ENV CI=true
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/* \

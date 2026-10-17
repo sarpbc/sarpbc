@@ -3,6 +3,8 @@
 # Monorepo context: always build from repository root (--file apps/front/Dockerfile).
 FROM node:24.22.0-alpine AS base
 
+ENV CI=true
+
 WORKDIR /app
 RUN apk add --no-cache libc6-compat \
   && npm install -g pnpm@11.22.0
