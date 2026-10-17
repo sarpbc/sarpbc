@@ -2,7 +2,6 @@ export interface ParsedTweetUrl {
   id: string;
   handle: string | null;
   url: string;
-  oembedUrl: string;
 }
 
 export interface NewsTweetTag {
@@ -17,8 +16,16 @@ export interface TweetEmbed {
   authorName: string;
   authorHandle: string;
   authorUrl: string;
+  authorImageUrl: string | null;
   text: string;
-  postedAtLabel: string | null;
+  postedAt: string;
+  media: {
+    type: "photo" | "video" | "animated_gif";
+    url: string;
+    width: number;
+    height: number;
+    alt: string;
+  }[];
 }
 
 const TWEET_STATUS_PATTERN =
@@ -50,7 +57,6 @@ export function parseTweetUrl(input: string): ParsedTweetUrl | null {
     id,
     handle,
     url: `https://x.com/${pathHandle}/status/${id}`,
-    oembedUrl: `https://twitter.com/${pathHandle}/status/${id}`,
   };
 }
 

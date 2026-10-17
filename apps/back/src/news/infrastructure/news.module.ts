@@ -8,7 +8,7 @@ import { ReplyService } from "../../reply/application/reply.service";
 import { NewsController } from "./http/news.controller";
 import { NewsService } from "../application/news.service";
 import { TweetEmbedService } from "../application/tweet-embed.service";
-import { TweetOEmbedGateway } from "./tweet-oembed.gateway";
+import { TweetSyndicationGateway } from "./tweet-syndication.gateway";
 import { MikroNewsStore } from "./persistence/news.store";
 import { transactionalNews } from "./composition";
 import { IndexNowService } from "./indexnow.service";
@@ -25,7 +25,7 @@ import { IndexNowService } from "./indexnow.service";
     },
     {
       provide: TweetEmbedService,
-      useFactory: () => new TweetEmbedService(new TweetOEmbedGateway()),
+      useFactory: () => new TweetEmbedService(new TweetSyndicationGateway()),
     },
   ],
   exports: [NewsService],
