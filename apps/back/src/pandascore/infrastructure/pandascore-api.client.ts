@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PandascoreIncidentType, PandascoreIncidentsListDto } from "./dto/incident.dto";
-import { MatchDto } from "./dto/match.dto";
-import { TournamentDto } from "./dto/tournament.dto";
+import { PandascoreIncidentType } from "./dto/incident.dto";
+import { z } from "zod";
+
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
@@ -71,7 +71,7 @@ export class PandascoreApiClient {
     this.apiToken = apiToken;
   }
 
-  async listIncidents(params: ListIncidentsClientParams = {}): Promise<PandascoreIncidentsListDto> {
+  async listIncidents(params: ListIncidentsClientParams = {}): Promise<unknown[]> {
     const query: PandascoreQueryParams = {
       page: String(params.page ?? 1),
       per_page: String(params.perPage ?? 100),
@@ -88,29 +88,30 @@ export class PandascoreApiClient {
       query.videogame = params.videogame;
     }
 
-    return this.paginateAll<PandascoreIncidentsListDto[number]>("/incidents", {
+    return this.paginateAll("/incidents", {
       params: query,
       perPage: params.perPage ?? 100,
     });
   }
 
-  async getTournaments(): Promise<TournamentDto[]> {
-    const pastTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/past");
-    const upcomingTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/upcoming");
-    const runningTournaments = await this.paginateAll<TournamentDto>("/rl/tournaments/running");
+  async getTournaments(): Promise<unknown[]> {
+    const pastTournaments = await this.paginateAll("/rl/tournaments/past");
+    const upcomingTournaments = await this.paginateAll("/rl/tournaments/upcoming");
+    const runningTournaments = await this.paginateAll("/rl/tournaments/running");
     const allTournaments = [...pastTournaments, ...upcomingTournaments, ...runningTournaments];
-    const byId = new Map<number, TournamentDto>();
+    const byId = new Map<number, unknown>();
     for (const tournament of allTournaments) {
-      if (!byId.has(tournament.id)) {
-        byId.set(tournament.id, tournament);
+      const { id } = z.object({ id: z.number().int() }).parse(tournament);
+      if (!byId.has(id)) {
+        byId.set(id, tournament);
       }
     }
     return Array.from(byId.values());
   }
 
-  async getTournamentById(tournamentId: number): Promise<TournamentDto | null> {
+  async getTournamentById(tournamentId: number): Promise<unknown | null> {
     try {
-      return await this.request<TournamentDto>(`/tournaments/${tournamentId}`);
+      return await this.request(`/tournaments/${tournamentId}`);
     } catch (error) {
       if (error instanceof PandascoreApiError && error.status === 404) {
         return null;
@@ -125,37 +126,42 @@ export class PandascoreApiClient {
     }
   }
 
-  async getTournamentBrackets(tournamentId: number): Promise<MatchDto[]> {
-    return this.paginateAll<MatchDto>(`/tournaments/${tournamentId}/brackets`);
+  async getTournamentBrackets(tournamentId: number): Promise<unknown[]> {
+    return this.paginateAll(`/tournaments/${tournamentId}/brackets`);
   }
 
-  async getTournamentMatches(tournamentId: number): Promise<MatchDto[]> {
-    return this.paginateAll<MatchDto>(`/tournaments/${tournamentId}/matches`);
+  async getTournamentMatches(tournamentId: number): Promise<unknown[]> {
+    return this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
-  async getRocketLeaguePlayers(): Promise<RocketLeaguePlayerDto[]> {
-    return this.paginateAll<RocketLeaguePlayerDto>("/rl/players", {
+  async getRocketLeaguePlayers(): Promise<unknown[]> {
+    return this.paginateAll("/rl/players", {
       params: { sort: "name" },
       rateLimitMs: 200,
     });
   }
 
-  private async paginateAll<T>(path: string, options: PandascoreRequestOptions = {}): Promise<T[]> {
+  private async paginateAll(
+    path: string,
+    options: PandascoreRequestOptions = {},
+  ): Promise<unknown[]> {
     const perPage = options.perPage ?? 100;
     const rateLimitMs = options.rateLimitMs ?? 100;
-    const allItems: T[] = [];
+    const allItems: unknown[] = [];
     let page = 1;
     let hasMore = true;
 
     while (hasMore) {
-      const items = await this.request<T[]>(path, {
-        ...options,
-        params: {
-          ...options.params,
-          page: String(page),
-          per_page: String(perPage),
-        },
-      });
+      const items = z.array(z.unknown()).parse(
+        await this.request(path, {
+          ...options,
+          params: {
+            ...options.params,
+            page: String(page),
+            per_page: String(perPage),
+          },
+        }),
+      );
 
       if (items.length === 0) {
         hasMore = false;
@@ -175,7 +181,7 @@ export class PandascoreApiClient {
     return allItems;
   }
 
-  private async request<T>(path: string, options: PandascoreRequestOptions = {}): Promise<T> {
+  private async request(path: string, options: PandascoreRequestOptions = {}): Promise<unknown> {
     const url = new URL(`${this.baseUrl}${path}`);
 
     if (options.params) {
@@ -210,7 +216,7 @@ export class PandascoreApiClient {
       );
     }
 
-    return response.json() as Promise<T>;
+    return response.json();
   }
 
   private sleep(ms: number): Promise<void> {

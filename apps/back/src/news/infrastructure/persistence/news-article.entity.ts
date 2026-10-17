@@ -1,0 +1,47 @@
+import { defineEntity, p } from "@mikro-orm/core";
+import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
+import { User } from "../../../user/infrastructure/persistence/user.entity";
+
+export class NewsArticle {
+  id!: string;
+  slug!: string;
+  title!: string;
+  content!: string;
+  titleFr: string | null = null;
+  contentFr: string | null = null;
+  author!: User;
+  createdAt: Date = new Date();
+  updatedAt: Date | null = null;
+  isDraft: boolean = true;
+  imageUrl: string | null = null;
+  type: NewsType = "short";
+}
+
+export const NewsArticleSchema = defineEntity({
+  class: NewsArticle,
+  indexes: [{ properties: ["title"] }, { properties: ["author"] }, { properties: ["type"] }],
+  properties: {
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    slug: p.string().length(255).unique(),
+    title: p.string().length(255),
+    content: p.text(),
+    titleFr: p.string().length(255).nullable(),
+    contentFr: p.text().nullable(),
+    author: p.manyToOne(User),
+    createdAt: p
+      .datetime()
+      .type("timestamptz")
+      .onCreate(() => new Date()),
+    updatedAt: p
+      .datetime()
+      .type("timestamptz")
+      .nullable()
+      .onUpdate(() => new Date()),
+    isDraft: p.boolean().default(true),
+    imageUrl: p.string().length(255).nullable(),
+    type: p
+      .enum([...NEWS_TYPES])
+      .columnType("text")
+      .default("short"),
+  },
+});

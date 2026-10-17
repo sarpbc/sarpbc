@@ -1,0 +1,40 @@
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Patch,
+  Request,
+  UseGuards,
+} from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
+import { UserService } from "../../application/user.service";
+import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
+import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import { CurrentUserId } from "./decorator/current-user.decorator";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { UserMapper } from "./user.mapper";
+
+@Controller("user")
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @UseGuards(AuthGuard)
+  @Get("profile")
+  async getProfile(@Request() req: AuthenticatedUserRequest) {
+    const user = await this.userService.findOneByEmail(req.user.email);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    const userDto = UserMapper.toDto(user);
+    return { user: userDto };
+  }
+
+  @UseGuards(AuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Patch("profile")
+  async updateProfile(@CurrentUserId() userId: string, @Body() dto: UpdateProfileDto) {
+    const user = await this.userService.updateUserName(userId, dto.userName);
+    return { user: UserMapper.toDto(user) };
+  }
+}

@@ -1,60 +1,20 @@
-import {
-  PandascoreIncidentDto,
-  PandascoreIncidentType,
-  PandascoreIncidentsListDto,
-} from "../../infrastructure/dto/incident.dto";
-import { MatchDto } from "../../infrastructure/dto/match.dto";
-import { TournamentDto } from "../../infrastructure/dto/tournament.dto";
-import { TeamDto } from "../../infrastructure/dto/team.dto";
-import { PlayerDto } from "../../infrastructure/dto/tournament.dto";
-import { LeagueDto } from "../../infrastructure/dto/tournament.dto";
-
+import type { CompetitionIncident, ImportedPlayer, IncidentKind } from "../models/competition-feed";
+import type { UpsertTournamentCommand } from "../commands/upsert-tournament.command";
+import type { UpsertMatchCommand } from "../commands/upsert-match.command";
 export interface ListIncidentsParams {
   since?: Date;
-  type?: PandascoreIncidentType[];
+  type?: IncidentKind[];
   videogame?: string[];
   page?: number;
   perPage?: number;
   sort?: "modified_at" | "-modified_at" | "id" | "-id";
 }
-
 export interface PandascoreGateway {
-  listIncidents(params?: ListIncidentsParams): Promise<PandascoreIncidentsListDto>;
-  getTournaments(): Promise<TournamentDto[]>;
-  getTournamentById(tournamentId: number): Promise<TournamentDto | null>;
-  getTournamentBrackets(tournamentId: number): Promise<MatchDto[]>;
-  getTournamentMatches(tournamentId: number): Promise<MatchDto[]>;
-  getRocketLeaguePlayers(): Promise<
-    Array<{
-      id: number;
-      name: string;
-      slug: string;
-      first_name?: string;
-      last_name?: string;
-      birthday?: string;
-      nationality?: string;
-      image_url?: string;
-      role?: string | null;
-      current_team?: {
-        id: number;
-        name: string;
-        slug: string;
-        image_url?: string;
-        dark_mode_image_url?: string | null;
-      };
-    }>
-  >;
+  listIncidents(params?: ListIncidentsParams): Promise<CompetitionIncident[]>;
+  getTournaments(): Promise<UpsertTournamentCommand[]>;
+  getTournamentById(id: number): Promise<UpsertTournamentCommand | null>;
+  getTournamentBrackets(id: number): Promise<UpsertMatchCommand[]>;
+  getTournamentMatches(id: number): Promise<UpsertMatchCommand[]>;
+  getRocketLeaguePlayers(): Promise<ImportedPlayer[]>;
 }
-
 export const PANDASCORE_GATEWAY = Symbol("PANDASCORE_GATEWAY");
-
-export type {
-  PandascoreIncidentDto,
-  PandascoreIncidentType,
-  PandascoreIncidentsListDto,
-  TournamentDto,
-  MatchDto,
-  TeamDto,
-  PlayerDto,
-  LeagueDto,
-};

@@ -1,87 +1,39 @@
-export class MatchResultDto {
-  team_id!: number;
-  score!: number;
-}
-
-export class MatchLiveDto {
-  supported!: boolean;
-  url!: string | null;
-  opens_at!: string | null;
-}
-
-export class MatchOpponentTeamDto {
-  id!: number;
-  name!: string;
-  location!: string;
-  slug!: string;
-  modified_at!: string;
-  acronym!: string;
-  image_url!: string;
-}
-
-export class MatchOpponentDto {
-  type!: string;
-  opponent!: MatchOpponentTeamDto;
-}
-
-export class PreviousMatchDto {
-  type!: "loser" | "winner";
-  match_id!: number;
-}
-
-export class GameWinnerDto {
-  id!: number;
-  type!: string;
-}
-
-export class GameDto {
-  complete!: boolean;
-  id!: number;
-  position!: number;
-  status!: string;
-  length!: number;
-  finished!: boolean;
-  begin_at!: string;
-  detailed_stats!: boolean;
-  end_at!: string;
-  forfeit!: boolean;
-  match_id!: number;
-  winner_type!: string;
-  winner!: GameWinnerDto;
-}
-
-export class MatchStreamDto {
-  main!: boolean;
-  language!: string;
-  embed_url!: string;
-  official!: boolean;
-  raw_url!: string;
-}
-
-export class MatchDto {
-  id!: number;
-  name!: string;
-  status!: string;
-  results!: MatchResultDto[];
-  live!: MatchLiveDto;
-  begin_at!: string;
-  detailed_stats!: boolean;
-  end_at!: string;
-  forfeit!: boolean;
-  winner_id!: number;
-  winner_type!: string;
-  draw!: boolean;
-  slug!: string;
-  modified_at!: string;
-  tournament_id!: number;
-  match_type!: string;
-  number_of_games!: number;
-  scheduled_at!: string;
-  opponents!: MatchOpponentDto[];
-  previous_matches!: PreviousMatchDto[];
-  original_scheduled_at!: string;
-  games!: GameDto[];
-  streams_list!: MatchStreamDto[];
-}
-
-export type MatchesListDto = MatchDto[];
+import { z } from "zod";
+const text = z
+  .string()
+  .nullish()
+  .transform((v) => v ?? undefined);
+const date = z
+  .string()
+  .refine((v) => Number.isFinite(Date.parse(v)), "Invalid provider date")
+  .nullish()
+  .transform((v) => v ?? undefined);
+export const streamSchema = z.object({
+  main: z.boolean().default(false),
+  language: z.string().default(""),
+  embed_url: z.string().default(""),
+  official: z.boolean().default(false),
+  raw_url: z.string().default(""),
+});
+export const matchSchema = z.object({
+  id: z.number().int().positive(),
+  tournament_id: z.number().int().positive(),
+  name: text,
+  slug: text,
+  status: text,
+  begin_at: date,
+  end_at: date,
+  number_of_games: z.number().int().nullish(),
+  opponents: z
+    .array(
+      z.object({ opponent: z.object({ id: z.number().int().optional(), slug: text }).nullish() }),
+    )
+    .default([]),
+  results: z.array(z.object({ team_id: z.number().int(), score: z.number().int() })).default([]),
+  previous_matches: z
+    .array(z.object({ type: z.enum(["loser", "winner"]), match_id: z.number().int() }))
+    .default([]),
+  streams_list: z.array(streamSchema).default([]),
+});
+export type MatchStreamDto = z.infer<typeof streamSchema>;
+export type MatchDto = z.infer<typeof matchSchema>;

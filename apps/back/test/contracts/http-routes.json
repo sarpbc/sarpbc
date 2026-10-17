@@ -1,0 +1,970 @@
+[
+  {
+    "controller": "\"air-riddle\"",
+    "verb": "GET",
+    "path": "\"today\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"air-riddle\"",
+    "verb": "POST",
+    "path": "\"guess\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "GET",
+    "path": "\"google/callback\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "GET",
+    "path": "\"google\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "GET",
+    "path": "\"logout\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "GET",
+    "path": "\"profile\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "POST",
+    "path": "\"login\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "POST",
+    "path": "\"refresh\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"auth\"",
+    "verb": "POST",
+    "path": "\"signup\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"forum/topics\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"forum/topics\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"forum\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"forum\"",
+    "verb": "GET",
+    "path": "\"preview\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"forum\"",
+    "verb": "POST",
+    "path": "\"replies\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"health\"",
+    "verb": "GET",
+    "path": "\"live\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"health\"",
+    "verb": "GET",
+    "path": "\"ready\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"images\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"images.manage\""]
+  },
+  {
+    "controller": "\"images\"",
+    "verb": "POST",
+    "path": "\"upload-url\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"images.manage\""]
+  },
+  {
+    "controller": "\"matches\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"matches\"",
+    "verb": "GET",
+    "path": "\"results\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"matches\"",
+    "verb": "GET",
+    "path": "\"upcoming\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"mcp\"",
+    "verb": "DELETE",
+    "path": "\"\"",
+    "status": "405",
+    "guards": ["PatAuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"mcp\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": "405",
+    "guards": ["PatAuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"mcp\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["PatAuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"moderation\"",
+    "verb": "GET",
+    "path": "\"replies\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"forum.moderate\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "DELETE",
+    "path": "\":slug\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\":slug\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"admin/:slug\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"admin\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"embed/tweet\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"sitemap/:chunk\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"sitemap\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
+    "path": "\"weeks/:week\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "PATCH",
+    "path": "\":slug/publish\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "PATCH",
+    "path": "\":slug/unpublish\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "PATCH",
+    "path": "\":slug\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "POST",
+    "path": "\":slug/replies\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"news.manage\""]
+  },
+  {
+    "controller": "\"notifications\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"notifications\"",
+    "verb": "GET",
+    "path": "\"unread-count\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"notifications\"",
+    "verb": "PATCH",
+    "path": "\"read\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pat\"",
+    "verb": "DELETE",
+    "path": "\"tokens/:id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pat\"",
+    "verb": "GET",
+    "path": "\"tokens\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pat\"",
+    "verb": "POST",
+    "path": "\"tokens\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pickem\"",
+    "verb": "GET",
+    "path": "\"tournament/:tournamentId/leaderboard\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"pickem\"",
+    "verb": "GET",
+    "path": "\"tournament/:tournamentId/me\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pickem\"",
+    "verb": "GET",
+    "path": "\"tournament/:tournamentId/user/picks\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pickem\"",
+    "verb": "POST",
+    "path": "\"match/:matchId/pick\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"pickem\"",
+    "verb": "POST",
+    "path": "\"matches/:matchId/validate\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"pickems.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "DELETE",
+    "path": "\":id/contract/:contractId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "DELETE",
+    "path": "\":id/photo/:photoId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/awards\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/contract\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/matches\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/old-teams\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/photo\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/tournaments\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id/trophies\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
+    "path": "\"slug/:slug\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "PATCH",
+    "path": "\":id/contract/:contractId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "PATCH",
+    "path": "\":id/photo/:photoId/set-profile\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "POST",
+    "path": "\":id/contract\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "POST",
+    "path": "\":id/photo\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\""]
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"forum.moderate\""]
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "GET",
+    "path": "\"creation-status\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "GET",
+    "path": "\"topic/:topicId\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"posts\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"replies\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"forum.moderate\""]
+  },
+  {
+    "controller": "\"replies\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"replies\"",
+    "verb": "PATCH",
+    "path": "\":id/hide\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"forum.moderate\""]
+  },
+  {
+    "controller": "\"replies\"",
+    "verb": "POST",
+    "path": "\":id/report\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"replies\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"search\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"search\"",
+    "verb": "GET",
+    "path": "\"players\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"search\"",
+    "verb": "GET",
+    "path": "\"teams\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"search\"",
+    "verb": "GET",
+    "path": "\"tournaments\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"storage/r2\"",
+    "verb": "POST",
+    "path": "\"upload-url\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"images.manage\""]
+  },
+  {
+    "controller": "\"storage/r2\"",
+    "verb": "POST",
+    "path": "\"upload\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"images.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "DELETE",
+    "path": "\":id/contract/:contractId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id/contract\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id/former-players\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id/tournaments\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id/trophies\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\"slug/:slug\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "PATCH",
+    "path": "\":id/contract/:contractId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "POST",
+    "path": "\":id/contract\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "POST",
+    "path": "\"sync\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "DELETE",
+    "path": "\":id/awards/:awardId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\":id/awards\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\":id/matches\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\":id\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"leagues\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"matches/player/:playerId\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"matches/team/:teamId\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"player/:playerId\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"without-matches\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\":id/awards\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\":id/matches\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\":id/sync\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\":tournamentId/enable-pickems\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\"sync/additions\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\"sync/pandascore/:pandascoreId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\"matches/:matchId/winner\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"user\"",
+    "verb": "GET",
+    "path": "\"profile\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  },
+  {
+    "controller": "\"user\"",
+    "verb": "PATCH",
+    "path": "\"profile\"",
+    "status": null,
+    "guards": ["AuthGuard"],
+    "permissions": []
+  }
+]
