@@ -13,7 +13,7 @@ function filesIn(dir) {
     const file = path.join(dir, entry.name);
     return entry.isDirectory()
       ? filesIn(file)
-      : file.endsWith(".ts") && !file.endsWith(".spec.ts")
+      : file.endsWith(".ts") && !file.endsWith(".test.ts")
         ? [file]
         : [];
   });
@@ -92,7 +92,7 @@ const sources = baselineFromHead
     })
       .trim()
       .split("\n")
-      .filter((file) => file.endsWith(".ts") && !file.endsWith(".spec.ts"))
+      .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
       .map((file) => ({
         file,
         text: execFileSync("git", ["show", `HEAD:${file}`], {

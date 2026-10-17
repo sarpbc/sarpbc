@@ -20,7 +20,7 @@
     "test:cov": "pnpm run build && vitest run --coverage",
     "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc -p tsconfig.build.json --noEmit --incremental false",
-    "typecheck:tests": "tsc -p tsconfig.spec.json --incremental false",
+    "typecheck:tests": "tsc -p tsconfig.test.json --incremental false",
     "test:architecture": "node --test scripts/check-architecture.test.mjs && node scripts/check-architecture.mjs",
     "test:contracts": "node scripts/check-http-contract.mjs",
     "test:integration": "pnpm run build && vitest run --project integration"
