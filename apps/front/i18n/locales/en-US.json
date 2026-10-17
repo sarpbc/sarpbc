@@ -80,7 +80,8 @@
     "noTeam": "No current team",
     "viewOnX": "View on X",
     "tweetUnavailable": "This X post could not be loaded. Open it on X",
-    "tweetOnX": "Post by {name} on X"
+    "tweetOnX": "Post by {name} on X",
+    "tweetImage": "Image {index} from the X post"
   },
   "general": {
     "news": "News",
