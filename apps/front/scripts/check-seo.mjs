@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import { parse } from "parse5";
-import { INDEXNOW_KEY, INDEXNOW_KEY_PATH } from "@sarpbc/utils";
+import { INDEXNOW_KEY_PATTERN } from "@sarpbc/utils";
 
 const base = process.argv[2] ?? "http://localhost:4000";
 const site = "https://sarpbc.org";
 
-async function get(path) {
+async function get(path, label = path) {
   const response = await fetch(new URL(path, base), {
     headers: { Accept: "text/html", "Accept-Language": "en-US" },
     redirect: "manual",
     signal: AbortSignal.timeout(60000),
   });
-  assert.equal(response.status, 200, `${path}: HTTP ${response.status}`);
+  assert.equal(response.status, 200, `${label}: HTTP ${response.status}`);
   return { response, text: await response.text() };
 }
 
@@ -29,8 +29,16 @@ function locations(xml) {
   return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]).pathname);
 }
 
-const { response: keyResponse, text: key } = await get(INDEXNOW_KEY_PATH);
-assert.equal(key, INDEXNOW_KEY, "The public verification key must match backend submissions");
+const configuredKey = process.env.INDEXNOW_KEY;
+assert.ok(
+  configuredKey && INDEXNOW_KEY_PATTERN.test(configuredKey),
+  "Set INDEXNOW_KEY in the local environment before verification",
+);
+const { response: keyResponse, text: key } = await get(
+  `/${configuredKey}.txt`,
+  "IndexNow key file",
+);
+assert.ok(key === configuredKey, "The verification key must match backend submissions");
 assert.ok(keyResponse.headers.get("content-type")?.startsWith("text/plain"));
 
 const { text: sitemap } = await get("/sitemaps/pages.xml");

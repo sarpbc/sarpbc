@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { INDEXNOW_KEY_PATTERN } from "@sarpbc/utils";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -8,6 +9,7 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional(),
   POSTHOG_PROJECT_TOKEN: z.string().optional(),
   POSTHOG_HOST: z.string().optional(),
+  INDEXNOW_KEY: z.union([z.literal(""), z.string().regex(INDEXNOW_KEY_PATTERN)]).optional(),
 });
 
 export interface ProcessEnv {
@@ -18,6 +20,7 @@ export interface ProcessEnv {
   REDIS_PASSWORD?: string;
   POSTHOG_PROJECT_TOKEN?: string;
   POSTHOG_HOST?: string;
+  INDEXNOW_KEY?: string;
 }
 
 export function validateEnv(config: ProcessEnv) {

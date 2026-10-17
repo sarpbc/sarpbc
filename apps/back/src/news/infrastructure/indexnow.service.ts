@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { INDEXNOW_KEY, INDEXNOW_KEY_PATH } from "@sarpbc/utils";
 import { createLogger } from "evlog";
 import type { NewsIndexing } from "../application/ports";
 
@@ -9,7 +8,8 @@ export class IndexNowService implements NewsIndexing {
   constructor(private readonly configService: ConfigService) {}
 
   async submitNewsSlugs(slugs: string[]): Promise<void> {
-    if (!this.configService.get<boolean>("production") || slugs.length === 0) {
+    const key = this.configService.get<string>("indexnow.key");
+    if (!this.configService.get<boolean>("production") || !key || slugs.length === 0) {
       return;
     }
 
@@ -25,8 +25,8 @@ export class IndexNowService implements NewsIndexing {
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
           host: new URL(origin).host,
-          key: INDEXNOW_KEY,
-          keyLocation: `${origin}${INDEXNOW_KEY_PATH}`,
+          key,
+          keyLocation: `${origin}/${key}.txt`,
           urlList,
         }),
         signal: AbortSignal.timeout(5000),
