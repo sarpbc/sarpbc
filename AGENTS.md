@@ -100,6 +100,7 @@ Each skill contains the authoritative guidance for its domain.
 
 - Branches must use `<type>/<kebab-case-description>` and commit subjects and PR titles must use `<type>(optional-scope): description`. Allowed types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`. Never use `codex`, `cursor`, or `claude` as a prefix. See `CONTRIBUTING.md`.
 - Prefer minimal, focused diffs.
+- Name test files `*.test.ts` or `*.test.mjs`, with `*.e2e.test.ts` and `*.integration.test.mjs` for specialized suites.
 - Avoid unrelated refactors.
 - Remove dead code instead of leaving unused paths.
 - Keep implementations simple.

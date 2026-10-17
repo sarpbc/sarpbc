@@ -11,7 +11,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          include: ["src/**/*.spec.ts"],
+          include: ["src/**/*.test.ts"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },
@@ -19,13 +19,13 @@ export default defineConfig({
         extends: true,
         test: {
           name: "e2e",
-          include: ["test/**/*.e2e-spec.ts"],
+          include: ["test/**/*.e2e.test.ts"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },
       {
         extends: true,
-        test: { name: "integration", include: ["test/**/*.integration-spec.mjs"] },
+        test: { name: "integration", include: ["test/**/*.integration.test.mjs"] },
       },
     ],
     coverage: {
@@ -33,7 +33,7 @@ export default defineConfig({
       reportsDirectory: "./coverage",
       include: ["src/**/*.ts"],
       exclude: [
-        "src/**/*.spec.ts",
+        "src/**/*.test.ts",
         "src/**/*.d.ts",
         "src/**/*.module.ts",
         "src/**/dto/**",
