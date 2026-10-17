@@ -98,6 +98,7 @@ Each skill contains the authoritative guidance for its domain.
 
 ## Code Changes
 
+- Branches must use `<type>/<kebab-case-description>` and commit subjects and PR titles must use `<type>(optional-scope): description`. Allowed types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`. Never use `codex`, `cursor`, or `claude` as a prefix. See `CONTRIBUTING.md`.
 - Prefer minimal, focused diffs.
 - Avoid unrelated refactors.
 - Remove dead code instead of leaving unused paths.

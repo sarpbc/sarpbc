@@ -2,6 +2,7 @@ name: Pull Request Checks
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
     branches:
       - main
 
@@ -14,6 +15,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  git-names:
+    name: Branch and commit names
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Test naming checks
+        run: node --test scripts/check-git-names.test.mjs
+
+      - name: Check branch, commits and PR title
+        run: node scripts/check-git-names.mjs pr
+
   changes:
     name: Detect changes
     runs-on: ubuntu-latest
@@ -43,6 +64,7 @@ jobs:
               - '.nvmrc'
               - '.npmrc'
               - 'lefthook.yml'
+              - 'scripts/**'
               - 'docker-compose.local.yml'
               - '.github/workflows/**'
             backend:
@@ -90,10 +112,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: |
+          pnpm exec oxlint scripts
+          pnpm run lint
 
       - name: Format check
-        run: pnpm run fmt:check
+        run: |
+          pnpm exec oxfmt --check scripts
+          pnpm run fmt:check
 
   backend:
     name: Backend tests and coverage
@@ -193,13 +219,14 @@ jobs:
 
   ci:
     name: CI
-    needs: [changes, quality, backend, frontend, admin]
+    needs: [git-names, changes, quality, backend, frontend, admin]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check results
         run: |
           results=(
+            "${{ needs.git-names.result }}"
             "${{ needs.changes.result }}"
             "${{ needs.quality.result }}"
             "${{ needs.backend.result }}"

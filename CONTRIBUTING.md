@@ -32,6 +32,22 @@ Local URLs: front `http://localhost:4000`, API `http://localhost:4001`, admin `h
 
 Bring your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). Respect each provider’s terms. See [NOTICE](NOTICE).
 
+## Branch and commit names
+
+Use one of these types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`.
+
+- Branches: `<type>/<kebab-case-description>`, for example `feat/player-search` or `fix/159-localized-seo`. The permanent `main` branch is exempt.
+- Commit subjects and PR titles: `<type>(optional-scope): description`, for example `fix(back): repair player sync`. Use `!` before the colon for breaking changes, such as `feat(api)!: change player response`.
+- Prefixes such as `codex/`, `cursor/`, `claude/`, `codex:`, `cursor:`, and `claude:` are rejected. The same naming rules apply to people and agents.
+
+`pnpm install` installs Lefthook. The hooks check the current branch before commits, commit subjects before saving, and destination branches before pushes. Tags and branch deletions are exempt from the push check.
+
+CI checks the source branch, PR title, and every commit introduced by the PR. Rebase onto `main` instead of creating commits with Git's default merge messages. Historical commits already on `main` are excluded. PR title edits rerun the checks, including for squash merges.
+
+Keep the `CI` status check required in GitHub's branch protection for `main` to block merges when naming checks fail. Local hooks can be bypassed.
+
+Run `pnpm test:git-names` to test the naming checks.
+
 ## Start here
 
 | You want to…                      | Go to…                                                                                                                                                             |
