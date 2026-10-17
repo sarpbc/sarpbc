@@ -36,10 +36,6 @@ export function isMatchLockedForPickem(match: Match, now = Date.now()): boolean 
   return false;
 }
 
-export function isMatchFinishedForPickem(match: Match): boolean {
-  return Boolean(match.endAt) || match.status === "finished" || Boolean(match.winner);
-}
-
 export type PickemPickState = {
   pickedParticipant: string;
   points: number | null;

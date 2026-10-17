@@ -44,16 +44,6 @@ export class CompetitionSyncService {
     await this.afterCommit(result.tournament.id, result.completed);
     return result.tournament;
   }
-  async upsertMatchesForTournament(
-    tournament: Tournament,
-    commands: UpsertMatchCommand[],
-  ): Promise<number> {
-    const ids = await this.transaction.run((scope) =>
-      this.applyMatches(scope, tournament, commands),
-    );
-    await this.afterCommit(tournament.id, ids);
-    return ids.length;
-  }
   async applyIncident(
     incident: Exclude<CompetitionIncident, { changeType: "deletion" }>,
     backfill?: UpsertTournamentCommand | null,

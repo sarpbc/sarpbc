@@ -3,7 +3,6 @@ import type {
   CareerRegion,
   CareerRole,
   CareerSplitFieldResult,
-  CareerSplitRecord,
   CareerStage,
   CareerStats,
   CareerWorldState,

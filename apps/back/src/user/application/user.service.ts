@@ -3,12 +3,7 @@ import { User } from "../domain/user";
 import type { CreateAccountInput, SignInInput } from "./models/account-input";
 import type { PasswordHasher } from "./ports/password-hasher";
 import type { IUserRepository } from "./ports/user.repository";
-import {
-  isStaffRole,
-  roleHasAnyPermission,
-  roleHasPermission,
-  StaffPermission,
-} from "../domain/staff-access";
+import { roleHasAnyPermission, StaffPermission } from "../domain/staff-access";
 
 export class UserService {
   constructor(
@@ -54,21 +49,6 @@ export class UserService {
 
     await this.userRepository.save(user);
     return user;
-  }
-
-  async isAdmin(id: string): Promise<boolean> {
-    const user = await this.userRepository.findById(id);
-    return user?.role === "admin";
-  }
-
-  async isStaff(id: string): Promise<boolean> {
-    const user = await this.userRepository.findById(id);
-    return user ? isStaffRole(user.role) : false;
-  }
-
-  async hasPermission(id: string, permission: StaffPermission): Promise<boolean> {
-    const user = await this.userRepository.findById(id);
-    return user ? roleHasPermission(user.role, permission) : false;
   }
 
   async hasAnyPermission(id: string, permissions: StaffPermission[]): Promise<boolean> {

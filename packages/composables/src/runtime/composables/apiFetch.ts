@@ -14,10 +14,9 @@ export const apiFetch = async <T>(
   };
 
   if (event?.node?.req?.headers?.cookie) {
-    fetchOptions.headers = {
-      ...fetchOptions.headers,
-      cookie: event.node.req.headers.cookie,
-    } as HeadersInit;
+    const headers = new Headers(fetchOptions.headers);
+    headers.set("cookie", event.node.req.headers.cookie);
+    fetchOptions.headers = headers;
   }
 
   return $fetch<T>(`${config.public.apiBase}${url}`, fetchOptions);

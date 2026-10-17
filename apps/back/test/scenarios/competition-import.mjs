@@ -167,7 +167,29 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   assert(
     (await run(() => sync.getKnownTournamentPandascoreIds())).has(tournamentCommand.pandascoreId),
   );
-  assert.equal(await run(() => sync.upsertMatchesForTournament(imported, [semifinal])), 1);
+  await run(() =>
+    sync.applyIncident({
+      id: 3,
+      modifiedAt: new Date(),
+      changeType: "update",
+      kind: "match",
+      command: {
+        ...semifinal,
+        results: [
+          { teamPandascoreId: oldTeam.pandascoreId, score: 3 },
+          { teamPandascoreId: rival.pandascoreId, score: 2 },
+        ],
+      },
+    }),
+  );
+  const updatedSemifinal = (await request("GET", `/matches/${semiView.id}`)).json().match;
+  assert.equal(updatedSemifinal.id, semiView.id);
+  assert.equal(updatedSemifinal.winner.id, participant.id);
+  assert.equal(updatedSemifinal.results.length, 2);
+  assert.equal(
+    updatedSemifinal.results.find((result) => result.participant.id !== participant.id).score,
+    2,
+  );
 
   await run(() =>
     sync.applyIncident({

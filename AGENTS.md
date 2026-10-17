@@ -110,6 +110,8 @@ Each skill contains the authoritative guidance for its domain.
 
 # Workflow
 
+Do not add or run frontend automated tests, including tests for application composables and shared UI/composables packages. Validate frontend changes with linting, formatting, typechecking, and builds. Keep backend tests.
+
 When working on this repository:
 
 1. Identify the affected application(s).

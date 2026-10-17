@@ -13,6 +13,13 @@ describe("tweet-oembed.util", () => {
     expect(htmlToPlainText('a <a href="https://x.com/x">@x</a> b')).toBe("a @x b");
   });
 
+  it("preserves invalid numeric entities without breaking the tweet text", () => {
+    expect(htmlToPlainText("Before &#1114112; &#x110000; &#12ab; after")).toBe(
+      "Before &#1114112; &#x110000; &#12ab; after",
+    );
+    expect(htmlToPlainText("&#128640; &#x1F680;")).toBe("🚀 🚀");
+  });
+
   it("reads the handle from the author URL", () => {
     expect(handleFromAuthorUrl("https://twitter.com/Interior")).toBe("Interior");
     expect(handleFromAuthorUrl("https://x.com/RL_Comm/")).toBe("RL_Comm");

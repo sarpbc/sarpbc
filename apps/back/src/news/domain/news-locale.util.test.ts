@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  emptyToNull,
-  hasFrenchTranslation,
-  localizedNewsFields,
-  parseNewsLocale,
-} from "./news-locale.util";
+import { hasFrenchTranslation, localizedNewsFields, parseNewsLocale } from "./news-locale.util";
 
 describe("news-locale.util", () => {
   it("parses French locale prefixes as fr-FR", () => {
@@ -53,12 +48,5 @@ describe("news-locale.util", () => {
       title: "English",
       content: "Hello",
     });
-  });
-
-  it("turns blank strings into null", () => {
-    expect(emptyToNull(undefined)).toBeUndefined();
-    expect(emptyToNull(null)).toBeNull();
-    expect(emptyToNull("  ")).toBeNull();
-    expect(emptyToNull("Titre")).toBe("Titre");
   });
 });

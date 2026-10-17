@@ -1,6 +1,3 @@
-export const NEWS_LOCALE_QUERY = ["en", "en-US", "fr", "fr-FR"] as const;
-
-export type NewsLocaleQuery = (typeof NEWS_LOCALE_QUERY)[number];
 export type NewsLocale = "en-US" | "fr-FR";
 
 export type NewsTranslationFields = {
