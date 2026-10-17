@@ -1,54 +1,32 @@
-import {
-  IsIn,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-  ValidateIf,
-} from "class-validator";
-import { Transform } from "class-transformer";
-import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
-import { emptyToNull } from "./empty-to-null";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
+import { z } from "zod";
+import { NEWS_TYPES } from "@sarpbc/types";
+export const CreateNewsArticleDto = z.strictObject({
+  title: z.string().min(1).max(255),
+  content: z.string().min(1),
+  titleFr: z
+    .string()
+    .trim()
+    .max(255)
+    .transform((value) => value || null)
+    .nullish(),
+  contentFr: z
+    .string()
+    .trim()
+    .transform((value) => value || null)
+    .nullish(),
+  imageUrl: z
+    .string()
+    .trim()
+    .max(255)
+    .pipe(z.url({ protocol: /^(https?|ftp)$/, message: "Enter a valid cover image URL." }))
+    .optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Enter a slug, or leave empty to generate one from the title.")
+    .max(255)
+    .optional(),
+  type: z.enum(NEWS_TYPES).optional(),
+});
 
-export class CreateNewsArticleDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  title!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  content!: string;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value != null)
-  @IsString()
-  @MaxLength(255)
-  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
-  titleFr?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value != null)
-  @IsString()
-  @Transform(({ value }: { value: string | null | undefined }) => emptyToNull(value))
-  contentFr?: string | null;
-
-  @IsOptional()
-  @IsUrl({}, { message: "Enter a valid cover image URL." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: "Enter a slug, or leave empty to generate one from the title." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  slug?: string;
-
-  @IsOptional()
-  @IsIn(NEWS_TYPES)
-  type?: NewsType;
-}
+export type CreateNewsArticleDto = z.infer<typeof CreateNewsArticleDto>;

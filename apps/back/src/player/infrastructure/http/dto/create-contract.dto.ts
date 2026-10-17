@@ -1,20 +1,11 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsUUID } from "class-validator";
+import { z } from "zod";
+import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 import { ContractRole } from "../../../domain/roster";
+export const CreateContractDto = z.strictObject({
+  teamId: z.uuid(),
+  startDate: isoDateSchema,
+  endDate: isoDateSchema.optional(),
+  role: z.enum(ContractRole).optional(),
+});
 
-export class CreateContractDto {
-  @IsNotEmpty()
-  @IsUUID()
-  teamId!: string;
-
-  @IsNotEmpty()
-  @IsDateString()
-  startDate!: string;
-
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
-
-  @IsOptional()
-  @IsEnum(ContractRole)
-  role?: ContractRole;
-}
+export type CreateContractDto = z.infer<typeof CreateContractDto>;

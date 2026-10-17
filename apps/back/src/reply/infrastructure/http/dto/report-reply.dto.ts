@@ -1,9 +1,7 @@
-import { IsIn } from "class-validator";
-import { REPLY_REPORT_REASONS, type ReplyReportReason } from "../../../domain/reply-report-reason";
+import { z } from "zod";
+import { REPLY_REPORT_REASONS } from "../../../domain/reply-report-reason";
+export const ReportReplyDto = z.strictObject({
+  reason: z.enum(REPLY_REPORT_REASONS),
+});
 
-export class ReportReplyDto {
-  @IsIn(REPLY_REPORT_REASONS, {
-    message: "Choose a valid report reason from the list.",
-  })
-  readonly reason!: ReplyReportReason;
-}
+export type ReportReplyDto = z.infer<typeof ReportReplyDto>;

@@ -23,7 +23,7 @@ export class ImagesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async saveImage(@Body() dto: SaveImageDto) {
+  async saveImage(@Body({ schema: SaveImageDto }) dto: SaveImageDto) {
     return this.imagesService.saveImage(dto.imageId);
   }
 }

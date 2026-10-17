@@ -1,8 +1,7 @@
-import { IsNotEmpty, IsString, IsUrl } from "class-validator";
+import { z } from "zod";
 
-export class AddPlayerPhotoDto {
-  @IsNotEmpty()
-  @IsString()
-  @IsUrl()
-  url!: string;
-}
+export const AddPlayerPhotoDto = z.strictObject({
+  url: z.url({ protocol: /^(https?|ftp)$/ }),
+});
+
+export type AddPlayerPhotoDto = z.infer<typeof AddPlayerPhotoDto>;

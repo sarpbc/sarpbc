@@ -26,7 +26,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { ReplyService } from "../../../reply/application/reply.service";
-import { CreateReplyDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";
+import { ReplyContentDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 
 @Controller("news")
@@ -43,13 +43,13 @@ export class NewsController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @CurrentUserId() userId: string,
-    @Body() createNewsArticleDto: CreateNewsArticleDto,
+    @Body({ schema: CreateNewsArticleDto }) createNewsArticleDto: CreateNewsArticleDto,
   ) {
     return this.newsService.create(createNewsArticleDto, userId);
   }
 
   @Get()
-  findAll(@Query() { page, limit, locale, type }: NewsListQueryDto) {
+  findAll(@Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto) {
     return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale), type);
   }
 
@@ -64,24 +64,30 @@ export class NewsController {
   }
 
   @Get("embed/tweet")
-  embedTweet(@Query() { url }: TweetEmbedQueryDto) {
+  embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto) {
     return this.tweetEmbedService.embed(url);
   }
 
   @Get("weeks/:week")
-  findWeek(@Param("week") week: string, @Query() { locale }: NewsLocaleQueryDto) {
+  findWeek(
+    @Param("week") week: string,
+    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
+  ) {
     return this.newsService.findPublishedShortsByWeek(week, parseNewsLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("news.manage")
   @Get("admin")
-  findAllAdmin(@Query() { page, limit }: PaginationQueryDto) {
+  findAllAdmin(@Query({ schema: PaginationQueryDto }) { page, limit }: PaginationQueryDto) {
     return this.newsService.findAll(page, limit);
   }
 
   @Get(":slug")
-  async findOne(@Param("slug") slug: string, @Query() { locale }: NewsLocaleQueryDto) {
+  async findOne(
+    @Param("slug") slug: string,
+    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
+  ) {
     const article = await this.newsService.findOneBySlug(slug, parseNewsLocale(locale));
     if (!article || article.isDraft) {
       throw new NotFoundException(`News article with slug "${slug}" not found`);
@@ -99,7 +105,10 @@ export class NewsController {
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("news.manage")
   @Patch(":slug")
-  async update(@Param("slug") slug: string, @Body() dto: UpdateNewsArticleDto) {
+  async update(
+    @Param("slug") slug: string,
+    @Body({ schema: UpdateNewsArticleDto }) dto: UpdateNewsArticleDto,
+  ) {
     return this.newsService.update(slug, dto);
   }
 
@@ -132,7 +141,7 @@ export class NewsController {
   async createReply(
     @Param("slug") slug: string,
     @CurrentUserId() userId: string,
-    @Body() dto: Omit<CreateReplyDto, "postId" | "newsArticleId" | "matchId">,
+    @Body({ schema: ReplyContentDto }) dto: ReplyContentDto,
   ) {
     const articleId = await this.newsService.findArticleIdBySlug(slug);
     const reply = await this.replyService.create(userId, {

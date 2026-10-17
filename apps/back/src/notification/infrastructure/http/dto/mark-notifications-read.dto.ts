@@ -1,8 +1,7 @@
-import { IsArray, IsOptional, IsUUID } from "class-validator";
+import { z } from "zod";
 
-export class MarkNotificationsReadDto {
-  @IsOptional()
-  @IsArray()
-  @IsUUID("4", { each: true })
-  ids?: string[];
-}
+export const MarkNotificationsReadDto = z.strictObject({
+  ids: z.array(z.uuidv4()).optional(),
+});
+
+export type MarkNotificationsReadDto = z.infer<typeof MarkNotificationsReadDto>;

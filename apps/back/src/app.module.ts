@@ -37,10 +37,6 @@ import mikroOrmConfig from "./mikro-orm.config";
       load: [configuration],
       isGlobal: true,
       validate: validateEnv,
-      validationOptions: {
-        allowUnknown: true,
-        abortEarly: true,
-      },
     }),
     EvlogModule.forRoot(),
     ThrottlerModule.forRoot({

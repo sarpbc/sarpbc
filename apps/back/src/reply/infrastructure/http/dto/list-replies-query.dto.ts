@@ -1,14 +1,8 @@
-import { IsEnum, IsNotEmpty, IsUUID } from "class-validator";
+import { z } from "zod";
 import { PaginationQueryDto } from "../../../../common/infrastructure/http/dto/pagination-query.dto";
-import type { ReplyTargetType } from "./reply-response.dto";
+export const ListRepliesQueryDto = PaginationQueryDto.extend({
+  targetType: z.enum(["forumPost", "newsArticle", "match"]),
+  targetId: z.uuidv4(),
+});
 
-export class ListRepliesQueryDto extends PaginationQueryDto {
-  @IsEnum(["forumPost", "newsArticle", "match"], {
-    message: "targetType must be forumPost, newsArticle, or match.",
-  })
-  readonly targetType!: ReplyTargetType;
-
-  @IsUUID("4", { message: "targetId must be a valid UUID." })
-  @IsNotEmpty()
-  readonly targetId!: string;
-}
+export type ListRepliesQueryDto = z.infer<typeof ListRepliesQueryDto>;

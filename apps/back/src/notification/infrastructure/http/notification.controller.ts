@@ -11,7 +11,10 @@ export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get()
-  async list(@CurrentUserId() userId: string, @Query() query: ListNotificationsQueryDto) {
+  async list(
+    @CurrentUserId() userId: string,
+    @Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryDto,
+  ) {
     const notifications = await this.notificationService.listForUser(userId, query.limit);
     return { notifications };
   }
@@ -23,7 +26,10 @@ export class NotificationController {
   }
 
   @Patch("read")
-  async markRead(@CurrentUserId() userId: string, @Body() body: MarkNotificationsReadDto) {
+  async markRead(
+    @CurrentUserId() userId: string,
+    @Body({ schema: MarkNotificationsReadDto }) body: MarkNotificationsReadDto,
+  ) {
     const result = await this.notificationService.markRead(userId, body.ids);
     return result;
   }

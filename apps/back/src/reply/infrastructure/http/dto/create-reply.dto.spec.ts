@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validate } from "class-validator";
-import { plainToInstance } from "class-transformer";
-import { CreateReplyDto } from "./create-reply.dto";
+import { CreateReplyDto, ReplyContentDto } from "./create-reply.dto";
 
 interface CreateReplyDtoPlain {
   content?: string;
@@ -13,8 +11,8 @@ interface CreateReplyDtoPlain {
 
 describe("CreateReplyDto", () => {
   async function validateDto(plain: CreateReplyDtoPlain) {
-    const dto = plainToInstance(CreateReplyDto, plain);
-    return validate(dto);
+    const result = CreateReplyDto.safeParse(plain);
+    return result.success ? [] : result.error.issues;
   }
 
   it("accepts a single match target", async () => {
@@ -26,7 +24,7 @@ describe("CreateReplyDto", () => {
   });
 
   it("trims content", async () => {
-    const dto = plainToInstance(CreateReplyDto, {
+    const dto = CreateReplyDto.parse({
       content: "  padded  ",
       matchId: "22222222-2222-4222-8222-222222222222",
     });
@@ -53,5 +51,20 @@ describe("CreateReplyDto", () => {
       matchId: "22222222-2222-4222-8222-222222222222",
     });
     expect(errors.length).toBeGreaterThan(0);
+  });
+
+  it.each(["   ", "a".repeat(2049)])("rejects blank or oversized content", (content) => {
+    expect(
+      CreateReplyDto.safeParse({ content, matchId: "22222222-2222-4222-8222-222222222222" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("validates article reply content without accepting a caller-supplied target", () => {
+    expect(ReplyContentDto.parse({ content: " hi " })).toEqual({ content: "hi" });
+    expect(
+      ReplyContentDto.safeParse({ content: "hi", matchId: "22222222-2222-4222-8222-222222222222" })
+        .success,
+    ).toBe(false);
   });
 });

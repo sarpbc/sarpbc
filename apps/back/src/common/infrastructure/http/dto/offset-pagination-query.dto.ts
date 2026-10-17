@@ -1,17 +1,8 @@
-import { Type } from "class-transformer";
-import { IsInt, IsOptional, Max, Min } from "class-validator";
+import { z } from "zod";
 
-export class OffsetPaginationQueryDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  limit: number = 25;
+export const OffsetPaginationQueryDto = z.strictObject({
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+  offset: z.coerce.number().int().min(0).default(0),
+});
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  offset: number = 0;
-}
+export type OffsetPaginationQueryDto = z.infer<typeof OffsetPaginationQueryDto>;

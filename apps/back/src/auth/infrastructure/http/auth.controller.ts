@@ -37,7 +37,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("login")
   async signIn(
-    @Body() userData: SignInUserDto,
+    @Body({ schema: SignInUserDto }) userData: SignInUserDto,
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {
@@ -81,7 +81,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("signup")
   async signUp(
-    @Body() userData: CreateUserDto,
+    @Body({ schema: CreateUserDto }) userData: CreateUserDto,
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {

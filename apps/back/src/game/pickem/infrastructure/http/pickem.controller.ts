@@ -29,7 +29,7 @@ export class PickemController {
   async makePick(
     @Request() req: AuthenticatedUserRequest,
     @Param("matchId") matchId: string,
-    @Body() body: MakePickDto,
+    @Body({ schema: MakePickDto }) body: MakePickDto,
   ) {
     await this.pickemService.makePick(req.user.id, matchId, body.pickedParticipantId);
     const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;

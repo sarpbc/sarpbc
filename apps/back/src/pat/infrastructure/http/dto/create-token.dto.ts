@@ -1,11 +1,7 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { Transform } from "class-transformer";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
+import { z } from "zod";
 
-export class CreateTokenDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  @Transform(trimIncomingString)
-  name!: string;
-}
+export const CreateTokenDto = z.strictObject({
+  name: z.string().trim().min(1).max(100),
+});
+
+export type CreateTokenDto = z.infer<typeof CreateTokenDto>;

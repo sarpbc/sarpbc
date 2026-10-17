@@ -28,7 +28,10 @@ export class PatController {
   @UseGuards(AuthGuard)
   @Post("tokens")
   @HttpCode(HttpStatus.CREATED)
-  async createToken(@CurrentUserId() userId: string, @Body() dto: CreateTokenDto) {
+  async createToken(
+    @CurrentUserId() userId: string,
+    @Body({ schema: CreateTokenDto }) dto: CreateTokenDto,
+  ) {
     return this.patService.createToken(userId, dto.name);
   }
 

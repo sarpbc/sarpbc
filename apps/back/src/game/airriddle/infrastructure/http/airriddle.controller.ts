@@ -18,7 +18,7 @@ export class AirRiddleController {
   }
 
   @Post("guess")
-  async guess(@Body() body: GuessDto, @Request() req: FastifyRequest) {
+  async guess(@Body({ schema: GuessDto }) body: GuessDto, @Request() req: FastifyRequest) {
     const { results, error, answer } = await this.airRiddleService.guess(body.guess, body.last);
     const distinctId = req.headers["x-posthog-distinct-id"] as string | undefined;
     const sessionId = req.headers["x-posthog-session-id"] as string | undefined;

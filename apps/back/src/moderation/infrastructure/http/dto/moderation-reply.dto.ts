@@ -1,4 +1,4 @@
-import type { ReplyTargetType } from "../../../../reply/infrastructure/http/dto/reply-response.dto";
+import type { ReplyTargetType } from "../../../../reply/domain/reply";
 
 export type ModerationReplyDto = {
   id: string;
