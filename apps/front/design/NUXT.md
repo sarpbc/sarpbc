@@ -1,4 +1,4 @@
-# Nuxt Patterns — sarpbc
+# Nuxt Patterns — sarpbc.org
 
 Repo-specific implementation notes for `apps/front`.
 

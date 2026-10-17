@@ -1,4 +1,4 @@
-# Geist → sarpbc Token Mapping
+# Geist → sarpbc.org Token Mapping
 
 Maps [Geist](https://vercel.com/design) tokens to **@nuxt/ui v4** + **Tailwind v4** as used in `apps/front`.
 
@@ -96,7 +96,7 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 
 ## Radius
 
-| Geist | Value  | sarpbc                                                              |
+| Geist | Value  | sarpbc.org                                                          |
 | ----- | ------ | ------------------------------------------------------------------- |
 | sm    | 6px    | `--ui-radius: 0rem` (sharp)—**project uses zero radius; don't mix** |
 | md    | 12px   | Nuxt UI modal/menu default                                          |
@@ -125,4 +125,4 @@ Tailwind v4 defaults differ—use `sm:`, `md:`, `lg:` consistently with existing
 
 ## Dark theme
 
-Geist dark tokens live at [vercel.com/design.dark](https://vercel.com/design.dark). When adding dark mode to sarpbc, map the same semantic names (`bg-default`, `text-muted`) via Nuxt UI color mode—don't fork per-component colors.
+Geist dark tokens live at [vercel.com/design.dark](https://vercel.com/design.dark). When adding dark mode to sarpbc.org, map the same semantic names (`bg-default`, `text-muted`) via Nuxt UI color mode—don't fork per-component colors.

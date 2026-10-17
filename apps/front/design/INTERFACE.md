@@ -1,4 +1,4 @@
-# SARPBC interface conventions
+# sarpbc.org interface conventions
 
 The current [DESIGN.md](../DESIGN.md) takes precedence when an older example in this supporting guide differs from the shipped design.
 
@@ -10,7 +10,7 @@ The current [DESIGN.md](../DESIGN.md) takes precedence when an older example in 
 
 ## Abstract
 
-This guide merges Vercel's design system, design-engineering mindset, and interface guidelines into one actionable reference for the sarpbc monorepo. It prioritizes usefulness, accessibility, and craft while mapping Geist tokens to the project's Nuxt UI + Tailwind stack.
+This guide merges Vercel's design system, design-engineering mindset, and interface guidelines into one actionable reference for the sarpbc.org monorepo. It prioritizes usefulness, accessibility, and craft while mapping Geist tokens to the project's Nuxt UI + Tailwind stack.
 
 ---
 
@@ -84,7 +84,7 @@ Geist is minimal, high-contrast, developer-focused: whitespace, restrained color
 
 Use semantic tokens via Nuxt UI / Tailwind—not raw hex in components.
 
-| Geist intent      | sarpbc / Nuxt UI                                                  |
+| Geist intent      | sarpbc.org / Nuxt UI                                              |
 | ----------------- | ----------------------------------------------------------------- |
 | Primary text      | `text-highlighted` or default foreground                          |
 | Secondary text    | `text-muted`                                                      |
@@ -455,7 +455,7 @@ When reviewing UI changes:
 - [Geist Design System](https://vercel.com/design)
 - [Design Engineer Principles](https://vercel.com/design/engineer)
 - [Web Interface Guidelines](https://vercel.com/design/guidelines)
-- sarpbc: [references/tokens.md](TOKENS.md), [references/nuxt-sarpbc.md](NUXT.md)
+- sarpbc.org: [Token mapping](TOKENS.md), [Nuxt patterns](NUXT.md)
 - Project instructions: root `AGENTS.md`; backend boundaries: `apps/back/ARCHITECTURE.md`
 
 ---

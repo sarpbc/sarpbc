@@ -1,4 +1,4 @@
-# SARPBC design context
+# sarpbc.org design context
 
 Design guidance is scoped to the application being changed. Read [AGENTS.md](AGENTS.md) for architecture, conventions and verification.
 

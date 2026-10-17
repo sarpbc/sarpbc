@@ -1,4 +1,4 @@
-# sarpbc front — Design
+# sarpbc.org front — Design
 
 Design reference for **`apps/front`** (public site), shared by contributors and agents. This file defines the public site's decisions; [supporting interface conventions](design/INTERFACE.md) provide detailed examples.
 
@@ -19,12 +19,12 @@ Inspired by [Geist](https://vercel.com/design), Linear, and Polar-style product 
 
 ## Surfaces
 
-sarpbc has two public design modes. Same tokens and components; different density and layout.
+sarpbc.org has two public design modes. Same tokens and components; different density and layout.
 
 | Mode          | Routes                                                                               | Layout                                         | Density                    | Job                                          |
 | ------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------- | -------------------------- | -------------------------------------------- |
 | **Hub**       | `/`, `/matches`, `/news`, `/forum`, `/player`, `/team`, `/tournaments`, `/game/*`, … | Default 3-column shell (`layouts/default.vue`) | Dense, border-aligned rows | Daily returning fans — news, schedule, rails |
-| **Marketing** | `/about`                                                                             | `layouts/marketing.vue` — **no** hub sidebars  | Editorial, more whitespace | First-time visitors — what sarpbc is         |
+| **Marketing** | `/about`                                                                             | `layouts/marketing.vue` — **no** hub sidebars  | Editorial, more whitespace | First-time visitors — what sarpbc.org is     |
 
 ### Hub (default)
 

@@ -1,8 +1,8 @@
-# SARPBC product principles
+# sarpbc.org product principles
 
-**Version 1.0.0** · Product: [SARPBC.org](https://sarpbc.org) · Backlog: [Linear — Sarpbc team](https://linear.app/sarpbc)
+**Version 1.0.0** · Product: [sarpbc.org](https://sarpbc.org) · Backlog: [Linear — Sarpbc team](https://linear.app/sarpbc)
 
-> Optimized for AI agents evolving the SARPBC roadmap and translating product intent into shippable work. Humans may use it too.
+> Optimized for AI agents evolving the sarpbc.org roadmap and translating product intent into shippable work. Humans may use it too.
 
 ---
 
@@ -22,7 +22,7 @@ This guide combines **outcome-driven product management** with a **relentless gr
 6. [Ticket Generation Rules](#6-ticket-generation-rules) — HIGH
 7. [Roadmap Horizons](#7-roadmap-horizons) — HIGH
 8. [Strategic Lens](#8-strategic-lens) — MEDIUM
-9. [Product Context (sarpbc)](#9-product-context-sarpbc) — MEDIUM
+9. [Product Context (sarpbc.org)](#9-product-context-sarpbcorg) — MEDIUM
 10. [Linear Conventions](#10-linear-conventions) — MEDIUM
 11. [Output Format](#11-output-format) — HIGH
 
@@ -299,7 +299,7 @@ Epic
 | **Next**  | 4–8 weeks | Important; may depend on Now validation     |
 | **Later** | Backlog   | Valuable; no metric yet or heavy infra      |
 
-**Default sequencing (sarpbc):**
+**Default sequencing (sarpbc.org):**
 
 1. Match discovery polish
 2. Match detail v1.5 (H2H, rosters, share cards)
@@ -332,7 +332,7 @@ Continuously evaluate opportunities in:
 
 ---
 
-## 9. Product Context (sarpbc)
+## 9. Product Context (sarpbc.org)
 
 **Impact: MEDIUM**
 
@@ -397,4 +397,4 @@ Be opinionated. Challenge assumptions. Delete unnecessary work. Optimize for use
 
 ---
 
-_Maintained with the SARPBC product documentation._
+_Maintained with the sarpbc.org product documentation._

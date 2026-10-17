@@ -1,11 +1,11 @@
 ---
-description: Load SARPBC project instructions and the applicable design document
+description: Load sarpbc.org project instructions and the applicable design document
 globs:
   - "**/*"
 alwaysApply: true
 ---
 
-# SARPBC context
+# sarpbc.org context
 
 Read [AGENTS.md](../../AGENTS.md) and applicable nested instruction files before
 significant work. For UI changes, read [DESIGN.md](../../DESIGN.md) and the guide

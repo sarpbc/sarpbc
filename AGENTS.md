@@ -14,7 +14,9 @@
 
 # Project
 
-SARPBC is a Rocket League esports platform combining news, competitive data, forums and community features.
+sarpbc.org is a Rocket League esports platform combining news, competitive data, forums and community features.
+
+Use `sarpbc.org` as the project and product name in documentation and copy.
 
 This repository is a pnpm monorepo containing:
 
@@ -153,4 +155,4 @@ local services and browser tools are available.
 - `apps/front/DESIGN.md` — Human design documentation
 - `DESIGN.md` — Design scope and application-specific references
 - `apps/back/ARCHITECTURE.md` — Backend boundaries and verification
-- `docs/PRODUCT.md` — SARPBC product context
+- `docs/PRODUCT.md` — sarpbc.org product context
