@@ -19,5 +19,5 @@ export const apiFetch = async <T>(
     fetchOptions.headers = headers;
   }
 
-  return $fetch<T>(`${config.public.apiBase}${url}`, fetchOptions);
+  return $fetch<T, string>(`${config.public.apiBase}${url}`, fetchOptions);
 };

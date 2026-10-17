@@ -357,7 +357,7 @@ export function buildTournamentSportsEvent(
     eventAttendanceMode: venue.eventAttendanceMode,
     location: venue.location,
     organizer: organizerName
-      ? compactJsonLd({
+      ? compactJsonLd<SportsOrganizationLd>({
           "@type": "SportsOrganization",
           name: organizerName,
           url: resolveStructuredDataUrl(tournament.league?.url, origin),

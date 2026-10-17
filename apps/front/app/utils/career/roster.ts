@@ -314,10 +314,9 @@ function generateReplacement(
   rating: number,
 ): string {
   const names = usedNames(world);
-  let name = SPARE_GAMERTAGS.find((candidate) => !names.has(candidate));
-  if (!name) {
-    name = `Prospect${world.nextGeneratedId}`;
-  }
+  const name =
+    SPARE_GAMERTAGS.find((candidate) => !names.has(candidate)) ??
+    `Prospect${world.nextGeneratedId}`;
   const id = `gen-${world.nextGeneratedId}`;
   world.nextGeneratedId += 1;
   world.players[id] = {
