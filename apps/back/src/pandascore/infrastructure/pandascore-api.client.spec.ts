@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { PandascoreApiClient } from "./pandascore-api.client";
@@ -13,18 +14,18 @@ describe("PandascoreApiClient", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue("test-token"),
+            get: vi.fn().mockReturnValue("test-token"),
           },
         },
       ],
     }).compile();
 
     client = module.get(PandascoreApiClient);
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("throws when API token is missing", async () => {
@@ -34,7 +35,7 @@ describe("PandascoreApiClient", () => {
           PandascoreApiClient,
           {
             provide: ConfigService,
-            useValue: { get: jest.fn().mockReturnValue(undefined) },
+            useValue: { get: vi.fn().mockReturnValue(undefined) },
           },
         ],
       }).compile(),
@@ -42,7 +43,7 @@ describe("PandascoreApiClient", () => {
   });
 
   it("listIncidents builds query params and paginates", async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce({
         ok: true,
         json: async () => [{ id: 1, type: "match", modified_at: "2025-01-01T00:00:00Z" }],
@@ -63,7 +64,7 @@ describe("PandascoreApiClient", () => {
     expect(incidents).toHaveLength(1);
     expect(global.fetch).toHaveBeenCalledTimes(2);
 
-    const firstCallUrl = String((global.fetch as jest.Mock).mock.calls[0][0]);
+    const firstCallUrl = String((global.fetch as Mock).mock.calls[0][0]);
     expect(firstCallUrl).toContain("/incidents");
     expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
     expect(firstCallUrl).toContain("videogame=rl");
@@ -74,7 +75,7 @@ describe("PandascoreApiClient", () => {
   });
 
   it("getTournaments merges past, upcoming, and running", async () => {
-    (global.fetch as jest.Mock)
+    (global.fetch as Mock)
       .mockResolvedValueOnce({
         ok: true,
         json: async () => [{ id: 1, name: "Past" }],
@@ -99,14 +100,14 @@ describe("PandascoreApiClient", () => {
       { id: 3, name: "Running" },
     ]);
 
-    const urls = (global.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+    const urls = (global.fetch as Mock).mock.calls.map((call) => String(call[0]));
     expect(urls[0]).toContain("/rl/tournaments/past");
     expect(urls[1]).toContain("/rl/tournaments/upcoming");
     expect(urls[2]).toContain("/rl/tournaments/running");
   });
 
   it("getTournamentById returns null on 404", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
       status: 404,
       statusText: "Not Found",
@@ -117,7 +118,7 @@ describe("PandascoreApiClient", () => {
   });
 
   it("request throws PandascoreApiError on failure", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
       status: 401,
       statusText: "Unauthorized",

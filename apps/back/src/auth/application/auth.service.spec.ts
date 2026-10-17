@@ -1,0 +1,175 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { AuthenticationError } from "../../common/domain/errors";
+import { google } from "googleapis";
+import { AuthService } from "./auth.service";
+import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway";
+import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
+import { User } from "../../user/domain/user";
+
+vi.mock("googleapis", () => ({
+  google: {
+    auth: {
+      OAuth2: vi.fn(),
+    },
+    oauth2: vi.fn(),
+  },
+}));
+
+async function waitUntil(predicate: () => boolean): Promise<void> {
+  const startedAt = Date.now();
+  while (!predicate()) {
+    if (Date.now() - startedAt > 1000) {
+      throw new Error("Timed out waiting for overlapping OAuth callbacks");
+    }
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
+}
+
+describe("AuthService", () => {
+  let service: AuthService;
+  const userService = {
+    signIn: vi.fn(),
+    findOneByGoogleId: vi.fn(),
+    findOneByEmail: vi.fn(),
+    createGoogleUser: vi.fn(),
+    linkGoogleAccount: vi.fn(),
+    create: vi.fn(),
+  };
+  const jwtService = {
+    signAsync: vi.fn().mockResolvedValue("jwt-token"),
+  };
+
+  beforeEach(async () => {
+    service = new AuthService(
+      new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn() }, "secret"),
+      new GoogleIdentityGateway("client-id", "secret", "http://localhost/callback"),
+      userService as never,
+      { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
+    );
+    vi.clearAllMocks();
+  });
+
+  describe("signIn", () => {
+    it("throws AuthenticationError with actionable message for bad credentials", async () => {
+      userService.signIn.mockResolvedValue(null);
+
+      await expect(service.signIn({ email: "a@b.com", password: "wrong" })).rejects.toBeInstanceOf(
+        AuthenticationError,
+      );
+
+      await expect(service.signIn({ email: "a@b.com", password: "wrong" })).rejects.toThrow(
+        /Email or password is incorrect/,
+      );
+    });
+
+    it("returns a token pair when credentials are valid", async () => {
+      userService.signIn.mockResolvedValue(
+        Object.assign(new User("a@b.com", "alice", "hash"), { id: "user-1" }),
+      );
+
+      await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toEqual({
+        accessToken: "jwt-token",
+        refreshToken: "jwt-token",
+      });
+      expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("OAuth return destination", () => {
+    it("parses returnTo allowlist and defaults to front", () => {
+      expect(service.parseOAuthReturnTo("admin")).toBe("admin");
+      expect(service.parseOAuthReturnTo("front")).toBe("front");
+      expect(service.parseOAuthReturnTo("https://evil.example")).toBe("front");
+      expect(service.parseOAuthReturnTo(undefined)).toBe("front");
+    });
+
+    it("resolves only FRONT_URL or ADMIN_URL", () => {
+      expect(service.resolveOAuthReturnUrl("admin")).toBe("http://localhost:4002");
+      expect(service.resolveOAuthReturnUrl("front")).toBe("http://localhost:4000");
+      expect(service.resolveOAuthReturnUrl(undefined)).toBe("http://localhost:4000");
+    });
+  });
+
+  describe("handleGoogleCallback", () => {
+    it("does not swap Google profiles when two callbacks overlap", async () => {
+      let releaseGetToken!: () => void;
+      const holdGetToken = new Promise<void>((resolve) => {
+        releaseGetToken = resolve;
+      });
+      let getTokenStarted = 0;
+
+      interface OAuthClientCredentials {
+        access_token?: string;
+      }
+
+      const profiles = {
+        "code-a": { id: "google-a", email: "a@example.com", name: "Alice" },
+        "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
+      } as const;
+
+      const oauth2Mock: Mock = google.auth.OAuth2 as never;
+      oauth2Mock.mockImplementation(function () {
+        const client = {
+          credentials: {} as OAuthClientCredentials,
+          getToken: vi.fn(async (code: string) => {
+            getTokenStarted += 1;
+            await holdGetToken;
+            return { tokens: { access_token: code } };
+          }),
+          setCredentials: vi.fn((tokens: { access_token: string }) => {
+            client.credentials = tokens;
+          }),
+          generateAuthUrl: vi.fn(),
+        };
+        return client;
+      });
+
+      const oauth2ApiMock: Mock = google.oauth2 as never;
+      oauth2ApiMock.mockReturnValue({
+        userinfo: {
+          get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
+            const code = auth.credentials.access_token;
+            const profile = code === "code-a" || code === "code-b" ? profiles[code] : undefined;
+            if (!profile) {
+              throw new Error(`Unknown Google token ${code}`);
+            }
+            return { data: profile };
+          }),
+        },
+      });
+
+      userService.findOneByGoogleId.mockResolvedValue(null);
+      userService.findOneByEmail.mockResolvedValue(null);
+      userService.createGoogleUser.mockImplementation(
+        async (email: string, name: string, googleId: string) =>
+          Object.assign(new User(email, name, null, googleId), { id: `user-${googleId}` }),
+      );
+      jwtService.signAsync.mockImplementation(
+        async (payload: { id: string }) => `jwt-${payload.id}`,
+      );
+
+      const first = service.handleGoogleCallback("code-a");
+      const second = service.handleGoogleCallback("code-b");
+
+      await waitUntil(() => getTokenStarted === 2);
+      releaseGetToken();
+
+      await expect(Promise.all([first, second])).resolves.toEqual([
+        { accessToken: "jwt-user-google-a", refreshToken: "jwt-user-google-a" },
+        { accessToken: "jwt-user-google-b", refreshToken: "jwt-user-google-b" },
+      ]);
+      expect(userService.createGoogleUser).toHaveBeenCalledWith(
+        "a@example.com",
+        "Alice",
+        "google-a",
+        null,
+      );
+      expect(userService.createGoogleUser).toHaveBeenCalledWith(
+        "b@example.com",
+        "Bob",
+        "google-b",
+        null,
+      );
+    });
+  });
+});

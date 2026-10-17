@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { RedisService } from "src/redis/redis.service";
+import { RedisService } from "../../infrastructure/redis/redis.service";
 import {
   PANDASCORE_SYNC_CURSOR_KEY,
   SyncCursorRepository,
