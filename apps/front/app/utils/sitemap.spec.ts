@@ -39,6 +39,15 @@ describe("buildSitemapIndex", () => {
 });
 
 describe("buildPagesUrlset", () => {
+  it("lists both locale canonicals and excludes account pages", () => {
+    const xml = buildPagesUrlset();
+    expect(xml).toContain("<loc>https://sarpbc.org/fr/about</loc>");
+    expect(xml).toContain("<loc>https://sarpbc.org/fr/</loc>");
+    expect(xml).toContain("<loc>https://sarpbc.org/matches</loc>");
+    expect(xml).toContain("<loc>https://sarpbc.org/results</loc>");
+    expect(xml).not.toContain("/login");
+    expect(xml).not.toContain("/register");
+  });
   it("includes about and contact trust pages with fr hreflang", () => {
     const xml = buildPagesUrlset();
     expect(xml).toContain("<loc>https://sarpbc.org/about</loc>");
@@ -54,6 +63,7 @@ describe("buildNewsUrlset", () => {
   it("lists a published slug with en/fr/x-default hreflang and omits drafts", () => {
     const xml = buildNewsUrlset([{ slug: "rlcs-finals", lastmod: "2026-08-26T19:06:04.869Z" }]);
     expect(xml).toContain("<loc>https://sarpbc.org/news/rlcs-finals</loc>");
+    expect(xml).toContain("<loc>https://sarpbc.org/fr/news/rlcs-finals</loc>");
     expect(xml).toContain('hreflang="en" href="https://sarpbc.org/news/rlcs-finals"');
     expect(xml).toContain('hreflang="fr" href="https://sarpbc.org/fr/news/rlcs-finals"');
     expect(xml).toContain('hreflang="x-default" href="https://sarpbc.org/news/rlcs-finals"');

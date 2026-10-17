@@ -109,7 +109,7 @@ watch(
       title: tournament.value
         ? t("page.game.pickems.detail.seoTitle", { tournament: displayName.value })
         : t("page.game.pickems.title"),
-      description: t("page.game.pickems.description"),
+      description: t("page.game.pickems.seo.description"),
     });
   },
   { immediate: true },

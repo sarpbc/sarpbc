@@ -1,6 +1,6 @@
 ---
 title: "Legal Notice"
-description: "Legal information about sarpbc.org website, including editor details, hosting information, and intellectual property rights."
+description: "Find the legal information for sarpbc.org, including publisher and hosting details, intellectual property terms and the independent status of this esports platform."
 lastUpdated: "September 4, 2025"
 ---
 

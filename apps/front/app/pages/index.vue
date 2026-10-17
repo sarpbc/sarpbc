@@ -71,6 +71,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
 
 <template>
   <div class="w-full flex flex-col">
+    <h1 class="sr-only">{{ $t("page.home.seo.heading") }}</h1>
     <MatchMobileHomeStrip />
     <div class="w-full flex flex-col" :class="{ 'gap-4': Boolean(activePickemTournament) }">
       <PickemPromoBanner

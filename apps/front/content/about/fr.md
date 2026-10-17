@@ -1,6 +1,6 @@
 ---
 title: "À propos de sarpbc.org"
-description: "sarpbc.org est un projet indépendant dont l'ambition est de construire la plateforme de référence de l'esport Rocket League."
+description: "Découvrez sarpbc.org, une plateforme indépendante consacrée à l’esport Rocket League : actualités, matchs, résultats, profils de joueurs et jeux communautaires."
 ---
 
 # À propos de sarpbc.org

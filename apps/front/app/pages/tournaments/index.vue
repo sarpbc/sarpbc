@@ -62,7 +62,7 @@ const nextPageQuery = computed(() => ({
 }));
 
 setPageSeo({
-  title: `${t("page.tournaments.index.title")} | sarpbc.org`,
+  title: t("page.tournaments.index.seoTitle"),
   description: t("page.tournaments.index.description", { count: totalTournaments.value }),
 });
 

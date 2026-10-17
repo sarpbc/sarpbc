@@ -4,6 +4,16 @@ import { ORGANIZATION_ID } from "./organization";
 import { SCHEMA_ORG } from "./jsonLd";
 
 describe("buildNewsArticleJsonLd", () => {
+  it("uses the French article URL for French metadata", () => {
+    const ld = buildNewsArticleJsonLd({
+      title: "Finale RLCS",
+      slug: "rlcs-final",
+      content: "Les résultats de la finale RLCS.",
+      createdAt: "2026-10-17T12:00:00.000Z",
+      locale: "fr",
+    });
+    expect(ld.url).toBe("https://sarpbc.org/fr/news/rlcs-final");
+  });
   it("builds a NewsArticle node with publisher and author", () => {
     const ld = buildNewsArticleJsonLd({
       title: "Comm retires from professional Rocket League",

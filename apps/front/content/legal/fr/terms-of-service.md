@@ -1,6 +1,6 @@
 ---
 title: "Conditions Générales d'Utilisation"
-description: "Lisez nos conditions de service pour comprendre les règles et directives d'utilisation du site web et de la communauté sarpbc.org."
+description: "Consultez les conditions d’utilisation de sarpbc.org : participation à la communauté, responsabilités des comptes, conduite attendue et règles des contenus partagés."
 lastUpdated: "23 juillet 2026"
 ---
 

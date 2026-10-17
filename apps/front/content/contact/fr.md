@@ -1,6 +1,6 @@
 ---
 title: "Contacter sarpbc.org"
-description: "Comment joindre l'éditeur de sarpbc.org pour des retours, corrections, demandes de confidentialité et prises de contact presse."
+description: "Contactez l’éditeur de sarpbc.org pour une correction, un retour sur la couverture esport Rocket League, une demande presse, un partenariat ou la confidentialité."
 ---
 
 # Contacter sarpbc.org

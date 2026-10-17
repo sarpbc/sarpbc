@@ -27,6 +27,9 @@ export default () => ({
   pandascore_api_token: getPandaScoreApiToken(),
   pandascore_sync_on_boot: process.env.PANDASCORE_SYNC_ON_BOOT === "true",
   production: process.env.NODE_ENV === "production",
+  indexnow: {
+    key: process.env.INDEXNOW_KEY ?? "",
+  },
   port: Number(process.env.PORT ?? 4001),
   redis: {
     host: process.env.REDIS_HOST || "redis",

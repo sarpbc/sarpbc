@@ -1,5 +1,12 @@
 <script lang="ts" setup>
 const config = useRuntimeConfig();
+const { t } = useI18n();
+const { setPageSeo } = useSarpbcSeo();
+setPageSeo({
+  title: t("page.register.seoTitle"),
+  description: t("page.register.seoDescription"),
+  noIndex: true,
+});
 const posthog = usePostHog();
 
 interface RegisterState {

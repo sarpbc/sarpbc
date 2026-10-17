@@ -11,15 +11,17 @@ import { TweetEmbedService } from "../application/tweet-embed.service";
 import { TweetOEmbedGateway } from "./tweet-oembed.gateway";
 import { MikroNewsStore } from "./persistence/news.store";
 import { transactionalNews } from "./composition";
+import { IndexNowService } from "./indexnow.service";
 @Module({
   imports: [MikroOrmModule.forFeature([NewsArticle]), UserModule, ReplyModule],
   controllers: [NewsController],
   providers: [
+    IndexNowService,
     {
       provide: NewsService,
-      useFactory: (em: EntityManager, replies: ReplyService) =>
-        new NewsService(new MikroNewsStore(em), transactionalNews(em), replies),
-      inject: [EntityManager, ReplyService],
+      useFactory: (em: EntityManager, replies: ReplyService, indexing: IndexNowService) =>
+        new NewsService(new MikroNewsStore(em), transactionalNews(em), replies, indexing),
+      inject: [EntityManager, ReplyService, IndexNowService],
     },
     {
       provide: TweetEmbedService,

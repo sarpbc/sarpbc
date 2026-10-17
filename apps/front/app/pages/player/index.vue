@@ -95,7 +95,9 @@ const description = computed(() => {
 });
 
 setPageSeo({
-  title: pageTitle.value,
+  title: start.value
+    ? t("page.players.letter.title", { letter: start.value })
+    : t("page.players.index.title"),
   description: description.value,
 });
 </script>

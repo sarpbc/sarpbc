@@ -3,6 +3,12 @@ import { getApiErrorMessage } from "~/utils/apiError";
 
 const config = useRuntimeConfig();
 const { t } = useI18n();
+const { setPageSeo } = useSarpbcSeo();
+setPageSeo({
+  title: t("page.login.seoTitle"),
+  description: t("page.login.seoDescription"),
+  noIndex: true,
+});
 const route = useRoute();
 const localePath = useLocalePath();
 const posthog = usePostHog();
