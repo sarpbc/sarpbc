@@ -12,7 +12,7 @@ const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, project);
 const files = parsed.fileNames
   .map((file) => path.resolve(file))
   .filter(
-    (file) => file.startsWith(sourceRoot) && !file.endsWith(".spec.ts") && !file.endsWith(".d.ts"),
+    (file) => file.startsWith(sourceRoot) && !file.endsWith(".test.ts") && !file.endsWith(".d.ts"),
   );
 const normalized = (file) => path.relative(sourceRoot, file).split(path.sep).join("/");
 const layer = (file) =>
