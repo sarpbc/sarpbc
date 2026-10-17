@@ -4,8 +4,8 @@ const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();
 
 setPageSeo({
-  title: t("page.game.pickems.title"),
-  description: t("page.game.pickems.description"),
+  title: t("page.game.pickems.seo.title"),
+  description: t("page.game.pickems.seo.description"),
 });
 
 const {

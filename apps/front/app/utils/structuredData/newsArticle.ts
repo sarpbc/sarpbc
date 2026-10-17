@@ -22,6 +22,7 @@ export interface BuildNewsArticleJsonLdInput {
   author?: string;
   imageUrl?: string | null;
   origin?: string;
+  locale?: "en" | "fr";
 }
 
 export function newsArticleCanonicalUrl(slug: string, origin = SITE_ORIGIN): string {
@@ -30,7 +31,10 @@ export function newsArticleCanonicalUrl(slug: string, origin = SITE_ORIGIN): str
 
 export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): NewsArticleLd {
   const origin = article.origin ?? SITE_ORIGIN;
-  const url = newsArticleCanonicalUrl(article.slug, origin);
+  const url =
+    article.locale === "fr"
+      ? `${origin}/fr/news/${article.slug}`
+      : newsArticleCanonicalUrl(article.slug, origin);
   const description =
     excerptFromNewsContent(article.content, NEWS_SEO_DESCRIPTION_MAX_LENGTH) || undefined;
   const authorName = article.author?.trim();

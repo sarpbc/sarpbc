@@ -13,6 +13,7 @@ import { excerptFromContent } from "./news-content.util";
 import { hasFrenchTranslation, localizedNewsFields, type NewsLocale } from "./news-locale.util";
 import { UserService } from "src/user/user.service";
 import { ReplyService } from "src/reply/reply.service";
+import { IndexNowService } from "./indexnow.service";
 import { sanitizeNewsHtml, sanitizePlainText } from "src/common/html/sanitize-user-html";
 import slugify from "slugify";
 import type { NewsType } from "@sarpbc/types";
@@ -85,6 +86,7 @@ export class NewsService {
     private readonly newsRepository: EntityRepository<NewsArticle>,
     private readonly userService: UserService,
     private readonly replyService: ReplyService,
+    private readonly indexNowService: IndexNowService,
   ) {}
 
   private mapListArticle(
@@ -393,6 +395,9 @@ export class NewsService {
       article.type = dto.type;
     }
     await this.newsRepository.getEntityManager().flush();
+    if (!article.isDraft) {
+      await this.indexNowService.submitNewsSlugs([slug, article.slug]);
+    }
     return this.mapAdminArticle(article);
   }
 
@@ -401,8 +406,12 @@ export class NewsService {
     if (!article) {
       throw new NotFoundException(`NewsArticle with slug "${slug}" not found`);
     }
+    const wasDraft = article.isDraft;
     article.isDraft = isDraft;
     await this.newsRepository.getEntityManager().flush();
+    if (wasDraft !== isDraft) {
+      await this.indexNowService.submitNewsSlugs([article.slug]);
+    }
   }
 
   async delete(slug: string): Promise<void> {
@@ -412,5 +421,8 @@ export class NewsService {
     }
     await this.replyService.deleteAllForTarget("newsArticle", article.id);
     await this.newsRepository.getEntityManager().remove(article).flush();
+    if (!article.isDraft) {
+      await this.indexNowService.submitNewsSlugs([slug]);
+    }
   }
 }

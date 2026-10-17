@@ -1,6 +1,6 @@
 ---
 title: "Politique de Confidentialité"
-description: "Découvrez comment nous collectons, utilisons et protégeons vos informations personnelles en conformité avec le RGPD et les lois françaises sur la protection des données."
+description: "Découvrez comment sarpbc.org collecte, utilise et protège vos données personnelles, leurs durées de conservation et les moyens d’exercer vos droits RGPD."
 lastUpdated: "13 octobre 2026"
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Terms of Service"
-description: "Read our terms of service to understand the rules and guidelines for using the sarpbc.org website and community."
+description: "Read the terms for using sarpbc.org, including community participation, account responsibilities, acceptable conduct and the rules that apply to shared content."
 lastUpdated: "July 23, 2026"
 ---
 

@@ -15,6 +15,7 @@
     "fmt:check": "oxfmt . --check",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
+    "test:seo": "node scripts/check-seo.mjs",
     "test:watch": "vitest"
   },
   "dependencies": {

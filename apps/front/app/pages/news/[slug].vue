@@ -64,6 +64,7 @@ setJsonLd("ld-json-news-article", () => {
     content: article.value.content,
     author: article.value.author,
     imageUrl: article.value.imageUrl,
+    locale: locale.value === "fr" ? "fr" : "en",
   });
 });
 </script>

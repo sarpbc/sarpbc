@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { NEWS_SITEMAP_CHUNK_SIZE, NewsService, newsSitemapChunkCount } from "./news.service";
-import type { NewsArticle } from "./domain/news-article.entity";
+import { NewsArticle } from "./domain/news-article.entity";
 
 describe("newsSitemapChunkCount", () => {
   it("always exposes at least chunk 0 so the index can list a news urlset", () => {
@@ -22,7 +22,7 @@ describe("NewsService sitemap", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never);
+    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
     jest.clearAllMocks();
   });
 
@@ -130,7 +130,12 @@ describe("NewsService findAllPublishedArticle", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, replyService as never);
+    service = new NewsService(
+      newsRepository as never,
+      {} as never,
+      replyService as never,
+      {} as never,
+    );
     jest.clearAllMocks();
     replyService.countByTargetIds.mockResolvedValue(new Map());
   });
@@ -165,7 +170,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never);
+    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
     jest.clearAllMocks();
   });
 
@@ -196,5 +201,82 @@ describe("NewsService findPublishedShortsByWeek", () => {
         limit: 100,
       },
     );
+  });
+});
+
+describe("news publication notifications", () => {
+  const article = Object.assign(new NewsArticle(), {
+    id: "news-1",
+    slug: "old-slug",
+    title: "RLCS final",
+    content: "Final results",
+    author: { userName: "Editor" },
+  });
+  const flush = jest.fn();
+  const entityManager = { flush, remove: jest.fn() };
+  const repository = { findOne: jest.fn(), getEntityManager: () => entityManager };
+  const replyService = { deleteAllForTarget: jest.fn() };
+  const indexNow = { submitNewsSlugs: jest.fn() };
+  const service = new NewsService(
+    repository as never,
+    {} as never,
+    replyService as never,
+    indexNow as never,
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    article.isDraft = false;
+    article.slug = "old-slug";
+    repository.findOne.mockImplementation(async ({ slug }) =>
+      slug === article.slug ? article : null,
+    );
+    entityManager.remove.mockReturnValue(entityManager);
+    flush.mockResolvedValue(undefined);
+    indexNow.submitNewsSlugs.mockResolvedValue(undefined);
+  });
+
+  it("notifies both the old and new URLs after a published article is saved", async () => {
+    await service.update("old-slug", { slug: "new-slug" });
+    expect(indexNow.submitNewsSlugs).toHaveBeenCalledWith(["old-slug", "new-slug"]);
+    expect(flush.mock.invocationCallOrder[0]).toBeLessThan(
+      indexNow.submitNewsSlugs.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("does not expose changes to unpublished drafts", async () => {
+    article.isDraft = true;
+    await service.update("old-slug", { title: "Unpublished changes" });
+    expect(indexNow.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it.each([true, false])("notifies when draft status changes to %s", async (draft) => {
+    article.isDraft = !draft;
+    await service.setDraftStatus("old-slug", draft);
+    expect(indexNow.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+  });
+
+  it("does not notify when publishing an already published article", async () => {
+    await service.setDraftStatus("old-slug", false);
+    expect(indexNow.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it("notifies search engines when a published article is deleted", async () => {
+    await service.delete("old-slug");
+    expect(indexNow.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+  });
+
+  it("does not notify when deleting a draft", async () => {
+    article.isDraft = true;
+    await service.delete("old-slug");
+    expect(indexNow.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it("does not notify when saving fails", async () => {
+    flush.mockRejectedValueOnce(new Error("Database unavailable"));
+    await expect(service.update("old-slug", { title: "New title" })).rejects.toThrow(
+      "Database unavailable",
+    );
+    expect(indexNow.submitNewsSlugs).not.toHaveBeenCalled();
   });
 });

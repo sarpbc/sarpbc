@@ -310,8 +310,9 @@
       "shortNewsCount": "{n} short | {n} shorts",
       "allNews": "All news",
       "seo": {
-        "title": "Rocket League news & matches | sarpbc.org",
-        "description": "Bringing the competitive Rocket League ecosystem into one place."
+        "title": "Rocket League news, RLCS matches & results | sarpbc.org",
+        "description": "Follow Rocket League esports with the latest news, RLCS match schedules and results, tournament brackets, team rosters, player profiles and community games.",
+        "heading": "Rocket League esports news, matches and results"
       },
       "empty": "No news published yet.",
       "emptyHint": "New stories will show up here.",
@@ -371,7 +372,7 @@
         },
         "detail": {
           "title": "{tournament} Pick'em",
-          "seoTitle": "{tournament} Pick'em",
+          "seoTitle": "{tournament} Rocket League Pick'em | sarpbc.org",
           "signInPrompt": "Sign in to save your picks and climb the leaderboard.",
           "signInCta": "Sign In",
           "pickSaved": "Pick saved",
@@ -390,6 +391,10 @@
             "points": "{points} pts",
             "empty": "Rankings appear after matches finish."
           }
+        },
+        "seo": {
+          "title": "Rocket League Pick'ems: Match Predictions | sarpbc.org",
+          "description": "Predict Rocket League tournament matches, save your picks and follow the leaderboard. Join the sarpbc.org community and test your knowledge of the RLCS scene."
         }
       },
       "career": {
@@ -1140,14 +1145,14 @@
       "week": {
         "title": "This week",
         "range": "{start} – {end}",
-        "seoTitle": "This week's short news | sarpbc.org",
-        "seoDescription": "Follow this week's Rocket League short news as a live thread."
+        "seoTitle": "This Week's Rocket League Esports News | sarpbc.org",
+        "seoDescription": "Catch up on this week's Rocket League esports news. Follow short updates on RLCS teams, player transfers and tournament announcements on sarpbc.org."
       }
     },
     "players": {
       "index": {
-        "title": "All Players - sarpbc.org",
-        "description": "Browse all {count} players in the sarpbc.org database. Find players by name alphabetically organized.",
+        "title": "Rocket League Players: Profiles and Results | sarpbc.org",
+        "description": "Explore Rocket League esports player profiles on sarpbc.org. Browse the alphabetical directory to find teams, recent match results and tournament history.",
         "ogTitle": "All Players - sarpbc.org",
         "ogDescription": "Browse all {count} players in the sarpbc.org database.",
         "pageTitle": "Players Directory",
@@ -1160,8 +1165,8 @@
         "error": "Couldn't load players. Check your connection and try again."
       },
       "letter": {
-        "title": "Players starting with {letter} - sarpbc.org",
-        "description": "Browse all players whose names start with {letter}. Find detailed player profiles, stats, and team information.",
+        "title": "Rocket League Players Starting with {letter} | sarpbc.org",
+        "description": "Find Rocket League esports players whose names start with {letter}. Explore their profiles, teams, recent match results and tournament history on sarpbc.org.",
         "ogTitle": "Players starting with {letter} - sarpbc.org",
         "ogDescription": "Browse {count} players whose names start with {letter}.",
         "pageTitle": "Players - {letter}",
@@ -1271,8 +1276,8 @@
     },
     "teams": {
       "index": {
-        "title": "All Teams - sarpbc.org",
-        "description": "Browse all {count} teams in the sarpbc.org database. Find teams by name alphabetically organized.",
+        "title": "Rocket League Teams: Rosters and Results | sarpbc.org",
+        "description": "Explore Rocket League esports teams on sarpbc.org. Browse the alphabetical directory to find rosters, recent match results and tournament appearances.",
         "ogTitle": "All Teams - sarpbc.org",
         "ogDescription": "Browse all {count} teams in the sarpbc.org database.",
         "pageTitle": "Teams Directory",
@@ -1285,8 +1290,8 @@
         "error": "Couldn't load teams. Check your connection and try again."
       },
       "letter": {
-        "title": "Teams starting with {letter} - sarpbc.org",
-        "description": "Browse all teams whose names start with {letter}. Find detailed team profiles, rosters, and match information.",
+        "title": "Rocket League Teams Starting with {letter} | sarpbc.org",
+        "description": "Find Rocket League esports teams whose names start with {letter}. Explore their rosters, recent match results and tournament appearances on sarpbc.org.",
         "ogTitle": "Teams starting with {letter} - sarpbc.org",
         "ogDescription": "Browse {count} teams whose names start with {letter}.",
         "pageTitle": "Teams - {letter}",
@@ -1402,10 +1407,11 @@
     "tournaments": {
       "index": {
         "title": "Tournaments",
-        "description": "Browse all {count} Rocket League tournaments, brackets, and schedules on sarpbc.org",
+        "description": "Explore Rocket League esports tournaments on sarpbc.org. Find event brackets, match schedules, results and participating teams across the competitive scene.",
         "empty": "No tournaments found.",
         "page": "Page",
-        "error": "Couldn't load tournaments. Check your connection and try again."
+        "error": "Couldn't load tournaments. Check your connection and try again.",
+        "seoTitle": "Rocket League Tournaments: Brackets & Results | sarpbc.org"
       },
       "id": {
         "seoTitle": "{tournamentName} Bracket | sarpbc.org",
@@ -1445,8 +1451,8 @@
     "matches": {
       "title": "Matches",
       "seo": {
-        "title": "Matches | sarpbc.org",
-        "description": "Browse live and upcoming Rocket League matches from every tournament on sarpbc.org."
+        "title": "Rocket League Matches: Live & Upcoming RLCS | sarpbc.org",
+        "description": "Follow live and upcoming Rocket League esports matches on sarpbc.org. Check start times, team lineups and tournament details to plan what to watch next."
       },
       "empty": {
         "upcoming": "No live or upcoming matches right now.",
@@ -1461,8 +1467,8 @@
     "results": {
       "title": "Results",
       "seo": {
-        "title": "Results | sarpbc.org",
-        "description": "Browse completed Rocket League match results from every tournament on sarpbc.org."
+        "title": "Rocket League Match Results & Scores | sarpbc.org",
+        "description": "Browse completed Rocket League esports matches on sarpbc.org. Check final scores, compare teams and explore match details from RLCS and other tournaments."
       },
       "empty": {
         "title": "No completed matches to show yet.",
@@ -1509,7 +1515,7 @@
     },
     "brand": {
       "title": "Brand",
-      "metaDescription": "sarpbc.org logo files and how to use the mark.",
+      "metaDescription": "Download the official sarpbc.org logo, favicon and social sharing image. Find brand colors and usage guidance for covering the Rocket League esports platform.",
       "intro": "Resources for presenting sarpbc.org. Use the files as they ship.",
       "nameTitle": "Name",
       "nameBody": "The name is written sarpbc.org — lowercase, with the domain. There is no separate wordmark file.",
@@ -1535,12 +1541,13 @@
       "colorRgb": "RGB {value}",
       "copyHex": "Copy Hex",
       "hexCopied": "Hex copied",
-      "hexCopyFailed": "Could not copy hex. Copy it from the page"
+      "hexCopyFailed": "Could not copy hex. Copy it from the page",
+      "metaTitle": "sarpbc.org Brand Assets: Logos and Usage Guide"
     },
     "forum": {
       "index": {
-        "title": "Forum | sarpbc.org",
-        "description": "Join the sarpbc.org community forum. Discuss Rocket League strategies, share experiences, and connect with fellow players in our vibrant community.",
+        "title": "Rocket League Forum: Community Discussions | sarpbc.org",
+        "description": "Discuss Rocket League esports with the sarpbc.org community. Share opinions on RLCS matches, tournaments, teams and players, or start your own discussion.",
         "ogTitle": "sarpbc.org Forum - Rocket League Community",
         "ogDescription": "Connect with the Rocket League community on sarpbc.org Forum. Share strategies, discuss gameplay, and stay updated with the latest community news.",
         "pageTitle": "Forum",
@@ -1646,6 +1653,14 @@
         "googleFailed": "Google sign-in failed. Try again or use email and password.",
         "googleLinkFailed": "Could not link Google to your account. Try email and password."
       }
+    },
+    "login": {
+      "seoTitle": "Sign In to Your Rocket League Community | sarpbc.org",
+      "seoDescription": "Sign in to your sarpbc.org account to join Rocket League discussions, save tournament predictions and take part in the esports community."
+    },
+    "register": {
+      "seoTitle": "Join the Rocket League Community | sarpbc.org",
+      "seoDescription": "Create a sarpbc.org account to join Rocket League esports discussions, save your match predictions and take part in the community."
     }
   },
   "pages": {

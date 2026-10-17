@@ -1,6 +1,6 @@
 ---
 title: "Contact sarpbc.org"
-description: "How to reach the sarpbc.org publisher for feedback, corrections, privacy requests, and partnership inquiries."
+description: "Contact the sarpbc.org publisher about Rocket League esports coverage, corrections, partnerships or privacy. Find the right contact details for your request."
 ---
 
 # Contact sarpbc.org

@@ -12,6 +12,7 @@ export {
   newsContentToPlainText,
 } from "./news-content.ts";
 export { readingTimeMinutes } from "./news-reading-time.ts";
+export { INDEXNOW_KEY, INDEXNOW_KEY_PATH } from "./indexnow.ts";
 export {
   ISO_WEEK_ID_PATTERN,
   formatIsoWeekId,
