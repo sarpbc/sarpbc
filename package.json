@@ -8,7 +8,6 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "prepare": "node -e \"if (!process.env.CI) require('node:child_process').execSync('lefthook install', { stdio: 'inherit' })\"",
     "test:git-names": "node --test scripts/check-git-names.test.mjs",
     "dev": "turbo run dev",
     "dev:back": "turbo run dev --filter=back",
