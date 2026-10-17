@@ -154,11 +154,11 @@ pnpm lint:fix
 
 ## Design (public frontend)
 
-Human-facing UI decisions for the Nuxt site (hub vs marketing, row grid, components): [`apps/front/DESIGN.md`](apps/front/DESIGN.md). Agent craft rules live under [`.agents/skills/geist-design/`](.agents/skills/geist-design/).
+UI decisions for the Nuxt site (hub vs marketing, row grid, components): [`apps/front/DESIGN.md`](apps/front/DESIGN.md). The root [design index](DESIGN.md) identifies the applicable guide for each application.
 
 ## AI / Cursor
 
-Agent index and skill routing: [AGENTS.md](AGENTS.md). Cursor rules in `.cursor/rules/` (hub + scoped front/back).
+Project instructions: [AGENTS.md](AGENTS.md). The minimal Cursor rule points to the same project documents. Personal skills are installed outside this repository and follow its instructions and design.
 
 ## Migration from legacy repos
 

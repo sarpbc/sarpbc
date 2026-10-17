@@ -14,7 +14,9 @@
 
 # Project
 
-SARPBC is a Rocket League esports platform combining news, competitive data, forums and community features.
+sarpbc.org is a Rocket League esports platform combining news, competitive data, forums and community features.
+
+Use `sarpbc.org` as the project and product name in documentation and copy.
 
 This repository is a pnpm monorepo containing:
 
@@ -25,7 +27,9 @@ This repository is a pnpm monorepo containing:
 
 This file contains only repository-wide guidance.
 
-Framework-specific and domain-specific rules live inside `.agents/skills/`.
+Project instructions and design decisions live in the documentation linked below.
+Personal agent workflows are installed outside this repository and do not define
+the project's architecture, design or delivery conventions.
 
 ---
 
@@ -56,23 +60,43 @@ Framework-specific and domain-specific rules live inside `.agents/skills/`.
 
 ---
 
-# Skills
+# Project context
 
-Before making significant changes, load the relevant skill(s).
+Read this file before significant work, then the documentation for the affected
+scope. Applicable nested instruction files refine the guidance for their own
+directory. Read the relevant design before changing UI; do not apply the public
+site's layout to the staff application by default.
 
-| Skill                                | When to use                                                   |
-| ------------------------------------ | ------------------------------------------------------------- |
-| `nuxt`                               | Nuxt, Vue, routing, SSR, composables, Nitro                   |
-| `nestjs-best-practices`              | Backend architecture, modules, DTOs, MikroORM, authentication |
-| `geist-design`                       | UI, UX, forms, accessibility, copywriting                     |
-| `llm-safe-design-system`             | Design system rules                                           |
-| `customer-needs`                     | Product feedback interpretation                               |
-| `sarpbc-pm`                          | Roadmap, backlog, feature planning                            |
-| `improve-codebase-architecture`      | Large architectural refactors                                 |
-| `thermo-nuclear-code-quality-review` | Deep code quality audits                                      |
-| `grill-me`                           | Critical review and planning sessions                         |
+| Scope                                                | Source of truth                                                                                                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Design scope and application boundaries              | [DESIGN.md](DESIGN.md)                                                                                                                           |
+| Public UI, interaction, copy and tokens              | [apps/front/DESIGN.md](apps/front/DESIGN.md)                                                                                                     |
+| Supporting interface conventions                     | [apps/front/design/INTERFACE.md](apps/front/design/INTERFACE.md), [TOKENS.md](apps/front/design/TOKENS.md), [NUXT.md](apps/front/design/NUXT.md) |
+| Backend modules, ports, persistence and transactions | [apps/back/ARCHITECTURE.md](apps/back/ARCHITECTURE.md)                                                                                           |
+| Product scope, personas and backlog                  | [docs/PRODUCT.md](docs/PRODUCT.md)                                                                                                               |
+| News tone, sourcing and bilingual drafts             | [docs/playbooks/roster-change-news.md](docs/playbooks/roster-change-news.md#4-drafting)                                                          |
+| Setup, naming and delivery checks                    | [CONTRIBUTING.md](CONTRIBUTING.md), the affected app's README and package scripts                                                                |
 
-Each skill contains the authoritative guidance for its domain.
+Project documents take precedence over personal workflow defaults. Keep reusable
+personal skills outside this repo. Do not add a skill library, model routing or
+a dependency on a personal plugin to make the project usable.
+
+For frontend work, reuse the affected app's Nuxt 4 conventions and `@nuxt/ui`
+components. Use SSR-aware data fetching, localized navigation and cookie
+credentials to the NestJS API. Public primitives live in
+`apps/front/app/components/s/`; cross-app UI belongs in `packages/ui`. Inspect
+existing helpers before adding a wrapper. Cover loading, empty, error and
+populated states, keyboard use and the supported locales.
+
+For backend work, read the architecture document first. Domain and application
+code remain free of framework and storage dependencies; infrastructure owns
+Nest providers, HTTP validation, ORM records and adapters. Consumers use
+application contracts instead of private persistence implementations. Verify
+transactions and schema changes with the appropriate existing checks.
+
+For news, preserve the documented neutral, scene-informed tone without hype.
+Attribute sources, distinguish reports from confirmed announcements and write
+natural French. Human staff review and publish drafts in admin.
 
 ---
 
@@ -113,9 +137,15 @@ Each skill contains the authoritative guidance for its domain.
 When working on this repository:
 
 1. Identify the affected application(s).
-2. Read the corresponding skill(s).
+2. Read the corresponding project instructions, design and architecture documents.
 3. Follow repository conventions.
 4. Run formatting and linting before considering the task complete.
+
+Find executable checks in the current package scripts. Use pnpm. Common checks
+are `pnpm lint`, `pnpm fmt:check` and the affected app's tests/typecheck. Backend
+architecture, contract and integration checks are documented in
+`apps/back/ARCHITECTURE.md`. UI changes need evidence from the affected page when
+local services and browser tools are available.
 
 ---
 
@@ -123,4 +153,6 @@ When working on this repository:
 
 - `README.md` — Human onboarding
 - `apps/front/DESIGN.md` — Human design documentation
-- `.agents/skills/` — Detailed agent instructions
+- `DESIGN.md` — Design scope and application-specific references
+- `apps/back/ARCHITECTURE.md` — Backend boundaries and verification
+- `docs/PRODUCT.md` — sarpbc.org product context

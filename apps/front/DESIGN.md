@@ -1,6 +1,6 @@
-# sarpbc front — Design
+# sarpbc.org front — Design
 
-Human-facing design reference for **`apps/front`** (public site). Use this when shipping UI by hand. Agents should prefer [`.agents/skills/geist-design/`](../../.agents/skills/geist-design/) and still honor the rules here.
+Design reference for **`apps/front`** (public site), shared by contributors and agents. This file defines the public site's decisions; [supporting interface conventions](design/INTERFACE.md) provide detailed examples.
 
 Inspired by [Geist](https://vercel.com/design), Linear, and Polar-style product docs: decisions written down, not tribal knowledge.
 
@@ -19,12 +19,12 @@ Inspired by [Geist](https://vercel.com/design), Linear, and Polar-style product 
 
 ## Surfaces
 
-sarpbc has two public design modes. Same tokens and components; different density and layout.
+sarpbc.org has two public design modes. Same tokens and components; different density and layout.
 
 | Mode          | Routes                                                                               | Layout                                         | Density                    | Job                                          |
 | ------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------- | -------------------------- | -------------------------------------------- |
 | **Hub**       | `/`, `/matches`, `/news`, `/forum`, `/player`, `/team`, `/tournaments`, `/game/*`, … | Default 3-column shell (`layouts/default.vue`) | Dense, border-aligned rows | Daily returning fans — news, schedule, rails |
-| **Marketing** | `/about`                                                                             | `layouts/marketing.vue` — **no** hub sidebars  | Editorial, more whitespace | First-time visitors — what sarpbc is         |
+| **Marketing** | `/about`                                                                             | `layouts/marketing.vue` — **no** hub sidebars  | Editorial, more whitespace | First-time visitors — what sarpbc.org is     |
 
 ### Hub (default)
 
@@ -249,7 +249,7 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 - In-progress: `Saving…` (ellipsis character).
 - Units: non-breaking space in locale files (`10\u00a0MB`).
 
-API messages from NestJS often surface in toasts — keep them actionable (see geist-design § NestJS ↔ UI).
+API messages from NestJS often surface in toasts — keep them actionable (see [interface conventions](design/INTERFACE.md#9-nestjs--ui-contract)).
 
 ---
 
@@ -261,17 +261,17 @@ API messages from NestJS often surface in toasts — keep them actionable (see g
 4. **Primitives first:** `@nuxt/ui` → existing `S*` (`app/components/s/`) → new `S*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.
-7. **Agents:** follow [geist-design](../../.agents/skills/geist-design/); do not paste the full skill into PRs. Point humans at this `DESIGN.md`.
+7. **Agents:** read the root [AGENTS.md](../../AGENTS.md), this design document and the supporting references relevant to the change. Link the applicable decision in PRs rather than copying the full guide.
 8. **Admin** (`apps/admin`) is a separate surface — out of scope for this doc.
 
 ### Docs map
 
-| Audience           | Doc                                                                 |
-| ------------------ | ------------------------------------------------------------------- |
-| Humans (this file) | `apps/front/DESIGN.md`                                              |
-| Agents (UI craft)  | `.agents/skills/geist-design/`                                      |
-| Token cheat sheet  | `.agents/skills/geist-design/references/tokens.md`                  |
-| Repo / stack index | root [`AGENTS.md`](../../AGENTS.md), [`README.md`](../../README.md) |
+| Audience              | Doc                                                                 |
+| --------------------- | ------------------------------------------------------------------- |
+| Design decisions      | `apps/front/DESIGN.md`                                              |
+| Interface conventions | [INTERFACE.md](design/INTERFACE.md)                                 |
+| Token cheat sheet     | [TOKENS.md](design/TOKENS.md)                                       |
+| Repo / stack index    | root [`AGENTS.md`](../../AGENTS.md), [`README.md`](../../README.md) |
 
 ---
 

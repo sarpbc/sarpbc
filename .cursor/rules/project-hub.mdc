@@ -1,21 +1,14 @@
 ---
-description: sarpbc monorepo hub — read AGENTS.md and load the right skill
+description: Load sarpbc.org project instructions and the applicable design document
 globs:
   - "**/*"
 alwaysApply: true
 ---
 
-# sarpbc
+# sarpbc.org context
 
-Monorepo: `apps/front` (Nuxt 4) + `apps/back` (NestJS). pnpm only.
-
-Before non-trivial work, read **[AGENTS.md](../AGENTS.md)** at the repo root and load the relevant **`SKILL.md`** from `.agents/skills/` (not `GUIDE.md` — those are on-demand references):
-
-- UI / copy / a11y → `geist-design`
-- Design-system constraints for agents / UI drift → `llm-safe-design-system`
-- NestJS / API / DB → `nestjs-best-practices`
-- Nuxt / SSR / routing → `nuxt`
-- Roadmap / backlog / scope grilling → `sarpbc-pm`
-- Customer feedback / feature requests → `customer-needs`
-
-Do not duplicate full skill docs in responses. Prefer minimal diffs; oxlint + oxfmt; i18n for all user strings in the frontend.
+Read [AGENTS.md](../../AGENTS.md) and applicable nested instruction files before
+significant work. For UI changes, read [DESIGN.md](../../DESIGN.md) and the guide
+for the affected application. Follow their links to architecture, product and
+editorial guidance as needed. Project conventions override personal skill
+defaults; keep reusable workflows outside this repository.
