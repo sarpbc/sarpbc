@@ -27,10 +27,5 @@ Rocket League / Psyonix / Epic Games
 ---------------------------------------------------------------------------
 Third-party materials in this repository
 
-Agent skills under .agents/skills/ may include third-party content with their
-own licenses (for example nestjs-best-practices declares MIT). Those notices
-apply to the corresponding skill trees; they do not change the Apache-2.0
-license of the sarpbc.org application code.
-
 npm / pnpm dependencies are licensed separately under their respective
 licenses as declared in each package.

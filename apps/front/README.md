@@ -26,7 +26,7 @@ Open http://localhost:4000. The API must be running on port `4001` for live data
 ## Contributing
 
 - All user-facing strings go in `i18n/locales/en-US.json` and `fr-FR.json`.
-- UI work: [`.agents/skills/geist-design/SKILL.md`](../../.agents/skills/geist-design/SKILL.md)
-- Framework: [`.agents/skills/nuxt/SKILL.md`](../../.agents/skills/nuxt/SKILL.md)
+- UI work: [DESIGN.md](DESIGN.md) and its linked interface references.
+- Project and framework conventions: [AGENTS.md](../../AGENTS.md).
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md) at the repo root.
