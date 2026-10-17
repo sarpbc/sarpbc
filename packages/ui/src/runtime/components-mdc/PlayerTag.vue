@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { playerHref, opensInNewTab } = useEntityTagLink();
+const { playerHref, teamHref, opensInNewTab } = useEntityTagLink();
 
 const open = ref(false);
 const pending = ref(false);
@@ -46,9 +46,10 @@ async function loadPlayer() {
 
   try {
     const response = await fetchWithEntityTagCache(`player:${props.slug}`, () =>
-      apiFetch<{ player: Player }>(`/player/slug/${encodeURIComponent(props.slug)}`),
+      apiFetch<{ player: Player | null }>(`/player/slug/${encodeURIComponent(props.slug)}`),
     );
     player.value = response.player;
+    error.value = response.player === null;
   } catch {
     error.value = true;
   } finally {
@@ -64,61 +65,85 @@ watch(open, (isOpen) => {
 </script>
 
 <template>
-  <UPopover v-model:open="open" mode="hover" :open-delay="0" :close-delay="100">
+  <UPopover
+    v-model:open="open"
+    mode="hover"
+    :open-delay="0"
+    :close-delay="100"
+    :ui="{ content: 'rounded-none border border-default ring-0 shadow-sm overflow-hidden' }"
+  >
     <NuxtLink
       :to="href"
       :target="opensInNewTab ? '_blank' : undefined"
       :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
-      class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      class="font-medium text-primary transition-none hover:text-highlighted"
       translate="no"
     >
       {{ label }}
     </NuxtLink>
 
     <template #content>
-      <div v-if="pending" class="flex w-64 flex-col gap-3 p-3">
-        <div class="flex items-center gap-3">
-          <USkeleton class="size-12 shrink-0 rounded-full" />
+      <div v-if="pending" class="flex w-72 flex-col" aria-busy="true">
+        <div class="flex items-center gap-3 p-3">
+          <USkeleton class="size-16 shrink-0 rounded-none" />
           <div class="flex min-w-0 flex-1 flex-col gap-1.5">
             <USkeleton class="h-4 w-24" />
             <USkeleton class="h-3 w-32" />
           </div>
         </div>
-        <USkeleton class="h-3 w-28" />
+        <div class="flex h-row items-center gap-2 border-t border-default px-3">
+          <USkeleton class="size-5 shrink-0 rounded-none" />
+          <USkeleton class="h-3 w-28" />
+        </div>
+        <div class="flex h-row items-center border-t border-default px-3">
+          <USkeleton class="h-3 w-24" />
+        </div>
       </div>
 
-      <div v-else-if="error" class="w-64 p-3 text-sm text-muted">
+      <div v-else-if="error" class="w-72 p-3 text-sm text-muted">
         {{ t("newsTag.error") }}
       </div>
 
-      <div v-else-if="player" class="flex w-64 flex-col gap-3 p-3">
-        <div class="flex items-center gap-3">
-          <UAvatar
-            :src="player.imageUrl ?? undefined"
-            :alt="player.name"
-            size="lg"
-            icon="i-fluent-person-24-regular"
-          />
+      <div v-else-if="player" class="flex w-72 flex-col">
+        <div class="flex items-center gap-3 p-3">
+          <div
+            class="flex size-16 shrink-0 items-center justify-center overflow-hidden bg-elevated"
+          >
+            <img
+              v-if="player.imageUrl"
+              :src="player.imageUrl"
+              alt=""
+              class="size-full object-cover"
+            />
+            <UIcon v-else name="i-fluent-person-24-regular" class="size-6 text-muted" />
+          </div>
           <div class="min-w-0 flex-1">
             <p class="truncate font-semibold text-highlighted" translate="no">
               {{ player.name }}
             </p>
-            <p v-if="fullName" class="truncate text-sm text-muted">
+            <p v-if="fullName" class="truncate text-sm text-muted" translate="no">
               {{ fullName }}
             </p>
           </div>
         </div>
 
-        <div v-if="player.team" class="flex items-center gap-2 border-t border-default pt-2">
-          <UAvatar
+        <NuxtLink
+          v-if="player.team"
+          :to="teamHref(player.team.slug)"
+          :target="opensInNewTab ? '_blank' : undefined"
+          :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+          class="flex h-row min-w-0 items-center gap-2 border-t border-default px-3 text-muted transition-none hover:bg-elevated hover:text-highlighted"
+        >
+          <img
+            v-if="teamLogoSrc"
             :src="teamLogoSrc"
-            :alt="player.team.name"
-            size="xs"
-            icon="i-fluent-people-team-24-regular"
+            alt=""
+            class="size-5 shrink-0 object-contain"
           />
-          <span class="truncate text-sm text-muted" translate="no">{{ player.team.name }}</span>
-        </div>
-        <p v-else class="border-t border-default pt-2 text-sm text-muted">
+          <UIcon v-else name="i-fluent-people-team-24-regular" class="size-5 shrink-0" />
+          <span class="truncate text-sm" translate="no">{{ player.team.name }}</span>
+        </NuxtLink>
+        <p v-else class="flex h-row items-center border-t border-default px-3 text-sm text-muted">
           {{ t("newsTag.noTeam") }}
         </p>
 
@@ -126,9 +151,10 @@ watch(open, (isOpen) => {
           :to="href"
           :target="opensInNewTab ? '_blank' : undefined"
           :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
-          class="text-sm font-medium text-muted transition-none hover:text-highlighted"
+          class="flex h-row items-center justify-between gap-2 border-t border-default px-3 text-sm font-medium text-muted transition-none hover:bg-elevated hover:text-highlighted"
         >
           {{ t("newsTag.viewProfile") }}
+          <UIcon name="i-fluent-chevron-right-24-regular" class="size-4 shrink-0" />
         </NuxtLink>
       </div>
     </template>
