@@ -27,3 +27,6 @@ export interface NewsTransaction {
 export interface NewsComments {
   countByTargetIds(type: "newsArticle", ids: string[]): Promise<Map<string, number>>;
 }
+export interface NewsIndexing {
+  submitNewsSlugs(slugs: string[]): Promise<void>;
+}

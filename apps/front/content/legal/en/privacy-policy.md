@@ -1,6 +1,6 @@
 ---
 title: "Privacy Policy"
-description: "Learn how we collect, use, and protect your personal information in compliance with GDPR and French data protection laws."
+description: "Learn how sarpbc.org collects, uses and protects personal data, how long information is retained, and how to exercise your privacy rights under the GDPR."
 lastUpdated: "October 13, 2026"
 ---
 

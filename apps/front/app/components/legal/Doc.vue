@@ -29,7 +29,7 @@ watch(
     }
 
     setPageSeo({
-      title: value.title,
+      title: `${value.title} | sarpbc.org`,
       description: value.description,
     });
   },

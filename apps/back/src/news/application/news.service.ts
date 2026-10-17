@@ -11,7 +11,7 @@ import type {
   CreateNewsArticleInput,
   UpdateNewsArticleInput,
 } from "../domain/news-article";
-import type { NewsQueries, NewsTransaction, NewsComments } from "./ports";
+import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
 import slugify from "slugify";
 import type { NewsType } from "@sarpbc/types";
 import { isoWeekUtcRange } from "@sarpbc/utils";
@@ -80,6 +80,7 @@ export class NewsService {
     private readonly newsRepository: NewsQueries,
     private readonly transaction: NewsTransaction,
     private readonly replyService: NewsComments,
+    private readonly indexing: NewsIndexing,
     private readonly id: () => string = () => crypto.randomUUID(),
   ) {}
 
@@ -343,7 +344,7 @@ export class NewsService {
   }
 
   async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdminResponse> {
-    return this.transaction.run(async (scope) => {
+    const result = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
@@ -381,27 +382,40 @@ export class NewsService {
       await scope.articles.save(article);
       return this.mapAdminArticle(article);
     });
+    if (!result.isDraft) {
+      await this.indexing.submitNewsSlugs([slug, result.slug]);
+    }
+    return result;
   }
 
   async setDraftStatus(slug: string, isDraft: boolean) {
-    return this.transaction.run(async (scope) => {
+    const changed = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
       }
+      const wasDraft = article.isDraft;
       article.isDraft = isDraft;
       await scope.articles.save(article);
+      return wasDraft !== isDraft;
     });
+    if (changed) {
+      await this.indexing.submitNewsSlugs([slug]);
+    }
   }
 
   async delete(slug: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    const wasPublished = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
       }
       await scope.replies.deleteAllForTarget("newsArticle", article.id);
       await scope.articles.delete(article);
+      return !article.isDraft;
     });
+    if (wasPublished) {
+      await this.indexing.submitNewsSlugs([slug]);
+    }
   }
 }

@@ -1,6 +1,6 @@
 ---
 title: "Mentions Légales"
-description: "Informations légales sur le site web sarpbc.org, incluant les détails de l'éditeur, l'hébergement et les droits de propriété intellectuelle."
+description: "Consultez les mentions légales de sarpbc.org : informations sur l’éditeur et l’hébergement, propriété intellectuelle et statut indépendant de la plateforme esport."
 lastUpdated: "4 septembre 2025"
 ---
 

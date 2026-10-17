@@ -7,7 +7,7 @@ const BRAND_BLUE = "#2B7FFF";
 const BRAND_BLUE_RGB = "43, 127, 255";
 
 setPageSeo({
-  title: t("page.brand.title"),
+  title: t("page.brand.metaTitle"),
   description: t("page.brand.metaDescription"),
 });
 

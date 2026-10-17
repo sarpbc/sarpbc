@@ -1,6 +1,6 @@
 ---
 title: "Politique des Cookies"
-description: "Découvrez comment nous utilisons les cookies sur notre site web, y compris PostHog et autres technologies de suivi."
+description: "Comprenez l’utilisation des cookies essentiels et des outils de mesure sur sarpbc.org. Consultez leurs finalités et les moyens de gérer votre consentement."
 lastUpdated: "13 octobre 2026"
 ---
 

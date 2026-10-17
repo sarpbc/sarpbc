@@ -22,28 +22,28 @@ export type SitemapChangefreq = "daily" | "weekly" | "monthly";
 
 export interface StaticSitemapPage {
   path: string;
-  lastmod: string;
   changefreq: SitemapChangefreq;
   priority: string;
 }
 
 export const STATIC_SITEMAP_PAGES: readonly StaticSitemapPage[] = [
-  { path: "/", lastmod: "2026-01-12", changefreq: "daily", priority: "1.0" },
-  { path: "/game/airriddle", lastmod: "2026-01-12", changefreq: "weekly", priority: "0.9" },
-  { path: "/game/pickems", lastmod: "2026-01-12", changefreq: "weekly", priority: "0.9" },
-  { path: "/forum", lastmod: "2026-01-12", changefreq: "daily", priority: "0.9" },
-  { path: "/tournaments", lastmod: "2026-01-12", changefreq: "daily", priority: "0.9" },
-  { path: "/player", lastmod: "2026-01-12", changefreq: "daily", priority: "0.9" },
-  { path: "/team", lastmod: "2026-01-12", changefreq: "daily", priority: "0.9" },
-  { path: "/login", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.7" },
-  { path: "/register", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.7" },
-  { path: "/about", lastmod: "2026-08-21", changefreq: "monthly", priority: "0.5" },
-  { path: "/contact", lastmod: "2026-08-21", changefreq: "monthly", priority: "0.5" },
-  { path: "/brand", lastmod: "2026-09-06", changefreq: "monthly", priority: "0.5" },
-  { path: "/cookie-policy", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
-  { path: "/legal-notice", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
-  { path: "/privacy-policy", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
-  { path: "/terms-of-service", lastmod: "2026-01-12", changefreq: "monthly", priority: "0.4" },
+  { path: "/", changefreq: "daily", priority: "1.0" },
+  { path: "/game/airriddle", changefreq: "weekly", priority: "0.9" },
+  { path: "/game/pickems", changefreq: "weekly", priority: "0.9" },
+  { path: "/forum", changefreq: "daily", priority: "0.9" },
+  { path: "/tournaments", changefreq: "daily", priority: "0.9" },
+  { path: "/matches", changefreq: "daily", priority: "0.9" },
+  { path: "/results", changefreq: "daily", priority: "0.9" },
+  { path: "/player", changefreq: "daily", priority: "0.9" },
+  { path: "/team", changefreq: "daily", priority: "0.9" },
+  { path: "/game/career", changefreq: "weekly", priority: "0.7" },
+  { path: "/about", changefreq: "monthly", priority: "0.5" },
+  { path: "/contact", changefreq: "monthly", priority: "0.5" },
+  { path: "/brand", changefreq: "monthly", priority: "0.5" },
+  { path: "/cookie-policy", changefreq: "monthly", priority: "0.4" },
+  { path: "/legal-notice", changefreq: "monthly", priority: "0.4" },
+  { path: "/privacy-policy", changefreq: "monthly", priority: "0.4" },
+  { path: "/terms-of-service", changefreq: "monthly", priority: "0.4" },
 ];
 
 export function newsSitemapPath(chunk: number): string {
@@ -107,28 +107,31 @@ ${body}
 function pageUrlEntry(page: StaticSitemapPage, origin: string): string {
   const enUrl = absoluteUrl(page.path, origin);
   const frUrl = absoluteUrl(frenchPath(page.path), origin);
-  return `  <url>
-    <loc>${escapeXml(enUrl)}</loc>
+  return [enUrl, frUrl]
+    .map(
+      (url) => `  <url>
+    <loc>${escapeXml(url)}</loc>
 ${hreflangLinks(enUrl, frUrl)}
-    <lastmod>${escapeXml(page.lastmod)}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`;
+  </url>`,
+    )
+    .join("\n");
 }
 
-/**
- * `/fr/news/{slug}` already 200s with an English fallback, so every article
- * gets en / fr / x-default hreflang like the rest of the site.
- */
 function newsUrlEntry(entry: NewsSitemapEntry, origin: string): string {
   const path = `/news/${entry.slug}`;
   const enUrl = absoluteUrl(path, origin);
   const frUrl = absoluteUrl(frenchPath(path), origin);
-  return `  <url>
-    <loc>${escapeXml(enUrl)}</loc>
+  return [enUrl, frUrl]
+    .map(
+      (url) => `  <url>
+    <loc>${escapeXml(url)}</loc>
 ${hreflangLinks(enUrl, frUrl)}
     <lastmod>${escapeXml(formatSitemapLastmod(entry.lastmod))}</lastmod>
-  </url>`;
+  </url>`,
+    )
+    .join("\n");
 }
 
 export function buildSitemapIndex(newsChunkCount: number, origin: string = SITE_ORIGIN): string {

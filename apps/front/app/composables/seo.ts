@@ -86,42 +86,34 @@ export const useSarpbcSeo = () => {
     const noIndex = opts?.noIndex ?? false;
     const twitterCard = opts?.twitterCard ?? "summary_large_image";
 
-    // Canonicals are unprefixed; `/fr` is the locale prefix, not part of the path.
-    const cleanPath = route.path.replace(/^\/fr/, "");
-    const canonicalUrl = `${baseUrl}${cleanPath}`;
+    useHead(() => {
+      const cleanPath = route.path.replace(/^\/fr(?=\/|$)/, "") || "/";
+      const alternateLinks = locales.value.map((loc) => ({
+        rel: "alternate" as const,
+        hreflang: loc.language,
+        href: loc.code === "en" ? `${baseUrl}${cleanPath}` : `${baseUrl}/${loc.code}${cleanPath}`,
+      }));
 
-    const availableLocales = locales.value as Array<{
-      code: string;
-      language: string;
-    }>;
-
-    const alternateLinks = availableLocales.map((loc) => ({
-      rel: "alternate" as const,
-      hreflang: loc.language,
-      href: loc.code === "en" ? `${baseUrl}${cleanPath}` : `${baseUrl}/${loc.code}${cleanPath}`,
-    }));
-
-    alternateLinks.push({
-      rel: "alternate" as const,
-      hreflang: "x-default",
-      href: canonicalUrl,
-    });
-
-    const pageLinks: Array<Record<string, string>> = [
-      { rel: "canonical", href: canonicalUrl },
-      ...alternateLinks,
-    ];
-
-    if (!noIndex) {
-      pageLinks.push({
-        rel: "alternate",
-        type: "text/markdown",
-        href: `${baseUrl}${markdownPathFromHtmlPath(route.path)}`,
+      alternateLinks.push({
+        rel: "alternate" as const,
+        hreflang: "x-default",
+        href: `${baseUrl}${cleanPath}`,
       });
-    }
 
-    useHead({
-      link: pageLinks,
+      const pageLinks: Array<Record<string, string>> = [
+        { rel: "canonical", href: getCanonicalUrl() },
+        ...alternateLinks,
+      ];
+
+      if (!noIndex) {
+        pageLinks.push({
+          rel: "alternate",
+          type: "text/markdown",
+          href: `${baseUrl}${markdownPathFromHtmlPath(route.path)}`,
+        });
+      }
+
+      return { link: pageLinks };
     });
 
     const seoMeta: PageSeoMeta = {
@@ -130,7 +122,7 @@ export const useSarpbcSeo = () => {
       ogSiteName: DEFAULT_SITE_NAME,
       description,
       ogDescription: description,
-      ogUrl: canonicalUrl,
+      ogUrl: getCanonicalUrl(),
       ogImage: image,
       ogImageWidth: OG_IMAGE_WIDTH,
       ogImageHeight: OG_IMAGE_HEIGHT,
@@ -144,12 +136,11 @@ export const useSarpbcSeo = () => {
     if (imageType) {
       seoMeta.ogImageType = imageType;
     }
-    useSeoMeta(seoMeta);
+    useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl });
   };
 
   const getCanonicalUrl = () => {
-    const cleanPath = route.path.replace(/^\/fr/, "");
-    return `${baseUrl}${cleanPath}`;
+    return `${baseUrl}${route.path === "/fr" ? "/fr/" : route.path}`;
   };
 
   return {

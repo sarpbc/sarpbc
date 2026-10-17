@@ -5,6 +5,7 @@ import {
 } from "../../common/domain/errors";
 import { NEWS_SITEMAP_CHUNK_SIZE, NewsService, newsSitemapChunkCount } from "./news.service";
 import type { NewsArticleRecord as NewsArticle } from "../domain/news-article";
+import type { NewsTransaction, NewsWriteScope } from "./ports";
 
 describe("newsSitemapChunkCount", () => {
   it("always exposes at least chunk 0 so the index can list a news urlset", () => {
@@ -26,7 +27,7 @@ describe("NewsService sitemap", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never);
+    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
     vi.clearAllMocks();
   });
 
@@ -126,7 +127,12 @@ describe("NewsService findAllPublishedArticle", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, replyService as never);
+    service = new NewsService(
+      newsRepository as never,
+      {} as never,
+      replyService as never,
+      {} as never,
+    );
     vi.clearAllMocks();
     replyService.countByTargetIds.mockResolvedValue(new Map());
   });
@@ -155,7 +161,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
   };
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never);
+    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
     vi.clearAllMocks();
   });
 
@@ -176,5 +182,105 @@ describe("NewsService findPublishedShortsByWeek", () => {
       new Date("2026-09-07T00:00:00.000Z"),
       100,
     );
+  });
+});
+
+describe("news publication notifications", () => {
+  let article: NewsArticle;
+  let committed = false;
+  const commit = vi.fn(async () => {
+    committed = true;
+  });
+  const articles = {
+    findBySlug: vi.fn(),
+    findById: vi.fn(),
+    listPublished: vi.fn(),
+    listWeek: vi.fn(),
+    countPublished: vi.fn(),
+    sitemapChunk: vi.fn(),
+    listAdmin: vi.fn(),
+    save: vi.fn(),
+    delete: vi.fn(),
+  };
+  const scope: NewsWriteScope = {
+    articles,
+    users: { findById: vi.fn() },
+    replies: { deleteAllForTarget: vi.fn() },
+  };
+  const transaction: NewsTransaction = {
+    async run(work) {
+      const result = await work(scope);
+      await commit();
+      return result;
+    },
+  };
+  const indexing = {
+    submitNewsSlugs: vi.fn(async (_slugs: string[]) => {
+      expect(committed).toBe(true);
+    }),
+  };
+  const service = new NewsService(articles, transaction, { countByTargetIds: vi.fn() }, indexing);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    committed = false;
+    article = {
+      id: "news-1",
+      slug: "old-slug",
+      title: "RLCS final",
+      content: "Final results",
+      titleFr: null,
+      contentFr: null,
+      author: { id: "editor", userName: "Editor" },
+      createdAt: new Date("2026-10-17T12:00:00Z"),
+      updatedAt: null,
+      isDraft: false,
+      imageUrl: null,
+      type: "article",
+    };
+    articles.findBySlug.mockImplementation(async (slug: string) =>
+      slug === article.slug ? article : null,
+    );
+  });
+
+  it("notifies both the old and new URLs only after the article transaction commits", async () => {
+    await service.update("old-slug", { slug: "new-slug" });
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug", "new-slug"]);
+  });
+
+  it("does not expose changes to unpublished drafts", async () => {
+    article.isDraft = true;
+    await service.update("old-slug", { title: "Unpublished changes" });
+    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it.each([true, false])("notifies when draft status changes to %s", async (draft) => {
+    article.isDraft = !draft;
+    await service.setDraftStatus("old-slug", draft);
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+  });
+
+  it("does not notify when publishing an already published article", async () => {
+    await service.setDraftStatus("old-slug", false);
+    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it("notifies after a published article is deleted", async () => {
+    await service.delete("old-slug");
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+  });
+
+  it("does not notify when deleting a draft", async () => {
+    article.isDraft = true;
+    await service.delete("old-slug");
+    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+  });
+
+  it("does not notify when committing fails", async () => {
+    commit.mockRejectedValueOnce(new Error("Database unavailable"));
+    await expect(service.update("old-slug", { title: "New title" })).rejects.toThrow(
+      "Database unavailable",
+    );
+    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
   });
 });

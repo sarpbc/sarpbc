@@ -1,6 +1,6 @@
 ---
 title: "Cookie Policy"
-description: "Learn about how we use cookies on our website, including PostHog analytics and other tracking technologies."
+description: "Understand how sarpbc.org uses essential cookies and optional analytics, what each category does, and how to manage your consent while browsing the platform."
 lastUpdated: "October 13, 2026"
 ---
 
