@@ -6,7 +6,7 @@ set -e
 
 # Run database migrations (compiled config + JS migrations in dist/)
 echo "Running database migrations..."
-pnpm run mikro:migrate:prod
+node node_modules/@mikro-orm/cli/cli.js migration:up --config ./dist/mikro-orm.config.js
 
 # Execute the main command (passed to this script)
 echo "Starting application..."

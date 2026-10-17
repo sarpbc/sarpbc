@@ -64,7 +64,6 @@ ARG APP_RELEASE=unknown
 RUN apt-get update \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
-  && npm install -g pnpm@11.22.0 \
   && addgroup --system --gid 1001 app \
   && adduser --system --uid 1001 --ingroup app --home /nonexistent --shell /usr/sbin/nologin app
 
@@ -84,4 +83,4 @@ WORKDIR /app/apps/back
 ENTRYPOINT ["/app/apps/back/entrypoint.sh"]
 EXPOSE 4001
 
-CMD ["pnpm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
