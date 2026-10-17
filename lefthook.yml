@@ -1,7 +1,29 @@
 # https://lefthook.dev/
 
+source_dir: scripts
+
+# Script jobs also run for empty commits and pushes without file changes.
 pre-commit:
   jobs:
+    - name: branch-name
+      script: ../check-git-names.mjs
+      runner: node
+      args: branch
     - name: oxfmt
       run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
+
+commit-msg:
+  jobs:
+    - name: commit-message
+      script: ../check-git-names.mjs
+      runner: node
+      args: commit-msg '{1}'
+
+pre-push:
+  jobs:
+    - name: branch-names
+      script: ../check-git-names.mjs
+      runner: node
+      args: pre-push
+      use_stdin: true
