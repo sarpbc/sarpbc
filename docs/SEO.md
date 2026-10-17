@@ -16,6 +16,8 @@ HTTP `200` means the notification was received. HTTP `202` means key verificatio
 
 ## Follow up on Bing's SEO report
 
+The homepage description is the brand tagline: "Bringing the competitive Rocket League ecosystem into one place." Keep it and its French translation. A description-length warning alone does not justify replacing brand copy. The homepage title stays "Rocket League news & matches | sarpbc.org", with the literal separator escaped for vue-i18n.
+
 The 17 October 2026 summary contains categories and counts, without affected URLs. Export the URL details for the image ALT warning before changing images. Empty ALT text is valid for decorative images, including a logo whose link already has an accessible name. The HTML parser in `test:seo` checks attribute presence, including abbreviated empty attributes.
 
 Prioritize informative titles and descriptions on the homepage, match lists, tournament lists, player and team directories, forum, and games. Keep French and English canonicals separate. Login and registration use `noindex` and stay outside the sitemap. The public sitemap lists each locale URL and its reciprocal language alternates.

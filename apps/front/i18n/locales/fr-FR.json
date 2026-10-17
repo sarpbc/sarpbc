@@ -310,8 +310,8 @@
       "shortNewsCount": "{n} short | {n} shorts",
       "allNews": "Toutes les actus",
       "seo": {
-        "title": "Actualités Rocket League, matchs et résultats RLCS {'|'} sarpbc.org",
-        "description": "Suivez l’esport Rocket League : actualités, calendrier et résultats RLCS, brackets de tournois, équipes, joueurs et jeux avec la communauté sarpbc.org.",
+        "title": "Actus & matchs Rocket League {'|'} sarpbc.org",
+        "description": "Réunir l'écosystème de l'esport Rocket League en un seul endroit.",
         "heading": "Actualités, matchs et résultats de l’esport Rocket League"
       },
       "empty": "Aucune actu publiée pour le moment.",

@@ -310,8 +310,8 @@
       "shortNewsCount": "{n} short | {n} shorts",
       "allNews": "All news",
       "seo": {
-        "title": "Rocket League news, RLCS matches & results {'|'} sarpbc.org",
-        "description": "Follow Rocket League esports with the latest news, RLCS match schedules and results, tournament brackets, team rosters, player profiles and community games.",
+        "title": "Rocket League news & matches {'|'} sarpbc.org",
+        "description": "Bringing the competitive Rocket League ecosystem into one place.",
         "heading": "Rocket League esports news, matches and results"
       },
       "empty": "No news published yet.",
