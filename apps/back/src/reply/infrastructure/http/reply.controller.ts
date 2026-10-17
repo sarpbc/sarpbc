@@ -27,7 +27,7 @@ export class ReplyController {
   constructor(private replyService: ReplyService) {}
 
   @Get()
-  async findByTarget(@Query() query: ListRepliesQueryDto) {
+  async findByTarget(@Query({ schema: ListRepliesQueryDto }) query: ListRepliesQueryDto) {
     return this.replyService.findByTargetPaginated(
       query.targetType,
       query.targetId,
@@ -39,7 +39,10 @@ export class ReplyController {
   @UseGuards(AuthGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
+  async create(
+    @CurrentUserId() userId: string,
+    @Body({ schema: CreateReplyDto }) createReplyDto: CreateReplyDto,
+  ) {
     const reply = await this.replyService.create(userId, createReplyDto);
     return { reply };
   }
@@ -51,7 +54,7 @@ export class ReplyController {
   async report(
     @CurrentUserId() userId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() reportReplyDto: ReportReplyDto,
+    @Body({ schema: ReportReplyDto }) reportReplyDto: ReportReplyDto,
   ) {
     const report = await this.replyService.report(userId, id, reportReplyDto.reason);
     return { report };

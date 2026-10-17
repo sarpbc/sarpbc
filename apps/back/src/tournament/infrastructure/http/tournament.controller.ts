@@ -40,7 +40,7 @@ export class TournamentController {
   ) {}
 
   @Get()
-  async find(@Query() query: ListTournamentsQueryDto) {
+  async find(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
     const [tournaments, count] = await this.tournamentService.find({
       limit: query.limit,
       offset: query.offset,
@@ -71,7 +71,7 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body() dto: CreateTournamentDto) {
+  async create(@Body({ schema: CreateTournamentDto }) dto: CreateTournamentDto) {
     const tournament = await this.manualTournamentService.create(dto);
     return { tournament: mapTournament(tournament) };
   }
@@ -88,7 +88,10 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() dto: UpdateTournamentDto) {
+  async update(
+    @Param("id") id: string,
+    @Body({ schema: UpdateTournamentDto }) dto: UpdateTournamentDto,
+  ) {
     const tournament = await this.manualTournamentService.update(id, dto);
     return { tournament: mapTournament(tournament) };
   }
@@ -153,7 +156,10 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/awards")
-  async createAward(@Param("id") tournamentId: string, @Body() dto: CreatePlayerAwardDto) {
+  async createAward(
+    @Param("id") tournamentId: string,
+    @Body({ schema: CreatePlayerAwardDto }) dto: CreatePlayerAwardDto,
+  ) {
     const award = await this.playerAwardService.create(
       tournamentId,
       dto.participantId,
@@ -174,7 +180,10 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/matches")
-  async createMatch(@Param("id") tournamentId: string, @Body() matchData: CreateMatchDto) {
+  async createMatch(
+    @Param("id") tournamentId: string,
+    @Body({ schema: CreateMatchDto }) matchData: CreateMatchDto,
+  ) {
     const match = await this.matchService.upsertMatch(tournamentId, {
       ...matchData,
       beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
@@ -186,7 +195,10 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/winner")
-  async setMatchWinner(@Param("matchId") matchId: string, @Body() body: SetMatchWinnerDto) {
+  async setMatchWinner(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
+  ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
     return { match };
   }

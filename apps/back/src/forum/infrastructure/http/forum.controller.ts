@@ -40,7 +40,10 @@ export class ForumController {
   @UseGuards(AuthGuard)
   @Post("replies")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async createReply(@CurrentUserId() userId: string, @Body() createReplyDto: CreateReplyDto) {
+  async createReply(
+    @CurrentUserId() userId: string,
+    @Body({ schema: CreateReplyDto }) createReplyDto: CreateReplyDto,
+  ) {
     await this.replyService.create(userId, createReplyDto);
   }
 }

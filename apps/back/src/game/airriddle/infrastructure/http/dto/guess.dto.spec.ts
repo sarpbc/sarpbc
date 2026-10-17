@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ValidationPipe } from "@nestjs/common";
+import { StandardSchemaValidationPipe } from "@nestjs/common";
 import { GuessDto } from "./guess.dto";
 
 describe("AirRiddle guess input", () => {
-  const pipe = new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true });
-  const metadata = { type: "body", metatype: GuessDto } as const;
+  const pipe = new StandardSchemaValidationPipe();
+  const metadata = { type: "body", schema: GuessDto } as const;
 
   it("accepts a player name and an optional final-guess boolean", async () => {
     await expect(pipe.transform({ guess: "Kaydop" }, metadata)).resolves.toEqual({

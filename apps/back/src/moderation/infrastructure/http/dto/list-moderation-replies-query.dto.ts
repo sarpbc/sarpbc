@@ -1,11 +1,7 @@
-import { Type } from "class-transformer";
-import { IsInt, Max, Min } from "class-validator";
+import { z } from "zod";
 import { PaginationQueryDto } from "../../../../common/infrastructure/http/dto/pagination-query.dto";
+export const ListModerationRepliesQueryDto = PaginationQueryDto.extend({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
 
-export class ListModerationRepliesQueryDto extends PaginationQueryDto {
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  override limit: number = 50;
-}
+export type ListModerationRepliesQueryDto = z.infer<typeof ListModerationRepliesQueryDto>;

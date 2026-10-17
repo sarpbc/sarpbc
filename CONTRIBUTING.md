@@ -12,7 +12,7 @@ We aim to review pull requests within **7 days**. If yours is waiting longer, co
 
 ## Prerequisites
 
-- Node.js **24.13.1** (see root README)
+- Node.js **24.22.0** (see root README)
 - **pnpm** 10+ (enforced via `only-allow`)
 - Docker and Docker Compose for local Postgres + Redis
 

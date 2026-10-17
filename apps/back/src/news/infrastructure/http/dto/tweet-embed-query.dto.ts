@@ -1,11 +1,7 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { Transform } from "class-transformer";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
+import { z } from "zod";
 
-export class TweetEmbedQueryDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(512)
-  @Transform(trimIncomingString)
-  url!: string;
-}
+export const TweetEmbedQueryDto = z.strictObject({
+  url: z.string().trim().min(1).max(512),
+});
+
+export type TweetEmbedQueryDto = z.infer<typeof TweetEmbedQueryDto>;

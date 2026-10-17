@@ -33,7 +33,10 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Patch("profile")
-  async updateProfile(@CurrentUserId() userId: string, @Body() dto: UpdateProfileDto) {
+  async updateProfile(
+    @CurrentUserId() userId: string,
+    @Body({ schema: UpdateProfileDto }) dto: UpdateProfileDto,
+  ) {
     const user = await this.userService.updateUserName(userId, dto.userName);
     return { user: UserMapper.toDto(user) };
   }

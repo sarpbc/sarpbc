@@ -36,7 +36,7 @@ export class TeamController {
   ) {}
 
   @Get()
-  async find(@Query() query: ListDirectoryQueryDto) {
+  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryDto) {
     const [teams, count] = await this.teamService.findAndCount({
       name: query.name,
       start: query.start,
@@ -53,7 +53,7 @@ export class TeamController {
   @RequirePermissions("teams.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body() dto: CreateTeamDto) {
+  async create(@Body({ schema: CreateTeamDto }) dto: CreateTeamDto) {
     const team = await this.teamService.create(dto);
     return { team: mapTeam(team) };
   }
@@ -115,7 +115,10 @@ export class TeamController {
   @RequirePermissions("teams.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/contract")
-  async createContract(@Param("id") id: string, @Body() dto: CreateTeamContractDto) {
+  async createContract(
+    @Param("id") id: string,
+    @Body({ schema: CreateTeamContractDto }) dto: CreateTeamContractDto,
+  ) {
     const contract = await this.contractService.createForTeam(id, dto);
     return { contract };
   }
@@ -126,7 +129,7 @@ export class TeamController {
   async updateContract(
     @Param("id") id: string,
     @Param("contractId") contractId: string,
-    @Body() dto: UpdateTeamContractDto,
+    @Body({ schema: UpdateTeamContractDto }) dto: UpdateTeamContractDto,
   ) {
     const contract = await this.contractService.updateForTeam(id, contractId, dto);
     return { contract };
@@ -149,7 +152,7 @@ export class TeamController {
   @RequirePermissions("teams.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() dto: UpdateTeamDto) {
+  async update(@Param("id") id: string, @Body({ schema: UpdateTeamDto }) dto: UpdateTeamDto) {
     const team = await this.teamService.update(id, dto);
     return { team: mapTeam(team) };
   }

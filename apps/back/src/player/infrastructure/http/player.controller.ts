@@ -41,7 +41,7 @@ export class PlayerController {
   ) {}
 
   @Get()
-  async find(@Query() query: ListDirectoryQueryDto) {
+  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryDto) {
     const [players, count] = await this.playerService.findAndCount({
       name: query.name,
       start: query.start,
@@ -58,7 +58,7 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body() dto: CreatePlayerDto) {
+  async create(@Body({ schema: CreatePlayerDto }) dto: CreatePlayerDto) {
     const player = await this.playerService.create(dto);
     return { player: mapPlayer(player) };
   }
@@ -78,7 +78,7 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() dto: UpdatePlayerDto) {
+  async update(@Param("id") id: string, @Body({ schema: UpdatePlayerDto }) dto: UpdatePlayerDto) {
     const player = await this.playerService.update(id, dto);
     return { player: mapPlayer(player) };
   }
@@ -104,7 +104,10 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/contract")
-  async createContract(@Param("id") id: string, @Body() dto: CreateContractDto) {
+  async createContract(
+    @Param("id") id: string,
+    @Body({ schema: CreateContractDto }) dto: CreateContractDto,
+  ) {
     const contract = await this.contractService.create(id, dto);
     return { contract };
   }
@@ -115,7 +118,7 @@ export class PlayerController {
   async updateContract(
     @Param("id") id: string,
     @Param("contractId") contractId: string,
-    @Body() dto: UpdateContractDto,
+    @Body({ schema: UpdateContractDto }) dto: UpdateContractDto,
   ) {
     const contract = await this.contractService.update(id, contractId, dto);
     return { contract };
@@ -184,7 +187,10 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/photo")
-  async addPhoto(@Param("id") id: string, @Body() dto: AddPlayerPhotoDto) {
+  async addPhoto(
+    @Param("id") id: string,
+    @Body({ schema: AddPlayerPhotoDto }) dto: AddPlayerPhotoDto,
+  ) {
     const photo = await this.playerService.addPhoto(id, dto.url);
     return { photo };
   }

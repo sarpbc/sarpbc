@@ -1,35 +1,22 @@
-import { Transform, Type } from "class-transformer";
-import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
+import { z } from "zod";
 import { OffsetPaginationQueryDto } from "./offset-pagination-query.dto";
-import { parseOptionalBoolean } from "./parse-optional-boolean";
 
-export class ListTournamentsQueryDto extends OffsetPaginationQueryDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  override limit: number = 20;
+const optionalBoolean = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  z
+    .union([z.boolean(), z.enum(["true", "false"]).transform((value) => value === "true")])
+    .optional(),
+);
 
-  @IsOptional()
-  @Transform(parseOptionalBoolean)
-  @IsBoolean()
-  pickems?: boolean;
+export const ListTournamentsQueryDto = OffsetPaginationQueryDto.extend({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  pickems: optionalBoolean,
+  activeOnly: optionalBoolean,
+});
+export type ListTournamentsQueryDto = z.infer<typeof ListTournamentsQueryDto>;
 
-  @IsOptional()
-  @Transform(parseOptionalBoolean)
-  @IsBoolean()
-  activeOnly?: boolean;
-}
-
-export class ListDirectoryQueryDto extends OffsetPaginationQueryDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(16)
-  start?: string;
-}
+export const ListDirectoryQueryDto = OffsetPaginationQueryDto.extend({
+  name: z.string().max(100).optional(),
+  start: z.string().max(16).optional(),
+});
+export type ListDirectoryQueryDto = z.infer<typeof ListDirectoryQueryDto>;

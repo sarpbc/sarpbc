@@ -1,55 +1,19 @@
-import {
-  IsNotEmpty,
-  IsString,
-  IsUUID,
-  MaxLength,
-  MinLength,
-  IsOptional,
-  ValidateNested,
-  IsIn,
-} from "class-validator";
-import { Type } from "class-transformer";
+import { z } from "zod";
 
-class TranslationDto {
-  @IsNotEmpty()
-  @IsString()
-  @IsIn(["en-US", "fr-FR"])
-  readonly locale!: "en-US" | "fr-FR";
+export const CreatePostDto = z.strictObject({
+  id: z.uuidv4(),
+  title: z.string().min(1).max(128),
+  content: z.string().min(1).max(2048),
+  topicId: z.uuid(),
+  translations: z
+    .array(
+      z.strictObject({
+        locale: z.enum(["en-US", "fr-FR"]),
+        title: z.string().min(1).max(128),
+        content: z.string().min(1).max(2048),
+      }),
+    )
+    .optional(),
+});
 
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(128)
-  readonly title!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(2048)
-  readonly content!: string;
-}
-
-export class CreatePostDto {
-  @IsNotEmpty()
-  @IsUUID("4")
-  readonly id!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(128)
-  @MinLength(1)
-  readonly title!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(2048)
-  @MinLength(1)
-  readonly content!: string;
-
-  @IsNotEmpty()
-  @IsUUID()
-  readonly topicId!: string;
-
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => TranslationDto)
-  readonly translations?: TranslationDto[];
-}
+export type CreatePostDto = z.infer<typeof CreatePostDto>;

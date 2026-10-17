@@ -45,6 +45,17 @@ function collectRoutes(sources) {
       const prefix = controller.args[0] ?? '""';
       for (const method of statement.members) {
         if (!ts.isMethodDeclaration(method)) continue;
+        for (const parameter of method.parameters) {
+          const dto = parameter.type?.getText(source);
+          const input = decorators(parameter, source).find((decorator) =>
+            ["Body", "Query"].includes(decorator.name),
+          );
+          if (!input || !dto?.endsWith("Dto")) continue;
+          assert(
+            input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
+            `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,
+          );
+        }
         const methodDecorators = decorators(method, source);
         for (const route of methodDecorators.filter((decorator) =>
           ["Get", "Post", "Put", "Patch", "Delete", "Head", "Options", "All"].includes(

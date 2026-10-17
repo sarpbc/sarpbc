@@ -1,56 +1,18 @@
-import {
-  IsString,
-  IsOptional,
-  IsArray,
-  ValidateNested,
-  ArrayMinSize,
-  ArrayMaxSize,
-} from "class-validator";
-import { Type } from "class-transformer";
-
-export class AddParticipantPlayerDto {
-  @IsString()
-  playerId!: string;
-
-  @IsString()
-  playerName!: string;
-
-  @IsOptional()
-  @IsString()
-  playerSlug?: string;
-
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  nationality?: string;
-}
-
-export class AddParticipantDto {
-  @IsString()
-  teamId!: string;
-
-  @IsString()
-  teamName!: string;
-
-  @IsOptional()
-  @IsString()
-  teamSlug?: string;
-
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @IsArray()
-  @ArrayMinSize(3)
-  @ArrayMaxSize(3)
-  @ValidateNested({ each: true })
-  @Type(() => AddParticipantPlayerDto)
-  players!: AddParticipantPlayerDto[];
-}
+import { z } from "zod";
+export const AddParticipantPlayerDto = z.strictObject({
+  playerId: z.string(),
+  playerName: z.string(),
+  playerSlug: z.string().optional(),
+  imageUrl: z.string().optional(),
+  nationality: z.string().optional(),
+});
+export type AddParticipantPlayerDto = z.infer<typeof AddParticipantPlayerDto>;
+export const AddParticipantDto = z.strictObject({
+  teamId: z.string(),
+  teamName: z.string(),
+  teamSlug: z.string().optional(),
+  imageUrl: z.string().optional(),
+  location: z.string().optional(),
+  players: z.array(AddParticipantPlayerDto).length(3),
+});
+export type AddParticipantDto = z.infer<typeof AddParticipantDto>;

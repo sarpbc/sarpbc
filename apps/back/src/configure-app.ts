@@ -1,14 +1,8 @@
-import { ValidationPipe } from "@nestjs/common";
+import { StandardSchemaValidationPipe } from "@nestjs/common";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
-
-export const VALIDATION_PIPE_OPTIONS = {
-  transform: true,
-  whitelist: true,
-  forbidNonWhitelisted: true,
-} as const;
 
 export async function configureApp(app: NestFastifyApplication): Promise<void> {
   app.enableCors({
@@ -24,7 +18,7 @@ export async function configureApp(app: NestFastifyApplication): Promise<void> {
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe(VALIDATION_PIPE_OPTIONS));
+  app.useGlobalPipes(new StandardSchemaValidationPipe());
 
   await app.register(helmet, {
     global: true,

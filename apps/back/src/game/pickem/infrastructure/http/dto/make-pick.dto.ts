@@ -1,7 +1,7 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { z } from "zod";
 
-export class MakePickDto {
-  @IsString()
-  @IsNotEmpty()
-  pickedParticipantId!: string;
-}
+export const MakePickDto = z.strictObject({
+  pickedParticipantId: z.string().min(1),
+});
+
+export type MakePickDto = z.infer<typeof MakePickDto>;

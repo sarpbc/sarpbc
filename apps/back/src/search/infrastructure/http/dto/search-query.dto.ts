@@ -1,14 +1,8 @@
-import { IsIn, IsOptional, IsString, MaxLength } from "class-validator";
+import { z } from "zod";
 import { OffsetPaginationQueryDto } from "../../../../common/infrastructure/http/dto/offset-pagination-query.dto";
-import type { SearchType } from "../../../application/models/search-result";
+export const SearchQueryDto = OffsetPaginationQueryDto.extend({
+  q: z.string().max(200).optional(),
+  type: z.enum(["player", "team", "tournament", "all"]).optional(),
+});
 
-export class SearchQueryDto extends OffsetPaginationQueryDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  q?: string;
-
-  @IsOptional()
-  @IsIn(["player", "team", "tournament", "all"])
-  type?: SearchType;
-}
+export type SearchQueryDto = z.infer<typeof SearchQueryDto>;
