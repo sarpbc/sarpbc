@@ -50,14 +50,14 @@ Run `pnpm test:git-names` to test the naming checks.
 
 ## Start here
 
-| You want to…                      | Go to…                                                                                                                                                             |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Change public UI, pages, or copy  | `apps/front` — read [apps/front/README.md](apps/front/README.md) and [`.agents/skills/geist-design/SKILL.md`](.agents/skills/geist-design/SKILL.md)                |
-| Change API, data, or auth         | `apps/back` — read [apps/back/README.md](apps/back/README.md) and [`.agents/skills/nestjs-best-practices/SKILL.md`](.agents/skills/nestjs-best-practices/SKILL.md) |
-| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required)                                                                                          |
-| Staff admin console               | `apps/admin`                                                                                                                                                       |
-| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports)                                                                                   |
-| Docs, changelog, or OSS process   | Root `README.md`, `CHANGELOG.md`, this file                                                                                                                        |
+| You want to…                      | Go to…                                                                                                         |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Change public UI, pages, or copy  | `apps/front` — read [apps/front/README.md](apps/front/README.md) and [DESIGN.md](apps/front/DESIGN.md)         |
+| Change API, data, or auth         | `apps/back` — read [apps/back/README.md](apps/back/README.md) and [ARCHITECTURE.md](apps/back/ARCHITECTURE.md) |
+| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required)                                      |
+| Staff admin console               | `apps/admin`                                                                                                   |
+| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports)                               |
+| Docs, changelog, or OSS process   | Root `README.md`, `CHANGELOG.md`, this file                                                                    |
 
 ## Project layout
 
