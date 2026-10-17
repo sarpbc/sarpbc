@@ -2,8 +2,8 @@ import { defineConfig } from "@mikro-orm/postgresql";
 import { SqlHighlighter } from "@mikro-orm/sql-highlighter";
 import { log } from "evlog";
 import * as dotenv from "dotenv";
-import { getDatabasePassword } from "./common/envirronement/secrets";
-import { SarpbcNamingStrategy } from "./common/mikro-orm/sarpbc-naming.strategy";
+import { getDatabasePassword } from "./infrastructure/config/secrets";
+import { SarpbcNamingStrategy } from "./infrastructure/database/sarpbc-naming.strategy";
 import { mikroOrmEntities } from "./mikro-orm.entities";
 
 dotenv.config();
@@ -29,8 +29,8 @@ export default defineConfig({
     defaultUpdateRule: "cascade",
   },
   migrations: {
-    path: "dist/migrations",
-    pathTs: "src/migrations",
+    path: "dist/infrastructure/database/migrations",
+    pathTs: "src/infrastructure/database/migrations",
     glob: "!(*.d).{js,ts}",
     transactional: true,
     disableForeignKeys: true,

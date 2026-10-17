@@ -5,23 +5,23 @@
  * - `timestamptz` — instants (createdAt, updatedAt, beginAt, endAt)
  * - `date` — calendar-only fields (birthday, contract dates)
  */
-import { AirRiddleSchema } from "./game/airriddle/domain/airriddle.entity";
-import { PickemChoiceSchema } from "./game/pickem/domain/pickem.entity";
+import { AirRiddleSchema } from "./game/airriddle/infrastructure/persistence/airriddle.entity";
+import { PickemChoiceSchema } from "./game/pickem/infrastructure/persistence/pickem.entity";
 import {
   TopicSchema,
   PostSchema,
   PostTranslationSchema,
   ReplySchema,
   ReplyReportSchema,
-} from "./forum/forum.entities";
-import { ImageSchema } from "./images/domain/image.entity";
-import { NewsArticleSchema } from "./news/domain/news-article.entity";
+} from "./forum/infrastructure/persistence/forum.entities";
+import { ImageSchema } from "./images/infrastructure/persistence/image.entity";
+import { NewsArticleSchema } from "./news/infrastructure/persistence/news-article.entity";
 import {
   PlayerSchema,
   ContractSchema,
   PlayerPhotoSchema,
   TeamSchema,
-} from "./player/player.entities";
+} from "./player/infrastructure/persistence/player.entities";
 import {
   LeagueSchema,
   TournamentSchema,
@@ -29,11 +29,11 @@ import {
   MatchSchema,
   BracketLinkSchema,
   MatchResultSchema,
-} from "./tournament/tournament.entities";
-import { PlayerAwardSchema } from "./tournament/player-award.entities";
-import { ReplyNotificationSchema } from "./notification/reply-notification.entity";
-import { PersonalAccessTokenSchema } from "./pat/domain/personal-access-token.entity";
-import { UserSchema } from "./user/domain/user.entity";
+} from "./tournament/infrastructure/persistence/tournament.entities";
+import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/player-award.entities";
+import { ReplyNotificationSchema } from "./notification/infrastructure/persistence/reply-notification.entity";
+import { PersonalAccessTokenSchema } from "./pat/infrastructure/persistence/personal-access-token.entity";
+import { UserSchema } from "./user/infrastructure/persistence/user.entity";
 
 export const mikroOrmEntities = [
   UserSchema,

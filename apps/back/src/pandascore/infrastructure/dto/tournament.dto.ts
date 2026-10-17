@@ -1,124 +1,63 @@
-export class LiveDto {
-  supported!: boolean;
-  url!: string | null;
-  opens_at!: string | null;
-}
-
-export class StreamDto {
-  main!: boolean;
-  language!: string;
-  embed_url!: string;
-  official!: boolean;
-  raw_url!: string;
-}
-
-export class MatchDto {
-  id!: number;
-  name!: string;
-  status!: string;
-  live!: LiveDto;
-  slug!: string;
-  begin_at!: string;
-  detailed_stats!: boolean;
-  end_at!: string;
-  forfeit!: boolean;
-  winner_id!: number | null;
-  winner_type!: string;
-  draw!: boolean;
-  modified_at!: string;
-  tournament_id!: number;
-  match_type!: string;
-  number_of_games!: number;
-  scheduled_at!: string;
-  original_scheduled_at!: string;
-  streams_list!: StreamDto[];
-  rescheduled!: boolean;
-}
-
-export class TeamDto {
-  id!: number;
-  name!: string;
-  location!: string;
-  slug!: string;
-  modified_at!: string;
-  acronym!: string;
-  image_url!: string;
-  dark_mode_image_url!: string | null;
-}
-
-export class PlayerDto {
-  active!: boolean;
-  id!: number;
-  name!: string;
-  role!: string | null;
-  slug!: string;
-  modified_at!: string;
-  age!: number | null;
-  birthday!: string | null;
-  first_name!: string;
-  last_name!: string | null;
-  nationality!: string;
-  image_url!: string | null;
-}
-
-export class ExpectedRosterDto {
-  players!: PlayerDto[];
-  team!: TeamDto;
-}
-
-export class VideogameDto {
-  id!: number;
-  name!: string;
-  slug!: string;
-}
-
-export class LeagueDto {
-  id!: number;
-  name!: string;
-  url!: string | null;
-  slug!: string;
-  modified_at!: string;
-  image_url!: string;
-}
-
-export class SerieDto {
-  id!: number;
-  name!: string;
-  year!: number;
-  slug!: string;
-  begin_at!: string;
-  end_at!: string;
-  winner_id!: number | null;
-  winner_type!: string;
-  modified_at!: string;
-  league_id!: number;
-  full_name!: string;
-}
-
-export class TournamentDto {
-  id!: number;
-  name!: string;
-  type!: string;
-  matches!: MatchDto[];
-  country!: string | null;
-  slug!: string;
-  begin_at!: string;
-  detailed_stats!: boolean;
-  end_at!: string;
-  winner_id!: number | null;
-  winner_type!: string;
-  teams!: TeamDto[];
-  serie_id!: number;
-  serie!: SerieDto;
-  modified_at!: string;
-  videogame!: VideogameDto;
-  league_id!: number;
-  league!: LeagueDto;
-  prizepool!: number | null;
-  tier!: string;
-  videogame_title!: string | null;
-  has_bracket!: boolean;
-  region!: string;
-  live_supported!: boolean;
-  expected_roster!: ExpectedRosterDto[];
-}
+import { z } from "zod";
+const text = z
+  .string()
+  .nullish()
+  .transform((v) => v ?? undefined);
+const date = z
+  .string()
+  .refine((v) => Number.isFinite(Date.parse(v)), "Invalid provider date")
+  .nullish()
+  .transform((v) => v ?? undefined);
+export const teamSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  slug: z.string(),
+  location: text,
+  image_url: text,
+  dark_mode_image_url: text,
+});
+export const playerSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  slug: z.string(),
+  first_name: text,
+  last_name: text,
+  birthday: date,
+  nationality: text,
+  image_url: text,
+  role: z.string().nullable().optional(),
+});
+export const leagueSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  slug: z.string(),
+  url: z.string().nullable().optional(),
+  image_url: text,
+  modified_at: date,
+});
+export const rosterSchema = z.object({
+  team: teamSchema,
+  players: z.array(playerSchema).default([]),
+});
+export const tournamentSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  slug: text,
+  type: text,
+  country: text,
+  begin_at: date,
+  end_at: date,
+  winner_id: z.number().int().nullable().optional(),
+  winner_type: text,
+  prizepool: z.union([z.number(), z.string()]).nullish(),
+  tier: text,
+  league: leagueSchema.nullish(),
+  serie: z.object({ full_name: text }).nullish(),
+  has_bracket: z.boolean().optional(),
+  expected_roster: z.array(rosterSchema).default([]),
+});
+export type TeamDto = z.infer<typeof teamSchema>;
+export type PlayerDto = z.infer<typeof playerSchema>;
+export type LeagueDto = z.infer<typeof leagueSchema>;
+export type ExpectedRosterDto = z.infer<typeof rosterSchema>;
+export type TournamentDto = z.infer<typeof tournamentSchema>;
