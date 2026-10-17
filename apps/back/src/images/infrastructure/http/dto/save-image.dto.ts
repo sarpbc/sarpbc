@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { z } from "zod";
 
-export class SaveImageDto {
-  @IsString()
-  @IsNotEmpty()
-  imageId!: string;
-}
+export const SaveImageDto = z.strictObject({
+  imageId: z.string().min(1),
+});
+
+export type SaveImageDto = z.infer<typeof SaveImageDto>;

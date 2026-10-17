@@ -28,7 +28,7 @@ export class StorageController {
   constructor(private readonly r2Service: StorageService) {}
 
   @Post("upload-url")
-  createUploadUrl(@Body() dto: R2UploadUrlDto) {
+  createUploadUrl(@Body({ schema: R2UploadUrlDto }) dto: R2UploadUrlDto) {
     return this.r2Service.createImageUploadUrl(dto.contentType, dto.filename, dto.target);
   }
 
@@ -43,7 +43,7 @@ export class StorageController {
   uploadImage(
     @Files() files: Record<string, Storage.MultipartFile[]> | null,
     @Req() request: FastifyRequest,
-    @Body() dto: R2UploadDto,
+    @Body({ schema: R2UploadDto }) dto: R2UploadDto,
   ) {
     const file = files?.file?.[0];
     if (!file) {

@@ -1,59 +1,25 @@
-import { Transform } from "class-transformer";
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-  MinLength,
-  Validate,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-  ValidationArguments,
-} from "class-validator";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
+import { z } from "zod";
 
-@ValidatorConstraint({ name: "exactlyOneReplyTarget", async: false })
-export class ExactlyOneReplyTargetConstraint implements ValidatorConstraintInterface {
-  validate(_value: string, args: ValidationArguments): boolean {
-    const dto = args.object as CreateReplyDto;
-    const targets = [dto.postId, dto.newsArticleId, dto.matchId].filter(
-      (id) => id !== undefined && id !== null && id !== "",
-    );
-    return targets.length === 1;
-  }
+export const ReplyContentDto = z.strictObject({
+  content: z
+    .string()
+    .trim()
+    .min(1, "Comment cannot be empty. Write something before posting.")
+    .max(2048, "Comment is too long. Keep it under 2048 characters."),
+  replyToId: z.uuidv4().optional(),
+});
+export type ReplyContentDto = z.infer<typeof ReplyContentDto>;
 
-  defaultMessage(): string {
-    return "Provide exactly one of postId, newsArticleId, or matchId.";
-  }
-}
-
-export class CreateReplyDto {
-  @Transform(trimIncomingString)
-  @IsNotEmpty({ message: "Comment cannot be empty. Write something before posting." })
-  @IsString()
-  @MaxLength(2048, {
-    message: "Comment is too long. Keep it under 2048 characters.",
-  })
-  @MinLength(1, {
-    message: "Comment cannot be empty. Write something before posting.",
-  })
-  @Validate(ExactlyOneReplyTargetConstraint)
-  readonly content!: string;
-
-  @IsOptional()
-  @IsUUID("4", { message: "postId must be a valid UUID." })
-  readonly postId?: string;
-
-  @IsOptional()
-  @IsUUID("4", { message: "newsArticleId must be a valid UUID." })
-  readonly newsArticleId?: string;
-
-  @IsOptional()
-  @IsUUID("4", { message: "matchId must be a valid UUID." })
-  readonly matchId?: string;
-
-  @IsOptional()
-  @IsUUID("4", { message: "replyToId must be a valid UUID." })
-  readonly replyToId?: string;
-}
+export const CreateReplyDto = ReplyContentDto.extend({
+  postId: z.uuidv4().optional(),
+  newsArticleId: z.uuidv4().optional(),
+  matchId: z.uuidv4().optional(),
+}).refine(
+  (dto) =>
+    [dto.postId, dto.newsArticleId, dto.matchId].filter((id) => id !== undefined).length === 1,
+  {
+    message: "Provide exactly one of postId, newsArticleId, or matchId.",
+    path: ["content"],
+  },
+);
+export type CreateReplyDto = z.infer<typeof CreateReplyDto>;

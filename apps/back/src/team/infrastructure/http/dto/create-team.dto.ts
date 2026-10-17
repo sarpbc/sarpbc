@@ -1,23 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { z } from "zod";
 
-export class CreateTeamDto {
-  @IsNotEmpty()
-  @IsString()
-  name!: string;
+export const CreateTeamDto = z.strictObject({
+  name: z.string().min(1),
+  location: z.string().optional(),
+  imageUrl: z.string().optional(),
+  darkModeImageUrl: z.string().optional(),
+  slug: z.string().optional(),
+});
 
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  darkModeImageUrl?: string;
-
-  @IsOptional()
-  @IsString()
-  slug?: string;
-}
+export type CreateTeamDto = z.infer<typeof CreateTeamDto>;

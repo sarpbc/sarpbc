@@ -12,7 +12,9 @@ export class ModerationController {
   constructor(private readonly moderationService: ModerationService) {}
 
   @Get("replies")
-  async listReplies(@Query() query: ListModerationRepliesQueryDto) {
+  async listReplies(
+    @Query({ schema: ListModerationRepliesQueryDto }) query: ListModerationRepliesQueryDto,
+  ) {
     const replies = await this.moderationService.listRecentReplies(query.limit);
     return { replies };
   }

@@ -30,7 +30,7 @@ pnpm --filter front build
 
 ### Prerequisites
 
-- Node.js 24.13.1
+- Node.js 24.22.0
 - pnpm 10+
 - Docker and Docker Compose for local databases
 

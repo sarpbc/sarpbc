@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString, Length } from "class-validator";
-import { Transform } from "class-transformer";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
+import { z } from "zod";
 
-export class UpdateProfileDto {
-  @Transform(trimIncomingString)
-  @IsNotEmpty({ message: "Enter a username." })
-  @IsString()
-  @Length(1, 100, { message: "Username must be between 1 and 100 characters." })
-  readonly userName!: string;
-}
+export const UpdateProfileDto = z.strictObject({
+  userName: z
+    .string()
+    .trim()
+    .min(1, "Enter a username.")
+    .max(100, "Username must be between 1 and 100 characters."),
+});
+
+export type UpdateProfileDto = z.infer<typeof UpdateProfileDto>;

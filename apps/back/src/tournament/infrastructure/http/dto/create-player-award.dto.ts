@@ -1,13 +1,9 @@
-import { IsIn, IsUUID } from "class-validator";
-import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
+import { z } from "zod";
+import { PLAYER_AWARD_TYPES } from "@sarpbc/types";
+export const CreatePlayerAwardDto = z.strictObject({
+  participantId: z.uuid(),
+  playerId: z.uuid(),
+  awardType: z.enum(PLAYER_AWARD_TYPES),
+});
 
-export class CreatePlayerAwardDto {
-  @IsUUID()
-  participantId!: string;
-
-  @IsUUID()
-  playerId!: string;
-
-  @IsIn(PLAYER_AWARD_TYPES)
-  awardType!: PlayerAwardType;
-}
+export type CreatePlayerAwardDto = z.infer<typeof CreatePlayerAwardDto>;

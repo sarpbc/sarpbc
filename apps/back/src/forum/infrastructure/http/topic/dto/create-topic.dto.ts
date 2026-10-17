@@ -1,11 +1,8 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { z } from "zod";
 
-export class CreateTopicDto {
-  @IsNotEmpty()
-  @IsString()
-  readonly title!: string;
+export const CreateTopicDto = z.strictObject({
+  title: z.string().min(1),
+  description: z.string().optional(),
+});
 
-  @IsString()
-  @IsOptional()
-  readonly description?: string;
-}
+export type CreateTopicDto = z.infer<typeof CreateTopicDto>;

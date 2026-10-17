@@ -9,8 +9,6 @@ import {
   ParseUUIDPipe,
   Post,
   UseGuards,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Request,
 } from "@nestjs/common";
 import { PostService } from "../../application/post.service";
@@ -25,7 +23,6 @@ import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/ty
 import { ReplyService } from "../../../reply/application/reply.service";
 
 @Controller("posts")
-@UseInterceptors(ClassSerializerInterceptor)
 export class PostController {
   constructor(
     private postService: PostService,
@@ -90,7 +87,10 @@ export class PostController {
   @UseGuards(AuthGuard)
   @Post()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async create(@CurrentUserId() userId: string, @Body() createPostDto: CreatePostDto) {
+  async create(
+    @CurrentUserId() userId: string,
+    @Body({ schema: CreatePostDto }) createPostDto: CreatePostDto,
+  ) {
     await this.postService.create(userId, createPostDto);
   }
 

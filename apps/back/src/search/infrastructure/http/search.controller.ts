@@ -17,7 +17,7 @@ export class SearchController {
   }
 
   @Get()
-  async search(@Query() query: SearchQueryDto) {
+  async search(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
     const result = await this.searchService.search({
       ...this.criteria(query),
       type: query.type ?? "all",
@@ -32,19 +32,19 @@ export class SearchController {
   }
 
   @Get("players")
-  async searchPlayers(@Query() query: SearchQueryDto) {
+  async searchPlayers(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
     const players = await this.searchService.searchPlayers(this.criteria(query));
     return players.map((player) => mapPlayer(player));
   }
 
   @Get("teams")
-  async searchTeams(@Query() query: SearchQueryDto) {
+  async searchTeams(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
     const teams = await this.searchService.searchTeams(this.criteria(query));
     return teams.map((team) => mapTeam(team));
   }
 
   @Get("tournaments")
-  async searchTournaments(@Query() query: SearchQueryDto) {
+  async searchTournaments(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
     const tournaments = await this.searchService.searchTournaments(this.criteria(query));
     return tournaments.map((tournament) => mapTournament(tournament));
   }

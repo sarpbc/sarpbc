@@ -1,18 +1,9 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from "class-validator";
+import { z } from "zod";
 
-export class CreateUserDto {
-  @IsNotEmpty()
-  @IsString()
-  @IsEmail()
-  readonly email!: string;
+export const CreateUserDto = z.strictObject({
+  email: z.email(),
+  password: z.string().min(8).max(100),
+  userName: z.string().min(1).max(100),
+});
 
-  @IsNotEmpty()
-  @IsString()
-  @Length(8, 100)
-  readonly password!: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Length(1, 100)
-  readonly userName!: string;
-}
+export type CreateUserDto = z.infer<typeof CreateUserDto>;

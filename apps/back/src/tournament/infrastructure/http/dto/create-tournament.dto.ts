@@ -1,75 +1,38 @@
-import {
-  ArrayUnique,
-  IsArray,
-  IsDateString,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-  IsUUID,
-  MaxLength,
-  ValidateIf,
-} from "class-validator";
-import { Transform } from "class-transformer";
-import { trimIncomingString } from "../../../../common/infrastructure/http/dto/trim-incoming-string";
-
-/** Shared write fields for create + update (update adds null clears). */
-export class TournamentManualWriteDto {
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: "Enter a slug, or leave empty to generate one from the name." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  slug?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  @Transform(trimIncomingString)
-  tier?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsUUID("4", { message: "Choose a valid league from the list." })
-  leagueId?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsDateString({}, { message: "Enter a valid start date (YYYY-MM-DD)." })
-  beginAt?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null)
-  @IsDateString({}, { message: "Enter a valid end date (YYYY-MM-DD)." })
-  endAt?: string | null;
-
-  @IsOptional()
-  @ValidateIf((_, value) => value !== null && value !== "")
-  @IsUrl({}, { message: "Enter a valid image URL." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  imageUrl?: string | null;
-
-  @IsOptional()
-  @IsArray({ message: "Teams must be a list of team ids." })
-  @ArrayUnique({ message: "Each team can only be added once." })
-  @IsUUID("4", { each: true, message: "Choose valid teams from the list." })
-  teamIds?: string[];
-}
-
-export class CreateTournamentDto extends TournamentManualWriteDto {
-  @IsString()
-  @IsNotEmpty({ message: "Enter a tournament name." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  name!: string;
-}
-
-export class UpdateTournamentDto extends TournamentManualWriteDto {
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty({ message: "Enter a tournament name." })
-  @MaxLength(255)
-  @Transform(trimIncomingString)
-  name?: string;
-}
+import { z } from "zod";
+import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
+const tournamentWriteSchema = z.strictObject({
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Enter a slug, or leave empty to generate one from the name.")
+    .max(255)
+    .optional(),
+  tier: z.string().trim().max(50).nullish(),
+  leagueId: z.uuidv4({ message: "Choose a valid league from the list." }).nullish(),
+  beginAt: isoDateSchema.nullish(),
+  endAt: isoDateSchema.nullish(),
+  imageUrl: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z
+          .string()
+          .max(255)
+          .pipe(z.url({ protocol: /^(https?|ftp)$/ })),
+        z.literal(""),
+      ]),
+    )
+    .nullish(),
+  teamIds: z
+    .array(z.uuidv4())
+    .refine((ids) => new Set(ids).size === ids.length, "Each team can only be added once.")
+    .optional(),
+});
+const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
+export const CreateTournamentDto = tournamentWriteSchema.extend({ name: tournamentName });
+export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
+export const UpdateTournamentDto = tournamentWriteSchema.extend({
+  name: tournamentName.optional(),
+});
+export type UpdateTournamentDto = z.infer<typeof UpdateTournamentDto>;

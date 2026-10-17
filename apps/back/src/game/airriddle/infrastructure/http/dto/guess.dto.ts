@@ -1,11 +1,8 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { z } from "zod";
 
-export class GuessDto {
-  @IsString()
-  @IsNotEmpty()
-  guess!: string;
+export const GuessDto = z.strictObject({
+  guess: z.string().min(1),
+  last: z.boolean().optional(),
+});
 
-  @IsOptional()
-  @IsBoolean()
-  last?: boolean;
-}
+export type GuessDto = z.infer<typeof GuessDto>;
