@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { resolveReplyTargetLink } from "./reply-target-link.util";
 import type { ReplyRecord as Reply } from "./reply";
 

@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import {
   InvalidInputError as BadRequestException,
   IntegrationError as ServiceUnavailableException,
@@ -11,12 +12,12 @@ describe("TweetEmbedService", () => {
 
   beforeEach(() => {
     service = new TweetEmbedService(new TweetOEmbedGateway());
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("rejects URLs that are not X status posts", async () => {
@@ -27,7 +28,7 @@ describe("TweetEmbedService", () => {
   });
 
   it("maps oEmbed JSON to a tweet card and caches the result", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       status: 200,
       json: async () => ({
@@ -48,7 +49,7 @@ describe("TweetEmbedService", () => {
   });
 
   it("surfaces a service error when X oEmbed is down", async () => {
-    (global.fetch as jest.Mock).mockRejectedValue(new Error("network"));
+    (global.fetch as Mock).mockRejectedValue(new Error("network"));
 
     await expect(
       service.embed("https://x.com/RL_Comm/status/2095971934320071030"),

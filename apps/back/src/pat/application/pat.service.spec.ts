@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import { ForbiddenError, NotFoundError } from "../../common/domain/errors";
 import { User } from "../../user/domain/user";
@@ -12,7 +13,7 @@ describe("PatService", () => {
   let savedHash: string | null;
   let lastUsedAt: Date | null;
   let service: PatService;
-  const touch = jest.fn();
+  const touch = vi.fn();
 
   beforeEach(() => {
     owner = new User("staff@test.com", "staff", "hash");

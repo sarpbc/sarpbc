@@ -1,3 +1,13 @@
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type Mock,
+  type MockInstance,
+} from "vitest";
 import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
@@ -8,12 +18,12 @@ import { InvalidInputError } from "../../common/domain/errors";
 
 describe("R2Service", () => {
   const logger = {
-    set: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-    emit: jest.fn(),
+    set: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    emit: vi.fn(),
   };
 
   const configuredValues = {
@@ -25,19 +35,19 @@ describe("R2Service", () => {
     r2_public_base_url: "https://cdn.example",
   } as const;
 
-  let sendSpy: jest.SpyInstance;
+  let sendSpy: MockInstance;
   let service: StorageService;
 
   beforeEach(() => {
-    (createLogger as jest.Mock).mockReturnValue(logger);
-    sendSpy = jest.spyOn(S3Client.prototype, "send").mockResolvedValue({} as never);
+    (createLogger as Mock).mockReturnValue(logger);
+    sendSpy = vi.spyOn(S3Client.prototype, "send").mockResolvedValue({} as never);
     service = new StorageService(
       new R2Service({
         get: (key: string) => configuredValues[key as keyof typeof configuredValues],
       } as ConfigService),
     );
-    jest.clearAllMocks();
-    (createLogger as jest.Mock).mockReturnValue(logger);
+    vi.clearAllMocks();
+    (createLogger as Mock).mockReturnValue(logger);
   });
 
   afterEach(() => {

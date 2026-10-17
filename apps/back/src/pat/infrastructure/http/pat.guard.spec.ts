@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { PatAuthGuard } from "./pat.guard";
@@ -15,7 +16,7 @@ interface PatGuardTestRequest {
 describe("PatAuthGuard", () => {
   let guard: PatAuthGuard;
   const patService = {
-    resolveUser: jest.fn(),
+    resolveUser: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -24,7 +25,7 @@ describe("PatAuthGuard", () => {
     }).compile();
 
     guard = module.get(PatAuthGuard);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {

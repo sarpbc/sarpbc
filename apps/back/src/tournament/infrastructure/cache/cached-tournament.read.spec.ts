@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { log } from "evlog";
 import { Player, Team } from "../../../player/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
@@ -29,13 +30,13 @@ function fixture(): Tournament {
 }
 
 describe("CachedTournamentRead", () => {
-  const redis = { get: jest.fn(), set: jest.fn() };
-  const tournaments = { findById: jest.fn() };
+  const redis = { get: vi.fn(), set: vi.fn() };
+  const tournaments = { findById: vi.fn() };
   const read = new CachedTournamentRead(tournaments, redis);
   let model: Tournament;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     model = fixture();
     tournaments.findById.mockResolvedValue(model);
     redis.get.mockResolvedValue(null);

@@ -1,20 +1,21 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompetitionSyncService } from "./competition-sync.service";
 import { Tournament, TournamentParticipant } from "../../domain/competition";
 import { Team } from "../../../player/domain/roster";
 import type { CompetitionWriteScope } from "../ports";
 describe("Competition synchronization", () => {
   const tournaments = {
-    byPandascoreId: jest.fn(),
-    save: jest.fn(),
-    participants: jest.fn(),
-    saveParticipant: jest.fn(),
-    leagueByPandascoreId: jest.fn(),
-    saveLeague: jest.fn(),
+    byPandascoreId: vi.fn(),
+    save: vi.fn(),
+    participants: vi.fn(),
+    saveParticipant: vi.fn(),
+    leagueByPandascoreId: vi.fn(),
+    saveLeague: vi.fn(),
   };
-  const rosters = { upsertTeam: jest.fn(), upsertPlayer: jest.fn() };
-  const cache = { invalidateTournament: jest.fn() },
-    scoring = { autoScoreMatch: jest.fn() },
-    diagnostics = { error: jest.fn() };
+  const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() },
+    scoring = { autoScoreMatch: vi.fn() },
+    diagnostics = { error: vi.fn() };
   const events: string[] = [];
   const tx = {
     run: async <T>(work: (scope: CompetitionWriteScope) => Promise<T>) => {
@@ -25,7 +26,7 @@ describe("Competition synchronization", () => {
   };
   const service = new CompetitionSyncService({} as never, tx, cache, scoring, diagnostics);
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     events.length = 0;
     tournaments.byPandascoreId.mockResolvedValue(null);
     tournaments.participants.mockResolvedValue([]);

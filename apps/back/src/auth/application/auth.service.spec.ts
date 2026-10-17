@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { AuthenticationError } from "../../common/domain/errors";
 import { google } from "googleapis";
 import { AuthService } from "./auth.service";
@@ -5,12 +6,12 @@ import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
 
-jest.mock("googleapis", () => ({
+vi.mock("googleapis", () => ({
   google: {
     auth: {
-      OAuth2: jest.fn(),
+      OAuth2: vi.fn(),
     },
-    oauth2: jest.fn(),
+    oauth2: vi.fn(),
   },
 }));
 
@@ -27,25 +28,25 @@ async function waitUntil(predicate: () => boolean): Promise<void> {
 describe("AuthService", () => {
   let service: AuthService;
   const userService = {
-    signIn: jest.fn(),
-    findOneByGoogleId: jest.fn(),
-    findOneByEmail: jest.fn(),
-    createGoogleUser: jest.fn(),
-    linkGoogleAccount: jest.fn(),
-    create: jest.fn(),
+    signIn: vi.fn(),
+    findOneByGoogleId: vi.fn(),
+    findOneByEmail: vi.fn(),
+    createGoogleUser: vi.fn(),
+    linkGoogleAccount: vi.fn(),
+    create: vi.fn(),
   };
   const jwtService = {
-    signAsync: jest.fn().mockResolvedValue("jwt-token"),
+    signAsync: vi.fn().mockResolvedValue("jwt-token"),
   };
 
   beforeEach(async () => {
     service = new AuthService(
-      new JwtTokenGateway({ ...jwtService, verifyAsync: jest.fn() }, "secret"),
+      new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn() }, "secret"),
       new GoogleIdentityGateway("client-id", "secret", "http://localhost/callback"),
       userService as never,
       { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
     );
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("signIn", () => {
@@ -106,27 +107,27 @@ describe("AuthService", () => {
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
       } as const;
 
-      const oauth2Mock: jest.Mock = google.auth.OAuth2 as never;
-      oauth2Mock.mockImplementation(() => {
+      const oauth2Mock: Mock = google.auth.OAuth2 as never;
+      oauth2Mock.mockImplementation(function () {
         const client = {
           credentials: {} as OAuthClientCredentials,
-          getToken: jest.fn(async (code: string) => {
+          getToken: vi.fn(async (code: string) => {
             getTokenStarted += 1;
             await holdGetToken;
             return { tokens: { access_token: code } };
           }),
-          setCredentials: jest.fn((tokens: { access_token: string }) => {
+          setCredentials: vi.fn((tokens: { access_token: string }) => {
             client.credentials = tokens;
           }),
-          generateAuthUrl: jest.fn(),
+          generateAuthUrl: vi.fn(),
         };
         return client;
       });
 
-      const oauth2ApiMock: jest.Mock = google.oauth2 as never;
+      const oauth2ApiMock: Mock = google.oauth2 as never;
       oauth2ApiMock.mockReturnValue({
         userinfo: {
-          get: jest.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
+          get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
             const code = auth.credentials.access_token;
             const profile = code === "code-a" || code === "code-b" ? profiles[code] : undefined;
             if (!profile) {

@@ -51,12 +51,13 @@ Run these commands from the repository root:
 
 ```sh
 pnpm --filter back typecheck
+pnpm --filter back typecheck:tests
 pnpm --filter back lint
 pnpm --filter back fmt:check
 pnpm --filter back test:architecture
 pnpm --filter back test:contracts
-pnpm --filter back test --runInBand
-pnpm --filter back test:e2e --runInBand
+pnpm --filter back test
+pnpm --filter back test:e2e
 pnpm --filter back test:integration
 ```
 

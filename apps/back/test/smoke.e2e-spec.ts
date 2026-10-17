@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
@@ -25,22 +26,22 @@ describe("API smoke (e2e)", () => {
   let app: NestFastifyApplication;
   const user = Object.assign(new User("fan@sarpbc.org", "fan", "hash"), { id: "user-1" });
   const userService = {
-    signIn: jest.fn().mockResolvedValue(user),
-    findById: jest.fn().mockResolvedValue(user),
-    create: jest.fn(),
-    findOneByGoogleId: jest.fn(),
-    findOneByEmail: jest.fn(),
-    createGoogleUser: jest.fn(),
-    linkGoogleAccount: jest.fn(),
+    signIn: vi.fn().mockResolvedValue(user),
+    findById: vi.fn().mockResolvedValue(user),
+    create: vi.fn(),
+    findOneByGoogleId: vi.fn(),
+    findOneByEmail: vi.fn(),
+    createGoogleUser: vi.fn(),
+    linkGoogleAccount: vi.fn(),
   };
   const newsService = {
-    findAllPublishedArticle: jest.fn().mockResolvedValue({
+    findAllPublishedArticle: vi.fn().mockResolvedValue({
       data: [{ id: "n1", title: "Hello", slug: "hello" }],
       total: 1,
       page: 0,
       limit: 25,
     }),
-    findPublishedShortsByWeek: jest.fn(async (week: string) => {
+    findPublishedShortsByWeek: vi.fn(async (week: string) => {
       if (week === "2026-W99") {
         throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
       }
@@ -53,7 +54,7 @@ describe("API smoke (e2e)", () => {
     }),
   };
   const matchService = {
-    findDetailById: jest.fn(async (id: string) => {
+    findDetailById: vi.fn(async (id: string) => {
       if (id === "missing") {
         throw new NotFoundException(`Match with id "${id}" not found`);
       }
@@ -63,9 +64,9 @@ describe("API smoke (e2e)", () => {
         headToHead: null,
       };
     }),
-    findUpcomingAndCount: jest.fn(),
-    findLiveAndCount: jest.fn(),
-    findResultsAndCount: jest.fn(),
+    findUpcomingAndCount: vi.fn(),
+    findLiveAndCount: vi.fn(),
+    findResultsAndCount: vi.fn(),
   };
 
   beforeAll(async () => {
@@ -95,11 +96,11 @@ describe("API smoke (e2e)", () => {
         { provide: UserService, useValue: userService },
         {
           provide: PostHogService,
-          useValue: { capture: jest.fn(), flush: jest.fn().mockResolvedValue(undefined) },
+          useValue: { capture: vi.fn(), flush: vi.fn().mockResolvedValue(undefined) },
         },
         { provide: NewsService, useValue: newsService },
-        { provide: TweetEmbedService, useValue: { embed: jest.fn() } },
-        { provide: ReplyService, useValue: { countByTargetIds: jest.fn() } },
+        { provide: TweetEmbedService, useValue: { embed: vi.fn() } },
+        { provide: ReplyService, useValue: { countByTargetIds: vi.fn() } },
         { provide: MatchService, useValue: matchService },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

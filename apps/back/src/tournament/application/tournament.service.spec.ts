@@ -1,7 +1,8 @@
+import { describe, expect, it, vi } from "vitest";
 import { TournamentService } from "./tournament.service";
 
 describe("TournamentService.findPandascoreActiveIds", () => {
-  const tournamentRepository = { findPandascoreActive: jest.fn() };
+  const tournamentRepository = { findPandascoreActive: vi.fn() };
   const service = new TournamentService(
     tournamentRepository as never,
     {} as never,

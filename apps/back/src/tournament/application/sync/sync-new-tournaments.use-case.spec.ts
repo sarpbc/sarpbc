@@ -1,11 +1,12 @@
+import { expect, it, vi } from "vitest";
 import { SyncNewTournamentsUseCase } from "./sync-new-tournaments.use-case";
 it("discovers missing tournaments, continues failed details, then reconciles incidents", async () => {
-  const additions = { execute: jest.fn().mockResolvedValue(["t1", "t2"]) },
+  const additions = { execute: vi.fn().mockResolvedValue(["t1", "t2"]) },
     details = {
-      execute: jest.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("boom")),
+      execute: vi.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("boom")),
     },
-    incidents = { execute: jest.fn() },
-    diagnostics = { error: jest.fn() };
+    incidents = { execute: vi.fn() },
+    diagnostics = { error: vi.fn() };
   const service = new SyncNewTournamentsUseCase(
     additions as never,
     details as never,

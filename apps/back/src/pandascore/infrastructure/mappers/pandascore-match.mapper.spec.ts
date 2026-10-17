@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { PandascoreMatchMapper } from "./pandascore-match.mapper";
 
 describe("PandascoreMatchMapper", () => {

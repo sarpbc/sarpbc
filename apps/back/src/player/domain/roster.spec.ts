@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { Player, Team } from "./roster";
 
 describe("roster policies", () => {

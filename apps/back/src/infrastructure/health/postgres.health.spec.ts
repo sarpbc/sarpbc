@@ -1,12 +1,13 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostgresHealthIndicator } from "./postgres.health";
 
 describe("PostgresHealthIndicator", () => {
-  const up = jest.fn().mockReturnValue({ postgres: { status: "up" } });
-  const down = jest.fn().mockReturnValue({ postgres: { status: "down" } });
+  const up = vi.fn().mockReturnValue({ postgres: { status: "up" } });
+  const down = vi.fn().mockReturnValue({ postgres: { status: "down" } });
   const healthIndicatorService = {
-    check: jest.fn().mockReturnValue({ up, down }),
+    check: vi.fn().mockReturnValue({ up, down }),
   };
-  const execute = jest.fn();
+  const execute = vi.fn();
   const em = {
     getConnection: () => ({ execute }),
   };
@@ -14,7 +15,7 @@ describe("PostgresHealthIndicator", () => {
   let indicator: PostgresHealthIndicator;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
     indicator = new PostgresHealthIndicator(em as never, healthIndicatorService as never);
   });

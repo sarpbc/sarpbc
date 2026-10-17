@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { canonicalImageContentType } from "../../domain/image-content-type";
 
 describe("canonicalImageContentType", () => {

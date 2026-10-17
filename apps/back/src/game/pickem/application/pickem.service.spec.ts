@@ -1,11 +1,12 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PickemService } from "./pickem.service";
 import type { Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 describe("PickemService", () => {
   let match: PickMatch, picks: Pick[], service: PickemService;
-  const warn = jest.fn();
+  const warn = vi.fn();
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     match = {
       id: "m",
       pickemsEnabled: true,

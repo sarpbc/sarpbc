@@ -1,19 +1,20 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RedisHealthIndicator } from "./redis.health";
 
 describe("RedisHealthIndicator", () => {
-  const up = jest.fn().mockReturnValue({ redis: { status: "up" } });
-  const down = jest.fn().mockReturnValue({ redis: { status: "down" } });
+  const up = vi.fn().mockReturnValue({ redis: { status: "up" } });
+  const down = vi.fn().mockReturnValue({ redis: { status: "down" } });
   const healthIndicatorService = {
-    check: jest.fn().mockReturnValue({ up, down }),
+    check: vi.fn().mockReturnValue({ up, down }),
   };
   const redis = {
-    ping: jest.fn(),
+    ping: vi.fn(),
   };
 
   let indicator: RedisHealthIndicator;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     healthIndicatorService.check.mockReturnValue({ up, down });
     indicator = new RedisHealthIndicator(redis as never, healthIndicatorService as never);
   });

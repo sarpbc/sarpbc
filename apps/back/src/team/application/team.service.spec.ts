@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../../player/domain/roster";
 import { ContractService } from "../../player/application/contract.service";
 import { PlayerService } from "../../player/application/player.service";
@@ -25,39 +26,39 @@ describe("Roster workflows", () => {
     team.players = [player];
     stores = {
       teams: {
-        search: jest.fn(),
-        searchAndCount: jest.fn(),
+        search: vi.fn(),
+        searchAndCount: vi.fn(),
         findById: async () => team,
-        findBySlug: jest.fn(),
+        findBySlug: vi.fn(),
         findWithPlayers: async () => team,
-        findAllTeams: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
+        findAllTeams: vi.fn(),
+        save: vi.fn(),
+        delete: vi.fn(),
       },
       players: {
-        search: jest.fn(),
-        searchAndCount: jest.fn(),
+        search: vi.fn(),
+        searchAndCount: vi.fn(),
         findById: async () => player,
-        findBySlug: jest.fn(),
-        getRandomPlayer: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
+        findBySlug: vi.fn(),
+        getRandomPlayer: vi.fn(),
+        save: vi.fn(),
+        delete: vi.fn(),
       },
       photos: {
-        findByPlayer: jest.fn(),
-        findById: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
+        findByPlayer: vi.fn(),
+        findById: vi.fn(),
+        save: vi.fn(),
+        delete: vi.fn(),
       },
       contracts: {
-        findByPlayer: jest.fn(),
-        findPastContractsByPlayer: jest.fn(),
+        findByPlayer: vi.fn(),
+        findPastContractsByPlayer: vi.fn(),
         findByTeam: async () => [contract],
-        findFormerPlayersByTeam: jest.fn(),
+        findFormerPlayersByTeam: vi.fn(),
         findById: async () => contract,
-        findActiveContract: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
+        findActiveContract: vi.fn(),
+        save: vi.fn(),
+        delete: vi.fn(),
       },
     };
     transactions = 0;

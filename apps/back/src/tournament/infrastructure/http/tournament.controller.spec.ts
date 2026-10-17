@@ -1,15 +1,16 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotFoundException } from "@nestjs/common";
 import { TournamentController } from "./tournament.controller";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { Tournament } from "../../domain/competition";
 
 describe("TournamentController.findOne", () => {
-  const redis = { get: jest.fn(), set: jest.fn() };
-  const tournaments = { findById: jest.fn() };
+  const redis = { get: vi.fn(), set: vi.fn() };
+  const tournaments = { findById: vi.fn() };
   let controller: TournamentController;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     controller = new TournamentController(
       {} as never,
       {} as never,

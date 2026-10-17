@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { parseTweetUrl } from "@sarpbc/utils";
 import { handleFromAuthorUrl, htmlToPlainText, tweetEmbedFromOEmbed } from "./tweet-oembed.util";
 

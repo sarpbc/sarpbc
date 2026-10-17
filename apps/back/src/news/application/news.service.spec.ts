@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   InvalidInputError as BadRequestException,
   NotFoundError as NotFoundException,
@@ -20,13 +21,13 @@ describe("newsSitemapChunkCount", () => {
 describe("NewsService sitemap", () => {
   let service: NewsService;
   const newsRepository = {
-    countPublished: jest.fn(),
-    sitemapChunk: jest.fn(),
+    countPublished: vi.fn(),
+    sitemapChunk: vi.fn(),
   };
 
   beforeEach(() => {
     service = new NewsService(newsRepository as never, {} as never, {} as never);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function publishedArticle(
@@ -118,15 +119,15 @@ describe("NewsService sitemap", () => {
 describe("NewsService findAllPublishedArticle", () => {
   let service: NewsService;
   const newsRepository = {
-    listPublished: jest.fn(),
+    listPublished: vi.fn(),
   };
   const replyService = {
-    countByTargetIds: jest.fn(),
+    countByTargetIds: vi.fn(),
   };
 
   beforeEach(() => {
     service = new NewsService(newsRepository as never, {} as never, replyService as never);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     replyService.countByTargetIds.mockResolvedValue(new Map());
   });
 
@@ -150,12 +151,12 @@ describe("NewsService findAllPublishedArticle", () => {
 describe("NewsService findPublishedShortsByWeek", () => {
   let service: NewsService;
   const newsRepository = {
-    listWeek: jest.fn(),
+    listWeek: vi.fn(),
   };
 
   beforeEach(() => {
     service = new NewsService(newsRepository as never, {} as never, {} as never);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("rejects an invalid ISO week id", async () => {

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
 import { Tournament, TournamentParticipant } from "../domain/competition";
 import { Team } from "../../player/domain/roster";
@@ -5,19 +6,19 @@ import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
 describe("ManualTournamentService", () => {
   const writer = {
-    load: jest.fn(),
-    save: jest.fn(),
-    bySlug: jest.fn(),
-    participants: jest.fn(),
-    teamsExist: jest.fn(),
-    participantReferences: jest.fn(),
-    removeParticipant: jest.fn(),
-    saveParticipant: jest.fn(),
-    league: jest.fn(),
+    load: vi.fn(),
+    save: vi.fn(),
+    bySlug: vi.fn(),
+    participants: vi.fn(),
+    teamsExist: vi.fn(),
+    participantReferences: vi.fn(),
+    removeParticipant: vi.fn(),
+    saveParticipant: vi.fn(),
+    league: vi.fn(),
   };
-  const cache = { invalidateTournament: jest.fn() },
-    diagnostics = { error: jest.fn() },
-    reads = { findById: jest.fn(), leagues: jest.fn() };
+  const cache = { invalidateTournament: vi.fn() },
+    diagnostics = { error: vi.fn() },
+    reads = { findById: vi.fn(), leagues: vi.fn() };
   let tournament: Tournament;
   const events: string[] = [];
   const tx = {
@@ -29,7 +30,7 @@ describe("ManualTournamentService", () => {
   };
   const service = new ManualTournamentService(reads as never, tx, cache, diagnostics);
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     events.length = 0;
     tournament = Object.assign(new Tournament(), {
       id: "ewc",

@@ -1,19 +1,20 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AirRiddleService } from "./application/airriddle.service";
 import { evaluateGuess } from "./domain/airriddle";
 import { AirRiddleResultEnum as Result } from "./domain/airriddle-result.enum";
 describe("AirRiddleService", () => {
-  const repository = { findTodaysRiddle: jest.fn(), save: jest.fn() };
-  const players = { getRandomPlayer: jest.fn(), find: jest.fn() };
+  const repository = { findTodaysRiddle: vi.fn(), save: vi.fn() };
+  const players = { getRandomPlayer: vi.fn(), find: vi.fn() };
   const runtime = {
     dayStart: () => new Date("2026-10-14T22:00:00Z"),
     now: () => new Date("2026-10-15T12:00:00Z"),
     id: () => "riddle-1",
-    skipped: jest.fn(),
-    error: jest.fn(),
+    skipped: vi.fn(),
+    error: vi.fn(),
   };
   let service: AirRiddleService;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new AirRiddleService(repository, players, runtime);
   });
   it("creates a riddle with a randomly selected player", async () => {

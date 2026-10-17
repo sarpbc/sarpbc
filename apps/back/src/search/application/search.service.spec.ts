@@ -1,13 +1,14 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchService } from "./search.service";
 
 describe("SearchService", () => {
-  const playerService = { find: jest.fn() };
-  const teamService = { find: jest.fn() };
-  const tournamentService = { searchByName: jest.fn() };
+  const playerService = { find: vi.fn() };
+  const teamService = { find: vi.fn() };
+  const tournamentService = { searchByName: vi.fn() };
   let service: SearchService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new SearchService(
       playerService as never,
       teamService as never,

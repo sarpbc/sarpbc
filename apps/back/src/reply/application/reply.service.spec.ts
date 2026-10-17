@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   InvalidInputError as BadRequestException,
   NotFoundError as NotFoundException,
@@ -11,33 +12,33 @@ import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
 describe("ReplyService", () => {
   let service: ReplyService;
   const replyRepository = {
-    findByTarget: jest.fn(),
-    findById: jest.fn(),
-    findLatestByUser: jest.fn(),
-    countRootsByTarget: jest.fn(),
-    countByTargetIds: jest.fn(),
-    findDescendantsForRoots: jest.fn(),
-    save: jest.fn(),
-    delete: jest.fn(),
-    findChildren: jest.fn(),
+    findByTarget: vi.fn(),
+    findById: vi.fn(),
+    findLatestByUser: vi.fn(),
+    countRootsByTarget: vi.fn(),
+    countByTargetIds: vi.fn(),
+    findDescendantsForRoots: vi.fn(),
+    save: vi.fn(),
+    delete: vi.fn(),
+    findChildren: vi.fn(),
   };
   const replyReportRepository = {
-    findByReplyAndReporter: jest.fn(),
-    save: jest.fn(),
+    findByReplyAndReporter: vi.fn(),
+    save: vi.fn(),
   };
   const userService = {
-    findById: jest.fn(),
+    findById: vi.fn(),
   };
   const notificationService = {
-    createForDirectReply: jest.fn(),
+    createForDirectReply: vi.fn(),
   };
   const em = {
-    findOne: jest.fn(),
+    findOne: vi.fn(),
   };
 
   beforeEach(async () => {
     const scope: ReplyWriteScope = {
-      replies: { ...replyRepository, findRecentForModeration: jest.fn() },
+      replies: { ...replyRepository, findRecentForModeration: vi.fn() },
       reports: replyReportRepository,
       users: userService,
       notifications: notificationService,
@@ -54,7 +55,7 @@ describe("ReplyService", () => {
       },
     };
     service = new ReplyService(scope.replies, { run: (work) => work(scope) });
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function makeUser(id = "user-1"): User {

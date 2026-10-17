@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import { PostService } from "./post.service";
 import type { ForumWriteScope, ForumTransaction } from "./ports";
 import type { PostRecord, TopicRecord, TranslationRecord } from "../domain/forum";
@@ -15,31 +16,31 @@ function setup(role: string | null = "admin") {
   const saved: PostRecord[] = [];
   const translations: TranslationRecord[] = [];
   const posts = {
-    findPaginated: jest.fn().mockResolvedValue([]),
-    findByTopicId: jest.fn().mockResolvedValue([]),
-    findById: jest.fn().mockResolvedValue(null),
-    findWithDetails: jest.fn().mockResolvedValue(null),
-    findLatestByUser: jest.fn().mockResolvedValue(null),
-    findRecentActivity: jest.fn().mockResolvedValue([]),
-    save: jest.fn(async (model: PostRecord) => {
+    findPaginated: vi.fn().mockResolvedValue([]),
+    findByTopicId: vi.fn().mockResolvedValue([]),
+    findById: vi.fn().mockResolvedValue(null),
+    findWithDetails: vi.fn().mockResolvedValue(null),
+    findLatestByUser: vi.fn().mockResolvedValue(null),
+    findRecentActivity: vi.fn().mockResolvedValue([]),
+    save: vi.fn(async (model: PostRecord) => {
       saved.push(model);
     }),
-    saveTranslation: jest.fn(async (model: TranslationRecord) => {
+    saveTranslation: vi.fn(async (model: TranslationRecord) => {
       translations.push(model);
     }),
-    deleteTranslations: jest.fn(),
-    delete: jest.fn(),
+    deleteTranslations: vi.fn(),
+    delete: vi.fn(),
   };
   const scope: ForumWriteScope = {
     posts,
     topics: {
-      findAllTopics: jest.fn().mockResolvedValue([]),
-      findById: jest.fn().mockResolvedValue(topic),
-      findByTitle: jest.fn().mockResolvedValue(topic),
-      save: jest.fn(),
+      findAllTopics: vi.fn().mockResolvedValue([]),
+      findById: vi.fn().mockResolvedValue(topic),
+      findByTitle: vi.fn().mockResolvedValue(topic),
+      save: vi.fn(),
     },
-    users: { findById: jest.fn().mockResolvedValue({ id: "user", userName: "Fan", role }) },
-    replies: { deleteAllForPost: jest.fn() },
+    users: { findById: vi.fn().mockResolvedValue({ id: "user", userName: "Fan", role }) },
+    replies: { deleteAllForPost: vi.fn() },
   };
   let commits = 0;
   const transaction: ForumTransaction = {

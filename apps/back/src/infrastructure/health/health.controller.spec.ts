@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceUnavailableException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { HealthCheckService } from "@nestjs/terminus";
@@ -9,16 +10,16 @@ import { ShutdownStateService } from "./shutdown-state.service";
 describe("HealthController", () => {
   let controller: HealthController;
   const health = {
-    check: jest.fn(),
+    check: vi.fn(),
   };
   const postgres = {
-    pingCheck: jest.fn(),
+    pingCheck: vi.fn(),
   };
   const redis = {
-    pingCheck: jest.fn(),
+    pingCheck: vi.fn(),
   };
   const shutdownState = {
-    isShuttingDown: jest.fn().mockReturnValue(false),
+    isShuttingDown: vi.fn().mockReturnValue(false),
   };
 
   beforeEach(async () => {
@@ -33,7 +34,7 @@ describe("HealthController", () => {
     }).compile();
 
     controller = module.get(HealthController);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     shutdownState.isShuttingDown.mockReturnValue(false);
   });
 

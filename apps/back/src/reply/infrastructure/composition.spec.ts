@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import { ConflictError } from "../../common/domain/errors";
 import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
 import type { ReplyRecord } from "../domain/reply";
@@ -17,12 +18,12 @@ const reply: ReplyRecord = {
 
 function setup(failure: Error, phase: "flush" | "commit" = "flush") {
   const tx = {
-    getRepository: jest.fn().mockReturnValue({}),
-    findOne: jest.fn().mockResolvedValue(null),
-    getReference: jest.fn((_entity, id: string) => ({ id })),
-    persist: jest.fn(),
-    remove: jest.fn(),
-    flush: jest.fn(async () => {
+    getRepository: vi.fn().mockReturnValue({}),
+    findOne: vi.fn().mockResolvedValue(null),
+    getReference: vi.fn((_entity, id: string) => ({ id })),
+    persist: vi.fn(),
+    remove: vi.fn(),
+    flush: vi.fn(async () => {
       if (phase === "flush") throw failure;
     }),
   };

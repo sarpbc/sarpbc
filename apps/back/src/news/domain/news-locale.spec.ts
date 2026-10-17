@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { hasFrenchTranslation, localizedNewsFields, parseNewsLocale } from "@sarpbc/utils";
 
 describe("news locale", () => {

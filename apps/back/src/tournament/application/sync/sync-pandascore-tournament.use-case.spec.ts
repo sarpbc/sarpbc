@@ -1,14 +1,15 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 describe("SyncPandascoreTournamentUseCase", () => {
   const feed = {
-    getTournamentById: jest.fn(),
-    getTournamentBrackets: jest.fn(),
-    getTournamentMatches: jest.fn(),
+    getTournamentById: vi.fn(),
+    getTournamentBrackets: vi.fn(),
+    getTournamentMatches: vi.fn(),
   };
-  const sync = { findTournamentById: jest.fn(), upsertTournament: jest.fn() };
+  const sync = { findTournamentById: vi.fn(), upsertTournament: vi.fn() };
   const useCase = new SyncPandascoreTournamentUseCase(feed as never, sync as never);
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     sync.findTournamentById.mockResolvedValue({
       id: "t1",
       source: "pandascore",

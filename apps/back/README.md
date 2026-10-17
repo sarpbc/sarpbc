@@ -37,6 +37,20 @@ pnpm --filter back run mikro:migrate
 
 Integration tests rebuild a fresh PostgreSQL database through these migrations and verify that the resulting schema matches the ORM entities.
 
+## Tests
+
+Vitest runs the unit and HTTP smoke tests as separate projects. SWC preserves the NestJS decorator metadata used by the HTTP tests.
+
+```bash
+pnpm --filter back test
+pnpm --filter back test:watch
+pnpm --filter back test:cov
+pnpm --filter back test:e2e
+pnpm --filter back typecheck:tests
+```
+
+`test:integration` builds the backend and verifies it against disposable PostgreSQL and Redis containers.
+
 ## Contributing
 
 - Feature modules use `domain`, `application`, and `infrastructure` layers. See [Backend architecture](ARCHITECTURE.md).

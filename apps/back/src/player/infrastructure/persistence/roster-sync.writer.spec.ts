@@ -1,11 +1,12 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Player, Team } from "./player.entities";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import type { EntityManager } from "@mikro-orm/postgresql";
 describe("RosterSyncWriter", () => {
-  const em = { findOne: jest.fn(), persist: jest.fn(), getReference: jest.fn() };
+  const em = { findOne: vi.fn(), persist: vi.fn(), getReference: vi.fn() };
   const manager: Pick<EntityManager, "findOne" | "persist" | "getReference"> = em;
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     em.findOne.mockResolvedValue(null);
     em.getReference.mockImplementation((entity, id) => Object.assign(new entity(), { id }));
   });

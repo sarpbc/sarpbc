@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import { ReplyService } from "./reply.service";
 import type { ReplyWriteScope, ReplyTransaction } from "./ports";
 import type { ReplyRecord, ReplyAuthor } from "../domain/reply";
@@ -22,30 +23,30 @@ function setup() {
   const saved: ReplyRecord[] = [];
   const notified: { recipientId: string; replyId: string }[] = [];
   const replies = {
-    findByTarget: jest.fn().mockResolvedValue([]),
-    findById: jest.fn().mockResolvedValue(reply()),
-    findLatestByUser: jest.fn().mockResolvedValue(null),
-    countRootsByTarget: jest.fn().mockResolvedValue(0),
-    countByTargetIds: jest.fn().mockResolvedValue(new Map()),
-    findDescendantsForRoots: jest.fn().mockResolvedValue([]),
-    findRecentForModeration: jest.fn().mockResolvedValue([]),
-    findChildren: jest.fn().mockResolvedValue([]),
-    save: jest.fn(async (model: ReplyRecord) => {
+    findByTarget: vi.fn().mockResolvedValue([]),
+    findById: vi.fn().mockResolvedValue(reply()),
+    findLatestByUser: vi.fn().mockResolvedValue(null),
+    countRootsByTarget: vi.fn().mockResolvedValue(0),
+    countByTargetIds: vi.fn().mockResolvedValue(new Map()),
+    findDescendantsForRoots: vi.fn().mockResolvedValue([]),
+    findRecentForModeration: vi.fn().mockResolvedValue([]),
+    findChildren: vi.fn().mockResolvedValue([]),
+    save: vi.fn(async (model: ReplyRecord) => {
       saved.push(model);
     }),
-    delete: jest.fn(),
+    delete: vi.fn(),
   };
   const scope: ReplyWriteScope = {
     replies,
-    reports: { findByReplyAndReporter: jest.fn().mockResolvedValue(null), save: jest.fn() },
-    users: { findById: jest.fn().mockResolvedValue(author) },
+    reports: { findByReplyAndReporter: vi.fn().mockResolvedValue(null), save: vi.fn() },
+    users: { findById: vi.fn().mockResolvedValue(author) },
     targets: {
-      find: jest
+      find: vi
         .fn()
         .mockResolvedValue({ post: { id: "p", title: "Thread" }, newsArticle: null, match: null }),
     },
     notifications: {
-      createForDirectReply: jest.fn(async (recipientId: string, replyId: string) => {
+      createForDirectReply: vi.fn(async (recipientId: string, replyId: string) => {
         notified.push({ recipientId, replyId });
       }),
     },

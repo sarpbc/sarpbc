@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { deriveWinnerParticipantId } from "./derive-match-winner";
 
 describe("deriveWinnerParticipantId", () => {

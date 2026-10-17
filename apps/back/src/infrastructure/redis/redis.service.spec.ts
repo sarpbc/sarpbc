@@ -1,13 +1,16 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RedisService } from "./redis.service";
 
-const mockRedisClient = {
-  quit: jest.fn().mockResolvedValue("OK"),
-  on: jest.fn(),
-  ping: jest.fn().mockResolvedValue("PONG"),
-};
+const mockRedisClient = vi.hoisted(() => ({
+  quit: vi.fn().mockResolvedValue("OK"),
+  on: vi.fn(),
+  ping: vi.fn().mockResolvedValue("PONG"),
+}));
 
-jest.mock("ioredis", () => ({
-  Redis: jest.fn(() => mockRedisClient),
+vi.mock("ioredis", () => ({
+  Redis: vi.fn(function () {
+    return mockRedisClient;
+  }),
 }));
 
 describe("RedisService", () => {
@@ -15,7 +18,7 @@ describe("RedisService", () => {
 
   beforeEach(() => {
     service = new RedisService({
-      get: jest.fn((key: string) => {
+      get: vi.fn((key: string) => {
         switch (key) {
           case "redis.host":
             return "redis";
@@ -26,7 +29,7 @@ describe("RedisService", () => {
         }
       }),
     } as never);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service.onModuleInit();
   });
 

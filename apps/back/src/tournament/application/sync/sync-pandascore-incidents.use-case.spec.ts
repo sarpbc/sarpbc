@@ -1,10 +1,11 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import type { CompetitionIncident } from "../../../pandascore/application/models/competition-feed";
 describe("PandaScore incidents", () => {
-  const feed = { listIncidents: jest.fn(), getTournamentById: jest.fn() },
-    cursor = { getLastSyncAt: jest.fn(), setLastSyncAt: jest.fn() },
-    sync = { applyIncident: jest.fn(), findTournamentByPandascoreId: jest.fn() },
-    diagnostics = { error: jest.fn() };
+  const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
+    cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },
+    sync = { applyIncident: vi.fn(), findTournamentByPandascoreId: vi.fn() },
+    diagnostics = { error: vi.fn() };
   const now = new Date("2026-10-15T12:00:00Z");
   const service = new SyncPandascoreIncidentsUseCase(
     feed as never,
@@ -19,7 +20,7 @@ describe("PandaScore incidents", () => {
     modifiedAt: new Date("2026-10-15T10:00:00Z"),
   };
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cursor.getLastSyncAt.mockResolvedValue(new Date("2026-10-14"));
     sync.applyIncident.mockResolvedValue(undefined);
   });

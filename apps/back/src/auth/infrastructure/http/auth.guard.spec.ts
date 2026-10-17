@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
@@ -20,13 +21,13 @@ interface AuthGuardTestRequest {
 describe("AuthGuard", () => {
   let guard: AuthGuard;
   const jwtService = {
-    verifyAsync: jest.fn(),
-    signAsync: jest.fn().mockResolvedValue("rotated-token"),
+    verifyAsync: vi.fn(),
+    signAsync: vi.fn().mockResolvedValue("rotated-token"),
   };
   const userService = {
-    findById: jest.fn(),
+    findById: vi.fn(),
   };
-  const setCookie = jest.fn();
+  const setCookie = vi.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,7 +37,7 @@ describe("AuthGuard", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               if (key === "jwt_token") {
                 return "secret";
               }
@@ -52,7 +53,7 @@ describe("AuthGuard", () => {
     }).compile();
 
     guard = module.get(AuthGuard);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     jwtService.signAsync.mockResolvedValue("rotated-token");
   });
 

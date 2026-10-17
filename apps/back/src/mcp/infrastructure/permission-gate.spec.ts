@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { PatUser } from "../../pat/application/pat.service";
 import { runReadTool, runStaffReadTool, runWriteTool } from "./permission-gate";

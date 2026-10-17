@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import {
   AuthenticationError,
   ConflictError,
@@ -20,7 +21,7 @@ describe("AllExceptionsFilter", () => {
   const filter = new AllExceptionsFilter();
 
   function hostWith(
-    send: jest.Mock,
+    send: Mock,
     sent = false,
     request: { url: string; method: string; user?: { id: string; email: string } } = {
       url: "/news",
@@ -29,18 +30,18 @@ describe("AllExceptionsFilter", () => {
   ): ArgumentsHost {
     return {
       switchToHttp: () => ({
-        getResponse: () => ({ sent, status: jest.fn().mockReturnThis(), send }),
+        getResponse: () => ({ sent, status: vi.fn().mockReturnThis(), send }),
         getRequest: () => request,
       }),
     } as ArgumentsHost;
   }
 
   beforeEach(() => {
-    (log.error as jest.Mock).mockClear();
+    (log.error as Mock).mockClear();
   });
 
   it("preserves HttpException response bodies", () => {
-    const send = jest.fn();
+    const send = vi.fn();
     filter.catch(new HttpException("Tournament not found", HttpStatus.NOT_FOUND), hostWith(send));
     expect(send).toHaveBeenCalledWith({
       statusCode: 404,
@@ -50,7 +51,7 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("logs HTTP 5xx with environment and user", () => {
-    const send = jest.fn();
+    const send = vi.fn();
     filter.catch(
       new InternalServerErrorException("Cover image could not be stored."),
       hostWith(send, false, {
@@ -82,13 +83,13 @@ describe("AllExceptionsFilter", () => {
     [new UnprocessableError("Unknown team"), 422, "Unprocessable Entity"],
     [new IntegrationError("Provider unavailable"), 500, "Internal Server Error"],
   ])("translates application failure %p to HTTP %p", (failure, statusCode, error) => {
-    const send = jest.fn();
+    const send = vi.fn();
     filter.catch(failure, hostWith(send));
     expect(send).toHaveBeenCalledWith({ statusCode, error, message: failure.message });
   });
 
   it("preserves coded business error payloads", () => {
-    const send = jest.fn();
+    const send = vi.fn();
     filter.catch(
       new ConflictError({ message: "Already reported", code: "REPLY_ALREADY_REPORTED" }),
       hostWith(send),
@@ -100,7 +101,7 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("hides unexpected error details", () => {
-    const send = jest.fn();
+    const send = vi.fn();
     filter.catch(new Error("secret stack"), hostWith(send));
     expect(send).toHaveBeenCalledWith({
       statusCode: 500,

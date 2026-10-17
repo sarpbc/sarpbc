@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { ShutdownStateService } from "./shutdown-state.service";
 
 describe("ShutdownStateService", () => {

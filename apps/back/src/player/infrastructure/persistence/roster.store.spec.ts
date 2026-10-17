@@ -1,13 +1,14 @@
+import { describe, expect, it, vi } from "vitest";
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { Player as PlayerRow } from "./player.entities";
 import { Player } from "../../domain/roster";
 import { rosterStores } from "./roster.store";
 
 function fixture() {
-  const execute = jest.fn();
-  const findOne = jest.fn();
+  const execute = vi.fn();
+  const findOne = vi.fn();
   const manager: Pick<EntityManager, "getConnection" | "findOne"> = {
-    getConnection: jest.fn().mockReturnValue({ execute }),
+    getConnection: vi.fn().mockReturnValue({ execute }),
     findOne,
   };
 

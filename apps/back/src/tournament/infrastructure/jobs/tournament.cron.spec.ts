@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { MikroORM } from "@mikro-orm/postgresql";
 import { TournamentCron } from "./tournament.cron";
@@ -6,15 +7,22 @@ import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pan
 import { MatchService } from "../../application/match/match.service";
 import { TournamentService } from "../../application/tournament.service";
 
+vi.mock("@mikro-orm/decorators/legacy", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@mikro-orm/decorators/legacy")>()),
+  CreateRequestContext:
+    () => (_target: TournamentCron, _key: string | symbol, descriptor: PropertyDescriptor) =>
+      descriptor,
+}));
+
 describe("TournamentCron", () => {
   let cron: TournamentCron;
-  const syncNewTournamentsUseCase = { execute: jest.fn() };
-  const syncPandascoreTournamentUseCase = { execute: jest.fn() };
+  const syncNewTournamentsUseCase = { execute: vi.fn() };
+  const syncPandascoreTournamentUseCase = { execute: vi.fn() };
   const matchService = {
-    findLive: jest.fn(),
-    findRecentlyEnded: jest.fn(),
+    findLive: vi.fn(),
+    findRecentlyEnded: vi.fn(),
   };
-  const tournamentService = { findPandascoreActiveIds: jest.fn() };
+  const tournamentService = { findPandascoreActiveIds: vi.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,7 +37,7 @@ describe("TournamentCron", () => {
     }).compile();
 
     cron = module.get(TournamentCron);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     matchService.findLive.mockResolvedValue([]);
     matchService.findRecentlyEnded.mockResolvedValue([]);
     tournamentService.findPandascoreActiveIds.mockResolvedValue([]);

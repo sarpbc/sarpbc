@@ -4,7 +4,7 @@
     "rootDir": ".",
     "noEmit": true,
     "rewriteRelativeImportExtensions": false,
-    "types": ["jest", "node"]
+    "types": ["node"]
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, NotFoundError } from "../../common/domain/errors";
 import { UserService } from "./user.service";
 import { passwordHasher } from "../infrastructure/password-hasher";
@@ -6,18 +7,18 @@ import { User } from "../domain/user";
 describe("UserService", () => {
   let service: UserService;
   const userRepository = {
-    findByEmail: jest.fn(),
-    findById: jest.fn(),
-    findByGoogleId: jest.fn(),
-    findByEmailWithPassword: jest.fn(),
-    existsByEmail: jest.fn(),
-    existsByUserName: jest.fn(),
-    save: jest.fn(),
+    findByEmail: vi.fn(),
+    findById: vi.fn(),
+    findByGoogleId: vi.fn(),
+    findByEmailWithPassword: vi.fn(),
+    existsByEmail: vi.fn(),
+    existsByUserName: vi.fn(),
+    save: vi.fn(),
   };
 
   beforeEach(async () => {
     service = new UserService(userRepository, passwordHasher);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("create", () => {

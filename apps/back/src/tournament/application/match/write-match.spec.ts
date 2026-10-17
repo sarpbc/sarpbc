@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../../common/domain/errors";
 import { Team } from "../../../player/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
@@ -14,15 +15,15 @@ describe("Match writes", () => {
     }),
   );
   const writer = {
-    load: jest.fn(),
-    byPandascoreId: jest.fn(),
-    save: jest.fn(),
-    tournament: jest.fn(),
-    participants: jest.fn(),
+    load: vi.fn(),
+    byPandascoreId: vi.fn(),
+    save: vi.fn(),
+    tournament: vi.fn(),
+    participants: vi.fn(),
   } satisfies MatchWriter;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     writer.tournament.mockResolvedValue(tournament);
     writer.participants.mockResolvedValue(participants);
     writer.byPandascoreId.mockResolvedValue(null);

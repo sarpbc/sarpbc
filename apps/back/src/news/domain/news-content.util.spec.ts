@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { excerptFromContent, stripMarkdownToPlain } from "./news-content.util";
 
 describe("news-content.util", () => {
