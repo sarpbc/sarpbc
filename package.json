@@ -8,6 +8,8 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "prepare": "lefthook install",
+    "test:git-names": "node --test scripts/check-git-names.test.mjs",
     "dev": "turbo run dev",
     "dev:back": "turbo run dev --filter=back",
     "dev:front": "turbo run dev --filter=front",
