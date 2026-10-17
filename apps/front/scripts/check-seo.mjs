@@ -77,6 +77,13 @@ for (const path of paths) {
       ),
       "Missing title",
     );
+    if (path === "/" || path === "/fr/" || path.includes("/news/")) {
+      const title = nodes.find((node) => node.tagName === "title");
+      assert.ok(
+        title.childNodes.some((child) => child.value?.includes("sarpbc.org")),
+        "Site name missing from title",
+      );
+    }
     const description = metas.find((node) => attr(node, "name") === "description");
     assert.ok(description && attr(description, "content")?.trim(), "Missing description");
     for (const image of nodes.filter((node) => node.tagName === "img")) {
