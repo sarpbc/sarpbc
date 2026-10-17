@@ -100,10 +100,10 @@ export const useSarpbcSeo = () => {
         href: `${baseUrl}${cleanPath}`,
       });
 
-      const pageLinks: Array<Record<string, string>> = [
-        { rel: "canonical", href: getCanonicalUrl() },
-        ...alternateLinks,
-      ];
+      const pageLinks: (
+        | { rel: "canonical"; href: string }
+        | { rel: "alternate"; href: string; hreflang?: string; type?: string }
+      )[] = [{ rel: "canonical", href: getCanonicalUrl() }, ...alternateLinks];
 
       if (!noIndex) {
         pageLinks.push({

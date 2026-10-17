@@ -101,7 +101,7 @@ function formatDateRange(event: TeamEventListItem): string | null {
           <SSegmented
             :model-value="tab"
             :items="tabItems"
-            :aria-label="t('page.team.slug.events.sectionTitle')"
+            :ariaLabel="t('page.team.slug.events.sectionTitle')"
             @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
           />
         </div>

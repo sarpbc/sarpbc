@@ -1,7 +1,11 @@
 export const SCHEMA_ORG = "https://schema.org";
 
 export type JsonLdPrimitive = string | number | boolean;
-export type JsonLdValue = JsonLdPrimitive | JsonLdNode | JsonLdValue[];
+export interface JsonLdReference {
+  "@id": string;
+}
+
+export type JsonLdValue = JsonLdPrimitive | JsonLdNode | JsonLdReference | JsonLdValue[];
 
 export interface JsonLdNode {
   "@context"?: string;
@@ -11,15 +15,15 @@ export interface JsonLdNode {
 }
 
 export function compactJsonLd<T extends JsonLdNode>(node: T): T {
-  const result: JsonLdNode = { "@type": node["@type"] };
+  const result = { ...node };
 
   for (const [key, value] of Object.entries(node)) {
-    if (value !== undefined) {
-      result[key] = value;
+    if (value === undefined) {
+      delete result[key];
     }
   }
 
-  return result as T;
+  return result;
 }
 
 export function serializeJsonLd(data: JsonLdNode): string {

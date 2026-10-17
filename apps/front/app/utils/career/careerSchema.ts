@@ -14,9 +14,7 @@ import type { CareerResult, CareerState } from "~/types/career";
 const ALL_COUNTRIES = Object.values(CAREER_COUNTRIES).flat();
 
 const careerRegionSchema = z.enum(CAREER_REGIONS);
-const careerCountrySchema = z
-  .string()
-  .refine((value): value is (typeof ALL_COUNTRIES)[number] => ALL_COUNTRIES.includes(value));
+const careerCountrySchema = z.enum(ALL_COUNTRIES);
 const careerRoleSchema = z.enum(CAREER_ROLES);
 const careerBackgroundSchema = z.enum(CAREER_BACKGROUNDS);
 const careerPhaseSchema = z.enum([

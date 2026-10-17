@@ -4,7 +4,6 @@ export function useResultsListPage() {
   const page = useOffsetMatchListPage<MatchResultsResponse>({
     keyPrefix: "matches-results",
     fetch: getMatchesResults,
-    total: (data) => data?.total ?? 0,
   });
 
   const pastMatches = computed(() => page.data.value?.results ?? []);

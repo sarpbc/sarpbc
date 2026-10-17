@@ -93,7 +93,7 @@ function setTab(nextTab: PlayerMatchesTab) {
           <SSegmented
             :model-value="tab"
             :items="tabItems"
-            :aria-label="t('page.player.slug.matches.sectionTitle')"
+            :ariaLabel="t('page.player.slug.matches.sectionTitle')"
             @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
           />
         </div>

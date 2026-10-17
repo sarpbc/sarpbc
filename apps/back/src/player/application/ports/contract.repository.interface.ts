@@ -1,4 +1,4 @@
-import { Contract, ContractRole, Player } from "../../domain/roster";
+import { Contract } from "../../domain/roster";
 
 export const CONTRACT_REPOSITORY = Symbol("CONTRACT_REPOSITORY");
 
@@ -11,12 +11,4 @@ export interface IContractRepository {
   save(contract: Contract): Promise<void>;
   delete(contract: Contract): Promise<void>;
   findActiveContract(playerId: string): Promise<Contract | null>;
-}
-
-export interface CreateContractProps {
-  player: Player;
-  teamId: string;
-  startDate: Date;
-  endDate?: Date;
-  role?: ContractRole;
 }

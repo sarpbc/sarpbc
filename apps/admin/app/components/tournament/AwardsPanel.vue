@@ -19,8 +19,8 @@ const toast = useToast();
 
 const assigning = ref(false);
 const removingAwardId = ref<string | null>(null);
-const selectedPlayerId = ref<string | null>(null);
-const selectedAwardType = ref<PlayerAwardType | null>(null);
+const selectedPlayerId = ref<string>();
+const selectedAwardType = ref<PlayerAwardType>();
 
 const { data: awards, refresh: refreshAwards } = await useLazyAsyncData(
   () => `admin-tournament-${props.tournamentId}-awards`,
@@ -69,14 +69,14 @@ watch(
   availableAwardTypeOptions,
   (options) => {
     if (options.length === 0) {
-      selectedAwardType.value = null;
+      selectedAwardType.value = undefined;
       return;
     }
     if (
       !selectedAwardType.value ||
       !options.some((option) => option.value === selectedAwardType.value)
     ) {
-      selectedAwardType.value = options[0]?.value ?? null;
+      selectedAwardType.value = options[0]?.value;
     }
   },
   { immediate: true },
@@ -104,7 +104,7 @@ async function handleAssignAward() {
         }),
         color: "success",
       });
-      selectedPlayerId.value = null;
+      selectedPlayerId.value = undefined;
       await refreshAwards();
     }
   } finally {

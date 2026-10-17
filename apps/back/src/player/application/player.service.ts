@@ -113,18 +113,6 @@ export class PlayerService {
     });
   }
 
-  async assignToTeam(playerId: string, teamId: string): Promise<Player | null> {
-    const player = await this.playerRepository.findById(playerId);
-    const team = await this.teamRepository.findById(teamId);
-
-    if (player && team) {
-      player.team = team;
-      await this.playerRepository.save(player);
-    }
-
-    return player;
-  }
-
   async getRandomPlayer(): Promise<Player | null> {
     return this.playerRepository.getRandomPlayer();
   }

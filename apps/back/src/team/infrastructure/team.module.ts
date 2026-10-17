@@ -8,7 +8,6 @@ import {
   TEAM_REPOSITORY,
   type ITeamRepository,
 } from "../application/ports/team.repository.interface";
-import { PlayerService } from "../../player/application/player.service";
 import {
   PANDASCORE_GATEWAY,
   PandascoreGateway,
@@ -50,10 +49,9 @@ import { log } from "evlog";
       useFactory: (
         teams: ITeamRepository,
         transaction: RosterTransaction,
-        players: PlayerService,
         sync: SyncPandascoreTeamsUseCase,
-      ) => new TeamService(teams, transaction, players, sync),
-      inject: [TEAM_REPOSITORY, ROSTER_TRANSACTION, PlayerService, SyncPandascoreTeamsUseCase],
+      ) => new TeamService(teams, transaction, sync),
+      inject: [TEAM_REPOSITORY, ROSTER_TRANSACTION, SyncPandascoreTeamsUseCase],
     },
   ],
   exports: [TeamService, RosterPersistenceModule],

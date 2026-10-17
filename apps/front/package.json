@@ -13,10 +13,7 @@
     "lint:fix": "node scripts/generate-oxlint-globals.mjs && oxlint -c .oxlintrc.generated.json app --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
-    "test:seo": "node scripts/check-seo.mjs",
-    "test:watch": "vitest"
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "@iconify-json/flag": "^1.2.12",
@@ -54,7 +51,6 @@
     "@types/node": "catalog:",
     "debug": "^4.4.3",
     "extend": "^3.0.2",
-    "parse5": "^8.0.1",
     "rehype-raw": "^7.0.0",
     "remark-emoji": "^5.0.2",
     "remark-gfm": "^4.0.1",
@@ -63,7 +59,6 @@
     "typescript": "catalog:",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
-    "vitest": "^4.1.11",
     "vue-tsc": "catalog:"
   }
 }

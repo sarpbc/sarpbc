@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../../player/domain/roster";
 import { ContractService } from "../../player/application/contract.service";
-import { PlayerService } from "../../player/application/player.service";
 import type {
   RosterStores,
   RosterTransaction,
@@ -69,12 +68,11 @@ describe("Roster workflows", () => {
       },
     };
     contractService = new ContractService(stores.contracts, stores.players, stores.teams);
-    const players = new PlayerService(stores.players, stores.photos, stores.teams, transaction);
     const sync = new SyncPandascoreTeamsUseCase(
       { hasTeams: async () => false, syncCurrentTeams: async () => {} },
       { load: async () => [] },
     );
-    service = new TeamService(stores.teams, transaction, players, sync);
+    service = new TeamService(stores.teams, transaction, sync);
   });
 
   it("deletes contracts and clears current membership with the team in one transaction", async () => {

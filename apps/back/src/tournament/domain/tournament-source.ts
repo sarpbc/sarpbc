@@ -4,10 +4,6 @@ export const TOURNAMENT_SOURCES = ["pandascore", "manual"] as const;
 
 export type TournamentSource = (typeof TOURNAMENT_SOURCES)[number];
 
-export function isTournamentSource(value: string): value is TournamentSource {
-  return (TOURNAMENT_SOURCES as readonly string[]).includes(value);
-}
-
 export function assertTournamentUpdateAllowed(
   source: TournamentSource,
   patch: {

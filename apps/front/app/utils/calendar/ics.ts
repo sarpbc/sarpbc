@@ -23,10 +23,6 @@ export interface CalendarFeed {
   dtStamp: Date;
 }
 
-export function matchCalendarPath(id: string): string {
-  return `/calendar/match/${id}.ics`;
-}
-
 export function tournamentCalendarPath(id: string): string {
   return `/calendar/tournament/${id}.ics`;
 }

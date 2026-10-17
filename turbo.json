@@ -21,9 +21,6 @@
     "test": {
       "dependsOn": ["build"]
     },
-    "front#test": {
-      "dependsOn": []
-    },
     "test:cov": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"]

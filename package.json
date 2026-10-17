@@ -20,8 +20,7 @@
     "lint:fix": "turbo run lint:fix",
     "fmt": "turbo run fmt",
     "fmt:check": "turbo run fmt:check",
-    "test:back": "turbo run test --filter=back",
-    "test:front": "turbo run test --filter=front"
+    "test:back": "turbo run test --filter=back"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.81.0",

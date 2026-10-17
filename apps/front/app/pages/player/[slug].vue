@@ -67,7 +67,7 @@ const {
 
 const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
 
-function parsePlayerTab(value: LocationQuery[string] | number): PlayerProfileTab {
+function parsePlayerTab(value: LocationQuery[string] | number | undefined): PlayerProfileTab {
   if (value === "matches" || value === "events" || value === "trophies") {
     return value;
   }

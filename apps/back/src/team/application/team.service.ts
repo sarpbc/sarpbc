@@ -1,7 +1,6 @@
 import type { RosterTransaction } from "../../player/application/ports/roster-transaction";
 import { NotFoundError } from "../../common/domain/errors";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
-import { PlayerService } from "../../player/application/player.service";
 import { Team } from "../../player/domain/roster";
 import { TeamSearchProps } from "./search-team-props";
 import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
@@ -12,7 +11,6 @@ export class TeamService {
   constructor(
     private readonly teamRepository: ITeamRepository,
     private readonly transaction: RosterTransaction,
-    private readonly playerService: PlayerService,
     private readonly syncPandascoreTeamsUseCase: SyncPandascoreTeamsUseCase,
   ) {}
 
@@ -75,18 +73,6 @@ export class TeamService {
       }
       await teams.delete(team);
     });
-  }
-
-  async addPlayerToTeam(teamId: string, playerId: string): Promise<Team | null> {
-    const team = await this.teamRepository.findById(teamId);
-    if (!team) return null;
-
-    const player = await this.playerService.findById(playerId);
-    if (!player) return null;
-
-    player.team = team;
-    await this.playerService.assignToTeam(playerId, teamId);
-    return this.teamRepository.findWithPlayers(teamId);
   }
 
   async initializeTeamsFromPandaScore(cancelIfExistingTeam: boolean): Promise<void> {

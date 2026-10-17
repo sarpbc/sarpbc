@@ -40,7 +40,7 @@ export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): Ne
   const authorName = article.author?.trim();
   const image = article.imageUrl?.trim() || undefined;
 
-  return compactJsonLd({
+  return compactJsonLd<NewsArticleLd>({
     "@context": SCHEMA_ORG,
     "@type": "NewsArticle",
     headline: article.title,
@@ -49,10 +49,10 @@ export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): Ne
     description,
     image,
     author: authorName
-      ? compactJsonLd({
+      ? {
           "@type": "Person",
           name: authorName,
-        })
+        }
       : undefined,
     publisher: {
       "@id": ORGANIZATION_ID,

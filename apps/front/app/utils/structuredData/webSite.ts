@@ -20,7 +20,7 @@ export interface BuildWebSiteOptions {
 export function buildWebSite(options: BuildWebSiteOptions): WebSiteLd {
   const origin = options.origin ?? SITE_ORIGIN;
 
-  return compactJsonLd({
+  return compactJsonLd<WebSiteLd>({
     "@context": SCHEMA_ORG,
     "@type": "WebSite",
     name: "sarpbc.org",
