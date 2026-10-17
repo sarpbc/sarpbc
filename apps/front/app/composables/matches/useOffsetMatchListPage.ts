@@ -24,10 +24,9 @@ export function offsetPageQuery(offset: number): OffsetPageQuery {
   return { offset: String(offset) };
 }
 
-export function useOffsetMatchListPage<TData>(config: {
+export function useOffsetMatchListPage<TData extends { total: number }>(config: {
   keyPrefix: string;
   fetch: (query: { limit: number; offset: number }) => Promise<TData>;
-  total: (data: TData | null) => number;
 }) {
   const route = useRoute();
   const offset = computed(() => parseRouteOffset(route.query.offset));
@@ -36,16 +35,22 @@ export function useOffsetMatchListPage<TData>(config: {
     offset: offset.value,
   }));
 
-  const { data, pending, error, refresh } = useLazyAsyncData<TData | null>(
+  const {
+    data: response,
+    pending,
+    error,
+    refresh,
+  } = useLazyAsyncData(
     () => `${config.keyPrefix}-${offset.value}`,
-    () => config.fetch(listQuery.value),
+    async () => ({ data: await config.fetch(listQuery.value) }),
     {
       watch: [offset],
       default: () => null,
     },
   );
 
-  const totalMatches = computed(() => config.total(data.value));
+  const data = computed(() => response.value?.data ?? null);
+  const totalMatches = computed(() => data.value?.total ?? 0);
   const currentPage = computed(() => Math.floor(offset.value / MATCH_LIST_PAGE_SIZE) + 1);
   const totalPages = computed(() =>
     Math.max(1, Math.ceil(totalMatches.value / MATCH_LIST_PAGE_SIZE)),

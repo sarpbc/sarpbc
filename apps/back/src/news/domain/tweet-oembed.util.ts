@@ -54,20 +54,16 @@ export function handleFromAuthorUrl(authorUrl: string | undefined): string {
 }
 
 export function decodeHtmlEntities(value: string): string {
-  return value.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, entity: string) => {
+  return value.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (match, entity: string) => {
     const named = namedHtmlEntity(entity);
     if (named) {
       return named;
     }
 
-    if (entity.startsWith("#x") || entity.startsWith("#X")) {
-      const code = Number.parseInt(entity.slice(2), 16);
-      return Number.isFinite(code) ? String.fromCodePoint(code) : match;
-    }
-
     if (entity.startsWith("#")) {
-      const code = Number.parseInt(entity.slice(1), 10);
-      return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+      const hexadecimal = entity[1].toLowerCase() === "x";
+      const code = Number.parseInt(entity.slice(hexadecimal ? 2 : 1), hexadecimal ? 16 : 10);
+      return code <= 0x10ffff ? String.fromCodePoint(code) : match;
     }
 
     return match;

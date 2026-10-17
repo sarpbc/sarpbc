@@ -15,7 +15,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const toast = useToast();
 
-const selectedReason = ref<ReplyReportReason | null>(null);
+const selectedReason = ref<ReplyReportReason>();
 const isSubmitting = ref(false);
 
 const reasonItems = computed(() =>
@@ -27,7 +27,7 @@ const reasonItems = computed(() =>
 
 watch(open, (isOpen) => {
   if (!isOpen) {
-    selectedReason.value = null;
+    selectedReason.value = undefined;
   }
 });
 

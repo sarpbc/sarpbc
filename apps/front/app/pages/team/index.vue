@@ -42,10 +42,10 @@ const totalPages = computed(() => Math.ceil(totalTeams.value / TEAMS_PER_PAGE));
 const hasPrevious = computed(() => offset.value > 0);
 const hasNext = computed(() => offset.value + TEAMS_PER_PAGE < totalTeams.value);
 
-interface HubListQuery {
+type HubListQuery = {
   offset: string;
   start?: string;
-}
+};
 
 const previousPageQuery = computed(() => {
   const query: HubListQuery = {

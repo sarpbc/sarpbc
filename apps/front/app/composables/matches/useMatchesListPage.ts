@@ -8,7 +8,6 @@ export function useMatchesListPage() {
   const page = useOffsetMatchListPage<UpcomingMatchesResponse>({
     keyPrefix: "matches-schedule",
     fetch: getUpcomingMatches,
-    total: (data) => data?.total ?? 0,
   });
 
   const liveMatchIds = computed(

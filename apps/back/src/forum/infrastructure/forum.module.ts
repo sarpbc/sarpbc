@@ -8,7 +8,6 @@ import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { ForumController } from "./http/forum.controller";
 import { PostController } from "./http/post.controller";
 import { TopicController } from "./http/topic.contoller";
-import { ForumService } from "../application/forum.service";
 import { PostService } from "../application/post.service";
 import { TopicService } from "../application/topic.service";
 import { MikroPostStore, MikroTopicStore } from "./persistence/forum.store";
@@ -40,13 +39,8 @@ class TopicInitializer implements OnModuleInit {
         new TopicService(new MikroTopicStore(em), transactionalForum(em)),
       inject: [EntityManager],
     },
-    {
-      provide: ForumService,
-      useFactory: (topics: TopicService) => new ForumService(topics),
-      inject: [TopicService],
-    },
     TopicInitializer,
   ],
-  exports: [ForumService, PostService, TopicService],
+  exports: [PostService, TopicService],
 })
 export class ForumModule {}

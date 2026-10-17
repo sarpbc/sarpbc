@@ -14,9 +14,6 @@ export class PickemService {
     private readonly transaction: PickemTransaction,
     private readonly runtime: PickemRuntime,
   ) {}
-  listByTournament(tournamentId: string) {
-    return this.reads.list(tournamentId);
-  }
   async getUserPicksForTournament(tournamentId: string, userId: string): Promise<UserPickDto[]> {
     return (await this.reads.list(tournamentId, userId)).map((p) => ({
       match: p.match.id,
@@ -74,9 +71,6 @@ export class PickemService {
         `Auto-score skipped for match ${matchId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-  }
-  tryValidateMatchResult(matchId: string): Promise<void> {
-    return this.autoScoreMatch(matchId);
   }
   async leaderboard(tournamentId: string): Promise<LeaderboardEntryDto[]> {
     const entries = new Map<string, LeaderboardEntryDto>();

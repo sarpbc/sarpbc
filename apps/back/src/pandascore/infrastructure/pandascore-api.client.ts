@@ -22,29 +22,6 @@ export interface PandascoreRequestOptions {
   rateLimitMs?: number;
 }
 
-export interface RocketLeaguePlayerDto {
-  active: boolean;
-  age?: number;
-  birthday?: string;
-  current_team?: {
-    id: number;
-    name: string;
-    slug: string;
-    acronym?: string;
-    image_url?: string;
-    dark_mode_image_url?: string | null;
-  };
-  first_name?: string;
-  id: number;
-  image_url?: string;
-  last_name?: string;
-  modified_at: string;
-  name: string;
-  nationality?: string;
-  role?: string;
-  slug: string;
-}
-
 export interface ListIncidentsClientParams {
   since?: Date;
   type?: PandascoreIncidentType[];
