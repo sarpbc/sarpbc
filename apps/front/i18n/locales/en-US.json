@@ -94,9 +94,9 @@
   },
   "components": {
     "cookiePopup": {
-      "description": "Do you agree to let PostHog measure your navigation and record your session (pages, clicks, scrolling and mouse movements) to improve the site? Text and inputs are masked, and tracking is not linked to your account. You can decline or withdraw your consent at any time.",
+      "description": "With your permission, we use cookies to understand how the site is used and improve it.",
       "label": "Cookie preferences",
-      "learnMore": "Learn more about tracking",
+      "learnMore": "Learn more about cookies",
       "manage": "Manage My Preferences"
     },
     "footer": {

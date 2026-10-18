@@ -1,10 +1,10 @@
 ---
 title: "Politique des Cookies"
 description: "Comprenez l’utilisation des cookies essentiels et des outils de mesure sur sarpbc.org. Consultez leurs finalités et les moyens de gérer votre consentement."
-lastUpdated: "13 octobre 2026"
+lastUpdated: "18 octobre 2026"
 ---
 
-_Dernière mise à jour: 13 octobre 2026_
+_Dernière mise à jour: 18 octobre 2026_
 
 ## Que sont les Cookies ?
 
@@ -26,7 +26,7 @@ Nous utilisons des cookies analytiques pour comprendre comment les visiteurs int
 
 - Avec votre accord préalable, nous utilisons PostHog (UE) pour mesurer les pages consultées, les clics, l'utilisation des fonctionnalités et le défilement, ainsi que pour enregistrer et rejouer votre session, y compris les mouvements de souris et les interactions tactiles. Ces mesures servent à comprendre l'utilisation du site et à améliorer son ergonomie.
 - Le suivi utilise un identifiant aléatoire conservé dans le stockage de session de votre navigateur. Nous ne lui associons ni votre compte, ni votre pseudo, ni votre adresse email. Un identifiant aléatoire constitue une pseudonymisation, pas un anonymat absolu.
-- Les textes et les saisies sont masqués dans les enregistrements. Les paramètres et fragments des URL sont retirés du suivi. Les contenus des requêtes et réponses réseau et les journaux de console ne sont pas enregistrés.
+- Les textes et les styles des pages sont visibles dans les enregistrements. Les valeurs des champs de saisie et les zones de texte modifiables sont masquées. Les paramètres et fragments des URL sont retirés du suivi. Les contenus des requêtes et réponses réseau et les journaux de console ne sont pas enregistrés.
 - Si vous refusez ou n'avez pas encore donné votre accord, le suivi PostHog et l'enregistrement de session ne démarrent pas. Le retrait de votre accord arrête le suivi et l'enregistrement pour la suite de votre visite ; il ne supprime pas automatiquement les données déjà envoyées.
 
 ## Gestion de Vos Préférences de Cookies
