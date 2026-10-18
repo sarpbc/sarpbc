@@ -5,7 +5,9 @@ const { t } = useI18n();
 const nextTheme = computed(() => (colorMode.value === "dark" ? "light" : "dark"));
 
 const themeAriaLabel = computed(() =>
-  t("components.settings.theme.switchTo", { mode: nextTheme.value }),
+  nextTheme.value === "light"
+    ? t("components.footer.switchToLight")
+    : t("components.footer.switchToDark"),
 );
 
 const switchTheme = () => {
@@ -64,27 +66,27 @@ const startViewTransition = (event: MouseEvent) => {
 
 <template>
   <ClientOnly>
-    <UButton
-      class="w-fit"
-      variant="ghost"
-      color="neutral"
-      :icon="
-        colorMode.value === 'dark'
-          ? 'i-fluent-weather-moon-24-regular'
-          : 'i-fluent-weather-sunny-24-regular'
-      "
-      size="md"
+    <button
+      type="button"
+      class="flex text-muted transition-none hover:text-highlighted"
       :aria-label="themeAriaLabel"
       @click="startViewTransition"
-    />
+    >
+      <UIcon
+        :name="
+          colorMode.value === 'dark'
+            ? 'i-fluent-weather-moon-24-regular'
+            : 'i-fluent-weather-sunny-24-regular'
+        "
+        class="size-4"
+        aria-hidden="true"
+      />
+    </button>
 
     <template #fallback>
-      <UButton
-        icon="i-fluent-weather-moon-24-regular"
-        size="md"
-        color="neutral"
-        :aria-label="themeAriaLabel"
-      />
+      <span class="flex text-muted" aria-hidden="true">
+        <UIcon name="i-fluent-weather-moon-24-regular" class="size-4" />
+      </span>
     </template>
   </ClientOnly>
 </template>

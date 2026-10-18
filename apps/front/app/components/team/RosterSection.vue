@@ -22,7 +22,7 @@ const headingId = "team-roster-title";
         v-for="player in players"
         :key="player.id"
         :to="$localePath(`/player/${player.slug}`)"
-        class="flex min-w-0 flex-col items-center justify-center gap-2 overflow-hidden p-3 border-r border-default touch-manipulation transition-none hover:bg-elevated"
+        class="flex min-w-0 flex-col items-center justify-center gap-2 overflow-hidden p-3 border-r border-default touch-manipulation interactive-surface"
       >
         <PlayerImg :player-name="player.name" :img="player.imageUrl" size="lg" />
         <div class="flex min-w-0 max-w-full flex-row items-center justify-center gap-1">

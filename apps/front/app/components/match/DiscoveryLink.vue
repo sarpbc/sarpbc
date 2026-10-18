@@ -17,7 +17,7 @@ const to = computed(() =>
   source ? matchDetailTo(matchId, source) : localePath(`/matches/${matchId}`),
 );
 
-const linkClass = computed(() => ["block hover:bg-elevated/50", attrs.class]);
+const linkClass = computed(() => ["block interactive-surface", attrs.class]);
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;

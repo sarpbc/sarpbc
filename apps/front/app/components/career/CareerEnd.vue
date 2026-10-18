@@ -149,7 +149,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
     </SRail>
 
     <div v-if="!shared" class="flex flex-col gap-2 sm:flex-row">
-      <UButton class="flex-1" variant="outline" @click="onShare">
+      <UButton class="flex-1" color="neutral" variant="outline" @click="onShare">
         {{ t("page.game.career.end.share") }}
       </UButton>
       <UButton class="flex-1" @click="emit('playAgain')">

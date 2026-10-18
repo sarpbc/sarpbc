@@ -46,7 +46,7 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
       <h2 class="min-w-0 truncate text-xl font-semibold">
         {{ title }}
       </h2>
-      <UButton :to="pickemPath" color="neutral" size="sm" class="shrink-0">
+      <UButton :to="pickemPath" color="neutral" variant="outline" size="sm" class="shrink-0">
         {{ ctaLabel }}
       </UButton>
     </div>

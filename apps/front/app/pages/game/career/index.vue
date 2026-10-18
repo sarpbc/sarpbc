@@ -150,7 +150,7 @@ function handleContinue() {
         <UButton color="error" :label="confirmCopy.action" @click="confirmPending" />
         <UButton
           color="neutral"
-          variant="subtle"
+          variant="outline"
           :label="t('common.cancel')"
           @click="confirmOpen = false"
         />

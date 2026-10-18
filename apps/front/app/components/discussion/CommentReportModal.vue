@@ -99,7 +99,7 @@ async function submitReport() {
       />
       <UButton
         color="neutral"
-        variant="subtle"
+        variant="outline"
         :label="$t('common.cancel')"
         :disabled="isSubmitting"
         @click="open = false"

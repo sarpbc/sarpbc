@@ -34,13 +34,15 @@ setPageSeo({
 
 <template>
   <SHubPageBody>
-    <SCrossCard v-if="pending" class="min-h-row-triple" aria-live="polite">
-      <div class="flex w-full flex-col gap-3 p-3">
-        <USkeleton class="h-4 w-48" />
-        <USkeleton class="h-3 w-full" />
+    <SCard v-if="pending" flush-top flush-bottom aria-live="polite">
+      <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
+        <USkeleton class="h-3 w-48" />
+        <USkeleton class="h-3 w-32" />
+      </div>
+      <div class="flex min-h-row items-center border-b border-default px-3">
         <USkeleton class="h-3 w-2/3" />
       </div>
-    </SCrossCard>
+    </SCard>
 
     <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
       <SErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
@@ -59,28 +61,22 @@ setPageSeo({
     </SCard>
 
     <template v-else>
-      <SCrossCard class="h-row-grid">
-        <div class="flex w-full flex-col">
-          <div class="flex h-row items-center justify-between gap-3 border-b border-default px-3">
-            <h1 class="truncate text-base font-semibold text-toned">
-              {{ post.title }}
-            </h1>
-            <span class="shrink-0 text-sm font-medium text-muted">
-              {{ post.author }}
-            </span>
-          </div>
-
-          <div class="whitespace-pre-wrap p-3 leading-relaxed text-toned">
-            {{ post.content }}
-          </div>
-
-          <div class="flex h-row items-center border-t border-default px-3">
-            <span class="text-sm font-normal text-muted">
+      <SCard flush-top flush-bottom class="h-row-grid">
+        <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
+          <h1 class="min-w-0 truncate text-sm font-semibold text-default">
+            {{ post.title }}
+          </h1>
+          <div class="flex shrink-0 items-center gap-3 text-xs text-muted">
+            <span>{{ post.author }}</span>
+            <time :datetime="new Date(post.createdAt).toISOString()" class="tabular-nums">
               {{ df(locale).format(new Date(post.createdAt)) }}
-            </span>
+            </time>
           </div>
         </div>
-      </SCrossCard>
+        <div class="flex min-h-row items-center border-b border-default px-3 py-2">
+          <p class="whitespace-pre-wrap text-sm leading-6 text-default">{{ post.content }}</p>
+        </div>
+      </SCard>
 
       <DiscussionCommentThread target-type="forumPost" :target-id="postId" />
     </template>

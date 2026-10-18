@@ -300,18 +300,20 @@ watch(
           <UButton
             :to="tabTo('pickem')"
             :label="t('page.game.pickems.detail.tabs.pickem')"
-            :variant="activeTab === 'pickem' ? 'solid' : 'soft'"
             color="neutral"
+            variant="outline"
             size="sm"
-            class="min-w-0 flex-1 items-center justify-center"
+            :aria-current="activeTab === 'pickem' ? 'page' : undefined"
+            class="min-w-0 flex-1 items-center justify-center selectable"
           />
           <UButton
             :to="tabTo('leaderboard')"
             :label="t('page.game.pickems.detail.tabs.leaderboard')"
-            :variant="activeTab === 'leaderboard' ? 'solid' : 'soft'"
             color="neutral"
+            variant="outline"
             size="sm"
-            class="min-w-0 flex-1 items-center justify-center"
+            :aria-current="activeTab === 'leaderboard' ? 'page' : undefined"
+            class="min-w-0 flex-1 items-center justify-center selectable"
           />
         </div>
       </div>

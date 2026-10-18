@@ -180,7 +180,7 @@ setPageSeo({
         </div>
 
         <UPopover v-model:open="menuOpen">
-          <SButton
+          <UButton
             square
             variant="ghost"
             color="neutral"
@@ -199,7 +199,7 @@ setPageSeo({
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('page.profile.actions')"
             >
-              <SButton
+              <UButton
                 size="sm"
                 variant="ghost"
                 color="neutral"
@@ -210,7 +210,7 @@ setPageSeo({
                 :label="$t('page.profile.editProfile')"
                 @click="openEditProfile"
               />
-              <SButton
+              <UButton
                 v-if="showStaffConsole"
                 size="sm"
                 variant="ghost"
@@ -225,7 +225,7 @@ setPageSeo({
                 :label="$t('page.profile.staff')"
                 @click="menuOpen = false"
               />
-              <SButton
+              <UButton
                 size="sm"
                 variant="ghost"
                 color="error"
@@ -247,7 +247,7 @@ setPageSeo({
         <template #caption>
           <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
             <h2>{{ $t("page.profile.notifications.title") }}</h2>
-            <SButton
+            <UButton
               v-if="unreadNotifications.length > 0"
               size="xs"
               variant="ghost"
@@ -314,11 +314,10 @@ setPageSeo({
         </UForm>
       </template>
       <template #footer>
-        <SButton
+        <UButton
           type="submit"
           form="edit-username-form"
-          color="neutral"
-          variant="solid"
+          color="primary"
           :loading="isSavingUserName"
           :disabled="isSavingUserName"
           :label="

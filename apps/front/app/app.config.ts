@@ -20,6 +20,11 @@ export default defineAppConfig({
           variant: "solid",
           class: "active:bg-(--ui-bg-inverted-pressed)",
         },
+        {
+          color: "neutral",
+          variant: "outline",
+          class: "ring-default",
+        },
       ],
     },
     breadcrumb: {

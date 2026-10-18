@@ -133,7 +133,7 @@ function formatDateRange(event: PlayerEventListItem): string | null {
               v-for="event in live"
               :key="event.id"
               :to="$localePath(`/tournaments/${event.id}`)"
-              class="flex items-center gap-3 p-3 hover:bg-elevated"
+              class="flex items-center gap-3 p-3 interactive-surface"
             >
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate">{{ event.name }}</p>
@@ -162,7 +162,7 @@ function formatDateRange(event: PlayerEventListItem): string | null {
             v-for="event in activeEvents"
             :key="event.id"
             :to="$localePath(`/tournaments/${event.id}`)"
-            class="flex items-center gap-3 p-3 hover:bg-elevated"
+            class="flex items-center gap-3 p-3 interactive-surface"
           >
             <div class="flex-1 min-w-0">
               <p class="font-medium truncate">{{ event.name }}</p>

@@ -98,13 +98,13 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
 <template>
   <div class="w-full flex flex-col gap-4">
     <div v-if="pending" class="w-full flex flex-col gap-4" aria-live="polite">
-      <SCrossCard class="min-h-row-stack">
+      <SCard class="min-h-row-stack">
         <div class="w-full p-4 animate-pulse flex flex-col gap-3 items-center">
           <div class="h-3 w-32 rounded bg-elevated" />
           <div class="h-8 w-full max-w-md rounded bg-elevated" />
           <div class="h-3 w-48 rounded bg-elevated" />
         </div>
-      </SCrossCard>
+      </SCard>
     </div>
 
     <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
