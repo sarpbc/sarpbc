@@ -100,13 +100,10 @@ function metaParts(award: PlayerProfileAward): string[] {
           <div class="flex w-full min-w-0 items-center gap-2">
             <UIcon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium leading-none text-highlighted">
+              <p class="truncate text-sm font-medium text-highlighted">
                 {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.name }}
               </p>
-              <p
-                v-if="metaParts(award).length > 0"
-                class="truncate text-xs leading-none text-muted"
-              >
+              <p v-if="metaParts(award).length > 0" class="truncate text-xs text-muted">
                 {{ metaParts(award).join(" · ") }}
               </p>
             </div>

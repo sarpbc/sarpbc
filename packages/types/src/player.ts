@@ -4,10 +4,10 @@ export interface Player {
   id: string;
   name: string;
   team?: Team;
-  birthday?: Date;
+  birthday?: Date | null;
   nationality?: string;
-  firstName?: string;
-  lastName?: string;
+  firstName?: string | null;
+  lastName?: string | null;
   imageUrl?: string;
   /** PandaScore role (e.g. "Coach"); null/undefined for standard players. */
   role?: string | null;

@@ -7,30 +7,16 @@ defineProps<{
 </script>
 
 <template>
-  <UButton
-    :key="player.id"
-    :to="$localePath(`/player/${player.slug}`)"
-    variant="ghost"
-    color="neutral"
-    as="link"
-  >
-    <div
-      class="size-10 flex items-center justify-center overflow-hidden shrink-0 rounded-full bg-muted"
-    >
-      <img
-        v-if="player.imageUrl"
-        :src="player.imageUrl"
-        :alt="player.name"
-        class="h-full w-full object-cover"
-      />
-      <UIcon v-else name="i-fluent-shield-question-24-regular" class="text-2xl text-muted" />
-    </div>
-    <div class="flex-1 min-w-0">
-      <div class="font-medium truncate">{{ player.name }}</div>
-      <div v-if="player.team" class="text-sm text-muted truncate">
-        {{ player.team.name }}
-      </div>
-    </div>
-    <FlagIcon v-if="player.nationality" :code="player.nationality" class="w-6 h-4 shrink-0" />
-  </UButton>
+  <SListItem divider :to="$localePath(`/player/${player.slug}`)" class="min-w-0 gap-3">
+    <PlayerImg :player-name="player.name" :img="player.imageUrl" size="list" />
+    <h2 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+      {{ player.name }}
+    </h2>
+    <span class="w-28 shrink-0 truncate text-xs text-muted sm:w-40">
+      {{ player.team?.name }}
+    </span>
+    <span class="flex w-4 shrink-0 justify-end">
+      <FlagIcon v-if="player.nationality" :nationality="player.nationality" size="md" />
+    </span>
+  </SListItem>
 </template>
