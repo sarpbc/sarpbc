@@ -69,13 +69,13 @@ const formatEndDate = (value: Date | string | null) => {
           <div class="flex w-full min-w-0 items-center gap-2">
             <UIcon name="i-fluent-trophy-24-regular" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium leading-none text-highlighted">
+              <p class="truncate text-sm font-medium text-highlighted">
                 {{ trophy.displayName }}
               </p>
               <time
                 v-if="trophy.endAt"
                 :datetime="new Date(trophy.endAt).toISOString()"
-                class="block truncate text-xs leading-none text-muted tabular-nums"
+                class="block truncate text-xs text-muted tabular-nums"
               >
                 {{ formatEndDate(trophy.endAt) }}
               </time>
