@@ -21,9 +21,9 @@ export function formatPrizepool(prizepool: string | undefined | null): string {
   if (!prizepool) return "";
 
   const parts = prizepool.trim().split(" ");
-  if (parts.length < 3) return prizepool;
+  if (parts.length < 2) return prizepool;
 
-  const amount = parseFloat(parts[0] || "0");
+  const amount = parseFloat((parts[0] ?? "").replaceAll(",", ""));
   if (isNaN(amount)) return prizepool;
 
   const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
@@ -46,9 +46,9 @@ export function createCurrencyFormatter(locale: string = "en-US") {
       if (!prizepool) return "";
 
       const parts = prizepool.trim().split(" ");
-      if (parts.length < 3) return prizepool;
+      if (parts.length < 2) return prizepool;
 
-      const amount = parseFloat(parts[0] || "0");
+      const amount = parseFloat((parts[0] ?? "").replaceAll(",", ""));
       if (isNaN(amount)) return prizepool;
 
       const currencyCode = currencyCodeFor(parts.slice(1).join(" "));

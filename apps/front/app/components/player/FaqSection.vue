@@ -30,14 +30,6 @@ const faqItems = computed(() => {
       ? t("page.player.slug.faq.who.answerFreeAgent", { name, nationality: demonym })
       : t("page.player.slug.faq.who.answerFreeAgentGeneric", { name });
 
-  const ageAnswer =
-    player.birthday !== undefined
-      ? t("page.player.slug.faq.age.answerWithAge", {
-          name,
-          age: getAgeFromBirthday(new Date(player.birthday)),
-        })
-      : t("page.player.slug.faq.age.answerUnknown", { name });
-
   const trophyAnswer =
     trophies.length > 0
       ? t("page.player.slug.faq.trophies.answerWithWins", {
@@ -47,20 +39,29 @@ const faqItems = computed(() => {
         })
       : t("page.player.slug.faq.trophies.answerNone", { name });
 
-  return [
+  const items = [
     {
       question: t("page.player.slug.faq.who.question", { name }),
       answer: whoAnswer,
     },
-    {
-      question: t("page.player.slug.faq.age.question", { name }),
-      answer: ageAnswer,
-    },
-    {
-      question: t("page.player.slug.faq.trophies.question", { name }),
-      answer: trophyAnswer,
-    },
   ];
+
+  if (player.birthday) {
+    items.push({
+      question: t("page.player.slug.faq.age.question", { name }),
+      answer: t("page.player.slug.faq.age.answerWithAge", {
+        name,
+        age: getAgeFromBirthday(new Date(player.birthday)),
+      }),
+    });
+  }
+
+  items.push({
+    question: t("page.player.slug.faq.trophies.question", { name }),
+    answer: trophyAnswer,
+  });
+
+  return items;
 });
 
 const faqJsonLd = computed(() => buildFaqPage(faqItems.value));

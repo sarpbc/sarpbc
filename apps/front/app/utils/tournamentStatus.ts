@@ -24,6 +24,24 @@ export function getTournamentStatus(
   return "upcoming";
 }
 
+export function formatTournamentShortDateRange(
+  beginAt: Date | string | null | undefined,
+  endAt: Date | string | null | undefined,
+  locale: string,
+): string | null {
+  const begin = beginAt ? new Date(beginAt) : null;
+  if (!begin || Number.isNaN(begin.getTime())) {
+    return null;
+  }
+
+  const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  const end = endAt ? new Date(endAt) : null;
+  if (!end || Number.isNaN(end.getTime()) || end < begin) {
+    return formatter.format(begin);
+  }
+  return formatter.formatRange(begin, end);
+}
+
 export function formatTournamentDateRange(
   beginAt: Date | string | null | undefined,
   endAt: Date | string | null | undefined,

@@ -39,15 +39,11 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
       <SErrorState :message="$t('page.game.pickems.list.error')" @retry="refresh()" />
     </SCard>
 
-    <SCard v-else-if="tournaments && tournaments.length > 0" flush-bottom flush-top>
-      <TournamentRow
-        v-for="(tournament, index) in tournaments"
-        :key="tournament.id"
-        :tournament="tournament"
-        :to="localePath(`/game/pickems/${tournament.id}`)"
-        :divider-top="index === 0"
-      />
-    </SCard>
+    <TournamentListGroup
+      v-else-if="tournaments && tournaments.length > 0"
+      :tournaments="tournaments"
+      :to="(tournament) => localePath(`/game/pickems/${tournament.id}`)"
+    />
 
     <SCard v-else>
       <div class="flex flex-col items-center gap-2 py-12 px-4 text-center">

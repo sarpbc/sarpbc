@@ -2,40 +2,31 @@
 import type { Team } from "~/types/team";
 import { selectActiveRosterPlayers } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { team } = defineProps<{
   team: Team;
 }>();
 
-const activePlayerCount = computed(
-  () => selectActiveRosterPlayers(props.team.players ?? []).length,
-);
+const activePlayerCount = computed(() => selectActiveRosterPlayers(team.players ?? []).length);
 </script>
 
 <template>
-  <UButton
-    :key="team.id"
-    :to="$localePath(`/team/${team.slug}`)"
-    variant="ghost"
-    color="neutral"
-    as="link"
-  >
+  <SListItem divider :to="$localePath(`/team/${team.slug}`)" class="min-w-0 gap-3">
     <TeamImg
       :team-name="team.name"
       :image-url="team.imageUrl"
       :dark-mode-image-url="team.darkModeImageUrl"
-      size="sm"
+      size="list"
     />
-    <div class="flex-1 min-w-0">
-      <div class="font-medium truncate">{{ team.name }}</div>
-      <div v-if="team.location" class="text-sm text-muted truncate">
-        {{ team.location }}
-      </div>
-    </div>
-    <div v-if="activePlayerCount > 0" class="text-xs text-muted">
-      {{ activePlayerCount }}
-      {{
-        activePlayerCount === 1 ? $t("page.players.index.player") : $t("page.players.index.players")
-      }}
-    </div>
-  </UButton>
+    <h2 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+      {{ team.name }}
+    </h2>
+    <span class="hidden w-40 shrink-0 truncate text-xs text-muted sm:block">
+      {{ team.location }}
+    </span>
+    <span class="w-20 shrink-0 truncate text-end text-xs text-muted tabular-nums">
+      <template v-if="activePlayerCount > 0">
+        {{ $t("page.teams.index.activePlayers", { count: activePlayerCount }) }}
+      </template>
+    </span>
+  </SListItem>
 </template>

@@ -108,43 +108,46 @@ setPageSeo({
       </template>
     </SHubPageHeader>
 
-    <SLetterFilter
-      :active="start"
-      :to="(letter) => ({ path: $localePath('/team'), query: getLetterQuery(letter) })"
-    />
-
-    <SCard v-if="pending" class="flex min-h-row-stack h-row-grid" aria-live="polite">
-      <div class="grid w-full grid-cols-1 content-start gap-1 p-2 md:grid-cols-2 lg:grid-cols-4">
-        <USkeleton v-for="index in 8" :key="index" class="h-10" />
-      </div>
-    </SCard>
-
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.teams.index.error')" @retry="refresh()" />
-    </SCard>
-
-    <SCard v-else-if="teams.length > 0" class="h-row-grid">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 p-2">
-        <TeamLink v-for="team in teams" :key="team.id" :team="team" />
-      </div>
-    </SCard>
-
-    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-      <SEmptyState
-        icon="i-fluent-shield-dismiss-24-regular"
-        :title="t('page.teams.index.noTeamsFound')"
-        :hint="start ? t('page.teams.letter.noTeamsStartingWith', { letter: start }) : undefined"
+    <div>
+      <SLetterFilter
+        :active="start"
+        :to="(letter) => ({ path: $localePath('/team'), query: getLetterQuery(letter) })"
       />
-    </SCard>
 
-    <SPagination
-      v-if="totalPages > 1"
-      :current-page="currentPage"
-      :total-pages="totalPages"
-      :has-previous="hasPrevious"
-      :has-next="hasNext"
-      :previous-to="{ path: $localePath('/team'), query: previousPageQuery }"
-      :next-to="{ path: $localePath('/team'), query: nextPageQuery }"
-    />
+      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
+        <SListItem v-for="index in 8" :key="index" divider class="gap-3">
+          <USkeleton class="size-7 shrink-0" />
+          <USkeleton class="h-3 max-w-40 flex-1" />
+          <USkeleton class="h-3 w-20" />
+        </SListItem>
+      </SCard>
+
+      <SCard v-else-if="error" flush-top class="flex min-h-row-stack h-row-grid items-center">
+        <SErrorState :message="t('page.teams.index.error')" @retry="refresh()" />
+      </SCard>
+
+      <SCard v-else-if="teams.length > 0" flush-bottom flush-top>
+        <TeamLink v-for="team in teams" :key="team.id" :team="team" />
+      </SCard>
+
+      <SCard v-else flush-top class="flex min-h-row-stack h-row-grid items-center">
+        <SEmptyState
+          icon="i-fluent-shield-dismiss-24-regular"
+          :title="t('page.teams.index.noTeamsFound')"
+          :hint="start ? t('page.teams.letter.noTeamsStartingWith', { letter: start }) : undefined"
+        />
+      </SCard>
+
+      <SPagination
+        v-if="totalPages > 1"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :has-previous="hasPrevious"
+        :has-next="hasNext"
+        :previous-to="{ path: $localePath('/team'), query: previousPageQuery }"
+        :next-to="{ path: $localePath('/team'), query: nextPageQuery }"
+        class="mt-row"
+      />
+    </div>
   </div>
 </template>
