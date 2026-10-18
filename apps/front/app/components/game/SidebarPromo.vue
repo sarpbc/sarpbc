@@ -8,11 +8,7 @@
         class="text-xs font-normal text-default"
       >
         <div class="min-w-0 flex-1 truncate">{{ $t("page.game.airriddle.title") }}</div>
-        <div class="shrink-0">
-          <UBadge color="primary" variant="soft" class="text-xs">
-            {{ $t("components.game.sidebarPromo.play") }}
-          </UBadge>
-        </div>
+        <span class="shrink-0 text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
       </SListItem>
       <SListItem
         size="compact"
@@ -21,11 +17,7 @@
         class="text-xs font-normal text-default border-t border-default"
       >
         <div class="min-w-0 flex-1 truncate">{{ $t("page.game.career.title") }}</div>
-        <div class="shrink-0">
-          <UBadge color="primary" variant="soft" class="text-xs">
-            {{ $t("components.game.sidebarPromo.play") }}
-          </UBadge>
-        </div>
+        <span class="shrink-0 text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
       </SListItem>
     </div>
   </SRail>

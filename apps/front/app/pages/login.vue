@@ -105,9 +105,9 @@ function googleLogin() {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-6">
           {{ $t("page.authentication.noAccount") }}&nbsp;
-          <ULink class="text-sm text-primary hover:underline" :to="$localePath('/register')">
+          <SLink variant="accent" :to="$localePath('/register')">
             {{ $t("page.authentication.register") }}
-          </ULink>
+          </SLink>
           .
         </div>
 
@@ -153,7 +153,8 @@ function googleLogin() {
 
           <UButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
-            color="neutral"
+            color="primary"
+            size="lg"
             type="submit"
             :loading="pending"
             :disabled="pending"

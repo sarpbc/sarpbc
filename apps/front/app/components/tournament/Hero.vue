@@ -84,7 +84,7 @@ const showSubscribeCalendar = computed(
 </script>
 
 <template>
-  <SCrossCard class="min-h-row-header">
+  <SCard class="min-h-row-header">
     <div class="w-full flex flex-col">
       <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
         <div
@@ -146,5 +146,5 @@ const showSubscribeCalendar = computed(
       </div>
       <slot />
     </div>
-  </SCrossCard>
+  </SCard>
 </template>

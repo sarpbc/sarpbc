@@ -107,7 +107,7 @@ async function onDelete() {
 
       <div class="flex flex-row items-center justify-end gap-1 border-t border-default px-2 py-1">
         <ForumSignInPrompt action="reply">
-          <SButton
+          <UButton
             square
             size="xs"
             variant="ghost"
@@ -121,7 +121,7 @@ async function onDelete() {
         </ForumSignInPrompt>
 
         <UPopover v-model:open="menuOpen">
-          <SButton
+          <UButton
             square
             size="xs"
             variant="ghost"
@@ -141,7 +141,7 @@ async function onDelete() {
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('components.discussion.moreActions')"
             >
-              <SButton
+              <UButton
                 size="sm"
                 variant="ghost"
                 color="neutral"
@@ -152,7 +152,7 @@ async function onDelete() {
                 :label="$t('components.discussion.permalink')"
                 @click="onPermalinkClick"
               />
-              <SButton
+              <UButton
                 v-if="canReport"
                 size="sm"
                 variant="ghost"
@@ -164,7 +164,7 @@ async function onDelete() {
                 :label="$t('components.discussion.report.action')"
                 @click="onReportClick"
               />
-              <SButton
+              <UButton
                 v-if="canModerate"
                 size="sm"
                 variant="ghost"
@@ -178,7 +178,7 @@ async function onDelete() {
                 :disabled="isModerating"
                 @click="onHide"
               />
-              <SButton
+              <UButton
                 v-if="canModerate"
                 size="sm"
                 variant="ghost"

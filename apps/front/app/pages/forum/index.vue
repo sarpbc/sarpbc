@@ -27,8 +27,15 @@ const {
         <span>{{ t("page.hub.headers.forumPosts", { count: posts.length }) }}</span>
       </template>
     </SHubPageHeader>
-    <SCard v-if="pending && !posts?.length" flush-bottom aria-live="polite">
-      <SListItem v-for="index in 4" :key="index" size="default" divider class="gap-3">
+    <SCard v-if="pending && !posts?.length" flush-top flush-bottom aria-live="polite">
+      <SListItem
+        v-for="index in 4"
+        :key="index"
+        size="default"
+        divider
+        :divider-top="index === 1"
+        class="gap-3"
+      >
         <USkeleton class="h-3 w-48" />
         <USkeleton class="ml-auto h-3 w-20" />
       </SListItem>
@@ -36,8 +43,13 @@ const {
     <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
       <SErrorState :message="t('page.forum.index.error')" @retry="refresh()" />
     </SCard>
-    <SCard v-else-if="posts?.length" flush-bottom>
-      <ForumPostCard v-for="post in posts" :key="post.id" :post="post" />
+    <SCard v-else-if="posts?.length" flush-top flush-bottom>
+      <ForumPostCard
+        v-for="(post, index) in posts"
+        :key="post.id"
+        :post="post"
+        :divider-top="index === 0"
+      />
     </SCard>
     <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
       <SEmptyState

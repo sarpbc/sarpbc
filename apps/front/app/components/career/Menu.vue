@@ -20,7 +20,12 @@ const { t } = useI18n();
     <p v-if="canContinue && continueName" class="text-center text-xs text-muted">
       {{ continueName }}
     </p>
-    <UButton block :variant="canContinue ? 'outline' : 'solid'" @click="emit('newCareer')">
+    <UButton
+      block
+      :color="canContinue ? 'neutral' : 'primary'"
+      :variant="canContinue ? 'outline' : 'solid'"
+      @click="emit('newCareer')"
+    >
       {{ t("page.game.career.menu.newCareer") }}
     </UButton>
   </div>
