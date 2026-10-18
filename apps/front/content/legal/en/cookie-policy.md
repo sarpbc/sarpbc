@@ -1,10 +1,10 @@
 ---
 title: "Cookie Policy"
 description: "Understand how sarpbc.org uses essential cookies and optional analytics, what each category does, and how to manage your consent while browsing the platform."
-lastUpdated: "October 13, 2026"
+lastUpdated: "October 18, 2026"
 ---
 
-_Last updated: October 13, 2026_
+_Last updated: October 18, 2026_
 
 ## What Are Cookies?
 
@@ -26,7 +26,7 @@ We use analytics cookies to understand how visitors interact with our website. T
 
 - With your prior consent, we use PostHog (EU) to measure page views, clicks, feature usage and scrolling, and to record and replay your session, including mouse movements and touch interactions. These measurements help us understand how the site is used and improve its usability.
 - Tracking uses a random identifier kept in your browser's session storage. We do not associate it with your account, username or email address. A random identifier provides pseudonymization, not absolute anonymity.
-- Text and inputs are masked in recordings. URL query parameters and fragments are removed from tracking. Network request and response bodies and console logs are not recorded.
+- Page text and styles are visible in recordings. Input values and editable text areas are masked. URL query parameters and fragments are removed from tracking. Network request and response bodies and console logs are not recorded.
 - If you decline or have not yet given consent, PostHog tracking and session recording do not start. Withdrawing consent stops tracking and recording for the remainder of your visit; it does not automatically delete data already sent.
 
 ## Managing Your Cookie Preferences
