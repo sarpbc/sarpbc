@@ -1257,8 +1257,7 @@
           },
           "age": {
             "question": "How old is {name}?",
-            "answerWithAge": "{name} is {age} years old.",
-            "answerUnknown": "We don't have {name}'s date of birth on record."
+            "answerWithAge": "{name} is {age} years old."
           },
           "trophies": {
             "question": "What tournaments has {name} won?",

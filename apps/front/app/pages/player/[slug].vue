@@ -67,6 +67,17 @@ const {
 
 const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
 
+const realName = computed(() =>
+  [currentPlayer.value.firstName, currentPlayer.value.lastName]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(" "),
+);
+
+const birthday = computed(() =>
+  currentPlayer.value.birthday ? new Date(currentPlayer.value.birthday) : null,
+);
+
 function parsePlayerTab(value: LocationQuery[string] | number | undefined): PlayerProfileTab {
   if (value === "matches" || value === "events" || value === "trophies") {
     return value;
@@ -150,32 +161,31 @@ setPageSeo({
               <h1 class="text-xl font-semibold tracking-tight text-balance">
                 {{ currentPlayer.name }}
               </h1>
-              <div class="flex min-w-0 flex-row items-center gap-2">
+              <div
+                v-if="currentPlayer.nationality || realName"
+                class="flex min-w-0 flex-row items-center gap-2"
+              >
                 <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-                <span class="truncate text-sm text-muted">
-                  {{ `${currentPlayer.firstName} ${currentPlayer.lastName}` }}
-                </span>
+                <span v-if="realName" class="truncate text-sm text-muted">{{ realName }}</span>
               </div>
             </div>
             <dl class="w-full min-w-0 flex flex-col gap-3">
-              <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+              <div
+                v-if="birthday"
+                class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4"
+              >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
                 <dd class="min-w-0">
                   <UTooltip
-                    v-if="currentPlayer.birthday !== undefined"
                     :content="{
                       align: 'center',
                       side: 'top',
                       sideOffset: 4,
                     }"
-                    :text="df.format(new Date(currentPlayer.birthday))"
+                    :text="df.format(birthday)"
                   >
                     <span class="text-sm font-medium tabular-nums">
-                      {{
-                        t("page.player.slug.xYears", {
-                          years: getAgeFromBirthday(new Date(currentPlayer.birthday)),
-                        })
-                      }}
+                      {{ t("page.player.slug.xYears", { years: getAgeFromBirthday(birthday) }) }}
                     </span>
                   </UTooltip>
                 </dd>
