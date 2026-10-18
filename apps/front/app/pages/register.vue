@@ -79,9 +79,9 @@ function googleLogin() {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-12">
           {{ $t("page.authentication.alreadyHaveAnAccount") }}&nbsp;
-          <ULink class="text-sm text-primary hover:underline" :to="$localePath('/login')">
+          <SLink variant="accent" :to="$localePath('/login')">
             {{ $t("page.authentication.login") }}
-          </ULink>
+          </SLink>
           .
         </div>
 
@@ -121,7 +121,8 @@ function googleLogin() {
           <UButton
             :label="$t('page.authentication.toRegister')"
             type="submit"
-            color="neutral"
+            color="primary"
+            size="lg"
             class="w-full flex flex-col items-center"
           />
         </UForm>

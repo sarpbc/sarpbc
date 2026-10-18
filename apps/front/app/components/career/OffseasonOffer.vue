@@ -136,7 +136,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           v-for="choice in destinyPromptChoices"
           :key="choice.id"
           type="button"
-          class="w-full border-b border-default px-3 py-3 text-left last:border-b-0 touch-manipulation transition-colors hover:bg-elevated"
+          class="w-full border-b border-default px-3 py-3 text-left last:border-b-0 touch-manipulation interactive-surface"
           @click="emit('destiny', choice.id)"
         >
           <span class="block text-sm">
@@ -201,7 +201,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
             </p>
           </div>
           <div class="px-3 py-3">
-            <UButton color="neutral" variant="soft" block @click="emit('stay')">
+            <UButton color="neutral" variant="outline" block @click="emit('stay')">
               {{ t("page.game.career.offseason.continue") }}
             </UButton>
           </div>

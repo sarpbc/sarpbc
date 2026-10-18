@@ -40,11 +40,11 @@ const activities = computed(() => recentForumActivities.value ?? []);
           v-if="user"
           :to="localePath('/forum/new')"
           color="neutral"
-          variant="solid"
+          variant="outline"
           size="xs"
           :label="$t('components.forum.createPost')"
           :title="$t('components.forum.createPost')"
-          class="h-row-compact min-h-row-compact w-full justify-center rounded-none border border-default font-normal"
+          class="h-row-compact min-h-row-compact w-full justify-center font-normal"
         />
       </ClientOnly>
     </SRail>

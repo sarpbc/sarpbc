@@ -3,7 +3,7 @@ import type { RouteLocationRaw } from "vue-router";
 
 defineOptions({ inheritAttrs: false });
 
-type LinkVariant = "muted" | "inline";
+type LinkVariant = "muted" | "inline" | "accent";
 
 const { to, variant = "muted" } = defineProps<{
   to: RouteLocationRaw;
@@ -15,9 +15,11 @@ const attrs = useAttrs();
 function variantClasses(value: LinkVariant): string {
   switch (value) {
     case "muted":
-      return "text-muted hover:text-highlighted transition-none rounded-sm";
+      return "text-muted hover:text-highlighted transition-none";
     case "inline":
-      return "font-medium text-toned hover:text-default rounded-sm transition-none";
+      return "font-medium text-toned hover:text-default transition-none";
+    case "accent":
+      return "font-medium text-(--ui-link) hover:text-(--ui-link-hover) transition-none";
     default: {
       const exhaustive: never = value;
       return exhaustive;

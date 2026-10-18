@@ -207,15 +207,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           />
         </UFormField>
 
-        <SButton
-          type="submit"
-          color="neutral"
-          variant="solid"
-          :disabled="!canSubmit"
-          :loading="isSubmitting"
-        >
+        <UButton type="submit" color="primary" :disabled="!canSubmit" :loading="isSubmitting">
           {{ $t("page.forum.new.form.submit") }}
-        </SButton>
+        </UButton>
       </UForm>
     </SCard>
   </div>

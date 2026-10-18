@@ -88,7 +88,7 @@ Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay c
 
 Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and Nuxt UI components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
 
-Inline news links use `--ui-news-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-news-link-hover`; it does not underline the text. Article cards connect directly to the discussion composer with a single shared border.
+Text links in news prose and `SLink variant="accent"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
 
 ---
 
@@ -155,8 +155,7 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid         |
 | `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta) or `inline` (entity names). No hover sound.                                          |
-| `SButton`        | Thin `UButton` wrapper for shared submit patterns                                                                                  |
+| `SLink`          | Internal link — `variant`: `muted` (nav/meta), `inline` (entity names) or `accent` (standalone text links). No hover sound.        |
 | `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                           |
 | `SBadgeLive`     | Live status with text + color                                                                                                      |
 | `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)                     |
@@ -168,6 +167,25 @@ Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend
 | `SPagination`    | Previous / page / next bar on one `h-row`                                                                                          |
 | `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                            |
 | `SSegmented`     | Mutually exclusive views of one list (e.g. upcoming / past), placed in the section caption. Underline tabs are for navigation only |
+
+#### Actions and interactive states
+
+Use `UButton` directly. Every button picks one rung of this ladder; no other color/variant pairs.
+
+| Rung        | `UButton` props                                  | Use                                                                      |
+| ----------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
+| Primary     | `color="primary"` (solid)                        | The one action the view exists for: submit, sign in, start. One per view |
+| Secondary   | `color="neutral" variant="outline"`              | Alternatives, cancel, retry, rail and promo calls to action, consent     |
+| Tertiary    | `color="neutral" variant="ghost"`                | Inline row actions, icon buttons, toolbars, filters                      |
+| Destructive | `color="error"` (solid to confirm, ghost inline) | Delete, abandon, retire                                                  |
+
+- Primary is brand blue in both themes. Do not use inverted neutral solid buttons as the main action.
+- Outline buttons draw their edge in `border-default` (set once in `app/app.config.ts`), the same hairline as cards and rows, so a button sitting against a card reads as one surface.
+- Do not use `soft` or `subtle` variants. Air Riddle keyboard keys are the only exception, because they mimic physical keys.
+- Labels inside a clickable row are text (`text-muted`), not badges or buttons. The row hover already signals the target.
+- **Hover:** clickable rows, tiles and cards use the `interactive-surface` utility (`bg-elevated` on hover and press, no transition), matching Nuxt UI ghost buttons. Do not add other hover fills.
+- **Selected:** toggles set `aria-pressed`, and in-page view switches set `aria-current="page"`. Both use the `selectable` utility, which adds `bg-elevated`, `text-highlighted` and a 1px inverted inner outline. Keyboard focus keeps priority. Do not mark a selection with primary color or thicker rings.
+- **Text links:** `SLink` — `muted` for navigation and meta, `inline` for entity names, `accent` for standalone links in copy (auth switches, policies).
 
 #### `SListItem` sizes
 

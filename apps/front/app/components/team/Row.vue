@@ -9,7 +9,7 @@ const { team } = defineProps<Props>();
 </script>
 
 <template>
-  <SButton
+  <UButton
     class="flex items-center gap-3"
     variant="ghost"
     color="neutral"
@@ -22,5 +22,5 @@ const { team } = defineProps<Props>();
         </span>
       </div>
     </div>
-  </SButton>
+  </UButton>
 </template>

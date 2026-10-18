@@ -52,16 +52,16 @@
 :root {
   --ui-radius: 0rem;
   --ui-bg-inverted-pressed: color-mix(in oklch, var(--ui-bg-inverted) 90%, var(--color-ink-950));
-  --ui-news-link: var(--color-blue-600);
-  --ui-news-link-hover: var(--color-blue-700);
+  --ui-link: var(--color-blue-600);
+  --ui-link-hover: var(--color-blue-700);
   --z-base: 1;
 }
 
 /* Color-mode signal for tooling + forced-colors resilience */
 .dark {
   color-scheme: dark;
-  --ui-news-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
-  --ui-news-link-hover: var(--color-blue-400);
+  --ui-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
+  --ui-link-hover: var(--color-blue-400);
 }
 
 .light {
@@ -161,13 +161,13 @@
 
 .news-prose :where(p, li, td) a {
   border-bottom: 0;
-  color: var(--ui-news-link);
+  color: var(--ui-link);
   font-weight: 500;
   text-decoration: none;
 }
 
 .news-prose :where(p, li, td) a:hover {
-  color: var(--ui-news-link-hover);
+  color: var(--ui-link-hover);
 }
 
 @media (forced-colors: active) {
@@ -183,6 +183,34 @@
   .border,
   [class*="border-"] {
     border-color: CanvasText;
+  }
+}
+
+/* One hover and press fill for every clickable row, tile and ghost control, matching Nuxt UI ghost buttons. */
+@utility interactive-surface {
+  transition-property: none;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--ui-bg-elevated);
+    }
+  }
+
+  &:active {
+    background-color: var(--ui-bg-elevated);
+  }
+}
+
+/* One selected state for toggles (aria-pressed) and in-page navigation (aria-current). Keyboard focus keeps its own outline. */
+@utility selectable {
+  &:is([aria-pressed="true"], [aria-current="page"]) {
+    background-color: var(--ui-bg-elevated);
+    color: var(--ui-text-highlighted);
+  }
+
+  &:is([aria-pressed="true"], [aria-current="page"]):not(:focus-visible) {
+    outline: 1px solid var(--ui-border-inverted);
+    outline-offset: -1px;
   }
 }
 

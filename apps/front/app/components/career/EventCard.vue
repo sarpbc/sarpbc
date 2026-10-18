@@ -59,7 +59,7 @@ const decisionLabel = computed(() => {
         v-for="choice in event.choices"
         :key="choice.id"
         type="button"
-        class="w-full border-b border-default px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation transition-colors hover:bg-elevated"
+        class="w-full border-b border-default px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation interactive-surface"
         @click="emit('choose', choice.id)"
       >
         {{ t(`${eventKey}.choices.${choice.id}.label`) }}

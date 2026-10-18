@@ -161,7 +161,8 @@ onMounted(() => {
         />
 
         <div v-if="hasMore" class="flex justify-center">
-          <SButton
+          <UButton
+            color="neutral"
             variant="outline"
             :loading="loadingMore"
             :disabled="loadingMore"
@@ -172,7 +173,7 @@ onMounted(() => {
                 ? t("components.discussion.loadingMore")
                 : t("components.discussion.loadMore")
             }}
-          </SButton>
+          </UButton>
         </div>
       </div>
 

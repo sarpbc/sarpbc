@@ -112,7 +112,10 @@ function onStart() {
         <UButton
           v-for="regionOption in CAREER_REGIONS"
           :key="regionOption"
-          :variant="props.region === regionOption ? 'solid' : 'outline'"
+          color="neutral"
+          variant="outline"
+          class="selectable"
+          :aria-pressed="props.region === regionOption"
           @click="emit('selectRegion', regionOption)"
         >
           {{ t(`page.game.career.onboarding.regions.${regionOption}`) }}
@@ -134,7 +137,10 @@ function onStart() {
         <UButton
           v-for="countryOption in countriesForRegion"
           :key="countryOption"
-          :variant="props.country === countryOption ? 'solid' : 'outline'"
+          color="neutral"
+          variant="outline"
+          class="selectable"
+          :aria-pressed="props.country === countryOption"
           @click="emit('selectCountry', countryOption)"
         >
           {{ t(`page.game.career.onboarding.countries.${countryOption}`) }}
@@ -157,8 +163,8 @@ function onStart() {
           v-for="roleOption in CAREER_ROLES"
           :key="roleOption"
           type="button"
-          class="border border-default p-4 text-left transition-colors hover:bg-elevated"
-          :class="props.role === roleOption ? 'ring-2 ring-primary' : ''"
+          class="border border-default p-4 text-left interactive-surface selectable"
+          :aria-pressed="props.role === roleOption"
           @click="emit('selectRole', roleOption)"
         >
           <p class="font-semibold">
@@ -186,8 +192,8 @@ function onStart() {
           v-for="bg in CAREER_BACKGROUNDS"
           :key="bg"
           type="button"
-          class="border border-default p-4 text-left transition-colors hover:bg-elevated"
-          :class="props.background === bg ? 'ring-2 ring-primary' : ''"
+          class="border border-default p-4 text-left interactive-surface selectable"
+          :aria-pressed="props.background === bg"
           @click="emit('selectBackground', bg)"
         >
           <p class="font-semibold">

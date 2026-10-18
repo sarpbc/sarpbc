@@ -19,24 +19,24 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
       :aria-label="t('common.filterByLetter')"
     >
       <UButton
-        variant="soft"
+        color="neutral"
+        variant="ghost"
         size="xs"
-        :color="!active ? 'primary' : 'neutral'"
         :to="to('')"
         :aria-current="!active ? 'page' : undefined"
-        class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
+        class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10 selectable"
       >
         {{ t("common.all") }}
       </UButton>
       <UButton
         v-for="letter in letters"
         :key="letter"
-        variant="soft"
+        color="neutral"
+        variant="ghost"
         size="xs"
-        :color="active === letter ? 'primary' : 'neutral'"
         :to="to(letter)"
         :aria-current="active === letter ? 'page' : undefined"
-        class="h-7 min-w-6 flex-1 justify-center px-0.5 pointer-coarse:h-10 pointer-coarse:min-w-10"
+        class="h-7 min-w-6 flex-1 justify-center px-0.5 pointer-coarse:h-10 pointer-coarse:min-w-10 selectable"
       >
         {{ letter }}
       </UButton>

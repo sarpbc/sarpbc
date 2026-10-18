@@ -33,15 +33,15 @@ const rejectCookies = () => {
           {{ t("components.cookiePopup.description") }}
         </p>
 
-        <ULink :to="localePath('/cookie-policy')" class="text-sm underline mb-4 block">
+        <SLink variant="accent" :to="localePath('/cookie-policy')" class="text-sm mb-4 block">
           {{ t("components.cookiePopup.learnMore") }}
-        </ULink>
+        </SLink>
 
         <div class="flex justify-start space-x-2">
-          <UButton variant="solid" color="neutral" @click="acceptCookies">
+          <UButton variant="outline" color="neutral" @click="acceptCookies">
             {{ t("common.accept") }}
           </UButton>
-          <UButton variant="solid" color="neutral" @click="rejectCookies">
+          <UButton variant="outline" color="neutral" @click="rejectCookies">
             {{ t("common.decline") }}
           </UButton>
         </div>
