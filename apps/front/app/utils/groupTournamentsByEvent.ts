@@ -22,7 +22,7 @@ function stageDay(tournament: Tournament): string {
 }
 
 function compareStages(a: Tournament, b: Tournament): number {
-  return stageDay(a).localeCompare(stageDay(b)) || a.name.localeCompare(b.name);
+  return stageDay(b).localeCompare(stageDay(a)) || a.name.localeCompare(b.name);
 }
 
 export function groupTournamentsByEvent(tournaments: Tournament[]): TournamentEventGroup[] {
