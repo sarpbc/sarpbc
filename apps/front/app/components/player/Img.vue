@@ -3,12 +3,13 @@ interface Props {
   playerName: string;
   img?: string;
   /** `row` fills the height of a stretched parent row (e.g. an `SListItem` double row). */
-  size: "sm" | "row" | "lg" | "xl";
+  size: "list" | "sm" | "row" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
   priority?: boolean;
 }
 
 const boxClasses = {
+  list: "size-7 shrink-0",
   sm: "h-12 w-16 shrink-0",
   row: "h-full w-16 shrink-0 lg:w-28",
   lg: "aspect-3/2 w-full min-w-0",
@@ -16,6 +17,7 @@ const boxClasses = {
 };
 
 const dimensions = {
+  list: { width: 28, height: 28 },
   sm: { width: 64, height: 48 },
   row: { width: 112, height: 72 },
   lg: { width: 192, height: 128 },
@@ -23,6 +25,7 @@ const dimensions = {
 };
 
 const sizesAttr = {
+  list: "28px",
   sm: "64px",
   row: "(max-width: 1023px) 64px, 112px",
   lg: "(max-width: 639px) 30vw, 192px",
@@ -30,6 +33,7 @@ const sizesAttr = {
 };
 
 const iconClasses = {
+  list: "size-4",
   sm: "size-6",
   row: "size-6",
   lg: "size-10",
@@ -37,6 +41,7 @@ const iconClasses = {
 };
 
 const fallbackRadiusClasses = {
+  list: "rounded-xs",
   sm: "rounded-sm",
   row: "rounded-sm",
   lg: "rounded-md",

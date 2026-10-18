@@ -1,84 +1,36 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
+import { formatTournamentShortDateRange } from "~/utils/tournamentStatus";
 
-const {
-  tournament,
-  to,
-  dividerTop = false,
-} = defineProps<{
+const { tournament, to } = defineProps<{
   tournament: Tournament;
   to?: string;
-  dividerTop?: boolean;
 }>();
 
 const localePath = useLocalePath();
-const { t } = useI18n();
-const { formatTournamentPrizepool } = useCurrency();
+const { t, locale } = useI18n();
 
 const href = computed(() => to ?? localePath(`/tournaments/${tournament.id}`));
 
-const imageUrl = computed(() => tournament.imageUrl?.trim() || tournament.league?.imageUrl?.trim());
-const showImage = computed(() => tournament.tier === "s" && Boolean(imageUrl.value));
-
-const displayName = computed(() =>
-  [tournament.league?.name, tournament.name]
-    .map((part) => part?.trim())
-    .filter((part): part is string => Boolean(part))
-    .join(" "),
+const dateLabel = computed(() =>
+  formatTournamentShortDateRange(tournament.beginAt, tournament.endAt, locale.value),
 );
 
-const teamsLabel = computed(() => {
-  const count = tournament.participants?.length ?? 0;
-  return `${count} ${t("general.teams").toLocaleLowerCase()}`;
-});
-
-const prizeLabel = computed(
-  () =>
-    formatTournamentPrizepool(tournament.prizepool) || t("components.tournaments.prizepoolOther"),
-);
-
-const typeLabel = computed(() => t(`components.tournaments.${tournament.type}`));
+const teamCount = computed(() => tournament.participants?.length ?? 0);
 </script>
 
 <template>
-  <SListItem
-    :size="showImage ? 'triple' : 'default'"
-    divider
-    :divider-top="dividerTop"
-    :to="href"
-    class="min-w-0 overflow-hidden"
-  >
-    <div v-if="showImage" class="flex h-full w-full min-w-0 items-stretch gap-x-3">
-      <div class="flex h-full w-36 shrink-0 items-center justify-center overflow-hidden">
-        <NuxtImg
-          :src="imageUrl!"
-          :alt="displayName"
-          width="144"
-          height="132"
-          sizes="144px"
-          class="max-h-full max-w-full object-contain"
-        />
-      </div>
-      <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
-        <h3 class="truncate text-sm font-medium text-toned">
-          {{ displayName }}
-        </h3>
-        <div class="flex min-w-0 flex-wrap gap-x-3 text-xs text-muted">
-          <span class="truncate tabular-nums">{{ teamsLabel }}</span>
-          <span class="truncate">{{ prizeLabel }}</span>
-          <span class="truncate">{{ typeLabel }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div
-      v-else
-      class="grid w-full min-w-0 grid-cols-10 items-center gap-x-2 text-xs font-medium text-toned"
-    >
-      <h3 class="col-span-5 truncate">{{ displayName }}</h3>
-      <span class="col-span-2 truncate text-muted tabular-nums">{{ teamsLabel }}</span>
-      <span class="col-span-2 truncate text-muted">{{ prizeLabel }}</span>
-      <span class="col-span-1 truncate text-muted">{{ typeLabel }}</span>
-    </div>
+  <SListItem divider :to="href" class="min-w-0 gap-3">
+    <h3 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+      {{ tournament.name }}
+    </h3>
+    <span class="w-24 shrink-0 truncate text-xs text-muted tabular-nums sm:w-32">
+      {{ dateLabel }}
+    </span>
+    <span class="w-20 shrink-0 truncate text-end text-xs text-muted tabular-nums">
+      <template v-if="teamCount > 0">
+        {{ t("page.tournaments.id.hero.teamsCount", { count: teamCount }) }}
+      </template>
+    </span>
   </SListItem>
 </template>
