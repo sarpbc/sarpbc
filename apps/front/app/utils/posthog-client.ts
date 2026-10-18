@@ -98,8 +98,9 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
       mask_personal_data_properties: true,
       session_recording: {
         maskAllInputs: true,
-        maskTextSelector: "*",
-        maskAllElementAttributes: true,
+        maskTextSelector: ".ph-mask, [contenteditable]:not([contenteditable='false'])",
+        maskAllElementAttributes: false,
+        inlineStylesheet: true,
         recordHeaders: false,
         recordBody: false,
         recordCrossOriginIframes: false,

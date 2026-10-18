@@ -1,10 +1,10 @@
 ---
 title: "Privacy Policy"
 description: "Learn how sarpbc.org collects, uses and protects personal data, how long information is retained, and how to exercise your privacy rights under the GDPR."
-lastUpdated: "October 13, 2026"
+lastUpdated: "October 18, 2026"
 ---
 
-_Last updated: October 13, 2026_
+_Last updated: October 18, 2026_
 
 ## Introduction
 
@@ -50,7 +50,7 @@ We process your personal data based on:
 We may share your data with:
 
 - Analytics providers (PostHog) for website analysis
-- With your prior consent, PostHog (EU) receives navigation events and session recordings to improve the site's usability. Text and inputs are masked, URL query parameters are removed, and tracking is not linked to your account. You can withdraw consent from the cookie policy page. Withdrawal stops future collection; contact us to request deletion of data already collected.
+- With your prior consent, PostHog (EU) receives navigation events and session recordings to improve the site's usability. Page text and styles are visible in recordings. Input values and editable text areas are masked, URL query parameters are removed, and tracking is not linked to your account. You can withdraw consent from the cookie policy page. Withdrawal stops future collection; contact us to request deletion of data already collected.
 - Hosting providers for website operation
 - Law enforcement or regulatory authorities when required by law
 
