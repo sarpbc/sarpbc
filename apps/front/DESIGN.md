@@ -84,6 +84,8 @@ Note: on `ink`, keep caption/title steps distinct — avoid pairing `text-highli
 
 Color signals **state** (live, error, success) — not decoration. One primary action per view.
 
+**Results are not states.** Scores, winners and losers stay neutral: the winner's name and score use `font-medium text-highlighted`, the loser's use `text-muted` at normal weight (unresolved or tied: `text-toned`). This applies to result rows, live scores, brackets and the match hero. Never color a score green or red, and never tint a winner's row. Recent-form W/L badges keep `success` / `error` because each badge is a status label with text, not a score.
+
 Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay consistent; don't mix soft Geist-style radii into hub chrome.
 
 Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and Nuxt UI components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
@@ -96,15 +98,24 @@ Text links in news prose and `SLink variant="accent"` use `--ui-link` (the Soute
 
 Prefer system / Nuxt UI sans. Mono for IDs, codes, and aligned stats (`font-mono`, `tabular-nums`).
 
-| Role                  | Classes                                                              |
-| --------------------- | -------------------------------------------------------------------- |
-| Page title (hub band) | `text-xl font-semibold` inside `h-row-header`                        |
-| Section / rail label  | `text-sm font-medium text-toned`                                     |
-| Forum rail list links | `text-xs font-normal text-muted`                                     |
-| List meta             | `text-xs text-muted`                                                 |
-| Marketing H1          | Larger (`text-2xl`–`text-3xl`), `tracking-tight`, more lead-in space |
+| Role                  | Classes                                                               |
+| --------------------- | --------------------------------------------------------------------- |
+| Page title (hub band) | `text-xl font-medium` inside `h-row-header`                           |
+| Section / rail label  | `text-sm font-medium text-toned`                                      |
+| Forum rail list links | `text-xs font-normal text-muted`                                      |
+| List meta             | `text-xs text-muted`                                                  |
+| Result winner         | `font-medium text-highlighted` (loser: `text-muted`)                  |
+| Article title         | `text-3xl md:text-4xl font-medium tracking-tight`                     |
+| Article body          | `text-lg` (18px)                                                      |
+| Article H2 / H3       | `text-2xl` / `text-xl`, `font-medium text-highlighted`                |
+| Match hero            | Score `text-4xl tabular-nums`; team names `text-base`; meta `text-sm` |
+| Marketing H1          | Larger (`text-2xl`–`text-3xl`), `tracking-tight`, more lead-in space  |
 
-Don't mix more than two weights in one view. UI labels default to `text-sm` (14px).
+**Two weights:** `font-normal` (400) and `font-medium` (500). Medium is the only emphasis weight — titles, headings, captions, links, `strong`, winners — and matches Nuxt UI's controls. Do not use `font-semibold` or `font-bold`; emphasis beyond medium comes from size and the text hierarchy, not weight. UI labels default to `text-sm` (14px).
+
+Routes outside news articles and match detail still carry `font-semibold`; move them to medium when you touch them.
+
+Headings in news prose are real `##` / `###` headings, larger than the body text. Do not fake a heading with a bold paragraph.
 
 ---
 

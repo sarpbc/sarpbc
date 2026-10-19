@@ -1482,6 +1482,7 @@
         "notFound": "Match introuvable",
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
         "unknownTeam": "À déterminer",
+        "versus": "contre",
         "unknownTournament": "Tournoi inconnu",
         "format": "Bo{count}",
         "addToCalendar": "Ajouter au calendrier",

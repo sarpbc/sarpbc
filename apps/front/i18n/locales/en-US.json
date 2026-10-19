@@ -1482,6 +1482,7 @@
         "notFound": "Match not found",
         "error": "Could not load this match. Check your connection and try again.",
         "unknownTeam": "TBD",
+        "versus": "vs",
         "unknownTournament": "Unknown tournament",
         "format": "Bo{count}",
         "addToCalendar": "Add to Calendar",

@@ -94,11 +94,7 @@ function participantRowClass(participantId: string | undefined): string {
     return "";
   }
 
-  if (participantId === winnerParticipantId) {
-    return "bg-success/15 text-success";
-  }
-
-  return "bg-error/5 text-muted";
+  return participantId === winnerParticipantId ? "font-medium text-highlighted" : "text-muted";
 }
 </script>
 
@@ -131,9 +127,7 @@ function participantRowClass(participantId: string | undefined): string {
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
-        <span v-if="showScores" class="tabular-nums font-semibold text-xs">{{
-          displayScoreA
-        }}</span>
+        <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreA }}</span>
       </div>
       <div
         :class="[
@@ -148,9 +142,7 @@ function participantRowClass(participantId: string | undefined): string {
           size="xs"
         />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
-        <span v-if="showScores" class="tabular-nums font-semibold text-xs">{{
-          displayScoreB
-        }}</span>
+        <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreB }}</span>
       </div>
     </template>
 
@@ -164,7 +156,7 @@ function participantRowClass(participantId: string | undefined): string {
         <div class="flex min-w-0 items-center gap-1">
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamA }}</span>
         </div>
-        <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
+        <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
           <template v-if="showScores">{{ displayScoreA }}</template>
         </span>
       </div>
@@ -177,7 +169,7 @@ function participantRowClass(participantId: string | undefined): string {
         <div class="flex min-w-0 items-center gap-1">
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamB }}</span>
         </div>
-        <span :class="['tabular-nums font-semibold', compact ? 'text-xs' : 'text-sm']">
+        <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
           <template v-if="showScores">{{ displayScoreB }}</template>
         </span>
       </div>

@@ -18,12 +18,12 @@ ui: {
 
 ### Text hierarchy
 
-| Geist token | Tailwind / Nuxt UI class            | Usage                  |
-| ----------- | ----------------------------------- | ---------------------- |
-| gray-1000   | `text-highlighted`, `font-semibold` | Primary text, headings |
-| gray-900    | default foreground                  | Body primary           |
-| gray-700    | `text-muted`                        | Secondary, metadata    |
-| gray-600    | `text-dimmed`                       | Disabled, placeholders |
+| Geist token | Tailwind / Nuxt UI class          | Usage                  |
+| ----------- | --------------------------------- | ---------------------- |
+| gray-1000   | `text-highlighted`, `font-medium` | Primary text, headings |
+| gray-900    | default foreground                | Body primary           |
+| gray-700    | `text-muted`                      | Secondary, metadata    |
+| gray-600    | `text-dimmed`                     | Disabled, placeholders |
 
 ### Surfaces
 
@@ -48,16 +48,16 @@ Don't use accent color for decoration. One primary action per view.
 
 Geist Sans ≈ system / Nuxt UI default sans. Geist Mono ≈ `font-mono`.
 
-| Geist token   | Tailwind approximation                  |
-| ------------- | --------------------------------------- |
-| heading-32    | `text-3xl font-semibold tracking-tight` |
-| heading-24    | `text-2xl font-semibold tracking-tight` |
-| heading-20    | `text-xl font-semibold`                 |
-| heading-16    | `text-base font-semibold`               |
-| label-14      | `text-sm`                               |
-| copy-16       | `text-base leading-6`                   |
-| copy-14       | `text-sm leading-5`                     |
-| label-14-mono | `text-sm font-mono tabular-nums`        |
+| Geist token   | Tailwind approximation                |
+| ------------- | ------------------------------------- |
+| heading-32    | `text-3xl font-medium tracking-tight` |
+| heading-24    | `text-2xl font-medium tracking-tight` |
+| heading-20    | `text-xl font-medium`                 |
+| heading-16    | `text-base font-medium`               |
+| label-14      | `text-sm`                             |
+| copy-16       | `text-base leading-6`                 |
+| copy-14       | `text-sm leading-5`                   |
+| label-14-mono | `text-sm font-mono tabular-nums`      |
 
 ## Spacing
 

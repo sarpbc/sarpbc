@@ -30,27 +30,21 @@ function tournamentLabel(currentMatch: Match) {
 
 <template>
   <div
-    class="flex max-w-32 flex-col items-center justify-center text-center text-xs text-default text-pretty sm:max-w-40 sm:text-sm lg:max-w-none"
+    class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-sm text-muted text-pretty"
   >
+    <SBadgeLive v-if="matchStatus === 'live'" />
     <SLink
       v-if="match.tournament"
       :to="$localePath(tournamentMatchesPath(match.tournament.id))"
       variant="muted"
-      class="font-normal"
     >
       {{ tournamentLabel(match) }}
     </SLink>
-    <span v-if="match.beginAt" class="tabular-nums text-sm lg:text-lg">
+    <span v-if="match.beginAt" class="tabular-nums">
       {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
     </span>
-    <div
-      v-if="match.numberOfGames || matchStatus === 'live'"
-      class="flex flex-row items-center gap-2 font-normal text-toned"
-    >
-      <span v-if="match.numberOfGames" class="tabular-nums">
-        {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
-      </span>
-      <SBadgeLive v-if="matchStatus === 'live'" />
-    </div>
+    <span v-if="match.numberOfGames" class="tabular-nums">
+      {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
+    </span>
   </div>
 </template>
