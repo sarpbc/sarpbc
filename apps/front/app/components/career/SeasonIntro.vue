@@ -15,7 +15,7 @@ const { t } = useI18n();
 
 <template>
   <div class="flex flex-col gap-4 text-center">
-    <h2 class="text-lg font-semibold tracking-tight">
+    <h2 class="text-lg font-medium tracking-tight">
       {{
         t("page.game.career.season.introTitle", {
           season,

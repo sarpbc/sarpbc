@@ -42,12 +42,12 @@ const decisionLabel = computed(() => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <p class="text-xs font-semibold text-muted">
+    <p class="text-xs font-medium text-muted">
       {{ stageLabel }}
       <span v-if="decisionLabel"> · {{ decisionLabel }}</span>
     </p>
     <div class="space-y-2">
-      <h2 class="text-lg font-semibold tracking-tight">
+      <h2 class="text-lg font-medium tracking-tight">
         {{ t(`${eventKey}.title`) }}
       </h2>
       <p class="text-sm text-muted text-pretty">

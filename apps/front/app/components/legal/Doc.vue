@@ -40,7 +40,7 @@ watch(
 <template>
   <div class="w-full flex flex-col">
     <h1
-      class="flex text-xl font-semibold tracking-tight h-16 justify-center items-center md:justify-start md:items-start"
+      class="flex text-xl font-medium tracking-tight h-16 justify-center items-center md:justify-start md:items-start"
     >
       {{ doc?.title }}
     </h1>
@@ -49,7 +49,7 @@ watch(
       <div v-if="doc" class="border border-default p-2 md:p-4">
         <ContentRenderer
           :value="doc"
-          class="legal-prose text-muted [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:text-highlighted [&_em]:not-italic [&_em]:block [&_em]:mb-6"
+          class="legal-prose text-muted [&_h2]:text-lg [&_h2]:font-medium [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:font-medium [&_strong]:text-highlighted [&_em]:not-italic [&_em]:block [&_em]:mb-6"
         />
       </div>
       <div v-else class="border border-default p-4 text-muted">

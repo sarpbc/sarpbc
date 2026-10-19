@@ -20,7 +20,7 @@ const latest = computed(() => props.week.items[0] ?? null);
     class="min-w-0 overflow-hidden"
   >
     <div class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-default">
+      <h2 class="min-w-0 flex-1 truncate text-base font-medium tracking-tight text-default">
         {{ t("page.home.latestShort", { title: latest.title }) }}
       </h2>
       <p class="shrink-0 text-xs font-normal text-muted tabular-nums">

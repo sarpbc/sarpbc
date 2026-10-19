@@ -52,12 +52,12 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
 <template>
   <div class="flex flex-col gap-6">
     <div class="space-y-2 text-center">
-      <h2 class="text-lg font-semibold tracking-tight">
+      <h2 class="text-lg font-medium tracking-tight">
         {{ shared ? t("page.game.career.end.viewShared") : t("page.game.career.end.title") }}
       </h2>
-      <p class="text-xl font-bold tracking-tight">
+      <p class="text-xl font-medium tracking-tight">
         {{ result.playerName }}
-        <span class="font-semibold text-muted"> · {{ nickname }}</span>
+        <span class="font-medium text-muted"> · {{ nickname }}</span>
       </p>
       <p class="text-sm text-muted">
         {{ t(`page.game.career.destiny.${result.destiny}.endLine`) }}
@@ -79,7 +79,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
 
     <div class="border border-default p-4 text-center">
       <p class="text-xs text-muted">{{ t("page.game.career.end.finalRating") }}</p>
-      <p class="text-3xl font-bold tabular-nums">{{ result.finalRating }}</p>
+      <p class="text-3xl font-medium tabular-nums">{{ result.finalRating }}</p>
       <p class="mt-2 text-sm text-muted tabular-nums">
         {{ t("page.game.career.stats.form") }} {{ result.finalForm }} ·
         {{ t("page.game.career.stats.morale") }} {{ result.finalMorale }}

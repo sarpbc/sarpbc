@@ -36,7 +36,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
         :key="group.round"
         class="flex flex-col gap-2"
       >
-        <h2 class="text-sm font-semibold text-muted">
+        <h2 class="text-sm font-medium text-muted">
           {{ group.round }}
         </h2>
         <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">

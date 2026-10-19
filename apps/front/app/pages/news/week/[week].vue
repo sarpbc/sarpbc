@@ -79,7 +79,7 @@ setPageSeo({
             <p class="text-xs text-muted tabular-nums">
               {{ formatLocaleTimeAgo(new Date(item.createdAt)) }}
             </p>
-            <h2 class="text-lg font-semibold tracking-tight text-highlighted text-balance">
+            <h2 class="text-lg font-medium tracking-tight text-highlighted text-balance">
               <a :href="`#${item.slug}`" class="hover:text-(--ui-link-hover)">
                 {{ item.title }}
               </a>

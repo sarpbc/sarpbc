@@ -113,8 +113,6 @@ Prefer system / Nuxt UI sans. Mono for IDs, codes, and aligned stats (`font-mono
 
 **Two weights:** `font-normal` (400) and `font-medium` (500). Medium is the only emphasis weight — titles, headings, captions, links, `strong`, winners — and matches Nuxt UI's controls. Do not use `font-semibold` or `font-bold`; emphasis beyond medium comes from size and the text hierarchy, not weight. UI labels default to `text-sm` (14px).
 
-Routes outside news articles and match detail still carry `font-semibold`; move them to medium when you touch them.
-
 Headings in news prose are real `##` / `###` headings, larger than the body text. Do not fake a heading with a bold paragraph.
 
 ---
@@ -239,7 +237,7 @@ Omit `size` on `flushBottom` list cards. Prefer `size="l"` over `min-h-row-tripl
 Hub list pages share chrome via `SHubPageHeader` (`app/components/s/HubPageHeader.vue`):
 
 - Outer shell: `SCrossCard` + `h-row-header` (56px title band).
-- Inner layout: centered `h1` (`text-xl font-semibold`) + optional `#meta` slot (`text-sm text-muted`).
+- Inner layout: centered `h1` (`text-xl font-medium`) + optional `#meta` slot (`text-sm text-muted`).
 
 Vary **inner content** per hub — not the outer chrome:
 
