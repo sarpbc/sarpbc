@@ -113,7 +113,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
 <template>
   <div class="flex flex-col gap-4">
     <div class="space-y-0.5 text-center">
-      <h2 v-if="title" class="text-lg font-semibold tracking-tight">{{ title }}</h2>
+      <h2 v-if="title" class="text-lg font-medium tracking-tight">{{ title }}</h2>
       <p class="text-sm text-muted text-pretty">{{ body }}</p>
     </div>
 
@@ -121,7 +121,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
       v-if="showCurrentTeamIndicator"
       class="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5 text-center"
     >
-      <span class="text-xs font-semibold text-muted">
+      <span class="text-xs font-medium text-muted">
         {{ t("page.game.career.offseason.currentTeam") }}
       </span>
       <span class="text-sm font-medium">{{ currentTeamName }}</span>
@@ -174,7 +174,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           @focusout="onRowFocusOut($event, offer.teamId)"
         >
           <div class="min-w-0 px-3 py-3">
-            <p class="truncate text-sm font-semibold">{{ offer.name }}</p>
+            <p class="truncate text-sm font-medium">{{ offer.name }}</p>
             <p v-if="offer.rank" class="text-xs text-muted tabular-nums">
               {{ t("page.game.career.offseason.worldRank", { rank: offer.rank }) }}
             </p>
@@ -195,7 +195,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           @focusout="onRowFocusOut($event, currentTeamId)"
         >
           <div class="min-w-0 px-3 py-3">
-            <p class="truncate text-sm font-semibold">{{ currentTeamName }}</p>
+            <p class="truncate text-sm font-medium">{{ currentTeamName }}</p>
             <p v-if="currentTeamRank" class="text-xs text-muted tabular-nums">
               {{ t("page.game.career.offseason.worldRank", { rank: currentTeamRank }) }}
             </p>
@@ -213,7 +213,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           @mouseenter="setHoveredTeam(null)"
         >
           <div class="min-w-0 px-3 py-3">
-            <p class="truncate text-sm font-semibold">
+            <p class="truncate text-sm font-medium">
               {{ t("page.game.career.offseason.retire") }}
             </p>
           </div>

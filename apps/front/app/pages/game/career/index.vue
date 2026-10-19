@@ -108,7 +108,7 @@ function handleContinue() {
       class="min-h-row-header"
     >
       <div class="flex w-full flex-col items-center justify-center gap-1 py-3 text-center">
-        <h1 class="text-xl font-semibold tracking-tight">
+        <h1 class="text-xl font-medium tracking-tight">
           {{ t("page.game.career.title") }}
         </h1>
         <p class="text-sm text-muted">{{ t("page.game.career.subtitle") }}</p>

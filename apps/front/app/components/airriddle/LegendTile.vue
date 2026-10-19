@@ -21,7 +21,7 @@ const toneClass = computed(() => {
 
 <template>
   <div
-    class="flex size-7 items-center justify-center border border-default font-mono text-sm font-bold"
+    class="flex size-7 items-center justify-center border border-default font-mono text-sm font-medium"
     :class="toneClass"
     aria-hidden="true"
   >

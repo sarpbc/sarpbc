@@ -102,7 +102,7 @@ const showSubscribeCalendar = computed(
           </p>
         </div>
 
-        <h1 class="text-xl font-semibold tracking-tight text-balance max-w-3xl">
+        <h1 class="text-xl font-medium tracking-tight text-balance max-w-3xl">
           {{ tournament.name }}
         </h1>
 

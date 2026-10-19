@@ -47,7 +47,7 @@ function formatDelta(value: number): string {
 <template>
   <div class="flex flex-col gap-4">
     <div class="space-y-2">
-      <h2 class="text-lg font-semibold tracking-tight">
+      <h2 class="text-lg font-medium tracking-tight">
         {{ t(`${eventKey}.title`) }}
       </h2>
       <p class="text-sm text-muted text-pretty">
@@ -67,7 +67,7 @@ function formatDelta(value: number): string {
       >
         <p class="text-xs text-muted">{{ t(`page.game.career.stats.${row.stat}`) }}</p>
         <p
-          class="text-lg font-semibold tabular-nums"
+          class="text-lg font-medium tabular-nums"
           :class="row.value > 0 ? 'text-success' : 'text-error'"
         >
           {{ formatDelta(row.value) }}

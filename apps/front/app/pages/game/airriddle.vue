@@ -274,7 +274,7 @@ setPageSeo({
   <section class="flex w-full flex-col gap-4">
     <SCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
-        <h1 class="text-xl font-semibold tracking-tight">
+        <h1 class="text-xl font-medium tracking-tight">
           {{ t("page.game.airriddle.title") }}
         </h1>
       </div>
@@ -327,7 +327,7 @@ setPageSeo({
         <div class="flex min-h-0 flex-1 flex-col items-center justify-between gap-6">
           <div class="w-full text-center" aria-live="polite" aria-atomic="true">
             <div v-if="gameState.isWon" class="text-success">
-              <p class="text-xl font-bold tracking-tight">
+              <p class="text-xl font-medium tracking-tight">
                 {{ t("page.game.airriddle.congratulations") }}
               </p>
               <p class="text-sm text-muted tabular-nums">
@@ -335,7 +335,7 @@ setPageSeo({
               </p>
             </div>
             <div v-else-if="gameState.isGameOver" class="text-error">
-              <p class="text-xl font-bold tracking-tight">
+              <p class="text-xl font-medium tracking-tight">
                 {{ t("page.game.airriddle.gameOver") }}
               </p>
               <p class="text-sm text-muted">
@@ -343,7 +343,7 @@ setPageSeo({
               </p>
             </div>
             <div v-else>
-              <p class="text-sm font-semibold text-muted tabular-nums">
+              <p class="text-sm font-medium text-muted tabular-nums">
                 {{ statusMessage }}
               </p>
               <p class="mt-1 text-xs text-muted">

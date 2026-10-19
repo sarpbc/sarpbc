@@ -27,11 +27,15 @@ export default defineAppConfig({
         },
       ],
     },
-    breadcrumb: {
-      variants: {
-        active: {
-          true: { link: "text-highlighted font-semibold" },
-        },
+    modal: {
+      slots: {
+        title: "font-medium",
+      },
+    },
+    error: {
+      slots: {
+        statusCode: "font-medium",
+        statusMessage: "font-medium",
       },
     },
   },

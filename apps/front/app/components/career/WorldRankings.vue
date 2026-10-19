@@ -169,7 +169,7 @@ function teamRowClass(entry: RankedTeam): string[] {
     "h-row-compact min-h-row-compact border-b border-default border-l-2 text-left text-sm",
     "hover:border-l-primary hover:bg-elevated",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
-    entry.isPlayerTeam ? "bg-elevated font-semibold" : "",
+    entry.isPlayerTeam ? "bg-elevated font-medium" : "",
   ];
 }
 
@@ -180,7 +180,7 @@ function playerRowClass(entry: RankedPlayer): string[] {
     "h-row-compact min-h-row-compact border-b border-default border-l-2 text-sm",
     "hover:border-l-primary hover:bg-elevated",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
-    entry.isUser ? "bg-elevated font-semibold" : "",
+    entry.isUser ? "bg-elevated font-medium" : "",
   ];
 }
 

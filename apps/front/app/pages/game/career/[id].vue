@@ -49,7 +49,7 @@ watchEffect(() => {
   <section class="flex w-full flex-col gap-4">
     <SCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
-        <h1 class="text-xl font-semibold tracking-tight">
+        <h1 class="text-xl font-medium tracking-tight">
           {{ t("page.game.career.title") }}
         </h1>
       </div>
@@ -67,7 +67,7 @@ watchEffect(() => {
       <div class="flex flex-col items-center gap-4 text-center">
         <UIcon name="i-fluent-warning-24-regular" class="size-8 text-muted" />
         <div class="space-y-2">
-          <p class="text-lg font-semibold">{{ t("page.game.career.share.notFound") }}</p>
+          <p class="text-lg font-medium">{{ t("page.game.career.share.notFound") }}</p>
           <p class="text-sm text-muted text-pretty">
             {{ t("page.game.career.share.notFoundBody") }}
           </p>

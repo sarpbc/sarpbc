@@ -49,7 +49,7 @@ const displayLetter = computed(() => letter.toUpperCase());
 
 <template>
   <div
-    class="flex aspect-square w-full min-w-0 items-center justify-center border-r border-b border-default font-mono text-base font-bold tabular-nums select-none sm:text-2xl"
+    class="flex aspect-square w-full min-w-0 items-center justify-center border-r border-b border-default font-mono text-base font-medium tabular-nums select-none sm:text-2xl"
     :class="[tileClass, revealDelay !== undefined && 'tile-reveal']"
     :style="revealDelay !== undefined ? { animationDelay: `${revealDelay}ms` } : undefined"
   >

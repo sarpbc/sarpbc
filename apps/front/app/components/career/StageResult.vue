@@ -84,7 +84,7 @@ function pointsTooltip(points: number): string {
             :class="split.major ? 'bg-elevated' : undefined"
           >
             <div class="flex items-center justify-between gap-2">
-              <p class="min-w-0 font-semibold">
+              <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.major", { split: split.split }) }}
               </p>
               <UTooltip
