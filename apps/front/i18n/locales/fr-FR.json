@@ -291,11 +291,10 @@
   "page": {
     "hub": {
       "headers": {
-        "newsTotal": "{count} actualités",
-        "forumPosts": "{count} publications",
-        "pickemsOpen": "{count} pick'ems ouverts",
-        "playersTotal": "{count} joueurs",
-        "teamsTotal": "{count} équipes",
+        "forumPosts": "{count} publication | {count} publication | {count} publications",
+        "pickemsOpen": "{count} pick'em ouvert | {count} pick'em ouvert | {count} pick'ems ouverts",
+        "playersTotal": "{count} joueur | {count} joueur | {count} joueurs",
+        "teamsTotal": "{count} équipe | {count} équipe | {count} équipes",
         "nextEvent": "Prochain : {name}"
       }
     },
