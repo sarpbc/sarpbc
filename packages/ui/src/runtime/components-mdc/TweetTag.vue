@@ -81,7 +81,7 @@ const postedAtLabel = computed(() =>
             class="size-10 shrink-0 object-cover"
           />
           <span class="min-w-0">
-            <span class="block truncate text-sm font-semibold text-highlighted" translate="no">
+            <span class="block truncate text-sm font-medium text-highlighted" translate="no">
               {{ data.authorName }}
             </span>
             <span v-if="data.authorHandle" class="block truncate text-sm text-muted" translate="no">

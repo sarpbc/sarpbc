@@ -32,21 +32,12 @@ const winnerParticipantId = computed(() => {
   return null;
 });
 
-/** Winner reads heavier and brighter, so the result never relies on colour alone. */
-function teamNameClass(participantId: string | undefined): string {
-  if (!participantId) {
-    return "text-muted";
+function participantClass(participantId: string | undefined): string {
+  if (participantId && winnerParticipantId.value === participantId) {
+    return "font-medium text-highlighted";
   }
 
-  return winnerParticipantId.value === participantId ? "text-default font-semibold" : "text-muted";
-}
-
-function scoreClass(participantId: string | undefined): string {
-  if (!participantId || !winnerParticipantId.value) {
-    return "text-toned";
-  }
-
-  return winnerParticipantId.value === participantId ? "text-success" : "text-error";
+  return winnerParticipantId.value ? "text-muted" : "text-toned";
 }
 </script>
 
@@ -54,18 +45,18 @@ function scoreClass(participantId: string | undefined): string {
   <SListItem size="default" :divider="divider" :divider-top="dividerTop" class="min-w-0">
     <div
       v-if="teamA && teamB"
-      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs font-medium"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs"
     >
-      <span class="truncate" :class="teamNameClass(teamA.id)">
+      <span class="truncate" :class="participantClass(teamA.id)">
         {{ teamA.team.name || $t("components.match.tbd") }}
       </span>
-      <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamA.id)">
+      <span class="text-end tabular-nums" :class="participantClass(teamA.id)">
         {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
       </span>
-      <span class="truncate" :class="teamNameClass(teamB.id)">
+      <span class="truncate" :class="participantClass(teamB.id)">
         {{ teamB.team.name || $t("components.match.tbd") }}
       </span>
-      <span class="text-end font-semibold tabular-nums" :class="scoreClass(teamB.id)">
+      <span class="text-end tabular-nums" :class="participantClass(teamB.id)">
         {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
       </span>
     </div>

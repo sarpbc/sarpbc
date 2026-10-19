@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import {
+  displayMatchScore,
+  getMatchParticipantScore,
+  shouldShowMatchScores,
+} from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
@@ -98,6 +102,26 @@ const matchStatus = computed(() => {
   }
   return resolveMatchDiscoveryStatus(match.value);
 });
+
+const showScores = computed(() => shouldShowMatchScores(matchStatus.value));
+
+const heroScoreA = computed(() =>
+  match.value && teamA.value
+    ? displayMatchScore(getParticipantScore(match.value, teamA.value.id), matchStatus.value)
+    : "–",
+);
+const heroScoreB = computed(() =>
+  match.value && teamB.value
+    ? displayMatchScore(getParticipantScore(match.value, teamB.value.id), matchStatus.value)
+    : "–",
+);
+
+function heroScoreClass(participantId: string | undefined): string {
+  if (!winnerParticipantId.value) return "font-medium text-highlighted";
+  return participantId === winnerParticipantId.value
+    ? "font-medium text-highlighted"
+    : "text-muted";
+}
 
 watch(
   () => {
@@ -253,26 +277,37 @@ const scoreboardLabel = computed(() => {
       <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
       <SCrossCard class="min-h-row-triple h-row-grid">
-        <div
-          class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 px-2 py-4 text-base font-semibold tracking-tight sm:gap-x-4 sm:px-4 md:py-0 lg:text-xl"
-        >
-          <MatchTeamResult
-            :participant="teamA"
-            :score="teamA ? getParticipantScore(match, teamA.id) : null"
-            :winner="teamA && winnerParticipantId ? winnerParticipantId === teamA.id : undefined"
-            :match-status="matchStatus"
-            class="min-w-0"
-          />
+        <div class="flex w-full flex-col items-center gap-4 px-2 py-4 sm:px-4">
+          <div
+            class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 text-base sm:gap-x-6"
+          >
+            <MatchTeamResult
+              :participant="teamA"
+              :winner="teamA && winnerParticipantId ? winnerParticipantId === teamA.id : undefined"
+              class="min-w-0"
+            />
+
+            <p
+              v-if="showScores"
+              class="flex items-center gap-2 text-4xl tabular-nums sm:gap-3"
+              aria-hidden="true"
+            >
+              <span :class="heroScoreClass(teamA?.id)">{{ heroScoreA }}</span>
+              <span class="text-dimmed">–</span>
+              <span :class="heroScoreClass(teamB?.id)">{{ heroScoreB }}</span>
+            </p>
+            <p v-else class="text-sm text-muted" aria-hidden="true">
+              {{ t("page.match.detail.versus") }}
+            </p>
+
+            <MatchTeamResult
+              :participant="teamB"
+              :winner="teamB && winnerParticipantId ? winnerParticipantId === teamB.id : undefined"
+              class="min-w-0"
+            />
+          </div>
 
           <MatchInformation :match="match" :match-status="matchStatus" />
-
-          <MatchTeamResult
-            :participant="teamB"
-            :score="teamB ? getParticipantScore(match, teamB.id) : null"
-            :winner="teamB && winnerParticipantId ? winnerParticipantId === teamB.id : undefined"
-            :match-status="matchStatus"
-            class="min-w-0"
-          />
         </div>
       </SCrossCard>
 
