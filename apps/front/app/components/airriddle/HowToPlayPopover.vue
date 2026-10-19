@@ -13,7 +13,7 @@ const titleId = "airriddle-how-to-play-title";
     <UButton
       variant="ghost"
       color="neutral"
-      class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-semibold leading-none tabular-nums"
+      class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-medium leading-none tabular-nums"
       :aria-label="t('page.game.airriddle.howToPlayLabel')"
       aria-haspopup="dialog"
       :aria-expanded="open"
@@ -30,7 +30,7 @@ const titleId = "airriddle-how-to-play-title";
         role="dialog"
         :aria-labelledby="titleId"
       >
-        <p :id="titleId" class="text-sm font-semibold tracking-tight text-highlighted">
+        <p :id="titleId" class="text-sm font-medium tracking-tight text-highlighted">
           {{ t("page.game.airriddle.howToPlay") }}
         </p>
         <ul class="flex flex-col gap-2.5">

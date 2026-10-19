@@ -23,21 +23,21 @@ async function copyHex(): Promise<void> {
 
 <template>
   <article class="w-full max-w-3xl mx-auto">
-    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-highlighted mb-4">
+    <h1 class="text-3xl md:text-4xl font-medium tracking-tight text-highlighted mb-4">
       {{ $t("page.brand.title") }}
     </h1>
     <p class="text-base leading-relaxed text-muted">
       {{ $t("page.brand.intro") }}
     </p>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.nameTitle") }}
     </h2>
     <p class="text-base leading-relaxed text-muted">
       {{ $t("page.brand.nameBody") }}
     </p>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.usageTitle") }}
     </h2>
     <p class="text-base leading-relaxed text-muted mb-4">
@@ -47,7 +47,7 @@ async function copyHex(): Promise<void> {
       {{ $t("page.brand.usageAlter", { hex: BRAND_BLUE }) }}
     </p>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.logoTitle") }}
     </h2>
     <p class="text-base leading-relaxed text-muted mb-6">
@@ -82,7 +82,7 @@ async function copyHex(): Promise<void> {
       </UButton>
     </div>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.iconTitle") }}
     </h2>
     <p class="text-base leading-relaxed text-muted mb-6">
@@ -103,7 +103,7 @@ async function copyHex(): Promise<void> {
       </UButton>
     </div>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.ogTitle") }}
     </h2>
     <p class="text-base leading-relaxed text-muted mb-6">
@@ -130,7 +130,7 @@ async function copyHex(): Promise<void> {
       </UButton>
     </div>
 
-    <h2 class="text-xl font-semibold tracking-tight text-highlighted mt-16 mb-4">
+    <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.colorTitle") }}
     </h2>
     <div class="border border-default">

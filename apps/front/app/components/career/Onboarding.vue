@@ -71,7 +71,7 @@ function onStart() {
   <div class="flex flex-col gap-6">
     <div v-if="step === 'intro'" class="flex flex-col gap-4">
       <div class="space-y-2 text-center">
-        <h2 class="text-lg font-semibold tracking-tight">
+        <h2 class="text-lg font-medium tracking-tight">
           {{ t("page.game.career.onboarding.introTitle") }}
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.introBody") }}</p>
@@ -103,7 +103,7 @@ function onStart() {
 
     <div v-else-if="step === 'region'" class="flex flex-col gap-4">
       <div class="space-y-2 text-center">
-        <h2 class="text-lg font-semibold tracking-tight">
+        <h2 class="text-lg font-medium tracking-tight">
           {{ t("page.game.career.onboarding.regionTitle") }}
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.regionBody") }}</p>
@@ -128,7 +128,7 @@ function onStart() {
 
     <div v-else-if="step === 'country'" class="flex flex-col gap-4">
       <div class="space-y-2 text-center">
-        <h2 class="text-lg font-semibold tracking-tight">
+        <h2 class="text-lg font-medium tracking-tight">
           {{ t("page.game.career.onboarding.countryTitle") }}
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.countryBody") }}</p>
@@ -153,7 +153,7 @@ function onStart() {
 
     <div v-else-if="step === 'role'" class="flex flex-col gap-4">
       <div class="space-y-2 text-center">
-        <h2 class="text-lg font-semibold tracking-tight">
+        <h2 class="text-lg font-medium tracking-tight">
           {{ t("page.game.career.onboarding.roleTitle") }}
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.roleBody") }}</p>
@@ -167,7 +167,7 @@ function onStart() {
           :aria-pressed="props.role === roleOption"
           @click="emit('selectRole', roleOption)"
         >
-          <p class="font-semibold">
+          <p class="font-medium">
             {{ t(`page.game.career.onboarding.roles.${roleOption}.label`) }}
           </p>
           <p class="mt-1 text-sm text-muted">
@@ -182,7 +182,7 @@ function onStart() {
 
     <div v-else-if="step === 'background'" class="flex flex-col gap-4">
       <div class="space-y-2 text-center">
-        <h2 class="text-lg font-semibold tracking-tight">
+        <h2 class="text-lg font-medium tracking-tight">
           {{ t("page.game.career.onboarding.backgroundTitle") }}
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.backgroundBody") }}</p>
@@ -196,7 +196,7 @@ function onStart() {
           :aria-pressed="props.background === bg"
           @click="emit('selectBackground', bg)"
         >
-          <p class="font-semibold">
+          <p class="font-medium">
             {{ t(`page.game.career.onboarding.backgrounds.${bg}.label`) }}
           </p>
           <p class="mt-1 text-sm text-muted">

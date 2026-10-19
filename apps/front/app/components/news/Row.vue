@@ -57,7 +57,7 @@ const rowSize = computed(() => {
       </div>
       <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
         <h2
-          class="min-w-0 text-base font-semibold leading-snug tracking-tight text-default line-clamp-2 sm:line-clamp-1"
+          class="min-w-0 text-base font-medium leading-snug tracking-tight text-default line-clamp-2 sm:line-clamp-1"
         >
           {{ props.article.title }}
         </h2>
@@ -74,7 +74,7 @@ const rowSize = computed(() => {
     </div>
 
     <div v-else class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-base font-semibold tracking-tight text-default">
+      <h2 class="min-w-0 flex-1 truncate text-base font-medium tracking-tight text-default">
         {{ props.article.title }}
       </h2>
       <p class="shrink-0 text-xs font-normal text-muted tabular-nums">

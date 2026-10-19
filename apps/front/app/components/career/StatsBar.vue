@@ -29,7 +29,7 @@ const cells = computed(
       class="flex flex-col items-center justify-center text-center"
     >
       <p class="text-xs text-muted">{{ t(`page.game.career.stats.${cell.key}`) }}</p>
-      <p class="text-lg font-semibold tabular-nums">{{ cell.value }}</p>
+      <p class="text-lg font-medium tabular-nums">{{ cell.value }}</p>
     </div>
   </div>
 </template>

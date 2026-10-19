@@ -180,7 +180,7 @@ setPageSeo({
               priority
             />
             <div class="flex min-w-0 flex-col items-start gap-1">
-              <h1 class="text-xl font-semibold tracking-tight text-balance">
+              <h1 class="text-xl font-medium tracking-tight text-balance">
                 {{ team.name }}
               </h1>
               <FlagNationalities
