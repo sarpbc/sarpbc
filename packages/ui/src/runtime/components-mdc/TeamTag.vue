@@ -102,7 +102,7 @@ watch(open, (isOpen) => {
             <img v-if="logoSrc" :src="logoSrc" :alt="team.name" class="size-full object-contain" />
             <UIcon v-else name="i-fluent-people-team-24-regular" class="size-5 text-muted" />
           </div>
-          <p class="truncate font-semibold text-highlighted" translate="no">
+          <p class="truncate font-medium text-highlighted" translate="no">
             {{ team.name }}
           </p>
         </div>

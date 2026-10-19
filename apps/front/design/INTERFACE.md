@@ -112,14 +112,14 @@ Full mapping: [references/tokens.md](TOKENS.md)
 
 ### 2.2 Typography (`geist-typography`)
 
-- **Headings:** `font-semibold` / `font-bold`, tighter tracking on large titles (`tracking-tight`)
+- **Headings:** `font-medium`, tighter tracking on large titles (`tracking-tight`); size carries the hierarchy
 - **UI labels:** `text-sm` (14px class) — default for nav, table headers, form labels
 - **Body:** `text-base` with comfortable line height
 - **Data / codes / IDs:** `font-mono`, `tabular-nums` for aligned numbers
-- **Don't** mix more than two weights in one view
+- **Weights:** `font-normal` and `font-medium` only (see [DESIGN.md](../DESIGN.md#typography))
 
 ```vue
-<h1 class="text-2xl font-bold tracking-tight">{{ $t('page.title') }}</h1>
+<h1 class="text-2xl font-medium tracking-tight">{{ $t('page.title') }}</h1>
 <p class="text-sm text-muted">{{ $t('page.subtitle') }}</p>
 ```
 

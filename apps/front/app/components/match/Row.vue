@@ -91,7 +91,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
   if (score === null || other === null || score === other) {
     return "text-highlighted";
   }
-  return score > other ? "text-success" : "text-muted";
+  return score > other ? "text-highlighted" : "text-muted";
 }
 </script>
 
@@ -120,7 +120,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
         <DiscussionCommentCount :count="match.commentCount ?? 0" />
         <div
           v-if="showLiveScore"
-          class="flex flex-col items-end gap-0.5 text-xs font-semibold tabular-nums"
+          class="flex flex-col items-end gap-0.5 text-xs font-medium tabular-nums"
           :class="{ 'score-flash': scoreChanged }"
           aria-live="polite"
           :aria-label="`${scoreA ?? '–'} – ${scoreB ?? '–'}`"

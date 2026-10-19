@@ -118,7 +118,7 @@ watch(open, (isOpen) => {
             <UIcon v-else name="i-fluent-person-24-regular" class="size-6 text-muted" />
           </div>
           <div class="min-w-0 flex-1">
-            <p class="truncate font-semibold text-highlighted" translate="no">
+            <p class="truncate font-medium text-highlighted" translate="no">
               {{ player.name }}
             </p>
             <p v-if="fullName" class="truncate text-sm text-muted" translate="no">
