@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { en, fr } from "@nuxt/ui/locale";
-
 const appConfig = useAppConfig();
 const { locale } = useI18n();
-
-const uiLocale = computed(() => (locale.value.toLowerCase().startsWith("fr") ? fr : en));
 
 useHead({
   meta: [
@@ -19,7 +15,7 @@ useHead({
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster" :locale="uiLocale" :scroll-body="false">
+  <UApp :toaster="appConfig.toaster" :scroll-body="false">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

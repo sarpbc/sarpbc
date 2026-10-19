@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { en, fr } from "@nuxt/ui/locale";
 import { uiComponentDefaults } from "~/config/ui-component-defaults";
 
 const appConfig = useAppConfig();
 const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const colorMode = useColorMode();
-
-const uiLocale = computed(() => (locale.value.toLowerCase().startsWith("fr") ? fr : en));
 
 setPageSeo();
 
@@ -28,7 +25,7 @@ useHead({
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster" :locale="uiLocale" :scroll-body="false">
+  <UApp :toaster="appConfig.toaster" :scroll-body="false">
     <UTheme :props="uiComponentDefaults">
       <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
       <NuxtLayout>
