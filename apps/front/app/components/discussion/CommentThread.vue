@@ -180,7 +180,7 @@ onMounted(() => {
       <SCard
         :flush-top="flushTop && !comments.length"
         class="min-h-row h-row-grid px-3"
-        :class="{ 'pb-3': user }"
+        :class="user ? 'pb-3' : 'flex items-center'"
       >
         <DiscussionCommentComposer
           :target-type="targetType"
