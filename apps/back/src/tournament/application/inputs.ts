@@ -16,7 +16,6 @@ export interface UpdateTournamentInput extends ManualTournamentFields {
 }
 export interface UpsertMatchInput {
   name: string;
-  slug?: string;
   beginAt?: Date;
   endAt?: Date;
   status?: string;

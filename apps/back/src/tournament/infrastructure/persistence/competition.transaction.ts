@@ -236,7 +236,6 @@ export class CompetitionMatchWriter implements MatchWriter {
     Object.assign(row, {
       pandascoreId: model.pandascoreId,
       name: model.name,
-      slug: model.slug,
       beginAt: model.beginAt,
       endAt: model.endAt,
       status: model.status,

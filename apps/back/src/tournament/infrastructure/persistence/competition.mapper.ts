@@ -50,7 +50,6 @@ export function toMatch(row: Row.Match): Match {
     publicId: row.publicId,
     pandascoreId: row.pandascoreId,
     name: row.name,
-    slug: row.slug,
     beginAt: row.beginAt,
     endAt: row.endAt,
     status: row.status,

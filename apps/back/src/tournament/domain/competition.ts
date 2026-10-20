@@ -49,7 +49,6 @@ export class Match {
   publicId!: number;
   pandascoreId: number | null = null;
   name = "";
-  slug: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
   status: string | null = null;

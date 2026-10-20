@@ -2,7 +2,6 @@ import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 export const CreateMatchDto = z.strictObject({
   name: z.string(),
-  slug: z.string().optional(),
   beginAt: isoDateSchema.optional(),
   endAt: isoDateSchema.optional(),
   status: z.string().optional(),

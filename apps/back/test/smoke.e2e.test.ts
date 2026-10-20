@@ -61,7 +61,6 @@ describe("API smoke (e2e)", () => {
   const grandFinal = Object.assign(new Match(), {
     publicId: 7250,
     name: "Grand Final: Karmine Corp vs Team Falcons",
-    slug: "stored-pandascore-slug",
     participants: ["Karmine Corp", "Team Falcons"].map((name) =>
       Object.assign(new TournamentParticipant(), { team: Object.assign(new Team(), { name }) }),
     ),

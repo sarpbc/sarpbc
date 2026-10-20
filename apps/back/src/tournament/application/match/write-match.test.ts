@@ -54,21 +54,18 @@ describe("Match writes", () => {
     expect(writer.save).not.toHaveBeenCalled();
   });
 
-  it("preserves an edited slug and omitted streams when refreshing a match", async () => {
+  it("preserves omitted streams when refreshing a match", async () => {
     const match = Object.assign(new Match(), {
       id: "match",
       tournament,
-      slug: "local-final",
       officialStreams: [{ language: "en", url: "https://twitch.tv/rocketleague", main: true }],
     });
     writer.byPandascoreId.mockResolvedValue(match);
     const updated = await upsertMatchInTransaction(writer, tournament.id, {
       name: "Final",
       pandascoreId: 123,
-      slug: "provider-final",
       participantIds: ["a", "b"],
     });
-    expect(updated.slug).toBe("local-final");
     expect(updated.officialStreams).toEqual([
       { language: "en", url: "https://twitch.tv/rocketleague", main: true },
     ]);

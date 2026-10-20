@@ -18,7 +18,6 @@ export class PandascoreMatchMapper {
       pandascoreId: dto.id,
       tournamentPandascoreId: dto.tournament_id,
       name: dto.name ?? "TBD",
-      slug: dto.slug,
       beginAt: dto.begin_at ? new Date(dto.begin_at) : undefined,
       endAt: dto.end_at ? new Date(dto.end_at) : undefined,
       status: dto.status,
