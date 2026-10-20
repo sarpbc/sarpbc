@@ -59,7 +59,7 @@ function isLive(matchId: string): boolean {
             <MatchDiscoveryLink
               v-for="match in matches"
               :key="match.id"
-              :match-id="match.id"
+              :match="match"
               :source="SOURCE"
               :status="isLive(match.id) ? 'live' : 'upcoming'"
             >

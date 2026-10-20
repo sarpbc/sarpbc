@@ -24,6 +24,8 @@ function toMatchListItem(match: Match): MatchListItem {
 
   return {
     id: match.id,
+    publicId: match.publicId,
+    slug: match.slug,
     beginAt: match.beginAt ?? null,
     participants: (match.participants ?? []).map((participant) => ({
       id: participant.id,

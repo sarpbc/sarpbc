@@ -36,6 +36,8 @@ export function toLayoutMatch(
 ): BracketLayoutMatch {
   return {
     matchId: match.id,
+    publicId: match.publicId,
+    slug: match.slug,
     column,
     row,
     zone,

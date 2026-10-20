@@ -106,7 +106,7 @@ function bracketMatchStatus(match: (typeof layout.matches)[number]) {
         <TournamentMatchScoreLink
           bracket
           compact
-          :match-id="match.matchId"
+          :match="{ id: match.matchId, publicId: match.publicId, slug: match.slug }"
           :name="match.name"
           :team-a-name="match.teamA?.name"
           :team-b-name="match.teamB?.name"

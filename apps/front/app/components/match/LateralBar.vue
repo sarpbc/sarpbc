@@ -49,7 +49,7 @@ const upcomingTitle = computed(() => {
           <MatchDiscoveryLink
             v-for="(match, index) in visibleLiveMatches"
             :key="match.id"
-            :match-id="match.id"
+            :match="match"
             :source="SOURCE"
             status="live"
           >
@@ -66,7 +66,7 @@ const upcomingTitle = computed(() => {
           <MatchDiscoveryLink
             v-for="(match, index) in upcomingMatches"
             :key="match.id"
-            :match-id="match.id"
+            :match="match"
             :source="SOURCE"
             status="upcoming"
           >
@@ -85,7 +85,7 @@ const upcomingTitle = computed(() => {
           <MatchDiscoveryLink
             v-for="(match, index) in resultMatches"
             :key="match.id"
-            :match-id="match.id"
+            :match="match"
             :source="SOURCE"
             status="finished"
           >

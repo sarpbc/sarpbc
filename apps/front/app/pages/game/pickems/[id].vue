@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
+import { matchPath } from "@sarpbc/utils";
 import {
   displayMatchScore,
   getMatchParticipantScore,
@@ -453,7 +454,7 @@ watch(
                   {{ match.participants?.[0]?.team.name }}
                 </UButton>
                 <NuxtLink
-                  :to="localePath(`/matches/${match.id}`)"
+                  :to="localePath(matchPath(match.publicId, match.slug))"
                   class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default"
                   :aria-label="openMatchLabel(match)"
                 >

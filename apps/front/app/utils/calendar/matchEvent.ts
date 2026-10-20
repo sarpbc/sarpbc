@@ -30,7 +30,7 @@ export function matchToCalendarEvent(match: Match, dtStamp: Date): CalendarEvent
   const endAt = match.endAt ? new Date(match.endAt) : undefined;
   const teamA = participantName(match, 0);
   const teamB = participantName(match, 1);
-  const url = matchPageUrl(match.id);
+  const url = matchPageUrl(match);
 
   return {
     uid: matchEventUid(match.id),

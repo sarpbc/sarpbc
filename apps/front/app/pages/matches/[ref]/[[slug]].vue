@@ -11,13 +11,15 @@ import {
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
 } from "~/utils/matchDiscoveryAnalytics";
+import { matchPath } from "@sarpbc/utils";
 import { getApiErrorStatus } from "~/utils/apiError";
 
 const { t, locale } = useI18n();
 const route = useRoute();
+const localePath = useLocalePath();
 const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
-const matchId = computed(() => route.params.id as string);
+const matchRef = computed(() => route.params.ref as string);
 const { trackMatchDetailViewed } = useMatchDiscoveryAnalytics();
 const discoverySource = computed(() =>
   parseMatchDiscoverySource(route.query[MATCH_DISCOVERY_FROM_QUERY]),
@@ -29,28 +31,40 @@ const {
   error,
   refresh,
 } = await useAsyncData<MatchDetailResponse | null>(
-  () => `match-${matchId.value}`,
+  () => `match-${matchRef.value}`,
   async () => {
     try {
-      return await getMatchById(matchId.value);
+      return await getMatchById(matchRef.value);
     } catch (err: unknown) {
       if (getApiErrorStatus(err) === 404) {
-        throw createError({
-          statusCode: 404,
-          message: t("page.match.detail.notFound"),
-        });
+        return null;
       }
 
       throw err;
     }
   },
   {
-    watch: [matchId],
+    watch: [matchRef],
     default: () => null,
   },
 );
 
+if (!matchDetail.value) {
+  throwEntityLoadError(error.value, {
+    notFound: t("page.match.detail.notFound"),
+    failed: t("page.match.detail.error"),
+  });
+}
+
 const match = computed(() => matchDetail.value?.match ?? null);
+
+const { publicId, slug } = matchDetail.value.match;
+if (matchRef.value !== String(publicId) || route.params.slug !== slug) {
+  await navigateTo(
+    { path: localePath(matchPath(publicId, slug)), query: route.query, hash: route.hash },
+    { redirectCode: 301, replace: true },
+  );
+}
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
 const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
 
@@ -124,19 +138,14 @@ function heroScoreClass(participantId: string | undefined): string {
 }
 
 watch(
-  () => {
-    if (!match.value || match.value.id !== matchId.value) {
-      return null;
-    }
-    return `${matchId.value}:${discoverySource.value ?? ""}`;
-  },
+  () => (match.value ? `${match.value.id}:${discoverySource.value ?? ""}` : null),
   (key) => {
     if (!key || !match.value) {
       return;
     }
 
     trackMatchDetailViewed({
-      matchId: matchId.value,
+      matchId: match.value.id,
       status: matchStatus.value,
       source: discoverySource.value,
     });
@@ -213,12 +222,12 @@ function getMatchOgImageUrl(id: string): string {
 }
 
 watch(
-  [seoTitle, seoDescription, matchId, match],
+  [seoTitle, seoDescription, match],
   () => {
     setPageSeo({
       title: seoTitle.value,
       description: seoDescription.value,
-      image: match.value ? getMatchOgImageUrl(matchId.value) : undefined,
+      image: match.value ? getMatchOgImageUrl(match.value.id) : undefined,
     });
   },
   { immediate: true },

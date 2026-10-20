@@ -1,4 +1,7 @@
-/** Query key carrying discovery source onto `/matches/:id` for CTR. */
+import { matchPath } from "@sarpbc/utils";
+import type { MatchLinkTarget } from "~/types/matches";
+
+/** Query key carrying discovery source onto the match page for CTR. */
 export const MATCH_DISCOVERY_FROM_QUERY = "from";
 
 export const MATCH_DISCOVERY_SOURCES = [
@@ -80,11 +83,11 @@ export function resolveMatchDiscoveryStatus(input: {
 
 export function buildMatchDetailTo(
   localePath: (path: string) => string,
-  matchId: string,
+  match: MatchLinkTarget,
   source: MatchDiscoverySource,
 ): MatchDiscoveryDetailTo {
   return {
-    path: localePath(`/matches/${matchId}`),
+    path: localePath(matchPath(match.publicId, match.slug)),
     query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
   };
 }

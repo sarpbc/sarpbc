@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { matchPath } from "@sarpbc/utils";
 import type { TeamForm } from "~/types/matches";
 
 const { t } = useI18n();
@@ -38,7 +39,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
       v-for="recentMatch in teamForm?.recent ?? []"
       :key="recentMatch.id"
       size="default"
-      :to="localePath(`/matches/${recentMatch.id}`)"
+      :to="localePath(matchPath(recentMatch.publicId, recentMatch.slug))"
       class="min-w-0"
     >
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">

@@ -11,7 +11,7 @@ const discoveryStatus = computed(() => resolveMatchDiscoveryStatus(match));
 
 <template>
   <TournamentMatchScoreLink
-    :match-id="match.id"
+    :match="match"
     :name="match.name"
     :team-a-name="match.participants?.[0]?.team.name"
     :team-b-name="match.participants?.[1]?.team.name"
