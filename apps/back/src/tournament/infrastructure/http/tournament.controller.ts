@@ -145,7 +145,7 @@ export class TournamentController {
   @Get(":id/matches")
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
-    return { matches };
+    return { matches: matches.map(withPublicSlug) };
   }
 
   @Get(":id/awards")
