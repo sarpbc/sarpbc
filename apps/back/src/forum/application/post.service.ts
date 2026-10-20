@@ -1,4 +1,6 @@
+import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
+import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
 import {
   FORUM_ERROR_CODES,
@@ -7,6 +9,7 @@ import {
 } from "../domain/forum.constants";
 import { PostType } from "../domain/post-type.enum";
 import type {
+  NewPostRecord,
   PostRecord,
   TranslationRecord,
   CreatePostInput,
@@ -37,12 +40,12 @@ export class PostService {
     return this.postRepository.findByTopicId(topicId);
   }
 
-  async findById(id: string): Promise<PostRecord | null> {
-    return this.postRepository.findWithDetails(id);
+  async findById(ref: EntityRef): Promise<PostRecord | null> {
+    return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(id: string): Promise<PostView | null> {
-    const post = await this.findById(id);
+  async findByIdDto(ref: EntityRef): Promise<PostView | null> {
+    const post = await this.findById(ref);
     if (!post) return null;
 
     const buildNestedReplies = (replies: ReplyRecord[]) => {
@@ -79,6 +82,8 @@ export class PostService {
 
     return {
       id: post.id,
+      publicId: post.publicId,
+      slug: forumPostSlug(post.title),
       title: post.title,
       content: post.content,
       topic: { id: post.topic.id, title: post.topic.title },
@@ -126,7 +131,7 @@ export class PostService {
         throw new NotFoundError("User not found");
       }
 
-      const newPost: PostRecord = {
+      const newPost: NewPostRecord = {
         id: createPostInput.id,
         title: sanitizePlainText(createPostInput.title),
         content: sanitizePlainText(createPostInput.content),
@@ -163,7 +168,7 @@ export class PostService {
 
   async delete(id: string): Promise<void> {
     return this.transaction.run(async (scope) => {
-      const post = await scope.posts.findWithDetails(id);
+      const post = await scope.posts.findWithDetails({ kind: "id", value: id });
       if (!post) {
         throw new NotFoundError("Post not found");
       }

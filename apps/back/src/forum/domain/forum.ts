@@ -10,6 +10,7 @@ export interface TopicRecord {
 }
 export interface PostSummary {
   id: string;
+  publicId: number;
   title: string;
   content: string;
   author: ReplyAuthor;
@@ -31,6 +32,7 @@ export interface PostRecord extends PostSummary {
   translations: TranslationRecord[];
   replies: ReplyRecord[];
 }
+export type NewPostRecord = Omit<PostRecord, "publicId">;
 export interface CreatePostInput {
   id: string;
   title: string;
@@ -53,6 +55,8 @@ export interface PostReplyView {
 }
 export interface PostView {
   id: string;
+  publicId: number;
+  slug: string;
   title: string;
   content: string;
   topic: { id: string; title: string };

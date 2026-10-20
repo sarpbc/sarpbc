@@ -12,9 +12,9 @@ export interface ReplyRecord {
   createdAt: Date;
   hiddenAt: Date | null;
   author: ReplyAuthor;
-  post: { id: string; title: string } | null;
+  post: { id: string; publicId: number; title: string } | null;
   newsArticle: { id: string; title: string; slug: string } | null;
-  match: { id: string; name: string } | null;
+  match: { id: string; publicId: number; name: string; slug: string } | null;
   replyTo: { id: string } | null;
 }
 export interface CreateReplyInput {

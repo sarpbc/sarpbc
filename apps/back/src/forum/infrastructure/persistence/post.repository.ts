@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { EntityRepository } from "@mikro-orm/core";
 
+import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Post, PostTranslation } from "./forum.entities";
 
 export class PostRepository extends EntityRepository<Post> {
@@ -25,25 +26,16 @@ export class PostRepository extends EntityRepository<Post> {
     return this.findOne({ id }, { populate: ["author", "topic"] });
   }
 
-  async findWithDetails(id: string): Promise<Post | null> {
-    return this.findOne(
-      { id },
-      {
-        populate: [
-          "author",
-          "topic",
-          "replies",
-          "replies.author",
-          "replies.replyTo",
-          "translations",
-        ],
-      },
-    );
+  async findWithDetails(ref: EntityRef): Promise<Post | null> {
+    return this.findOne(ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value }, {
+      populate: ["author", "topic", "replies", "replies.author", "replies.replyTo", "translations"],
+    });
   }
 
   async findRecentActivity(limit: number): Promise<
     Array<{
       id: string;
+      publicId: number;
       title: string;
       messageCount: number;
       lastActivity: Date;
@@ -52,13 +44,14 @@ export class PostRepository extends EntityRepository<Post> {
     const query = `
       SELECT
         p.id,
+        p.public_id,
         p.title,
         p.created_at,
         COALESCE(MAX(r.created_at), p.created_at) as last_activity,
         COUNT(r.id) as reply_count
       FROM post p
       LEFT JOIN reply r ON p.id = r.post_id
-      GROUP BY p.id, p.title, p.created_at
+      GROUP BY p.id, p.public_id, p.title, p.created_at
       ORDER BY COALESCE(MAX(r.created_at), p.created_at) DESC
       LIMIT ?
     `;
@@ -67,6 +60,7 @@ export class PostRepository extends EntityRepository<Post> {
       .array(
         z.object({
           id: z.string(),
+          public_id: z.number().int().positive(),
           title: z.string(),
           reply_count: z.coerce.number().int().nonnegative(),
           last_activity: z.coerce.date(),
@@ -75,6 +69,7 @@ export class PostRepository extends EntityRepository<Post> {
       .parse(results);
     return rows.map((row) => ({
       id: row.id,
+      publicId: row.public_id,
       title: row.title,
       messageCount: row.reply_count + 1,
       lastActivity: row.last_activity,

@@ -143,9 +143,18 @@ export class ReplyRepository {
       return [];
     }
 
-    const replies = await this.rows.find(
+    const replies: Reply[] = await this.rows.find(
       { id: { $in: ids } },
-      { populate: ["author", "post", "newsArticle", "match"] },
+      {
+        populate: [
+          "author",
+          "post",
+          "newsArticle",
+          "match",
+          "match.participants.team",
+          "match.tournament.league",
+        ],
+      },
     );
 
     const replyById = new Map(replies.map((reply) => [reply.id, reply]));

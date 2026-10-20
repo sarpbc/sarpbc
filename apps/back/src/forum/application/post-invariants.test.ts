@@ -97,6 +97,7 @@ describe("post transaction and policies", () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
       id: "latest",
+      publicId: 1,
       title: "Post",
       content: "Body",
       author: { id: "user", userName: "Fan" },
@@ -118,6 +119,7 @@ describe("post transaction and policies", () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
       id: "latest",
+      publicId: 1,
       title: "Post",
       content: "Body",
       author: { id: "user", userName: "Fan" },
@@ -162,5 +164,51 @@ describe("post transaction and policies", () => {
     expect(f.scope.posts.deleteTranslations).not.toHaveBeenCalled();
     expect(f.scope.posts.delete).not.toHaveBeenCalled();
     expect(f.commits()).toBe(1);
+  });
+});
+describe("post lookup", () => {
+  const stored: PostRecord = {
+    id: "0a1b2c3d-0000-4000-8000-123456789abc",
+    publicId: 88,
+    title: "Mon Post: Quel roster ?",
+    content: "Body",
+    author: { id: "user", userName: "Fan" },
+    topic: { id: "topic", title: "Topic" },
+    postType: PostType.DISCUSSION,
+    createdAt: now,
+    updatedAt: null,
+    translations: [
+      {
+        id: "t",
+        post: { id: "0a1b2c3d-0000-4000-8000-123456789abc" },
+        locale: "en-US",
+        title: "Translated title",
+        content: "Translated",
+        createdAt: now,
+        updatedAt: null,
+      },
+    ],
+    replies: [],
+  };
+  it("exposes the public id and a slug derived from the base title", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    const ref = { kind: "publicId", value: 88 } as const;
+    expect(await f.service.findByIdDto(ref)).toMatchObject({
+      id: stored.id,
+      publicId: 88,
+      slug: "mon-post-quel-roster",
+    });
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith(ref);
+  });
+  it("reports a missing post as null", async () => {
+    const f = setup();
+    expect(await f.service.findByIdDto({ kind: "id", value: stored.id })).toBeNull();
+  });
+  it("deletes by legacy id", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    await f.service.delete(stored.id);
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith({ kind: "id", value: stored.id });
   });
 });

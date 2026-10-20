@@ -10,7 +10,7 @@ function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
     id: "parent",
     author,
     content: "hello",
-    post: { id: "p", title: "Thread" },
+    post: { id: "p", publicId: 1, title: "Thread" },
     newsArticle: null,
     match: null,
     replyTo: null,
@@ -41,9 +41,11 @@ function setup() {
     reports: { findByReplyAndReporter: vi.fn().mockResolvedValue(null), save: vi.fn() },
     users: { findById: vi.fn().mockResolvedValue(author) },
     targets: {
-      find: vi
-        .fn()
-        .mockResolvedValue({ post: { id: "p", title: "Thread" }, newsArticle: null, match: null }),
+      find: vi.fn().mockResolvedValue({
+        post: { id: "p", publicId: 1, title: "Thread" },
+        newsArticle: null,
+        match: null,
+      }),
     },
     notifications: {
       createForDirectReply: vi.fn(async (recipientId: string, replyId: string) => {
@@ -104,7 +106,9 @@ describe("reply invariants without Nest or ORM", () => {
   });
   it("rejects a parent from another target before saving", async () => {
     const f = setup();
-    f.replies.findById.mockResolvedValue(reply({ post: { id: "different", title: "Other" } }));
+    f.replies.findById.mockResolvedValue(
+      reply({ post: { id: "different", publicId: 2, title: "Other" } }),
+    );
     await expect(
       f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" }),
     ).rejects.toBeInstanceOf(InvalidInputError);

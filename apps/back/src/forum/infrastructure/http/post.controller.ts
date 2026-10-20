@@ -6,11 +6,13 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
   Post,
   UseGuards,
   Request,
 } from "@nestjs/common";
+import { forumPostSlug } from "@sarpbc/utils";
+import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
+import type { EntityRef } from "../../../common/domain/entity-ref";
 import { PostService } from "../../application/post.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -39,6 +41,8 @@ export class PostController {
     return {
       posts: posts.map((post) => ({
         id: post.id,
+        publicId: post.publicId,
+        slug: forumPostSlug(post.title),
         title: post.title,
         author: post.author.userName,
         createdAt: post.createdAt,
@@ -54,7 +58,7 @@ export class PostController {
   @Get("topic/:topicId")
   async findByTopic(@Param("topicId") topicId: string) {
     const posts = await this.postService.findByTopicId(topicId);
-    return { posts };
+    return { posts: posts.map((post) => ({ ...post, slug: forumPostSlug(post.title) })) };
   }
 
   @Get("creation-status")
@@ -63,17 +67,17 @@ export class PostController {
     return this.postService.getCreationStatus(userId);
   }
 
-  @Get(":id")
+  @Get(":ref")
   async findById(
-    @Param("id", ParseUUIDPipe) id: string,
+    @Param("ref", EntityRefPipe) ref: EntityRef,
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
-    const post = await this.postService.findByIdDto(id);
+    const post = await this.postService.findByIdDto(ref);
     if (!post) return { post: null };
 
     const preferred = (req.headers["accept-language"] || "en-US").split(",")[0];
     if (preferred && preferred.toLowerCase().startsWith("fr")) {
-      const p = await this.postService.findById(id);
+      const p = await this.postService.findById(ref);
       const trans = p?.translations.find((t) => t.locale === "fr-FR");
       if (trans) {
         post.title = trans.title;

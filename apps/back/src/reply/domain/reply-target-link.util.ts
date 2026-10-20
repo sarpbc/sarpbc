@@ -1,3 +1,4 @@
+import { forumPostPath, forumPostSlug, matchPath } from "@sarpbc/utils";
 import type { ReplyRecord as Reply, ReplyTargetType } from "./reply";
 
 export type ReplyTargetLink = {
@@ -13,7 +14,7 @@ export function resolveReplyTargetLink(reply: Reply): ReplyTargetLink | null {
       targetType: "forumPost",
       targetId: reply.post.id,
       targetLabel: reply.post.title,
-      targetPath: `/forum/post/${reply.post.id}`,
+      targetPath: forumPostPath(reply.post.publicId, forumPostSlug(reply.post.title)),
     };
   }
 
@@ -31,7 +32,7 @@ export function resolveReplyTargetLink(reply: Reply): ReplyTargetLink | null {
       targetType: "match",
       targetId: reply.match.id,
       targetLabel: reply.match.name,
-      targetPath: `/matches/${reply.match.id}`,
+      targetPath: matchPath(reply.match.publicId, reply.match.slug),
     };
   }
 

@@ -4,7 +4,8 @@ import { User } from "../../../user/infrastructure/persistence/user.entity";
 import { PostRepository } from "./post.repository";
 import { TopicRepository } from "./topic.repository";
 import { postSnapshot, topicSnapshot } from "./forum.mapper";
-import type { PostRecord, TopicRecord, TranslationRecord } from "../../domain/forum";
+import type { EntityRef } from "../../../common/domain/entity-ref";
+import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "../../domain/forum";
 import type { PostStore, TopicStore } from "../../application/ports";
 export class MikroPostStore implements PostStore {
   private readonly rows: PostRepository;
@@ -21,8 +22,8 @@ export class MikroPostStore implements PostStore {
     const row = await this.rows.findById(id);
     return row ? postSnapshot(row) : null;
   }
-  async findWithDetails(id: string) {
-    const row = await this.rows.findWithDetails(id);
+  async findWithDetails(ref: EntityRef) {
+    const row = await this.rows.findWithDetails(ref);
     return row ? postSnapshot(row) : null;
   }
   async findLatestByUser(id: string) {
@@ -32,7 +33,7 @@ export class MikroPostStore implements PostStore {
   findRecentActivity(limit: number) {
     return this.rows.findRecentActivity(limit);
   }
-  async save(model: PostRecord) {
+  async save(model: NewPostRecord) {
     const row = (await this.rows.findById(model.id)) ?? new Post();
     row.id = model.id;
     row.title = model.title;
