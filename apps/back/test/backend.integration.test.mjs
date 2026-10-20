@@ -354,10 +354,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           Number.isInteger(match.publicId) && match.publicId > 0,
           "created match has a public id",
         );
-        assert.match(
-          match.slug,
-          /^integration-(alpha-vs-integration-beta|beta-vs-integration-alpha)-integration-cup$/,
-        );
+        assert.equal(match.slug, "integration-alpha-vs-integration-beta-integration-cup");
         const byLegacyId = (await request("GET", `/matches/${match.id}`)).json();
         const byPublicId = (await request("GET", `/matches/${match.publicId}`)).json();
         assert.deepEqual(byPublicId.match, byLegacyId.match);

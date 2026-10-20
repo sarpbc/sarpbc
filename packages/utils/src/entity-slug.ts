@@ -57,7 +57,9 @@ export function matchSlug({ teamNames, matchName, tournament }: MatchSlugInput):
     const trimmed = name?.trim();
     return trimmed && !/^tbd$/i.test(trimmed) ? trimmed : null;
   });
-  const lead = teamA && teamB ? [teamA, "vs", teamB] : [roundLabel(matchName)];
+  const [first, second] =
+    teamA && teamB && toSlug(teamA) > toSlug(teamB) ? [teamB, teamA] : [teamA, teamB];
+  const lead = first && second ? [first, "vs", second] : [roundLabel(matchName)];
   return toSlug(...lead, ...tournamentSlugParts(tournament)) || "match";
 }
 

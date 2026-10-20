@@ -81,6 +81,13 @@ describe("matchSlug", () => {
     ).toBe("karmine-corp-vs-team-falcons-rlcs-world-championship-2026-playoffs");
   });
 
+  it("gives the same slug whichever order the teams arrive in", () => {
+    const input = { matchName: "Final", tournament: worlds };
+    const swapped = matchSlug({ ...input, teamNames: ["Team Falcons", "Karmine Corp"] });
+    expect(swapped).toBe(matchSlug({ ...input, teamNames: ["Karmine Corp", "Team Falcons"] }));
+    expect(swapped).toMatch(/^karmine-corp-vs-team-falcons-/);
+  });
+
   it("falls back to the round label when a team is missing", () => {
     expect(
       matchSlug({

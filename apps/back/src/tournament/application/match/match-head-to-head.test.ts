@@ -117,7 +117,7 @@ describe("match-head-to-head", () => {
 
     expect(meeting).toMatchObject({
       publicId: 7250,
-      slug: "team-vitality-vs-karmine-corp-rlcs-major-playoffs",
+      slug: "karmine-corp-vs-team-vitality-rlcs-major-playoffs",
     });
   });
 
