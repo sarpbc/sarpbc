@@ -14,9 +14,14 @@ const sizeClasses = {
 </script>
 
 <template>
-  <UIcon
+  <img
     v-if="nationality"
-    :name="`flag:${nationality.toLowerCase()}-4x3`"
+    :src="`/flags/${nationality.toLowerCase()}.svg`"
+    alt=""
+    width="4"
+    height="3"
+    loading="lazy"
+    decoding="async"
     :class="sizeClasses[size || 'md']"
     class="inline-block"
   />
