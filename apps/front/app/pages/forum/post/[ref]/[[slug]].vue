@@ -16,7 +16,10 @@ const {
 } = await useAsyncData(
   () => `forum-post-${postRef.value}`,
   () => getPostById(postRef.value),
-  { watch: [postRef] },
+  {
+    watch: [postRef],
+    pick: ["id", "publicId", "slug", "title", "content", "author", "createdAt"],
+  },
 );
 
 if (!post.value) {
