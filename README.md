@@ -110,24 +110,6 @@ App-specific notes: [apps/front/README.md](apps/front/README.md), [apps/back/REA
 
 The code should be reusable by the community: fork it, self-host it, fix bugs, and build on it. It is under **Apache-2.0** (free reuse with attribution). The **sarpbc.org** name, logos, and production domains are not licensed for claiming as your own. See [docs/TRADEMARK.md](docs/TRADEMARK.md).
 
-## Production deployment (Dokploy)
-
-Production deploys use **Dokploy**, not GitHub Actions image builds. On each push to `main`, [`release-tag.yml`](.github/workflows/release-tag.yml) creates a tag `vYYYY.MM.DD.N` (for example `v2026.06.03.42`) and a GitHub Release with notes from [CHANGELOG.md](CHANGELOG.md). Configure Dokploy apps with trigger **On Tag**.
-
-| App      | Dockerfile              | Docker context | Port |
-| -------- | ----------------------- | -------------- | ---- |
-| Backend  | `apps/back/Dockerfile`  | `/`            | 4001 |
-| Frontend | `apps/front/Dockerfile` | `/`            | 4000 |
-| Admin    | `apps/admin/Dockerfile` | `/`            | 4002 |
-
-Suggested registry images: `ghcr.io/sarpbc/back`, `ghcr.io/sarpbc/front`, `ghcr.io/sarpbc/admin`.
-
-Set secrets and env vars from `apps/back/.env.example`, `apps/front/.env.example`, and `apps/admin/.env.example` in Dokploy. Backend needs `ADMIN_URL` (e.g. `https://admin.sarpbc.org`) alongside `FRONT_URL`.
-
-Optional build arg: `APP_RELEASE` = tag name.
-
-CI on pull requests: lint, format, frontend typecheck and build. See [`.github/workflows/pr.yml`](.github/workflows/pr.yml).
-
 ## Useful commands
 
 ```bash
@@ -155,11 +137,3 @@ pnpm lint:fix
 ## Design (public frontend)
 
 UI decisions for the Nuxt site (hub vs marketing, row grid, components): [`apps/front/DESIGN.md`](apps/front/DESIGN.md). The root [design index](DESIGN.md) identifies the applicable guide for each application.
-
-## AI / Cursor
-
-Project instructions: [AGENTS.md](AGENTS.md). The minimal Cursor rule points to the same project documents. Personal skills are installed outside this repository and follow its instructions and design.
-
-## Migration from legacy repos
-
-The former `sarpbc-front` and `sarpbc-back` repositories are superseded by this monorepo. Archive or mark them read-only after switching Dokploy to `sarpbc/sarpbc`.
