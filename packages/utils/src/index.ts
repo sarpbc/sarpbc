@@ -46,6 +46,16 @@ export {
 export { resolveThemedLogoUrl } from "./themed-logo.ts";
 export { isStaffUser, hasPermission, canModerateComments } from "./staff.ts";
 export {
+  forumPostPath,
+  forumPostSlug,
+  matchPath,
+  matchSlug,
+  toSlug,
+  tournamentSlugParts,
+  type MatchSlugInput,
+  type TournamentSlugInput,
+} from "./entity-slug.ts";
+export {
   parseNewsLocale,
   hasFrenchTranslation,
   localizedNewsFields,
