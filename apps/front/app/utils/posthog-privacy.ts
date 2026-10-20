@@ -1,8 +1,8 @@
 import type { CaptureResult } from "posthog-js";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 const urlPropertySchema = z.string();
-const heatmapSchema = z.record(z.string(), z.array(z.object({}).loose()));
+const heatmapSchema = z.record(z.string(), z.array(z.looseObject({})));
 
 export function sanitizePostHogUrl(value: string): string {
   try {
