@@ -6,7 +6,7 @@
         <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-4">
           <div class="hidden md:flex md:col-span-3 lg:col-span-2">
             <SHubColumn variant="main">
-              <MatchLateralBar />
+              <LazyMatchLateralBar hydrate-on-visible />
             </SHubColumn>
           </div>
 
@@ -22,7 +22,7 @@
         </div>
       </div>
     </div>
-    <NavFooter class="mt-auto" />
-    <LandingCookiePopup />
+    <LazyNavFooter hydrate-on-visible class="mt-auto" />
+    <LazyLandingCookiePopup hydrate-on-idle />
   </main>
 </template>

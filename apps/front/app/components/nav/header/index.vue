@@ -115,7 +115,7 @@ const menuToggleLabel = computed(() =>
         />
       </div>
       <div class="h-full flex-row flex-1 justify-end items-center gap-4 hidden md:flex">
-        <NavHeaderSearch />
+        <LazyNavHeaderSearch hydrate-on-visible />
         <NavHeaderUser />
       </div>
       <UButton
