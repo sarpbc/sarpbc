@@ -71,6 +71,7 @@ export class MatchResult {
 
 export class Match {
   id: string = v4();
+  publicId!: number;
   pandascoreId: number | null = null;
   name!: string;
   slug: string | null = null;
@@ -160,6 +161,7 @@ export const MatchSchema = defineEntity({
   repository: () => MatchRepository,
   properties: {
     id: p.string().primary(),
+    publicId: p.integer().autoincrement().generated("identity").unique(),
     pandascoreId: p.integer().nullable().unique(),
     name: p.string(),
     slug: p.string().nullable(),
