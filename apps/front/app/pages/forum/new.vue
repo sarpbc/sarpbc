@@ -103,6 +103,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   isSubmitting.value = false;
 
   if (createResult.ok) {
+    // The public id is assigned by the server; the legacy id answers a 301 to the canonical path.
     await navigateTo(localePath(`/forum/post/${postId}`));
     return;
   }

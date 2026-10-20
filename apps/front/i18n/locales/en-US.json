@@ -1593,8 +1593,6 @@
       "post": {
         "failedToLoadPostData": "Failed to load post data",
         "postNotFound": "Post Not Found",
-        "postCouldNotBeFound": "The post could not be found.",
-        "goBackToForum": "Go back to forum",
         "seoTitleWithTitle": "{title} - sarpbc.org Forum",
         "seoTitleDefault": "Forum Post - sarpbc.org",
         "seoDescriptionWithTitle": "Read \"{title}\" in the sarpbc.org forum",

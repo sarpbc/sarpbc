@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { forumPostPath } from "@sarpbc/utils";
+
 const localePath = useLocalePath();
 const user = useUser();
 
@@ -26,7 +28,7 @@ const activities = computed(() => recentForumActivities.value ?? []);
           size="compact"
           :divider="!user || index < activities.length - 1"
           :divider-top="index === 0"
-          :to="$localePath(`/forum/post/${activity.id}`)"
+          :to="$localePath(forumPostPath(activity.publicId, activity.slug))"
           :title="activity.title"
           class="text-xs font-normal text-muted"
           :class="{ 'pb-px': user && index === activities.length - 1 }"
