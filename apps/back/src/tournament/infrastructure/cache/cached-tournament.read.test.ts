@@ -15,6 +15,7 @@ function fixture(): Tournament {
   const participant = Object.assign(new TournamentParticipant(), { team, players: [player] });
   const match = Object.assign(new Match(), {
     id: "match",
+    publicId: 7250,
     participants: [participant],
     winner: participant,
     beginAt: new Date("2026-01-01"),

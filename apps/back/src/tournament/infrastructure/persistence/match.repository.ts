@@ -1,4 +1,5 @@
 import { EntityRepository } from "@mikro-orm/core";
+import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match } from "./tournament.entities";
 import type {
   MatchListQueryOptions,
@@ -35,6 +36,8 @@ const TEAM_FORM_POPULATE = [
   "results.participant",
   "winner",
   "winner.team",
+  "tournament",
+  "tournament.league",
 ] as const;
 
 const HEAD_TO_HEAD_POPULATE = [
@@ -162,8 +165,9 @@ export class MatchRepository extends EntityRepository<Match> {
     });
   }
 
-  async findDetailById(id: string): Promise<Match | null> {
-    return this.findOne({ id }, { populate: [...DETAIL_POPULATE] });
+  async findDetail(ref: EntityRef): Promise<Match | null> {
+    const where = ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value };
+    return this.findOne(where, { populate: [...DETAIL_POPULATE] });
   }
 
   async findRecentFinishedByTeamId({

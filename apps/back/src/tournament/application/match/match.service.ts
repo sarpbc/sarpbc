@@ -1,5 +1,6 @@
 import { NotFoundError } from "../../../common/domain/errors";
-import { Match } from "../../domain/competition";
+import type { EntityRef } from "../../../common/domain/entity-ref";
+import { Match, matchPublicSlug } from "../../domain/competition";
 import type { MatchListQueryOptions } from "./match-list-filters";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type {
@@ -31,6 +32,8 @@ export interface TeamFormMatchScore {
 
 export interface TeamFormMatchEntry {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt?: Date | null;
   endAt?: Date | null;
   opponent: TeamFormOpponent;
@@ -87,10 +90,10 @@ export class MatchService {
     return this.reads.recentlyEnded({ limit, minutesAgo });
   }
 
-  async findDetailById(
-    id: string,
+  async findDetail(
+    ref: EntityRef,
   ): Promise<{ match: Match; teamForms: TeamFormsMap; headToHead: HeadToHead | null }> {
-    const match = await this.reads.detail(id);
+    const match = await this.reads.detail(ref);
 
     if (!match) {
       throw new NotFoundError(
@@ -177,6 +180,8 @@ export class MatchService {
 
     return {
       id: match.id,
+      publicId: match.publicId,
+      slug: matchPublicSlug(match),
       beginAt: match.beginAt,
       endAt: match.endAt,
       opponent: {
@@ -227,17 +232,24 @@ export class MatchService {
   }
 
   async upsertMatch(tournamentId: string, input: UpsertMatchInput): Promise<Match> {
-    const match = await this.transaction.run(({ matches }) =>
+    const written = await this.transaction.run(({ matches }) =>
       upsertMatchInTransaction(matches, tournamentId, input),
     );
+    const match = await this.committed(written.id);
     await this.score(match);
     return match;
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
-    const match = await this.transaction.run(({ matches }) =>
+    const written = await this.transaction.run(({ matches }) =>
       setWinnerInTransaction(matches, matchId, winnerId),
     );
+    const match = await this.committed(written.id);
     await this.score(match);
+    return match;
+  }
+  private async committed(id: string): Promise<Match> {
+    const match = await this.reads.detail({ kind: "id", value: id });
+    if (!match) throw new NotFoundError("Match not found");
     return match;
   }
   private async score(match: Match) {

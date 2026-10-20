@@ -1,5 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { FilterQuery } from "@mikro-orm/core";
+import type { EntityRef } from "../../../common/domain/entity-ref";
 import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentRepository } from "./tournament.repository";
 import { MatchRepository } from "./match.repository";
@@ -135,8 +136,8 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       await this.em.getRepository<Match, MatchRepository>(Match).findRecentlyEnded(options)
     ).map(toMatch);
   }
-  async detail(id: string) {
-    const row = await this.em.getRepository<Match, MatchRepository>(Match).findDetailById(id);
+  async detail(ref: EntityRef) {
+    const row = await this.em.getRepository<Match, MatchRepository>(Match).findDetail(ref);
     return row ? toMatch(row) : null;
   }
   async recentByTeam(options: { teamId: string; excludeMatchId: string; limit: number }) {

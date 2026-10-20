@@ -10,6 +10,7 @@ import type {
 } from "../domain/competition";
 import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
 import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
+import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
 export interface TournamentQueries {
@@ -36,7 +37,7 @@ export interface MatchQueries {
     options: MatchListQueryOptions,
   ): Promise<[Match[], number]>;
   recentlyEnded(options: { limit?: number; minutesAgo?: number }): Promise<Match[]>;
-  detail(id: string): Promise<Match | null>;
+  detail(ref: EntityRef): Promise<Match | null>;
   recentByTeam(options: {
     teamId: string;
     excludeMatchId: string;

@@ -1,3 +1,4 @@
+import { matchPath } from "@sarpbc/utils";
 import { getAdminUrl, getFrontUrl } from "../../infrastructure/config/secrets";
 
 export function playerUrl(slug: string): string {
@@ -8,8 +9,8 @@ export function teamUrl(slug: string): string {
   return `${getFrontUrl()}/team/${slug}`;
 }
 
-export function matchUrl(id: string): string {
-  return `${getFrontUrl()}/matches/${id}`;
+export function matchUrl(publicId: number, slug: string): string {
+  return `${getFrontUrl()}${matchPath(publicId, slug)}`;
 }
 
 export function tournamentUrl(id: string): string {

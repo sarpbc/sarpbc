@@ -11,6 +11,7 @@ import {
   Match,
   Tournament,
   TournamentParticipant,
+  matchPublicSlug,
 } from "../../domain/competition";
 
 export interface LeagueResponse {
@@ -43,9 +44,10 @@ export interface TournamentBracketLinkResponse {
 
 export interface TournamentMatchResponse {
   id: string;
+  publicId: number;
   pandascoreId: number | null;
   name: string;
-  slug: string | null;
+  slug: string;
   beginAt: Date | null;
   endAt: Date | null;
   status: string | null;
@@ -118,12 +120,13 @@ function mapBracketLink(link: BracketLink, fallbackMatchId: string): TournamentB
   };
 }
 
-function mapMatch(match: Match): TournamentMatchResponse {
+function mapMatch(match: Match, tournament: Tournament): TournamentMatchResponse {
   return {
     id: match.id,
+    publicId: match.publicId,
     pandascoreId: match.pandascoreId,
     name: match.name,
-    slug: match.slug,
+    slug: matchPublicSlug({ name: match.name, participants: match.participants, tournament }),
     beginAt: match.beginAt,
     endAt: match.endAt,
     status: match.status,
@@ -172,7 +175,7 @@ export function mapTournament(
     participants: tournament.participants.map(mapParticipant),
   };
   if (includeMatches) {
-    mapped.matches = tournament.matches.map(mapMatch);
+    mapped.matches = tournament.matches.map((match) => mapMatch(match, tournament));
   }
   return mapped;
 }

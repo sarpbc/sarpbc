@@ -1,7 +1,9 @@
-import { Match } from "../../domain/competition";
+import { Match, matchPublicSlug } from "../../domain/competition";
 
 export interface MatchListItemResponse {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt: Date | null;
   participants: { id: string; team: { name: string } }[];
   results: { participant: string; score: number }[];
@@ -20,6 +22,8 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
 
   return {
     id: match.id,
+    publicId: match.publicId,
+    slug: matchPublicSlug(match),
     beginAt: match.beginAt,
     participants: participants.map((participant) => ({
       id: participant.id,
@@ -41,4 +45,8 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
         : undefined,
     },
   };
+}
+
+export function withPublicSlug(match: Match): Omit<Match, "slug"> & { slug: string } {
+  return { ...match, slug: matchPublicSlug(match) };
 }

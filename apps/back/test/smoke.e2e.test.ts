@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { NotFoundException, BadRequestException } from "@nestjs/common";
+import { BadRequestException } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
@@ -19,7 +19,11 @@ import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
 import { MatchService } from "../src/tournament/application/match/match.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
+import { NotFoundError } from "../src/common/domain/errors";
 import { configureApp } from "../src/configure-app";
+import type { EntityRef } from "../src/common/domain/entity-ref";
+import { League, Match, TournamentParticipant } from "../src/tournament/domain/competition";
+import { Team } from "../src/player/domain/roster";
 import { User } from "../src/user/domain/user";
 
 describe("API smoke (e2e)", () => {
@@ -53,16 +57,27 @@ describe("API smoke (e2e)", () => {
       };
     }),
   };
+  const MISSING_MATCH_ID = "11111111-1111-4111-8111-111111111111";
+  const grandFinal = Object.assign(new Match(), {
+    publicId: 7250,
+    name: "Grand Final: Karmine Corp vs Team Falcons",
+    slug: "stored-pandascore-slug",
+    participants: ["Karmine Corp", "Team Falcons"].map((name) =>
+      Object.assign(new TournamentParticipant(), { team: Object.assign(new Team(), { name }) }),
+    ),
+    tournament: {
+      name: "Playoffs",
+      serie: "Paris 2026",
+      beginAt: null,
+      league: Object.assign(new League(), { name: "RLCS Major" }),
+    },
+  });
   const matchService = {
-    findDetailById: vi.fn(async (id: string) => {
-      if (id === "missing") {
-        throw new NotFoundException(`Match with id "${id}" not found`);
+    findDetail: vi.fn(async (ref: EntityRef) => {
+      if (ref.kind === "id" && ref.value === MISSING_MATCH_ID) {
+        throw new NotFoundError("This match could not be found.");
       }
-      return {
-        match: { id, name: "Grand Final" },
-        teamForms: {},
-        headToHead: null,
-      };
+      return { match: grandFinal, teamForms: {}, headToHead: null };
     }),
     findUpcomingAndCount: vi.fn(),
     findLiveAndCount: vi.fn(),
@@ -156,8 +171,24 @@ describe("API smoke (e2e)", () => {
     await request(app.getHttpServer()).get("/news/weeks/2026-W99").expect(400);
   });
 
-  it("returns match detail 200 and 404", async () => {
-    await request(app.getHttpServer()).get("/matches/match-1").expect(200);
+  it("serves a match by public id with its computed slug", async () => {
+    const response = await request(app.getHttpServer()).get("/matches/7250").expect(200);
+    expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "publicId", value: 7250 });
+    expect(response.body.match).toMatchObject({
+      publicId: 7250,
+      slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
+    });
+  });
+
+  it("serves a match by its legacy id", async () => {
+    await request(app.getHttpServer()).get(`/matches/${grandFinal.id}`).expect(200);
+    expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "id", value: grandFinal.id });
+  });
+
+  it("answers 404 for unknown and malformed match references", async () => {
+    await request(app.getHttpServer()).get(`/matches/${MISSING_MATCH_ID}`).expect(404);
     await request(app.getHttpServer()).get("/matches/missing").expect(404);
+    await request(app.getHttpServer()).get("/matches/0").expect(404);
+    await request(app.getHttpServer()).get("/matches/-4").expect(404);
   });
 });

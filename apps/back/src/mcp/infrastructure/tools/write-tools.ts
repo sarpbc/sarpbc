@@ -10,6 +10,7 @@ import {
   UpdateTournamentDto,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
+import { matchPublicSlug } from "../../../tournament/domain/competition";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -244,7 +245,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: match.id,
             name: match.name,
             tournamentId,
-            url: matchUrl(match.id),
+            url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
       }),
@@ -268,7 +269,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           result: {
             id: match.id,
             winnerId,
-            url: matchUrl(match.id),
+            url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
       }),

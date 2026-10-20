@@ -210,6 +210,7 @@ export class CompetitionMatchWriter implements MatchWriter {
           id: t.id,
           name: t.name,
           serie: t.serie,
+          beginAt: t.beginAt,
           league: t.league,
           pickemsEnabled: t.pickemsEnabled,
           source: t.source,
