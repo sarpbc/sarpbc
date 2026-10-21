@@ -350,7 +350,24 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           )
         ).json().match;
         assert(match.id);
-        await request("GET", `/matches/${match.id}`);
+        assert(
+          Number.isInteger(match.publicId) && match.publicId > 0,
+          "created match has a public id",
+        );
+        assert.equal(match.slug, "integration-alpha-vs-integration-beta-integration-cup");
+        const byLegacyId = (await request("GET", `/matches/${match.id}`)).json();
+        const byPublicId = (await request("GET", `/matches/${match.publicId}`)).json();
+        assert.deepEqual(byPublicId.match, byLegacyId.match);
+        assert.equal(byPublicId.match.id, match.id);
+        assert.equal(byPublicId.match.publicId, match.publicId);
+        assert.equal(byPublicId.match.slug, match.slug);
+        await request("GET", `/matches/${match.publicId + 1000}`, undefined, undefined, 404);
+        await request("GET", "/matches/not-a-match", undefined, undefined, 404);
+        const listed = (
+          await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)
+        ).json();
+        assert.equal(listed.upcoming[0].publicId, match.publicId);
+        assert.equal(listed.upcoming[0].slug, match.slug);
         assert.equal(
           (await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)).json().total,
           1,
@@ -513,6 +530,61 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     );
 
     await check(
+      "match and forum post comments link notifications and moderation to canonical paths",
+      async () => {
+        const postId = randomUUID();
+        const topics = (await request("GET", "/forum")).json().topics;
+        const post = (
+          await request(
+            "POST",
+            "/posts",
+            { id: postId, title: "Linked Discussion", content: "Body", topicId: topics[0].id },
+            memberCookie,
+            201,
+          )
+        ).json();
+        const renamed = (await request("GET", `/matches/${match.publicId}`)).json().match;
+        const targets = [
+          { body: { matchId: match.id }, path: `/matches/${renamed.publicId}/${renamed.slug}` },
+          { body: { postId }, path: `/forum/post/${post.publicId}/linked-discussion` },
+        ];
+        for (const { body, path } of targets) {
+          const root = (
+            await request("POST", "/replies", { content: "Root", ...body }, staffCookie, 201)
+          ).json().reply;
+          await request(
+            "POST",
+            "/replies",
+            { content: "Answer", ...body, replyToId: root.id },
+            memberCookie,
+            201,
+          );
+          const notifications = (
+            await request("GET", "/notifications", undefined, staffCookie)
+          ).json().notifications;
+          assert.equal(notifications[0].targetPath, path);
+          await request("PATCH", "/notifications/read", {}, staffCookie);
+          await request(
+            "POST",
+            `/replies/${root.id}/report`,
+            { reason: "spam" },
+            memberCookie,
+            201,
+          );
+          const moderated = (
+            await request("GET", "/moderation/replies", undefined, staffCookie)
+          ).json();
+          const reported = (Array.isArray(moderated) ? moderated : moderated.replies).find(
+            (reply) => reply.id === root.id,
+          );
+          assert.equal(reported.targetPath, path);
+          await request("DELETE", `/replies/${root.id}`, undefined, staffCookie, 204);
+        }
+        await request("DELETE", `/posts/${postId}`, undefined, staffCookie, 204);
+      },
+    );
+
+    await check(
       "real reply + notification transaction rolls back both flushed writes",
       async () => {
         const { transactionalReplies } = await import("../src/reply/infrastructure/composition.ts");
@@ -671,7 +743,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const overview = (await request("GET", "/forum")).json();
         assert.equal(overview.totalTopics, 4);
         const id = randomUUID();
-        await request(
+        const creation = await request(
           "POST",
           "/posts",
           {
@@ -684,12 +756,18 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             ],
           },
           staffCookie,
-          204,
+          201,
         );
-        assert.equal(
-          (await request("GET", `/posts/${id}`)).json().post.title,
-          "Integration Discussion",
-        );
+        const createdLocation = creation.json();
+        const created = (await request("GET", `/posts/${id}`)).json().post;
+        assert.equal(created.title, "Integration Discussion");
+        assert(Number.isInteger(created.publicId) && created.publicId > 0, "post has a public id");
+        assert.equal(created.slug, "integration-discussion");
+        assert.deepEqual(createdLocation, { publicId: created.publicId, slug: created.slug });
+        const byPublicId = (await request("GET", `/posts/${created.publicId}`)).json().post;
+        assert.equal(byPublicId.id, id);
+        assert.equal((await request("GET", `/posts/${created.publicId + 1000}`)).json().post, null);
+        await request("GET", "/posts/not-a-post", undefined, undefined, 404);
         assert.equal(
           (
             await request("GET", `/posts/${id}`, undefined, undefined, 200, {
@@ -702,7 +780,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           (await request("GET", "/posts/creation-status", undefined, staffCookie)).json().canCreate,
           false,
         );
-        assert.equal((await request("GET", "/forum/preview")).json().recentPosts[0].id, id);
+        const preview = (await request("GET", "/forum/preview")).json().recentPosts[0];
+        assert.equal(preview.id, id);
+        assert.equal(preview.publicId, created.publicId);
+        assert.equal(preview.slug, "integration-discussion");
+        const listedPost = (await request("GET", "/posts"))
+          .json()
+          .posts.find((post) => post.id === id);
+        assert.equal(listedPost.publicId, created.publicId);
+        assert.equal(listedPost.slug, "integration-discussion");
         await request("DELETE", `/posts/${id}`, undefined, memberCookie, 403);
         await request("DELETE", `/posts/${id}`, undefined, staffCookie, 204);
         assert.equal((await request("GET", `/posts/${id}`)).json().post, null);

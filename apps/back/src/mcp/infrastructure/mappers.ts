@@ -66,16 +66,14 @@ export function mapTournamentDetail(tournament: Tournament) {
     hasBracket: tournament.hasBracket,
     matches: matches.map((match) => ({
       ...match,
-      url: matchUrl(match.id),
+      url: matchUrl(match.publicId, match.slug),
     })),
   };
 }
 
 export function mapMatchListResponse(match: Match) {
-  return {
-    ...mapMatchListItem(match),
-    url: matchUrl(match.id),
-  };
+  const item = mapMatchListItem(match);
+  return { ...item, url: matchUrl(item.publicId, item.slug) };
 }
 
 export function mapNewsListItem(article: NewsArticleAdminResponse) {

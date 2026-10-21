@@ -19,7 +19,6 @@ export const matchSchema = z.object({
   id: z.number().int().positive(),
   tournament_id: z.number().int().positive(),
   name: text,
-  slug: text,
   status: text,
   begin_at: date,
   end_at: date,

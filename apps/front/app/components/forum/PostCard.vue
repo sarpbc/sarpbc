@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { forumPostPath } from "@sarpbc/utils";
 import type { PostShort } from "~/types/forum";
 
 interface Props {
@@ -12,7 +13,7 @@ const { post } = defineProps<Props>();
   <SListItem
     size="default"
     divider
-    :to="$localePath(`/forum/post/${post.id}`)"
+    :to="$localePath(forumPostPath(post.publicId, post.slug))"
     class="min-w-0 gap-3"
   >
     <h3 class="min-w-0 flex-1 truncate text-sm font-medium text-default">

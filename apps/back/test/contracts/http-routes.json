@@ -146,7 +146,7 @@
   {
     "controller": "\"matches\"",
     "verb": "GET",
-    "path": "\":id\"",
+    "path": "\":ref\"",
     "status": null,
     "guards": [],
     "permissions": []
@@ -562,7 +562,7 @@
   {
     "controller": "\"posts\"",
     "verb": "GET",
-    "path": "\":id\"",
+    "path": "\":ref\"",
     "status": null,
     "guards": [],
     "permissions": []
@@ -595,7 +595,7 @@
     "controller": "\"posts\"",
     "verb": "POST",
     "path": "\"\"",
-    "status": "HttpStatus.NO_CONTENT",
+    "status": null,
     "guards": ["AuthGuard"],
     "permissions": []
   },

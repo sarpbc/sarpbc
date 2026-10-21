@@ -1,16 +1,39 @@
 <script lang="ts" setup>
+import { forumPostPath } from "@sarpbc/utils";
+
 const route = useRoute();
+const localePath = useLocalePath();
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
-const postId = computed(() => route.params.id as string);
+const postRef = computed(() => route.params.ref as string);
 
 const {
   data: post,
   pending,
   error,
   refresh,
-} = await useLazyAsyncData(`forum-post-${postId.value}`, () => getPostById(postId.value));
+} = await useAsyncData(
+  () => `forum-post-${postRef.value}`,
+  () => getPostById(postRef.value),
+  { watch: [postRef] },
+);
+
+if (!post.value) {
+  throwEntityLoadError(error.value, {
+    notFound: t("page.forum.post.postNotFound"),
+    failed: t("page.forum.post.failedToLoadPostData"),
+  });
+}
+
+const { publicId, slug } = post.value;
+const canonicalPath = localePath(forumPostPath(publicId, slug));
+if (route.path !== canonicalPath) {
+  await navigateTo(
+    { path: canonicalPath, query: route.query, hash: route.hash },
+    { redirectCode: 301, replace: true },
+  );
+}
 
 const title = computed(() =>
   post.value?.title
@@ -26,10 +49,13 @@ const description = computed(() =>
     : t("page.forum.post.seoDescriptionDefault"),
 );
 
-setPageSeo({
-  title: title.value,
-  description: description.value,
-});
+watch(
+  [title, description],
+  () => {
+    setPageSeo({ title: title.value, description: description.value });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -48,19 +74,7 @@ setPageSeo({
       <SErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
     </SCard>
 
-    <SCard v-else-if="!post" class="flex min-h-row-stack h-row-grid items-center">
-      <SEmptyState
-        icon="i-fluent-chat-dismiss-24-regular"
-        :title="t('page.forum.post.postNotFound')"
-        :hint="t('page.forum.post.postCouldNotBeFound')"
-      >
-        <UButton variant="outline" color="neutral" :to="$localePath('/forum')">
-          {{ t("page.forum.post.goBackToForum") }}
-        </UButton>
-      </SEmptyState>
-    </SCard>
-
-    <template v-else>
+    <template v-else-if="post">
       <SCard flush-top flush-bottom class="h-row-grid">
         <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
           <h1 class="min-w-0 truncate text-sm font-medium text-default">
@@ -78,7 +92,7 @@ setPageSeo({
         </div>
       </SCard>
 
-      <DiscussionCommentThread target-type="forumPost" :target-id="postId" />
+      <DiscussionCommentThread target-type="forumPost" :target-id="post.id" />
     </template>
   </SHubPageBody>
 </template>

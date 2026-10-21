@@ -3,6 +3,7 @@ import { ConflictError } from "../../common/domain/errors";
 import { Post } from "../../forum/infrastructure/persistence/forum.entities";
 import { NewsArticle } from "../../news/infrastructure/persistence/news-article.entity";
 import { Match } from "../../tournament/infrastructure/persistence/tournament.entities";
+import { toMatchSlug } from "../../tournament/infrastructure/persistence/competition.mapper";
 import { User } from "../../user/infrastructure/persistence/user.entity";
 import { directReplyNotifications } from "../../notification/infrastructure/composition";
 import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
@@ -27,7 +28,11 @@ export function replyWriteScope(em: EntityManager): ReplyWriteScope {
           case "forumPost": {
             const row = await em.findOne(Post, { id: target.id });
             return row
-              ? { post: { id: row.id, title: row.title }, newsArticle: null, match: null }
+              ? {
+                  post: { id: row.id, publicId: row.publicId, title: row.title },
+                  newsArticle: null,
+                  match: null,
+                }
               : null;
           }
           case "newsArticle": {
@@ -41,9 +46,22 @@ export function replyWriteScope(em: EntityManager): ReplyWriteScope {
               : null;
           }
           case "match": {
-            const row = await em.findOne(Match, { id: target.id });
+            const row = await em.findOne(
+              Match,
+              { id: target.id },
+              { populate: ["participants.team", "tournament.league"] },
+            );
             return row
-              ? { post: null, newsArticle: null, match: { id: row.id, name: row.name } }
+              ? {
+                  post: null,
+                  newsArticle: null,
+                  match: {
+                    id: row.id,
+                    publicId: row.publicId,
+                    name: row.name,
+                    slug: toMatchSlug(row),
+                  },
+                }
               : null;
           }
           default: {

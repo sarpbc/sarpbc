@@ -1,9 +1,11 @@
+import { wrap } from "@mikro-orm/core";
 import * as Row from "./tournament.entities";
 import {
   League,
   Match,
   Tournament,
   TournamentParticipant,
+  matchPublicSlug,
   type TournamentSummary,
 } from "../../domain/competition";
 import { toPlayer, toTeam } from "../../../player/infrastructure/roster-persistence";
@@ -35,6 +37,7 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
     id: row.id,
     name: row.name,
     serie: row.serie,
+    beginAt: row.beginAt,
     league: row.league ? toLeague(row.league) : null,
     pickemsEnabled: row.pickemsEnabled,
     source: row.source,
@@ -44,9 +47,9 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
 export function toMatch(row: Row.Match): Match {
   return Object.assign(new Match(), {
     id: row.id,
+    publicId: row.publicId,
     pandascoreId: row.pandascoreId,
     name: row.name,
-    slug: row.slug,
     beginAt: row.beginAt,
     endAt: row.endAt,
     status: row.status,
@@ -104,5 +107,21 @@ export function toTournament(row: Row.Tournament): Tournament {
       ? row.participants.getItems().map(toParticipant)
       : [],
     matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
+  });
+}
+/** Safe on partially loaded rows, such as the match reference behind a reply. */
+export function toMatchSlug(row: Row.Match): string {
+  const loaded = wrap(row).isInitialized();
+  const tournament =
+    loaded && row.tournament && wrap(row.tournament).isInitialized() ? row.tournament : null;
+  return matchPublicSlug({
+    name: row.name,
+    participants: loaded && row.participants.isInitialized() ? row.participants.getItems() : [],
+    tournament: {
+      name: tournament?.name ?? "",
+      serie: tournament?.serie ?? null,
+      beginAt: tournament?.beginAt ?? null,
+      league: tournament?.league ?? null,
+    },
   });
 }

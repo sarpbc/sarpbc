@@ -44,6 +44,8 @@ export interface MatchListParticipant {
 
 export interface MatchListItem {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt?: Date | null;
   participants?: MatchListParticipant[];
   results?: MatchResult[];
@@ -85,6 +87,8 @@ export interface TeamFormMatchScore {
 
 export interface TeamFormMatchEntry {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt?: Date;
   endAt?: Date;
   opponent: TeamFormOpponent;
@@ -101,6 +105,8 @@ export type TeamFormsMap = Record<string, TeamForm>;
 
 export interface HeadToHeadMeeting {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt?: Date;
   endAt?: Date;
   tournamentLabel: string;
@@ -128,9 +134,10 @@ export interface MatchDetailResponse {
 
 export interface Match {
   id: string;
+  publicId: number;
   pandascoreId?: number;
   name: string;
-  slug?: string;
+  slug: string;
   beginAt?: Date;
   endAt?: Date;
   status?: string;
@@ -144,6 +151,8 @@ export interface Match {
   previousMatches?: BracketLink[];
   officialStreams?: OfficialMatchStream[];
 }
+
+export type MatchLinkTarget = Pick<Match, "id" | "publicId" | "slug">;
 
 export type MatchStatus = "upcoming" | "live" | "finished";
 

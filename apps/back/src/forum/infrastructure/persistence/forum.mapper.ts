@@ -4,6 +4,7 @@ import { replySnapshot } from "../../../reply/infrastructure/persistence/reply.m
 export function postSnapshot(row: Post): PostRecord {
   return {
     id: row.id,
+    publicId: row.publicId,
     title: row.title,
     content: row.content,
     author: { id: row.author.id, userName: row.author.userName },

@@ -1593,8 +1593,6 @@
       "post": {
         "failedToLoadPostData": "Échec du chargement des données du post",
         "postNotFound": "Post introuvable",
-        "postCouldNotBeFound": "Le post n'a pas pu être trouvé.",
-        "goBackToForum": "Retour au forum",
         "seoTitleWithTitle": "{title} - Forum sarpbc.org",
         "seoTitleDefault": "Post du forum - sarpbc.org",
         "seoDescriptionWithTitle": "Lire \"{title}\" dans le forum sarpbc.org",

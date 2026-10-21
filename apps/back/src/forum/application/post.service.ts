@@ -1,4 +1,6 @@
+import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
+import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
 import {
   FORUM_ERROR_CODES,
@@ -7,9 +9,11 @@ import {
 } from "../domain/forum.constants";
 import { PostType } from "../domain/post-type.enum";
 import type {
+  NewPostRecord,
   PostRecord,
   TranslationRecord,
   CreatePostInput,
+  CreatedPost,
   PostView,
   PostReplyView,
   PostCreationStatus,
@@ -37,13 +41,14 @@ export class PostService {
     return this.postRepository.findByTopicId(topicId);
   }
 
-  async findById(id: string): Promise<PostRecord | null> {
-    return this.postRepository.findWithDetails(id);
+  async findById(ref: EntityRef): Promise<PostRecord | null> {
+    return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(id: string): Promise<PostView | null> {
-    const post = await this.findById(id);
+  async findByIdDto(ref: EntityRef, locale: string | null): Promise<PostView | null> {
+    const post = await this.findById(ref);
     if (!post) return null;
+    const translation = locale ? post.translations.find((t) => t.locale === locale) : undefined;
 
     const buildNestedReplies = (replies: ReplyRecord[]) => {
       const replyMap = new Map<string, PostReplyView>();
@@ -79,8 +84,10 @@ export class PostService {
 
     return {
       id: post.id,
-      title: post.title,
-      content: post.content,
+      publicId: post.publicId,
+      slug: forumPostSlug(post.title),
+      title: translation?.title ?? post.title,
+      content: translation?.content ?? post.content,
       topic: { id: post.topic.id, title: post.topic.title },
       author: post.author.userName,
       createdAt: post.createdAt,
@@ -98,8 +105,8 @@ export class PostService {
     };
   }
 
-  async create(userId: string, createPostInput: CreatePostInput): Promise<void> {
-    return this.transaction.run(async (scope) => {
+  async create(userId: string, createPostInput: CreatePostInput): Promise<CreatedPost> {
+    await this.transaction.run(async (scope) => {
       const eligibility = await this.resolvePostCreationEligibility(userId, scope.posts);
       if (!eligibility.canCreate) {
         throw new InvalidInputError({
@@ -126,7 +133,7 @@ export class PostService {
         throw new NotFoundError("User not found");
       }
 
-      const newPost: PostRecord = {
+      const newPost: NewPostRecord = {
         id: createPostInput.id,
         title: sanitizePlainText(createPostInput.title),
         content: sanitizePlainText(createPostInput.content),
@@ -155,6 +162,9 @@ export class PostService {
         }
       }
     });
+    const created = await this.postRepository.findById(createPostInput.id);
+    if (!created) throw new NotFoundError("Post not found");
+    return { publicId: created.publicId, slug: forumPostSlug(created.title) };
   }
 
   async findRecentActivity(limit: number = 20) {
@@ -163,7 +173,7 @@ export class PostService {
 
   async delete(id: string): Promise<void> {
     return this.transaction.run(async (scope) => {
-      const post = await scope.posts.findWithDetails(id);
+      const post = await scope.posts.findWithDetails({ kind: "id", value: id });
       if (!post) {
         throw new NotFoundError("Post not found");
       }

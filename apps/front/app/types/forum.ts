@@ -1,5 +1,7 @@
 export interface PostPreview {
   id: string;
+  publicId: number;
+  slug: string;
   title: string;
   messageCount: number;
   lastActivity: Date;
@@ -7,6 +9,8 @@ export interface PostPreview {
 
 export interface PostShort {
   id: string;
+  publicId: number;
+  slug: string;
   title: string;
   author: string;
   createdAt: Date;
@@ -27,6 +31,8 @@ export interface Reply {
 
 export interface Post {
   id: string;
+  publicId: number;
+  slug: string;
   title: string;
   content: string;
   topic: Topic;
@@ -48,7 +54,7 @@ export interface ForumPostCreationStatus {
 }
 
 export type CreateForumPostResult =
-  | { ok: true }
+  | { ok: true; post: { publicId: number; slug: string } }
   | {
       ok: false;
       reason: "unauthorized" | "rate_limited" | "conflict" | "unknown";

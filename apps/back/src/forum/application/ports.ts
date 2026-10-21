@@ -1,15 +1,22 @@
-import type { PostRecord, TopicRecord, TranslationRecord } from "../domain/forum";
+import type { EntityRef } from "../../common/domain/entity-ref";
+import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "../domain/forum";
 import type { ReplyAuthor } from "../../reply/domain/reply";
 export interface PostStore {
   findPaginated(options: { limit?: number; offset?: number }): Promise<PostRecord[]>;
   findByTopicId(id: string): Promise<PostRecord[]>;
   findById(id: string): Promise<PostRecord | null>;
-  findWithDetails(id: string): Promise<PostRecord | null>;
+  findWithDetails(ref: EntityRef): Promise<PostRecord | null>;
   findLatestByUser(id: string): Promise<PostRecord | null>;
-  findRecentActivity(
-    limit: number,
-  ): Promise<{ id: string; title: string; messageCount: number; lastActivity: Date }[]>;
-  save(post: PostRecord): Promise<void>;
+  findRecentActivity(limit: number): Promise<
+    {
+      id: string;
+      publicId: number;
+      title: string;
+      messageCount: number;
+      lastActivity: Date;
+    }[]
+  >;
+  save(post: NewPostRecord): Promise<void>;
   saveTranslation(translation: TranslationRecord): Promise<void>;
   deleteTranslations(post: PostRecord): Promise<void>;
   delete(post: PostRecord): Promise<void>;

@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from "@nestjs/common";
+import { forumPostSlug } from "@sarpbc/utils";
 import { TopicService } from "../../application/topic.service";
 import { PostService } from "../../application/post.service";
 import { ReplyService } from "../../../reply/application/reply.service";
@@ -33,7 +34,7 @@ export class ForumController {
   async getPreview() {
     const recentPosts = await this.postService.findRecentActivity(20);
     return {
-      recentPosts,
+      recentPosts: recentPosts.map((post) => ({ ...post, slug: forumPostSlug(post.title) })),
     };
   }
 

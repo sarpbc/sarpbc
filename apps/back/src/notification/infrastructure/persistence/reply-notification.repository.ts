@@ -17,7 +17,15 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
     return this.find(
       { recipient: { id: recipientId } },
       {
-        populate: ["reply", "reply.author", "reply.post", "reply.newsArticle", "reply.match"],
+        populate: [
+          "reply",
+          "reply.author",
+          "reply.post",
+          "reply.newsArticle",
+          "reply.match",
+          "reply.match.participants.team",
+          "reply.match.tournament.league",
+        ],
         orderBy: { createdAt: "DESC" },
         limit,
       },

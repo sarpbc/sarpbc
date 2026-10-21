@@ -1,7 +1,9 @@
-import type { Match } from "../../domain/competition";
+import { matchPublicSlug, type Match } from "../../domain/competition";
 
 export interface HeadToHeadMeeting {
   id: string;
+  publicId: number;
+  slug: string;
   beginAt?: Date | null;
   endAt?: Date | null;
   tournamentLabel: string;
@@ -76,6 +78,8 @@ export function mapHeadToHeadMeeting(
 
   return {
     id: match.id,
+    publicId: match.publicId,
+    slug: matchPublicSlug(match),
     beginAt: match.beginAt,
     endAt: match.endAt,
     tournamentLabel: formatTournamentLabel(match),

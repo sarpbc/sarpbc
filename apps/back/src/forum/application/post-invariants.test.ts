@@ -18,7 +18,10 @@ function setup(role: string | null = "admin") {
   const posts = {
     findPaginated: vi.fn().mockResolvedValue([]),
     findByTopicId: vi.fn().mockResolvedValue([]),
-    findById: vi.fn().mockResolvedValue(null),
+    findById: vi.fn(async (id: string) => {
+      const post = saved.find((candidate) => candidate.id === id);
+      return post ? { ...post, publicId: 41 } : null;
+    }),
     findWithDetails: vi.fn().mockResolvedValue(null),
     findLatestByUser: vi.fn().mockResolvedValue(null),
     findRecentActivity: vi.fn().mockResolvedValue([]),
@@ -73,7 +76,7 @@ const input = {
 describe("post transaction and policies", () => {
   it("creates the post and sanitized admin translations before a single commit", async () => {
     const f = setup();
-    await f.service.create("user", input);
+    expect(await f.service.create("user", input)).toEqual({ publicId: 41, slug: "title" });
     expect(f.saved[0]?.title).toBe("Title");
     expect(f.translations[0]?.title).toBe("Titre");
     expect(f.translations[0]?.post.id).toBe("post");
@@ -97,6 +100,7 @@ describe("post transaction and policies", () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
       id: "latest",
+      publicId: 1,
       title: "Post",
       content: "Body",
       author: { id: "user", userName: "Fan" },
@@ -118,6 +122,7 @@ describe("post transaction and policies", () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
       id: "latest",
+      publicId: 1,
       title: "Post",
       content: "Body",
       author: { id: "user", userName: "Fan" },
@@ -162,5 +167,62 @@ describe("post transaction and policies", () => {
     expect(f.scope.posts.deleteTranslations).not.toHaveBeenCalled();
     expect(f.scope.posts.delete).not.toHaveBeenCalled();
     expect(f.commits()).toBe(1);
+  });
+});
+describe("post lookup", () => {
+  const stored: PostRecord = {
+    id: "0a1b2c3d-0000-4000-8000-123456789abc",
+    publicId: 88,
+    title: "Mon Post: Quel roster ?",
+    content: "Body",
+    author: { id: "user", userName: "Fan" },
+    topic: { id: "topic", title: "Topic" },
+    postType: PostType.DISCUSSION,
+    createdAt: now,
+    updatedAt: null,
+    translations: [
+      {
+        id: "t",
+        post: { id: "0a1b2c3d-0000-4000-8000-123456789abc" },
+        locale: "en-US",
+        title: "Translated title",
+        content: "Translated",
+        createdAt: now,
+        updatedAt: null,
+      },
+    ],
+    replies: [],
+  };
+  it("exposes the public id and a slug derived from the base title", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    const ref = { kind: "publicId", value: 88 } as const;
+    expect(await f.service.findByIdDto(ref, null)).toMatchObject({
+      id: stored.id,
+      publicId: 88,
+      slug: "mon-post-quel-roster",
+      title: stored.title,
+    });
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith(ref);
+  });
+  it("applies the requested translation from the single lookup and keeps the base slug", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    expect(await f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US")).toMatchObject({
+      slug: "mon-post-quel-roster",
+      title: "Translated title",
+      content: "Translated",
+    });
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledTimes(1);
+  });
+  it("reports a missing post as null", async () => {
+    const f = setup();
+    expect(await f.service.findByIdDto({ kind: "id", value: stored.id }, null)).toBeNull();
+  });
+  it("deletes by legacy id", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    await f.service.delete(stored.id);
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith({ kind: "id", value: stored.id });
   });
 });

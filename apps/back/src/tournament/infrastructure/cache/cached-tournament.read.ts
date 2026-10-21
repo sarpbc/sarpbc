@@ -35,9 +35,10 @@ const participant = z.object({
 });
 const match = z.object({
   id: z.string(),
+  publicId: z.number().int().positive(),
   pandascoreId: z.number().nullable(),
   name: z.string(),
-  slug: nullableText,
+  slug: z.string(),
   beginAt: date.nullable(),
   endAt: date.nullable(),
   status: nullableText,

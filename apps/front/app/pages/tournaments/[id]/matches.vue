@@ -88,7 +88,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           <SCard flush-bottom variant="soft" class="w-full">
             <div v-for="match in dayGroup.matches" :key="match.id">
               <MatchDiscoveryLink
-                :match-id="match.id"
+                :match="match"
                 :source="SOURCE"
                 status="upcoming"
                 class="touch-manipulation"
@@ -111,7 +111,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
         <SCard flush-bottom variant="soft" class="w-full">
           <div v-for="match in dayGroup.matches" :key="match.id">
             <MatchDiscoveryLink
-              :match-id="match.id"
+              :match="match"
               :source="SOURCE"
               status="finished"
               class="touch-manipulation"

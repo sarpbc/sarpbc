@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { matchPath } from "@sarpbc/utils";
 import type { HeadToHead } from "~/types/matches";
 
 const { t, locale } = useI18n();
@@ -61,7 +62,7 @@ function winnerLabel(winnerTeamId: string | null) {
       :key="meeting.id"
       size="default"
       divider
-      :to="localePath(`/matches/${meeting.id}`)"
+      :to="localePath(matchPath(meeting.publicId, meeting.slug))"
       class="min-w-0"
     >
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">

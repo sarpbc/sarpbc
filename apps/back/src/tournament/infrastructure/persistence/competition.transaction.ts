@@ -210,6 +210,7 @@ export class CompetitionMatchWriter implements MatchWriter {
           id: t.id,
           name: t.name,
           serie: t.serie,
+          beginAt: t.beginAt,
           league: t.league,
           pickemsEnabled: t.pickemsEnabled,
           source: t.source,
@@ -235,7 +236,6 @@ export class CompetitionMatchWriter implements MatchWriter {
     Object.assign(row, {
       pandascoreId: model.pandascoreId,
       name: model.name,
-      slug: model.slug,
       beginAt: model.beginAt,
       endAt: model.endAt,
       status: model.status,

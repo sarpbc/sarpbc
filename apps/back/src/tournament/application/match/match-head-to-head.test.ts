@@ -48,6 +48,7 @@ function createFinishedMatch({
 
   const match = new Match();
   match.id = id;
+  match.publicId = 7250;
   match.name = `${teamA.name} vs ${teamB.name}`;
   match.tournament = tournament;
   match.endAt = endAt;
@@ -99,6 +100,25 @@ describe("match-head-to-head", () => {
     expect(headToHead.recentMeetings[0]?.scoreA).toBe(4);
     expect(headToHead.recentMeetings[0]?.scoreB).toBe(2);
     expect(headToHead.recentMeetings[0]?.winnerTeamId).toBe(teamVitality.id);
+  });
+
+  it("links each meeting to its canonical match page", () => {
+    const match = createFinishedMatch({
+      id: "match-1",
+      teamA: teamVitality,
+      teamB: teamKarmine,
+      scoreA: 4,
+      scoreB: 2,
+      tournamentName: "Playoffs",
+      leagueName: "RLCS Major",
+    });
+
+    const [meeting] = buildHeadToHead([match], teamVitality.id, teamKarmine.id).recentMeetings;
+
+    expect(meeting).toMatchObject({
+      publicId: 7250,
+      slug: "karmine-corp-vs-team-vitality-rlcs-major-playoffs",
+    });
   });
 
   it("returns empty history when no previous meetings exist", () => {

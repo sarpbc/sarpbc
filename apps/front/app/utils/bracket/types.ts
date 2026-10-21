@@ -17,6 +17,8 @@ export interface TournamentBracketRoundGroup {
 
 export interface BracketLayoutMatch {
   matchId: string;
+  publicId: number;
+  slug: string;
   column: number;
   row: number;
   zone?: BracketZone;

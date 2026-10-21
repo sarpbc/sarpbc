@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { MatchResult, MatchStatus } from "~/types/matches";
+import { matchPath } from "@sarpbc/utils";
+import type { MatchLinkTarget, MatchResult, MatchStatus } from "~/types/matches";
 import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
 import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
@@ -9,7 +10,7 @@ const localePath = useLocalePath();
 const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
-  matchId,
+  match,
   name,
   teamAName,
   teamBName,
@@ -27,7 +28,7 @@ const {
   discoverySource,
   discoveryStatus,
 } = defineProps<{
-  matchId: string;
+  match: MatchLinkTarget;
   name?: string;
   teamAName?: string;
   teamBName?: string;
@@ -49,9 +50,9 @@ const {
 
 const detailTo = computed(() => {
   if (discoverySource) {
-    return matchDetailTo(matchId, discoverySource);
+    return matchDetailTo(match, discoverySource);
   }
-  return localePath(`/matches/${matchId}`);
+  return localePath(matchPath(match.publicId, match.slug));
 });
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
@@ -67,7 +68,7 @@ function onMatchClick() {
     return;
   }
   trackMatchRowClicked({
-    matchId,
+    matchId: match.id,
     source: discoverySource,
     status: discoveryStatus,
   });

@@ -1,4 +1,5 @@
 import { v4 } from "uuid";
+import { matchSlug } from "@sarpbc/utils";
 import type { Player, Team } from "../../player/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import type { TournamentSource } from "./tournament-source";
@@ -37,6 +38,7 @@ export interface TournamentSummary {
   id: string;
   name: string;
   serie: string | null;
+  beginAt: Date | null;
   league: League | null;
   pickemsEnabled: boolean;
   source: TournamentSource;
@@ -44,9 +46,9 @@ export interface TournamentSummary {
 }
 export class Match {
   id = v4();
+  publicId!: number;
   pandascoreId: number | null = null;
   name = "";
-  slug: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
   status: string | null = null;
@@ -59,6 +61,28 @@ export class Match {
   createdAt = new Date();
   updatedAt = new Date();
   tournament!: TournamentSummary;
+}
+export interface MatchSlugSource {
+  name: string;
+  participants: ReadonlyArray<{ team: { name: string } }>;
+  tournament: {
+    name: string;
+    serie: string | null;
+    beginAt: Date | null;
+    league: { name: string } | null;
+  };
+}
+export function matchPublicSlug({ name, participants, tournament }: MatchSlugSource): string {
+  return matchSlug({
+    teamNames: [participants[0]?.team.name, participants[1]?.team.name],
+    matchName: name,
+    tournament: {
+      leagueName: tournament.league?.name,
+      serie: tournament.serie,
+      stageName: tournament.name,
+      beginAt: tournament.beginAt,
+    },
+  });
 }
 export class Tournament {
   id = v4();

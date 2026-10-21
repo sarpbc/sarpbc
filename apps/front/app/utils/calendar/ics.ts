@@ -1,3 +1,6 @@
+import { matchPath } from "@sarpbc/utils";
+import type { MatchLinkTarget } from "~/types/matches";
+
 /** RFC 5545: fold lines at 75 octets; escape TEXT values. */
 
 export const ICS_PROD_ID = "-//sarpbc.org//EN";
@@ -27,8 +30,8 @@ export function tournamentCalendarPath(id: string): string {
   return `/calendar/tournament/${id}.ics`;
 }
 
-export function matchPageUrl(id: string): string {
-  return `${SITE_ORIGIN}/matches/${id}`;
+export function matchPageUrl(match: MatchLinkTarget): string {
+  return `${SITE_ORIGIN}${matchPath(match.publicId, match.slug)}`;
 }
 
 export function matchEventUid(id: string): string {

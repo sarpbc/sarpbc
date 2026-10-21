@@ -1,3 +1,4 @@
+import type { MatchLinkTarget } from "~/types/matches";
 import {
   buildMatchDetailTo,
   type MatchDiscoverySource,
@@ -14,8 +15,8 @@ export function useMatchDiscoveryAnalytics() {
   const posthog = usePostHog();
   const localePath = useLocalePath();
 
-  function matchDetailTo(matchId: string, source: MatchDiscoverySource) {
-    return buildMatchDetailTo(localePath, matchId, source);
+  function matchDetailTo(match: MatchLinkTarget, source: MatchDiscoverySource) {
+    return buildMatchDetailTo(localePath, match, source);
   }
 
   function trackMatchRowClicked(input: {

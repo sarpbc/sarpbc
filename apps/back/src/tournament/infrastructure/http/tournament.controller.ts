@@ -27,6 +27,7 @@ import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { withPublicSlug } from "./match-list.mapper";
 import { mapTournament } from "./tournament.mapper";
 
 @Controller("tournaments")
@@ -144,7 +145,7 @@ export class TournamentController {
   @Get(":id/matches")
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
-    return { matches };
+    return { matches: matches.map(withPublicSlug) };
   }
 
   @Get(":id/awards")
@@ -189,7 +190,7 @@ export class TournamentController {
       beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
       endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,
     });
-    return { match };
+    return { match: withPublicSlug(match) };
   }
 
   @RequirePermissions("tournaments.manage")
@@ -200,7 +201,7 @@ export class TournamentController {
     @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
-    return { match };
+    return { match: withPublicSlug(match) };
   }
 
   @Get("player/:playerId")
@@ -212,12 +213,12 @@ export class TournamentController {
   @Get("matches/player/:playerId")
   async getMatchesByPlayer(@Param("playerId") playerId: string) {
     const matches = await this.matchService.getMatchesByPlayer(playerId);
-    return { matches };
+    return { matches: matches.map(withPublicSlug) };
   }
 
   @Get("matches/team/:teamId")
   async getMatchesByTeam(@Param("teamId") teamId: string) {
     const matches = await this.matchService.getMatchesByTeam(teamId);
-    return { matches };
+    return { matches: matches.map(withPublicSlug) };
   }
 }

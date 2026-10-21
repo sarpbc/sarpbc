@@ -18,6 +18,7 @@ export class Topic {
 
 export class Post {
   id!: string;
+  publicId!: number;
   title!: string;
   content!: string;
   translations = new Collection<PostTranslation>(this);
@@ -87,6 +88,7 @@ export const PostSchema = defineEntity({
   repository: () => PostRepository,
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    publicId: p.integer().autoincrement().generated("identity").unique(),
     title: p.string(),
     content: p.text(),
     translations: p.oneToMany(PostTranslation).mappedBy("post"),

@@ -1,8 +1,10 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
-import { mapMatchListItem } from "./match-list.mapper";
+import { mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
+import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
+import type { EntityRef } from "../../../common/domain/entity-ref";
 
 function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
   return {
@@ -98,8 +100,9 @@ export class MatchController {
     };
   }
 
-  @Get(":id")
-  async findOne(@Param("id") id: string) {
-    return this.matchService.findDetailById(id);
+  @Get(":ref")
+  async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
+    const detail = await this.matchService.findDetail(ref);
+    return { ...detail, match: withPublicSlug(detail.match) };
   }
 }

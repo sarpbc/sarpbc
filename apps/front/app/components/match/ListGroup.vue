@@ -93,7 +93,7 @@ function discoveryStatusFor(matchId: string) {
           <MatchDiscoveryLink
             v-for="match in group.matches"
             :key="match.id"
-            :match-id="match.id"
+            :match="match"
             :source="discoverySource"
             :status="discoveryStatusFor(match.id)"
           >

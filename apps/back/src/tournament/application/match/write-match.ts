@@ -23,7 +23,6 @@ export async function upsertMatchInTransaction(
     match.pandascoreId = input.pandascoreId ?? null;
   }
   match.name = input.name;
-  match.slug = match.slug ?? input.slug ?? null;
   match.beginAt = input.beginAt ?? null;
   match.endAt = input.endAt ?? null;
   match.status = input.status ?? null;

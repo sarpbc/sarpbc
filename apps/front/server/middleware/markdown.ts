@@ -42,6 +42,16 @@ export default defineEventHandler(async (event) => {
       },
     });
 
+    const location = response.headers.get("location");
+    if (response.status >= 300 && response.status < 400 && location) {
+      const target = new URL(location, url.origin);
+      return sendRedirect(
+        event,
+        `${markdownPathFromHtmlPath(target.pathname)}${target.search}`,
+        response.status,
+      );
+    }
+
     const contentType = response.headers.get("content-type") ?? "";
     if (!contentType.includes("text/html")) {
       setResponseStatus(event, response.status || 404);

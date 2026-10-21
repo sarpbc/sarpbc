@@ -14,7 +14,6 @@ export interface UpsertMatchCommand {
   pandascoreId: number;
   tournamentPandascoreId: number;
   name: string;
-  slug?: string;
   beginAt?: Date;
   endAt?: Date;
   status?: string;

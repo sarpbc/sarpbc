@@ -10,6 +10,7 @@ import {
   UpdateTournamentDto,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
+import { matchPublicSlug } from "../../../tournament/domain/competition";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -197,7 +198,6 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID the match belongs to."),
         name: z.string().min(1).describe("Match display name."),
-        slug: z.string().optional().describe("Optional URL slug for the match."),
         beginAt: z.string().optional().describe("Scheduled start time (ISO 8601 date string)."),
         endAt: z.string().optional().describe("Scheduled or actual end time (ISO 8601)."),
         status: z
@@ -218,7 +218,6 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     async ({
       tournamentId,
       name,
-      slug,
       beginAt,
       endAt,
       status,
@@ -229,7 +228,6 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       runWriteTool(user, "create_match", "tournaments.manage", async () => {
         const match = await ctx.matchService.upsertMatch(tournamentId, {
           name,
-          slug,
           beginAt: beginAt ? new Date(beginAt) : undefined,
           endAt: endAt ? new Date(endAt) : undefined,
           status,
@@ -244,7 +242,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: match.id,
             name: match.name,
             tournamentId,
-            url: matchUrl(match.id),
+            url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
       }),
@@ -268,7 +266,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           result: {
             id: match.id,
             winnerId,
-            url: matchUrl(match.id),
+            url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
       }),

@@ -8,7 +8,7 @@ const reply: ReplyRecord = {
   id: "reply",
   content: "Comment",
   author: { id: "author", userName: "Fan" },
-  post: { id: "post", title: "Thread" },
+  post: { id: "post", publicId: 1, title: "Thread" },
   newsArticle: null,
   match: null,
   replyTo: null,
