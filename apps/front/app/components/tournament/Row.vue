@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
+import type { TournamentListItem } from "@sarpbc/types";
 import { formatTournamentShortDateRange } from "~/utils/tournamentStatus";
 
 const { tournament, to } = defineProps<{
-  tournament: Tournament;
+  tournament: TournamentListItem;
   to: string;
 }>();
 

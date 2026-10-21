@@ -1,21 +1,13 @@
-import type { Match } from "~/types/matches";
+import type { TournamentListItem, TournamentMatchListItem } from "@sarpbc/types";
 import type { Tournament, TournamentEvent, TournamentPathResponse } from "~/types/tournament";
-import { parseMatchResults } from "~/utils/parseMatchResult";
 import { getApiErrorStatus } from "~/utils/apiError";
-
-function parseMatch(match: Match): Match {
-  return {
-    ...match,
-    results: parseMatchResults(match.results),
-  };
-}
 
 export async function getAllTournaments(query?: {
   limit?: number;
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<{ tournaments: Tournament[]; total: number }> {
+}): Promise<{ tournaments: TournamentListItem[]; total: number }> {
   const config = useRuntimeConfig();
   const { limit, offset, pickems, activeOnly } = query || {};
   const url = new URL(`${config.public.apiBase}/tournaments`);
@@ -32,7 +24,7 @@ export async function getAllTournaments(query?: {
     url.searchParams.set("activeOnly", "true");
   }
 
-  const res = await $fetch<{ tournaments?: Tournament[]; count?: number }>(url.toString(), {
+  const res = await $fetch<{ tournaments?: TournamentListItem[]; count?: number }>(url.toString(), {
     method: "GET",
     credentials: "include",
   });
@@ -46,7 +38,7 @@ export async function getEvents(query: {
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<{ events: TournamentEvent[]; total: number }> {
+}): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> {
   const config = useRuntimeConfig();
   const { limit, offset, pickems, activeOnly } = query;
   const url = new URL(`${config.public.apiBase}/events`);
@@ -63,10 +55,13 @@ export async function getEvents(query: {
     url.searchParams.set("activeOnly", "true");
   }
 
-  const res = await $fetch<{ events: TournamentEvent[]; count: number }>(url.toString(), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await $fetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
+    url.toString(),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return { events: res.events, total: res.count };
 }
@@ -126,17 +121,19 @@ export async function syncTournament(tournamentId: string): Promise<boolean> {
   }
 }
 
-export async function getTournamentMatches(tournamentId: string) {
+export async function getTournamentMatches(
+  tournamentId: string,
+): Promise<TournamentMatchListItem[]> {
   const config = useRuntimeConfig();
   try {
     const url = new URL(`${config.public.apiBase}/tournaments/${tournamentId}/matches`);
 
-    const res = await $fetch<{ matches?: Match[] }>(url.toString(), {
+    const res = await $fetch<{ matches?: TournamentMatchListItem[] }>(url.toString(), {
       method: "GET",
       credentials: "include",
     });
 
-    return (res.matches ?? []).map(parseMatch);
+    return res.matches ?? [];
   } catch (error) {
     console.error("Error fetching tournament matches:", error);
     return [];

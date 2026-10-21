@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { tournamentLabel } from "~/utils/tournamentLabel";
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { Tournament } from "~/types/tournament";
+import type { TournamentListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -12,7 +12,7 @@ const page = ref(1);
 const isSyncingAdditions = ref(false);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
-const tournaments = ref<Tournament[]>([]);
+const tournaments = ref<TournamentListItem[]>([]);
 const total = ref(0);
 
 const { status, data, refresh } = await useLazyAsyncData(
@@ -42,7 +42,7 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-const columns: TableColumn<Tournament>[] = [
+const columns: TableColumn<TournamentListItem>[] = [
   {
     id: "name",
     header: t("page.tournaments.columns.name"),
@@ -64,11 +64,11 @@ const columns: TableColumn<Tournament>[] = [
   },
 ];
 
-function isManualTournament(tournament: Tournament): boolean {
+function isManualTournament(tournament: TournamentListItem): boolean {
   return tournament.source === "manual";
 }
 
-function selectRow(e: Event, row: TableRow<Tournament>) {
+function selectRow(e: Event, row: TableRow<TournamentListItem>) {
   e.preventDefault();
   navigateTo(localePath(`/tournaments/${row.original.id}`));
 }

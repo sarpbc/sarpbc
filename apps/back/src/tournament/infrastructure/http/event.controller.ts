@@ -5,7 +5,7 @@ import { EventService } from "../../application/event.service";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { mapEvent, type TournamentPathResponse } from "./event.mapper";
-import { mapTournament, type TournamentResponse } from "./tournament.mapper";
+import { mapTournamentListItem, type TournamentResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
 
@@ -26,10 +26,7 @@ export class EventController {
     });
     return {
       events: listings.map(({ event, stages }) =>
-        mapEvent(
-          event,
-          stages.map((stage) => mapTournament(stage)),
-        ),
+        mapEvent(event, stages.map(mapTournamentListItem)),
       ),
       count,
     };

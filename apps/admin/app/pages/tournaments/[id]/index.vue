@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Match } from "~/types/matches";
+import type { TournamentMatchListItem } from "@sarpbc/types";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -37,13 +37,13 @@ const displayMatches = computed(() =>
   (matches.value ?? []).filter((match) => (match.participants?.length ?? 0) >= 2),
 );
 
-function matchLabel(match: Match): string {
+function matchLabel(match: TournamentMatchListItem): string {
   const teamA = match.participants?.[0]?.team.name ?? "TBD";
   const teamB = match.participants?.[1]?.team.name ?? "TBD";
   return `${teamA} vs ${teamB}`;
 }
 
-function matchScore(match: Match): string {
+function matchScore(match: TournamentMatchListItem): string {
   if (!match.participants?.length) {
     return "-";
   }
@@ -66,7 +66,7 @@ async function handleRefresh() {
   });
 }
 
-async function handleSetWinner(match: Match, participantId: string) {
+async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
   settingWinnerMatchId.value = match.id;
   try {
     const success = await setMatchWinner(match.id, participantId);

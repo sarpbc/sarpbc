@@ -9,6 +9,13 @@ export type { ContractRole, PlayerContract, TeamContract } from "./contract";
 export type { League } from "./league";
 export type { TournamentEventRef } from "./tournament-event";
 export type { NewsType } from "./news";
+export type {
+  TeamSummary,
+  TournamentListItem,
+  TournamentMatchListItem,
+  TournamentSource,
+} from "./competition";
+export type { ForumPost } from "./forum";
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",

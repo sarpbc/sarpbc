@@ -28,7 +28,7 @@ export class PostRepository extends EntityRepository<Post> {
 
   async findWithDetails(ref: EntityRef): Promise<Post | null> {
     return this.findOne(ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value }, {
-      populate: ["author", "topic", "replies", "replies.author", "replies.replyTo", "translations"],
+      populate: ["author", "topic", "translations"],
     });
   }
 

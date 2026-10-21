@@ -2,7 +2,12 @@ import type { StageTab } from "../../domain/tournament-path";
 import { compareStages, type TournamentEvent } from "../../domain/tournament-event";
 import { mapLeague, type LeagueResponse, type TournamentResponse } from "./tournament.mapper";
 
-export interface EventListItemResponse {
+type EventStage = Pick<
+  TournamentResponse,
+  "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
+>;
+
+export interface EventListItemResponse<Stage extends EventStage> {
   id: string;
   slug: string;
   name: string;
@@ -12,10 +17,10 @@ export interface EventListItemResponse {
   type: string | null;
   beginAt: Date | null;
   endAt: Date | null;
-  stages: TournamentResponse[];
+  stages: Stage[];
 }
 
-export type EventDetailResponse = EventListItemResponse;
+export type EventDetailResponse = EventListItemResponse<TournamentResponse>;
 
 export type TournamentPathResponse =
   | { kind: "event"; event: EventDetailResponse }
@@ -26,10 +31,10 @@ function bound(dates: Array<Date | null>, pick: (...times: number[]) => number):
   return times.length ? new Date(pick(...times)) : null;
 }
 
-export function mapEvent(
+export function mapEvent<Stage extends EventStage>(
   event: TournamentEvent,
-  stages: TournamentResponse[],
-): EventListItemResponse {
+  stages: Stage[],
+): EventListItemResponse<Stage> {
   const ordered = [...stages].sort(compareStages);
   const [newest] = ordered;
   // Only the main stage carries the prize pool; its type wins over qualifier stages.

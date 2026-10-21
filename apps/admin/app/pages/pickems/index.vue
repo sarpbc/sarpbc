@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { tournamentLabel } from "~/utils/tournamentLabel";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
-import type { Tournament } from "~/types/tournament";
+import type { TournamentListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

@@ -1,3 +1,4 @@
+import type { ForumPost } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -14,11 +15,8 @@ import type {
   TranslationRecord,
   CreatePostInput,
   CreatedPost,
-  PostView,
-  PostReplyView,
   PostCreationStatus,
 } from "../domain/forum";
-import type { ReplyRecord } from "../../reply/domain/reply";
 import type { PostStore, ForumTransaction } from "./ports";
 interface PostCreationEligibility {
   canCreate: boolean;
@@ -45,42 +43,10 @@ export class PostService {
     return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(ref: EntityRef, locale: string | null): Promise<PostView | null> {
+  async findByIdDto(ref: EntityRef, locale: string | null): Promise<ForumPost | null> {
     const post = await this.findById(ref);
     if (!post) return null;
     const translation = locale ? post.translations.find((t) => t.locale === locale) : undefined;
-
-    const buildNestedReplies = (replies: ReplyRecord[]) => {
-      const replyMap = new Map<string, PostReplyView>();
-      const rootReplies: PostReplyView[] = [];
-
-      replies.forEach((reply) => {
-        replyMap.set(reply.id, {
-          id: reply.id,
-          content: reply.content,
-          author: reply.author.userName,
-          createdAt: reply.createdAt,
-          replyTo: reply.replyTo?.id || null,
-          replies: [],
-        });
-      });
-
-      replies.forEach((reply) => {
-        const replyDto = replyMap.get(reply.id)!;
-        if (reply.replyTo?.id) {
-          const parent = replyMap.get(reply.replyTo.id);
-          if (parent) {
-            parent.replies.push(replyDto);
-          } else {
-            rootReplies.push(replyDto);
-          }
-        } else {
-          rootReplies.push(replyDto);
-        }
-      });
-
-      return rootReplies;
-    };
 
     return {
       id: post.id,
@@ -91,7 +57,6 @@ export class PostService {
       topic: { id: post.topic.id, title: post.topic.title },
       author: post.author.userName,
       createdAt: post.createdAt,
-      replies: buildNestedReplies(post.replies.filter((reply) => !reply.hiddenAt)),
     };
   }
 
@@ -143,7 +108,6 @@ export class PostService {
         createdAt: this.now(),
         updatedAt: null,
         translations: [],
-        replies: [],
       };
       await scope.posts.save(newPost);
 

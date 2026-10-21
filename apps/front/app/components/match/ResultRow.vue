@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { MatchListItem } from "~/types/matches";
+import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
 
 const {
@@ -7,7 +7,7 @@ const {
   divider = true,
   dividerTop = false,
 } = defineProps<{
-  match: MatchListItem;
+  match: MatchRowItem;
   divider?: boolean;
   /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
   dividerTop?: boolean;

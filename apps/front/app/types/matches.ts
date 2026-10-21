@@ -44,15 +44,18 @@ export interface MatchListParticipant {
   team: { name: string };
 }
 
-export interface MatchListItem {
+export interface MatchRowItem {
   id: string;
   publicId: number;
   slug: string;
-  beginAt?: Date | null;
+  beginAt?: Date | string | null;
   participants?: MatchListParticipant[];
   results?: MatchResult[];
-  tournament: MatchListTournament;
   commentCount?: number;
+}
+
+export interface MatchListItem extends MatchRowItem {
+  tournament: MatchListTournament;
 }
 
 export interface UpcomingMatchesResponse {

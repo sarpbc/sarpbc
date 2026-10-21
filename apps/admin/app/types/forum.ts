@@ -12,7 +12,7 @@ export interface PostShort {
 export interface Reply {
   id: string;
   content: string;
-  author: string;
+  author: { id: string; userName: string };
   createdAt: Date;
   replies: Reply[];
 }
@@ -21,14 +21,4 @@ export interface Topic {
   id: string;
   title: string;
   description: string;
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  content: string;
-  topic: Topic;
-  author: string;
-  createdAt: Date;
-  replies: Reply[];
 }

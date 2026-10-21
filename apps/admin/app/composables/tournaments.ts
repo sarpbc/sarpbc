@@ -1,13 +1,17 @@
-import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
-import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
+import type {
+  PlayerAwardType,
+  TournamentAwardListItem,
+  TournamentListItem,
+  TournamentMatchListItem,
+} from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
   limit?: number;
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<{ tournaments: Tournament[]; total: number }> {
+}): Promise<{ tournaments: TournamentListItem[]; total: number }> {
   const { limit, offset, pickems, activeOnly } = query || {};
   try {
     const params: Record<string, string | number | undefined> = {};
@@ -16,10 +20,13 @@ export async function getAllTournaments(query?: {
     if (pickems !== undefined) params.pickems = pickems ? "true" : "false";
     if (activeOnly) params.activeOnly = "true";
 
-    const res = await apiFetch<{ tournaments?: Tournament[]; count?: number }>("/tournaments", {
-      method: "GET",
-      query: params,
-    });
+    const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
+      "/tournaments",
+      {
+        method: "GET",
+        query: params,
+      },
+    );
 
     const tournaments = res.tournaments ?? [];
     return {
@@ -56,11 +63,16 @@ export async function syncTournament(tournamentId: string): Promise<boolean> {
   }
 }
 
-export async function getTournamentMatches(tournamentId: string): Promise<Match[]> {
+export async function getTournamentMatches(
+  tournamentId: string,
+): Promise<TournamentMatchListItem[]> {
   try {
-    const res = await apiFetch<{ matches?: Match[] }>(`/tournaments/${tournamentId}/matches`, {
-      method: "GET",
-    });
+    const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
+      `/tournaments/${tournamentId}/matches`,
+      {
+        method: "GET",
+      },
+    );
     return res.matches ?? [];
   } catch (error) {
     console.error("Error fetching tournament matches:", error);
