@@ -86,16 +86,12 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
             {{ formatDayHeader(dayGroup) }}
           </h3>
           <SCard flush-bottom variant="soft" class="w-full">
-            <div v-for="match in dayGroup.matches" :key="match.id">
-              <MatchDiscoveryLink
-                :match="match"
-                :source="SOURCE"
-                status="upcoming"
-                class="touch-manipulation"
-              >
-                <MatchRow :match="match" :show-date="false" />
-              </MatchDiscoveryLink>
-            </div>
+            <MatchLinkRows
+              :matches="dayGroup.matches"
+              variant="upcoming"
+              :source="SOURCE"
+              :show-date="false"
+            />
           </SCard>
         </div>
       </section>
@@ -109,16 +105,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           {{ formatDayHeader(dayGroup) }}
         </h3>
         <SCard flush-bottom variant="soft" class="w-full">
-          <div v-for="match in dayGroup.matches" :key="match.id">
-            <MatchDiscoveryLink
-              :match="match"
-              :source="SOURCE"
-              status="finished"
-              class="touch-manipulation"
-            >
-              <MatchResultRow :match="match" />
-            </MatchDiscoveryLink>
-          </div>
+          <MatchLinkRows :matches="dayGroup.matches" variant="result" :source="SOURCE" />
         </SCard>
       </section>
     </div>

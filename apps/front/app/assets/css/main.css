@@ -201,6 +201,15 @@
   }
 }
 
+/* Pair with contain-intrinsic-block-size. Paint containment clips the outset forced-colors focus outline, so it stays off there. */
+@utility skip-offscreen {
+  content-visibility: auto;
+
+  @media (forced-colors: active) {
+    content-visibility: visible;
+  }
+}
+
 /* One selected state for toggles (aria-pressed) and in-page navigation (aria-current). Keyboard focus keeps its own outline. */
 @utility selectable {
   &:is([aria-pressed="true"], [aria-current="page"]) {

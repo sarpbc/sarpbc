@@ -2,7 +2,6 @@
 import type { MatchListItem } from "~/types/matches";
 import type { MatchEventGroup } from "~/composables/matches/groupMatchesByEvent";
 import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
-import { listVariantToDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { formatDayHeaderDate } from "~/utils/dateFormatter";
 
 const { matches, variant, discoverySource, liveMatchIds } = defineProps<{
@@ -45,17 +44,6 @@ const blocks = computed((): ListBlock[] => {
     }),
   );
 });
-
-function isLiveMatch(matchId: string): boolean {
-  return variant === "live" || Boolean(liveMatchIds?.has(matchId));
-}
-
-function discoveryStatusFor(matchId: string) {
-  if (variant === "result") {
-    return listVariantToDiscoveryStatus("result");
-  }
-  return isLiveMatch(matchId) ? "live" : "upcoming";
-}
 </script>
 
 <template>
@@ -90,21 +78,13 @@ function discoveryStatusFor(matchId: string) {
             variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined
           "
         >
-          <MatchDiscoveryLink
-            v-for="match in group.matches"
-            :key="match.id"
-            :match="match"
+          <MatchLinkRows
+            :matches="group.matches"
+            :variant="variant"
             :source="discoverySource"
-            :status="discoveryStatusFor(match.id)"
-          >
-            <MatchRow
-              v-if="variant !== 'result'"
-              :match="match"
-              :live="isLiveMatch(match.id)"
-              :show-date="!useDateGrouping"
-            />
-            <MatchResultRow v-else :match="match" />
-          </MatchDiscoveryLink>
+            :live-match-ids="liveMatchIds"
+            :show-date="!useDateGrouping"
+          />
         </SCard>
       </SRail>
     </div>
