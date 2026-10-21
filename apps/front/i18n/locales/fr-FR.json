@@ -18,7 +18,11 @@
     "retry": "Réessayer",
     "filterByLetter": "Filtrer par lettre",
     "close": "Fermer",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "errorPage": {
+      "notFound": "Introuvable",
+      "serverError": "Erreur serveur"
+    }
   },
   "nationalities": {
     "demonym": {
