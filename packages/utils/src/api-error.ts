@@ -1,4 +1,4 @@
-import * as z from "zod";
+import * as z from "zod/mini";
 
 export interface ApiErrorBody {
   message?: string | string[];
@@ -9,17 +9,17 @@ export interface ApiErrorBody {
 const apiErrorMessageSchema = z.union([z.string(), z.array(z.string())]);
 
 const apiErrorBodySchema = z.object({
-  message: apiErrorMessageSchema.optional(),
-  code: z.string().optional(),
-  statusCode: z.number().optional(),
+  message: z.optional(apiErrorMessageSchema),
+  code: z.optional(z.string()),
+  statusCode: z.optional(z.number()),
 });
 
 const apiErrorSchema = z.object({
-  statusCode: z.number().optional(),
-  status: z.number().optional(),
-  data: apiErrorBodySchema.optional(),
-  message: apiErrorMessageSchema.optional(),
-  code: z.string().optional(),
+  statusCode: z.optional(z.number()),
+  status: z.optional(z.number()),
+  data: z.optional(apiErrorBodySchema),
+  message: z.optional(apiErrorMessageSchema),
+  code: z.optional(z.string()),
 });
 
 export function getApiErrorStatus(cause: unknown): number | undefined {

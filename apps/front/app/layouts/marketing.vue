@@ -6,7 +6,7 @@
         <slot />
       </div>
     </div>
-    <NavFooter class="mt-auto" />
+    <LazyNavFooter hydrate-on-visible class="mt-auto" />
     <LazyLandingCookiePopup hydrate-on-idle />
   </main>
 </template>

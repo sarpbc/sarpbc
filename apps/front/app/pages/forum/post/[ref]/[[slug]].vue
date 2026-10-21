@@ -16,7 +16,20 @@ const {
 } = await useAsyncData(
   () => `forum-post-${postRef.value}`,
   () => getPostById(postRef.value),
-  { watch: [postRef] },
+  {
+    watch: [postRef],
+    // Nuxt's `pick` throws on a null result, which would turn a missing post into a 500.
+    transform: (post) =>
+      post && {
+        id: post.id,
+        publicId: post.publicId,
+        slug: post.slug,
+        title: post.title,
+        content: post.content,
+        author: post.author,
+        createdAt: post.createdAt,
+      },
+  },
 );
 
 if (!post.value) {

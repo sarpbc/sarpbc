@@ -297,6 +297,15 @@ const tooltipText = computed(() => {
 
 <template>
   <UTooltip v-if="flagToDisplay" :text="tooltipText" :popper="{ placement: 'top' }">
-    <UIcon :name="`flag:${flagToDisplay}-4x3`" :class="sizeClasses[size]" class="inline-block" />
+    <img
+      :src="`/flags/${flagToDisplay}.svg`"
+      alt=""
+      width="4"
+      height="3"
+      loading="lazy"
+      decoding="async"
+      :class="sizeClasses[size]"
+      class="inline-block"
+    />
   </UTooltip>
 </template>

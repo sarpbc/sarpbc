@@ -1,15 +1,18 @@
-import * as z from "zod";
+import * as z from "zod/mini";
 import type { MatchResult } from "~/types/matches";
 
-const matchResultParticipantIdSchema = z.preprocess((value) => {
-  if (value instanceof Object && value !== null && "id" in value) {
-    return (value as { id: unknown }).id;
-  }
+const matchResultParticipantIdSchema = z.pipe(
+  z.transform((value) => {
+    if (value instanceof Object && value !== null && "id" in value) {
+      return (value as { id: unknown }).id;
+    }
 
-  return value;
-}, z.string());
+    return value;
+  }),
+  z.string(),
+);
 
-export const matchResultSchema: z.ZodType<MatchResult> = z.object({
+export const matchResultSchema: z.ZodMiniType<MatchResult> = z.object({
   participant: matchResultParticipantIdSchema,
   score: z.number(),
 });
