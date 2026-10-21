@@ -1,14 +1,9 @@
-import type { Match } from "~/types/matches";
+import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getMatchParticipantScore } from "~/types/matches";
-import type { BracketLink } from "~/types/tournament";
 
-export function resolvePreviousMatchId(previousMatch: BracketLink["previousMatch"]): string {
-  return previousMatch instanceof Object ? previousMatch.id : previousMatch;
-}
-
-export function getMatchWinnerParticipantId(match: Match): string | null {
-  if (match.winner?.id) {
-    return match.winner.id;
+export function getMatchWinnerParticipantId(match: TournamentDetailMatch): string | null {
+  if (match.winnerId) {
+    return match.winnerId;
   }
 
   const participantAId = match.participants?.[0]?.id;
@@ -31,27 +26,27 @@ export function getMatchWinnerParticipantId(match: Match): string | null {
   return null;
 }
 
-export function getParentIds(match: Match, matchIds: Set<string>): string[] {
+export function getParentIds(match: TournamentDetailMatch, matchIds: Set<string>): string[] {
   return (match.previousMatches ?? [])
-    .map((link) => resolvePreviousMatchId(link.previousMatch))
+    .map((link) => link.previousMatch)
     .filter((id) => matchIds.has(id));
 }
 
-export function getWinnerParentIds(match: Match, matchIds: Set<string>): string[] {
+export function getWinnerParentIds(match: TournamentDetailMatch, matchIds: Set<string>): string[] {
   return (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
-    .map((link) => resolvePreviousMatchId(link.previousMatch))
+    .map((link) => link.previousMatch)
     .filter((id) => matchIds.has(id));
 }
 
-export function getWinnerParentIdsFromLinks(match: Match): string[] {
+export function getWinnerParentIdsFromLinks(match: TournamentDetailMatch): string[] {
   return (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
-    .map((link) => resolvePreviousMatchId(link.previousMatch));
+    .map((link) => link.previousMatch);
 }
 
-export function hasUpperWinnerFeed(match: Match, upperIds: Set<string>): boolean {
+export function hasUpperWinnerFeed(match: TournamentDetailMatch, upperIds: Set<string>): boolean {
   return (match.previousMatches ?? []).some(
-    (link) => link.type === "winner" && upperIds.has(resolvePreviousMatchId(link.previousMatch)),
+    (link) => link.type === "winner" && upperIds.has(link.previousMatch),
   );
 }

@@ -1,35 +1,30 @@
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
-import type { Tournament, TournamentParticipant } from "~/types/tournament";
+import type { TeamSummary, TournamentDetail, TournamentDetailParticipant } from "@sarpbc/types";
+
+type ParticipantPlayer = TournamentDetailParticipant["players"][number];
 
 export interface TournamentParticipantEntry {
-  team: Team;
-  players: Player[];
+  team: TeamSummary;
+  players: ParticipantPlayer[];
   hasReliableRoster: boolean;
 }
 
-export function hasReliableParticipantRoster(players?: Player[]): boolean {
-  return (players ?? []).some((player) => Boolean(player.slug));
-}
-
-function getParticipantTeam(participant: TournamentParticipant): Team | null {
-  return participant.team ?? null;
+export function hasReliableParticipantRoster(players: ParticipantPlayer[]): boolean {
+  return players.some((player) => Boolean(player.slug));
 }
 
 export function buildTournamentParticipantEntries(
-  tournament: Pick<Tournament, "participants">,
+  tournament: Pick<TournamentDetail, "participants">,
 ): TournamentParticipantEntry[] {
-  const participants = tournament.participants ?? [];
   const seen = new Set<string>();
   const result: TournamentParticipantEntry[] = [];
 
-  for (const participant of participants) {
-    const team = getParticipantTeam(participant);
-    if (!team?.slug || seen.has(team.id)) {
+  for (const participant of tournament.participants) {
+    const team = participant.team;
+    if (!team.slug || seen.has(team.id)) {
       continue;
     }
     seen.add(team.id);
-    const players = (participant.players ?? [])
+    const players = participant.players
       .filter((player) => player.slug)
       .sort((a, b) => a.name.localeCompare(b.name));
     result.push({

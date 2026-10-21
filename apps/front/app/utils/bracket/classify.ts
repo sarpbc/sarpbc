@@ -1,9 +1,8 @@
-import type { Match } from "~/types/matches";
-import type { Tournament } from "~/types/tournament";
+import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
 import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./types";
 import { sortMatchesByBeginAt } from "./rows";
 
-export function classifyTournamentBracket(tournament: Tournament): TournamentBracketFormat {
+export function classifyTournamentBracket(tournament: TournamentDetail): TournamentBracketFormat {
   const matches = tournament.matches ?? [];
   if (matches.length === 0) {
     return "flat-stage";
@@ -30,8 +29,10 @@ export function classifyTournamentBracket(tournament: Tournament): TournamentBra
   return "flat-stage";
 }
 
-export function groupMatchesByRound(matches: Match[]): TournamentBracketRoundGroup[] {
-  const groups = new Map<string, Match[]>();
+export function groupMatchesByRound(
+  matches: TournamentDetailMatch[],
+): TournamentBracketRoundGroup[] {
+  const groups = new Map<string, TournamentDetailMatch[]>();
 
   for (const match of matches) {
     const round = match.name?.trim() || "TBD";

@@ -1,23 +1,21 @@
-import type { Match } from "~/types/matches";
-import type { Tournament } from "~/types/tournament";
+import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
 import { classifyTournamentBracket, groupMatchesByRound } from "./classify";
 import {
   buildUnifiedDoubleEliminationLayout,
   splitDoubleEliminationMatches,
 } from "./doubleElimLayout";
-import { resolvePreviousMatchId } from "./graph";
 import { sortMatchesByBeginAt } from "./rows";
 import { buildBracketSectionLayout } from "./singleElimLayout";
 import type { TournamentBracketView } from "./types";
 
 /** Matches with no in-set feeder links (shown as flat fallback rows). */
-function getOrphanMatches(matches: Match[]): Match[] {
+function getOrphanMatches(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
   const ids = new Set(matches.map((match) => match.id));
   const connected = new Set<string>();
 
   for (const match of matches) {
     for (const link of match.previousMatches ?? []) {
-      const parentId = resolvePreviousMatchId(link.previousMatch);
+      const parentId = link.previousMatch;
       if (ids.has(parentId)) {
         connected.add(match.id);
         connected.add(parentId);
@@ -28,7 +26,7 @@ function getOrphanMatches(matches: Match[]): Match[] {
   return sortMatchesByBeginAt(matches.filter((match) => !connected.has(match.id)));
 }
 
-export function buildTournamentBracketView(tournament: Tournament): TournamentBracketView {
+export function buildTournamentBracketView(tournament: TournamentDetail): TournamentBracketView {
   const format = classifyTournamentBracket(tournament);
   const matches = tournament.matches ?? [];
 

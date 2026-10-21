@@ -1,4 +1,4 @@
-import type { Match } from "~/types/matches";
+import type { ProfileMatchListItem } from "@sarpbc/types";
 import type { Team } from "~/types/team";
 import type { Tournament } from "~/types/tournament";
 import type { ContractRole, TeamContract } from "~/types/contract";
@@ -101,9 +101,9 @@ export async function getTeamTournaments(teamId: string): Promise<Tournament[]> 
   return res.tournaments ?? [];
 }
 
-export async function getTeamMatches(teamId: string): Promise<Match[]> {
+export async function getTeamMatches(teamId: string): Promise<ProfileMatchListItem[]> {
   const config = useRuntimeConfig();
-  const res = await $fetch<{ matches?: Match[] }>(
+  const res = await $fetch<{ matches?: ProfileMatchListItem[] }>(
     `${config.public.apiBase}/tournaments/matches/team/${teamId}`,
     {
       method: "GET",

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Team } from "~/types/team";
+import type { TeamSummary } from "@sarpbc/types";
 import {
   formatTournamentDateRange,
   getTournamentStatus,
@@ -26,7 +26,7 @@ const {
   prizepool?: string | null;
   type?: string | null;
   countLabel?: string | null;
-  champion?: Team | null;
+  champion?: TeamSummary | null;
   calendarPath?: string | null;
 }>();
 

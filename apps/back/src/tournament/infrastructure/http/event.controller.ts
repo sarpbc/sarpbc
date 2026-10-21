@@ -5,7 +5,7 @@ import { EventService } from "../../application/event.service";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { mapEvent, type TournamentPathResponse } from "./event.mapper";
-import { mapTournamentListItem, type TournamentResponse } from "./tournament.mapper";
+import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
 
@@ -69,7 +69,7 @@ export class EventController {
     }
   }
 
-  private async stage(id: string): Promise<TournamentResponse> {
+  private async stage(id: string): Promise<TournamentDetailResponse> {
     const tournament = await this.tournamentRead.findById(id);
     if (!tournament) throw new NotFoundError(MISSING);
     return tournament;

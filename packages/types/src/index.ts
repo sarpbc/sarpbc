@@ -10,7 +10,11 @@ export type { League } from "./league";
 export type { TournamentEventRef } from "./tournament-event";
 export type { NewsType } from "./news";
 export type {
+  ProfileMatchListItem,
   TeamSummary,
+  TournamentDetail,
+  TournamentDetailMatch,
+  TournamentDetailParticipant,
   TournamentListItem,
   TournamentMatchListItem,
   TournamentSource,

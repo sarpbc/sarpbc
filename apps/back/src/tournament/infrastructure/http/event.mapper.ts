@@ -1,6 +1,11 @@
 import type { StageTab } from "../../domain/tournament-path";
 import { compareStages, type TournamentEvent } from "../../domain/tournament-event";
-import { mapLeague, type LeagueResponse, type TournamentResponse } from "./tournament.mapper";
+import {
+  mapLeague,
+  type LeagueResponse,
+  type TournamentDetailResponse,
+  type TournamentResponse,
+} from "./tournament.mapper";
 
 type EventStage = Pick<
   TournamentResponse,
@@ -20,11 +25,11 @@ export interface EventListItemResponse<Stage extends EventStage> {
   stages: Stage[];
 }
 
-export type EventDetailResponse = EventListItemResponse<TournamentResponse>;
+export type EventDetailResponse = EventListItemResponse<TournamentDetailResponse>;
 
 export type TournamentPathResponse =
   | { kind: "event"; event: EventDetailResponse }
-  | { kind: "stage"; tournament: TournamentResponse; tab: StageTab };
+  | { kind: "stage"; tournament: TournamentDetailResponse; tab: StageTab };
 
 function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): Date | null {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));

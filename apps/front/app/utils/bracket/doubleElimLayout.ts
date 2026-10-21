@@ -1,16 +1,11 @@
-import type { Match } from "~/types/matches";
+import type { TournamentDetailMatch } from "@sarpbc/types";
 import {
   compressColumnIndices,
   computeLowerProgressionDepths,
   remapDepthsToColumnRange,
 } from "./columns";
 import { buildConnectors, finalizeSectionLayout, toLayoutMatch } from "./connectors";
-import {
-  getWinnerParentIds,
-  getWinnerParentIdsFromLinks,
-  hasUpperWinnerFeed,
-  resolvePreviousMatchId,
-} from "./graph";
+import { getWinnerParentIds, getWinnerParentIdsFromLinks, hasUpperWinnerFeed } from "./graph";
 import {
   getBracketSectionFromName,
   getCombinedColumnFromName,
@@ -23,8 +18,8 @@ const MAX_DOUBLE_ELIM_COMBINED_COLUMNS = 5;
 const UPPER_TO_LOWER_ROW_GAP = 2;
 
 export interface DoubleEliminationSplit {
-  upper: Match[];
-  lower: Match[];
+  upper: TournamentDetailMatch[];
+  lower: TournamentDetailMatch[];
 }
 
 /**
@@ -32,7 +27,9 @@ export interface DoubleEliminationSplit {
  * cross-bracket finals share the combined grid. Match names are used when PandaScore
  * omits feeder links (common for lower round 1).
  */
-export function splitDoubleEliminationMatches(matches: Match[]): DoubleEliminationSplit {
+export function splitDoubleEliminationMatches(
+  matches: TournamentDetailMatch[],
+): DoubleEliminationSplit {
   const matchIds = new Set(matches.map((match) => match.id));
   const matchById = new Map(matches.map((match) => [match.id, match]));
   const lowerIds = new Set<string>();
@@ -110,7 +107,7 @@ export function splitDoubleEliminationMatches(matches: Match[]): DoubleEliminati
 }
 
 export function buildDoubleEliminationCombinedLayout(
-  lowerMatches: Match[],
+  lowerMatches: TournamentDetailMatch[],
   upperIds: Set<string>,
 ): BracketSectionLayout | null {
   if (lowerMatches.length === 0) {
@@ -118,7 +115,7 @@ export function buildDoubleEliminationCombinedLayout(
   }
 
   const namedColumns = new Map<string, number>();
-  const unnamedMatches: Match[] = [];
+  const unnamedMatches: TournamentDetailMatch[] = [];
 
   for (const match of lowerMatches) {
     const namedColumn = getCombinedColumnFromName(match.name);
@@ -200,9 +197,9 @@ export function buildDoubleEliminationCombinedLayout(
 }
 
 export function buildUnifiedDoubleEliminationLayout(
-  upperMatches: Match[],
-  lowerMatches: Match[],
-  allMatches: Match[],
+  upperMatches: TournamentDetailMatch[],
+  lowerMatches: TournamentDetailMatch[],
+  allMatches: TournamentDetailMatch[],
 ): BracketSectionLayout | null {
   if (upperMatches.length === 0 && lowerMatches.length === 0) {
     return null;
@@ -214,7 +211,7 @@ export function buildUnifiedDoubleEliminationLayout(
     (lowerSectionLayout?.matches ?? []).map((match) => [match.matchId, match]),
   );
 
-  const upperPlacements: Array<{ match: Match; column: number; row: number }> = [];
+  const upperPlacements: Array<{ match: TournamentDetailMatch; column: number; row: number }> = [];
 
   for (const upperMatch of sortMatchesByBeginAt(upperMatches)) {
     let anchorColumn: number | null = getUpperColumnFromName(upperMatch.name);
@@ -228,7 +225,7 @@ export function buildUnifiedDoubleEliminationLayout(
       }
 
       for (const link of child.previousMatches ?? []) {
-        if (resolvePreviousMatchId(link.previousMatch) !== upperMatch.id) {
+        if (link.previousMatch !== upperMatch.id) {
           continue;
         }
 

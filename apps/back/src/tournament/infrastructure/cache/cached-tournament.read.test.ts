@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { log } from "evlog";
 import { Player, Team } from "../../../player/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
-import { mapTournament } from "../http/tournament.mapper";
+import { mapTournamentDetail } from "../http/tournament.mapper";
 import { CachedTournamentRead } from "./cached-tournament.read";
 
 function fixture(): Tournament {
@@ -48,7 +48,7 @@ describe("CachedTournamentRead", () => {
 
   it("stores the public DTO with the established key and 60 second TTL", async () => {
     const result = await read.findById("t1");
-    expect(result).toEqual(mapTournament(model, { includeMatches: true }));
+    expect(result).toEqual(mapTournamentDetail(model));
     expect(redis.set).toHaveBeenCalledWith("tournament:t1", JSON.stringify(result), 60);
     expect(JSON.stringify(result)).not.toContain("tournamentId");
   });
@@ -67,14 +67,14 @@ describe("CachedTournamentRead", () => {
     "treats malformed or incompatible cache data %p as a diagnosed miss",
     async (cached) => {
       redis.get.mockResolvedValue(cached);
-      expect(await read.findById("t1")).toEqual(mapTournament(model, { includeMatches: true }));
+      expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
       expect(log.warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
     },
   );
 
   it("rejects an invalid date and a DTO for a different key", async () => {
-    const dto = mapTournament(model, { includeMatches: true });
-    redis.get.mockResolvedValue(JSON.stringify({ ...dto, createdAt: "yesterday" }));
+    const dto = mapTournamentDetail(model);
+    redis.get.mockResolvedValue(JSON.stringify({ ...dto, beginAt: "yesterday" }));
     await read.findById("t1");
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, id: "other" }));
     await read.findById("t1");
@@ -83,7 +83,7 @@ describe("CachedTournamentRead", () => {
   });
 
   it("strips cache fields outside the public response", async () => {
-    const dto = mapTournament(model, { includeMatches: true });
+    const dto = mapTournamentDetail(model);
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, internalSecret: "hidden" }));
     expect(await read.findById("t1")).toEqual(dto);
     expect(tournaments.findById).not.toHaveBeenCalled();
@@ -93,7 +93,7 @@ describe("CachedTournamentRead", () => {
     "preserves database success when cache %s fails",
     async (operation) => {
       redis[operation].mockRejectedValue(new Error("Redis unavailable"));
-      expect(await read.findById("t1")).toEqual(mapTournament(model, { includeMatches: true }));
+      expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
       expect(log.warn).toHaveBeenCalled();
     },
   );

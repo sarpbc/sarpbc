@@ -1,19 +1,14 @@
 import type { Match } from "~/types/matches";
-import type { Tournament } from "~/types/tournament";
 
 interface PickemTournamentState {
   pickemsEnabled?: boolean;
   endAt?: Date | string | null;
   winnerId?: string | null;
-  winner?: Tournament["winner"];
+  winner?: { id: string } | null;
 }
 
 function hasTournamentWinner(tournament: PickemTournamentState): boolean {
-  if (tournament.winnerId) return true;
-  const winner = tournament.winner;
-  if (winner == null) return false;
-  if (winner instanceof Object) return Boolean(winner.id);
-  return winner.length > 0;
+  return Boolean(tournament.winnerId || tournament.winner?.id);
 }
 
 export function isPickemTournamentActive(
@@ -33,7 +28,10 @@ export function isPickemOpenForMatch(match: Match, now = Date.now()): boolean {
   return true;
 }
 
-export function isMatchLockedForPickem(match: Match, now = Date.now()): boolean {
+export function isMatchLockedForPickem(
+  match: { beginAt: Date | string | null; endAt: Date | string | null; status: string | null },
+  now = Date.now(),
+): boolean {
   if (match.endAt || match.status === "finished") return true;
   if (match.beginAt && new Date(match.beginAt).getTime() <= now) return true;
   return false;
@@ -46,15 +44,14 @@ export type PickemPickState = {
 };
 
 export function getPickOutcome(
-  match: Match,
+  match: { winnerId: string | null },
   pick: PickemPickState | undefined,
 ): "correct" | "incorrect" | "pending" | "none" {
   if (!pick) return "none";
   if (!pick.scored) return "pending";
   if (pick.points != null && pick.points > 0) return "correct";
-  const winnerId = match.winner?.id;
-  if (winnerId) {
-    return pick.pickedParticipant === winnerId ? "correct" : "incorrect";
+  if (match.winnerId) {
+    return pick.pickedParticipant === match.winnerId ? "correct" : "incorrect";
   }
   return pick.points === 0 ? "incorrect" : "pending";
 }

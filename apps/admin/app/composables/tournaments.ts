@@ -1,7 +1,7 @@
-import type { Tournament } from "~/types/tournament";
 import type {
   PlayerAwardType,
   TournamentAwardListItem,
+  TournamentDetail,
   TournamentListItem,
   TournamentMatchListItem,
 } from "@sarpbc/types";
@@ -39,9 +39,9 @@ export async function getAllTournaments(query?: {
   }
 }
 
-export async function getTournamentById(id: string): Promise<Tournament | null> {
+export async function getTournamentById(id: string): Promise<TournamentDetail | null> {
   try {
-    const res = await apiFetch<{ tournament?: Tournament }>(`/tournaments/${id}`, {
+    const res = await apiFetch<{ tournament?: TournamentDetail }>(`/tournaments/${id}`, {
       method: "GET",
     });
     return res.tournament ?? null;
@@ -157,8 +157,10 @@ export async function getTournamentLeagues(): Promise<TournamentLeagueOption[]> 
   }
 }
 
-export async function createTournament(body: ManualTournamentInput): Promise<Tournament | null> {
-  const res = await apiFetch<{ tournament?: Tournament }>("/tournaments", {
+export async function createTournament(
+  body: ManualTournamentInput,
+): Promise<TournamentDetail | null> {
+  const res = await apiFetch<{ tournament?: TournamentDetail }>("/tournaments", {
     method: "POST",
     body,
   });
@@ -168,8 +170,8 @@ export async function createTournament(body: ManualTournamentInput): Promise<Tou
 export async function updateTournament(
   id: string,
   body: Partial<ManualTournamentInput>,
-): Promise<Tournament | null> {
-  const res = await apiFetch<{ tournament?: Tournament }>(`/tournaments/${id}`, {
+): Promise<TournamentDetail | null> {
+  const res = await apiFetch<{ tournament?: TournamentDetail }>(`/tournaments/${id}`, {
     method: "PATCH",
     body,
   });

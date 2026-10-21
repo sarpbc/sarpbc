@@ -1,6 +1,5 @@
-import type { Match } from "~/types/matches";
+import type { TeamSummary, TournamentDetailMatch } from "@sarpbc/types";
 import type { MatchResult } from "~/types/matches";
-import type { Team } from "~/types/team";
 
 export type BracketZone = "upper" | "lower";
 
@@ -12,7 +11,7 @@ export type TournamentBracketFormat =
 
 export interface TournamentBracketRoundGroup {
   round: string;
-  matches: Match[];
+  matches: TournamentDetailMatch[];
 }
 
 export interface BracketLayoutMatch {
@@ -22,16 +21,16 @@ export interface BracketLayoutMatch {
   column: number;
   row: number;
   zone?: BracketZone;
-  name?: string;
-  teamA?: Team;
-  teamB?: Team;
+  name: string;
+  teamA?: TeamSummary;
+  teamB?: TeamSummary;
   participantAId?: string;
   participantBId?: string;
   results?: MatchResult[];
   winnerParticipantId: string | null;
-  beginAt?: Date;
-  endAt?: Date;
-  status?: string;
+  beginAt: Date | string | null;
+  endAt: Date | string | null;
+  status: string | null;
 }
 
 export interface BracketConnector {
@@ -53,7 +52,7 @@ export interface TournamentBracketView {
   upperLayout: BracketSectionLayout | null;
   /** Lower bracket + cross-bracket semifinals/grand final on a single Liquipedia-like grid. */
   doubleEliminationLayout: BracketSectionLayout | null;
-  lowerBracketFlatMatches: Match[];
-  flatMatches: Match[];
+  lowerBracketFlatMatches: TournamentDetailMatch[];
+  flatMatches: TournamentDetailMatch[];
   groupedMatches: TournamentBracketRoundGroup[];
 }
