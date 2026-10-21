@@ -122,7 +122,7 @@ natural French. Human staff review and publish drafts in admin.
 
 ## Code Changes
 
-- Branches must use `<type>/<kebab-case-description>` and commit subjects and PR titles must use `<type>(optional-scope): description`. Allowed types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`. Never use `codex`, `cursor`, or `claude` as a prefix. See `CONTRIBUTING.md`.
+- Branches must use `<type>/<kebab-case-description>` and commit subjects and PR titles must use `<type>(optional-scope): description`. Allowed types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `test`, `build`, `ci`, `chore`, `revert`. Never use `codex`, `cursor`, or `claude` as a prefix. Never add `Co-authored-by` or session trailers crediting an agent to commits or PR descriptions. See `CONTRIBUTING.md`.
 - Prefer minimal, focused diffs.
 - Name test files `*.test.ts` or `*.test.mjs`, with `*.e2e.test.ts` and `*.integration.test.mjs` for specialized suites.
 - Avoid unrelated refactors.
