@@ -21,6 +21,7 @@ const VUE_MACROS = [
 const BROWSER_GLOBALS = [
   "AbortController",
   "CustomEvent",
+  "Element",
   "Event",
   "File",
   "FormData",
