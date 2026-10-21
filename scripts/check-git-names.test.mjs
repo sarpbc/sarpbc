@@ -93,6 +93,24 @@ test("commit messages reject agent prefixes and malformed subjects", (t) => {
   }
 });
 
+test("commit messages reject agent co-authors and keep human ones", (t) => {
+  const message = join(fixture(t), "COMMIT_EDITMSG");
+  for (const trailer of [
+    "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+    "Co-authored-by: Cursor Agent <cursoragent@cursor.com>",
+    "co-authored-by: Codex <codex@openai.com>",
+    "Claude-Session: https://claude.ai/code/session_01",
+  ]) {
+    writeFileSync(message, `fix: repair search\r\n\r\nDetails.\r\n\r\n${trailer}\r\n`);
+    expectStatus(run(["commit-msg", message]), 1);
+  }
+  writeFileSync(
+    message,
+    "fix(back): repair redis cursor\n\nCo-authored-by: Jane Doe <jane@example.com>\n",
+  );
+  expectStatus(run(["commit-msg", message]), 0);
+});
+
 test("pushes check destination branches, including refspecs and multiple refs", () => {
   const sha = "a".repeat(40);
   const zero = "0".repeat(40);
@@ -158,6 +176,22 @@ test("PR checks inspect real commits and exclude existing history", (t) => {
   const result = checkPr();
   expectStatus(result, 1);
   assert.match(result.stderr, /cursor: generated update/);
+  pr.base.sha = pr.head.sha;
+  git(
+    "commit",
+    "--allow-empty",
+    "-m",
+    "fix: repair search",
+    "-m",
+    "Co-authored-by: Codex <codex@openai.com>",
+  );
+  pr.head.sha = git("rev-parse", "HEAD");
+  assert.match(checkPr().stderr, /Co-authored-by: Codex/);
+  git("commit", "--amend", "--allow-empty", "-m", "fix: repair search");
+  pr.head.sha = git("rev-parse", "HEAD");
+  expectStatus(checkPr(), 0);
+  pr.body = "Summary.\n\nCo-Authored-By: Claude <noreply@anthropic.com>";
+  expectStatus(checkPr(), 1);
   git("switch", "--detach");
   expectStatus(run(["branch"], { cwd: directory }), 1);
 });

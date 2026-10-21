@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 const types = "feat|fix|perf|refactor|docs|style|test|build|ci|chore|revert";
 const branchPattern = new RegExp(`^(${types})/[a-z0-9]+(?:-[a-z0-9]+)*$`);
 const subjectPattern = new RegExp(`^(${types})(\\([a-z0-9][a-z0-9/-]*\\))?!?: \\S.*$`);
+const agentTrailerPattern =
+  /^(?:co-authored-by:.*\b(?:claude|codex|cursor|anthropic|openai)\b.*|(?:claude|codex|cursor)-session:.*)$/im;
 
 function git(...args) {
   return execFileSync("git", args, { encoding: "utf8" }).trim();
@@ -25,6 +27,15 @@ function checkSubject(subject, label) {
   }
 }
 
+function checkTrailers(message, label) {
+  const trailer = message.match(agentTrailerPattern)?.[0];
+  if (trailer) {
+    throw new Error(
+      `Invalid ${label}: remove ${JSON.stringify(trailer.trim())}. Agents such as Claude, Codex and Cursor are not credited as co-authors.`,
+    );
+  }
+}
+
 try {
   switch (process.argv[2]) {
     case "branch": {
@@ -32,8 +43,9 @@ try {
       break;
     }
     case "commit-msg": {
-      const subject = readFileSync(process.argv[3], "utf8").split(/\r?\n/, 1)[0];
-      checkSubject(subject, "commit subject");
+      const message = readFileSync(process.argv[3], "utf8");
+      checkSubject(message.split(/\r?\n/, 1)[0], "commit subject");
+      checkTrailers(message, "commit message");
       break;
     }
     case "pre-push": {
@@ -49,11 +61,13 @@ try {
       const { pull_request: pr } = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
       checkBranch(pr.head.ref);
       checkSubject(pr.title, "pull request title");
-      const commits = git("log", "--format=%H%x00%s", `${pr.base.sha}..${pr.head.sha}`, "--");
-      for (const line of commits.split("\n")) {
-        if (!line) continue;
-        const [sha, subject] = line.split("\0");
+      checkTrailers(pr.body ?? "", "pull request description");
+      const commits = git("log", "-z", "--format=%H%n%B", `${pr.base.sha}..${pr.head.sha}`, "--");
+      for (const commit of commits.split("\0")) {
+        if (!commit) continue;
+        const [sha, subject] = commit.split("\n");
         checkSubject(subject, `commit ${sha}`);
+        checkTrailers(commit, `commit ${sha}`);
       }
       break;
     }

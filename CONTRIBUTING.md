@@ -39,10 +39,11 @@ Use one of these types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `tes
 - Branches: `<type>/<kebab-case-description>`, for example `feat/player-search` or `fix/159-localized-seo`. The permanent `main` branch is exempt.
 - Commit subjects and PR titles: `<type>(optional-scope): description`, for example `fix(back): repair player sync`. Use `!` before the colon for breaking changes, such as `feat(api)!: change player response`.
 - Prefixes such as `codex/`, `cursor/`, `claude/`, `codex:`, `cursor:`, and `claude:` are rejected. The same naming rules apply to people and agents.
+- Agents are not credited as co-authors. Commit messages and PR descriptions with a `Co-authored-by:` trailer naming Claude, Codex, Cursor, Anthropic, or OpenAI, or with a `Claude-Session:`-style trailer, are rejected. Turn off your tool's commit attribution setting.
 
-`pnpm install` installs Lefthook. The hooks check the current branch before commits, commit subjects before saving, and destination branches before pushes. Tags and branch deletions are exempt from the push check.
+`pnpm install` installs Lefthook. The hooks check the current branch before commits, commit messages before saving, and destination branches before pushes. Tags and branch deletions are exempt from the push check.
 
-CI checks the source branch, PR title, and every commit introduced by the PR. Rebase onto `main` instead of creating commits with Git's default merge messages. Historical commits already on `main` are excluded. PR title edits rerun the checks, including for squash merges.
+CI checks the source branch, PR title and description, and every commit introduced by the PR. Rebase onto `main` instead of creating commits with Git's default merge messages. Historical commits already on `main` are excluded. PR title edits rerun the checks, including for squash merges.
 
 Keep the `CI` status check required in GitHub's branch protection for `main` to block merges when naming checks fail. Local hooks can be bypassed.
 
