@@ -18,7 +18,17 @@ const {
   () => getPostById(postRef.value),
   {
     watch: [postRef],
-    pick: ["id", "publicId", "slug", "title", "content", "author", "createdAt"],
+    // Nuxt's `pick` throws on a null result, which would turn a missing post into a 500.
+    transform: (post) =>
+      post && {
+        id: post.id,
+        publicId: post.publicId,
+        slug: post.slug,
+        title: post.title,
+        content: post.content,
+        author: post.author,
+        createdAt: post.createdAt,
+      },
   },
 );
 
