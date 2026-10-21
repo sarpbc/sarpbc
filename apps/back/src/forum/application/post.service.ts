@@ -13,6 +13,7 @@ import type {
   PostRecord,
   TranslationRecord,
   CreatePostInput,
+  CreatedPost,
   PostView,
   PostReplyView,
   PostCreationStatus,
@@ -44,9 +45,10 @@ export class PostService {
     return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(ref: EntityRef): Promise<PostView | null> {
+  async findByIdDto(ref: EntityRef, locale: string | null): Promise<PostView | null> {
     const post = await this.findById(ref);
     if (!post) return null;
+    const translation = locale ? post.translations.find((t) => t.locale === locale) : undefined;
 
     const buildNestedReplies = (replies: ReplyRecord[]) => {
       const replyMap = new Map<string, PostReplyView>();
@@ -84,8 +86,8 @@ export class PostService {
       id: post.id,
       publicId: post.publicId,
       slug: forumPostSlug(post.title),
-      title: post.title,
-      content: post.content,
+      title: translation?.title ?? post.title,
+      content: translation?.content ?? post.content,
       topic: { id: post.topic.id, title: post.topic.title },
       author: post.author.userName,
       createdAt: post.createdAt,
@@ -103,8 +105,8 @@ export class PostService {
     };
   }
 
-  async create(userId: string, createPostInput: CreatePostInput): Promise<void> {
-    return this.transaction.run(async (scope) => {
+  async create(userId: string, createPostInput: CreatePostInput): Promise<CreatedPost> {
+    await this.transaction.run(async (scope) => {
       const eligibility = await this.resolvePostCreationEligibility(userId, scope.posts);
       if (!eligibility.canCreate) {
         throw new InvalidInputError({
@@ -160,6 +162,9 @@ export class PostService {
         }
       }
     });
+    const created = await this.postRepository.findById(createPostInput.id);
+    if (!created) throw new NotFoundError("Post not found");
+    return { publicId: created.publicId, slug: forumPostSlug(created.title) };
   }
 
   async findRecentActivity(limit: number = 20) {

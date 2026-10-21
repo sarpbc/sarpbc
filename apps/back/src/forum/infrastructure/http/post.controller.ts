@@ -21,6 +21,7 @@ import { CurrentUserId } from "../../../user/infrastructure/http/decorator/curre
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import { PostCreationStatusDto } from "./post/dto/post-creation-status.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
+import type { CreatedPost } from "../../domain/forum";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
 
@@ -72,30 +73,18 @@ export class PostController {
     @Param("ref", EntityRefPipe) ref: EntityRef,
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
-    const post = await this.postService.findByIdDto(ref);
-    if (!post) return { post: null };
-
     const preferred = (req.headers["accept-language"] || "en-US").split(",")[0];
-    if (preferred && preferred.toLowerCase().startsWith("fr")) {
-      const p = await this.postService.findById(ref);
-      const trans = p?.translations.find((t) => t.locale === "fr-FR");
-      if (trans) {
-        post.title = trans.title;
-        post.content = trans.content;
-      }
-    }
-
-    return { post };
+    const locale = preferred?.toLowerCase().startsWith("fr") ? "fr-FR" : null;
+    return { post: await this.postService.findByIdDto(ref, locale) };
   }
 
   @UseGuards(AuthGuard)
   @Post()
-  @HttpCode(HttpStatus.NO_CONTENT)
   async create(
     @CurrentUserId() userId: string,
     @Body({ schema: CreatePostDto }) createPostDto: CreatePostDto,
-  ) {
-    await this.postService.create(userId, createPostDto);
+  ): Promise<CreatedPost> {
+    return this.postService.create(userId, createPostDto);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

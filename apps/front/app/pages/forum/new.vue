@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import { forumPostPath } from "@sarpbc/utils";
 import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
 const { t, locale } = useI18n();
@@ -92,9 +93,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
   isSubmitting.value = true;
 
-  const postId = crypto.randomUUID();
   const createResult = await createForumPost({
-    id: postId,
+    id: crypto.randomUUID(),
     title: result.data.title,
     content: result.data.content,
     topicId: result.data.topicId,
@@ -103,8 +103,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   isSubmitting.value = false;
 
   if (createResult.ok) {
-    // The public id is assigned by the server; the legacy id answers a 301 to the canonical path.
-    await navigateTo(localePath(`/forum/post/${postId}`));
+    await navigateTo(localePath(forumPostPath(createResult.post.publicId, createResult.post.slug)));
     return;
   }
 

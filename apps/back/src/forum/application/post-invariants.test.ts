@@ -18,7 +18,10 @@ function setup(role: string | null = "admin") {
   const posts = {
     findPaginated: vi.fn().mockResolvedValue([]),
     findByTopicId: vi.fn().mockResolvedValue([]),
-    findById: vi.fn().mockResolvedValue(null),
+    findById: vi.fn(async (id: string) => {
+      const post = saved.find((candidate) => candidate.id === id);
+      return post ? { ...post, publicId: 41 } : null;
+    }),
     findWithDetails: vi.fn().mockResolvedValue(null),
     findLatestByUser: vi.fn().mockResolvedValue(null),
     findRecentActivity: vi.fn().mockResolvedValue([]),
@@ -73,7 +76,7 @@ const input = {
 describe("post transaction and policies", () => {
   it("creates the post and sanitized admin translations before a single commit", async () => {
     const f = setup();
-    await f.service.create("user", input);
+    expect(await f.service.create("user", input)).toEqual({ publicId: 41, slug: "title" });
     expect(f.saved[0]?.title).toBe("Title");
     expect(f.translations[0]?.title).toBe("Titre");
     expect(f.translations[0]?.post.id).toBe("post");
@@ -194,16 +197,27 @@ describe("post lookup", () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     const ref = { kind: "publicId", value: 88 } as const;
-    expect(await f.service.findByIdDto(ref)).toMatchObject({
+    expect(await f.service.findByIdDto(ref, null)).toMatchObject({
       id: stored.id,
       publicId: 88,
       slug: "mon-post-quel-roster",
+      title: stored.title,
     });
     expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith(ref);
   });
+  it("applies the requested translation from the single lookup and keeps the base slug", async () => {
+    const f = setup();
+    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    expect(await f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US")).toMatchObject({
+      slug: "mon-post-quel-roster",
+      title: "Translated title",
+      content: "Translated",
+    });
+    expect(f.scope.posts.findWithDetails).toHaveBeenCalledTimes(1);
+  });
   it("reports a missing post as null", async () => {
     const f = setup();
-    expect(await f.service.findByIdDto({ kind: "id", value: stored.id })).toBeNull();
+    expect(await f.service.findByIdDto({ kind: "id", value: stored.id }, null)).toBeNull();
   });
   it("deletes by legacy id", async () => {
     const f = setup();

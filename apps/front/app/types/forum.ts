@@ -54,7 +54,7 @@ export interface ForumPostCreationStatus {
 }
 
 export type CreateForumPostResult =
-  | { ok: true }
+  | { ok: true; post: { publicId: number; slug: string } }
   | {
       ok: false;
       reason: "unauthorized" | "rate_limited" | "conflict" | "unknown";

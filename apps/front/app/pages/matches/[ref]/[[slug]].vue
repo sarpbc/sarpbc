@@ -59,9 +59,10 @@ if (!matchDetail.value) {
 const match = computed(() => matchDetail.value?.match ?? null);
 
 const { publicId, slug } = matchDetail.value.match;
-if (matchRef.value !== String(publicId) || route.params.slug !== slug) {
+const canonicalPath = localePath(matchPath(publicId, slug));
+if (route.path !== canonicalPath) {
   await navigateTo(
-    { path: localePath(matchPath(publicId, slug)), query: route.query, hash: route.hash },
+    { path: canonicalPath, query: route.query, hash: route.hash },
     { redirectCode: 301, replace: true },
   );
 }

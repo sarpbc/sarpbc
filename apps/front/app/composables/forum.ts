@@ -92,12 +92,12 @@ export async function createForumPost(data: {
   topicId: string;
 }): Promise<CreateForumPostResult> {
   try {
-    await apiFetch("/posts", {
+    const post = await apiFetch<{ publicId: number; slug: string }>("/posts", {
       method: "POST",
       body: data,
     });
 
-    return { ok: true };
+    return { ok: true, post };
   } catch (error) {
     const status = getApiErrorStatus(error);
     const message = getApiErrorMessage(error);

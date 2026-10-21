@@ -27,9 +27,10 @@ if (!post.value) {
 }
 
 const { publicId, slug } = post.value;
-if (postRef.value !== String(publicId) || route.params.slug !== slug) {
+const canonicalPath = localePath(forumPostPath(publicId, slug));
+if (route.path !== canonicalPath) {
   await navigateTo(
-    { path: localePath(forumPostPath(publicId, slug)), query: route.query, hash: route.hash },
+    { path: canonicalPath, query: route.query, hash: route.hash },
     { redirectCode: 301, replace: true },
   );
 }

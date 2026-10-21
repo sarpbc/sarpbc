@@ -40,6 +40,10 @@ export interface CreatePostInput {
   topicId: string;
   translations?: { locale: "en-US" | "fr-FR"; title: string; content: string }[];
 }
+export interface CreatedPost {
+  publicId: number;
+  slug: string;
+}
 export interface PostCreationStatus {
   canCreate: boolean;
   nextAvailableAt: string | null;

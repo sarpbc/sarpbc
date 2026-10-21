@@ -595,7 +595,7 @@
     "controller": "\"posts\"",
     "verb": "POST",
     "path": "\"\"",
-    "status": "HttpStatus.NO_CONTENT",
+    "status": null,
     "guards": ["AuthGuard"],
     "permissions": []
   },

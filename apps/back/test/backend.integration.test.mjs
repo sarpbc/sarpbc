@@ -534,14 +534,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       async () => {
         const postId = randomUUID();
         const topics = (await request("GET", "/forum")).json().topics;
-        await request(
-          "POST",
-          "/posts",
-          { id: postId, title: "Linked Discussion", content: "Body", topicId: topics[0].id },
-          memberCookie,
-          204,
-        );
-        const post = (await request("GET", `/posts/${postId}`)).json().post;
+        const post = (
+          await request(
+            "POST",
+            "/posts",
+            { id: postId, title: "Linked Discussion", content: "Body", topicId: topics[0].id },
+            memberCookie,
+            201,
+          )
+        ).json();
         const renamed = (await request("GET", `/matches/${match.publicId}`)).json().match;
         const targets = [
           { body: { matchId: match.id }, path: `/matches/${renamed.publicId}/${renamed.slug}` },
@@ -742,7 +743,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const overview = (await request("GET", "/forum")).json();
         assert.equal(overview.totalTopics, 4);
         const id = randomUUID();
-        await request(
+        const creation = await request(
           "POST",
           "/posts",
           {
@@ -755,12 +756,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             ],
           },
           staffCookie,
-          204,
+          201,
         );
+        const createdLocation = creation.json();
         const created = (await request("GET", `/posts/${id}`)).json().post;
         assert.equal(created.title, "Integration Discussion");
         assert(Number.isInteger(created.publicId) && created.publicId > 0, "post has a public id");
         assert.equal(created.slug, "integration-discussion");
+        assert.deepEqual(createdLocation, { publicId: created.publicId, slug: created.slug });
         const byPublicId = (await request("GET", `/posts/${created.publicId}`)).json().post;
         assert.equal(byPublicId.id, id);
         assert.equal((await request("GET", `/posts/${created.publicId + 1000}`)).json().post, null);
