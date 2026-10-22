@@ -2,7 +2,53 @@ import { Migration } from "@mikro-orm/migrations";
 import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { z } from "zod";
-import { compareStages, eventDisplayName } from "../../../tournament/domain/tournament-event";
+
+// Production runs migrations from src through Node's type stripping, where extensionless relative
+// imports fail to resolve. Keep this file free of app imports: it is a frozen copy of the domain rules.
+const GENERIC_STAGE_NAMES = new Set([
+  "playoffs",
+  "group stage",
+  "group a",
+  "group b",
+  "group c",
+  "group d",
+  "swiss",
+  "main event",
+  "grand finals",
+  "finals",
+]);
+
+function eventDisplayName(input: {
+  leagueName: string | null;
+  serieName: string | null;
+  stageName: string;
+}): string {
+  const league = input.leagueName?.trim();
+  const serie = input.serieName?.trim();
+  const stage = input.stageName.trim();
+  if (serie) {
+    if (/^\d{4}$/.test(serie)) {
+      if (league) return `${league} ${serie}`;
+      return stage && !GENERIC_STAGE_NAMES.has(stage.toLowerCase()) ? stage : serie;
+    }
+    return league && !serie.toLowerCase().startsWith(league.toLowerCase())
+      ? `${league} ${serie}`
+      : serie;
+  }
+  if (league && stage) return `${league} ${stage}`;
+  return stage || league || "";
+}
+
+function utcDay(date: Date | null): string {
+  return date ? date.toISOString().slice(0, 10) : "";
+}
+
+function compareStages(
+  a: { beginAt: Date | null; name: string },
+  b: { beginAt: Date | null; name: string },
+): number {
+  return utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
+}
 
 const stageRow = z
   .object({
