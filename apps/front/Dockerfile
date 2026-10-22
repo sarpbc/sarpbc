@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # Monorepo context: always build from repository root (--file apps/front/Dockerfile).
-FROM node:24.22.0-alpine AS base
+FROM node:24.22.1-alpine AS base
 
 WORKDIR /app
 RUN apk add --no-cache libc6-compat \
@@ -38,7 +38,7 @@ ENV NODE_OPTIONS=--max-old-space-size=8192
 
 RUN pnpm run build
 
-FROM node:24.22.0-alpine AS runtime
+FROM node:24.22.1-alpine AS runtime
 
 ENV NODE_ENV=production
 ENV NITRO_HOST=0.0.0.0
