@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import type { League } from "./league";
 import type { Match } from "./matches";
 import type { Player } from "./player";
@@ -14,8 +15,9 @@ export interface Tournament {
   pandascoreId?: number;
   name: string;
   description?: string;
-  slug?: string;
-  serie?: string;
+  /** Stage slug, unique within its event. */
+  slug: string;
+  event: TournamentEventRef;
   tier?: string;
   beginAt?: Date;
   endAt?: Date;
@@ -43,3 +45,24 @@ export interface TournamentParticipant {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type TournamentTab = "overview" | "matches";
+
+/** One PandaScore serie or manual tournament. Its stages are `Tournament`s, newest first. */
+export interface TournamentEvent {
+  id: string;
+  slug: string;
+  name: string;
+  league: League | null;
+  logoUrl: string | null;
+  prizepool: string | null;
+  type: string | null;
+  beginAt: string | null;
+  endAt: string | null;
+  /** List responses omit `matches`; the event detail embeds them for the brackets. */
+  stages: Tournament[];
+}
+
+export type TournamentPathResponse =
+  | { kind: "event"; event: TournamentEvent }
+  | { kind: "stage"; tournament: Tournament; tab: TournamentTab };

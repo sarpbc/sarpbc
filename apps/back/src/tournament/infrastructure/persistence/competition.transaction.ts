@@ -1,17 +1,26 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import { UniqueConstraintViolationException } from "@mikro-orm/core";
+import { UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
 import { ConflictError } from "../../../common/domain/errors";
 import { Player, Team } from "../../../player/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../player/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
 import type * as Model from "../../domain/competition";
+import type { TournamentEvent } from "../../domain/tournament-event";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
+  EventWriter,
   TournamentWriter,
   MatchWriter,
 } from "../../application/ports";
-import { toTournament, toLeague, toParticipant, toMatch } from "./competition.mapper";
+import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
+import {
+  toTournament,
+  toTournamentEvent,
+  toLeague,
+  toParticipant,
+  toMatch,
+} from "./competition.mapper";
 import { CompetitionAwardWriter } from "./player-award.store";
 export class CompetitionTournamentWriter implements TournamentWriter {
   private readonly tournaments = new Map<string, Row.Tournament>();
@@ -24,7 +33,9 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       (await this.em.findOne(
         Row.Tournament,
         { id },
-        { populate: ["league", "winner.team", "participants.team", "participants.players"] },
+        {
+          populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
+        },
       ));
     if (row) this.tournaments.set(row.id, row);
     return row ? toTournament(row) : null;
@@ -35,17 +46,11 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     const row = await this.em.findOne(
       Row.Tournament,
       { pandascoreId: id },
-      { populate: ["league", "winner.team", "participants.team", "participants.players"] },
+      {
+        populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
+      },
     );
     if (row) this.tournaments.set(row.id, row);
-    return row ? toTournament(row) : null;
-  }
-  async bySlug(slug: string) {
-    const row = await this.em.findOne(
-      Row.Tournament,
-      { slug },
-      { populate: ["league", "winner.team"] },
-    );
     return row ? toTournament(row) : null;
   }
   async save(model: Model.Tournament) {
@@ -61,7 +66,6 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       name: model.name,
       description: model.description,
       slug: model.slug,
-      serie: model.serie,
       tier: model.tier,
       beginAt: model.beginAt,
       endAt: model.endAt,
@@ -73,6 +77,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       pickemsEnabled: model.pickemsEnabled,
       hasBracket: model.hasBracket,
     });
+    row.event = this.em.getReference(Row.TournamentEvent, model.event.id);
     row.league = model.league ? this.em.getReference(Row.League, model.league.id) : null;
     row.winner = model.winner
       ? this.em.getReference(Row.TournamentParticipant, model.winner.id)
@@ -171,7 +176,7 @@ export class CompetitionMatchWriter implements MatchWriter {
         { id },
         {
           populate: [
-            "tournament.league",
+            ...MATCH_TOURNAMENT_POPULATE,
             "participants.team",
             "participants.players",
             "winner.team",
@@ -191,7 +196,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       { pandascoreId: id },
       {
         populate: [
-          "tournament.league",
+          ...MATCH_TOURNAMENT_POPULATE,
           "participants.team",
           "participants.players",
           "winner.team",
@@ -209,7 +214,8 @@ export class CompetitionMatchWriter implements MatchWriter {
       ? {
           id: t.id,
           name: t.name,
-          serie: t.serie,
+          slug: t.slug,
+          event: t.event,
           beginAt: t.beginAt,
           league: t.league,
           pickemsEnabled: t.pickemsEnabled,
@@ -285,6 +291,69 @@ export class CompetitionMatchWriter implements MatchWriter {
     this.staged.set(row.id, row);
   }
 }
+export class CompetitionEventWriter implements EventWriter {
+  constructor(private readonly em: EntityManager) {}
+  private async find(where: FilterQuery<Row.TournamentEvent>) {
+    const row = await this.em.findOne(Row.TournamentEvent, where, {
+      populate: ["league"],
+      orderBy: { id: "ASC" },
+    });
+    return row ? toTournamentEvent(row) : null;
+  }
+  load(id: string) {
+    return this.find({ id });
+  }
+  bySerieId(id: number) {
+    return this.find({ pandascoreSerieId: id });
+  }
+  unclaimedByName(leagueId: string | null, name: string) {
+    return this.find({
+      pandascoreSerieId: null,
+      league: leagueId,
+      name,
+      stages: { $none: { source: "manual" } },
+    });
+  }
+  async slugTaken(slug: string, exceptEventId: string | null) {
+    const where: FilterQuery<Row.TournamentEvent> = exceptEventId
+      ? { slug, id: { $ne: exceptEventId } }
+      : { slug };
+    return (await this.em.count(Row.TournamentEvent, where)) > 0;
+  }
+  async stageSlugTaken(eventId: string, slug: string, exceptTournamentId: string) {
+    return (
+      (await this.em.count(Row.Tournament, {
+        event: eventId,
+        slug,
+        id: { $ne: exceptTournamentId },
+      })) > 0
+    );
+  }
+  async stages(eventId: string) {
+    const rows = await this.em.find(
+      Row.Tournament,
+      { event: eventId },
+      { orderBy: { beginAt: "ASC", id: "ASC" } },
+    );
+    return rows.map(({ id, name }) => ({ id, name }));
+  }
+  async save(model: TournamentEvent) {
+    const row =
+      (await this.em.findOne(Row.TournamentEvent, { id: model.id })) ??
+      Object.assign(new Row.TournamentEvent(), { id: model.id });
+    Object.assign(row, {
+      pandascoreSerieId: model.pandascoreSerieId,
+      slug: model.slug,
+      name: model.name,
+    });
+    row.league = model.league ? this.em.getReference(Row.League, model.league.id) : null;
+    this.em.persist(row);
+  }
+  async remove(id: string) {
+    const row = await this.em.findOne(Row.TournamentEvent, { id });
+    if (row) this.em.remove(row);
+  }
+}
 export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
   constructor(private readonly em: EntityManager) {}
   async run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
@@ -295,6 +364,7 @@ export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
         awardWriter = new CompetitionAwardWriter(em);
         const result = await work({
           tournaments,
+          events: new CompetitionEventWriter(em),
           matches: new CompetitionMatchWriter(em, tournaments),
           rosters: new RosterSyncWriter(em),
           awards: awardWriter,

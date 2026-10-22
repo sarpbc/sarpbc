@@ -9,7 +9,7 @@ const { tournament, variant = "homepage" } = defineProps<{
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const eventName = computed(() => tournament.league?.name || tournament.name || "");
+const eventName = computed(() => tournament.event.name);
 
 const title = computed(() => {
   switch (variant) {

@@ -28,7 +28,13 @@ describe("TournamentController.findOne", () => {
   });
 
   it("returns the tournament response through the read adapter", async () => {
-    tournaments.findById.mockResolvedValue(Object.assign(new Tournament(), { id: "t1" }));
+    tournaments.findById.mockResolvedValue(
+      Object.assign(new Tournament(), {
+        id: "t1",
+        slug: "playoffs",
+        event: { id: "e1", slug: "rlcs-2026", name: "RLCS 2026" },
+      }),
+    );
     const result = await controller.findOne("t1");
     expect(result.tournament).toMatchObject({ id: "t1", matches: [], participants: [] });
   });

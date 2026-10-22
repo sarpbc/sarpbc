@@ -8,6 +8,7 @@ import type {
   ParticipantSnapshot,
   ParticipantReferences,
 } from "../domain/competition";
+import type { TournamentEvent } from "../domain/tournament-event";
 import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
 import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -56,7 +57,6 @@ export interface MatchQueries {
 export interface TournamentWriter {
   load(id: string): Promise<Tournament | null>;
   byPandascoreId(id: number): Promise<Tournament | null>;
-  bySlug(slug: string): Promise<Tournament | null>;
   save(tournament: Tournament): Promise<void>;
   league(id: string): Promise<League | null>;
   leagueByPandascoreId(id: number): Promise<League | null>;
@@ -69,6 +69,29 @@ export interface TournamentWriter {
     participantId: string,
   ): Promise<ParticipantReferences>;
   teamsExist(ids: string[]): Promise<boolean>;
+}
+export interface EventStage {
+  id: string;
+  name: string;
+}
+export interface EventWriter {
+  load(id: string): Promise<TournamentEvent | null>;
+  bySerieId(id: number): Promise<TournamentEvent | null>;
+  unclaimedByName(leagueId: string | null, name: string): Promise<TournamentEvent | null>;
+  slugTaken(slug: string, exceptEventId: string | null): Promise<boolean>;
+  stageSlugTaken(eventId: string, slug: string, exceptTournamentId: string): Promise<boolean>;
+  stages(eventId: string): Promise<EventStage[]>;
+  save(event: TournamentEvent): Promise<void>;
+  remove(id: string): Promise<void>;
+}
+export interface EventListing {
+  event: TournamentEvent;
+  stages: Tournament[];
+}
+export interface EventQueries {
+  list(options: TournamentListOptions): Promise<[EventListing[], number]>;
+  bySlug(slug: string): Promise<{ event: TournamentEvent; stageIds: string[] } | null>;
+  stageId(eventSlug: string, stageSlug: string): Promise<string | null>;
 }
 export interface MatchWriter {
   load(id: string): Promise<Match | null>;
@@ -105,6 +128,7 @@ export interface AwardQueries {
 }
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;
+  events: EventWriter;
   matches: MatchWriter;
   rosters: RosterIdentityWriter;
   awards: AwardWriter;

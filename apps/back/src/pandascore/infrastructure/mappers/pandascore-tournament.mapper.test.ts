@@ -73,8 +73,7 @@ describe("PandascoreTournamentMapper", () => {
     expect(command).toEqual({
       pandascoreId: 42,
       name: "RLCS 2025",
-      slug: "rlcs-2025",
-      serie: "RLCS 2025 Season",
+      serie: { pandascoreId: 2, fullName: "RLCS 2025 Season", year: 2025 },
       tier: "s",
       beginAt: new Date("2025-06-01T10:00:00Z"),
       endAt: new Date("2025-06-10T18:00:00Z"),

@@ -45,7 +45,7 @@ export function formatDateForInput(date: Date | string | null | undefined): stri
 export function tournamentToFormState(tournament: Tournament): ManualTournamentFormState {
   return {
     name: tournament.name ?? "",
-    slug: tournament.slug ?? "",
+    slug: tournament.event.slug,
     tier: tournament.tier ?? "",
     leagueId: tournament.league?.id ?? "",
     beginAt: formatDateForInput(tournament.beginAt),

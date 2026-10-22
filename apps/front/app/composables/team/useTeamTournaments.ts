@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import type { MaybeRef } from "vue";
 import type { Tournament } from "~/types/tournament";
 import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
@@ -13,10 +14,10 @@ interface TeamTournamentsPayload {
 export interface TeamEventListItem {
   id: string;
   name: string;
+  slug: string;
+  event: TournamentEventRef;
   beginAt: Date | string | null;
   endAt: Date | string | null;
-  leagueName?: string;
-  serie?: string | null;
   status: TournamentStatus;
   isWinner: boolean;
 }
@@ -32,7 +33,6 @@ function timeOf(value: Date | string | null | undefined): number {
 }
 
 function toEventListItem(tournament: Tournament, teamId: string, now: number): TeamEventListItem {
-  const league = tournament.league instanceof Object ? tournament.league : undefined;
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
   const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
   const status = getTournamentStatus(tournament, now);
@@ -40,10 +40,10 @@ function toEventListItem(tournament: Tournament, teamId: string, now: number): T
   return {
     id: tournament.id,
     name: tournament.name,
+    slug: tournament.slug,
+    event: tournament.event,
     beginAt: tournament.beginAt ?? null,
     endAt: tournament.endAt ?? null,
-    leagueName: league?.name,
-    serie: tournament.serie ?? null,
     status: status ?? "finished",
     isWinner: winnerTeamId === teamId,
   };

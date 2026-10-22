@@ -3,6 +3,7 @@ import type { Match, MatchDetailResponse } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 import { getFetchStatusCode } from "./match-og";
 
 interface TournamentResponse {
@@ -105,11 +106,8 @@ export function buildTournamentIcs(tournament: Tournament, matches: Match[], now
     .map((match) => matchToCalendarEvent(match, now))
     .filter((event) => event != null);
 
-  const league = tournament.league?.name;
-  const name = league && tournament.name ? `${league} ${tournament.name}` : tournament.name;
-
   return buildIcs({
-    name,
+    name: tournamentStageLabel(tournament),
     dtStamp: now,
     events,
   });

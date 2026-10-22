@@ -63,7 +63,7 @@ const formatEndDate = (value: Date | string | null) => {
           v-for="trophy in trophies"
           :key="trophy.id"
           divider
-          :to="$localePath(`/tournaments/${trophy.id}`)"
+          :to="$localePath(trophy.path)"
           class="min-w-0"
         >
           <div class="flex w-full min-w-0 items-center gap-2">

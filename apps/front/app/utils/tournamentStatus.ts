@@ -1,9 +1,7 @@
-import type { Tournament } from "~/types/tournament";
-
 export type TournamentStatus = "live" | "upcoming" | "finished";
 
 export function getTournamentStatus(
-  tournament: Pick<Tournament, "beginAt" | "endAt">,
+  tournament: { beginAt?: Date | string | null; endAt?: Date | string | null },
   now = Date.now(),
 ): TournamentStatus | null {
   const beginAt = tournament.beginAt ? new Date(tournament.beginAt).getTime() : null;
@@ -22,6 +20,21 @@ export function getTournamentStatus(
   }
 
   return "upcoming";
+}
+
+export function tournamentStatusLabelKey(status: TournamentStatus): string {
+  switch (status) {
+    case "live":
+      return "page.tournaments.id.status.live";
+    case "upcoming":
+      return "page.tournaments.id.status.upcoming";
+    case "finished":
+      return "page.tournaments.id.status.finished";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
 }
 
 export function formatTournamentShortDateRange(

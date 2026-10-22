@@ -1,85 +1,70 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
 import type { Team } from "~/types/team";
-import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   formatTournamentDateRange,
   getTournamentStatus,
-  type TournamentStatus,
+  tournamentStatusLabelKey,
 } from "~/utils/tournamentStatus";
 
-interface Props {
-  tournament: Tournament;
-}
+const {
+  title,
+  logoUrl = null,
+  leagueName = null,
+  beginAt = null,
+  endAt = null,
+  prizepool = null,
+  type = null,
+  countLabel = null,
+  champion = null,
+  calendarPath = null,
+} = defineProps<{
+  title: string;
+  logoUrl?: string | null;
+  leagueName?: string | null;
+  beginAt?: Date | string | null;
+  endAt?: Date | string | null;
+  prizepool?: string | null;
+  type?: string | null;
+  countLabel?: string | null;
+  champion?: Team | null;
+  calendarPath?: string | null;
+}>();
 
-const { tournament } = defineProps<Props>();
+defineSlots<{
+  kicker?(): unknown;
+  default?(): unknown;
+}>();
+
 const { t, locale, te } = useI18n();
 const { formatTournamentPrizepool } = useCurrency();
-const imageUrl = computed(() => tournament.imageUrl?.trim() || tournament.league?.imageUrl);
 
-const status = computed(() => getTournamentStatus(tournament));
+const status = computed(() => getTournamentStatus({ beginAt, endAt }));
 
-const dateRange = computed(() =>
-  formatTournamentDateRange(tournament.beginAt, tournament.endAt, locale.value),
+const dateRange = computed(() => formatTournamentDateRange(beginAt, endAt, locale.value));
+
+const statusLabel = computed(() =>
+  status.value ? t(tournamentStatusLabelKey(status.value)) : null,
 );
 
-const statusLabel = computed(() => {
-  const current: TournamentStatus | null = status.value;
-  if (!current) return null;
-
-  switch (current) {
-    case "live":
-      return t("page.tournaments.id.status.live");
-    case "upcoming":
-      return t("page.tournaments.id.status.upcoming");
-    case "finished":
-      return t("page.tournaments.id.status.finished");
-    default: {
-      const _exhaustive: never = current;
-      return _exhaustive;
-    }
-  }
-});
-
-const prizepoolLabel = computed(() => {
-  const formatted = formatTournamentPrizepool(tournament.prizepool);
-  return formatted || null;
-});
-
-const teamCount = computed(() => tournament.participants?.length ?? 0);
-
-const teamCountLabel = computed(() => {
-  if (teamCount.value <= 0) return null;
-  return t("page.tournaments.id.hero.teamsCount", { count: teamCount.value });
-});
-
 const typeLabel = computed(() => {
-  const type = tournament.type;
   if (!type) return null;
   const key = `components.tournaments.${type}`;
-  if (!te(key)) return null;
-  return t(key);
+  return te(key) ? t(key) : null;
 });
 
 const metaItems = computed(() => {
   const items: { label: string; tabular: boolean }[] = [];
-  if (prizepoolLabel.value) items.push({ label: prizepoolLabel.value, tabular: true });
-  if (teamCountLabel.value) items.push({ label: teamCountLabel.value, tabular: true });
+  const prizepoolLabel = formatTournamentPrizepool(prizepool);
+  if (prizepoolLabel) items.push({ label: prizepoolLabel, tabular: true });
+  if (countLabel) items.push({ label: countLabel, tabular: true });
   if (typeLabel.value) items.push({ label: typeLabel.value, tabular: false });
   return items;
 });
 
-const championTeam = computed((): Team | null => {
-  const winner = tournament.winner;
-  if (!winner || !(winner instanceof Object)) return null;
-  if (!("team" in winner) || !winner.team?.slug) return null;
-  return winner.team;
-});
-
-const showChampion = computed(() => status.value === "finished" && championTeam.value != null);
+const showChampion = computed(() => status.value === "finished" && champion != null);
 
 const showSubscribeCalendar = computed(
-  () => status.value === "live" || status.value === "upcoming",
+  () => calendarPath != null && (status.value === "live" || status.value === "upcoming"),
 );
 </script>
 
@@ -88,22 +73,19 @@ const showSubscribeCalendar = computed(
     <div class="w-full flex flex-col">
       <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
         <div
-          v-if="imageUrl || tournament.league?.name"
+          v-if="logoUrl || leagueName || $slots.kicker"
           class="flex items-center justify-center gap-2"
         >
-          <img
-            v-if="imageUrl"
-            :src="imageUrl"
-            :alt="tournament.name"
-            class="size-4 object-contain"
-          />
-          <p v-if="tournament.league?.name" class="text-sm text-muted text-pretty">
-            {{ tournament.league.name }}
-          </p>
+          <img v-if="logoUrl" :src="logoUrl" alt="" class="size-4 object-contain" />
+          <slot name="kicker">
+            <p v-if="leagueName" class="text-sm text-muted text-pretty">
+              {{ leagueName }}
+            </p>
+          </slot>
         </div>
 
         <h1 class="text-xl font-medium tracking-tight text-balance max-w-3xl">
-          {{ tournament.name }}
+          {{ title }}
         </h1>
 
         <div
@@ -114,9 +96,9 @@ const showSubscribeCalendar = computed(
           <span v-else-if="statusLabel">{{ statusLabel }}</span>
           <span v-if="status && dateRange" aria-hidden="true">·</span>
           <span v-if="dateRange" class="tabular-nums">{{ dateRange }}</span>
-          <template v-if="showSubscribeCalendar">
+          <template v-if="showSubscribeCalendar && calendarPath">
             <span v-if="status || dateRange" aria-hidden="true">·</span>
-            <SLink :to="tournamentCalendarPath(tournament.id)" variant="muted" external>
+            <SLink :to="calendarPath" variant="muted" external>
               {{ t("page.tournaments.id.subscribeCalendar") }}
             </SLink>
           </template>
@@ -132,15 +114,15 @@ const showSubscribeCalendar = computed(
           </template>
         </div>
 
-        <p v-if="showChampion && championTeam" class="text-sm text-highlighted text-pretty">
+        <p v-if="showChampion && champion" class="text-sm text-highlighted text-pretty">
           <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
           {{ " " }}
           <SLink
-            :to="$localePath(`/team/${championTeam.slug}`)"
+            :to="$localePath(`/team/${champion.slug}`)"
             variant="inline"
             class="inline-flex items-center min-h-10"
           >
-            {{ championTeam.name }}
+            {{ champion.name }}
           </SLink>
         </p>
       </div>

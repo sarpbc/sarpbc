@@ -1,7 +1,9 @@
+import { tournamentStagePath } from "@sarpbc/utils";
 import type { Team } from "~/types/team";
 import type { Tournament } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/calendar/ics";
 import { formatPrizepool } from "~/utils/currencyFormatter";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 
@@ -88,17 +90,6 @@ export interface BuildTournamentSportsEventOptions {
 
 function isTournamentFormat(value: string): value is TournamentFormat {
   return (TOURNAMENT_FORMATS as readonly string[]).includes(value);
-}
-
-export function tournamentCanonicalUrl(id: string, origin = SITE_ORIGIN): string {
-  return `${origin}/tournaments/${id}`;
-}
-
-export function tournamentDisplayName(tournament: Pick<Tournament, "name" | "league">): string {
-  return [tournament.league?.name, tournament.name]
-    .map((part) => part?.trim())
-    .filter((part): part is string => Boolean(part))
-    .join(" ");
 }
 
 export function resolveStructuredDataUrl(
@@ -333,7 +324,7 @@ export function buildTournamentSportsEvent(
   options: BuildTournamentSportsEventOptions = {},
 ): SportsEventLd {
   const origin = options.origin ?? SITE_ORIGIN;
-  const url = tournamentCanonicalUrl(tournament.id, origin);
+  const url = `${origin}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
   const status = getTournamentStatus(tournament, options.now);
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
   const format = formatLabel(tournament.type);
@@ -349,7 +340,7 @@ export function buildTournamentSportsEvent(
     "@type": "SportsEvent",
     "@id": url,
     url,
-    name: tournamentDisplayName(tournament),
+    name: tournamentStageLabel(tournament),
     sport: ROCKET_LEAGUE_SPORT,
     startDate: toIsoDate(tournament.beginAt),
     endDate: toIsoDate(tournament.endAt),

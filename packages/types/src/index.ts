@@ -7,6 +7,7 @@ export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } fro
 export type { Team } from "./team";
 export type { ContractRole, PlayerContract, TeamContract } from "./contract";
 export type { League } from "./league";
+export type { TournamentEventRef } from "./tournament-event";
 export type { NewsType } from "./news";
 
 export const PLAYER_AWARD_TYPES = [

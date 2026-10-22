@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { tournamentStagePath } from "@sarpbc/utils";
 import type { Match, MatchStatus } from "~/types/matches";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 
 const { t, locale } = useI18n();
 
@@ -16,16 +18,9 @@ const dateTimeFormatter = computed(
     }),
 );
 
-function tournamentMatchesPath(tournamentId: string) {
-  return `/tournaments/${tournamentId}/matches`;
-}
-
-function tournamentLabel(currentMatch: Match) {
-  const league = currentMatch.tournament?.league?.name;
-  const name = currentMatch.tournament?.name;
-  if (league && name) return `${league} ${name}`;
-  return name ?? t("page.match.detail.unknownTournament");
-}
+const tournamentMatchesPath = computed(
+  () => `${tournamentStagePath(match.tournament.event.slug, match.tournament.slug)}/matches`,
+);
 </script>
 
 <template>
@@ -33,12 +28,8 @@ function tournamentLabel(currentMatch: Match) {
     class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-sm text-muted text-pretty"
   >
     <SBadgeLive v-if="matchStatus === 'live'" />
-    <SLink
-      v-if="match.tournament"
-      :to="$localePath(tournamentMatchesPath(match.tournament.id))"
-      variant="muted"
-    >
-      {{ tournamentLabel(match) }}
+    <SLink :to="$localePath(tournamentMatchesPath)" variant="muted">
+      {{ tournamentStageLabel(match.tournament) }}
     </SLink>
     <span v-if="match.beginAt" class="tabular-nums">
       {{ dateTimeFormatter.format(new Date(match.beginAt)) }}

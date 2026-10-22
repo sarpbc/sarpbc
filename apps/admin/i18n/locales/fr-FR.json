@@ -194,7 +194,7 @@
       "form": {
         "name": "Nom",
         "slug": "Slug d’URL",
-        "slugHint": "Utilisé sur la page publique du tournoi. Laissez vide pour le générer depuis le nom.",
+        "slugHint": "Définit l’URL publique de l’événement (/tournaments/votre-slug). Laissez vide pour la générer depuis le nom.",
         "slugPlaceholder": "community-cup-2026",
         "tier": "Niveau",
         "tierPlaceholder": "S-Tier",

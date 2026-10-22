@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
@@ -33,7 +34,8 @@ export function getMatchParticipantScore(
 export interface MatchListTournament {
   id: string;
   name: string;
-  serie?: string | null;
+  slug: string;
+  event: TournamentEventRef;
   league?: { id: string; name: string };
 }
 

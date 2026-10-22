@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { tournamentLabel } from "~/utils/tournamentLabel";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import type { Tournament } from "~/types/tournament";
 
@@ -23,14 +24,6 @@ const breadcrumbItems = computed(() => [
     label: t("page.pickems.title"),
   },
 ]);
-
-function tournamentLabel(tournament: Tournament): string {
-  const year = tournament.beginAt
-    ? new Date(tournament.beginAt).getFullYear()
-    : new Date().getFullYear();
-  const league = tournament.league?.name ? `${tournament.league.name} ` : "";
-  return `${league}${year} ${tournament.name}`.trim();
-}
 
 function teamLogoSrc(
   team: { imageUrl?: string | null; darkModeImageUrl?: string | null } | null | undefined,

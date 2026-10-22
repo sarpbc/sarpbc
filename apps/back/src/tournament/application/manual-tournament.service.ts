@@ -1,12 +1,15 @@
-import slugify from "slugify";
+import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { isUuid } from "../../common/domain/entity-ref";
 import { Tournament } from "../domain/competition";
+import { TournamentEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
 import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
 import type {
   CompetitionCache,
   CompetitionDiagnostics,
   CompetitionTransaction,
+  EventWriter,
   TournamentQueries,
   TournamentWriter,
 } from "./ports";
@@ -21,23 +24,27 @@ export class ManualTournamentService {
     return (await this.reads.leagues({ limit: 200 })).map(({ id, name }) => ({ id, name }));
   }
   async create(input: CreateTournamentInput): Promise<Tournament> {
-    const id = await this.transaction.run(async ({ tournaments }) => {
+    const id = await this.transaction.run(async ({ tournaments, events }) => {
       const tournament = new Tournament();
       tournament.source = "manual";
       tournament.pandascoreId = null;
       tournament.name = input.name;
-      tournament.slug = await this.slug(
-        tournaments,
-        input.slug ?? input.name,
-        undefined,
-        Boolean(input.slug),
-      );
+      tournament.slug = stageSlug(input.name);
       tournament.tier = input.tier?.trim() || null;
       tournament.imageUrl = input.imageUrl?.trim() || null;
       tournament.beginAt = input.beginAt ? new Date(input.beginAt) : null;
       tournament.endAt = input.endAt ? new Date(input.endAt) : null;
       this.assertDateOrder(tournament);
       tournament.league = await this.league(tournaments, input.leagueId);
+      const event = Object.assign(new TournamentEvent(), {
+        name: input.name,
+        league: tournament.league,
+      });
+      event.slug = input.slug
+        ? await this.explicitSlug(events, input.slug, event.id)
+        : await allocateSlug(eventSlug(input.name, null), (slug) => events.slugTaken(slug, null));
+      await events.save(event);
+      tournament.event = toEventRef(event);
       await tournaments.save(tournament);
       if (input.teamIds?.length)
         await this.syncParticipants(tournaments, tournament, input.teamIds);
@@ -46,7 +53,7 @@ export class ManualTournamentService {
     return this.detail(id);
   }
   async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
-    await this.transaction.run(async ({ tournaments }) => {
+    await this.transaction.run(async ({ tournaments, events }) => {
       const tournament = await tournaments.load(id);
       if (!tournament) throw new NotFoundError('Tournament with id "' + id + '" was not found.');
       assertTournamentUpdateAllowed(tournament.source, input);
@@ -61,8 +68,7 @@ export class ManualTournamentService {
         if (input.leagueId !== undefined)
           tournament.league = await this.league(tournaments, input.leagueId);
         this.assertDateOrder(tournament);
-        if (input.slug !== undefined)
-          tournament.slug = await this.slug(tournaments, input.slug, id, true);
+        await this.updateEvent(events, tournament, input);
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);
       }
@@ -94,30 +100,32 @@ export class ManualTournamentService {
       );
     return league;
   }
-  private async slug(
-    writer: TournamentWriter,
-    raw: string,
-    excludeId: string | undefined,
-    explicit: boolean,
+  /** A manual tournament is the single stage of its own event, which carries its name and URL. */
+  private async updateEvent(
+    events: EventWriter,
+    tournament: Tournament,
+    input: UpdateTournamentInput,
   ) {
-    const base = slugify(raw, { lower: true, strict: true });
-    if (!base)
-      throw new ConflictError(
-        explicit
-          ? "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs-2026)."
-          : "Could not generate a URL slug from that name. Add a slug manually (letters, numbers, hyphens).",
+    const event = await events.load(tournament.event.id);
+    if (!event) throw new NotFoundError("The event of this tournament was not found.");
+    event.name = tournament.name;
+    event.league = tournament.league;
+    if (input.slug !== undefined)
+      event.slug = await this.explicitSlug(events, input.slug, event.id);
+    await events.save(event);
+    tournament.event = toEventRef(event);
+  }
+  private async explicitSlug(events: EventWriter, raw: string, eventId: string) {
+    const slug = toSlug(raw);
+    if (!slug || isUuid(slug))
+      throw new InvalidInputError(
+        "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs-2026).",
       );
-    let slug = base,
-      suffix = 1;
-    while (true) {
-      const existing = await writer.bySlug(slug);
-      if (!existing || existing.id === excludeId) return slug;
-      if (explicit)
-        throw new ConflictError(
-          'A tournament with the slug "' + slug + '" already exists. Choose a different slug.',
-        );
-      slug = base + "-" + suffix++;
-    }
+    if (await events.slugTaken(slug, eventId))
+      throw new ConflictError(
+        `An event with the slug "${slug}" already exists. Choose a different slug.`,
+      );
+    return slug;
   }
   private async syncParticipants(
     writer: TournamentWriter,

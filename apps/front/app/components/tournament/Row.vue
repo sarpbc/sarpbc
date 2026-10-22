@@ -4,13 +4,10 @@ import { formatTournamentShortDateRange } from "~/utils/tournamentStatus";
 
 const { tournament, to } = defineProps<{
   tournament: Tournament;
-  to?: string;
+  to: string;
 }>();
 
-const localePath = useLocalePath();
 const { t, locale } = useI18n();
-
-const href = computed(() => to ?? localePath(`/tournaments/${tournament.id}`));
 
 const dateLabel = computed(() =>
   formatTournamentShortDateRange(tournament.beginAt, tournament.endAt, locale.value),
@@ -20,7 +17,7 @@ const teamCount = computed(() => tournament.participants?.length ?? 0);
 </script>
 
 <template>
-  <SListItem divider :to="href" class="min-w-0 gap-3">
+  <SListItem divider :to="to" class="min-w-0 gap-3">
     <h3 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
       {{ tournament.name }}
     </h3>

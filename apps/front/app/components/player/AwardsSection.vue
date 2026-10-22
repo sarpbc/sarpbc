@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
 import { PlayerAwardTypes, type PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
+import { tournamentStagePath } from "@sarpbc/utils";
+import { distinctStageName } from "~/utils/tournamentStageLabel";
 
 const {
   awards,
@@ -47,11 +49,9 @@ function awardTypeLabel(awardType: PlayerAwardType): string {
 
 function metaParts(award: PlayerProfileAward): string[] {
   const parts: string[] = [];
-  if (award.tournament.leagueName) {
-    parts.push(award.tournament.leagueName);
-  }
-  if (award.tournament.serie) {
-    parts.push(award.tournament.serie);
+  const stageName = distinctStageName(award.tournament);
+  if (stageName) {
+    parts.push(stageName);
   }
   if (award.tournament.endAt) {
     parts.push(
@@ -94,14 +94,14 @@ function metaParts(award: PlayerProfileAward): string[] {
           v-for="award in awards"
           :key="award.id"
           divider
-          :to="$localePath(`/tournaments/${award.tournament.id}`)"
+          :to="$localePath(tournamentStagePath(award.tournament.event.slug, award.tournament.slug))"
           class="min-w-0"
         >
           <div class="flex w-full min-w-0 items-center gap-2">
             <UIcon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium text-highlighted">
-                {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.name }}
+                {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.event.name }}
               </p>
               <p v-if="metaParts(award).length > 0" class="truncate text-xs text-muted">
                 {{ metaParts(award).join(" · ") }}

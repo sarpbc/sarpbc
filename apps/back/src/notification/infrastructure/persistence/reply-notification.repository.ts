@@ -24,7 +24,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
           "reply.newsArticle",
           "reply.match",
           "reply.match.participants.team",
-          "reply.match.tournament.league",
+          "reply.match.tournament.event",
         ],
         orderBy: { createdAt: "DESC" },
         limit,

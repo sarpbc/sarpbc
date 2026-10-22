@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError } from "../../common/domain/errors";
 import { Tournament, TournamentParticipant } from "../domain/competition";
+import { TournamentEvent } from "../domain/tournament-event";
 import { Team } from "../../player/domain/roster";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
@@ -8,13 +9,25 @@ describe("ManualTournamentService", () => {
   const writer = {
     load: vi.fn(),
     save: vi.fn(),
-    bySlug: vi.fn(),
     participants: vi.fn(),
     teamsExist: vi.fn(),
     participantReferences: vi.fn(),
     removeParticipant: vi.fn(),
     saveParticipant: vi.fn(),
     league: vi.fn(),
+  };
+  const stored = new Map<string, TournamentEvent>();
+  const eventWriter = {
+    load: vi.fn(async (id: string) => {
+      const event = stored.get(id);
+      return event ? Object.assign(new TournamentEvent(), event) : null;
+    }),
+    slugTaken: vi.fn(async (slug: string, except: string | null) =>
+      [...stored.values()].some((event) => event.slug === slug && event.id !== except),
+    ),
+    save: vi.fn(async (event: TournamentEvent) => {
+      stored.set(event.id, Object.assign(new TournamentEvent(), event));
+    }),
   };
   const cache = { invalidateTournament: vi.fn() },
     diagnostics = { error: vi.fn() },
@@ -23,7 +36,7 @@ describe("ManualTournamentService", () => {
   const events: string[] = [];
   const tx = {
     run: async <T>(work: (scope: never) => Promise<T>) => {
-      const result = await work({ tournaments: writer } as never);
+      const result = await work({ tournaments: writer, events: eventWriter } as never);
       events.push("commit");
       return result;
     },
@@ -32,11 +45,20 @@ describe("ManualTournamentService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     events.length = 0;
+    stored.clear();
+    const event = Object.assign(new TournamentEvent(), {
+      id: "event",
+      slug: "ewc-2026",
+      name: "EWC",
+    });
+    stored.set(event.id, event);
     tournament = Object.assign(new Tournament(), {
       id: "ewc",
       source: "pandascore",
       pandascoreId: 123,
       name: "Group A",
+      slug: "group-a",
+      event: { id: "event", slug: "ewc-2026", name: "EWC" },
       imageUrl: "https://cdn.example/old.png",
     });
     writer.load.mockImplementation(async () => tournament);
@@ -80,13 +102,60 @@ describe("ManualTournamentService", () => {
   it("rejects an empty synced patch", async () => {
     await expect(service.update("ewc", {})).rejects.toBeInstanceOf(InvalidInputError);
   });
-  it("allows manual details and artwork together", async () => {
+  it("allows manual details and artwork together and renames the event", async () => {
     tournament.source = "manual";
     expect(await service.update("ewc", { name: "Community Cup", imageUrl: null })).toMatchObject({
       name: "Community Cup",
+      slug: "group-a",
+      event: { slug: "ewc-2026", name: "Community Cup" },
       imageUrl: null,
     });
   });
+  it("creates a single-stage event with a generated, deduplicated slug", async () => {
+    stored.set(
+      "taken",
+      Object.assign(new TournamentEvent(), { id: "taken", slug: "community-cup" }),
+    );
+    writer.save.mockImplementation(async (saved: Tournament) => {
+      tournament = saved;
+    });
+    const created = await service.create({ name: "Community Cup" });
+    expect(created).toMatchObject({
+      source: "manual",
+      slug: "community-cup",
+      event: { slug: "community-cup-2", name: "Community Cup" },
+    });
+    expect(stored.get(created.event.id)).toMatchObject({ slug: "community-cup-2" });
+  });
+  it("uses an explicit staff slug for the event and rejects one that is taken", async () => {
+    writer.save.mockImplementation(async (saved: Tournament) => {
+      tournament = saved;
+    });
+    expect(await service.create({ name: "Cup", slug: "My Cup" })).toMatchObject({
+      event: { slug: "my-cup" },
+    });
+    await expect(service.create({ name: "Other", slug: "ewc-2026" })).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+  });
+  it("edits the event slug of a manual tournament", async () => {
+    tournament.source = "manual";
+    stored.set("other", Object.assign(new TournamentEvent(), { id: "other", slug: "taken" }));
+    expect(await service.update("ewc", { slug: "ewc-renamed" })).toMatchObject({
+      event: { slug: "ewc-renamed" },
+    });
+    expect(await service.update("ewc", { slug: "ewc-renamed" })).toMatchObject({
+      event: { slug: "ewc-renamed" },
+    });
+    await expect(service.update("ewc", { slug: "taken" })).rejects.toBeInstanceOf(ConflictError);
+  });
+  it.each(["???", "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b"])(
+    "rejects the unusable event slug %p",
+    async (slug) => {
+      tournament.source = "manual";
+      await expect(service.update("ewc", { slug })).rejects.toBeInstanceOf(InvalidInputError);
+    },
+  );
   it("preserves committed success when optional invalidation fails", async () => {
     cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
     expect((await service.update("ewc", { imageUrl: null })).imageUrl).toBeNull();

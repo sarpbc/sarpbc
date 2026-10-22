@@ -1,13 +1,6 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 
-export function getTournamentDisplayName(tournament: Tournament): string {
-  const league = tournament.league?.name;
-  const name = tournament.name;
-  if (league && name) return `${league} ${name}`;
-  return name ?? "";
-}
-
 function hasTournamentWinner(tournament: Tournament): boolean {
   if (tournament.winnerId) return true;
   const winner = tournament.winner;

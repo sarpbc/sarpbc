@@ -4,7 +4,6 @@ import type { MatchListItem } from "~/types/matches";
 import type { Player } from "~/types/player";
 import type { Team } from "~/types/team";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
-import { tournamentEventDisplayName } from "~/utils/tournamentEventDisplayName";
 
 const {
   team,
@@ -31,17 +30,9 @@ function opponentName(match: MatchListItem): string {
   return names[0] ?? t("page.team.slug.faq.upcoming.unknownOpponent");
 }
 
-function eventName(match: MatchListItem): string {
-  return tournamentEventDisplayName({
-    name: match.tournament.name,
-    leagueName: match.tournament.league?.name,
-    serie: match.tournament.serie,
-  });
-}
-
 function formatMatchLine(match: MatchListItem, live: boolean): string {
   const opponent = opponentName(match);
-  const event = eventName(match);
+  const event = match.tournament.event.name;
 
   if (live) {
     return event

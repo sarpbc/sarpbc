@@ -1,31 +1,17 @@
 <script lang="ts" setup>
+import type { Tournament } from "~/types/tournament";
 import { groupTournamentMatchesByDate } from "~/utils/groupMatchesByDate";
 import { formatDayHeaderDate } from "~/utils/dateFormatter";
 import { getTournamentStatus } from "~/utils/tournamentStatus";
 
-const route = useRoute();
+const { tournament } = defineProps<{
+  tournament: Tournament;
+}>();
+
 const { t, locale } = useI18n();
 
-const tournamentId = computed(() => route.params.id as string);
+const tournamentId = computed(() => tournament.id);
 const SOURCE = "tournament_hub" as const;
-
-const { data: tournament } = await useAsyncData(
-  () => `tournament-${tournamentId.value}`,
-  async () => {
-    const result = await getTournamentById(tournamentId.value);
-    if (!result) {
-      throw createError({
-        statusCode: 404,
-        message: t("page.tournaments.id.notFound"),
-      });
-    }
-    return result;
-  },
-  {
-    watch: [tournamentId],
-    default: () => null,
-  },
-);
 
 const { data: matches } = await useAsyncData(
   () => `tournament-matches-${tournamentId.value}`,
@@ -38,9 +24,7 @@ const { data: matches } = await useAsyncData(
 
 const groupedMatches = computed(() => groupTournamentMatchesByDate(matches.value ?? []));
 
-const isFinished = computed(
-  () => tournament.value != null && getTournamentStatus(tournament.value) === "finished",
-);
+const isFinished = computed(() => getTournamentStatus(tournament) === "finished");
 
 const displayGroupedMatches = computed(() => {
   const { upcoming, completed } = groupedMatches.value;
@@ -71,21 +55,24 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
 </script>
 
 <template>
-  <div v-if="tournament" class="w-full flex flex-col gap-4">
+  <div class="w-full flex flex-col gap-4">
     <div v-if="hasMatches" class="flex flex-col gap-4">
-      <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col gap-2">
-        <h2 v-if="showUpcomingSectionTitle" class="text-sm font-medium text-toned pl-1">
+      <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col">
+        <h2
+          v-if="showUpcomingSectionTitle"
+          class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned"
+        >
           {{ t("page.tournaments.id.matchSections.upcoming") }}
         </h2>
         <div
           v-for="dayGroup in displayGroupedMatches.upcoming"
           :key="`upcoming-${dayGroup.dateKey}`"
-          class="flex flex-col gap-px"
+          class="flex flex-col"
         >
-          <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
+          <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
             {{ formatDayHeader(dayGroup) }}
           </h3>
-          <SCard flush-bottom variant="soft" class="w-full">
+          <SCard flush-bottom class="w-full">
             <MatchLinkRows
               :matches="dayGroup.matches"
               variant="upcoming"
@@ -99,20 +86,21 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
       <section
         v-for="dayGroup in displayGroupedMatches.completed"
         :key="`completed-${dayGroup.dateKey}`"
-        class="flex flex-col gap-px"
+        class="flex flex-col"
       >
-        <h3 class="flex text-sm font-medium text-toned h-10.75 items-end pl-1">
+        <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
           {{ formatDayHeader(dayGroup) }}
         </h3>
-        <SCard flush-bottom variant="soft" class="w-full">
+        <SCard flush-bottom class="w-full">
           <MatchLinkRows :matches="dayGroup.matches" variant="result" :source="SOURCE" />
         </SCard>
       </section>
     </div>
-    <SCard v-else variant="soft" class="w-full">
-      <div class="text-center py-8 text-muted">
-        {{ t("page.tournaments.id.noMatches") }}
-      </div>
+    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
+      <SEmptyState
+        icon="i-fluent-calendar-clock-24-regular"
+        :title="t('page.tournaments.id.noMatches')"
+      />
     </SCard>
   </div>
 </template>

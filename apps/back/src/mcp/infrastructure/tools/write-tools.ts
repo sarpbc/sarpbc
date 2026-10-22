@@ -284,7 +284,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .max(255)
           .optional()
-          .describe("Optional URL slug. Generated from the name when omitted."),
+          .describe("Optional event URL slug. Generated from the name when omitted."),
         tier: z
           .string()
           .max(50)
@@ -316,7 +316,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             name: tournament.name,
             slug: tournament.slug,
             source: tournament.source,
-            url: tournamentUrl(tournament.id),
+            url: tournamentUrl(tournament),
           },
         };
       }),
@@ -330,7 +330,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
-        slug: z.string().min(1).max(255).optional().describe("URL slug."),
+        slug: z.string().min(1).max(255).optional().describe("Event URL slug."),
         tier: z
           .string()
           .max(50)
@@ -371,7 +371,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             slug: tournament.slug,
             source: tournament.source,
             imageUrl: tournament.imageUrl,
-            url: tournamentUrl(tournament.id),
+            url: tournamentUrl(tournament),
           },
         };
       }),
@@ -430,14 +430,14 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     },
     async ({ pandascoreId }) =>
       runWriteTool(user, "sync_pandascore_tournament", "tournaments.manage", async () => {
-        const tournamentId = await ctx.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+        const tournament = await ctx.tournamentService.syncTournamentByPandascoreId(pandascoreId);
         return {
-          entityId: tournamentId,
+          entityId: tournament.id,
           result: {
             success: true,
-            tournamentId,
+            tournamentId: tournament.id,
             pandascoreId,
-            url: tournamentUrl(tournamentId),
+            url: tournamentUrl(tournament),
           },
         };
       }),

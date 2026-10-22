@@ -194,7 +194,7 @@
       "form": {
         "name": "Name",
         "slug": "URL Slug",
-        "slugHint": "Used on the public tournament page. Leave empty to generate from the name.",
+        "slugHint": "Sets the public event URL (/tournaments/your-slug). Leave empty to generate it from the name.",
         "slugPlaceholder": "community-cup-2026",
         "tier": "Tier",
         "tierPlaceholder": "S-Tier",

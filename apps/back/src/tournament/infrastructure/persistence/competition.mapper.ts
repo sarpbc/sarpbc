@@ -1,4 +1,5 @@
 import { wrap } from "@mikro-orm/core";
+import type { TournamentEventRef } from "@sarpbc/types";
 import * as Row from "./tournament.entities";
 import {
   League,
@@ -8,6 +9,7 @@ import {
   matchPublicSlug,
   type TournamentSummary,
 } from "../../domain/competition";
+import { TournamentEvent } from "../../domain/tournament-event";
 import { toPlayer, toTeam } from "../../../player/infrastructure/roster-persistence";
 export function toLeague(row: Row.League): League {
   return Object.assign(new League(), {
@@ -21,6 +23,23 @@ export function toLeague(row: Row.League): League {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
+}
+export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
+  return Object.assign(new TournamentEvent(), {
+    id: row.id,
+    pandascoreSerieId: row.pandascoreSerieId,
+    slug: row.slug,
+    name: row.name,
+    league: row.league ? toLeague(row.league) : null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  });
+}
+function toEventRef(row: Row.TournamentEvent): TournamentEventRef {
+  // An unpopulated reference would silently map to an empty slug and break every public URL.
+  if (!wrap(row).isInitialized())
+    throw new Error("Tournament event " + row.id + " is not populated");
+  return { id: row.id, slug: row.slug, name: row.name };
 }
 export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant {
   return Object.assign(new TournamentParticipant(), {
@@ -36,7 +55,8 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
   return {
     id: row.id,
     name: row.name,
-    serie: row.serie,
+    slug: row.slug,
+    event: toEventRef(row.event),
     beginAt: row.beginAt,
     league: row.league ? toLeague(row.league) : null,
     pickemsEnabled: row.pickemsEnabled,
@@ -88,7 +108,7 @@ export function toTournament(row: Row.Tournament): Tournament {
     name: row.name,
     description: row.description,
     slug: row.slug,
-    serie: row.serie,
+    event: toEventRef(row.event),
     tier: row.tier,
     beginAt: row.beginAt,
     endAt: row.endAt,
@@ -114,14 +134,10 @@ export function toMatchSlug(row: Row.Match): string {
   const loaded = wrap(row).isInitialized();
   const tournament =
     loaded && row.tournament && wrap(row.tournament).isInitialized() ? row.tournament : null;
+  const event = tournament && wrap(tournament.event).isInitialized() ? tournament.event : null;
   return matchPublicSlug({
     name: row.name,
     participants: loaded && row.participants.isInitialized() ? row.participants.getItems() : [],
-    tournament: {
-      name: tournament?.name ?? "",
-      serie: tournament?.serie ?? null,
-      beginAt: tournament?.beginAt ?? null,
-      league: tournament?.league ?? null,
-    },
+    tournament: { slug: tournament?.slug ?? "", event: { slug: event?.slug ?? "" } },
   });
 }

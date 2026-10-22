@@ -46,14 +46,20 @@ export {
 export { resolveThemedLogoUrl } from "./themed-logo.ts";
 export { isStaffUser, hasPermission, canModerateComments } from "./staff.ts";
 export {
+  allocateSlug,
+  eventSlug,
   forumPostSlug,
   matchSlug,
+  stageSlug,
   toSlug,
-  tournamentSlugParts,
   type MatchSlugInput,
-  type TournamentSlugInput,
 } from "./entity-slug.ts";
-export { forumPostPath, matchPath } from "./entity-path.ts";
+export {
+  forumPostPath,
+  matchPath,
+  tournamentEventPath,
+  tournamentStagePath,
+} from "./entity-path.ts";
 export {
   parseNewsLocale,
   hasFrenchTranslation,

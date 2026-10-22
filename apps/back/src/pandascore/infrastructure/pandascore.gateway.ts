@@ -13,6 +13,7 @@ import { PandascoreMatchMapper } from "./mappers/pandascore-match.mapper";
 import { PandascoreTeamMapper } from "./mappers/pandascore-team.mapper";
 import { PandascorePlayerMapper } from "./mappers/pandascore-player.mapper";
 import { PandascoreLeagueMapper } from "./mappers/pandascore-league.mapper";
+import { PandascoreSerieMapper, parseProviderDeletion } from "./mappers/pandascore-serie.mapper";
 @Injectable()
 export class PandascoreGatewayImpl implements PandascoreGateway {
   constructor(private readonly apiClient: PandascoreApiClient) {}
@@ -50,7 +51,13 @@ export class PandascoreGatewayImpl implements PandascoreGateway {
     return (await this.apiClient.listIncidents(params)).map((v) => {
       const i = incidentSchema.parse(v),
         base = { id: i.id, modifiedAt: new Date(i.modified_at) };
-      if (i.change_type === "deletion") return { ...base, changeType: "deletion", kind: i.type };
+      if (i.change_type === "deletion")
+        return {
+          ...base,
+          changeType: "deletion",
+          kind: i.type,
+          deletion: parseProviderDeletion(i.object),
+        };
       const changeType = i.change_type;
       switch (i.type) {
         case "tournament":
@@ -94,7 +101,12 @@ export class PandascoreGatewayImpl implements PandascoreGateway {
             command: PandascoreLeagueMapper.toUpsertCommand(i.object),
           };
         case "serie":
-          return { ...base, changeType, kind: i.type };
+          return {
+            ...base,
+            changeType,
+            kind: i.type,
+            command: PandascoreSerieMapper.toUpsertCommand(i.object),
+          };
         default: {
           const neverIncident: never = i;
           return neverIncident;

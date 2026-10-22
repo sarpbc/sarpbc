@@ -1,32 +1,20 @@
+import { tournamentStagePath } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import type { Tournament } from "~/types/tournament";
-import { tournamentEventDisplayName } from "~/utils/tournamentEventDisplayName";
 
 export interface TeamTrophyListItem {
   id: string;
-  name: string;
+  path: string;
   displayName: string;
   endAt: Date | string | null;
-  leagueName?: string;
-  serie?: string | null;
 }
 
 function toTrophyListItem(tournament: Tournament): TeamTrophyListItem {
-  const league = tournament.league instanceof Object ? tournament.league : undefined;
-  const leagueName = league?.name;
-  const serie = tournament.serie ?? null;
-
   return {
     id: tournament.id,
-    name: tournament.name,
-    displayName: tournamentEventDisplayName({
-      name: tournament.name,
-      leagueName,
-      serie,
-    }),
+    path: tournamentStagePath(tournament.event.slug, tournament.slug),
+    displayName: tournament.event.name,
     endAt: tournament.endAt ?? null,
-    leagueName,
-    serie,
   };
 }
 

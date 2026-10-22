@@ -72,6 +72,30 @@
     "permissions": []
   },
   {
+    "controller": "\"events\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
+    "path": "\"resolve/:event/:stage\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
+    "path": "\"resolve/:event\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"forum/topics\"",
     "verb": "GET",
     "path": "\":id\"",

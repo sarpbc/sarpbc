@@ -4,6 +4,7 @@ import { Post } from "../../forum/infrastructure/persistence/forum.entities";
 import { NewsArticle } from "../../news/infrastructure/persistence/news-article.entity";
 import { Match } from "../../tournament/infrastructure/persistence/tournament.entities";
 import { toMatchSlug } from "../../tournament/infrastructure/persistence/competition.mapper";
+import { MATCH_TOURNAMENT_POPULATE } from "../../tournament/infrastructure/persistence/match-populate";
 import { User } from "../../user/infrastructure/persistence/user.entity";
 import { directReplyNotifications } from "../../notification/infrastructure/composition";
 import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
@@ -49,7 +50,7 @@ export function replyWriteScope(em: EntityManager): ReplyWriteScope {
             const row = await em.findOne(
               Match,
               { id: target.id },
-              { populate: ["participants.team", "tournament.league"] },
+              { populate: ["participants.team", ...MATCH_TOURNAMENT_POPULATE] },
             );
             return row
               ? {

@@ -1,6 +1,7 @@
 import { EntityRepository } from "@mikro-orm/core";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match } from "./tournament.entities";
+import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type {
   MatchListQueryOptions,
   MatchListScopeFilters,
@@ -17,7 +18,7 @@ interface MatchListFilter {
   tournament?: MatchTournamentScopeFilter;
 }
 
-const LIST_POPULATE = ["participants.team", "results", "tournament", "tournament.league"] as const;
+const LIST_POPULATE = ["participants.team", "results", ...MATCH_TOURNAMENT_POPULATE] as const;
 
 const DETAIL_POPULATE = [
   "participants.team",
@@ -26,8 +27,7 @@ const DETAIL_POPULATE = [
   "results.participant",
   "winner",
   "winner.team",
-  "tournament",
-  "tournament.league",
+  ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
 const TEAM_FORM_POPULATE = [
@@ -36,8 +36,7 @@ const TEAM_FORM_POPULATE = [
   "results.participant",
   "winner",
   "winner.team",
-  "tournament",
-  "tournament.league",
+  ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
 const HEAD_TO_HEAD_POPULATE = [
@@ -46,8 +45,7 @@ const HEAD_TO_HEAD_POPULATE = [
   "results.participant",
   "winner",
   "winner.team",
-  "tournament",
-  "tournament.league",
+  ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
 export class MatchRepository extends EntityRepository<Match> {

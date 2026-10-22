@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { TournamentSource } from "../../domain/tournament-source";
 import {
@@ -67,8 +68,8 @@ export interface TournamentResponse {
   source: TournamentSource;
   name: string;
   description: string | null;
-  slug: string | null;
-  serie: string | null;
+  slug: string;
+  event: TournamentEventRef;
   tier: string | null;
   beginAt: Date | null;
   endAt: Date | null;
@@ -87,7 +88,7 @@ export interface TournamentResponse {
   matches?: TournamentMatchResponse[];
 }
 
-function mapLeague(league: League | null | undefined): LeagueResponse | null {
+export function mapLeague(league: League | null | undefined): LeagueResponse | null {
   if (!league?.id) {
     return null;
   }
@@ -157,7 +158,7 @@ export function mapTournament(
     name: tournament.name,
     description: tournament.description,
     slug: tournament.slug,
-    serie: tournament.serie,
+    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
     tier: tournament.tier,
     beginAt: tournament.beginAt,
     endAt: tournament.endAt,

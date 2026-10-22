@@ -24,7 +24,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
-      populate: ["league"],
+      populate: ["league", "event"],
     });
   }
 

@@ -1,5 +1,5 @@
 import type { Match } from "~/types/matches";
-import type { Tournament } from "~/types/tournament";
+import type { Tournament, TournamentEvent, TournamentPathResponse } from "~/types/tournament";
 import { parseMatchResults } from "~/utils/parseMatchResult";
 import { getApiErrorStatus } from "~/utils/apiError";
 
@@ -39,6 +39,56 @@ export async function getAllTournaments(query?: {
 
   const tournaments = res.tournaments ?? [];
   return { tournaments, total: res.count ?? tournaments.length };
+}
+
+export async function getEvents(query: {
+  limit?: number;
+  offset?: number;
+  pickems?: boolean;
+  activeOnly?: boolean;
+}): Promise<{ events: TournamentEvent[]; total: number }> {
+  const config = useRuntimeConfig();
+  const { limit, offset, pickems, activeOnly } = query;
+  const url = new URL(`${config.public.apiBase}/events`);
+  if (limit !== undefined) {
+    url.searchParams.set("limit", String(limit));
+  }
+  if (offset !== undefined) {
+    url.searchParams.set("offset", String(offset));
+  }
+  if (pickems !== undefined) {
+    url.searchParams.set("pickems", pickems ? "true" : "false");
+  }
+  if (activeOnly) {
+    url.searchParams.set("activeOnly", "true");
+  }
+
+  const res = await $fetch<{ events: TournamentEvent[]; count: number }>(url.toString(), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return { events: res.events, total: res.count };
+}
+
+/** Resolves `/tournaments/{segments}`, legacy stage ids included. A 404 resolves to null. */
+export async function resolveTournamentPath(
+  segments: readonly string[],
+): Promise<TournamentPathResponse | null> {
+  const config = useRuntimeConfig();
+  const path = segments.map((segment) => encodeURIComponent(segment)).join("/");
+
+  try {
+    return await $fetch<TournamentPathResponse>(`${config.public.apiBase}/events/resolve/${path}`, {
+      method: "GET",
+      credentials: "include",
+    });
+  } catch (cause) {
+    if (getApiErrorStatus(cause) === 404) {
+      return null;
+    }
+    throw cause;
+  }
 }
 
 export async function getTournamentById(id: string): Promise<Tournament | null> {

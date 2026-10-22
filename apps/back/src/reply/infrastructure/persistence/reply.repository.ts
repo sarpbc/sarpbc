@@ -152,7 +152,7 @@ export class ReplyRepository {
           "newsArticle",
           "match",
           "match.participants.team",
-          "match.tournament.league",
+          "match.tournament.event",
         ],
       },
     );

@@ -7,12 +7,16 @@ import {
   League,
   Match,
   Tournament,
+  TournamentEvent,
   TournamentParticipant,
 } from "./persistence/tournament.entities";
 import { PlayerAward } from "./persistence/player-award.entities";
 import { Player, Team } from "../../player/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
+import { EventController } from "./http/event.controller";
+import { EventService } from "../application/event.service";
+import { CompetitionEventQueries } from "./persistence/event.queries";
 import { TournamentCron } from "./jobs/tournament.cron";
 import { TournamentService } from "../application/tournament.service";
 import { ManualTournamentService } from "../application/manual-tournament.service";
@@ -47,6 +51,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
   imports: [
     MikroOrmModule.forFeature([
       Tournament,
+      TournamentEvent,
       Match,
       TournamentParticipant,
       League,
@@ -61,8 +66,13 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     PickemModule,
     ReplyModule,
   ],
-  controllers: [TournamentController, MatchController],
+  controllers: [TournamentController, EventController, MatchController],
   providers: [
+    {
+      provide: EventService,
+      useFactory: (em: EntityManager) => new EventService(new CompetitionEventQueries(em)),
+      inject: [EntityManager],
+    },
     {
       provide: CachedTournamentRead,
       useFactory: (tournaments: TournamentService, redis: RedisService) =>

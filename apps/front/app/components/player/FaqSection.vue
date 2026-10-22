@@ -3,7 +3,7 @@ import type { PlayerTrophyListItem } from "~/composables/player/usePlayerTrophie
 import type { Player } from "~/types/player";
 import { resolvePlayerNationalityDemonym } from "~/utils/playerNationalityDemonym";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
-import { formatTrophyHighlightNames } from "~/utils/tournamentEventDisplayName";
+import { formatTrophyHighlightNames } from "~/utils/trophyHighlights";
 
 const { player, trophies } = defineProps<{
   player: Player;

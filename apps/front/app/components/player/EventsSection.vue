@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { PlayerEventListItem } from "~/composables/player/usePlayerTournaments";
 import type { TournamentStatus } from "~/utils/tournamentStatus";
+import { tournamentStagePath } from "@sarpbc/utils";
 import { formatTournamentDateRange } from "~/utils/tournamentStatus";
+import { distinctStageName } from "~/utils/tournamentStageLabel";
 
 type PlayerEventsTab = "upcoming" | "past";
 
@@ -85,8 +87,13 @@ function statusLabel(status: TournamentStatus): string {
   }
 }
 
-function formatDateRange(event: PlayerEventListItem): string | null {
-  return formatTournamentDateRange(event.beginAt, event.endAt, locale.value);
+function eventMeta(event: PlayerEventListItem): string {
+  return [
+    distinctStageName(event),
+    formatTournamentDateRange(event.beginAt, event.endAt, locale.value),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 </script>
 
@@ -132,21 +139,13 @@ function formatDateRange(event: PlayerEventListItem): string | null {
             <ULink
               v-for="event in live"
               :key="event.id"
-              :to="$localePath(`/tournaments/${event.id}`)"
+              :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
               class="flex items-center gap-3 p-3 interactive-surface"
             >
               <div class="flex-1 min-w-0">
-                <p class="font-medium truncate">{{ event.name }}</p>
-                <p class="text-sm text-muted truncate">
-                  <span v-if="event.leagueName">{{ event.leagueName }}</span>
-                  <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
-                  <span v-if="event.serie">{{ event.serie }}</span>
-                  <span
-                    v-if="(event.leagueName || event.serie) && formatDateRange(event)"
-                    class="mx-1"
-                    >·</span
-                  >
-                  <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
+                <p class="font-medium truncate">{{ event.event.name }}</p>
+                <p v-if="eventMeta(event)" class="text-sm text-muted truncate">
+                  {{ eventMeta(event) }}
                 </p>
               </div>
               <SBadgeLive />
@@ -161,21 +160,13 @@ function formatDateRange(event: PlayerEventListItem): string | null {
           <ULink
             v-for="event in activeEvents"
             :key="event.id"
-            :to="$localePath(`/tournaments/${event.id}`)"
+            :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
             class="flex items-center gap-3 p-3 interactive-surface"
           >
             <div class="flex-1 min-w-0">
-              <p class="font-medium truncate">{{ event.name }}</p>
-              <p class="text-sm text-muted truncate">
-                <span v-if="event.leagueName">{{ event.leagueName }}</span>
-                <span v-if="event.leagueName && event.serie" class="mx-1">·</span>
-                <span v-if="event.serie">{{ event.serie }}</span>
-                <span
-                  v-if="(event.leagueName || event.serie) && formatDateRange(event)"
-                  class="mx-1"
-                  >·</span
-                >
-                <span v-if="formatDateRange(event)">{{ formatDateRange(event) }}</span>
+              <p class="font-medium truncate">{{ event.event.name }}</p>
+              <p v-if="eventMeta(event)" class="text-sm text-muted truncate">
+                {{ eventMeta(event) }}
               </p>
             </div>
             <div class="flex shrink-0 items-center gap-2">

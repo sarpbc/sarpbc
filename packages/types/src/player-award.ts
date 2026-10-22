@@ -1,3 +1,5 @@
+import type { TournamentEventRef } from "./tournament-event";
+
 export type PlayerAwardType = "mvp" | "defensive_mvp";
 
 export interface PlayerProfileAward {
@@ -6,9 +8,9 @@ export interface PlayerProfileAward {
   tournament: {
     id: string;
     name: string;
+    slug: string;
     endAt: Date | string | null;
-    serie?: string | null;
-    leagueName?: string;
+    event: TournamentEventRef;
   };
 }
 
