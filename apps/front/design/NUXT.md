@@ -85,19 +85,18 @@ Extend here when the same pattern appears 3+ times.
 
 ## Tournament display names
 
-PandaScore maps to our `Tournament` model as:
+An **event** is one PandaScore serie or one manual tournament. Each `Tournament` is a **stage** of an event and carries:
 
-- `serie` — event identity (e.g. `Paris 2026`, `Boston Major: Open 2 2026`, or a weak year like `2025`)
-- `name` — stage within the event (e.g. `Playoffs`, `Group Stage`)
-- `league.name` — competition umbrella (e.g. `RLCS Major`, `RLCS EU`)
+- `event.name` — the event title, computed by the API (e.g. `RLCS Major Paris 2026`)
+- `name` — the stage within the event (e.g. `Playoffs`, `Group Stage`)
+- `event.slug` and `slug` — frozen URL segments for the event and the stage
 
-User-facing event titles must go through `tournamentEventDisplayName()` in `apps/front/app/utils/tournamentEventDisplayName.ts`:
+Rules:
 
-- Prefix `league.name` when `serie` omits it (e.g. `Paris 2026` → `RLCS Major Paris 2026`)
-- When `serie` is year-only, join league + year (e.g. `2025` → `FIFAe World Cup 2025`)
-- Never use raw `tournament.name` alone for event titles — it is usually a stage name
-
-Trophy cabinets, player and team FAQ highlights, and similar lists should reuse `displayName` from `usePlayerTrophies` / `useTeamTrophies`, not `serie` or `name` directly.
+- Event titles (trophy cabinets, FAQ answers, the tournaments header, awards, list captions) use `event.name`. Never use raw `tournament.name` alone for an event title; it is usually a stage name.
+- A label naming one stage (match groups, match pages, calendar feeds, stage SEO titles) uses `tournamentStageLabel()` from `app/utils/tournamentStageLabel.ts`. It joins the event and stage names without repeating a stage the event is named after.
+- Links use `tournamentEventPath(event.slug)` and `tournamentStagePath(event.slug, slug)` from `@sarpbc/utils`; the stage matches tab appends `/matches`. Never build `/tournaments/${id}`. Pick'em pages (`/game/pickems/{id}`) and calendar feeds (`/calendar/tournament/{id}.ics`) stay id-based.
+- The API computes slugs and event names. Do not import slug builders into the front.
 
 ## i18n Checklist
 
