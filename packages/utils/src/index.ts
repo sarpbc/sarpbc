@@ -53,7 +53,12 @@ export {
   type MatchSlugInput,
   type TournamentSlugInput,
 } from "./entity-slug.ts";
-export { forumPostPath, matchPath } from "./entity-path.ts";
+export {
+  forumPostPath,
+  matchPath,
+  tournamentEventPath,
+  tournamentStagePath,
+} from "./entity-path.ts";
 export {
   parseNewsLocale,
   hasFrenchTranslation,
