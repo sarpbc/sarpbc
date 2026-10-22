@@ -113,10 +113,10 @@ export class TournamentController {
       throw new BadRequestException("pandascoreId must be a positive integer");
     }
 
-    const tournamentId = await this.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+    const tournament = await this.tournamentService.syncTournamentByPandascoreId(pandascoreId);
     return {
       success: true,
-      tournamentId,
+      tournamentId: tournament.id,
       pandascoreId,
     };
   }

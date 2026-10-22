@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  allocateSlug,
+  eventSlug,
   forumPostPath,
   forumPostSlug,
   matchPath,
   matchSlug,
+  stageSlug,
   toSlug,
-  tournamentSlugParts,
+  tournamentEventPath,
+  tournamentStagePath,
 } from "@sarpbc/utils";
-
-const BEGIN_2026 = new Date("2026-03-14T12:00:00Z");
 
 describe("toSlug", () => {
   it("joins non-empty parts and normalizes accents and punctuation", () => {
@@ -33,56 +35,62 @@ describe("toSlug", () => {
   });
 });
 
-describe("tournamentSlugParts", () => {
-  it("orders league, serie and stage", () => {
-    expect(
-      tournamentSlugParts({
-        leagueName: "RLCS Major",
-        serie: "Paris 2026",
-        stageName: "Playoffs",
-        beginAt: BEGIN_2026,
-      }),
-    ).toEqual(["RLCS Major", "Paris 2026", "Playoffs"]);
+describe("eventSlug", () => {
+  it("appends the year when the name carries none", () => {
+    expect(eventSlug("RLCS Major Paris", 2026)).toBe("rlcs-major-paris-2026");
+    expect(eventSlug("RLCS EU Paris: Open 6", 2026)).toBe("rlcs-eu-paris-open-6-2026");
   });
 
-  it("appends the year only when no year is already present", () => {
-    expect(
-      tournamentSlugParts({
-        leagueName: "RLCS EU",
-        serie: "Open",
-        stageName: "Playoffs",
-        beginAt: BEGIN_2026,
-      }),
-    ).toEqual(["RLCS EU", "Open", "Playoffs", "2026"]);
+  it("keeps a name that already carries a year as is", () => {
+    expect(eventSlug("RLCS Major Paris 2026", 2025)).toBe("rlcs-major-paris-2026");
+    expect(eventSlug("RLCS World Championship 2026", 2026)).toBe("rlcs-world-championship-2026");
   });
 
-  it("copes with a missing league, serie and begin date", () => {
-    expect(
-      tournamentSlugParts({ leagueName: null, serie: null, stageName: "Finals", beginAt: null }),
-    ).toEqual(["Finals"]);
+  it("falls back when the name is not slugifiable", () => {
+    expect(eventSlug("???", null)).toBe("event");
+    expect(eventSlug("Community Cup", null)).toBe("community-cup");
+  });
+});
+
+describe("stageSlug", () => {
+  it("slugifies the stage name with a fallback", () => {
+    expect(stageSlug("Group Stage")).toBe("group-stage");
+    expect(stageSlug("???")).toBe("stage");
+  });
+});
+
+describe("allocateSlug", () => {
+  it("returns the base when it is free", async () => {
+    expect(await allocateSlug("playoffs", () => false)).toBe("playoffs");
+  });
+
+  it("numbers taken slugs from 2 upward", async () => {
+    const taken = new Set(["playoffs", "playoffs-2"]);
+    expect(await allocateSlug("playoffs", async (slug) => taken.has(slug))).toBe("playoffs-3");
+  });
+
+  it("never returns a UUID-shaped slug", async () => {
+    const uuid = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
+    expect(await allocateSlug(uuid, () => false)).toBe(`${uuid}-2`);
   });
 });
 
 describe("matchSlug", () => {
-  const worlds = {
-    leagueName: "RLCS World Championship",
-    serie: "2026",
-    stageName: "Group A",
-    beginAt: BEGIN_2026,
-  };
+  const worlds = { eventSlug: "rlcs-world-championship-2026", stageSlug: "group-a" };
 
   it("names both teams when they are known", () => {
     expect(
       matchSlug({
         teamNames: ["Karmine Corp", "Team Falcons"],
         matchName: "Upper bracket final: Karmine Corp vs Team Falcons",
-        tournament: { ...worlds, serie: "2026", stageName: "Playoffs" },
+        ...worlds,
+        stageSlug: "playoffs",
       }),
     ).toBe("karmine-corp-vs-team-falcons-rlcs-world-championship-2026-playoffs");
   });
 
   it("gives the same slug whichever order the teams arrive in", () => {
-    const input = { matchName: "Final", tournament: worlds };
+    const input = { matchName: "Final", ...worlds };
     const swapped = matchSlug({ ...input, teamNames: ["Team Falcons", "Karmine Corp"] });
     expect(swapped).toBe(matchSlug({ ...input, teamNames: ["Karmine Corp", "Team Falcons"] }));
     expect(swapped).toMatch(/^karmine-corp-vs-team-falcons-/);
@@ -93,7 +101,7 @@ describe("matchSlug", () => {
       matchSlug({
         teamNames: ["Karmine Corp", null],
         matchName: "Lower bracket round 2: Karmine Corp vs TBD",
-        tournament: worlds,
+        ...worlds,
       }),
     ).toBe("lower-bracket-round-2-rlcs-world-championship-2026-group-a");
   });
@@ -103,30 +111,26 @@ describe("matchSlug", () => {
       matchSlug({
         teamNames: ["TBD", "TBD"],
         matchName: "Upper bracket final: TBD vs TBD",
-        tournament: worlds,
+        ...worlds,
       }),
     ).toBe("upper-bracket-final-rlcs-world-championship-2026-group-a");
   });
 
   it("uses no label for an unlabeled TBD match", () => {
-    expect(
-      matchSlug({ teamNames: [null, null], matchName: "TBD vs TBD", tournament: worlds }),
-    ).toBe("rlcs-world-championship-2026-group-a");
+    expect(matchSlug({ teamNames: [null, null], matchName: "TBD vs TBD", ...worlds })).toBe(
+      "rlcs-world-championship-2026-group-a",
+    );
   });
 
   it("keeps a colon-free label that is not a TBD placeholder", () => {
-    expect(
-      matchSlug({ teamNames: [null, null], matchName: "Grand Final", tournament: worlds }),
-    ).toBe("grand-final-rlcs-world-championship-2026-group-a");
+    expect(matchSlug({ teamNames: [null, null], matchName: "Grand Final", ...worlds })).toBe(
+      "grand-final-rlcs-world-championship-2026-group-a",
+    );
   });
 
   it("never returns an empty slug", () => {
     expect(
-      matchSlug({
-        teamNames: [null, null],
-        matchName: "TBD",
-        tournament: { leagueName: null, serie: null, stageName: null, beginAt: null },
-      }),
+      matchSlug({ teamNames: [null, null], matchName: "TBD", eventSlug: "", stageSlug: "" }),
     ).toBe("match");
   });
 });
@@ -140,5 +144,9 @@ describe("forumPostSlug and path builders", () => {
   it("builds canonical paths", () => {
     expect(matchPath(7250, "a-vs-b")).toBe("/matches/7250/a-vs-b");
     expect(forumPostPath(88, "my-post-title")).toBe("/forum/post/88/my-post-title");
+    expect(tournamentEventPath("rlcs-major-paris-2026")).toBe("/tournaments/rlcs-major-paris-2026");
+    expect(tournamentStagePath("rlcs-major-paris-2026", "playoffs")).toBe(
+      "/tournaments/rlcs-major-paris-2026/playoffs",
+    );
   });
 });

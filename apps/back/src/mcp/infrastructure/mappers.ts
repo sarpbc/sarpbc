@@ -47,12 +47,12 @@ export function mapTournamentListItem(tournament: Tournament) {
     slug: tournament.slug,
     source: tournament.source,
     imageUrl: tournament.imageUrl,
-    serie: tournament.serie,
+    event: tournament.event,
     beginAt: tournament.beginAt,
     endAt: tournament.endAt,
     pickemsEnabled: tournament.pickemsEnabled,
     league: tournament.league ? { id: tournament.league.id, name: tournament.league.name } : null,
-    url: tournamentUrl(tournament.id),
+    url: tournamentUrl(tournament),
   };
 }
 

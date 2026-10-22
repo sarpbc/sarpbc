@@ -1,11 +1,11 @@
 import { UpsertLeagueCommand } from "./upsert-league.command";
+import { UpsertSerieCommand } from "./upsert-serie.command";
 import { UpsertTournamentParticipantCommand } from "./upsert-tournament-participant.command";
 
 export interface UpsertTournamentCommand {
   pandascoreId: number;
   name: string;
-  slug?: string;
-  serie?: string;
+  serie?: UpsertSerieCommand;
   tier?: string;
   beginAt?: Date;
   endAt?: Date;

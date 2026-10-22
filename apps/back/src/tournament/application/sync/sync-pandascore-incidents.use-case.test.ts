@@ -78,10 +78,17 @@ describe("PandaScore incidents", () => {
       sync.applyIncident.mock.invocationCallOrder[1],
     );
   });
-  it("skips deletions and still advances cursor", async () => {
-    feed.listIncidents.mockResolvedValue([{ ...base, kind: "player", changeType: "deletion" }]);
+  it("hands deletions to the sync without a backfill and advances the cursor", async () => {
+    const incident = {
+      ...base,
+      kind: "serie",
+      changeType: "deletion",
+      deletion: { kind: "merged", intoId: 9 },
+    };
+    feed.listIncidents.mockResolvedValue([incident]);
     await service.execute();
-    expect(sync.applyIncident).not.toHaveBeenCalled();
+    expect(feed.getTournamentById).not.toHaveBeenCalled();
+    expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(base.modifiedAt);
   });
   it("fetches missing tournament before the incident write", async () => {

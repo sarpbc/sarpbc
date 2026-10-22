@@ -21,7 +21,8 @@ function tournament(): Tournament {
   return Object.assign(new Tournament(), {
     id: "tournament",
     name: "Playoffs",
-    serie: "Paris 2026",
+    slug: "playoffs",
+    event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
     beginAt: new Date("2026-03-01T00:00:00Z"),
     league: Object.assign(new League(), { id: "league", name: "RLCS Major" }),
   });
@@ -49,6 +50,11 @@ describe("match links in API payloads", () => {
     expect(item).toMatchObject({
       publicId: 7250,
       slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
+      tournament: {
+        slug: "playoffs",
+        event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
+        league: { id: "league", name: "RLCS Major" },
+      },
     });
   });
 

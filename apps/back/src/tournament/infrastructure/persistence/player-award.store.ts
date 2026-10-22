@@ -24,7 +24,7 @@ export class CompetitionAwardQueries implements AwardQueries {
     const rows = await this.em.find(
       PlayerAward,
       { player: { id } },
-      { populate: ["tournament.league"], orderBy: { tournament: { endAt: "DESC" } } },
+      { populate: ["tournament.event"], orderBy: { tournament: { endAt: "DESC" } } },
     );
     return rows.map((row) => ({
       id: row.id,
@@ -32,9 +32,13 @@ export class CompetitionAwardQueries implements AwardQueries {
       tournament: {
         id: row.tournament.id,
         name: row.tournament.name,
+        slug: row.tournament.slug,
         endAt: row.tournament.endAt,
-        serie: row.tournament.serie,
-        leagueName: row.tournament.league?.name,
+        event: {
+          id: row.tournament.event.id,
+          slug: row.tournament.event.slug,
+          name: row.tournament.event.name,
+        },
       },
     }));
   }

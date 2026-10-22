@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { matchSchema } from "./match.dto";
-import { teamSchema, playerSchema, leagueSchema, tournamentSchema } from "./tournament.dto";
+import {
+  teamSchema,
+  playerSchema,
+  leagueSchema,
+  serieSchema,
+  tournamentSchema,
+} from "./tournament.dto";
 export const currentPlayerSchema = playerSchema.extend({ current_team: teamSchema.nullish() });
 const change = z.enum(["creation", "update"]);
 const base = {
@@ -23,7 +29,7 @@ const upsert = z.discriminatedUnion("type", [
     object: currentPlayerSchema,
   }),
   z.object({ ...base, change_type: change, type: z.literal("league"), object: leagueSchema }),
-  z.object({ ...base, change_type: change, type: z.literal("serie"), object: z.unknown() }),
+  z.object({ ...base, change_type: change, type: z.literal("serie"), object: serieSchema }),
 ]);
 export const incidentSchema = z.union([
   upsert,
@@ -31,7 +37,11 @@ export const incidentSchema = z.union([
     ...base,
     change_type: z.literal("deletion"),
     type: z.enum(["league", "match", "player", "serie", "team", "tournament"]),
-    object: z.unknown(),
+    object: z
+      .object({ reason: z.string().nullish() })
+      .nullish()
+      .catch(null)
+      .transform((deletion) => deletion?.reason ?? null),
   }),
 ]);
 export type PandascoreIncidentDto = z.infer<typeof incidentSchema>;

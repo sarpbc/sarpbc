@@ -26,7 +26,7 @@ function createFinishedMatch({
   scoreA,
   scoreB,
   tournamentName = "RLCS",
-  leagueName = "RLCS",
+  eventSlug = "rlcs-2025",
   endAt = new Date("2025-06-01T18:00:00Z"),
 }: {
   id: string;
@@ -35,13 +35,15 @@ function createFinishedMatch({
   scoreA: number;
   scoreB: number;
   tournamentName?: string;
-  leagueName?: string;
+  eventSlug?: string;
   endAt?: Date;
 }): Match {
   const tournament = new Tournament();
   tournament.id = `tournament-${id}`;
   tournament.name = tournamentName;
-  tournament.league = Object.assign(new League(), { id: "league-1", name: leagueName });
+  tournament.slug = tournamentName.toLowerCase();
+  tournament.event = { id: "event-1", slug: eventSlug, name: eventSlug };
+  tournament.league = Object.assign(new League(), { id: "league-1", name: "RLCS" });
 
   const participantA = createParticipant(`participant-a-${id}`, teamA);
   const participantB = createParticipant(`participant-b-${id}`, teamB);
@@ -110,14 +112,14 @@ describe("match-head-to-head", () => {
       scoreA: 4,
       scoreB: 2,
       tournamentName: "Playoffs",
-      leagueName: "RLCS Major",
+      eventSlug: "rlcs-major-paris-2026",
     });
 
     const [meeting] = buildHeadToHead([match], teamVitality.id, teamKarmine.id).recentMeetings;
 
     expect(meeting).toMatchObject({
       publicId: 7250,
-      slug: "karmine-corp-vs-team-vitality-rlcs-major-playoffs",
+      slug: "karmine-corp-vs-team-vitality-rlcs-major-paris-2026-playoffs",
     });
   });
 

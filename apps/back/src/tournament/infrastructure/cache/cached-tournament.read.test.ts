@@ -24,6 +24,8 @@ function fixture(): Tournament {
   return Object.assign(new Tournament(), {
     id: "t1",
     name: "RLCS",
+    slug: "playoffs",
+    event: { id: "e1", slug: "rlcs-2026", name: "RLCS 2026" },
     participants: [participant],
     matches: [match],
     winner: participant,

@@ -1,6 +1,7 @@
 import { NotFoundError } from "../../../common/domain/errors";
 import type { PandascoreGateway } from "../../../pandascore/application/ports/pandascore.gateway.port";
 import { assertPandascoreSyncAllowed } from "../../domain/tournament-source";
+import type { Tournament } from "../../domain/competition";
 import { CompetitionSyncService } from "./competition-sync.service";
 export class SyncPandascoreTournamentUseCase {
   constructor(
@@ -20,12 +21,12 @@ export class SyncPandascoreTournamentUseCase {
       : await this.feed.getTournamentMatches(command.pandascoreId);
     await this.synchronization.upsertTournament(command, matches);
   }
-  async executeByPandascoreId(id: number): Promise<string> {
+  async executeByPandascoreId(id: number): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
     if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
     const matches = command.hasBracket
       ? await this.feed.getTournamentBrackets(id)
       : await this.feed.getTournamentMatches(id);
-    return (await this.synchronization.upsertTournament(command, matches)).id;
+    return this.synchronization.upsertTournament(command, matches);
   }
 }

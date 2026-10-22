@@ -5,11 +5,13 @@ import { League, Match, Tournament, TournamentParticipant } from "./tournament.e
 import { TournamentRepository } from "./tournament.repository";
 import { MatchRepository } from "./match.repository";
 import { toLeague, toMatch, toTournament } from "./competition.mapper";
+import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type { TournamentQueries, MatchQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 import type { MatchListQueryOptions } from "../../application/match/match-list-filters";
 export const TOURNAMENT_DETAIL_POPULATE = [
   "league",
+  "event",
   "winner.team",
   "winner.players",
   "participants.team",
@@ -21,21 +23,33 @@ export const TOURNAMENT_DETAIL_POPULATE = [
   "matches.results.participant",
   "matches.winner.team",
 ] as const;
+interface StageFilter {
+  pickemsEnabled?: boolean;
+  winner?: null;
+  $or?: [{ endAt: null }, { endAt: { $gt: Date } }];
+}
+export function stageFilter({
+  pickems,
+  activeOnly = false,
+}: Pick<TournamentListOptions, "pickems" | "activeOnly">): StageFilter {
+  const where: StageFilter = {};
+  if (pickems !== undefined) where.pickemsEnabled = pickems;
+  if (activeOnly) {
+    where.winner = null;
+    where.$or = [{ endAt: null }, { endAt: { $gt: new Date() } }];
+  }
+  return where;
+}
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
-  async find({ limit = 20, offset = 0, pickems, activeOnly = false }: TournamentListOptions) {
-    const where: FilterQuery<Tournament> = {};
-    if (pickems !== undefined) where.pickemsEnabled = pickems;
-    if (activeOnly) {
-      where.winner = null;
-      where.$or = [{ endAt: null }, { endAt: { $gt: new Date() } }];
-    }
-    const [rows, count] = await this.em.findAndCount(Tournament, where, {
+  async find({ limit = 20, offset = 0, ...filters }: TournamentListOptions) {
+    const [rows, count] = await this.em.findAndCount(Tournament, stageFilter(filters), {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
       populate: [
         "league",
+        "event",
         "winner.team",
         "winner.players",
         "participants.team",
@@ -63,7 +77,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     const row = await this.em.findOne(
       Tournament,
       { pandascoreId: id },
-      { populate: ["league", "winner.team", "participants.team", "participants.players"] },
+      {
+        populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
+      },
     );
     return row ? toTournament(row) : null;
   }
@@ -92,7 +108,12 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
   }
   private async tournamentsByParticipants(where: FilterQuery<TournamentParticipant>) {
     const participants = await this.em.find(TournamentParticipant, where, {
-      populate: ["tournament.league", "tournament.winner.team", "tournament.winner.players"],
+      populate: [
+        "tournament.league",
+        "tournament.event",
+        "tournament.winner.team",
+        "tournament.winner.players",
+      ],
     });
     return [
       ...new Map(participants.map((p) => [p.tournament.id, toTournament(p.tournament)])).values(),
@@ -109,7 +130,10 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       await this.em.find(
         Tournament,
         { winner: { players: { id } } },
-        { populate: ["league", "winner.team", "winner.players"], orderBy: { endAt: "DESC" } },
+        {
+          populate: ["league", "event", "winner.team", "winner.players"],
+          orderBy: { endAt: "DESC" },
+        },
       )
     ).map(toTournament);
   }
@@ -118,7 +142,10 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       await this.em.find(
         Tournament,
         { winner: { team: { id } } },
-        { populate: ["league", "winner.team", "winner.players"], orderBy: { endAt: "DESC" } },
+        {
+          populate: ["league", "event", "winner.team", "winner.players"],
+          orderBy: { endAt: "DESC" },
+        },
       )
     ).map(toTournament);
   }
@@ -160,7 +187,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       await this.em.find(Match, where, {
         orderBy: { beginAt: "ASC" },
         populate: [
-          "tournament.league",
+          ...MATCH_TOURNAMENT_POPULATE,
           "participants.team",
           "participants.players",
           "participants.players.team",

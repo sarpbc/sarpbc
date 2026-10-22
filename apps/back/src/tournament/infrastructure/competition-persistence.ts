@@ -3,6 +3,7 @@ export {
   TournamentParticipant,
   Match,
   League,
+  TournamentEvent,
   BracketLink,
   MatchResult,
 } from "./persistence/tournament.entities";

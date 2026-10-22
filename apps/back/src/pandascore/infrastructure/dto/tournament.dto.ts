@@ -39,10 +39,14 @@ export const rosterSchema = z.object({
   team: teamSchema,
   players: z.array(playerSchema).default([]),
 });
+export const serieSchema = z.object({
+  id: z.number().int().positive(),
+  full_name: text,
+  year: z.number().int().optional().catch(undefined),
+});
 export const tournamentSchema = z.object({
   id: z.number().int().positive(),
   name: z.string(),
-  slug: text,
   type: text,
   country: text,
   begin_at: date,
@@ -52,12 +56,13 @@ export const tournamentSchema = z.object({
   prizepool: z.union([z.number(), z.string()]).nullish(),
   tier: text,
   league: leagueSchema.nullish(),
-  serie: z.object({ full_name: text }).nullish(),
+  serie: serieSchema.nullish(),
   has_bracket: z.boolean().optional(),
   expected_roster: z.array(rosterSchema).default([]),
 });
 export type TeamDto = z.infer<typeof teamSchema>;
 export type PlayerDto = z.infer<typeof playerSchema>;
 export type LeagueDto = z.infer<typeof leagueSchema>;
+export type SerieDto = z.infer<typeof serieSchema>;
 export type ExpectedRosterDto = z.infer<typeof rosterSchema>;
 export type TournamentDto = z.infer<typeof tournamentSchema>;

@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
 
 export interface MatchListItemResponse {
@@ -10,7 +11,8 @@ export interface MatchListItemResponse {
   tournament: {
     id: string;
     name: string;
-    serie: string | null;
+    slug: string;
+    event: TournamentEventRef;
     league?: { id: string; name: string };
   };
 }
@@ -36,7 +38,8 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
     tournament: {
       id: tournament.id,
       name: tournament.name,
-      serie: tournament.serie,
+      slug: tournament.slug,
+      event: tournament.event,
       league: tournament.league
         ? {
             id: tournament.league.id,

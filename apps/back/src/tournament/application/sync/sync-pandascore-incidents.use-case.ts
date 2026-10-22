@@ -26,16 +26,15 @@ export class SyncPandascoreIncidentsUseCase {
     let latest = since;
     for (const incident of incidents) {
       try {
-        if (incident.changeType !== "deletion") {
-          const backfill =
-            incident.kind === "match" &&
-            !(await this.synchronization.findTournamentByPandascoreId(
-              incident.command.tournamentPandascoreId,
-            ))
-              ? await this.feed.getTournamentById(incident.command.tournamentPandascoreId)
-              : undefined;
-          await this.synchronization.applyIncident(incident, backfill);
-        }
+        const backfill =
+          incident.changeType !== "deletion" &&
+          incident.kind === "match" &&
+          !(await this.synchronization.findTournamentByPandascoreId(
+            incident.command.tournamentPandascoreId,
+          ))
+            ? await this.feed.getTournamentById(incident.command.tournamentPandascoreId)
+            : undefined;
+        await this.synchronization.applyIncident(incident, backfill);
       } catch (error) {
         this.diagnostics.error("PandaScore incident failed: " + incident.id, error);
       }

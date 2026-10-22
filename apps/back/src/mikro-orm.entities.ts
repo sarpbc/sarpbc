@@ -24,6 +24,7 @@ import {
 } from "./player/infrastructure/persistence/player.entities";
 import {
   LeagueSchema,
+  TournamentEventSchema,
   TournamentSchema,
   TournamentParticipantSchema,
   MatchSchema,
@@ -43,6 +44,7 @@ export const mikroOrmEntities = [
   ContractSchema,
   PlayerPhotoSchema,
   LeagueSchema,
+  TournamentEventSchema,
   TournamentSchema,
   TournamentParticipantSchema,
   MatchSchema,

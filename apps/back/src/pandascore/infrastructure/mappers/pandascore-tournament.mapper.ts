@@ -3,6 +3,7 @@ import { UpsertTournamentCommand } from "../../application/commands/upsert-tourn
 import { ExpectedRosterDto, TournamentDto } from "../dto/tournament.dto";
 import { PandascoreLeagueMapper } from "./pandascore-league.mapper";
 import { PandascorePlayerMapper } from "./pandascore-player.mapper";
+import { PandascoreSerieMapper } from "./pandascore-serie.mapper";
 import { PandascoreTeamMapper } from "./pandascore-team.mapper";
 
 export class PandascoreTournamentMapper {
@@ -10,8 +11,7 @@ export class PandascoreTournamentMapper {
     return {
       pandascoreId: dto.id,
       name: dto.name,
-      slug: dto.slug,
-      serie: dto.serie?.full_name,
+      serie: dto.serie ? PandascoreSerieMapper.toUpsertCommand(dto.serie) : undefined,
       tier: dto.tier,
       beginAt: dto.begin_at ? new Date(dto.begin_at) : undefined,
       endAt: dto.end_at ? new Date(dto.end_at) : undefined,

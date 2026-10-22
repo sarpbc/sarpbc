@@ -20,14 +20,25 @@ export class League {
   tournaments = new Collection<Tournament>(this);
 }
 
+export class TournamentEvent {
+  id: string = v4();
+  pandascoreSerieId: number | null = null;
+  slug!: string;
+  name!: string;
+  league: League | null = null;
+  createdAt: Date = new Date();
+  updatedAt: Date = new Date();
+  stages = new Collection<Tournament>(this);
+}
+
 export class Tournament {
   id: string = v4();
   pandascoreId: number | null = null;
   source: TournamentSource = "pandascore";
   name!: string;
   description: string | null = null;
-  slug: string | null = null;
-  serie: string | null = null;
+  slug!: string;
+  event!: TournamentEvent;
   tier: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
@@ -107,17 +118,35 @@ export const LeagueSchema = defineEntity({
   },
 });
 
+export const TournamentEventSchema = defineEntity({
+  class: TournamentEvent,
+  properties: {
+    id: p.string().primary(),
+    pandascoreSerieId: p.integer().nullable().unique(),
+    slug: p.string().unique(),
+    name: p.string(),
+    league: p.manyToOne(League).nullable(),
+    createdAt: p.datetime().type("timestamptz"),
+    updatedAt: p
+      .datetime()
+      .type("timestamptz")
+      .onUpdate(() => new Date()),
+    stages: p.oneToMany(Tournament).mappedBy("event"),
+  },
+});
+
 export const TournamentSchema = defineEntity({
   class: Tournament,
   repository: () => TournamentRepository,
+  uniques: [{ properties: ["event", "slug"] }],
   properties: {
     id: p.string().primary(),
     pandascoreId: p.integer().nullable().unique(),
     source: p.string().$type<TournamentSource>().default("pandascore"),
     name: p.string(),
     description: p.string().nullable(),
-    slug: p.string().nullable(),
-    serie: p.string().nullable(),
+    slug: p.string(),
+    event: p.manyToOne(TournamentEvent),
     tier: p.string().nullable(),
     beginAt: p.datetime().type("timestamptz").nullable(),
     endAt: p.datetime().type("timestamptz").nullable(),
