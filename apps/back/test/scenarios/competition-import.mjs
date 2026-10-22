@@ -45,7 +45,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   const tournamentCommand = {
     pandascoreId: 9301,
     name: "Imported Championship",
-    slug: "imported-championship",
+    serie: { pandascoreId: 9601, fullName: "Spring Split", year: 2026 },
     country: "FR",
     hasBracket: true,
     beginAt: new Date(Date.now() - 172800000),
@@ -95,6 +95,11 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   const imported = await run(() => sync.upsertTournament(tournamentCommand, [final, semifinal]));
   let view = (await request("GET", `/tournaments/${imported.id}`)).json().tournament;
   assert.equal(view.source, "pandascore");
+  assert.equal(view.slug, "imported-championship");
+  assert.deepEqual(
+    { slug: view.event.slug, name: view.event.name },
+    { slug: "imported-league-spring-split-2026", name: "Imported League Spring Split" },
+  );
   assert.equal(view.country, "FR");
   assert.equal(view.participants.length, 2);
   assert.equal(view.matches.length, 2);
@@ -117,13 +122,27 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   );
   await run(() =>
     sync.upsertTournament(
-      { ...tournamentCommand, name: "Imported Championship Updated", slug: "upstream-rename" },
+      {
+        ...tournamentCommand,
+        name: "Imported Championship Updated",
+        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+      },
       [semifinal, final],
     ),
   );
   view = (await request("GET", `/tournaments/${imported.id}`)).json().tournament;
   assert.equal(view.name, "Imported Championship Updated");
   assert.equal(view.slug, "imported-championship");
+  assert.deepEqual(
+    { slug: view.event.slug, name: view.event.name },
+    { slug: "imported-league-spring-split-2026", name: "Imported League Spring Major" },
+  );
+  const eventPath = `/events/resolve/${view.event.slug}`;
+  assert.equal((await request("GET", eventPath)).json().event.stages[0].id, imported.id);
+  assert.equal(
+    (await request("GET", `${eventPath}/imported-championship`)).json().tournament.id,
+    imported.id,
+  );
   assert.equal(view.imageUrl, "https://example.test/local-cup.png");
   assert.equal(view.participants.length, 2);
   assert.equal(view.matches.length, 2);
@@ -206,6 +225,38 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       .json()
       .tournament.participants.find((p) => p.id === participant.id).players[0].id,
     player.id,
+  );
+
+  const qualifier = await run(() =>
+    sync.upsertTournament({
+      pandascoreId: 9302,
+      name: "Imported Championship Updated",
+      league: tournamentCommand.league,
+      serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
+    }),
+  );
+  assert.equal(qualifier.event.slug, "imported-league-spring-qualifier-2026");
+  await run(() =>
+    sync.applyIncident({
+      id: 9602,
+      modifiedAt: new Date(),
+      changeType: "deletion",
+      kind: "serie",
+      deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
+    }),
+  );
+  const merged = (await request("GET", `/tournaments/${qualifier.id}`)).json().tournament;
+  assert.deepEqual(
+    [merged.event.slug, merged.slug],
+    ["imported-league-spring-split-2026", "imported-championship-updated"],
+  );
+  await request("GET", `/events/resolve/${qualifier.event.slug}`, undefined, undefined, 404);
+  assert.deepEqual(
+    (await request("GET", `/events/resolve/${merged.event.slug}`))
+      .json()
+      .event.stages.map((stage) => stage.id)
+      .sort(),
+    [imported.id, qualifier.id].sort(),
   );
   return { tournamentId: imported.id, participantId: participant.id, playerId: player.id };
 }

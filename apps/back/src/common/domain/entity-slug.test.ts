@@ -128,6 +128,17 @@ describe("matchSlug", () => {
     );
   });
 
+  it("names a stage slugged like its event only once", () => {
+    expect(
+      matchSlug({
+        teamNames: ["A", "B"],
+        matchName: "Final",
+        eventSlug: "community-cup",
+        stageSlug: "community-cup",
+      }),
+    ).toBe("a-vs-b-community-cup");
+  });
+
   it("never returns an empty slug", () => {
     expect(
       matchSlug({ teamNames: [null, null], matchName: "TBD", eventSlug: "", stageSlug: "" }),

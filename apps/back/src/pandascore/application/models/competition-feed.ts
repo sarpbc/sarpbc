@@ -16,7 +16,6 @@ type IncidentChange =
   | { kind: "player"; command: ImportedPlayer }
   | { kind: "league"; command: UpsertLeagueCommand }
   | { kind: "serie"; command: UpsertSerieCommand };
-/** Why PandaScore removed an entity, parsed from its free-text deletion reason. */
 export type ProviderDeletion =
   | { kind: "merged"; intoId: number }
   | { kind: "replaced"; entity: "serie" | "tournament"; byId: number }

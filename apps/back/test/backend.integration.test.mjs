@@ -398,6 +398,82 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
+    await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
+      assert.equal(tournament.slug, "integration-cup");
+      assert.deepEqual(
+        { slug: tournament.event.slug, name: tournament.event.name },
+        { slug: "integration-cup", name: "Integration Cup" },
+      );
+      const listed = (await request("GET", "/events?limit=100")).json();
+      const listedEvent = listed.events.find((event) => event.id === tournament.event.id);
+      assert(listedEvent, "the manual tournament is listed as an event");
+      assert(listed.count >= 1);
+      assert.equal(listedEvent.name, "Integration Cup Updated");
+      assert.deepEqual(
+        listedEvent.stages.map((stage) => [stage.id, stage.matches]),
+        [[tournament.id, undefined]],
+      );
+      const pickems = (await request("GET", "/events?pickems=false&limit=100")).json();
+      assert(!pickems.events.some((event) => event.id === tournament.event.id));
+      const active = (await request("GET", "/events?activeOnly=true&limit=100")).json();
+      assert(active.events.some((event) => event.id === tournament.event.id));
+
+      const event = (await request("GET", "/events/resolve/Integration-Cup")).json();
+      assert.equal(event.kind, "event");
+      assert.equal(event.event.slug, "integration-cup");
+      assert.equal(event.event.stages[0].id, tournament.id);
+      assert.equal(event.event.stages[0].matches[0].id, match.id);
+
+      const stage = (
+        await request("GET", "/events/resolve/integration-cup/integration-cup")
+      ).json();
+      assert.deepEqual(
+        [stage.kind, stage.tab, stage.tournament.id],
+        ["stage", "overview", tournament.id],
+      );
+      const legacy = (await request("GET", `/events/resolve/${tournament.id}`)).json();
+      assert.deepEqual(
+        [legacy.kind, legacy.tab, legacy.tournament.event.slug, legacy.tournament.slug],
+        ["stage", "overview", "integration-cup", "integration-cup"],
+      );
+      const legacyMatches = (
+        await request("GET", `/events/resolve/${tournament.id}/matches`)
+      ).json();
+      assert.equal(legacyMatches.tab, "matches");
+      for (const path of [
+        "/events/resolve/no-such-event",
+        "/events/resolve/integration-cup/no-such-stage",
+        `/events/resolve/${tournament.id}/overview`,
+        "/events/resolve/7d4c1a52-3c1f-4f0e-8a7b-9e0d1c2b3a4f",
+      ])
+        await request("GET", path, undefined, undefined, 404);
+
+      await request(
+        "POST",
+        "/tournaments",
+        { name: "Integration Clash", slug: "integration-cup" },
+        staffCookie,
+        409,
+      );
+      const generated = (
+        await request("POST", "/tournaments", { name: "Integration Cup" }, staffCookie, 201)
+      ).json().tournament;
+      assert.equal(generated.event.slug, "integration-cup-2");
+      const renamed = (
+        await request(
+          "PATCH",
+          `/tournaments/${generated.id}`,
+          { slug: "integration-cup-replay" },
+          staffCookie,
+        )
+      ).json().tournament;
+      assert.deepEqual(
+        [renamed.slug, renamed.event.slug],
+        ["integration-cup", "integration-cup-replay"],
+      );
+      await request("GET", "/events/resolve/integration-cup-2", undefined, undefined, 404);
+    });
+
     await check(
       "concurrent picks preserve unique user/match and scoring is idempotent",
       async () => {

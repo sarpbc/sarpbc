@@ -284,7 +284,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .max(255)
           .optional()
-          .describe("Optional URL slug. Generated from the name when omitted."),
+          .describe("Optional event URL slug. Generated from the name when omitted."),
         tier: z
           .string()
           .max(50)
@@ -330,7 +330,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
-        slug: z.string().min(1).max(255).optional().describe("URL slug."),
+        slug: z.string().min(1).max(255).optional().describe("Event URL slug."),
         tier: z
           .string()
           .max(50)

@@ -65,7 +65,8 @@ export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchS
   const [first, second] =
     teamA && teamB && toSlug(teamA) > toSlug(teamB) ? [teamB, teamA] : [teamA, teamB];
   const lead = first && second ? [first, "vs", second] : [roundLabel(matchName)];
-  return toSlug(...lead, eventSlug, stageSlug) || "match";
+  // A manual tournament is the only stage of an event slugged after the same name.
+  return toSlug(...lead, eventSlug, stageSlug === eventSlug ? null : stageSlug) || "match";
 }
 
 export function forumPostSlug(title: string): string {
