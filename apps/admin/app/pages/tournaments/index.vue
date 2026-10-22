@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { tournamentLabel } from "~/utils/tournamentLabel";
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { Tournament } from "~/types/tournament";
 
@@ -62,14 +63,6 @@ const columns: TableColumn<Tournament>[] = [
     header: t("page.tournaments.columns.actions"),
   },
 ];
-
-function tournamentLabel(tournament: Tournament): string {
-  const year = tournament.beginAt
-    ? new Date(tournament.beginAt).getFullYear()
-    : new Date().getFullYear();
-  const league = tournament.league?.name ? `${tournament.league.name} ` : "";
-  return `${league}${year} ${tournament.name}`.trim();
-}
 
 function isManualTournament(tournament: Tournament): boolean {
   return tournament.source === "manual";

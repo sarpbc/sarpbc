@@ -1,3 +1,4 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import type { League } from "./league";
 import type { Match } from "./matches";
 import type { Player } from "./player";
@@ -11,8 +12,9 @@ export interface Tournament {
   source: TournamentSource;
   name: string;
   description?: string;
-  slug?: string;
-  serie?: string;
+  /** Stage slug, unique within its event. */
+  slug: string;
+  event: TournamentEventRef;
   tier?: string;
   beginAt?: Date;
   endAt?: Date;

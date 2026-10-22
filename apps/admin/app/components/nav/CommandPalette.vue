@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { tournamentLabel } from "~/utils/tournamentLabel";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { hasPermission } from "~/utils/staff";
@@ -71,14 +72,6 @@ watch(open, (isOpen) => {
     refreshState.value = "idle";
   }
 });
-
-function tournamentLabel(tournament: Tournament): string {
-  const year = tournament.beginAt
-    ? new Date(tournament.beginAt).getFullYear()
-    : new Date().getFullYear();
-  const league = tournament.league?.name ? `${tournament.league.name} ` : "";
-  return `${league}${year} ${tournament.name}`.trim();
-}
 
 function closeAndGo(path: string) {
   open.value = false;
