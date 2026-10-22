@@ -1,7 +1,7 @@
-import type { Tournament } from "~/types/tournament";
+import { tournamentEventPath } from "@sarpbc/utils";
+import type { TournamentEvent } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/calendar/ics";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
-import { tournamentCanonicalUrl, tournamentDisplayName } from "./tournamentSportsEvent";
 
 export interface ListItemLd extends JsonLdNode {
   "@type": "ListItem";
@@ -19,7 +19,7 @@ export interface ItemListLd extends JsonLdNode {
 }
 
 export interface BuildTournamentItemListOptions {
-  tournaments: Tournament[];
+  events: TournamentEvent[];
   total: number;
   positionOffset?: number;
   origin?: string;
@@ -37,12 +37,12 @@ export function buildTournamentItemList(options: BuildTournamentItemListOptions)
     name: options.name ?? "Rocket League tournaments",
     url,
     numberOfItems: options.total,
-    itemListElement: options.tournaments.map((tournament, index) =>
+    itemListElement: options.events.map((event, index) =>
       compactJsonLd({
         "@type": "ListItem",
         position: positionOffset + index + 1,
-        name: tournamentDisplayName(tournament),
-        url: tournamentCanonicalUrl(tournament.id, origin),
+        name: event.name,
+        url: `${origin}${tournamentEventPath(event.slug)}`,
       }),
     ),
   });

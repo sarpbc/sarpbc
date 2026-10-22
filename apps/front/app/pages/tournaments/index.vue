@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
+import { tournamentEventPath } from "@sarpbc/utils";
+import type { TournamentEvent } from "~/types/tournament";
 import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
-import { tournamentEventDisplayName } from "~/utils/tournamentEventDisplayName";
 import { getTournamentStatus } from "~/utils/tournamentStatus";
 
 const { t } = useI18n();
@@ -9,10 +9,10 @@ const route = useRoute();
 const { setPageSeo } = useSarpbcSeo();
 const { setJsonLd } = useStructuredData();
 
-const TOURNAMENTS_PER_PAGE = 20;
+const EVENTS_PER_PAGE = 20;
 
 interface TournamentsIndexPayload {
-  tournaments: Tournament[];
+  events: TournamentEvent[];
   total: number;
 }
 
@@ -28,15 +28,9 @@ const {
   refresh,
 } = await useAsyncData<TournamentsIndexPayload>(
   () => `tournaments-index-${offset.value}`,
-  async () => {
-    const result = await getAllTournaments({
-      limit: TOURNAMENTS_PER_PAGE,
-      offset: offset.value,
-    });
-    return result;
-  },
+  () => getEvents({ limit: EVENTS_PER_PAGE, offset: offset.value }),
   {
-    default: () => ({ tournaments: [], total: 0 }),
+    default: () => ({ events: [], total: 0 }),
     watch: [offset],
     getCachedData(key, nuxtApp) {
       return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
@@ -47,55 +41,46 @@ const {
 const { data: nextEvent } = useLazyAsyncData(
   "tournaments-next-event",
   async () => {
-    const { tournaments: active } = await getAllTournaments({ limit: 50, activeOnly: true });
+    const { events: active } = await getEvents({ limit: 50, activeOnly: true });
     const next = active
-      .filter((tournament) => getTournamentStatus(tournament) === "upcoming")
+      .filter((event) => getTournamentStatus(event) === "upcoming")
       .toSorted((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime())[0];
     if (!next) return null;
-    return {
-      id: next.id,
-      name: tournamentEventDisplayName({
-        name: next.name,
-        leagueName: next.league?.name,
-        serie: next.serie,
-      }),
-    };
+    return { slug: next.slug, name: next.name };
   },
   { default: () => null },
 );
 
-const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? []);
-const totalTournaments = computed(() => tournamentsResponse.value?.total ?? 0);
+const events = computed(() => tournamentsResponse.value?.events ?? []);
+const totalEvents = computed(() => tournamentsResponse.value?.total ?? 0);
 
-const currentPage = computed(() => Math.floor(offset.value / TOURNAMENTS_PER_PAGE) + 1);
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalTournaments.value / TOURNAMENTS_PER_PAGE)),
-);
+const currentPage = computed(() => Math.floor(offset.value / EVENTS_PER_PAGE) + 1);
+const totalPages = computed(() => Math.max(1, Math.ceil(totalEvents.value / EVENTS_PER_PAGE)));
 
 const hasPrevious = computed(() => offset.value > 0);
-const hasNext = computed(() => offset.value + TOURNAMENTS_PER_PAGE < totalTournaments.value);
+const hasNext = computed(() => offset.value + EVENTS_PER_PAGE < totalEvents.value);
 
 const previousPageQuery = computed(() => ({
-  offset: Math.max(0, offset.value - TOURNAMENTS_PER_PAGE).toString(),
+  offset: Math.max(0, offset.value - EVENTS_PER_PAGE).toString(),
 }));
 
 const nextPageQuery = computed(() => ({
-  offset: (offset.value + TOURNAMENTS_PER_PAGE).toString(),
+  offset: (offset.value + EVENTS_PER_PAGE).toString(),
 }));
 
 setPageSeo({
   title: t("page.tournaments.index.seoTitle"),
-  description: t("page.tournaments.index.description", { count: totalTournaments.value }),
+  description: t("page.tournaments.index.description", { count: totalEvents.value }),
 });
 
 const tournamentsJsonLd = computed(() => {
-  if (pending.value && tournaments.value.length === 0) {
+  if (pending.value && events.value.length === 0) {
     return null;
   }
 
   return buildTournamentItemList({
-    tournaments: tournaments.value,
-    total: totalTournaments.value,
+    events: events.value,
+    total: totalEvents.value,
     positionOffset: offset.value,
   });
 });
@@ -108,14 +93,14 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
     <SHubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
       <template v-if="nextEvent" #meta>
-        <SLink :to="$localePath(`/tournaments/${nextEvent.id}`)" variant="muted">
+        <SLink :to="$localePath(tournamentEventPath(nextEvent.slug))" variant="muted">
           {{ t("page.hub.headers.nextEvent", { name: nextEvent.name }) }}
         </SLink>
       </template>
     </SHubPageHeader>
 
     <div>
-      <div v-if="pending && !tournaments.length" class="w-full flex flex-col" aria-live="polite">
+      <div v-if="pending && !events.length" class="w-full flex flex-col" aria-live="polite">
         <SRail v-for="group in 2" :key="group" caption="section">
           <template #caption>
             <USkeleton class="h-3 w-40" />
@@ -130,8 +115,8 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
         </SRail>
       </div>
 
-      <template v-else-if="tournaments.length">
-        <TournamentListGroup :tournaments="tournaments" />
+      <template v-else-if="events.length">
+        <TournamentListGroup :events="events" />
 
         <SPagination
           v-if="totalPages > 1"

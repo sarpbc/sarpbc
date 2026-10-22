@@ -4,6 +4,7 @@ import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { parseMatchResults } from "~/utils/parseMatchResult";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
@@ -46,15 +47,6 @@ function getParticipantScore(
   return getMatchParticipantScore(match.results, participantId);
 }
 
-function buildTournamentLabel(match: MatchDetailResponse["match"]): string {
-  const league = match.tournament?.league?.name;
-  const name = match.tournament?.name;
-  if (league && name) {
-    return `${league} ${name}`;
-  }
-  return name ?? "Rocket League";
-}
-
 export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const match = matchDetail.match;
   const participants = match.participants ?? [];
@@ -62,7 +54,7 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const teamB = participants[1];
   const teamAName = truncate(teamA?.team.name ?? "TBD", 28);
   const teamBName = truncate(teamB?.team.name ?? "TBD", 28);
-  const tournament = truncate(buildTournamentLabel(match), 48);
+  const tournament = truncate(tournamentStageLabel(match.tournament), 48);
   const status = getMatchStatus(match);
 
   let centerLine = "vs";

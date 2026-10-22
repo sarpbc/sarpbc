@@ -29,20 +29,18 @@ const blocks = computed((): ListBlock[] => {
       {
         key: "all",
         dateLabel: null,
-        events: groupMatchesByEvent(matches, t("page.matches.unknownTournament")),
+        events: groupMatchesByEvent(matches),
       },
     ];
   }
 
-  return groupMatchesByDateThenEvent(matches, t("page.matches.unknownTournament")).map(
-    (dayGroup) => ({
-      key: dayGroup.dateKey,
-      dateLabel: dayGroup.date
-        ? formatDayHeaderDate(dayGroup.date, locale.value)
-        : t("page.tournaments.id.matchSections.unknownDate"),
-      events: dayGroup.events,
-    }),
-  );
+  return groupMatchesByDateThenEvent(matches).map((dayGroup) => ({
+    key: dayGroup.dateKey,
+    dateLabel: dayGroup.date
+      ? formatDayHeaderDate(dayGroup.date, locale.value)
+      : t("page.tournaments.id.matchSections.unknownDate"),
+    events: dayGroup.events,
+  }));
 });
 </script>
 
@@ -59,14 +57,9 @@ const blocks = computed((): ListBlock[] => {
       <SRail v-for="group in block.events" :key="group.key" caption="section">
         <template #caption>
           <h4 class="h-fit min-w-0 truncate text-sm font-medium">
-            <SLink
-              v-if="group.tournamentId"
-              :to="$localePath(`/tournaments/${group.tournamentId}/matches`)"
-              variant="muted"
-            >
+            <SLink :to="$localePath(group.matchesPath)" variant="muted">
               {{ group.displayName }}
             </SLink>
-            <span v-else>{{ group.displayName }}</span>
           </h4>
         </template>
 

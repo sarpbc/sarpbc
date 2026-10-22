@@ -20,7 +20,7 @@ export interface TeamMatchSections {
 function toMatchListItem(match: Match): MatchListItem {
   const tournament = match.tournament;
   // An unpopulated relation serializes to its id, so only trust an object here.
-  const league = tournament?.league instanceof Object ? tournament.league : undefined;
+  const league = tournament.league instanceof Object ? tournament.league : undefined;
 
   return {
     id: match.id,
@@ -33,9 +33,10 @@ function toMatchListItem(match: Match): MatchListItem {
     })),
     results: match.results ?? [],
     tournament: {
-      id: tournament?.id ?? "",
-      name: tournament?.name ?? "",
-      serie: tournament?.serie ?? null,
+      id: tournament.id,
+      name: tournament.name,
+      slug: tournament.slug,
+      event: tournament.event,
       league: league ? { id: league.id, name: league.name } : undefined,
     },
   };

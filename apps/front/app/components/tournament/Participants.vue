@@ -10,13 +10,14 @@ const { t } = useI18n();
 
 const participantEntries = computed(() => buildTournamentParticipantEntries(tournament));
 const hasTeams = computed(() => participantEntries.value.length > 0);
+const headingId = computed(() => `tournament-participants-title-${tournament.id}`);
 </script>
 
 <template>
-  <section class="w-full" aria-labelledby="tournament-participants-title">
+  <section class="w-full" :aria-labelledby="headingId">
     <SRail>
       <template #caption>
-        <h2 id="tournament-participants-title" class="text-balance">
+        <h2 :id="headingId" class="text-balance">
           {{ t("page.tournaments.id.participants.title") }}
         </h2>
       </template>
@@ -37,7 +38,7 @@ const hasTeams = computed(() => participantEntries.value.length > 0);
         </div>
       </div>
 
-      <SCard v-else flush-top variant="soft">
+      <SCard v-else flush-top>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

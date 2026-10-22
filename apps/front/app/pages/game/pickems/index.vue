@@ -9,27 +9,30 @@ setPageSeo({
 });
 
 const {
-  data: tournamentsResponse,
+  data: eventsResponse,
   pending,
   error,
   refresh,
-} = await useLazyAsyncData(`tournaments-pickems`, () =>
-  getAllTournaments({ limit: 10, pickems: true }),
+} = await useLazyAsyncData("tournament-events-pickems", () =>
+  getEvents({ limit: 10, pickems: true }),
 );
 
-const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? []);
+const events = computed(() => eventsResponse.value?.events ?? []);
+const stageCount = computed(() =>
+  events.value.reduce((count, event) => count + event.stages.length, 0),
+);
 </script>
 
 <template>
   <div class="w-full flex flex-col gap-4">
     <SHubPageHeader>
       <template #title>{{ $t("page.game.pickems.title") }}</template>
-      <template v-if="tournaments?.length" #meta>
-        <span>{{ t("page.hub.headers.pickemsOpen", { count: tournaments.length }) }}</span>
+      <template v-if="stageCount > 0" #meta>
+        <span>{{ t("page.hub.headers.pickemsOpen", { count: stageCount }) }}</span>
       </template>
     </SHubPageHeader>
 
-    <SCard v-if="pending && !tournaments?.length" class="p-4" aria-live="polite">
+    <SCard v-if="pending && !events.length" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-2">
         <USkeleton v-for="i in 4" :key="i" class="h-row w-full" />
       </div>
@@ -40,9 +43,9 @@ const tournaments = computed(() => tournamentsResponse.value?.tournaments ?? [])
     </SCard>
 
     <TournamentListGroup
-      v-else-if="tournaments && tournaments.length > 0"
-      :tournaments="tournaments"
-      :to="(tournament) => localePath(`/game/pickems/${tournament.id}`)"
+      v-else-if="events.length > 0"
+      :events="events"
+      :to="(stage) => localePath(`/game/pickems/${stage.id}`)"
     />
 
     <SCard v-else>

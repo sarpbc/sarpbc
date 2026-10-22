@@ -1410,6 +1410,13 @@
         "error": "Impossible de charger les tournois. Vérifiez votre connexion et réessayez.",
         "seoTitle": "Tournois Rocket League : brackets et résultats {'|'} sarpbc.org"
       },
+      "event": {
+        "seoTitle": "{eventName} : phases, brackets et résultats {'|'} sarpbc.org",
+        "seoDescription": "Suivez {eventName} sur sarpbc.org : chaque phase de l’événement Rocket League avec son bracket, ses dates et ses résultats.",
+        "stagesCount": "{count} phase | {count} phases",
+        "notFound": "Événement introuvable",
+        "error": "Impossible de charger cet événement. Vérifiez votre connexion et réessayez."
+      },
       "id": {
         "seoTitle": "Bracket de {tournamentName} {'|'} sarpbc.org",
         "seoTitleDefault": "Bracket de tournoi Rocket League {'|'} sarpbc.org",
@@ -1458,7 +1465,6 @@
         "viewTournaments": "Voir les tournois"
       },
       "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
-      "unknownTournament": "Tournoi inconnu",
       "unknownSubTournament": "Épreuve inconnue"
     },
     "results": {
@@ -1486,7 +1492,6 @@
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
         "unknownTeam": "À déterminer",
         "versus": "contre",
-        "unknownTournament": "Tournoi inconnu",
         "format": "Bo{count}",
         "addToCalendar": "Ajouter au calendrier",
         "watchStream": "Regarder le stream",

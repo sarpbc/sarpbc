@@ -11,10 +11,7 @@ export type MatchDateEventGroup = {
 /**
  * Days without a beginAt go last under dateKey `"__unknown__"`.
  */
-export function groupMatchesByDateThenEvent(
-  matches: MatchListItem[],
-  unknownLabel: string,
-): MatchDateEventGroup[] {
+export function groupMatchesByDateThenEvent(matches: MatchListItem[]): MatchDateEventGroup[] {
   const unknown: MatchListItem[] = [];
   const byDay = new Map<string, { date: Date; matches: MatchListItem[] }>();
 
@@ -44,7 +41,6 @@ export function groupMatchesByDateThenEvent(
           const bTime = parseMatchDate(b.beginAt)?.getTime() ?? 0;
           return aTime - bTime;
         }),
-        unknownLabel,
       ),
     }))
     .sort((a, b) => a.date!.getTime() - b.date!.getTime());
@@ -53,7 +49,7 @@ export function groupMatchesByDateThenEvent(
     groups.push({
       dateKey: "__unknown__",
       date: null,
-      events: groupMatchesByEvent(unknown, unknownLabel),
+      events: groupMatchesByEvent(unknown),
     });
   }
 

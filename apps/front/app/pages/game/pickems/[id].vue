@@ -8,12 +8,8 @@ import {
   type Match,
 } from "~/types/matches";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import {
-  getPickOutcome,
-  getTournamentDisplayName,
-  isMatchLockedForPickem,
-  type PickemPickState,
-} from "~/utils/pickems";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { getPickOutcome, isMatchLockedForPickem, type PickemPickState } from "~/utils/pickems";
 
 const LEADERBOARD_TOP = 10;
 
@@ -94,7 +90,7 @@ const { data: personalRank, refresh: refreshPersonalRank } = useLazyAsyncData(
 );
 
 const displayName = computed(() =>
-  tournament.value ? getTournamentDisplayName(tournament.value) : "",
+  tournament.value ? tournamentStageLabel(tournament.value) : "",
 );
 
 const pageTitle = computed(() =>

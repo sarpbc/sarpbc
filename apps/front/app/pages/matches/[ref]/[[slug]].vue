@@ -13,6 +13,7 @@ import {
 } from "~/utils/matchDiscoveryAnalytics";
 import { matchPath } from "@sarpbc/utils";
 import { getApiErrorStatus } from "~/utils/apiError";
+import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -82,13 +83,6 @@ function isTbdTeam(participant?: TournamentParticipant): boolean {
 }
 
 const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
-
-function tournamentLabel(currentMatch: Match) {
-  const league = currentMatch.tournament?.league?.name;
-  const name = currentMatch.tournament?.name;
-  if (league && name) return `${league} ${name}`;
-  return name ?? t("page.match.detail.unknownTournament");
-}
 
 function getParticipantScore(currentMatch: Match, participantId: string): number | null {
   return getMatchParticipantScore(currentMatch.results, participantId);
@@ -170,7 +164,7 @@ const seoTitle = computed(() => {
   return t("page.match.detail.seoTitle", {
     teamA: participantName(teamA.value),
     teamB: participantName(teamB.value),
-    tournament: tournamentLabel(match.value),
+    tournament: tournamentStageLabel(match.value.tournament),
   });
 });
 
@@ -179,7 +173,7 @@ const seoDescription = computed(() => {
     return t("page.match.detail.seoDescriptionDefault");
   }
 
-  const tournament = tournamentLabel(match.value);
+  const tournament = tournamentStageLabel(match.value.tournament);
   const teamAName = participantName(teamA.value);
   const teamBName = participantName(teamB.value);
 

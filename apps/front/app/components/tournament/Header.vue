@@ -1,7 +1,9 @@
 <script setup lang="ts">
-const { tournamentId, activeTab } = defineProps<{
-  tournamentId: string;
-  activeTab: "overview" | "matches";
+import type { TournamentTab } from "~/types/tournament";
+
+const { stagePath, activeTab } = defineProps<{
+  stagePath: string;
+  activeTab: TournamentTab;
 }>();
 
 const { t } = useI18n();
@@ -9,12 +11,12 @@ const localePath = useLocalePath();
 
 const tabItems = computed(() => [
   {
-    to: localePath(`/tournaments/${tournamentId}`),
+    to: localePath(stagePath),
     label: t("common.overview"),
     active: activeTab === "overview",
   },
   {
-    to: localePath(`/tournaments/${tournamentId}/matches`),
+    to: localePath(`${stagePath}/matches`),
     label: t("general.matches"),
     active: activeTab === "matches",
   },
