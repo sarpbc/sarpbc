@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # pnpm is configured as the npm ecosystem. The root lockfile covers the workspace.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+      include: scope
+    # Default branch names include versions (dots) and scoped paths. Those fail
+    # scripts/check-git-names.mjs, which allows only <type>/<kebab-case>.
+    # Grouped names render as chore/npm-updates-<digest>.
+    pull-request-branch-name:
+      prefix: chore
+      template: "chore/{name}"
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
