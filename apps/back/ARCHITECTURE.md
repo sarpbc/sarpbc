@@ -38,7 +38,7 @@ HTTP requests use the MikroORM request context. Scheduled jobs and initializatio
 
 ## Ownership and failures
 
-Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit but not redistribution, so MCP reads and any open-data export filter `startgg` rows through `isRedistributable`. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.
+Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit. start.gg players and teams are public everywhere, MCP included; start.gg tournaments and matches are not redistributed, so MCP reads and any open-data export filter them through `isRedistributable` or the `redistributableOnly` list option. A start.gg team does not hide the redistributable match it plays in. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.
 
 Current-team imports and historical tournament rosters are separate operations. A historical roster refresh cannot move an existing participant's players back to an old team. PandaScore numeric IDs identify imported players; imports preserve local slugs and tournament artwork. Domain policies reject PandaScore writes to manual tournaments.
 

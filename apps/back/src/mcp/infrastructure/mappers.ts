@@ -1,21 +1,13 @@
-import { isRedistributable, type DataSource } from "../../common/domain/data-source";
+import { isRedistributable } from "../../common/domain/data-source";
 import type { Player, Team } from "../../player/domain/roster";
 import type { Match, Tournament } from "../../tournament/domain/competition";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import { adminNewsEditUrl, matchUrl, newsUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
 
-/** MCP never returns start.gg data: its terms allow display with credit, not redistribution. */
-export function redistributable<T extends { source: DataSource }>(items: T[]): T[] {
-  return items.filter((item) => isRedistributable(item.source));
-}
-
+/** start.gg teams may play in a redistributable match; only the match and tournament source count. */
 export function isRedistributableMatch(match: Match): boolean {
-  return (
-    isRedistributable(match.source) &&
-    isRedistributable(match.tournament.source) &&
-    match.participants.every((participant) => isRedistributable(participant.team.source))
-  );
+  return isRedistributable(match.source) && isRedistributable(match.tournament.source);
 }
 
 export function mapPlayerSummary(player: Player) {
@@ -26,15 +18,16 @@ export function mapPlayerSummary(player: Player) {
     nationality: player.nationality,
     status: player.status,
     role: player.role,
-    team:
-      player.team && isRedistributable(player.team.source)
-        ? {
-            id: player.team.id,
-            slug: player.team.slug,
-            name: player.team.name,
-            url: teamUrl(player.team.slug),
-          }
-        : null,
+    source: player.source,
+    team: player.team
+      ? {
+          id: player.team.id,
+          slug: player.team.slug,
+          name: player.team.name,
+          source: player.team.source,
+          url: teamUrl(player.team.slug),
+        }
+      : null,
     url: playerUrl(player.slug),
   };
 }
@@ -48,10 +41,12 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     name: team.name,
     location: team.location,
     active: team.active,
-    players: redistributable(roster).map((player) => ({
+    source: team.source,
+    players: roster.map((player) => ({
       id: player.id,
       slug: player.slug,
       name: player.name,
+      source: player.source,
       url: playerUrl(player.slug),
     })),
     url: teamUrl(team.slug),
@@ -80,10 +75,9 @@ export function mapTournamentDetail(tournament: Tournament) {
     description: tournament.description,
     tier: tournament.tier,
     hasBracket: tournament.hasBracket,
-    winner:
-      tournament.winner && isRedistributable(tournament.winner.team.source)
-        ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
-        : null,
+    winner: tournament.winner
+      ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
+      : null,
     matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
   };
 }

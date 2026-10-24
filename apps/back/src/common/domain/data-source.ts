@@ -2,7 +2,10 @@ export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
 
 export type DataSource = (typeof DATA_SOURCES)[number];
 
-/** start.gg terms allow display with credit but forbid redistributing its data. */
+/**
+ * start.gg terms allow display with credit. Its players and teams are public; its tournaments
+ * and matches stay out of the MCP, open-data exports and other redistribution paths.
+ */
 export function isRedistributable(source: DataSource): boolean {
   switch (source) {
     case "pandascore":

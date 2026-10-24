@@ -9,7 +9,7 @@ describe("data source", () => {
     expect(sourceFromUrl("https://x.com/team/status/1")).toBe("manual");
   });
 
-  it("only forbids redistributing start.gg data", () => {
+  it("only forbids redistributing start.gg tournaments and matches", () => {
     expect(isRedistributable("pandascore")).toBe(true);
     expect(isRedistributable("manual")).toBe(true);
     expect(isRedistributable("startgg")).toBe(false);

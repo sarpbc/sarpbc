@@ -5,7 +5,7 @@ import { Player } from "./player.entities";
  * PandaScore renames player slugs and has given one player's slug a different person's
  * name (`zen-aidan-hui` is Alexis "zen" Bernier), so the PandaScore id is the identity.
  * The slug lookup only adopts rows stored before the id was recorded, never start.gg rows:
- * adopting one would relabel it as PandaScore data and make it redistributable.
+ * adopting one would relabel it as PandaScore data and drop the start.gg credit.
  */
 export async function findPandascorePlayer(
   em: Pick<EntityManager, "findOne">,
