@@ -73,9 +73,9 @@ Write tools (staff permission required):
 | `update_match`            | `tournaments.manage` | Correct score, status or dates of a manual match |
 | `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions      |
 
-Roster tools (staff permission and a public `sourceUrl` required). Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, and teams are marked inactive instead of removed.
+Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 
-| Tool                      | Permission       | Description                                                                                                |
+| Tool                      | Permission       | Description once approved                                                                                  |
 | ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
 | `add_player_to_team`      | `players.manage` | Close the player's open contracts and open one with the new team                                           |
 | `remove_player_from_team` | `players.manage` | Close the contract and set the player `free_agent` or `retired`                                            |
@@ -83,6 +83,14 @@ Roster tools (staff permission and a public `sourceUrl` required). Nothing is ph
 | `update_player`           | `players.manage` | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`) |
 | `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                                        |
 | `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                               |
+| `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                     |
+| `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team               |
+
+A merged duplicate keeps its row and slug; its public page redirects to the kept entity and listings skip it. Merges are refused when both entities are distinct PandaScore records, when two players play for different current teams, or when two teams took part in the same tournament.
+
+## Data sources and start.gg
+
+Players, teams, tournaments and matches record a `source`: `pandascore`, `manual` or `startgg`. start.gg allows displaying its data with credit but not redistributing it, so MCP reads never return `startgg` rows and open-data exports must filter them the same way. A roster proposal whose `sourceUrl` is on `start.gg` creates `startgg` players and teams; `create_tournament` takes `source: "startgg"` explicitly, and matches added to a start.gg tournament inherit it. The public player, team and tournament responses expose `source` so the site can credit start.gg.
 
 `get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
 

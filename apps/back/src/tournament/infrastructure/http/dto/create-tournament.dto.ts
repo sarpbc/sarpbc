@@ -30,7 +30,10 @@ const tournamentWriteSchema = z.strictObject({
     .optional(),
 });
 const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
-export const CreateTournamentDto = tournamentWriteSchema.extend({ name: tournamentName });
+export const CreateTournamentDto = tournamentWriteSchema.extend({
+  name: tournamentName,
+  source: z.enum(["manual", "startgg"]).optional(),
+});
 export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
 export const UpdateTournamentDto = tournamentWriteSchema.extend({
   name: tournamentName.optional(),

@@ -21,6 +21,11 @@ export async function upsertMatchInTransaction(
     match = new Match();
     match.tournament = tournament;
     match.pandascoreId = input.pandascoreId ?? null;
+    match.source = input.pandascoreId
+      ? "pandascore"
+      : tournament.source === "startgg"
+        ? "startgg"
+        : "manual";
   }
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;

@@ -30,11 +30,15 @@ The following operations share a transaction:
 - Content deletion and dependent replies, notifications, reports, or translations.
 - Player photo replacement or selection, and player or team deletion with dependent roster data.
 - A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
+- A player or team merge: moving contracts, photos, awards and tournament participations to the kept entity and recording the duplicate's redirect.
+- A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
 
 ## Ownership and failures
+
+Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit but not redistribution, so MCP reads and any open-data export filter `startgg` rows through `isRedistributable`. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.
 
 Current-team imports and historical tournament rosters are separate operations. A historical roster refresh cannot move an existing participant's players back to an old team. PandaScore numeric IDs identify imported players; imports preserve local slugs and tournament artwork. Domain policies reject PandaScore writes to manual tournaments.
 

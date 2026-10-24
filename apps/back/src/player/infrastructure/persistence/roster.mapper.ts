@@ -10,6 +10,8 @@ export function toTeam(row: Record.Team, includePlayers = true): Team {
     darkModeImageUrl: row.darkModeImageUrl,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
+    source: row.source,
+    mergedIntoId: row.mergedInto?.id ?? null,
   });
   if (includePlayers && row.players.isInitialized())
     team.players = row.players.getItems().map((p) => toPlayer(p));
@@ -28,6 +30,8 @@ export function toPlayer(row: Record.Player): Player {
     status: row.status,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
+    source: row.source,
+    mergedIntoId: row.mergedInto?.id ?? null,
     team: row.team ? toTeam(row.team, false) : null,
   });
   if (row.photos.isInitialized()) player.photos = row.photos.getItems().map((p) => toPhoto(p));

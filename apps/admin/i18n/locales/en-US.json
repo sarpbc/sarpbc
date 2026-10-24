@@ -43,6 +43,7 @@
       "pickems": "Pick'ems",
       "forum": "Forum",
       "moderation": "Moderation",
+      "proposals": "Roster proposals",
       "tokens": "API Tokens",
       "admin": "Admin",
       "openMenu": "Open navigation",
@@ -158,6 +159,60 @@
         "moderateError": "Could not moderate this comment. Try again."
       }
     },
+    "proposals": {
+      "title": "Roster Proposals",
+      "subtitle": "Sourced roster, player and team changes proposed through the MCP. Nothing applies until a staff member approves it.",
+      "loadError": "Could not load roster proposals.",
+      "retry": "Try Again",
+      "empty": "No roster proposals to review.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "kinds": {
+        "add_player_to_team": "Join team",
+        "remove_player_from_team": "Leave team",
+        "create_player": "New player",
+        "update_player": "Player update",
+        "create_team": "New team",
+        "update_team": "Team update",
+        "merge_players": "Merge players",
+        "merge_teams": "Merge teams"
+      },
+      "fields": {
+        "playerId": "Player",
+        "teamId": "Team",
+        "effectiveDate": "Effective date",
+        "status": "Status",
+        "name": "Name",
+        "nationality": "Country",
+        "role": "Role",
+        "location": "Country",
+        "imageUrl": "Logo",
+        "active": "Active",
+        "keptId": "Keep",
+        "duplicateId": "Duplicate",
+        "sourceUrl": "Source"
+      },
+      "playerStatus": {
+        "active": "Active",
+        "free_agent": "Free agent",
+        "retired": "Retired"
+      },
+      "roles": {
+        "player": "Player",
+        "coach": "Coach",
+        "substitute": "Substitute"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "messages": {
+        "approved": "Proposal approved and applied",
+        "rejected": "Proposal rejected",
+        "errorTitle": "Could not review proposal",
+        "reviewError": "Could not review this proposal. Try again."
+      }
+    },
     "tournaments": {
       "title": "Tournaments",
       "loading": "Loading…",
@@ -176,7 +231,8 @@
       },
       "source": {
         "manual": "Manual",
-        "pandascore": "PandaScore"
+        "pandascore": "PandaScore",
+        "startgg": "start.gg"
       },
       "create": {
         "action": "Create Tournament",

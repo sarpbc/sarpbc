@@ -2,6 +2,7 @@ import { Collection, defineEntity, p } from "@mikro-orm/core";
 
 export { ContractRole, PlayerStatus } from "../../domain/roster";
 import { ContractRole, PlayerStatus } from "../../domain/roster";
+import type { DataSource } from "../../../common/domain/data-source";
 
 export class Team {
   id!: string;
@@ -13,6 +14,8 @@ export class Team {
   darkModeImageUrl: string | null = null;
   slug!: string;
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
+  mergedInto: Team | null = null;
 }
 
 export class Player {
@@ -29,6 +32,8 @@ export class Player {
   status: PlayerStatus = PlayerStatus.ACTIVE;
   slug!: string;
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
+  mergedInto: Player | null = null;
   contracts = new Collection<Contract>(this);
   photos = new Collection<PlayerPhoto>(this);
 }
@@ -65,6 +70,8 @@ export const TeamSchema = defineEntity({
     darkModeImageUrl: p.string().nullable(),
     slug: p.string(),
     pandascoreId: p.integer().nullable(),
+    source: p.string().$type<DataSource>().default("manual"),
+    mergedInto: p.manyToOne(Team).nullable(),
   },
 });
 
@@ -87,6 +94,8 @@ export const PlayerSchema = defineEntity({
       .default(PlayerStatus.ACTIVE),
     slug: p.string(),
     pandascoreId: p.integer().nullable().unique(),
+    source: p.string().$type<DataSource>().default("manual"),
+    mergedInto: p.manyToOne(Player).nullable(),
     contracts: p.oneToMany(Contract).mappedBy("player"),
     photos: p.oneToMany(PlayerPhoto).mappedBy("player"),
   },

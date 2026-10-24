@@ -1,4 +1,5 @@
 import { InvalidInputError } from "../../common/domain/errors";
+import type { DataSource } from "../../common/domain/data-source";
 export interface ImportedTeamProfile {
   pandascoreId?: number;
   name: string;
@@ -53,9 +54,14 @@ export class Team {
   darkModeImageUrl: string | null = null;
   slug = "";
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
+  mergedIntoId: string | null = null;
   synchronizeProfile(input: ImportedTeamProfile): void {
     this.name = input.name;
-    if (input.pandascoreId !== undefined) this.pandascoreId = input.pandascoreId;
+    if (input.pandascoreId !== undefined) {
+      this.pandascoreId = input.pandascoreId;
+      this.source = "pandascore";
+    }
     if (input.location !== undefined) this.location = input.location;
     if (!this.imageUrl && input.imageUrl) this.imageUrl = input.imageUrl;
     if (!this.darkModeImageUrl && input.darkModeImageUrl)
@@ -75,10 +81,13 @@ export class Player {
   status = PlayerStatus.ACTIVE;
   slug = "";
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
+  mergedIntoId: string | null = null;
   contracts: Contract[] = [];
   photos: PlayerPhoto[] = [];
   synchronizeProfile(input: ImportedPlayerProfile): void {
     this.pandascoreId = input.pandascoreId;
+    this.source = "pandascore";
     this.name = input.name;
     this.firstName = input.firstName ?? null;
     this.lastName = input.lastName ?? null;

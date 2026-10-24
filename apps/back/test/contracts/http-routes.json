@@ -664,6 +664,30 @@
     "permissions": []
   },
   {
+    "controller": "\"roster-proposals\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+  },
+  {
+    "controller": "\"roster-proposals\"",
+    "verb": "POST",
+    "path": "\":id/approve\"",
+    "status": "HttpStatus.OK",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+  },
+  {
+    "controller": "\"roster-proposals\"",
+    "verb": "POST",
+    "path": "\":id/reject\"",
+    "status": "HttpStatus.OK",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+  },
+  {
     "controller": "\"search\"",
     "verb": "GET",
     "path": "\"\"",

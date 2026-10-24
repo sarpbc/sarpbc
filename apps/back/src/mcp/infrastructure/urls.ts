@@ -24,3 +24,7 @@ export function newsUrl(slug: string): string {
 export function adminNewsEditUrl(slug: string): string {
   return `${getAdminUrl()}/news/${slug}`;
 }
+
+export function adminRosterProposalsUrl(): string {
+  return `${getAdminUrl()}/proposals`;
+}

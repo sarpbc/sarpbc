@@ -3,6 +3,7 @@ import { matchSlug } from "@sarpbc/utils";
 import type { TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../player/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
+import type { DataSource } from "../../common/domain/data-source";
 import type { TournamentSource } from "./tournament-source";
 export class League {
   id = v4();
@@ -50,6 +51,7 @@ export class Match {
   id = v4();
   publicId!: number;
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
   name = "";
   beginAt: Date | null = null;
   endAt: Date | null = null;

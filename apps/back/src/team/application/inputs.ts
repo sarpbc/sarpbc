@@ -1,6 +1,8 @@
 import { ContractRole } from "../../player/domain/roster";
+import type { DataSource } from "../../common/domain/data-source";
 export interface CreateTeamInput {
   name: string;
+  source?: Exclude<DataSource, "pandascore">;
   location?: string;
   imageUrl?: string;
   darkModeImageUrl?: string;

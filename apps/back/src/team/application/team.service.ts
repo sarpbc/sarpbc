@@ -22,16 +22,21 @@ export class TeamService {
     return this.teamRepository.searchAndCount(options);
   }
 
+  /** A merged duplicate resolves to the team it was merged into. */
   async findById(id: string): Promise<Team | null> {
-    return this.teamRepository.findById(id);
+    return this.resolveMerged(await this.teamRepository.findById(id));
   }
 
   async findBySlug(slug: string): Promise<Team | null> {
-    return this.teamRepository.findBySlug(slug);
+    return this.resolveMerged(await this.teamRepository.findBySlug(slug));
   }
 
   async getTeamWithPlayers(id: string): Promise<Team | null> {
-    return this.teamRepository.findWithPlayers(id);
+    return this.resolveMerged(await this.teamRepository.findWithPlayers(id));
+  }
+
+  private async resolveMerged(team: Team | null): Promise<Team | null> {
+    return team?.mergedIntoId ? this.teamRepository.findWithPlayers(team.mergedIntoId) : team;
   }
 
   async create(dto: CreateTeamInput): Promise<Team> {
@@ -41,6 +46,7 @@ export class TeamService {
     team.imageUrl = dto.imageUrl ?? null;
     team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
     team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+    if (dto.source !== undefined) team.source = dto.source;
 
     if (await this.teamRepository.findBySlug(team.slug)) {
       throw new ConflictError(`A team with slug "${team.slug}" already exists`);
@@ -54,6 +60,11 @@ export class TeamService {
     const team = await this.teamRepository.findById(id);
     if (!team) {
       throw new NotFoundError(`Team with id "${id}" not found`);
+    }
+    if (team.mergedIntoId) {
+      throw new InvalidInputError(
+        `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
+      );
     }
 
     if (dto.name !== undefined) team.name = dto.name;

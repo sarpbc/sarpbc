@@ -72,6 +72,12 @@ const links = computed(() => {
       permission: "forum.moderate",
     },
     {
+      label: t("page.nav.proposals"),
+      icon: "i-fluent-clipboard-task-list-ltr-24-regular",
+      to: localePath("/proposals"),
+      permission: "players.manage",
+    },
+    {
       label: t("page.nav.tokens"),
       icon: "i-fluent-key-24-regular",
       to: localePath("/tokens"),

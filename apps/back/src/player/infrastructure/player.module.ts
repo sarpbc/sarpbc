@@ -19,7 +19,13 @@ import {
   type ITeamRepository,
 } from "../../team/application/ports/team.repository.interface";
 import type { RosterTransaction } from "../application/ports/roster-transaction";
-import { ROSTER_TRANSACTION, RosterPersistenceModule } from "./roster-persistence.module";
+import {
+  ROSTER_MERGE_TRANSACTION,
+  ROSTER_TRANSACTION,
+  RosterPersistenceModule,
+} from "./roster-persistence.module";
+import type { RosterMergeTransaction } from "../application/ports/roster-merge-transaction";
+import { RosterMergeService } from "../application/roster-merge.service";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 
@@ -38,6 +44,11 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
       inject: [PLAYER_REPOSITORY, PLAYER_PHOTO_REPOSITORY, TEAM_REPOSITORY, ROSTER_TRANSACTION],
     },
     {
+      provide: RosterMergeService,
+      useFactory: (transaction: RosterMergeTransaction) => new RosterMergeService(transaction),
+      inject: [ROSTER_MERGE_TRANSACTION],
+    },
+    {
       provide: ContractService,
       useFactory: (
         contracts: IContractRepository,
@@ -47,6 +58,6 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
       inject: [CONTRACT_REPOSITORY, PLAYER_REPOSITORY, TEAM_REPOSITORY],
     },
   ],
-  exports: [PlayerService, ContractService, RosterPersistenceModule],
+  exports: [PlayerService, ContractService, RosterMergeService, RosterPersistenceModule],
 })
 export class PlayerModule {}

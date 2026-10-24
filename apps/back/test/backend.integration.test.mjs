@@ -151,6 +151,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     const { PickemChoice } =
       await import("../src/game/pickem/infrastructure/persistence/pickem.entity.ts");
     const { PatService } = await import("../src/pat/application/pat.service.ts");
+    const { AirRiddle } =
+      await import("../src/game/airriddle/infrastructure/persistence/airriddle.entity.ts");
 
     await check(
       "MikroORM migrations rebuild PostgreSQL with no pending schema changes",
@@ -813,7 +815,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
-    await check("MCP roster tools keep sourced contract history without deletes", async () => {
+    await check("MCP roster proposals, approval, merges and start.gg exclusion", async () => {
       const token = (
         await request("POST", "/pat/tokens", { name: "Roster MCP" }, staffCookie, 201)
       ).json();
@@ -836,64 +838,118 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         if (message.error || message.result.isError) return { error: true };
         return JSON.parse(message.result.content[0].text);
       };
+      const review = (proposal, action = "approve", status = 200) =>
+        request(
+          "POST",
+          `/roster-proposals/${proposal.proposalId}/${action}`,
+          undefined,
+          staffCookie,
+          status,
+        ).then((response) => response.json().proposal);
+      const applied = async (tool, args) => {
+        const proposal = await callTool(tool, args);
+        assert.equal(proposal.status, "pending", `${tool} is queued`);
+        const result = await review(proposal);
+        assert.equal(result.status, "applied");
+        return result.entityId;
+      };
       const source = "https://x.com/integration/status/1";
-      const alpha = await callTool("create_team", { name: "MCP Alpha", sourceUrl: source });
-      const beta = await callTool("create_team", { name: "MCP Beta", sourceUrl: source });
-      assert.deepEqual(await callTool("create_team", { name: "MCP Alpha", sourceUrl: source }), {
-        error: true,
-      });
-      const created = await callTool("create_player", {
+      const alpha = await applied("create_team", { name: "MCP Alpha", sourceUrl: source });
+      const beta = await applied("create_team", { name: "MCP Beta", sourceUrl: source });
+
+      const duplicate = await callTool("create_team", { name: "MCP Alpha", sourceUrl: source });
+      await review(duplicate, "approve", 409);
+      const pending = (await request("GET", "/roster-proposals", undefined, staffCookie)).json();
+      assert.deepEqual(
+        pending.proposals.map((proposal) => [proposal.id, proposal.status]),
+        [[duplicate.proposalId, "pending"]],
+      );
+      assert.equal(pending.names[staff.id], "Integration Staff");
+      await request("GET", "/roster-proposals", undefined, memberCookie, 403);
+      assert.equal((await review(duplicate, "reject")).status, "rejected");
+      await review(duplicate, "approve", 400);
+
+      const created = await applied("create_player", {
         name: "MCP Roster Player",
         country: "FR",
         role: "player",
         sourceUrl: source,
       });
-      assert.equal(created.status, "free_agent");
-      const move = (teamId, effectiveDate) => ({
-        playerId: created.id,
+      const move = (playerId, teamId, effectiveDate) => ({
+        playerId,
         teamId,
         effectiveDate,
         sourceUrl: source,
       });
-      await callTool("add_player_to_team", move(alpha.id, "2026-01-10"));
-      const transfer = await callTool("add_player_to_team", move(beta.id, "2026-10-23"));
-      assert.equal(transfer.player.team.id, beta.id);
-      assert.deepEqual(
-        transfer.closed.map((contract) => [contract.teamId, contract.leaveSourceUrl]),
-        [[alpha.id, source]],
-      );
-      const departure = await callTool("remove_player_from_team", {
-        ...move(beta.id, "2026-10-24"),
+      const queued = await callTool("add_player_to_team", move(created, alpha, "2026-01-10"));
+      const before = await orm.em.fork().findOneOrFail(rosterRows.Player, { id: created });
+      assert.equal(before.team, null, "a pending proposal changes nothing");
+      await review(queued);
+      await applied("add_player_to_team", move(created, beta, "2026-10-23"));
+      await applied("remove_player_from_team", {
+        ...move(created, beta, "2026-10-24"),
         status: "retired",
       });
-      assert.equal(departure.player.team, null);
-      assert.equal(departure.player.status, "retired");
-      const contracts = await orm.em
-        .fork()
-        .find(rosterRows.Contract, { player: created.id }, { orderBy: { startDate: "asc" } });
-      assert.deepEqual(
-        contracts.map((contract) => [
+      const contracts = async (where) =>
+        (
+          await orm.em.fork().find(rosterRows.Contract, where, { orderBy: { startDate: "asc" } })
+        ).map((contract) => [
           contract.team.id,
           contract.joinSourceUrl,
-          new Date(contract.endDate).toISOString().slice(0, 10),
-        ]),
-        [
-          [alpha.id, source, "2026-10-23"],
-          [beta.id, source, "2026-10-24"],
-        ],
-      );
+          contract.endDate && new Date(contract.endDate).toISOString().slice(0, 10),
+        ]);
+      assert.deepEqual(await contracts({ player: created }), [
+        [alpha, source, "2026-10-23"],
+        [beta, source, "2026-10-24"],
+      ]);
       assert.equal(
-        (await callTool("update_team", { teamId: beta.id, active: false, sourceUrl: source }))
-          .active,
-        false,
+        (await orm.em.fork().findOneOrFail(rosterRows.Player, { id: created })).status,
+        "retired",
       );
-      assert.deepEqual(await callTool("add_player_to_team", move(beta.id, "2026-10-25")), {
+      await applied("update_team", { teamId: beta, active: false, sourceUrl: source });
+      const inactive = await callTool("add_player_to_team", move(created, beta, "2026-10-25"));
+      await review(inactive, "approve", 400);
+      await review(inactive, "reject");
+      assert.deepEqual(await callTool("update_team", { teamId: beta, active: true }), {
         error: true,
       });
-      assert.deepEqual(await callTool("update_team", { teamId: beta.id, active: true }), {
-        error: true,
+
+      const twin = await applied("create_player", { name: "MCP Roster Twin", sourceUrl: source });
+      await applied("add_player_to_team", move(twin, alpha, "2026-09-01"));
+      const mergePlayers = { keptPlayerId: created, duplicatePlayerId: twin, sourceUrl: source };
+      assert.equal(await applied("merge_players", mergePlayers), created);
+      const twinRow = await orm.em.fork().findOneOrFail(rosterRows.Player, { id: twin });
+      assert.equal(twinRow.mergedInto.id, created);
+      assert.deepEqual(await contracts({ player: twin }), []);
+      assert.equal((await contracts({ player: created })).length, 3);
+      const redirected = (await request("GET", "/player/slug/mcp-roster-twin")).json().player;
+      assert.equal(redirected.slug, "mcp-roster-player");
+      assert.equal(redirected.team.id, alpha);
+      assert.deepEqual(
+        (await request("GET", "/player?name=MCP%20Roster")).json().players.map(({ id }) => id),
+        [created],
+      );
+      assert.deepEqual(await callTool("merge_players", mergePlayers), { error: true });
+
+      await applied("merge_teams", { keptTeamId: alpha, duplicateTeamId: beta, sourceUrl: source });
+      assert.deepEqual(
+        (await contracts({ player: created })).map(([teamId]) => teamId),
+        [alpha, alpha, alpha],
+      );
+      assert.equal((await request("GET", "/team/slug/mcp-beta")).json().team.id, alpha);
+      assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
+
+      const scouted = await applied("create_player", {
+        name: "MCP Startgg Player",
+        sourceUrl: "https://www.start.gg/tournament/integration/event/main",
       });
-      assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta.id }), 1);
+      assert.equal(
+        (await request("GET", "/player/slug/mcp-startgg-player")).json().player.source,
+        "startgg",
+      );
+      assert.deepEqual(await callTool("search_players", { query: "MCP Startgg" }), []);
+      assert.deepEqual(await callTool("get_player", { idOrSlug: scouted }), { error: true });
+      assert.equal((await callTool("search_players", { query: "MCP Roster" }))[0].id, created);
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 
@@ -959,18 +1015,21 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "daily AirRiddle persistence and exact guess use the real player store",
       async () => {
         const today = (await request("GET", "/air-riddle/today")).json();
-        assert.equal(today.length, player.name.length);
+        const { playerName } = await orm.em
+          .fork()
+          .findOneOrFail(AirRiddle, { id: { $ne: null } }, { orderBy: { createdAt: "desc" } });
+        assert.equal(today.length, playerName.length);
         const guessed = (
           await request(
             "POST",
             "/air-riddle/guess",
-            { guess: player.name, last: true },
+            { guess: playerName, last: true },
             undefined,
             201,
           )
         ).json();
-        assert.equal(guessed.answer, player.name);
-        assert.equal(guessed.results.length, player.name.length);
+        assert.equal(guessed.answer, playerName);
+        assert.equal(guessed.results.length, playerName.length);
         assert.equal((await request("GET", "/air-riddle/today")).json().length, today.length);
       },
     );

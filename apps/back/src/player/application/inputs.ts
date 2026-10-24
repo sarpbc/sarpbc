@@ -1,6 +1,8 @@
 import { ContractRole, PlayerStatus, RosterRole } from "../../player/domain/roster";
+import type { DataSource } from "../../common/domain/data-source";
 export interface CreatePlayerInput {
   name: string;
+  source?: Exclude<DataSource, "pandascore">;
   teamId?: string;
   firstName?: string;
   lastName?: string;

@@ -35,6 +35,7 @@ import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/playe
 import { ReplyNotificationSchema } from "./notification/infrastructure/persistence/reply-notification.entity";
 import { PersonalAccessTokenSchema } from "./pat/infrastructure/persistence/personal-access-token.entity";
 import { UserSchema } from "./user/infrastructure/persistence/user.entity";
+import { RosterProposalSchema } from "./roster-proposal/infrastructure/persistence/roster-proposal.entity";
 
 export const mikroOrmEntities = [
   UserSchema,
@@ -43,6 +44,7 @@ export const mikroOrmEntities = [
   PlayerSchema,
   ContractSchema,
   PlayerPhotoSchema,
+  RosterProposalSchema,
   LeagueSchema,
   TournamentEventSchema,
   TournamentSchema,

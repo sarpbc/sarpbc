@@ -1,3 +1,4 @@
+import type { DataSource } from "../../../common/domain/data-source";
 import { Player, Team } from "../../domain/roster";
 
 export interface TeamSummaryResponse {
@@ -18,6 +19,7 @@ export interface PlayerResponse {
   lastName: string | null;
   imageUrl: string | null;
   role: string | null;
+  source: DataSource;
   team: TeamSummaryResponse | null;
   photos?: string[];
 }
@@ -29,6 +31,7 @@ export interface TeamResponse {
   imageUrl: string | null;
   location: string | null;
   pandascoreId: number | null;
+  source: DataSource;
   players: PlayerResponse[];
 }
 
@@ -55,6 +58,7 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     lastName: player.lastName,
     imageUrl: player.imageUrl,
     role: player.role,
+    source: player.source,
     team: player.team ? mapTeamSummary(player.team) : null,
   };
   if (options?.includePhotos) {
@@ -71,6 +75,7 @@ export function mapTeam(team: Team): TeamResponse {
     imageUrl: team.imageUrl,
     location: team.location,
     pandascoreId: team.pandascoreId,
+    source: team.source,
     players: team.players.map((player) => mapPlayer(player)),
   };
 }

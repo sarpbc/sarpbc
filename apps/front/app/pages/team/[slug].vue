@@ -6,16 +6,25 @@ type TeamProfileTab = "info" | "matches" | "events" | "trophies";
 
 const route = useRoute();
 const router = useRouter();
+const localePath = useLocalePath();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
-const { team, teamId, pending, error, refresh } = await useTeamByRouteSlug();
+const { slug, team, teamId, pending, error, refresh } = await useTeamByRouteSlug();
 
 if (!team.value) {
   throwEntityLoadError(error.value, {
     notFound: t("page.team.slug.teamNotFound"),
     failed: t("page.team.slug.failedToLoadTeamData"),
   });
+}
+
+// A merged duplicate's slug resolves to the kept team.
+if (team.value && team.value.slug !== slug.value) {
+  await navigateTo(
+    { path: localePath(`/team/${team.value.slug}`), query: route.query, hash: route.hash },
+    { redirectCode: 301, replace: true },
+  );
 }
 
 const {

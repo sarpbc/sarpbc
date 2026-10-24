@@ -1,10 +1,10 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { PlayerStatus, ROSTER_ROLES, type Contract } from "../../../player/domain/roster";
-import type { RosterMove } from "../../../player/application/player.service";
-import { mapPlayerSummary, mapTeamSummary } from "../mappers";
+import { PlayerStatus, ROSTER_ROLES } from "../../../player/domain/roster";
+import type { RosterChange } from "../../../roster-proposal/domain/roster-proposal";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
+import { adminRosterProposalsUrl } from "../urls";
 import { requireUpdateFields } from "./update-fields";
 
 const sourceUrlSchema = z
@@ -12,7 +12,7 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .describe(
-    "Required public source: the official team or player announcement, the PandaScore page, or the start.gg event.",
+    "Required public source: the official team or player announcement, the PandaScore page, or the start.gg event. A start.gg source marks created players and teams as start.gg data, which MCP reads never return.",
   );
 
 const effectiveDateSchema = z
@@ -33,34 +33,32 @@ const rosterRoleSchema = z
   .enum(ROSTER_ROLES)
   .describe("Roster role: player, coach, or substitute.");
 
-function mapContract(contract: Contract) {
-  return {
-    id: contract.id,
-    teamId: contract.team.id,
-    teamName: contract.team.name,
-    startDate: contract.startDate,
-    endDate: contract.endDate,
-    joinSourceUrl: contract.joinSourceUrl,
-    leaveSourceUrl: contract.leaveSourceUrl,
-  };
-}
-
-function mapRosterMove(move: RosterMove) {
-  return {
-    player: mapPlayerSummary(move.player),
-    opened: move.opened ? mapContract(move.opened) : null,
-    closed: move.closed.map(mapContract),
-  };
-}
+const REVIEW_NOTE =
+  "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
 
 export function registerRosterTools(server: McpServer, ctx: McpToolContext): void {
   const { user } = ctx;
+
+  const propose = async (change: RosterChange, sourceUrl: string) => {
+    const proposal = await ctx.rosterProposalService.propose(change, sourceUrl, user.id);
+    return {
+      entityId: proposal.id,
+      sourceUrl,
+      result: {
+        proposalId: proposal.id,
+        kind: change.kind,
+        status: proposal.status,
+        reviewUrl: adminRosterProposalsUrl(),
+        note: REVIEW_NOTE,
+      },
+    };
+  };
 
   server.registerTool(
     "add_player_to_team",
     {
       description:
-        "Add a player to a team's current roster. Requires players.manage. Closes the player's open contracts at effectiveDate and opens a new one, so roster history is kept. Check get_player and get_team first.",
+        "Propose adding a player to a team's current roster. Requires players.manage. Once approved, closes the player's open contracts at effectiveDate and opens a new one, so roster history is kept. Check get_player and get_team first.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         teamId: z.string().uuid().describe("Team UUID."),
@@ -68,19 +66,17 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
         sourceUrl: sourceUrlSchema,
       },
     },
-    async ({ playerId, ...input }) =>
-      runWriteTool(user, "add_player_to_team", "players.manage", async () => ({
-        entityId: playerId,
-        sourceUrl: input.sourceUrl,
-        result: mapRosterMove(await ctx.playerService.joinTeam(playerId, input)),
-      })),
+    async ({ sourceUrl, ...input }) =>
+      runWriteTool(user, "add_player_to_team", "players.manage", () =>
+        propose({ kind: "add_player_to_team", ...input }, sourceUrl),
+      ),
   );
 
   server.registerTool(
     "remove_player_from_team",
     {
       description:
-        "Remove a player from a team's current roster. Requires players.manage. Closes the open contract at effectiveDate instead of deleting it and sets the player's status.",
+        "Propose removing a player from a team's current roster. Requires players.manage. Once approved, closes the open contract at effectiveDate instead of deleting it and sets the player's status.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         teamId: z.string().uuid().describe("Team UUID the player leaves."),
@@ -92,24 +88,20 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
           .describe("Status after leaving. Defaults to free_agent."),
       },
     },
-    async ({ playerId, status, ...input }) =>
-      runWriteTool(user, "remove_player_from_team", "players.manage", async () => ({
-        entityId: playerId,
-        sourceUrl: input.sourceUrl,
-        result: mapRosterMove(
-          await ctx.playerService.leaveTeam(playerId, {
-            ...input,
-            status: status ?? PlayerStatus.FREE_AGENT,
-          }),
+    async ({ sourceUrl, status, ...input }) =>
+      runWriteTool(user, "remove_player_from_team", "players.manage", () =>
+        propose(
+          { kind: "remove_player_from_team", ...input, status: status ?? PlayerStatus.FREE_AGENT },
+          sourceUrl,
         ),
-      })),
+      ),
   );
 
   server.registerTool(
     "create_player",
     {
       description:
-        "Create a player without a team. Requires players.manage. Run search_players first to avoid duplicates, then use add_player_to_team to place the player on a roster.",
+        "Propose creating a player without a team. Requires players.manage. Run search_players first to avoid duplicates, then propose add_player_to_team once the player exists.",
       inputSchema: {
         name: z.string().min(1).max(255).describe("In-game name."),
         country: countrySchema.optional(),
@@ -119,22 +111,25 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ name, country, status, role, sourceUrl }) =>
-      runWriteTool(user, "create_player", "players.manage", async () => {
-        const player = await ctx.playerService.create({
-          name,
-          nationality: country,
-          status: status ?? PlayerStatus.FREE_AGENT,
-          role,
-        });
-        return { entityId: player.id, sourceUrl, result: mapPlayerSummary(player) };
-      }),
+      runWriteTool(user, "create_player", "players.manage", () =>
+        propose(
+          {
+            kind: "create_player",
+            name,
+            nationality: country,
+            status: status ?? PlayerStatus.FREE_AGENT,
+            role,
+          },
+          sourceUrl,
+        ),
+      ),
   );
 
   server.registerTool(
     "update_player",
     {
       description:
-        "Update a player's name, country, status, or role. Requires players.manage. Use add_player_to_team and remove_player_from_team to change teams.",
+        "Propose updating a player's name, country, status, or role. Requires players.manage. Use add_player_to_team and remove_player_from_team to change teams.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         name: z.string().min(1).max(255).optional().describe("In-game name."),
@@ -145,15 +140,12 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ playerId, name, country, status, role, sourceUrl }) =>
-      runWriteTool(user, "update_player", "players.manage", async () => {
+      runWriteTool(user, "update_player", "players.manage", () => {
         requireUpdateFields({ name, country, status, role });
-        const player = await ctx.playerService.update(playerId, {
-          name,
-          nationality: country,
-          status,
-          role,
-        });
-        return { entityId: player.id, sourceUrl, result: mapPlayerSummary(player) };
+        return propose(
+          { kind: "update_player", playerId, name, nationality: country, status, role },
+          sourceUrl,
+        );
       }),
   );
 
@@ -161,7 +153,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "create_team",
     {
       description:
-        "Create a team. Requires teams.manage. Run search_teams first to avoid duplicates.",
+        "Propose creating a team. Requires teams.manage. Run search_teams first to avoid duplicates.",
       inputSchema: {
         name: z.string().min(1).max(255).describe("Team name."),
         country: countrySchema.optional(),
@@ -170,17 +162,16 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ name, country, imageUrl, sourceUrl }) =>
-      runWriteTool(user, "create_team", "teams.manage", async () => {
-        const team = await ctx.teamService.create({ name, location: country, imageUrl });
-        return { entityId: team.id, sourceUrl, result: mapTeamSummary(team) };
-      }),
+      runWriteTool(user, "create_team", "teams.manage", () =>
+        propose({ kind: "create_team", name, location: country, imageUrl }, sourceUrl),
+      ),
   );
 
   server.registerTool(
     "update_team",
     {
       description:
-        "Update a team's name, country, or logo, or mark it inactive. Requires teams.manage. Teams are never deleted; remove current players before setting active to false.",
+        "Propose updating a team's name, country, or logo, or marking it inactive. Requires teams.manage. Teams are never deleted; remove current players before setting active to false.",
       inputSchema: {
         teamId: z.string().uuid().describe("Team UUID."),
         name: z.string().min(1).max(255).optional().describe("Team name."),
@@ -191,15 +182,52 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ teamId, name, country, imageUrl, active, sourceUrl }) =>
-      runWriteTool(user, "update_team", "teams.manage", async () => {
+      runWriteTool(user, "update_team", "teams.manage", () => {
         requireUpdateFields({ name, country, imageUrl, active });
-        const team = await ctx.teamService.update(teamId, {
-          name,
-          location: country,
-          imageUrl,
-          active,
-        });
-        return { entityId: team.id, sourceUrl, result: mapTeamSummary(team) };
+        return propose(
+          { kind: "update_team", teamId, name, location: country, imageUrl, active },
+          sourceUrl,
+        );
       }),
+  );
+
+  server.registerTool(
+    "merge_players",
+    {
+      description:
+        "Propose merging a duplicate player into the player to keep. Requires players.manage. Once approved, contracts, photos, awards and tournament rosters move to the kept player, and the duplicate stays as a redirect to it instead of being deleted. Fails when both are distinct PandaScore players or play for different current teams.",
+      inputSchema: {
+        keptPlayerId: z.string().uuid().describe("UUID of the player to keep."),
+        duplicatePlayerId: z.string().uuid().describe("UUID of the duplicate to merge into it."),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ keptPlayerId, duplicatePlayerId, sourceUrl }) =>
+      runWriteTool(user, "merge_players", "players.manage", () =>
+        propose(
+          { kind: "merge_players", keptId: keptPlayerId, duplicateId: duplicatePlayerId },
+          sourceUrl,
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "merge_teams",
+    {
+      description:
+        "Propose merging a duplicate team into the team to keep. Requires teams.manage. Once approved, contracts, current players and tournament participations move to the kept team, and the duplicate becomes an inactive redirect to it instead of being deleted. Fails when both teams played in the same tournament or are distinct PandaScore teams.",
+      inputSchema: {
+        keptTeamId: z.string().uuid().describe("UUID of the team to keep."),
+        duplicateTeamId: z.string().uuid().describe("UUID of the duplicate to merge into it."),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ keptTeamId, duplicateTeamId, sourceUrl }) =>
+      runWriteTool(user, "merge_teams", "teams.manage", () =>
+        propose(
+          { kind: "merge_teams", keptId: keptTeamId, duplicateId: duplicateTeamId },
+          sourceUrl,
+        ),
+      ),
   );
 }

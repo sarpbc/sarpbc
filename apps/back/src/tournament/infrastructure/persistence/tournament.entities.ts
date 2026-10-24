@@ -6,6 +6,7 @@ import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { TournamentSource } from "../../domain/tournament-source";
+import type { DataSource } from "../../../common/domain/data-source";
 
 export class League {
   id: string = v4();
@@ -84,6 +85,7 @@ export class Match {
   id: string = v4();
   publicId!: number;
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
   name!: string;
   beginAt: Date | null = null;
   endAt: Date | null = null;
@@ -191,6 +193,7 @@ export const MatchSchema = defineEntity({
     id: p.string().primary(),
     publicId: p.integer().autoincrement().generated("identity").unique(),
     pandascoreId: p.integer().nullable().unique(),
+    source: p.string().$type<DataSource>().default("manual"),
     name: p.string(),
     beginAt: p.datetime().type("timestamptz").nullable(),
     endAt: p.datetime().type("timestamptz").nullable(),

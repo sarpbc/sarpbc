@@ -15,7 +15,7 @@ export async function findPandascorePlayer(
   if (byId) {
     return byId;
   }
-  return em.findOne(Player, { slug, pandascoreId: null });
+  return em.findOne(Player, { slug, pandascoreId: null, mergedInto: null });
 }
 
 export async function availablePlayerSlug(

@@ -277,7 +277,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 
 - [ ] `:player` / `:team` tags use correct slugs (preview in admin)
 - [ ] `:tweet` cards render (or fallback link if X is unavailable)
-- [ ] Player/team records updated with `add_player_to_team` / `remove_player_from_team` and the announcement as `sourceUrl` if MCP data was stale
+- [ ] Player/team changes proposed with `add_player_to_team` / `remove_player_from_team` and the announcement as `sourceUrl` if MCP data was stale, then approved in admin → **Roster proposals**
 - [ ] No broken internal links
 
 ### Bilingual

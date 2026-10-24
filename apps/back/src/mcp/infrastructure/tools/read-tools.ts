@@ -1,7 +1,9 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
+import { isRedistributable } from "../../../common/domain/data-source";
 import {
+  isRedistributableMatch,
   mapMatchListResponse,
   mapNewsAdminArticle,
   mapNewsListItem,
@@ -9,6 +11,7 @@ import {
   mapTeamSummary,
   mapTournamentDetail,
   mapTournamentListItem,
+  redistributable,
 } from "../mappers";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runReadTool, runStaffReadTool } from "../permission-gate";
@@ -20,14 +23,10 @@ const DEFAULT_NEWS_LIMIT = 20;
 const MAX_NEWS_LIMIT = 100;
 
 async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
-  const bySlug = await ctx.playerService.findBySlug(idOrSlug);
-  if (bySlug) {
-    return bySlug;
-  }
-
-  const byId = await ctx.playerService.findById(idOrSlug);
-  if (byId) {
-    return byId;
+  const player =
+    (await ctx.playerService.findBySlug(idOrSlug)) ?? (await ctx.playerService.findById(idOrSlug));
+  if (player && isRedistributable(player.source)) {
+    return player;
   }
 
   throw new NotFoundException(
@@ -38,7 +37,7 @@ async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
 async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.teamService.findBySlug(idOrSlug);
   const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
-  if (team) {
+  if (team && isRedistributable(team.source)) {
     return team;
   }
 
@@ -66,7 +65,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return players.map(mapPlayerSummary);
+        return redistributable(players).map(mapPlayerSummary);
       }),
   );
 
@@ -86,7 +85,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return teams.map((team) => mapTeamSummary(team));
+        return redistributable(teams).map((team) => mapTeamSummary(team));
       }),
   );
 
@@ -148,7 +147,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: limit ?? 20,
           offset: 0,
         });
-        return tournaments.map(mapTournamentListItem);
+        return redistributable(tournaments).map(mapTournamentListItem);
       }),
   );
 
@@ -164,7 +163,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     async ({ id }) =>
       runReadTool(async () => {
         const tournament = await ctx.tournamentService.findById(id);
-        if (!tournament) {
+        if (!tournament || !isRedistributable(tournament.source)) {
           throw new NotFoundException(
             `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
           );
@@ -197,8 +196,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         ]);
 
         return {
-          upcoming: upcomingMatches.map(mapMatchListResponse),
-          live: liveMatches.map(mapMatchListResponse),
+          upcoming: upcomingMatches.filter(isRedistributableMatch).map(mapMatchListResponse),
+          live: liveMatches.filter(isRedistributableMatch).map(mapMatchListResponse),
           upcomingTotal,
           liveTotal,
           total: upcomingTotal + liveTotal,
@@ -230,7 +229,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         });
 
         return {
-          results: results.map(mapMatchListResponse),
+          results: results.filter(isRedistributableMatch).map(mapMatchListResponse),
           total,
         };
       }),

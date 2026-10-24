@@ -346,6 +346,12 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .array(z.string().uuid())
           .optional()
           .describe("Team UUIDs to register as participants. Use search_teams to find ids."),
+        source: z
+          .enum(["manual", "startgg"])
+          .optional()
+          .describe(
+            "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
+          ),
       },
     },
     async (input) =>

@@ -16,7 +16,7 @@ export class RosterSyncWriter {
       (input.pandascoreId !== undefined
         ? await this.em.findOne(Team, { pandascoreId: input.pandascoreId })
         : null) ??
-      (await this.em.findOne(Team, { slug: input.slug, pandascoreId: null }));
+      (await this.em.findOne(Team, { slug: input.slug, pandascoreId: null, mergedInto: null }));
     const row = existing ?? new Team();
     if (!existing) {
       row.id = v4();
@@ -28,6 +28,7 @@ export class RosterSyncWriter {
     Object.assign(row, {
       name: model.name,
       pandascoreId: model.pandascoreId,
+      source: model.source,
       location: model.location,
       imageUrl: model.imageUrl,
       darkModeImageUrl: model.darkModeImageUrl,
@@ -52,6 +53,7 @@ export class RosterSyncWriter {
     model.synchronizeProfile(input);
     Object.assign(row, {
       pandascoreId: model.pandascoreId,
+      source: model.source,
       name: model.name,
       firstName: model.firstName,
       lastName: model.lastName,

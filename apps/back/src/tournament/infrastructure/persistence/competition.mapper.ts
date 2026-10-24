@@ -69,6 +69,7 @@ export function toMatch(row: Row.Match): Match {
     id: row.id,
     publicId: row.publicId,
     pandascoreId: row.pandascoreId,
+    source: row.source,
     name: row.name,
     beginAt: row.beginAt,
     endAt: row.endAt,

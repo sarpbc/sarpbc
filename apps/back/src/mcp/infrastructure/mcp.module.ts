@@ -5,11 +5,20 @@ import { PlayerModule } from "../../player/infrastructure/player.module";
 import { TeamModule } from "../../team/infrastructure/team.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { NewsModule } from "../../news/infrastructure/news.module";
+import { RosterProposalModule } from "../../roster-proposal/infrastructure/roster-proposal.module";
 import { McpController } from "./mcp.controller";
 import { McpServerFactory } from "./mcp-server.factory";
 
 @Module({
-  imports: [PatModule, SearchModule, PlayerModule, TeamModule, TournamentModule, NewsModule],
+  imports: [
+    PatModule,
+    SearchModule,
+    PlayerModule,
+    TeamModule,
+    TournamentModule,
+    NewsModule,
+    RosterProposalModule,
+  ],
   controllers: [McpController],
   providers: [McpServerFactory],
 })

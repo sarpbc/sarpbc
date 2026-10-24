@@ -30,12 +30,17 @@ export class PlayerService {
     return this.playerRepository.searchAndCount(options);
   }
 
+  /** A merged duplicate resolves to the player it was merged into. */
   async findById(id: string): Promise<Player | null> {
-    return this.playerRepository.findById(id);
+    return this.resolveMerged(await this.playerRepository.findById(id));
   }
 
   async findBySlug(slug: string): Promise<Player | null> {
-    return this.playerRepository.findBySlug(slug);
+    return this.resolveMerged(await this.playerRepository.findBySlug(slug));
+  }
+
+  private async resolveMerged(player: Player | null): Promise<Player | null> {
+    return player?.mergedIntoId ? this.playerRepository.findById(player.mergedIntoId) : player;
   }
 
   async create(dto: CreatePlayerInput): Promise<Player> {
@@ -49,6 +54,7 @@ export class PlayerService {
     player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
     if (dto.status !== undefined) player.status = dto.status;
     if (dto.role !== undefined) player.role = rosterRoleLabel(dto.role);
+    if (dto.source !== undefined) player.source = dto.source;
 
     if (await this.playerRepository.findBySlug(player.slug)) {
       throw new ConflictError(`A player with slug "${player.slug}" already exists`);
@@ -67,10 +73,7 @@ export class PlayerService {
 
   async update(id: string, dto: UpdatePlayerInput): Promise<Player> {
     return this.transaction.run(async ({ players, photos, teams }) => {
-      const player = await players.findById(id);
-      if (!player) {
-        throw new NotFoundError(`Player with id "${id}" not found`);
-      }
+      const player = requireUnmerged(await players.findById(id), id);
 
       if (dto.name !== undefined) player.name = dto.name;
       if (dto.firstName !== undefined) player.firstName = dto.firstName;
@@ -111,8 +114,7 @@ export class PlayerService {
 
   async joinTeam(playerId: string, input: RosterMoveInput): Promise<RosterMove> {
     return this.transaction.run(async ({ players, teams, contracts }) => {
-      const player = await players.findById(playerId);
-      if (!player) throw new NotFoundError(`Player with id "${playerId}" not found`);
+      const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
       if (!team) throw new NotFoundError(`Team with id "${input.teamId}" not found`);
       if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
@@ -143,8 +145,7 @@ export class PlayerService {
 
   async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<RosterMove> {
     return this.transaction.run(async ({ players, contracts }) => {
-      const player = await players.findById(playerId);
-      if (!player) throw new NotFoundError(`Player with id "${playerId}" not found`);
+      const player = requireUnmerged(await players.findById(playerId), playerId);
 
       const closed = (await openContracts(contracts, playerId)).filter(
         (contract) => contract.team.id === input.teamId,
@@ -249,4 +250,14 @@ async function openContracts(
   playerId: string,
 ): Promise<Contract[]> {
   return (await contracts.findByPlayer(playerId)).filter((contract) => contract.endDate === null);
+}
+
+function requireUnmerged(player: Player | null, id: string): Player {
+  if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
+  if (player.mergedIntoId) {
+    throw new InvalidInputError(
+      `${player.name} was merged into player "${player.mergedIntoId}"; edit that player instead`,
+    );
+  }
+  return player;
 }

@@ -43,6 +43,7 @@
       "pickems": "Pick'ems",
       "forum": "Forum",
       "moderation": "Modération",
+      "proposals": "Propositions de roster",
       "tokens": "Jetons API",
       "admin": "Admin",
       "openMenu": "Ouvrir la navigation",
@@ -158,6 +159,60 @@
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
       }
     },
+    "proposals": {
+      "title": "Propositions de roster",
+      "subtitle": "Changements sourcés de rosters, joueurs et équipes proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
+      "loadError": "Impossible de charger les propositions de roster.",
+      "retry": "Réessayer",
+      "empty": "Aucune proposition de roster à examiner.",
+      "approve": "Valider",
+      "reject": "Refuser",
+      "kinds": {
+        "add_player_to_team": "Arrivée",
+        "remove_player_from_team": "Départ",
+        "create_player": "Nouveau joueur",
+        "update_player": "Modification du joueur",
+        "create_team": "Nouvelle équipe",
+        "update_team": "Modification de l'équipe",
+        "merge_players": "Fusion de joueurs",
+        "merge_teams": "Fusion d'équipes"
+      },
+      "fields": {
+        "playerId": "Joueur",
+        "teamId": "Équipe",
+        "effectiveDate": "Date d'effet",
+        "status": "Statut",
+        "name": "Nom",
+        "nationality": "Pays",
+        "role": "Rôle",
+        "location": "Pays",
+        "imageUrl": "Logo",
+        "active": "Active",
+        "keptId": "À conserver",
+        "duplicateId": "Doublon",
+        "sourceUrl": "Source"
+      },
+      "playerStatus": {
+        "active": "Actif",
+        "free_agent": "Agent libre",
+        "retired": "Retraité"
+      },
+      "roles": {
+        "player": "Joueur",
+        "coach": "Coach",
+        "substitute": "Remplaçant"
+      },
+      "values": {
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "messages": {
+        "approved": "Proposition validée et appliquée",
+        "rejected": "Proposition refusée",
+        "errorTitle": "Impossible d'examiner la proposition",
+        "reviewError": "Impossible d'examiner cette proposition. Réessayez."
+      }
+    },
     "tournaments": {
       "title": "Tournois",
       "loading": "Chargement…",
@@ -176,7 +231,8 @@
       },
       "source": {
         "manual": "Manuel",
-        "pandascore": "PandaScore"
+        "pandascore": "PandaScore",
+        "startgg": "start.gg"
       },
       "create": {
         "action": "Créer un Tournoi",

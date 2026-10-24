@@ -10,6 +10,7 @@ export interface ManualTournamentFields {
 }
 export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;
+  source?: "manual" | "startgg";
 }
 export interface UpdateTournamentInput extends ManualTournamentFields {
   name?: string;

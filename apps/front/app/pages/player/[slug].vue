@@ -8,6 +8,7 @@ const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const route = useRoute();
 const router = useRouter();
+const localePath = useLocalePath();
 
 const slug = computed(() => route.params.slug as string);
 
@@ -21,6 +22,14 @@ if (!player.value) {
     notFound: t("page.player.slug.playerNotFound"),
     failed: t("page.player.slug.failedToLoadPlayerData"),
   });
+}
+
+// A merged duplicate's slug resolves to the kept player.
+if (player.value && player.value.slug !== slug.value) {
+  await navigateTo(
+    { path: localePath(`/player/${player.value.slug}`), query: route.query, hash: route.hash },
+    { redirectCode: 301, replace: true },
+  );
 }
 
 const currentPlayer = computed(() => player.value!);
