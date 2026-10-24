@@ -17,4 +17,7 @@ export const competitionDiagnostics: CompetitionDiagnostics = {
       error: error instanceof Error ? error : new Error(String(error)),
     });
   },
+  warn(message, context) {
+    log.warn({ component: "Competition", message, ...context });
+  },
 };

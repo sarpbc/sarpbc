@@ -64,10 +64,12 @@ export class ManualTournamentService {
       if (input.endAt !== undefined)
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
       if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
-      if (tournament.source !== "pandascore") {
+      this.assertDateOrder(tournament);
+      if (tournament.source === "pandascore") {
+        if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
+      } else {
         if (input.leagueId !== undefined)
           tournament.league = await this.league(tournaments, input.leagueId);
-        this.assertDateOrder(tournament);
         await this.updateEvent(events, tournament, input);
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);

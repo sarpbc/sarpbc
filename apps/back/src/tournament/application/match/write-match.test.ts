@@ -24,6 +24,7 @@ describe("Match writes", () => {
     save: vi.fn(),
     tournament: vi.fn(),
     participants: vi.fn(),
+    timings: vi.fn(),
   } satisfies MatchWriter;
 
   beforeEach(() => {
@@ -104,6 +105,7 @@ describe("Manual match corrections", () => {
     save: vi.fn(),
     tournament: vi.fn(),
     participants: vi.fn(),
+    timings: vi.fn(),
   } satisfies MatchWriter;
   const manualMatch = () =>
     Object.assign(new Match(), {

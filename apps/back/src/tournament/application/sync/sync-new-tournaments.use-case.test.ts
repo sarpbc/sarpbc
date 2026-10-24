@@ -6,7 +6,7 @@ it("discovers missing tournaments, continues failed details, then reconciles inc
       execute: vi.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error("boom")),
     },
     incidents = { execute: vi.fn() },
-    diagnostics = { error: vi.fn() };
+    diagnostics = { error: vi.fn(), warn: vi.fn() };
   const service = new SyncNewTournamentsUseCase(
     additions as never,
     details as never,

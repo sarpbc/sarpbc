@@ -3,7 +3,10 @@ import { allocateSlug, eventSlug, stageSlug } from "@sarpbc/utils";
 import { Team } from "../../../player/domain/roster";
 import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
-import { assertPandascoreUpsertAllowed } from "../../domain/tournament-source";
+import { ConflictError, NotFoundError } from "../../../common/domain/errors";
+import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
+import { inferEndAt } from "../../domain/tournament-end";
+import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/tournament-source";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
@@ -54,10 +57,13 @@ export class CompetitionSyncService {
   async upsertTournament(
     command: UpsertTournamentCommand,
     matches: UpsertMatchCommand[] = [],
+    linkTournamentId?: string,
   ): Promise<Tournament> {
     const result = await this.transaction.run(async (scope) => {
-      const { tournament, stageIds } = await this.applyTournament(scope, command);
-      return { tournament, stageIds, matches: await this.applyMatches(scope, tournament, matches) };
+      const { tournament, stageIds } = await this.applyTournament(scope, command, linkTournamentId);
+      const applied = await this.applyMatches(scope, tournament, matches);
+      await this.settleEndAt(scope, tournament);
+      return { tournament, stageIds, matches: applied };
     });
     await this.afterCommit(result);
     return result.tournament;
@@ -79,11 +85,11 @@ export class CompetitionSyncService {
     backfill: UpsertTournamentCommand | null | undefined,
   ): Promise<Applied | null> {
     switch (incident.kind) {
-      case "tournament":
-        return {
-          stageIds: (await this.applyTournament(scope, incident.command)).stageIds,
-          matches: [],
-        };
+      case "tournament": {
+        const { tournament, stageIds } = await this.applyTournament(scope, incident.command);
+        await this.settleEndAt(scope, tournament);
+        return { stageIds, matches: [] };
+      }
       case "match": {
         const pandascoreId = incident.command.tournamentPandascoreId;
         const existing = await scope.tournaments.byPandascoreId(pandascoreId);
@@ -94,10 +100,9 @@ export class CompetitionSyncService {
             : null;
         if (!applied) return null;
         assertPandascoreUpsertAllowed(applied.tournament, pandascoreId);
-        return {
-          stageIds: applied.stageIds,
-          matches: await this.applyMatches(scope, applied.tournament, [incident.command]),
-        };
+        const matches = await this.applyMatches(scope, applied.tournament, [incident.command]);
+        await this.settleEndAt(scope, applied.tournament);
+        return { stageIds: applied.stageIds, matches };
       }
       case "team":
         await scope.rosters.upsertTeam(incident.command);
@@ -204,8 +209,10 @@ export class CompetitionSyncService {
   private async applyTournament(
     scope: CompetitionWriteScope,
     command: UpsertTournamentCommand,
+    linkTournamentId?: string,
   ): Promise<AppliedTournament> {
-    const existing = await scope.tournaments.byPandascoreId(command.pandascoreId);
+    const league = command.league ? await this.applyLeague(scope, command.league) : null;
+    const existing = await this.syncTarget(scope, command, league, linkTournamentId);
     if (existing) assertPandascoreUpsertAllowed(existing, command.pandascoreId);
     const tournament =
       existing ?? Object.assign(new Tournament(), { pandascoreId: command.pandascoreId });
@@ -213,13 +220,13 @@ export class CompetitionSyncService {
     tournament.name = command.name;
     tournament.tier = command.tier ?? null;
     tournament.beginAt = command.beginAt ?? null;
-    tournament.endAt = command.endAt ?? null;
+    if (!tournament.endAtCorrected) tournament.endAt = command.endAt ?? null;
     tournament.prizepool = command.prizepool ?? null;
     tournament.type = command.type ?? null;
     tournament.country = command.country ?? null;
     tournament.hasBracket = command.hasBracket ?? false;
     tournament.winnerType = command.winnerType ?? null;
-    tournament.league = command.league ? await this.applyLeague(scope, command.league) : null;
+    tournament.league = league;
     const previousEventId = existing?.event.id ?? null;
     const { event, renamed } = await this.resolveEvent(
       scope.events,
@@ -264,6 +271,70 @@ export class CompetitionSyncService {
     await scope.tournaments.save(tournament);
     const siblings = renamed ? (await scope.events.stages(event.id)).map((stage) => stage.id) : [];
     return { tournament, stageIds: [...new Set([tournament.id, ...siblings])] };
+  }
+  private async syncTarget(
+    scope: CompetitionWriteScope,
+    command: UpsertTournamentCommand,
+    league: League | null,
+    linkTournamentId: string | undefined,
+  ): Promise<Tournament | null> {
+    const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
+    if (synced) {
+      if (linkTournamentId && synced.id !== linkTournamentId)
+        throw new ConflictError(
+          `PandaScore tournament ${command.pandascoreId} is already imported as tournament ${synced.id}.`,
+        );
+      return synced;
+    }
+    const manualId = linkTournamentId ?? (await this.manualCounterpart(scope, command, league));
+    if (!manualId) return null;
+    const manual = await scope.tournaments.load(manualId);
+    if (!manual) throw new NotFoundError(`Tournament with id "${manualId}" was not found.`);
+    claimForPandascore(manual, command.pandascoreId, command.endAt ?? null);
+    return manual;
+  }
+  private async manualCounterpart(
+    scope: CompetitionWriteScope,
+    command: UpsertTournamentCommand,
+    league: League | null,
+  ): Promise<string | null> {
+    const eventName = eventDisplayName({
+      leagueName: league?.name ?? null,
+      serieName: command.serie?.fullName ?? null,
+      stageName: command.name,
+    });
+    const stage = {
+      fullName: `${eventName} ${command.name}`,
+      leagueId: league?.id ?? null,
+      beginAt: command.beginAt ?? null,
+      endAt: command.endAt ?? null,
+    };
+    const window = counterpartSearchWindow(stage);
+    if (!window) return null;
+    const match = findManualCounterpart(stage, await scope.tournaments.manualCandidates(window));
+    switch (match.kind) {
+      case "none":
+        return null;
+      case "unique":
+        return match.id;
+      case "ambiguous":
+        this.diagnostics.warn("Several manual tournaments match a PandaScore stage; none linked", {
+          pandascoreId: command.pandascoreId,
+          tournamentIds: match.ids,
+        });
+        return null;
+      default: {
+        const neverMatch: never = match;
+        return neverMatch;
+      }
+    }
+  }
+  private async settleEndAt(scope: CompetitionWriteScope, tournament: Tournament) {
+    if (tournament.endAt || tournament.endAtCorrected) return;
+    const endAt = inferEndAt(await scope.matches.timings(tournament.id));
+    if (!endAt) return;
+    tournament.endAt = endAt;
+    await scope.tournaments.save(tournament);
   }
   /**
    * Ordered identity lookup: the serie's event, then the stage's own event or a same-named event

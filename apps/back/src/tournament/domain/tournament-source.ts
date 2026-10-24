@@ -19,15 +19,15 @@ export function assertTournamentUpdateAllowed(
     case "startgg":
       return;
     case "pandascore": {
-      const { imageUrl, ...syncedFields } = patch;
+      const { imageUrl, endAt, ...syncedFields } = patch;
       if (
-        imageUrl !== undefined &&
+        (imageUrl !== undefined || endAt !== undefined) &&
         Object.values(syncedFields).every((value) => value === undefined)
       ) {
         return;
       }
       throw new InvalidInputError(
-        "Only the image can be edited on a PandaScore tournament. Send imageUrl alone, or null to clear it.",
+        "Only the image and the end date can be edited on a PandaScore tournament. Send imageUrl or endAt alone, or null to clear them.",
       );
     }
     default: {
@@ -52,4 +52,24 @@ export function assertPandascoreUpsertAllowed(
       `Refusing PandaScore upsert for id ${pandascoreId}: tournament ${tournament.id} is source=${tournament.source}`,
     );
   }
+}
+
+export function claimForPandascore(
+  tournament: {
+    id: string;
+    source: DataSource;
+    pandascoreId: number | null;
+    endAt: Date | null;
+    endAtCorrected: boolean;
+  },
+  pandascoreId: number,
+  providerEndAt: Date | null,
+): void {
+  if (tournament.source !== "manual")
+    throw new InvalidInputError(
+      `Only manual tournaments can be linked to PandaScore; this one is source=${tournament.source}.`,
+    );
+  tournament.source = "pandascore";
+  tournament.pandascoreId = pandascoreId;
+  tournament.endAtCorrected = tournament.endAt !== null && providerEndAt === null;
 }

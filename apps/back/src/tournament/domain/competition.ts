@@ -90,6 +90,7 @@ export class Tournament {
   tier: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
+  endAtCorrected = false;
   winner: TournamentParticipant | null = null;
   winnerType: string | null = null;
   type: string | null = null;

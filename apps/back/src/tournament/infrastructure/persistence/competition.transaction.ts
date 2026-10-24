@@ -53,6 +53,20 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     if (row) this.tournaments.set(row.id, row);
     return row ? toTournament(row) : null;
   }
+  async manualCandidates({ from, to }: { from: Date; to: Date }) {
+    const rows = await this.em.find(
+      Row.Tournament,
+      { source: "manual", pandascoreId: null, beginAt: { $gte: from, $lte: to } },
+      { orderBy: { id: "ASC" } },
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      leagueId: row.league?.id ?? null,
+      beginAt: row.beginAt,
+      endAt: row.endAt,
+    }));
+  }
   async save(model: Model.Tournament) {
     let row =
       this.tournaments.get(model.id) ?? (await this.em.findOne(Row.Tournament, { id: model.id }));
@@ -69,6 +83,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       tier: model.tier,
       beginAt: model.beginAt,
       endAt: model.endAt,
+      endAtCorrected: model.endAtCorrected,
       winnerType: model.winnerType,
       type: model.type,
       country: model.country,
@@ -207,6 +222,13 @@ export class CompetitionMatchWriter implements MatchWriter {
     );
     if (row) this.staged.set(row.id, row);
     return row ? toMatch(row) : null;
+  }
+  async timings(tournamentId: string) {
+    const rows = await this.em.find(Row.Match, { tournament: tournamentId });
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    for (const row of this.staged.values())
+      if (row.tournament.id === tournamentId) byId.set(row.id, row);
+    return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
   }
   async tournament(id: string) {
     const t = await this.tournaments.load(id);

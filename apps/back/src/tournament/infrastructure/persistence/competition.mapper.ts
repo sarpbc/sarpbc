@@ -113,6 +113,7 @@ export function toTournament(row: Row.Tournament): Tournament {
     tier: row.tier,
     beginAt: row.beginAt,
     endAt: row.endAt,
+    endAtCorrected: row.endAtCorrected,
     winnerType: row.winnerType,
     type: row.type,
     country: row.country,

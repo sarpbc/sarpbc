@@ -63,6 +63,9 @@ export class TournamentService {
   syncTournamentByPandascoreId(id: number) {
     return this.details.executeByPandascoreId(id);
   }
+  linkPandascoreTournament(tournamentId: string, pandascoreId: number) {
+    return this.details.executeByPandascoreId(pandascoreId, tournamentId);
+  }
   syncNewTournamentsFromPandascore() {
     return this.additions.execute();
   }
