@@ -85,11 +85,11 @@ export class CompetitionSyncService {
     backfill: UpsertTournamentCommand | null | undefined,
   ): Promise<Applied | null> {
     switch (incident.kind) {
-      case "tournament":
-        return {
-          stageIds: (await this.applyTournament(scope, incident.command)).stageIds,
-          matches: [],
-        };
+      case "tournament": {
+        const { tournament, stageIds } = await this.applyTournament(scope, incident.command);
+        await this.settleEndAt(scope, tournament);
+        return { stageIds, matches: [] };
+      }
       case "match": {
         const pandascoreId = incident.command.tournamentPandascoreId;
         const existing = await scope.tournaments.byPandascoreId(pandascoreId);
@@ -269,7 +269,6 @@ export class CompetitionSyncService {
       }
     }
     await scope.tournaments.save(tournament);
-    await this.settleEndAt(scope, tournament);
     const siblings = renamed ? (await scope.events.stages(event.id)).map((stage) => stage.id) : [];
     return { tournament, stageIds: [...new Set([tournament.id, ...siblings])] };
   }

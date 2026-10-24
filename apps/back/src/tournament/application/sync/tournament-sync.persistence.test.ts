@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CompetitionSyncService } from "./competition-sync.service";
-import { League, Tournament, TournamentParticipant } from "../../domain/competition";
+import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { Team } from "../../../player/domain/roster";
 import type { CompetitionWriteScope, EventWriter } from "../ports";
@@ -102,7 +102,18 @@ function memoryStore() {
     const tournament = tournaments.get(tournamentId);
     return tournament ? events.get(tournament.event.id) : undefined;
   };
-  const matchWriter = { timings: async (id: string) => timings.get(id) ?? [] };
+  const matchWriter = {
+    timings: async (id: string) => timings.get(id) ?? [],
+    tournament: async (id: string) => tournaments.get(id) ?? null,
+    participants: async (): Promise<TournamentParticipant[]> => [],
+    byPandascoreId: async () => null,
+    save: async ({ tournament, status, beginAt, endAt }: Match) => {
+      timings.set(tournament.id, [
+        ...(timings.get(tournament.id) ?? []),
+        { status, beginAt, endAt },
+      ]);
+    },
+  };
   return {
     tournaments,
     events,
@@ -438,6 +449,40 @@ describe("Competition synchronization", () => {
         { status: "not_started", beginAt: new Date("2025-03-03T10:00Z"), endAt: null },
       ]);
       expect((await service.upsertTournament(stageCommand({}))).endAt).toBeNull();
+    });
+
+    it("keeps the stage open when the sync adds a match to a finished stage", async () => {
+      const event = store.seedEvent({ slug: "e", name: "E" });
+      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      store.timings.set("stage", [finished("2025-03-01T10:00Z")]);
+      const synced = await service.upsertTournament(stageCommand({}), [
+        {
+          pandascoreId: 10,
+          tournamentPandascoreId: 1,
+          name: "Tiebreaker",
+          beginAt: new Date("2025-03-03T10:00Z"),
+          status: "not_started",
+          opponentSlugs: [],
+          results: [],
+          previousMatches: [],
+          officialStreams: [],
+        },
+      ]);
+      expect(synced.endAt).toBeNull();
+    });
+
+    it("closes a finished stage from a tournament incident", async () => {
+      const event = store.seedEvent({ slug: "e", name: "E" });
+      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      store.timings.set("stage", [finished("2025-03-02T18:00Z")]);
+      await service.applyIncident({
+        id: 1,
+        modifiedAt: new Date(),
+        kind: "tournament",
+        changeType: "update",
+        command: stageCommand({}),
+      } as CompetitionIncident);
+      expect(store.tournaments.get("stage")?.endAt).toEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps a staff-corrected end date over PandaScore", async () => {
