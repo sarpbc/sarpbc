@@ -55,6 +55,10 @@ const { data: playerData } = await useLazyAsyncData(
 watch(
   playerData,
   (p) => {
+    if (p && p.id !== playerId) {
+      navigateTo(localePath(`/players/${p.id}`), { replace: true });
+      return;
+    }
     if (p) {
       player.value = p;
       playerForm.value = {

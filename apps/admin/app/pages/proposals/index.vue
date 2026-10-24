@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import type { RosterProposal } from "~/types/rosterProposal";
+import type { RosterChange, RosterProposal } from "~/types/rosterProposal";
+import type { StaffPermission } from "~/types/user";
 import { getApiErrorMessage } from "~/utils/apiError";
+import { hasPermission } from "~/utils/staff";
 
 const { t, locale } = useI18n();
 const toast = useToast();
@@ -15,7 +17,31 @@ const dateFormatter = computed(
     }),
 );
 
+const user = useUser();
 const reviewingId = ref<string | null>(null);
+
+function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
+  switch (kind) {
+    case "add_player_to_team":
+    case "remove_player_from_team":
+    case "create_player":
+    case "update_player":
+    case "merge_players":
+      return "players.manage";
+    case "create_team":
+    case "update_team":
+    case "merge_teams":
+      return "teams.manage";
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
+}
+
+function canReview(proposal: RosterProposal): boolean {
+  return hasPermission(user.value, reviewPermission(proposal.change.kind));
+}
 
 const { status, data, error, refresh } = await useLazyAsyncData(
   "admin-roster-proposals",
@@ -145,7 +171,7 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
                   dateFormatter.format(new Date(proposal.createdAt))
                 }}</span>
               </div>
-              <div class="flex flex-row items-center gap-1">
+              <div v-if="canReview(proposal)" class="flex flex-row items-center gap-1">
                 <UButton
                   icon="i-fluent-checkmark-24-regular"
                   :label="$t('page.proposals.approve')"
