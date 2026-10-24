@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+      include: scope
+    pull-request-branch-name:
+      prefix: chore
+      template: "chore/{name}"
+    groups:
+      npm-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      npm-security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
