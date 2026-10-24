@@ -34,6 +34,8 @@ The following operations share a transaction:
 - A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
+Application services publish domain events through feature ports after commit, so a feature reacts to another without importing it. `MatchDecided` is republished on each committed write that leaves a match decided, which lets a re-sync retry a failed handler. Handlers are idempotent and best effort. Pick'em scores picks from this event, and its manual validation endpoint is the recovery path.
+
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
 
 ## Ownership and failures

@@ -5,6 +5,7 @@ import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
 import { ConflictError, NotFoundError } from "../../../common/domain/errors";
 import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
+import { matchDecided } from "../../domain/match-decided";
 import { inferEndAt } from "../../domain/tournament-end";
 import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/tournament-source";
 import type {
@@ -13,7 +14,7 @@ import type {
   CompetitionCache,
   CompetitionDiagnostics,
   EventWriter,
-  MatchScoring,
+  CompetitionEvents,
   TournamentQueries,
 } from "../ports";
 import type { UpsertTournamentCommand } from "../../../pandascore/application/commands/upsert-tournament.command";
@@ -42,7 +43,7 @@ export class CompetitionSyncService {
     private readonly reads: TournamentQueries,
     private readonly transaction: CompetitionTransaction,
     private readonly cache: CompetitionCache,
-    private readonly scoring: MatchScoring,
+    private readonly events: CompetitionEvents,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
   findTournamentById(id: string) {
@@ -432,7 +433,7 @@ export class CompetitionSyncService {
           score: r.score,
         })),
       });
-      if (match.winner && (match.status === "finished" || match.endAt)) ids.push(match.id);
+      if (match.isDecided()) ids.push(match.id);
     }
     return ids;
   }
@@ -446,9 +447,9 @@ export class CompetitionSyncService {
     }
     for (const matchId of matches) {
       try {
-        await this.scoring.autoScoreMatch(matchId);
+        await this.events.publish(matchDecided(matchId));
       } catch (error) {
-        this.diagnostics.error("Automatic match scoring failed", error);
+        this.diagnostics.error("MatchDecided publication failed", error);
       }
     }
   }

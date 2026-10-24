@@ -11,6 +11,7 @@ import type {
 import type { TournamentEvent } from "../domain/tournament-event";
 import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
+import type { MatchDecided } from "../domain/match-decided";
 import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
 import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -143,8 +144,8 @@ export interface CompetitionTransaction {
 export interface CompetitionCache {
   invalidateTournament(id: string): Promise<void>;
 }
-export interface MatchScoring {
-  autoScoreMatch(id: string): Promise<unknown>;
+export interface CompetitionEvents {
+  publish(event: MatchDecided): Promise<void>;
 }
 export interface CompetitionDiagnostics {
   error(message: string, error: unknown): void;

@@ -60,8 +60,7 @@ export async function upsertMatchInTransaction(
         });
     }
   }
-  const finished = match.status === "finished" || Boolean(match.endAt);
-  if (finished && input.results) {
+  if (match.hasEnded() && input.results) {
     const winnerId = deriveWinnerParticipantId(
       input.results.filter((r): r is { participantId: string; score: number } =>
         Boolean(r.participantId),
@@ -112,9 +111,7 @@ export async function updateMatchInTransaction(
       score: r.score,
     }));
   }
-  const finished = input.status
-    ? input.status === "finished"
-    : match.status === "finished" || Boolean(match.endAt);
+  const finished = input.status ? input.status === "finished" : match.hasEnded();
   if (!finished) {
     match.winner = null;
   } else {
