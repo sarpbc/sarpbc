@@ -1,5 +1,6 @@
 import { htmlToMarkdown } from "@mdream/js";
 import { shouldServeMarkdown } from "@mdream/js/negotiate";
+import { filterPlugin, frontmatterPlugin } from "@mdream/js/plugins";
 import {
   htmlPathFromMarkdownPath,
   isMarkdownEligibleHtmlPath,
@@ -63,13 +64,12 @@ export default defineEventHandler(async (event) => {
     const html = await response.text();
     const markdown = htmlToMarkdown(html, {
       origin: url.origin,
-      plugins: {
-        frontmatter: true,
-        isolateMain: false,
-        filter: {
+      plugins: [
+        frontmatterPlugin(),
+        filterPlugin({
           exclude: ["header", "footer", "form", "script", "style", "noscript"],
-        },
-      },
+        }),
+      ],
     });
 
     setHeader(event, "content-type", "text/markdown; charset=utf-8");
