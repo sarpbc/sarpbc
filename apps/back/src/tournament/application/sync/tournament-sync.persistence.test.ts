@@ -6,6 +6,7 @@ import { Team } from "../../../player/domain/roster";
 import type { CompetitionWriteScope, EventWriter } from "../ports";
 import type { UpsertTournamentCommand } from "../../../pandascore/application/commands/upsert-tournament.command";
 import type { CompetitionIncident } from "../../../pandascore/application/models/competition-feed";
+import type { MatchTiming } from "../../domain/tournament-end";
 
 const copy = <T extends object>(value: T): T =>
   Object.assign(Object.create(Object.getPrototypeOf(value) as object) as T, value);
@@ -14,6 +15,7 @@ function memoryStore() {
   const tournaments = new Map<string, Tournament>();
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<number, League>();
+  const timings = new Map<string, MatchTiming[]>();
   const all = () => [...tournaments.values()];
   const tournamentWriter = {
     byPandascoreId: vi.fn(async (id: number) => {
@@ -24,6 +26,24 @@ function memoryStore() {
       const found = tournaments.get(id);
       return found ? copy(found) : null;
     }),
+    manualCandidates: vi.fn(async ({ from, to }: { from: Date; to: Date }) =>
+      all()
+        .filter(
+          (t) =>
+            t.source === "manual" &&
+            t.pandascoreId === null &&
+            t.beginAt !== null &&
+            t.beginAt >= from &&
+            t.beginAt <= to,
+        )
+        .map((t) => ({
+          id: t.id,
+          name: t.name,
+          leagueId: t.league?.id ?? null,
+          beginAt: t.beginAt,
+          endAt: t.endAt,
+        })),
+    ),
     save: vi.fn(async (tournament: Tournament) => {
       tournaments.set(tournament.id, copy(tournament));
     }),
@@ -82,9 +102,12 @@ function memoryStore() {
     const tournament = tournaments.get(tournamentId);
     return tournament ? events.get(tournament.event.id) : undefined;
   };
+  const matchWriter = { timings: async (id: string) => timings.get(id) ?? [] };
   return {
     tournaments,
     events,
+    timings,
+    matchWriter,
     tournamentWriter,
     eventWriter,
     seedEvent,
@@ -97,12 +120,17 @@ describe("Competition synchronization", () => {
   const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
   const cache = { invalidateTournament: vi.fn() },
     scoring = { autoScoreMatch: vi.fn() },
-    diagnostics = { error: vi.fn() };
+    diagnostics = { error: vi.fn(), warn: vi.fn() };
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
   const tx = {
     run: async <T>(work: (scope: CompetitionWriteScope) => Promise<T>) => {
-      const scope = { tournaments: store.tournamentWriter, events: store.eventWriter, rosters };
+      const scope = {
+        tournaments: store.tournamentWriter,
+        events: store.eventWriter,
+        matches: store.matchWriter,
+        rosters,
+      };
       const result = await work(scope as never);
       log.push("commit");
       return result;
@@ -384,5 +412,102 @@ describe("Competition synchronization", () => {
       service.upsertTournament({ pandascoreId: 42, name: "Cup" }),
     ).resolves.toMatchObject({ name: "Cup" });
     expect(diagnostics.error).toHaveBeenCalled();
+  });
+
+  describe("end date", () => {
+    const finished = (endAt: string): MatchTiming => ({
+      status: "finished",
+      beginAt: new Date(endAt),
+      endAt: new Date(endAt),
+    });
+
+    it("closes a stage once every match is finished and PandaScore has no end date", async () => {
+      const event = store.seedEvent({ slug: "e", name: "E" });
+      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      store.timings.set("stage", [finished("2025-03-01T10:00Z"), finished("2025-03-02T18:00Z")]);
+      expect((await service.upsertTournament(stageCommand({}))).endAt).toEqual(
+        new Date("2025-03-02T18:00Z"),
+      );
+    });
+
+    it("keeps the stage open while a match remains", async () => {
+      const event = store.seedEvent({ slug: "e", name: "E" });
+      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      store.timings.set("stage", [
+        finished("2025-03-01T10:00Z"),
+        { status: "not_started", beginAt: new Date("2025-03-03T10:00Z"), endAt: null },
+      ]);
+      expect((await service.upsertTournament(stageCommand({}))).endAt).toBeNull();
+    });
+
+    it("keeps a staff-corrected end date over PandaScore", async () => {
+      const event = store.seedEvent({ slug: "e", name: "E" });
+      store.seedStage(event, {
+        id: "stage",
+        pandascoreId: 1,
+        name: "Playoffs",
+        slug: "playoffs",
+        endAt: new Date("2025-03-05"),
+        endAtCorrected: true,
+      });
+      const synced = await service.upsertTournament(
+        stageCommand({ endAt: new Date("2025-04-01") }),
+      );
+      expect(synced.endAt).toEqual(new Date("2025-03-05"));
+    });
+  });
+
+  describe("manual counterparts", () => {
+    const beginAt = new Date("2026-03-01T12:00Z");
+    const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
+      store.seedStage(store.seedEvent({ id: "event-" + id, slug: id, name }), {
+        id,
+        source: "manual",
+        pandascoreId: null,
+        name,
+        slug: "manual-" + id,
+        beginAt: new Date("2026-03-01T00:00Z"),
+        endAt: new Date("2026-03-02T00:00Z"),
+      });
+
+    it("turns the single matching manual tournament into the synced stage", async () => {
+      seedManual("manual");
+      const synced = await service.upsertTournament(stageCommand({ beginAt }));
+      expect(synced).toMatchObject({
+        id: "manual",
+        source: "pandascore",
+        pandascoreId: 1,
+        name: "Playoffs",
+        endAt: new Date("2026-03-02T00:00Z"),
+        endAtCorrected: true,
+      });
+      expect(store.tournaments.size).toBe(1);
+      expect(store.eventOf("manual")).toMatchObject({ slug: "manual", pandascoreSerieId: 100 });
+    });
+
+    it("creates a separate stage and warns when several manual tournaments match", async () => {
+      seedManual("first");
+      seedManual("second");
+      const synced = await service.upsertTournament(stageCommand({ beginAt }));
+      expect(synced.id).not.toMatch(/first|second/);
+      expect(diagnostics.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Several manual tournaments"),
+        { pandascoreId: 1, tournamentIds: ["first", "second"] },
+      );
+    });
+
+    it("links the manual tournament staff chose even when names differ", async () => {
+      seedManual("manual", "MENA qualifier");
+      const linked = await service.upsertTournament(stageCommand({ beginAt }), [], "manual");
+      expect(linked).toMatchObject({ id: "manual", source: "pandascore", pandascoreId: 1 });
+    });
+
+    it("refuses a link when PandaScore already has its own stage", async () => {
+      await service.upsertTournament(stageCommand({}));
+      seedManual("manual", "MENA qualifier");
+      await expect(
+        service.upsertTournament(stageCommand({ beginAt }), [], "manual"),
+      ).rejects.toThrow("already imported");
+    });
   });
 });

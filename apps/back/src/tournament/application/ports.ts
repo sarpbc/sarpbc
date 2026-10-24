@@ -9,6 +9,8 @@ import type {
   ParticipantReferences,
 } from "../domain/competition";
 import type { TournamentEvent } from "../domain/tournament-event";
+import type { ManualCandidate } from "../domain/manual-counterpart";
+import type { MatchTiming } from "../domain/tournament-end";
 import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
 import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -57,6 +59,8 @@ export interface MatchQueries {
 export interface TournamentWriter {
   load(id: string): Promise<Tournament | null>;
   byPandascoreId(id: number): Promise<Tournament | null>;
+  /** Manual tournaments without a PandaScore id that start within the window. */
+  manualCandidates(window: { from: Date; to: Date }): Promise<ManualCandidate[]>;
   save(tournament: Tournament): Promise<void>;
   league(id: string): Promise<League | null>;
   leagueByPandascoreId(id: number): Promise<League | null>;
@@ -97,6 +101,7 @@ export interface MatchWriter {
   load(id: string): Promise<Match | null>;
   byPandascoreId(id: number): Promise<Match | null>;
   save(match: Match): Promise<void>;
+  timings(tournamentId: string): Promise<MatchTiming[]>;
   tournament(id: string): Promise<TournamentSummary | null>;
   participants(tournamentId: string): Promise<TournamentParticipant[]>;
 }
@@ -144,4 +149,5 @@ export interface MatchScoring {
 }
 export interface CompetitionDiagnostics {
   error(message: string, error: unknown): void;
+  warn(message: string, context: { pandascoreId: number; tournamentIds: string[] }): void;
 }

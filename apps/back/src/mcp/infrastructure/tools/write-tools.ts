@@ -376,7 +376,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "update_tournament",
     {
       description:
-        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send imageUrl alone; all other fields are managed by the sync. Pass null to clear the image. Manual tournaments accept all listed fields.",
+        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
@@ -421,6 +421,40 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             slug: tournament.slug,
             source: tournament.source,
             imageUrl: tournament.imageUrl,
+            endAt: tournament.endAt,
+            url: tournamentUrl(tournament),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "link_pandascore_tournament",
+    {
+      description:
+        "Link a manual tournament to its PandaScore tournament when the sync did not match it automatically. Requires tournaments.manage. The manual tournament becomes the synced stage (keeping its id, URLs and image) and PandaScore fills its details and matches, so no duplicate is created. Fails if that PandaScore tournament is already imported as another tournament.",
+      inputSchema: {
+        tournamentId: z.string().uuid().describe("Manual tournament UUID to link."),
+        pandascoreId: z
+          .number()
+          .int()
+          .positive()
+          .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
+      },
+    },
+    async ({ tournamentId, pandascoreId }) =>
+      runWriteTool(user, "link_pandascore_tournament", "tournaments.manage", async () => {
+        const tournament = await ctx.tournamentService.linkPandascoreTournament(
+          tournamentId,
+          pandascoreId,
+        );
+        return {
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            source: tournament.source,
+            pandascoreId: tournament.pandascoreId,
             url: tournamentUrl(tournament),
           },
         };

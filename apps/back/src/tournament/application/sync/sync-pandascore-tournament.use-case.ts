@@ -21,12 +21,13 @@ export class SyncPandascoreTournamentUseCase {
       : await this.feed.getTournamentMatches(command.pandascoreId);
     await this.synchronization.upsertTournament(command, matches);
   }
-  async executeByPandascoreId(id: number): Promise<Tournament> {
+  /** `linkTournamentId` turns that manual tournament into the imported stage. */
+  async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
     if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
     const matches = command.hasBracket
       ? await this.feed.getTournamentBrackets(id)
       : await this.feed.getTournamentMatches(id);
-    return this.synchronization.upsertTournament(command, matches);
+    return this.synchronization.upsertTournament(command, matches, linkTournamentId);
   }
 }

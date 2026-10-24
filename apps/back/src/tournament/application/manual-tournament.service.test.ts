@@ -30,7 +30,7 @@ describe("ManualTournamentService", () => {
     }),
   };
   const cache = { invalidateTournament: vi.fn() },
-    diagnostics = { error: vi.fn() },
+    diagnostics = { error: vi.fn(), warn: vi.fn() },
     reads = { findById: vi.fn(), leagues: vi.fn() };
   let tournament: Tournament;
   const events: string[] = [];
@@ -90,7 +90,6 @@ describe("ManualTournamentService", () => {
     { tier: null },
     { leagueId: null },
     { beginAt: null },
-    { endAt: null },
     { teamIds: [] },
   ])("rejects PandaScore-owned fields %p", async (patch) => {
     await expect(service.update("ewc", { ...patch, imageUrl: null })).rejects.toBeInstanceOf(
@@ -98,6 +97,12 @@ describe("ManualTournamentService", () => {
     );
     expect(writer.save).not.toHaveBeenCalled();
     expect(cache.invalidateTournament).not.toHaveBeenCalled();
+  });
+  it("marks a synced end date as corrected until staff clear it", async () => {
+    const corrected = await service.update("ewc", { endAt: "2025-03-02" });
+    expect(corrected).toMatchObject({ endAt: new Date("2025-03-02"), endAtCorrected: true });
+    const cleared = await service.update("ewc", { endAt: null });
+    expect(cleared).toMatchObject({ endAt: null, endAtCorrected: false });
   });
   it("rejects an empty synced patch", async () => {
     await expect(service.update("ewc", {})).rejects.toBeInstanceOf(InvalidInputError);

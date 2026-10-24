@@ -5,7 +5,7 @@ describe("PandaScore incidents", () => {
   const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
     cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },
     sync = { applyIncident: vi.fn(), findTournamentByPandascoreId: vi.fn() },
-    diagnostics = { error: vi.fn() };
+    diagnostics = { error: vi.fn(), warn: vi.fn() };
   const now = new Date("2026-10-15T12:00:00Z");
   const service = new SyncPandascoreIncidentsUseCase(
     feed as never,

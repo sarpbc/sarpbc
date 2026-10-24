@@ -66,12 +66,14 @@ News tools (`news.manage`):
 
 Write tools (staff permission required):
 
-| Tool                      | Permission           | Description                                      |
-| ------------------------- | -------------------- | ------------------------------------------------ |
-| `create_match`            | `tournaments.manage` | Create a tournament match                        |
-| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id               |
-| `update_match`            | `tournaments.manage` | Correct score, status or dates of a manual match |
-| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions      |
+| Tool                         | Permission           | Description                                                                              |
+| ---------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
+| `create_match`               | `tournaments.manage` | Create a tournament match                                                                |
+| `set_match_winner`           | `tournaments.manage` | Set match winner by participant id                                                       |
+| `update_match`               | `tournaments.manage` | Correct score, status or dates of a manual match                                         |
+| `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
+| `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
+| `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
 
 Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 

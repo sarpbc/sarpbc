@@ -42,6 +42,7 @@ export class Tournament {
   tier: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
+  endAtCorrected = false;
   winner: TournamentParticipant | null = null;
   winnerType: string | null = null;
   type: string | null = null;
@@ -151,6 +152,7 @@ export const TournamentSchema = defineEntity({
     tier: p.string().nullable(),
     beginAt: p.datetime().type("timestamptz").nullable(),
     endAt: p.datetime().type("timestamptz").nullable(),
+    endAtCorrected: p.boolean().default(false),
     winner: p.manyToOne(TournamentParticipant).nullable(),
     winnerType: p.string().nullable(),
     type: p.string().nullable(),
