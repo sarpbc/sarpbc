@@ -846,7 +846,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
-    await check("MCP roster proposals, approval, merges and start.gg exclusion", async () => {
+    await check("MCP roster proposals, approval, merges and start.gg sources", async () => {
       const token = (
         await request("POST", "/pat/tokens", { name: "Roster MCP" }, staffCookie, 201)
       ).json();
@@ -1018,19 +1018,69 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.equal((await request("GET", "/team/slug/mcp-beta")).json().team.id, alpha);
       assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
 
-      const scouted = await applied("create_player", {
+      const startgg = "https://www.start.gg/tournament/integration/event/main";
+      const scoutProposal = await callTool("create_player", {
         name: "MCP Startgg Player",
-        sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+        sourceUrl: startgg,
       });
+      const pendingIds = async () =>
+        (await callTool("list_roster_proposals", {})).proposals.map(({ id }) => id);
+      assert.ok((await pendingIds()).includes(scoutProposal.proposalId));
+      const scouted = (await review(scoutProposal)).entityId;
+      assert.ok(!(await pendingIds()).includes(scoutProposal.proposalId));
       assert.equal(
         (await request("GET", "/player/slug/mcp-startgg-player")).json().player.source,
         "startgg",
       );
-      assert.deepEqual(await callTool("search_players", { query: "MCP Startgg" }), []);
-      assert.deepEqual(await callTool("get_player", { idOrSlug: scouted }), {
-        error: true,
-      });
+      assert.deepEqual(
+        (await callTool("search_players", { query: "MCP Startgg" })).map(({ id, source }) => [
+          id,
+          source,
+        ]),
+        [[scouted, "startgg"]],
+      );
+      assert.equal((await callTool("get_player", { idOrSlug: scouted })).source, "startgg");
       assert.equal((await callTool("search_players", { query: "MCP Roster" }))[0].id, created);
+
+      const scoutedTeam = await applied("create_team", {
+        name: "MCP Startgg Team",
+        sourceUrl: startgg,
+      });
+      assert.equal((await callTool("search_teams", { query: "MCP Startgg" }))[0].id, scoutedTeam);
+      assert.equal((await callTool("get_team", { idOrSlug: scoutedTeam })).source, "startgg");
+
+      const participantIds = async (tournamentId) =>
+        (await orm.em.fork().find("TournamentParticipant", { tournament: tournamentId })).map(
+          ({ id }) => id,
+        );
+      const tournamentWith = async (tournamentSource) => {
+        const { id } = await callTool("create_tournament", {
+          name: `MCP ${tournamentSource} Cup`,
+          beginAt: "2026-10-20",
+          endAt: "2026-10-30",
+          teamIds: [alpha, scoutedTeam],
+          source: tournamentSource,
+        });
+        await callTool("create_match", {
+          tournamentId: id,
+          name: `MCP ${tournamentSource} Final`,
+          participantIds: await participantIds(id),
+        });
+        return id;
+      };
+      const manualCup = await tournamentWith("manual");
+      const startggCup = await tournamentWith("startgg");
+      assert.deepEqual(
+        (await callTool("get_tournament", { id: manualCup })).matches.map(({ participants }) =>
+          participants.map(({ team }) => team.name).sort(),
+        ),
+        [["MCP Alpha", "MCP Startgg Team"]],
+        "a start.gg team does not hide a redistributable match",
+      );
+      assert.deepEqual(await callTool("get_tournament", { id: startggCup }), { error: true });
+      const listed = (await callTool("get_tournaments", { limit: 100 })).map(({ id }) => id);
+      assert.ok(listed.includes(manualCup));
+      assert.ok(!listed.includes(startggCup));
       const results = await callTool("get_match_results", {});
       assert.equal(
         results.total,

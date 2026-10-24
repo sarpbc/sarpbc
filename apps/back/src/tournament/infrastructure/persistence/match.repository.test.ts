@@ -10,7 +10,7 @@ describe("MatchRepository", () => {
     return { repo, findAndCount };
   }
 
-  it("filters start.gg matches, tournaments and teams in the query", async () => {
+  it("filters start.gg matches and tournaments but not start.gg participants", async () => {
     const { repo, findAndCount } = repository();
     await repo.findResultsAndCount({ leagueId: "rlcs", redistributableOnly: true });
     expect(findAndCount).toHaveBeenCalledWith(
@@ -18,7 +18,6 @@ describe("MatchRepository", () => {
         endAt: { $ne: null },
         source: { $ne: "startgg" },
         tournament: { league: { id: "rlcs" }, source: { $ne: "startgg" } },
-        participants: { $none: { team: { source: "startgg" } } },
       },
       expect.anything(),
     );

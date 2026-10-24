@@ -10,7 +10,6 @@ import {
   mapTeamSummary,
   mapTournamentDetail,
   mapTournamentListItem,
-  redistributable,
 } from "../mappers";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runReadTool, runStaffReadTool } from "../permission-gate";
@@ -24,7 +23,7 @@ const MAX_NEWS_LIMIT = 100;
 async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
   const player =
     (await ctx.playerService.findBySlug(idOrSlug)) ?? (await ctx.playerService.findById(idOrSlug));
-  if (player && isRedistributable(player.source)) {
+  if (player) {
     return player;
   }
 
@@ -36,7 +35,7 @@ async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
 async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.teamService.findBySlug(idOrSlug);
   const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
-  if (team && isRedistributable(team.source)) {
+  if (team) {
     return team;
   }
 
@@ -64,7 +63,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return redistributable(players).map(mapPlayerSummary);
+        return players.map(mapPlayerSummary);
       }),
   );
 
@@ -84,7 +83,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return redistributable(teams).map((team) => mapTeamSummary(team));
+        return teams.map((team) => mapTeamSummary(team));
       }),
   );
 

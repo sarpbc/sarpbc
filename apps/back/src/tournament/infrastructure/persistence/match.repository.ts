@@ -19,7 +19,6 @@ interface MatchListFilter {
   endAt?: null | { $ne: null };
   tournament?: MatchTournamentScopeFilter;
   source?: { $ne: DataSource };
-  participants?: { $none: { team: { source: DataSource } } };
 }
 
 const LIST_POPULATE = ["participants.team", "results", ...MATCH_TOURNAMENT_POPULATE] as const;
@@ -293,7 +292,6 @@ export class MatchRepository extends EntityRepository<Match> {
     if (tournamentFilter) query.tournament = tournamentFilter;
     if (scope.redistributableOnly) {
       query.source = { $ne: "startgg" };
-      query.participants = { $none: { team: { source: "startgg" } } };
     }
     return query;
   }

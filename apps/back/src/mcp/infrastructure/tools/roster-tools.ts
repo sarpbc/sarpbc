@@ -1,9 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { PlayerStatus, ROSTER_ROLES } from "../../../player/domain/roster";
-import type { RosterChange } from "../../../roster-proposal/domain/roster-proposal";
+import {
+  ROSTER_PROPOSAL_STATUSES,
+  type RosterChange,
+} from "../../../roster-proposal/domain/roster-proposal";
 import type { McpToolContext } from "../mcp-tool-context";
-import { runWriteTool } from "../permission-gate";
+import { runStaffReadTool, runWriteTool } from "../permission-gate";
 import { adminRosterProposalsUrl } from "../urls";
 import { requireUpdateFields } from "./update-fields";
 
@@ -12,7 +15,7 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .describe(
-    "Required public source: the official team or player announcement, the PandaScore page, or the start.gg event. A start.gg source marks created players and teams as start.gg data, which MCP reads never return.",
+    "Required public source: the official team or player announcement, the PandaScore page, or the start.gg event. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
 
 const effectiveDateSchema = z
@@ -101,7 +104,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "create_player",
     {
       description:
-        "Propose creating a player without a team. Requires players.manage. Run search_players first to avoid duplicates, then propose add_player_to_team once the player exists.",
+        "Propose creating a player without a team. Requires players.manage. Run search_players and list_roster_proposals first to avoid duplicates, then propose add_player_to_team once the player exists.",
       inputSchema: {
         name: z.string().min(1).max(255).describe("In-game name."),
         country: countrySchema.optional(),
@@ -153,7 +156,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "create_team",
     {
       description:
-        "Propose creating a team. Requires teams.manage. Run search_teams first to avoid duplicates.",
+        "Propose creating a team. Requires teams.manage. Run search_teams and list_roster_proposals first to avoid duplicates.",
       inputSchema: {
         name: z.string().min(1).max(255).describe("Team name."),
         country: countrySchema.optional(),
@@ -229,5 +232,34 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
           sourceUrl,
         ),
       ),
+  );
+
+  server.registerTool(
+    "list_roster_proposals",
+    {
+      description:
+        "List roster proposals, pending by default. Requires players.manage. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.",
+      inputSchema: {
+        status: z
+          .enum(ROSTER_PROPOSAL_STATUSES)
+          .optional()
+          .describe("Proposal status (default pending)."),
+      },
+    },
+    async ({ status }) =>
+      runStaffReadTool(user, "players.manage", async () => {
+        const { proposals, names } = await ctx.rosterProposalService.list(status ?? "pending");
+        return {
+          proposals: proposals.map((proposal) => ({
+            id: proposal.id,
+            change: proposal.change,
+            sourceUrl: proposal.sourceUrl,
+            status: proposal.status,
+            entityId: proposal.entityId,
+            createdAt: proposal.createdAt,
+          })),
+          names,
+        };
+      }),
   );
 }
