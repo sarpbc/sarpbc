@@ -42,8 +42,7 @@ export class RosterProposalService {
     sourceUrl: string,
     proposedById: string,
   ): Promise<RosterProposal> {
-    for (const id of referencedPlayerIds(change)) await this.requirePlayer(id);
-    for (const id of referencedTeamIds(change)) await this.requireTeam(id);
+    await this.requireReferences(change);
     if (change.kind === "update_contract") {
       await this.requireContract(change.playerId, change.contractId);
     }
@@ -66,6 +65,8 @@ export class RosterProposalService {
   async approve(id: string, reviewerId: string): Promise<RosterProposal> {
     return this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
+      // A merge approved since the proposal would leave the change on a redirect record.
+      await this.requireReferences(proposal.change);
       proposal.approve(reviewerId, new Date());
       proposal.entityId = await this.apply(proposal.change, proposal.sourceUrl);
       await proposals.save(proposal);
@@ -151,6 +152,11 @@ export class RosterProposalService {
     if (player.id !== id) {
       throw new InvalidInputError(`Player "${id}" was merged into "${player.id}"; use that id`);
     }
+  }
+
+  private async requireReferences(change: RosterChange): Promise<void> {
+    for (const id of referencedPlayerIds(change)) await this.requirePlayer(id);
+    for (const id of referencedTeamIds(change)) await this.requireTeam(id);
   }
 
   private async requireContract(playerId: string, contractId: string): Promise<void> {

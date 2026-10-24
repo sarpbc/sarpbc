@@ -194,6 +194,15 @@ describe("RosterProposalService", () => {
     });
   });
 
+  it("refuses to apply a change to a player merged since the proposal", async () => {
+    const { id } = await addZen();
+    players.findById.mockResolvedValueOnce(Object.assign(new Player(), { id: "kept" }));
+
+    await expect(service.approve(id, "admin")).rejects.toThrow('was merged into "kept"');
+    expect(players.joinTeam).not.toHaveBeenCalled();
+    expect(saved.get(id)?.status).toBe("pending");
+  });
+
   it("keeps a proposal pending when the change fails", async () => {
     const { id } = await addZen();
     players.joinTeam.mockRejectedValueOnce(new InvalidInputError("Team is inactive"));

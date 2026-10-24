@@ -16,19 +16,18 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(
-    (url) => !/(^|\.)liquipedia\.net$/i.test(new URL(url).hostname),
+    (url) => !URL.canParse(url) || !/(^|\.)liquipedia\.net\.?$/i.test(new URL(url).hostname),
     "Liquipedia is not an accepted source; cite the official announcement it relies on",
   )
   .describe(
     "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
 
-const effectiveDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
-  .describe("Date the move takes effect according to the source (YYYY-MM-DD).");
+const contractDateSchema = z.iso.date("Use a real YYYY-MM-DD date");
 
-const contractDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+const effectiveDateSchema = contractDateSchema.describe(
+  "Date the move takes effect according to the source (YYYY-MM-DD).",
+);
 
 const contractRoleSchema = z
   .enum(ContractRole)

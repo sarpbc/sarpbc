@@ -127,6 +127,12 @@ export class Contract {
         `The contract ends (${isoDay(this.endDate)}) before it starts (${isoDay(this.startDate)}).`,
       );
     }
+    const stored = others.find((other) => other.id === this.id);
+    if (stored && !stored.endDate && stored.team.id === currentTeamId && this.endDate) {
+      throw new InvalidInputError(
+        `This contract is the player's current ${stored.team.name} contract; record the departure with remove_player_from_team.`,
+      );
+    }
     if (!this.endDate && this.team.id !== currentTeamId) {
       throw new InvalidInputError(
         `An open contract must be with the player's current team; give ${this.team.name} an end date or record the move with add_player_to_team.`,

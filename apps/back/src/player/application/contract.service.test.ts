@@ -17,13 +17,14 @@ describe("ContractService sourced career periods", () => {
     findPastContractsByPlayer: async () => [],
     findByTeam: async () => [],
     findFormerPlayersByTeam: async () => [],
-    findById: async (id) => career.find((contract) => contract.id === id) ?? null,
+    findById: async (id) => {
+      const stored = career.find((contract) => contract.id === id);
+      return stored ? Object.assign(new Contract(), stored) : null;
+    },
     findActiveContract: async () => null,
     save: async (contract) => {
-      if (!contract.id) {
-        contract.id = `contract-${career.length + 1}`;
-        career.push(contract);
-      }
+      contract.id ||= `contract-${career.length + 1}`;
+      career = [...career.filter((stored) => stored.id !== contract.id), contract];
     },
     delete: async () => {},
   };
@@ -58,6 +59,7 @@ describe("ContractService sourced career periods", () => {
     });
 
     expect(career).toContain(contract);
+    expect(career).toHaveLength(2);
     expect(contract).toMatchObject({
       role: ContractRole.BENCHED,
       joinSourceUrl: source,
@@ -103,6 +105,13 @@ describe("ContractService sourced career periods", () => {
         sourceUrl: source,
       }),
     ).rejects.toThrow(InvalidInputError);
+  });
+
+  it("leaves the current team's departure to roster moves", async () => {
+    await expect(
+      service.revisePeriod("zen", "kc-2025-06-01", { endDate: "2025-12-31", sourceUrl: source }),
+    ).rejects.toThrow("remove_player_from_team");
+    expect(career[0].endDate).toBeNull();
   });
 
   it("revises a period and re-sources only the edited end", async () => {

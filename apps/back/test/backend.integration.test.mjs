@@ -1048,6 +1048,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       for (const invalid of [
         { ...stint, sourceUrl: "https://liquipedia.net/rocketleague/Zen" },
         { ...stint, endDate: "2023-12-31" },
+        { ...stint, endDate: "2025-02-30" },
       ]) {
         assert.deepEqual(await callTool("create_contract", invalid), { error: true });
       }
@@ -1075,9 +1076,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         "loaned",
         correction,
       ]);
-      const reopen = await callTool("update_contract", revise({ endDate: null }));
-      await review(reopen, "approve", 400);
-      await review(reopen, "reject");
+      const currentId = (await callTool("list_contracts", { idOrSlug: veteran })).contracts[1].id;
+      for (const changes of [{ endDate: null }, { contractId: currentId, endDate: "2026-05-01" }]) {
+        const proposal = await callTool("update_contract", revise(changes));
+        await review(proposal, "approve", 400);
+        await review(proposal, "reject");
+      }
       assert.deepEqual(
         await callTool("update_contract", revise({ contractId: randomUUID(), role: "benched" })),
         { error: true },

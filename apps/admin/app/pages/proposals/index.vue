@@ -68,7 +68,7 @@ function nameOf(id: string): string {
 }
 
 function formatValue(key: string, value: string | boolean | null): string {
-  if (value === null) return t("page.proposals.values.cleared");
+  if (value === null) return t("page.proposals.values.ongoing");
   if (value === true) return t("page.proposals.values.yes");
   if (value === false) return t("page.proposals.values.no");
   switch (key) {
@@ -84,7 +84,10 @@ function formatValue(key: string, value: string | boolean | null): string {
 }
 
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
-  const fields: [string, string | boolean | null | undefined][] = Object.entries(proposal.change);
+  const { change } = proposal;
+  const shown =
+    change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
+  const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);
   return fields
     .filter(
       (field): field is [string, string | boolean | null] =>

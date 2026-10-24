@@ -211,7 +211,7 @@
       "values": {
         "yes": "Oui",
         "no": "Non",
-        "cleared": "Effacée"
+        "ongoing": "En cours"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
