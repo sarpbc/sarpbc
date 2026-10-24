@@ -26,6 +26,12 @@ export interface UpsertMatchInput {
   results?: { participantId: string | null; score: number }[];
   officialStreams?: OfficialMatchStream[];
 }
+export interface UpdateMatchInput {
+  beginAt?: Date | null;
+  endAt?: Date | null;
+  status?: string;
+  results?: { participantId: string; score: number }[];
+}
 export interface TournamentListOptions {
   limit?: number;
   offset?: number;

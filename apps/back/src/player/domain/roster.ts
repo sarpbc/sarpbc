@@ -1,3 +1,4 @@
+import { InvalidInputError } from "../../common/domain/errors";
 export interface ImportedTeamProfile {
   pandascoreId?: number;
   name: string;
@@ -20,10 +21,33 @@ export enum ContractRole {
   BENCHED = "benched",
   LOANED = "loaned",
 }
+export enum PlayerStatus {
+  ACTIVE = "active",
+  FREE_AGENT = "free_agent",
+  RETIRED = "retired",
+}
+export const ROSTER_ROLES = ["player", "coach", "substitute"] as const;
+export type RosterRole = (typeof ROSTER_ROLES)[number];
+/** Stored in PandaScore's role format, where standard roster players have no role. */
+export function rosterRoleLabel(role: RosterRole): string | null {
+  switch (role) {
+    case "player":
+      return null;
+    case "coach":
+      return "Coach";
+    case "substitute":
+      return "Substitute";
+    default: {
+      const unreachable: never = role;
+      return unreachable;
+    }
+  }
+}
 export class Team {
   id = "";
   name = "";
   players: Player[] = [];
+  active = true;
   location: string | null = null;
   imageUrl: string | null = null;
   darkModeImageUrl: string | null = null;
@@ -48,6 +72,7 @@ export class Player {
   lastName: string | null = null;
   imageUrl: string | null = null;
   role: string | null = null;
+  status = PlayerStatus.ACTIVE;
   slug = "";
   pandascoreId: number | null = null;
   contracts: Contract[] = [];
@@ -75,7 +100,17 @@ export class Contract {
   startDate!: Date;
   endDate: Date | null = null;
   role = ContractRole.ACTIVE;
+  joinSourceUrl: string | null = null;
+  leaveSourceUrl: string | null = null;
   createdAt = new Date();
+  close(endDate: Date, sourceUrl: string): void {
+    if (endDate < this.startDate)
+      throw new InvalidInputError(
+        `The departure date precedes the contract start (${this.startDate.toISOString().slice(0, 10)}).`,
+      );
+    this.endDate = endDate;
+    this.leaveSourceUrl = sourceUrl;
+  }
 }
 export class PlayerPhoto {
   id = "";

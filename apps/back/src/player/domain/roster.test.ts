@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Player, Team } from "./roster";
+import { InvalidInputError } from "../../common/domain/errors";
+import { Contract, Player, ROSTER_ROLES, Team, rosterRoleLabel } from "./roster";
 
 describe("roster policies", () => {
   it("archives only a different nonempty profile photo", () => {
@@ -44,5 +45,26 @@ describe("roster policies", () => {
     expect(team.name).toBe("Updated name");
     expect(team.imageUrl).toBe("local.png");
     expect(team.darkModeImageUrl).toBe("dark-local.png");
+  });
+});
+
+describe("contracts", () => {
+  it("closes a contract with its departure source", () => {
+    const contract = Object.assign(new Contract(), { startDate: new Date("2026-01-10") });
+    contract.close(new Date("2026-10-23"), "https://x.com/team/status/1");
+    expect(contract.endDate).toEqual(new Date("2026-10-23"));
+    expect(contract.leaveSourceUrl).toBe("https://x.com/team/status/1");
+  });
+
+  it("rejects a departure before the contract start", () => {
+    const contract = Object.assign(new Contract(), { startDate: new Date("2026-10-23") });
+    expect(() => contract.close(new Date("2026-01-10"), "https://x.com/a")).toThrow(
+      InvalidInputError,
+    );
+    expect(contract.endDate).toBeNull();
+  });
+
+  it("stores roster roles in the PandaScore format", () => {
+    expect(ROSTER_ROLES.map(rosterRoleLabel)).toEqual([null, "Coach", "Substitute"]);
   });
 });

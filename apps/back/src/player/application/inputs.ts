@@ -1,4 +1,4 @@
-import { ContractRole } from "../../player/domain/roster";
+import { ContractRole, PlayerStatus, RosterRole } from "../../player/domain/roster";
 export interface CreatePlayerInput {
   name: string;
   teamId?: string;
@@ -8,6 +8,8 @@ export interface CreatePlayerInput {
   nationality?: string;
   imageUrl?: string;
   slug?: string;
+  status?: PlayerStatus;
+  role?: RosterRole;
 }
 
 export interface UpdatePlayerInput {
@@ -19,6 +21,18 @@ export interface UpdatePlayerInput {
   nationality?: string;
   imageUrl?: string;
   slug?: string;
+  status?: PlayerStatus;
+  role?: RosterRole;
+}
+
+export interface RosterMoveInput {
+  teamId: string;
+  effectiveDate: string;
+  sourceUrl: string;
+}
+
+export interface LeaveTeamInput extends RosterMoveInput {
+  status: PlayerStatus.FREE_AGENT | PlayerStatus.RETIRED;
 }
 
 export interface CreateContractInput {

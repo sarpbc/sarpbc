@@ -96,6 +96,7 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           lastName: model.lastName,
           imageUrl: model.imageUrl,
           role: model.role,
+          status: model.status,
           team: model.team ? em.getReference(Row.Team, model.team.id) : null,
         });
         em.persist(row);
@@ -147,6 +148,7 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           name: model.name,
           slug: model.slug,
           pandascoreId: model.pandascoreId,
+          active: model.active,
           location: model.location,
           imageUrl: model.imageUrl,
           darkModeImageUrl: model.darkModeImageUrl,
@@ -190,6 +192,8 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           startDate: model.startDate,
           endDate: model.endDate,
           role: model.role,
+          joinSourceUrl: model.joinSourceUrl,
+          leaveSourceUrl: model.leaveSourceUrl,
           createdAt: model.createdAt,
         });
         em.persist(row);

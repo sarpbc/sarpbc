@@ -1,5 +1,5 @@
 import type { RosterTransaction } from "../../player/application/ports/roster-transaction";
-import { NotFoundError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
 import { Team } from "../../player/domain/roster";
 import { TeamSearchProps } from "./search-team-props";
@@ -42,6 +42,10 @@ export class TeamService {
     team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
     team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
 
+    if (await this.teamRepository.findBySlug(team.slug)) {
+      throw new ConflictError(`A team with slug "${team.slug}" already exists`);
+    }
+
     await this.teamRepository.save(team);
     return team;
   }
@@ -57,6 +61,12 @@ export class TeamService {
     if (dto.imageUrl !== undefined) team.imageUrl = dto.imageUrl;
     if (dto.darkModeImageUrl !== undefined) team.darkModeImageUrl = dto.darkModeImageUrl;
     if (dto.slug !== undefined) team.slug = dto.slug;
+    if (dto.active === false && team.players.length > 0) {
+      throw new InvalidInputError(
+        `Remove the ${team.players.length} current players before marking "${team.name}" inactive`,
+      );
+    }
+    if (dto.active !== undefined) team.active = dto.active;
 
     await this.teamRepository.save(team);
     return team;

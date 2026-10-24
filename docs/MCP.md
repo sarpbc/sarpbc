@@ -66,10 +66,24 @@ News tools (`news.manage`):
 
 Write tools (staff permission required):
 
-| Tool                      | Permission           | Description                                 |
-| ------------------------- | -------------------- | ------------------------------------------- |
-| `create_match`            | `tournaments.manage` | Create a tournament match                   |
-| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id          |
-| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions |
+| Tool                      | Permission           | Description                                      |
+| ------------------------- | -------------------- | ------------------------------------------------ |
+| `create_match`            | `tournaments.manage` | Create a tournament match                        |
+| `set_match_winner`        | `tournaments.manage` | Set match winner by participant id               |
+| `update_match`            | `tournaments.manage` | Correct score, status or dates of a manual match |
+| `trigger_tournament_sync` | `tournaments.manage` | Sync one tournament or PandaScore additions      |
+
+Roster tools (staff permission and a public `sourceUrl` required). Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, and teams are marked inactive instead of removed.
+
+| Tool                      | Permission       | Description                                                                                                |
+| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `add_player_to_team`      | `players.manage` | Close the player's open contracts and open one with the new team                                           |
+| `remove_player_from_team` | `players.manage` | Close the contract and set the player `free_agent` or `retired`                                            |
+| `create_player`           | `players.manage` | Create a player without a team (name, country, status, role)                                               |
+| `update_player`           | `players.manage` | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`) |
+| `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                                        |
+| `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                               |
+
+`get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
 
 Staff playbook for roster-change news drafts (web verification + `create_news_draft`): [playbooks/roster-change-news.md](playbooks/roster-change-news.md).

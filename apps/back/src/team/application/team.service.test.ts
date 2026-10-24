@@ -7,7 +7,7 @@ import type {
 } from "../../player/application/ports/roster-transaction";
 import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
 import { TeamService } from "./team.service";
-import { UnprocessableError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 
 describe("Roster workflows", () => {
   let stores: RosterStores;
@@ -90,6 +90,27 @@ describe("Roster workflows", () => {
     expect(player.team).toBe(team);
     expect(stores.contracts.delete).not.toHaveBeenCalled();
     expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("keeps a team with current players active", async () => {
+    await expect(service.update(team.id, { active: false })).rejects.toBeInstanceOf(
+      InvalidInputError,
+    );
+    expect(team.active).toBe(true);
+    expect(stores.teams.save).not.toHaveBeenCalled();
+  });
+
+  it("marks an empty team inactive without deleting it", async () => {
+    team.players = [];
+    expect((await service.update(team.id, { active: false })).active).toBe(false);
+    expect(stores.teams.save).toHaveBeenCalledWith(team);
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("rejects a team whose slug is already taken", async () => {
+    stores.teams.findBySlug = async () => team;
+    await expect(service.create({ name: "Vitality" })).rejects.toBeInstanceOf(ConflictError);
+    expect(stores.teams.save).not.toHaveBeenCalled();
   });
 
   it("uses the unprocessable error for missing contract teams on creation and update", async () => {

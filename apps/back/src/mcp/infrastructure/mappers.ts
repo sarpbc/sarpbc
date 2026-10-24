@@ -10,6 +10,8 @@ export function mapPlayerSummary(player: Player) {
     slug: player.slug,
     name: player.name,
     nationality: player.nationality,
+    status: player.status,
+    role: player.role,
     team: player.team
       ? {
           id: player.team.id,
@@ -30,6 +32,7 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     slug: team.slug,
     name: team.name,
     location: team.location,
+    active: team.active,
     players: roster.map((player) => ({
       id: player.id,
       slug: player.slug,
@@ -57,23 +60,31 @@ export function mapTournamentListItem(tournament: Tournament) {
 }
 
 export function mapTournamentDetail(tournament: Tournament) {
-  const matches = tournament.matches.map(mapMatchListItem);
-
   return {
     ...mapTournamentListItem(tournament),
     description: tournament.description,
     tier: tournament.tier,
     hasBracket: tournament.hasBracket,
-    matches: matches.map((match) => ({
-      ...match,
-      url: matchUrl(match.publicId, match.slug),
-    })),
+    winner: tournament.winner
+      ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
+      : null,
+    matches: tournament.matches.map(mapMatchListResponse),
   };
 }
 
 export function mapMatchListResponse(match: Match) {
   const item = mapMatchListItem(match);
-  return { ...item, url: matchUrl(item.publicId, item.slug) };
+  const winnerId = match.winner?.id ?? null;
+  // List queries do not populate the winner relation; participants carry the team names.
+  const winner = match.participants.find((participant) => participant.id === winnerId);
+  return {
+    ...item,
+    pandascoreId: match.pandascoreId,
+    status: match.status,
+    endAt: match.endAt,
+    winner: winner ? { participantId: winner.id, teamName: winner.team.name } : null,
+    url: matchUrl(item.publicId, item.slug),
+  };
 }
 
 export function mapNewsListItem(article: NewsArticleAdminResponse) {

@@ -4,6 +4,7 @@ export function toTeam(row: Record.Team, includePlayers = true): Team {
   const team = Object.assign(new Team(), {
     id: row.id,
     name: row.name,
+    active: row.active,
     location: row.location,
     imageUrl: row.imageUrl,
     darkModeImageUrl: row.darkModeImageUrl,
@@ -24,6 +25,7 @@ export function toPlayer(row: Record.Player): Player {
     lastName: row.lastName,
     imageUrl: row.imageUrl,
     role: row.role,
+    status: row.status,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
     team: row.team ? toTeam(row.team, false) : null,
@@ -39,6 +41,8 @@ export function toContract(row: Record.Contract): Contract {
     startDate: new Date(row.startDate),
     endDate: row.endDate ? new Date(row.endDate) : null,
     role: row.role,
+    joinSourceUrl: row.joinSourceUrl,
+    leaveSourceUrl: row.leaveSourceUrl,
     createdAt: new Date(row.createdAt),
   });
 }

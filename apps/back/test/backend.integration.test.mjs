@@ -813,6 +813,90 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
+    await check("MCP roster tools keep sourced contract history without deletes", async () => {
+      const token = (
+        await request("POST", "/pat/tokens", { name: "Roster MCP" }, staffCookie, 201)
+      ).json();
+      let rpcId = 0;
+      const callTool = async (name, args) => {
+        const response = await request(
+          "POST",
+          "/mcp",
+          { jsonrpc: "2.0", id: ++rpcId, method: "tools/call", params: { name, arguments: args } },
+          undefined,
+          200,
+          {
+            authorization: `Bearer ${token.token}`,
+            accept: "application/json, text/event-stream",
+            "content-type": "application/json",
+          },
+        );
+        const data = response.body.split("\n").find((line) => line.startsWith("data: "));
+        const message = JSON.parse(data ? data.slice("data: ".length) : response.body);
+        if (message.error || message.result.isError) return { error: true };
+        return JSON.parse(message.result.content[0].text);
+      };
+      const source = "https://x.com/integration/status/1";
+      const alpha = await callTool("create_team", { name: "MCP Alpha", sourceUrl: source });
+      const beta = await callTool("create_team", { name: "MCP Beta", sourceUrl: source });
+      assert.deepEqual(await callTool("create_team", { name: "MCP Alpha", sourceUrl: source }), {
+        error: true,
+      });
+      const created = await callTool("create_player", {
+        name: "MCP Roster Player",
+        country: "FR",
+        role: "player",
+        sourceUrl: source,
+      });
+      assert.equal(created.status, "free_agent");
+      const move = (teamId, effectiveDate) => ({
+        playerId: created.id,
+        teamId,
+        effectiveDate,
+        sourceUrl: source,
+      });
+      await callTool("add_player_to_team", move(alpha.id, "2026-01-10"));
+      const transfer = await callTool("add_player_to_team", move(beta.id, "2026-10-23"));
+      assert.equal(transfer.player.team.id, beta.id);
+      assert.deepEqual(
+        transfer.closed.map((contract) => [contract.teamId, contract.leaveSourceUrl]),
+        [[alpha.id, source]],
+      );
+      const departure = await callTool("remove_player_from_team", {
+        ...move(beta.id, "2026-10-24"),
+        status: "retired",
+      });
+      assert.equal(departure.player.team, null);
+      assert.equal(departure.player.status, "retired");
+      const contracts = await orm.em
+        .fork()
+        .find(rosterRows.Contract, { player: created.id }, { orderBy: { startDate: "asc" } });
+      assert.deepEqual(
+        contracts.map((contract) => [
+          contract.team.id,
+          contract.joinSourceUrl,
+          new Date(contract.endDate).toISOString().slice(0, 10),
+        ]),
+        [
+          [alpha.id, source, "2026-10-23"],
+          [beta.id, source, "2026-10-24"],
+        ],
+      );
+      assert.equal(
+        (await callTool("update_team", { teamId: beta.id, active: false, sourceUrl: source }))
+          .active,
+        false,
+      );
+      assert.deepEqual(await callTool("add_player_to_team", move(beta.id, "2026-10-25")), {
+        error: true,
+      });
+      assert.deepEqual(await callTool("update_team", { teamId: beta.id, active: true }), {
+        error: true,
+      });
+      assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta.id }), 1);
+      await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
+    });
+
     await check(
       "forum topics, post translations, cooldown, recent activity and deletion",
       async () => {

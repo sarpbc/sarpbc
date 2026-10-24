@@ -3,7 +3,11 @@ import { InvalidInputError } from "../../../common/domain/errors";
 import { Team } from "../../../player/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
-import { setWinnerInTransaction, upsertMatchInTransaction } from "./write-match";
+import {
+  setWinnerInTransaction,
+  updateMatchInTransaction,
+  upsertMatchInTransaction,
+} from "./write-match";
 
 describe("Match writes", () => {
   const tournament = Object.assign(new Tournament(), { id: "cup" });
@@ -84,5 +88,73 @@ describe("Match writes", () => {
     const match = await setWinnerInTransaction(writer, "match", "b");
     expect(match).toMatchObject({ status: "finished", winner: { id: "b" } });
     expect(writer.save).toHaveBeenCalledWith(match);
+  });
+});
+
+describe("Manual match corrections", () => {
+  const participants = ["a", "b"].map((id) =>
+    Object.assign(new TournamentParticipant(), {
+      id,
+      team: Object.assign(new Team(), { id: `team-${id}` }),
+    }),
+  );
+  const writer = {
+    load: vi.fn(),
+    byPandascoreId: vi.fn(),
+    save: vi.fn(),
+    tournament: vi.fn(),
+    participants: vi.fn(),
+  } satisfies MatchWriter;
+  const manualMatch = () =>
+    Object.assign(new Match(), {
+      id: "match",
+      participants,
+      status: "finished",
+      winner: participants[0],
+    });
+
+  beforeEach(() => vi.resetAllMocks());
+
+  it("replaces scores and re-derives the winner of a finished match", async () => {
+    writer.load.mockResolvedValue(manualMatch());
+    const match = await updateMatchInTransaction(writer, "match", {
+      results: [
+        { participantId: "a", score: 1 },
+        { participantId: "b", score: 3 },
+      ],
+    });
+    expect(match.winner?.id).toBe("b");
+    expect(match.results.map((result) => [result.participant.id, result.score])).toEqual([
+      ["a", 1],
+      ["b", 3],
+    ]);
+    expect(writer.save).toHaveBeenCalledWith(match);
+  });
+
+  it("clears the winner when the match is reopened", async () => {
+    writer.load.mockResolvedValue(manualMatch());
+    const match = await updateMatchInTransaction(writer, "match", { status: "running" });
+    expect(match).toMatchObject({ status: "running", winner: null });
+  });
+
+  it("refuses PandaScore-synced matches", async () => {
+    writer.load.mockResolvedValue(Object.assign(manualMatch(), { pandascoreId: 99 }));
+    await expect(
+      updateMatchInTransaction(writer, "match", { status: "running" }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("rejects scores for teams outside the match", async () => {
+    writer.load.mockResolvedValue(manualMatch());
+    await expect(
+      updateMatchInTransaction(writer, "match", {
+        results: [
+          { participantId: "a", score: 3 },
+          { participantId: "outsider", score: 1 },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.save).not.toHaveBeenCalled();
   });
 });

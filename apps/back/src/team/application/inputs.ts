@@ -13,6 +13,7 @@ export interface UpdateTeamInput {
   imageUrl?: string;
   darkModeImageUrl?: string;
   slug?: string;
+  active?: boolean;
 }
 
 export interface CreateTeamContractInput {

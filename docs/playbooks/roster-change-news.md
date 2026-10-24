@@ -277,7 +277,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 
 - [ ] `:player` / `:team` tags use correct slugs (preview in admin)
 - [ ] `:tweet` cards render (or fallback link if X is unavailable)
-- [ ] Player/team admin records updated if MCP data was stale (manual step in admin — out of MCP scope for SAR-127)
+- [ ] Player/team records updated with `add_player_to_team` / `remove_player_from_team` and the announcement as `sourceUrl` if MCP data was stale
 - [ ] No broken internal links
 
 ### Bilingual
@@ -336,7 +336,6 @@ After three trials, note:
 
 - Twitter/X **API**, RSS, scrapers, scheduled monitoring (oEmbed display of a pasted post URL is in scope)
 - Auto-publish or MCP publish tool
-- Updating roster/contract **data** via MCP (admin UI remains source of truth for DB updates)
 
 ## References
 

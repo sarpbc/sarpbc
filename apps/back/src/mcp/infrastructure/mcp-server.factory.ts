@@ -10,6 +10,7 @@ import { TeamService } from "../../team/application/team.service";
 import { TournamentService } from "../../tournament/application/tournament.service";
 import type { McpToolContext } from "./mcp-tool-context";
 import { registerReadTools } from "./tools/read-tools";
+import { registerRosterTools } from "./tools/roster-tools";
 import { registerWriteTools } from "./tools/write-tools";
 
 @Injectable()
@@ -46,6 +47,7 @@ export class McpServerFactory {
 
     registerReadTools(server, ctx);
     registerWriteTools(server, ctx);
+    registerRosterTools(server, ctx);
 
     return server;
   }

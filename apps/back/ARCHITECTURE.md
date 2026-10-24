@@ -29,6 +29,7 @@ The following operations share a transaction:
 - A forum post and its translations.
 - Content deletion and dependent replies, notifications, reports, or translations.
 - Player photo replacement or selection, and player or team deletion with dependent roster data.
+- A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.

@@ -2,7 +2,7 @@ import { v4 } from "uuid";
 import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
 import { Match } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
-import type { UpsertMatchInput } from "../inputs";
+import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
 import { deriveWinnerParticipantId } from "./derive-match-winner";
 export async function upsertMatchInTransaction(
   writer: MatchWriter,
@@ -81,6 +81,40 @@ export async function setWinnerInTransaction(
   if (!winner) throw new InvalidInputError("Winner must be a participant in this match");
   match.winner = winner;
   match.status = "finished";
+  await writer.save(match);
+  return match;
+}
+export async function updateMatchInTransaction(
+  writer: MatchWriter,
+  id: string,
+  input: UpdateMatchInput,
+): Promise<Match> {
+  const match = await writer.load(id);
+  if (!match) throw new NotFoundError("Match not found");
+  if (match.pandascoreId !== null)
+    throw new InvalidInputError("PandaScore manages the score, status and dates of this match");
+  if (input.beginAt !== undefined) match.beginAt = input.beginAt;
+  if (input.endAt !== undefined) match.endAt = input.endAt;
+  if (input.status !== undefined) match.status = input.status;
+  if (input.results) {
+    const ids = new Set(match.participants.map((p) => p.id));
+    if (input.results.some((r) => !ids.has(r.participantId)))
+      throw new InvalidInputError("Scores must belong to participants in this match");
+    match.results = input.results.map((r) => ({
+      id: v4(),
+      match: { id: match.id },
+      participant: { id: r.participantId },
+      score: r.score,
+    }));
+  }
+  const finished = match.status === "finished" || Boolean(match.endAt);
+  if (!finished) {
+    match.winner = null;
+  } else if (input.results) {
+    const winnerId = deriveWinnerParticipantId(input.results);
+    match.winner = match.participants.find((p) => p.id === winnerId) ?? null;
+    if (match.winner) match.status = "finished";
+  }
   await writer.save(match);
   return match;
 }

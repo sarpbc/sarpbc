@@ -41,7 +41,7 @@ export async function runWriteTool(
   user: PatUser,
   toolName: string,
   permission: StaffPermission,
-  handler: () => Promise<{ result: unknown; entityId?: string }>,
+  handler: () => Promise<{ result: unknown; entityId?: string; sourceUrl?: string }>,
 ): Promise<CallToolResult> {
   const denied = denyIfMissingPermission(user, permission);
   if (denied) {
@@ -49,12 +49,13 @@ export async function runWriteTool(
   }
 
   try {
-    const { result, entityId } = await handler();
+    const { result, entityId, sourceUrl } = await handler();
     log.info({
       component: "McpWriteTool",
       userId: user.id,
       tool: toolName,
       entityId,
+      sourceUrl,
       message: `${toolName} completed`,
     });
     return jsonToolResult(result);
