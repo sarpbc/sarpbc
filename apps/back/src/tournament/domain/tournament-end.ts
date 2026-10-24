@@ -6,11 +6,7 @@ export interface MatchTiming {
   endAt: Date | null;
 }
 
-/**
- * PandaScore leaves some stages without an end date. Once every match is settled and at least
- * one was played, the latest played match end (or start, when PandaScore omits the end) closes
- * the stage.
- */
+/** PandaScore leaves some stages without an end date and some matches without an end time. */
 export function inferEndAt(matches: readonly MatchTiming[]): Date | null {
   if (!matches.some((match) => match.status === "finished")) return null;
   let latest: Date | null = null;

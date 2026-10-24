@@ -54,7 +54,6 @@ export class CompetitionSyncService {
   getKnownTournamentPandascoreIds() {
     return this.reads.knownPandascoreIds();
   }
-  /** `linkTournamentId` names the manual tournament that becomes this PandaScore stage. */
   async upsertTournament(
     command: UpsertTournamentCommand,
     matches: UpsertMatchCommand[] = [],
@@ -274,10 +273,6 @@ export class CompetitionSyncService {
     const siblings = renamed ? (await scope.events.stages(event.id)).map((stage) => stage.id) : [];
     return { tournament, stageIds: [...new Set([tournament.id, ...siblings])] };
   }
-  /**
-   * The synced tournament, else the manual tournament staff linked, else the single manual
-   * tournament that matches the stage, so a manual entry does not get a synced duplicate.
-   */
   private async syncTarget(
     scope: CompetitionWriteScope,
     command: UpsertTournamentCommand,
@@ -310,7 +305,7 @@ export class CompetitionSyncService {
       stageName: command.name,
     });
     const stage = {
-      name: `${eventName} ${command.name}`,
+      fullName: `${eventName} ${command.name}`,
       leagueId: league?.id ?? null,
       beginAt: command.beginAt ?? null,
       endAt: command.endAt ?? null,
@@ -335,7 +330,6 @@ export class CompetitionSyncService {
       }
     }
   }
-  /** Closes a stage PandaScore leaves open once all of its matches are settled. */
   private async settleEndAt(scope: CompetitionWriteScope, tournament: Tournament) {
     if (tournament.endAt || tournament.endAtCorrected) return;
     const endAt = inferEndAt(await scope.matches.timings(tournament.id));

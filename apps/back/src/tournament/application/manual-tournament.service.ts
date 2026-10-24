@@ -66,7 +66,6 @@ export class ManualTournamentService {
       if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
       this.assertDateOrder(tournament);
       if (tournament.source === "pandascore") {
-        // Clearing the end date hands it back to the sync.
         if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
       } else {
         if (input.leagueId !== undefined)

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { findManualCounterpart, type ManualCandidate } from "./manual-counterpart";
 
 const stage = {
-  name: "RLCS 2025 MENA Open Qualifier 4 Group B",
+  fullName: "RLCS 2025 MENA Open Qualifier 4 Group B",
   leagueId: "league-rlcs",
   beginAt: new Date("2025-03-01T12:00Z"),
   endAt: null,

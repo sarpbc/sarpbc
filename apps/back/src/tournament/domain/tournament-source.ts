@@ -54,10 +54,6 @@ export function assertPandascoreUpsertAllowed(
   }
 }
 
-/**
- * A manual tournament that PandaScore also lists becomes the synced tournament, so the provider
- * keeps one local row. A staff end date survives as a correction when PandaScore has none.
- */
 export function claimForPandascore(
   tournament: {
     id: string;

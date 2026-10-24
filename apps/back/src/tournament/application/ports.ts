@@ -59,7 +59,6 @@ export interface MatchQueries {
 export interface TournamentWriter {
   load(id: string): Promise<Tournament | null>;
   byPandascoreId(id: number): Promise<Tournament | null>;
-  /** Manual tournaments without a PandaScore id that start within the window. */
   manualCandidates(window: { from: Date; to: Date }): Promise<ManualCandidate[]>;
   save(tournament: Tournament): Promise<void>;
   league(id: string): Promise<League | null>;

@@ -10,8 +10,7 @@ export interface ManualCandidate {
 }
 
 export interface ProviderStage {
-  /** Event and stage name together, as staff would title a manual stage. */
-  name: string;
+  fullName: string;
   leagueId: string | null;
   beginAt: Date | null;
   endAt: Date | null;
@@ -22,7 +21,7 @@ export type CounterpartMatch =
   | { kind: "unique"; id: string }
   | { kind: "ambiguous"; ids: string[] };
 
-function nameTokens(name: string): string {
+function nameKey(name: string): string {
   const tokens = name
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
@@ -51,21 +50,16 @@ export function counterpartSearchWindow(stage: ProviderStage): { from: Date; to:
   };
 }
 
-/**
- * A manual stage is the counterpart of a PandaScore stage only when the same words name both
- * (word order and punctuation aside, so region and stage must agree), the league does not
- * contradict, and the dates overlap within a day. Several matches are ambiguous and attach nothing.
- */
 export function findManualCounterpart(
   stage: ProviderStage,
   candidates: readonly ManualCandidate[],
 ): CounterpartMatch {
-  const name = nameTokens(stage.name);
+  const name = nameKey(stage.fullName);
   if (!name) return { kind: "none" };
   const ids = candidates
     .filter(
       (candidate) =>
-        nameTokens(candidate.name) === name &&
+        nameKey(candidate.name) === name &&
         (candidate.leagueId === null || candidate.leagueId === stage.leagueId) &&
         overlaps(candidate, stage),
     )

@@ -21,7 +21,6 @@ export class SyncPandascoreTournamentUseCase {
       : await this.feed.getTournamentMatches(command.pandascoreId);
     await this.synchronization.upsertTournament(command, matches);
   }
-  /** `linkTournamentId` turns that manual tournament into the imported stage. */
   async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
     if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");

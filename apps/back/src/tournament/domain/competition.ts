@@ -90,7 +90,6 @@ export class Tournament {
   tier: string | null = null;
   beginAt: Date | null = null;
   endAt: Date | null = null;
-  /** Staff fixed the end date; PandaScore sync leaves it alone. */
   endAtCorrected = false;
   winner: TournamentParticipant | null = null;
   winnerType: string | null = null;
