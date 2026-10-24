@@ -52,8 +52,90 @@ function importsOf(source) {
   return imports;
 }
 
+const isInner = (file) => ["domain", "application"].includes(layer(file));
+const featureOf = (file) => normalized(file).split("/")[0];
+
+function stronglyConnected(graph) {
+  const index = new Map();
+  const low = new Map();
+  const stack = [];
+  const onStack = new Set();
+  const components = [];
+  let counter = 0;
+  function visit(node) {
+    index.set(node, counter);
+    low.set(node, counter);
+    counter += 1;
+    stack.push(node);
+    onStack.add(node);
+    for (const next of [...(graph.get(node)?.keys() ?? [])].sort()) {
+      if (!index.has(next)) {
+        visit(next);
+        low.set(node, Math.min(low.get(node), low.get(next)));
+      } else if (onStack.has(next)) {
+        low.set(node, Math.min(low.get(node), index.get(next)));
+      }
+    }
+    if (low.get(node) === index.get(node)) {
+      const component = [];
+      let member;
+      do {
+        member = stack.pop();
+        onStack.delete(member);
+        component.push(member);
+      } while (member !== node);
+      components.push(component.sort());
+    }
+  }
+  for (const node of [...graph.keys()].sort()) if (!index.has(node)) visit(node);
+  return components;
+}
+
+function cyclePath(component, graph) {
+  const members = new Set(component);
+  const start = component[0];
+  const path = [start];
+  const seen = new Set([start]);
+  function walk(node) {
+    for (const next of [...graph.get(node).keys()].sort()) {
+      if (!members.has(next)) continue;
+      if (next === start) return path.concat(start);
+      if (seen.has(next)) continue;
+      seen.add(next);
+      path.push(next);
+      const found = walk(next);
+      if (found) return found;
+      path.pop();
+    }
+    return undefined;
+  }
+  return walk(start);
+}
+
+function featureCycles(edges) {
+  const graph = new Map();
+  for (const [from, target, via] of edges) {
+    if (!graph.has(from)) graph.set(from, new Map());
+    if (!graph.has(target)) graph.set(target, new Map());
+    const importers = graph.get(from).get(target) ?? [];
+    graph.get(from).set(target, [...importers, via].sort());
+  }
+  return stronglyConnected(graph)
+    .filter((component) => component.length > 1)
+    .map((component) => {
+      const path = cyclePath(component, graph);
+      const imports = path
+        .slice(0, -1)
+        .map((from, i) => `${from} -> ${path[i + 1]}: ${graph.get(from).get(path[i + 1])[0]}`);
+      return [`feature cycle: ${path.join(" -> ")}`, ...imports.map((line) => `  ${line}`)].join(
+        "\n",
+      );
+    });
+}
+
 export function architectureViolations(sourceFiles = files) {
   const violations = [];
+  const featureEdges = [];
   for (const file of sourceFiles) {
     const origin = normalized(file);
     const originLayer = layer(file);
@@ -86,6 +168,13 @@ export function architectureViolations(sourceFiles = files) {
               `${origin}: ${originLayer} imports ${normalized(resolved.resolvedFileName)}`,
             );
           }
+          if (
+            isInner(file) &&
+            isInner(resolved.resolvedFileName) &&
+            featureOf(file) !== featureOf(resolved.resolvedFileName)
+          ) {
+            featureEdges.push([featureOf(file), featureOf(resolved.resolvedFileName), origin]);
+          }
         }
       }
       if (resolved && resolved.resolvedFileName.startsWith(sourceRoot)) {
@@ -102,7 +191,7 @@ export function architectureViolations(sourceFiles = files) {
       }
     }
   }
-  return violations;
+  return [...violations, ...featureCycles(featureEdges)];
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
