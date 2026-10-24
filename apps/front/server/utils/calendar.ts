@@ -1,3 +1,4 @@
+import type { TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
 import type { Match, MatchDetailResponse } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
@@ -11,7 +12,7 @@ interface TournamentResponse {
 }
 
 interface TournamentMatchesResponse {
-  matches?: Match[];
+  matches?: TournamentMatchListItem[];
 }
 
 export function sendIcs(event: H3Event, ics: string, filename: string): string {
@@ -56,7 +57,7 @@ export async function fetchMatchForCalendar(id: string): Promise<Match> {
 
 export async function fetchTournamentForCalendar(
   id: string,
-): Promise<{ tournament: Tournament; matches: Match[] }> {
+): Promise<{ tournament: Tournament; matches: TournamentMatchListItem[] }> {
   const config = useRuntimeConfig();
 
   let tournamentRes: TournamentResponse;
@@ -86,7 +87,7 @@ export async function fetchTournamentForCalendar(
 }
 
 export function buildMatchIcs(match: Match, now: Date): string {
-  const event = matchToCalendarEvent(match, now);
+  const event = matchToCalendarEvent(match, match.tournament, now);
   if (!event) {
     throw createError({ statusCode: 404, statusMessage: "Match has no scheduled time" });
   }
@@ -100,10 +101,14 @@ export function buildMatchIcs(match: Match, now: Date): string {
   return buildIcs(feed);
 }
 
-export function buildTournamentIcs(tournament: Tournament, matches: Match[], now: Date): string {
+export function buildTournamentIcs(
+  tournament: Tournament,
+  matches: TournamentMatchListItem[],
+  now: Date,
+): string {
   const events = matches
     .filter((match) => isMatchOnCalendar(match))
-    .map((match) => matchToCalendarEvent(match, now))
+    .map((match) => matchToCalendarEvent(match, tournament, now))
     .filter((event) => event != null);
 
   return buildIcs({

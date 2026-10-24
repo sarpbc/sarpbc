@@ -58,6 +58,7 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
     status: match.status,
     beginAt: match.beginAt,
     endAt: match.endAt,
+    numberOfGames: match.numberOfGames,
     participants: match.participants.map((participant) => ({
       id: participant.id,
       team: { id: participant.team.id, name: participant.team.name },

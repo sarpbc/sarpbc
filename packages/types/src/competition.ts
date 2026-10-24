@@ -34,6 +34,7 @@ export interface TournamentMatchListItem {
   status: string | null;
   beginAt: Date | string | null;
   endAt: Date | string | null;
+  numberOfGames: number | null;
   participants: { id: string; team: { id: string; name: string } }[];
   results: { participant: string; score: number }[];
 }
