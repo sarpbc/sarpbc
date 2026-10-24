@@ -20,7 +20,7 @@ const layer = (file) =>
     .split("/")
     .find((part) => ["domain", "application", "infrastructure"].includes(part));
 const technicalPackage =
-  /^(?:@nestjs\/|@mikro-orm\/|fastify(?:$|\/)|@fastify\/|ioredis(?:$|\/)|@aws-sdk\/|googleapis(?:$|\/)|axios(?:$|\/)|posthog-node(?:$|\/)|evlog(?:$|\/)|@modelcontextprotocol\/)/;
+  /^(?:@nestjs\/|@mikro-orm\/|fastify(?:$|\/)|@fastify\/|ioredis(?:$|\/)|@aws-sdk\/|@googleapis\/|axios(?:$|\/)|posthog-node(?:$|\/)|evlog(?:$|\/)|@modelcontextprotocol\/)/;
 
 function importsOf(source) {
   const imports = [];
