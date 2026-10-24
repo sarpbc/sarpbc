@@ -4,11 +4,14 @@ export function toTeam(row: Record.Team, includePlayers = true): Team {
   const team = Object.assign(new Team(), {
     id: row.id,
     name: row.name,
+    active: row.active,
     location: row.location,
     imageUrl: row.imageUrl,
     darkModeImageUrl: row.darkModeImageUrl,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
+    source: row.source,
+    mergedIntoId: row.mergedInto?.id ?? null,
   });
   if (includePlayers && row.players.isInitialized())
     team.players = row.players.getItems().map((p) => toPlayer(p));
@@ -24,8 +27,11 @@ export function toPlayer(row: Record.Player): Player {
     lastName: row.lastName,
     imageUrl: row.imageUrl,
     role: row.role,
+    status: row.status,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
+    source: row.source,
+    mergedIntoId: row.mergedInto?.id ?? null,
     team: row.team ? toTeam(row.team, false) : null,
   });
   if (row.photos.isInitialized()) player.photos = row.photos.getItems().map((p) => toPhoto(p));
@@ -39,6 +45,8 @@ export function toContract(row: Record.Contract): Contract {
     startDate: new Date(row.startDate),
     endDate: row.endDate ? new Date(row.endDate) : null,
     role: row.role,
+    joinSourceUrl: row.joinSourceUrl,
+    leaveSourceUrl: row.leaveSourceUrl,
     createdAt: new Date(row.createdAt),
   });
 }

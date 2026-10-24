@@ -26,7 +26,7 @@ export class ManualTournamentService {
   async create(input: CreateTournamentInput): Promise<Tournament> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
       const tournament = new Tournament();
-      tournament.source = "manual";
+      tournament.source = input.source ?? "manual";
       tournament.pandascoreId = null;
       tournament.name = input.name;
       tournament.slug = stageSlug(input.name);
@@ -64,7 +64,7 @@ export class ManualTournamentService {
       if (input.endAt !== undefined)
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
       if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
-      if (tournament.source === "manual") {
+      if (tournament.source !== "pandascore") {
         if (input.leagueId !== undefined)
           tournament.league = await this.league(tournaments, input.leagueId);
         this.assertDateOrder(tournament);

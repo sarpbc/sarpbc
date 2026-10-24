@@ -17,7 +17,7 @@ export type {
   TournamentDetailParticipant,
   TournamentListItem,
   TournamentMatchListItem,
-  TournamentSource,
+  DataSource,
 } from "./competition";
 export type { ForumPost } from "./forum";
 

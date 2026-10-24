@@ -10,6 +10,7 @@ export interface ManualTournamentFields {
 }
 export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;
+  source?: "manual" | "startgg";
 }
 export interface UpdateTournamentInput extends ManualTournamentFields {
   name?: string;
@@ -26,9 +27,16 @@ export interface UpsertMatchInput {
   results?: { participantId: string | null; score: number }[];
   officialStreams?: OfficialMatchStream[];
 }
+export interface UpdateMatchInput {
+  beginAt?: Date | null;
+  endAt?: Date | null;
+  status?: string;
+  results?: { participantId: string; score: number }[];
+}
 export interface TournamentListOptions {
   limit?: number;
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
+  redistributableOnly?: boolean;
 }

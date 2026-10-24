@@ -1,5 +1,5 @@
 import { useUser } from "~/composables/state";
-import { hasPermission, isStaffUser, permissionForAdminPath } from "~/utils/staff";
+import { isStaffUser, meetsRequirement, permissionForAdminPath } from "~/utils/staff";
 
 export default defineNuxtRouteMiddleware((to) => {
   const path = to.path.replace(/\/$/, "") || "/";
@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware((to) => {
     return;
   }
 
-  if (!hasPermission(user.value, required)) {
+  if (!meetsRequirement(user.value, required)) {
     const localePath = useLocalePath();
     return navigateTo({
       path: localePath("/"),

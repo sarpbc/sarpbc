@@ -1,8 +1,22 @@
+import { isRedistributable, type DataSource } from "../../common/domain/data-source";
 import type { Player, Team } from "../../player/domain/roster";
 import type { Match, Tournament } from "../../tournament/domain/competition";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import { adminNewsEditUrl, matchUrl, newsUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
+
+/** MCP never returns start.gg data: its terms allow display with credit, not redistribution. */
+export function redistributable<T extends { source: DataSource }>(items: T[]): T[] {
+  return items.filter((item) => isRedistributable(item.source));
+}
+
+export function isRedistributableMatch(match: Match): boolean {
+  return (
+    isRedistributable(match.source) &&
+    isRedistributable(match.tournament.source) &&
+    match.participants.every((participant) => isRedistributable(participant.team.source))
+  );
+}
 
 export function mapPlayerSummary(player: Player) {
   return {
@@ -10,14 +24,17 @@ export function mapPlayerSummary(player: Player) {
     slug: player.slug,
     name: player.name,
     nationality: player.nationality,
-    team: player.team
-      ? {
-          id: player.team.id,
-          slug: player.team.slug,
-          name: player.team.name,
-          url: teamUrl(player.team.slug),
-        }
-      : null,
+    status: player.status,
+    role: player.role,
+    team:
+      player.team && isRedistributable(player.team.source)
+        ? {
+            id: player.team.id,
+            slug: player.team.slug,
+            name: player.team.name,
+            url: teamUrl(player.team.slug),
+          }
+        : null,
     url: playerUrl(player.slug),
   };
 }
@@ -30,7 +47,8 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     slug: team.slug,
     name: team.name,
     location: team.location,
-    players: roster.map((player) => ({
+    active: team.active,
+    players: redistributable(roster).map((player) => ({
       id: player.id,
       slug: player.slug,
       name: player.name,
@@ -57,23 +75,32 @@ export function mapTournamentListItem(tournament: Tournament) {
 }
 
 export function mapTournamentDetail(tournament: Tournament) {
-  const matches = tournament.matches.map(mapMatchListItem);
-
   return {
     ...mapTournamentListItem(tournament),
     description: tournament.description,
     tier: tournament.tier,
     hasBracket: tournament.hasBracket,
-    matches: matches.map((match) => ({
-      ...match,
-      url: matchUrl(match.publicId, match.slug),
-    })),
+    winner:
+      tournament.winner && isRedistributable(tournament.winner.team.source)
+        ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
+        : null,
+    matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
   };
 }
 
 export function mapMatchListResponse(match: Match) {
   const item = mapMatchListItem(match);
-  return { ...item, url: matchUrl(item.publicId, item.slug) };
+  const winnerId = match.winner?.id ?? null;
+  // List queries do not populate the winner relation; participants carry the team names.
+  const winner = match.participants.find((participant) => participant.id === winnerId);
+  return {
+    ...item,
+    pandascoreId: match.pandascoreId,
+    status: match.status,
+    endAt: match.endAt,
+    winner: winner ? { participantId: winner.id, teamName: winner.team.name } : null,
+    url: matchUrl(item.publicId, item.slug),
+  };
 }
 
 export function mapNewsListItem(article: NewsArticleAdminResponse) {

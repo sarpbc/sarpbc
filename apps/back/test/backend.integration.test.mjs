@@ -17,7 +17,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
   let redis;
 
   function docker(...args) {
-    return execFileSync("docker", args, { encoding: "utf8", timeout: 30_000 }).trim();
+    return execFileSync("docker", args, {
+      encoding: "utf8",
+      timeout: 30_000,
+    }).trim();
   }
 
   async function container(service, image, port, environment, readiness) {
@@ -124,7 +127,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     });
     await import("reflect-metadata");
     const { initLogger } = await import("evlog");
-    initLogger({ env: { service: "backend-integration", environment: "test" } });
+    initLogger({
+      env: { service: "backend-integration", environment: "test" },
+    });
     const { NestFactory } = await import("@nestjs/core");
     const { FastifyAdapter } = await import("@nestjs/platform-fastify");
     const { MikroORM } = await import("@mikro-orm/postgresql");
@@ -151,6 +156,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     const { PickemChoice } =
       await import("../src/game/pickem/infrastructure/persistence/pickem.entity.ts");
     const { PatService } = await import("../src/pat/application/pat.service.ts");
+    const { AirRiddle } =
+      await import("../src/game/airriddle/infrastructure/persistence/airriddle.entity.ts");
 
     await check(
       "MikroORM migrations rebuild PostgreSQL with no pending schema changes",
@@ -490,9 +497,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           ),
         );
         assert.equal(
-          await orm.em
-            .fork()
-            .count(PickemChoice, { user: { id: member.id }, match: { id: match.id } }),
+          await orm.em.fork().count(PickemChoice, {
+            user: { id: member.id },
+            match: { id: match.id },
+          }),
           1,
         );
         await request(
@@ -551,7 +559,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           await request(
             "POST",
             "/replies",
-            { content: "A reply", newsArticleId: article.id, replyToId: rootReply.id },
+            {
+              content: "A reply",
+              newsArticleId: article.id,
+              replyToId: rootReply.id,
+            },
             memberCookie,
             201,
           )
@@ -614,15 +626,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           await request(
             "POST",
             "/posts",
-            { id: postId, title: "Linked Discussion", content: "Body", topicId: topics[0].id },
+            {
+              id: postId,
+              title: "Linked Discussion",
+              content: "Body",
+              topicId: topics[0].id,
+            },
             memberCookie,
             201,
           )
         ).json();
         const renamed = (await request("GET", `/matches/${match.publicId}`)).json().match;
         const targets = [
-          { body: { matchId: match.id }, path: `/matches/${renamed.publicId}/${renamed.slug}` },
-          { body: { postId }, path: `/forum/post/${post.publicId}/linked-discussion` },
+          {
+            body: { matchId: match.id },
+            path: `/matches/${renamed.publicId}/${renamed.slug}`,
+          },
+          {
+            body: { postId },
+            path: `/forum/post/${post.publicId}/linked-discussion`,
+          },
         ];
         for (const { body, path } of targets) {
           const root = (
@@ -678,7 +701,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
                   hiddenAt: null,
                   author: { id: member.id, userName: member.userName },
                   post: null,
-                  newsArticle: { id: article.id, title: article.title, slug: article.slug },
+                  newsArticle: {
+                    id: article.id,
+                    title: article.title,
+                    slug: article.slug,
+                  },
                   match: null,
                   replyTo: null,
                 });
@@ -718,7 +745,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
                   hiddenAt: null,
                   author: { id: member.id, userName: member.userName },
                   post: null,
-                  newsArticle: { id: article.id, title: article.title, slug: article.slug },
+                  newsArticle: {
+                    id: article.id,
+                    title: article.title,
+                    slug: article.slug,
+                  },
                   match: null,
                   replyTo: null,
                 });
@@ -750,7 +781,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await import("../src/player/infrastructure/persistence/roster.store.ts");
       const { PlayerPhoto } = await import("../src/player/domain/roster.ts");
       const em = orm.em.fork();
-      const before = await em.findOneOrFail(rosterRows.Player, { id: player.id });
+      const before = await em.findOneOrFail(rosterRows.Player, {
+        id: player.id,
+      });
       const original = before.imageUrl;
       const photo = new PlayerPhoto();
       const failure = new Error("injected after player and photo SQL writes");
@@ -813,6 +846,203 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
+    await check("MCP roster proposals, approval, merges and start.gg exclusion", async () => {
+      const token = (
+        await request("POST", "/pat/tokens", { name: "Roster MCP" }, staffCookie, 201)
+      ).json();
+      let rpcId = 0;
+      const callTool = async (name, args) => {
+        const response = await request(
+          "POST",
+          "/mcp",
+          {
+            jsonrpc: "2.0",
+            id: ++rpcId,
+            method: "tools/call",
+            params: { name, arguments: args },
+          },
+          undefined,
+          200,
+          {
+            authorization: `Bearer ${token.token}`,
+            accept: "application/json, text/event-stream",
+            "content-type": "application/json",
+          },
+        );
+        const data = response.body.split("\n").find((line) => line.startsWith("data: "));
+        const message = JSON.parse(data ? data.slice("data: ".length) : response.body);
+        if (message.error || message.result.isError) return { error: true };
+        return JSON.parse(message.result.content[0].text);
+      };
+      const review = (proposal, action = "approve", status = 200) =>
+        request(
+          "POST",
+          `/roster-proposals/${proposal.proposalId}/${action}`,
+          undefined,
+          staffCookie,
+          status,
+        ).then((response) => response.json().proposal);
+      const applied = async (tool, args) => {
+        const proposal = await callTool(tool, args);
+        assert.equal(proposal.status, "pending", `${tool} is queued`);
+        const result = await review(proposal);
+        assert.equal(result.status, "applied");
+        return result.entityId;
+      };
+      const source = "https://x.com/integration/status/1";
+      const alpha = await applied("create_team", {
+        name: "MCP Alpha",
+        sourceUrl: source,
+      });
+      const beta = await applied("create_team", {
+        name: "MCP Beta",
+        sourceUrl: source,
+      });
+
+      const duplicate = await callTool("create_team", {
+        name: "MCP Alpha",
+        sourceUrl: source,
+      });
+      await review(duplicate, "approve", 409);
+      const pending = (await request("GET", "/roster-proposals", undefined, staffCookie)).json();
+      assert.deepEqual(
+        pending.proposals.map((proposal) => [proposal.id, proposal.status]),
+        [[duplicate.proposalId, "pending"]],
+      );
+      assert.equal(pending.names[staff.id], "Integration Staff");
+      await request("GET", "/roster-proposals", undefined, memberCookie, 403);
+      assert.equal((await review(duplicate, "reject")).status, "rejected");
+      await review(duplicate, "approve", 400);
+
+      const created = await applied("create_player", {
+        name: "MCP Roster Player",
+        country: "FR",
+        role: "player",
+        sourceUrl: source,
+      });
+      const move = (playerId, teamId, effectiveDate) => ({
+        playerId,
+        teamId,
+        effectiveDate,
+        sourceUrl: source,
+      });
+      const queued = await callTool("add_player_to_team", move(created, alpha, "2026-01-10"));
+      const before = await orm.em.fork().findOneOrFail(rosterRows.Player, { id: created });
+      assert.equal(before.team, null, "a pending proposal changes nothing");
+      await review(queued);
+      await applied("add_player_to_team", move(created, beta, "2026-10-23"));
+      await applied("remove_player_from_team", {
+        ...move(created, beta, "2026-10-24"),
+        status: "retired",
+      });
+      const contracts = async (where) =>
+        (
+          await orm.em.fork().find(rosterRows.Contract, where, {
+            orderBy: { startDate: "asc" },
+          })
+        ).map((contract) => [
+          contract.team.id,
+          contract.joinSourceUrl,
+          contract.endDate && new Date(contract.endDate).toISOString().slice(0, 10),
+        ]);
+      assert.deepEqual(await contracts({ player: created }), [
+        [alpha, source, "2026-10-23"],
+        [beta, source, "2026-10-24"],
+      ]);
+      assert.equal(
+        (await orm.em.fork().findOneOrFail(rosterRows.Player, { id: created })).status,
+        "retired",
+      );
+      await applied("update_team", {
+        teamId: beta,
+        active: false,
+        sourceUrl: source,
+      });
+      const inactive = await callTool("add_player_to_team", move(created, beta, "2026-10-25"));
+      await review(inactive, "approve", 400);
+      await review(inactive, "reject");
+      assert.deepEqual(await callTool("update_team", { teamId: beta, active: true }), {
+        error: true,
+      });
+
+      const twin = await applied("create_player", {
+        name: "MCP Roster Twin",
+        sourceUrl: source,
+      });
+      await applied("add_player_to_team", move(twin, alpha, "2026-09-01"));
+      await applied("add_player_to_team", move(created, alpha, "2026-10-25"));
+      const mergePlayers = {
+        keptPlayerId: created,
+        duplicatePlayerId: twin,
+        sourceUrl: source,
+      };
+      assert.equal(await applied("merge_players", mergePlayers), created);
+      const twinRow = await orm.em.fork().findOneOrFail(rosterRows.Player, { id: twin });
+      assert.equal(twinRow.mergedInto.id, created);
+      assert.deepEqual(await contracts({ player: twin }), []);
+      assert.deepEqual(await contracts({ player: created }), [
+        [alpha, source, "2026-10-23"],
+        [alpha, source, null],
+        [beta, source, "2026-10-24"],
+      ]);
+      const open = await orm.em.fork().findOneOrFail(rosterRows.Contract, {
+        player: created,
+        endDate: null,
+      });
+      assert.equal(new Date(open.startDate).toISOString().slice(0, 10), "2026-09-01");
+      assert.equal(
+        (await request("GET", `/player/${twin}/contract`)).json().contracts.length,
+        3,
+        "a merged id serves the kept player sub-resources",
+      );
+      const redirected = (await request("GET", "/player/slug/mcp-roster-twin")).json().player;
+      assert.equal(redirected.slug, "mcp-roster-player");
+      assert.equal(redirected.team.id, alpha);
+      assert.deepEqual(
+        (await request("GET", "/player?name=MCP%20Roster")).json().players.map(({ id }) => id),
+        [created],
+      );
+      assert.deepEqual(await callTool("merge_players", mergePlayers), {
+        error: true,
+      });
+
+      await applied("merge_teams", {
+        keptTeamId: alpha,
+        duplicateTeamId: beta,
+        sourceUrl: source,
+      });
+      assert.deepEqual(
+        (await contracts({ player: created })).map(([teamId]) => teamId),
+        [alpha, alpha, alpha],
+      );
+      assert.equal((await request("GET", "/team/slug/mcp-beta")).json().team.id, alpha);
+      assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
+
+      const scouted = await applied("create_player", {
+        name: "MCP Startgg Player",
+        sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+      });
+      assert.equal(
+        (await request("GET", "/player/slug/mcp-startgg-player")).json().player.source,
+        "startgg",
+      );
+      assert.deepEqual(await callTool("search_players", { query: "MCP Startgg" }), []);
+      assert.deepEqual(await callTool("get_player", { idOrSlug: scouted }), {
+        error: true,
+      });
+      assert.equal((await callTool("search_players", { query: "MCP Roster" }))[0].id, created);
+      const results = await callTool("get_match_results", {});
+      assert.equal(
+        results.total,
+        results.results.length,
+        "start.gg rows are excluded before counting",
+      );
+      const upcoming = await callTool("get_upcoming_matches", {});
+      assert.equal(upcoming.total, upcoming.upcoming.length + upcoming.live.length);
+      assert.ok(Array.isArray(await callTool("get_tournaments", {})));
+      await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
+    });
+
     await check(
       "forum topics, post translations, cooldown, recent activity and deletion",
       async () => {
@@ -828,7 +1058,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             content: "Forum content",
             topicId: overview.topics[0].id,
             translations: [
-              { locale: "fr-FR", title: "Discussion intégration", content: "Contenu français" },
+              {
+                locale: "fr-FR",
+                title: "Discussion intégration",
+                content: "Contenu français",
+              },
             ],
           },
           staffCookie,
@@ -839,7 +1073,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(created.title, "Integration Discussion");
         assert(Number.isInteger(created.publicId) && created.publicId > 0, "post has a public id");
         assert.equal(created.slug, "integration-discussion");
-        assert.deepEqual(createdLocation, { publicId: created.publicId, slug: created.slug });
+        assert.deepEqual(createdLocation, {
+          publicId: created.publicId,
+          slug: created.slug,
+        });
         const byPublicId = (await request("GET", `/posts/${created.publicId}`)).json().post;
         assert.equal(byPublicId.id, id);
         assert.equal((await request("GET", `/posts/${created.publicId + 1000}`)).json().post, null);
@@ -875,18 +1112,21 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "daily AirRiddle persistence and exact guess use the real player store",
       async () => {
         const today = (await request("GET", "/air-riddle/today")).json();
-        assert.equal(today.length, player.name.length);
+        const { playerName } = await orm.em
+          .fork()
+          .findOneOrFail(AirRiddle, { id: { $ne: null } }, { orderBy: { createdAt: "desc" } });
+        assert.equal(today.length, playerName.length);
         const guessed = (
           await request(
             "POST",
             "/air-riddle/guess",
-            { guess: player.name, last: true },
+            { guess: playerName, last: true },
             undefined,
             201,
           )
         ).json();
-        assert.equal(guessed.answer, player.name);
-        assert.equal(guessed.results.length, player.name.length);
+        assert.equal(guessed.answer, playerName);
+        assert.equal(guessed.results.length, playerName.length);
         assert.equal((await request("GET", "/air-riddle/today")).json().length, today.length);
       },
     );
@@ -933,7 +1173,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     process.stdout.write(`Integration verification passed (${results.length} scenarios).\n`);
   } catch (error) {
     failures.push(
-      new Error(`Integration failed after ${results.length} scenarios`, { cause: error }),
+      new Error(`Integration failed after ${results.length} scenarios`, {
+        cause: error,
+      }),
     );
   } finally {
     const closed = await Promise.allSettled([redis?.quit(), app?.close()]);

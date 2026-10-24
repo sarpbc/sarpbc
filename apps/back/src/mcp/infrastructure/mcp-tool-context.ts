@@ -3,6 +3,7 @@ import type { ManualTournamentService } from "../../tournament/application/manua
 import type { NewsService } from "../../news/application/news.service";
 import type { PatUser } from "../../pat/application/pat.service";
 import type { PlayerService } from "../../player/application/player.service";
+import type { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import type { SearchService } from "../../search/application/search.service";
 import type { TeamService } from "../../team/application/team.service";
 import type { TournamentService } from "../../tournament/application/tournament.service";
@@ -16,4 +17,5 @@ export interface McpToolContext {
   manualTournamentService: ManualTournamentService;
   matchService: MatchService;
   newsService: NewsService;
+  rosterProposalService: RosterProposalService;
 }

@@ -5,7 +5,7 @@ import { Team } from "../../../player/infrastructure/roster-persistence";
 import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
-import type { TournamentSource } from "../../domain/tournament-source";
+import type { DataSource } from "../../../common/domain/data-source";
 
 export class League {
   id: string = v4();
@@ -34,7 +34,7 @@ export class TournamentEvent {
 export class Tournament {
   id: string = v4();
   pandascoreId: number | null = null;
-  source: TournamentSource = "pandascore";
+  source: DataSource = "pandascore";
   name!: string;
   description: string | null = null;
   slug!: string;
@@ -84,6 +84,7 @@ export class Match {
   id: string = v4();
   publicId!: number;
   pandascoreId: number | null = null;
+  source: DataSource = "manual";
   name!: string;
   beginAt: Date | null = null;
   endAt: Date | null = null;
@@ -142,7 +143,7 @@ export const TournamentSchema = defineEntity({
   properties: {
     id: p.string().primary(),
     pandascoreId: p.integer().nullable().unique(),
-    source: p.string().$type<TournamentSource>().default("pandascore"),
+    source: p.string().$type<DataSource>().default("pandascore"),
     name: p.string(),
     description: p.string().nullable(),
     slug: p.string(),
@@ -191,6 +192,7 @@ export const MatchSchema = defineEntity({
     id: p.string().primary(),
     publicId: p.integer().autoincrement().generated("identity").unique(),
     pandascoreId: p.integer().nullable().unique(),
+    source: p.string().$type<DataSource>().default("manual"),
     name: p.string(),
     beginAt: p.datetime().type("timestamptz").nullable(),
     endAt: p.datetime().type("timestamptz").nullable(),

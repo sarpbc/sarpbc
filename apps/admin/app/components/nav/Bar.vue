@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import type { StaffPermission } from "~/types/user";
-import { hasPermission } from "~/utils/staff";
+import {
+  meetsRequirement,
+  ROSTER_PROPOSAL_PERMISSIONS,
+  type PermissionRequirement,
+} from "~/utils/staff";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -22,7 +25,7 @@ const links = computed(() => {
     icon: string;
     to: string;
     target?: string;
-    permission?: StaffPermission;
+    permission?: PermissionRequirement;
   }[] = [
     {
       label: t("page.nav.home"),
@@ -72,6 +75,12 @@ const links = computed(() => {
       permission: "forum.moderate",
     },
     {
+      label: t("page.nav.proposals"),
+      icon: "i-fluent-clipboard-task-list-ltr-24-regular",
+      to: localePath("/proposals"),
+      permission: ROSTER_PROPOSAL_PERMISSIONS,
+    },
+    {
       label: t("page.nav.tokens"),
       icon: "i-fluent-key-24-regular",
       to: localePath("/tokens"),
@@ -88,7 +97,7 @@ const links = computed(() => {
     if (!link.permission) {
       return true;
     }
-    return hasPermission(user.value, link.permission);
+    return meetsRequirement(user.value, link.permission);
   });
 });
 

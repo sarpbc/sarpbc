@@ -1,12 +1,18 @@
-import type { RosterTransaction } from "./ports/roster-transaction";
-import { NotFoundError } from "../../common/domain/errors";
-import { CreatePlayerInput, UpdatePlayerInput } from "./inputs";
+import type { RosterStores, RosterTransaction } from "./ports/roster-transaction";
+import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { CreatePlayerInput, LeaveTeamInput, RosterMoveInput, UpdatePlayerInput } from "./inputs";
 import { ITeamRepository } from "../../team/application/ports/team.repository.interface";
-import { Player, PlayerPhoto } from "../domain/roster";
+import { Contract, Player, PlayerPhoto, PlayerStatus, rosterRoleLabel } from "../domain/roster";
 import { PlayerSearchProps } from "./search-player-props";
 
 import { IPlayerPhotoRepository } from "./ports/player-photo.repository.interface";
 import { IPlayerRepository } from "./ports/player.repository.interface";
+
+export interface RosterMove {
+  player: Player;
+  opened: Contract | null;
+  closed: Contract[];
+}
 
 export class PlayerService {
   constructor(
@@ -25,11 +31,15 @@ export class PlayerService {
   }
 
   async findById(id: string): Promise<Player | null> {
-    return this.playerRepository.findById(id);
+    return this.resolveMerged(await this.playerRepository.findById(id));
   }
 
   async findBySlug(slug: string): Promise<Player | null> {
-    return this.playerRepository.findBySlug(slug);
+    return this.resolveMerged(await this.playerRepository.findBySlug(slug));
+  }
+
+  private async resolveMerged(player: Player | null): Promise<Player | null> {
+    return player?.mergedIntoId ? this.playerRepository.findById(player.mergedIntoId) : player;
   }
 
   async create(dto: CreatePlayerInput): Promise<Player> {
@@ -41,6 +51,13 @@ export class PlayerService {
     player.nationality = dto.nationality ?? null;
     player.imageUrl = dto.imageUrl ?? null;
     player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+    if (dto.status !== undefined) player.status = dto.status;
+    if (dto.role !== undefined) player.role = rosterRoleLabel(dto.role);
+    if (dto.source !== undefined) player.source = dto.source;
+
+    if (await this.playerRepository.findBySlug(player.slug)) {
+      throw new ConflictError(`A player with slug "${player.slug}" already exists`);
+    }
 
     if (dto.teamId) {
       const team = await this.teamRepository.findById(dto.teamId);
@@ -55,10 +72,7 @@ export class PlayerService {
 
   async update(id: string, dto: UpdatePlayerInput): Promise<Player> {
     return this.transaction.run(async ({ players, photos, teams }) => {
-      const player = await players.findById(id);
-      if (!player) {
-        throw new NotFoundError(`Player with id "${id}" not found`);
-      }
+      const player = requireUnmerged(await players.findById(id), id);
 
       if (dto.name !== undefined) player.name = dto.name;
       if (dto.firstName !== undefined) player.firstName = dto.firstName;
@@ -67,6 +81,8 @@ export class PlayerService {
         player.birthday = dto.birthday ? new Date(dto.birthday) : null;
       if (dto.nationality !== undefined) player.nationality = dto.nationality;
       if (dto.slug !== undefined) player.slug = dto.slug;
+      if (dto.status !== undefined) player.status = dto.status;
+      if (dto.role !== undefined) player.role = rosterRoleLabel(dto.role);
 
       if (dto.imageUrl !== undefined) {
         const archived = player.replaceProfilePhoto(dto.imageUrl);
@@ -92,6 +108,62 @@ export class PlayerService {
 
       await players.save(player);
       return player;
+    });
+  }
+
+  async joinTeam(playerId: string, input: RosterMoveInput): Promise<RosterMove> {
+    return this.transaction.run(async ({ players, teams, contracts }) => {
+      const player = requireUnmerged(await players.findById(playerId), playerId);
+      const team = await teams.findById(input.teamId);
+      if (!team) throw new NotFoundError(`Team with id "${input.teamId}" not found`);
+      if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
+
+      const effectiveDate = new Date(input.effectiveDate);
+      const open = await openContracts(contracts, playerId);
+      if (open.some((contract) => contract.team.id === team.id)) {
+        throw new ConflictError(`${player.name} already has an open contract with ${team.name}`);
+      }
+      for (const contract of open) {
+        contract.close(effectiveDate, input.sourceUrl);
+        await contracts.save(contract);
+      }
+
+      const contract = new Contract();
+      contract.player = player;
+      contract.team = team;
+      contract.startDate = effectiveDate;
+      contract.joinSourceUrl = input.sourceUrl;
+      await contracts.save(contract);
+
+      player.team = team;
+      player.status = PlayerStatus.ACTIVE;
+      await players.save(player);
+      return { player, opened: contract, closed: open };
+    });
+  }
+
+  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<RosterMove> {
+    return this.transaction.run(async ({ players, contracts }) => {
+      const player = requireUnmerged(await players.findById(playerId), playerId);
+
+      const closed = (await openContracts(contracts, playerId)).filter(
+        (contract) => contract.team.id === input.teamId,
+      );
+      // Players imported from PandaScore have a current team but no contract row.
+      if (closed.length === 0 && player.team?.id !== input.teamId) {
+        throw new InvalidInputError(`${player.name} is not on team "${input.teamId}"`);
+      }
+      for (const contract of closed) {
+        contract.close(new Date(input.effectiveDate), input.sourceUrl);
+        await contracts.save(contract);
+      }
+
+      if (player.team?.id === input.teamId) {
+        player.team = null;
+        player.status = input.status;
+      }
+      await players.save(player);
+      return { player, opened: null, closed };
     });
   }
 
@@ -172,4 +244,21 @@ export class PlayerService {
       return player;
     });
   }
+}
+
+async function openContracts(
+  contracts: RosterStores["contracts"],
+  playerId: string,
+): Promise<Contract[]> {
+  return (await contracts.findByPlayer(playerId)).filter((contract) => contract.endDate === null);
+}
+
+function requireUnmerged(player: Player | null, id: string): Player {
+  if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
+  if (player.mergedIntoId) {
+    throw new InvalidInputError(
+      `${player.name} was merged into player "${player.mergedIntoId}"; edit that player instead`,
+    );
+  }
+  return player;
 }

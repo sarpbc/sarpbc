@@ -4,6 +4,11 @@ import * as Row from "./player.entities";
 import { LockMode } from "@mikro-orm/core";
 import { toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { RosterStores, RosterTransaction } from "../../application/ports/roster-transaction";
+import type {
+  RosterMergeStores,
+  RosterMergeTransaction,
+  RosterReferences,
+} from "../../application/ports/roster-merge-transaction";
 import type { PlayerSearchProps } from "../../application/search-player-props";
 import type { TeamSearchProps } from "../../../team/application/search-team-props";
 export function rosterStores(em: EntityManager, flush = true): RosterStores {
@@ -13,18 +18,18 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
   const playerQuery = (options: Partial<PlayerSearchProps>) => {
     const { name, start } = options;
     return start
-      ? { name: { $ilike: start + "%" } }
+      ? { name: { $ilike: start + "%" }, mergedInto: null }
       : name
-        ? { name: { $ilike: "%" + name + "%" } }
-        : {};
+        ? { name: { $ilike: "%" + name + "%" }, mergedInto: null }
+        : { mergedInto: null };
   };
   const teamQuery = (options: Partial<TeamSearchProps>) => {
     const { name, start } = options;
     return name
-      ? { name: { $ilike: "%" + name + "%" } }
+      ? { name: { $ilike: "%" + name + "%" }, mergedInto: null }
       : start
-        ? { name: { $ilike: start + "%" } }
-        : {};
+        ? { name: { $ilike: start + "%" }, mergedInto: null }
+        : { mergedInto: null };
   };
   const playerOptions = { populate: ["team", "photos"] as const };
   const teamOptions = { populate: ["players", "players.team"] as const };
@@ -74,7 +79,7 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
       getRandomPlayer: async () => {
         const rows: { id: string }[] = await em
           .getConnection()
-          .execute("SELECT id FROM player ORDER BY random() LIMIT 1");
+          .execute("SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1");
         const row = rows[0]
           ? await em.findOne(Row.Player, { id: rows[0].id }, playerOptions)
           : null;
@@ -96,6 +101,9 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           lastName: model.lastName,
           imageUrl: model.imageUrl,
           role: model.role,
+          status: model.status,
+          source: model.source,
+          mergedInto: model.mergedIntoId ? em.getReference(Row.Player, model.mergedIntoId) : null,
           team: model.team ? em.getReference(Row.Team, model.team.id) : null,
         });
         em.persist(row);
@@ -147,6 +155,9 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           name: model.name,
           slug: model.slug,
           pandascoreId: model.pandascoreId,
+          active: model.active,
+          source: model.source,
+          mergedInto: model.mergedIntoId ? em.getReference(Row.Team, model.mergedIntoId) : null,
           location: model.location,
           imageUrl: model.imageUrl,
           darkModeImageUrl: model.darkModeImageUrl,
@@ -190,6 +201,8 @@ export function rosterStores(em: EntityManager, flush = true): RosterStores {
           startDate: model.startDate,
           endDate: model.endDate,
           role: model.role,
+          joinSourceUrl: model.joinSourceUrl,
+          leaveSourceUrl: model.leaveSourceUrl,
           createdAt: model.createdAt,
         });
         em.persist(row);
@@ -233,6 +246,73 @@ export class MikroRosterTransaction implements RosterTransaction {
   run<T>(work: (stores: RosterStores) => Promise<T>): Promise<T> {
     return this.em.transactional(async (tx) => {
       const result = await work(rosterStores(tx, false));
+      await tx.flush();
+      return result;
+    });
+  }
+}
+
+/** Raw SQL reaches tables owned by the competition feature inside the same transaction. */
+function rosterReferences(em: EntityManager): RosterReferences {
+  const run = async (sql: string, params: unknown[]) => {
+    await em.execute(sql, params);
+  };
+  // Two open contracts for one player and team would both survive the reassignment;
+  // the kept one absorbs the earlier start date and the duplicate is dropped.
+  const mergeOpenContracts = async (owner: "player_id" | "team_id", from: string, to: string) => {
+    const shared = owner === "player_id" ? "team_id" : "player_id";
+    const conflict = `k."${owner}" = ? and d."${owner}" = ? and k."${shared}" = d."${shared}"
+      and k."end_date" is null and d."end_date" is null`;
+    await run(
+      `update "contract" k set "start_date" = least(k."start_date", d."start_date")
+       from "contract" d where ${conflict}`,
+      [to, from],
+    );
+    await run(`delete from "contract" d using "contract" k where ${conflict}`, [to, from]);
+  };
+  return {
+    movePlayer: async (from, to) => {
+      // Frees the unique PandaScore id before the kept player takes it in the same flush.
+      await run(`update "player" set "pandascore_id" = null where "id" = ?`, [from]);
+      await run(`update "player" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
+      await mergeOpenContracts("player_id", from, to);
+      await run(`update "contract" set "player_id" = ? where "player_id" = ?`, [to, from]);
+      await run(`update "player_photo" set "player_id" = ? where "player_id" = ?`, [to, from]);
+      await run(`update "player_award" set "player_id" = ? where "player_id" = ?`, [to, from]);
+      await run(
+        `insert into "tournament_participant_players" ("tournament_participant_id", "player_id")
+         select "tournament_participant_id", ? from "tournament_participant_players" where "player_id" = ?
+         on conflict do nothing`,
+        [to, from],
+      );
+      await run(`delete from "tournament_participant_players" where "player_id" = ?`, [from]);
+    },
+    moveTeam: async (from, to) => {
+      await run(`update "team" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
+      await mergeOpenContracts("team_id", from, to);
+      await run(`update "contract" set "team_id" = ? where "team_id" = ?`, [to, from]);
+      await run(`update "player" set "team_id" = ? where "team_id" = ?`, [to, from]);
+      await run(`update "tournament_participant" set "team_id" = ? where "team_id" = ?`, [
+        to,
+        from,
+      ]);
+    },
+    sharedTournamentIds: async (teamId, otherTeamId) => {
+      const rows: { tournament_id: string }[] = await em.execute(
+        `select distinct a."tournament_id" from "tournament_participant" a
+         join "tournament_participant" b on b."tournament_id" = a."tournament_id"
+         where a."team_id" = ? and b."team_id" = ?`,
+        [teamId, otherTeamId],
+      );
+      return rows.map((row) => row.tournament_id);
+    },
+  };
+}
+export class MikroRosterMergeTransaction implements RosterMergeTransaction {
+  constructor(private readonly em: EntityManager) {}
+  run<T>(work: (stores: RosterMergeStores) => Promise<T>): Promise<T> {
+    return this.em.transactional(async (tx) => {
+      const result = await work({ ...rosterStores(tx, false), references: rosterReferences(tx) });
       await tx.flush();
       return result;
     });

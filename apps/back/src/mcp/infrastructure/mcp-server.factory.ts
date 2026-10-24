@@ -5,11 +5,13 @@ import { MatchService } from "../../tournament/application/match/match.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { NewsService } from "../../news/application/news.service";
 import { PlayerService } from "../../player/application/player.service";
+import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import { SearchService } from "../../search/application/search.service";
 import { TeamService } from "../../team/application/team.service";
 import { TournamentService } from "../../tournament/application/tournament.service";
 import type { McpToolContext } from "./mcp-tool-context";
 import { registerReadTools } from "./tools/read-tools";
+import { registerRosterTools } from "./tools/roster-tools";
 import { registerWriteTools } from "./tools/write-tools";
 
 @Injectable()
@@ -22,6 +24,7 @@ export class McpServerFactory {
     private readonly manualTournamentService: ManualTournamentService,
     private readonly matchService: MatchService,
     private readonly newsService: NewsService,
+    private readonly rosterProposalService: RosterProposalService,
   ) {}
 
   createServer(user: PatUser): McpServer {
@@ -42,10 +45,12 @@ export class McpServerFactory {
       manualTournamentService: this.manualTournamentService,
       matchService: this.matchService,
       newsService: this.newsService,
+      rosterProposalService: this.rosterProposalService,
     };
 
     registerReadTools(server, ctx);
     registerWriteTools(server, ctx);
+    registerRosterTools(server, ctx);
 
     return server;
   }

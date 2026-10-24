@@ -1,11 +1,8 @@
 import { InvalidInputError } from "../../common/domain/errors";
-
-export const TOURNAMENT_SOURCES = ["pandascore", "manual"] as const;
-
-export type TournamentSource = (typeof TOURNAMENT_SOURCES)[number];
+import type { DataSource } from "../../common/domain/data-source";
 
 export function assertTournamentUpdateAllowed(
-  source: TournamentSource,
+  source: DataSource,
   patch: {
     imageUrl?: string | null;
     name?: string;
@@ -19,6 +16,7 @@ export function assertTournamentUpdateAllowed(
 ): void {
   switch (source) {
     case "manual":
+    case "startgg":
       return;
     case "pandascore": {
       const { imageUrl, ...syncedFields } = patch;
@@ -39,24 +37,19 @@ export function assertTournamentUpdateAllowed(
   }
 }
 
-/** Sync-by-id: never pull PandaScore into a manual row. */
-export function assertPandascoreSyncAllowed(source: TournamentSource): void {
-  if (source === "manual") {
-    throw new Error("Cannot sync a manual tournament from PandaScore");
+export function assertPandascoreSyncAllowed(source: DataSource): void {
+  if (source !== "pandascore") {
+    throw new Error(`Cannot sync a ${source} tournament from PandaScore`);
   }
 }
 
-/**
- * Upsert-by-pandascoreId: a manual row matching a PandaScore id is data corruption.
- * Fail loud — do not silently no-op.
- */
 export function assertPandascoreUpsertAllowed(
-  tournament: { id: string; source: TournamentSource },
+  tournament: { id: string; source: DataSource },
   pandascoreId: number,
 ): void {
-  if (tournament.source === "manual") {
+  if (tournament.source !== "pandascore") {
     throw new Error(
-      `Refusing PandaScore upsert for id ${pandascoreId}: tournament ${tournament.id} is source=manual`,
+      `Refusing PandaScore upsert for id ${pandascoreId}: tournament ${tournament.id} is source=${tournament.source}`,
     );
   }
 }

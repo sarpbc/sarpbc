@@ -50,7 +50,7 @@ const [{ data: leagues }, { data: teamsData, status: teamsStatus }] = await Prom
 ]);
 
 const teams = computed(() => teamsData.value?.teams ?? []);
-const isManual = computed(() => tournament.value?.source === "manual");
+const isManual = computed(() => tournament.value?.source !== "pandascore");
 
 async function handleSubmit() {
   if (!tournament.value || isSaving.value || isUploading.value) return;
@@ -131,11 +131,7 @@ async function handleSubmit() {
               <UBadge
                 :color="isManual ? 'primary' : 'neutral'"
                 variant="subtle"
-                :label="
-                  isManual
-                    ? $t('page.tournaments.source.manual')
-                    : $t('page.tournaments.source.pandascore')
-                "
+                :label="$t(`page.tournaments.source.${tournament.source}`)"
               />
             </div>
             <p class="text-sm text-muted">

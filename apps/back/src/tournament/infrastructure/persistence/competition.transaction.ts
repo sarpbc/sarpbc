@@ -241,6 +241,7 @@ export class CompetitionMatchWriter implements MatchWriter {
     }
     Object.assign(row, {
       pandascoreId: model.pandascoreId,
+      source: model.source,
       name: model.name,
       beginAt: model.beginAt,
       endAt: model.endAt,
@@ -311,7 +312,7 @@ export class CompetitionEventWriter implements EventWriter {
       pandascoreSerieId: null,
       league: leagueId,
       name,
-      stages: { $none: { source: "manual" } },
+      stages: { $none: { source: { $ne: "pandascore" } } },
     });
   }
   async slugTaken(slug: string, exceptEventId: string | null) {

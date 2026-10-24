@@ -1,15 +1,13 @@
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { DataSource, TournamentEventRef } from "@sarpbc/types";
 import type { League } from "./league";
 import type { Match } from "./matches";
 import type { Player } from "./player";
 import type { Team } from "./team";
 
-export type TournamentSource = "pandascore" | "manual";
-
 export interface Tournament {
   id: string;
   pandascoreId?: number;
-  source: TournamentSource;
+  source: DataSource;
   name: string;
   description?: string;
   /** Stage slug, unique within its event. */

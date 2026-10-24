@@ -1,4 +1,5 @@
 import { EntityRepository } from "@mikro-orm/core";
+import type { DataSource } from "../../../common/domain/data-source";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match } from "./tournament.entities";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
@@ -10,12 +11,15 @@ import type {
 interface MatchTournamentScopeFilter {
   id?: string;
   league?: { id: string };
+  source?: { $ne: DataSource };
 }
 
 interface MatchListFilter {
   beginAt?: { $gte?: Date; $lte?: Date };
   endAt?: null | { $ne: null };
   tournament?: MatchTournamentScopeFilter;
+  source?: { $ne: DataSource };
+  participants?: { $none: { team: { source: DataSource } } };
 }
 
 const LIST_POPULATE = ["participants.team", "results", ...MATCH_TOURNAMENT_POPULATE] as const;
@@ -59,10 +63,12 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
     const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
       tournamentId,
       leagueId,
+      redistributableOnly,
     });
 
     return this.find(query, {
@@ -79,10 +85,12 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
     const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
       tournamentId,
       leagueId,
+      redistributableOnly,
     });
     return this.findAndCount(query, {
       limit,
@@ -98,10 +106,12 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
     const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
       tournamentId,
       leagueId,
+      redistributableOnly,
     });
 
     return this.find(query, {
@@ -118,10 +128,12 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
     const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
       tournamentId,
       leagueId,
+      redistributableOnly,
     });
     return this.findAndCount(query, {
       limit,
@@ -136,8 +148,16 @@ export class MatchRepository extends EntityRepository<Match> {
     offset = 0,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
-    const query = this.mergeScopeFilters({ endAt: { $ne: null } }, { tournamentId, leagueId });
+    const query = this.mergeScopeFilters(
+      { endAt: { $ne: null } },
+      {
+        tournamentId,
+        leagueId,
+        redistributableOnly,
+      },
+    );
 
     return this.find(query, {
       limit,
@@ -152,8 +172,16 @@ export class MatchRepository extends EntityRepository<Match> {
     offset = 0,
     tournamentId,
     leagueId,
+    redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
-    const query = this.mergeScopeFilters({ endAt: { $ne: null } }, { tournamentId, leagueId });
+    const query = this.mergeScopeFilters(
+      { endAt: { $ne: null } },
+      {
+        tournamentId,
+        leagueId,
+        redistributableOnly,
+      },
+    );
 
     return this.findAndCount(query, {
       limit,
@@ -260,21 +288,21 @@ export class MatchRepository extends EntityRepository<Match> {
   }
 
   private mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters): MatchListFilter {
-    const tournamentFilter = this.buildTournamentFilter(scope);
-    if (!tournamentFilter) {
-      return base;
-    }
-
     const query: MatchListFilter = { ...base };
-    query.tournament = tournamentFilter;
+    const tournamentFilter = this.buildTournamentFilter(scope);
+    if (tournamentFilter) query.tournament = tournamentFilter;
+    if (scope.redistributableOnly) {
+      query.source = { $ne: "startgg" };
+      query.participants = { $none: { team: { source: "startgg" } } };
+    }
     return query;
   }
 
   private buildTournamentFilter(
     scope: MatchListScopeFilters,
   ): MatchTournamentScopeFilter | undefined {
-    const { tournamentId, leagueId } = scope;
-    if (!tournamentId && !leagueId) {
+    const { tournamentId, leagueId, redistributableOnly } = scope;
+    if (!tournamentId && !leagueId && !redistributableOnly) {
       return undefined;
     }
 
@@ -284,6 +312,9 @@ export class MatchRepository extends EntityRepository<Match> {
     }
     if (leagueId) {
       filter.league = { id: leagueId };
+    }
+    if (redistributableOnly) {
+      filter.source = { $ne: "startgg" };
     }
 
     return filter;

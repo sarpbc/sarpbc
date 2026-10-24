@@ -1,9 +1,23 @@
-import type { StaffPermission } from "~/types/user";
+import { hasPermission } from "@sarpbc/utils";
+import type { StaffPermission, User } from "~/types/user";
 
 export { isStaffUser, hasPermission, canModerateComments } from "@sarpbc/utils";
 
+export type PermissionRequirement = StaffPermission | readonly StaffPermission[];
+
+export const ROSTER_PROPOSAL_PERMISSIONS = ["players.manage", "teams.manage"] as const;
+
+export function meetsRequirement(
+  user: User | null | undefined,
+  required: PermissionRequirement,
+): boolean {
+  return typeof required === "string"
+    ? hasPermission(user, required)
+    : required.some((permission) => hasPermission(user, permission));
+}
+
 /** Home (`/`) is staff-only — any staff role, no specific permission. */
-export function permissionForAdminPath(path: string): StaffPermission | "staff" | null {
+export function permissionForAdminPath(path: string): PermissionRequirement | "staff" | null {
   const normalized = path.replace(/\/$/, "") || "/";
   const withoutLocale = normalized.replace(/^\/fr(?=\/|$)/, "") || "/";
 
@@ -19,6 +33,9 @@ export function permissionForAdminPath(path: string): StaffPermission | "staff" 
   }
   if (withoutLocale === "/moderation" || withoutLocale.startsWith("/moderation/")) {
     return "forum.moderate";
+  }
+  if (withoutLocale === "/proposals" || withoutLocale.startsWith("/proposals/")) {
+    return ROSTER_PROPOSAL_PERMISSIONS;
   }
   if (withoutLocale === "/players" || withoutLocale.startsWith("/players/")) {
     return "players.manage";

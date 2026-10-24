@@ -95,7 +95,7 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           :to="localePath(`/tournaments/${tournamentId}/edit`)"
         />
         <UButton
-          v-if="tournament?.source !== 'manual'"
+          v-if="tournament?.source === 'pandascore'"
           :loading="syncingId === tournamentId"
           :icon="iconFor(tournamentId)"
           :color="colorFor(tournamentId)"

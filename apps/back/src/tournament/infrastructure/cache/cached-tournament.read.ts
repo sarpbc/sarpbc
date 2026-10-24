@@ -2,7 +2,7 @@ import { log } from "evlog";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentService } from "../../application/tournament.service";
-import { TOURNAMENT_SOURCES } from "../../domain/tournament-source";
+import { DATA_SOURCES } from "../../../common/domain/data-source";
 import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));
@@ -39,7 +39,7 @@ const match = z.object({
 });
 const tournament = z.object({
   id: z.string(),
-  source: z.enum(TOURNAMENT_SOURCES),
+  source: z.enum(DATA_SOURCES),
   name: z.string(),
   slug: z.string(),
   event: z.object({ id: z.string(), slug: z.string(), name: z.string() }),

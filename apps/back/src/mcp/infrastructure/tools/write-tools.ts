@@ -11,6 +11,8 @@ import {
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
+import { mapMatchListResponse } from "../mappers";
+import { requireUpdateFields } from "./update-fields";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -273,6 +275,48 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
   );
 
   server.registerTool(
+    "update_match",
+    {
+      description:
+        "Correct the score, status, or dates of a manual match (pandascoreId is null). Requires tournaments.manage. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner.",
+      inputSchema: {
+        matchId: z.string().min(1).describe("Match UUID."),
+        beginAt: z
+          .string()
+          .datetime({ offset: true })
+          .nullable()
+          .optional()
+          .describe("Start time (ISO 8601), or null."),
+        endAt: z
+          .string()
+          .datetime({ offset: true })
+          .nullable()
+          .optional()
+          .describe("End time (ISO 8601), or null."),
+        status: z.enum(["not_started", "running", "finished"]).optional().describe("Match status."),
+        results: z
+          .array(z.object({ participantId: z.string().min(1), score: z.number().int().min(0) }))
+          .min(2)
+          .optional()
+          .describe("Score of every match participant, keyed by tournament participant UUID."),
+      },
+    },
+    async ({ matchId, beginAt, endAt, status, results }) =>
+      runWriteTool(user, "update_match", "tournaments.manage", async () => {
+        requireUpdateFields({ beginAt, endAt, status, results });
+        const toDate = (value: string | null | undefined) =>
+          value === undefined ? undefined : value === null ? null : new Date(value);
+        const match = await ctx.matchService.updateMatch(matchId, {
+          beginAt: toDate(beginAt),
+          endAt: toDate(endAt),
+          status,
+          results,
+        });
+        return { entityId: match.id, result: mapMatchListResponse(match) };
+      }),
+  );
+
+  server.registerTool(
     "create_tournament",
     {
       description:
@@ -302,6 +346,12 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .array(z.string().uuid())
           .optional()
           .describe("Team UUIDs to register as participants. Use search_teams to find ids."),
+        source: z
+          .enum(["manual", "startgg"])
+          .optional()
+          .describe(
+            "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
+          ),
       },
     },
     async (input) =>

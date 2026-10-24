@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
+import { isRedistributable } from "../../../common/domain/data-source";
 import {
   mapMatchListResponse,
   mapNewsAdminArticle,
@@ -9,6 +10,7 @@ import {
   mapTeamSummary,
   mapTournamentDetail,
   mapTournamentListItem,
+  redistributable,
 } from "../mappers";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runReadTool, runStaffReadTool } from "../permission-gate";
@@ -20,14 +22,10 @@ const DEFAULT_NEWS_LIMIT = 20;
 const MAX_NEWS_LIMIT = 100;
 
 async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
-  const bySlug = await ctx.playerService.findBySlug(idOrSlug);
-  if (bySlug) {
-    return bySlug;
-  }
-
-  const byId = await ctx.playerService.findById(idOrSlug);
-  if (byId) {
-    return byId;
+  const player =
+    (await ctx.playerService.findBySlug(idOrSlug)) ?? (await ctx.playerService.findById(idOrSlug));
+  if (player && isRedistributable(player.source)) {
+    return player;
   }
 
   throw new NotFoundException(
@@ -38,7 +36,7 @@ async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
 async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.teamService.findBySlug(idOrSlug);
   const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
-  if (team) {
+  if (team && isRedistributable(team.source)) {
     return team;
   }
 
@@ -66,7 +64,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return players.map(mapPlayerSummary);
+        return redistributable(players).map(mapPlayerSummary);
       }),
   );
 
@@ -86,7 +84,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           limit: SEARCH_LIMIT,
           offset: 0,
         });
-        return teams.map((team) => mapTeamSummary(team));
+        return redistributable(teams).map((team) => mapTeamSummary(team));
       }),
   );
 
@@ -145,6 +143,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       runReadTool(async () => {
         const [tournaments] = await ctx.tournamentService.find({
           activeOnly: activeOnly ?? false,
+          redistributableOnly: true,
           limit: limit ?? 20,
           offset: 0,
         });
@@ -164,7 +163,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     async ({ id }) =>
       runReadTool(async () => {
         const tournament = await ctx.tournamentService.findById(id);
-        if (!tournament) {
+        if (!tournament || !isRedistributable(tournament.source)) {
           throw new NotFoundException(
             `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
           );
@@ -190,10 +189,14 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ limit }) =>
       runReadTool(async () => {
-        const searchLimit = Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT);
+        const listOptions = {
+          limit: Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT),
+          offset: 0,
+          redistributableOnly: true,
+        };
         const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-          ctx.matchService.findUpcomingAndCount({ limit: searchLimit, offset: 0 }),
-          ctx.matchService.findLiveAndCount({ limit: searchLimit, offset: 0 }),
+          ctx.matchService.findUpcomingAndCount(listOptions),
+          ctx.matchService.findLiveAndCount(listOptions),
         ]);
 
         return {
@@ -227,6 +230,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         const [results, total] = await ctx.matchService.findResultsAndCount({
           limit: searchLimit,
           offset: 0,
+          redistributableOnly: true,
         });
 
         return {

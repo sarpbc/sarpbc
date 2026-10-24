@@ -9,8 +9,12 @@ import type {
   MatchQueries,
   MatchScoring,
 } from "../ports";
-import type { UpsertMatchInput } from "../inputs";
-import { upsertMatchInTransaction, setWinnerInTransaction } from "./write-match";
+import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
+import {
+  upsertMatchInTransaction,
+  setWinnerInTransaction,
+  updateMatchInTransaction,
+} from "./write-match";
 const RECENT_FORM_LIMIT = 5;
 
 export interface TeamFormRecord {
@@ -242,6 +246,14 @@ export class MatchService {
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setWinnerInTransaction(matches, matchId, winnerId),
+    );
+    const match = await this.committed(written.id);
+    await this.score(match);
+    return match;
+  }
+  async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
+    const written = await this.transaction.run(({ matches }) =>
+      updateMatchInTransaction(matches, matchId, input),
     );
     const match = await this.committed(written.id);
     await this.score(match);

@@ -65,7 +65,7 @@ const columns: TableColumn<TournamentListItem>[] = [
 ];
 
 function isManualTournament(tournament: TournamentListItem): boolean {
-  return tournament.source === "manual";
+  return tournament.source !== "pandascore";
 }
 
 function selectRow(e: Event, row: TableRow<TournamentListItem>) {
@@ -134,11 +134,7 @@ async function updatePage(value: number) {
             <UBadge
               :color="isManualTournament(row.original) ? 'primary' : 'neutral'"
               variant="subtle"
-              :label="
-                isManualTournament(row.original)
-                  ? $t('page.tournaments.source.manual')
-                  : $t('page.tournaments.source.pandascore')
-              "
+              :label="$t(`page.tournaments.source.${row.original.source}`)"
             />
           </template>
           <template #actions-cell="{ row }">

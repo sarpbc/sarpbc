@@ -28,7 +28,9 @@ describe("rosterStores.players.getRandomPlayer", () => {
 
     const result = await players.getRandomPlayer();
 
-    expect(execute).toHaveBeenCalledWith("SELECT id FROM player ORDER BY random() LIMIT 1");
+    expect(execute).toHaveBeenCalledWith(
+      "SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1",
+    );
     expect(findOne).toHaveBeenCalledWith(
       PlayerRow,
       { id: row.id },
@@ -45,7 +47,9 @@ describe("rosterStores.players.getRandomPlayer", () => {
 
     await expect(players.getRandomPlayer()).resolves.toBeNull();
 
-    expect(execute).toHaveBeenCalledWith("SELECT id FROM player ORDER BY random() LIMIT 1");
+    expect(execute).toHaveBeenCalledWith(
+      "SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1",
+    );
     expect(findOne).not.toHaveBeenCalled();
   });
 });
