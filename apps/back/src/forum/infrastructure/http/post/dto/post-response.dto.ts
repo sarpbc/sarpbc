@@ -1,5 +1,5 @@
-import type { PostView } from "../../../../domain/forum";
+import type { ForumPost } from "@sarpbc/types";
 
 export interface PostResponse {
-  post: PostView | null;
+  post: ForumPost | null;
 }

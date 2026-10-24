@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
-
 const { tournament, variant = "homepage" } = defineProps<{
-  tournament: Tournament;
+  tournament: { id: string; event: { name: string } };
   variant?: "homepage" | "match";
 }>();
 

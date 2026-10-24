@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
 import type { TournamentEvent } from "~/types/tournament";
 import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
@@ -12,7 +13,7 @@ const { setJsonLd } = useStructuredData();
 const EVENTS_PER_PAGE = 20;
 
 interface TournamentsIndexPayload {
-  events: TournamentEvent[];
+  events: TournamentEvent<TournamentListItem>[];
   total: number;
 }
 

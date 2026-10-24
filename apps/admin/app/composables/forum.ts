@@ -1,4 +1,5 @@
-import type { Post, PostShort } from "~/types/forum";
+import type { ForumPost } from "@sarpbc/types";
+import type { PostShort, Reply } from "~/types/forum";
 import { apiFetch } from "~/utils/apiFetch";
 
 export async function getPosts(): Promise<PostShort[]> {
@@ -13,15 +14,31 @@ export async function getPosts(): Promise<PostShort[]> {
   }
 }
 
-export async function getPostById(id: string): Promise<Post | null> {
+const REPLIES_PAGE_SIZE = 100;
+
+export async function getPostById(id: string): Promise<ForumPost | null> {
   try {
-    const res = await apiFetch<{ post: Post }>(`/posts/${id}`, {
+    const res = await apiFetch<{ post: ForumPost }>(`/posts/${id}`, {
       method: "GET",
     });
     return res.post || null;
   } catch (error) {
     console.error("Error fetching forum post:", error);
     return null;
+  }
+}
+
+export async function getPostReplies(postId: string): Promise<Reply[]> {
+  const replies: Reply[] = [];
+  for (let page = 0; ; page++) {
+    const res = await apiFetch<{ replies: Reply[]; total: number }>("/replies", {
+      method: "GET",
+      query: { targetType: "forumPost", targetId: postId, page, limit: REPLIES_PAGE_SIZE },
+    });
+    replies.push(...res.replies);
+    if (res.replies.length === 0 || (page + 1) * REPLIES_PAGE_SIZE >= res.total) {
+      return replies;
+    }
   }
 }
 

@@ -15,14 +15,19 @@ const isDeletingReply = ref(false);
 const hidingReplyId = ref<string | null>(null);
 
 const {
-  data: post,
+  data: thread,
   status,
   refresh,
 } = await useLazyAsyncData(
   () => `admin-forum-post-${postId.value}`,
-  () => getPostById(postId.value),
+  async () => {
+    const post = await getPostById(postId.value);
+    return post ? { post, replies: await getPostReplies(post.id) } : null;
+  },
   { server: false, watch: [postId] },
 );
+
+const post = computed(() => thread.value?.post ?? null);
 
 const breadcrumbItems = computed(() => [
   {
@@ -46,9 +51,7 @@ const flatReplies = computed(() => {
     }
   }
 
-  if (post.value?.replies?.length) {
-    walk(post.value.replies);
-  }
+  walk(thread.value?.replies ?? []);
 
   return items;
 });
@@ -155,7 +158,7 @@ async function hideReply(reply: Reply) {
           >
             <div class="flex min-w-0 flex-col gap-1">
               <p class="text-sm text-muted">
-                <span translate="no">{{ reply.author }}</span>
+                <span translate="no">{{ reply.author.userName }}</span>
                 · {{ new Date(reply.createdAt).toLocaleString() }}
               </p>
               <p class="whitespace-pre-wrap">{{ reply.content }}</p>

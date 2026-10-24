@@ -1,6 +1,6 @@
 import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
-import type { Tournament } from "~/types/tournament";
+import type { TournamentListItem } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 export type UserPickemPick = {
@@ -22,7 +22,7 @@ export type PickemPersonalRanking = {
   points: number;
 };
 
-export async function getActivePickemTournaments(limit = 1): Promise<Tournament[]> {
+export async function getActivePickemTournaments(limit = 1): Promise<TournamentListItem[]> {
   const { tournaments } = await getAllTournaments({
     limit: Math.max(limit, 1),
     pickems: true,

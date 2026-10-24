@@ -1,4 +1,4 @@
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { TournamentEventRef, TournamentListItem } from "@sarpbc/types";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { TournamentSource } from "../../domain/tournament-source";
 import {
@@ -142,6 +142,36 @@ function mapMatch(match: Match, tournament: Tournament): TournamentMatchResponse
     })),
     previousMatches: match.previousMatches.map((link) => mapBracketLink(link, match.id)),
     officialStreams: match.officialStreams ?? [],
+  };
+}
+
+export function mapTournamentListItem(
+  tournament: Tournament,
+): TournamentListItem & Pick<TournamentResponse, "beginAt" | "endAt"> {
+  return {
+    id: tournament.id,
+    source: tournament.source,
+    name: tournament.name,
+    slug: tournament.slug,
+    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    type: tournament.type,
+    prizepool: tournament.prizepool,
+    imageUrl: tournament.imageUrl,
+    beginAt: tournament.beginAt,
+    endAt: tournament.endAt,
+    pickemsEnabled: tournament.pickemsEnabled,
+    winnerId: tournament.winner?.id ?? null,
+    league: tournament.league
+      ? {
+          id: tournament.league.id,
+          name: tournament.league.name,
+          imageUrl: tournament.league.imageUrl,
+        }
+      : null,
+    participants: tournament.participants.map((participant) => ({
+      id: participant.id,
+      team: mapTeamSummary(participant.team),
+    })),
   };
 }
 

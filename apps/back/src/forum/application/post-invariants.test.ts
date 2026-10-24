@@ -109,7 +109,6 @@ describe("post transaction and policies", () => {
       createdAt: new Date(now.getTime() - 3599999),
       updatedAt: null,
       translations: [],
-      replies: [],
     });
     expect(await f.service.getCreationStatus("user")).toEqual({
       canCreate: false,
@@ -131,7 +130,6 @@ describe("post transaction and policies", () => {
       createdAt: new Date(now.getTime() - 3600000),
       updatedAt: null,
       translations: [],
-      replies: [],
     });
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
@@ -191,7 +189,6 @@ describe("post lookup", () => {
         updatedAt: null,
       },
     ],
-    replies: [],
   };
   it("exposes the public id and a slug derived from the base title", async () => {
     const f = setup();

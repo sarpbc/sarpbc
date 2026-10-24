@@ -27,8 +27,8 @@ import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
-import { withPublicSlug } from "./match-list.mapper";
-import { mapTournament } from "./tournament.mapper";
+import { mapTournamentMatchListItem, withPublicSlug } from "./match-list.mapper";
+import { mapTournament, mapTournamentListItem } from "./tournament.mapper";
 
 @Controller("tournaments")
 export class TournamentController {
@@ -50,7 +50,7 @@ export class TournamentController {
     });
 
     return {
-      tournaments: tournaments.map((tournament) => mapTournament(tournament)),
+      tournaments: tournaments.map(mapTournamentListItem),
       count,
     };
   }
@@ -145,7 +145,7 @@ export class TournamentController {
   @Get(":id/matches")
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
-    return { matches: matches.map(withPublicSlug) };
+    return { matches: matches.map(mapTournamentMatchListItem) };
   }
 
   @Get(":id/awards")

@@ -1,25 +1,26 @@
 <script lang="ts" setup>
+import type { TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
-import type { Tournament, TournamentEvent } from "~/types/tournament";
+import type { TournamentEvent } from "~/types/tournament";
 
 const { events, to } = defineProps<{
-  events: TournamentEvent[];
+  events: TournamentEvent<TournamentListItem>[];
   /** Overrides the stage link (pick'ems); the event name then stays plain text. */
-  to?: (stage: Tournament) => string;
+  to?: (stage: TournamentListItem) => string;
 }>();
 
 const { t, te } = useI18n();
 const localePath = useLocalePath();
 const { formatTournamentPrizepool } = useCurrency();
 
-function eventMeta(event: TournamentEvent): string {
+function eventMeta(event: TournamentEvent<TournamentListItem>): string {
   const typeKey = `components.tournaments.${event.type}`;
   return [event.type && te(typeKey) ? t(typeKey) : "", formatTournamentPrizepool(event.prizepool)]
     .filter(Boolean)
     .join(" · ");
 }
 
-function stageHref(event: TournamentEvent, stage: Tournament): string {
+function stageHref(event: TournamentEvent<TournamentListItem>, stage: TournamentListItem): string {
   return to ? to(stage) : localePath(tournamentStagePath(event.slug, stage.slug));
 }
 </script>

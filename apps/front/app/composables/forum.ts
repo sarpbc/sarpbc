@@ -1,7 +1,7 @@
+import type { ForumPost } from "@sarpbc/types";
 import type {
   CreateForumPostResult,
   ForumPostCreationStatus,
-  Post,
   PostPreview,
   PostShort,
   Topic,
@@ -57,10 +57,10 @@ export async function getPosts(): Promise<PostShort[]> {
   return res.posts || [];
 }
 
-export async function getPostById(id: string): Promise<Post | null> {
+export async function getPostById(id: string): Promise<ForumPost | null> {
   const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ post: Post }>(`${config.public.apiBase}/posts/${id}`, {
+    const res = await $fetch<{ post: ForumPost }>(`${config.public.apiBase}/posts/${id}`, {
       method: "GET",
       credentials: "include",
     });

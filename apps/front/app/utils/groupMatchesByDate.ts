@@ -1,9 +1,9 @@
-import type { Match } from "~/types/matches";
+import type { TournamentMatchListItem } from "@sarpbc/types";
 
 export type MatchDateGroup = {
   dateKey: string;
   date: Date | null;
-  matches: Match[];
+  matches: TournamentMatchListItem[];
 };
 
 export type TournamentMatchesByDate = {
@@ -11,23 +11,23 @@ export type TournamentMatchesByDate = {
   completed: MatchDateGroup[];
 };
 
-function parseDate(value: Date | string | undefined): Date | null {
+function parseDate(value: Date | string | null): Date | null {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function getGroupDate(match: Match, played: boolean): Date | null {
+function getGroupDate(match: TournamentMatchListItem, played: boolean): Date | null {
   return played ? parseDate(match.endAt) : parseDate(match.beginAt);
 }
 
 function groupByDate(
-  matches: Match[],
+  matches: TournamentMatchListItem[],
   played: boolean,
   groupOrder: "asc" | "desc",
 ): MatchDateGroup[] {
-  const unknown: Match[] = [];
-  const byDay = new Map<string, { date: Date; matches: Match[] }>();
+  const unknown: TournamentMatchListItem[] = [];
+  const byDay = new Map<string, { date: Date; matches: TournamentMatchListItem[] }>();
 
   for (const match of matches) {
     const date = getGroupDate(match, played);
@@ -45,7 +45,7 @@ function groupByDate(
     }
   }
 
-  const sortMatches = (a: Match, b: Match) => {
+  const sortMatches = (a: TournamentMatchListItem, b: TournamentMatchListItem) => {
     const aTime = getGroupDate(a, played)?.getTime() ?? 0;
     const bTime = getGroupDate(b, played)?.getTime() ?? 0;
     return groupOrder === "desc" ? bTime - aTime : aTime - bTime;
@@ -74,7 +74,9 @@ function groupByDate(
   return groups;
 }
 
-export function groupTournamentMatchesByDate(matches: Match[]): TournamentMatchesByDate {
+export function groupTournamentMatchesByDate(
+  matches: TournamentMatchListItem[],
+): TournamentMatchesByDate {
   const upcoming = matches.filter((match) => !match.endAt);
   const completed = matches.filter((match) => match.endAt);
 

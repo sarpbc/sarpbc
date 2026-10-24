@@ -1,7 +1,14 @@
 import type { Match } from "~/types/matches";
 import type { Tournament } from "~/types/tournament";
 
-function hasTournamentWinner(tournament: Tournament): boolean {
+interface PickemTournamentState {
+  pickemsEnabled?: boolean;
+  endAt?: Date | string | null;
+  winnerId?: string | null;
+  winner?: Tournament["winner"];
+}
+
+function hasTournamentWinner(tournament: PickemTournamentState): boolean {
   if (tournament.winnerId) return true;
   const winner = tournament.winner;
   if (winner == null) return false;
@@ -9,7 +16,10 @@ function hasTournamentWinner(tournament: Tournament): boolean {
   return winner.length > 0;
 }
 
-export function isPickemTournamentActive(tournament: Tournament, now = Date.now()): boolean {
+export function isPickemTournamentActive(
+  tournament: PickemTournamentState,
+  now = Date.now(),
+): boolean {
   if (!tournament.pickemsEnabled) return false;
   if (hasTournamentWinner(tournament)) return false;
   if (tournament.endAt && new Date(tournament.endAt).getTime() < now) return false;

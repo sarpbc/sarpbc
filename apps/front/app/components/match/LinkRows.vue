@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { matchPath } from "@sarpbc/utils";
-import type { MatchListItem } from "~/types/matches";
+import type { MatchRowItem } from "~/types/matches";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   listVariantToDiscoveryStatus,
@@ -15,7 +15,7 @@ const {
   liveMatchIds,
   showDate = true,
 } = defineProps<{
-  matches: MatchListItem[];
+  matches: MatchRowItem[];
   variant: "live" | "upcoming" | "result";
   /** When set, links carry `?from=` and emit `match_row_clicked`. */
   source?: MatchDiscoverySource;
@@ -38,7 +38,7 @@ function statusFor(matchId: string): MatchDiscoveryStatus {
   return isLive(matchId) ? "live" : "upcoming";
 }
 
-function href(match: MatchListItem): string {
+function href(match: MatchRowItem): string {
   const path = localePath(matchPath(match.publicId, match.slug));
   return source ? `${path}?${MATCH_DISCOVERY_FROM_QUERY}=${source}` : path;
 }

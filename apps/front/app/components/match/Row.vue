@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { MatchListItem } from "~/types/matches";
+import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
 
@@ -21,7 +21,7 @@ const {
   /** When false, always show time only (day headers already provide the date). */
   showDate = true,
 } = defineProps<{
-  match: MatchListItem;
+  match: MatchRowItem;
   live?: boolean;
   divider?: boolean;
   /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */

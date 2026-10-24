@@ -1,4 +1,4 @@
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { TournamentEventRef, TournamentMatchListItem } from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
 
 export interface MatchListItemResponse {
@@ -47,6 +47,26 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
           }
         : undefined,
     },
+  };
+}
+
+export function mapTournamentMatchListItem(match: Match): TournamentMatchListItem {
+  return {
+    id: match.id,
+    publicId: match.publicId,
+    slug: matchPublicSlug(match),
+    status: match.status,
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    numberOfGames: match.numberOfGames,
+    participants: match.participants.map((participant) => ({
+      id: participant.id,
+      team: { id: participant.team.id, name: participant.team.name },
+    })),
+    results: match.results.map((result) => ({
+      participant: result.participant.id,
+      score: result.score,
+    })),
   };
 }
 

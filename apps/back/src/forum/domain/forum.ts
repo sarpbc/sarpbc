@@ -1,4 +1,4 @@
-import type { ReplyRecord, ReplyAuthor } from "../../reply/domain/reply";
+import type { ReplyAuthor } from "../../reply/domain/reply";
 import type { PostType } from "./post-type.enum";
 export interface TopicRecord {
   id: string;
@@ -30,7 +30,6 @@ export interface TranslationRecord {
 }
 export interface PostRecord extends PostSummary {
   translations: TranslationRecord[];
-  replies: ReplyRecord[];
 }
 export type NewPostRecord = Omit<PostRecord, "publicId">;
 export interface CreatePostInput {
@@ -48,23 +47,4 @@ export interface PostCreationStatus {
   canCreate: boolean;
   nextAvailableAt: string | null;
   cooldownHours: number;
-}
-export interface PostReplyView {
-  id: string;
-  content: string;
-  author: string;
-  createdAt: Date;
-  replyTo: string | null;
-  replies: PostReplyView[];
-}
-export interface PostView {
-  id: string;
-  publicId: number;
-  slug: string;
-  title: string;
-  content: string;
-  topic: { id: string; title: string };
-  author: string;
-  createdAt: Date;
-  replies: PostReplyView[];
 }

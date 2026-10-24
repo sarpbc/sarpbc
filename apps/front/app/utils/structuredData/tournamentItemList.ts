@@ -1,3 +1,4 @@
+import type { TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
 import type { TournamentEvent } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/calendar/ics";
@@ -19,7 +20,7 @@ export interface ItemListLd extends JsonLdNode {
 }
 
 export interface BuildTournamentItemListOptions {
-  events: TournamentEvent[];
+  events: TournamentEvent<TournamentListItem>[];
   total: number;
   positionOffset?: number;
   origin?: string;

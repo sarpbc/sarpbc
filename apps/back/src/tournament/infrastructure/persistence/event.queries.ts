@@ -36,14 +36,7 @@ export class CompetitionEventQueries implements EventQueries {
         Tournament,
         { $and: [where, { event: { $in: ids } }] },
         {
-          populate: [
-            "league",
-            "event",
-            "winner.team",
-            "winner.players",
-            "participants.team",
-            "participants.players",
-          ],
+          populate: ["league", "event", "winner.team", "participants.team"],
         },
       ),
     ]);

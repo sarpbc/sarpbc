@@ -47,14 +47,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
-      populate: [
-        "league",
-        "event",
-        "winner.team",
-        "winner.players",
-        "participants.team",
-        "participants.players",
-      ],
+      populate: ["league", "event", "winner.team", "participants.team"],
     });
     return [rows.map(toTournament), count] as [ReturnType<typeof toTournament>[], number];
   }
@@ -204,7 +197,16 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
   byTeam(id: string) {
     return this.matchesBy({ participants: { team: { id } } });
   }
-  byTournament(id: string) {
-    return this.matchesBy({ tournament: { id } });
+  async byTournament(id: string) {
+    return (
+      await this.em.find(
+        Match,
+        { tournament: { id } },
+        {
+          orderBy: { beginAt: "ASC" },
+          populate: [...MATCH_TOURNAMENT_POPULATE, "participants.team", "results", "winner.team"],
+        },
+      )
+    ).map(toMatch);
   }
 }

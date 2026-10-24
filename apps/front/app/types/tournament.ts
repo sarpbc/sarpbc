@@ -49,7 +49,7 @@ export interface TournamentParticipant {
 export type TournamentTab = "overview" | "matches";
 
 /** One PandaScore serie or manual tournament. Its stages are `Tournament`s, newest first. */
-export interface TournamentEvent {
+export interface TournamentEvent<Stage = Tournament> {
   id: string;
   slug: string;
   name: string;
@@ -59,8 +59,8 @@ export interface TournamentEvent {
   type: string | null;
   beginAt: string | null;
   endAt: string | null;
-  /** List responses omit `matches`; the event detail embeds them for the brackets. */
-  stages: Tournament[];
+  /** List responses carry list items; the event detail embeds full stages for the brackets. */
+  stages: Stage[];
 }
 
 export type TournamentPathResponse =

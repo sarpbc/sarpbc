@@ -130,6 +130,6 @@ describe("EventController", () => {
     });
     expect(listed.count).toBe(1);
     expect(listed.events[0].stages.map((s) => s.name)).toEqual(["Playoffs", "Group A"]);
-    expect(listed.events[0].stages[0].matches).toBeUndefined();
+    expect(listed.events[0].stages[0]).not.toHaveProperty("matches");
   });
 });

@@ -21,26 +21,6 @@ export interface PostShort {
   };
 }
 
-export interface Reply {
-  id: string;
-  content: string;
-  author: string;
-  createdAt: Date;
-  replies: Reply[];
-}
-
-export interface Post {
-  id: string;
-  publicId: number;
-  slug: string;
-  title: string;
-  content: string;
-  topic: Topic;
-  author: string;
-  createdAt: Date;
-  replies: Reply[];
-}
-
 export interface Topic {
   id: string;
   title: string;

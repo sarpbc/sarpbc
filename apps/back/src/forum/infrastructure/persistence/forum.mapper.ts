@@ -1,6 +1,5 @@
 import type { Post, Topic } from "./forum.entities";
 import type { PostRecord, TopicRecord } from "../../domain/forum";
-import { replySnapshot } from "../../../reply/infrastructure/persistence/reply.mapper";
 export function postSnapshot(row: Post): PostRecord {
   return {
     id: row.id,
@@ -23,7 +22,6 @@ export function postSnapshot(row: Post): PostRecord {
           updatedAt: t.updatedAt ? new Date(t.updatedAt) : null,
         }))
       : [],
-    replies: row.replies.isInitialized() ? row.replies.getItems().map(replySnapshot) : [],
   };
 }
 export function topicSnapshot(row: Topic): TopicRecord {
