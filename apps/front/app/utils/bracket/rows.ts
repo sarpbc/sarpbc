@@ -1,9 +1,9 @@
-import type { Match } from "~/types/matches";
+import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
 export const MIN_ROW_GAP = 2;
 
-export function sortMatchesByBeginAt(matches: Match[]): Match[] {
+export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
   return [...matches].sort((a, b) => {
     const dateA = a.beginAt ? new Date(a.beginAt).getTime() : Number.NaN;
     const dateB = b.beginAt ? new Date(b.beginAt).getTime() : Number.NaN;
@@ -42,13 +42,13 @@ export function nextAvailableRow(idealRow: number, takenRows: number[]): number 
 }
 
 export function assignMatchRows(
-  matches: Match[],
+  matches: TournamentDetailMatch[],
   columns: Map<string, number>,
 ): Map<string, number> {
   const matchIds = new Set(matches.map((match) => match.id));
   const maxColumn = Math.max(0, ...columns.values());
   const rows = new Map<string, number>();
-  const byColumn = new Map<number, Match[]>();
+  const byColumn = new Map<number, TournamentDetailMatch[]>();
 
   for (const match of matches) {
     const column = columns.get(match.id) ?? 0;

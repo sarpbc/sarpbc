@@ -107,11 +107,10 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   assert(participant, "the historical team remains a tournament participant");
   assert.equal(participant.players[0].id, player.id);
   assert.equal(view.winner.id, participant.id);
-  const semiView = view.matches.find((m) => m.pandascoreId === semifinal.pandascoreId);
-  const finalView = view.matches.find((m) => m.pandascoreId === final.pandascoreId);
-  assert.equal(semiView.winner.id, participant.id);
+  const semiView = view.matches.find((m) => m.name === semifinal.name);
+  const finalView = view.matches.find((m) => m.name === final.name);
+  assert.equal(semiView.winnerId, participant.id);
   assert.equal(finalView.previousMatches[0].previousMatch, semiView.id);
-  assert.equal(finalView.officialStreams[0].language, "en");
   assert.equal((await request("GET", `/player/${player.id}`)).json().player.team.id, currentTeamId);
 
   await request(
@@ -153,6 +152,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   assert.equal(refreshedPlayer.team.id, currentTeamId);
 
   const finalDetail = (await request("GET", `/matches/${finalView.id}`)).json();
+  assert.equal(finalDetail.match.officialStreams[0].language, "en");
   assert.equal(finalDetail.headToHead.totalMeetings, 1);
   assert.equal(finalDetail.teamForms[participant.team.id].record.wins, 1);
   assert.equal(

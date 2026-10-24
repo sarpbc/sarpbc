@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
+import type { TournamentDetail } from "@sarpbc/types";
 import { isPickemTournamentActive } from "~/utils/pickems";
 
 const { tournament } = defineProps<{
-  tournament: Tournament;
+  tournament: TournamentDetail;
 }>();
 
 const showPickemCta = computed(() => isPickemTournamentActive(tournament));

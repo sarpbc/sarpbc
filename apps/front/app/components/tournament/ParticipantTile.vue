@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import type { TeamSummary, TournamentDetailParticipant } from "@sarpbc/types";
 
 const { team, players } = defineProps<{
-  team: Team;
-  players: Player[];
+  team: TeamSummary;
+  players: TournamentDetailParticipant["players"];
 }>();
 
 const { t } = useI18n();
@@ -24,12 +23,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
       :aria-expanded="open"
       :aria-controls="dialogId"
     >
-      <TeamImg
-        :team-name="team.name"
-        :image-url="team.imageUrl"
-        :dark-mode-image-url="team.darkModeImageUrl"
-        size="sm"
-      />
+      <TeamImg :team-name="team.name" :image-url="team.imageUrl ?? undefined" size="sm" />
       <span class="text-sm font-medium truncate">{{ team.name }}</span>
     </button>
 
@@ -47,12 +41,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
           class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: team.name })"
         >
-          <TeamImg
-            :team-name="team.name"
-            :image-url="team.imageUrl"
-            :dark-mode-image-url="team.darkModeImageUrl"
-            size="xs"
-          />
+          <TeamImg :team-name="team.name" :image-url="team.imageUrl ?? undefined" size="xs" />
           <span class="truncate">{{ team.name }}</span>
         </SLink>
 

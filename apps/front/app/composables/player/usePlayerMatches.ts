@@ -1,56 +1,31 @@
 import type { MaybeRef } from "vue";
-import type { Match, MatchListItem } from "~/types/matches";
+import type { ProfileMatchListItem } from "@sarpbc/types";
 
 const PAST_MATCHES_LIMIT = 10;
 
 const LIVE_STATUSES = new Set(["running", "live", "in_progress"]);
 
 interface PlayerMatchesPayload {
-  matches: Match[];
+  matches: ProfileMatchListItem[];
   /** Captured with the fetch so the server and client split matches identically on hydration. */
   fetchedAt: number;
 }
 
 export interface PlayerMatchSections {
-  live: MatchListItem[];
-  upcoming: MatchListItem[];
-  past: MatchListItem[];
-}
-
-function toMatchListItem(match: Match): MatchListItem {
-  const tournament = match.tournament;
-  // An unpopulated relation serializes to its id, so only trust an object here.
-  const league = tournament.league instanceof Object ? tournament.league : undefined;
-
-  return {
-    id: match.id,
-    publicId: match.publicId,
-    slug: match.slug,
-    beginAt: match.beginAt ?? null,
-    participants: (match.participants ?? []).map((participant) => ({
-      id: participant.id,
-      team: { name: participant.team?.name ?? "" },
-    })),
-    results: match.results ?? [],
-    tournament: {
-      id: tournament.id,
-      name: tournament.name,
-      slug: tournament.slug,
-      event: tournament.event,
-      league: league ? { id: league.id, name: league.name } : undefined,
-    },
-  };
+  live: ProfileMatchListItem[];
+  upcoming: ProfileMatchListItem[];
+  past: ProfileMatchListItem[];
 }
 
 function timeOf(value: Date | string | null | undefined): number {
   return value ? new Date(value).getTime() : 0;
 }
 
-function isPast(match: Match): boolean {
+function isPast(match: ProfileMatchListItem): boolean {
   return Boolean(match.endAt) || match.status === "finished";
 }
 
-function isLive(match: Match, now: number): boolean {
+function isLive(match: ProfileMatchListItem, now: number): boolean {
   if (match.status && LIVE_STATUSES.has(match.status)) {
     return true;
   }
@@ -58,10 +33,13 @@ function isLive(match: Match, now: number): boolean {
   return Boolean(match.beginAt) && timeOf(match.beginAt) <= now;
 }
 
-export function splitPlayerMatches(matches: Match[], now: number): PlayerMatchSections {
-  const live: Match[] = [];
-  const upcoming: Match[] = [];
-  const past: Match[] = [];
+export function splitPlayerMatches(
+  matches: ProfileMatchListItem[],
+  now: number,
+): PlayerMatchSections {
+  const live: ProfileMatchListItem[] = [];
+  const upcoming: ProfileMatchListItem[] = [];
+  const past: ProfileMatchListItem[] = [];
 
   for (const match of matches) {
     if (isPast(match)) {
@@ -73,8 +51,9 @@ export function splitPlayerMatches(matches: Match[], now: number): PlayerMatchSe
     }
   }
 
-  const byBeginAtAsc = (a: Match, b: Match) => timeOf(a.beginAt) - timeOf(b.beginAt);
-  const byEndAtDesc = (a: Match, b: Match) =>
+  const byBeginAtAsc = (a: ProfileMatchListItem, b: ProfileMatchListItem) =>
+    timeOf(a.beginAt) - timeOf(b.beginAt);
+  const byEndAtDesc = (a: ProfileMatchListItem, b: ProfileMatchListItem) =>
     (timeOf(b.endAt) || timeOf(b.beginAt)) - (timeOf(a.endAt) || timeOf(a.beginAt));
 
   live.sort(byBeginAtAsc);
@@ -82,9 +61,9 @@ export function splitPlayerMatches(matches: Match[], now: number): PlayerMatchSe
   past.sort(byEndAtDesc);
 
   return {
-    live: live.map(toMatchListItem),
-    upcoming: upcoming.map(toMatchListItem),
-    past: past.slice(0, PAST_MATCHES_LIMIT).map(toMatchListItem),
+    live,
+    upcoming,
+    past: past.slice(0, PAST_MATCHES_LIMIT),
   };
 }
 

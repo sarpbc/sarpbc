@@ -874,14 +874,6 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
-    "path": "\"matches/player/:playerId\"",
-    "status": null,
-    "guards": [],
-    "permissions": []
-  },
-  {
-    "controller": "\"tournaments\"",
-    "verb": "GET",
     "path": "\"matches/team/:teamId\"",
     "status": null,
     "guards": [],

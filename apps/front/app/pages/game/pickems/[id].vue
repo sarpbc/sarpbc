@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
 import { matchPath } from "@sarpbc/utils";
+import type { TournamentDetailMatch } from "@sarpbc/types";
 import {
   displayMatchScore,
   getMatchParticipantScore,
   shouldShowMatchScores,
-  type Match,
 } from "~/types/matches";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
@@ -122,7 +122,7 @@ const pickemTimeDf = computed(
 
 interface PickemDayGroup {
   date: Date;
-  matches: Match[];
+  matches: TournamentDetailMatch[];
 }
 
 const matchesByDay = computed(() => {
@@ -186,7 +186,7 @@ function loginRedirectPath() {
   };
 }
 
-function matchScoreLabel(match: Match): string | null {
+function matchScoreLabel(match: TournamentDetailMatch): string | null {
   const status = resolveMatchDiscoveryStatus(match);
   if (!shouldShowMatchScores(status)) return null;
 
@@ -202,14 +202,14 @@ function matchScoreLabel(match: Match): string | null {
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
 }
 
-function matchCenterPrimary(match: Match): string | null {
+function matchCenterPrimary(match: TournamentDetailMatch): string | null {
   const score = matchScoreLabel(match);
   if (score) return score;
   if (!match.beginAt) return null;
   return pickemTimeDf.value.format(new Date(match.beginAt));
 }
 
-function openMatchLabel(match: Match): string {
+function openMatchLabel(match: TournamentDetailMatch): string {
   return t("page.game.pickems.detail.openMatch", {
     teamA: match.participants?.[0]?.team.name ?? t("components.match.tbd"),
     teamB: match.participants?.[1]?.team.name ?? t("components.match.tbd"),
@@ -217,7 +217,7 @@ function openMatchLabel(match: Match): string {
 }
 
 function teamButtonColor(
-  match: Match,
+  match: TournamentDetailMatch,
   participantId: string | undefined,
 ): "neutral" | "success" | "error" | "primary" {
   if (!participantId || !picks.value) return "neutral";

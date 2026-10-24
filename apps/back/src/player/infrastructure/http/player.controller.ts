@@ -25,6 +25,7 @@ import { UpdateContractDto } from "./dto/update-contract.dto";
 import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
 import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import { mapPlayer } from "./player.mapper";
+import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 import { MatchService } from "../../../tournament/application/match/match.service";
 import { TournamentService } from "../../../tournament/application/tournament.service";
@@ -175,7 +176,7 @@ export class PlayerController {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
     const matches = await this.matchService.getMatchesByPlayer(id);
-    return { matches };
+    return { matches: matches.map(mapProfileMatchListItem) };
   }
 
   @Get(":id/photo")

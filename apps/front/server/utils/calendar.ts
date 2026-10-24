@@ -1,14 +1,13 @@
-import type { TournamentMatchListItem } from "@sarpbc/types";
+import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import type { Tournament } from "~/types/tournament";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
 import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 import { getFetchStatusCode } from "./match-og";
 
 interface TournamentResponse {
-  tournament?: Tournament;
+  tournament?: TournamentDetail;
 }
 
 interface TournamentMatchesResponse {
@@ -57,7 +56,7 @@ export async function fetchMatchForCalendar(id: string): Promise<Match> {
 
 export async function fetchTournamentForCalendar(
   id: string,
-): Promise<{ tournament: Tournament; matches: TournamentMatchListItem[] }> {
+): Promise<{ tournament: TournamentDetail; matches: TournamentMatchListItem[] }> {
   const config = useRuntimeConfig();
 
   let tournamentRes: TournamentResponse;
@@ -102,7 +101,7 @@ export function buildMatchIcs(match: Match, now: Date): string {
 }
 
 export function buildTournamentIcs(
-  tournament: Tournament,
+  tournament: TournamentDetail,
   matches: TournamentMatchListItem[],
   now: Date,
 ): string {

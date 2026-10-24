@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { Tournament } from "~/types/tournament";
+import type { TournamentDetail } from "@sarpbc/types";
 import { buildTournamentBracketView } from "~/utils/tournamentBracket";
 
 interface Props {
-  tournament: Tournament;
+  tournament: TournamentDetail;
 }
 
 const { tournament } = defineProps<Props>();
@@ -13,7 +13,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
 
 <template>
   <div class="w-full flex flex-col gap-6">
-    <p v-if="!tournament.matches?.length" class="text-sm text-muted">
+    <p v-if="!tournament.matches.length" class="text-sm text-muted">
       {{ $t("page.tournaments.id.bracketEmpty") }}
     </p>
 

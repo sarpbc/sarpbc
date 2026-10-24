@@ -1,7 +1,7 @@
-import type { Match } from "~/types/matches";
+import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
-function getMatchBeginAtTime(match: Match): number | null {
+function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
   if (!match.beginAt) {
     return null;
   }
@@ -10,7 +10,7 @@ function getMatchBeginAtTime(match: Match): number | null {
   return Number.isNaN(time) ? null : time;
 }
 
-function getMatchDayKey(match: Match): string | null {
+function getMatchDayKey(match: TournamentDetailMatch): string | null {
   if (!match.beginAt) {
     return null;
   }
@@ -35,7 +35,7 @@ export function compressColumnIndices(columns: Map<string, number>): Map<string,
  * Columns follow match calendar order (beginAt day buckets), then are pushed right
  * so a match never appears before any of its feeder matches.
  */
-export function computeChronologicalColumns(matches: Match[]): Map<string, number> {
+export function computeChronologicalColumns(matches: TournamentDetailMatch[]): Map<string, number> {
   const matchIds = new Set(matches.map((match) => match.id));
   const columns = new Map<string, number>();
   const dayOrder = new Map<string, number>();
@@ -134,7 +134,7 @@ export function computeChronologicalColumns(matches: Match[]): Map<string, numbe
 }
 
 export function computeLowerProgressionDepths(
-  matches: Match[],
+  matches: TournamentDetailMatch[],
   crossBracketFinalIds: Set<string>,
 ): Map<string, number> {
   const matchIds = new Set(matches.map((match) => match.id));

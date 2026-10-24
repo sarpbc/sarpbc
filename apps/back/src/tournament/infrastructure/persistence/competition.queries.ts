@@ -13,15 +13,12 @@ export const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
   "winner.team",
-  "winner.players",
   "participants.team",
   "participants.players",
-  "participants.players.team",
   "matches.participants.team",
-  "matches.participants.players",
-  "matches.previousMatches.previousMatch",
-  "matches.results.participant",
-  "matches.winner.team",
+  "matches.previousMatches",
+  "matches.results",
+  "matches.winner",
 ] as const;
 interface StageFilter {
   pickemsEnabled?: boolean;
@@ -179,15 +176,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return (
       await this.em.find(Match, where, {
         orderBy: { beginAt: "ASC" },
-        populate: [
-          ...MATCH_TOURNAMENT_POPULATE,
-          "participants.team",
-          "participants.players",
-          "participants.players.team",
-          "results.participant",
-          "winner.team",
-          "previousMatches.previousMatch",
-        ],
+        populate: [...MATCH_TOURNAMENT_POPULATE, "participants.team", "results", "winner"],
       })
     ).map(toMatch);
   }

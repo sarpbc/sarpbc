@@ -1,6 +1,5 @@
+import type { TeamSummary, TournamentDetail } from "@sarpbc/types";
 import { tournamentStagePath } from "@sarpbc/utils";
-import type { Team } from "~/types/team";
-import type { Tournament } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/calendar/ics";
 import { formatPrizepool } from "~/utils/currencyFormatter";
 import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
@@ -143,7 +142,7 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
   }
 }
 
-export function formatLabel(type: string | undefined): string | undefined {
+export function formatLabel(type: string | null): string | undefined {
   if (!type || !isTournamentFormat(type)) {
     return undefined;
   }
@@ -191,7 +190,7 @@ function onlineVenue(url: string): SportsEventVenueLd {
 // and location are always emitted together, falling back to the online venue
 // (every event is streamed) when no country is known.
 export function eventVenue(
-  type: string | undefined,
+  type: string | null,
   country: string | null | undefined,
   url: string,
 ): SportsEventVenueLd {
@@ -220,29 +219,22 @@ export function eventVenue(
   }
 }
 
-export function getTournamentChampionTeam(tournament: Pick<Tournament, "winner">): Team | null {
-  const winner = tournament.winner;
-  if (!winner) {
-    return null;
-  }
-
-  const record = Object(winner) as { team?: Team };
-  if (!("team" in record) || !record.team?.slug) {
-    return null;
-  }
-
-  return record.team;
+export function getTournamentChampionTeam(
+  tournament: Pick<TournamentDetail, "winner">,
+): TeamSummary | null {
+  const team = tournament.winner?.team;
+  return team?.slug ? team : null;
 }
 
 function competitorFromTournament(
-  tournament: Pick<Tournament, "participants">,
+  tournament: Pick<TournamentDetail, "participants">,
   origin: string,
 ): SportsTeamLd[] | undefined {
   const teams = new Map<string, SportsTeamLd>();
 
-  for (const participant of tournament.participants ?? []) {
+  for (const participant of tournament.participants) {
     const team = participant.team;
-    const name = team?.name?.trim();
+    const name = team.name.trim();
     if (!name || teams.has(team.id)) {
       continue;
     }
@@ -320,7 +312,7 @@ function buildDescription(parts: {
 }
 
 export function buildTournamentSportsEvent(
-  tournament: Tournament,
+  tournament: TournamentDetail,
   options: BuildTournamentSportsEventOptions = {},
 ): SportsEventLd {
   const origin = options.origin ?? SITE_ORIGIN;

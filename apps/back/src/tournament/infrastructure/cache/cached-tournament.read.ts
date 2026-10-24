@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentService } from "../../application/tournament.service";
 import { TOURNAMENT_SOURCES } from "../../domain/tournament-source";
-import { mapTournament, type TournamentResponse } from "../http/tournament.mapper";
+import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));
 const nullableText = z.string().nullable();
@@ -14,79 +14,51 @@ const team = z.object({
   imageUrl: nullableText,
   location: nullableText,
 });
-const player = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  birthday: date.nullable(),
-  nationality: nullableText,
-  firstName: nullableText,
-  lastName: nullableText,
-  imageUrl: nullableText,
-  role: nullableText,
-  team: team.nullable(),
-});
 const participant = z.object({
   id: z.string(),
   team,
-  players: z.array(player),
-  createdAt: date,
-  updatedAt: date,
+  players: z.array(
+    z.object({ id: z.string(), name: z.string(), slug: z.string(), nationality: nullableText }),
+  ),
 });
 const match = z.object({
   id: z.string(),
   publicId: z.number().int().positive(),
-  pandascoreId: z.number().nullable(),
-  name: z.string(),
   slug: z.string(),
+  name: z.string(),
+  status: nullableText,
   beginAt: date.nullable(),
   endAt: date.nullable(),
-  status: nullableText,
   numberOfGames: z.number().nullable(),
-  createdAt: date,
-  updatedAt: date,
-  participants: z.array(participant),
-  winner: participant.nullable(),
+  winnerId: nullableText,
+  participants: z.array(z.object({ id: z.string(), team })),
   results: z.array(z.object({ participant: z.string(), score: z.number() })),
   previousMatches: z.array(
-    z.object({ match: z.string(), previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
+    z.object({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
   ),
-  officialStreams: z.array(z.object({ url: z.string(), language: z.string(), main: z.boolean() })),
 });
 const tournament = z.object({
   id: z.string(),
-  pandascoreId: z.number().nullable(),
   source: z.enum(TOURNAMENT_SOURCES),
   name: z.string(),
-  description: nullableText,
   slug: z.string(),
   event: z.object({ id: z.string(), slug: z.string(), name: z.string() }),
   tier: nullableText,
-  beginAt: date.nullable(),
-  endAt: date.nullable(),
-  winnerType: nullableText,
   type: nullableText,
   country: nullableText,
   prizepool: nullableText,
   imageUrl: nullableText,
+  beginAt: date.nullable(),
+  endAt: date.nullable(),
   pickemsEnabled: z.boolean(),
   hasBracket: z.boolean(),
-  createdAt: date,
-  updatedAt: date,
   league: z
-    .object({
-      id: z.string(),
-      pandascoreId: z.number(),
-      name: z.string(),
-      slug: nullableText,
-      url: nullableText,
-      imageUrl: nullableText,
-    })
+    .object({ id: z.string(), name: z.string(), imageUrl: nullableText, url: nullableText })
     .nullable(),
-  winner: participant.nullable(),
+  winner: z.object({ id: z.string(), team }).nullable(),
   participants: z.array(participant),
   matches: z.array(match),
-});
+}) satisfies z.ZodType<TournamentDetailResponse>;
 
 export class CachedTournamentRead {
   constructor(
@@ -94,14 +66,14 @@ export class CachedTournamentRead {
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
-  async findById(id: string): Promise<TournamentResponse | null> {
+  async findById(id: string): Promise<TournamentDetailResponse | null> {
     const key = `tournament:${id}`;
     const cached = await this.readCached(key, id);
     if (cached) return cached;
 
     const model = await this.tournaments.findById(id);
     if (!model) return null;
-    const mapped = mapTournament(model, { includeMatches: true });
+    const mapped = mapTournamentDetail(model);
     try {
       await this.redis.set(key, JSON.stringify(mapped), 60);
     } catch (error) {
@@ -110,7 +82,7 @@ export class CachedTournamentRead {
     return mapped;
   }
 
-  private async readCached(key: string, id: string): Promise<TournamentResponse | null> {
+  private async readCached(key: string, id: string): Promise<TournamentDetailResponse | null> {
     try {
       const cached = await this.redis.get(key);
       if (cached === null) return null;

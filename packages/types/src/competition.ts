@@ -38,3 +38,63 @@ export interface TournamentMatchListItem {
   participants: { id: string; team: { id: string; name: string } }[];
   results: { participant: string; score: number }[];
 }
+
+export interface TournamentDetailParticipant {
+  id: string;
+  team: TeamSummary;
+  players: { id: string; name: string; slug: string; nationality: string | null }[];
+}
+
+export interface TournamentDetailMatch {
+  id: string;
+  publicId: number;
+  slug: string;
+  name: string;
+  status: string | null;
+  beginAt: Date | string | null;
+  endAt: Date | string | null;
+  numberOfGames: number | null;
+  winnerId: string | null;
+  participants: { id: string; team: TeamSummary }[];
+  results: { participant: string; score: number }[];
+  previousMatches: { previousMatch: string; type: "winner" | "loser" }[];
+}
+
+export interface TournamentDetail {
+  id: string;
+  source: TournamentSource;
+  name: string;
+  slug: string;
+  event: TournamentEventRef;
+  tier: string | null;
+  type: string | null;
+  country: string | null;
+  prizepool: string | null;
+  imageUrl: string | null;
+  beginAt: Date | string | null;
+  endAt: Date | string | null;
+  pickemsEnabled: boolean;
+  hasBracket: boolean;
+  league: { id: string; name: string; imageUrl: string | null; url: string | null } | null;
+  winner: { id: string; team: TeamSummary } | null;
+  participants: TournamentDetailParticipant[];
+  matches: TournamentDetailMatch[];
+}
+
+export interface ProfileMatchListItem {
+  id: string;
+  publicId: number;
+  slug: string;
+  status: string | null;
+  beginAt: Date | string | null;
+  endAt: Date | string | null;
+  participants: { id: string; team: { name: string } }[];
+  results: { participant: string; score: number }[];
+  tournament: {
+    id: string;
+    name: string;
+    slug: string;
+    event: TournamentEventRef;
+    league?: { id: string; name: string };
+  };
+}

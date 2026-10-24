@@ -8,7 +8,7 @@ import {
   type TournamentSummary,
 } from "../../domain/competition";
 import { mapMatchListItem } from "./match-list.mapper";
-import { mapTournament } from "./tournament.mapper";
+import { mapTournamentDetail } from "./tournament.mapper";
 
 function participant(name: string): TournamentParticipant {
   return Object.assign(new TournamentParticipant(), {
@@ -79,7 +79,7 @@ describe("match links in API payloads", () => {
       }),
     ];
 
-    const [mapped] = mapTournament(parent, { includeMatches: true }).matches ?? [];
+    const [mapped] = mapTournamentDetail(parent).matches;
 
     expect(mapped).toMatchObject({
       publicId: 7250,

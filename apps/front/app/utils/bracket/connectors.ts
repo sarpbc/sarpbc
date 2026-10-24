@@ -1,5 +1,5 @@
-import type { Match } from "~/types/matches";
-import { getMatchWinnerParticipantId, resolvePreviousMatchId } from "./graph";
+import type { TournamentDetailMatch } from "@sarpbc/types";
+import { getMatchWinnerParticipantId } from "./graph";
 import type {
   BracketConnector,
   BracketLayoutMatch,
@@ -7,17 +7,18 @@ import type {
   BracketZone,
 } from "./types";
 
-export function buildConnectors(matches: Match[], matchIds: Set<string>): BracketConnector[] {
+export function buildConnectors(
+  matches: TournamentDetailMatch[],
+  matchIds: Set<string>,
+): BracketConnector[] {
   const connectors: BracketConnector[] = [];
 
   for (const match of matches) {
-    const links = (match.previousMatches ?? []).filter((link) =>
-      matchIds.has(resolvePreviousMatchId(link.previousMatch)),
-    );
+    const links = (match.previousMatches ?? []).filter((link) => matchIds.has(link.previousMatch));
 
     links.forEach((link, index) => {
       connectors.push({
-        fromMatchId: resolvePreviousMatchId(link.previousMatch),
+        fromMatchId: link.previousMatch,
         toMatchId: match.id,
         linkType: link.type,
         targetSlot: index === 0 ? "a" : "b",
@@ -29,7 +30,7 @@ export function buildConnectors(matches: Match[], matchIds: Set<string>): Bracke
 }
 
 export function toLayoutMatch(
-  match: Match,
+  match: TournamentDetailMatch,
   column: number,
   row: number,
   zone?: BracketZone,
@@ -55,7 +56,7 @@ export function toLayoutMatch(
 }
 
 export function finalizeSectionLayout(
-  matches: Match[],
+  matches: TournamentDetailMatch[],
   layoutMatches: BracketLayoutMatch[],
   maxColumn: number,
 ): BracketSectionLayout {

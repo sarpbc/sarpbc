@@ -1,4 +1,8 @@
-import type { TournamentEventRef, TournamentMatchListItem } from "@sarpbc/types";
+import type {
+  ProfileMatchListItem,
+  TournamentEventRef,
+  TournamentMatchListItem,
+} from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
 
 export interface MatchListItemResponse {
@@ -48,6 +52,10 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
         : undefined,
     },
   };
+}
+
+export function mapProfileMatchListItem(match: Match): ProfileMatchListItem {
+  return { ...mapMatchListItem(match), status: match.status, endAt: match.endAt };
 }
 
 export function mapTournamentMatchListItem(match: Match): TournamentMatchListItem {

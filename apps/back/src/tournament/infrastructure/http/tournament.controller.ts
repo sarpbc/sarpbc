@@ -27,8 +27,12 @@ import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
-import { mapTournamentMatchListItem, withPublicSlug } from "./match-list.mapper";
-import { mapTournament, mapTournamentListItem } from "./tournament.mapper";
+import {
+  mapProfileMatchListItem,
+  mapTournamentMatchListItem,
+  withPublicSlug,
+} from "./match-list.mapper";
+import { mapTournament, mapTournamentDetail, mapTournamentListItem } from "./tournament.mapper";
 
 @Controller("tournaments")
 export class TournamentController {
@@ -74,7 +78,7 @@ export class TournamentController {
   @Post()
   async create(@Body({ schema: CreateTournamentDto }) dto: CreateTournamentDto) {
     const tournament = await this.manualTournamentService.create(dto);
-    return { tournament: mapTournament(tournament) };
+    return { tournament: mapTournamentDetail(tournament) };
   }
 
   @Get(":id")
@@ -94,7 +98,7 @@ export class TournamentController {
     @Body({ schema: UpdateTournamentDto }) dto: UpdateTournamentDto,
   ) {
     const tournament = await this.manualTournamentService.update(id, dto);
-    return { tournament: mapTournament(tournament) };
+    return { tournament: mapTournamentDetail(tournament) };
   }
 
   @RequirePermissions("tournaments.manage")
@@ -210,15 +214,9 @@ export class TournamentController {
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
-  @Get("matches/player/:playerId")
-  async getMatchesByPlayer(@Param("playerId") playerId: string) {
-    const matches = await this.matchService.getMatchesByPlayer(playerId);
-    return { matches: matches.map(withPublicSlug) };
-  }
-
   @Get("matches/team/:teamId")
   async getMatchesByTeam(@Param("teamId") teamId: string) {
     const matches = await this.matchService.getMatchesByTeam(teamId);
-    return { matches: matches.map(withPublicSlug) };
+    return { matches: matches.map(mapProfileMatchListItem) };
   }
 }

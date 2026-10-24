@@ -1,5 +1,5 @@
-import type { TournamentListItem, TournamentMatchListItem } from "@sarpbc/types";
-import type { Tournament, TournamentEvent, TournamentPathResponse } from "~/types/tournament";
+import type { TournamentDetail, TournamentListItem, TournamentMatchListItem } from "@sarpbc/types";
+import type { TournamentEvent, TournamentPathResponse } from "~/types/tournament";
 import { getApiErrorStatus } from "~/utils/apiError";
 
 export async function getAllTournaments(query?: {
@@ -86,12 +86,12 @@ export async function resolveTournamentPath(
   }
 }
 
-export async function getTournamentById(id: string): Promise<Tournament | null> {
+export async function getTournamentById(id: string): Promise<TournamentDetail | null> {
   const config = useRuntimeConfig();
   const url = new URL(`${config.public.apiBase}/tournaments/${id}`);
 
   try {
-    const res = await $fetch<{ tournament?: Tournament }>(url.toString(), {
+    const res = await $fetch<{ tournament?: TournamentDetail }>(url.toString(), {
       method: "GET",
       credentials: "include",
     });

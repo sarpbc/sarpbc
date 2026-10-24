@@ -1,4 +1,4 @@
-import type { Tournament } from "~/types/tournament";
+import type { TournamentDetail } from "@sarpbc/types";
 import type { ManualTournamentInput } from "./tournaments";
 
 export interface ManualTournamentFormState {
@@ -42,7 +42,7 @@ export function formatDateForInput(date: Date | string | null | undefined): stri
   return new Date(date).toISOString().substring(0, 10);
 }
 
-export function tournamentToFormState(tournament: Tournament): ManualTournamentFormState {
+export function tournamentToFormState(tournament: TournamentDetail): ManualTournamentFormState {
   return {
     name: tournament.name ?? "",
     slug: tournament.event.slug,
@@ -51,7 +51,7 @@ export function tournamentToFormState(tournament: Tournament): ManualTournamentF
     beginAt: formatDateForInput(tournament.beginAt),
     endAt: formatDateForInput(tournament.endAt),
     imageUrl: tournament.imageUrl ?? "",
-    teamIds: tournament.participants?.map((participant) => participant.team.id) ?? [],
+    teamIds: tournament.participants.map((participant) => participant.team.id),
   };
 }
 

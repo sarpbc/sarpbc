@@ -1,4 +1,4 @@
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { TournamentDetail, TournamentEventRef } from "@sarpbc/types";
 import type { League } from "./league";
 import type { Match } from "./matches";
 import type { Player } from "./player";
@@ -49,7 +49,7 @@ export interface TournamentParticipant {
 export type TournamentTab = "overview" | "matches";
 
 /** One PandaScore serie or manual tournament. Its stages are `Tournament`s, newest first. */
-export interface TournamentEvent<Stage = Tournament> {
+export interface TournamentEvent<Stage> {
   id: string;
   slug: string;
   name: string;
@@ -64,5 +64,5 @@ export interface TournamentEvent<Stage = Tournament> {
 }
 
 export type TournamentPathResponse =
-  | { kind: "event"; event: TournamentEvent }
-  | { kind: "stage"; tournament: Tournament; tab: TournamentTab };
+  | { kind: "event"; event: TournamentEvent<TournamentDetail> }
+  | { kind: "stage"; tournament: TournamentDetail; tab: TournamentTab };
