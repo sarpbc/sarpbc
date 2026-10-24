@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveReplyTargetLink } from "./reply-target-link.util";
-import type { ReplyRecord as Reply } from "./reply";
+import { resolveReplyTargetLink, type ReplyTargetSource as Reply } from "./reply-target-link.util";
 
 function makeReply(partial: Partial<Reply>): Reply {
   return {

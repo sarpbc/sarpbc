@@ -1,4 +1,5 @@
-import type { ReplyRecord, ReplyTargetType, ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { ReplyTargetType, ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { ReplyRecord } from "./models";
 import type { ReplyReportReason } from "../domain/reply-report-reason";
 export interface ReplyFindOptions {
   includeHidden?: boolean;

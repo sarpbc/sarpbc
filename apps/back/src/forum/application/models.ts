@@ -1,5 +1,5 @@
 import type { ReplyAuthor } from "../../reply/domain/reply";
-import type { PostType } from "./post-type.enum";
+import type { PostType } from "../domain/post-type.enum";
 export interface TopicRecord {
   id: string;
   title: string;

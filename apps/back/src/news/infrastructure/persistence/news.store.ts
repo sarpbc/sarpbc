@@ -2,7 +2,7 @@ import type { EntityManager } from "@mikro-orm/postgresql";
 import type { NewsType } from "@sarpbc/types";
 import { NewsArticle } from "./news-article.entity";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
-import type { NewsArticleRecord } from "../../domain/news-article";
+import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
   return {
@@ -58,7 +58,7 @@ export class MikroNewsStore implements NewsStore {
   async sitemapChunk(
     offset: number,
     limit: number,
-  ): Promise<[import("../../domain/news-article").NewsSitemapRecord[], number]> {
+  ): Promise<[import("../../application/models").NewsSitemapRecord[], number]> {
     const [rows, total] = await this.em.findAndCount(
       NewsArticle,
       { isDraft: false },

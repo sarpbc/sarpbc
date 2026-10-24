@@ -1,5 +1,5 @@
 import type { EntityRef } from "../../common/domain/entity-ref";
-import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "../domain/forum";
+import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "./models";
 import type { ReplyAuthor } from "../../reply/domain/reply";
 export interface PostStore {
   findPaginated(options: { limit?: number; offset?: number }): Promise<PostRecord[]>;

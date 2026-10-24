@@ -3,11 +3,12 @@ import {
   InvalidInputError as BadRequestException,
   NotFoundError as NotFoundException,
 } from "../../common/domain/errors";
-import type { ReplyRecord as Reply, ReplyAuthor as User, ReplyTarget } from "../domain/reply";
+import type { ReplyAuthor as User, ReplyTarget } from "../domain/reply";
+import type { ReplyRecord as Reply } from "./models";
 import type { ReplyWriteScope } from "./ports";
 type Match = NonNullable<Reply["match"]>;
 import { ReplyService } from "./reply.service";
-import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
+import { REPLY_ERROR_CODES } from "../domain/reply-limits";
 
 describe("ReplyService", () => {
   let service: ReplyService;
@@ -124,7 +125,7 @@ describe("ReplyService", () => {
         }),
       ).rejects.toMatchObject({
         detail: expect.objectContaining({
-          code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED,
+          code: REPLY_ERROR_CODES.REPLY_RATE_LIMITED,
         }),
       });
     });

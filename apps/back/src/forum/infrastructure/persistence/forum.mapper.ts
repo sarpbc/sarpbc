@@ -1,5 +1,5 @@
 import type { Post, Topic } from "./forum.entities";
-import type { PostRecord, TopicRecord } from "../../domain/forum";
+import type { PostRecord, TopicRecord } from "../../application/models";
 export function postSnapshot(row: Post): PostRecord {
   return {
     id: row.id,

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { ConflictError } from "../../common/domain/errors";
-import { FORUM_ERROR_CODES } from "../../forum/domain/forum.constants";
-import type { ReplyRecord } from "../domain/reply";
+import type { ReplyRecord } from "../application/models";
+import { REPLY_ERROR_CODES } from "../domain/reply-limits";
 import { transactionalReplies } from "./composition";
 
 const reply: ReplyRecord = {
@@ -104,7 +104,7 @@ describe("reply transaction persistence errors", () => {
         kind: "conflict",
         detail: {
           message: "You already reported this comment.",
-          code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
+          code: REPLY_ERROR_CODES.REPLY_ALREADY_REPORTED,
         },
       });
     },

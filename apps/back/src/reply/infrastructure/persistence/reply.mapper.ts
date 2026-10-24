@@ -1,6 +1,6 @@
 import { toMatchSlug } from "../../../tournament/infrastructure/persistence/competition.mapper";
 import type { Reply } from "../../../forum/infrastructure/persistence/forum.entities";
-import type { ReplyRecord } from "../../domain/reply";
+import type { ReplyRecord } from "../../application/models";
 export function replySnapshot(row: Reply): ReplyRecord {
   return {
     id: row.id,

@@ -6,11 +6,7 @@ import {
   localizedNewsFields,
   type NewsLocale,
 } from "../domain/news-locale.util";
-import type {
-  NewsArticleRecord,
-  CreateNewsArticleInput,
-  UpdateNewsArticleInput,
-} from "../domain/news-article";
+import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
 import slugify from "slugify";
 import type { NewsType } from "@sarpbc/types";

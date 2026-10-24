@@ -4,7 +4,7 @@ import {
   NotFoundError as NotFoundException,
 } from "../../common/domain/errors";
 import { NEWS_SITEMAP_CHUNK_SIZE, NewsService, newsSitemapChunkCount } from "./news.service";
-import type { NewsArticleRecord as NewsArticle } from "../domain/news-article";
+import type { NewsArticleRecord as NewsArticle } from "./models";
 import type { NewsTransaction, NewsWriteScope } from "./ports";
 
 describe("newsSitemapChunkCount", () => {

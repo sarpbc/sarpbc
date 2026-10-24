@@ -1,5 +1,4 @@
-import type { ReplyRecord } from "../../reply/domain/reply";
-import type { ReplyModerationReader } from "../../reply/application/public";
+import type { ReplyModerationReader, ReplyRecord } from "../../reply/application/public";
 import type { ModerationReplyDto } from "./moderation-reply.view";
 import { resolveReplyTargetLink } from "../../reply/domain/reply-target-link.util";
 import type { ReplyTargetLink } from "../../reply/domain/reply-target-link.util";

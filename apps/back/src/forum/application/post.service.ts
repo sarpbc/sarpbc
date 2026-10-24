@@ -16,7 +16,7 @@ import type {
   CreatePostInput,
   CreatedPost,
   PostCreationStatus,
-} from "../domain/forum";
+} from "./models";
 import type { PostStore, ForumTransaction } from "./ports";
 interface PostCreationEligibility {
   canCreate: boolean;

@@ -1,4 +1,4 @@
-import type { ReplyRecord } from "../../reply/domain/reply";
+import type { ReplyRecord } from "../../reply/application/public";
 export interface NotificationRecord {
   id: string;
   createdAt: Date;
