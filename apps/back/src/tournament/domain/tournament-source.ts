@@ -1,12 +1,8 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import { DATA_SOURCES, type DataSource } from "../../common/domain/data-source";
-
-export const TOURNAMENT_SOURCES = DATA_SOURCES;
-
-export type TournamentSource = DataSource;
+import type { DataSource } from "../../common/domain/data-source";
 
 export function assertTournamentUpdateAllowed(
-  source: TournamentSource,
+  source: DataSource,
   patch: {
     imageUrl?: string | null;
     name?: string;
@@ -41,19 +37,14 @@ export function assertTournamentUpdateAllowed(
   }
 }
 
-/** Sync-by-id: never pull PandaScore into a manual or start.gg row. */
-export function assertPandascoreSyncAllowed(source: TournamentSource): void {
+export function assertPandascoreSyncAllowed(source: DataSource): void {
   if (source !== "pandascore") {
     throw new Error(`Cannot sync a ${source} tournament from PandaScore`);
   }
 }
 
-/**
- * Upsert-by-pandascoreId: a manual row matching a PandaScore id is data corruption.
- * Fail loud — do not silently no-op.
- */
 export function assertPandascoreUpsertAllowed(
-  tournament: { id: string; source: TournamentSource },
+  tournament: { id: string; source: DataSource },
   pandascoreId: number,
 ): void {
   if (tournament.source !== "pandascore") {

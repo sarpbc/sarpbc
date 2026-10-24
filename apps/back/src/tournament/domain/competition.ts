@@ -4,7 +4,6 @@ import type { TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../player/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import type { DataSource } from "../../common/domain/data-source";
-import type { TournamentSource } from "./tournament-source";
 export class League {
   id = v4();
   pandascoreId!: number;
@@ -44,7 +43,7 @@ export interface TournamentSummary {
   beginAt: Date | null;
   league: League | null;
   pickemsEnabled: boolean;
-  source: TournamentSource;
+  source: DataSource;
   pandascoreId: number | null;
 }
 export class Match {
@@ -82,7 +81,7 @@ export function matchPublicSlug({ name, participants, tournament }: MatchSlugSou
 export class Tournament {
   id = v4();
   pandascoreId: number | null = null;
-  source: TournamentSource = "pandascore";
+  source: DataSource = "pandascore";
   name = "";
   description: string | null = null;
   /** Stage slug, unique within its event and frozen once allocated. */

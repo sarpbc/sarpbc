@@ -4,7 +4,7 @@ import type {
   TournamentEventRef,
   TournamentListItem,
 } from "@sarpbc/types";
-import type { TournamentSource } from "../../domain/tournament-source";
+import type { DataSource } from "../../../common/domain/data-source";
 import {
   mapPlayer,
   mapTeamSummary,
@@ -37,7 +37,7 @@ export interface TournamentParticipantResponse {
 export interface TournamentResponse {
   id: string;
   pandascoreId: number | null;
-  source: TournamentSource;
+  source: DataSource;
   name: string;
   description: string | null;
   slug: string;

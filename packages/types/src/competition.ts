@@ -2,8 +2,6 @@ import type { TournamentEventRef } from "./tournament-event";
 
 export type DataSource = "pandascore" | "manual" | "startgg";
 
-export type TournamentSource = DataSource;
-
 export interface TeamSummary {
   id: string;
   name: string;
@@ -14,7 +12,7 @@ export interface TeamSummary {
 
 export interface TournamentListItem {
   id: string;
-  source: TournamentSource;
+  source: DataSource;
   name: string;
   slug: string;
   event: TournamentEventRef;
@@ -64,7 +62,7 @@ export interface TournamentDetailMatch {
 
 export interface TournamentDetail {
   id: string;
-  source: TournamentSource;
+  source: DataSource;
   name: string;
   slug: string;
   event: TournamentEventRef;
