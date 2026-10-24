@@ -4,6 +4,7 @@ import type { PatUser } from "../../pat/application/pat.service";
 import { MatchService } from "../../tournament/application/match/match.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { NewsService } from "../../news/application/news.service";
+import { ContractService } from "../../player/application/contract.service";
 import { PlayerService } from "../../player/application/player.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import { SearchService } from "../../search/application/search.service";
@@ -19,6 +20,7 @@ export class McpServerFactory {
   constructor(
     private readonly searchService: SearchService,
     private readonly playerService: PlayerService,
+    private readonly contractService: ContractService,
     private readonly teamService: TeamService,
     private readonly tournamentService: TournamentService,
     private readonly manualTournamentService: ManualTournamentService,
@@ -40,6 +42,7 @@ export class McpServerFactory {
       user,
       searchService: this.searchService,
       playerService: this.playerService,
+      contractService: this.contractService,
       teamService: this.teamService,
       tournamentService: this.tournamentService,
       manualTournamentService: this.manualTournamentService,

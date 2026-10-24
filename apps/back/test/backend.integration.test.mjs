@@ -1018,6 +1018,71 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.equal((await request("GET", "/team/slug/mcp-beta")).json().team.id, alpha);
       assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
 
+      const gamma = await applied("create_team", { name: "MCP Gamma", sourceUrl: source });
+      const veteran = await applied("create_player", {
+        name: "MCP Career Player",
+        sourceUrl: source,
+      });
+      await applied("add_player_to_team", move(veteran, alpha, "2026-02-01"));
+      const career = async () =>
+        (await callTool("list_contracts", { idOrSlug: veteran })).contracts.map((contract) => [
+          contract.team.id,
+          contract.startDate,
+          contract.endDate,
+          contract.role,
+          contract.leaveSourceUrl,
+        ]);
+      const stint = {
+        playerId: veteran,
+        teamId: gamma,
+        startDate: "2024-01-01",
+        endDate: "2025-12-31",
+        role: "loaned",
+        sourceUrl: "https://x.com/integration/status/2",
+      };
+      const stintId = await applied("create_contract", stint);
+      assert.deepEqual(await career(), [
+        [gamma, "2024-01-01", "2025-12-31", "loaned", stint.sourceUrl],
+        [alpha, "2026-02-01", null, "active", null],
+      ]);
+      for (const invalid of [
+        { ...stint, sourceUrl: "https://liquipedia.net/rocketleague/Zen" },
+        { ...stint, endDate: "2023-12-31" },
+      ]) {
+        assert.deepEqual(await callTool("create_contract", invalid), { error: true });
+      }
+      for (const conflicting of [
+        { ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" },
+        { ...stint, startDate: "2026-03-01", endDate: undefined },
+      ]) {
+        const proposal = await callTool("create_contract", conflicting);
+        await review(proposal, "approve", 400);
+        await review(proposal, "reject");
+      }
+
+      const correction = "https://x.com/integration/status/3";
+      const revise = (changes) => ({
+        playerId: veteran,
+        contractId: stintId,
+        sourceUrl: correction,
+        ...changes,
+      });
+      assert.equal(await applied("update_contract", revise({ endDate: "2025-11-30" })), stintId);
+      assert.deepEqual((await career())[0], [
+        gamma,
+        "2024-01-01",
+        "2025-11-30",
+        "loaned",
+        correction,
+      ]);
+      const reopen = await callTool("update_contract", revise({ endDate: null }));
+      await review(reopen, "approve", 400);
+      await review(reopen, "reject");
+      assert.deepEqual(
+        await callTool("update_contract", revise({ contractId: randomUUID(), role: "benched" })),
+        { error: true },
+      );
+
       const startgg = "https://www.start.gg/tournament/integration/event/main";
       const scoutProposal = await callTool("create_player", {
         name: "MCP Startgg Player",

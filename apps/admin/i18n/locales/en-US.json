@@ -175,7 +175,9 @@
         "create_team": "New team",
         "update_team": "Team update",
         "merge_players": "Merge players",
-        "merge_teams": "Merge teams"
+        "merge_teams": "Merge teams",
+        "create_contract": "New contract",
+        "update_contract": "Contract update"
       },
       "fields": {
         "playerId": "Player",
@@ -190,6 +192,10 @@
         "active": "Active",
         "keptId": "Keep",
         "duplicateId": "Duplicate",
+        "contractId": "Contract",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "contractRole": "Contract role",
         "sourceUrl": "Source"
       },
       "playerStatus": {
@@ -204,7 +210,8 @@
       },
       "values": {
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "cleared": "Cleared"
       },
       "messages": {
         "approved": "Proposal approved and applied",

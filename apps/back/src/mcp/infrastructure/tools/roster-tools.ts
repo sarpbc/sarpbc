@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
-import { PlayerStatus, ROSTER_ROLES } from "../../../player/domain/roster";
+import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../player/domain/roster";
 import {
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,
@@ -14,14 +15,24 @@ const sourceUrlSchema = z
   .string()
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
+  .refine(
+    (url) => !/(^|\.)liquipedia\.net$/i.test(new URL(url).hostname),
+    "Liquipedia is not an accepted source; cite the official announcement it relies on",
+  )
   .describe(
-    "Required public source: the official team or player announcement, the PandaScore page, or the start.gg event. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
+    "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
 
 const effectiveDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
   .describe("Date the move takes effect according to the source (YYYY-MM-DD).");
+
+const contractDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
+
+const contractRoleSchema = z
+  .enum(ContractRole)
+  .describe("Contract role: active, benched, or loaned. Defaults to active.");
 
 const countrySchema = z
   .string()
@@ -232,6 +243,70 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
           sourceUrl,
         ),
       ),
+  );
+
+  server.registerTool(
+    "create_contract",
+    {
+      description:
+        "Propose recording a dated contract in a player's career, such as a past stint with a former team. Requires players.manage. Run list_contracts and list_roster_proposals first. Only record periods the source states. A contract without endDate must be with the player's current team; use add_player_to_team for a new move. Once approved, it fails if it overlaps another contract with the same team.",
+      inputSchema: {
+        playerId: z.string().uuid().describe("Player UUID."),
+        teamId: z.string().uuid().describe("Team UUID."),
+        startDate: contractDateSchema.describe("Date the player joined (YYYY-MM-DD)."),
+        endDate: contractDateSchema
+          .optional()
+          .describe("Date the player left (YYYY-MM-DD). Omit only for the current team."),
+        role: contractRoleSchema.optional(),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ playerId, teamId, startDate, endDate, role, sourceUrl }) =>
+      runWriteTool(user, "create_contract", "players.manage", () => {
+        if (endDate && endDate < startDate) {
+          throw new BadRequestException("endDate must not precede startDate.");
+        }
+        return propose(
+          { kind: "create_contract", playerId, teamId, startDate, endDate, contractRole: role },
+          sourceUrl,
+        );
+      }),
+  );
+
+  server.registerTool(
+    "update_contract",
+    {
+      description:
+        "Propose correcting a contract's team, dates, or role. Requires players.manage. Take contractId from list_contracts. Pass null as endDate to reopen the contract, only for the player's current team. Contracts are never deleted through the MCP.",
+      inputSchema: {
+        playerId: z.string().uuid().describe("UUID of the player the contract belongs to."),
+        contractId: z.string().uuid().describe("Contract UUID from list_contracts."),
+        teamId: z.string().uuid().optional().describe("Corrected team UUID."),
+        startDate: contractDateSchema.optional().describe("Corrected start date (YYYY-MM-DD)."),
+        endDate: contractDateSchema
+          .nullable()
+          .optional()
+          .describe("Corrected end date (YYYY-MM-DD), or null to reopen."),
+        role: contractRoleSchema.optional(),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ playerId, contractId, teamId, startDate, endDate, role, sourceUrl }) =>
+      runWriteTool(user, "update_contract", "players.manage", () => {
+        requireUpdateFields({ teamId, startDate, endDate, role });
+        return propose(
+          {
+            kind: "update_contract",
+            contractId,
+            playerId,
+            teamId,
+            startDate,
+            endDate,
+            contractRole: role,
+          },
+          sourceUrl,
+        );
+      }),
   );
 
   server.registerTool(

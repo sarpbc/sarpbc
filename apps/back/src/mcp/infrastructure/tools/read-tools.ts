@@ -3,6 +3,7 @@ import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
 import { isRedistributable } from "../../../common/domain/data-source";
 import {
+  mapCareer,
   mapMatchListResponse,
   mapNewsAdminArticle,
   mapNewsListItem,
@@ -100,6 +101,22 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       runReadTool(async () => {
         const player = await resolvePlayer(ctx, idOrSlug);
         return mapPlayerSummary(player);
+      }),
+  );
+
+  server.registerTool(
+    "list_contracts",
+    {
+      description:
+        "List a player's contracts, past and current, oldest first, with their sources. Read it before create_contract or update_contract so a period is not recorded twice.",
+      inputSchema: {
+        idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
+      },
+    },
+    async ({ idOrSlug }) =>
+      runReadTool(async () => {
+        const player = await resolvePlayer(ctx, idOrSlug);
+        return mapCareer(player, await ctx.contractService.getContractsByPlayer(player.id));
       }),
   );
 

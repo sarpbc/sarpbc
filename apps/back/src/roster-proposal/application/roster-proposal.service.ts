@@ -1,5 +1,6 @@
 import { sourceFromUrl } from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import type { ContractService } from "../../player/application/contract.service";
 import type { PlayerService } from "../../player/application/player.service";
 import type { RosterMergeService } from "../../player/application/roster-merge.service";
 import type { TeamService } from "../../team/application/team.service";
@@ -19,6 +20,7 @@ export interface RosterProposalList {
 
 type Players = Pick<PlayerService, "findById" | "create" | "update" | "joinTeam" | "leaveTeam">;
 type Teams = Pick<TeamService, "findById" | "create" | "update">;
+type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
 
@@ -30,6 +32,7 @@ export class RosterProposalService {
     private readonly transaction: RosterProposalTransaction,
     private readonly players: Players,
     private readonly teams: Teams,
+    private readonly contracts: Contracts,
     private readonly merges: Merges,
     private readonly staff: Staff,
   ) {}
@@ -41,6 +44,9 @@ export class RosterProposalService {
   ): Promise<RosterProposal> {
     for (const id of referencedPlayerIds(change)) await this.requirePlayer(id);
     for (const id of referencedTeamIds(change)) await this.requireTeam(id);
+    if (change.kind === "update_contract") {
+      await this.requireContract(change.playerId, change.contractId);
+    }
     const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
     await this.store.save(proposal);
     return proposal;
@@ -122,6 +128,16 @@ export class RosterProposalService {
         return (await this.merges.mergePlayers(change.keptId, change.duplicateId)).kept.id;
       case "merge_teams":
         return (await this.merges.mergeTeams(change.keptId, change.duplicateId)).kept.id;
+      case "create_contract": {
+        const { playerId, teamId, startDate, endDate, contractRole } = change;
+        const input = { teamId, startDate, endDate, role: contractRole, sourceUrl };
+        return (await this.contracts.recordPeriod(playerId, input)).id;
+      }
+      case "update_contract": {
+        const { contractId, playerId, teamId, startDate, endDate, contractRole } = change;
+        const input = { teamId, startDate, endDate, role: contractRole, sourceUrl };
+        return (await this.contracts.revisePeriod(playerId, contractId, input)).id;
+      }
       default: {
         const exhaustive: never = change;
         return exhaustive;
@@ -134,6 +150,13 @@ export class RosterProposalService {
     if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
     if (player.id !== id) {
       throw new InvalidInputError(`Player "${id}" was merged into "${player.id}"; use that id`);
+    }
+  }
+
+  private async requireContract(playerId: string, contractId: string): Promise<void> {
+    const career = await this.contracts.getContractsByPlayer(playerId);
+    if (!career.some((contract) => contract.id === contractId)) {
+      throw new NotFoundError(`Contract "${contractId}" does not belong to player "${playerId}"`);
     }
   }
 
@@ -151,6 +174,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "add_player_to_team":
     case "remove_player_from_team":
     case "update_player":
+    case "create_contract":
+    case "update_contract":
       return [change.playerId];
     case "merge_players":
       return [change.keptId, change.duplicateId];
@@ -172,7 +197,10 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "remove_player_from_team":
       return [change.teamId];
     case "update_team":
+    case "create_contract":
       return [change.teamId];
+    case "update_contract":
+      return change.teamId ? [change.teamId] : [];
     case "merge_teams":
       return [change.keptId, change.duplicateId];
     case "create_player":

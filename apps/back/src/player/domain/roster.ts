@@ -115,11 +115,40 @@ export class Contract {
   close(endDate: Date, sourceUrl: string): void {
     if (endDate < this.startDate)
       throw new InvalidInputError(
-        `The departure date precedes the contract start (${this.startDate.toISOString().slice(0, 10)}).`,
+        `The departure date precedes the contract start (${isoDay(this.startDate)}).`,
       );
     this.endDate = endDate;
     this.leaveSourceUrl = sourceUrl;
   }
+  /** An open contract stands for the current team, which only roster moves change. */
+  assertFitsCareer(others: Contract[], currentTeamId: string | null): void {
+    if (this.endDate && this.endDate < this.startDate) {
+      throw new InvalidInputError(
+        `The contract ends (${isoDay(this.endDate)}) before it starts (${isoDay(this.startDate)}).`,
+      );
+    }
+    if (!this.endDate && this.team.id !== currentTeamId) {
+      throw new InvalidInputError(
+        `An open contract must be with the player's current team; give ${this.team.name} an end date or record the move with add_player_to_team.`,
+      );
+    }
+    const overlap = others.find(
+      (other) =>
+        other.id !== this.id &&
+        other.team.id === this.team.id &&
+        other.startDate < (this.endDate ?? FOREVER) &&
+        this.startDate < (other.endDate ?? FOREVER),
+    );
+    if (overlap) {
+      throw new InvalidInputError(
+        `This period overlaps contract "${overlap.id}" with ${this.team.name} (${isoDay(overlap.startDate)} to ${overlap.endDate ? isoDay(overlap.endDate) : "now"}); update that contract instead.`,
+      );
+    }
+  }
+}
+const FOREVER = new Date(8.64e15);
+function isoDay(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 export class PlayerPhoto {
   id = "";

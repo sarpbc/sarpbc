@@ -50,3 +50,11 @@ export interface UpdateContractInput {
   endDate?: string | null;
   role?: ContractRole;
 }
+
+export interface SourcedContractInput extends CreateContractInput {
+  sourceUrl: string;
+}
+
+export interface SourcedContractUpdate extends UpdateContractInput {
+  sourceUrl: string;
+}
