@@ -1,18 +1,16 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { AuthenticationError } from "../../common/domain/errors";
-import { google } from "googleapis";
+import * as googleOAuth2 from "@googleapis/oauth2";
 import { AuthService } from "./auth.service";
 import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway";
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
 
-vi.mock("googleapis", () => ({
-  google: {
-    auth: {
-      OAuth2: vi.fn(),
-    },
-    oauth2: vi.fn(),
+vi.mock("@googleapis/oauth2", () => ({
+  auth: {
+    OAuth2: vi.fn(),
   },
+  oauth2: vi.fn(),
 }));
 
 async function waitUntil(predicate: () => boolean): Promise<void> {
@@ -107,7 +105,7 @@ describe("AuthService", () => {
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
       } as const;
 
-      const oauth2Mock: Mock = google.auth.OAuth2 as never;
+      const oauth2Mock: Mock = googleOAuth2.auth.OAuth2 as never;
       oauth2Mock.mockImplementation(function () {
         const client = {
           credentials: {} as OAuthClientCredentials,
@@ -124,7 +122,7 @@ describe("AuthService", () => {
         return client;
       });
 
-      const oauth2ApiMock: Mock = google.oauth2 as never;
+      const oauth2ApiMock: Mock = googleOAuth2.oauth2 as never;
       oauth2ApiMock.mockReturnValue({
         userinfo: {
           get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {

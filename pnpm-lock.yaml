@@ -205,6 +205,9 @@ importers:
       '@fastify/multipart':
         specifier: ^10.1.4
         version: 10.1.4
+      '@googleapis/oauth2':
+        specifier: ^10.0.1
+        version: 10.0.1(supports-color@10.2.2)
       '@mikro-orm/cli':
         specifier: 'catalog:'
         version: 7.2.5
@@ -283,9 +286,6 @@ importers:
       fastify:
         specifier: 5.12.3
         version: 5.12.3
-      googleapis:
-        specifier: ^187.0.0
-        version: 187.0.0(supports-color@10.2.2)
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@10.2.2)
@@ -1442,6 +1442,10 @@ packages:
     resolution: {integrity: sha512-043dyEKD9TDSfz080YH2vobubgg+NIo/9Fw4RAl7sEMpD8Am1DNrrSTl/GpMBjyGHoD/FbJY2QLawY+HSQsEIA==}
     peerDependencies:
       vue: 3.5.42
+
+  '@googleapis/oauth2@10.0.1':
+    resolution: {integrity: sha512-qS5QaGqkaqWh3XUdaRKNxhz2SbwMIWIdDVg94Y2EF3xaIHmGzfKWoMicM1WcrkiDJKVM3TTEHgAFdyYmG0f5BQ==}
+    engines: {node: '>=22.0.0'}
 
   '@hono/node-server@2.1.5':
     resolution: {integrity: sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q==}
@@ -6732,10 +6736,6 @@ packages:
     resolution: {integrity: sha512-wtv/e7JYgmtpIPcSez2EFD/Wx49DPsRX2rj15D7hTwc7tDsP82dcwoX/I4+zE38mu6S9PcghizzzADLf+ZMunA==}
     engines: {node: '>=22'}
 
-  googleapis@187.0.0:
-    resolution: {integrity: sha512-5hpTXGmBIJK43TmZQqQpVxu6IvM/NVy9e2ePbVWSkXSS46+221td6xgtcK9wEKr+MbxusPa0twIYcdGtNgwSWQ==}
-    engines: {node: '>=22.0.0'}
-
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -11086,6 +11086,12 @@ snapshots:
       '@floating-ui/dom': 1.8.0
       '@floating-ui/utils': 0.2.12
       vue: 3.5.42(typescript@6.0.3)
+
+  '@googleapis/oauth2@10.0.1(supports-color@10.2.2)':
+    dependencies:
+      googleapis-common: 9.3.1(supports-color@10.2.2)
+    transitivePeerDependencies:
+      - supports-color
 
   '@hono/node-server@2.1.5(hono@4.13.13)':
     dependencies:
@@ -17883,13 +17889,6 @@ snapshots:
       google-logging-utils: 2.1.0
       qs: 6.16.1
       url-template: 2.0.8
-    transitivePeerDependencies:
-      - supports-color
-
-  googleapis@187.0.0(supports-color@10.2.2):
-    dependencies:
-      google-auth-library: 11.3.1(supports-color@10.2.2)
-      googleapis-common: 9.3.1(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
 

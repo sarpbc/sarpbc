@@ -1,4 +1,4 @@
-import { google } from "googleapis";
+import { auth, oauth2 } from "@googleapis/oauth2";
 import { z } from "zod";
 import { AuthenticationError } from "../../common/domain/errors";
 import type {
@@ -22,14 +22,14 @@ export class GoogleIdentityGateway implements GoogleIdentity {
   ) {}
 
   private client() {
-    return new google.auth.OAuth2(this.clientId, this.clientSecret, this.redirectUri);
+    return new auth.OAuth2(this.clientId, this.clientSecret, this.redirectUri);
   }
 
   async profile(code: string): Promise<GoogleProfile> {
     const client = this.client();
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
-    const { data } = await google.oauth2("v2").userinfo.get({ auth: client });
+    const { data } = await oauth2("v2").userinfo.get({ auth: client });
     const parsed = profileSchema.safeParse(data);
     if (!parsed.success) {
       throw new AuthenticationError(
