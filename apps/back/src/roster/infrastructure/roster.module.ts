@@ -20,14 +20,11 @@ import {
   MikroTeamStore,
 } from "./persistence/roster.store";
 import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
-import { PandascoreCurrentRosterSource } from "./persistence/current-roster.adapter";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
-import {
-  PANDASCORE_GATEWAY,
-  type PandascoreGateway,
-} from "../../pandascore/application/ports/pandascore.gateway.port";
+import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
+import type { CurrentRosterSource } from "../application/ports";
 
 @Module({
   imports: [
@@ -76,9 +73,9 @@ import {
     },
     {
       provide: SyncPandascoreTeamsUseCase,
-      useFactory: (writer: MikroCurrentRosterWriter, gateway: PandascoreGateway) =>
-        new SyncPandascoreTeamsUseCase(writer, new PandascoreCurrentRosterSource(gateway)),
-      inject: [MikroCurrentRosterWriter, PANDASCORE_GATEWAY],
+      useFactory: (writer: MikroCurrentRosterWriter, source: CurrentRosterSource) =>
+        new SyncPandascoreTeamsUseCase(writer, source),
+      inject: [MikroCurrentRosterWriter, PandascoreCurrentRosterSource],
     },
     {
       provide: PlayerService,

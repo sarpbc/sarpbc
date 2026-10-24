@@ -1,11 +1,10 @@
-import type { PandascoreGateway } from "../../../pandascore/application/ports/pandascore.gateway.port";
-import type { SyncCursorRepository } from "../../../pandascore/domain/sync-cursor.repository.interface";
-import type { CompetitionDiagnostics } from "../ports";
+import type { CompetitionFeed } from "../feed";
+import type { CompetitionDiagnostics, SyncCursor } from "../ports";
 import { CompetitionSyncService } from "./competition-sync.service";
 export class SyncPandascoreIncidentsUseCase {
   constructor(
-    private readonly feed: PandascoreGateway,
-    private readonly cursor: SyncCursorRepository,
+    private readonly feed: CompetitionFeed,
+    private readonly cursor: SyncCursor,
     private readonly synchronization: CompetitionSyncService,
     private readonly diagnostics: CompetitionDiagnostics,
     private readonly now: () => Date = () => new Date(),

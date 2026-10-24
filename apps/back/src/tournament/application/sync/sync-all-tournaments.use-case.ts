@@ -1,8 +1,8 @@
-import type { PandascoreGateway } from "../../../pandascore/application/ports/pandascore.gateway.port";
+import type { CompetitionFeed } from "../feed";
 import { CompetitionSyncService } from "./competition-sync.service";
 export class SyncAllTournamentsUseCase {
   constructor(
-    private readonly feed: PandascoreGateway,
+    private readonly feed: CompetitionFeed,
     private readonly synchronization: CompetitionSyncService,
   ) {}
   async execute(): Promise<string[]> {

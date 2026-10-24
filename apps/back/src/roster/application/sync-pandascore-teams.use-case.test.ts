@@ -11,9 +11,9 @@ describe("SyncPandascoreTeamsUseCase", () => {
           nationality: "BR",
           imageUrl: "https://cdn.pandascore.co/drufinho.png",
         },
-        team: { pandascoreId: 10, name: "Team Secret", slug: "team-secret-rl" },
+        currentTeam: { pandascoreId: 10, name: "Team Secret", slug: "team-secret-rl" },
       },
-      { player: { pandascoreId: 2, name: "Comm", slug: "comm" }, team: null },
+      { player: { pandascoreId: 2, name: "Comm", slug: "comm" }, currentTeam: null },
     ];
     const writer = {
       hasTeams: async () => false,

@@ -1,7 +1,16 @@
-import { UpsertPlayerCommand } from "../../application/commands/upsert-player.command";
+import { ImportedPlayer, UpsertPlayerCommand } from "../../../roster/application/imports";
+import { CurrentPlayerDto } from "../dto/incident.dto";
 import { PlayerDto } from "../dto/tournament.dto";
+import { PandascoreTeamMapper } from "./pandascore-team.mapper";
 
 export class PandascorePlayerMapper {
+  static toImportedPlayer(dto: CurrentPlayerDto): ImportedPlayer {
+    return {
+      player: PandascorePlayerMapper.toUpsertCommand(dto),
+      currentTeam: dto.current_team ? PandascoreTeamMapper.toUpsertCommand(dto.current_team) : null,
+    };
+  }
+
   static toUpsertCommand(dto: PlayerDto, teamSlug?: string): UpsertPlayerCommand {
     return {
       pandascoreId: dto.id,
@@ -14,32 +23,6 @@ export class PandascorePlayerMapper {
       imageUrl: dto.image_url ?? undefined,
       role: dto.role,
       teamSlug,
-    };
-  }
-
-  static fromRocketLeaguePlayer(dto: {
-    id: number;
-    name: string;
-    slug: string;
-    first_name?: string;
-    last_name?: string;
-    birthday?: string;
-    nationality?: string;
-    image_url?: string;
-    role?: string | null;
-    current_team?: { slug: string };
-  }): UpsertPlayerCommand {
-    return {
-      pandascoreId: dto.id,
-      name: dto.name,
-      slug: dto.slug,
-      firstName: dto.first_name,
-      lastName: dto.last_name,
-      birthday: dto.birthday ? new Date(dto.birthday) : undefined,
-      nationality: dto.nationality,
-      imageUrl: dto.image_url,
-      role: dto.role ?? null,
-      teamSlug: dto.current_team?.slug,
     };
   }
 }

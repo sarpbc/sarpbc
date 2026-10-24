@@ -3,8 +3,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Player, Team } from "./player.entities";
 import { availablePlayerSlug, findPandascorePlayer } from "./find-pandascore-player";
-import type { UpsertPlayerCommand } from "../../../pandascore/application/commands/upsert-player.command";
-import type { UpsertTeamCommand } from "../../../pandascore/application/commands/upsert-team.command";
+import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../application/imports";
 export class RosterSyncWriter {
   private readonly teams = new Map<string, Team>();
   private readonly players = new Map<number, Player>();

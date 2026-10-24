@@ -11,3 +11,17 @@ export interface UpsertPlayerCommand {
   role?: string | null;
   teamSlug?: string;
 }
+
+export interface UpsertTeamCommand {
+  pandascoreId?: number;
+  name: string;
+  slug: string;
+  location?: string;
+  imageUrl?: string;
+  darkModeImageUrl?: string;
+}
+
+export interface ImportedPlayer {
+  player: UpsertPlayerCommand;
+  currentTeam: UpsertTeamCommand | null;
+}

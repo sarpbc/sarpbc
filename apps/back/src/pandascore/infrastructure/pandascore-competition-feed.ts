@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import type {
+  CompetitionFeed,
+  CompetitionIncident,
   ListIncidentsParams,
-  PandascoreGateway,
-} from "../application/ports/pandascore.gateway.port";
-import type { CompetitionIncident, ImportedPlayer } from "../application/models/competition-feed";
+} from "../../tournament/application/feed";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { tournamentSchema } from "./dto/tournament.dto";
 import { matchSchema } from "./dto/match.dto";
-import { currentPlayerSchema, incidentSchema } from "./dto/incident.dto";
+import { incidentSchema } from "./dto/incident.dto";
 import { PandascoreTournamentMapper } from "./mappers/pandascore-tournament.mapper";
 import { PandascoreMatchMapper } from "./mappers/pandascore-match.mapper";
 import { PandascoreTeamMapper } from "./mappers/pandascore-team.mapper";
@@ -15,7 +15,7 @@ import { PandascorePlayerMapper } from "./mappers/pandascore-player.mapper";
 import { PandascoreLeagueMapper } from "./mappers/pandascore-league.mapper";
 import { PandascoreSerieMapper, parseProviderDeletion } from "./mappers/pandascore-serie.mapper";
 @Injectable()
-export class PandascoreGatewayImpl implements PandascoreGateway {
+export class PandascoreCompetitionFeed implements CompetitionFeed {
   constructor(private readonly apiClient: PandascoreApiClient) {}
   async getTournaments() {
     return (await this.apiClient.getTournaments()).map((v) =>
@@ -37,15 +37,6 @@ export class PandascoreGatewayImpl implements PandascoreGateway {
     return (await this.apiClient.getTournamentMatches(id)).map((v) =>
       PandascoreMatchMapper.toUpsertCommand(matchSchema.parse(v)),
     );
-  }
-  async getRocketLeaguePlayers(): Promise<ImportedPlayer[]> {
-    return (await this.apiClient.getRocketLeaguePlayers()).map((v) => {
-      const p = currentPlayerSchema.parse(v);
-      return {
-        player: PandascorePlayerMapper.toUpsertCommand(p),
-        currentTeam: p.current_team ? PandascoreTeamMapper.toUpsertCommand(p.current_team) : null,
-      };
-    });
   }
   async listIncidents(params: ListIncidentsParams = {}): Promise<CompetitionIncident[]> {
     return (await this.apiClient.listIncidents(params)).map((v) => {
@@ -86,12 +77,7 @@ export class PandascoreGatewayImpl implements PandascoreGateway {
             ...base,
             changeType,
             kind: i.type,
-            command: {
-              player: PandascorePlayerMapper.toUpsertCommand(i.object),
-              currentTeam: i.object.current_team
-                ? PandascoreTeamMapper.toUpsertCommand(i.object.current_team)
-                : null,
-            },
+            command: PandascorePlayerMapper.toImportedPlayer(i.object),
           };
         case "league":
           return {

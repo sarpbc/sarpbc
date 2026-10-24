@@ -5,8 +5,7 @@ import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { Team } from "../../../roster/domain/roster";
 import type { CompetitionWriteScope, EventWriter } from "../ports";
-import type { UpsertTournamentCommand } from "../../../pandascore/application/commands/upsert-tournament.command";
-import type { CompetitionIncident } from "../../../pandascore/application/models/competition-feed";
+import type { CompetitionIncident, UpsertTournamentCommand } from "../feed";
 import type { MatchTiming } from "../../domain/tournament-end";
 
 const copy = <T extends object>(value: T): T =>

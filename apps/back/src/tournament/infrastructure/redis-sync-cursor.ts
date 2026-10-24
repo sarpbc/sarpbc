@@ -1,12 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { RedisService } from "../../infrastructure/redis/redis.service";
-import {
-  PANDASCORE_SYNC_CURSOR_KEY,
-  SyncCursorRepository,
-} from "../domain/sync-cursor.repository.interface";
+import type { RedisService } from "../../infrastructure/redis/redis.service";
+import type { SyncCursor } from "../application/ports";
 
-@Injectable()
-export class RedisSyncCursorRepository implements SyncCursorRepository {
+export const PANDASCORE_SYNC_CURSOR_KEY = "pandascore:sync:additions:cursor";
+
+export class RedisSyncCursor implements SyncCursor {
   constructor(private readonly redisService: RedisService) {}
 
   async getLastSyncAt(): Promise<Date | null> {

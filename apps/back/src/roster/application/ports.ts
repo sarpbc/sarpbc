@@ -1,6 +1,5 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
-import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
-import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
+import type { ImportedPlayer } from "./imports";
 import type { PlayerSearchProps, TeamSearchProps } from "./search-props";
 export interface PlayerQueries {
   search(options: Partial<PlayerSearchProps>): Promise<Player[]>;
@@ -71,14 +70,10 @@ export interface RosterMergeWriteScope extends RosterWriteScope {
 export interface RosterMergeTransaction {
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T>;
 }
-export interface CurrentRoster {
-  player: UpsertPlayerCommand;
-  team: UpsertTeamCommand | null;
-}
 export interface CurrentRosterSource {
-  load(): Promise<CurrentRoster[]>;
+  load(): Promise<ImportedPlayer[]>;
 }
 export interface CurrentRosterWriter {
   hasTeams(): Promise<boolean>;
-  syncCurrentTeams(roster: CurrentRoster[]): Promise<void>;
+  syncCurrentTeams(roster: ImportedPlayer[]): Promise<void>;
 }

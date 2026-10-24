@@ -1,5 +1,4 @@
-import type { UpsertSerieCommand } from "../../application/commands/upsert-serie.command";
-import type { ProviderDeletion } from "../../application/models/competition-feed";
+import type { ProviderDeletion, UpsertSerieCommand } from "../../../tournament/application/feed";
 import type { SerieDto } from "../dto/tournament.dto";
 
 export class PandascoreSerieMapper {

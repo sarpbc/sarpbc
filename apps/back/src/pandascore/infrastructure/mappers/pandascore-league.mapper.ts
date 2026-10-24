@@ -1,4 +1,4 @@
-import { UpsertLeagueCommand } from "../../application/commands/upsert-league.command";
+import { UpsertLeagueCommand } from "../../../tournament/application/feed";
 import { LeagueDto } from "../dto/tournament.dto";
 
 export class PandascoreLeagueMapper {
