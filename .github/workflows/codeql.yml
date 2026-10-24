@@ -28,7 +28,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Interpreted language: extract source, do not autobuild.
           - language: javascript-typescript
             build-mode: none
     steps:

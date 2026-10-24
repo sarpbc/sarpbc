@@ -1,6 +1,5 @@
 version: 2
 updates:
-  # pnpm is configured as the npm ecosystem. The root lockfile covers the workspace.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -8,10 +7,6 @@ updates:
     commit-message:
       prefix: chore
       include: scope
-    # Default branch names include versions (dots) and scoped paths. Those fail
-    # scripts/check-git-names.mjs, which allows only <type>/<kebab-case>.
-    # Grouped names render as chore/npm-updates-<digest>. Security updates
-    # need their own group too, otherwise they fall back to per-package names.
     pull-request-branch-name:
       prefix: chore
       template: "chore/{name}"
