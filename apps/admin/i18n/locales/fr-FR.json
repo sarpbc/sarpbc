@@ -175,7 +175,9 @@
         "create_team": "Nouvelle équipe",
         "update_team": "Modification de l'équipe",
         "merge_players": "Fusion de joueurs",
-        "merge_teams": "Fusion d'équipes"
+        "merge_teams": "Fusion d'équipes",
+        "create_contract": "Nouveau contrat",
+        "update_contract": "Modification du contrat"
       },
       "fields": {
         "playerId": "Joueur",
@@ -190,6 +192,10 @@
         "active": "Active",
         "keptId": "À conserver",
         "duplicateId": "Doublon",
+        "contractId": "Contrat",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "contractRole": "Rôle sous contrat",
         "sourceUrl": "Source"
       },
       "playerStatus": {
@@ -204,7 +210,8 @@
       },
       "values": {
         "yes": "Oui",
-        "no": "Non"
+        "no": "Non",
+        "ongoing": "En cours"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",

@@ -1,6 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { Module } from "@nestjs/common";
+import { ContractService } from "../../player/application/contract.service";
 import { PlayerService } from "../../player/application/player.service";
 import { RosterMergeService } from "../../player/application/roster-merge.service";
 import { PlayerModule } from "../../player/infrastructure/player.module";
@@ -26,6 +27,7 @@ import {
         em: EntityManager,
         players: PlayerService,
         teams: TeamService,
+        contracts: ContractService,
         merges: RosterMergeService,
         users: UserService,
       ) =>
@@ -34,10 +36,18 @@ import {
           new MikroRosterProposalTransaction(em),
           players,
           teams,
+          contracts,
           merges,
           users,
         ),
-      inject: [EntityManager, PlayerService, TeamService, RosterMergeService, UserService],
+      inject: [
+        EntityManager,
+        PlayerService,
+        TeamService,
+        ContractService,
+        RosterMergeService,
+        UserService,
+      ],
     },
   ],
   exports: [RosterProposalService],

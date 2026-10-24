@@ -1,5 +1,10 @@
 import { NotFoundError, UnprocessableError } from "../../common/domain/errors";
-import { CreateContractInput, UpdateContractInput } from "./inputs";
+import {
+  CreateContractInput,
+  SourcedContractInput,
+  SourcedContractUpdate,
+  UpdateContractInput,
+} from "./inputs";
 import { CreateTeamContractInput, UpdateTeamContractInput } from "../../team/application/inputs";
 
 import { ITeamRepository } from "../../team/application/ports/team.repository.interface";
@@ -71,6 +76,53 @@ export class ContractService {
   }
 
   async create(playerId: string, dto: CreateContractInput): Promise<Contract> {
+    const contract = await this.build(playerId, dto);
+    await this.contractRepository.save(contract);
+    return contract;
+  }
+
+  async recordPeriod(
+    playerId: string,
+    { sourceUrl, ...dto }: SourcedContractInput,
+  ): Promise<Contract> {
+    const contract = await this.build(playerId, dto);
+    contract.joinSourceUrl = sourceUrl;
+    if (contract.endDate) contract.leaveSourceUrl = sourceUrl;
+    await this.saveInCareer(contract);
+    return contract;
+  }
+
+  async update(playerId: string, contractId: string, dto: UpdateContractInput): Promise<Contract> {
+    const contract = await this.edit(playerId, contractId, dto);
+    await this.contractRepository.save(contract);
+    return contract;
+  }
+
+  async revisePeriod(
+    playerId: string,
+    contractId: string,
+    { sourceUrl, ...dto }: SourcedContractUpdate,
+  ): Promise<Contract> {
+    const contract = await this.edit(playerId, contractId, dto);
+    if (dto.teamId !== undefined || dto.startDate !== undefined) {
+      contract.joinSourceUrl = sourceUrl;
+    }
+    if (dto.endDate !== undefined) {
+      contract.leaveSourceUrl = dto.endDate ? sourceUrl : null;
+    }
+    await this.saveInCareer(contract);
+    return contract;
+  }
+
+  async delete(playerId: string, contractId: string): Promise<void> {
+    const contract = await this.contractRepository.findById(contractId);
+    if (!contract || contract.player.id !== playerId) {
+      throw new NotFoundError(`Contract with id "${contractId}" not found`);
+    }
+    await this.contractRepository.delete(contract);
+  }
+
+  private async build(playerId: string, dto: CreateContractInput): Promise<Contract> {
     const player = await this.playerRepository.findById(playerId);
     if (!player) {
       throw new NotFoundError(`Player with id "${playerId}" not found`);
@@ -87,12 +139,14 @@ export class ContractService {
     contract.startDate = new Date(dto.startDate);
     contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
     contract.role = dto.role ?? ContractRole.ACTIVE;
-
-    await this.contractRepository.save(contract);
     return contract;
   }
 
-  async update(playerId: string, contractId: string, dto: UpdateContractInput): Promise<Contract> {
+  private async edit(
+    playerId: string,
+    contractId: string,
+    dto: UpdateContractInput,
+  ): Promise<Contract> {
     const contract = await this.contractRepository.findById(contractId);
     if (!contract || contract.player.id !== playerId) {
       throw new NotFoundError(`Contract with id "${contractId}" not found`);
@@ -117,16 +171,13 @@ export class ContractService {
     if (dto.role !== undefined) {
       contract.role = dto.role;
     }
-
-    await this.contractRepository.save(contract);
     return contract;
   }
 
-  async delete(playerId: string, contractId: string): Promise<void> {
-    const contract = await this.contractRepository.findById(contractId);
-    if (!contract || contract.player.id !== playerId) {
-      throw new NotFoundError(`Contract with id "${contractId}" not found`);
-    }
-    await this.contractRepository.delete(contract);
+  private async saveInCareer(contract: Contract): Promise<void> {
+    const player = await this.playerRepository.findById(contract.player.id);
+    const career = await this.contractRepository.findByPlayer(contract.player.id);
+    contract.assertFitsCareer(career, player?.team?.id ?? null);
+    await this.contractRepository.save(contract);
   }
 }

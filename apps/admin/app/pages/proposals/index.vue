@@ -27,6 +27,8 @@ function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
     case "create_player":
     case "update_player":
     case "merge_players":
+    case "create_contract":
+    case "update_contract":
       return "players.manage";
     case "create_team":
     case "update_team":
@@ -65,7 +67,8 @@ function nameOf(id: string): string {
   return names.value[id] ?? id;
 }
 
-function formatValue(key: string, value: string | boolean): string {
+function formatValue(key: string, value: string | boolean | null): string {
+  if (value === null) return t("page.proposals.values.ongoing");
   if (value === true) return t("page.proposals.values.yes");
   if (value === false) return t("page.proposals.values.no");
   switch (key) {
@@ -73,16 +76,22 @@ function formatValue(key: string, value: string | boolean): string {
       return t(`page.proposals.playerStatus.${value}`);
     case "role":
       return t(`page.proposals.roles.${value}`);
+    case "contractRole":
+      return t(`common.contractRole.${value}`);
     default:
       return nameOf(value);
   }
 }
 
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
-  const fields: [string, string | boolean | undefined][] = Object.entries(proposal.change);
+  const { change } = proposal;
+  const shown =
+    change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
+  const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);
   return fields
     .filter(
-      (field): field is [string, string | boolean] => field[0] !== "kind" && field[1] !== undefined,
+      (field): field is [string, string | boolean | null] =>
+        field[0] !== "kind" && field[1] !== undefined,
     )
     .map(([key, value]) => ({
       key,

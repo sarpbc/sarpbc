@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Player, PlayerStatus, Team } from "../../player/domain/roster";
+import { Contract, Player, PlayerStatus, Team } from "../../player/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -31,6 +31,11 @@ function setup() {
     create: vi.fn(async () => Object.assign(new Team(), { id: "new-team" })),
     update: vi.fn(),
   };
+  const contracts = {
+    getContractsByPlayer: vi.fn(async () => [Object.assign(new Contract(), { id: "zen-kc" })]),
+    recordPeriod: vi.fn(async () => Object.assign(new Contract(), { id: "new-contract" })),
+    revisePeriod: vi.fn(async () => Object.assign(new Contract(), { id: "zen-kc" })),
+  };
   const merges = { mergePlayers: vi.fn(), mergeTeams: vi.fn() };
   const staff = { allowed: true };
   const service = new RosterProposalService(
@@ -38,12 +43,13 @@ function setup() {
     { run: (work) => work(store) },
     players,
     teams,
+    contracts,
     merges,
     {
       hasAnyPermission: async () => staff.allowed,
     },
   );
-  return { saved, store, players, staff, service };
+  return { saved, store, players, contracts, staff, service };
 }
 
 describe("RosterProposalService", () => {
@@ -51,11 +57,12 @@ describe("RosterProposalService", () => {
   let saved: ReturnType<typeof setup>["saved"];
   let store: ReturnType<typeof setup>["store"];
   let players: ReturnType<typeof setup>["players"];
+  let contracts: ReturnType<typeof setup>["contracts"];
   let staff: ReturnType<typeof setup>["staff"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, store, players, staff, service } = setup());
+    ({ saved, store, players, contracts, staff, service } = setup());
   });
 
   const addZen = () =>
@@ -137,6 +144,63 @@ describe("RosterProposalService", () => {
       status: PlayerStatus.FREE_AGENT,
       source: "startgg",
     });
+  });
+
+  it("records a sourced career contract on approval", async () => {
+    const { id } = await service.propose(
+      {
+        kind: "create_contract",
+        playerId: "zen",
+        teamId: "kc",
+        startDate: "2022-01-10",
+        endDate: "2023-06-30",
+      },
+      source,
+      "journalist",
+    );
+
+    expect((await service.approve(id, "admin")).entityId).toBe("new-contract");
+    expect(contracts.recordPeriod).toHaveBeenCalledWith("zen", {
+      teamId: "kc",
+      startDate: "2022-01-10",
+      endDate: "2023-06-30",
+      role: undefined,
+      sourceUrl: source,
+    });
+  });
+
+  it("only proposes updates to a contract of the named player", async () => {
+    await expect(
+      service.propose(
+        { kind: "update_contract", contractId: "other", playerId: "zen", endDate: null },
+        source,
+        "journalist",
+      ),
+    ).rejects.toThrow(NotFoundError);
+
+    const { id } = await service.propose(
+      { kind: "update_contract", contractId: "zen-kc", playerId: "zen", endDate: "2024-01-01" },
+      source,
+      "journalist",
+    );
+    await service.approve(id, "admin");
+
+    expect(contracts.revisePeriod).toHaveBeenCalledWith("zen", "zen-kc", {
+      teamId: undefined,
+      startDate: undefined,
+      endDate: "2024-01-01",
+      role: undefined,
+      sourceUrl: source,
+    });
+  });
+
+  it("refuses to apply a change to a player merged since the proposal", async () => {
+    const { id } = await addZen();
+    players.findById.mockResolvedValueOnce(Object.assign(new Player(), { id: "kept" }));
+
+    await expect(service.approve(id, "admin")).rejects.toThrow('was merged into "kept"');
+    expect(players.joinTeam).not.toHaveBeenCalled();
+    expect(saved.get(id)?.status).toBe("pending");
   });
 
   it("keeps a proposal pending when the change fails", async () => {

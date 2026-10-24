@@ -1,5 +1,5 @@
 import { isRedistributable } from "../../common/domain/data-source";
-import type { Player, Team } from "../../player/domain/roster";
+import type { Contract, Player, Team } from "../../player/domain/roster";
 import type { Match, Tournament } from "../../tournament/domain/competition";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
@@ -30,6 +30,32 @@ export function mapPlayerSummary(player: Player) {
       : null,
     url: playerUrl(player.slug),
   };
+}
+
+export function mapCareer(player: Player, contracts: Contract[]) {
+  return {
+    player: {
+      id: player.id,
+      slug: player.slug,
+      name: player.name,
+      currentTeamId: player.team?.id ?? null,
+    },
+    contracts: [...contracts]
+      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+      .map((contract) => ({
+        id: contract.id,
+        team: { id: contract.team.id, slug: contract.team.slug, name: contract.team.name },
+        startDate: isoDay(contract.startDate),
+        endDate: contract.endDate ? isoDay(contract.endDate) : null,
+        role: contract.role,
+        joinSourceUrl: contract.joinSourceUrl,
+        leaveSourceUrl: contract.leaveSourceUrl,
+      })),
+  };
+}
+
+function isoDay(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 export function mapTeamSummary(team: Team, players?: Player[]) {

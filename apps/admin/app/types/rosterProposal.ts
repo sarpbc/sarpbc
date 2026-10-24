@@ -1,3 +1,5 @@
+import type { ContractRole } from "./contract";
+
 export type RosterProposalStatus = "pending" | "applied" | "rejected";
 
 export type RosterChange =
@@ -34,7 +36,24 @@ export type RosterChange =
       active?: boolean;
     }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
-  | { kind: "merge_teams"; keptId: string; duplicateId: string };
+  | { kind: "merge_teams"; keptId: string; duplicateId: string }
+  | {
+      kind: "create_contract";
+      playerId: string;
+      teamId: string;
+      startDate: string;
+      endDate?: string;
+      contractRole?: ContractRole;
+    }
+  | {
+      kind: "update_contract";
+      contractId: string;
+      playerId: string;
+      teamId?: string;
+      startDate?: string;
+      endDate?: string | null;
+      contractRole?: ContractRole;
+    };
 
 export interface RosterProposal {
   id: string;

@@ -1,5 +1,5 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { PlayerStatus, RosterRole } from "../../player/domain/roster";
+import type { ContractRole, PlayerStatus, RosterRole } from "../../player/domain/roster";
 import type { StaffPermission } from "../../user/domain/staff-access";
 
 export type RosterChange =
@@ -36,7 +36,24 @@ export type RosterChange =
       active?: boolean;
     }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
-  | { kind: "merge_teams"; keptId: string; duplicateId: string };
+  | { kind: "merge_teams"; keptId: string; duplicateId: string }
+  | {
+      kind: "create_contract";
+      playerId: string;
+      teamId: string;
+      startDate: string;
+      endDate?: string;
+      contractRole?: ContractRole;
+    }
+  | {
+      kind: "update_contract";
+      contractId: string;
+      playerId: string;
+      teamId?: string;
+      startDate?: string;
+      endDate?: string | null;
+      contractRole?: ContractRole;
+    };
 
 export type RosterChangeKind = RosterChange["kind"];
 
@@ -51,6 +68,8 @@ export function requiredPermission(kind: RosterChangeKind): StaffPermission {
     case "create_player":
     case "update_player":
     case "merge_players":
+    case "create_contract":
+    case "update_contract":
       return "players.manage";
     case "create_team":
     case "update_team":
