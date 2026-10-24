@@ -7,6 +7,7 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PickemChoice } from "./persistence/pickem.entity";
 import { PickemController } from "./http/pickem.controller";
 import { PickemService } from "../application/pickem.service";
+import { MatchDecidedListener } from "./match-decided.listener";
 import { UserModule } from "../../../user/infrastructure/user.module";
 
 @Module({
@@ -26,6 +27,7 @@ import { UserModule } from "../../../user/infrastructure/user.module";
       },
       inject: [EntityManager],
     },
+    MatchDecidedListener,
   ],
   exports: [PickemService],
 })

@@ -16,6 +16,7 @@ import { HealthModule } from "./infrastructure/health/health.module";
 import configuration from "./infrastructure/config/configuration";
 import { validateEnv } from "./infrastructure/config/env.validation";
 import { AllExceptionsFilter } from "./common/infrastructure/http/filters/all-exceptions.filter";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
 import { GameModule } from "./game/infrastructure/game.module";
 import { ForumModule } from "./forum/infrastructure/forum.module";
@@ -59,6 +60,7 @@ import mikroOrmConfig from "./mikro-orm.config";
       ...mikroOrmConfig,
       driver: PostgreSqlDriver,
     }),
+    EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     UserModule,
     AuthModule,

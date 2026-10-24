@@ -1,13 +1,14 @@
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match, matchPublicSlug } from "../../domain/competition";
+import { matchDecided } from "../../domain/match-decided";
 import type { MatchListQueryOptions } from "./match-list-filters";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type {
   CompetitionDiagnostics,
+  CompetitionEvents,
   CompetitionTransaction,
   MatchQueries,
-  MatchScoring,
 } from "../ports";
 import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
 import {
@@ -56,7 +57,7 @@ export class MatchService {
   constructor(
     private readonly reads: MatchQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly scoring: MatchScoring,
+    private readonly events: CompetitionEvents,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
 
@@ -240,7 +241,7 @@ export class MatchService {
       upsertMatchInTransaction(matches, tournamentId, input),
     );
     const match = await this.committed(written.id);
-    await this.score(match);
+    await this.publishDecided(match);
     return match;
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
@@ -248,7 +249,7 @@ export class MatchService {
       setWinnerInTransaction(matches, matchId, winnerId),
     );
     const match = await this.committed(written.id);
-    await this.score(match);
+    await this.publishDecided(match);
     return match;
   }
   async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
@@ -256,7 +257,7 @@ export class MatchService {
       updateMatchInTransaction(matches, matchId, input),
     );
     const match = await this.committed(written.id);
-    await this.score(match);
+    await this.publishDecided(match);
     return match;
   }
   private async committed(id: string): Promise<Match> {
@@ -264,12 +265,12 @@ export class MatchService {
     if (!match) throw new NotFoundError("Match not found");
     return match;
   }
-  private async score(match: Match) {
-    if (match.winner && (match.status === "finished" || match.endAt)) {
+  private async publishDecided(match: Match) {
+    if (match.isDecided()) {
       try {
-        await this.scoring.autoScoreMatch(match.id);
+        await this.events.publish(matchDecided(match.id));
       } catch (error) {
-        this.diagnostics.error("Automatic match scoring failed", error);
+        this.diagnostics.error("MatchDecided publication failed", error);
       }
     }
   }

@@ -30,7 +30,11 @@ import { SyncNewTournamentsUseCase } from "../application/sync/sync-new-tourname
 import { CompetitionQueries } from "./persistence/competition.queries";
 import { MikroOrmCompetitionTransaction } from "./persistence/competition.transaction";
 import { CompetitionAwardQueries } from "./persistence/player-award.store";
-import { CompetitionCacheAdapter, competitionDiagnostics } from "./competition.adapters";
+import {
+  CompetitionCacheAdapter,
+  CompetitionEventsAdapter,
+  competitionDiagnostics,
+} from "./competition.adapters";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
@@ -42,8 +46,6 @@ import {
   SYNC_CURSOR_REPOSITORY,
   type SyncCursorRepository,
 } from "../../pandascore/domain/sync-cursor.repository.interface";
-import { PickemModule } from "../../game/pickem/infrastructure/pickem.module";
-import { PickemService } from "../../game/pickem/application/pickem.service";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { CachedTournamentRead } from "./cache/cached-tournament.read";
 import { RedisService } from "../../infrastructure/redis/redis.service";
@@ -63,7 +65,6 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     PandascoreModule,
     RedisModule,
     ConfigModule,
-    PickemModule,
     ReplyModule,
   ],
   controllers: [TournamentController, EventController, MatchController],
@@ -80,6 +81,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [TournamentService, RedisService],
     },
     CompetitionCacheAdapter,
+    CompetitionEventsAdapter,
     TournamentCron,
     {
       provide: CompetitionQueries,
@@ -102,13 +104,13 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
         cache: CompetitionCacheAdapter,
-        scoring: PickemService,
-      ) => new CompetitionSyncService(reads, tx, cache, scoring, competitionDiagnostics),
+        events: CompetitionEventsAdapter,
+      ) => new CompetitionSyncService(reads, tx, cache, events, competitionDiagnostics),
       inject: [
         CompetitionQueries,
         MikroOrmCompetitionTransaction,
         CompetitionCacheAdapter,
-        PickemService,
+        CompetitionEventsAdapter,
       ],
     },
     {
@@ -178,9 +180,9 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       useFactory: (
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
-        scoring: PickemService,
-      ) => new MatchService(reads, tx, scoring, competitionDiagnostics),
-      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, PickemService],
+        events: CompetitionEventsAdapter,
+      ) => new MatchService(reads, tx, events, competitionDiagnostics),
+      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionEventsAdapter],
     },
     {
       provide: PlayerAwardService,

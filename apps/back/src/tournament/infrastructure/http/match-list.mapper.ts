@@ -78,6 +78,8 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
   };
 }
 
-export function withPublicSlug(match: Match): Omit<Match, "slug"> & { slug: string } {
+export function withPublicSlug(
+  match: Match,
+): Omit<Match, "slug" | "hasEnded" | "isDecided"> & { slug: string } {
   return { ...match, slug: matchPublicSlug(match) };
 }

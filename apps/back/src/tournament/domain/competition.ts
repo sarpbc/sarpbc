@@ -64,6 +64,12 @@ export class Match {
   createdAt = new Date();
   updatedAt = new Date();
   tournament!: TournamentSummary;
+  hasEnded(): boolean {
+    return this.status === "finished" || this.endAt !== null;
+  }
+  isDecided(): boolean {
+    return this.winner !== null && this.hasEnded();
+  }
 }
 export interface MatchSlugSource {
   name: string;
