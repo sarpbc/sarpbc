@@ -10,6 +10,10 @@ updates:
     pull-request-branch-name:
       prefix: chore
       template: "chore/{name}"
+    ignore:
+      # TypeScript 7 drops the JS API that vue-tsc and apps/back/scripts/check-architecture.mjs use.
+      - dependency-name: typescript
+        versions: [">=7"]
     groups:
       npm-updates:
         applies-to: version-updates
