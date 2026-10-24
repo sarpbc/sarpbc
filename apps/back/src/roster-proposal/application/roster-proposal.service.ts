@@ -14,14 +14,13 @@ import type { RosterProposalTransaction, RosterProposalStore } from "./ports";
 
 export interface RosterProposalList {
   proposals: RosterProposal[];
-  /** Player, team and proposer names keyed by id. */
   names: Record<string, string>;
 }
 
 type Players = Pick<PlayerService, "findById" | "create" | "update" | "joinTeam" | "leaveTeam">;
 type Teams = Pick<TeamService, "findById" | "create" | "update">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
-type Staff = Pick<UserService, "hasAnyPermission" | "findById">;
+type Staff = Pick<UserService, "hasAnyPermission">;
 
 const LIST_LIMIT = 100;
 
@@ -49,14 +48,11 @@ export class RosterProposalService {
 
   async list(status: RosterProposalStatus): Promise<RosterProposalList> {
     const proposals = await this.store.list(status, LIST_LIMIT);
-    const names: Record<string, string> = {};
-    for (const { change, proposedById } of proposals) {
-      names[proposedById] ??= (await this.staff.findById(proposedById))?.userName ?? proposedById;
-      for (const id of referencedPlayerIds(change))
-        names[id] ??= (await this.players.findById(id))?.name ?? id;
-      for (const id of referencedTeamIds(change))
-        names[id] ??= (await this.teams.findById(id))?.name ?? id;
-    }
+    const names = await this.store.names({
+      players: [...new Set(proposals.flatMap(({ change }) => referencedPlayerIds(change)))],
+      teams: [...new Set(proposals.flatMap(({ change }) => referencedTeamIds(change)))],
+      users: [...new Set(proposals.map(({ proposedById }) => proposedById))],
+    });
     return { proposals, names };
   }
 

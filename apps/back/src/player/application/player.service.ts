@@ -30,7 +30,6 @@ export class PlayerService {
     return this.playerRepository.searchAndCount(options);
   }
 
-  /** A merged duplicate resolves to the player it was merged into. */
   async findById(id: string): Promise<Player | null> {
     return this.resolveMerged(await this.playerRepository.findById(id));
   }
@@ -159,8 +158,10 @@ export class PlayerService {
         await contracts.save(contract);
       }
 
-      if (player.team?.id === input.teamId) player.team = null;
-      player.status = input.status;
+      if (player.team?.id === input.teamId) {
+        player.team = null;
+        player.status = input.status;
+      }
       await players.save(player);
       return { player, opened: null, closed };
     });

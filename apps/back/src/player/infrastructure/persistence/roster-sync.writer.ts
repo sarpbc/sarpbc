@@ -16,7 +16,12 @@ export class RosterSyncWriter {
       (input.pandascoreId !== undefined
         ? await this.em.findOne(Team, { pandascoreId: input.pandascoreId })
         : null) ??
-      (await this.em.findOne(Team, { slug: input.slug, pandascoreId: null, mergedInto: null }));
+      (await this.em.findOne(Team, {
+        slug: input.slug,
+        pandascoreId: null,
+        mergedInto: null,
+        source: { $ne: "startgg" },
+      }));
     const row = existing ?? new Team();
     if (!existing) {
       row.id = v4();

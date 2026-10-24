@@ -203,6 +203,23 @@ describe("PlayerService roster moves", () => {
     expect(player).toMatchObject({ team: null, status: PlayerStatus.FREE_AGENT });
   });
 
+  it("keeps the current team status when closing a stale contract elsewhere", async () => {
+    history.push(
+      Object.assign(new Contract(), {
+        id: "stale",
+        player,
+        team: newTeam,
+        startDate: new Date("2025-03-01"),
+      }),
+    );
+    const result = await service.leaveTeam(player.id, {
+      ...move(newTeam.id),
+      status: PlayerStatus.RETIRED,
+    });
+    expect(result.closed.map((contract) => contract.id)).toEqual(["stale"]);
+    expect(player).toMatchObject({ team: oldTeam, status: PlayerStatus.ACTIVE });
+  });
+
   it("rejects leaving a team the player is not on", async () => {
     await expect(
       service.leaveTeam(player.id, { ...move(newTeam.id), status: PlayerStatus.FREE_AGENT }),

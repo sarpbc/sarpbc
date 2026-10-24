@@ -5,6 +5,13 @@ export interface RosterProposalStore {
   findById(id: string): Promise<RosterProposal | null>;
   list(status: RosterProposalStatus, limit: number): Promise<RosterProposal[]>;
   save(proposal: RosterProposal): Promise<void>;
+  names(ids: RosterNameIds): Promise<Record<string, string>>;
+}
+
+export interface RosterNameIds {
+  players: string[];
+  teams: string[];
+  users: string[];
 }
 
 export interface RosterProposalTransaction {

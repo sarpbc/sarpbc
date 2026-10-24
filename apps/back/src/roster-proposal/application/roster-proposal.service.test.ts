@@ -8,18 +8,18 @@ import { RosterProposalService } from "./roster-proposal.service";
 function setup() {
   const saved = new Map<string, RosterProposal>();
   let sequence = 0;
-  const store: RosterProposalStore = {
+  const store = {
     findById: async (id) => saved.get(id) ?? null,
     list: async (status) => [...saved.values()].filter((p) => p.status === status),
     save: async (proposal) => {
       proposal.id ||= `proposal-${++sequence}`;
       saved.set(proposal.id, proposal);
     },
-  };
+    names: vi.fn(async () => ({ zen: "zen", kc: "Karmine Corp" })),
+  } satisfies RosterProposalStore;
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const players = {
-    // A merged duplicate resolves to the player it was merged into.
     findById: vi.fn(async (id: string) => (id === "zen" || id === "zen-dup" ? zen : null)),
     create: vi.fn(async () => Object.assign(new Player(), { id: "new-player" })),
     update: vi.fn(async () => zen),
@@ -41,21 +41,21 @@ function setup() {
     merges,
     {
       hasAnyPermission: async () => staff.allowed,
-      findById: async () => null,
     },
   );
-  return { saved, players, staff, service };
+  return { saved, store, players, staff, service };
 }
 
 describe("RosterProposalService", () => {
   const source = "https://x.com/KarmineCorp/status/1";
   let saved: ReturnType<typeof setup>["saved"];
+  let store: ReturnType<typeof setup>["store"];
   let players: ReturnType<typeof setup>["players"];
   let staff: ReturnType<typeof setup>["staff"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, players, staff, service } = setup());
+    ({ saved, store, players, staff, service } = setup());
   });
 
   const addZen = () =>
@@ -70,6 +70,23 @@ describe("RosterProposalService", () => {
 
     expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
     expect(players.joinTeam).not.toHaveBeenCalled();
+  });
+
+  it("resolves listed names in one batched lookup per kind", async () => {
+    await addZen();
+    await addZen();
+    players.findById.mockClear();
+
+    const { proposals, names } = await service.list("pending");
+
+    expect(proposals).toHaveLength(2);
+    expect(names).toEqual({ zen: "zen", kc: "Karmine Corp" });
+    expect(store.names).toHaveBeenCalledExactlyOnceWith({
+      players: ["zen"],
+      teams: ["kc"],
+      users: ["journalist"],
+    });
+    expect(players.findById).not.toHaveBeenCalled();
   });
 
   it("rejects proposals that reference missing or merged entities", async () => {

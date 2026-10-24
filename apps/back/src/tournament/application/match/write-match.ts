@@ -112,12 +112,18 @@ export async function updateMatchInTransaction(
       score: r.score,
     }));
   }
-  const finished = match.status === "finished" || Boolean(match.endAt);
+  const finished = input.status
+    ? input.status === "finished"
+    : match.status === "finished" || Boolean(match.endAt);
   if (!finished) {
     match.winner = null;
-  } else if (input.results) {
-    const winnerId = deriveWinnerParticipantId(input.results);
-    match.winner = match.participants.find((p) => p.id === winnerId) ?? null;
+  } else {
+    const winnerId = deriveWinnerParticipantId(
+      match.results.map((r) => ({ participantId: r.participant.id, score: r.score })),
+    );
+    const winner = match.participants.find((p) => p.id === winnerId) ?? null;
+    // A staff-picked winner survives a status-only update on a drawn or unscored match.
+    if (winner || input.results) match.winner = winner;
     if (match.winner) match.status = "finished";
   }
   await writer.save(match);

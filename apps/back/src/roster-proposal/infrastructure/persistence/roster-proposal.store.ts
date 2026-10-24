@@ -3,6 +3,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
+import { Player, Team } from "../../../player/infrastructure/persistence/player.entities";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
 import * as Row from "./roster-proposal.entity";
 
@@ -55,6 +56,24 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       });
       em.persist(row);
       if (!inTransaction) await em.flush();
+    },
+    names: async (ids) => {
+      const [players, teams, users] = await Promise.all([
+        ids.players.length
+          ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
+          : [],
+        ids.teams.length
+          ? em.find(Team, { id: { $in: ids.teams } }, { fields: ["id", "name"] })
+          : [],
+        ids.users.length
+          ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
+          : [],
+      ]);
+      return Object.fromEntries([
+        ...players.map((player) => [player.id, player.name]),
+        ...teams.map((team) => [team.id, team.name]),
+        ...users.map((user) => [user.id, user.userName]),
+      ]);
     },
   };
 }

@@ -22,7 +22,6 @@ export class TeamService {
     return this.teamRepository.searchAndCount(options);
   }
 
-  /** A merged duplicate resolves to the team it was merged into. */
   async findById(id: string): Promise<Team | null> {
     return this.resolveMerged(await this.teamRepository.findById(id));
   }

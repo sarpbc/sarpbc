@@ -78,7 +78,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const trophies = await this.tournamentService.getTournamentsWonByTeam(id);
+    const trophies = await this.tournamentService.getTournamentsWonByTeam(team.id);
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
@@ -88,7 +88,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const tournaments = await this.tournamentService.getTournamentsByTeam(id);
+    const tournaments = await this.tournamentService.getTournamentsByTeam(team.id);
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
@@ -98,7 +98,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const contracts = await this.contractService.getFormerPlayersByTeam(id);
+    const contracts = await this.contractService.getFormerPlayersByTeam(team.id);
     return { contracts };
   }
 
@@ -108,7 +108,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const contracts = await this.contractService.getContractsByTeam(id);
+    const contracts = await this.contractService.getContractsByTeam(team.id);
     return { contracts };
   }
 

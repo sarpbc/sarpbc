@@ -71,7 +71,7 @@ export const TeamSchema = defineEntity({
     slug: p.string(),
     pandascoreId: p.integer().nullable(),
     source: p.string().$type<DataSource>().default("manual"),
-    mergedInto: p.manyToOne(Team).nullable(),
+    mergedInto: p.manyToOne(Team).nullable().deleteRule("restrict"),
   },
 });
 
@@ -95,7 +95,7 @@ export const PlayerSchema = defineEntity({
     slug: p.string(),
     pandascoreId: p.integer().nullable().unique(),
     source: p.string().$type<DataSource>().default("manual"),
-    mergedInto: p.manyToOne(Player).nullable(),
+    mergedInto: p.manyToOne(Player).nullable().deleteRule("restrict"),
     contracts: p.oneToMany(Contract).mappedBy("player"),
     photos: p.oneToMany(PlayerPhoto).mappedBy("player"),
   },

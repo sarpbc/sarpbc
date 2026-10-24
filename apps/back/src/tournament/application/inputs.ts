@@ -38,4 +38,5 @@ export interface TournamentListOptions {
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
+  redistributableOnly?: boolean;
 }

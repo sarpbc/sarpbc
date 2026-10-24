@@ -88,6 +88,18 @@ describe("RosterSyncWriter", () => {
     expect(player.slug).toBe("comm");
   });
 
+  it("never adopts a start.gg row through the slug fallback", async () => {
+    await new RosterSyncWriter(manager).upsertPlayer({
+      pandascoreId: 3,
+      name: "Atow",
+      slug: "atow",
+    });
+    await new RosterSyncWriter(manager).upsertTeam({ name: "Vitality", slug: "vitality" });
+    const excludesStartgg = expect.objectContaining({ source: { $ne: "startgg" } });
+    expect(em.findOne).toHaveBeenCalledWith(Player, excludesStartgg);
+    expect(em.findOne).toHaveBeenCalledWith(Team, excludesStartgg);
+  });
+
   it("suffixes a conflicting slug without overwriting a different provider identity", async () => {
     const other = Object.assign(new Player(), { id: "other", pandascoreId: 1, slug: "zen" });
     em.findOne.mockImplementation(async (entity, where) =>

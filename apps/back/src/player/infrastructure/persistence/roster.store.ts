@@ -257,11 +257,25 @@ function rosterReferences(em: EntityManager): RosterReferences {
   const run = async (sql: string, params: unknown[]) => {
     await em.execute(sql, params);
   };
+  // Two open contracts for one player and team would both survive the reassignment;
+  // the kept one absorbs the earlier start date and the duplicate is dropped.
+  const mergeOpenContracts = async (owner: "player_id" | "team_id", from: string, to: string) => {
+    const shared = owner === "player_id" ? "team_id" : "player_id";
+    const conflict = `k."${owner}" = ? and d."${owner}" = ? and k."${shared}" = d."${shared}"
+      and k."end_date" is null and d."end_date" is null`;
+    await run(
+      `update "contract" k set "start_date" = least(k."start_date", d."start_date")
+       from "contract" d where ${conflict}`,
+      [to, from],
+    );
+    await run(`delete from "contract" d using "contract" k where ${conflict}`, [to, from]);
+  };
   return {
     movePlayer: async (from, to) => {
       // Frees the unique PandaScore id before the kept player takes it in the same flush.
       await run(`update "player" set "pandascore_id" = null where "id" = ?`, [from]);
       await run(`update "player" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
+      await mergeOpenContracts("player_id", from, to);
       await run(`update "contract" set "player_id" = ? where "player_id" = ?`, [to, from]);
       await run(`update "player_photo" set "player_id" = ? where "player_id" = ?`, [to, from]);
       await run(`update "player_award" set "player_id" = ? where "player_id" = ?`, [to, from]);
@@ -275,6 +289,7 @@ function rosterReferences(em: EntityManager): RosterReferences {
     },
     moveTeam: async (from, to) => {
       await run(`update "team" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
+      await mergeOpenContracts("team_id", from, to);
       await run(`update "contract" set "team_id" = ? where "team_id" = ?`, [to, from]);
       await run(`update "player" set "team_id" = ? where "team_id" = ?`, [to, from]);
       await run(`update "tournament_participant" set "team_id" = ? where "team_id" = ?`, [

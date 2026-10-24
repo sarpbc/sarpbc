@@ -3,7 +3,6 @@ import { z } from "zod";
 import { NotFoundException } from "@nestjs/common";
 import { isRedistributable } from "../../../common/domain/data-source";
 import {
-  isRedistributableMatch,
   mapMatchListResponse,
   mapNewsAdminArticle,
   mapNewsListItem,
@@ -144,10 +143,11 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       runReadTool(async () => {
         const [tournaments] = await ctx.tournamentService.find({
           activeOnly: activeOnly ?? false,
+          redistributableOnly: true,
           limit: limit ?? 20,
           offset: 0,
         });
-        return redistributable(tournaments).map(mapTournamentListItem);
+        return tournaments.map(mapTournamentListItem);
       }),
   );
 
@@ -189,15 +189,19 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ limit }) =>
       runReadTool(async () => {
-        const searchLimit = Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT);
+        const listOptions = {
+          limit: Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT),
+          offset: 0,
+          redistributableOnly: true,
+        };
         const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-          ctx.matchService.findUpcomingAndCount({ limit: searchLimit, offset: 0 }),
-          ctx.matchService.findLiveAndCount({ limit: searchLimit, offset: 0 }),
+          ctx.matchService.findUpcomingAndCount(listOptions),
+          ctx.matchService.findLiveAndCount(listOptions),
         ]);
 
         return {
-          upcoming: upcomingMatches.filter(isRedistributableMatch).map(mapMatchListResponse),
-          live: liveMatches.filter(isRedistributableMatch).map(mapMatchListResponse),
+          upcoming: upcomingMatches.map(mapMatchListResponse),
+          live: liveMatches.map(mapMatchListResponse),
           upcomingTotal,
           liveTotal,
           total: upcomingTotal + liveTotal,
@@ -226,10 +230,11 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         const [results, total] = await ctx.matchService.findResultsAndCount({
           limit: searchLimit,
           offset: 0,
+          redistributableOnly: true,
         });
 
         return {
-          results: results.filter(isRedistributableMatch).map(mapMatchListResponse),
+          results: results.map(mapMatchListResponse),
           total,
         };
       }),

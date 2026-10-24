@@ -63,7 +63,6 @@ export function requiredPermission(kind: RosterChangeKind): StaffPermission {
   }
 }
 
-/** A sourced roster write held until a staff member approves or rejects it. */
 export class RosterProposal {
   id = "";
   change!: RosterChange;
@@ -72,7 +71,6 @@ export class RosterProposal {
   proposedById = "";
   reviewedById: string | null = null;
   reviewedAt: Date | null = null;
-  /** Player or team the applied change created or modified. */
   entityId: string | null = null;
   createdAt = new Date();
 

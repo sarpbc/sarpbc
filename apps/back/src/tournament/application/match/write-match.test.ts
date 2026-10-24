@@ -137,6 +137,33 @@ describe("Manual match corrections", () => {
     expect(match).toMatchObject({ status: "running", winner: null });
   });
 
+  it("keeps a reopened match running even when scores are sent", async () => {
+    writer.load.mockResolvedValue(Object.assign(manualMatch(), { endAt: new Date() }));
+    const match = await updateMatchInTransaction(writer, "match", {
+      status: "running",
+      results: [
+        { participantId: "a", score: 1 },
+        { participantId: "b", score: 3 },
+      ],
+    });
+    expect(match).toMatchObject({ status: "running", winner: null });
+  });
+
+  it("derives the winner from stored scores when finishing a match", async () => {
+    writer.load.mockResolvedValue(
+      Object.assign(manualMatch(), {
+        status: "running",
+        winner: null,
+        results: [
+          { id: "r1", match: { id: "match" }, participant: { id: "a" }, score: 2 },
+          { id: "r2", match: { id: "match" }, participant: { id: "b" }, score: 4 },
+        ],
+      }),
+    );
+    const match = await updateMatchInTransaction(writer, "match", { status: "finished" });
+    expect(match).toMatchObject({ status: "finished", winner: { id: "b" } });
+  });
+
   it("refuses PandaScore-synced matches", async () => {
     writer.load.mockResolvedValue(Object.assign(manualMatch(), { pandascoreId: 99 }));
     await expect(

@@ -11,9 +11,12 @@ export interface MatchListQueryOptions {
   tournamentId?: string;
   /** User-facing tournament (League entity). */
   leagueId?: string;
+  /** Excludes start.gg matches, tournaments and teams, whose data may not be redistributed. */
+  redistributableOnly?: boolean;
 }
 
 export interface MatchListScopeFilters {
   tournamentId?: string;
   leagueId?: string;
+  redistributableOnly?: boolean;
 }

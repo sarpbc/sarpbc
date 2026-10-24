@@ -11,7 +11,11 @@ export function redistributable<T extends { source: DataSource }>(items: T[]): T
 }
 
 export function isRedistributableMatch(match: Match): boolean {
-  return isRedistributable(match.source) && isRedistributable(match.tournament.source);
+  return (
+    isRedistributable(match.source) &&
+    isRedistributable(match.tournament.source) &&
+    match.participants.every((participant) => isRedistributable(participant.team.source))
+  );
 }
 
 export function mapPlayerSummary(player: Player) {
@@ -76,9 +80,10 @@ export function mapTournamentDetail(tournament: Tournament) {
     description: tournament.description,
     tier: tournament.tier,
     hasBracket: tournament.hasBracket,
-    winner: tournament.winner
-      ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
-      : null,
+    winner:
+      tournament.winner && isRedistributable(tournament.winner.team.source)
+        ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
+        : null,
     matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
   };
 }

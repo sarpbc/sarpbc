@@ -98,7 +98,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const contracts = await this.contractService.getContractsByPlayer(id);
+    const contracts = await this.contractService.getContractsByPlayer(player.id);
     return { contracts };
   }
 
@@ -139,7 +139,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const contracts = await this.contractService.getOldTeamsByPlayer(id);
+    const contracts = await this.contractService.getOldTeamsByPlayer(player.id);
     return { contracts };
   }
 
@@ -149,13 +149,17 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const trophies = await this.tournamentService.getTournamentsWonByPlayer(id);
+    const trophies = await this.tournamentService.getTournamentsWonByPlayer(player.id);
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/awards")
   async getAwards(@Param("id", ParseUUIDPipe) id: string) {
-    const awards = await this.playerAwardService.findByPlayerId(id);
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const awards = await this.playerAwardService.findByPlayerId(player.id);
     return { awards };
   }
 
@@ -165,7 +169,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const tournaments = await this.tournamentService.getTournamentsByPlayer(id);
+    const tournaments = await this.tournamentService.getTournamentsByPlayer(player.id);
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
@@ -175,7 +179,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const matches = await this.matchService.getMatchesByPlayer(id);
+    const matches = await this.matchService.getMatchesByPlayer(player.id);
     return { matches: matches.map(mapProfileMatchListItem) };
   }
 

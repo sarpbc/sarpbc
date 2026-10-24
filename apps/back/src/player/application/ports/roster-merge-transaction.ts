@@ -1,6 +1,5 @@
 import type { RosterStores } from "./roster-transaction";
 
-/** Rows owned by other features that point at a player or team. */
 export interface RosterReferences {
   movePlayer(fromId: string, toId: string): Promise<void>;
   moveTeam(fromId: string, toId: string): Promise<void>;
