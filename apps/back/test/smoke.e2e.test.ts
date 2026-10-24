@@ -23,7 +23,7 @@ import { NotFoundError } from "../src/common/domain/errors";
 import { configureApp } from "../src/configure-app";
 import type { EntityRef } from "../src/common/domain/entity-ref";
 import { League, Match, TournamentParticipant } from "../src/tournament/domain/competition";
-import { Team } from "../src/player/domain/roster";
+import { Team } from "../src/roster/domain/roster";
 import { User } from "../src/user/domain/user";
 
 describe("API smoke (e2e)", () => {

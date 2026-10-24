@@ -1,5 +1,5 @@
 import { isRedistributable } from "../../common/domain/data-source";
-import type { Contract, Player, Team } from "../../player/domain/roster";
+import type { Contract, Player, Team } from "../../roster/domain/roster";
 import type { Match, Tournament } from "../../tournament/domain/competition";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";

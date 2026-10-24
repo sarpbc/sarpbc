@@ -2,7 +2,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { DateTime } from "luxon";
 import { log } from "evlog";
-import { PlayerService } from "../../../player/application/player.service";
+import { PlayerService } from "../../../roster/application/player.service";
 import { MikroDailyRiddles } from "./persistence/airriddle.store";
 import { AirRiddleJob } from "./airriddle.job";
 import { Module } from "@nestjs/common";
@@ -10,10 +10,10 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { AirRiddle } from "./persistence/airriddle.entity";
 import { AirRiddleController } from "./http/airriddle.controller";
 import { AirRiddleService } from "../application/airriddle.service";
-import { PlayerModule } from "../../../player/infrastructure/player.module";
+import { RosterModule } from "../../../roster/infrastructure/roster.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([AirRiddle]), PlayerModule],
+  imports: [MikroOrmModule.forFeature([AirRiddle]), RosterModule],
   controllers: [AirRiddleController],
   providers: [
     AirRiddleJob,

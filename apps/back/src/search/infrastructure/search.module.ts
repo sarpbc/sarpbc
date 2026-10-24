@@ -1,15 +1,14 @@
-import { PlayerService } from "../../player/application/player.service";
-import { TeamService } from "../../team/application/team.service";
+import { PlayerService } from "../../roster/application/player.service";
+import { TeamService } from "../../roster/application/team.service";
 import { TournamentService } from "../../tournament/application/tournament.service";
 import { Module } from "@nestjs/common";
 import { SearchController } from "./http/search.controller";
 import { SearchService } from "../application/search.service";
-import { PlayerModule } from "../../player/infrastructure/player.module";
-import { TeamModule } from "../../team/infrastructure/team.module";
+import { RosterModule } from "../../roster/infrastructure/roster.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 
 @Module({
-  imports: [PlayerModule, TeamModule, TournamentModule],
+  imports: [RosterModule, TournamentModule],
   controllers: [SearchController],
   providers: [
     {

@@ -1,7 +1,7 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { v4 } from "uuid";
-import { Player } from "../../../player/infrastructure/roster-persistence";
-import { Team } from "../../../player/infrastructure/roster-persistence";
+import { Player } from "../../../roster/infrastructure/roster-persistence";
+import { Team } from "../../../roster/infrastructure/roster-persistence";
 import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";

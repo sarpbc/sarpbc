@@ -9,7 +9,7 @@ import {
   mapPlayer,
   mapTeamSummary,
   type TeamSummaryResponse,
-} from "../../../player/infrastructure/http/player.mapper";
+} from "../../../roster/infrastructure/http/player.mapper";
 import {
   League,
   Tournament,

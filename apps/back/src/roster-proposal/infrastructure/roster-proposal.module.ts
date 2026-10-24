@@ -1,12 +1,11 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { Module } from "@nestjs/common";
-import { ContractService } from "../../player/application/contract.service";
-import { PlayerService } from "../../player/application/player.service";
-import { RosterMergeService } from "../../player/application/roster-merge.service";
-import { PlayerModule } from "../../player/infrastructure/player.module";
-import { TeamService } from "../../team/application/team.service";
-import { TeamModule } from "../../team/infrastructure/team.module";
+import { ContractService } from "../../roster/application/contract.service";
+import { PlayerService } from "../../roster/application/player.service";
+import { RosterMergeService } from "../../roster/application/roster-merge.service";
+import { RosterModule } from "../../roster/infrastructure/roster.module";
+import { TeamService } from "../../roster/application/team.service";
 import { UserService } from "../../user/application/user.service";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
@@ -18,7 +17,7 @@ import {
 } from "./persistence/roster-proposal.store";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([RosterProposal]), PlayerModule, TeamModule, UserModule],
+  imports: [MikroOrmModule.forFeature([RosterProposal]), RosterModule, UserModule],
   controllers: [RosterProposalController],
   providers: [
     {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { log } from "evlog";
-import { Player, Team } from "../../../player/domain/roster";
+import { Player, Team } from "../../../roster/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import { mapTournamentDetail } from "../http/tournament.mapper";
 import { CachedTournamentRead } from "./cached-tournament.read";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Team } from "../../../player/domain/roster";
+import { Team } from "../../../roster/domain/roster";
 import {
   League,
   Match,

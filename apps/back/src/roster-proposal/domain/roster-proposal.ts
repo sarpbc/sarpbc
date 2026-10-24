@@ -1,5 +1,5 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { ContractRole, PlayerStatus, RosterRole } from "../../player/domain/roster";
+import type { ContractRole, PlayerStatus, RosterRole } from "../../roster/domain/roster";
 import type { StaffPermission } from "../../user/domain/staff-access";
 
 export type RosterChange =

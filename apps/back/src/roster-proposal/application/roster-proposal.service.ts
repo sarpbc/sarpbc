@@ -1,9 +1,9 @@
 import { sourceFromUrl } from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { ContractService } from "../../player/application/contract.service";
-import type { PlayerService } from "../../player/application/player.service";
-import type { RosterMergeService } from "../../player/application/roster-merge.service";
-import type { TeamService } from "../../team/application/team.service";
+import type { ContractService } from "../../roster/application/contract.service";
+import type { PlayerService } from "../../roster/application/player.service";
+import type { RosterMergeService } from "../../roster/application/roster-merge.service";
+import type { TeamService } from "../../roster/application/team.service";
 import {
   RosterProposal,
   requiredPermission,

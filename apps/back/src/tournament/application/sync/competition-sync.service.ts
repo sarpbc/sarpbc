@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { allocateSlug, eventSlug, stageSlug } from "@sarpbc/utils";
-import { Team } from "../../../player/domain/roster";
+import { Team } from "../../../roster/domain/roster";
 import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
 import { ConflictError, NotFoundError } from "../../../common/domain/errors";

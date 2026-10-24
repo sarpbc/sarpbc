@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 export async function verifyCompetitionImport({ app, orm, request, staffCookie, RequestContext }) {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
-  const { Player } = await import("../../src/player/infrastructure/persistence/player.entities.ts");
+  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
   const sync = app.get(CompetitionSyncService);
   const run = (work) => RequestContext.create(orm.em.fork(), work);
   const veteran = {

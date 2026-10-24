@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../../common/domain/errors";
-import { Team } from "../../../player/domain/roster";
+import { Team } from "../../../roster/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import {

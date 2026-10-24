@@ -146,7 +146,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     const { default: Redis } = await import("ioredis");
     redis = new Redis({ host: "127.0.0.1", port: redisPort });
     const { User } = await import("../src/user/infrastructure/persistence/user.entity.ts");
-    const rosterRows = await import("../src/player/infrastructure/persistence/player.entities.ts");
+    const rosterRows = await import("../src/roster/infrastructure/persistence/player.entities.ts");
     const { Reply, ReplyReport } =
       await import("../src/forum/infrastructure/persistence/forum.entities.ts");
     const { ReplyNotification } =
@@ -778,8 +778,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
     await check("real roster + photo transaction rolls back both flushed writes", async () => {
       const { MikroRosterTransaction } =
-        await import("../src/player/infrastructure/persistence/roster.store.ts");
-      const { PlayerPhoto } = await import("../src/player/domain/roster.ts");
+        await import("../src/roster/infrastructure/persistence/roster.store.ts");
+      const { PlayerPhoto } = await import("../src/roster/domain/roster.ts");
       const em = orm.em.fork();
       const before = await em.findOneOrFail(rosterRows.Player, {
         id: player.id,

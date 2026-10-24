@@ -11,7 +11,7 @@ import {
   TournamentParticipant,
 } from "./persistence/tournament.entities";
 import { PlayerAward } from "./persistence/player-award.entities";
-import { Player, Team } from "../../player/infrastructure/roster-persistence";
+import { Player, Team } from "../../roster/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
 import { EventController } from "./http/event.controller";

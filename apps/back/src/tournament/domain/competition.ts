@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { matchSlug } from "@sarpbc/utils";
 import type { TournamentEventRef } from "@sarpbc/types";
-import type { Player, Team } from "../../player/domain/roster";
+import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import type { DataSource } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors";
