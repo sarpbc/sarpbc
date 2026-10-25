@@ -1,6 +1,10 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import * as Row from "./player.entities";
+import {
+  PlayerAward,
+  TournamentParticipant,
+} from "../../../tournament/infrastructure/competition-persistence";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { Contract, Player, PlayerPhoto, Team } from "../../domain/roster";
@@ -291,62 +295,70 @@ export class MikroRosterTransaction implements RosterTransaction {
   }
 }
 
-/** Raw SQL reaches tables owned by the competition feature inside the same transaction. */
 function rosterReferences(em: EntityManager): RosterReferences {
-  const run = async (sql: string, params: unknown[]) => {
-    await em.execute(sql, params);
-  };
-  // Two open contracts for one player and team would both survive the reassignment;
-  // the kept one absorbs the earlier start date and the duplicate is dropped.
-  const mergeOpenContracts = async (owner: "player_id" | "team_id", from: string, to: string) => {
-    const shared = owner === "player_id" ? "team_id" : "player_id";
-    const conflict = `k."${owner}" = ? and d."${owner}" = ? and k."${shared}" = d."${shared}"
-      and k."end_date" is null and d."end_date" is null`;
-    await run(
-      `update "contract" k set "start_date" = least(k."start_date", d."start_date")
-       from "contract" d where ${conflict}`,
-      [to, from],
+  const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
+    const shared = owner === "player" ? "team" : "player";
+    const open = await em.find(
+      Row.Contract,
+      { [owner]: { $in: [from, to] }, endDate: null },
+      { disableIdentityMap: true },
     );
-    await run(`delete from "contract" d using "contract" k where ${conflict}`, [to, from]);
+    const duplicates = open.filter(
+      (contract) =>
+        contract[owner].id === from &&
+        open.some((kept) => kept[owner].id === to && kept[shared].id === contract[shared].id),
+    );
+    for (const kept of open.filter((contract) => contract[owner].id === to)) {
+      const starts = [kept, ...duplicates.filter((d) => d[shared].id === kept[shared].id)].map(
+        ({ startDate }) => new Date(startDate).getTime(),
+      );
+      if (starts.length > 1) {
+        await em.nativeUpdate(
+          Row.Contract,
+          { id: kept.id },
+          { startDate: new Date(Math.min(...starts)) },
+        );
+      }
+    }
+    await em.nativeDelete(Row.Contract, { id: { $in: duplicates.map(({ id }) => id) } });
   };
   return {
     movePlayer: async (from, to) => {
       // Frees the unique PandaScore id before the kept player takes it in the same flush.
-      await run(`update "player" set "pandascore_id" = null where "id" = ?`, [from]);
-      await run(`update "player" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
-      await mergeOpenContracts("player_id", from, to);
-      await run(`update "contract" set "player_id" = ? where "player_id" = ?`, [to, from]);
-      await run(`update "player_photo" set "player_id" = ? where "player_id" = ?`, [to, from]);
-      await run(`update "player_award" set "player_id" = ? where "player_id" = ?`, [to, from]);
-      await run(
-        `insert into "tournament_participant_players" ("tournament_participant_id", "player_id")
-         select "tournament_participant_id", ? from "tournament_participant_players" where "player_id" = ?
-         on conflict do nothing`,
-        [to, from],
+      await em.nativeUpdate(Row.Player, { id: from }, { pandascoreId: null });
+      await em.nativeUpdate(Row.Player, { mergedInto: from }, { mergedInto: to });
+      await mergeOpenContracts("player", from, to);
+      await em.nativeUpdate(Row.Contract, { player: from }, { player: to });
+      await em.nativeUpdate(Row.PlayerPhoto, { player: from }, { player: to });
+      await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
+      const participants = await em.find(
+        TournamentParticipant,
+        { players: from },
+        { populate: ["players"] },
       );
-      await run(`delete from "tournament_participant_players" where "player_id" = ?`, [from]);
+      for (const participant of participants) {
+        participant.players.remove(em.getReference(Row.Player, from));
+        participant.players.add(em.getReference(Row.Player, to));
+      }
     },
     moveTeam: async (from, to) => {
-      await run(`update "team" set "merged_into_id" = ? where "merged_into_id" = ?`, [to, from]);
-      await mergeOpenContracts("team_id", from, to);
-      await run(`update "contract" set "team_id" = ? where "team_id" = ?`, [to, from]);
-      await run(`update "player" set "team_id" = ? where "team_id" = ?`, [to, from]);
-      await run(`update "tournament_participant" set "team_id" = ? where "team_id" = ?`, [
-        to,
-        from,
-      ]);
+      await em.nativeUpdate(Row.Team, { mergedInto: from }, { mergedInto: to });
+      await mergeOpenContracts("team", from, to);
+      await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
+      await em.nativeUpdate(Row.Player, { team: from }, { team: to });
+      await em.nativeUpdate(TournamentParticipant, { team: from }, { team: to });
     },
     sharedTournamentIds: async (teamId, otherTeamId) => {
-      const rows: { tournament_id: string }[] = await em.execute(
-        `select distinct a."tournament_id" from "tournament_participant" a
-         join "tournament_participant" b on b."tournament_id" = a."tournament_id"
-         where a."team_id" = ? and b."team_id" = ?`,
-        [teamId, otherTeamId],
+      const participants = await em.find(
+        TournamentParticipant,
+        { team: teamId, tournament: { participants: { team: otherTeamId } } },
+        { fields: ["tournament"], disableIdentityMap: true },
       );
-      return rows.map((row) => row.tournament_id);
+      return [...new Set(participants.map(({ tournament }) => tournament.id))];
     },
   };
 }
+
 export class MikroRosterMergeTransaction implements RosterMergeTransaction {
   constructor(private readonly em: EntityManager) {}
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {

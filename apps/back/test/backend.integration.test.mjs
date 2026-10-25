@@ -1162,6 +1162,190 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 
+    await check("roster merges move every reference and release the PandaScore id", async () => {
+      const { RosterMergeService } =
+        await import("../src/roster/application/roster-merge.service.ts");
+      const { ConflictError } = await import("../src/common/domain/errors.ts");
+      const { TournamentParticipant, PlayerAward } =
+        await import("../src/tournament/infrastructure/competition-persistence.ts");
+      const merges = app.get(RosterMergeService);
+      const merge = (work) => RequestContext.create(orm.em.fork(), () => work(merges));
+      const day = (value) => value && new Date(value).toISOString().slice(0, 10);
+      const slug = (name) => name.toLowerCase().replaceAll(" ", "-");
+
+      const insert = async (entity, data) => {
+        const em = orm.em.fork();
+        const id = randomUUID();
+        em.persist(em.create(entity, { id, ...data }));
+        await em.flush();
+        return id;
+      };
+      const newTeam = (name, props) =>
+        insert(rosterRows.Team, { name, slug: slug(name), ...props });
+      const newPlayer = (name, props) =>
+        insert(rosterRows.Player, { name, slug: slug(name), ...props });
+      const newContract = (player, team, startDate, endDate = null) =>
+        insert(rosterRows.Contract, {
+          player,
+          team,
+          startDate: new Date(startDate),
+          endDate: endDate && new Date(endDate),
+        });
+      const newPhoto = (player, url) => insert(rosterRows.PlayerPhoto, { player, url });
+      const newCup = async (name, teamIds) => {
+        const { id, participants } = (
+          await request("POST", "/tournaments", { name, teamIds }, staffCookie, 201)
+        ).json().tournament;
+        return {
+          id,
+          participantOf: (teamId) => participants.find((entry) => entry.team.id === teamId).id,
+        };
+      };
+      const addMembers = async (participantId, ...playerIds) => {
+        const em = orm.em.fork();
+        const participant = await em.findOneOrFail(
+          TournamentParticipant,
+          { id: participantId },
+          { populate: ["players"] },
+        );
+        for (const id of playerIds) participant.players.add(em.getReference(rosterRows.Player, id));
+        await em.flush();
+      };
+      const members = async (participantId) =>
+        (
+          await orm.em
+            .fork()
+            .findOneOrFail(TournamentParticipant, { id: participantId }, { populate: ["players"] })
+        ).players
+          .getItems()
+          .map(({ id }) => id)
+          .sort();
+      const award = (cup, participantId, playerId, awardType) =>
+        request(
+          "POST",
+          `/tournaments/${cup.id}/awards`,
+          { participantId, playerId, awardType },
+          staffCookie,
+          201,
+        );
+      const awardsOf = async (player) =>
+        (await orm.em.fork().find(PlayerAward, { player })).map((row) => row.awardType).sort();
+      const photosOf = async (player) =>
+        (await orm.em.fork().find(rosterRows.PlayerPhoto, { player })).map((row) => row.url).sort();
+      const contractsOf = async (where) =>
+        (
+          await orm.em.fork().find(rosterRows.Contract, where, { orderBy: { startDate: "asc" } })
+        ).map((row) => [row.team.id, day(row.startDate), day(row.endDate)]);
+      const playerRow = (id) => orm.em.fork().findOneOrFail(rosterRows.Player, { id });
+      const teamRow = (id) => orm.em.fork().findOneOrFail(rosterRows.Team, { id });
+      const redirectOf = async (entity, id) =>
+        (await orm.em.fork().findOneOrFail(entity, { id }, { populate: ["mergedInto"] })).mergedInto
+          ?.id ?? null;
+      const teamOf = async (entity, id) =>
+        (await orm.em.fork().findOneOrFail(entity, { id }, { populate: ["team"] })).team.id;
+
+      const alpha = await newTeam("Reference Alpha");
+      const beta = await newTeam("Reference Beta");
+      const kept = await newPlayer("Reference Kept", { team: alpha });
+      const duplicate = await newPlayer("Reference Duplicate", {
+        team: alpha,
+        pandascoreId: 77001,
+      });
+      const redirected = await newPlayer("Reference Redirected", { mergedInto: duplicate });
+      await newContract(kept, alpha, "2026-03-01");
+      await newContract(duplicate, alpha, "2026-01-15");
+      await newContract(duplicate, beta, "2024-01-01", "2024-12-31");
+      await newPhoto(kept, "https://example.test/reference-kept.jpg");
+      await newPhoto(duplicate, "https://example.test/reference-duplicate-1.jpg");
+      await newPhoto(duplicate, "https://example.test/reference-duplicate-2.jpg");
+      const soloCup = await newCup("Reference Solo Cup", [alpha, beta]);
+      const sharedCup = await newCup("Reference Shared Cup", [alpha, beta]);
+      const soloEntry = soloCup.participantOf(alpha);
+      const sharedEntry = sharedCup.participantOf(alpha);
+      await addMembers(soloEntry, duplicate);
+      await addMembers(sharedEntry, kept, duplicate);
+      await award(soloCup, soloEntry, duplicate, "mvp");
+      await award(sharedCup, sharedEntry, duplicate, "defensive_mvp");
+
+      await merge((service) => service.mergePlayers(kept, duplicate));
+
+      const keptRow = await playerRow(kept);
+      assert.equal(keptRow.pandascoreId, 77001, "the kept player takes the freed PandaScore id");
+      assert.equal(keptRow.source, "pandascore");
+      const duplicateRow = await playerRow(duplicate);
+      assert.equal(duplicateRow.pandascoreId, null);
+      assert.equal(await redirectOf(rosterRows.Player, duplicate), kept);
+      assert.equal(
+        await redirectOf(rosterRows.Player, redirected),
+        kept,
+        "merged_into chains are repointed",
+      );
+      assert.deepEqual(await contractsOf({ player: duplicate }), []);
+      assert.deepEqual(
+        await contractsOf({ player: kept }),
+        [
+          [beta, "2024-01-01", "2024-12-31"],
+          [alpha, "2026-01-15", null],
+        ],
+        "duplicate open contracts collapse onto the earlier start date",
+      );
+      assert.deepEqual(await photosOf(duplicate), []);
+      assert.deepEqual(await photosOf(kept), [
+        "https://example.test/reference-duplicate-1.jpg",
+        "https://example.test/reference-duplicate-2.jpg",
+        "https://example.test/reference-kept.jpg",
+      ]);
+      assert.deepEqual(await awardsOf(duplicate), []);
+      assert.deepEqual(await awardsOf(kept), ["defensive_mvp", "mvp"]);
+      assert.deepEqual(await members(soloEntry), [kept]);
+      assert.deepEqual(await members(sharedEntry), [kept], "no duplicate membership");
+
+      const keeper = await newTeam("Reference Keeper");
+      const dropped = await newTeam("Reference Dropped");
+      const opponent = await newTeam("Reference Opponent");
+      const redirectedTeam = await newTeam("Reference Redirected Team", { mergedInto: dropped });
+      const first = await newPlayer("Reference Squad One", { team: dropped });
+      const second = await newPlayer("Reference Squad Two", { team: keeper });
+      await newContract(first, dropped, "2026-02-01");
+      await newContract(first, keeper, "2026-04-01");
+      await newContract(second, dropped, "2023-01-01", "2023-12-31");
+      const droppedCup = await newCup("Reference Dropped Cup", [dropped, opponent]);
+      const keeperCup = await newCup("Reference Keeper Cup", [keeper, opponent]);
+      const droppedEntry = droppedCup.participantOf(dropped);
+
+      await merge((service) => service.mergeTeams(keeper, dropped));
+
+      assert.equal((await teamRow(dropped)).active, false);
+      assert.equal(await redirectOf(rosterRows.Team, dropped), keeper);
+      assert.equal(
+        await redirectOf(rosterRows.Team, redirectedTeam),
+        keeper,
+        "merged_into chains are repointed",
+      );
+      assert.deepEqual(await contractsOf({ team: dropped }), []);
+      assert.deepEqual(await contractsOf({ player: first }), [[keeper, "2026-02-01", null]]);
+      assert.deepEqual(await contractsOf({ player: second }), [
+        [keeper, "2023-01-01", "2023-12-31"],
+      ]);
+      for (const id of [first, second]) assert.equal(await teamOf(rosterRows.Player, id), keeper);
+      assert.equal(await teamOf(TournamentParticipant, droppedEntry), keeper);
+      assert.equal(await teamOf(TournamentParticipant, keeperCup.participantOf(keeper)), keeper);
+      assert.equal(
+        await teamOf(TournamentParticipant, droppedCup.participantOf(opponent)),
+        opponent,
+      );
+
+      const twinOne = await newTeam("Reference Twin One");
+      const twinTwo = await newTeam("Reference Twin Two");
+      const twinCup = await newCup("Reference Twin Cup", [twinOne, twinTwo]);
+      await assert.rejects(
+        merge((service) => service.mergeTeams(twinOne, twinTwo)),
+        (error) => error instanceof ConflictError && error.message.includes(twinCup.id),
+      );
+      assert.equal(await teamOf(TournamentParticipant, twinCup.participantOf(twinTwo)), twinTwo);
+      assert.equal(await redirectOf(rosterRows.Team, twinTwo), null);
+    });
+
     await check(
       "forum topics, post translations, cooldown, recent activity and deletion",
       async () => {
