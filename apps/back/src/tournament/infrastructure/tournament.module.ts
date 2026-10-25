@@ -11,7 +11,7 @@ import {
   TournamentParticipant,
 } from "./persistence/tournament.entities";
 import { PlayerAward } from "./persistence/player-award.entities";
-import { Player, Team } from "../../player/infrastructure/roster-persistence";
+import { Player, Team } from "../../roster/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
 import { EventController } from "./http/event.controller";
@@ -38,14 +38,10 @@ import {
 import { UserModule } from "../../user/infrastructure/user.module";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
-import {
-  PANDASCORE_GATEWAY,
-  type PandascoreGateway,
-} from "../../pandascore/application/ports/pandascore.gateway.port";
-import {
-  SYNC_CURSOR_REPOSITORY,
-  type SyncCursorRepository,
-} from "../../pandascore/domain/sync-cursor.repository.interface";
+import { PandascoreCompetitionFeed } from "../../pandascore/infrastructure/pandascore-competition-feed";
+import { RedisSyncCursor } from "./redis-sync-cursor";
+import type { CompetitionFeed } from "../application/feed";
+import type { SyncCursor } from "../application/ports";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { CachedTournamentRead } from "./cache/cached-tournament.read";
 import { RedisService } from "../../infrastructure/redis/redis.service";
@@ -114,25 +110,27 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       ],
     },
     {
+      provide: RedisSyncCursor,
+      useFactory: (redis: RedisService) => new RedisSyncCursor(redis),
+      inject: [RedisService],
+    },
+    {
       provide: SyncAllTournamentsUseCase,
-      useFactory: (feed: PandascoreGateway, sync: CompetitionSyncService) =>
+      useFactory: (feed: CompetitionFeed, sync: CompetitionSyncService) =>
         new SyncAllTournamentsUseCase(feed, sync),
-      inject: [PANDASCORE_GATEWAY, CompetitionSyncService],
+      inject: [PandascoreCompetitionFeed, CompetitionSyncService],
     },
     {
       provide: SyncPandascoreTournamentUseCase,
-      useFactory: (feed: PandascoreGateway, sync: CompetitionSyncService) =>
+      useFactory: (feed: CompetitionFeed, sync: CompetitionSyncService) =>
         new SyncPandascoreTournamentUseCase(feed, sync),
-      inject: [PANDASCORE_GATEWAY, CompetitionSyncService],
+      inject: [PandascoreCompetitionFeed, CompetitionSyncService],
     },
     {
       provide: SyncPandascoreIncidentsUseCase,
-      useFactory: (
-        feed: PandascoreGateway,
-        cursor: SyncCursorRepository,
-        sync: CompetitionSyncService,
-      ) => new SyncPandascoreIncidentsUseCase(feed, cursor, sync, competitionDiagnostics),
-      inject: [PANDASCORE_GATEWAY, SYNC_CURSOR_REPOSITORY, CompetitionSyncService],
+      useFactory: (feed: CompetitionFeed, cursor: SyncCursor, sync: CompetitionSyncService) =>
+        new SyncPandascoreIncidentsUseCase(feed, cursor, sync, competitionDiagnostics),
+      inject: [PandascoreCompetitionFeed, RedisSyncCursor, CompetitionSyncService],
     },
     {
       provide: SyncNewTournamentsUseCase,

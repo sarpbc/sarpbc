@@ -1,6 +1,2 @@
 export { NewsService } from "./news.service";
-export type {
-  NewsArticleRecord,
-  CreateNewsArticleInput,
-  UpdateNewsArticleInput,
-} from "../domain/news-article";
+export type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";

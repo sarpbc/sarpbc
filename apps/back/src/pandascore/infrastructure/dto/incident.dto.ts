@@ -8,6 +8,7 @@ import {
   tournamentSchema,
 } from "./tournament.dto";
 export const currentPlayerSchema = playerSchema.extend({ current_team: teamSchema.nullish() });
+export type CurrentPlayerDto = z.infer<typeof currentPlayerSchema>;
 const change = z.enum(["creation", "update"]);
 const base = {
   id: z.number().int(),

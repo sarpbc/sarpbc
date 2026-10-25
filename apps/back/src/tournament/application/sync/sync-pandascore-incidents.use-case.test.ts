@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
-import type { CompetitionIncident } from "../../../pandascore/application/models/competition-feed";
+import type { CompetitionIncident } from "../feed";
 describe("PandaScore incidents", () => {
   const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
     cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },

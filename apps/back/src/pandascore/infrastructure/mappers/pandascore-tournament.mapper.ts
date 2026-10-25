@@ -1,5 +1,7 @@
-import { UpsertTournamentParticipantCommand } from "../../application/commands/upsert-tournament-participant.command";
-import { UpsertTournamentCommand } from "../../application/commands/upsert-tournament.command";
+import {
+  UpsertTournamentParticipantCommand,
+  UpsertTournamentCommand,
+} from "../../../tournament/application/feed";
 import { ExpectedRosterDto, TournamentDto } from "../dto/tournament.dto";
 import { PandascoreLeagueMapper } from "./pandascore-league.mapper";
 import { PandascorePlayerMapper } from "./pandascore-player.mapper";

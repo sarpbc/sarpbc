@@ -21,7 +21,7 @@ import {
   ContractSchema,
   PlayerPhotoSchema,
   TeamSchema,
-} from "./player/infrastructure/persistence/player.entities";
+} from "./roster/infrastructure/persistence/player.entities";
 import {
   LeagueSchema,
   TournamentEventSchema,

@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { SearchService } from "../../application/search.service";
 import { SearchQueryDto } from "./dto/search-query.dto";
-import { mapPlayer, mapTeam } from "../../../player/infrastructure/http/player.mapper";
+import { mapPlayer, mapTeam } from "../../../roster/infrastructure/http/player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 
 @Controller("search")

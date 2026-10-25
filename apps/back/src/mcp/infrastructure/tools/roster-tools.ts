@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
-import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../player/domain/roster";
+import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../roster/domain/roster";
 import {
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,

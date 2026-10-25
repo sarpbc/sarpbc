@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { allocateSlug, eventSlug, stageSlug } from "@sarpbc/utils";
-import { Team } from "../../../player/domain/roster";
+import { Team } from "../../../roster/domain/roster";
 import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
 import { ConflictError, NotFoundError } from "../../../common/domain/errors";
@@ -17,14 +17,14 @@ import type {
   CompetitionEvents,
   TournamentQueries,
 } from "../ports";
-import type { UpsertTournamentCommand } from "../../../pandascore/application/commands/upsert-tournament.command";
-import type { UpsertLeagueCommand } from "../../../pandascore/application/commands/upsert-league.command";
-import type { UpsertMatchCommand } from "../../../pandascore/application/commands/upsert-match.command";
-import type { UpsertSerieCommand } from "../../../pandascore/application/commands/upsert-serie.command";
 import type {
   CompetitionIncident,
   ProviderDeletion,
-} from "../../../pandascore/application/models/competition-feed";
+  UpsertLeagueCommand,
+  UpsertMatchCommand,
+  UpsertSerieCommand,
+  UpsertTournamentCommand,
+} from "../feed";
 import { upsertMatchInTransaction } from "../match/write-match";
 
 type IncidentChange = Exclude<CompetitionIncident, { changeType: "deletion" }>;

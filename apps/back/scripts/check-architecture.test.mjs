@@ -7,6 +7,53 @@ import { architectureViolations } from "./check-architecture.mjs";
 
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../src");
 
+test("reports a cycle between features' inner layers once and accepts a one-way import", () => {
+  const first = fs.mkdtempSync(path.join(source, "architecture-first-"));
+  const second = fs.mkdtempSync(path.join(source, "architecture-second-"));
+  const write = (root, relative, content) => {
+    const file = path.join(root, relative);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, content);
+    return file;
+  };
+  try {
+    const firstName = path.basename(first);
+    const secondName = path.basename(second);
+    const firstModel = write(first, "application/model.ts", "export type First = string;");
+    const secondModel = write(second, "application/model.ts", "export type Second = string;");
+    const firstUse = write(
+      first,
+      "application/use.ts",
+      `import type { Second } from "../../${secondName}/application/model";`,
+    );
+    assert.deepEqual(architectureViolations([firstUse, firstModel, secondModel]), []);
+
+    const secondUse = write(
+      second,
+      "application/use.ts",
+      `import type { First } from "../../${firstName}/application/model";`,
+    );
+    const cycles = architectureViolations([firstUse, secondUse, firstModel, secondModel]).filter(
+      (message) => message.startsWith("feature cycle:"),
+    );
+    assert.equal(cycles.length, 1);
+    const [a, b] = [firstName, secondName].sort();
+    assert.equal(
+      cycles[0],
+      [
+        `feature cycle: ${a} -> ${b} -> ${a}`,
+        `  ${a} -> ${b}: ${a}/application/use.ts`,
+        `  ${b} -> ${a}: ${b}/application/use.ts`,
+      ].join("\n"),
+    );
+  } finally {
+    assert.equal(path.dirname(path.resolve(first)), source);
+    assert.equal(path.dirname(path.resolve(second)), source);
+    fs.rmSync(first, { recursive: true, force: true });
+    fs.rmSync(second, { recursive: true, force: true });
+  }
+});
+
 test("rejects framework dependencies, aliases, type imports, reexports and foreign repositories", () => {
   const probe = fs.mkdtempSync(path.join(source, "architecture-probe-"));
   const other = fs.mkdtempSync(path.join(source, "architecture-other-"));

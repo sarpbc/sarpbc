@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
-import { Team } from "../../../player/domain/roster";
+import { Team } from "../../../roster/domain/roster";
 import { buildHeadToHead, getWinnerTeamId, mapHeadToHeadMeeting } from "./match-head-to-head";
 
 function createTeam(id: string, name: string): Team {

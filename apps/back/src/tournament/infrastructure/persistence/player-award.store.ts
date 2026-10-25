@@ -1,7 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
 import type { AwardQueries, AwardWriter } from "../../application/ports";
-import { Player } from "../../../player/infrastructure/roster-persistence";
+import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
 function toTournamentItem(row: PlayerAward): TournamentAwardListItem {

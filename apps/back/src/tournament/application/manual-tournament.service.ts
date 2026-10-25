@@ -1,7 +1,7 @@
 import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { isUuid } from "../../common/domain/entity-ref";
-import { Tournament } from "../domain/competition";
+import { Tournament, assertParticipantRemovable } from "../domain/competition";
 import { TournamentEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
 import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
@@ -34,7 +34,7 @@ export class ManualTournamentService {
       tournament.imageUrl = input.imageUrl?.trim() || null;
       tournament.beginAt = input.beginAt ? new Date(input.beginAt) : null;
       tournament.endAt = input.endAt ? new Date(input.endAt) : null;
-      this.assertDateOrder(tournament);
+      tournament.assertDateOrder();
       tournament.league = await this.league(tournaments, input.leagueId);
       const event = Object.assign(new TournamentEvent(), {
         name: input.name,
@@ -64,7 +64,7 @@ export class ManualTournamentService {
       if (input.endAt !== undefined)
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
       if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
-      this.assertDateOrder(tournament);
+      tournament.assertDateOrder();
       if (tournament.source === "pandascore") {
         if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
       } else {
@@ -88,10 +88,6 @@ export class ManualTournamentService {
     if (!tournament)
       throw new NotFoundError('Tournament with id "' + id + '" was not found after save.');
     return tournament;
-  }
-  private assertDateOrder(tournament: Tournament) {
-    if (tournament.beginAt && tournament.endAt && tournament.endAt < tournament.beginAt)
-      throw new InvalidInputError("End date must be on or after the start date.");
   }
   private async league(writer: TournamentWriter, id: string | null | undefined) {
     if (!id) return null;
@@ -142,23 +138,7 @@ export class ManualTournamentService {
       desired = new Set(teamIds);
     for (const p of existing) {
       if (desired.has(p.team.id)) continue;
-      const refs = await writer.participantReferences(tournament.id, p.id);
-      if (refs.tournamentWinner)
-        throw new InvalidInputError(
-          "Cannot remove a team that is the tournament winner. Clear the winner first.",
-        );
-      if (refs.matchParticipant)
-        throw new InvalidInputError(
-          "Cannot remove a team that already appears in matches. Remove or reassign those matches first.",
-        );
-      if (refs.matchWinner)
-        throw new InvalidInputError(
-          "Cannot remove a team that is recorded as a match winner. Clear those winners first.",
-        );
-      if (refs.results)
-        throw new InvalidInputError(
-          "Cannot remove a team that has match results. Remove those results first.",
-        );
+      assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
       await writer.removeParticipant(p.id);
     }
     const present = new Set(existing.map((p) => p.team.id));

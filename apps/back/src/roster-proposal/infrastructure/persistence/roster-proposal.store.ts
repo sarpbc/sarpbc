@@ -3,7 +3,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
-import { Player, Team } from "../../../player/infrastructure/persistence/player.entities";
+import { Player, Team } from "../../../roster/infrastructure/persistence/player.entities";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
 import * as Row from "./roster-proposal.entity";
 

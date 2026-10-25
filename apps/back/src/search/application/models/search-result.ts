@@ -1,4 +1,4 @@
-import type { Player, Team } from "../../../player/domain/roster";
+import type { Player, Team } from "../../../roster/domain/roster";
 import type { Tournament } from "../../../tournament/domain/competition";
 
 export type SearchType = "player" | "team" | "tournament" | "all";

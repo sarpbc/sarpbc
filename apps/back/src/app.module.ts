@@ -5,8 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { PostHogModule } from "./infrastructure/telemetry/posthog.module";
 import { UserModule } from "./user/infrastructure/user.module";
 import { AuthModule } from "./auth/infrastructure/auth.module";
-import { TeamModule } from "./team/infrastructure/team.module";
-import { PlayerModule } from "./player/infrastructure/player.module";
+import { RosterModule } from "./roster/infrastructure/roster.module";
 import { SearchModule } from "./search/infrastructure/search.module";
 import { ConfigModule } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
@@ -64,8 +63,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     ScheduleModule.forRoot(),
     UserModule,
     AuthModule,
-    TeamModule,
-    PlayerModule,
+    RosterModule,
     SearchModule,
     GameModule,
     ForumModule,

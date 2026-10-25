@@ -5,9 +5,11 @@ Each feature separates business decisions from HTTP, NestJS, and storage.
 ```text
 src/<feature>/
   domain/          Detached models, invariants, and policies
-  application/     Use cases, inputs, projections, and consumed ports
+  application/     Use cases, records, inputs, projections, and consumed ports
   infrastructure/  Nest factories, HTTP, ORM, external services, and jobs
 ```
+
+Records, inputs, and projections live in `application/`; the domain holds models and rules. `roster/` owns players, teams, contracts, and photos. Competition lives in `tournament/`.
 
 `app.module.ts`, `main.ts`, `configure-app.ts`, and the ORM configuration assemble the application. Shared technical services live in `src/infrastructure`. Shared pure contracts live in `src/common/domain` and `src/common/application`.
 
@@ -15,9 +17,13 @@ src/<feature>/
 
 Domain code depends on pure domain code. Application code depends on domain models and pure application contracts. Infrastructure implements those contracts and supplies dependencies through Nest provider factories. Application classes have no Nest decorators.
 
-ORM records and domain models are separate representations. Persistence mappers return detached objects and arrays. Controllers present explicit response objects rather than serialize managed ORM records. Decorated request DTOs stay at HTTP boundaries. PandaScore adapters validate provider responses with Zod before mapping them into application commands.
+The graph of features formed by `domain/` and `application/` imports is acyclic, and `test:architecture` reports each cycle with one importing file per edge. Infrastructure is excluded: Nest composition and shared relational mappings legitimately cross features in both directions.
 
-Feature consumers use application services or consumed ports. Shared relational mappings are exposed through the explicit roster and competition infrastructure composition files. Private repositories remain private. Source imports use relative paths so the compiled application runs directly in Node.js.
+ORM records and domain models are separate representations. Persistence mappers return detached objects and arrays. Controllers present explicit response objects rather than serialize managed ORM records. Decorated request DTOs stay at HTTP boundaries.
+
+The consumer owns each contract it needs from an external provider. `pandascore/` is an infrastructure-only adapter. `PandascoreCompetitionFeed` implements competition's `CompetitionFeed`, and `PandascoreCurrentRosterSource` implements roster's `CurrentRosterSource`. Competition also owns `SyncCursor`, which its own infrastructure implements. The adapters validate provider responses with Zod before mapping them into the consumer's commands.
+
+Feature consumers use application services or consumed ports. Shared relational mappings are exposed through `roster/infrastructure/roster-persistence.ts` and `tournament/infrastructure/competition-persistence.ts`. Private repositories remain private. Source imports use relative paths so the compiled application runs directly in Node.js.
 
 ## Writes and execution contexts
 
@@ -71,6 +77,6 @@ pnpm --filter back test:integration
 pnpm --filter back test:cov
 ```
 
-The architecture check resolves imports, including type imports, aliases, and reexports. Its tests deliberately introduce forbidden dependencies. The HTTP fixture records routes, status overrides, guards, and permissions; behavior tests verify response content separately.
+The architecture check resolves imports, including type imports, aliases, and reexports, and detects feature cycles in the inner layers. Its tests deliberately introduce forbidden dependencies. The HTTP fixture records routes, status overrides, guards, and permissions; behavior tests verify response content separately.
 
 Integration verification runs the real application sources under Vitest and uses disposable PostgreSQL and Redis containers. It rebuilds the database with the compiled MikroORM migrations, checks that no migration or schema change remains pending, and exercises real adapters and transaction rollback. A second migration run must apply nothing. The coverage command combines these workflows with unit and HTTP smoke tests. Unit tests and mocked HTTP smoke tests alone do not establish SQL atomicity or Redis semantics.

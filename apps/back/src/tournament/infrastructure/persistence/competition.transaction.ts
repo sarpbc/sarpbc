@@ -1,8 +1,8 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
 import { ConflictError } from "../../../common/domain/errors";
-import { Player, Team } from "../../../player/infrastructure/roster-persistence";
-import { RosterSyncWriter } from "../../../player/infrastructure/roster-persistence";
+import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
+import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
 import type * as Model from "../../domain/competition";
 import type { TournamentEvent } from "../../domain/tournament-event";

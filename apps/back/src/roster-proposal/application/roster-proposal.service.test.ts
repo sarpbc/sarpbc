@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Contract, Player, PlayerStatus, Team } from "../../player/domain/roster";
+import { Contract, Player, PlayerStatus, Team } from "../../roster/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";

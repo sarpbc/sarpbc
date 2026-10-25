@@ -5,7 +5,12 @@ import { PostRepository } from "./post.repository";
 import { TopicRepository } from "./topic.repository";
 import { postSnapshot, topicSnapshot } from "./forum.mapper";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "../../domain/forum";
+import type {
+  NewPostRecord,
+  PostRecord,
+  TopicRecord,
+  TranslationRecord,
+} from "../../application/models";
 import type { PostStore, TopicStore } from "../../application/ports";
 export class MikroPostStore implements PostStore {
   private readonly rows: PostRepository;

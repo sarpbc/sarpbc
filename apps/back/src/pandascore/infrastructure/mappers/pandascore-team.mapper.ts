@@ -1,4 +1,4 @@
-import { UpsertTeamCommand } from "../../application/commands/upsert-team.command";
+import { UpsertTeamCommand } from "../../../roster/application/imports";
 import { TeamDto } from "../dto/tournament.dto";
 
 export class PandascoreTeamMapper {

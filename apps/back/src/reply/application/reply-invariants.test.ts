@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReplyService } from "./reply.service";
 import type { ReplyWriteScope, ReplyTransaction } from "./ports";
-import type { ReplyRecord, ReplyAuthor } from "../domain/reply";
+import type { ReplyAuthor } from "../domain/reply";
+import type { ReplyRecord } from "./models";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 const now = new Date("2026-10-15T12:00:00Z");
 const author: ReplyAuthor = { id: "author", userName: "Fan" };

@@ -10,7 +10,7 @@ import {
   type TournamentSummary,
 } from "../../domain/competition";
 import { TournamentEvent } from "../../domain/tournament-event";
-import { toPlayer, toTeam } from "../../../player/infrastructure/roster-persistence";
+import { toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
 export function toLeague(row: Row.League): League {
   return Object.assign(new League(), {
     id: row.id,

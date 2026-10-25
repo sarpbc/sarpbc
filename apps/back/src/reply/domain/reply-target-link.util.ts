@@ -1,5 +1,5 @@
 import { forumPostPath, forumPostSlug, matchPath } from "@sarpbc/utils";
-import type { ReplyRecord as Reply, ReplyTargetType } from "./reply";
+import type { ReplyTargetType } from "./reply";
 
 export type ReplyTargetLink = {
   targetType: ReplyTargetType;
@@ -8,7 +8,13 @@ export type ReplyTargetLink = {
   targetPath: string;
 };
 
-export function resolveReplyTargetLink(reply: Reply): ReplyTargetLink | null {
+export interface ReplyTargetSource {
+  post: { id: string; publicId: number; title: string } | null;
+  newsArticle: { id: string; title: string; slug: string } | null;
+  match: { id: string; publicId: number; name: string; slug: string } | null;
+}
+
+export function resolveReplyTargetLink(reply: ReplyTargetSource): ReplyTargetLink | null {
   if (reply.post) {
     return {
       targetType: "forumPost",

@@ -1,4 +1,4 @@
-import { UpsertMatchCommand } from "../../application/commands/upsert-match.command";
+import { UpsertMatchCommand } from "../../../tournament/application/feed";
 import { MatchDto } from "../dto/match.dto";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 

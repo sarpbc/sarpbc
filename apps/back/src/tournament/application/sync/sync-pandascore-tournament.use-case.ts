@@ -1,11 +1,11 @@
 import { NotFoundError } from "../../../common/domain/errors";
-import type { PandascoreGateway } from "../../../pandascore/application/ports/pandascore.gateway.port";
+import type { CompetitionFeed } from "../feed";
 import { assertPandascoreSyncAllowed } from "../../domain/tournament-source";
 import type { Tournament } from "../../domain/competition";
 import { CompetitionSyncService } from "./competition-sync.service";
 export class SyncPandascoreTournamentUseCase {
   constructor(
-    private readonly feed: PandascoreGateway,
+    private readonly feed: CompetitionFeed,
     private readonly synchronization: CompetitionSyncService,
   ) {}
   async execute(id: string): Promise<void> {

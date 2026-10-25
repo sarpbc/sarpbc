@@ -1,5 +1,5 @@
-import type { PlayerService } from "../../player/application/player.service";
-import type { TeamService } from "../../team/application/team.service";
+import type { PlayerService } from "../../roster/application/player.service";
+import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentService } from "../../tournament/application/tournament.service";
 import {
   SearchResult,
@@ -8,7 +8,7 @@ import {
   TeamSearchParams,
   TournamentSearchParams,
 } from "./models/search-result";
-import type { Player, Team } from "../../player/domain/roster";
+import type { Player, Team } from "../../roster/domain/roster";
 import type { Tournament } from "../../tournament/domain/competition";
 
 export class SearchService {

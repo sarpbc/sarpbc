@@ -1,9 +1,10 @@
 import { v4 } from "uuid";
 import { matchSlug } from "@sarpbc/utils";
 import type { TournamentEventRef } from "@sarpbc/types";
-import type { Player, Team } from "../../player/domain/roster";
+import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import type { DataSource } from "../../common/domain/data-source";
+import { InvalidInputError } from "../../common/domain/errors";
 export class League {
   id = v4();
   pandascoreId!: number;
@@ -110,6 +111,10 @@ export class Tournament {
   updatedAt = new Date();
   matches: Match[] = [];
   participants: TournamentParticipant[] = [];
+  assertDateOrder(): void {
+    if (this.beginAt && this.endAt && this.endAt < this.beginAt)
+      throw new InvalidInputError("End date must be on or after the start date.");
+  }
 }
 export interface ParticipantSnapshot {
   id: string;
@@ -122,4 +127,22 @@ export interface ParticipantReferences {
   matchParticipant: boolean;
   matchWinner: boolean;
   results: boolean;
+}
+export function assertParticipantRemovable(refs: ParticipantReferences): void {
+  if (refs.tournamentWinner)
+    throw new InvalidInputError(
+      "Cannot remove a team that is the tournament winner. Clear the winner first.",
+    );
+  if (refs.matchParticipant)
+    throw new InvalidInputError(
+      "Cannot remove a team that already appears in matches. Remove or reassign those matches first.",
+    );
+  if (refs.matchWinner)
+    throw new InvalidInputError(
+      "Cannot remove a team that is recorded as a match winner. Clear those winners first.",
+    );
+  if (refs.results)
+    throw new InvalidInputError(
+      "Cannot remove a team that has match results. Remove those results first.",
+    );
 }

@@ -2,11 +2,11 @@ import type { MatchService } from "../../tournament/application/match/match.serv
 import type { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import type { NewsService } from "../../news/application/news.service";
 import type { PatUser } from "../../pat/application/pat.service";
-import type { ContractService } from "../../player/application/contract.service";
-import type { PlayerService } from "../../player/application/player.service";
+import type { ContractService } from "../../roster/application/contract.service";
+import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import type { SearchService } from "../../search/application/search.service";
-import type { TeamService } from "../../team/application/team.service";
+import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentService } from "../../tournament/application/tournament.service";
 
 export interface McpToolContext {

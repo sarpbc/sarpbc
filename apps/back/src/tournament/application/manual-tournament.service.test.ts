@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
 import { Tournament, TournamentParticipant } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
-import { Team } from "../../player/domain/roster";
+import { Team } from "../../roster/domain/roster";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
 describe("ManualTournamentService", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { PostService } from "./post.service";
 import type { ForumWriteScope, ForumTransaction } from "./ports";
-import type { PostRecord, TopicRecord, TranslationRecord } from "../domain/forum";
+import type { PostRecord, TopicRecord, TranslationRecord } from "./models";
 import { PostType } from "../domain/post-type.enum";
 const now = new Date("2026-10-15T12:00:00Z");
 function setup(role: string | null = "admin") {

@@ -12,8 +12,7 @@ import type { TournamentEvent } from "../domain/tournament-event";
 import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
 import type { MatchDecided } from "../domain/match-decided";
-import type { UpsertPlayerCommand } from "../../pandascore/application/commands/upsert-player.command";
-import type { UpsertTeamCommand } from "../../pandascore/application/commands/upsert-team.command";
+import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
@@ -140,6 +139,10 @@ export interface CompetitionWriteScope {
 }
 export interface CompetitionTransaction {
   run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T>;
+}
+export interface SyncCursor {
+  getLastSyncAt(): Promise<Date | null>;
+  setLastSyncAt(date: Date): Promise<void>;
 }
 export interface CompetitionCache {
   invalidateTournament(id: string): Promise<void>;

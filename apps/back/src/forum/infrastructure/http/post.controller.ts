@@ -21,7 +21,7 @@ import { CurrentUserId } from "../../../user/infrastructure/http/decorator/curre
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import { PostCreationStatusDto } from "./post/dto/post-creation-status.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
-import type { CreatedPost } from "../../domain/forum";
+import type { CreatedPost } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
 

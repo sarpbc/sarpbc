@@ -1,4 +1,4 @@
-import type { TopicRecord } from "../domain/forum";
+import type { TopicRecord } from "./models";
 import type { TopicStore, ForumTransaction } from "./ports";
 const predefinedTopics = [
   {

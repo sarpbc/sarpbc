@@ -1,4 +1,4 @@
-import type { NewsArticleRecord, NewsSitemapRecord } from "../domain/news-article";
+import type { NewsArticleRecord, NewsSitemapRecord } from "./models";
 import type { NewsType } from "@sarpbc/types";
 export interface NewsQueries {
   findBySlug(slug: string): Promise<NewsArticleRecord | null>;

@@ -6,7 +6,8 @@ import { User } from "../../../user/infrastructure/persistence/user.entity";
 import { ReplyRepository } from "./reply.repository";
 import { ReplyReportRepository } from "./reply-report.repository";
 import { replySnapshot } from "./reply.mapper";
-import type { ReplyRecord, ReplyTargetType } from "../../domain/reply";
+import type { ReplyTargetType } from "../../domain/reply";
+import type { ReplyRecord } from "../../application/models";
 import type { ReplyWrites, ReplyFindOptions, ReplyReportRecord } from "../../application/ports";
 export class MikroReplyStore implements ReplyWrites {
   private readonly rows: ReplyRepository;
