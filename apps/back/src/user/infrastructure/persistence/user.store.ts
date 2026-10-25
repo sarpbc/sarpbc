@@ -1,7 +1,11 @@
-import { Injectable } from "@nestjs/common";
 import { EntityManager, type FilterQuery } from "@mikro-orm/postgresql";
 import { User as Account } from "../../domain/user";
-import type { IUserRepository } from "../../application/ports/user.repository";
+import type {
+  UserQueries,
+  UserTransaction,
+  UserWriteScope,
+  UserWriter,
+} from "../../application/ports/user-store";
 import { User } from "./user.entity";
 
 export function toAccount(record: User): Account {
@@ -18,8 +22,7 @@ export function toAccount(record: User): Account {
   return account;
 }
 
-@Injectable()
-export class UserRepository implements IUserRepository {
+export class MikroUserStore implements UserQueries, UserWriter {
   constructor(private readonly em: EntityManager) {}
 
   private async find(where: FilterQuery<User>): Promise<Account | null> {
@@ -75,5 +78,16 @@ export class UserRepository implements IUserRepository {
     record.createdAt = account.createdAt;
     await this.em.persist(record).flush();
     account.id = record.id;
+  }
+}
+
+export class MikroUserTransaction implements UserTransaction {
+  constructor(private readonly em: EntityManager) {}
+  run<T>(work: (scope: UserWriteScope) => Promise<T>): Promise<T> {
+    return this.em.transactional(async (tx) => {
+      const result = await work({ users: new MikroUserStore(tx) });
+      await tx.flush();
+      return result;
+    });
   }
 }

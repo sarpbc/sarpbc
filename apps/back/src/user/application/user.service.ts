@@ -2,29 +2,30 @@ import { ConflictError, NotFoundError } from "../../common/domain/errors";
 import { User } from "../domain/user";
 import type { CreateAccountInput, SignInInput } from "./models/account-input";
 import type { PasswordHasher } from "./ports/password-hasher";
-import type { IUserRepository } from "./ports/user.repository";
+import type { UserQueries, UserTransaction } from "./ports/user-store";
 import { roleHasAnyPermission, StaffPermission } from "../domain/staff-access";
 
 export class UserService {
   constructor(
-    private readonly userRepository: IUserRepository,
+    private readonly users: UserQueries,
+    private readonly transaction: UserTransaction,
     private readonly passwords: PasswordHasher,
   ) {}
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findByEmail(email);
+    return this.users.findByEmail(email);
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.userRepository.findById(id);
+    return this.users.findById(id);
   }
 
   async findOneByGoogleId(googleId: string): Promise<User | null> {
-    return this.userRepository.findByGoogleId(googleId);
+    return this.users.findByGoogleId(googleId);
   }
 
   async signIn(dto: SignInInput): Promise<User | null> {
-    const user = await this.userRepository.findByEmailWithPassword(dto.email);
+    const user = await this.users.findByEmailWithPassword(dto.email);
     if (!user || user.password === null) {
       return null;
     }
@@ -37,22 +38,22 @@ export class UserService {
   }
 
   async create(dto: CreateAccountInput): Promise<User> {
-    const alreadyExists = await this.userRepository.existsByEmail(dto.email);
-    if (alreadyExists) {
-      throw new ConflictError(
-        "An account with this email already exists. Log in or use a different email.",
-      );
-    }
+    return this.transaction.run(async ({ users }) => {
+      if (await users.existsByEmail(dto.email)) {
+        throw new ConflictError(
+          "An account with this email already exists. Log in or use a different email.",
+        );
+      }
 
-    const hash = await this.passwords.hash(dto.password);
-    const user = new User(dto.email, dto.userName, hash);
-
-    await this.userRepository.save(user);
-    return user;
+      const hash = await this.passwords.hash(dto.password);
+      const user = new User(dto.email, dto.userName, hash);
+      await users.save(user);
+      return user;
+    });
   }
 
   async hasAnyPermission(id: string, permissions: StaffPermission[]): Promise<boolean> {
-    const user = await this.userRepository.findById(id);
+    const user = await this.users.findById(id);
     if (!user) {
       return false;
     }
@@ -65,35 +66,36 @@ export class UserService {
     googleId: string,
     avatarUrl: string | null | undefined,
   ): Promise<User> {
-    const alreadyExists = await this.userRepository.existsByEmail(email);
-    if (alreadyExists) {
-      throw new ConflictError(
-        "An account with this email already exists. Log in or link Google from your profile.",
-      );
-    }
+    return this.transaction.run(async ({ users }) => {
+      if (await users.existsByEmail(email)) {
+        throw new ConflictError(
+          "An account with this email already exists. Log in or link Google from your profile.",
+        );
+      }
 
-    const user = new User(email, userName, null, googleId, avatarUrl ?? null);
-
-    await this.userRepository.save(user);
-    return user;
+      const user = new User(email, userName, null, googleId, avatarUrl ?? null);
+      await users.save(user);
+      return user;
+    });
   }
 
   async updateUserName(userId: string, userName: string): Promise<User> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    if (user.userName !== userName) {
-      const taken = await this.userRepository.existsByUserName(userName, userId);
-      if (taken) {
-        throw new ConflictError("This username is already taken. Choose a different name.");
+    return this.transaction.run(async ({ users }) => {
+      const user = await users.findById(userId);
+      if (!user) {
+        throw new NotFoundError("User not found");
       }
-      user.userName = userName;
-      await this.userRepository.save(user);
-    }
 
-    return user;
+      if (user.userName !== userName) {
+        if (await users.existsByUserName(userName, userId)) {
+          throw new ConflictError("This username is already taken. Choose a different name.");
+        }
+        user.userName = userName;
+        await users.save(user);
+      }
+
+      return user;
+    });
   }
 
   async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null): Promise<User> {
@@ -101,7 +103,7 @@ export class UserService {
     if (avatarUrl && !user.avatarUrl) {
       user.avatarUrl = avatarUrl;
     }
-    await this.userRepository.save(user);
+    await this.transaction.run(({ users }) => users.save(user));
     return user;
   }
 }
