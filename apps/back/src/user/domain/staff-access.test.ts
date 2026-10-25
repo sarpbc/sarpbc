@@ -33,6 +33,8 @@ describe("staff-access", () => {
     expect(roleHasPermission("journalist", "forum.moderate")).toBe(false);
     expect(roleHasPermission("moderator", "forum.moderate")).toBe(true);
     expect(roleHasPermission("moderator", "players.manage")).toBe(false);
+    expect(roleHasPermission("journalist", "users.manage")).toBe(false);
+    expect(roleHasPermission("moderator", "users.manage")).toBe(false);
     expect(permissionsForRole(null)).toEqual([]);
   });
 });

@@ -18,21 +18,35 @@
   },
   "page": {
     "home": {
-      "brand": "sarpbc.org Admin",
       "logoAlt": "Logo sarpbc.org",
       "title": "Console Staff",
-      "subtitle": "Actualités, joueurs, équipes, tournois, pick'ems et modération du forum sont ici.",
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
-      "openNews": "Ouvrir les Articles",
-      "openPlayers": "Ouvrir les Joueurs",
-      "openTeams": "Ouvrir les Équipes",
-      "openTournaments": "Ouvrir les Tournois",
-      "openPickems": "Ouvrir les Pick'ems",
-      "openForum": "Ouvrir le Forum",
       "forbidden": "Vous n’avez pas accès à cette section",
-      "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin."
+      "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin.",
+      "retry": "Réessayer",
+      "loadError": "Impossible de charger cette section. Vérifiez votre connexion et réessayez.",
+      "dateUnknown": "Date à confirmer",
+      "tbd": "Équipes à confirmer",
+      "shortcuts": "Raccourcis",
+      "queues": {
+        "proposals": "Propositions de roster",
+        "proposalsEmpty": "Aucune proposition en attente",
+        "proposalsCount": "{count} proposition à examiner | {count} propositions à examiner",
+        "replies": "Réponses à modérer",
+        "repliesEmpty": "Aucune réponse à modérer",
+        "repliesCount": "{count} réponse à examiner | {count} réponses à examiner"
+      },
+      "articles": {
+        "title": "Articles récents",
+        "empty": "Aucun article pour le moment.",
+        "draft": "Brouillon"
+      },
+      "matches": {
+        "title": "Prochains matchs",
+        "empty": "Aucun match à venir."
+      }
     },
     "nav": {
       "home": "Tableau de bord",
@@ -47,7 +61,9 @@
       "tokens": "Jetons API",
       "admin": "Admin",
       "openMenu": "Ouvrir la navigation",
-      "backToSite": "Retour au site"
+      "drawerDescription": "Navigation du staff",
+      "backToSite": "Retour au site",
+      "users": "Utilisateurs"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -541,6 +557,38 @@
       "errors": {
         "loginFailed": "Impossible de se connecter. Vérifiez votre e-mail et mot de passe, puis réessayez.",
         "notAdmin": "Ce compte n’est pas staff. Contactez un administrateur pour obtenir l’accès."
+      }
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "searchPlaceholder": "Rechercher par nom ou e-mail",
+      "loadError": "Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "empty": "Aucun utilisateur pour le moment.",
+      "emptySearch": "Aucun utilisateur ne correspond à cette recherche.",
+      "usersCount": "{count} utilisateur | {count} utilisateurs",
+      "columns": {
+        "userName": "Nom",
+        "email": "E-mail",
+        "role": "Rôle",
+        "createdAt": "Créé le"
+      },
+      "roles": {
+        "member": "Membre",
+        "journalist": "Journaliste",
+        "moderator": "Modérateur",
+        "admin": "Admin"
+      },
+      "confirm": {
+        "title": "Modifier l’accès admin ?",
+        "description": "{user} passera de {from} à {to}. Les admins gèrent tous les outils et tous les utilisateurs.",
+        "cancel": "Annuler",
+        "confirm": "Changer le rôle"
+      },
+      "messages": {
+        "updated": "{user} est désormais {role}.",
+        "errorTitle": "Rôle non modifié",
+        "updateError": "Impossible de modifier ce rôle. Réessayez."
       }
     }
   },

@@ -1,6 +1,13 @@
 import type { User } from "../../domain/user";
 
+export interface UserListQuery {
+  search?: string;
+  limit: number;
+  offset: number;
+}
+
 export interface UserQueries {
+  list(query: UserListQuery): Promise<{ users: User[]; total: number }>;
   findByEmail(email: string): Promise<User | null>;
   findById(id: string): Promise<User | null>;
   findByGoogleId(googleId: string): Promise<User | null>;

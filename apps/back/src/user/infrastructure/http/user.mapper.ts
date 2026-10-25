@@ -1,4 +1,4 @@
-import { UserDto } from "./dto/user.dto";
+import { UserDto, UserListItemDto } from "./dto/user.dto";
 import type { User } from "../../domain/user";
 import { isStaffRole, permissionsForRole } from "../../domain/staff-access";
 
@@ -20,5 +20,16 @@ export class UserMapper {
     }
 
     return dto;
+  }
+
+  static toListItemDto(user: User): UserListItemDto {
+    return {
+      id: user.id,
+      email: user.email,
+      userName: user.userName,
+      avatarUrl: user.avatarUrl,
+      role: isStaffRole(user.role) ? user.role : null,
+      createdAt: user.createdAt.toISOString(),
+    };
   }
 }

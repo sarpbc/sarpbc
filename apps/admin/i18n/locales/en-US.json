@@ -18,21 +18,35 @@
   },
   "page": {
     "home": {
-      "brand": "sarpbc.org Admin",
       "logoAlt": "sarpbc.org logo",
       "title": "Staff Console",
-      "subtitle": "News, players, teams, tournaments, pick'ems, and forum moderation live here.",
       "signedInAs": "Signed in as",
       "logout": "Log Out",
       "loggingOut": "Logging out…",
-      "openNews": "Open Articles",
-      "openPlayers": "Open Players",
-      "openTeams": "Open Teams",
-      "openTournaments": "Open Tournaments",
-      "openPickems": "Open Pick'ems",
-      "openForum": "Open Forum",
       "forbidden": "You do not have access to that section",
-      "noTools": "No tools are available for your staff role yet. Ask an admin if you need access."
+      "noTools": "No tools are available for your staff role yet. Ask an admin if you need access.",
+      "retry": "Try Again",
+      "loadError": "Could not load this section. Check your connection and try again.",
+      "dateUnknown": "Date to be confirmed",
+      "tbd": "Teams to be confirmed",
+      "shortcuts": "Shortcuts",
+      "queues": {
+        "proposals": "Roster proposals",
+        "proposalsEmpty": "No pending proposals",
+        "proposalsCount": "{count} proposal to review | {count} proposals to review",
+        "replies": "Replies to moderate",
+        "repliesEmpty": "No replies to moderate",
+        "repliesCount": "{count} reply to review | {count} replies to review"
+      },
+      "articles": {
+        "title": "Recent articles",
+        "empty": "No articles yet.",
+        "draft": "Draft"
+      },
+      "matches": {
+        "title": "Upcoming matches",
+        "empty": "No upcoming matches."
+      }
     },
     "nav": {
       "home": "Dashboard",
@@ -47,7 +61,9 @@
       "tokens": "API Tokens",
       "admin": "Admin",
       "openMenu": "Open navigation",
-      "backToSite": "Back to Site"
+      "drawerDescription": "Staff navigation",
+      "backToSite": "Back to Site",
+      "users": "Users"
     },
     "search": {
       "placeholder": "Search…",
@@ -541,6 +557,38 @@
       "errors": {
         "loginFailed": "Could not log in. Check your email and password and try again.",
         "notAdmin": "This account is not staff. Contact an administrator for access."
+      }
+    },
+    "users": {
+      "title": "Users",
+      "searchPlaceholder": "Search by name or email",
+      "loadError": "Could not load users. Check your connection and try again.",
+      "retry": "Try Again",
+      "empty": "No users yet.",
+      "emptySearch": "No users match this search.",
+      "usersCount": "{count} user | {count} users",
+      "columns": {
+        "userName": "Name",
+        "email": "Email",
+        "role": "Role",
+        "createdAt": "Created"
+      },
+      "roles": {
+        "member": "Member",
+        "journalist": "Journalist",
+        "moderator": "Moderator",
+        "admin": "Admin"
+      },
+      "confirm": {
+        "title": "Change admin access?",
+        "description": "{user} will go from {from} to {to}. Admins can manage every tool and every user.",
+        "cancel": "Cancel",
+        "confirm": "Change Role"
+      },
+      "messages": {
+        "updated": "{user} is now {role}.",
+        "errorTitle": "Role not changed",
+        "updateError": "Could not change this role. Try again."
       }
     }
   },

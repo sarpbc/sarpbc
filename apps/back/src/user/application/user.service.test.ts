@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError, ForbiddenError, NotFoundError } from "../../common/domain/errors";
 import { UserService } from "./user.service";
 import { passwordHasher } from "../infrastructure/password-hasher";
 import { User } from "../domain/user";
@@ -8,6 +8,7 @@ import type { UserTransaction } from "./ports/user-store";
 describe("UserService", () => {
   let service: UserService;
   const userQueries = {
+    list: vi.fn(),
     findByEmail: vi.fn(),
     findById: vi.fn(),
     findByGoogleId: vi.fn(),
@@ -162,6 +163,58 @@ describe("UserService", () => {
       userQueries.findById.mockResolvedValue(user);
 
       await expect(service.hasAnyPermission("user-1", ["news.manage"])).resolves.toBe(false);
+    });
+  });
+
+  describe("changeRole", () => {
+    it("forbids changing your own role", async () => {
+      await expect(service.changeRole("user-1", "user-1", "admin")).rejects.toBeInstanceOf(
+        ForbiddenError,
+      );
+      expect(userWriter.findById).not.toHaveBeenCalled();
+      expect(userWriter.save).not.toHaveBeenCalled();
+    });
+
+    it("throws NotFoundError when the target does not exist", async () => {
+      userWriter.findById.mockResolvedValue(null);
+
+      await expect(service.changeRole("admin-1", "missing", "moderator")).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
+      expect(userWriter.save).not.toHaveBeenCalled();
+    });
+
+    it("assigns a staff role", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      userWriter.findById.mockResolvedValue(user);
+
+      const updated = await service.changeRole("admin-1", "user-1", "journalist");
+
+      expect(updated.role).toBe("journalist");
+      expect(userWriter.save).toHaveBeenCalledWith(user);
+    });
+
+    it("clears the role when demoting to member", async () => {
+      const user = new User("a@b.com", "alice", "hash");
+      user.id = "user-1";
+      user.role = "moderator";
+      userWriter.findById.mockResolvedValue(user);
+
+      const updated = await service.changeRole("admin-1", "user-1", null);
+
+      expect(updated.role).toBeNull();
+      expect(userWriter.save).toHaveBeenCalledWith(user);
+    });
+  });
+
+  describe("list", () => {
+    it("delegates the query to the queries", async () => {
+      const result = { users: [], total: 0 };
+      userQueries.list.mockResolvedValue(result);
+
+      await expect(service.list({ search: "ali", limit: 25, offset: 0 })).resolves.toBe(result);
+      expect(userQueries.list).toHaveBeenCalledWith({ search: "ali", limit: 25, offset: 0 });
     });
   });
 });

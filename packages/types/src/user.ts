@@ -7,7 +7,8 @@ export type StaffPermission =
   | "players.manage"
   | "teams.manage"
   | "tournaments.manage"
-  | "pickems.manage";
+  | "pickems.manage"
+  | "users.manage";
 
 export interface User {
   id: string;

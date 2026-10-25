@@ -1006,5 +1006,21 @@
     "status": null,
     "guards": ["AuthGuard"],
     "permissions": []
+  },
+  {
+    "controller": "\"users\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"users.manage\""]
+  },
+  {
+    "controller": "\"users\"",
+    "verb": "PATCH",
+    "path": "\":id/role\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"users.manage\""]
   }
 ]
