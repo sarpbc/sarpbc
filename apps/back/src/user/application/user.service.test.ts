@@ -3,28 +3,35 @@ import { ConflictError, NotFoundError } from "../../common/domain/errors";
 import { UserService } from "./user.service";
 import { passwordHasher } from "../infrastructure/password-hasher";
 import { User } from "../domain/user";
+import type { UserTransaction } from "./ports/user-store";
 
 describe("UserService", () => {
   let service: UserService;
-  const userRepository = {
+  const userQueries = {
     findByEmail: vi.fn(),
     findById: vi.fn(),
     findByGoogleId: vi.fn(),
     findByEmailWithPassword: vi.fn(),
+  };
+  const userWriter = {
+    findById: vi.fn(),
     existsByEmail: vi.fn(),
     existsByUserName: vi.fn(),
     save: vi.fn(),
   };
+  const transaction: UserTransaction = {
+    run: (work) => work({ users: userWriter }),
+  };
 
   beforeEach(async () => {
-    service = new UserService(userRepository, passwordHasher);
+    service = new UserService(userQueries, transaction, passwordHasher);
     vi.clearAllMocks();
   });
 
   describe("create", () => {
     it("persists a new user without class-validator on the entity", async () => {
-      userRepository.existsByEmail.mockResolvedValue(false);
-      userRepository.save.mockImplementation(async (user: User) => {
+      userWriter.existsByEmail.mockResolvedValue(false);
+      userWriter.save.mockImplementation(async (user: User) => {
         user.id = "user-1";
       });
 
@@ -37,11 +44,11 @@ describe("UserService", () => {
       expect(created.email).toBe("new@example.com");
       expect(created.userName).toBe("newbie");
       expect(created.password).toBeTruthy();
-      expect(userRepository.save).toHaveBeenCalled();
+      expect(userWriter.save).toHaveBeenCalled();
     });
 
     it("throws ConflictError when email already exists", async () => {
-      userRepository.existsByEmail.mockResolvedValue(true);
+      userWriter.existsByEmail.mockResolvedValue(true);
 
       await expect(
         service.create({
@@ -57,40 +64,40 @@ describe("UserService", () => {
     it("updates the username when it is available", async () => {
       const user = new User("a@b.com", "alice", "hash");
       user.id = "user-1";
-      userRepository.findById.mockResolvedValue(user);
-      userRepository.existsByUserName.mockResolvedValue(false);
+      userWriter.findById.mockResolvedValue(user);
+      userWriter.existsByUserName.mockResolvedValue(false);
 
       const updated = await service.updateUserName("user-1", "alice2");
 
       expect(updated.userName).toBe("alice2");
-      expect(userRepository.existsByUserName).toHaveBeenCalledWith("alice2", "user-1");
-      expect(userRepository.save).toHaveBeenCalledWith(user);
+      expect(userWriter.existsByUserName).toHaveBeenCalledWith("alice2", "user-1");
+      expect(userWriter.save).toHaveBeenCalledWith(user);
     });
 
     it("does not persist when the username is unchanged", async () => {
       const user = new User("a@b.com", "alice", "hash");
       user.id = "user-1";
-      userRepository.findById.mockResolvedValue(user);
+      userWriter.findById.mockResolvedValue(user);
 
       const updated = await service.updateUserName("user-1", "alice");
 
       expect(updated.userName).toBe("alice");
-      expect(userRepository.existsByUserName).not.toHaveBeenCalled();
-      expect(userRepository.save).not.toHaveBeenCalled();
+      expect(userWriter.existsByUserName).not.toHaveBeenCalled();
+      expect(userWriter.save).not.toHaveBeenCalled();
     });
 
     it("throws ConflictError when the username is taken", async () => {
       const user = new User("a@b.com", "alice", "hash");
       user.id = "user-1";
-      userRepository.findById.mockResolvedValue(user);
-      userRepository.existsByUserName.mockResolvedValue(true);
+      userWriter.findById.mockResolvedValue(user);
+      userWriter.existsByUserName.mockResolvedValue(true);
 
       await expect(service.updateUserName("user-1", "taken")).rejects.toBeInstanceOf(ConflictError);
-      expect(userRepository.save).not.toHaveBeenCalled();
+      expect(userWriter.save).not.toHaveBeenCalled();
     });
 
     it("throws NotFoundError when the user is missing", async () => {
-      userRepository.findById.mockResolvedValue(null);
+      userWriter.findById.mockResolvedValue(null);
 
       await expect(service.updateUserName("missing", "alice")).rejects.toBeInstanceOf(
         NotFoundError,
@@ -107,7 +114,7 @@ describe("UserService", () => {
 
       expect(linked.googleId).toBe("google-123");
       expect(linked.avatarUrl).toBe("https://avatar");
-      expect(userRepository.save).toHaveBeenCalledWith(user);
+      expect(userWriter.save).toHaveBeenCalledWith(user);
     });
 
     it("does not overwrite an existing avatarUrl", async () => {
@@ -125,7 +132,7 @@ describe("UserService", () => {
       const user = new User("a@b.com", "alice", "hash");
       user.id = "user-1";
       user.role = "admin";
-      userRepository.findById.mockResolvedValue(user);
+      userQueries.findById.mockResolvedValue(user);
 
       await expect(
         service.hasAnyPermission("user-1", ["news.manage", "forum.moderate"]),
@@ -133,7 +140,7 @@ describe("UserService", () => {
     });
 
     it("denies access when the user is missing", async () => {
-      userRepository.findById.mockResolvedValue(null);
+      userQueries.findById.mockResolvedValue(null);
       await expect(service.hasAnyPermission("missing", ["news.manage"])).resolves.toBe(false);
     });
 
@@ -141,7 +148,7 @@ describe("UserService", () => {
       const user = new User("a@b.com", "alice", "hash");
       user.id = "user-1";
       user.role = "journalist";
-      userRepository.findById.mockResolvedValue(user);
+      userQueries.findById.mockResolvedValue(user);
 
       await expect(
         service.hasAnyPermission("user-1", ["forum.moderate", "news.manage"]),
@@ -152,7 +159,7 @@ describe("UserService", () => {
 
     it("denies staff permissions to users without a staff role", async () => {
       const user = new User("a@b.com", "alice", "hash");
-      userRepository.findById.mockResolvedValue(user);
+      userQueries.findById.mockResolvedValue(user);
 
       await expect(service.hasAnyPermission("user-1", ["news.manage"])).resolves.toBe(false);
     });
