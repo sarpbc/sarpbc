@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  InvalidInputError as BadRequestException,
-  NotFoundError as NotFoundException,
-} from "../../common/domain/errors";
+import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { NEWS_SITEMAP_CHUNK_SIZE, NewsService, newsSitemapChunkCount } from "./news.service";
-import type { NewsArticleRecord as NewsArticle } from "./models";
+import type { NewsArticleRecord, NewsSitemapRecord } from "./models";
 import type { NewsTransaction, NewsWriteScope } from "./ports";
 
 describe("newsSitemapChunkCount", () => {
@@ -32,14 +29,14 @@ describe("NewsService sitemap", () => {
   });
 
   function publishedArticle(
-    overrides: Pick<NewsArticle, "slug"> & Partial<NewsArticle>,
-  ): NewsArticle {
+    overrides: Pick<NewsSitemapRecord, "slug"> & Partial<NewsSitemapRecord>,
+  ): NewsSitemapRecord {
     return {
       id: overrides.id ?? "id-1",
       slug: overrides.slug,
       createdAt: overrides.createdAt ?? new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: overrides.updatedAt ?? null,
-    } as NewsArticle;
+    };
   }
 
   describe("findPublishedSitemapMeta", () => {
@@ -57,16 +54,14 @@ describe("NewsService sitemap", () => {
 
   describe("findPublishedSitemapChunk", () => {
     it("rejects a negative chunk index", async () => {
-      await expect(service.findPublishedSitemapChunk(-1)).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(service.findPublishedSitemapChunk(-1)).rejects.toBeInstanceOf(InvalidInputError);
       expect(newsRepository.sitemapChunk).not.toHaveBeenCalled();
     });
 
     it("404s chunks past the archive", async () => {
       newsRepository.sitemapChunk.mockResolvedValue([[], 1]);
 
-      await expect(service.findPublishedSitemapChunk(1)).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.findPublishedSitemapChunk(1)).rejects.toBeInstanceOf(NotFoundError);
     });
 
     it("returns published slugs in stable createdAt, id order and omits drafts", async () => {
@@ -167,7 +162,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
 
   it("rejects an invalid ISO week id", async () => {
     await expect(service.findPublishedShortsByWeek("2026-W99")).rejects.toBeInstanceOf(
-      BadRequestException,
+      InvalidInputError,
     );
     expect(newsRepository.listWeek).not.toHaveBeenCalled();
   });
@@ -186,7 +181,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
 });
 
 describe("news publication notifications", () => {
-  let article: NewsArticle;
+  let article: NewsArticleRecord;
   let committed = false;
   const commit = vi.fn(async () => {
     committed = true;

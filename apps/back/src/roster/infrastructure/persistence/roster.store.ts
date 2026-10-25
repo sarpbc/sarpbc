@@ -39,7 +39,6 @@ const teamFilter = ({ name, start }: Partial<TeamSearchProps>) =>
       ? { name: { $ilike: start + "%" }, mergedInto: null }
       : { mergedInto: null };
 
-/** Writes only stage rows: the transaction that owns the EntityManager flushes them together. */
 export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
   constructor(
     private readonly em: EntityManager,

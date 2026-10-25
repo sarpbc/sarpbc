@@ -1,12 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  InvalidInputError as BadRequestException,
-  NotFoundError as NotFoundException,
-} from "../../common/domain/errors";
-import type { ReplyAuthor as User, ReplyTarget } from "../domain/reply";
-import type { ReplyRecord as Reply } from "./models";
+import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import type { ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { ReplyRecord } from "./models";
 import type { ReplyWriteScope } from "./ports";
-type Match = NonNullable<Reply["match"]>;
+type Match = NonNullable<ReplyRecord["match"]>;
 import { ReplyService } from "./reply.service";
 import { REPLY_ERROR_CODES } from "../domain/reply-limits";
 
@@ -59,11 +56,11 @@ describe("ReplyService", () => {
     vi.clearAllMocks();
   });
 
-  function makeUser(id = "user-1"): User {
-    return { id, userName: "fan", email: "fan@test.com" } as User;
+  function makeUser(id = "user-1"): ReplyAuthor {
+    return { id, userName: "fan" };
   }
 
-  function makeReply(partial: Partial<Reply> & { id: string }): Reply {
+  function makeReply(partial: Partial<ReplyRecord> & { id: string }): ReplyRecord {
     return {
       content: "hello",
       createdAt: new Date("2026-01-01"),
@@ -72,16 +69,15 @@ describe("ReplyService", () => {
       newsArticle: null,
       match: null,
       replyTo: null,
-      replies: { getItems: () => [] } as never,
       hiddenAt: null,
       ...partial,
-    } as Reply;
+    };
   }
 
   describe("create target validation", () => {
     it("rejects when no target is provided", async () => {
       await expect(service.create("user-1", { content: "hi" } as never)).rejects.toBeInstanceOf(
-        BadRequestException,
+        InvalidInputError,
       );
     });
 
@@ -92,7 +88,7 @@ describe("ReplyService", () => {
           postId: "11111111-1111-4111-8111-111111111111",
           matchId: "22222222-2222-4222-8222-222222222222",
         } as never),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      ).rejects.toBeInstanceOf(InvalidInputError);
     });
 
     it("creates a match-targeted reply", async () => {
@@ -140,7 +136,7 @@ describe("ReplyService", () => {
           content: "   ",
           matchId: "22222222-2222-4222-8222-222222222222",
         }),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      ).rejects.toBeInstanceOf(InvalidInputError);
     });
 
     it("throws when match does not exist", async () => {
@@ -153,7 +149,7 @@ describe("ReplyService", () => {
           content: "hi",
           matchId: "22222222-2222-4222-8222-222222222222",
         }),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
