@@ -1,9 +1,10 @@
 <template>
   <div class="flex h-dvh w-full flex-col overflow-hidden">
     <div
-      class="flex h-header w-full shrink-0 flex-row items-center justify-between gap-4 border-b border-default py-2 pr-4 pl-8"
+      class="flex h-header w-full shrink-0 flex-row items-center justify-between gap-2 border-b border-default py-2 pr-4 pl-2 sm:gap-4 lg:pl-8"
     >
-      <div class="min-w-0">
+      <NavDrawer />
+      <div class="min-w-0 shrink">
         <slot name="breadcrumb" />
       </div>
       <div class="flex min-w-0 flex-1 justify-center">

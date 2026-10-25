@@ -1,6 +1,7 @@
 import { EntityManager, type FilterQuery } from "@mikro-orm/postgresql";
 import { User as Account } from "../../domain/user";
 import type {
+  UserListQuery,
   UserQueries,
   UserTransaction,
   UserWriteScope,
@@ -28,6 +29,21 @@ export class MikroUserStore implements UserQueries, UserWriter {
   private async find(where: FilterQuery<User>): Promise<Account | null> {
     const record = await this.em.findOne(User, where);
     return record ? toAccount(record) : null;
+  }
+
+  async list({
+    search,
+    limit,
+    offset,
+  }: UserListQuery): Promise<{ users: Account[]; total: number }> {
+    const [records, total] = await this.em.findAndCount(
+      User,
+      search
+        ? { $or: [{ email: { $ilike: `%${search}%` } }, { userName: { $ilike: `%${search}%` } }] }
+        : {},
+      { orderBy: { createdAt: "desc", id: "asc" }, limit, offset },
+    );
+    return { users: records.map(toAccount), total };
   }
 
   findByEmail(email: string): Promise<Account | null> {

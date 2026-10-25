@@ -124,3 +124,11 @@ export async function deleteNewsArticle(slug: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function getRecentNewsArticles(limit: number): Promise<NewsArticle[]> {
+  const res = await apiFetch<PaginatedNewsArticles>("/news/admin", {
+    method: "GET",
+    query: { page: 0, limit },
+  });
+  return res.data;
+}

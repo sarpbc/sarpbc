@@ -1,9 +1,9 @@
-import { ConflictError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError, ForbiddenError, NotFoundError } from "../../common/domain/errors";
 import { User } from "../domain/user";
 import type { CreateAccountInput, SignInInput } from "./models/account-input";
 import type { PasswordHasher } from "./ports/password-hasher";
-import type { UserQueries, UserTransaction } from "./ports/user-store";
-import { roleHasAnyPermission, StaffPermission } from "../domain/staff-access";
+import type { UserListQuery, UserQueries, UserTransaction } from "./ports/user-store";
+import { roleHasAnyPermission, StaffPermission, StaffRole } from "../domain/staff-access";
 
 export class UserService {
   constructor(
@@ -11,6 +11,27 @@ export class UserService {
     private readonly transaction: UserTransaction,
     private readonly passwords: PasswordHasher,
   ) {}
+
+  async list(query: UserListQuery): Promise<{ users: User[]; total: number }> {
+    return this.users.list(query);
+  }
+
+  async changeRole(actorId: string, targetId: string, role: StaffRole | null): Promise<User> {
+    if (actorId === targetId) {
+      throw new ForbiddenError("You cannot change your own role. Ask another admin.");
+    }
+
+    return this.transaction.run(async ({ users }) => {
+      const user = await users.findById(targetId);
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
+
+      user.role = role;
+      await users.save(user);
+      return user;
+    });
+  }
 
   async findOneByEmail(email: string): Promise<User | null> {
     return this.users.findByEmail(email);

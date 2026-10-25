@@ -10,3 +10,12 @@ export class UserDto {
   /** Derived from `role === "admin"`, not a separate assignment. */
   admin?: boolean;
 }
+
+export class UserListItemDto {
+  id!: string;
+  email!: string;
+  userName!: string;
+  avatarUrl!: string | null;
+  role!: StaffRole | null;
+  createdAt!: string;
+}
