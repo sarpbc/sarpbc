@@ -7,13 +7,13 @@ overrides:
   fastify: 5.12.7
   prosemirror-model: 1.25.11
   prosemirror-view: 1.42.3
-  vue: 3.5.42
-  vue-i18n: 11.4.10
-  "@intlify/core": 11.4.10
-  "@intlify/core-base": 11.4.10
-  "@intlify/devtools-types": 11.4.10
-  "@intlify/message-compiler": 11.4.10
-  "@intlify/shared": 11.4.10
+  vue: 3.5.44
+  vue-i18n: 11.4.16
+  "@intlify/core": 11.4.16
+  "@intlify/core-base": 11.4.16
+  "@intlify/devtools-types": 11.4.16
+  "@intlify/message-compiler": 11.4.16
+  "@intlify/shared": 11.4.16
   "@nuxt/content>zod": ^4.6.7
   "body-parser@>=2.0.0 <2.4.0": ^2.4.0
   "brace-expansion@<1.1.21": ^1.1.21
@@ -48,7 +48,8 @@ allowBuilds:
 catalog:
   typescript: ^6.0.3
   "@types/node": ^26.6.5
-  nuxt: ^4.6.2
+  nuxt: ^4.6.3
+  "@nuxt/kit": ^4.6.3
   vue: ^3.5.44
   vue-router: ^5.4.0
   vue-i18n: ^11.4.16
@@ -76,10 +77,11 @@ catalog:
   "@mikro-orm/seeder": ^7.2.5
 
 minimumReleaseAgeExclude:
-  - "@nuxt/kit@4.5.0"
-  - "@nuxt/nitro-server@4.5.0"
-  - "@nuxt/schema@4.5.0"
-  - "@nuxt/vite-builder@4.5.0"
-  - nuxt@4.5.0
+  - "@nuxt/kit@4.5.0 || 4.6.3"
+  - "@nuxt/nitro-server@4.5.0 || 4.6.3"
+  - "@nuxt/schema@4.5.0 || 4.6.3"
+  - "@nuxt/vite-builder@4.5.0 || 4.6.3"
+  - nuxt@4.5.0 || 4.6.3
   - "@posthog/core@1.45.1"
   - posthog-node@5.46.1
+  - "@nuxt/vite-server@4.6.3"
