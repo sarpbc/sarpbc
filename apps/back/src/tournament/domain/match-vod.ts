@@ -1,10 +1,12 @@
 import type { MatchVod, MatchVodSource } from "@sarpbc/types";
-import { isIso6391Code, parseMatchVodUrl, type MatchVodUrlError } from "@sarpbc/utils";
+import {
+  MAX_VODS_PER_GAME,
+  isIso6391Code,
+  maxVodGame,
+  parseMatchVodUrl,
+  type MatchVodUrlError,
+} from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
-
-export const MAX_VODS_PER_GAME = 10;
-/** Upper bound when the match format is unknown; Rocket League series stop at best-of-7. */
-export const MAX_VOD_GAME = 9;
 
 export interface MatchVodLink {
   url: string;
@@ -35,7 +37,7 @@ export function normalizeMatchVods(
   inputs: readonly MatchVodInput[],
   numberOfGames: number | null,
 ): MatchVod[] {
-  const maxGame = numberOfGames && numberOfGames > 0 ? numberOfGames : MAX_VOD_GAME;
+  const maxGame = maxVodGame(numberOfGames);
   const vods: MatchVod[] = [];
   const seen = new Set<string>();
   inputs.forEach((input, index) => {

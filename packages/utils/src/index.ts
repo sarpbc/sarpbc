@@ -48,6 +48,8 @@ export {
 export { resolveThemedLogoUrl } from "./themed-logo.ts";
 export {
   ISO_639_1_CODES,
+  MAX_VODS_PER_GAME,
+  maxVodGame,
   isIso6391Code,
   parseMatchVodUrl,
   type MatchVodUrlError,

@@ -11,7 +11,7 @@ import {
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
-import { MAX_VODS_PER_GAME } from "../../../tournament/domain/match-vod";
+import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import { mapMatchListResponse } from "../mappers";
 import { requireUpdateFields } from "./update-fields";
 

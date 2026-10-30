@@ -231,3 +231,11 @@ export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
     return { ok: false, error: "invalid-timestamp" };
   return { ok: true, url: url.href, source };
 }
+
+export const MAX_VODS_PER_GAME = 10;
+/** Upper bound when the match format is unknown; Rocket League series stop at best-of-7. */
+const MAX_VOD_GAME = 9;
+
+export function maxVodGame(numberOfGames: number | null | undefined): number {
+  return numberOfGames && numberOfGames > 0 ? numberOfGames : MAX_VOD_GAME;
+}

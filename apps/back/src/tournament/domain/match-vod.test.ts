@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
-import { MAX_VODS_PER_GAME, normalizeMatchVods, replaceGameVods } from "./match-vod";
+import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
+import { normalizeMatchVods, replaceGameVods } from "./match-vod";
 
 const vod = (url: string, overrides: Partial<{ game: number; language: string }> = {}) => ({
   game: 1,
