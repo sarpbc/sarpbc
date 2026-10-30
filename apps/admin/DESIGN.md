@@ -33,6 +33,8 @@ Every section has loading, empty and error states. No pageviews, DAU or charts.
 - Out of scope: impersonation, password reset, ban or deletion.
 - Backend: `GET /users?search=&limit=&offset=` and `PATCH /users/:id/role`, both guarded by `users.manage`. Follows `apps/back/ARCHITECTURE.md`: query and command on `UserService`, port methods on `IUserRepository`, DTO validation in infrastructure.
 
-## Deferred
+## Lists
 
-SAR-164 (`useAdminList` and shared confirm-delete) is a low-priority hygiene ticket and stays in the backlog; the users page is written so it can adopt it.
+- Paginated lists use `useAdminList` (fetch, page, refresh). It keeps the previous page visible while the next one loads.
+- Row deletion goes through `ConfirmDeleteModal`: bind the row to delete with `v-model:target`, pass the message and the delete call, refresh on `deleted`.
+- Teams, players and forum posts use both. The users page keeps its own fetch for now because of search and its error state.
