@@ -10,6 +10,16 @@ const envSchema = z.object({
   POSTHOG_PROJECT_TOKEN: z.string().optional(),
   POSTHOG_HOST: z.string().optional(),
   INDEXNOW_KEY: z.union([z.literal(""), z.string().regex(INDEXNOW_KEY_PATTERN)]).optional(),
+  INTERNAL_API_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const trimmed = value?.trim() ?? "";
+      return trimmed.length === 0 ? undefined : trimmed;
+    })
+    .refine((value) => value === undefined || /^[\x21-\x7E]{16,}$/.test(value), {
+      message: "must be at least 16 visible ASCII characters",
+    }),
 });
 
 export interface ProcessEnv {
@@ -21,6 +31,7 @@ export interface ProcessEnv {
   POSTHOG_PROJECT_TOKEN?: string;
   POSTHOG_HOST?: string;
   INDEXNOW_KEY?: string;
+  INTERNAL_API_TOKEN?: string;
 }
 
 export function validateEnv(config: ProcessEnv) {
@@ -35,5 +46,6 @@ export function validateEnv(config: ProcessEnv) {
   return {
     ...config,
     ...parsed.data,
+    INTERNAL_API_TOKEN: parsed.data.INTERNAL_API_TOKEN,
   };
 }

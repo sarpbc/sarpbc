@@ -4,10 +4,10 @@ import type { Tournament } from "~/types/tournament";
 import type { ContractRole, TeamContract } from "~/types/contract";
 
 export async function getTeamFromSlug(slug: string): Promise<Team | null> {
-  const config = useRuntimeConfig();
-  const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/slug/${slug}`, {
+  const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/slug/${slug}`, {
     method: "GET",
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   return res.team || null;
@@ -26,7 +26,6 @@ export async function getAllTeams(query?: {
   offset?: number;
   start?: string;
 }): Promise<{ teams: Team[]; total: number }> {
-  const config = useRuntimeConfig();
   const params: TeamListParams = {
     limit: query?.limit || 50,
   };
@@ -41,9 +40,10 @@ export async function getAllTeams(query?: {
     params.name = query.search;
   }
 
-  const res = await $fetch<{ teams?: Team[]; count?: number }>(`${config.public.apiBase}/team`, {
+  const res = await $fetch<{ teams?: Team[]; count?: number }>(`${useApiBase()}/team`, {
     method: "GET",
     credentials: "include",
+    headers: useInternalApiHeaders(),
     params,
   });
 
@@ -52,11 +52,11 @@ export async function getAllTeams(query?: {
 }
 
 export async function syncTeamFromPandascore(): Promise<void> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/team/sync`, {
+    await $fetch(`${useApiBase()}/team/sync`, {
       method: "POST",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error syncing team:", error);
@@ -64,37 +64,34 @@ export async function syncTeamFromPandascore(): Promise<void> {
 }
 
 export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ contracts?: TeamContract[] }>(
-    `${config.public.apiBase}/team/${teamId}/contract`,
+    `${useApiBase()}/team/${teamId}/contract`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
   return res.contracts ?? [];
 }
 export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
-  const config = useRuntimeConfig();
-  const res = await $fetch<{ trophies?: Tournament[] }>(
-    `${config.public.apiBase}/team/${teamId}/trophies`,
-    {
-      method: "GET",
-      credentials: "include",
-    },
-  );
+  const res = await $fetch<{ trophies?: Tournament[] }>(`${useApiBase()}/team/${teamId}/trophies`, {
+    method: "GET",
+    credentials: "include",
+    headers: useInternalApiHeaders(),
+  });
 
   return res.trophies ?? [];
 }
 
 export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ tournaments?: Tournament[] }>(
-    `${config.public.apiBase}/team/${teamId}/tournaments`,
+    `${useApiBase()}/team/${teamId}/tournaments`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
@@ -102,12 +99,12 @@ export async function getTeamTournaments(teamId: string): Promise<Tournament[]> 
 }
 
 export async function getTeamMatches(teamId: string): Promise<ProfileMatchListItem[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ matches?: ProfileMatchListItem[] }>(
-    `${config.public.apiBase}/tournaments/matches/team/${teamId}`,
+    `${useApiBase()}/tournaments/matches/team/${teamId}`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
@@ -115,11 +112,11 @@ export async function getTeamMatches(teamId: string): Promise<ProfileMatchListIt
 }
 
 export async function getTeamById(id: string): Promise<Team | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/${id}`, {
+    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/${id}`, {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
     return res.team || null;
   } catch (error) {
@@ -133,11 +130,11 @@ export async function createTeam(body: {
   location?: string;
   imageUrl?: string;
 }): Promise<Team | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team`, {
+    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team`, {
       method: "POST",
       credentials: "include",
+      headers: useInternalApiHeaders(),
       body,
     });
     return res.team || null;
@@ -155,11 +152,11 @@ export async function updateTeam(
     imageUrl?: string;
   },
 ): Promise<Team | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ team?: Team }>(`${config.public.apiBase}/team/${id}`, {
+    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/${id}`, {
       method: "PATCH",
       credentials: "include",
+      headers: useInternalApiHeaders(),
       body,
     });
     return res.team || null;
@@ -170,11 +167,11 @@ export async function updateTeam(
 }
 
 export async function deleteTeam(id: string): Promise<void> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/team/${id}`, {
+    await $fetch(`${useApiBase()}/team/${id}`, {
       method: "DELETE",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error deleting team:", error);
@@ -191,13 +188,13 @@ export async function createTeamContract(
     endDate?: string | null;
   },
 ): Promise<TeamContract | null> {
-  const config = useRuntimeConfig();
   try {
     const res = await $fetch<{ contract?: TeamContract }>(
-      `${config.public.apiBase}/team/${teamId}/contract`,
+      `${useApiBase()}/team/${teamId}/contract`,
       {
         method: "POST",
         credentials: "include",
+        headers: useInternalApiHeaders(),
         body,
       },
     );
@@ -218,13 +215,13 @@ export async function updateTeamContract(
     endDate?: string | null;
   },
 ): Promise<TeamContract | null> {
-  const config = useRuntimeConfig();
   try {
     const res = await $fetch<{ contract?: TeamContract }>(
-      `${config.public.apiBase}/team/${teamId}/contract/${contractId}`,
+      `${useApiBase()}/team/${teamId}/contract/${contractId}`,
       {
         method: "PATCH",
         credentials: "include",
+        headers: useInternalApiHeaders(),
         body,
       },
     );
@@ -236,11 +233,11 @@ export async function updateTeamContract(
 }
 
 export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/team/${teamId}/contract/${contractId}`, {
+    await $fetch(`${useApiBase()}/team/${teamId}/contract/${contractId}`, {
       method: "DELETE",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error deleting team contract:", error);

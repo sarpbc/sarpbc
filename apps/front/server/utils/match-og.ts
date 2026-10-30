@@ -134,10 +134,10 @@ export function getFetchStatusCode(cause: unknown): number | undefined {
 }
 
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
-  const config = useRuntimeConfig();
-
   try {
-    const response = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`);
+    const response = await $fetch<MatchDetailResponse>(`${useApiBase()}/matches/${id}`, {
+      headers: useInternalApiHeaders(),
+    });
     return {
       ...response,
       match: {

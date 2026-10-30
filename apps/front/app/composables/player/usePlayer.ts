@@ -53,8 +53,9 @@ interface PlayerMutationResponseDto {
 
 export function usePlayer() {
   const $api = $fetch.create({
-    baseURL: useRuntimeConfig().public.apiBase,
+    baseURL: useApiBase(),
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   function getPlayerFromSlug(slug: MaybeRef<string>) {

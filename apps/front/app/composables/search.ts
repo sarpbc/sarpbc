@@ -8,11 +8,11 @@ export interface SearchResult {
 }
 
 export async function searchTeamsAndPlayers({ query }: { query?: string }): Promise<SearchResult> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<Partial<SearchResult>>(`${config.public.apiBase}/search`, {
+    const res = await $fetch<Partial<SearchResult>>(`${useApiBase()}/search`, {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
       params: {
         q: query,
         type: "all",

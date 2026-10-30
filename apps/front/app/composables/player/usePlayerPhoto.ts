@@ -20,8 +20,9 @@ interface AddPlayerPhotoResponseDto {
 
 export function usePlayerPhoto() {
   const $api = $fetch.create({
-    baseURL: useRuntimeConfig().public.apiBase,
+    baseURL: useApiBase(),
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   function getPlayerPhotos(playerId: MaybeRef<string>) {

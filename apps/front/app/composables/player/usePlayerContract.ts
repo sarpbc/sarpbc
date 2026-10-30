@@ -24,8 +24,9 @@ interface UpsertPlayerContractResponseDto {
 
 export function usePlayerContract() {
   const $api = $fetch.create({
-    baseURL: useRuntimeConfig().public.apiBase,
+    baseURL: useApiBase(),
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   function getPlayerContracts(playerId: MaybeRef<string>) {

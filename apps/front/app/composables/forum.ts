@@ -15,15 +15,12 @@ import {
 } from "~/utils/apiError";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ recentPosts: PostPreview[] }>(
-      `${config.public.apiBase}/forum/preview`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const res = await $fetch<{ recentPosts: PostPreview[] }>(`${useApiBase()}/forum/preview`, {
+      method: "GET",
+      credentials: "include",
+      headers: useInternalApiHeaders(),
+    });
 
     return res.recentPosts || [];
   } catch (error) {
@@ -33,11 +30,11 @@ export async function getRecentForumActivities(): Promise<PostPreview[]> {
 }
 
 export async function getTopics(): Promise<Topic[]> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ topics: Topic[] }>(`${config.public.apiBase}/forum/topics`, {
+    const res = await $fetch<{ topics: Topic[] }>(`${useApiBase()}/forum/topics`, {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
 
     return res.topics || [];
@@ -48,21 +45,21 @@ export async function getTopics(): Promise<Topic[]> {
 }
 
 export async function getPosts(): Promise<PostShort[]> {
-  const config = useRuntimeConfig();
-  const res = await $fetch<{ posts: PostShort[] }>(`${config.public.apiBase}/posts`, {
+  const res = await $fetch<{ posts: PostShort[] }>(`${useApiBase()}/posts`, {
     method: "GET",
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   return res.posts || [];
 }
 
 export async function getPostById(id: string): Promise<ForumPost | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ post: ForumPost }>(`${config.public.apiBase}/posts/${id}`, {
+    const res = await $fetch<{ post: ForumPost }>(`${useApiBase()}/posts/${id}`, {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     });
 
     return res.post || null;

@@ -32,12 +32,12 @@ export async function getActivePickemTournaments(limit = 1): Promise<TournamentL
 }
 
 export async function getUserPickemsForTournament(tournamentId: string): Promise<UserPickemPick[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{
     picks?: UserPickemPick[];
-  }>(`${config.public.apiBase}/pickem/tournament/${tournamentId}/user/picks`, {
+  }>(`${useApiBase()}/pickem/tournament/${tournamentId}/user/picks`, {
     method: "GET",
     credentials: "include",
+    headers: useInternalApiHeaders(),
   });
 
   return (res.picks ?? []).map((pick) => ({
@@ -52,12 +52,12 @@ export async function updatePickemForMatch(
   matchId: string,
   pickedParticipantId: string,
 ): Promise<void> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ success?: boolean; error?: string }>(
-    `${config.public.apiBase}/pickem/match/${matchId}/pick`,
+    `${useApiBase()}/pickem/match/${matchId}/pick`,
     {
       method: "POST",
       credentials: "include",
+      headers: useInternalApiHeaders(),
       body: {
         pickedParticipantId,
       },
@@ -72,12 +72,12 @@ export async function updatePickemForMatch(
 export async function getPickemLeaderboard(
   tournamentId: string,
 ): Promise<PickemLeaderboardEntry[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ leaderboard?: PickemLeaderboardEntry[] }>(
-    `${config.public.apiBase}/pickem/tournament/${tournamentId}/leaderboard`,
+    `${useApiBase()}/pickem/tournament/${tournamentId}/leaderboard`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
   return res.leaderboard ?? [];
@@ -86,12 +86,12 @@ export async function getPickemLeaderboard(
 export async function getPickemPersonalRanking(
   tournamentId: string,
 ): Promise<PickemPersonalRanking> {
-  const config = useRuntimeConfig();
   return await $fetch<PickemPersonalRanking>(
-    `${config.public.apiBase}/pickem/tournament/${tournamentId}/me`,
+    `${useApiBase()}/pickem/tournament/${tournamentId}/me`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 }

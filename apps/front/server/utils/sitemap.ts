@@ -30,10 +30,11 @@ function rethrowSitemapFetchError(cause: unknown): never {
 }
 
 export async function handleSitemapIndex(event: H3Event): Promise<string> {
-  const config = useRuntimeConfig();
   let meta: NewsSitemapMetaResponse;
   try {
-    meta = await $fetch<NewsSitemapMetaResponse>(`${config.public.apiBase}/news/sitemap`);
+    meta = await $fetch<NewsSitemapMetaResponse>(`${useApiBase()}/news/sitemap`, {
+      headers: useInternalApiHeaders(),
+    });
   } catch (cause) {
     rethrowSitemapFetchError(cause);
   }
@@ -53,12 +54,11 @@ export async function handleNewsSitemapChunk(
     throw createError({ statusCode: 404, statusMessage: "News sitemap chunk not found" });
   }
 
-  const config = useRuntimeConfig();
   let response: NewsSitemapChunkResponse;
   try {
-    response = await $fetch<NewsSitemapChunkResponse>(
-      `${config.public.apiBase}/news/sitemap/${chunk}`,
-    );
+    response = await $fetch<NewsSitemapChunkResponse>(`${useApiBase()}/news/sitemap/${chunk}`, {
+      headers: useInternalApiHeaders(),
+    });
   } catch (cause) {
     rethrowSitemapFetchError(cause);
   }

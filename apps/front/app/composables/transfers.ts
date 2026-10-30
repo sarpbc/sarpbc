@@ -10,12 +10,12 @@ export interface TransferQuery {
 export async function getTransfers(
   query: TransferQuery,
 ): Promise<{ transfers: Transfer[]; total: number }> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ transfers?: Transfer[]; count?: number }>(
-    `${config.public.apiBase}/transfers`,
+    `${useApiBase()}/transfers`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
       params: query,
     },
   );

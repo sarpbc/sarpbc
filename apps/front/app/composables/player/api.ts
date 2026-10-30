@@ -2,12 +2,12 @@ import type { Tournament } from "~/types/tournament";
 import type { PlayerProfileAward, ProfileMatchListItem } from "@sarpbc/types";
 
 export async function getPlayerMatches(playerId: string): Promise<ProfileMatchListItem[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ matches?: ProfileMatchListItem[] }>(
-    `${config.public.apiBase}/player/${playerId}/matches`,
+    `${useApiBase()}/player/${playerId}/matches`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
@@ -15,12 +15,12 @@ export async function getPlayerMatches(playerId: string): Promise<ProfileMatchLi
 }
 
 export async function getPlayerTrophies(playerId: string): Promise<Tournament[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ trophies?: Tournament[] }>(
-    `${config.public.apiBase}/player/${playerId}/trophies`,
+    `${useApiBase()}/player/${playerId}/trophies`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
@@ -28,12 +28,12 @@ export async function getPlayerTrophies(playerId: string): Promise<Tournament[]>
 }
 
 export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAward[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ awards?: PlayerProfileAward[] }>(
-    `${config.public.apiBase}/player/${playerId}/awards`,
+    `${useApiBase()}/player/${playerId}/awards`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
@@ -41,12 +41,12 @@ export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAw
 }
 
 export async function getPlayerTournaments(playerId: string): Promise<Tournament[]> {
-  const config = useRuntimeConfig();
   const res = await $fetch<{ tournaments?: Tournament[] }>(
-    `${config.public.apiBase}/player/${playerId}/tournaments`,
+    `${useApiBase()}/player/${playerId}/tournaments`,
     {
       method: "GET",
       credentials: "include",
+      headers: useInternalApiHeaders(),
     },
   );
 
