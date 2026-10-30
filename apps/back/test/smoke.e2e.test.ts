@@ -15,11 +15,12 @@ import { PostHogService } from "../src/infrastructure/telemetry/posthog.service"
 import { NewsController } from "../src/news/infrastructure/http/news.controller";
 import { NewsService } from "../src/news/application/news.service";
 import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
+import { TweetImageService } from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
 import { MatchService } from "../src/tournament/application/match/match.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
-import { NotFoundError } from "../src/common/domain/errors";
+import { IntegrationError, NotFoundError } from "../src/common/domain/errors";
 import { configureApp } from "../src/configure-app";
 import type { EntityRef } from "../src/common/domain/entity-ref";
 import { League, Match, TournamentParticipant } from "../src/tournament/domain/competition";
@@ -55,6 +56,17 @@ describe("API smoke (e2e)", () => {
         end: new Date("2026-09-07T00:00:00.000Z"),
         items: [],
       };
+    }),
+  };
+  const tweetImages = {
+    load: vi.fn(async (url: string) => {
+      if (url.endsWith("/removed.jpg")) {
+        throw new NotFoundError("This image is no longer available on X.");
+      }
+      if (url.endsWith("/broken.jpg")) {
+        throw new IntegrationError("Could not load this image from X. Try again in a moment.");
+      }
+      return { contentType: "image/png", body: Buffer.from("png") };
     }),
   };
   const MISSING_MATCH_ID = "11111111-1111-4111-8111-111111111111";
@@ -115,6 +127,7 @@ describe("API smoke (e2e)", () => {
         },
         { provide: NewsService, useValue: newsService },
         { provide: TweetEmbedService, useValue: { embed: vi.fn() } },
+        { provide: TweetImageService, useValue: new TweetImageService(tweetImages) },
         { provide: ReplyService, useValue: { countByTargetIds: vi.fn() } },
         { provide: MatchService, useValue: matchService },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
@@ -169,6 +182,37 @@ describe("API smoke (e2e)", () => {
 
   it("rejects a malformed ISO week id", async () => {
     await request(app.getHttpServer()).get("/news/weeks/2026-W99").expect(400);
+  });
+
+  it("proxies allowlisted tweet images with a short public cache", async () => {
+    const url = "https://pbs.twimg.com/media/photo.png";
+    const response = await request(app.getHttpServer())
+      .get(`/news/embed/tweet/image?url=${encodeURIComponent(url)}`)
+      .expect(200);
+
+    expect(tweetImages.load).toHaveBeenLastCalledWith(url);
+    expect(response.headers["content-type"]).toBe("image/png");
+    expect(response.headers["cache-control"]).toBe("public, max-age=3600");
+    expect(response.headers["content-security-policy"]).toBe("default-src 'none'");
+    expect(response.headers["x-content-type-options"]).toBe("nosniff");
+    expect(Buffer.from(response.body).toString()).toBe("png");
+  });
+
+  it.each([
+    ["https://evil.example/photo.png", 400],
+    ["http://pbs.twimg.com/media/photo.png", 400],
+    ["https://pbs.twimg.com/media/removed.jpg", 404],
+    ["https://pbs.twimg.com/media/broken.jpg", 500],
+  ])("answers %s with %i", async (url, status) => {
+    const response = await request(app.getHttpServer())
+      .get(`/news/embed/tweet/image?url=${encodeURIComponent(url)}`)
+      .expect(status);
+
+    expect(response.headers["cache-control"]).toBeUndefined();
+  });
+
+  it("requires a tweet image URL", async () => {
+    await request(app.getHttpServer()).get("/news/embed/tweet/image").expect(400);
   });
 
   it("serves a match by public id with its computed slug", async () => {

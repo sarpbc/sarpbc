@@ -29,10 +29,12 @@ export {
   type NewsEntityTagKind,
 } from "./news-entity-tag.ts";
 export {
+  isTweetImageUrl,
   parseNewsTweetTag,
   parseTweetUrl,
   serializeNewsTweetTag,
   stripNewsTweetTags,
+  tweetImageProxyPath,
   type NewsTweetTag,
   type ParsedTweetUrl,
   type TweetEmbed,
