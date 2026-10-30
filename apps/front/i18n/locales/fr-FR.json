@@ -1688,29 +1688,7 @@
         "title": "Transferts et mouvements d'effectifs Rocket League {'|'} sarpbc.org",
         "description": "Suivez les mouvements d'effectifs de l'esport Rocket League sur sarpbc.org : arrivées, départs, mises sur le banc et prêts, avec leurs sources."
       },
-      "error": "Impossible de charger les transferts. Vérifiez votre connexion et réessayez.",
-      "emptyFiltered": "Essayez une autre période, équipe, joueur ou un autre type de mouvement.",
-      "clearFilters": "Effacer les filtres",
-      "filters": {
-        "type": "Type de mouvement",
-        "period": "Période",
-        "team": "Équipe",
-        "player": "Joueur",
-        "anyTeam": "Toutes les équipes",
-        "anyPlayer": "Tous les joueurs",
-        "types": {
-          "arrival": "Arrivées",
-          "departure": "Départs",
-          "benched": "Mis sur le banc",
-          "loan": "Prêts"
-        },
-        "periods": {
-          "all": "Depuis toujours",
-          "30d": "30 derniers jours",
-          "90d": "3 derniers mois",
-          "1y": "12 derniers mois"
-        }
-      }
+      "error": "Impossible de charger les transferts. Vérifiez votre connexion et réessayez."
     }
   },
   "pages": {

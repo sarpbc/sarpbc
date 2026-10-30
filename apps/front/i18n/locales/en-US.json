@@ -1688,29 +1688,7 @@
         "title": "Rocket League Transfers & Roster Moves {'|'} sarpbc.org",
         "description": "Follow Rocket League esports roster moves on sarpbc.org: player arrivals, departures, benchings and loans across teams, with sources."
       },
-      "error": "Could not load transfers. Check your connection and try again.",
-      "emptyFiltered": "Try another period, team, player or movement type.",
-      "clearFilters": "Clear Filters",
-      "filters": {
-        "type": "Movement type",
-        "period": "Period",
-        "team": "Team",
-        "player": "Player",
-        "anyTeam": "All teams",
-        "anyPlayer": "All players",
-        "types": {
-          "arrival": "Arrivals",
-          "departure": "Departures",
-          "benched": "Benched",
-          "loan": "Loans"
-        },
-        "periods": {
-          "all": "All time",
-          "30d": "Last 30 days",
-          "90d": "Last 3 months",
-          "1y": "Last 12 months"
-        }
-      }
+      "error": "Could not load transfers. Check your connection and try again."
     }
   },
   "pages": {
