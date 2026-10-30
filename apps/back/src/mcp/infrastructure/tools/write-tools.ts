@@ -11,6 +11,7 @@ import {
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
+import { MAX_VODS_PER_GAME } from "../../../tournament/domain/match-vod";
 import { mapMatchListResponse } from "../mappers";
 import { requireUpdateFields } from "./update-fields";
 
@@ -268,6 +269,47 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           result: {
             id: match.id,
             winnerId,
+            url: matchUrl(match.publicId, matchPublicSlug(match)),
+          },
+        };
+      }),
+  );
+
+  server.registerTool(
+    "set_match_game_vods",
+    {
+      description:
+        "Replace the VOD links of one game of a match (any source, PandaScore included). Requires tournaments.manage. Links are https twitch.tv, youtube.com or youtu.be URLs, optionally timestamped with t= (seconds or 1h2m3s); the source is derived from the host. Pass an empty list to clear the game. Returns every VOD link of the match.",
+      inputSchema: {
+        matchId: z.string().min(1).describe("Match UUID."),
+        game: z.number().int().min(1).describe("Game number in the series, starting at 1."),
+        links: z
+          .array(
+            z.object({
+              url: z.string().min(1).max(2048).describe("https VOD URL, optionally with t=."),
+              language: z
+                .string()
+                .min(2)
+                .max(2)
+                .describe("ISO 639-1 language of the broadcast (e.g. en, fr, de, es)."),
+              source: z
+                .enum(["twitch", "youtube"])
+                .optional()
+                .describe("Must match the URL host when given."),
+            }),
+          )
+          .max(MAX_VODS_PER_GAME)
+          .describe("VOD links for this game; replaces the existing ones."),
+      },
+    },
+    async ({ matchId, game, links }) =>
+      runWriteTool(user, "set_match_game_vods", "tournaments.manage", async () => {
+        const match = await ctx.matchService.setGameVods(matchId, game, links);
+        return {
+          entityId: match.id,
+          result: {
+            id: match.id,
+            vods: match.vods,
             url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };

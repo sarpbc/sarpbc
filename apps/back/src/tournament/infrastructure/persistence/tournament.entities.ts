@@ -6,6 +6,7 @@ import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { DataSource } from "../../../common/domain/data-source";
+import type { MatchVod } from "@sarpbc/types";
 
 export class League {
   id: string = v4();
@@ -96,6 +97,7 @@ export class Match {
   previousMatches = new Collection<BracketLink>(this);
   results = new Collection<MatchResult>(this);
   officialStreams: OfficialMatchStream[] = [];
+  vods: MatchVod[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   tournament!: Tournament;
@@ -205,6 +207,7 @@ export const MatchSchema = defineEntity({
     previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
     results: p.oneToMany(MatchResult).mappedBy("match"),
     officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
+    vods: p.json().$type<MatchVod[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()

@@ -270,6 +270,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       status: model.status,
       numberOfGames: model.numberOfGames,
       officialStreams: model.officialStreams,
+      vods: model.vods,
     });
     row.tournament = this.em.getReference(Row.Tournament, model.tournament.id);
     row.winner = model.winner

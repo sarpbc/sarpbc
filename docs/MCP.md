@@ -71,6 +71,7 @@ Write tools (staff permission required):
 | `create_match`               | `tournaments.manage` | Create a tournament match                                                                |
 | `set_match_winner`           | `tournaments.manage` | Set match winner by participant id                                                       |
 | `update_match`               | `tournaments.manage` | Correct score, status or dates of a manual match                                         |
+| `set_match_game_vods`        | `tournaments.manage` | Replace the Twitch/YouTube VOD links of one game, with their ISO 639-1 language          |
 | `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
 | `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
 | `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
@@ -97,5 +98,7 @@ A merged duplicate keeps its row and slug; its public page redirects to the kept
 Players, teams, tournaments and matches record a `source`: `pandascore`, `manual` or `startgg`. start.gg allows displaying its data with credit. start.gg players and teams are public: `search_*` and `get_*` return them with `source: "startgg"`, including as participants of PandaScore or manual matches. start.gg tournaments and matches are not redistributed: MCP reads exclude them in the query and open-data exports must filter them the same way. A roster proposal whose `sourceUrl` is on `start.gg` creates `startgg` players and teams; `create_tournament` takes `source: "startgg"` explicitly, and matches added to a start.gg tournament inherit it. The public player, team and tournament responses expose `source` so the site can credit start.gg.
 
 `get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
+
+VOD links are stored per game on the match. Only https `twitch.tv`, `youtube.com` and `youtu.be` URLs are accepted, optionally timestamped with `t=` (`123` or `1h2m3s`); the source is derived from the host and duplicate URLs within a game are dropped. MCP reads do not return VODs, and VODs of start.gg matches only appear where the match itself does.
 
 Staff playbook for roster-change news drafts (web verification + `create_news_draft`): [playbooks/roster-change-news.md](playbooks/roster-change-news.md).

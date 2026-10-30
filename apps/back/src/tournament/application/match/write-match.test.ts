@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
 import { Team } from "../../../roster/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import {
+  setGameVodsInTransaction,
+  setVodsInTransaction,
   setWinnerInTransaction,
   updateMatchInTransaction,
   upsertMatchInTransaction,
@@ -185,5 +187,85 @@ describe("Manual match corrections", () => {
       }),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(writer.save).not.toHaveBeenCalled();
+  });
+});
+
+describe("Match VOD writes", () => {
+  const writer = {
+    load: vi.fn(),
+    byPandascoreId: vi.fn(),
+    save: vi.fn(),
+    tournament: vi.fn(),
+    participants: vi.fn(),
+    timings: vi.fn(),
+  } satisfies MatchWriter;
+  const syncedMatch = () =>
+    Object.assign(new Match(), {
+      id: "match",
+      pandascoreId: 42,
+      source: "pandascore",
+      numberOfGames: 7,
+      vods: [
+        { game: 1, url: "https://youtu.be/g1", language: "en", source: "youtube" },
+        { game: 5, url: "https://youtu.be/g5", language: "en", source: "youtube" },
+      ],
+    });
+
+  beforeEach(() => vi.resetAllMocks());
+
+  it("replaces every VOD link, including on a PandaScore match", async () => {
+    writer.load.mockResolvedValue(syncedMatch());
+    const match = await setVodsInTransaction(writer, "match", [
+      { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "FR" },
+    ]);
+    expect(match.vods).toEqual([
+      { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "fr", source: "twitch" },
+    ]);
+    expect(writer.save).toHaveBeenCalledWith(match);
+  });
+
+  it("replaces the links of one game and keeps the others", async () => {
+    writer.load.mockResolvedValue(syncedMatch());
+    const match = await setGameVodsInTransaction(writer, "match", 5, [
+      { url: "https://youtu.be/g5?t=95", language: "de" },
+      { url: "https://twitch.tv/videos/5", language: "en", source: "twitch" },
+    ]);
+    expect(match.vods.map((vod) => [vod.game, vod.source, vod.language])).toEqual([
+      [1, "youtube", "en"],
+      [5, "youtube", "de"],
+      [5, "twitch", "en"],
+    ]);
+  });
+
+  it("rejects invalid links without saving", async () => {
+    writer.load.mockResolvedValue(syncedMatch());
+    await expect(
+      setGameVodsInTransaction(writer, "match", 8, [{ url: "https://youtu.be/x", language: "en" }]),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    await expect(
+      setVodsInTransaction(writer, "match", [
+        { game: 1, url: "https://youtu.be/x", language: "en", source: "twitch" },
+      ]),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("reports a missing match", async () => {
+    writer.load.mockResolvedValue(null);
+    await expect(setVodsInTransaction(writer, "missing", [])).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("keeps staff VOD links when PandaScore re-syncs the match", async () => {
+    const tournament = Object.assign(new Tournament(), { id: "cup", source: "pandascore" });
+    writer.tournament.mockResolvedValue(tournament);
+    writer.participants.mockResolvedValue([]);
+    writer.byPandascoreId.mockResolvedValue(syncedMatch());
+    const match = await upsertMatchInTransaction(writer, "cup", {
+      name: "Final",
+      participantIds: [],
+      pandascoreId: 42,
+      numberOfGames: 7,
+    });
+    expect(match.vods).toHaveLength(2);
   });
 });

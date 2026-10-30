@@ -426,6 +426,39 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
+    await check("per-game VOD links persist as validated jsonb on the match", async () => {
+      const vods = [
+        { game: 2, url: "https://youtu.be/second?t=1h2m3s", language: "FR" },
+        { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en" },
+        { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en" },
+      ];
+      await request("PUT", `/tournaments/matches/${match.id}/vods`, { vods }, memberCookie, 403);
+      const saved = (
+        await request("PUT", `/tournaments/matches/${match.id}/vods`, { vods }, staffCookie)
+      ).json().match.vods;
+      const expected = [
+        { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en", source: "twitch" },
+        { game: 2, url: "https://youtu.be/second?t=1h2m3s", language: "fr", source: "youtube" },
+      ];
+      assert.deepEqual(saved, expected);
+      assert.deepEqual(
+        (await request("GET", `/matches/${match.publicId}`)).json().match.vods,
+        expected,
+      );
+      const [row] = await orm.em
+        .getConnection()
+        .execute(`select vods from "match" where id = ?`, [match.id]);
+      assert.deepEqual(row.vods, expected);
+      await request(
+        "PUT",
+        `/tournaments/matches/${match.id}/vods`,
+        { vods: [{ game: 1, url: "http://youtu.be/x", language: "en" }] },
+        staffCookie,
+        400,
+      );
+      assert.deepEqual((await request("GET", `/matches/${match.id}`)).json().match.vods, expected);
+    });
+
     await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
       assert.equal(tournament.slug, "integration-cup");
       assert.deepEqual(
