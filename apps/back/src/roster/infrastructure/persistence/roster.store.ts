@@ -23,7 +23,11 @@ import type {
   TeamQueries,
   TeamWriter,
 } from "../../application/ports";
-import type { PlayerSearchProps, TeamSearchProps } from "../../application/search-props";
+import type {
+  ContractMovementFilter,
+  PlayerSearchProps,
+  TeamSearchProps,
+} from "../../application/search-props";
 
 const playerOptions = { populate: ["team", "photos"] as const };
 const teamOptions = { populate: ["players", "players.team"] as const };
@@ -213,6 +217,18 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
 
   findFormerPlayersByTeam(id: string) {
     return this.list({ team: { id }, endDate: { $ne: null } }, true);
+  }
+
+  async findMovements({ teamId, playerId, from, to }: ContractMovementFilter) {
+    const period = { ...(from && { $gte: from }), ...(to && { $lte: to }) };
+    const where: FilterQuery<Row.Contract> = {
+      ...(teamId && { team: teamId }),
+      ...(playerId && { player: playerId }),
+      ...((from || to) && { $or: [{ startDate: period }, { endDate: period }] }),
+    };
+    return (await this.em.find(Row.Contract, where, { populate: ["player", "team"] })).map(
+      toContract,
+    );
   }
 
   async findById(id: string) {

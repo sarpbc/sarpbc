@@ -221,6 +221,7 @@ setPageSeo({
           :has-error="Boolean(rosterHistoryError)"
           @retry="refreshRosterHistory()"
         />
+        <TransferLatest :team="team.slug" />
         <TeamFaqSection
           :team="team"
           :players="activeRoster"

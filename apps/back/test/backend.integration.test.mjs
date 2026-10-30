@@ -318,6 +318,27 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.equal(contract.team.id, team.id);
       assert.equal((await request("GET", `/team/${team.id}/contract`)).json().contracts.length, 1);
       assert.equal((await request("GET", `/team/${team.id}`)).json().team.players[0].id, player.id);
+
+      await request(
+        "POST",
+        `/player/${player.id}/contract`,
+        { teamId: otherTeam.id, startDate: "2025-03-01", endDate: "2025-12-31", role: "benched" },
+        staffCookie,
+        201,
+      );
+      const movements = async (query) =>
+        (await request("GET", `/transfers?${query}`))
+          .json()
+          .transfers.map(({ type, date, team: { slug } }) => [type, date, slug]);
+      assert.deepEqual(await movements(`player=${player.slug}`), [
+        ["arrival", "2026-01-01", team.slug],
+        ["departure", "2025-12-31", otherTeam.slug],
+        ["benched", "2025-03-01", otherTeam.slug],
+      ]);
+      assert.deepEqual(await movements(`team=${otherTeam.slug}&from=2025-06-01&to=2025-12-31`), [
+        ["departure", "2025-12-31", otherTeam.slug],
+      ]);
+      assert.deepEqual(await movements(`team=${team.slug}&type=departure`), []);
     });
 
     let tournament, match;

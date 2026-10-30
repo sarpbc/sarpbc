@@ -19,6 +19,10 @@ import { TweetImageService } from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
 import { MatchService } from "../src/tournament/application/match/match.service";
+import { TransferController } from "../src/roster/infrastructure/http/transfer.controller";
+import { TransferService } from "../src/roster/application/transfer.service";
+import { TeamService } from "../src/roster/application/team.service";
+import { PlayerService } from "../src/roster/application/player.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
 import { IntegrationError, NotFoundError } from "../src/common/domain/errors";
 import { configureApp } from "../src/configure-app";
@@ -96,6 +100,8 @@ describe("API smoke (e2e)", () => {
     findResultsAndCount: vi.fn(),
   };
 
+  const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -103,7 +109,7 @@ describe("API smoke (e2e)", () => {
           throttlers: [{ name: "default", ttl: 60_000, limit: 1000 }],
         }),
       ],
-      controllers: [AuthController, NewsController, MatchController],
+      controllers: [AuthController, NewsController, MatchController, TransferController],
       providers: [
         authServiceProvider,
         AuthGuard,
@@ -130,6 +136,9 @@ describe("API smoke (e2e)", () => {
         { provide: TweetImageService, useValue: new TweetImageService(tweetImages) },
         { provide: ReplyService, useValue: { countByTargetIds: vi.fn() } },
         { provide: MatchService, useValue: matchService },
+        { provide: TransferService, useValue: transferService },
+        { provide: TeamService, useValue: { findBySlug: vi.fn() } },
+        { provide: PlayerService, useValue: { findBySlug: vi.fn() } },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },
       ],
@@ -234,5 +243,28 @@ describe("API smoke (e2e)", () => {
     await request(app.getHttpServer()).get("/matches/missing").expect(404);
     await request(app.getHttpServer()).get("/matches/0").expect(404);
     await request(app.getHttpServer()).get("/matches/-4").expect(404);
+  });
+
+  it("lists transfers with coerced pagination and period filters", async () => {
+    const response = await request(app.getHttpServer())
+      .get("/transfers?type=loan&from=2026-01-01&to=2026-06-30&limit=5")
+      .expect(200);
+    expect(response.body).toEqual({ transfers: [], count: 0 });
+    expect(transferService.findAndCount).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        type: "loan",
+        from: new Date("2026-01-01"),
+        to: new Date("2026-06-30"),
+        limit: 5,
+        offset: 0,
+      }),
+    );
+  });
+
+  it("rejects invalid transfer filters", async () => {
+    await request(app.getHttpServer()).get("/transfers?type=coach").expect(400);
+    await request(app.getHttpServer()).get("/transfers?from=yesterday").expect(400);
+    await request(app.getHttpServer()).get("/transfers?limit=500").expect(400);
+    await request(app.getHttpServer()).get("/transfers?season=2026").expect(400);
   });
 });

@@ -5,9 +5,11 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { log } from "evlog";
 import { PlayerController } from "./http/player.controller";
 import { TeamController } from "./http/team.controller";
+import { TransferController } from "./http/transfer.controller";
 import { PlayerService } from "../application/player.service";
 import { TeamService } from "../application/team.service";
 import { ContractService } from "../application/contract.service";
+import { TransferService } from "../application/transfer.service";
 import { RosterMergeService } from "../application/roster-merge.service";
 import { SyncPandascoreTeamsUseCase } from "../application/sync-pandascore-teams.use-case";
 import { Player, Team, Contract, PlayerPhoto } from "./persistence/player.entities";
@@ -34,7 +36,7 @@ import type { CurrentRosterSource } from "../application/ports";
     PandascoreModule,
     ConfigModule,
   ],
-  controllers: [PlayerController, TeamController],
+  controllers: [PlayerController, TeamController, TransferController],
   providers: [
     {
       provide: MikroPlayerStore,
@@ -103,6 +105,11 @@ import type { CurrentRosterSource } from "../application/ports";
         transaction: MikroRosterTransaction,
       ) => new ContractService(contracts, teams, transaction),
       inject: [MikroContractStore, MikroTeamStore, MikroRosterTransaction],
+    },
+    {
+      provide: TransferService,
+      useFactory: (contracts: MikroContractStore) => new TransferService(contracts),
+      inject: [MikroContractStore],
     },
     {
       provide: RosterMergeService,

@@ -94,7 +94,8 @@
     "teams": "Teams",
     "players": "Players",
     "matches": "Matches",
-    "results": "Results"
+    "results": "Results",
+    "transfers": "Transfers"
   },
   "components": {
     "cookiePopup": {
@@ -249,6 +250,23 @@
       "online": "Online",
       "offline": "LAN",
       "online/offline": "Online & LAN"
+    },
+    "transfer": {
+      "type": {
+        "arrival": "Arrival",
+        "departure": "Departure",
+        "benched": "Benched",
+        "loan": "Loan"
+      },
+      "latest": {
+        "title": "Latest Transfers",
+        "viewAll": "View All",
+        "error": "Could not load transfers. Check your connection and try again."
+      },
+      "empty": {
+        "title": "No transfers recorded yet.",
+        "hint": "Roster moves appear here once sarpbc.org records them in team rosters."
+      }
     }
   },
   "timeAgo": {
@@ -299,7 +317,8 @@
         "pickemsOpen": "{count} open pick'em | {count} open pick'ems",
         "playersTotal": "{count} player | {count} players",
         "teamsTotal": "{count} team | {count} teams",
-        "nextEvent": "Next: {name}"
+        "nextEvent": "Next: {name}",
+        "transfersTotal": "{count} transfer | {count} transfers"
       }
     },
     "home": {
@@ -1662,6 +1681,14 @@
     "register": {
       "seoTitle": "Join the Rocket League Community {'|'} sarpbc.org",
       "seoDescription": "Create a sarpbc.org account to join Rocket League esports discussions, save your match predictions and take part in the community."
+    },
+    "transfers": {
+      "title": "Transfers",
+      "seo": {
+        "title": "Rocket League Transfers & Roster Moves {'|'} sarpbc.org",
+        "description": "Follow Rocket League esports roster moves on sarpbc.org: player arrivals, departures, benchings and loans across teams, with sources."
+      },
+      "error": "Could not load transfers. Check your connection and try again."
     }
   },
   "pages": {

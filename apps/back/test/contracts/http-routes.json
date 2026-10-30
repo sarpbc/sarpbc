@@ -1000,6 +1000,14 @@
     "permissions": ["\"tournaments.manage\""]
   },
   {
+    "controller": "\"transfers\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"user\"",
     "verb": "GET",
     "path": "\"profile\"",

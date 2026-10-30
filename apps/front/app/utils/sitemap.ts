@@ -36,6 +36,7 @@ export const STATIC_SITEMAP_PAGES: readonly StaticSitemapPage[] = [
   { path: "/results", changefreq: "daily", priority: "0.9" },
   { path: "/player", changefreq: "daily", priority: "0.9" },
   { path: "/team", changefreq: "daily", priority: "0.9" },
+  { path: "/transfers", changefreq: "daily", priority: "0.8" },
   { path: "/game/career", changefreq: "weekly", priority: "0.7" },
   { path: "/about", changefreq: "monthly", priority: "0.5" },
   { path: "/contact", changefreq: "monthly", priority: "0.5" },
