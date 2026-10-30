@@ -17,7 +17,6 @@ export function useAdminList<T>(
     { watch: [page], server: false },
   );
 
-  // Keeps the previous page visible while the next one loads.
   watch(
     status,
     (s) => {

@@ -11,7 +11,6 @@ const props = defineProps<{
 const emit = defineEmits<{ deleted: [] }>();
 
 const isDeleting = ref(false);
-// Clearing `target` closes the modal; keep the last item so the text survives the close transition.
 const shown = shallowRef<T | null>(target.value);
 
 watch(target, (item) => {
