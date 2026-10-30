@@ -345,7 +345,8 @@
           "invalid-url": "Enter a full URL.",
           "not-https": "Use an https link.",
           "unsupported-host": "Use a twitch.tv, youtube.com or youtu.be link.",
-          "invalid-timestamp": "Write t= in seconds (123) or as 1h2m3s."
+          "invalid-timestamp": "Write t= in seconds (123) or as 1h2m3s.",
+          "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
         }
       }
     },

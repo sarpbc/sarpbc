@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { MatchVod, MatchVodSource, TournamentMatchListItem } from "@sarpbc/types";
-import { ISO_639_1_CODES, maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
+import { maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
 import { getApiErrorMessage } from "~/utils/apiError";
+
+const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/;
 
 interface VodRow {
   key: number;
@@ -10,7 +12,7 @@ interface VodRow {
   language: string;
 }
 
-interface UrlFeedback {
+interface FieldFeedback {
   help?: string;
   error?: string;
 }
@@ -37,13 +39,20 @@ const gameOptions = computed(() =>
   })),
 );
 
-const languageOptions = computed(() => {
-  const names = new Intl.DisplayNames([locale.value], { type: "language" });
-  return ISO_639_1_CODES.map<{ value: string; label: string }>((code) => ({
-    value: code,
-    label: `${code.toUpperCase()} · ${names.of(code) ?? code}`,
-  }));
-});
+const languageNames = computed(
+  () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "none" }),
+);
+
+function normalizeLanguage(language: string): string {
+  return language.trim().toLowerCase();
+}
+
+function languageFeedback(language: string): FieldFeedback {
+  const code = normalizeLanguage(language);
+  return LANGUAGE_CODE_PATTERN.test(code)
+    ? { help: languageNames.value.of(code) }
+    : { error: t("page.tournaments.vods.errors.invalid-language") };
+}
 
 function sourceLabel(source: MatchVodSource): string {
   switch (source) {
@@ -58,7 +67,7 @@ function sourceLabel(source: MatchVodSource): string {
   }
 }
 
-function urlFeedback(url: string): UrlFeedback {
+function urlFeedback(url: string): FieldFeedback {
   if (!url.trim()) return {};
   const parsed = parseMatchVodUrl(url);
   return parsed.ok
@@ -66,7 +75,12 @@ function urlFeedback(url: string): UrlFeedback {
     : { error: t(`page.tournaments.vods.errors.${parsed.error}`) };
 }
 
-const canSave = computed(() => rows.value.every((row) => parseMatchVodUrl(row.url).ok));
+const canSave = computed(() =>
+  rows.value.every(
+    (row) =>
+      parseMatchVodUrl(row.url).ok && LANGUAGE_CODE_PATTERN.test(normalizeLanguage(row.language)),
+  ),
+);
 
 function toRows(vods: MatchVod[]): VodRow[] {
   return vods.map(({ game, url, language }) => ({ key: nextKey++, game, url, language }));
@@ -111,7 +125,11 @@ async function save() {
   try {
     const vods = await setMatchVods(
       match.id,
-      rows.value.map(({ game, url, language }) => ({ game, url, language })),
+      rows.value.map(({ game, url, language }) => ({
+        game,
+        url,
+        language: normalizeLanguage(language),
+      })),
     );
     rows.value = toRows(vods);
     toast.add({ title: t("page.tournaments.vods.saved"), color: "success" });
@@ -175,12 +193,15 @@ async function save() {
             />
           </UFormField>
 
-          <UFormField :label="t('page.tournaments.vods.language')">
-            <USelectMenu
+          <UFormField
+            :label="t('page.tournaments.vods.language')"
+            v-bind="languageFeedback(row.language)"
+          >
+            <UInput
               v-model="row.language"
-              :items="languageOptions"
-              value-key="value"
-              label-key="label"
+              maxlength="2"
+              autocomplete="off"
+              spellcheck="false"
               class="w-full"
             />
           </UFormField>

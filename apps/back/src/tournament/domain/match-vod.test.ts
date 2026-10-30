@@ -48,7 +48,11 @@ describe("normalizeMatchVods", () => {
     expect(
       normalizeMatchVods([vod("https://youtu.be/a", { language: " FR " })], 5)[0]?.language,
     ).toBe("fr");
-    for (const language of ["fra", "xx", "", "en-US"])
+    for (const language of ["aa", "ja", "zu"])
+      expect(normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)[0]?.language).toBe(
+        language,
+      );
+    for (const language of ["fra", "xx", "zz", "e1", "", "en-US"])
       expect(() => normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)).toThrow(
         InvalidInputError,
       );
