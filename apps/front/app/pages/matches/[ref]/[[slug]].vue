@@ -318,6 +318,10 @@ const scoreboardLabel = computed(() => {
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
+        <SRail v-if="match.vods?.length" :title="t('page.match.detail.sections.vods')">
+          <MatchVods :vods="match.vods" />
+        </SRail>
+
         <SRail :title="t('page.match.detail.sections.rosters')">
           <MatchRosterTable :participants="participants" />
         </SRail>

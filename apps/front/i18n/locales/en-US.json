@@ -1517,7 +1517,8 @@
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
-          "headToHead": "Head-to-Head"
+          "headToHead": "Head-to-Head",
+          "vods": "VODs"
         },
         "h2h": {
           "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",
@@ -1532,7 +1533,15 @@
         "formScore": "{teamScore}-{opponentScore}",
         "win": "W",
         "loss": "L",
-        "noRoster": "Roster not available"
+        "noRoster": "Roster not available",
+        "vods": {
+          "game": "Game {number}",
+          "linkLabel": "Game {game} VOD on {source}, {language} (opens in a new tab)",
+          "sources": {
+            "twitch": "Twitch",
+            "youtube": "YouTube"
+          }
+        }
       }
     },
     "brand": {
