@@ -36,24 +36,15 @@ const columns: TableColumn<PostShort>[] = [
   },
 ];
 
-const posts = ref<PostShort[]>([]);
-const isDeleteModalOpen = ref(false);
-const postToDelete = ref<PostShort | null>(null);
-const isDeleting = ref(false);
-
-const { status, data, refresh } = await useLazyAsyncData("admin-forum-posts", () => getPosts(), {
-  server: false,
-});
-
-watch(
+const {
+  items: posts,
   status,
-  (s) => {
-    if (s === "success" && data.value) {
-      posts.value = data.value;
-    }
-  },
-  { immediate: true },
-);
+  refresh,
+} = useAdminList("admin-forum-posts", async () => {
+  const posts = await getPosts();
+  return { items: posts, total: posts.length };
+});
+const postToDelete = ref<PostShort | null>(null);
 
 function selectRow(e: Event, row: TableRow<PostShort>) {
   e.preventDefault();
@@ -63,22 +54,6 @@ function selectRow(e: Event, row: TableRow<PostShort>) {
 function openDeleteModal(e: Event, post: PostShort) {
   e.stopPropagation();
   postToDelete.value = post;
-  isDeleteModalOpen.value = true;
-}
-
-async function confirmDelete() {
-  if (!postToDelete.value) return;
-  isDeleting.value = true;
-  try {
-    const success = await deleteForumPost(postToDelete.value.id);
-    if (success) {
-      isDeleteModalOpen.value = false;
-      postToDelete.value = null;
-      await refresh();
-    }
-  } finally {
-    isDeleting.value = false;
-  }
 }
 </script>
 
@@ -121,36 +96,14 @@ async function confirmDelete() {
         </ClientOnly>
       </div>
 
-      <UModal
-        v-model:open="isDeleteModalOpen"
+      <ConfirmDeleteModal
+        v-model:target="postToDelete"
         :title="$t('page.forum.delete.postTitle')"
-        :dismissible="!isDeleting"
-      >
-        <template #body>
-          <p>
-            {{
-              $t("page.forum.delete.postConfirm", {
-                title: postToDelete?.title ?? "",
-              })
-            }}
-          </p>
-        </template>
-        <template #footer>
-          <UButton
-            color="error"
-            :loading="isDeleting"
-            :label="$t('page.forum.delete.confirmButton')"
-            @click="confirmDelete"
-          />
-          <UButton
-            color="neutral"
-            variant="subtle"
-            :label="$t('common.cancel')"
-            :disabled="isDeleting"
-            @click="isDeleteModalOpen = false"
-          />
-        </template>
-      </UModal>
+        :confirm-label="$t('page.forum.delete.confirmButton')"
+        :message="(post) => $t('page.forum.delete.postConfirm', { title: post.title })"
+        :remove="(post) => deleteForumPost(post.id)"
+        @deleted="refresh"
+      />
     </DashboardContent>
   </NuxtLayout>
 </template>

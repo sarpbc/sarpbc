@@ -33,14 +33,19 @@ const columns: TableColumn<Player>[] = [
   },
 ];
 
-const players = ref<Player[]>([]);
-const total = ref(0);
-const limit = 25;
-const page = ref(1);
-const isCreateModalOpen = ref(false);
-const isDeleteModalOpen = ref(false);
+const {
+  items: players,
+  total,
+  page,
+  limit,
+  status,
+  refresh,
+} = useAdminList("admin-players", async (range) => {
+  const { players, total } = await getAllPlayers(range);
+  return { items: players, total };
+});
 const playerToDelete = ref<Player | null>(null);
-const isDeleting = ref(false);
+const isCreateModalOpen = ref(false);
 const isCreating = ref(false);
 
 const newPlayer = ref({
@@ -52,27 +57,6 @@ const newPlayer = ref({
   imageUrl: "",
 });
 
-const { status, data, refresh } = await useLazyAsyncData(
-  () => `admin-players-${page.value}`,
-  async () => getAllPlayers({ limit, offset: (page.value - 1) * limit }),
-  {
-    default: () => ({ players: [], total: 0 }),
-    watch: [page],
-    server: false,
-  },
-);
-
-watch(
-  status,
-  (s) => {
-    if (s === "success" && data.value) {
-      players.value = data.value.players;
-      total.value = data.value.total;
-    }
-  },
-  { immediate: true },
-);
-
 function selectRow(e: Event, row: TableRow<Player>) {
   e.preventDefault();
   navigateTo(localePath(`/players/${row.original.id}`));
@@ -81,22 +65,6 @@ function selectRow(e: Event, row: TableRow<Player>) {
 function openDeleteModal(e: Event, player: Player) {
   e.stopPropagation();
   playerToDelete.value = player;
-  isDeleteModalOpen.value = true;
-}
-
-async function confirmDelete() {
-  if (!playerToDelete.value) return;
-  isDeleting.value = true;
-  try {
-    await deletePlayer(playerToDelete.value.id);
-    isDeleteModalOpen.value = false;
-    playerToDelete.value = null;
-    await refresh();
-  } catch (error) {
-    console.error("Failed to delete player:", error);
-  } finally {
-    isDeleting.value = false;
-  }
 }
 
 function openCreateModal() {
@@ -131,10 +99,6 @@ async function confirmCreate() {
   } finally {
     isCreating.value = false;
   }
-}
-
-async function updatePage(value: number) {
-  page.value = value;
 }
 </script>
 
@@ -181,7 +145,7 @@ async function updatePage(value: number) {
             :page="page"
             :total="total"
             :items-per-page="limit"
-            @update:page="updatePage"
+            @update:page="page = $event"
           />
         </div>
       </ClientOnly>
@@ -232,36 +196,13 @@ async function updatePage(value: number) {
       </template>
     </UModal>
 
-    <UModal
-      v-model:open="isDeleteModalOpen"
+    <ConfirmDeleteModal
+      v-model:target="playerToDelete"
       :title="$t('page.players.delete.title')"
-      :dismissible="!isDeleting"
-    >
-      <template #body>
-        <p>
-          {{
-            $t("page.players.delete.confirm", {
-              name: playerToDelete?.name,
-            })
-          }}
-        </p>
-      </template>
-      <template #footer>
-        <UButton
-          icon="i-fluent-delete-24-regular"
-          color="error"
-          :label="$t('page.players.delete.confirm_button')"
-          :loading="isDeleting"
-          @click="confirmDelete"
-        />
-        <UButton
-          color="neutral"
-          variant="subtle"
-          :label="$t('common.cancel')"
-          :disabled="isDeleting"
-          @click="isDeleteModalOpen = false"
-        />
-      </template>
-    </UModal>
+      :confirm-label="$t('page.players.delete.confirm_button')"
+      :message="(player) => $t('page.players.delete.confirm', { name: player.name })"
+      :remove="(player) => deletePlayer(player.id)"
+      @deleted="refresh"
+    />
   </NuxtLayout>
 </template>
