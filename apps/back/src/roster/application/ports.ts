@@ -1,6 +1,6 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
 import type { ImportedPlayer } from "./imports";
-import type { PlayerSearchProps, TeamSearchProps } from "./search-props";
+import type { ContractMovementFilter, PlayerSearchProps, TeamSearchProps } from "./search-props";
 export interface PlayerQueries {
   search(options: Partial<PlayerSearchProps>): Promise<Player[]>;
   searchAndCount(options: Partial<PlayerSearchProps>): Promise<[Player[], number]>;
@@ -20,6 +20,8 @@ export interface ContractQueries {
   findPastContractsByPlayer(playerId: string): Promise<Contract[]>;
   findByTeam(teamId: string): Promise<Contract[]>;
   findFormerPlayersByTeam(teamId: string): Promise<Contract[]>;
+  /** Contracts that start or end within the period. */
+  findMovements(filter: ContractMovementFilter): Promise<Contract[]>;
 }
 export interface PhotoQueries {
   findByPlayer(playerId: string): Promise<PlayerPhoto[]>;

@@ -11,3 +11,10 @@ export interface TeamSearchProps {
   limit: number;
   offset: number;
 }
+
+export interface ContractMovementFilter {
+  teamId?: string;
+  playerId?: string;
+  from?: Date;
+  to?: Date;
+}
