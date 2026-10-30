@@ -29,10 +29,6 @@ function invalid(index: number, reason: string): InvalidInputError {
   return new InvalidInputError(`VOD link ${index + 1} ${reason}.`);
 }
 
-/**
- * Validates VOD links against the match format, derives each source from its host and drops
- * repeated URLs within a game, keeping the first. Games are sorted; links keep their order.
- */
 export function normalizeMatchVods(
   inputs: readonly MatchVodInput[],
   numberOfGames: number | null,

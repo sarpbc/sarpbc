@@ -4,7 +4,6 @@ export type DataSource = "pandascore" | "manual" | "startgg";
 
 export type MatchVodSource = "twitch" | "youtube";
 
-/** A link to one game of a match on an official stream; `language` is an ISO 639-1 code. */
 export interface MatchVod {
   game: number;
   url: string;

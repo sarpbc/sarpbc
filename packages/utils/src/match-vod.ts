@@ -202,7 +202,6 @@ const VOD_HOSTS: ReadonlyMap<string, MatchVodSource> = new Map([
   ["youtu.be", "youtube"],
 ]);
 
-/** Seconds (`123`) or Twitch/YouTube duration notation (`1h2m3s`, `90s`). */
 const TIMESTAMP_PATTERN = /^(?:\d+|(?=\d)(?:\d+h)?(?:\d+m)?(?:\d+s)?)$/;
 
 export type MatchVodUrlError =
@@ -233,7 +232,6 @@ export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
 }
 
 export const MAX_VODS_PER_GAME = 10;
-/** Upper bound when the match format is unknown; Rocket League series stop at best-of-7. */
 const MAX_VOD_GAME = 9;
 
 export function maxVodGame(numberOfGames: number | null | undefined): number {
