@@ -316,6 +316,37 @@
           "mvp": "MVP",
           "defensive_mvp": "Defensive MVP"
         }
+      },
+      "vods": {
+        "action": "VODs",
+        "title": "VODs · {match}",
+        "description": "Links to official Twitch or YouTube recordings, one or more per game. Add t= to a URL so it starts at the right moment.",
+        "game": "Game {number}",
+        "gameLabel": "Game",
+        "url": "URL",
+        "urlPlaceholder": "https://www.youtube.com/watch?v=…&t=1h2m3s",
+        "detectedSource": "Detected source: {source}",
+        "language": "Language",
+        "sources": {
+          "twitch": "Twitch",
+          "youtube": "YouTube"
+        },
+        "add": "Add Link",
+        "remove": "Remove Link",
+        "cancel": "Cancel",
+        "save": "Save VODs",
+        "saved": "VOD links saved",
+        "saveError": "Could not save VOD links",
+        "empty": "No VOD links yet. Add one per game and language.",
+        "loading": "Loading VOD links…",
+        "loadError": "Could not load VOD links.",
+        "retry": "Retry",
+        "errors": {
+          "invalid-url": "Enter a full URL.",
+          "not-https": "Use an https link.",
+          "unsupported-host": "Use a twitch.tv, youtube.com or youtu.be link.",
+          "invalid-timestamp": "Write t= in seconds (123) or as 1h2m3s."
+        }
       }
     },
     "pickems": {
