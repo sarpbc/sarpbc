@@ -116,7 +116,6 @@ export function isTweetImageUrl(input: string): boolean {
   );
 }
 
-// X's image CDN rejects requests whose Referer is another site, so embeds load images through the API.
 export function tweetImageProxyPath(url: string): string | null {
   return isTweetImageUrl(url) ? `/news/embed/tweet/image?url=${encodeURIComponent(url)}` : null;
 }

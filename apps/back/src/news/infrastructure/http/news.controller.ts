@@ -78,7 +78,6 @@ export class NewsController {
     @Res() reply: FastifyReply,
   ): Promise<void> {
     const image = await this.tweetImageService.load(url);
-    // X content may only be cached briefly; nothing is stored on our side.
     await reply
       .header("Content-Type", image.contentType)
       .header("Cache-Control", "public, max-age=3600")
