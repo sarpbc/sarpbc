@@ -2,7 +2,6 @@
 const LATEST_TRANSFERS = 5;
 
 const { team } = defineProps<{
-  /** Team slug; a team page hides the block while its roster has no recorded movement. */
   team?: string;
 }>();
 

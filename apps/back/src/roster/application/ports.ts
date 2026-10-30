@@ -20,7 +20,6 @@ export interface ContractQueries {
   findPastContractsByPlayer(playerId: string): Promise<Contract[]>;
   findByTeam(teamId: string): Promise<Contract[]>;
   findFormerPlayersByTeam(teamId: string): Promise<Contract[]>;
-  /** Contracts that start or end within the period. */
   findMovements(filter: ContractMovementFilter): Promise<Contract[]>;
 }
 export interface PhotoQueries {

@@ -3,7 +3,6 @@ export type TransferType = "arrival" | "departure" | "benched" | "loan";
 export interface Transfer {
   id: string;
   type: TransferType;
-  /** Calendar day, `YYYY-MM-DD`. */
   date: string;
   sourceUrl: string | null;
   player: {

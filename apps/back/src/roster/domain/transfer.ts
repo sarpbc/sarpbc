@@ -24,11 +24,6 @@ function joinType(role: ContractRole): TransferType {
   }
 }
 
-/**
- * Roster moves close a contract and open the next one on the same day, so a contract that
- * follows another with the same team is a role change: it yields its own movement and
- * suppresses the departure of the one it replaces.
- */
 export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] {
   const stint = (contract: Contract, day: Date) =>
     `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
