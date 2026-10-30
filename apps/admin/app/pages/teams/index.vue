@@ -21,6 +21,10 @@ const columns: TableColumn<Team>[] = [
     header: t("page.teams.columns.location"),
     cell: ({ getValue }) => (getValue() as string) || "-",
   },
+  {
+    id: "actions",
+    header: "",
+  },
 ];
 
 const {
@@ -141,6 +145,7 @@ async function onSyncTeams() {
               color="error"
               variant="ghost"
               size="xs"
+              :aria-label="$t('page.teams.delete.title')"
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>

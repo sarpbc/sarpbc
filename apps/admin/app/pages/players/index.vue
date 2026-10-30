@@ -31,6 +31,10 @@ const columns: TableColumn<Player>[] = [
     header: t("page.players.columns.nationality"),
     cell: ({ getValue }) => (getValue() as string) || "-",
   },
+  {
+    id: "actions",
+    header: "",
+  },
 ];
 
 const {
@@ -133,6 +137,7 @@ async function confirmCreate() {
               color="error"
               variant="ghost"
               size="xs"
+              :aria-label="$t('page.players.delete.title')"
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
