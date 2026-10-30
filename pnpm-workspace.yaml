@@ -85,3 +85,5 @@ minimumReleaseAgeExclude:
   - "@posthog/core@1.45.1"
   - posthog-node@5.46.1
   - "@nuxt/vite-server@4.6.3"
+  - "@nuxt/image@2.2.1"
+  - ipx@4.1.0
