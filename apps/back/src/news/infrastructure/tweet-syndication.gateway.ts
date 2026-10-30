@@ -19,7 +19,8 @@ const tweetSchema = z.object({
   user: z.object({
     name: z.string(),
     screen_name: z.string().regex(/^[A-Za-z0-9_]{1,15}$/),
-    profile_image_url_https: imageUrl.optional(),
+    // Accounts without an avatar point to a default image on abs.twimg.com.
+    profile_image_url_https: imageUrl.optional().catch(undefined),
   }),
   mediaDetails: z
     .array(
