@@ -1,5 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import { UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
+import { LockMode, UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
 import { ConflictError } from "../../../common/domain/errors";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
@@ -184,13 +184,17 @@ export class CompetitionMatchWriter implements MatchWriter {
     private readonly tournaments: CompetitionTournamentWriter,
   ) {}
   async load(id: string) {
-    const row =
-      this.staged.get(id) ??
-      (await this.em.findOne(
+    let row = this.staged.get(id) ?? null;
+    if (!row) {
+      row = await this.em.findOne(
         Row.Match,
         { id },
-        {
-          populate: [
+        { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
+      );
+      if (row)
+        await this.em.populate(
+          row,
+          [
             ...MATCH_TOURNAMENT_POPULATE,
             "participants.team",
             "participants.players",
@@ -198,8 +202,9 @@ export class CompetitionMatchWriter implements MatchWriter {
             "results.participant",
             "previousMatches.previousMatch",
           ],
-        },
-      ));
+          { refresh: true },
+        );
+    }
     if (row) this.staged.set(row.id, row);
     return row ? toMatch(row) : null;
   }

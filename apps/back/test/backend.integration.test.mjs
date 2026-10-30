@@ -457,6 +457,48 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         400,
       );
       assert.deepEqual((await request("GET", `/matches/${match.id}`)).json().match.vods, expected);
+      await request(
+        "PUT",
+        `/tournaments/matches/00000000-0000-4000-8000-000000000000/vods`,
+        { vods: [] },
+        staffCookie,
+        404,
+      );
+
+      const token = (
+        await request("POST", "/pat/tokens", { name: "VOD MCP" }, staffCookie, 201)
+      ).json();
+      const setGameVods = (game) =>
+        request(
+          "POST",
+          "/mcp",
+          {
+            jsonrpc: "2.0",
+            id: game,
+            method: "tools/call",
+            params: {
+              name: "set_match_game_vods",
+              arguments: {
+                matchId: match.id,
+                game,
+                links: [{ url: `https://youtu.be/game${game}`, language: "en" }],
+              },
+            },
+          },
+          undefined,
+          200,
+          {
+            authorization: `Bearer ${token.token}`,
+            accept: "application/json, text/event-stream",
+            "content-type": "application/json",
+          },
+        );
+      await Promise.all([3, 4, 5].map(setGameVods));
+      assert.deepEqual(
+        (await request("GET", `/matches/${match.id}`)).json().match.vods.map((vod) => vod.game),
+        [1, 2, 3, 4, 5],
+      );
+      await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 
     await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
