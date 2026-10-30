@@ -137,6 +137,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
           />
         </SCard>
       </SRail>
+      <TransferLatest />
     </div>
   </div>
 </template>
