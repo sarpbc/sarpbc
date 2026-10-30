@@ -1,4 +1,4 @@
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
@@ -155,6 +155,7 @@ export interface Match {
   tournament: Tournament;
   previousMatches?: BracketLink[];
   officialStreams?: OfficialMatchStream[];
+  vods?: MatchVod[];
 }
 
 export type MatchLinkTarget = Pick<Match, "id" | "publicId" | "slug">;

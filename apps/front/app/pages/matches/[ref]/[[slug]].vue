@@ -322,6 +322,10 @@ const scoreboardLabel = computed(() => {
           <MatchRosterTable :participants="participants" />
         </SRail>
 
+        <SRail v-if="match.vods?.length" :title="t('page.match.detail.sections.vods')">
+          <MatchVods :vods="match.vods" />
+        </SRail>
+
         <SRail
           v-if="matchStatus !== 'finished' && headToHead && teamA && teamB"
           :title="t('page.match.detail.sections.headToHead')"

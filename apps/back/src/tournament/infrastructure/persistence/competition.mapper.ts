@@ -76,6 +76,7 @@ export function toMatch(row: Row.Match): Match {
     status: row.status,
     numberOfGames: row.numberOfGames,
     officialStreams: row.officialStreams ?? [],
+    vods: row.vods ?? [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     tournament: toTournamentSummary(row.tournament),

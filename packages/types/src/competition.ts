@@ -2,6 +2,15 @@ import type { TournamentEventRef } from "./tournament-event";
 
 export type DataSource = "pandascore" | "manual" | "startgg";
 
+export type MatchVodSource = "twitch" | "youtube";
+
+export interface MatchVod {
+  game: number;
+  url: string;
+  language: string;
+  source: MatchVodSource;
+}
+
 export interface TeamSummary {
   id: string;
   name: string;

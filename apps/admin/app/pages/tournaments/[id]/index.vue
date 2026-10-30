@@ -8,6 +8,8 @@ const toast = useToast();
 
 const tournamentId = computed(() => route.params.id as string);
 const settingWinnerMatchId = ref<string | null>(null);
+const vodsMatch = ref<TournamentMatchListItem | null>(null);
+const vodsOpen = ref(false);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
@@ -64,6 +66,11 @@ async function handleRefresh() {
       awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
     ]);
   });
+}
+
+function openVods(match: TournamentMatchListItem) {
+  vodsMatch.value = match;
+  vodsOpen.value = true;
 }
 
 async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
@@ -149,6 +156,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">
               <UButton
+                size="xs"
+                variant="soft"
+                icon="i-fluent-video-clip-24-regular"
+                :label="$t('page.tournaments.vods.action')"
+                @click="openVods(match)"
+              />
+              <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 size="xs"
@@ -166,5 +180,12 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
         </div>
       </div>
     </DashboardContent>
+
+    <TournamentMatchVods
+      v-if="vodsMatch"
+      v-model:open="vodsOpen"
+      :match="vodsMatch"
+      :label="matchLabel(vodsMatch)"
+    />
   </NuxtLayout>
 </template>

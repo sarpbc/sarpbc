@@ -11,8 +11,11 @@ import type {
   MatchQueries,
 } from "../ports";
 import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
+import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
   upsertMatchInTransaction,
+  setGameVodsInTransaction,
+  setVodsInTransaction,
   setWinnerInTransaction,
   updateMatchInTransaction,
 } from "./write-match";
@@ -259,6 +262,18 @@ export class MatchService {
     const match = await this.committed(written.id);
     await this.publishDecided(match);
     return match;
+  }
+  async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
+    const written = await this.transaction.run(({ matches }) =>
+      setVodsInTransaction(matches, matchId, vods),
+    );
+    return this.committed(written.id);
+  }
+  async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
+    const written = await this.transaction.run(({ matches }) =>
+      setGameVodsInTransaction(matches, matchId, game, links),
+    );
+    return this.committed(written.id);
   }
   private async committed(id: string): Promise<Match> {
     const match = await this.reads.detail({ kind: "id", value: id });

@@ -45,6 +45,19 @@ describe("MatchService decided events", () => {
     expect(events.publish).not.toHaveBeenCalled();
   });
 
+  it("does not re-score a decided match when only its VODs change", async () => {
+    const decided = Object.assign(new Match(), {
+      id: "match",
+      status: "finished",
+      winner: participants[0],
+    });
+    matches.load.mockResolvedValue(decided);
+    reads.detail.mockResolvedValue(decided);
+    await service.setVods("match", [{ game: 1, url: "https://youtu.be/a", language: "en" }]);
+    await service.setGameVods("match", 2, []);
+    expect(events.publish).not.toHaveBeenCalled();
+  });
+
   it("returns the match when publication fails", async () => {
     reads.detail.mockResolvedValue(
       Object.assign(new Match(), { id: "match", status: "finished", winner: participants[0] }),

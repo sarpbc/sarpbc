@@ -4,6 +4,12 @@ import { Match } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
 import { deriveWinnerParticipantId } from "./derive-match-winner";
+import {
+  normalizeMatchVods,
+  replaceGameVods,
+  type MatchVodInput,
+  type MatchVodLink,
+} from "../../domain/match-vod";
 export async function upsertMatchInTransaction(
   writer: MatchWriter,
   tournamentId: string,
@@ -123,6 +129,29 @@ export async function updateMatchInTransaction(
     if (winner || input.results) match.winner = winner;
     if (match.winner) match.status = "finished";
   }
+  await writer.save(match);
+  return match;
+}
+export async function setVodsInTransaction(
+  writer: MatchWriter,
+  id: string,
+  vods: readonly MatchVodInput[],
+): Promise<Match> {
+  const match = await writer.load(id);
+  if (!match) throw new NotFoundError("Match not found");
+  match.vods = normalizeMatchVods(vods, match.numberOfGames);
+  await writer.save(match);
+  return match;
+}
+export async function setGameVodsInTransaction(
+  writer: MatchWriter,
+  id: string,
+  game: number,
+  links: readonly MatchVodLink[],
+): Promise<Match> {
+  const match = await writer.load(id);
+  if (!match) throw new NotFoundError("Match not found");
+  match.vods = replaceGameVods(match.vods, game, links, match.numberOfGames);
   await writer.save(match);
   return match;
 }

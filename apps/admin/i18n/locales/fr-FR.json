@@ -316,6 +316,38 @@
           "mvp": "MVP",
           "defensive_mvp": "MVP Défensif"
         }
+      },
+      "vods": {
+        "action": "VODs",
+        "title": "VODs · {match}",
+        "description": "Liens vers les rediffusions officielles Twitch ou YouTube, un ou plusieurs par game. Ajoutez t= à l’URL pour démarrer au bon moment.",
+        "game": "Game {number}",
+        "gameLabel": "Game",
+        "url": "URL",
+        "urlPlaceholder": "https://www.youtube.com/watch?v=…&t=1h2m3s",
+        "detectedSource": "Source détectée : {source}",
+        "language": "Langue",
+        "sources": {
+          "twitch": "Twitch",
+          "youtube": "YouTube"
+        },
+        "add": "Ajouter un Lien",
+        "remove": "Supprimer le Lien",
+        "cancel": "Annuler",
+        "save": "Enregistrer les VODs",
+        "saved": "Liens VOD enregistrés",
+        "saveError": "Impossible d’enregistrer les liens VOD",
+        "empty": "Aucun lien VOD pour l’instant. Ajoutez-en un par game et par langue.",
+        "loading": "Chargement des liens VOD…",
+        "loadError": "Impossible de charger les liens VOD.",
+        "retry": "Réessayer",
+        "errors": {
+          "invalid-url": "Saisissez une URL complète.",
+          "not-https": "Utilisez un lien https.",
+          "unsupported-host": "Utilisez un lien twitch.tv, youtube.com ou youtu.be.",
+          "invalid-timestamp": "Écrivez t= en secondes (123) ou sous la forme 1h2m3s.",
+          "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
+        }
       }
     },
     "pickems": {

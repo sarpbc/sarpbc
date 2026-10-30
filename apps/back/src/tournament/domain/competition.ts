@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { matchSlug } from "@sarpbc/utils";
-import type { TournamentEventRef } from "@sarpbc/types";
+import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import type { DataSource } from "../../common/domain/data-source";
@@ -62,6 +62,7 @@ export class Match {
   previousMatches: BracketLink[] = [];
   results: MatchResult[] = [];
   officialStreams: OfficialMatchStream[] = [];
+  vods: MatchVod[] = [];
   createdAt = new Date();
   updatedAt = new Date();
   tournament!: TournamentSummary;

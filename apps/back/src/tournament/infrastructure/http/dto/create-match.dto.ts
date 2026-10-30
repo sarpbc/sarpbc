@@ -12,3 +12,12 @@ export const CreateMatchDto = z.strictObject({
 export type CreateMatchDto = z.infer<typeof CreateMatchDto>;
 export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });
 export type SetMatchWinnerDto = z.infer<typeof SetMatchWinnerDto>;
+export const MatchVodLinkDto = z.strictObject({
+  url: z.string().min(1).max(2048),
+  language: z.string().min(1).max(8),
+  source: z.enum(["twitch", "youtube"]).optional(),
+});
+export const SetMatchVodsDto = z.strictObject({
+  vods: z.array(MatchVodLinkDto.extend({ game: z.number().int().min(1) })).max(100),
+});
+export type SetMatchVodsDto = z.infer<typeof SetMatchVodsDto>;

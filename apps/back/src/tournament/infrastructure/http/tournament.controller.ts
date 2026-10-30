@@ -16,7 +16,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
-import { CreateMatchDto, SetMatchWinnerDto } from "./dto/create-match.dto";
+import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -205,6 +205,17 @@ export class TournamentController {
     @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/vods")
+  async setMatchVods(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchVodsDto }) body: SetMatchVodsDto,
+  ) {
+    const match = await this.matchService.setVods(matchId, body.vods);
     return { match: withPublicSlug(match) };
   }
 

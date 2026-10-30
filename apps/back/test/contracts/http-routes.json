@@ -994,6 +994,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "PUT",
+    "path": "\"matches/:matchId/vods\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
     "path": "\"matches/:matchId/winner\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],

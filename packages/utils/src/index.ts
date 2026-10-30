@@ -46,6 +46,14 @@ export {
   selectActiveRosterPlayers,
 } from "./team-roster.ts";
 export { resolveThemedLogoUrl } from "./themed-logo.ts";
+export {
+  MAX_VODS_PER_GAME,
+  maxVodGame,
+  isIso6391Code,
+  parseMatchVodUrl,
+  type MatchVodUrlError,
+  type ParsedMatchVodUrl,
+} from "./match-vod.ts";
 export { isStaffUser, hasPermission, canModerateComments } from "./staff.ts";
 export {
   allocateSlug,
