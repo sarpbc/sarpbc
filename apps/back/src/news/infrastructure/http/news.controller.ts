@@ -11,8 +11,10 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from "@nestjs/common";
+import type { FastifyReply } from "fastify";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { PaginationQueryDto } from "../../../common/infrastructure/http/dto/pagination-query.dto";
 import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dto";
@@ -21,6 +23,7 @@ import { NewsService } from "../../application/news.service";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import { TweetEmbedQueryDto } from "./dto/tweet-embed-query.dto";
 import { TweetEmbedService } from "../../application/tweet-embed.service";
+import { TweetImageService } from "../../application/tweet-image.service";
 
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
@@ -35,6 +38,7 @@ export class NewsController {
     private readonly newsService: NewsService,
     private readonly replyService: ReplyService,
     private readonly tweetEmbedService: TweetEmbedService,
+    private readonly tweetImageService: TweetImageService,
   ) {}
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -66,6 +70,19 @@ export class NewsController {
   @Get("embed/tweet")
   embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto) {
     return this.tweetEmbedService.embed(url);
+  }
+
+  @Get("embed/tweet/image")
+  async tweetImage(
+    @Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto,
+    @Res() reply: FastifyReply,
+  ): Promise<void> {
+    const image = await this.tweetImageService.load(url);
+    await reply
+      .header("Content-Type", image.contentType)
+      .header("Cache-Control", "public, max-age=3600")
+      .header("Content-Security-Policy", "default-src 'none'")
+      .send(image.body);
   }
 
   @Get("weeks/:week")

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { parseTweetUrl, type TweetEmbed } from "@sarpbc/utils";
+import { parseTweetUrl, tweetImageProxyPath, type TweetEmbed } from "@sarpbc/utils";
 
 const props = defineProps<{
   url: string;
 }>();
 
 const { t, locale } = useI18n();
+const config = useRuntimeConfig();
 const parsed = computed(() => parseTweetUrl(props.url ?? ""));
 
 const { data, status, error } = useAsyncData(
@@ -18,6 +19,11 @@ const { data, status, error } = useAsyncData(
     return apiFetch<TweetEmbed>(`/news/embed/tweet?url=${encodeURIComponent(parsed.value.url)}`);
   },
 );
+
+function imageSrc(url: string): string {
+  const path = tweetImageProxyPath(url);
+  return path ? `${config.public.apiBase}${path}` : url;
+}
 
 const href = computed(() => data.value?.url ?? parsed.value?.url ?? props.url);
 const showError = computed(() => !parsed.value || status.value === "error" || error.value);
@@ -73,8 +79,9 @@ const postedAtLabel = computed(() =>
         >
           <img
             v-if="data.authorImageUrl"
-            :src="data.authorImageUrl"
+            :src="imageSrc(data.authorImageUrl)"
             alt=""
+            referrerpolicy="no-referrer"
             width="40"
             height="40"
             loading="lazy"
@@ -114,11 +121,12 @@ const postedAtLabel = computed(() =>
           :class="{ 'col-span-2': data.media.length === 3 && index === 0 }"
         >
           <img
-            :src="media.url"
+            :src="imageSrc(media.url)"
             :alt="media.alt || t('newsTag.tweetImage', { index: index + 1 })"
             :width="media.width"
             :height="media.height"
             loading="lazy"
+            referrerpolicy="no-referrer"
             class="block w-full object-contain"
             :class="data.media.length > 1 ? 'aspect-square' : 'max-h-96'"
           />

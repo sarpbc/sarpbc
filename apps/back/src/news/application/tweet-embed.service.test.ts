@@ -6,6 +6,7 @@ import {
 } from "../../common/domain/errors";
 import { TweetSyndicationGateway } from "../infrastructure/tweet-syndication.gateway";
 import { TweetEmbedService } from "./tweet-embed.service";
+import hereticsReply from "./__fixtures__/tweet-2116198150683734246.json";
 
 describe("TweetEmbedService", () => {
   const originalFetch = global.fetch;
@@ -135,6 +136,24 @@ describe("TweetEmbedService", () => {
     });
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.text).toBe("😀😀 Update");
+  });
+
+  it("loads a reply whose author has X's default avatar and whose parent has a video", async () => {
+    (global.fetch as Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => hereticsReply,
+    });
+
+    const embed = await service.embed("https://x.com/HereticsRL/status/2116198150683734246");
+
+    expect(embed).toMatchObject({
+      id: "2116198150683734246",
+      authorHandle: "HereticsRL",
+      authorImageUrl: null,
+      media: [],
+    });
+    expect(embed.text).toMatch(/^Give a warm welcome to the boys!/);
   });
 
   it.each([{}, { __typename: "TweetTombstone" }])(

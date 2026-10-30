@@ -266,6 +266,14 @@
   {
     "controller": "\"news\"",
     "verb": "GET",
+    "path": "\"embed/tweet/image\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"news\"",
+    "verb": "GET",
     "path": "\"embed/tweet\"",
     "status": null,
     "guards": [],

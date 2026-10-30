@@ -99,3 +99,23 @@ export function serializeNewsTweetTag(url: string): string {
 export function stripNewsTweetTags(content: string): string {
   return content.replace(/::tweet\{[^}]*\}\s*\n?::/g, " ").replace(/:tweet\{[^}]*\}/g, " ");
 }
+
+export function isTweetImageUrl(input: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return false;
+  }
+  return (
+    url.protocol === "https:" &&
+    url.hostname === "pbs.twimg.com" &&
+    url.port === "" &&
+    url.username === "" &&
+    url.password === ""
+  );
+}
+
+export function tweetImageProxyPath(url: string): string | null {
+  return isTweetImageUrl(url) ? `/news/embed/tweet/image?url=${encodeURIComponent(url)}` : null;
+}
