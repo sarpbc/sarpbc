@@ -267,17 +267,13 @@ export class MatchService {
     const written = await this.transaction.run(({ matches }) =>
       setVodsInTransaction(matches, matchId, vods),
     );
-    const match = await this.committed(written.id);
-    await this.publishDecided(match);
-    return match;
+    return this.committed(written.id);
   }
   async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setGameVodsInTransaction(matches, matchId, game, links),
     );
-    const match = await this.committed(written.id);
-    await this.publishDecided(match);
-    return match;
+    return this.committed(written.id);
   }
   private async committed(id: string): Promise<Match> {
     const match = await this.reads.detail({ kind: "id", value: id });

@@ -39,6 +39,7 @@ describe("normalizeMatchVods", () => {
     ["https://www.twitch.tv/videos/1?t=1h2x", "invalid t= timestamp"],
     ["https://youtu.be/x?t=", "invalid t= timestamp"],
     ["https://youtu.be/x?t=-5", "invalid t= timestamp"],
+    ["https://youtu.be/x?t=95&t=abc", "invalid t= timestamp"],
   ])("rejects %s", (url, message) => {
     expect(() => normalizeMatchVods([vod(url)], 5)).toThrow(message);
   });
@@ -122,5 +123,10 @@ describe("replaceGameVods", () => {
 
   it("clears a game with an empty list", () => {
     expect(replaceGameVods(current, 2, [], 5).map((v) => v.game)).toEqual([1]);
+  });
+
+  it("rejects a game outside the match format even when clearing it", () => {
+    for (const game of [0, 6, 1.5])
+      expect(() => replaceGameVods(current, game, [], 5)).toThrow("Game must be between 1 and 5.");
   });
 });

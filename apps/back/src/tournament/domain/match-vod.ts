@@ -29,6 +29,10 @@ function invalid(index: number, reason: string): InvalidInputError {
   return new InvalidInputError(`VOD link ${index + 1} ${reason}.`);
 }
 
+function isGameInRange(game: number, maxGame: number): boolean {
+  return Number.isInteger(game) && game >= 1 && game <= maxGame;
+}
+
 export function normalizeMatchVods(
   inputs: readonly MatchVodInput[],
   numberOfGames: number | null,
@@ -37,7 +41,7 @@ export function normalizeMatchVods(
   const vods: MatchVod[] = [];
   const seen = new Set<string>();
   inputs.forEach((input, index) => {
-    if (!Number.isInteger(input.game) || input.game < 1 || input.game > maxGame)
+    if (!isGameInRange(input.game, maxGame))
       throw invalid(index, `must target a game between 1 and ${maxGame}`);
     const parsed = parseMatchVodUrl(input.url);
     if (!parsed.ok) throw invalid(index, URL_ERRORS[parsed.error]);
@@ -63,6 +67,9 @@ export function replaceGameVods(
   links: readonly MatchVodLink[],
   numberOfGames: number | null,
 ): MatchVod[] {
+  const maxGame = maxVodGame(numberOfGames);
+  if (!isGameInRange(game, maxGame))
+    throw new InvalidInputError(`Game must be between 1 and ${maxGame}.`);
   const replaced = normalizeMatchVods(
     links.map((link) => ({ ...link, game })),
     numberOfGames,

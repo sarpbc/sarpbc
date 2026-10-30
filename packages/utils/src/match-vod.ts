@@ -225,8 +225,7 @@ export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
   const source = VOD_HOSTS.get(url.hostname);
   if (!source || url.port || url.username || url.password)
     return { ok: false, error: "unsupported-host" };
-  const timestamp = url.searchParams.get("t");
-  if (timestamp !== null && !TIMESTAMP_PATTERN.test(timestamp))
+  if (url.searchParams.getAll("t").some((timestamp) => !TIMESTAMP_PATTERN.test(timestamp)))
     return { ok: false, error: "invalid-timestamp" };
   return { ok: true, url: url.href, source };
 }
