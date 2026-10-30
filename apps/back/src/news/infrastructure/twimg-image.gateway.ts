@@ -6,7 +6,7 @@ import type { TweetImage, TweetImageGateway } from "../application/tweet-image.s
 const FETCH_TIMEOUT_MS = 5_000;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 2;
-// SVG is excluded: served from the API origin, it could run scripts.
+const TWIMG_ORIGIN = "https://pbs.twimg.com";
 const IMAGE_CONTENT_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -19,13 +19,24 @@ function unavailable(): IntegrationError {
   return new IntegrationError("Could not load this image from X. Try again in a moment.");
 }
 
+function twimgUrl(input: string, base?: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(input, base);
+  } catch {
+    return null;
+  }
+  if (!isTweetImageUrl(url.href)) return null;
+  return `${TWIMG_ORIGIN}${url.pathname}${url.search}`;
+}
+
 export class TwimgImageGateway implements TweetImageGateway {
   async load(url: string): Promise<TweetImage> {
     const signal = AbortSignal.timeout(FETCH_TIMEOUT_MS);
     try {
-      let target = url;
+      let target = twimgUrl(url);
       for (let redirects = 0; ; redirects++) {
-        // Node's fetch sends no Referer, which X's CDN requires for cross-site image requests.
+        if (!target) throw unavailable();
         const response = await fetch(target, {
           redirect: "manual",
           signal,
@@ -36,11 +47,8 @@ export class TwimgImageGateway implements TweetImageGateway {
         }
         await response.body?.cancel();
         const location = response.headers.get("location");
-        const next = location ? new URL(location, target).href : null;
-        if (!next || !isTweetImageUrl(next) || redirects >= MAX_REDIRECTS) {
-          throw unavailable();
-        }
-        target = next;
+        if (!location || redirects >= MAX_REDIRECTS) throw unavailable();
+        target = twimgUrl(location, target);
       }
     } catch (error) {
       if (error instanceof ApplicationError) throw error;

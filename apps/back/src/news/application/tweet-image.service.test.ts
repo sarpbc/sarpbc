@@ -62,17 +62,43 @@ describe("TweetImageService", () => {
     expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(next);
   });
 
-  it.each(["https://evil.example/photo.jpg", "http://pbs.twimg.com/media/photo.jpg", ""])(
-    "rejects a redirect to %j",
-    async (location) => {
-      (global.fetch as Mock).mockResolvedValue(
-        new Response(null, { status: 301, headers: location ? { location } : {} }),
-      );
+  it("keeps a protocol-relative looking path on the allowlisted host", async () => {
+    (global.fetch as Mock).mockResolvedValue(image(jpeg));
 
-      await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-    },
-  );
+    await service.load("https://pbs.twimg.com//evil.example/photo.jpg#frag");
+
+    expect((global.fetch as Mock).mock.calls[0]?.[0]).toBe(
+      "https://pbs.twimg.com//evil.example/photo.jpg",
+    );
+  });
+
+  it("resolves a relative redirect against the allowlisted host", async () => {
+    (global.fetch as Mock)
+      .mockResolvedValueOnce(
+        new Response(null, { status: 302, headers: { location: "/media/photo.jpg?name=orig" } }),
+      )
+      .mockResolvedValueOnce(image(jpeg));
+
+    await expect(service.load(imageUrl)).resolves.toMatchObject({ contentType: "image/jpeg" });
+    expect((global.fetch as Mock).mock.calls[1]?.[0]).toBe(
+      "https://pbs.twimg.com/media/photo.jpg?name=orig",
+    );
+  });
+
+  it.each([
+    "https://evil.example/photo.jpg",
+    "http://pbs.twimg.com/media/photo.jpg",
+    "//evil.example/photo.jpg",
+    "https://pbs.twimg.com@evil.example/photo.jpg",
+    "",
+  ])("rejects a redirect to %j", async (location) => {
+    (global.fetch as Mock).mockResolvedValue(
+      new Response(null, { status: 301, headers: location ? { location } : {} }),
+    );
+
+    await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
 
   it("stops after too many redirects", async () => {
     (global.fetch as Mock).mockImplementation(
