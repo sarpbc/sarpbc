@@ -15,7 +15,7 @@ const breadcrumbItems = [
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(locale.value, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -30,12 +30,12 @@ const columns: TableColumn<TrackedStreamer>[] = [
   {
     accessorKey: "displayName",
     header: t("page.streamers.columns.displayName"),
-    cell: ({ getValue }) => (getValue() as string | null) ?? "—",
+    cell: ({ row }) => row.original.displayName ?? "—",
   },
   {
     accessorKey: "createdAt",
     header: t("page.streamers.columns.createdAt"),
-    cell: ({ getValue }) => dateFormatter.value.format(new Date(getValue() as string)),
+    cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
   },
   {
     id: "actions",
@@ -60,7 +60,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-streamers", () => getTrackedStreamers(), {
-  default: () => [] as TrackedStreamer[],
+  default: (): TrackedStreamer[] => [],
   server: false,
 });
 
