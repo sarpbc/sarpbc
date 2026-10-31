@@ -46,14 +46,14 @@ function score(item: MatchBlockItem, index: number): string {
   return result ? String(result.score) : "–";
 }
 
-function stateColor(state: MatchBlockState) {
+function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
   switch (state) {
     case "live":
-      return "error" as const;
+      return "error";
     case "upcoming":
-      return "info" as const;
+      return "info";
     case "finished":
-      return "neutral" as const;
+      return "neutral";
     default: {
       const exhaustive: never = state;
       return exhaustive;
