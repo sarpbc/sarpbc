@@ -31,6 +31,7 @@ function repository(baseMigrations) {
   return {
     directory,
     add: (name) => writeFileSync(join(directory, name), ""),
+    delete: (name) => rmSync(join(directory, name)),
     remove: () => rmSync(root, { recursive: true, force: true }),
   };
 }
@@ -76,6 +77,45 @@ test("reports added migrations that are not newer than the newest migration on b
       /^Migration Migration20260115000000_older\.ts is not newer than 20260201000000, the newest migration on base\./,
     );
     assert.match(violations[2], /^Migration Migration20260201000000_same\.ts is not newer/);
+  } finally {
+    repo.remove();
+  }
+});
+
+test("reports files that are neither migrations nor snapshots", () => {
+  const repo = repository(["Migration20250815162622.ts"]);
+  try {
+    repo.add("Migration2026010100000_short.ts");
+    repo.add("Migration20260101000000-dash.ts");
+    repo.add("migration20260101000000.ts");
+    repo.add("Migration20260101000000.js");
+    const violations = migrationViolations(repo.directory);
+    assert.equal(violations.length, 4);
+    for (const violation of violations) assert.match(violation, /^Unexpected file /);
+  } finally {
+    repo.remove();
+  }
+});
+
+test("reports a base ref that does not resolve without throwing", () => {
+  const repo = repository(["Migration20250815162622.ts"]);
+  try {
+    assert.deepEqual(migrationViolations(repo.directory, "origin/missing"), [
+      "BASE_REF origin/missing does not resolve to a commit. Fetch it first or unset BASE_REF to skip the ordering check.",
+    ]);
+  } finally {
+    repo.remove();
+  }
+});
+
+test("reports a renamed base migration as renamed instead of not newer", () => {
+  const repo = repository(["Migration20250815162622.ts", "Migration20260201000000_onBase.ts"]);
+  try {
+    repo.delete("Migration20260201000000_onBase.ts");
+    repo.add("Migration20260201000000_renamed.ts");
+    assert.deepEqual(migrationViolations(repo.directory, "base"), [
+      "Migration Migration20260201000000_onBase.ts exists on base but was renamed or removed. MikroORM tracks applied migrations by name, so migrations already on base must keep their names.",
+    ]);
   } finally {
     repo.remove();
   }
