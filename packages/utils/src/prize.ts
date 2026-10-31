@@ -7,3 +7,11 @@ export function isIso4217Code(value: string): boolean {
 
 export const MAX_PRIZE_ENTRIES = 64;
 export const MAX_PRIZE_AMOUNT = 100_000_000;
+export const MAX_PRIZE_PLAYERS = 10;
+
+export function currencyFractionDigits(currency: string): number {
+  return (
+    new Intl.NumberFormat("en", { style: "currency", currency }).resolvedOptions()
+      .maximumFractionDigits ?? 2
+  );
+}

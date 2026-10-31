@@ -1,4 +1,5 @@
 import type { EarningsEntry, EarningsYear, PrizeAmount, ProfileEarnings } from "@sarpbc/types";
+import { currencyFractionDigits } from "@sarpbc/utils";
 
 export interface EarningsLine extends EarningsEntry {
   shares: number;
@@ -6,17 +7,21 @@ export interface EarningsLine extends EarningsEntry {
 
 interface ShareLine {
   entry: EarningsEntry;
-  cents: number;
+  minorUnits: number;
   year: number | null;
+}
+
+function minorUnitScale(currency: string): number {
+  return 10 ** currencyFractionDigits(currency);
 }
 
 function totals(lines: ShareLine[]): PrizeAmount[] {
   const byCurrency = new Map<string, number>();
-  for (const { entry, cents } of lines)
-    byCurrency.set(entry.currency, (byCurrency.get(entry.currency) ?? 0) + cents);
+  for (const { entry, minorUnits } of lines)
+    byCurrency.set(entry.currency, (byCurrency.get(entry.currency) ?? 0) + minorUnits);
   return [...byCurrency]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([currency, amount]) => ({ currency, amount: amount / 100 }));
+    .map(([currency, amount]) => ({ currency, amount: amount / minorUnitScale(currency) }));
 }
 
 function yearOf(entry: EarningsEntry): number | null {
@@ -26,8 +31,9 @@ function yearOf(entry: EarningsEntry): number | null {
 
 export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {
   const shares: ShareLine[] = lines.map(({ shares: count, ...entry }) => {
-    const cents = Math.round((entry.amount * 100) / Math.max(count, 1));
-    return { entry: { ...entry, amount: cents / 100 }, cents, year: yearOf(entry) };
+    const scale = minorUnitScale(entry.currency);
+    const minorUnits = Math.round((entry.amount * scale) / Math.max(count, 1));
+    return { entry: { ...entry, amount: minorUnits / scale }, minorUnits, year: yearOf(entry) };
   });
   const years = new Map<number | null, ShareLine[]>();
   for (const line of shares) years.set(line.year, [...(years.get(line.year) ?? []), line]);
