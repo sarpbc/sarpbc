@@ -37,7 +37,7 @@
     "evlog": "catalog:",
     "motion-v": "^2.8.0",
     "nuxt": "catalog:",
-    "posthog-js": "^1.438.13",
+    "posthog-js": "^1.440.0",
     "vue": "catalog:",
     "vue-i18n": "catalog:",
     "vue-router": "catalog:",
