@@ -23,12 +23,24 @@ describe("CreateStreamerDto", () => {
     });
   });
 
-  it.each(["abc", "a".repeat(26), "zen-rll", "zen rll", "https://twitch.tv/zenrll", "zén", ""])(
+  it.each(["a", "abc", "1v1"])("accepts the short legacy login %j", (login) => {
+    expect(CreateStreamerDto.safeParse({ login }).success).toBe(true);
+  });
+
+  it.each(["_zenrll", "a".repeat(26), "zen-rll", "zen rll", "https://twitch.tv/zenrll", "zén", ""])(
     "rejects the login %j",
     (login) => {
       expect(CreateStreamerDto.safeParse({ login }).success).toBe(false);
     },
   );
+
+  it("rejects a long adversarial login within the time budget", () => {
+    const payload = `${"a_".repeat(50_000)}!`;
+    const startedAt = performance.now();
+
+    expect(CreateStreamerDto.safeParse({ login: payload }).success).toBe(false);
+    expect(performance.now() - startedAt).toBeLessThan(100);
+  });
 
   it("rejects a display name over 100 characters", () => {
     expect(
