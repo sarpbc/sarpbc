@@ -11,6 +11,7 @@ import {
   TournamentParticipant,
 } from "./persistence/tournament.entities";
 import { PlayerAward } from "./persistence/player-award.entities";
+import { TournamentPrize } from "./persistence/tournament-prize.entities";
 import { Player, Team } from "../../roster/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
@@ -22,6 +23,7 @@ import { TournamentService } from "../application/tournament.service";
 import { ManualTournamentService } from "../application/manual-tournament.service";
 import { MatchService } from "../application/match/match.service";
 import { PlayerAwardService } from "../application/player-award.service";
+import { TournamentPrizeService } from "../application/tournament-prize.service";
 import { CompetitionSyncService } from "../application/sync/competition-sync.service";
 import { SyncAllTournamentsUseCase } from "../application/sync/sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../application/sync/sync-pandascore-tournament.use-case";
@@ -30,6 +32,7 @@ import { SyncNewTournamentsUseCase } from "../application/sync/sync-new-tourname
 import { CompetitionQueries } from "./persistence/competition.queries";
 import { MikroOrmCompetitionTransaction } from "./persistence/competition.transaction";
 import { CompetitionAwardQueries } from "./persistence/player-award.store";
+import { CompetitionPrizeQueries } from "./persistence/tournament-prize.store";
 import {
   CompetitionCacheAdapter,
   CompetitionEventsAdapter,
@@ -54,6 +57,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       TournamentParticipant,
       League,
       PlayerAward,
+      TournamentPrize,
       Player,
       Team,
     ]),
@@ -188,8 +192,20 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
         new PlayerAwardService(reads, tx),
       inject: [CompetitionAwardQueries, MikroOrmCompetitionTransaction],
     },
+    {
+      provide: TournamentPrizeService,
+      useFactory: (em: EntityManager, tx: MikroOrmCompetitionTransaction) =>
+        new TournamentPrizeService(new CompetitionPrizeQueries(em), tx),
+      inject: [EntityManager, MikroOrmCompetitionTransaction],
+    },
   ],
-  exports: [TournamentService, ManualTournamentService, MatchService, PlayerAwardService],
+  exports: [
+    TournamentService,
+    ManualTournamentService,
+    MatchService,
+    PlayerAwardService,
+    TournamentPrizeService,
+  ],
 })
 export class TournamentModule implements OnModuleInit {
   constructor(

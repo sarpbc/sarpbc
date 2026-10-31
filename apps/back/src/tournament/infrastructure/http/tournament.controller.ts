@@ -26,6 +26,8 @@ import { ManualTournamentService } from "../../application/manual-tournament.ser
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
+import { TournamentPrizeService } from "../../application/tournament-prize.service";
+import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import {
   mapProfileMatchListItem,
@@ -42,6 +44,7 @@ export class TournamentController {
     private matchService: MatchService,
     private tournamentRead: CachedTournamentRead,
     private playerAwardService: PlayerAwardService,
+    private tournamentPrizeService: TournamentPrizeService,
   ) {}
 
   @Get()
@@ -180,6 +183,21 @@ export class TournamentController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAward(@Param("id") tournamentId: string, @Param("awardId") awardId: string) {
     await this.playerAwardService.delete(tournamentId, awardId);
+  }
+
+  @Get(":id/prizes")
+  async getPrizes(@Param("id") id: string) {
+    return this.tournamentPrizeService.findByTournamentId(id);
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/prizes")
+  async setPrizes(
+    @Param("id") tournamentId: string,
+    @Body({ schema: SetTournamentPrizesDto }) dto: SetTournamentPrizesDto,
+  ) {
+    return this.tournamentPrizeService.setDistribution(tournamentId, dto.prizes);
   }
 
   @RequirePermissions("tournaments.manage")

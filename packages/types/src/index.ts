@@ -24,6 +24,14 @@ export type {
   MatchVodSource,
 } from "./competition";
 export type { ForumPost } from "./forum";
+export type {
+  EarningsEntry,
+  EarningsYear,
+  PrizeAmount,
+  ProfileEarnings,
+  TournamentPrize,
+  TournamentPrizes,
+} from "./prize";
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",

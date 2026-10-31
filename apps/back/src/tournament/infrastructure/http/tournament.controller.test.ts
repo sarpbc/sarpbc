@@ -17,6 +17,7 @@ describe("TournamentController.findOne", () => {
       {} as never,
       new CachedTournamentRead(tournaments, redis),
       {} as never,
+      {} as never,
     );
     redis.get.mockResolvedValue(null);
   });
