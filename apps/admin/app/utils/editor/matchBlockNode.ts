@@ -1,13 +1,32 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node, mergeAttributes, type MarkdownTokenizer } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
-import {
-  newsMatchBlockFromAttrs,
-  parseNewsMatchTag,
-  serializeNewsMatchTag,
-  type NewsMatchBlock,
-} from "@sarpbc/utils";
+import { newsMatchBlockFromAttrs, parseNewsMatchTag, serializeNewsMatchTag } from "@sarpbc/utils";
 import MatchBlockNodeView from "~/components/news/MatchBlockNodeView.vue";
 import { EMPTY_MATCH_BLOCK_ATTRS, matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
+
+const matchBlockTokenizer: MarkdownTokenizer = {
+  name: "matchBlock",
+  level: "block",
+  start: (src: string) => {
+    const block = src.indexOf("::matches{");
+    if (block !== -1) {
+      return block;
+    }
+    return src.indexOf(":matches{");
+  },
+  tokenize: (src: string) => {
+    const parsed = parseNewsMatchTag(src.trimStart());
+    if (!parsed) {
+      return undefined;
+    }
+
+    const leading = src.length - src.trimStart().length;
+    return {
+      type: "matchBlock",
+      raw: `${src.slice(0, leading)}${parsed.raw}`,
+    };
+  },
+};
 
 export const MatchBlockNode = Node.create({
   name: "matchBlock",
@@ -35,35 +54,12 @@ export const MatchBlockNode = Node.create({
 
   markdownTokenName: "matchBlock",
 
-  markdownTokenizer: {
-    name: "matchBlock",
-    level: "block" as const,
-    start: (src: string) => {
-      const block = src.indexOf("::matches{");
-      if (block !== -1) {
-        return block;
-      }
-      return src.indexOf(":matches{");
-    },
-    tokenize: (src: string) => {
-      const parsed = parseNewsMatchTag(src.trimStart());
-      if (!parsed) {
-        return undefined;
-      }
+  markdownTokenizer: matchBlockTokenizer,
 
-      const leading = src.length - src.trimStart().length;
-      return {
-        type: "matchBlock",
-        raw: `${src.slice(0, leading)}${parsed.raw}`,
-        block: parsed.block,
-      };
-    },
+  parseMarkdown: (token) => {
+    const parsed = parseNewsMatchTag((token.raw ?? "").trimStart());
+    return parsed ? { type: "matchBlock", attrs: matchBlockNodeAttrs(parsed.block) } : [];
   },
-
-  parseMarkdown: (token) => ({
-    type: "matchBlock",
-    attrs: matchBlockNodeAttrs(token.block as NewsMatchBlock),
-  }),
 
   renderMarkdown: (node) => {
     const block = newsMatchBlockFromAttrs(node.attrs ?? {});

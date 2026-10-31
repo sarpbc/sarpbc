@@ -108,6 +108,12 @@ export interface ProfileMatchListItem {
   };
 }
 
+export type MatchBlockSelector =
+  | { kind: "match"; id: string }
+  | { kind: "matches"; ids: string[] }
+  | { kind: "tournament"; id: string; limit: number }
+  | { kind: "team"; id: string; limit: number };
+
 export type MatchBlockState = "upcoming" | "live" | "finished";
 
 export interface MatchBlockItem {

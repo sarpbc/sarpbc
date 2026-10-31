@@ -56,6 +56,12 @@ describe("news-content.util", () => {
     );
   });
 
+  it("rejects a match block inside a sentence", () => {
+    expect(() =>
+      assertValidMatchBlocks('Watch :matches{match="0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f11"} live.'),
+    ).toThrow("on its own line");
+  });
+
   it("keeps hyphenated scores", () => {
     expect(stripMarkdownToPlain("a 4-0 sweep")).toBe("a 4-0 sweep");
   });

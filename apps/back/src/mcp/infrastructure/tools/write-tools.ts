@@ -16,7 +16,7 @@ import { mapMatchListResponse } from "../mappers";
 import { requireUpdateFields } from "./update-fields";
 
 const MATCH_BLOCK_FORMAT =
-  'Embed live match scores with a match block on its own line, using match, tournament or team UUIDs from get_tournament, get_upcoming_matches, get_match_results or search_teams: `:matches{match="<match id>"}` for one match, `:matches{ids="<match id>,<match id>"}` for a manual selection (up to 10, in that order), `:matches{tournament="<tournament id>" limit="5"}` or `:matches{team="<team id>" limit="5"}` for live, then upcoming, then latest matches (limit 1-10, default 5). Use the same block in English and French bodies.';
+  'Embed live match scores with a match block on its own line, using match, tournament or team UUIDs from get_tournament, get_upcoming_matches, get_match_results or search_teams: `:matches{match="<match id>"}` for one match, `:matches{ids="<match id>,<match id>"}` for a manual selection (up to 10, in that order), `:matches{tournament="<tournament id>" limit="5"}` or `:matches{team="<team id>" limit="5"}` for live, then upcoming, then latest matches (limit 1-10, default 5). Quote every attribute value with double quotes. Use the same block in English and French bodies.';
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
