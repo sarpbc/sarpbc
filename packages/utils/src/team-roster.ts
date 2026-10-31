@@ -9,7 +9,7 @@ export function isStaffContractRole(
 }
 
 export function isActiveRosterPlayer(player: { role?: ContractRole | null }): boolean {
-  return !isStaffContractRole(player.role);
+  return player.role === "active" || player.role == null;
 }
 
 export function selectActiveRosterPlayers<T extends { role?: ContractRole | null }>(

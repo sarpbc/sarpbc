@@ -1,7 +1,6 @@
 import type { PlayerAwardType } from "./player-award";
 import type { NewsType } from "./news";
 import type { TransferType } from "./transfer";
-import type { StaffContractRole } from "./contract";
 
 export type { StaffRole, StaffPermission, User } from "./user";
 export type { Player } from "./player";
@@ -47,12 +46,11 @@ export const TRANSFER_TYPES = [
   "staff",
 ] as const satisfies readonly TransferType[];
 
-export const STAFF_CONTRACT_ROLES = [
-  "coach",
-  "assistant_coach",
-  "analyst",
-  "manager",
-] as const satisfies readonly StaffContractRole[];
+export const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
+
+export const STAFF_CONTRACT_ROLES = ["coach", "assistant_coach", "analyst", "manager"] as const;
+
+export const CONTRACT_ROLES = [...PLAYER_CONTRACT_ROLES, ...STAFF_CONTRACT_ROLES] as const;
 
 export const PlayerAwardTypes = {
   MVP: "mvp",
