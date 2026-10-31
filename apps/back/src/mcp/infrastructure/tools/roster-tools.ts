@@ -3,6 +3,7 @@ import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
 import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../roster/domain/roster";
 import {
+  ROSTER_PROPOSAL_PERMISSIONS,
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,
 } from "../../../roster-proposal/domain/roster-proposal";
@@ -10,7 +11,12 @@ import type { McpToolContext } from "../mcp-tool-context";
 import { runStaffReadTool, runWriteTool } from "../permission-gate";
 import { adminRosterProposalsUrl } from "../urls";
 import { requireUpdateFields } from "./update-fields";
-import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
+import {
+  MAX_PRIZE_AMOUNT,
+  MAX_PRIZE_ENTRIES,
+  MAX_PRIZE_PLAYERS,
+  isIso4217Code,
+} from "@sarpbc/utils";
 
 const sourceUrlSchema = z
   .string()
@@ -313,7 +319,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "propose_tournament_prizes",
     {
       description:
-        "Propose the prize distribution of one tournament stage. Requires tournaments.manage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Enter each amount in the currency the source states; never convert it.",
+        "Propose the prize distribution of one tournament stage. Requires tournaments.manage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
       inputSchema: {
         tournamentId: z.string().uuid().describe("Tournament stage UUID."),
         prizes: z
@@ -337,9 +343,11 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
               teamId: z.string().uuid().describe("Team UUID."),
               playerIds: z
                 .array(z.string().uuid())
-                .max(10)
+                .max(MAX_PRIZE_PLAYERS)
                 .optional()
-                .describe("Optional player UUIDs who share this prize."),
+                .describe(
+                  "Optional player UUIDs from the team's stage roster who share this prize.",
+                ),
             }),
           )
           .max(MAX_PRIZE_ENTRIES)
@@ -367,7 +375,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "list_roster_proposals",
     {
       description:
-        "List roster proposals, pending by default. Requires players.manage. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.",
+        "List roster proposals, pending by default. Requires players.manage, teams.manage or tournaments.manage. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.",
       inputSchema: {
         status: z
           .enum(ROSTER_PROPOSAL_STATUSES)
@@ -376,7 +384,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ status }) =>
-      runStaffReadTool(user, "players.manage", async () => {
+      runStaffReadTool(user, ROSTER_PROPOSAL_PERMISSIONS, async () => {
         const { proposals, names } = await ctx.rosterProposalService.list(status ?? "pending");
         return {
           proposals: proposals.map((proposal) => ({

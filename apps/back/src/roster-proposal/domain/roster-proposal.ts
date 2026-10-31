@@ -63,6 +63,12 @@ export const ROSTER_PROPOSAL_STATUSES = ["pending", "applied", "rejected"] as co
 
 export type RosterProposalStatus = (typeof ROSTER_PROPOSAL_STATUSES)[number];
 
+export const ROSTER_PROPOSAL_PERMISSIONS = [
+  "players.manage",
+  "teams.manage",
+  "tournaments.manage",
+] as const satisfies readonly StaffPermission[];
+
 export function requiredPermission(kind: RosterChangeKind): StaffPermission {
   switch (kind) {
     case "add_player_to_team":

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { CompetitionPrizeQueries, CompetitionPrizeWriter } from "./tournament-prize.store";
 import { TournamentPrize } from "./tournament-prize.entities";
+import { TournamentParticipant } from "./tournament.entities";
 
 function prizeRow(playerCount: number) {
   return {
@@ -27,7 +28,7 @@ const startggExcluded = { tournament: { source: { $ne: "startgg" } } };
 describe("CompetitionPrizeQueries", () => {
   it("excludes start.gg tournaments from redistributable earnings", async () => {
     const find = vi.fn().mockResolvedValue([]);
-    const queries = new CompetitionPrizeQueries({ find } as never);
+    const queries = new CompetitionPrizeQueries({ find, findOne: vi.fn() });
 
     await queries.byTeam("team-a", { redistributableOnly: true });
     await queries.byPlayer("player-a", { redistributableOnly: true });
@@ -48,7 +49,7 @@ describe("CompetitionPrizeQueries", () => {
 
   it("keeps start.gg earnings for the site with their source", async () => {
     const find = vi.fn().mockResolvedValue([prizeRow(3)]);
-    const queries = new CompetitionPrizeQueries({ find } as never);
+    const queries = new CompetitionPrizeQueries({ find, findOne: vi.fn() });
 
     const [line] = await queries.byPlayer("player-a", { redistributableOnly: false });
 
@@ -57,25 +58,37 @@ describe("CompetitionPrizeQueries", () => {
       { $and: [{ players: { id: "player-a" } }, { tournament: {} }] },
       expect.anything(),
     );
-    expect(line).toMatchObject({ shares: 3, amount: 900, tournament: { source: "startgg" } });
+    expect(line).toMatchObject({
+      shares: 3,
+      amount: 900,
+      tournament: { source: "startgg", beginAt: null, endAt: "2026-02-01T00:00:00.000Z" },
+    });
   });
 });
 
 describe("CompetitionPrizeWriter", () => {
-  it("reports unknown and merged references", async () => {
-    const find = vi
-      .fn()
-      .mockResolvedValueOnce([{ id: "team-a" }])
-      .mockResolvedValueOnce([]);
-    const writer = new CompetitionPrizeWriter({ find } as never);
+  it("lists each participant with its tournament roster", async () => {
+    const find = vi.fn().mockResolvedValue([
+      {
+        team: { id: "team-a" },
+        players: { getItems: () => [{ id: "player-a" }, { id: "player-b" }] },
+      },
+    ]);
+    const writer = new CompetitionPrizeWriter({
+      count: vi.fn(),
+      find,
+      nativeDelete: vi.fn(),
+      getReference: vi.fn(),
+      persist: vi.fn(),
+    });
 
-    expect(
-      await writer.missingReferences({ teamIds: ["team-a", "team-b"], playerIds: ["player-a"] }),
-    ).toEqual(["team-b", "player-a"]);
+    expect(await writer.participants("cup")).toEqual([
+      { teamId: "team-a", playerIds: ["player-a", "player-b"] },
+    ]);
     expect(find).toHaveBeenCalledWith(
-      expect.anything(),
-      { id: { $in: ["team-a", "team-b"] }, mergedInto: null },
-      { fields: ["id"] },
+      TournamentParticipant,
+      { tournament: "cup" },
+      { populate: ["players"] },
     );
   });
 });

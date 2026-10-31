@@ -1,4 +1,5 @@
 import type {
+  DataSource,
   PlayerAwardType,
   PlayerProfileAward,
   TournamentAwardListItem,
@@ -141,14 +142,22 @@ export interface EarningsScope {
   redistributableOnly: boolean;
 }
 export interface PrizeQueries {
+  tournamentSource(id: string): Promise<DataSource | null>;
   byTournament(id: string): Promise<TournamentPrizes | null>;
   byTeam(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
   byPlayer(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
 }
+export interface PrizeParticipant {
+  teamId: string;
+  playerIds: string[];
+}
 export interface PrizeWriter {
   tournamentExists(id: string): Promise<boolean>;
-  missingReferences(ids: { teamIds: string[]; playerIds: string[] }): Promise<string[]>;
+  participants(tournamentId: string): Promise<PrizeParticipant[]>;
   replace(tournamentId: string, entries: PrizeEntry[]): Promise<void>;
+}
+export interface PrizeTransaction {
+  run<T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>): Promise<T>;
 }
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;

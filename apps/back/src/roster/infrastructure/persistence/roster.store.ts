@@ -312,6 +312,29 @@ export class MikroRosterTransaction implements RosterTransaction {
   }
 }
 
+export async function moveTeamPrizes(
+  em: Pick<EntityManager, "find" | "nativeDelete" | "nativeUpdate">,
+  from: string,
+  to: string,
+): Promise<void> {
+  const prizes = await em.find(
+    TournamentPrize,
+    { team: { $in: [from, to] } },
+    { populate: ["players"] },
+  );
+  const kept = new Map(
+    prizes.filter(({ team }) => team.id === to).map((prize) => [prize.tournament.id, prize]),
+  );
+  const duplicates = prizes.filter(
+    ({ team, tournament }) => team.id === from && kept.has(tournament.id),
+  );
+  for (const duplicate of duplicates)
+    kept.get(duplicate.tournament.id)?.players.add(duplicate.players.getItems());
+  if (duplicates.length > 0)
+    await em.nativeDelete(TournamentPrize, { id: { $in: duplicates.map(({ id }) => id) } });
+  await em.nativeUpdate(TournamentPrize, { team: from }, { team: to });
+}
+
 function rosterReferences(em: EntityManager): RosterReferences {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
@@ -369,7 +392,7 @@ function rosterReferences(em: EntityManager): RosterReferences {
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });
       await em.nativeUpdate(TournamentParticipant, { team: from }, { team: to });
-      await em.nativeUpdate(TournamentPrize, { team: from }, { team: to });
+      await moveTeamPrizes(em, from, to);
     },
     sharedTournamentIds: async (teamId, otherTeamId) => {
       const participants = await em.find(

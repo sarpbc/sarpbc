@@ -3,6 +3,7 @@ import { NotFoundException } from "@nestjs/common";
 import { TournamentController } from "./tournament.controller";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { Tournament } from "../../domain/competition";
+import { TournamentPrizeService } from "../../application/tournament-prize.service";
 
 describe("TournamentController.findOne", () => {
   const redis = { get: vi.fn(), set: vi.fn() };
@@ -17,7 +18,10 @@ describe("TournamentController.findOne", () => {
       {} as never,
       new CachedTournamentRead(tournaments, redis),
       {} as never,
-      {} as never,
+      new TournamentPrizeService(
+        { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
+        { run: vi.fn() },
+      ),
     );
     redis.get.mockResolvedValue(null);
   });

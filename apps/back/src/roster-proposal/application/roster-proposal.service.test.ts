@@ -37,11 +37,15 @@ function setup() {
     revisePeriod: vi.fn(async () => Object.assign(new Contract(), { id: "zen-kc" })),
   };
   const merges = { mergePlayers: vi.fn(), mergeTeams: vi.fn() };
-  const staff = { allowed: true, permissions: [] as string[] };
+  const permissions: string[] = [];
+  const staff = { allowed: true, permissions };
   const prizes = {
-    findByTournamentId: vi.fn(async (id: string) => {
+    requireProposableTournament: vi.fn(async (id: string) => {
+      if (id === "startgg-cup")
+        throw new InvalidInputError(
+          "Prize distributions of start.gg tournaments cannot be proposed",
+        );
       if (id !== "cup") throw new NotFoundError(`Tournament with id "${id}" not found`);
-      return { source: "manual" as const, prizepool: null, prizes: [] };
     }),
     setDistribution: vi.fn(),
   };
@@ -246,7 +250,7 @@ describe("RosterProposalService", () => {
     expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
   });
 
-  it("rejects prize proposals with an unknown tournament, team or invalid currency", async () => {
+  it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {
     const propose = (tournamentId: string, entry: typeof prizeEntry) =>
       service.propose(
         { kind: "set_tournament_prizes", tournamentId, prizes: [entry] },
@@ -255,6 +259,7 @@ describe("RosterProposalService", () => {
       );
 
     await expect(propose("missing", prizeEntry)).rejects.toThrow(NotFoundError);
+    await expect(propose("startgg-cup", prizeEntry)).rejects.toThrow(InvalidInputError);
     await expect(propose("cup", { ...prizeEntry, teamId: "nope" })).rejects.toThrow(NotFoundError);
     await expect(propose("cup", { ...prizeEntry, currency: "XYZ" })).rejects.toThrow(
       InvalidInputError,

@@ -6,7 +6,7 @@ import type { EarningsLine } from "../../application/earnings";
 import type { EarningsScope, PrizeQueries, PrizeWriter } from "../../application/ports";
 import type { PrizeEntry } from "../../domain/prize-distribution";
 import { stageFilter } from "./competition.queries";
-import { Tournament } from "./tournament.entities";
+import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";
 
 function toPrizeItem(row: TournamentPrize): TournamentPrizeItem {
@@ -43,8 +43,8 @@ function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
       name: tournament.name,
       slug: tournament.slug,
       source: tournament.source,
-      beginAt: tournament.beginAt,
-      endAt: tournament.endAt,
+      beginAt: tournament.beginAt?.toISOString() ?? null,
+      endAt: tournament.endAt?.toISOString() ?? null,
       event: {
         id: tournament.event.id,
         slug: tournament.event.slug,
@@ -55,7 +55,12 @@ function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
 }
 
 export class CompetitionPrizeQueries implements PrizeQueries {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly em: Pick<EntityManager, "find" | "findOne">) {}
+
+  async tournamentSource(id: string) {
+    const tournament = await this.em.findOne(Tournament, { id }, { fields: ["source"] });
+    return tournament?.source ?? null;
+  }
 
   async byTournament(id: string) {
     const tournament = await this.em.findOne(Tournament, { id });
@@ -102,23 +107,27 @@ export class CompetitionPrizeQueries implements PrizeQueries {
 }
 
 export class CompetitionPrizeWriter implements PrizeWriter {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: Pick<
+      EntityManager,
+      "count" | "find" | "nativeDelete" | "getReference" | "persist"
+    >,
+  ) {}
 
   async tournamentExists(id: string) {
     return (await this.em.count(Tournament, { id })) > 0;
   }
 
-  async missingReferences({ teamIds, playerIds }: { teamIds: string[]; playerIds: string[] }) {
-    const [teams, players] = await Promise.all([
-      teamIds.length
-        ? this.em.find(Team, { id: { $in: teamIds }, mergedInto: null }, { fields: ["id"] })
-        : [],
-      playerIds.length
-        ? this.em.find(Player, { id: { $in: playerIds }, mergedInto: null }, { fields: ["id"] })
-        : [],
-    ]);
-    const found = new Set([...teams, ...players].map(({ id }) => id));
-    return [...new Set([...teamIds, ...playerIds])].filter((id) => !found.has(id));
+  async participants(tournamentId: string) {
+    const rows = await this.em.find(
+      TournamentParticipant,
+      { tournament: tournamentId },
+      { populate: ["players"] },
+    );
+    return rows.map((row) => ({
+      teamId: row.team.id,
+      playerIds: row.players.getItems().map(({ id }) => id),
+    }));
   }
 
   async replace(tournamentId: string, entries: PrizeEntry[]) {

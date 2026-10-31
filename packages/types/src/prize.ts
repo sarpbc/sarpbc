@@ -38,8 +38,8 @@ export interface EarningsEntry {
     name: string;
     slug: string;
     source: DataSource;
-    beginAt: Date | string | null;
-    endAt: Date | string | null;
+    beginAt: string | null;
+    endAt: string | null;
     event: TournamentEventRef;
   };
 }

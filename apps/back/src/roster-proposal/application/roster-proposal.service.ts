@@ -25,7 +25,7 @@ type Teams = Pick<TeamService, "findById" | "create" | "update">;
 type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
-type Prizes = Pick<TournamentPrizeService, "findByTournamentId" | "setDistribution">;
+type Prizes = Pick<TournamentPrizeService, "requireProposableTournament" | "setDistribution">;
 
 const LIST_LIMIT = 100;
 
@@ -52,7 +52,7 @@ export class RosterProposalService {
     }
     if (change.kind === "set_tournament_prizes") {
       assertPrizeDistribution(change.prizes);
-      await this.prizes.findByTournamentId(change.tournamentId);
+      await this.prizes.requireProposableTournament(change.tournamentId);
     }
     const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
     await this.store.save(proposal);

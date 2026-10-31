@@ -73,6 +73,23 @@ describe("permission-gate", () => {
       expect(result.isError).toBeUndefined();
       expect(textContent(result)).toContain("zen-joins-karmine-corp");
     });
+
+    it("accepts any one of several permissions", async () => {
+      const allowed = await runStaffReadTool(
+        journalist,
+        ["tournaments.manage", "news.manage"],
+        async () => ({ ok: true }),
+      );
+      const denied = await runStaffReadTool(
+        journalist,
+        ["players.manage", "tournaments.manage"],
+        async () => ({ ok: true }),
+      );
+
+      expect(allowed.isError).toBeUndefined();
+      expect(denied.isError).toBe(true);
+      expect(textContent(denied)).toContain("players.manage or tournaments.manage");
+    });
   });
 
   describe("runReadTool", () => {
