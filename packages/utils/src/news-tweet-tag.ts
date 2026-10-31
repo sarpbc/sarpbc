@@ -1,3 +1,5 @@
+import { parseNewsTagAttrs } from "./news-tag-attrs.ts";
+
 export interface ParsedTweetUrl {
   id: string;
   handle: string | null;
@@ -32,11 +34,7 @@ const TWEET_STATUS_PATTERN =
   /^https?:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(?:i\/(?:web\/)?status|([A-Za-z0-9_]{1,15})\/status)\/(\d+)/i;
 
 const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{([^}]*)\}(?:\s*\n?::)?/;
-const ATTR_PATTERN = /(\w+)="((?:\\.|[^"\\])*)"/g;
-
-function unescapeAttrValue(value: string): string {
-  return value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-}
+const WHITESPACE = /\s/;
 
 function escapeAttrValue(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -66,13 +64,9 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
     return null;
   }
 
-  let url: string | undefined;
-  for (const attr of (match[1] ?? "").matchAll(ATTR_PATTERN)) {
-    if (attr[1] === "url" && attr[2] != null) {
-      url = unescapeAttrValue(attr[2]).trim();
-      break;
-    }
-  }
+  const url = parseNewsTagAttrs(match[1] ?? "")
+    .find((attr) => attr.name === "url")
+    ?.value.trim();
 
   if (!url) {
     return null;
@@ -96,8 +90,53 @@ export function serializeNewsTweetTag(url: string): string {
   return `:tweet{url="${escapeAttrValue(canonical)}"}`;
 }
 
+function blockTagEnd(content: string, afterBrace: number): number {
+  let index = afterBrace;
+  while (index < content.length && WHITESPACE.test(content.charAt(index))) {
+    index += 1;
+  }
+  return content.startsWith("::", index) ? index + 2 : -1;
+}
+
+function inlineTagEnd(_content: string, afterBrace: number): number {
+  return afterBrace;
+}
+
+function replaceTweetTags(
+  content: string,
+  opener: string,
+  tagEnd: (content: string, afterBrace: number) => number,
+): string {
+  let result = "";
+  let copiedUntil = 0;
+  let searchFrom = 0;
+  while (true) {
+    const start = content.indexOf(opener, searchFrom);
+    if (start === -1) {
+      break;
+    }
+    const closingBrace = content.indexOf("}", start + opener.length);
+    if (closingBrace === -1) {
+      break;
+    }
+    const end = tagEnd(content, closingBrace + 1);
+    if (end === -1) {
+      searchFrom = closingBrace + 1;
+      continue;
+    }
+    result += `${content.slice(copiedUntil, start)} `;
+    copiedUntil = end;
+    searchFrom = end;
+  }
+  return result + content.slice(copiedUntil);
+}
+
 export function stripNewsTweetTags(content: string): string {
-  return content.replace(/::tweet\{[^}]*\}\s*\n?::/g, " ").replace(/:tweet\{[^}]*\}/g, " ");
+  return replaceTweetTags(
+    replaceTweetTags(content, "::tweet{", blockTagEnd),
+    ":tweet{",
+    inlineTagEnd,
+  );
 }
 
 export function isTweetImageUrl(input: string): boolean {
