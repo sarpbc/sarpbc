@@ -1,5 +1,5 @@
 import type { Tournament } from "~/types/tournament";
-import type { PlayerProfileAward, ProfileMatchListItem } from "@sarpbc/types";
+import type { PlayerProfileAward, ProfileEarnings, ProfileMatchListItem } from "@sarpbc/types";
 import { apiFetch } from "~/utils/apiFetch";
 
 export async function getPlayerMatches(playerId: string): Promise<ProfileMatchListItem[]> {
@@ -24,6 +24,14 @@ export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAw
   });
 
   return res.awards ?? [];
+}
+
+export async function getPlayerEarnings(playerId: string): Promise<ProfileEarnings> {
+  const res = await apiFetch<{ earnings: ProfileEarnings }>(`/player/${playerId}/earnings`, {
+    method: "GET",
+  });
+
+  return res.earnings;
 }
 
 export async function getPlayerTournaments(playerId: string): Promise<Tournament[]> {

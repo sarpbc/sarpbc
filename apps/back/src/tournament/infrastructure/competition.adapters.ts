@@ -8,11 +8,15 @@ import type {
   CompetitionEvents,
 } from "../application/ports";
 import type { MatchDecided } from "../domain/match-decided";
+import { tournamentPrizesCacheKey } from "./cache/cached-tournament-prizes.read";
 @Injectable()
 export class CompetitionCacheAdapter implements CompetitionCache {
   constructor(private readonly redis: RedisService) {}
   async invalidateTournament(id: string) {
-    await this.redis.delete("tournament:" + id);
+    await Promise.all([
+      this.redis.delete("tournament:" + id),
+      this.redis.delete(tournamentPrizesCacheKey(id)),
+    ]);
   }
 }
 @Injectable()

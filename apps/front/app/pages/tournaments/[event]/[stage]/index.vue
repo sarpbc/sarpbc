@@ -26,5 +26,6 @@ const bracketHeadingId = computed(() => `tournament-bracket-title-${tournament.i
       </SRail>
     </section>
     <TournamentParticipants :tournament="tournament" />
+    <TournamentPrizes :tournament="tournament" />
   </div>
 </template>

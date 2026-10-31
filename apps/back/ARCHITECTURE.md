@@ -36,7 +36,7 @@ The following operations share a transaction:
 - Content deletion and dependent replies, notifications, reports, or translations.
 - Player photo replacement or selection, and player or team deletion with dependent roster data.
 - A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
-- A player or team merge: moving contracts, photos, awards and tournament participations to the kept entity and recording the duplicate's redirect.
+- A player or team merge: moving contracts, photos, awards, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect.
 - A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
@@ -46,7 +46,7 @@ HTTP requests use the MikroORM request context. Scheduled jobs and initializatio
 
 ## Ownership and failures
 
-Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit. start.gg players and teams are public everywhere, MCP included; start.gg tournaments and matches are not redistributed, so MCP reads and any open-data export filter them through `isRedistributable` or the `redistributableOnly` list option. A start.gg team does not hide the redistributable match it plays in. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.
+Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit. start.gg players and teams are public everywhere, MCP included; start.gg tournaments and matches are not redistributed, so MCP reads and any open-data export filter them through `isRedistributable` or the `redistributableOnly` list option. Prize distributions and earnings follow their tournament: site responses keep start.gg rows with their `source` for the credit, and MCP earnings reads pass `redistributableOnly`. A start.gg team does not hide the redistributable match it plays in. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.
 
 Transfers are not stored. `GET /transfers` derives them from contracts up to the current day: a contract start is an arrival, a benching, a loan or a staff move according to its role, and a contract end is a departure unless a contract with the same team starts that day.
 

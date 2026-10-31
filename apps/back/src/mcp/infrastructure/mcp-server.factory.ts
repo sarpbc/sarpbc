@@ -10,6 +10,7 @@ import { RosterProposalService } from "../../roster-proposal/application/roster-
 import { SearchService } from "../../search/application/search.service";
 import { TeamService } from "../../roster/application/team.service";
 import { TournamentService } from "../../tournament/application/tournament.service";
+import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { McpToolContext } from "./mcp-tool-context";
 import { registerReadTools } from "./tools/read-tools";
 import { registerRosterTools } from "./tools/roster-tools";
@@ -27,6 +28,7 @@ export class McpServerFactory {
     private readonly matchService: MatchService,
     private readonly newsService: NewsService,
     private readonly rosterProposalService: RosterProposalService,
+    private readonly tournamentPrizeService: TournamentPrizeService,
   ) {}
 
   createServer(user: PatUser): McpServer {
@@ -49,6 +51,7 @@ export class McpServerFactory {
       matchService: this.matchService,
       newsService: this.newsService,
       rosterProposalService: this.rosterProposalService,
+      tournamentPrizeService: this.tournamentPrizeService,
     };
 
     registerReadTools(server, ctx);

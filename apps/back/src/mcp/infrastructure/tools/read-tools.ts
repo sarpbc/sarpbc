@@ -189,6 +189,59 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
   );
 
   server.registerTool(
+    "get_tournament_prizes",
+    {
+      description:
+        "Get a tournament stage prize distribution: placement, amount and ISO 4217 currency per team, with the players it lists. prizepool is the overall prize pool synced from PandaScore. Amounts are never converted between currencies.",
+      inputSchema: {
+        id: z.string().min(1).describe("Tournament UUID."),
+      },
+    },
+    async ({ id }) =>
+      runReadTool(async () => {
+        const distribution = await ctx.tournamentPrizeService.findByTournamentId(id);
+        if (!isRedistributable(distribution.source)) {
+          throw new NotFoundException(
+            `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
+          );
+        }
+        return { tournamentId: id, prizepool: distribution.prizepool, prizes: distribution.prizes };
+      }),
+  );
+
+  server.registerTool(
+    "get_team_earnings",
+    {
+      description:
+        "Get a team prize earnings by year, with totals per currency (amounts are never converted).",
+      inputSchema: {
+        idOrSlug: z.string().min(1).describe("Team slug or internal UUID."),
+      },
+    },
+    async ({ idOrSlug }) =>
+      runReadTool(async () => {
+        const team = await resolveTeam(ctx, idOrSlug);
+        return ctx.tournamentPrizeService.teamEarnings(team.id, { redistributableOnly: true });
+      }),
+  );
+
+  server.registerTool(
+    "get_player_earnings",
+    {
+      description:
+        "Get a player prize earnings by year, with totals per currency (amounts are never converted). A prize that lists players is split equally between them.",
+      inputSchema: {
+        idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
+      },
+    },
+    async ({ idOrSlug }) =>
+      runReadTool(async () => {
+        const player = await resolvePlayer(ctx, idOrSlug);
+        return ctx.tournamentPrizeService.playerEarnings(player.id, { redistributableOnly: true });
+      }),
+  );
+
+  server.registerTool(
     "get_upcoming_matches",
     {
       description:
@@ -273,7 +326,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       },
     },
     async ({ page, limit }) =>
-      runStaffReadTool(user, "news.manage", async () => {
+      runStaffReadTool(user, ["news.manage"], async () => {
         const result = await ctx.newsService.findAll(page ?? 0, limit ?? DEFAULT_NEWS_LIMIT);
         return {
           data: result.data.map(mapNewsListItem),
@@ -294,7 +347,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       },
     },
     async ({ idOrSlug }) =>
-      runStaffReadTool(user, "news.manage", async () => {
+      runStaffReadTool(user, ["news.manage"], async () => {
         const article = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
         return mapNewsAdminArticle(article);
       }),

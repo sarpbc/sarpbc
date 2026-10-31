@@ -19,6 +19,7 @@ import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { ContractService } from "../../application/contract.service";
 import { TournamentService } from "../../../tournament/application/tournament.service";
+import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
@@ -33,6 +34,7 @@ export class TeamController {
     private teamService: TeamService,
     private contractService: ContractService,
     private tournamentService: TournamentService,
+    private tournamentPrizeService: TournamentPrizeService,
   ) {}
 
   @Get()
@@ -80,6 +82,18 @@ export class TeamController {
     }
     const trophies = await this.tournamentService.getTournamentsWonByTeam(team.id);
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
+  }
+
+  @Get(":id/earnings")
+  async getEarnings(@Param("id", ParseUUIDPipe) id: string) {
+    const team = await this.teamService.findById(id);
+    if (!team) {
+      throw new NotFoundException(`Team with id "${id}" not found`);
+    }
+    const earnings = await this.tournamentPrizeService.teamEarnings(team.id, {
+      redistributableOnly: false,
+    });
+    return { earnings };
   }
 
   @Get(":id/tournaments")

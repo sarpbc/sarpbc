@@ -219,7 +219,7 @@
     },
     "proposals": {
       "title": "Propositions de roster",
-      "subtitle": "Changements sourcés de rosters, joueurs et équipes proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
+      "subtitle": "Changements sourcés de rosters, joueurs, équipes et répartitions des gains proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
       "loadError": "Impossible de charger les propositions de roster.",
       "retry": "Réessayer",
       "empty": "Aucune proposition de roster à examiner.",
@@ -235,7 +235,8 @@
         "merge_players": "Fusion de joueurs",
         "merge_teams": "Fusion d'équipes",
         "create_contract": "Nouveau contrat",
-        "update_contract": "Modification du contrat"
+        "update_contract": "Modification du contrat",
+        "set_tournament_prizes": "Répartition des gains"
       },
       "fields": {
         "playerId": "Joueur",
@@ -253,7 +254,10 @@
         "startDate": "Date de début",
         "endDate": "Date de fin",
         "contractRole": "Rôle sous contrat",
-        "sourceUrl": "Source"
+        "sourceUrl": "Source",
+        "tournamentId": "Tournoi",
+        "prizes": "Gains",
+        "placement": "{placement}re place | {placement}e place"
       },
       "playerStatus": {
         "active": "Actif",
@@ -263,7 +267,8 @@
       "values": {
         "yes": "Oui",
         "no": "Non",
-        "ongoing": "En cours"
+        "ongoing": "En cours",
+        "noPrizes": "Vider la répartition"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
@@ -383,6 +388,38 @@
           "unsupported-host": "Utilisez un lien twitch.tv, youtube.com ou youtu.be.",
           "invalid-timestamp": "Écrivez t= en secondes (123) ou sous la forme 1h2m3s.",
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
+        }
+      },
+      "prizes": {
+        "title": "Répartition des gains",
+        "hint": "Saisissez le montant remporté par chaque équipe, dans la devise indiquée par la source. Les montants ne sont jamais convertis. Les joueurs listés se partagent le gain à parts égales sur leur profil.",
+        "prizepool": "Cashprize PandaScore : {prizepool}",
+        "noPrizepool": "Aucun cashprize synchronisé depuis PandaScore.",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger la répartition des gains.",
+        "retry": "Réessayer",
+        "noParticipants": "Aucune équipe trouvée. Synchronisez le tournoi ou ajoutez d’abord des participants.",
+        "empty": "Aucun gain enregistré pour ce tournoi.",
+        "placement": "Place",
+        "amount": "Montant",
+        "currency": "Devise",
+        "team": "Équipe",
+        "players": "Joueurs",
+        "selectTeam": "Choisir une équipe",
+        "selectPlayers": "Facultatif",
+        "notParticipantOption": "{name} (hors participants)",
+        "notOnRosterOption": "{name} (hors effectif du tournoi)",
+        "add": "Ajouter un gain",
+        "remove": "Retirer le gain",
+        "save": "Enregistrer la répartition",
+        "saved": "Répartition des gains enregistrée",
+        "saveError": "Impossible d’enregistrer la répartition des gains",
+        "errors": {
+          "amount": "Saisissez un montant entier entre 1 et {max}.",
+          "notParticipant": "Cette équipe ne participe pas au tournoi. Retirez ce gain ou ajoutez-la aux participants.",
+          "notOnRoster": "Certains joueurs ne figurent pas dans l’effectif de l’équipe pour ce tournoi.",
+          "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
+          "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
         }
       }
     },

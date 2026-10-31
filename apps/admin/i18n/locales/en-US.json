@@ -219,7 +219,7 @@
     },
     "proposals": {
       "title": "Roster Proposals",
-      "subtitle": "Sourced roster, player and team changes proposed through the MCP. Nothing applies until a staff member approves it.",
+      "subtitle": "Sourced roster, player, team and prize distribution changes proposed through the MCP. Nothing applies until a staff member approves it.",
       "loadError": "Could not load roster proposals.",
       "retry": "Try Again",
       "empty": "No roster proposals to review.",
@@ -235,7 +235,8 @@
         "merge_players": "Merge players",
         "merge_teams": "Merge teams",
         "create_contract": "New contract",
-        "update_contract": "Contract update"
+        "update_contract": "Contract update",
+        "set_tournament_prizes": "Prize distribution"
       },
       "fields": {
         "playerId": "Player",
@@ -253,7 +254,10 @@
         "startDate": "Start date",
         "endDate": "End date",
         "contractRole": "Contract role",
-        "sourceUrl": "Source"
+        "sourceUrl": "Source",
+        "tournamentId": "Tournament",
+        "prizes": "Prizes",
+        "placement": "Place {placement}"
       },
       "playerStatus": {
         "active": "Active",
@@ -263,7 +267,8 @@
       "values": {
         "yes": "Yes",
         "no": "No",
-        "ongoing": "Ongoing"
+        "ongoing": "Ongoing",
+        "noPrizes": "Clear the distribution"
       },
       "messages": {
         "approved": "Proposal approved and applied",
@@ -383,6 +388,38 @@
           "unsupported-host": "Use a twitch.tv, youtube.com or youtu.be link.",
           "invalid-timestamp": "Write t= in seconds (123) or as 1h2m3s.",
           "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
+        }
+      },
+      "prizes": {
+        "title": "Prize Distribution",
+        "hint": "Enter the amount each team earned, in the currency the source states. Amounts are never converted. Listed players share the prize equally on their profiles.",
+        "prizepool": "Prize pool from PandaScore: {prizepool}",
+        "noPrizepool": "No prize pool synced from PandaScore.",
+        "loading": "Loading…",
+        "loadError": "Could not load the prize distribution.",
+        "retry": "Try Again",
+        "noParticipants": "No teams found. Sync the tournament or add participants first.",
+        "empty": "No prizes recorded for this tournament.",
+        "placement": "Place",
+        "amount": "Amount",
+        "currency": "Currency",
+        "team": "Team",
+        "players": "Players",
+        "selectTeam": "Select a team",
+        "selectPlayers": "Optional",
+        "notParticipantOption": "{name} (not a participant)",
+        "notOnRosterOption": "{name} (not on the tournament roster)",
+        "add": "Add Prize",
+        "remove": "Remove Prize",
+        "save": "Save Distribution",
+        "saved": "Prize distribution saved",
+        "saveError": "Could not save the prize distribution",
+        "errors": {
+          "amount": "Enter a whole amount between 1 and {max}.",
+          "notParticipant": "This team does not take part in the tournament. Remove this prize or add the team as a participant.",
+          "notOnRoster": "Some players are not on the team's tournament roster.",
+          "currency": "Use an ISO 4217 code such as USD or EUR.",
+          "duplicateTeam": "Each team can appear only once."
         }
       }
     },
