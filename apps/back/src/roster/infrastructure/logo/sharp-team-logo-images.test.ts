@@ -46,6 +46,20 @@ describe("SharpTeamLogoImages", () => {
     });
   });
 
+  it("shrinks a large SVG below the pixel limit before rasterizing it", async () => {
+    const svg = new TextEncoder().encode(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="6000" height="6000" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#0af"/></svg>',
+    );
+
+    const output = await images.normalize(svg, "svg", 512);
+
+    expect(await sharp(output).metadata()).toMatchObject({
+      format: "webp",
+      width: 512,
+      height: 512,
+    });
+  });
+
   it("reports undecodable bytes as invalid input", async () => {
     const broken = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]);
 
