@@ -1,35 +1,51 @@
 import type { ExecutionContext } from "@nestjs/common";
 import { normalizeIp } from "@nestjs/throttler";
 import {
+  forwardedPublicClient,
   internalApiTokenMatches,
   isDirectLoopback,
   resolveClientAddress,
   type ClientRequest,
-} from "./client-address";
+} from "@sarpbc/utils/client-address";
 
-function asClientRequest(request: object): ClientRequest {
-  return request as ClientRequest;
-}
+const PUBLIC_LIMIT = 100;
+const SSR_LIMIT = 400;
 
-export function clientThrottleTracking(internalApiToken: string | undefined) {
+export type ClientRateLimits = {
+  publicLimit: number;
+  ssrLimit: number;
+};
+
+const DEFAULT_LIMITS: ClientRateLimits = {
+  publicLimit: PUBLIC_LIMIT,
+  ssrLimit: SSR_LIMIT,
+};
+
+export function createClientThrottleOptions(
+  internalApiToken: string | undefined,
+  limits: ClientRateLimits = DEFAULT_LIMITS,
+) {
   return {
-    skipIf: (context: ExecutionContext) => {
-      const request = asClientRequest(context.switchToHttp().getRequest());
-      return isDirectLoopback(request) || internalApiTokenMatches(request, internalApiToken);
+    skipIf: (context: ExecutionContext) =>
+      isDirectLoopback(context.switchToHttp().getRequest() as ClientRequest),
+    getTracker: (request: ClientRequest) => {
+      const address = internalApiTokenMatches(request, internalApiToken)
+        ? (forwardedPublicClient(request) ?? resolveClientAddress(request))
+        : resolveClientAddress(request);
+      const normalized = normalizeIp(address);
+      return internalApiTokenMatches(request, internalApiToken) ? `ssr:${normalized}` : normalized;
     },
-    getTracker: (request: Record<string, unknown>) =>
-      normalizeIp(resolveClientAddress(asClientRequest(request))),
-  };
-}
-
-export function createClientThrottleOptions(internalApiToken: string | undefined) {
-  return {
-    ...clientThrottleTracking(internalApiToken),
     throttlers: [
       {
         name: "default",
         ttl: 60_000,
-        limit: 100,
+        limit: (context: ExecutionContext) =>
+          internalApiTokenMatches(
+            context.switchToHttp().getRequest() as ClientRequest,
+            internalApiToken,
+          )
+            ? limits.ssrLimit
+            : limits.publicLimit,
       },
     ],
   };

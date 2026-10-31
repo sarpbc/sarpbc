@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { INTERNAL_API_HEADER } from "@sarpbc/utils";
+import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "@sarpbc/utils";
 import {
   canonicalIp,
+  forwardedPublicClient,
   internalApiTokenMatches,
   isCloudflareIp,
   isDirectLoopback,
   isPublicIp,
   resolveClientAddress,
-} from "./client-address";
+  visitorAddressFromProxy,
+} from "@sarpbc/utils/client-address";
 
 const TOKEN = "internal-api-token-value";
 
@@ -28,6 +30,9 @@ describe("client address", () => {
     expect(isCloudflareIp("10.0.0.4")).toBe(false);
     expect(isPublicIp("203.0.113.9")).toBe(true);
     expect(isPublicIp("10.1.1.1")).toBe(false);
+    expect(isPublicIp("100.64.0.1")).toBe(false);
+    expect(isPublicIp("100.127.255.255")).toBe(false);
+    expect(isPublicIp("100.128.0.1")).toBe(true);
     expect(isPublicIp("127.0.0.1")).toBe(false);
     expect(isPublicIp("::1")).toBe(false);
   });
@@ -73,6 +78,43 @@ describe("client address", () => {
     expect(isDirectLoopback({ socket: { remoteAddress: "::ffff:127.0.0.1" } })).toBe(true);
     expect(isDirectLoopback({ socket: { remoteAddress: "10.0.0.8" } })).toBe(false);
     expect(isDirectLoopback({ ip: "127.0.0.1" })).toBe(false);
+  });
+
+  it("reads the visitor the same way a trusted proxy in front of Cloudflare does", () => {
+    expect(
+      visitorAddressFromProxy({
+        socketAddress: "10.0.0.5",
+        forwardedFor: "203.0.113.10, 104.16.0.1",
+        connectingIp: "203.0.113.10",
+      }),
+    ).toBe("203.0.113.10");
+
+    expect(
+      visitorAddressFromProxy({
+        socketAddress: "203.0.113.77",
+        forwardedFor: "198.51.100.8",
+        connectingIp: "203.0.113.10",
+      }),
+    ).toBe("203.0.113.77");
+
+    expect(
+      visitorAddressFromProxy({
+        socketAddress: "10.0.0.5",
+        forwardedFor: "10.1.1.1",
+      }),
+    ).toBeUndefined();
+  });
+
+  it("accepts a public forwarded client and ignores a private one", () => {
+    expect(forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: "203.0.113.10" } })).toBe(
+      "203.0.113.10",
+    );
+    expect(forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: "10.1.1.1" } })).toBe(
+      undefined,
+    );
+    expect(forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: "100.80.0.4" } })).toBe(
+      undefined,
+    );
   });
 
   it("accepts the internal token with a constant-time compare and ignores a wrong length", () => {

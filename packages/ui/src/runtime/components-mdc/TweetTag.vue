@@ -22,7 +22,6 @@ const { data, status, error } = useAsyncData(
 
 function imageSrc(url: string): string {
   const path = tweetImageProxyPath(url);
-  // This URL is written into the page for the browser. Server fetches use useApiBase().
   return path ? `${config.public.apiBase}${path}` : url;
 }
 

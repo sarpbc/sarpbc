@@ -113,8 +113,6 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    apiBaseServer: "",
-    apiInternalToken: "",
     public: {
       apiBase: apiBase,
       publicSiteUrl: publicSiteUrl,

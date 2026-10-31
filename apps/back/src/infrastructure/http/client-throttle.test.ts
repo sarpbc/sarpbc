@@ -4,9 +4,9 @@ import { NestFactory } from "@nestjs/core";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { INTERNAL_API_HEADER } from "@sarpbc/utils";
+import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "@sarpbc/utils";
 import { createHttpAdapter } from "./fastify-adapter";
-import { clientThrottleTracking } from "./client-throttle";
+import { createClientThrottleOptions } from "./client-throttle";
 
 const TOKEN = "internal-api-token-value";
 
@@ -20,10 +20,7 @@ class ProbeController {
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot({
-      ...clientThrottleTracking(TOKEN),
-      throttlers: [{ name: "default", ttl: 60_000, limit: 2 }],
-    }),
+    ThrottlerModule.forRoot(createClientThrottleOptions(TOKEN, { publicLimit: 2, ssrLimit: 4 })),
   ],
   controllers: [ProbeController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
@@ -55,6 +52,7 @@ describe("client throttle behind a trusted proxy", () => {
     forwardedFor?: string;
     connectingIp?: string;
     token?: string;
+    client?: string;
   }) {
     const headers: Record<string, string> = {};
     if (options.forwardedFor) {
@@ -65,6 +63,9 @@ describe("client throttle behind a trusted proxy", () => {
     }
     if (options.token) {
       headers[INTERNAL_API_HEADER] = options.token;
+    }
+    if (options.client) {
+      headers[INTERNAL_CLIENT_HEADER] = options.client;
     }
     return app.getHttpAdapter().getInstance().inject({
       method: "GET",
@@ -149,21 +150,79 @@ describe("client throttle behind a trusted proxy", () => {
     expect(blocked.statusCode).toBe(429);
   });
 
-  it("skips the limit for a direct loopback call and for the internal token", async () => {
+  it("skips the limit for a direct loopback call", async () => {
     for (let attempt = 0; attempt < 4; attempt += 1) {
       expect((await hit({ remoteAddress: "127.0.0.1" })).statusCode).toBe(200);
     }
+  });
 
+  it("limits internal SSR calls per forwarded visitor above the public limit", async () => {
     for (let attempt = 0; attempt < 4; attempt += 1) {
       expect(
         (
           await hit({
             remoteAddress: "10.0.0.12",
-            forwardedFor: "203.0.113.90",
             token: TOKEN,
+            client: "203.0.113.50",
           })
         ).statusCode,
       ).toBe(200);
     }
+
+    expect(
+      (
+        await hit({
+          remoteAddress: "10.0.0.12",
+          token: TOKEN,
+          client: "203.0.113.50",
+        })
+      ).statusCode,
+    ).toBe(429);
+
+    expect(
+      (
+        await hit({
+          remoteAddress: "10.0.0.12",
+          token: TOKEN,
+          client: "203.0.113.51",
+        })
+      ).statusCode,
+    ).toBe(200);
+  });
+
+  it("ignores a forwarded visitor without the internal token", async () => {
+    const base = {
+      remoteAddress: "10.0.0.21",
+      forwardedFor: "198.51.100.77",
+    };
+    expect((await hit({ ...base, client: "203.0.113.60" })).statusCode).toBe(200);
+    expect((await hit({ ...base, client: "203.0.113.61" })).statusCode).toBe(200);
+    expect((await hit({ ...base, client: "203.0.113.62" })).statusCode).toBe(429);
+  });
+
+  it("does not split the SSR bucket on a private forwarded visitor", async () => {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      expect(
+        (
+          await hit({
+            remoteAddress: "10.0.0.22",
+            forwardedFor: "198.51.100.88",
+            token: TOKEN,
+            client: attempt % 2 === 0 ? "10.9.9.1" : "100.64.1.1",
+          })
+        ).statusCode,
+      ).toBe(200);
+    }
+
+    expect(
+      (
+        await hit({
+          remoteAddress: "10.0.0.22",
+          forwardedFor: "198.51.100.88",
+          token: TOKEN,
+          client: "10.9.9.2",
+        })
+      ).statusCode,
+    ).toBe(429);
   });
 });

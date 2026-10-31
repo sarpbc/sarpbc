@@ -5,6 +5,7 @@ import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { parseMatchResults } from "~/utils/parseMatchResult";
 import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { apiFetch } from "~/utils/apiFetch";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
@@ -135,9 +136,7 @@ export function getFetchStatusCode(cause: unknown): number | undefined {
 
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
-    const response = await $fetch<MatchDetailResponse>(`${useApiBase()}/matches/${id}`, {
-      headers: useInternalApiHeaders(),
-    });
+    const response = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
     return {
       ...response,
       match: {

@@ -2,12 +2,11 @@ import type { ProfileMatchListItem } from "@sarpbc/types";
 import type { Team } from "~/types/team";
 import type { Tournament } from "~/types/tournament";
 import type { ContractRole, TeamContract } from "~/types/contract";
+import { apiFetch } from "~/utils/apiFetch";
 
 export async function getTeamFromSlug(slug: string): Promise<Team | null> {
-  const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/slug/${slug}`, {
+  const res = await apiFetch<{ team?: Team }>(`/team/slug/${slug}`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
   });
 
   return res.team || null;
@@ -40,10 +39,8 @@ export async function getAllTeams(query?: {
     params.name = query.search;
   }
 
-  const res = await $fetch<{ teams?: Team[]; count?: number }>(`${useApiBase()}/team`, {
+  const res = await apiFetch<{ teams?: Team[]; count?: number }>(`/team`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
     params,
   });
 
@@ -53,10 +50,8 @@ export async function getAllTeams(query?: {
 
 export async function syncTeamFromPandascore(): Promise<void> {
   try {
-    await $fetch(`${useApiBase()}/team/sync`, {
+    await apiFetch(`/team/sync`, {
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error syncing team:", error);
@@ -64,47 +59,33 @@ export async function syncTeamFromPandascore(): Promise<void> {
 }
 
 export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
-  const res = await $fetch<{ contracts?: TeamContract[] }>(
-    `${useApiBase()}/team/${teamId}/contract`,
-    {
-      method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
-    },
-  );
+  const res = await apiFetch<{ contracts?: TeamContract[] }>(`/team/${teamId}/contract`, {
+    method: "GET",
+  });
 
   return res.contracts ?? [];
 }
 export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
-  const res = await $fetch<{ trophies?: Tournament[] }>(`${useApiBase()}/team/${teamId}/trophies`, {
+  const res = await apiFetch<{ trophies?: Tournament[] }>(`/team/${teamId}/trophies`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
   });
 
   return res.trophies ?? [];
 }
 
 export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
-  const res = await $fetch<{ tournaments?: Tournament[] }>(
-    `${useApiBase()}/team/${teamId}/tournaments`,
-    {
-      method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
-    },
-  );
+  const res = await apiFetch<{ tournaments?: Tournament[] }>(`/team/${teamId}/tournaments`, {
+    method: "GET",
+  });
 
   return res.tournaments ?? [];
 }
 
 export async function getTeamMatches(teamId: string): Promise<ProfileMatchListItem[]> {
-  const res = await $fetch<{ matches?: ProfileMatchListItem[] }>(
-    `${useApiBase()}/tournaments/matches/team/${teamId}`,
+  const res = await apiFetch<{ matches?: ProfileMatchListItem[] }>(
+    `/tournaments/matches/team/${teamId}`,
     {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     },
   );
 
@@ -113,10 +94,8 @@ export async function getTeamMatches(teamId: string): Promise<ProfileMatchListIt
 
 export async function getTeamById(id: string): Promise<Team | null> {
   try {
-    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/${id}`, {
+    const res = await apiFetch<{ team?: Team }>(`/team/${id}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
     return res.team || null;
   } catch (error) {
@@ -131,10 +110,8 @@ export async function createTeam(body: {
   imageUrl?: string;
 }): Promise<Team | null> {
   try {
-    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team`, {
+    const res = await apiFetch<{ team?: Team }>(`/team`, {
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       body,
     });
     return res.team || null;
@@ -153,10 +130,8 @@ export async function updateTeam(
   },
 ): Promise<Team | null> {
   try {
-    const res = await $fetch<{ team?: Team }>(`${useApiBase()}/team/${id}`, {
+    const res = await apiFetch<{ team?: Team }>(`/team/${id}`, {
       method: "PATCH",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       body,
     });
     return res.team || null;
@@ -168,10 +143,8 @@ export async function updateTeam(
 
 export async function deleteTeam(id: string): Promise<void> {
   try {
-    await $fetch(`${useApiBase()}/team/${id}`, {
+    await apiFetch(`/team/${id}`, {
       method: "DELETE",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error deleting team:", error);
@@ -189,15 +162,10 @@ export async function createTeamContract(
   },
 ): Promise<TeamContract | null> {
   try {
-    const res = await $fetch<{ contract?: TeamContract }>(
-      `${useApiBase()}/team/${teamId}/contract`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: useInternalApiHeaders(),
-        body,
-      },
-    );
+    const res = await apiFetch<{ contract?: TeamContract }>(`/team/${teamId}/contract`, {
+      method: "POST",
+      body,
+    });
     return res.contract || null;
   } catch (error) {
     console.error("Error creating team contract:", error);
@@ -216,12 +184,10 @@ export async function updateTeamContract(
   },
 ): Promise<TeamContract | null> {
   try {
-    const res = await $fetch<{ contract?: TeamContract }>(
-      `${useApiBase()}/team/${teamId}/contract/${contractId}`,
+    const res = await apiFetch<{ contract?: TeamContract }>(
+      `/team/${teamId}/contract/${contractId}`,
       {
         method: "PATCH",
-        credentials: "include",
-        headers: useInternalApiHeaders(),
         body,
       },
     );
@@ -234,10 +200,8 @@ export async function updateTeamContract(
 
 export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
   try {
-    await $fetch(`${useApiBase()}/team/${teamId}/contract/${contractId}`, {
+    await apiFetch(`/team/${teamId}/contract/${contractId}`, {
       method: "DELETE",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error deleting team contract:", error);

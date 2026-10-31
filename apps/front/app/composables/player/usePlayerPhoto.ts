@@ -1,5 +1,6 @@
 import type { MaybeRef } from "vue";
 import { toValue } from "vue";
+import { createApiClient } from "~/utils/apiFetch";
 
 interface AddPlayerPhotoDto {
   photoUrl: string;
@@ -19,11 +20,7 @@ interface AddPlayerPhotoResponseDto {
 }
 
 export function usePlayerPhoto() {
-  const $api = $fetch.create({
-    baseURL: useApiBase(),
-    credentials: "include",
-    headers: useInternalApiHeaders(),
-  });
+  const $api = createApiClient();
 
   function getPlayerPhotos(playerId: MaybeRef<string>) {
     return useAsyncData(

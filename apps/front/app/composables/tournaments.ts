@@ -1,6 +1,12 @@
 import type { TournamentDetail, TournamentListItem, TournamentMatchListItem } from "@sarpbc/types";
 import type { TournamentEvent, TournamentPathResponse } from "~/types/tournament";
+import { apiFetch } from "~/utils/apiFetch";
 import { getApiErrorStatus } from "~/utils/apiError";
+
+function withQuery(path: string, params: URLSearchParams): string {
+  const search = params.toString();
+  return search ? `${path}?${search}` : path;
+}
 
 export async function getAllTournaments(query?: {
   limit?: number;
@@ -9,25 +15,24 @@ export async function getAllTournaments(query?: {
   activeOnly?: boolean;
 }): Promise<{ tournaments: TournamentListItem[]; total: number }> {
   const { limit, offset, pickems, activeOnly } = query || {};
-  const url = new URL(`${useApiBase()}/tournaments`);
+  const params = new URLSearchParams();
   if (limit !== undefined) {
-    url.searchParams.set("limit", String(limit));
+    params.set("limit", String(limit));
   }
   if (offset !== undefined) {
-    url.searchParams.set("offset", String(offset));
+    params.set("offset", String(offset));
   }
   if (pickems !== undefined) {
-    url.searchParams.set("pickems", pickems ? "true" : "false");
+    params.set("pickems", pickems ? "true" : "false");
   }
   if (activeOnly) {
-    url.searchParams.set("activeOnly", "true");
+    params.set("activeOnly", "true");
   }
 
-  const res = await $fetch<{ tournaments?: TournamentListItem[]; count?: number }>(url.toString(), {
-    method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
-  });
+  const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
+    withQuery("/tournaments", params),
+    { method: "GET" },
+  );
 
   const tournaments = res.tournaments ?? [];
   return { tournaments, total: res.count ?? tournaments.length };
@@ -40,27 +45,23 @@ export async function getEvents(query: {
   activeOnly?: boolean;
 }): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> {
   const { limit, offset, pickems, activeOnly } = query;
-  const url = new URL(`${useApiBase()}/events`);
+  const params = new URLSearchParams();
   if (limit !== undefined) {
-    url.searchParams.set("limit", String(limit));
+    params.set("limit", String(limit));
   }
   if (offset !== undefined) {
-    url.searchParams.set("offset", String(offset));
+    params.set("offset", String(offset));
   }
   if (pickems !== undefined) {
-    url.searchParams.set("pickems", pickems ? "true" : "false");
+    params.set("pickems", pickems ? "true" : "false");
   }
   if (activeOnly) {
-    url.searchParams.set("activeOnly", "true");
+    params.set("activeOnly", "true");
   }
 
-  const res = await $fetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
-    url.toString(),
-    {
-      method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
-    },
+  const res = await apiFetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
+    withQuery("/events", params),
+    { method: "GET" },
   );
 
   return { events: res.events, total: res.count };
@@ -73,10 +74,8 @@ export async function resolveTournamentPath(
   const path = segments.map((segment) => encodeURIComponent(segment)).join("/");
 
   try {
-    return await $fetch<TournamentPathResponse>(`${useApiBase()}/events/resolve/${path}`, {
+    return await apiFetch<TournamentPathResponse>(`/events/resolve/${path}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (cause) {
     if (getApiErrorStatus(cause) === 404) {
@@ -87,13 +86,9 @@ export async function resolveTournamentPath(
 }
 
 export async function getTournamentById(id: string): Promise<TournamentDetail | null> {
-  const url = new URL(`${useApiBase()}/tournaments/${id}`);
-
   try {
-    const res = await $fetch<{ tournament?: TournamentDetail }>(url.toString(), {
+    const res = await apiFetch<{ tournament?: TournamentDetail }>(`/tournaments/${id}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
 
     return res.tournament ?? null;
@@ -107,12 +102,8 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
 
 export async function syncTournament(tournamentId: string): Promise<boolean> {
   try {
-    const url = new URL(`${useApiBase()}/tournaments/${tournamentId}/sync`);
-
-    await $fetch(url.toString(), {
+    await apiFetch(`/tournaments/${tournamentId}/sync`, {
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
     return true;
   } catch (error) {
@@ -125,13 +116,10 @@ export async function getTournamentMatches(
   tournamentId: string,
 ): Promise<TournamentMatchListItem[]> {
   try {
-    const url = new URL(`${useApiBase()}/tournaments/${tournamentId}/matches`);
-
-    const res = await $fetch<{ matches?: TournamentMatchListItem[] }>(url.toString(), {
-      method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
-    });
+    const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
+      `/tournaments/${tournamentId}/matches`,
+      { method: "GET" },
+    );
 
     return res.matches ?? [];
   } catch (error) {
@@ -145,11 +133,9 @@ export async function setTournamentPickemsEnabled(
   enabled: boolean,
 ): Promise<boolean> {
   try {
-    await $fetch(`${useApiBase()}/tournaments/${tournamentId}/enable-pickems`, {
+    await apiFetch(`/tournaments/${tournamentId}/enable-pickems`, {
       body: { enabled },
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
     return true;
   } catch (error) {
@@ -160,10 +146,8 @@ export async function setTournamentPickemsEnabled(
 
 export async function syncTournamentAdditions(): Promise<boolean> {
   try {
-    await $fetch(`${useApiBase()}/tournaments/sync/additions`, {
+    await apiFetch("/tournaments/sync/additions", {
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
     return true;
   } catch (error) {
@@ -174,11 +158,9 @@ export async function syncTournamentAdditions(): Promise<boolean> {
 
 export async function setMatchWinner(matchId: string, winnerId: string): Promise<boolean> {
   try {
-    await $fetch(`${useApiBase()}/tournaments/matches/${matchId}/winner`, {
+    await apiFetch(`/tournaments/matches/${matchId}/winner`, {
       method: "PUT",
       body: { winnerId },
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
     return true;
   } catch (error) {

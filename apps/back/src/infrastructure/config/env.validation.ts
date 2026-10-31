@@ -46,6 +46,5 @@ export function validateEnv(config: ProcessEnv) {
   return {
     ...config,
     ...parsed.data,
-    INTERNAL_API_TOKEN: parsed.data.INTERNAL_API_TOKEN,
   };
 }

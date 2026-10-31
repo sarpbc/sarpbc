@@ -48,11 +48,10 @@ Use `composables/seo.ts` patterns when they exist. Accurate `<title>` per contex
 ## Auth & API Calls
 
 ```vue
-await $fetch(`${useApiBase()}/resource`, { method: "POST", body: payload, credentials: "include",
-headers: useInternalApiHeaders(), });
+await apiFetch("/resource", { method: "POST", body: payload });
 ```
 
-`useApiBase()` is the public API origin in the browser and `runtimeConfig.apiBaseServer` during SSR when `NUXT_API_BASE_SERVER` is set. Keep `runtimeConfig.public.apiBase` for URLs the browser must request itself (OAuth redirects, images).
+`apiFetch` uses the public API origin in the browser and `runtimeConfig.apiBaseServer` during SSR when `NUXT_API_BASE_SERVER` is set. Keep `runtimeConfig.public.apiBase` for URLs the browser must request itself (OAuth redirects, images).
 
 - Session via cookies; `getProfile()` in composables
 - On error: `useToast()` with actionable message from `error.data?.message`

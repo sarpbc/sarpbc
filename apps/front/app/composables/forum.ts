@@ -16,10 +16,8 @@ import {
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
   try {
-    const res = await $fetch<{ recentPosts: PostPreview[] }>(`${useApiBase()}/forum/preview`, {
+    const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
 
     return res.recentPosts || [];
@@ -31,10 +29,8 @@ export async function getRecentForumActivities(): Promise<PostPreview[]> {
 
 export async function getTopics(): Promise<Topic[]> {
   try {
-    const res = await $fetch<{ topics: Topic[] }>(`${useApiBase()}/forum/topics`, {
+    const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
 
     return res.topics || [];
@@ -45,10 +41,8 @@ export async function getTopics(): Promise<Topic[]> {
 }
 
 export async function getPosts(): Promise<PostShort[]> {
-  const res = await $fetch<{ posts: PostShort[] }>(`${useApiBase()}/posts`, {
+  const res = await apiFetch<{ posts: PostShort[] }>(`/posts`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
   });
 
   return res.posts || [];
@@ -56,10 +50,8 @@ export async function getPosts(): Promise<PostShort[]> {
 
 export async function getPostById(id: string): Promise<ForumPost | null> {
   try {
-    const res = await $fetch<{ post: ForumPost }>(`${useApiBase()}/posts/${id}`, {
+    const res = await apiFetch<{ post: ForumPost }>(`/posts/${id}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
 
     return res.post || null;

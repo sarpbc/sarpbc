@@ -5,6 +5,7 @@ import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
 import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 import { getFetchStatusCode } from "./match-og";
+import { apiFetch } from "~/utils/apiFetch";
 
 interface TournamentResponse {
   tournament?: TournamentDetail;
@@ -45,9 +46,7 @@ function rethrowMappedFetchError(
 
 export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
-    const res = await $fetch<MatchDetailResponse>(`${useApiBase()}/matches/${id}`, {
-      headers: useInternalApiHeaders(),
-    });
+    const res = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
     return res.match;
   } catch (cause) {
     rethrowMappedFetchError(cause, "Match not found", "Could not load match for calendar");
@@ -62,12 +61,8 @@ export async function fetchTournamentForCalendar(
 
   try {
     [tournamentRes, matchesRes] = await Promise.all([
-      $fetch<TournamentResponse>(`${useApiBase()}/tournaments/${id}`, {
-        headers: useInternalApiHeaders(),
-      }),
-      $fetch<TournamentMatchesResponse>(`${useApiBase()}/tournaments/${id}/matches`, {
-        headers: useInternalApiHeaders(),
-      }),
+      apiFetch<TournamentResponse>(`/tournaments/${id}`),
+      apiFetch<TournamentMatchesResponse>(`/tournaments/${id}/matches`),
     ]);
   } catch (cause) {
     rethrowMappedFetchError(

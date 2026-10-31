@@ -1,5 +1,6 @@
 import type { MaybeRef } from "vue";
 import type { ContractRole, PlayerContract } from "~/types/contract";
+import { createApiClient } from "~/utils/apiFetch";
 
 export interface CreatePlayerContractDto {
   teamId: string;
@@ -23,11 +24,7 @@ interface UpsertPlayerContractResponseDto {
 }
 
 export function usePlayerContract() {
-  const $api = $fetch.create({
-    baseURL: useApiBase(),
-    credentials: "include",
-    headers: useInternalApiHeaders(),
-  });
+  const $api = createApiClient();
 
   function getPlayerContracts(playerId: MaybeRef<string>) {
     const playerIdRef = toRef(playerId);

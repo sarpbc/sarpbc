@@ -1,5 +1,6 @@
 import type { MaybeRef } from "vue";
 import type { Player } from "~/types/player";
+import { createApiClient } from "~/utils/apiFetch";
 
 interface GetAllPlayersQueryDto {
   limit?: number;
@@ -52,11 +53,7 @@ interface PlayerMutationResponseDto {
 }
 
 export function usePlayer() {
-  const $api = $fetch.create({
-    baseURL: useApiBase(),
-    credentials: "include",
-    headers: useInternalApiHeaders(),
-  });
+  const $api = createApiClient();
 
   function getPlayerFromSlug(slug: MaybeRef<string>) {
     const slugRef = toRef(slug);

@@ -2,6 +2,7 @@ import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
 import type { TournamentListItem } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
+import { apiFetch } from "~/utils/apiFetch";
 
 export type UserPickemPick = {
   match: string;
@@ -32,12 +33,10 @@ export async function getActivePickemTournaments(limit = 1): Promise<TournamentL
 }
 
 export async function getUserPickemsForTournament(tournamentId: string): Promise<UserPickemPick[]> {
-  const res = await $fetch<{
+  const res = await apiFetch<{
     picks?: UserPickemPick[];
-  }>(`${useApiBase()}/pickem/tournament/${tournamentId}/user/picks`, {
+  }>(`/pickem/tournament/${tournamentId}/user/picks`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
   });
 
   return (res.picks ?? []).map((pick) => ({
@@ -52,12 +51,10 @@ export async function updatePickemForMatch(
   matchId: string,
   pickedParticipantId: string,
 ): Promise<void> {
-  const res = await $fetch<{ success?: boolean; error?: string }>(
-    `${useApiBase()}/pickem/match/${matchId}/pick`,
+  const res = await apiFetch<{ success?: boolean; error?: string }>(
+    `/pickem/match/${matchId}/pick`,
     {
       method: "POST",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       body: {
         pickedParticipantId,
       },
@@ -72,12 +69,10 @@ export async function updatePickemForMatch(
 export async function getPickemLeaderboard(
   tournamentId: string,
 ): Promise<PickemLeaderboardEntry[]> {
-  const res = await $fetch<{ leaderboard?: PickemLeaderboardEntry[] }>(
-    `${useApiBase()}/pickem/tournament/${tournamentId}/leaderboard`,
+  const res = await apiFetch<{ leaderboard?: PickemLeaderboardEntry[] }>(
+    `/pickem/tournament/${tournamentId}/leaderboard`,
     {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     },
   );
   return res.leaderboard ?? [];
@@ -86,14 +81,9 @@ export async function getPickemLeaderboard(
 export async function getPickemPersonalRanking(
   tournamentId: string,
 ): Promise<PickemPersonalRanking> {
-  return await $fetch<PickemPersonalRanking>(
-    `${useApiBase()}/pickem/tournament/${tournamentId}/me`,
-    {
-      method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
-    },
-  );
+  return await apiFetch<PickemPersonalRanking>(`/pickem/tournament/${tournamentId}/me`, {
+    method: "GET",
+  });
 }
 
 export function pickemApiErrorMessage(cause: unknown, fallback: string): string {

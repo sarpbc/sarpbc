@@ -1,4 +1,5 @@
 import type { NewsType } from "@sarpbc/types";
+import { apiFetch } from "~/utils/apiFetch";
 
 export type NewsArticleListItem = {
   id: string;
@@ -40,11 +41,9 @@ export async function createNewsArticle(body: {
   type?: NewsType;
 }): Promise<NewsArticle | null> {
   try {
-    return await $fetch<NewsArticle>(`${useApiBase()}/news`, {
+    return await apiFetch<NewsArticle>(`/news`, {
       method: "POST",
       body,
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error creating news article:", error);
@@ -58,20 +57,16 @@ export async function getNewsArticles(
   locale?: string,
   type?: NewsType,
 ): Promise<PaginatedNewsArticles> {
-  return $fetch<PaginatedNewsArticles>(`${useApiBase()}/news`, {
+  return apiFetch<PaginatedNewsArticles>(`/news`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
     query: type ? { page, limit, locale, type } : { page, limit, locale },
   });
 }
 
 export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek | null> {
   try {
-    return await $fetch<NewsWeek>(`${useApiBase()}/news/weeks/${week}`, {
+    return await apiFetch<NewsWeek>(`/news/weeks/${week}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       query: { locale },
     });
   } catch (error) {
@@ -82,10 +77,8 @@ export async function getNewsWeek(week: string, locale?: string): Promise<NewsWe
 
 export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<PaginatedNewsArticles> {
   try {
-    const res = await $fetch<PaginatedNewsArticles>(`${useApiBase()}/news/admin`, {
+    const res = await apiFetch<PaginatedNewsArticles>(`/news/admin`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       query: { page, limit },
     });
 
@@ -97,20 +90,16 @@ export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<Pagina
 }
 
 export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {
-  return $fetch<NewsArticle>(`${useApiBase()}/news/${slug}`, {
+  return apiFetch<NewsArticle>(`/news/${slug}`, {
     method: "GET",
-    credentials: "include",
-    headers: useInternalApiHeaders(),
     query: { locale },
   });
 }
 
 export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | null> {
   try {
-    const res = await $fetch<NewsArticle>(`${useApiBase()}/news/admin/${slug}`, {
+    const res = await apiFetch<NewsArticle>(`/news/admin/${slug}`, {
       method: "GET",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
 
     return res;
@@ -130,11 +119,9 @@ export async function editNewsArticle(
   },
 ): Promise<NewsArticle | null> {
   try {
-    return await $fetch<NewsArticle>(`${useApiBase()}/news/${slug}`, {
+    return await apiFetch<NewsArticle>(`/news/${slug}`, {
       method: "PATCH",
       body,
-      credentials: "include",
-      headers: useInternalApiHeaders(),
     });
   } catch (error) {
     console.error("Error editing news article:", error);
@@ -144,10 +131,8 @@ export async function editNewsArticle(
 
 export async function publishNewsArticle(slug: string): Promise<boolean> {
   try {
-    await $fetch(`${useApiBase()}/news/${slug}/publish`, {
+    await apiFetch(`/news/${slug}/publish`, {
       method: "PATCH",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       body: {},
     });
 
@@ -160,10 +145,8 @@ export async function publishNewsArticle(slug: string): Promise<boolean> {
 
 export async function unpublishNewsArticle(slug: string): Promise<boolean> {
   try {
-    await $fetch(`${useApiBase()}/news/${slug}/unpublish`, {
+    await apiFetch(`/news/${slug}/unpublish`, {
       method: "PATCH",
-      credentials: "include",
-      headers: useInternalApiHeaders(),
       body: {},
     });
 

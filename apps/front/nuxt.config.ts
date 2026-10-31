@@ -198,9 +198,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     indexnowKey: "",
-    // Overridden at runtime by NUXT_API_BASE_SERVER. Empty keeps the public apiBase.
     apiBaseServer: "",
-    // Overridden at runtime by NUXT_API_INTERNAL_TOKEN. Server-only; never sent to the browser.
     apiInternalToken: "",
     public: {
       apiBase: apiBase,
