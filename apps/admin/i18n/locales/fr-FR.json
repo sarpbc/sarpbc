@@ -4,7 +4,11 @@
     "contractRole": {
       "active": "Actif",
       "benched": "Remplaçant",
-      "loaned": "Prêté"
+      "loaned": "Prêté",
+      "coach": "Coach",
+      "assistant_coach": "Coach adjoint",
+      "analyst": "Analyste",
+      "manager": "Manager"
     }
   },
   "imageUpload": {
@@ -202,7 +206,6 @@
         "status": "Statut",
         "name": "Nom",
         "nationality": "Pays",
-        "role": "Rôle",
         "location": "Pays",
         "imageUrl": "Logo",
         "active": "Active",
@@ -218,11 +221,6 @@
         "active": "Actif",
         "free_agent": "Agent libre",
         "retired": "Retraité"
-      },
-      "roles": {
-        "player": "Joueur",
-        "coach": "Coach",
-        "substitute": "Remplaçant"
       },
       "values": {
         "yes": "Oui",

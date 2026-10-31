@@ -93,6 +93,10 @@ const contractRoleOptions: { label: string; value: ContractRole }[] = [
   { label: t("common.contractRole.active"), value: "active" },
   { label: t("common.contractRole.benched"), value: "benched" },
   { label: t("common.contractRole.loaned"), value: "loaned" },
+  { label: t("common.contractRole.coach"), value: "coach" },
+  { label: t("common.contractRole.assistant_coach"), value: "assistant_coach" },
+  { label: t("common.contractRole.analyst"), value: "analyst" },
+  { label: t("common.contractRole.manager"), value: "manager" },
 ];
 
 const contractForm = ref<{
