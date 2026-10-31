@@ -1,0 +1,35 @@
+name: Pull Request Names
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  git-names:
+    name: Branch and commit names
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Test naming checks
+        run: node --test scripts/check-git-names.test.mjs
+
+      - name: Check branch, commits and PR title
+        run: node scripts/check-git-names.mjs pr
