@@ -3,7 +3,6 @@
 .cursor
 .vscode
 .claude*
-.claude-weekend-logs
 docs
 tools
 **/node_modules
