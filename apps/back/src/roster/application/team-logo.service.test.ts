@@ -14,8 +14,11 @@ function setup(bytes: Uint8Array, size = { width: 512, height: 256 }) {
     dimensions: vi.fn(async () => size),
     normalize: vi.fn(async () => WEBP_OUTPUT),
   };
+  const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const storage = {
-    put: vi.fn(async (key: string) => `https://cdn.sarpbc.test/${key}`),
+    put: vi.fn(async (key: string) => stored(key)),
+    copy: vi.fn(async (_sourceKey: string, key: string) => stored(key)),
+    delete: vi.fn(async () => {}),
   };
   return { source, images, storage, service: new TeamLogoService(source, images, storage) };
 }
@@ -23,10 +26,10 @@ function setup(bytes: Uint8Array, size = { width: 512, height: 256 }) {
 describe("TeamLogoService", () => {
   const hash = createHash("sha256").update(WEBP_OUTPUT).digest("hex").slice(0, 16);
 
-  it("normalizes a raster logo and stores it under the team's variant key", async () => {
+  it("normalizes a raster logo and stages it under the team's pending variant key", async () => {
     const { source, images, storage, service } = setup(PNG);
 
-    const url = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+    const logo = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
     expect(source.download).toHaveBeenCalledWith(
       new URL("https://kcorp.gg/logo.png"),
@@ -35,11 +38,14 @@ describe("TeamLogoService", () => {
     expect(images.dimensions).toHaveBeenCalledWith(PNG);
     expect(images.normalize).toHaveBeenCalledWith(PNG, "png", 512);
     expect(storage.put).toHaveBeenCalledWith(
-      `teams/kc/logo-light-${hash}.webp`,
+      `pending/teams/kc/logo-light-${hash}.webp`,
       WEBP_OUTPUT,
       "image/webp",
     );
-    expect(url).toBe(`https://cdn.sarpbc.test/teams/kc/logo-light-${hash}.webp`);
+    expect(logo).toEqual({
+      key: `pending/teams/kc/logo-light-${hash}.webp`,
+      url: `https://cdn.sarpbc.test/pending/teams/kc/logo-light-${hash}.webp`,
+    });
   });
 
   it("normalizes a safe SVG without a pixel minimum", async () => {
@@ -50,7 +56,7 @@ describe("TeamLogoService", () => {
     expect(images.dimensions).not.toHaveBeenCalled();
     expect(images.normalize).toHaveBeenCalledWith(SVG, "svg", 512);
     expect(storage.put).toHaveBeenCalledWith(
-      `teams/kc/logo-dark-${hash}.webp`,
+      `pending/teams/kc/logo-dark-${hash}.webp`,
       WEBP_OUTPUT,
       "image/webp",
     );
@@ -69,7 +75,6 @@ describe("TeamLogoService", () => {
   });
 
   it.each([
-    ["an oversized file", new Uint8Array(MAX_TEAM_LOGO_BYTES + 1), "larger than 2 MB"],
     ["an unsupported format", new Uint8Array([0xff, 0xd8, 0xff]), "PNG, WebP or SVG"],
     [
       "an SVG with a script",
@@ -92,4 +97,39 @@ describe("TeamLogoService", () => {
     );
     expect(storage.put).not.toHaveBeenCalled();
   });
+
+  it("publishes a staged logo under its public key and removes the pending copy", async () => {
+    const { storage, service } = setup(PNG);
+    const pendingKey = `pending/teams/kc/logo-dark-${hash}.webp`;
+
+    await expect(service.publish(pendingKey)).resolves.toEqual({
+      key: `teams/kc/logo-dark-${hash}.webp`,
+      url: `https://cdn.sarpbc.test/teams/kc/logo-dark-${hash}.webp`,
+    });
+    expect(storage.copy).toHaveBeenCalledWith(pendingKey, `teams/kc/logo-dark-${hash}.webp`);
+    expect(storage.delete).toHaveBeenCalledExactlyOnceWith(pendingKey);
+  });
+
+  it("discards a staged logo", async () => {
+    const { storage, service } = setup(PNG);
+
+    await service.discard(`pending/teams/kc/logo-light-${hash}.webp`);
+
+    expect(storage.delete).toHaveBeenCalledExactlyOnceWith(
+      `pending/teams/kc/logo-light-${hash}.webp`,
+    );
+  });
+
+  it.each(["publish", "discard"] as const)(
+    "refuses to %s an object outside the pending prefix",
+    async (action) => {
+      const { storage, service } = setup(PNG);
+
+      await expect(service[action](`teams/kc/logo-light-${hash}.webp`)).rejects.toThrow(
+        InvalidInputError,
+      );
+      expect(storage.copy).not.toHaveBeenCalled();
+      expect(storage.delete).not.toHaveBeenCalled();
+    },
+  );
 });

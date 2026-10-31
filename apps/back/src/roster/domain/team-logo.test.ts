@@ -3,11 +3,12 @@ import { InvalidInputError } from "../../common/domain/errors";
 import {
   detectTeamLogoFormat,
   isLiquipediaHost,
+  pendingTeamLogoKey,
+  publishedTeamLogoKey,
   requireSafeSvg,
   requireTeamLogoDimensions,
   requireTeamLogoUrl,
   teamLogoField,
-  teamLogoKey,
 } from "./team-logo";
 
 const text = (value: string) => new TextEncoder().encode(value);
@@ -93,8 +94,14 @@ describe("team logo rules", () => {
     expect(isLiquipediaHost("notliquipedia.net")).toBe(false);
   });
 
-  it("stores each variant under a content-addressed key", () => {
-    expect(teamLogoKey("kc", "dark", "0123abcd")).toBe("teams/kc/logo-dark-0123abcd.webp");
+  it("stages each variant under a pending content-addressed key until it is published", () => {
+    const pending = pendingTeamLogoKey("kc", "dark", "0123abcd");
+
+    expect(pending).toBe("pending/teams/kc/logo-dark-0123abcd.webp");
+    expect(publishedTeamLogoKey(pending)).toBe("teams/kc/logo-dark-0123abcd.webp");
+    expect(() => publishedTeamLogoKey("teams/kc/logo-dark-0123abcd.webp")).toThrow(
+      InvalidInputError,
+    );
     expect(teamLogoField("light")).toBe("logoLightUrl");
     expect(teamLogoField("dark")).toBe("logoDarkUrl");
   });

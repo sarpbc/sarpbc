@@ -89,6 +89,13 @@ export interface TeamLogoImages {
   normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number): Promise<Uint8Array>;
 }
 
+export interface StoredTeamLogo {
+  key: string;
+  url: string;
+}
+
 export interface TeamLogoStorage {
-  put(key: string, bytes: Uint8Array, contentType: "image/webp"): Promise<string>;
+  put(key: string, bytes: Uint8Array, contentType: "image/webp"): Promise<StoredTeamLogo>;
+  copy(sourceKey: string, key: string): Promise<StoredTeamLogo>;
+  delete(key: string): Promise<void>;
 }

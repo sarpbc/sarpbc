@@ -46,6 +46,7 @@ export type RosterChange =
       teamId: string;
       variant: TeamLogoVariant;
       imageUrl: string;
+      logoKey: string;
       logoUrl: string;
     }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
