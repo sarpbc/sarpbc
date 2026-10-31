@@ -13,9 +13,9 @@ export function resolveThemedLogoUrl(
   const dark = present(logo?.logoDarkUrl);
   const image = present(logo?.imageUrl);
   if (colorMode === "dark") {
-    return dark ?? light ?? present(logo?.darkModeImageUrl) ?? image;
+    return dark ?? present(logo?.darkModeImageUrl) ?? light ?? image;
   }
-  return light ?? dark ?? image;
+  return light ?? image ?? dark;
 }
 
 function present(url: string | null | undefined): string | undefined {
