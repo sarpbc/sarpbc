@@ -49,6 +49,14 @@ Keep the `CI` status check required in GitHub's branch protection for `main` to 
 
 Run `pnpm test:git-names` to test the naming checks.
 
+## CI and releases
+
+The `CI` workflow runs on pull requests to `main` and on every push to `main`. On `main`, every job must run and pass. Title and description edits do not rerun `CI`. A stacked pull request retargeted to `main` only receives an `edited` event, so its `CI` check does not appear until you push a commit or close and reopen it.
+
+The backend job runs `pnpm --filter back test:migrations`. On pull requests it compares migrations with the base branch. On pushes to `main` it compares them with the previous `main` commit, so a migration merged out of timestamp order turns `main` red.
+
+`Create Release Tag` tags a `main` commit only after its `CI` push run succeeds. Dokploy deploys from these tags. Running the workflow manually is an escape hatch for a missed tag. It still requires a successful `CI` check on the dispatched commit and fails otherwise.
+
 ## Start here
 
 | You want to…                      | Go to…                                                                                                         |

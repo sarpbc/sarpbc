@@ -9,19 +9,32 @@ on:
 
 permissions:
   contents: write
-
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
+  checks: read
 
 jobs:
   release-tag:
     name: Create Dokploy release tag
     runs-on: ubuntu-latest
-    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository)
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
     env:
       SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
+      - name: Require green CI
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          conclusion="$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs?check_name=CI&filter=latest" --jq '[.check_runs[] | select(.app.slug == "github-actions")] | sort_by(.started_at) | last | .conclusion // "missing"')"
+          if [ "$conclusion" != "success" ]; then
+            echo "::error::The CI check for $SHA is '$conclusion', not 'success'. Wait for CI to pass on main before dispatching a release tag."
+            exit 1
+          fi
+          echo "CI passed on $SHA."
+
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
