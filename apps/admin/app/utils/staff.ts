@@ -5,7 +5,11 @@ export { isStaffUser, hasPermission, canModerateComments } from "@sarpbc/utils";
 
 export type PermissionRequirement = StaffPermission | readonly StaffPermission[];
 
-export const ROSTER_PROPOSAL_PERMISSIONS = ["players.manage", "teams.manage"] as const;
+export const ROSTER_PROPOSAL_PERMISSIONS = [
+  "players.manage",
+  "teams.manage",
+  "tournaments.manage",
+] as const;
 
 export function meetsRequirement(
   user: User | null | undefined,
