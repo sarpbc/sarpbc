@@ -271,6 +271,24 @@ describe("news publication notifications", () => {
     expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
   });
 
+  it("stores match blocks in English and French bodies", async () => {
+    const block = ':matches{tournament="a3c5e7f9-1b2d-4f6a-8c0e-2d4f6a8c0e33" limit="3"}';
+    await service.update("old-slug", {
+      content: `Bracket\n\n${block}`,
+      contentFr: `Tableau\n\n${block}`,
+    });
+    expect(article.content).toBe(`Bracket\n\n${block}`);
+    expect(article.contentFr).toBe(`Tableau\n\n${block}`);
+  });
+
+  it("rejects an invalid match block before saving", async () => {
+    await expect(
+      service.update("old-slug", { contentFr: 'Tableau\n\n:matches{team="falcons"}' }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(article.contentFr).toBeNull();
+    expect(articles.save).not.toHaveBeenCalled();
+  });
+
   it("does not notify when committing fails", async () => {
     commit.mockRejectedValueOnce(new Error("Database unavailable"));
     await expect(service.update("old-slug", { title: "New title" })).rejects.toThrow(

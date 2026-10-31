@@ -47,6 +47,8 @@ export interface MatchQueries {
     kind: "upcoming" | "live" | "results",
     options: MatchListQueryOptions,
   ): Promise<[Match[], number]>;
+  page(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions): Promise<Match[]>;
+  byIds(ids: string[]): Promise<Match[]>;
   recentlyEnded(options: { limit?: number; minutesAgo?: number }): Promise<Match[]>;
   detail(ref: EntityRef): Promise<Match | null>;
   recentByTeam(options: {

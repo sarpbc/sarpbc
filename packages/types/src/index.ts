@@ -26,6 +26,9 @@ export type {
   TournamentListItem,
   TournamentMatchListItem,
   DataSource,
+  MatchBlockItem,
+  MatchBlockState,
+  MatchBlocksResponse,
   MatchVod,
   MatchVodSource,
 } from "./competition";

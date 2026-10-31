@@ -1,6 +1,6 @@
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
-import { excerptFromContent } from "../domain/news-content.util";
+import { assertValidMatchBlocks, excerptFromContent } from "../domain/news-content.util";
 import {
   hasFrenchTranslation,
   localizedNewsFields,
@@ -69,6 +69,11 @@ export interface NewsWeekResponse {
   start: Date;
   end: Date;
   items: NewsArticleResponse[];
+}
+
+function newsContent(value: string): string {
+  assertValidMatchBlocks(value);
+  return sanitizeNewsHtml(value);
 }
 
 export class NewsService {
@@ -178,9 +183,9 @@ export class NewsService {
         id: this.id(),
         updatedAt: null,
         title: sanitizePlainText(dto.title),
-        content: sanitizeNewsHtml(dto.content),
+        content: newsContent(dto.content),
         titleFr: dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null,
-        contentFr: dto.contentFr != null ? sanitizeNewsHtml(dto.contentFr) : null,
+        contentFr: dto.contentFr != null ? newsContent(dto.contentFr) : null,
         author,
         slug,
         isDraft: true,
@@ -349,13 +354,13 @@ export class NewsService {
         article.title = sanitizePlainText(dto.title);
       }
       if (dto.content !== undefined) {
-        article.content = sanitizeNewsHtml(dto.content);
+        article.content = newsContent(dto.content);
       }
       if (dto.titleFr !== undefined) {
         article.titleFr = dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null;
       }
       if (dto.contentFr !== undefined) {
-        article.contentFr = dto.contentFr != null ? sanitizeNewsHtml(dto.contentFr) : null;
+        article.contentFr = dto.contentFr != null ? newsContent(dto.contentFr) : null;
       }
       if (dto.imageUrl !== undefined) {
         article.imageUrl = dto.imageUrl ?? null;

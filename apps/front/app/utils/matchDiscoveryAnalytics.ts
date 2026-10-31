@@ -10,6 +10,7 @@ export const MATCH_DISCOVERY_SOURCES = [
   "home_strip",
   "lateral_bar",
   "tournament_hub",
+  "news_article",
 ] as const;
 
 export type MatchDiscoverySource = (typeof MATCH_DISCOVERY_SOURCES)[number];

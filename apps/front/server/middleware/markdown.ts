@@ -52,7 +52,15 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
     plugins: [
       frontmatterPlugin(),
       filterPlugin({
-        exclude: ["header", "footer", "form", "script", "style", "noscript"],
+        exclude: [
+          "header",
+          "footer",
+          "form",
+          "script",
+          "style",
+          "noscript",
+          "[data-markdown-exclude]",
+        ],
       }),
     ],
   });

@@ -98,6 +98,7 @@ describe("API smoke (e2e)", () => {
     findUpcomingAndCount: vi.fn(),
     findLiveAndCount: vi.fn(),
     findResultsAndCount: vi.fn(),
+    findBlocks: vi.fn(async (blocks: unknown[]) => blocks.map(() => [grandFinal])),
   };
 
   const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
@@ -134,7 +135,10 @@ describe("API smoke (e2e)", () => {
         { provide: NewsService, useValue: newsService },
         { provide: TweetEmbedService, useValue: { embed: vi.fn() } },
         { provide: TweetImageService, useValue: new TweetImageService(tweetImages) },
-        { provide: ReplyService, useValue: { countByTargetIds: vi.fn() } },
+        {
+          provide: ReplyService,
+          useValue: { countByTargetIds: vi.fn(async () => new Map([[grandFinal.id, 2]])) },
+        },
         { provide: MatchService, useValue: matchService },
         { provide: TransferService, useValue: transferService },
         { provide: TeamService, useValue: { findBySlug: vi.fn() } },
@@ -243,6 +247,28 @@ describe("API smoke (e2e)", () => {
     await request(app.getHttpServer()).get("/matches/missing").expect(404);
     await request(app.getHttpServer()).get("/matches/0").expect(404);
     await request(app.getHttpServer()).get("/matches/-4").expect(404);
+  });
+
+  it("resolves article match blocks in one batched call", async () => {
+    const team = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
+    const response = await request(app.getHttpServer())
+      .get(`/matches/blocks?block=match:${grandFinal.id}&block=team:${team}:5`)
+      .expect(200);
+    expect(matchService.findBlocks).toHaveBeenLastCalledWith([
+      { kind: "match", id: grandFinal.id },
+      { kind: "team", id: team, limit: 5 },
+    ]);
+    expect(Object.keys(response.body.blocks)).toEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
+    expect(response.body.blocks[`team:${team}:5`][0]).toMatchObject({
+      publicId: 7250,
+      state: "upcoming",
+      commentCount: 2,
+    });
+  });
+
+  it("rejects missing or malformed match blocks", async () => {
+    await request(app.getHttpServer()).get("/matches/blocks").expect(400);
+    await request(app.getHttpServer()).get("/matches/blocks?block=team:falcons:5").expect(400);
   });
 
   it("lists transfers with coerced pagination and period filters", async () => {

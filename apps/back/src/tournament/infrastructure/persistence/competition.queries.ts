@@ -151,6 +151,18 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
         : repo.findResultsAndCount(options));
     return [rows.map(toMatch), count] as [ReturnType<typeof toMatch>[], number];
   }
+  async page(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions) {
+    const repo = this.em.getRepository<Match, MatchRepository>(Match);
+    const rows = await (kind === "upcoming"
+      ? repo.findUpcoming(options)
+      : kind === "live"
+        ? repo.findLive(options)
+        : repo.findResults(options));
+    return rows.map(toMatch);
+  }
+  async byIds(ids: string[]) {
+    return (await this.em.getRepository<Match, MatchRepository>(Match).findByIds(ids)).map(toMatch);
+  }
   async recentlyEnded(options: { limit?: number; minutesAgo?: number }) {
     return (
       await this.em.getRepository<Match, MatchRepository>(Match).findRecentlyEnded(options)

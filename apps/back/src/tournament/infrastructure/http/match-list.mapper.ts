@@ -1,9 +1,12 @@
 import type {
+  MatchBlockItem,
+  MatchBlockState,
   ProfileMatchListItem,
   TournamentEventRef,
   TournamentMatchListItem,
 } from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
+import { isRedistributable } from "../../../common/domain/data-source";
 
 export interface MatchListItemResponse {
   id: string;
@@ -51,6 +54,22 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
           }
         : undefined,
     },
+  };
+}
+
+function matchBlockState(match: Match, now: Date): MatchBlockState {
+  if (match.hasEnded()) {
+    return "finished";
+  }
+  return match.beginAt && match.beginAt <= now ? "live" : "upcoming";
+}
+
+export function mapMatchBlockItem(match: Match, now: Date, commentCount: number): MatchBlockItem {
+  return {
+    ...mapMatchListItem(match),
+    state: matchBlockState(match, now),
+    startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
+    commentCount,
   };
 }
 

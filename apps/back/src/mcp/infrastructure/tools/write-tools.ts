@@ -15,6 +15,9 @@ import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import { mapMatchListResponse } from "../mappers";
 import { requireUpdateFields } from "./update-fields";
 
+const MATCH_BLOCK_FORMAT =
+  'Embed live match scores with a match block on its own line, using match, tournament or team UUIDs from get_tournament, get_upcoming_matches, get_match_results or search_teams: `:matches{match="<match id>"}` for one match, `:matches{ids="<match id>,<match id>"}` for a manual selection (up to 10, in that order), `:matches{tournament="<tournament id>" limit="5"}` or `:matches{team="<team id>" limit="5"}` for live, then upcoming, then latest matches (limit 1-10, default 5). Use the same block in English and French bodies.';
+
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
   score: z.number(),
@@ -62,14 +65,17 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_news_draft",
     {
       description:
-        'Create a news article draft. Requires news.manage. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. When the primary source is an X/Twitter post, put `:tweet{url="https://x.com/…/status/…"}` on its own line in both English and French bodies (same URL). A human must review and publish it in the admin app.',
+        'Create a news article draft. Requires news.manage. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. When the primary source is an X/Twitter post, put `:tweet{url="https://x.com/…/status/…"}` on its own line in both English and French bodies (same URL). ' +
+        MATCH_BLOCK_FORMAT +
+        " A human must review and publish it in the admin app.",
       inputSchema: {
         title: z.string().min(1).describe("English article headline."),
         content: z
           .string()
           .min(1)
           .describe(
-            'English article body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line.',
+            'English article body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line. ' +
+              MATCH_BLOCK_FORMAT,
           ),
         titleFr: z.string().min(1).optional().describe("Optional French headline."),
         contentFr: z
@@ -77,7 +83,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .optional()
           .describe(
-            "Optional French body in markdown. Use the same player/team/tweet tags as English.",
+            "Optional French body in markdown. Use the same player/team/tweet/match tags as English.",
           ),
         imageUrl: z.string().url().optional().describe("Optional cover image URL."),
         slug: z
@@ -118,7 +124,8 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "update_news_article",
     {
       description:
-        'Update an existing news article. Requires news.manage. Pass only the fields to change. Pass null for titleFr, contentFr, or imageUrl to clear them. Does not publish — a human must review and publish in the admin app. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}`. Embed X posts with `:tweet{url="https://x.com/…/status/…"}` on its own line.',
+        'Update an existing news article. Requires news.manage. Pass only the fields to change. Pass null for titleFr, contentFr, or imageUrl to clear them. Does not publish — a human must review and publish in the admin app. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}`. Embed X posts with `:tweet{url="https://x.com/…/status/…"}` on its own line. ' +
+        MATCH_BLOCK_FORMAT,
       inputSchema: {
         idOrSlug: z.string().min(1).describe("Current article slug or UUID."),
         title: z.string().min(1).max(255).optional().describe("Updated English headline."),
@@ -127,7 +134,8 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .optional()
           .describe(
-            'Updated English body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line.',
+            'Updated English body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line. ' +
+              MATCH_BLOCK_FORMAT,
           ),
         titleFr: z
           .string()
@@ -141,7 +149,9 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .min(1)
           .nullable()
           .optional()
-          .describe("Updated French body in markdown, or null to clear. Keep the same tweet tags."),
+          .describe(
+            "Updated French body in markdown, or null to clear. Keep the same tweet and match tags.",
+          ),
         imageUrl: z
           .string()
           .url()

@@ -23,6 +23,17 @@ describe("MatchRepository", () => {
     );
   });
 
+  it("scopes results to a team's participations", async () => {
+    const repo = Object.create(MatchRepository.prototype) as MatchRepository;
+    const find = vi.fn().mockResolvedValue([]);
+    Object.assign(repo, { find });
+    await repo.findResults({ teamId: "falcons", limit: 5 });
+    expect(find).toHaveBeenCalledWith(
+      { endAt: { $ne: null }, participants: { team: { id: "falcons" } } },
+      expect.objectContaining({ limit: 5, orderBy: { endAt: "DESC" } }),
+    );
+  });
+
   it("keeps start.gg rows for public lists", async () => {
     const { repo, findAndCount } = repository();
     await repo.findResultsAndCount({});

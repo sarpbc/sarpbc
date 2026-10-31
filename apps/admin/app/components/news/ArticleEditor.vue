@@ -2,9 +2,11 @@
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from "@nuxt/ui";
 import { entityTagEditorExtensions } from "~/utils/editor/entityTagNode";
 import { TweetTagNode } from "~/utils/editor/tweetTagNode";
+import { MatchBlockNode } from "~/utils/editor/matchBlockNode";
 import { tableEditorExtensions } from "~/utils/editor/tableExtensions";
 import { useEntityTagEditor } from "~/composables/useEntityTagEditor";
 import { useTweetTagEditor } from "~/composables/useTweetTagEditor";
+import { useMatchBlockEditor } from "~/composables/useMatchBlockEditor";
 import { useTableEditor } from "~/composables/useTableEditor";
 import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
@@ -13,10 +15,22 @@ const content = defineModel<string>({ required: true });
 const { t } = useI18n();
 const { pickerOpen, pickerKind, entityTagHandlers, insertEntityTag } = useEntityTagEditor();
 const { tweetPickerOpen, tweetTagHandlers, insertTweetTag } = useTweetTagEditor();
+const { matchPickerOpen, matchPickerBlock, matchBlockHandlers, applyMatchBlock } =
+  useMatchBlockEditor();
 const { tableHandlers, tableToolbarItems, shouldShowTableToolbar } = useTableEditor();
 
-const editorExtensions = [...tableEditorExtensions, ...entityTagEditorExtensions, TweetTagNode];
-const editorHandlers = { ...entityTagHandlers, ...tweetTagHandlers, ...tableHandlers };
+const editorExtensions = [
+  ...tableEditorExtensions,
+  ...entityTagEditorExtensions,
+  TweetTagNode,
+  MatchBlockNode,
+];
+const editorHandlers = {
+  ...entityTagHandlers,
+  ...tweetTagHandlers,
+  ...matchBlockHandlers,
+  ...tableHandlers,
+};
 
 const appendToBody = () => document.body;
 const floatingMenuOptions = { strategy: "fixed" as const };
@@ -94,6 +108,11 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
       icon: "i-ri-twitter-x-fill",
     },
     {
+      kind: "matchBlock",
+      label: t("page.news.editor.insertMatches"),
+      icon: "i-fluent-trophy-24-regular",
+    },
+    {
       kind: "table",
       label: t("page.news.editor.insertTable"),
       icon: "i-lucide-table",
@@ -139,4 +158,9 @@ const suggestionItems = computed<EditorSuggestionMenuItem[][]>(() => [
 
   <NewsEntityTagPicker v-model:open="pickerOpen" :kind="pickerKind" @select="insertEntityTag" />
   <NewsTweetTagPicker v-model:open="tweetPickerOpen" @select="insertTweetTag" />
+  <NewsMatchBlockPicker
+    v-model:open="matchPickerOpen"
+    :block="matchPickerBlock"
+    @select="applyMatchBlock"
+  />
 </template>
