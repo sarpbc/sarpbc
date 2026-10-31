@@ -14,9 +14,6 @@ function apiOrigin(base: string): string | undefined {
 const apiOriginUrl = apiOrigin(apiBase);
 
 const contentSwr = { swr: 300 } as const;
-const isProduction = process.env.NODE_ENV === "production";
-const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
-const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
 
 function hostnameFromUrl(base: string | undefined): string | undefined {
   if (!base) {
@@ -204,8 +201,8 @@ export default defineNuxtConfig({
       apiBase: apiBase,
       adminUrl: adminUrl,
       posthog: {
-        publicKey: posthogPublicKey,
-        host: posthogHost,
+        publicKey: "",
+        host: "https://t.sarpbc.org",
       },
     },
   },

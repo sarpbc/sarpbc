@@ -1,10 +1,12 @@
 # PostHog visit tracking
 
-PostHog runs only in production, with a project token and the visitor's explicit consent. The consent banner covers analytics and session replay. Visitors with the old `cookieConsent` choice are asked again because that choice did not cover replay.
+PostHog runs only in production, with a project key and the visitor's explicit consent. The consent banner covers analytics and session replay. Visitors with the old `cookieConsent` choice are asked again because that choice did not cover replay.
 
 ## Project settings
 
-Before deploying, configure the EU PostHog project used by `NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN`:
+The project key is read at runtime from `NUXT_PUBLIC_POSTHOG_PUBLIC_KEY` and the proxy host from `NUXT_PUBLIC_POSTHOG_HOST` (default `https://t.sarpbc.org`), so set them on the running container, not as build arguments. The dev server never loads PostHog. An empty key skips initialization.
+
+Before deploying, configure the EU PostHog project used by `NUXT_PUBLIC_POSTHOG_PUBLIC_KEY`:
 
 - Session Replay and Heatmaps are already enabled on project `192444` (`sarpbc.org`), as verified through the connected PostHog MCP. Its project token matches the production site.
 - Recording retention is currently 30 days. Keep the project's retention settings and the privacy policy aligned when changing retention for recordings or events.
