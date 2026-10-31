@@ -37,7 +37,14 @@ function setup() {
     revisePeriod: vi.fn(async () => Object.assign(new Contract(), { id: "zen-kc" })),
   };
   const merges = { mergePlayers: vi.fn(), mergeTeams: vi.fn() };
-  const staff = { allowed: true };
+  const staff = { allowed: true, permissions: [] as string[] };
+  const prizes = {
+    findByTournamentId: vi.fn(async (id: string) => {
+      if (id !== "cup") throw new NotFoundError(`Tournament with id "${id}" not found`);
+      return { source: "manual" as const, prizepool: null, prizes: [] };
+    }),
+    setDistribution: vi.fn(),
+  };
   const service = new RosterProposalService(
     store,
     { run: (work) => work(store) },
@@ -46,10 +53,14 @@ function setup() {
     contracts,
     merges,
     {
-      hasAnyPermission: async () => staff.allowed,
+      hasAnyPermission: async (_: string, permissions: string[]) => {
+        staff.permissions.push(...permissions);
+        return staff.allowed;
+      },
     },
+    prizes,
   );
-  return { saved, store, players, contracts, staff, service };
+  return { saved, store, players, contracts, staff, prizes, service };
 }
 
 describe("RosterProposalService", () => {
@@ -59,10 +70,11 @@ describe("RosterProposalService", () => {
   let players: ReturnType<typeof setup>["players"];
   let contracts: ReturnType<typeof setup>["contracts"];
   let staff: ReturnType<typeof setup>["staff"];
+  let prizes: ReturnType<typeof setup>["prizes"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, store, players, contracts, staff, service } = setup());
+    ({ saved, store, players, contracts, staff, prizes, service } = setup());
   });
 
   const addZen = () =>
@@ -92,6 +104,7 @@ describe("RosterProposalService", () => {
       players: ["zen"],
       teams: ["kc"],
       users: ["journalist"],
+      tournaments: [],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -231,6 +244,45 @@ describe("RosterProposalService", () => {
     players.joinTeam.mockRejectedValueOnce(new InvalidInputError("Team is inactive"));
 
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
+  });
+
+  const prizeEntry = {
+    placement: 1,
+    amount: 1000,
+    currency: "USD",
+    teamId: "kc",
+    playerIds: ["zen"],
+  };
+
+  it("applies a sourced prize distribution once a tournament manager approves it", async () => {
+    const { id } = await service.propose(
+      { kind: "set_tournament_prizes", tournamentId: "cup", prizes: [prizeEntry] },
+      source,
+      "journalist",
+    );
+    expect(prizes.setDistribution).not.toHaveBeenCalled();
+
+    const approved = await service.approve(id, "admin");
+
+    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [prizeEntry]);
+    expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+  });
+
+  it("rejects prize proposals with an unknown tournament, team or invalid currency", async () => {
+    const propose = (tournamentId: string, entry: typeof prizeEntry) =>
+      service.propose(
+        { kind: "set_tournament_prizes", tournamentId, prizes: [entry] },
+        source,
+        "journalist",
+      );
+
+    await expect(propose("missing", prizeEntry)).rejects.toThrow(NotFoundError);
+    await expect(propose("cup", { ...prizeEntry, teamId: "nope" })).rejects.toThrow(NotFoundError);
+    await expect(propose("cup", { ...prizeEntry, currency: "XYZ" })).rejects.toThrow(
+      InvalidInputError,
+    );
+    expect(saved.size).toBe(0);
   });
 
   it("requires the change permission and reviews a proposal once", async () => {

@@ -8,6 +8,8 @@ import { RosterModule } from "../../roster/infrastructure/roster.module";
 import { TeamService } from "../../roster/application/team.service";
 import { UserService } from "../../user/application/user.service";
 import { UserModule } from "../../user/infrastructure/user.module";
+import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
+import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
 import { RosterProposalController } from "./http/roster-proposal.controller";
 import { RosterProposal } from "./persistence/roster-proposal.entity";
@@ -17,7 +19,12 @@ import {
 } from "./persistence/roster-proposal.store";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([RosterProposal]), RosterModule, UserModule],
+  imports: [
+    MikroOrmModule.forFeature([RosterProposal]),
+    RosterModule,
+    UserModule,
+    TournamentModule,
+  ],
   controllers: [RosterProposalController],
   providers: [
     {
@@ -29,6 +36,7 @@ import {
         contracts: ContractService,
         merges: RosterMergeService,
         users: UserService,
+        prizes: TournamentPrizeService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -38,6 +46,7 @@ import {
           contracts,
           merges,
           users,
+          prizes,
         ),
       inject: [
         EntityManager,
@@ -46,6 +55,7 @@ import {
         ContractService,
         RosterMergeService,
         UserService,
+        TournamentPrizeService,
       ],
     },
   ],

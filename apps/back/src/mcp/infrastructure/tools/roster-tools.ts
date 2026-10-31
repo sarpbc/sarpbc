@@ -10,6 +10,7 @@ import type { McpToolContext } from "../mcp-tool-context";
 import { runStaffReadTool, runWriteTool } from "../permission-gate";
 import { adminRosterProposalsUrl } from "../urls";
 import { requireUpdateFields } from "./update-fields";
+import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
 
 const sourceUrlSchema = z
   .string()
@@ -302,6 +303,60 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
           sourceUrl,
         );
       }),
+  );
+
+  server.registerTool(
+    "propose_tournament_prizes",
+    {
+      description:
+        "Propose the prize distribution of one tournament stage. Requires tournaments.manage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Enter each amount in the currency the source states; never convert it.",
+      inputSchema: {
+        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        prizes: z
+          .array(
+            z.object({
+              placement: z
+                .number()
+                .int()
+                .min(1)
+                .describe("Final placement; tied teams share the same placement."),
+              amount: z
+                .number()
+                .int()
+                .min(1)
+                .max(MAX_PRIZE_AMOUNT)
+                .describe("Whole amount in the stated currency."),
+              currency: z
+                .string()
+                .refine(isIso4217Code, "Use an ISO 4217 currency code")
+                .describe("ISO 4217 currency code as stated by the source (e.g. USD, EUR)."),
+              teamId: z.string().uuid().describe("Team UUID."),
+              playerIds: z
+                .array(z.string().uuid())
+                .max(10)
+                .optional()
+                .describe("Optional player UUIDs who share this prize."),
+            }),
+          )
+          .max(MAX_PRIZE_ENTRIES)
+          .describe("Every paid placement of the stage."),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ tournamentId, prizes, sourceUrl }) =>
+      runWriteTool(user, "propose_tournament_prizes", "tournaments.manage", () =>
+        propose(
+          {
+            kind: "set_tournament_prizes",
+            tournamentId,
+            prizes: prizes.map(({ playerIds, ...prize }) => ({
+              ...prize,
+              playerIds: playerIds ?? [],
+            })),
+          },
+          sourceUrl,
+        ),
+      ),
   );
 
   server.registerTool(

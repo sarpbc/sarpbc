@@ -5,6 +5,7 @@ import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
 import { Player, Team } from "../../../roster/infrastructure/persistence/player.entities";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import * as Row from "./roster-proposal.entity";
 
 function toProposal(row: Row.RosterProposal): RosterProposal {
@@ -58,7 +59,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       if (!inTransaction) await em.flush();
     },
     names: async (ids) => {
-      const [players, teams, users] = await Promise.all([
+      const [players, teams, users, tournaments] = await Promise.all([
         ids.players.length
           ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
           : [],
@@ -68,11 +69,18 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         ids.users.length
           ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
           : [],
+        ids.tournaments.length
+          ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
+          : [],
       ]);
       return Object.fromEntries([
         ...players.map((player) => [player.id, player.name]),
         ...teams.map((team) => [team.id, team.name]),
         ...users.map((user) => [user.id, user.userName]),
+        ...tournaments.map((tournament) => [
+          tournament.id,
+          `${tournament.event.name} · ${tournament.name}`,
+        ]),
       ]);
     },
   };
