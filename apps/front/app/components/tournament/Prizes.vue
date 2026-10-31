@@ -19,7 +19,12 @@ const {
 } = useLazyAsyncData(
   () => `tournament-prizes-${tournament.id}`,
   () => getTournamentPrizes(tournament.id),
-  { default: () => null },
+  {
+    default: () => null,
+    getCachedData(key, nuxtApp) {
+      return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+    },
+  },
 );
 
 const prizes = computed(() => distribution.value?.prizes ?? []);

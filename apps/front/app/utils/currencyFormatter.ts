@@ -1,3 +1,5 @@
+import { currencyFractionDigits } from "@sarpbc/utils";
+
 const CURRENCY_CODES = {
   "United State Dollar": "USD",
   "United States Dollar": "USD",
@@ -68,7 +70,7 @@ export function createCurrencyFormatter(locale: string = "en-US") {
 }
 
 export function formatPrizeAmount(amount: number, currency: string, locale: string): string {
-  const fractionDigits = Number.isInteger(amount) ? 0 : 2;
+  const fractionDigits = Number.isInteger(amount) ? 0 : currencyFractionDigits(currency);
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
