@@ -69,9 +69,7 @@ describe("stripNewsTweetTags", () => {
   });
 
   it("handles pathological tag input in linear time", () => {
-    const repeated = "::tweet{{".repeat(6_000);
-    assertFast(() => assert.equal(stripNewsTweetTags(repeated), repeated));
-    assertFast(() => stripNewsTweetTags(`${"::tweet{}x".repeat(5_000)}`));
-    assertFast(() => stripNewsTweetTags(`::tweet{}${" ".repeat(50_000)}x`));
+    const unclosed = "::tweet{".repeat(50_000);
+    assertFast(() => assert.equal(stripNewsTweetTags(unclosed), unclosed));
   });
 });

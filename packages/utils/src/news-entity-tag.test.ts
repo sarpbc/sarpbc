@@ -61,9 +61,9 @@ describe("parseNewsEntityTag", () => {
   });
 
   it("handles pathological attribute input in linear time", () => {
-    assertFast(() => assert.equal(parseNewsEntityTag(`:player{${"0".repeat(50_000)}}`), null));
+    assertFast(() => assert.equal(parseNewsEntityTag(`:player{${"a".repeat(50_000)}}`), null));
     assertFast(() =>
-      assert.equal(parseNewsEntityTag(`:player{${'a="\\\n'.repeat(12_500)}}`), null),
+      assert.equal(parseNewsEntityTag(`:player{a="${"x".repeat(50_000)}\\\n}`), null),
     );
   });
 });

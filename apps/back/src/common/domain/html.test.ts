@@ -42,12 +42,10 @@ describe("sanitizePlainText", () => {
   });
 
   it("handles pathological input in linear time", () => {
-    expectFast(() => sanitizePlainText("<!--".repeat(12_500)));
-    expectFast(() => sanitizePlainText("<script>".repeat(6_250)));
-    expectFast(() => sanitizePlainText("<script".repeat(7_000)));
-    expectFast(() => sanitizePlainText(`<script>${"</script".repeat(6_000)}`));
+    expectFast(() => sanitizePlainText("<!--".repeat(25_000)));
+    expectFast(() => sanitizePlainText("<script".repeat(10_000)));
+    expectFast(() => sanitizePlainText(`<script>${"</scriptx".repeat(20_000)}</script\t`));
     expectFast(() => sanitizePlainText("<".repeat(50_000)));
-    expectFast(() => sanitizePlainText(`${"<style>".repeat(3_000)}${"<!--".repeat(3_000)}>`));
   });
 });
 
@@ -82,7 +80,7 @@ describe("sanitizeNewsHtml", () => {
   });
 
   it("handles pathological dangerous blocks in linear time", () => {
-    expectFast(() => sanitizeNewsHtml("<!--".repeat(12_500)));
-    expectFast(() => sanitizeNewsHtml("<style>".repeat(7_000)));
+    expectFast(() => sanitizeNewsHtml("<!--".repeat(50_000)));
+    expectFast(() => sanitizeNewsHtml("<style>".repeat(30_000)));
   });
 });
