@@ -42,8 +42,9 @@ export {
 export {
   ACTIVE_ROSTER_LIMIT,
   isActiveRosterPlayer,
-  isTeamStaffRole,
+  isStaffContractRole,
   selectActiveRosterPlayers,
+  selectTeamStaff,
 } from "./team-roster.ts";
 export { resolveThemedLogoUrl } from "./themed-logo.ts";
 export {

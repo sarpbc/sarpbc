@@ -1013,7 +1013,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const created = await applied("create_player", {
         name: "MCP Roster Player",
         country: "FR",
-        role: "player",
         sourceUrl: source,
       });
       const move = (playerId, teamId, effectiveDate) => ({
@@ -1181,6 +1180,21 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.deepEqual(
         await callTool("update_contract", revise({ contractId: randomUUID(), role: "benched" })),
         { error: true },
+      );
+      await applied("add_player_to_team", {
+        ...move(veteran, alpha, "2026-06-01"),
+        role: "coach",
+      });
+      assert.deepEqual((await career()).slice(1), [
+        [alpha, "2026-02-01", "2026-06-01", "active", source],
+        [alpha, "2026-06-01", null, "coach", null],
+      ]);
+      const coach = await callTool("get_player", { idOrSlug: veteran });
+      assert.equal(coach.role, "coach");
+      const staffMoves = await request("GET", `/transfers?player=${coach.slug}&type=staff`);
+      assert.deepEqual(
+        staffMoves.json().transfers.map(({ type, date, role }) => [type, date, role]),
+        [["staff", "2026-06-01", "coach"]],
       );
 
       const startgg = "https://www.start.gg/tournament/integration/event/main";

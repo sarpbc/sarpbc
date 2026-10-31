@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
+import { CONTRACT_ROLES } from "@sarpbc/types";
 import type { ContractRole, PlayerContract } from "~/types/contract";
 import type { Player } from "~/types/player";
 
@@ -103,11 +104,12 @@ const isDeletingContract = ref(false);
 const isSavingContract = ref(false);
 const editingContract = ref<PlayerContract | null>(null);
 
-const contractRoleOptions: { label: string; value: ContractRole }[] = [
-  { label: t("common.contractRole.active"), value: "active" },
-  { label: t("common.contractRole.benched"), value: "benched" },
-  { label: t("common.contractRole.loaned"), value: "loaned" },
-];
+const contractRoleOptions: { label: string; value: ContractRole }[] = CONTRACT_ROLES.map(
+  (role) => ({
+    label: t(`common.contractRole.${role}`),
+    value: role,
+  }),
+);
 
 const contractForm = ref<{
   teamId: string;

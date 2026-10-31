@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TabsItem } from "@nuxt/ui";
-import { selectActiveRosterPlayers } from "@sarpbc/utils";
+import { selectActiveRosterPlayers, selectTeamStaff } from "@sarpbc/utils";
 
 type TeamProfileTab = "info" | "matches" | "events" | "trophies";
 
@@ -60,6 +60,7 @@ const {
 } = useTeamRosterHistory(teamId);
 
 const activeRoster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
+const staff = computed(() => selectTeamStaff(team.value?.players ?? []));
 
 const teamNationalities = computed(() => {
   if (!activeRoster.value.length) return [];
@@ -214,6 +215,7 @@ setPageSeo({
       </SCard>
 
       <template v-if="active === 'info'">
+        <TeamStaffSection v-if="staff.length > 0" :staff="staff" />
         <TeamRosterTimeline
           v-if="showRosterHistory"
           :eras="rosterHistoryEras"

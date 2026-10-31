@@ -100,8 +100,13 @@ export class RosterProposalService {
   private async apply(change: RosterChange, sourceUrl: string): Promise<string> {
     switch (change.kind) {
       case "add_player_to_team": {
-        const { playerId, teamId, effectiveDate } = change;
-        await this.players.joinTeam(playerId, { teamId, effectiveDate, sourceUrl });
+        const { playerId, teamId, effectiveDate, contractRole } = change;
+        await this.players.joinTeam(playerId, {
+          teamId,
+          effectiveDate,
+          sourceUrl,
+          role: contractRole,
+        });
         return playerId;
       }
       case "remove_player_from_team": {

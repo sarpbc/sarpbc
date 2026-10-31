@@ -1,4 +1,10 @@
-export type ContractRole = "active" | "benched" | "loaned";
+import type { CONTRACT_ROLES, PLAYER_CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./index";
+
+export type PlayerContractRole = (typeof PLAYER_CONTRACT_ROLES)[number];
+
+export type StaffContractRole = (typeof STAFF_CONTRACT_ROLES)[number];
+
+export type ContractRole = (typeof CONTRACT_ROLES)[number];
 
 export interface PlayerContract {
   id: string;

@@ -3,7 +3,13 @@ import type { ContractRole } from "./contract";
 export type RosterProposalStatus = "pending" | "applied" | "rejected";
 
 export type RosterChange =
-  | { kind: "add_player_to_team"; playerId: string; teamId: string; effectiveDate: string }
+  | {
+      kind: "add_player_to_team";
+      playerId: string;
+      teamId: string;
+      effectiveDate: string;
+      contractRole?: ContractRole;
+    }
   | {
       kind: "remove_player_from_team";
       playerId: string;
@@ -16,7 +22,6 @@ export type RosterChange =
       name: string;
       nationality?: string;
       status: "active" | "free_agent" | "retired";
-      role?: "player" | "coach" | "substitute";
     }
   | {
       kind: "update_player";
@@ -24,7 +29,6 @@ export type RosterChange =
       name?: string;
       nationality?: string;
       status?: "active" | "free_agent" | "retired";
-      role?: "player" | "coach" | "substitute";
     }
   | { kind: "create_team"; name: string; location?: string; imageUrl?: string }
   | {

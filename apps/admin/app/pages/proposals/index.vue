@@ -74,8 +74,6 @@ function formatValue(key: string, value: string | boolean | null): string {
   switch (key) {
     case "status":
       return t(`page.proposals.playerStatus.${value}`);
-    case "role":
-      return t(`page.proposals.roles.${value}`);
     case "contractRole":
       return t(`common.contractRole.${value}`);
     default:

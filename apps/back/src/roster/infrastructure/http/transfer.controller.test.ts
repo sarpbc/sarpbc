@@ -49,6 +49,7 @@ describe("TransferController", () => {
           id: "c1:join",
           type: "arrival",
           date: "2025-06-01",
+          role: "active",
           sourceUrl: "https://x.com/KarmineCorp/status/1",
           player: { id: "zen", name: "zen", slug: "zen", imageUrl: null, nationality: null },
           team: {

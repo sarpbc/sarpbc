@@ -23,12 +23,20 @@ function typeIcon(type: TransferType): string {
       return "i-fluent-pause-24-regular";
     case "loan":
       return "i-fluent-arrow-swap-24-regular";
+    case "staff":
+      return "i-fluent-briefcase-24-regular";
     default: {
       const exhaustive: never = type;
       return exhaustive;
     }
   }
 }
+
+const typeLabel = computed(() =>
+  transfer.type === "staff"
+    ? t(`common.contractRole.${transfer.role}`)
+    : t(`components.transfer.type.${transfer.type}`),
+);
 </script>
 
 <template>
@@ -60,7 +68,7 @@ function typeIcon(type: TransferType): string {
     <span class="flex shrink-0 items-center gap-1.5 text-xs text-muted sm:w-28">
       <UIcon :name="typeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
       <span class="sr-only truncate sm:not-sr-only">
-        {{ t(`components.transfer.type.${transfer.type}`) }}
+        {{ typeLabel }}
       </span>
     </span>
     <SLink
