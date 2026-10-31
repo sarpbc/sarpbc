@@ -2,11 +2,6 @@ import { BlockList, isIP } from "node:net";
 import { timingSafeEqual } from "node:crypto";
 import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api.ts";
 
-/**
- * Cloudflare publishes these ranges at https://www.cloudflare.com/ips-v4 and
- * https://www.cloudflare.com/ips-v6. Snapshot taken 2026-10-30.
- * `CF-Connecting-IP` is only trusted when the address Traefik saw is in this list.
- */
 const CLOUDFLARE_IPV4 = [
   "173.245.48.0/20",
   "103.21.244.0/22",
@@ -135,11 +130,6 @@ function header(headers: ClientRequest["headers"], name: string): string | undef
   return undefined;
 }
 
-/**
- * `request.ip` is the address left after trusting the private proxy hop.
- * When that address is a Cloudflare edge, the visitor IP is `CF-Connecting-IP`.
- * Otherwise the header is ignored so a direct client cannot pick their bucket.
- */
 export function resolveClientAddress(request: ClientRequest): string {
   const seen = canonicalIp(request.ip);
   if (!seen) {

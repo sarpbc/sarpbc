@@ -37,7 +37,6 @@ export function createApiClient() {
       const headers = new Headers(options.headers);
       let event: ServerRequest | undefined;
       try {
-        // Nuxt auto-import. Nitro's server program does not declare it, and it throws outside the Vue app.
         // @ts-ignore
         event = useRequestEvent();
       } catch {
