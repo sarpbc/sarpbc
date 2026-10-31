@@ -19,7 +19,10 @@ const UNSAFE_SVG_PATTERNS: [RegExp, string][] = [
   [/<(?:iframe|embed|object|audio|video)[\s>/]/i, "an embedded element"],
   [/\son[a-z]+\s*=/i, "an event handler attribute"],
   [/javascript:/i, "a javascript: URL"],
-  [/(?:href|src)\s*=\s*(?!["']?\s*#)/i, "an external reference"],
+  [
+    /(?:href|src)\s*=\s*(?!["']?\s*(?:#|data:image\/(?:png|jpeg|webp|gif)[;,]))/i,
+    "an external reference",
+  ],
   [/url\(\s*(?!["']?\s*#)/i, "an external url() reference"],
   [/@import/i, "a stylesheet import"],
 ];
@@ -62,8 +65,8 @@ export function requireTeamLogoUrl(value: string): URL {
 export function detectTeamLogoFormat(bytes: Uint8Array): TeamLogoFormat {
   if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) return "png";
   if (ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 12) === "WEBP") return "webp";
-  const head = new TextDecoder().decode(bytes.subarray(0, 1024)).replace(/^﻿/, "");
-  if (/^\s*(?:<\?xml[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(head)) return "svg";
+  const head = new TextDecoder().decode(bytes.subarray(0, 1024));
+  if (/^<svg[\s>]/i.test(skipSvgPrologue(head))) return "svg";
   throw new InvalidInputError("The logo must be a PNG, WebP or SVG image.");
 }
 
@@ -82,6 +85,21 @@ export function requireTeamLogoDimensions(width: number, height: number): void {
       `The logo is ${width}x${height} pixels; it must be at least ${MIN_TEAM_LOGO_PIXELS}x${MIN_TEAM_LOGO_PIXELS}.`,
     );
   }
+}
+
+function skipSvgPrologue(head: string): string {
+  let rest = head.trimStart();
+  if (rest.startsWith("<?xml")) {
+    const end = rest.indexOf(">");
+    if (end === -1) return rest;
+    rest = rest.slice(end + 1).trimStart();
+  }
+  while (rest.startsWith("<!--")) {
+    const end = rest.indexOf("-->", 4);
+    if (end === -1) return rest;
+    rest = rest.slice(end + 3).trimStart();
+  }
+  return rest;
 }
 
 function ascii(bytes: Uint8Array, start: number, end: number): string {
