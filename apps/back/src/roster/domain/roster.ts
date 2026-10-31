@@ -61,6 +61,8 @@ export class Team {
   location: string | null = null;
   imageUrl: string | null = null;
   darkModeImageUrl: string | null = null;
+  logoLightUrl: string | null = null;
+  logoDarkUrl: string | null = null;
   slug = "";
   pandascoreId: number | null = null;
   source: DataSource = "manual";

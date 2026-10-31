@@ -92,6 +92,8 @@ export class RosterMergeService {
       kept.location ??= merged.location;
       kept.imageUrl ??= merged.imageUrl;
       kept.darkModeImageUrl ??= merged.darkModeImageUrl;
+      kept.logoLightUrl ??= merged.logoLightUrl;
+      kept.logoDarkUrl ??= merged.logoDarkUrl;
       kept.active ||= merged.active;
 
       merged.active = false;

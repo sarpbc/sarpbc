@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import { resolveThemedLogoUrl } from "@sarpbc/utils";
+import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
 
 interface Props {
   teamName: string;
-  imageUrl?: string;
-  darkModeImageUrl?: string;
+  logo?: ThemedLogo | null;
   size?: "xs" | "list" | "sm" | "md" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
   priority?: boolean;
@@ -55,16 +54,10 @@ const fallbackRadiusClasses = {
   xl: "rounded-lg",
 };
 
-const {
-  teamName,
-  imageUrl,
-  darkModeImageUrl,
-  size = "md",
-  priority = false,
-} = defineProps<Props>();
+const { teamName, logo, size = "md", priority = false } = defineProps<Props>();
 
 const colorMode = useColorMode();
-const src = computed(() => resolveThemedLogoUrl(imageUrl, darkModeImageUrl, colorMode.value));
+const src = computed(() => resolveThemedLogoUrl(logo, colorMode.value));
 const dim = computed(() => dimensions[size]);
 const failed = ref(false);
 watch(src, () => {

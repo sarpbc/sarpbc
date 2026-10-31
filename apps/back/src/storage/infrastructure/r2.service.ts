@@ -1,6 +1,11 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  CopyObjectCommand,
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { createLogger } from "evlog";
@@ -173,6 +178,73 @@ export class R2Service implements ObjectStorage {
       throw new InternalServerErrorException(
         "Cover image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
       );
+    } finally {
+      log.emit();
+    }
+  }
+
+  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse> {
+    return this.objectOperation(
+      "putObject",
+      { key, imageContentType: contentType, imageSize: bytes.byteLength },
+      async (client) => {
+        await client.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+            Body: bytes,
+            ContentType: contentType,
+            CacheControl: "public, max-age=31536000, immutable",
+          }),
+        );
+        return { publicUrl: this.publicUrl(key), key };
+      },
+    );
+  }
+
+  copyObject(sourceKey: string, key: string): Promise<R2UploadResponse> {
+    return this.objectOperation("copyObject", { sourceKey, key }, async (client) => {
+      await client.send(
+        new CopyObjectCommand({
+          Bucket: this.bucket,
+          CopySource: encodeURI(`${this.bucket}/${sourceKey}`),
+          Key: key,
+        }),
+      );
+      return { publicUrl: this.publicUrl(key), key };
+    });
+  }
+
+  deleteObject(key: string): Promise<void> {
+    return this.objectOperation("deleteObject", { key }, async (client) => {
+      await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+    });
+  }
+
+  private publicUrl(key: string): string {
+    return `${this.publicBaseUrl.replace(/\/$/, "")}/${key}`;
+  }
+
+  private async objectOperation<T>(
+    action: string,
+    fields: Record<string, string | number>,
+    work: (client: S3Client) => Promise<T>,
+  ): Promise<T> {
+    const log = createLogger({
+      component: R2Service.name,
+      action,
+      environment: currentEnvironment(),
+      bucket: this.bucket,
+      ...fields,
+    });
+    try {
+      const result = await work(this.getClient());
+      log.set({ stored: true });
+      return result;
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      if (error instanceof InternalServerErrorException) throw error;
+      throw new InternalServerErrorException("The image could not be stored. Try again.");
     } finally {
       log.emit();
     }

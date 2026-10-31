@@ -22,12 +22,7 @@ const nameClass = computed(() => {
       class="flex max-w-full flex-col items-center justify-center gap-2 text-center text-balance break-words"
       :class="nameClass"
     >
-      <TeamImg
-        :team-name="participant.team.name"
-        :image-url="participant.team.imageUrl"
-        :dark-mode-image-url="participant.team.darkModeImageUrl"
-        size="md"
-      />
+      <TeamImg :team-name="participant.team.name" :logo="participant.team" size="md" />
       {{ participant.team.name }}
     </SLink>
   </div>

@@ -232,6 +232,7 @@
         "update_player": "Modification du joueur",
         "create_team": "Nouvelle équipe",
         "update_team": "Modification de l'équipe",
+        "upload_team_logo": "Logo d'équipe",
         "merge_players": "Fusion de joueurs",
         "merge_teams": "Fusion d'équipes",
         "create_contract": "Nouveau contrat",
@@ -247,6 +248,7 @@
         "nationality": "Pays",
         "location": "Pays",
         "imageUrl": "Logo",
+        "variant": "Variante",
         "active": "Active",
         "keptId": "À conserver",
         "duplicateId": "Doublon",
@@ -263,6 +265,15 @@
         "active": "Actif",
         "free_agent": "Agent libre",
         "retired": "Retraité"
+      },
+      "logoVariants": {
+        "light": "Fonds clairs",
+        "dark": "Fonds sombres"
+      },
+      "logoPreview": {
+        "light": "Sur fond clair",
+        "dark": "Sur fond sombre",
+        "alt": "Logo proposé"
       },
       "values": {
         "yes": "Oui",

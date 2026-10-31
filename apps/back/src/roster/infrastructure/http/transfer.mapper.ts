@@ -22,6 +22,8 @@ export function mapTransfer({ id, type, date, sourceUrl, contract }: Transfer): 
       slug: team.slug,
       imageUrl: team.imageUrl,
       darkModeImageUrl: team.darkModeImageUrl,
+      logoLightUrl: team.logoLightUrl,
+      logoDarkUrl: team.logoDarkUrl,
     },
   };
 }

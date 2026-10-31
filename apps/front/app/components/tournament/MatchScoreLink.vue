@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { matchPath } from "@sarpbc/utils";
+import { matchPath, type ThemedLogo } from "@sarpbc/utils";
 import type { MatchLinkTarget, MatchResult, MatchStatus } from "~/types/matches";
 import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
 import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
@@ -14,8 +14,8 @@ const {
   name,
   teamAName,
   teamBName,
-  teamAImageUrl,
-  teamBImageUrl,
+  teamALogo,
+  teamBLogo,
   participantAId,
   participantBId,
   results,
@@ -30,8 +30,8 @@ const {
   name?: string;
   teamAName?: string;
   teamBName?: string;
-  teamAImageUrl?: string;
-  teamBImageUrl?: string;
+  teamALogo?: ThemedLogo | null;
+  teamBLogo?: ThemedLogo | null;
   participantAId?: string;
   participantBId?: string;
   results?: MatchResult[];
@@ -117,11 +117,7 @@ function participantRowClass(participantId: string | undefined): string {
           participantRowClass(participantAId),
         ]"
       >
-        <TeamImg
-          :team-name="teamAName ?? $t('components.match.tbd')"
-          :image-url="teamAImageUrl"
-          size="xs"
-        />
+        <TeamImg :team-name="teamAName ?? $t('components.match.tbd')" :logo="teamALogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
         <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreA }}</span>
       </div>
@@ -131,11 +127,7 @@ function participantRowClass(participantId: string | undefined): string {
           participantRowClass(participantBId),
         ]"
       >
-        <TeamImg
-          :team-name="teamBName ?? $t('components.match.tbd')"
-          :image-url="teamBImageUrl"
-          size="xs"
-        />
+        <TeamImg :team-name="teamBName ?? $t('components.match.tbd')" :logo="teamBLogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
         <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreB }}</span>
       </div>

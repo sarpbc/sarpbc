@@ -3,7 +3,9 @@ import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/d
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterMergeService } from "../../roster/application/roster-merge.service";
+import type { TeamLogoService } from "../../roster/application/team-logo.service";
 import type { TeamService } from "../../roster/application/team.service";
+import { teamLogoField, type TeamLogoVariant } from "../../roster/domain/team-logo";
 import {
   RosterProposal,
   requiredPermission,
@@ -26,6 +28,13 @@ type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" |
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
 type Prizes = Pick<TournamentPrizeService, "requireProposableTournament" | "setDistribution">;
+type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
+
+export interface TeamLogoProposal {
+  teamId: string;
+  variant: TeamLogoVariant;
+  imageUrl: string;
+}
 
 const LIST_LIMIT = 100;
 
@@ -39,6 +48,7 @@ export class RosterProposalService {
     private readonly merges: Merges,
     private readonly staff: Staff,
     private readonly prizes: Prizes,
+    private readonly logos: Logos,
   ) {}
 
   async propose(
@@ -57,6 +67,32 @@ export class RosterProposalService {
     const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
     await this.store.save(proposal);
     return proposal;
+  }
+
+  async proposeTeamLogo(
+    { teamId, variant, imageUrl }: TeamLogoProposal,
+    sourceUrl: string,
+    proposedById: string,
+  ): Promise<RosterProposal> {
+    await this.requireTeam(teamId);
+    const logo = await this.logos.upload(teamId, variant, imageUrl);
+    try {
+      return await this.propose(
+        {
+          kind: "upload_team_logo",
+          teamId,
+          variant,
+          imageUrl,
+          logoKey: logo.key,
+          logoUrl: logo.url,
+        },
+        sourceUrl,
+        proposedById,
+      );
+    } catch (error) {
+      await this.logos.discard(logo.key);
+      throw error;
+    }
   }
 
   async list(status: RosterProposalStatus): Promise<RosterProposalList> {
@@ -83,6 +119,10 @@ export class RosterProposalService {
       // A merge approved since the proposal would leave the change on a redirect record.
       await this.requireReferences(proposal.change);
       proposal.approve(reviewerId, new Date());
+      if (proposal.change.kind === "upload_team_logo") {
+        const published = await this.logos.publish(proposal.change.logoKey);
+        proposal.change = { ...proposal.change, logoKey: published.key, logoUrl: published.url };
+      }
       proposal.entityId = await this.apply(proposal.change, proposal.sourceUrl);
       await proposals.save(proposal);
       return proposal;
@@ -93,6 +133,9 @@ export class RosterProposalService {
     return this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
       proposal.reject(reviewerId, new Date());
+      if (proposal.change.kind === "upload_team_logo") {
+        await this.logos.discard(proposal.change.logoKey);
+      }
       await proposals.save(proposal);
       return proposal;
     });
@@ -144,6 +187,10 @@ export class RosterProposalService {
       case "update_team": {
         const { kind: _, teamId, ...input } = change;
         return (await this.teams.update(teamId, input)).id;
+      }
+      case "upload_team_logo": {
+        const { teamId, variant, logoUrl } = change;
+        return (await this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })).id;
       }
       case "merge_players":
         return (await this.merges.mergePlayers(change.keptId, change.duplicateId)).kept.id;
@@ -213,6 +260,7 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "create_player":
     case "create_team":
     case "update_team":
+    case "upload_team_logo":
     case "merge_teams":
       return [];
     default: {
@@ -228,6 +276,7 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "remove_player_from_team":
       return [change.teamId];
     case "update_team":
+    case "upload_team_logo":
     case "create_contract":
       return [change.teamId];
     case "update_contract":

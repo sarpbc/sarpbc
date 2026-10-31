@@ -232,6 +232,7 @@
         "update_player": "Player update",
         "create_team": "New team",
         "update_team": "Team update",
+        "upload_team_logo": "Team logo",
         "merge_players": "Merge players",
         "merge_teams": "Merge teams",
         "create_contract": "New contract",
@@ -247,6 +248,7 @@
         "nationality": "Country",
         "location": "Country",
         "imageUrl": "Logo",
+        "variant": "Variant",
         "active": "Active",
         "keptId": "Keep",
         "duplicateId": "Duplicate",
@@ -263,6 +265,15 @@
         "active": "Active",
         "free_agent": "Free agent",
         "retired": "Retired"
+      },
+      "logoVariants": {
+        "light": "Light backgrounds",
+        "dark": "Dark backgrounds"
+      },
+      "logoPreview": {
+        "light": "On a light background",
+        "dark": "On a dark background",
+        "alt": "Proposed logo"
       },
       "values": {
         "yes": "Yes",

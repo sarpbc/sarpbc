@@ -8,6 +8,7 @@ import { ContractService } from "../../../roster/application/contract.service";
 import { PlayerService } from "../../../roster/application/player.service";
 import { TeamService } from "../../../roster/application/team.service";
 import { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
+import type { RosterChange } from "../../../roster-proposal/domain/roster-proposal";
 import { SearchService } from "../../../search/application/search.service";
 import { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../../tournament/application/match/match.service";
@@ -34,7 +35,11 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
     playerEarnings: vi.fn().mockResolvedValue(earnings),
   };
   const rosterProposalService = {
-    propose: vi.fn().mockResolvedValue({ id: "proposal-1", status: "pending" }),
+    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
+      id: "proposal-1",
+      status: "pending",
+      change,
+    })),
   };
   const registerTool = vi.fn();
   const module = await Test.createTestingModule({

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { tournamentLabel } from "~/utils/tournamentLabel";
-import { resolveThemedLogoUrl } from "@sarpbc/utils";
+import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
 import type { TournamentListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
@@ -25,13 +25,8 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-function teamLogoSrc(
-  team: { imageUrl?: string | null; darkModeImageUrl?: string | null } | null | undefined,
-) {
-  if (!team) {
-    return undefined;
-  }
-  return resolveThemedLogoUrl(team.imageUrl, team.darkModeImageUrl, colorMode.value);
+function teamLogoSrc(team: ThemedLogo | null | undefined) {
+  return resolveThemedLogoUrl(team, colorMode.value);
 }
 
 async function handleSyncTournament(tournamentId: string) {
