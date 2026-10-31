@@ -222,7 +222,7 @@ setPageSeo({
                 </dd>
               </div>
               <div
-                v-if="currentPlayer.team && currentPlayer.role"
+                v-if="currentPlayer.role && currentPlayer.role !== 'active'"
                 class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4"
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.role") }}</dt>

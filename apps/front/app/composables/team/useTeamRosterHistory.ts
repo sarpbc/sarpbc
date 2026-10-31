@@ -1,4 +1,5 @@
 import type { MaybeRef } from "vue";
+import { CONTRACT_ROLES } from "@sarpbc/types";
 import type { ContractRole, TeamContract } from "~/types/contract";
 import { getTeamContracts } from "~/composables/team/api";
 
@@ -44,32 +45,9 @@ function toMember(contract: TeamContract): TeamRosterEraMember {
   };
 }
 
-function roleRank(role: ContractRole): number {
-  switch (role) {
-    case "active":
-      return 0;
-    case "benched":
-      return 1;
-    case "loaned":
-      return 2;
-    case "coach":
-      return 3;
-    case "assistant_coach":
-      return 4;
-    case "analyst":
-      return 5;
-    case "manager":
-      return 6;
-    default: {
-      const exhaustive: never = role;
-      return exhaustive;
-    }
-  }
-}
-
 function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
   return [...members].sort((a, b) => {
-    const roleDiff = roleRank(a.role) - roleRank(b.role);
+    const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
     if (roleDiff !== 0) return roleDiff;
     return a.name.localeCompare(b.name, "en");
   });

@@ -115,30 +115,13 @@ const memberNames = (members: TeamRosterEra["members"]) =>
               </div>
 
               <ul class="flex flex-col gap-2 list-none m-0 p-0">
-                <li
-                  v-for="member in era.members"
-                  :key="member.contractId"
-                  class="flex items-center gap-3"
-                >
-                  <SLink :to="$localePath(`/player/${member.slug}`)" class="shrink-0">
-                    <PlayerImg
-                      :player-name="member.name"
-                      :img="member.imageUrl || undefined"
-                      size="sm"
-                    />
-                  </SLink>
-                  <div class="flex-1 min-w-0">
-                    <SLink
-                      :to="$localePath(`/player/${member.slug}`)"
-                      variant="inline"
-                      class="truncate block"
-                    >
-                      {{ member.name }}
-                    </SLink>
-                    <p v-if="member.role !== 'active'" class="text-sm text-muted">
-                      {{ roleLabel(member.role) }}
-                    </p>
-                  </div>
+                <li v-for="member in era.members" :key="member.contractId">
+                  <TeamMember
+                    :name="member.name"
+                    :slug="member.slug"
+                    :image-url="member.imageUrl"
+                    :role="member.role === 'active' ? undefined : roleLabel(member.role)"
+                  />
                 </li>
               </ul>
 
