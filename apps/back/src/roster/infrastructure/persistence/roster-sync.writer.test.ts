@@ -38,7 +38,7 @@ describe("RosterSyncWriter", () => {
       slug: "comm",
       team: new Team(),
     });
-    em.findOne.mockResolvedValue(player);
+    em.findOne.mockImplementation(async (entity) => (entity === Player ? player : null));
     const writer = new RosterSyncWriter(manager);
     await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, "new-team");
     expect(player.team?.id).toBe("new-team");

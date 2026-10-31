@@ -1,7 +1,7 @@
 import { toPlayer, toTeam } from "./roster.mapper";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
-import { Player, Team } from "./player.entities";
+import { Contract, Player, Team } from "./player.entities";
 import { availablePlayerSlug, findPandascorePlayer } from "./find-pandascore-player";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../application/imports";
 export class RosterSyncWriter {
@@ -66,9 +66,13 @@ export class RosterSyncWriter {
       imageUrl: model.imageUrl,
       role: model.role,
     });
-    if (currentTeamId !== undefined)
+    if (currentTeamId !== undefined && !(existing && (await this.hasOpenContract(row.id))))
       row.team = currentTeamId === null ? null : this.em.getReference(Team, currentTeamId);
     this.em.persist(row);
     return { id: row.id };
+  }
+  /** Staff roster moves own the current team of a player under contract. */
+  private async hasOpenContract(playerId: string): Promise<boolean> {
+    return (await this.em.findOne(Contract, { player: playerId, endDate: null })) !== null;
   }
 }
