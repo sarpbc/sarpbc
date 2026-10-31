@@ -24,6 +24,15 @@ describe("validateEnv", () => {
     expect(validateEnv({ INTERNAL_API_TOKEN: "   " }).INTERNAL_API_TOKEN).toBeUndefined();
   });
 
+  it("treats absent or blank Twitch credentials as unset", () => {
+    const absent = validateEnv({});
+    expect(absent.TWITCH_CLIENT_ID).toBeUndefined();
+    expect(absent.TWITCH_CLIENT_SECRET).toBeUndefined();
+    const blank = validateEnv({ TWITCH_CLIENT_ID: "", TWITCH_CLIENT_SECRET: "  " });
+    expect(blank.TWITCH_CLIENT_ID).toBeUndefined();
+    expect(blank.TWITCH_CLIENT_SECRET).toBeUndefined();
+  });
+
   it("accepts a long internal API token", () => {
     expect(validateEnv({ INTERNAL_API_TOKEN: "internal-api-token-value" }).INTERNAL_API_TOKEN).toBe(
       "internal-api-token-value",

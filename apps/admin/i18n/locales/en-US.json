@@ -63,7 +63,8 @@
       "openMenu": "Open navigation",
       "drawerDescription": "Staff navigation",
       "backToSite": "Back to Site",
-      "users": "Users"
+      "users": "Users",
+      "streamers": "Live Streamers"
     },
     "search": {
       "placeholder": "Search…",
@@ -117,6 +118,43 @@
         "confirmButton": "Revoke Token",
         "success": "Token revoked",
         "failed": "Could not revoke token. Try again."
+      }
+    },
+    "streamers": {
+      "title": "Live Streamers",
+      "description": "Twitch channels shown in the public footer when they stream Rocket League.",
+      "loading": "Loading…",
+      "loadError": "Could not load streamers. Check your connection and try again.",
+      "retry": "Try Again",
+      "count": "{count} channel | {count} channels",
+      "columns": {
+        "login": "Twitch Login",
+        "displayName": "Display Name",
+        "createdAt": "Added"
+      },
+      "empty": {
+        "title": "No Channels Yet",
+        "description": "Add a Twitch channel to show it in the footer when it streams Rocket League."
+      },
+      "add": {
+        "button": "Add Channel",
+        "title": "Add Channel",
+        "loginLabel": "Twitch Login",
+        "loginHint": "Up to 25 lowercase letters, digits or underscores, not starting with an underscore, as in twitch.tv/login.",
+        "loginPlaceholder": "e.g. zenrll",
+        "displayNameLabel": "Display Name",
+        "displayNameHint": "Optional. Defaults to the name shown on Twitch.",
+        "displayNamePlaceholder": "e.g. Zen",
+        "submit": "Add Channel",
+        "success": "Channel added",
+        "failed": "Could not add channel. Check the login and try again."
+      },
+      "remove": {
+        "title": "Remove Channel",
+        "confirm": "Remove \"{login}\" from the live strip?",
+        "confirmButton": "Remove Channel",
+        "success": "Channel removed",
+        "failed": "Could not remove channel. Try again."
       }
     },
     "forum": {

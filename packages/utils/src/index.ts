@@ -13,6 +13,7 @@ export {
 } from "./news-content.ts";
 export { readingTimeMinutes } from "./news-reading-time.ts";
 export { INDEXNOW_KEY_PATTERN } from "./indexnow.ts";
+export { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "./twitch.ts";
 export {
   ISO_WEEK_ID_PATTERN,
   formatIsoWeekId,

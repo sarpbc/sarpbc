@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { INDEXNOW_KEY_PATTERN } from "@sarpbc/utils";
 
+const optionalSecret = z
+  .string()
+  .optional()
+  .transform((value) => value?.trim() || undefined);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4001),
@@ -10,6 +15,8 @@ const envSchema = z.object({
   POSTHOG_PROJECT_TOKEN: z.string().optional(),
   POSTHOG_HOST: z.string().optional(),
   INDEXNOW_KEY: z.union([z.literal(""), z.string().regex(INDEXNOW_KEY_PATTERN)]).optional(),
+  TWITCH_CLIENT_ID: optionalSecret,
+  TWITCH_CLIENT_SECRET: optionalSecret,
   INTERNAL_API_TOKEN: z
     .string()
     .optional()
@@ -32,6 +39,8 @@ export interface ProcessEnv {
   POSTHOG_HOST?: string;
   INDEXNOW_KEY?: string;
   INTERNAL_API_TOKEN?: string;
+  TWITCH_CLIENT_ID?: string;
+  TWITCH_CLIENT_SECRET?: string;
 }
 
 export function validateEnv(config: ProcessEnv) {

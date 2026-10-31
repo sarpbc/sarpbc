@@ -126,6 +126,11 @@
         "community": "Community",
         "company": "Company",
         "legal": "Legal"
+      },
+      "live": {
+        "title": "Live on Twitch",
+        "viewers": "{count} viewer | {count} viewers",
+        "linkLabel": "{name} is live on Twitch with {viewers}: {title}"
       }
     },
     "legal": {

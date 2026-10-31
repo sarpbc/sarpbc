@@ -39,6 +39,18 @@ pnpm --filter back run mikro:migrate
 
 Integration tests rebuild a fresh PostgreSQL database through these migrations and verify that the resulting schema matches the ORM entities.
 
+## Live Twitch streamers
+
+The footer strip lists tracked Twitch channels that are live in Rocket League. Set `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` to enable it; without them `GET /streamers/live` returns an empty list and never calls Twitch. Staff with `streamers.manage` edit the channel list in the admin app.
+
+The result is cached in Redis for 90 seconds, so Twitch receives at most one request per window, and `GET /streamers/live` sends `Cache-Control: public, max-age=60`. One instance refreshes at a time; the others serve the previous result. On a Twitch failure the endpoint returns the previous result for up to 10 minutes, then an empty list. Adding or removing a channel clears the cache and discards any refresh already in flight.
+
+To load development channels into a local database after migrating:
+
+```bash
+docker compose -f docker-compose.local.yml exec -T postgresdb psql -U sarpbc -d sarpbc < apps/back/scripts/dev-seed/twitch-streamers.sql
+```
+
 ## Tests
 
 Vitest runs unit, HTTP smoke, and PostgreSQL/Redis integration tests as separate projects. SWC preserves the NestJS decorator metadata used by the HTTP tests.
