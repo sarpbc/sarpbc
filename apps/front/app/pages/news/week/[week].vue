@@ -28,6 +28,11 @@ if (!week.value || week.value.items.length === 0) {
   });
 }
 
+provideNewsMatchBlocks(
+  () => `news-week-matches-${weekId.value}`,
+  () => week.value?.items.map((item) => item.content) ?? [],
+);
+
 const currentWeekId = isoWeekIdFromDate(new Date());
 const isCurrentWeek = computed(() => weekId.value === currentWeekId);
 const range = computed(() => isoWeekUtcRange(weekId.value));

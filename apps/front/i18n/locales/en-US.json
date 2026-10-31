@@ -107,7 +107,14 @@
     "viewOnX": "View on X",
     "tweetUnavailable": "This X post could not be loaded. Open it on X",
     "tweetOnX": "Post by {name} on X",
-    "tweetImage": "Image {index} from the X post"
+    "tweetImage": "Image {index} from the X post",
+    "matches": "Matches",
+    "matchVersus": "{teamA} vs {teamB}",
+    "matchScore": "{teamA} {scoreA}–{scoreB} {teamB}",
+    "matchFinal": "Final",
+    "matchUtc": "{date} UTC",
+    "matchDataBy": "Match data provided by",
+    "matchesUnavailable": "These matches could not be loaded."
   },
   "general": {
     "news": "News",

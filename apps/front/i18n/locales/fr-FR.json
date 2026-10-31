@@ -107,7 +107,14 @@
     "viewOnX": "Voir sur X",
     "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
     "tweetOnX": "Post de {name} sur X",
-    "tweetImage": "Image {index} du post X"
+    "tweetImage": "Image {index} du post X",
+    "matches": "Matchs",
+    "matchVersus": "{teamA} contre {teamB}",
+    "matchScore": "{teamA} {scoreA}–{scoreB} {teamB}",
+    "matchFinal": "Terminé",
+    "matchUtc": "{date} UTC",
+    "matchDataBy": "Données des matchs fournies par",
+    "matchesUnavailable": "Impossible de charger ces matchs."
   },
   "general": {
     "news": "Actualités",

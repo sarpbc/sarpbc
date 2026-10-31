@@ -520,6 +520,7 @@
         "insertPlayer": "Tag Joueur",
         "insertTeam": "Tag Équipe",
         "insertTweet": "Post X",
+        "insertMatches": "Matchs",
         "insertTable": "Tableau",
         "tweet": {
           "title": "Insérer un post X",
@@ -527,6 +528,28 @@
           "urlPlaceholder": "https://x.com/user/status/…",
           "urlInvalid": "Collez l’URL complète d’un post X (x.com/…/status/…).",
           "insert": "Insérer le post"
+        },
+        "matches": {
+          "title": "Insérer des matchs",
+          "editTitle": "Modifier les matchs",
+          "kind": {
+            "match": "Un match",
+            "matches": "Sélection",
+            "tournament": "Tournoi",
+            "team": "Équipe"
+          },
+          "tournamentLabel": "Tournoi",
+          "tournamentPlaceholder": "Rechercher un tournoi…",
+          "teamLabel": "Équipe",
+          "change": "Changer",
+          "matchesLabel": "Matchs",
+          "selected": "{count} sur {max} sélectionnés",
+          "limitLabel": "Matchs affichés",
+          "limitHint": "En direct d’abord, puis à venir, puis derniers résultats",
+          "insert": "Insérer les matchs",
+          "update": "Mettre à jour",
+          "edit": "Modifier",
+          "remove": "Supprimer"
         },
         "tableAddRowBefore": "Ajouter une Ligne Avant",
         "tableAddRowAfter": "Ajouter une Ligne Après",
@@ -716,6 +739,13 @@
     "viewOnX": "Voir sur X",
     "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
     "tweetOnX": "Post de {name} sur X",
-    "tweetImage": "Image {index} du post X"
+    "tweetImage": "Image {index} du post X",
+    "matchLive": "En direct",
+    "matchFinal": "Terminé",
+    "matchTbd": "À déterminer",
+    "matchDataBy": "Données des matchs fournies par",
+    "matchesInvalid": "Ce bloc de matchs est invalide. Modifiez-le pour choisir à nouveau les matchs.",
+    "matchesUnavailable": "Impossible de charger ces matchs.",
+    "matchesEmpty": "Aucun match pour le moment."
   }
 }

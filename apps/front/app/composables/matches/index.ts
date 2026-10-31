@@ -5,3 +5,4 @@ export * from "./useMatchesListPage";
 export * from "./useOffsetMatchListPage";
 export * from "./useResultsListPage";
 export * from "./useUpcomingMatches";
+export * from "./useLiveMatchRefresh";

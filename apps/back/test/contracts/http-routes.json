@@ -178,6 +178,14 @@
   {
     "controller": "\"matches\"",
     "verb": "GET",
+    "path": "\"blocks\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"matches\"",
+    "verb": "GET",
     "path": "\"results\"",
     "status": null,
     "guards": [],
