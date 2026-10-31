@@ -371,13 +371,17 @@
         "players": "Players",
         "selectTeam": "Select a team",
         "selectPlayers": "Optional",
+        "notParticipantOption": "{name} (not a participant)",
+        "notOnRosterOption": "{name} (not on the tournament roster)",
         "add": "Add Prize",
         "remove": "Remove Prize",
         "save": "Save Distribution",
         "saved": "Prize distribution saved",
         "saveError": "Could not save the prize distribution",
         "errors": {
-          "amount": "Enter a whole amount of at least 1.",
+          "amount": "Enter a whole amount between 1 and {max}.",
+          "notParticipant": "This team does not take part in the tournament. Remove this prize or add the team as a participant.",
+          "notOnRoster": "Some players are not on the team's tournament roster.",
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
         }
