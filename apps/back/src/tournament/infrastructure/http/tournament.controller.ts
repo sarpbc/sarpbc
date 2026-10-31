@@ -16,6 +16,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -45,6 +46,7 @@ export class TournamentController {
     private tournamentRead: CachedTournamentRead,
     private playerAwardService: PlayerAwardService,
     private tournamentPrizeService: TournamentPrizeService,
+    private tournamentPrizesRead: CachedTournamentPrizesRead,
   ) {}
 
   @Get()
@@ -187,7 +189,7 @@ export class TournamentController {
 
   @Get(":id/prizes")
   async getPrizes(@Param("id") id: string) {
-    return this.tournamentPrizeService.findByTournamentId(id);
+    return this.tournamentPrizesRead.findByTournamentId(id);
   }
 
   @RequirePermissions("tournaments.manage")

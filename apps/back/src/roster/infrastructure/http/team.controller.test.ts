@@ -11,6 +11,8 @@ describe("TeamController", () => {
   const prizes = new TournamentPrizeService(
     { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
     { run: vi.fn() },
+    { invalidateTournament: vi.fn() },
+    { error: vi.fn() },
   );
   const teamEarnings = vi.spyOn(prizes, "teamEarnings");
   const controller = new TeamController(

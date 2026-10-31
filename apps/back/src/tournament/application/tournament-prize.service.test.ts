@@ -2,7 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import type { DataSource } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { PrizeEntry } from "../domain/prize-distribution";
-import type { PrizeParticipant, PrizeQueries, PrizeTransaction, PrizeWriter } from "./ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  PrizeParticipant,
+  PrizeQueries,
+  PrizeTransaction,
+  PrizeWriter,
+} from "./ports";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
 const entry: PrizeEntry = {
@@ -34,8 +41,10 @@ function setup({
     byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
   };
   const transaction: PrizeTransaction = { run: (work) => work({ prizes: writer }) };
-  const service = new TournamentPrizeService(reads, transaction);
-  return { service, reads, writer };
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
+  const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
+  const service = new TournamentPrizeService(reads, transaction, cache, diagnostics);
+  return { service, reads, writer, cache, diagnostics };
 }
 
 describe("TournamentPrizeService", () => {
@@ -47,6 +56,19 @@ describe("TournamentPrizeService", () => {
     expect(writer.participants).toHaveBeenCalledWith("cup");
     expect(writer.replace).toHaveBeenCalledWith("cup", [entry]);
     expect(reads.byTournament).toHaveBeenCalledWith("cup");
+  });
+
+  it("invalidates the cached tournament and keeps the saved distribution when Redis fails", async () => {
+    const { service, cache, diagnostics } = setup();
+    cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
+
+    await expect(service.setDistribution("cup", [entry])).resolves.toMatchObject({ prizes: [] });
+
+    expect(cache.invalidateTournament).toHaveBeenCalledWith("cup");
+    expect(diagnostics.error).toHaveBeenCalledWith(
+      "Tournament cache invalidation failed",
+      expect.any(Error),
+    );
   });
 
   it("rejects an unknown tournament before writing", async () => {
