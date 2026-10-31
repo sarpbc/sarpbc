@@ -234,6 +234,8 @@ describe("hostile content", () => {
     assertFast("::matches{".repeat(50_000));
     assertFast(`::matches{${"a".repeat(200_000)}`);
     assertFast(`:matches{${'a="b" '.repeat(40_000)}}`);
+    assertFast(`:matches{${"0".repeat(200_000)}}`);
+    assertFast(`:matches{${"0".repeat(200_000)}="1"}`);
   });
 
   it("scans backtick runs in linear time", () => {

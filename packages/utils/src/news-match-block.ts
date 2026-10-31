@@ -25,7 +25,6 @@ const MATCH_TAG_SOURCE = String.raw`::matches\{([^{}]*)\}[ \t]*\r?\n::|::?matche
 const MATCH_TAG_PATTERN = new RegExp(`^(?:${MATCH_TAG_SOURCE})`);
 const MATCH_TAG_GLOBAL_PATTERN = new RegExp(MATCH_TAG_SOURCE, "g");
 const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/;
-const ATTR_PATTERN = /(\w+)="([^"]*)"/g;
 const LIMIT_PATTERN = /^[1-9]\d*$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const BACKTICK_RUN_PATTERN = /`+/g;
@@ -66,9 +65,12 @@ function parseAttrs(inner: string): Record<string, string> | null {
   if (!ATTRS_PATTERN.test(source)) {
     return null;
   }
+  const parts = source.split('"');
   const attrs: Record<string, string> = {};
-  for (const [, name, value] of source.matchAll(ATTR_PATTERN)) {
-    if (name === undefined || value === undefined || !ATTR_NAMES.has(name) || name in attrs) {
+  for (let index = 0; index + 1 < parts.length; index += 2) {
+    const name = parts[index]?.trim().slice(0, -1) ?? "";
+    const value = parts[index + 1] ?? "";
+    if (!ATTR_NAMES.has(name) || name in attrs) {
       return null;
     }
     attrs[name] = value;
