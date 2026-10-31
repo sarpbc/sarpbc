@@ -1,8 +1,10 @@
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
+import type { MatchBlockSelector } from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
 import type { MatchListQueryOptions } from "./match-list-filters";
+import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type {
   CompetitionDiagnostics,
@@ -86,6 +88,10 @@ export class MatchService {
 
   async findResultsAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
     return this.reads.list("results", options);
+  }
+
+  async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {
+    return findMatchBlocks(this.reads, blocks, now);
   }
 
   async findRecentlyEnded({

@@ -107,3 +107,34 @@ export interface ProfileMatchListItem {
     league?: { id: string; name: string };
   };
 }
+
+export type MatchBlockSelector =
+  | { kind: "match"; id: string }
+  | { kind: "matches"; ids: string[] }
+  | { kind: "tournament"; id: string; limit: number }
+  | { kind: "team"; id: string; limit: number };
+
+export type MatchBlockState = "upcoming" | "live" | "finished";
+
+export interface MatchBlockItem {
+  id: string;
+  publicId: number;
+  slug: string;
+  beginAt: Date | string | null;
+  state: MatchBlockState;
+  startgg: boolean;
+  commentCount: number;
+  participants: { id: string; team: { name: string } }[];
+  results: { participant: string; score: number }[];
+  tournament: {
+    id: string;
+    name: string;
+    slug: string;
+    event: TournamentEventRef;
+    league?: { id: string; name: string };
+  };
+}
+
+export interface MatchBlocksResponse {
+  blocks: Record<string, MatchBlockItem[]>;
+}

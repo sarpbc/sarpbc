@@ -29,6 +29,24 @@ export {
   type NewsEntityTagKind,
 } from "./news-entity-tag.ts";
 export {
+  NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
+  NEWS_MATCH_BLOCK_MAX_MATCHES,
+  NEWS_MATCH_BLOCKS_PER_REQUEST,
+  extractNewsMatchBlocks,
+  findInvalidNewsMatchTags,
+  newsMatchBlockFromAttrs,
+  newsMatchBlockKey,
+  newsMatchBlockToAttrs,
+  parseNewsMatchBlockKey,
+  parseNewsMatchTag,
+  serializeNewsMatchTag,
+  stripNewsMatchTags,
+  type NewsMatchBlock,
+  type NewsMatchBlockAttrs,
+  type NewsMatchBlockKind,
+  type NewsMatchTag,
+} from "./news-match-block.ts";
+export {
   isTweetImageUrl,
   parseNewsTweetTag,
   parseTweetUrl,
