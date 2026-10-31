@@ -29,12 +29,12 @@ jobs:
       admin: ${{ steps.filter.outputs.admin }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Filter paths
-        uses: dorny/paths-filter@v3.0.4
+        uses: dorny/paths-filter@v4.0.3
         id: filter
         with:
           filters: |
@@ -89,15 +89,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       # Version comes from package.json "packageManager" (do not pin here).
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@v6.1.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -122,15 +122,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@v6.1.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -169,14 +169,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@v6.1.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -200,14 +200,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.1.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v4.4.0
+      - uses: pnpm/action-setup@v6.1.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
