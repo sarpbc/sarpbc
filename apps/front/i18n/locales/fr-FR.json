@@ -22,6 +22,24 @@
     "errorPage": {
       "notFound": "Introuvable",
       "serverError": "Erreur serveur"
+    },
+    "placement": {
+      "one": "{n}er",
+      "two": "{n}e",
+      "few": "{n}e",
+      "other": "{n}e"
+    },
+    "prizes": {
+      "dataFrom": "Données issues de",
+      "earnings": {
+        "title": "Gains",
+        "total": "Total",
+        "undated": "Date à confirmer",
+        "error": "Impossible de charger les gains. Vérifiez votre connexion et réessayez.",
+        "empty": "Aucun gain enregistré pour le moment.",
+        "emptyHint": "Les gains apparaissent ici dès que la répartition d’un tournoi est enregistrée.",
+        "splitHint": "Un gain partagé par plusieurs joueurs est réparti à parts égales entre eux."
+      }
     }
   },
   "nationalities": {
@@ -1248,7 +1266,8 @@
           "info": "Infos",
           "matches": "Matchs",
           "events": "Événements",
-          "trophies": "Trophées"
+          "trophies": "Trophées",
+          "earnings": "Gains"
         },
         "events": {
           "sectionTitle": "Événements",
@@ -1336,7 +1355,8 @@
           "info": "Infos",
           "matches": "Matchs",
           "events": "Événements",
-          "trophies": "Trophées"
+          "trophies": "Trophées",
+          "earnings": "Gains"
         },
         "roster": {
           "empty": "Aucun joueur n'est actuellement listé.",
@@ -1468,7 +1488,11 @@
           "teamsCount": "{count} équipe | {count} équipes",
           "champion": "Champion :"
         },
-        "sections": "Sections du tournoi"
+        "sections": "Sections du tournoi",
+        "prizes": {
+          "title": "Répartition des gains",
+          "error": "Impossible de charger la répartition des gains. Vérifiez votre connexion et réessayez."
+        }
       }
     },
     "matches": {

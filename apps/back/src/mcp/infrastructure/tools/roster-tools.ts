@@ -3,6 +3,7 @@ import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
 import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../roster/domain/roster";
 import {
+  ROSTER_PROPOSAL_PERMISSIONS,
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,
 } from "../../../roster-proposal/domain/roster-proposal";
@@ -10,6 +11,12 @@ import type { McpToolContext } from "../mcp-tool-context";
 import { runStaffReadTool, runWriteTool } from "../permission-gate";
 import { adminRosterProposalsUrl } from "../urls";
 import { requireUpdateFields } from "./update-fields";
+import {
+  MAX_PRIZE_AMOUNT,
+  MAX_PRIZE_ENTRIES,
+  MAX_PRIZE_PLAYERS,
+  isIso4217Code,
+} from "@sarpbc/utils";
 
 const sourceUrlSchema = z
   .string()
@@ -309,10 +316,66 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
   );
 
   server.registerTool(
+    "propose_tournament_prizes",
+    {
+      description:
+        "Propose the prize distribution of one tournament stage. Requires tournaments.manage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
+      inputSchema: {
+        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        prizes: z
+          .array(
+            z.object({
+              placement: z
+                .number()
+                .int()
+                .min(1)
+                .describe("Final placement; tied teams share the same placement."),
+              amount: z
+                .number()
+                .int()
+                .min(1)
+                .max(MAX_PRIZE_AMOUNT)
+                .describe("Whole amount in the stated currency."),
+              currency: z
+                .string()
+                .refine(isIso4217Code, "Use an ISO 4217 currency code")
+                .describe("ISO 4217 currency code as stated by the source (e.g. USD, EUR)."),
+              teamId: z.string().uuid().describe("Team UUID."),
+              playerIds: z
+                .array(z.string().uuid())
+                .max(MAX_PRIZE_PLAYERS)
+                .optional()
+                .describe(
+                  "Optional player UUIDs from the team's stage roster who share this prize.",
+                ),
+            }),
+          )
+          .max(MAX_PRIZE_ENTRIES)
+          .describe("Every paid placement of the stage."),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ tournamentId, prizes, sourceUrl }) =>
+      runWriteTool(user, "propose_tournament_prizes", "tournaments.manage", () =>
+        propose(
+          {
+            kind: "set_tournament_prizes",
+            tournamentId,
+            prizes: prizes.map(({ playerIds, ...prize }) => ({
+              ...prize,
+              playerIds: playerIds ?? [],
+            })),
+          },
+          sourceUrl,
+        ),
+      ),
+  );
+
+  server.registerTool(
     "list_roster_proposals",
     {
       description:
-        "List roster proposals, pending by default. Requires players.manage. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.",
+        "List roster proposals, pending by default. Requires players.manage, teams.manage or tournaments.manage. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.",
       inputSchema: {
         status: z
           .enum(ROSTER_PROPOSAL_STATUSES)
@@ -321,7 +384,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
       },
     },
     async ({ status }) =>
-      runStaffReadTool(user, "players.manage", async () => {
+      runStaffReadTool(user, ROSTER_PROPOSAL_PERMISSIONS, async () => {
         const { proposals, names } = await ctx.rosterProposalService.list(status ?? "pending");
         return {
           proposals: proposals.map((proposal) => ({

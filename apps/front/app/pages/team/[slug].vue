@@ -2,7 +2,7 @@
 import type { TabsItem } from "@nuxt/ui";
 import { selectActiveRosterPlayers } from "@sarpbc/utils";
 
-type TeamProfileTab = "info" | "matches" | "events" | "trophies";
+type TeamProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
 
 const route = useRoute();
 const router = useRouter();
@@ -80,7 +80,7 @@ const showRosterHistory = computed(
 
 function tabFromQuery(): TeamProfileTab {
   const value = route.query.tab;
-  if (value === "matches" || value === "events" || value === "trophies") {
+  if (value === "matches" || value === "events" || value === "trophies" || value === "earnings") {
     return value;
   }
   return "info";
@@ -123,7 +123,9 @@ watch(
 
 watch(active, (tab) => {
   const nextTab: TeamProfileTab =
-    tab === "matches" || tab === "events" || tab === "trophies" ? tab : "info";
+    tab === "matches" || tab === "events" || tab === "trophies" || tab === "earnings"
+      ? tab
+      : "info";
   if (nextTab === tabFromQuery()) return;
   replaceTabQuery(nextTab);
 });
@@ -133,6 +135,7 @@ const tabItems = computed<TabsItem[]>(() => [
   { value: "matches", label: t("page.team.slug.tabs.matches") },
   { value: "events", label: t("page.team.slug.tabs.events") },
   { value: "trophies", label: t("page.team.slug.tabs.trophies") },
+  { value: "earnings", label: t("page.team.slug.tabs.earnings") },
 ]);
 
 const title = computed(() =>
@@ -249,6 +252,8 @@ setPageSeo({
         :has-error="Boolean(eventsError)"
         @retry="refreshEvents()"
       />
+
+      <EarningsSection v-else-if="active === 'earnings'" owner="team" :owner-id="team.id" />
 
       <TeamTrophyCabinet
         v-else

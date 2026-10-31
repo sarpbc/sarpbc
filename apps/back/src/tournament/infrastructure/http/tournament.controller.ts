@@ -16,6 +16,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -26,6 +27,8 @@ import { ManualTournamentService } from "../../application/manual-tournament.ser
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
+import { TournamentPrizeService } from "../../application/tournament-prize.service";
+import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import {
   mapProfileMatchListItem,
@@ -42,6 +45,8 @@ export class TournamentController {
     private matchService: MatchService,
     private tournamentRead: CachedTournamentRead,
     private playerAwardService: PlayerAwardService,
+    private tournamentPrizeService: TournamentPrizeService,
+    private tournamentPrizesRead: CachedTournamentPrizesRead,
   ) {}
 
   @Get()
@@ -180,6 +185,21 @@ export class TournamentController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAward(@Param("id") tournamentId: string, @Param("awardId") awardId: string) {
     await this.playerAwardService.delete(tournamentId, awardId);
+  }
+
+  @Get(":id/prizes")
+  async getPrizes(@Param("id") id: string) {
+    return this.tournamentPrizesRead.findByTournamentId(id);
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/prizes")
+  async setPrizes(
+    @Param("id") tournamentId: string,
+    @Body({ schema: SetTournamentPrizesDto }) dto: SetTournamentPrizesDto,
+  ) {
+    return this.tournamentPrizeService.setDistribution(tournamentId, dto.prizes);
   }
 
   @RequirePermissions("tournaments.manage")

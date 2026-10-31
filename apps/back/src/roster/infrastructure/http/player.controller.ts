@@ -30,6 +30,7 @@ import { mapTournament } from "../../../tournament/infrastructure/http/tournamen
 import { MatchService } from "../../../tournament/application/match/match.service";
 import { TournamentService } from "../../../tournament/application/tournament.service";
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
+import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 
 @Controller("player")
 export class PlayerController {
@@ -39,6 +40,7 @@ export class PlayerController {
     private matchService: MatchService,
     private tournamentService: TournamentService,
     private playerAwardService: PlayerAwardService,
+    private tournamentPrizeService: TournamentPrizeService,
   ) {}
 
   @Get()
@@ -161,6 +163,18 @@ export class PlayerController {
     }
     const awards = await this.playerAwardService.findByPlayerId(player.id);
     return { awards };
+  }
+
+  @Get(":id/earnings")
+  async getEarnings(@Param("id", ParseUUIDPipe) id: string) {
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const earnings = await this.tournamentPrizeService.playerEarnings(player.id, {
+      redistributableOnly: false,
+    });
+    return { earnings };
   }
 
   @Get(":id/tournaments")

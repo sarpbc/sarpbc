@@ -4,6 +4,7 @@ import type {
   TournamentDetail,
   TournamentListItem,
   TournamentMatchListItem,
+  TournamentPrizes,
 } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
@@ -225,4 +226,26 @@ export async function deleteTournamentAward(
     console.error("Error deleting tournament award:", error);
     return false;
   }
+}
+
+export interface TournamentPrizeInput {
+  placement: number;
+  amount: number;
+  currency: string;
+  teamId: string;
+  playerIds: string[];
+}
+
+export async function getTournamentPrizes(tournamentId: string): Promise<TournamentPrizes> {
+  return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
+}
+
+export async function setTournamentPrizes(
+  tournamentId: string,
+  prizes: TournamentPrizeInput[],
+): Promise<TournamentPrizes> {
+  return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
+    method: "PUT",
+    body: { prizes },
+  });
 }

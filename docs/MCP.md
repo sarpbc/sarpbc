@@ -44,16 +44,19 @@ Staff AI assistants can call the SARPBC API through a [Model Context Protocol](h
 
 Read tools (any valid PAT):
 
-| Tool                   | Description                              |
-| ---------------------- | ---------------------------------------- |
-| `search_players`       | Search players by name                   |
-| `search_teams`         | Search teams by name                     |
-| `get_player`           | Player profile by slug or id             |
-| `get_team`             | Team profile and roster by slug or id    |
-| `get_tournaments`      | List tournaments (`activeOnly`, `limit`) |
-| `get_tournament`       | Tournament detail with matches           |
-| `get_upcoming_matches` | Upcoming and live matches                |
-| `get_match_results`    | Recent finished match results            |
+| Tool                    | Description                              |
+| ----------------------- | ---------------------------------------- |
+| `search_players`        | Search players by name                   |
+| `search_teams`          | Search teams by name                     |
+| `get_player`            | Player profile by slug or id             |
+| `get_team`              | Team profile and roster by slug or id    |
+| `get_tournaments`       | List tournaments (`activeOnly`, `limit`) |
+| `get_tournament`        | Tournament detail with matches           |
+| `get_upcoming_matches`  | Upcoming and live matches                |
+| `get_match_results`     | Recent finished match results            |
+| `get_tournament_prizes` | Prize distribution of a tournament stage |
+| `get_team_earnings`     | Team earnings by year, per currency      |
+| `get_player_earnings`   | Player earnings by year, per currency    |
 
 News tools (`news.manage`):
 
@@ -78,24 +81,27 @@ Write tools (staff permission required):
 
 Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 
-| Tool                      | Permission       | Description once approved                                                                                  |
-| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| `add_player_to_team`      | `players.manage` | Close the player's open contracts and open one with the new team                                           |
-| `remove_player_from_team` | `players.manage` | Close the contract and set the player `free_agent` or `retired`                                            |
-| `create_player`           | `players.manage` | Create a player without a team (name, country, status, role)                                               |
-| `update_player`           | `players.manage` | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`) |
-| `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                                        |
-| `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                               |
-| `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                     |
-| `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team               |
+| Tool                        | Permission           | Description once approved                                                                                      |
+| --------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `add_player_to_team`        | `players.manage`     | Close the player's open contracts and open one with the new team                                               |
+| `remove_player_from_team`   | `players.manage`     | Close the contract and set the player `free_agent` or `retired`                                                |
+| `create_player`             | `players.manage`     | Create a player without a team (name, country, status, role)                                                   |
+| `update_player`             | `players.manage`     | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`)     |
+| `create_team`               | `teams.manage`       | Create a team (name, country, logo)                                                                            |
+| `update_team`               | `teams.manage`       | Update name, country or logo, or mark an empty team inactive                                                   |
+| `merge_players`             | `players.manage`     | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                         |
+| `merge_teams`               | `teams.manage`       | Move a duplicate's contracts, current players and tournament participations to the kept team                   |
+| `propose_tournament_prizes` | `tournaments.manage` | Replace a tournament stage's prize distribution (placement, amount, ISO 4217 currency, team, optional players) |
 
-`list_roster_proposals` (`players.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
+`list_roster_proposals` (`players.manage`, `teams.manage` or `tournaments.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
 
-A merged duplicate keeps its row and slug; its public page redirects to the kept entity and listings skip it. Merges are refused when both entities are distinct PandaScore records, when two players play for different current teams, or when two teams took part in the same tournament.
+A merged duplicate keeps its row and slug; its public page redirects to the kept entity and listings skip it. Merges are refused when both entities are distinct PandaScore records, when two players play for different current teams, or when two teams took part in the same tournament. If both teams still hold a prize on the same stage, the kept team's prize stays and gains the duplicate's players.
 
 ## Data sources and start.gg
 
 Players, teams, tournaments and matches record a `source`: `pandascore`, `manual` or `startgg`. start.gg allows displaying its data with credit. start.gg players and teams are public: `search_*` and `get_*` return them with `source: "startgg"`, including as participants of PandaScore or manual matches. start.gg tournaments and matches are not redistributed: MCP reads exclude them in the query and open-data exports must filter them the same way. A roster proposal whose `sourceUrl` is on `start.gg` creates `startgg` players and teams; `create_tournament` takes `source: "startgg"` explicitly, and matches added to a start.gg tournament inherit it. The public player, team and tournament responses expose `source` so the site can credit start.gg.
+
+Prize distributions record, per tournament stage, a placement, a whole amount in the currency the source states, a team and optionally the players who share it. Each team must be a participant of the stage and each player must be on that team's stage roster, whether the distribution comes from the admin editor or an approved proposal. `propose_tournament_prizes` refuses start.gg tournaments. Amounts are never converted: totals are given per currency, and a prize that lists players is split equally between them on player earnings, rounded to the minor unit of its currency (no cents for JPY or KRW). The overall prize pool stays the one synced from PandaScore (`prizepool`). Prize distributions of start.gg tournaments appear on the site with a start.gg credit, but `get_tournament_prizes`, `get_team_earnings` and `get_player_earnings` do not return them: the earnings tools exclude them in the query and `get_tournament_prizes` answers not found after reading the distribution, like start.gg tournaments and matches.
 
 `get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
 

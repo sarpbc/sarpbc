@@ -2,7 +2,7 @@
 import { DateFormatter } from "@internationalized/date";
 import type { LocationQuery } from "vue-router";
 
-type PlayerProfileTab = "info" | "matches" | "events" | "trophies";
+type PlayerProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -88,7 +88,7 @@ const birthday = computed(() =>
 );
 
 function parsePlayerTab(value: LocationQuery[string] | number | undefined): PlayerProfileTab {
-  if (value === "matches" || value === "events" || value === "trophies") {
+  if (value === "matches" || value === "events" || value === "trophies" || value === "earnings") {
     return value;
   }
   return "info";
@@ -101,6 +101,7 @@ const tabItems = computed(() => [
   { value: "matches" as const, label: t("page.player.slug.tabs.matches") },
   { value: "events" as const, label: t("page.player.slug.tabs.events") },
   { value: "trophies" as const, label: t("page.player.slug.tabs.trophies") },
+  { value: "earnings" as const, label: t("page.player.slug.tabs.earnings") },
 ]);
 
 function setTab(nextTab: PlayerProfileTab) {
@@ -260,6 +261,8 @@ setPageSeo({
         :has-error="Boolean(eventsError)"
         @retry="refreshEvents()"
       />
+
+      <EarningsSection v-else-if="tab === 'earnings'" owner="player" :owner-id="playerId" />
 
       <template v-else>
         <PlayerTrophyCabinet

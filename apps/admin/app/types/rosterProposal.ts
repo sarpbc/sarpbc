@@ -53,6 +53,17 @@ export type RosterChange =
       startDate?: string;
       endDate?: string | null;
       contractRole?: ContractRole;
+    }
+  | {
+      kind: "set_tournament_prizes";
+      tournamentId: string;
+      prizes: Array<{
+        placement: number;
+        amount: number;
+        currency: string;
+        teamId: string;
+        playerIds: string[];
+      }>;
     };
 
 export interface RosterProposal {

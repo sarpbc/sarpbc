@@ -6,11 +6,11 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 function denyIfMissingPermission(
   user: PatUser,
-  permission: StaffPermission,
+  permissions: readonly StaffPermission[],
 ): CallToolResult | null {
-  if (!roleHasPermission(user.role, permission)) {
+  if (!permissions.some((permission) => roleHasPermission(user.role, permission))) {
     return toolErrorResult(
-      `You need the ${permission} permission. Ask an admin to update your staff role.`,
+      `You need the ${permissions.join(" or ")} permission. Ask an admin to update your staff role.`,
     );
   }
   return null;
@@ -27,10 +27,10 @@ export async function runReadTool(handler: () => Promise<unknown>): Promise<Call
 
 export async function runStaffReadTool(
   user: PatUser,
-  permission: StaffPermission,
+  permissions: readonly StaffPermission[],
   handler: () => Promise<unknown>,
 ): Promise<CallToolResult> {
-  const denied = denyIfMissingPermission(user, permission);
+  const denied = denyIfMissingPermission(user, permissions);
   if (denied) {
     return denied;
   }
@@ -43,7 +43,7 @@ export async function runWriteTool(
   permission: StaffPermission,
   handler: () => Promise<{ result: unknown; entityId?: string; sourceUrl?: string }>,
 ): Promise<CallToolResult> {
-  const denied = denyIfMissingPermission(user, permission);
+  const denied = denyIfMissingPermission(user, [permission]);
   if (denied) {
     return denied;
   }

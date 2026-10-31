@@ -1,4 +1,10 @@
-import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import type {
+  DataSource,
+  PlayerAwardType,
+  PlayerProfileAward,
+  TournamentAwardListItem,
+  TournamentPrizes,
+} from "@sarpbc/types";
 import type {
   League,
   Match,
@@ -16,6 +22,8 @@ import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/applic
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
+import type { PrizeEntry } from "../domain/prize-distribution";
+import type { EarningsLine } from "./earnings";
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;
   searchByName(options: { name: string; limit?: number; offset?: number }): Promise<Tournament[]>;
@@ -130,12 +138,34 @@ export interface AwardQueries {
   byPlayer(id: string): Promise<PlayerProfileAward[] | null>;
   byTournament(id: string): Promise<TournamentAwardListItem[] | null>;
 }
+export interface EarningsScope {
+  redistributableOnly: boolean;
+}
+export interface PrizeQueries {
+  tournamentSource(id: string): Promise<DataSource | null>;
+  byTournament(id: string): Promise<TournamentPrizes | null>;
+  byTeam(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
+  byPlayer(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
+}
+export interface PrizeParticipant {
+  teamId: string;
+  playerIds: string[];
+}
+export interface PrizeWriter {
+  tournamentExists(id: string): Promise<boolean>;
+  participants(tournamentId: string): Promise<PrizeParticipant[]>;
+  replace(tournamentId: string, entries: PrizeEntry[]): Promise<void>;
+}
+export interface PrizeTransaction {
+  run<T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>): Promise<T>;
+}
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;
   events: EventWriter;
   matches: MatchWriter;
   rosters: RosterIdentityWriter;
   awards: AwardWriter;
+  prizes: PrizeWriter;
 }
 export interface CompetitionTransaction {
   run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T>;
