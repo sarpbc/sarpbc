@@ -1,33 +1,45 @@
 name: Create Release Tag
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
   release-tag:
     name: Create Dokploy release tag
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    env:
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ env.SHA }}
 
       - name: Create and push tag
         id: tag
         shell: bash
         run: |
+          git fetch --quiet --force --tags origin
+          latest="$(git for-each-ref --count=1 --sort=-creatordate --format='%(refname:short)' 'refs/tags/v*')"
+          if [ -n "$latest" ] && git merge-base --is-ancestor "$SHA" "$latest"; then
+            echo "$SHA is already released by $latest or an earlier tag. Nothing to create."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           tag="v$(date -u +'%Y.%m.%d').${GITHUB_RUN_NUMBER}"
 
           if git rev-parse "$tag" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
@@ -38,7 +50,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$tag" -m "Release $tag"
+          git tag -a "$tag" "$SHA" -m "Release $tag"
           git push origin "$tag"
 
           echo "created=true" >> "$GITHUB_OUTPUT"

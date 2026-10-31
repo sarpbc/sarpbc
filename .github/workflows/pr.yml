@@ -1,8 +1,11 @@
-name: Pull Request Checks
+name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+  push:
     branches:
       - main
 
@@ -12,31 +15,12 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  git-names:
-    name: Branch and commit names
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Test naming checks
-        run: node --test scripts/check-git-names.test.mjs
-
-      - name: Check branch, commits and PR title
-        run: node scripts/check-git-names.mjs pr
-
   changes:
     name: Detect changes
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       quality: ${{ steps.filter.outputs.quality }}
@@ -75,6 +59,8 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
             frontend:
               - 'apps/front/**'
               - 'packages/**'
@@ -93,7 +79,7 @@ jobs:
   quality:
     name: Lint and format
     needs: changes
-    if: needs.changes.outputs.quality == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.quality == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -124,11 +110,13 @@ jobs:
   backend:
     name: Backend tests and coverage
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.backend == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
@@ -147,12 +135,17 @@ jobs:
           pnpm --filter back typecheck:tests
           pnpm --filter @sarpbc/utils test
 
+      - name: Migration names
+        run: node apps/back/scripts/check-migrations.mjs
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || '' }}
+
       - name: Architecture and HTTP contracts
         run: |
           pnpm --filter back test:architecture
           pnpm --filter back test:contracts
 
-      - name: Unit, HTTP and PostgreSQL/Redis coverage
+      - name: Unit, e2e and integration tests (PostgreSQL/Redis, migrations) with coverage
         run: pnpm --filter back test:cov
         env:
           PANDASCORE_API_TOKEN: test-token
@@ -163,7 +156,7 @@ jobs:
   frontend:
     name: Frontend typecheck and build
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.frontend == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -192,7 +185,7 @@ jobs:
   admin:
     name: Admin typecheck and build
     needs: changes
-    if: needs.changes.outputs.admin == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.admin == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -220,14 +213,13 @@ jobs:
 
   ci:
     name: CI
-    needs: [git-names, changes, quality, backend, frontend, admin]
+    needs: [changes, quality, backend, frontend, admin]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check results
         run: |
           results=(
-            "${{ needs.git-names.result }}"
             "${{ needs.changes.result }}"
             "${{ needs.quality.result }}"
             "${{ needs.backend.result }}"
