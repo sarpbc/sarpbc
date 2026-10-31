@@ -26,6 +26,24 @@
     "errorPage": {
       "notFound": "Not Found",
       "serverError": "Server Error"
+    },
+    "placement": {
+      "one": "{n}st",
+      "two": "{n}nd",
+      "few": "{n}rd",
+      "other": "{n}th"
+    },
+    "prizes": {
+      "dataFrom": "Data from",
+      "earnings": {
+        "title": "Earnings",
+        "total": "Total",
+        "undated": "Date TBD",
+        "error": "Could not load earnings. Check your connection and try again.",
+        "empty": "No prize money recorded yet.",
+        "emptyHint": "Earnings appear here once a tournament's prize distribution is recorded.",
+        "splitHint": "A prize shared by several players is split equally between them."
+      }
     }
   },
   "nationalities": {
@@ -1258,7 +1276,8 @@
           "info": "Info",
           "matches": "Matches",
           "events": "Events",
-          "trophies": "Trophies"
+          "trophies": "Trophies",
+          "earnings": "Earnings"
         },
         "events": {
           "sectionTitle": "Events",
@@ -1347,7 +1366,8 @@
           "info": "Info",
           "matches": "Matches",
           "events": "Events",
-          "trophies": "Trophies"
+          "trophies": "Trophies",
+          "earnings": "Earnings"
         },
         "roster": {
           "empty": "No players currently listed.",
@@ -1479,7 +1499,11 @@
           "teamsCount": "{count} team | {count} teams",
           "champion": "Champion:"
         },
-        "sections": "Tournament sections"
+        "sections": "Tournament sections",
+        "prizes": {
+          "title": "Prize Distribution",
+          "error": "Could not load the prize distribution. Check your connection and try again."
+        }
       }
     },
     "matches": {

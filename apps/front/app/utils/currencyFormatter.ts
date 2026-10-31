@@ -66,3 +66,13 @@ export function createCurrencyFormatter(locale: string = "en-US") {
     },
   };
 }
+
+export function formatPrizeAmount(amount: number, currency: string, locale: string): string {
+  const fractionDigits = Number.isInteger(amount) ? 0 : 2;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(amount);
+}
