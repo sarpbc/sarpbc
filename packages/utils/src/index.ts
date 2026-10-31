@@ -32,6 +32,7 @@ export {
 export {
   NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
   NEWS_MATCH_BLOCK_MAX_MATCHES,
+  NEWS_MATCH_BLOCKS_PER_REQUEST,
   extractNewsMatchBlocks,
   findInvalidNewsMatchTags,
   newsMatchBlockFromAttrs,

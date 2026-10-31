@@ -1,11 +1,10 @@
+import type { MatchBlockSelector } from "@sarpbc/types";
+
 export const NEWS_MATCH_BLOCK_MAX_MATCHES = 10;
 export const NEWS_MATCH_BLOCK_DEFAULT_LIMIT = 5;
+export const NEWS_MATCH_BLOCKS_PER_REQUEST = 20;
 
-export type NewsMatchBlock =
-  | { kind: "match"; id: string }
-  | { kind: "matches"; ids: string[] }
-  | { kind: "tournament"; id: string; limit: number }
-  | { kind: "team"; id: string; limit: number };
+export type NewsMatchBlock = MatchBlockSelector;
 
 export type NewsMatchBlockKind = NewsMatchBlock["kind"];
 
@@ -22,17 +21,18 @@ export interface NewsMatchTag {
   raw: string;
 }
 
-const MATCH_TAG_SOURCE = String.raw`::matches\{([^}]*)\}[ \t]*\n?[ \t]*::|::?matches\{([^}]*)\}`;
+const MATCH_TAG_SOURCE = String.raw`::matches\{([^{}]*)\}[ \t]*\r?\n::|::?matches\{([^{}]*)\}`;
 const MATCH_TAG_PATTERN = new RegExp(`^(?:${MATCH_TAG_SOURCE})`);
 const MATCH_TAG_GLOBAL_PATTERN = new RegExp(MATCH_TAG_SOURCE, "g");
-const ATTR_PATTERN = /(\w+)="((?:\\.|[^"\\])*)"/g;
+const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/;
+const ATTR_PATTERN = /(\w+)="([^"]*)"/g;
+const LIMIT_PATTERN = /^[1-9]\d*$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const BACKTICK_RUN_PATTERN = /`+/g;
+const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})/;
+const MAX_TAG_INDENT = 3;
 const SELECTORS = ["match", "ids", "tournament", "team"] as const;
 const ATTR_NAMES = new Set<string>([...SELECTORS, "limit"]);
-
-function unescapeAttrValue(value: string): string {
-  return value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-}
 
 function isUuid(value: string): boolean {
   return UUID_PATTERN.test(value);
@@ -42,10 +42,12 @@ function parseLimit(value: string | number | null | undefined): number | null {
   if (value == null || value === "") {
     return NEWS_MATCH_BLOCK_DEFAULT_LIMIT;
   }
-  const limit = Number(String(value).trim());
-  return Number.isInteger(limit) && limit >= 1 && limit <= NEWS_MATCH_BLOCK_MAX_MATCHES
-    ? limit
-    : null;
+  const text = String(value).trim();
+  if (!LIMIT_PATTERN.test(text)) {
+    return null;
+  }
+  const limit = Number(text);
+  return limit <= NEWS_MATCH_BLOCK_MAX_MATCHES ? limit : null;
 }
 
 function parseIds(value: string): string[] | null {
@@ -59,17 +61,32 @@ function parseIds(value: string): string[] | null {
   return new Set(ids).size === ids.length ? ids : null;
 }
 
+function parseAttrs(inner: string): Record<string, string> | null {
+  const source = inner.trim();
+  if (!ATTRS_PATTERN.test(source)) {
+    return null;
+  }
+  const attrs: Record<string, string> = {};
+  for (const [, name, value] of source.matchAll(ATTR_PATTERN)) {
+    if (name === undefined || value === undefined || !ATTR_NAMES.has(name) || name in attrs) {
+      return null;
+    }
+    attrs[name] = value;
+  }
+  return attrs;
+}
+
 export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): NewsMatchBlock | null {
   const present = SELECTORS.filter((name) => {
     const value = attrs[name];
     return value != null && value.trim() !== "";
   });
-  if (present.length !== 1) {
+  const [selector, ...others] = present;
+  if (selector === undefined || others.length > 0) {
     return null;
   }
 
-  const selector = present[0]!;
-  const value = attrs[selector]!.trim();
+  const value = attrs[selector]?.trim() ?? "";
   const hasLimit = attrs.limit != null && attrs.limit !== "";
 
   switch (selector) {
@@ -116,17 +133,8 @@ export function parseNewsMatchTag(raw: string): NewsMatchTag | null {
     return null;
   }
 
-  const attrs: Record<string, string> = {};
-  for (const attr of (match[1] ?? match[2] ?? "").matchAll(ATTR_PATTERN)) {
-    if (attr[1] != null && attr[2] != null) {
-      attrs[attr[1]] = unescapeAttrValue(attr[2]);
-    }
-  }
-  if (Object.keys(attrs).some((name) => !ATTR_NAMES.has(name))) {
-    return null;
-  }
-
-  const block = newsMatchBlockFromAttrs(attrs);
+  const attrs = parseAttrs(match[1] ?? match[2] ?? "");
+  const block = attrs ? newsMatchBlockFromAttrs(attrs) : null;
   return block ? { block, raw: match[0] } : null;
 }
 
@@ -179,21 +187,113 @@ export function parseNewsMatchBlockKey(key: string): NewsMatchBlock | null {
   return block && newsMatchBlockKey(block) === key ? block : null;
 }
 
+function maskInlineCode(line: string): string {
+  const runs = [...line.matchAll(BACKTICK_RUN_PATTERN)].map((run) => ({
+    start: run.index,
+    length: run[0].length,
+  }));
+  const closers = new Map<number, number>();
+  const nextCloser: (number | undefined)[] = [];
+  for (let index = runs.length - 1; index >= 0; index -= 1) {
+    const run = runs[index];
+    if (run) {
+      nextCloser[index] = closers.get(run.length);
+      closers.set(run.length, index);
+    }
+  }
+
+  let masked = "";
+  let copied = 0;
+  let index = 0;
+  while (index < runs.length) {
+    const open = runs[index];
+    const closeIndex = nextCloser[index];
+    const close = closeIndex === undefined ? undefined : runs[closeIndex];
+    if (!open || closeIndex === undefined || !close) {
+      index += 1;
+      continue;
+    }
+    const end = close.start + close.length;
+    masked += line.slice(copied, open.start) + "x".repeat(end - open.start);
+    copied = end;
+    index = closeIndex + 1;
+  }
+  return masked + line.slice(copied);
+}
+
+function maskCode(content: string): string {
+  let fence: string | null = null;
+  return content
+    .split("\n")
+    .map((line) => {
+      const marker = FENCE_PATTERN.exec(line)?.[1];
+      if (fence !== null) {
+        if (
+          marker !== undefined &&
+          marker[0] === fence[0] &&
+          marker.length >= fence.length &&
+          line.trim() === marker
+        ) {
+          fence = null;
+        }
+        return "x".repeat(line.length);
+      }
+      if (marker !== undefined) {
+        fence = marker;
+        return "x".repeat(line.length);
+      }
+      return maskInlineCode(line);
+    })
+    .join("\n");
+}
+
+function isLineSpace(char: string | undefined): boolean {
+  return char === " " || char === "\t" || char === "\r";
+}
+
+function isOwnLine(text: string, start: number, end: number): boolean {
+  let before = start;
+  while (start - before < MAX_TAG_INDENT && text[before - 1] === " ") {
+    before -= 1;
+  }
+  let after = end;
+  while (isLineSpace(text[after])) {
+    after += 1;
+  }
+  return (
+    (before === 0 || text[before - 1] === "\n") && (after === text.length || text[after] === "\n")
+  );
+}
+
+interface ScannedMatchTag {
+  raw: string;
+  tag: NewsMatchTag | null;
+}
+
+function scanNewsMatchTags(content: string): ScannedMatchTag[] {
+  const masked = maskCode(content);
+  return [...masked.matchAll(MATCH_TAG_GLOBAL_PATTERN)].map((match) => {
+    const end = match.index + match[0].length;
+    const raw = content.slice(match.index, end);
+    const tag = isOwnLine(masked, match.index, end) ? parseNewsMatchTag(raw) : null;
+    return { raw, tag };
+  });
+}
+
 export function extractNewsMatchBlocks(content: string): NewsMatchBlock[] {
   const blocks = new Map<string, NewsMatchBlock>();
-  for (const match of content.matchAll(MATCH_TAG_GLOBAL_PATTERN)) {
-    const parsed = parseNewsMatchTag(match[0]);
-    if (parsed) {
-      blocks.set(newsMatchBlockKey(parsed.block), parsed.block);
+  for (const { tag } of scanNewsMatchTags(content)) {
+    if (tag) {
+      blocks.set(newsMatchBlockKey(tag.block), tag.block);
     }
   }
   return [...blocks.values()];
 }
 
 export function findInvalidNewsMatchTags(content: string): string[] {
-  return [...content.matchAll(MATCH_TAG_GLOBAL_PATTERN)]
-    .map((match) => match[0])
-    .filter((raw) => !parseNewsMatchTag(raw));
+  return scanNewsMatchTags(content)
+    .filter(({ tag }) => !tag)
+    .map(({ raw }) => raw);
 }
 
 export function stripNewsMatchTags(content: string): string {

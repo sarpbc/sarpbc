@@ -27,6 +27,7 @@ export type {
   TournamentMatchListItem,
   DataSource,
   MatchBlockItem,
+  MatchBlockSelector,
   MatchBlockState,
   MatchBlocksResponse,
   MatchVod,
