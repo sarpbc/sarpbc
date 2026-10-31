@@ -32,7 +32,16 @@ updates:
       include: scope
     pull-request-branch-name:
       prefix: ci
+      template: "ci/{name}"
     groups:
       github-actions:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      github-actions-major:
+        update-types:
+          - major
         patterns:
           - "*"

@@ -11,17 +11,17 @@ on:
       - "pnpm-workspace.yaml"
       - "package.json"
       - "apps/*/package.json"
+      - "packages/*/package.json"
+      - ".npmrc"
+      - "apps/back/entrypoint.sh"
       - ".github/workflows/docker.yml"
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -46,5 +46,3 @@ jobs:
           context: .
           file: apps/${{ matrix.app }}/Dockerfile
           push: false
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
