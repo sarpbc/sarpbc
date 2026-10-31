@@ -111,6 +111,13 @@ export const PlayerSchema = defineEntity({
 
 export const ContractSchema = defineEntity({
   class: Contract,
+  indexes: [
+    {
+      name: "contract_open_player_team_idx",
+      properties: ["player", "team"],
+      where: { endDate: null },
+    },
+  ],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     player: p.manyToOne(Player),

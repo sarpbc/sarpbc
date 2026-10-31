@@ -47,6 +47,7 @@ function roleFromPandascore(role: string | null): ContractRole {
     case "analyst":
       return ContractRole.ANALYST;
     case "manager":
+    case "staff":
       return ContractRole.MANAGER;
     default:
       return ContractRole.ACTIVE;

@@ -89,7 +89,7 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player       |
 | `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team |
 
-Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who becomes coach gets a new staff contract with `add_player_to_team` on the same team, so their past contracts stay player contracts. The role shown on player and team pages comes from the current contract.
+Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who changes role on the same team, for example from `active` to `benched` or from player to coach, gets a new contract with `add_player_to_team` on that team, so their past contracts keep their role. Proposing the team and role the player already holds is rejected. The role shown on player and team pages comes from the current contract.
 
 `list_roster_proposals` (`players.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
 

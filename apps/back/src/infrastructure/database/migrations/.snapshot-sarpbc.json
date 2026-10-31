@@ -329,6 +329,15 @@
       },
       "indexes": [
         {
+          "columnNames": ["player_id", "team_id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "contract_open_player_team_idx",
+          "primary": false,
+          "unique": false,
+          "where": "\"end_date\" is null"
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,

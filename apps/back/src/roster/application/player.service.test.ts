@@ -184,6 +184,31 @@ describe("PlayerService roster moves", () => {
     expect(stores.contracts.save).not.toHaveBeenCalled();
   });
 
+  it("names the conflict without exposing the raw role value", async () => {
+    history[1].role = ContractRole.ASSISTANT_COACH;
+    await expect(
+      service.joinTeam(player.id, { ...move(oldTeam.id), role: ContractRole.ASSISTANT_COACH }),
+    ).rejects.toThrow("Zen already has an open contract with Old in this role");
+  });
+
+  it("moves a player to the bench of the same team with a new contract", async () => {
+    const result = await service.joinTeam(player.id, {
+      ...move(oldTeam.id),
+      role: ContractRole.BENCHED,
+    });
+    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
+    expect(history[1]).toMatchObject({
+      role: ContractRole.ACTIVE,
+      endDate: new Date("2026-10-23"),
+    });
+    expect(result.opened).toMatchObject({
+      team: oldTeam,
+      role: ContractRole.BENCHED,
+      endDate: null,
+    });
+    expect(player.currentRole()).toBe(ContractRole.BENCHED);
+  });
+
   it("rejects joining an inactive team", async () => {
     newTeam.active = false;
     await expect(service.joinTeam(player.id, move(newTeam.id))).rejects.toBeInstanceOf(

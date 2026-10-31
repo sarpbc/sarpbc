@@ -118,7 +118,7 @@ export class PlayerService {
       const open = await openContracts(contracts, playerId);
       if (open.some((contract) => contract.team.id === team.id && contract.role === role)) {
         throw new ConflictError(
-          `${player.name} already has an open ${role} contract with ${team.name}`,
+          `${player.name} already has an open contract with ${team.name} in this role`,
         );
       }
       for (const contract of open) {

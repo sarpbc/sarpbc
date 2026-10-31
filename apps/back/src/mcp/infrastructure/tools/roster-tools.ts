@@ -69,7 +69,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "add_player_to_team",
     {
       description:
-        "Propose adding a player or staff member to a team's current roster. Requires players.manage. Once approved, closes the player's open contracts at effectiveDate and opens a new one with the given role, so roster history is kept. Use the same team with a new role when a player becomes coach. Check get_player and get_team first.",
+        "Propose adding a player or staff member to a team's current roster. Requires players.manage. Once approved, closes the player's open contracts at effectiveDate and opens a new one with the given role, so roster history is kept. Use the same team with a new role when a player changes role there, for example from active to benched or from player to coach; the same team and role is rejected. Check get_player and get_team first.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         teamId: z.string().uuid().describe("Team UUID."),
