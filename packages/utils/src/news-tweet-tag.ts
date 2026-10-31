@@ -98,14 +98,10 @@ function blockTagEnd(content: string, afterBrace: number): number {
   return content.startsWith("::", index) ? index + 2 : -1;
 }
 
-function inlineTagEnd(_content: string, afterBrace: number): number {
-  return afterBrace;
-}
-
 function replaceTweetTags(
   content: string,
   opener: string,
-  tagEnd: (content: string, afterBrace: number) => number,
+  tagEnd: (afterBrace: number) => number,
 ): string {
   let result = "";
   let copiedUntil = 0;
@@ -119,7 +115,7 @@ function replaceTweetTags(
     if (closingBrace === -1) {
       break;
     }
-    const end = tagEnd(content, closingBrace + 1);
+    const end = tagEnd(closingBrace + 1);
     if (end === -1) {
       searchFrom = closingBrace + 1;
       continue;
@@ -133,9 +129,9 @@ function replaceTweetTags(
 
 export function stripNewsTweetTags(content: string): string {
   return replaceTweetTags(
-    replaceTweetTags(content, "::tweet{", blockTagEnd),
+    replaceTweetTags(content, "::tweet{", (afterBrace) => blockTagEnd(content, afterBrace)),
     ":tweet{",
-    inlineTagEnd,
+    (afterBrace) => afterBrace,
   );
 }
 

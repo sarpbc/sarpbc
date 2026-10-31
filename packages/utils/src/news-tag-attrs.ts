@@ -4,7 +4,7 @@ export interface NewsTagAttr {
 }
 
 const WORD_CHAR = /\w/;
-const ESCAPABLE_CHAR = /./;
+const NOT_LINE_TERMINATOR = /./;
 
 function isWordChar(char: string | undefined): boolean {
   return char !== undefined && WORD_CHAR.test(char);
@@ -19,7 +19,7 @@ function findClosingQuote(raw: string, from: number): number {
     }
     if (char === "\\") {
       const escaped = raw[index + 1];
-      if (escaped === undefined || !ESCAPABLE_CHAR.test(escaped)) {
+      if (escaped === undefined || !NOT_LINE_TERMINATOR.test(escaped)) {
         return -1;
       }
       index += 2;
