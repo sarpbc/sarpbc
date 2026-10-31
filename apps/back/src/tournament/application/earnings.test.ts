@@ -61,6 +61,21 @@ describe("summarizeEarnings", () => {
     expect(earnings.totals).toEqual([{ currency: "USD", amount: 666.66 }]);
   });
 
+  it("rounds shares to the minor unit of each currency", () => {
+    const earnings = summarizeEarnings([
+      line("a", 1000, "JPY", "2026-05-01T00:00:00Z", 3),
+      line("b", 1000, "KRW", "2026-05-01T00:00:00Z", 3),
+      line("c", 1000, "KWD", "2026-05-01T00:00:00Z", 3),
+    ]);
+
+    expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toEqual([333, 333, 333.333]);
+    expect(earnings.totals).toEqual([
+      { currency: "JPY", amount: 333 },
+      { currency: "KRW", amount: 333 },
+      { currency: "KWD", amount: 333.333 },
+    ]);
+  });
+
   it("groups undated tournaments last", () => {
     const earnings = summarizeEarnings([
       line("a", 100, "USD", null),
