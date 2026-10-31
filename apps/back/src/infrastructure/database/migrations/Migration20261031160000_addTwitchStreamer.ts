@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20261031180000_addTwitchStreamer extends Migration {
-  override name = "Migration20261031180000_addTwitchStreamer";
+export class Migration20261031160000_addTwitchStreamer extends Migration {
+  override name = "Migration20261031160000_addTwitchStreamer";
 
   override up(): void | Promise<void> {
     this.addSql(
