@@ -2,7 +2,14 @@ import type { ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { assertPrizeDistribution, type PrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
-import type { EarningsScope, PrizeParticipant, PrizeQueries, PrizeTransaction } from "./ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  EarningsScope,
+  PrizeParticipant,
+  PrizeQueries,
+  PrizeTransaction,
+} from "./ports";
 
 function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipant[]): void {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
@@ -24,6 +31,8 @@ export class TournamentPrizeService {
   constructor(
     private readonly reads: PrizeQueries,
     private readonly transaction: PrizeTransaction,
+    private readonly cache: CompetitionCache,
+    private readonly diagnostics: Pick<CompetitionDiagnostics, "error">,
   ) {}
 
   async findByTournamentId(id: string): Promise<TournamentPrizes> {
@@ -55,6 +64,11 @@ export class TournamentPrizeService {
       assertParticipants(entries, await prizes.participants(tournamentId));
       await prizes.replace(tournamentId, entries);
     });
+    try {
+      await this.cache.invalidateTournament(tournamentId);
+    } catch (error) {
+      this.diagnostics.error("Tournament cache invalidation failed", error);
+    }
     return this.findByTournamentId(tournamentId);
   }
 }

@@ -47,6 +47,7 @@ import type { CompetitionFeed } from "../application/feed";
 import type { SyncCursor } from "../application/ports";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { CachedTournamentRead } from "./cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "./cache/cached-tournament-prizes.read";
 import { RedisService } from "../../infrastructure/redis/redis.service";
 @Module({
   imports: [
@@ -194,9 +195,24 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     },
     {
       provide: TournamentPrizeService,
-      useFactory: (em: EntityManager, tx: MikroOrmCompetitionTransaction) =>
-        new TournamentPrizeService(new CompetitionPrizeQueries(em), tx),
-      inject: [EntityManager, MikroOrmCompetitionTransaction],
+      useFactory: (
+        em: EntityManager,
+        tx: MikroOrmCompetitionTransaction,
+        cache: CompetitionCacheAdapter,
+      ) =>
+        new TournamentPrizeService(
+          new CompetitionPrizeQueries(em),
+          tx,
+          cache,
+          competitionDiagnostics,
+        ),
+      inject: [EntityManager, MikroOrmCompetitionTransaction, CompetitionCacheAdapter],
+    },
+    {
+      provide: CachedTournamentPrizesRead,
+      useFactory: (prizes: TournamentPrizeService, redis: RedisService) =>
+        new CachedTournamentPrizesRead(prizes, redis),
+      inject: [TournamentPrizeService, RedisService],
     },
   ],
   exports: [

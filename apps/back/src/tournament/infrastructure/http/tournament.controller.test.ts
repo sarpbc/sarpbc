@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotFoundException } from "@nestjs/common";
 import { TournamentController } from "./tournament.controller";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { Tournament } from "../../domain/competition";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
 
@@ -21,7 +22,10 @@ describe("TournamentController.findOne", () => {
       new TournamentPrizeService(
         { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
         { run: vi.fn() },
+        { invalidateTournament: vi.fn() },
+        { error: vi.fn() },
       ),
+      new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
     );
     redis.get.mockResolvedValue(null);
   });

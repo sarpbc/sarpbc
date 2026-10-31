@@ -3,6 +3,7 @@ import { Test } from "@nestjs/testing";
 import type { TournamentPrizes } from "@sarpbc/types";
 import { MAX_PRIZE_AMOUNT, MAX_PRIZE_PLAYERS } from "@sarpbc/utils";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { ManualTournamentService } from "../../application/manual-tournament.service";
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
@@ -22,9 +23,15 @@ describe("TournamentController prizes", () => {
   const prizes = new TournamentPrizeService(
     { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
     { run: vi.fn() },
+    { invalidateTournament: vi.fn() },
+    { error: vi.fn() },
   );
   const findByTournamentId = vi.spyOn(prizes, "findByTournamentId").mockResolvedValue(distribution);
   const setDistribution = vi.spyOn(prizes, "setDistribution").mockResolvedValue(distribution);
+  const prizesRead = new CachedTournamentPrizesRead(prizes, {
+    get: vi.fn().mockResolvedValue(null),
+    set: vi.fn(),
+  });
   let controller: TournamentController;
 
   beforeAll(async () => {
@@ -44,6 +51,7 @@ describe("TournamentController prizes", () => {
       module.get(CachedTournamentRead),
       module.get(PlayerAwardService),
       prizes,
+      prizesRead,
     );
   });
 
