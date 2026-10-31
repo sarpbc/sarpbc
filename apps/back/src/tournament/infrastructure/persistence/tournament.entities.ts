@@ -176,6 +176,7 @@ export const TournamentSchema = defineEntity({
 
 export const TournamentParticipantSchema = defineEntity({
   class: TournamentParticipant,
+  indexes: [{ properties: ["team"] }],
   properties: {
     id: p.string().primary(),
     tournament: p.manyToOne(Tournament),

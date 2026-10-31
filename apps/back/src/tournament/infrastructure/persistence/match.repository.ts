@@ -111,9 +111,10 @@ export class MatchRepository extends EntityRepository<Match> {
     tournamentId,
     leagueId,
     teamId,
+    liveSince,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
-    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
+    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly, liveSince), {
       tournamentId,
       leagueId,
       teamId,
@@ -135,9 +136,10 @@ export class MatchRepository extends EntityRepository<Match> {
     tournamentId,
     leagueId,
     teamId,
+    liveSince,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
-    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
+    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly, liveSince), {
       tournamentId,
       leagueId,
       teamId,
@@ -293,13 +295,18 @@ export class MatchRepository extends EntityRepository<Match> {
     return todayOnly ? { beginAt: { $gte: now, $lte: endOfDay } } : { beginAt: { $gte: now } };
   }
 
-  private buildLiveQuery(todayOnly: boolean): MatchListFilter {
+  private buildLiveQuery(todayOnly: boolean, liveSince?: Date): MatchListFilter {
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
+    const floors = [todayOnly ? startOfDay : null, liveSince ?? null].filter(
+      (date) => date !== null,
+    );
+    const since =
+      floors.length > 0 ? new Date(Math.max(...floors.map((date) => date.getTime()))) : null;
 
-    return todayOnly
-      ? { beginAt: { $lte: now, $gte: startOfDay }, endAt: null }
+    return since
+      ? { beginAt: { $lte: now, $gte: since }, endAt: null }
       : { beginAt: { $lte: now }, endAt: null };
   }
 

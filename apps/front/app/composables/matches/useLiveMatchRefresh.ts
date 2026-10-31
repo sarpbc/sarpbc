@@ -1,3 +1,5 @@
+import { useDocumentVisibility } from "@vueuse/core";
+
 const LIVE_MATCH_REFRESH_INTERVAL_MS = 20_000;
 
 export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () => boolean) {
@@ -5,6 +7,7 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
     return;
   }
 
+  const visibility = useDocumentVisibility();
   let timer: ReturnType<typeof setInterval> | null = null;
   let stopWatch: (() => void) | null = null;
   let disposed = false;
@@ -22,10 +25,10 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
     }
 
     stopWatch = watch(
-      hasLive,
-      (live) => {
+      () => hasLive() && visibility.value === "visible",
+      (polling) => {
         clear();
-        if (!live) {
+        if (!polling) {
           return;
         }
 

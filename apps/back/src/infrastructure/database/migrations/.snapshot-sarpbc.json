@@ -3810,6 +3810,14 @@
       },
       "indexes": [
         {
+          "columnNames": ["team_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "tournament_participant_team_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,

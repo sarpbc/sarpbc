@@ -1,9 +1,10 @@
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import type { NewsMatchBlock } from "@sarpbc/utils";
+import type { MatchBlockSelector } from "@sarpbc/types";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
 import type { MatchListQueryOptions } from "./match-list-filters";
+import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type {
   CompetitionDiagnostics,
@@ -89,55 +90,8 @@ export class MatchService {
     return this.reads.list("results", options);
   }
 
-  async findBlocks(blocks: readonly NewsMatchBlock[]): Promise<Match[][]> {
-    const ids = [
-      ...new Set(
-        blocks.flatMap((block) =>
-          block.kind === "match" ? [block.id] : block.kind === "matches" ? block.ids : [],
-        ),
-      ),
-    ];
-    const [byId, scoped] = await Promise.all([
-      ids.length > 0 ? this.reads.byIds(ids) : Promise.resolve([]),
-      Promise.all(blocks.map((block) => this.findScopedBlock(block))),
-    ]);
-    const matches = new Map(byId.map((match) => [match.id, match]));
-    const pick = (id: string): Match[] => {
-      const match = matches.get(id);
-      return match ? [match] : [];
-    };
-
-    return blocks.map((block, index) => {
-      switch (block.kind) {
-        case "match":
-          return pick(block.id);
-        case "matches":
-          return block.ids.flatMap(pick);
-        case "tournament":
-        case "team":
-          return scoped[index] ?? [];
-        default: {
-          const exhaustive: never = block;
-          return exhaustive;
-        }
-      }
-    });
-  }
-
-  private async findScopedBlock(block: NewsMatchBlock): Promise<Match[]> {
-    if (block.kind !== "tournament" && block.kind !== "team") {
-      return [];
-    }
-    const options = {
-      limit: block.limit,
-      ...(block.kind === "tournament" ? { tournamentId: block.id } : { teamId: block.id }),
-    };
-    const [live, upcoming, results] = await Promise.all([
-      this.reads.page("live", options),
-      this.reads.page("upcoming", options),
-      this.reads.page("results", options),
-    ]);
-    return [...live, ...upcoming, ...results].slice(0, block.limit);
+  async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {
+    return findMatchBlocks(this.reads, blocks, now);
   }
 
   async findRecentlyEnded({
