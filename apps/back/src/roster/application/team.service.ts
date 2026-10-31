@@ -71,6 +71,8 @@ export class TeamService {
       if (dto.location !== undefined) team.location = dto.location;
       if (dto.imageUrl !== undefined) team.imageUrl = dto.imageUrl;
       if (dto.darkModeImageUrl !== undefined) team.darkModeImageUrl = dto.darkModeImageUrl;
+      if (dto.logoLightUrl !== undefined) team.logoLightUrl = dto.logoLightUrl;
+      if (dto.logoDarkUrl !== undefined) team.logoDarkUrl = dto.logoDarkUrl;
       if (dto.slug !== undefined) team.slug = dto.slug;
       if (dto.active === false && team.players.length > 0) {
         throw new InvalidInputError(

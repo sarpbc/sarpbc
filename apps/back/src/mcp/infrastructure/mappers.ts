@@ -68,6 +68,8 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     location: team.location,
     active: team.active,
     source: team.source,
+    logoLightUrl: team.logoLightUrl,
+    logoDarkUrl: team.logoDarkUrl,
     players: roster.map((player) => ({
       id: player.id,
       slug: player.slug,

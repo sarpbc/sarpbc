@@ -27,6 +27,12 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
 import type { CurrentRosterSource } from "../application/ports";
+import { TeamLogoService } from "../application/team-logo.service";
+import { StorageService } from "../../storage/application/storage.service";
+import { StorageModule } from "../../storage/infrastructure/storage.module";
+import { HttpsTeamLogoSource } from "./logo/https-team-logo-source";
+import { R2TeamLogoStorage } from "./logo/r2-team-logo-storage";
+import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
 
 @Module({
   imports: [
@@ -34,6 +40,7 @@ import type { CurrentRosterSource } from "../application/ports";
     TournamentModule,
     UserModule,
     PandascoreModule,
+    StorageModule,
     ConfigModule,
   ],
   controllers: [PlayerController, TeamController, TransferController],
@@ -116,8 +123,18 @@ import type { CurrentRosterSource } from "../application/ports";
       useFactory: (transaction: MikroRosterMergeTransaction) => new RosterMergeService(transaction),
       inject: [MikroRosterMergeTransaction],
     },
+    {
+      provide: TeamLogoService,
+      useFactory: (storage: StorageService) =>
+        new TeamLogoService(
+          new HttpsTeamLogoSource(),
+          new SharpTeamLogoImages(),
+          new R2TeamLogoStorage(storage),
+        ),
+      inject: [StorageService],
+    },
   ],
-  exports: [PlayerService, TeamService, ContractService, RosterMergeService],
+  exports: [PlayerService, TeamService, ContractService, RosterMergeService, TeamLogoService],
 })
 export class RosterModule implements OnModuleInit {
   constructor(

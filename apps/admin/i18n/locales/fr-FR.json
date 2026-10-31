@@ -190,6 +190,7 @@
         "update_player": "Modification du joueur",
         "create_team": "Nouvelle équipe",
         "update_team": "Modification de l'équipe",
+        "upload_team_logo": "Logo d'équipe",
         "merge_players": "Fusion de joueurs",
         "merge_teams": "Fusion d'équipes",
         "create_contract": "Nouveau contrat",
@@ -205,6 +206,7 @@
         "role": "Rôle",
         "location": "Pays",
         "imageUrl": "Logo",
+        "variant": "Variante",
         "active": "Active",
         "keptId": "À conserver",
         "duplicateId": "Doublon",
@@ -223,6 +225,15 @@
         "player": "Joueur",
         "coach": "Coach",
         "substitute": "Remplaçant"
+      },
+      "logoVariants": {
+        "light": "Fonds clairs",
+        "dark": "Fonds sombres"
+      },
+      "logoPreview": {
+        "light": "Sur fond clair",
+        "dark": "Sur fond sombre",
+        "alt": "Logo proposé"
       },
       "values": {
         "yes": "Oui",

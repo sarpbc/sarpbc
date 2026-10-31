@@ -22,9 +22,7 @@ const href = computed(() => teamHref(props.slug));
 const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []).slice(0, 3));
 
 const colorMode = useColorMode();
-const logoSrc = computed(() =>
-  resolveThemedLogoUrl(team.value?.imageUrl, team.value?.darkModeImageUrl, colorMode.value),
-);
+const logoSrc = computed(() => resolveThemedLogoUrl(team.value, colorMode.value));
 
 async function loadTeam() {
   if (team.value || pending.value) {

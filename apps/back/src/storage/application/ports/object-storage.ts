@@ -33,4 +33,7 @@ export interface ObjectStorage {
     filename: string | undefined,
     context: ImageUploadContext,
   ): Promise<R2UploadResponse>;
+  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse>;
+  copyObject(sourceKey: string, key: string): Promise<R2UploadResponse>;
+  deleteObject(key: string): Promise<void>;
 }

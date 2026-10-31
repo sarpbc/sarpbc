@@ -5,6 +5,7 @@ import { ContractService } from "../../roster/application/contract.service";
 import { PlayerService } from "../../roster/application/player.service";
 import { RosterMergeService } from "../../roster/application/roster-merge.service";
 import { RosterModule } from "../../roster/infrastructure/roster.module";
+import { TeamLogoService } from "../../roster/application/team-logo.service";
 import { TeamService } from "../../roster/application/team.service";
 import { UserService } from "../../user/application/user.service";
 import { UserModule } from "../../user/infrastructure/user.module";
@@ -29,6 +30,7 @@ import {
         contracts: ContractService,
         merges: RosterMergeService,
         users: UserService,
+        logos: TeamLogoService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -38,6 +40,7 @@ import {
           contracts,
           merges,
           users,
+          logos,
         ),
       inject: [
         EntityManager,
@@ -46,6 +49,7 @@ import {
         ContractService,
         RosterMergeService,
         UserService,
+        TeamLogoService,
       ],
     },
   ],
