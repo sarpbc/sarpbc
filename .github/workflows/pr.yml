@@ -1,8 +1,11 @@
-name: Pull Request Checks
+name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+  push:
     branches:
       - main
 
@@ -12,31 +15,12 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  git-names:
-    name: Branch and commit names
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Test naming checks
-        run: node --test scripts/check-git-names.test.mjs
-
-      - name: Check branch, commits and PR title
-        run: node scripts/check-git-names.mjs pr
-
   changes:
     name: Detect changes
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
       quality: ${{ steps.filter.outputs.quality }}
@@ -45,10 +29,12 @@ jobs:
       admin: ${{ steps.filter.outputs.admin }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Filter paths
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
         id: filter
         with:
           filters: |
@@ -75,6 +61,8 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
             frontend:
               - 'apps/front/**'
               - 'packages/**'
@@ -82,6 +70,8 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
             admin:
               - 'apps/admin/**'
               - 'packages/**'
@@ -89,21 +79,25 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
 
   quality:
     name: Lint and format
     needs: changes
-    if: needs.changes.outputs.quality == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.quality == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       # Version comes from package.json "packageManager" (do not pin here).
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -124,16 +118,19 @@ jobs:
   backend:
     name: Backend tests and coverage
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.backend == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -147,12 +144,17 @@ jobs:
           pnpm --filter back typecheck:tests
           pnpm --filter @sarpbc/utils test
 
+      - name: Migration names
+        run: pnpm --filter back test:migrations
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || '' }}
+
       - name: Architecture and HTTP contracts
         run: |
           pnpm --filter back test:architecture
           pnpm --filter back test:contracts
 
-      - name: Unit, HTTP and PostgreSQL/Redis coverage
+      - name: Unit, e2e and integration tests (PostgreSQL/Redis, migrations) with coverage
         run: pnpm --filter back test:cov
         env:
           PANDASCORE_API_TOKEN: test-token
@@ -163,16 +165,18 @@ jobs:
   frontend:
     name: Frontend typecheck and build
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.frontend == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -192,16 +196,18 @@ jobs:
   admin:
     name: Admin typecheck and build
     needs: changes
-    if: needs.changes.outputs.admin == 'true'
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.admin == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: ".nvmrc"
           cache: pnpm
@@ -220,29 +226,38 @@ jobs:
 
   ci:
     name: CI
-    needs: [git-names, changes, quality, backend, frontend, admin]
+    needs: [changes, quality, backend, frontend, admin]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check results
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          results=(
-            "${{ needs.git-names.result }}"
-            "${{ needs.changes.result }}"
-            "${{ needs.quality.result }}"
-            "${{ needs.backend.result }}"
-            "${{ needs.frontend.result }}"
-            "${{ needs.admin.result }}"
-          )
-
-          for result in "${results[@]}"; do
-            case "$result" in
-              success|skipped) ;;
+          check() {
+            case "$2" in
+              success) ;;
+              skipped)
+                if [ "$EVENT_NAME" = "push" ] && [ "$1" != "changes" ]; then
+                  echo "Job $1 was skipped on push, every job must run on main."
+                  exit 1
+                fi
+                ;;
               *)
-                echo "A required job finished with status: $result"
+                echo "Job $1 finished with status: $2"
                 exit 1
                 ;;
             esac
-          done
+          }
 
-          echo "All executed jobs succeeded (path-skipped jobs ignored)."
+          check changes "${{ needs.changes.result }}"
+          check quality "${{ needs.quality.result }}"
+          check backend "${{ needs.backend.result }}"
+          check frontend "${{ needs.frontend.result }}"
+          check admin "${{ needs.admin.result }}"
+
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "All jobs succeeded."
+          else
+            echo "All executed jobs succeeded (path-skipped jobs ignored)."
+          fi

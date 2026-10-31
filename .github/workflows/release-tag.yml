@@ -1,33 +1,58 @@
 name: Create Release Tag
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: write
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  checks: read
 
 jobs:
   release-tag:
     name: Create Dokploy release tag
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository)
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: false
+    env:
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
+      - name: Require green CI
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          conclusion="$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs?check_name=CI&filter=latest" --jq '[.check_runs[] | select(.app.slug == "github-actions")] | sort_by(.started_at) | last | .conclusion // "missing"')"
+          if [ "$conclusion" != "success" ]; then
+            echo "::error::The CI check for $SHA is '$conclusion', not 'success'. Wait for CI to pass on main before dispatching a release tag."
+            exit 1
+          fi
+          echo "CI passed on $SHA."
+
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
+          ref: ${{ env.SHA }}
 
       - name: Create and push tag
         id: tag
         shell: bash
         run: |
+          git fetch --quiet --force --tags origin
+          latest="$(git for-each-ref --count=1 --sort=-creatordate --format='%(refname:short)' 'refs/tags/v*')"
+          if [ -n "$latest" ] && git merge-base --is-ancestor "$SHA" "$latest"; then
+            echo "$SHA is already released by $latest or an earlier tag. Nothing to create."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           tag="v$(date -u +'%Y.%m.%d').${GITHUB_RUN_NUMBER}"
 
           if git rev-parse "$tag" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
@@ -38,7 +63,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$tag" -m "Release $tag"
+          git tag -a "$tag" "$SHA" -m "Release $tag"
           git push origin "$tag"
 
           echo "created=true" >> "$GITHUB_OUTPUT"
