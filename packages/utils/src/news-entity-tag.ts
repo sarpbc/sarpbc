@@ -1,3 +1,5 @@
+import { parseNewsTagAttrs } from "./news-tag-attrs.ts";
+
 export type NewsEntityTagKind = "player" | "team";
 
 export interface NewsEntityTag {
@@ -15,28 +17,17 @@ interface NewsEntityTagAttrs {
 /** Matches `:player{...}` or `:team{...}` at the start of a string. */
 export const NEWS_ENTITY_TAG_PATTERN = /^:(player|team)\{([^}]*)\}/;
 
-const ATTR_PATTERN = /(\w+)="((?:\\.|[^"\\])*)"/g;
-
-function unescapeAttrValue(value: string): string {
-  return value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
-}
-
 function escapeAttrValue(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
   const attrs: NewsEntityTagAttrs = {};
-  for (const match of rawAttrs.matchAll(ATTR_PATTERN)) {
-    const key = match[1];
-    const value = match[2];
-    if (value == null) {
-      continue;
-    }
-    if (key === "slug") {
-      attrs.slug = unescapeAttrValue(value);
-    } else if (key === "label") {
-      attrs.label = unescapeAttrValue(value);
+  for (const { name, value } of parseNewsTagAttrs(rawAttrs)) {
+    if (name === "slug") {
+      attrs.slug = value;
+    } else if (name === "label") {
+      attrs.label = value;
     }
   }
   return attrs;
