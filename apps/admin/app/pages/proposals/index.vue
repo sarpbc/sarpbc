@@ -34,6 +34,8 @@ function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
     case "update_team":
     case "merge_teams":
       return "teams.manage";
+    case "set_tournament_prizes":
+      return "tournaments.manage";
     default: {
       const exhaustive: never = kind;
       return exhaustive;
@@ -83,8 +85,42 @@ function formatValue(key: string, value: string | boolean | null): string {
   }
 }
 
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
   const { change } = proposal;
+  if (change.kind === "set_tournament_prizes") {
+    return [
+      {
+        key: "tournamentId",
+        label: t("page.proposals.fields.tournamentId"),
+        value: nameOf(change.tournamentId),
+      },
+      ...(change.prizes.length === 0
+        ? [
+            {
+              key: "prizes",
+              label: t("page.proposals.fields.prizes"),
+              value: t("page.proposals.values.noPrizes"),
+            },
+          ]
+        : change.prizes.map((prize) => ({
+            key: `prize-${prize.teamId}`,
+            label: t("page.proposals.fields.placement", { placement: prize.placement }),
+            value: [
+              nameOf(prize.teamId),
+              formatAmount(prize.amount, prize.currency),
+              ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
+            ].join(" · "),
+          }))),
+    ];
+  }
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
   const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);

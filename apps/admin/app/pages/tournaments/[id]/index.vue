@@ -128,6 +128,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           :participants="tournament.participants ?? []"
         />
 
+        <TournamentPrizesPanel
+          v-if="tournament"
+          :tournament-id="tournamentId"
+          :prizepool="tournament.prizepool"
+          :participants="tournament.participants ?? []"
+        />
+
         <p class="text-sm text-muted">
           {{
             $t("page.tournaments.matchesCount", {
