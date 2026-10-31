@@ -25,7 +25,7 @@ const limits = {
   maxBytes: 16,
   timeoutMs: 1_000,
   maxRedirects: 2,
-  isAllowedHost: (hostname: string) => !hostname.endsWith("liquipedia.net"),
+  isAllowedHost: (hostname: string) => !/(^|\.)liquipedia\.net$/i.test(hostname),
 };
 
 function resolveDns(addresses: Record<string, string[]>) {
