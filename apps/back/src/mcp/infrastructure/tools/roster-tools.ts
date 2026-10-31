@@ -18,7 +18,7 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(
-    (url) => !URL.canParse(url) || !/(^|\.)liquipedia\.net\.?$/i.test(new URL(url).hostname),
+    (url) => !URL.canParse(url) || !isLiquipediaHost(new URL(url).hostname),
     "Liquipedia is not an accepted source; cite the official announcement it relies on",
   )
   .describe(
