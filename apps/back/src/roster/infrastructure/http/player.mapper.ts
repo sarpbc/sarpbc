@@ -6,6 +6,8 @@ export interface TeamSummaryResponse {
   name: string;
   slug: string;
   imageUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
   location: string | null;
 }
 
@@ -29,6 +31,8 @@ export interface TeamResponse {
   name: string;
   slug: string;
   imageUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
   location: string | null;
   pandascoreId: number | null;
   source: DataSource;
@@ -41,6 +45,8 @@ export function mapTeamSummary(team: Team): TeamSummaryResponse {
     name: team.name,
     slug: team.slug,
     imageUrl: team.imageUrl,
+    logoLightUrl: team.logoLightUrl,
+    logoDarkUrl: team.logoDarkUrl,
     location: team.location,
   };
 }
@@ -73,6 +79,8 @@ export function mapTeam(team: Team): TeamResponse {
     name: team.name,
     slug: team.slug,
     imageUrl: team.imageUrl,
+    logoLightUrl: team.logoLightUrl,
+    logoDarkUrl: team.logoDarkUrl,
     location: team.location,
     pandascoreId: team.pandascoreId,
     source: team.source,

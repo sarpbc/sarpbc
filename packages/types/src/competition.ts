@@ -16,6 +16,8 @@ export interface TeamSummary {
   name: string;
   slug: string;
   imageUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
   location: string | null;
 }
 

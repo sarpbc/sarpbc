@@ -47,7 +47,7 @@ export {
   selectActiveRosterPlayers,
   selectTeamStaff,
 } from "./team-roster.ts";
-export { resolveThemedLogoUrl } from "./themed-logo.ts";
+export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo.ts";
 export {
   MAX_VODS_PER_GAME,
   maxVodGame,

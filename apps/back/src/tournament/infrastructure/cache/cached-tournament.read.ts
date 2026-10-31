@@ -12,6 +12,8 @@ const team = z.object({
   name: z.string(),
   slug: z.string(),
   imageUrl: nullableText,
+  logoLightUrl: nullableText,
+  logoDarkUrl: nullableText,
   location: nullableText,
 });
 const participant = z.object({

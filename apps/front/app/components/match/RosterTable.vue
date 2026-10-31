@@ -22,12 +22,7 @@ const rowCount = computed(() =>
       :class="columnIndex === 0 ? 'border-r border-default' : undefined"
     >
       <SListItem size="default" divider class="min-w-0 gap-2">
-        <TeamImg
-          :team-name="participant.team.name"
-          :image-url="participant.team.imageUrl"
-          :dark-mode-image-url="participant.team.darkModeImageUrl"
-          size="xs"
-        />
+        <TeamImg :team-name="participant.team.name" :logo="participant.team" size="xs" />
         <h3 class="truncate text-xs font-medium text-toned">{{ participant.team.name }}</h3>
       </SListItem>
       <template v-for="rowIndex in rowCount" :key="rowIndex">

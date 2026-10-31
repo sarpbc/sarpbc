@@ -118,4 +118,34 @@ describe("R2Service", () => {
       }),
     );
   });
+
+  it("stores an object under its exact key with immutable caching", async () => {
+    const bytes = new Uint8Array([1, 2, 3]);
+    const key = "teams/kc/logo-light-0123456789abcdef.webp";
+
+    await expect(service.putObject(key, bytes, "image/webp")).resolves.toEqual({
+      key,
+      publicUrl: `https://cdn.example/${key}`,
+    });
+    expect(sendSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: {
+          Bucket: "sarpbc-org",
+          Key: key,
+          Body: bytes,
+          ContentType: "image/webp",
+          CacheControl: "public, max-age=31536000, immutable",
+        },
+      }),
+    );
+  });
+
+  it("hides R2 failures behind a safe 500 when storing an object", async () => {
+    sendSpy.mockRejectedValue(new Error("AccessDenied"));
+
+    await expect(
+      service.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
+    expect(logger.error).toHaveBeenCalled();
+  });
 });

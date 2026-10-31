@@ -83,7 +83,7 @@ function close() {
 
 function itemLogoSrc(item: Player | Team) {
   if (props.kind === "team") {
-    return resolveThemedLogoUrl(item.imageUrl, (item as Team).darkModeImageUrl, colorMode.value);
+    return resolveThemedLogoUrl(item as Team, colorMode.value);
   }
   return item.imageUrl ?? undefined;
 }

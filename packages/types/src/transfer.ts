@@ -21,5 +21,7 @@ export interface Transfer {
     slug: string;
     imageUrl: string | null;
     darkModeImageUrl: string | null;
+    logoLightUrl: string | null;
+    logoDarkUrl: string | null;
   };
 }

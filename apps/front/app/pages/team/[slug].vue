@@ -184,14 +184,7 @@ setPageSeo({
           <div
             class="flex h-row-double min-h-row-double w-full min-w-0 flex-row items-center gap-3 px-3"
           >
-            <TeamImg
-              class="shrink-0"
-              :team-name="team.name"
-              :image-url="team.imageUrl"
-              :dark-mode-image-url="team.darkModeImageUrl"
-              size="md"
-              priority
-            />
+            <TeamImg class="shrink-0" :team-name="team.name" :logo="team" size="md" priority />
             <div class="flex min-w-0 flex-col items-start gap-1">
               <h1 class="text-xl font-medium tracking-tight text-balance">
                 {{ team.name }}

@@ -75,6 +75,8 @@ export interface UpdateTeamInput {
   location?: string;
   imageUrl?: string;
   darkModeImageUrl?: string;
+  logoLightUrl?: string;
+  logoDarkUrl?: string;
   slug?: string;
   active?: boolean;
 }

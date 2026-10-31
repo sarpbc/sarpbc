@@ -8,6 +8,8 @@ export function toTeam(row: Record.Team, includePlayers = true): Team {
     location: row.location,
     imageUrl: row.imageUrl,
     darkModeImageUrl: row.darkModeImageUrl,
+    logoLightUrl: row.logoLightUrl,
+    logoDarkUrl: row.logoDarkUrl,
     slug: row.slug,
     pandascoreId: row.pandascoreId,
     source: row.source,

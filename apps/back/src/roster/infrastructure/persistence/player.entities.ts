@@ -12,6 +12,8 @@ export class Team {
   location: string | null = null;
   imageUrl: string | null = null;
   darkModeImageUrl: string | null = null;
+  logoLightUrl: string | null = null;
+  logoDarkUrl: string | null = null;
   slug!: string;
   pandascoreId: number | null = null;
   source: DataSource = "manual";
@@ -69,6 +71,8 @@ export const TeamSchema = defineEntity({
     location: p.string().nullable(),
     imageUrl: p.string().nullable(),
     darkModeImageUrl: p.string().nullable(),
+    logoLightUrl: p.text().nullable(),
+    logoDarkUrl: p.text().nullable(),
     slug: p.string(),
     pandascoreId: p.integer().nullable(),
     source: p.string().$type<DataSource>().default("manual"),

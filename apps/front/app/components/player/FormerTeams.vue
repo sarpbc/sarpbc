@@ -32,12 +32,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
           :key="contract.id"
           class="flex flex-row items-center gap-3 p-3"
         >
-          <TeamImg
-            :team-name="contract.team.name"
-            :image-url="contract.team.imageUrl ?? undefined"
-            :dark-mode-image-url="contract.team.darkModeImageUrl ?? undefined"
-            size="sm"
-          />
+          <TeamImg :team-name="contract.team.name" :logo="contract.team" size="sm" />
           <div class="flex-1 min-w-0">
             <SLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
               {{ contract.team.name }}

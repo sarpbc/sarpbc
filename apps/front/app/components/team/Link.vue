@@ -11,12 +11,7 @@ const activePlayerCount = computed(() => selectActiveRosterPlayers(team.players 
 
 <template>
   <SListItem divider :to="$localePath(`/team/${team.slug}`)" class="min-w-0 gap-3">
-    <TeamImg
-      :team-name="team.name"
-      :image-url="team.imageUrl"
-      :dark-mode-image-url="team.darkModeImageUrl"
-      size="list"
-    />
+    <TeamImg :team-name="team.name" :logo="team" size="list" />
     <h2 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
       {{ team.name }}
     </h2>

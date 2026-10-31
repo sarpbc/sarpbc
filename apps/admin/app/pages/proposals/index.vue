@@ -32,6 +32,7 @@ function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
       return "players.manage";
     case "create_team":
     case "update_team":
+    case "upload_team_logo":
     case "merge_teams":
       return "teams.manage";
     case "set_tournament_prizes":
@@ -78,6 +79,8 @@ function formatValue(key: string, value: string | boolean | null): string {
       return t(`page.proposals.playerStatus.${value}`);
     case "contractRole":
       return t(`common.contractRole.${value}`);
+    case "variant":
+      return t(`page.proposals.logoVariants.${value}`);
     default:
       return nameOf(value);
   }
@@ -129,7 +132,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   return fields
     .filter(
       (field): field is [string, string | boolean | null] =>
-        field[0] !== "kind" && field[1] !== undefined,
+        field[0] !== "kind" && field[0] !== "logoUrl" && field[1] !== undefined,
     )
     .map(([key, value]) => ({
       key,
@@ -137,6 +140,11 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
       value: formatValue(key, value),
     }));
 }
+
+const logoBackgrounds = [
+  { key: "light", class: "bg-white" },
+  { key: "dark", class: "bg-neutral-950" },
+] as const;
 
 async function review(proposal: RosterProposal, action: "approve" | "reject") {
   if (reviewingId.value) return;
@@ -240,6 +248,32 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
               <template v-for="row in changeRows(proposal)" :key="row.key">
                 <dt class="text-muted">{{ row.label }}</dt>
                 <dd class="break-all" translate="no">{{ row.value }}</dd>
+              </template>
+              <template v-if="proposal.change.kind === 'upload_team_logo'">
+                <dt class="sr-only">{{ $t("page.proposals.kinds.upload_team_logo") }}</dt>
+                <dd class="col-span-2 flex flex-row flex-wrap gap-3 py-2">
+                  <figure
+                    v-for="background in logoBackgrounds"
+                    :key="background.key"
+                    class="flex flex-col items-center gap-1"
+                  >
+                    <div
+                      :class="[
+                        background.class,
+                        'flex size-32 items-center justify-center rounded-md border border-default p-3',
+                      ]"
+                    >
+                      <img
+                        :src="proposal.change.logoUrl"
+                        :alt="$t('page.proposals.logoPreview.alt')"
+                        class="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                    <figcaption class="text-xs text-muted">
+                      {{ $t(`page.proposals.logoPreview.${background.key}`) }}
+                    </figcaption>
+                  </figure>
+                </dd>
               </template>
               <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
               <dd class="break-all">

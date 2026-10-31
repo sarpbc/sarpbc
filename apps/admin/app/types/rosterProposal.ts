@@ -39,6 +39,13 @@ export type RosterChange =
       imageUrl?: string;
       active?: boolean;
     }
+  | {
+      kind: "upload_team_logo";
+      teamId: string;
+      variant: "light" | "dark";
+      imageUrl: string;
+      logoUrl: string;
+    }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
   | { kind: "merge_teams"; keptId: string; duplicateId: string }
   | {
