@@ -40,8 +40,21 @@ export function teamLogoField(variant: TeamLogoVariant): "logoLightUrl" | "logoD
   }
 }
 
-export function teamLogoKey(teamId: string, variant: TeamLogoVariant, hash: string): string {
-  return `teams/${teamId}/logo-${variant}-${hash}.webp`;
+const PENDING_TEAM_LOGO_PREFIX = "pending/";
+
+export function pendingTeamLogoKey(teamId: string, variant: TeamLogoVariant, hash: string): string {
+  return `${PENDING_TEAM_LOGO_PREFIX}teams/${teamId}/logo-${variant}-${hash}.webp`;
+}
+
+export function requirePendingTeamLogoKey(key: string): void {
+  if (!key.startsWith(`${PENDING_TEAM_LOGO_PREFIX}teams/`)) {
+    throw new InvalidInputError(`"${key}" is not a pending team logo.`);
+  }
+}
+
+export function publishedTeamLogoKey(pendingKey: string): string {
+  requirePendingTeamLogoKey(pendingKey);
+  return pendingKey.slice(PENDING_TEAM_LOGO_PREFIX.length);
 }
 
 export function isLiquipediaHost(hostname: string): boolean {

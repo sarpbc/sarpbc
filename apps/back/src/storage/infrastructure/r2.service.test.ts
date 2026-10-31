@@ -148,4 +148,38 @@ describe("R2Service", () => {
     ).rejects.toBeInstanceOf(InternalServerErrorException);
     expect(logger.error).toHaveBeenCalled();
   });
+
+  it("publishes a pending object by copying it under its final key", async () => {
+    await expect(
+      service.copyObject(
+        "pending/teams/kc/logo-dark-0123456789abcdef.webp",
+        "teams/kc/logo-dark-0123456789abcdef.webp",
+      ),
+    ).resolves.toEqual({
+      key: "teams/kc/logo-dark-0123456789abcdef.webp",
+      publicUrl: "https://cdn.example/teams/kc/logo-dark-0123456789abcdef.webp",
+    });
+    expect(sendSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: {
+          Bucket: "sarpbc-org",
+          CopySource: "sarpbc-org/pending/teams/kc/logo-dark-0123456789abcdef.webp",
+          Key: "teams/kc/logo-dark-0123456789abcdef.webp",
+        },
+      }),
+    );
+  });
+
+  it("deletes an object by key", async () => {
+    await service.deleteObject("pending/teams/kc/logo-dark-0123456789abcdef.webp");
+
+    expect(sendSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: {
+          Bucket: "sarpbc-org",
+          Key: "pending/teams/kc/logo-dark-0123456789abcdef.webp",
+        },
+      }),
+    );
+  });
 });

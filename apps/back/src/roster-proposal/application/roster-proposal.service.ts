@@ -25,7 +25,7 @@ type Teams = Pick<TeamService, "findById" | "create" | "update">;
 type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
-type Logos = Pick<TeamLogoService, "upload">;
+type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
 
 export interface TeamLogoProposal {
   teamId: string;
@@ -67,12 +67,24 @@ export class RosterProposalService {
     proposedById: string,
   ): Promise<RosterProposal> {
     await this.requireTeam(teamId);
-    const logoUrl = await this.logos.upload(teamId, variant, imageUrl);
-    return this.propose(
-      { kind: "upload_team_logo", teamId, variant, imageUrl, logoUrl },
-      sourceUrl,
-      proposedById,
-    );
+    const logo = await this.logos.upload(teamId, variant, imageUrl);
+    try {
+      return await this.propose(
+        {
+          kind: "upload_team_logo",
+          teamId,
+          variant,
+          imageUrl,
+          logoKey: logo.key,
+          logoUrl: logo.url,
+        },
+        sourceUrl,
+        proposedById,
+      );
+    } catch (error) {
+      await this.logos.discard(logo.key);
+      throw error;
+    }
   }
 
   async list(status: RosterProposalStatus): Promise<RosterProposalList> {
@@ -92,6 +104,10 @@ export class RosterProposalService {
       // A merge approved since the proposal would leave the change on a redirect record.
       await this.requireReferences(proposal.change);
       proposal.approve(reviewerId, new Date());
+      if (proposal.change.kind === "upload_team_logo") {
+        const published = await this.logos.publish(proposal.change.logoKey);
+        proposal.change = { ...proposal.change, logoKey: published.key, logoUrl: published.url };
+      }
       proposal.entityId = await this.apply(proposal.change, proposal.sourceUrl);
       await proposals.save(proposal);
       return proposal;
@@ -102,6 +118,9 @@ export class RosterProposalService {
     return this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
       proposal.reject(reviewerId, new Date());
+      if (proposal.change.kind === "upload_team_logo") {
+        await this.logos.discard(proposal.change.logoKey);
+      }
       await proposals.save(proposal);
       return proposal;
     });

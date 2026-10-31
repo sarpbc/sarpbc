@@ -31,11 +31,13 @@ function setup() {
     create: vi.fn(async () => Object.assign(new Team(), { id: "new-team" })),
     update: vi.fn(async () => kc),
   };
+  const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
-    upload: vi.fn(
-      async (teamId: string, variant: string) =>
-        `https://cdn.sarpbc.test/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`,
+    upload: vi.fn(async (teamId: string, variant: string) =>
+      stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`),
     ),
+    publish: vi.fn(async (pendingKey: string) => stored(pendingKey.slice("pending/".length))),
+    discard: vi.fn(async () => {}),
   };
   const contracts = {
     getContractsByPlayer: vi.fn(async () => [Object.assign(new Contract(), { id: "zen-kc" })]),
@@ -232,7 +234,10 @@ describe("RosterProposalService", () => {
   });
 
   describe("team logos", () => {
-    const logoUrl = "https://cdn.sarpbc.test/teams/kc/logo-dark-0123456789abcdef.webp";
+    const pendingKey = "pending/teams/kc/logo-dark-0123456789abcdef.webp";
+    const pendingUrl = `https://cdn.sarpbc.test/${pendingKey}`;
+    const publishedKey = "teams/kc/logo-dark-0123456789abcdef.webp";
+    const publishedUrl = `https://cdn.sarpbc.test/${publishedKey}`;
     const proposeDarkLogo = () =>
       service.proposeTeamLogo(
         { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
@@ -240,7 +245,7 @@ describe("RosterProposalService", () => {
         "journalist",
       );
 
-    it("stores the normalized asset and queues it for review without touching the team", async () => {
+    it("stages the normalized asset and queues it for review without touching the team", async () => {
       const proposal = await proposeDarkLogo();
 
       expect(logos.upload).toHaveBeenCalledWith("kc", "dark", "https://kcorp.gg/logo-dark.svg");
@@ -252,10 +257,12 @@ describe("RosterProposalService", () => {
           teamId: "kc",
           variant: "dark",
           imageUrl: "https://kcorp.gg/logo-dark.svg",
-          logoUrl,
+          logoKey: pendingKey,
+          logoUrl: pendingUrl,
         },
       });
       expect(teams.update).not.toHaveBeenCalled();
+      expect(logos.publish).not.toHaveBeenCalled();
     });
 
     it("does not download anything for an unknown team", async () => {
@@ -279,13 +286,47 @@ describe("RosterProposalService", () => {
       expect(saved.size).toBe(0);
     });
 
-    it("sets only the proposed variant on approval", async () => {
+    it("publishes the staged asset and sets only the proposed variant on approval", async () => {
       const { id } = await proposeDarkLogo();
 
       const approved = await service.approve(id, "admin");
 
-      expect(teams.update).toHaveBeenCalledExactlyOnceWith("kc", { logoDarkUrl: logoUrl });
-      expect(approved).toMatchObject({ status: "applied", entityId: "kc" });
+      expect(logos.publish).toHaveBeenCalledExactlyOnceWith(pendingKey);
+      expect(teams.update).toHaveBeenCalledExactlyOnceWith("kc", { logoDarkUrl: publishedUrl });
+      expect(approved).toMatchObject({
+        status: "applied",
+        entityId: "kc",
+        change: { logoKey: publishedKey, logoUrl: publishedUrl },
+      });
+      expect(logos.discard).not.toHaveBeenCalled();
+    });
+
+    it("deletes the staged asset when the proposal is rejected", async () => {
+      const { id } = await proposeDarkLogo();
+
+      const rejected = await service.reject(id, "admin");
+
+      expect(logos.discard).toHaveBeenCalledExactlyOnceWith(pendingKey);
+      expect(logos.publish).not.toHaveBeenCalled();
+      expect(teams.update).not.toHaveBeenCalled();
+      expect(rejected).toMatchObject({ status: "rejected" });
+    });
+
+    it("records no rejection when the staged asset cannot be deleted", async () => {
+      const { id } = await proposeDarkLogo();
+      logos.discard.mockRejectedValueOnce(new Error("R2 unavailable"));
+      const save = vi.spyOn(store, "save");
+
+      await expect(service.reject(id, "admin")).rejects.toThrow("R2 unavailable");
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    it("deletes the staged asset when the proposal cannot be recorded", async () => {
+      const save = vi.spyOn(store, "save").mockRejectedValueOnce(new Error("database down"));
+
+      await expect(proposeDarkLogo()).rejects.toThrow("database down");
+      expect(logos.discard).toHaveBeenCalledExactlyOnceWith(pendingKey);
+      save.mockRestore();
     });
 
     it("requires teams.manage to review", async () => {

@@ -94,7 +94,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   return fields
     .filter(
       (field): field is [string, string | boolean | null] =>
-        field[0] !== "kind" && field[0] !== "logoUrl" && field[1] !== undefined,
+        !["kind", "logoKey", "logoUrl"].includes(field[0]) && field[1] !== undefined,
     )
     .map(([key, value]) => ({
       key,
