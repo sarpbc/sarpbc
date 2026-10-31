@@ -99,7 +99,7 @@ function teamItems(): CommandPaletteItem[] {
     return [];
   }
   return results.value.teams.map((team: Team) => {
-    const src = resolveThemedLogoUrl(team.imageUrl, team.darkModeImageUrl, colorMode.value);
+    const src = resolveThemedLogoUrl(team, colorMode.value);
     return {
       id: `team-${team.id}`,
       label: team.name,

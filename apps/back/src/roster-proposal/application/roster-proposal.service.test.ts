@@ -29,7 +29,13 @@ function setup() {
   const teams = {
     findById: vi.fn(async (id: string) => (id === "kc" ? kc : null)),
     create: vi.fn(async () => Object.assign(new Team(), { id: "new-team" })),
-    update: vi.fn(),
+    update: vi.fn(async () => kc),
+  };
+  const logos = {
+    upload: vi.fn(
+      async (teamId: string, variant: string) =>
+        `https://cdn.sarpbc.test/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`,
+    ),
   };
   const contracts = {
     getContractsByPlayer: vi.fn(async () => [Object.assign(new Contract(), { id: "zen-kc" })]),
@@ -48,8 +54,9 @@ function setup() {
     {
       hasAnyPermission: async () => staff.allowed,
     },
+    logos,
   );
-  return { saved, store, players, contracts, staff, service };
+  return { saved, store, players, teams, contracts, logos, staff, service };
 }
 
 describe("RosterProposalService", () => {
@@ -58,11 +65,13 @@ describe("RosterProposalService", () => {
   let store: ReturnType<typeof setup>["store"];
   let players: ReturnType<typeof setup>["players"];
   let contracts: ReturnType<typeof setup>["contracts"];
+  let teams: ReturnType<typeof setup>["teams"];
+  let logos: ReturnType<typeof setup>["logos"];
   let staff: ReturnType<typeof setup>["staff"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, store, players, contracts, staff, service } = setup());
+    ({ saved, store, players, teams, contracts, logos, staff, service } = setup());
   });
 
   const addZen = () =>
@@ -220,5 +229,73 @@ describe("RosterProposalService", () => {
     expect(saved.get(id)?.status).toBe("rejected");
     await expect(service.approve(id, "admin")).rejects.toThrow("already rejected");
     expect(players.joinTeam).not.toHaveBeenCalled();
+  });
+
+  describe("team logos", () => {
+    const logoUrl = "https://cdn.sarpbc.test/teams/kc/logo-dark-0123456789abcdef.webp";
+    const proposeDarkLogo = () =>
+      service.proposeTeamLogo(
+        { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
+        source,
+        "journalist",
+      );
+
+    it("stores the normalized asset and queues it for review without touching the team", async () => {
+      const proposal = await proposeDarkLogo();
+
+      expect(logos.upload).toHaveBeenCalledWith("kc", "dark", "https://kcorp.gg/logo-dark.svg");
+      expect(proposal).toMatchObject({
+        status: "pending",
+        sourceUrl: source,
+        change: {
+          kind: "upload_team_logo",
+          teamId: "kc",
+          variant: "dark",
+          imageUrl: "https://kcorp.gg/logo-dark.svg",
+          logoUrl,
+        },
+      });
+      expect(teams.update).not.toHaveBeenCalled();
+    });
+
+    it("does not download anything for an unknown team", async () => {
+      await expect(
+        service.proposeTeamLogo(
+          { teamId: "nope", variant: "light", imageUrl: "https://kcorp.gg/logo.png" },
+          source,
+          "journalist",
+        ),
+      ).rejects.toThrow(NotFoundError);
+      expect(logos.upload).not.toHaveBeenCalled();
+      expect(saved.size).toBe(0);
+    });
+
+    it("records nothing when the asset is rejected", async () => {
+      logos.upload.mockRejectedValueOnce(
+        new InvalidInputError("The logo must be a PNG, WebP or SVG image."),
+      );
+
+      await expect(proposeDarkLogo()).rejects.toThrow("PNG, WebP or SVG");
+      expect(saved.size).toBe(0);
+    });
+
+    it("sets only the proposed variant on approval", async () => {
+      const { id } = await proposeDarkLogo();
+
+      const approved = await service.approve(id, "admin");
+
+      expect(teams.update).toHaveBeenCalledExactlyOnceWith("kc", { logoDarkUrl: logoUrl });
+      expect(approved).toMatchObject({ status: "applied", entityId: "kc" });
+    });
+
+    it("requires teams.manage to review", async () => {
+      const { id } = await proposeDarkLogo();
+      staff.allowed = false;
+
+      await expect(service.approve(id, "journalist")).rejects.toThrow(
+        "Reviewing this proposal requires teams.manage",
+      );
+      expect(teams.update).not.toHaveBeenCalled();
+    });
   });
 });

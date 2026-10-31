@@ -8,6 +8,7 @@ describe("TransferController", () => {
     name: "Karmine Corp",
     slug: "karmine-corp",
     imageUrl: "https://cdn/kc.png",
+    logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
   });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen", slug: "zen", team: kc });
   const contract = Object.assign(new Contract(), {
@@ -57,6 +58,8 @@ describe("TransferController", () => {
             slug: "karmine-corp",
             imageUrl: "https://cdn/kc.png",
             darkModeImageUrl: null,
+            logoLightUrl: null,
+            logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
           },
         },
       ],

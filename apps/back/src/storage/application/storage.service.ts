@@ -31,4 +31,8 @@ export class StorageService {
     }
     return this.storage.uploadImage(bytes, type, filename, context);
   }
+
+  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse> {
+    return this.storage.putObject(key, bytes, contentType);
+  }
 }

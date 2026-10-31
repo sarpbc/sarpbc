@@ -69,12 +69,7 @@ function typeIcon(type: TransferType): string {
       variant="inline"
       class="flex w-28 min-w-0 shrink-0 items-center gap-2 sm:w-40"
     >
-      <TeamImg
-        :team-name="transfer.team.name"
-        :image-url="transfer.team.imageUrl || undefined"
-        :dark-mode-image-url="transfer.team.darkModeImageUrl || undefined"
-        size="xs"
-      />
+      <TeamImg :team-name="transfer.team.name" :logo="transfer.team" size="xs" />
       <span class="truncate text-sm">{{ transfer.team.name }}</span>
     </SLink>
   </SListItem>

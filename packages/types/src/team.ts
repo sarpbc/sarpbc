@@ -7,5 +7,7 @@ export interface Team {
   location?: string;
   imageUrl?: string;
   darkModeImageUrl?: string;
+  logoLightUrl?: string | null;
+  logoDarkUrl?: string | null;
   slug: string;
 }

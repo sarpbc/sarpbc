@@ -2,9 +2,11 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
 import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../roster/domain/roster";
+import { isLiquipediaHost, TEAM_LOGO_VARIANTS } from "../../../roster/domain/team-logo";
 import {
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,
+  type RosterProposal,
 } from "../../../roster-proposal/domain/roster-proposal";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runStaffReadTool, runWriteTool } from "../permission-gate";
@@ -52,20 +54,21 @@ const REVIEW_NOTE =
 export function registerRosterTools(server: McpServer, ctx: McpToolContext): void {
   const { user } = ctx;
 
-  const propose = async (change: RosterChange, sourceUrl: string) => {
-    const proposal = await ctx.rosterProposalService.propose(change, sourceUrl, user.id);
-    return {
-      entityId: proposal.id,
-      sourceUrl,
-      result: {
-        proposalId: proposal.id,
-        kind: change.kind,
-        status: proposal.status,
-        reviewUrl: adminRosterProposalsUrl(),
-        note: REVIEW_NOTE,
-      },
-    };
-  };
+  const proposed = (proposal: RosterProposal, sourceUrl: string) => ({
+    entityId: proposal.id,
+    sourceUrl,
+    result: {
+      proposalId: proposal.id,
+      kind: proposal.change.kind,
+      change: proposal.change,
+      status: proposal.status,
+      reviewUrl: adminRosterProposalsUrl(),
+      note: REVIEW_NOTE,
+    },
+  });
+
+  const propose = async (change: RosterChange, sourceUrl: string) =>
+    proposed(await ctx.rosterProposalService.propose(change, sourceUrl, user.id), sourceUrl);
 
   server.registerTool(
     "add_player_to_team",
@@ -184,7 +187,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "update_team",
     {
       description:
-        "Propose updating a team's name, country, or logo, or marking it inactive. Requires teams.manage. Teams are never deleted; remove current players before setting active to false.",
+        "Propose updating a team's name, country, or logo URL, or marking it inactive. Requires teams.manage. Prefer upload_team_logo for logos. Teams are never deleted; remove current players before setting active to false.",
       inputSchema: {
         teamId: z.string().uuid().describe("Team UUID."),
         name: z.string().min(1).max(255).optional().describe("Team name."),
@@ -202,6 +205,43 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
           sourceUrl,
         );
       }),
+  );
+
+  server.registerTool(
+    "upload_team_logo",
+    {
+      description:
+        "Propose a team logo variant stored on sarpbc.org. Requires teams.manage. Downloads imageUrl (https PNG, WebP or SVG, at most 2 MB, at least 128x128 pixels), rejects unsafe SVGs, and stores a square transparent WebP. Use the light variant for light backgrounds and the dark variant for dark backgrounds. Once approved, it replaces that variant on the team; the review shows it on both backgrounds.",
+      inputSchema: {
+        teamId: z.string().uuid().describe("Team UUID."),
+        variant: z
+          .enum(TEAM_LOGO_VARIANTS)
+          .describe("light for display on light backgrounds, dark for dark backgrounds."),
+        imageUrl: z
+          .string()
+          .url()
+          .regex(/^https:\/\//, "Use an https URL")
+          .refine(
+            (url) => !URL.canParse(url) || !isLiquipediaHost(new URL(url).hostname),
+            "Liquipedia is not an accepted logo source; use the team's official asset",
+          )
+          .describe(
+            "Direct https URL of the official logo file (PNG, WebP or SVG). Never Liquipedia.",
+          ),
+        sourceUrl: sourceUrlSchema,
+      },
+    },
+    async ({ teamId, variant, imageUrl, sourceUrl }) =>
+      runWriteTool(user, "upload_team_logo", "teams.manage", async () =>
+        proposed(
+          await ctx.rosterProposalService.proposeTeamLogo(
+            { teamId, variant, imageUrl },
+            sourceUrl,
+            user.id,
+          ),
+          sourceUrl,
+        ),
+      ),
   );
 
   server.registerTool(

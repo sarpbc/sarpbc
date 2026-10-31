@@ -1,4 +1,5 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
+import type { TeamLogoFormat } from "../domain/team-logo";
 import type { ImportedPlayer } from "./imports";
 import type { ContractMovementFilter, PlayerSearchProps, TeamSearchProps } from "./search-props";
 export interface PlayerQueries {
@@ -77,4 +78,17 @@ export interface CurrentRosterSource {
 export interface CurrentRosterWriter {
   hasTeams(): Promise<boolean>;
   syncCurrentTeams(roster: ImportedPlayer[]): Promise<void>;
+}
+
+export interface TeamLogoSource {
+  download(url: URL, maxBytes: number): Promise<Uint8Array>;
+}
+
+export interface TeamLogoImages {
+  dimensions(bytes: Uint8Array): Promise<{ width: number; height: number }>;
+  normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number): Promise<Uint8Array>;
+}
+
+export interface TeamLogoStorage {
+  put(key: string, bytes: Uint8Array, contentType: "image/webp"): Promise<string>;
 }

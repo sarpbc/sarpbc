@@ -20,13 +20,7 @@ const player = ref<Player | null>(null);
 const href = computed(() => playerHref(props.slug));
 
 const colorMode = useColorMode();
-const teamLogoSrc = computed(() =>
-  resolveThemedLogoUrl(
-    player.value?.team?.imageUrl,
-    player.value?.team?.darkModeImageUrl,
-    colorMode.value,
-  ),
-);
+const teamLogoSrc = computed(() => resolveThemedLogoUrl(player.value?.team, colorMode.value));
 
 const fullName = computed(() => {
   if (!player.value) {

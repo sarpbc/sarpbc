@@ -177,4 +177,35 @@ export class R2Service implements ObjectStorage {
       log.emit();
     }
   }
+
+  async putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse> {
+    const log = createLogger({
+      component: R2Service.name,
+      action: "putObject",
+      environment: currentEnvironment(),
+      key,
+      imageContentType: contentType,
+      imageSize: bytes.byteLength,
+      bucket: this.bucket,
+    });
+    try {
+      await this.getClient().send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: bytes,
+          ContentType: contentType,
+          CacheControl: "public, max-age=31536000, immutable",
+        }),
+      );
+      log.set({ stored: true });
+      return { publicUrl: `${this.publicBaseUrl.replace(/\/$/, "")}/${key}`, key };
+    } catch (error) {
+      log.error(error instanceof Error ? error : new Error(String(error)));
+      if (error instanceof InternalServerErrorException) throw error;
+      throw new InternalServerErrorException("The image could not be stored. Try again.");
+    } finally {
+      log.emit();
+    }
+  }
 }

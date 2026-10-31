@@ -1,5 +1,6 @@
 import { InvalidInputError } from "../../common/domain/errors";
 import type { ContractRole, PlayerStatus, RosterRole } from "../../roster/domain/roster";
+import type { TeamLogoVariant } from "../../roster/domain/team-logo";
 import type { StaffPermission } from "../../user/domain/staff-access";
 
 export type RosterChange =
@@ -34,6 +35,13 @@ export type RosterChange =
       location?: string;
       imageUrl?: string;
       active?: boolean;
+    }
+  | {
+      kind: "upload_team_logo";
+      teamId: string;
+      variant: TeamLogoVariant;
+      imageUrl: string;
+      logoUrl: string;
     }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
   | { kind: "merge_teams"; keptId: string; duplicateId: string }
@@ -73,6 +81,7 @@ export function requiredPermission(kind: RosterChangeKind): StaffPermission {
       return "players.manage";
     case "create_team":
     case "update_team":
+    case "upload_team_logo":
     case "merge_teams":
       return "teams.manage";
     default: {

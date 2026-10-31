@@ -86,8 +86,11 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `update_player`           | `players.manage` | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`) |
 | `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                                        |
 | `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                               |
+| `upload_team_logo`        | `teams.manage`   | Set the team's `light` or `dark` logo variant from an official asset stored on sarpbc.org                  |
 | `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                     |
 | `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team               |
+
+`upload_team_logo` takes `teamId`, `variant` (`light` or `dark`), the official asset's https `imageUrl` and `sourceUrl`; neither may be Liquipedia. The server downloads the asset from public addresses only (10 s, 2 MB, at most 3 redirects), accepts PNG, WebP or SVG without scripts, event handlers or external references, requires 128x128 pixels for raster files, and stores a 512x512 transparent WebP in R2 under `teams/{teamId}/logo-{variant}-{hash}.webp` when the proposal is created. The review shows the variant on light and dark backgrounds. `get_team` and `search_teams` return `logoLightUrl` and `logoDarkUrl`.
 
 `list_roster_proposals` (`players.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
 

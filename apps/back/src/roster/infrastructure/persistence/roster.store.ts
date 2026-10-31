@@ -182,6 +182,8 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
       location: model.location,
       imageUrl: model.imageUrl,
       darkModeImageUrl: model.darkModeImageUrl,
+      logoLightUrl: model.logoLightUrl,
+      logoDarkUrl: model.logoDarkUrl,
     });
     this.em.persist(row);
   }
