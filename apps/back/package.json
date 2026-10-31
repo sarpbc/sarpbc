@@ -26,9 +26,9 @@
     "test:integration": "pnpm run build && vitest run --project integration"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1154.0",
-    "@aws-sdk/s3-request-presigner": "^3.1154.0",
-    "@fastify/cookie": "^11.1.3",
+    "@aws-sdk/client-s3": "^3.1158.0",
+    "@aws-sdk/s3-request-presigner": "^3.1158.0",
+    "@fastify/cookie": "^11.1.5",
     "@fastify/helmet": "^13.2.0",
     "@fastify/multipart": "^10.1.4",
     "@googleapis/oauth2": "^10.0.1",
@@ -53,7 +53,7 @@
     "@nestjs/throttler": "6.7.1",
     "@sarpbc/types": "workspace:*",
     "@sarpbc/utils": "workspace:*",
-    "axios": "^1.20.0",
+    "axios": "^1.21.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.8",
@@ -70,8 +70,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@nestjs/cli": "12.0.10",
-    "@nestjs/schematics": "12.0.10",
+    "@nestjs/cli": "12.0.11",
+    "@nestjs/schematics": "12.0.11",
     "@nestjs/testing": "catalog:",
     "@swc-node/register": "^1.12.1",
     "@swc/cli": "^0.8.1",
