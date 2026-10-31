@@ -50,6 +50,21 @@ describe("TwitchAppToken", () => {
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
+  it("reuses a short-lived token for half of its lifetime", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(tokenResponse("first", 120))
+      .mockResolvedValueOnce(tokenResponse("second", 120));
+    global.fetch = fetchMock;
+
+    await token.get();
+    now += 59_000;
+    await expect(token.get()).resolves.toBe("first");
+    now += 1_000;
+    await expect(token.get()).resolves.toBe("second");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("shares one request between concurrent callers", async () => {
     (global.fetch as Mock).mockResolvedValueOnce(tokenResponse("first"));
 

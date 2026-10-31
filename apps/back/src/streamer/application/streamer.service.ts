@@ -43,14 +43,16 @@ export class StreamerService {
     if (!this.source) return [];
 
     let snapshot: LiveStreamSnapshot | null;
+    let claim: string | null;
     try {
       snapshot = await this.cache.read();
       if (snapshot && this.isFresh(snapshot)) return snapshot.streams;
-      if (!(await this.cache.claimRefresh())) return snapshot?.streams ?? [];
+      claim = await this.cache.claimRefresh();
     } catch (error) {
       this.reportFailure("cache", error);
       return [];
     }
+    if (claim === null) return snapshot?.streams ?? [];
 
     let streams: LiveStream[];
     try {
@@ -61,7 +63,7 @@ export class StreamerService {
     }
 
     try {
-      await this.cache.write({ streams, fetchedAt: this.now() });
+      await this.cache.write({ streams, fetchedAt: this.now() }, claim);
     } catch (error) {
       this.reportFailure("cache", error);
     }
