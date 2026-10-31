@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20261031180000_addTournamentPrize extends Migration {
-  override name = "Migration20261031180000_addTournamentPrize";
+export class Migration20261031170000_addTournamentPrize extends Migration {
+  override name = "Migration20261031170000_addTournamentPrize";
 
   override up(): void | Promise<void> {
     this.addSql(
