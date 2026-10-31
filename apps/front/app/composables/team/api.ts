@@ -1,4 +1,4 @@
-import type { ProfileMatchListItem } from "@sarpbc/types";
+import type { ProfileEarnings, ProfileMatchListItem } from "@sarpbc/types";
 import type { Team } from "~/types/team";
 import type { Tournament } from "~/types/tournament";
 import type { ContractRole, TeamContract } from "~/types/contract";
@@ -71,6 +71,14 @@ export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   });
 
   return res.trophies ?? [];
+}
+
+export async function getTeamEarnings(teamId: string): Promise<ProfileEarnings> {
+  const res = await apiFetch<{ earnings: ProfileEarnings }>(`/team/${teamId}/earnings`, {
+    method: "GET",
+  });
+
+  return res.earnings;
 }
 
 export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
