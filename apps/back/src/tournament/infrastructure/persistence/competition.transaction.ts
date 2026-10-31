@@ -22,6 +22,7 @@ import {
   toMatch,
 } from "./competition.mapper";
 import { CompetitionAwardWriter } from "./player-award.store";
+import { CompetitionPrizeWriter } from "./tournament-prize.store";
 export class CompetitionTournamentWriter implements TournamentWriter {
   private readonly tournaments = new Map<string, Row.Tournament>();
   private readonly participantsStaged = new Map<string, Row.TournamentParticipant>();
@@ -397,6 +398,7 @@ export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
           matches: new CompetitionMatchWriter(em, tournaments),
           rosters: new RosterSyncWriter(em),
           awards: awardWriter,
+          prizes: new CompetitionPrizeWriter(em),
         });
         await em.flush();
         return result;

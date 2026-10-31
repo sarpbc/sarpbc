@@ -4,6 +4,7 @@ import * as Row from "./player.entities";
 import {
   PlayerAward,
   TournamentParticipant,
+  TournamentPrize,
 } from "../../../tournament/infrastructure/competition-persistence";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
@@ -356,6 +357,11 @@ function rosterReferences(em: EntityManager): RosterReferences {
         participant.players.remove(em.getReference(Row.Player, from));
         participant.players.add(em.getReference(Row.Player, to));
       }
+      const prizes = await em.find(TournamentPrize, { players: from }, { populate: ["players"] });
+      for (const prize of prizes) {
+        prize.players.remove(em.getReference(Row.Player, from));
+        prize.players.add(em.getReference(Row.Player, to));
+      }
     },
     moveTeam: async (from, to) => {
       await em.nativeUpdate(Row.Team, { mergedInto: from }, { mergedInto: to });
@@ -363,6 +369,7 @@ function rosterReferences(em: EntityManager): RosterReferences {
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });
       await em.nativeUpdate(TournamentParticipant, { team: from }, { team: to });
+      await em.nativeUpdate(TournamentPrize, { team: from }, { team: to });
     },
     sharedTournamentIds: async (teamId, otherTeamId) => {
       const participants = await em.find(

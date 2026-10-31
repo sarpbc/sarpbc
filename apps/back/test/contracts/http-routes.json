@@ -474,6 +474,14 @@
   {
     "controller": "\"player\"",
     "verb": "GET",
+    "path": "\":id/earnings\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
     "path": "\":id/matches\"",
     "status": null,
     "guards": [],
@@ -677,7 +685,7 @@
     "path": "\"\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
-    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+    "permissions": ["\"players.manage\"", "\"teams.manage\"", "\"tournaments.manage\""]
   },
   {
     "controller": "\"roster-proposals\"",
@@ -685,7 +693,7 @@
     "path": "\":id/approve\"",
     "status": "HttpStatus.OK",
     "guards": ["AuthGuard", "PermissionGuard"],
-    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+    "permissions": ["\"players.manage\"", "\"teams.manage\"", "\"tournaments.manage\""]
   },
   {
     "controller": "\"roster-proposals\"",
@@ -693,7 +701,7 @@
     "path": "\":id/reject\"",
     "status": "HttpStatus.OK",
     "guards": ["AuthGuard", "PermissionGuard"],
-    "permissions": ["\"players.manage\"", "\"teams.manage\""]
+    "permissions": ["\"players.manage\"", "\"teams.manage\"", "\"tournaments.manage\""]
   },
   {
     "controller": "\"search\"",
@@ -795,6 +803,14 @@
     "controller": "\"team\"",
     "verb": "GET",
     "path": "\":id/contract\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "GET",
+    "path": "\":id/earnings\"",
     "status": null,
     "guards": [],
     "permissions": []
@@ -914,6 +930,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
+    "path": "\":id/prizes\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
     "path": "\":id\"",
     "status": null,
     "guards": [],
@@ -1019,6 +1043,14 @@
     "controller": "\"tournaments\"",
     "verb": "POST",
     "path": "\"sync/pandascore/:pandascoreId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\":id/prizes\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

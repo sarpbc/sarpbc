@@ -7,7 +7,13 @@ describe("TeamController", () => {
   const teams = { findById: vi.fn() };
   const contracts = { getFormerPlayersByTeam: vi.fn(), getContractsByTeam: vi.fn() };
   const tournaments = { getTournamentsWonByTeam: vi.fn(), getTournamentsByTeam: vi.fn() };
-  const controller = new TeamController(teams as never, contracts as never, tournaments as never);
+  const prizes = { teamEarnings: vi.fn() };
+  const controller = new TeamController(
+    teams as never,
+    contracts as never,
+    tournaments as never,
+    prizes as never,
+  );
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -16,6 +22,7 @@ describe("TeamController", () => {
     contracts.getContractsByTeam.mockResolvedValue([]);
     tournaments.getTournamentsWonByTeam.mockResolvedValue([]);
     tournaments.getTournamentsByTeam.mockResolvedValue([]);
+    prizes.teamEarnings.mockResolvedValue({ totals: [], years: [] });
   });
 
   it("reads the sub-resources of the team a merged id resolves to", async () => {
@@ -23,10 +30,12 @@ describe("TeamController", () => {
     await controller.getTournaments("merged");
     await controller.getFormerPlayers("merged");
     await controller.getContracts("merged");
+    await controller.getEarnings("merged");
 
     expect(tournaments.getTournamentsWonByTeam).toHaveBeenCalledWith("kept");
     expect(tournaments.getTournamentsByTeam).toHaveBeenCalledWith("kept");
     expect(contracts.getFormerPlayersByTeam).toHaveBeenCalledWith("kept");
     expect(contracts.getContractsByTeam).toHaveBeenCalledWith("kept");
+    expect(prizes.teamEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
   });
 });
