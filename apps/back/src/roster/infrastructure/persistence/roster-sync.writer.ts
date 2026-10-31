@@ -71,7 +71,6 @@ export class RosterSyncWriter {
     this.em.persist(row);
     return { id: row.id };
   }
-  /** Staff roster moves own the current team of a player under contract. */
   private async hasOpenContract(playerId: string): Promise<boolean> {
     return (await this.em.findOne(Contract, { player: playerId, endDate: null })) !== null;
   }
