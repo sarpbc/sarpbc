@@ -29,6 +29,7 @@ export class Player {
   imageUrl: string | null = null;
   /** PandaScore role (e.g. "Coach"); null for standard roster players. */
   role: string | null = null;
+  contractRole: ContractRole | null = null;
   status: PlayerStatus = PlayerStatus.ACTIVE;
   slug!: string;
   pandascoreId: number | null = null;
@@ -88,6 +89,13 @@ export const PlayerSchema = defineEntity({
     lastName: p.string().nullable(),
     imageUrl: p.string().nullable(),
     role: p.string().nullable(),
+    contractRole: p
+      .enum(() => ContractRole)
+      .nullable()
+      .formula(
+        (columns) =>
+          `(select c."role" from "contract" c where c."player_id" = ${columns.id} and c."team_id" = ${columns.team} and c."end_date" is null order by c."start_date" desc limit 1)`,
+      ),
     status: p
       .enum(() => PlayerStatus)
       .columnType("text")

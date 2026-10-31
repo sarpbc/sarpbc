@@ -27,6 +27,7 @@ export function toPlayer(row: Record.Player): Player {
     lastName: row.lastName,
     imageUrl: row.imageUrl,
     role: row.role,
+    contractRole: row.contractRole ?? null,
     status: row.status,
     slug: row.slug,
     pandascoreId: row.pandascoreId,

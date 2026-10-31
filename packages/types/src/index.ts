@@ -1,12 +1,19 @@
 import type { PlayerAwardType } from "./player-award";
 import type { NewsType } from "./news";
 import type { TransferType } from "./transfer";
+import type { StaffContractRole } from "./contract";
 
 export type { StaffRole, StaffPermission, User } from "./user";
 export type { Player } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
 export type { Team } from "./team";
-export type { ContractRole, PlayerContract, TeamContract } from "./contract";
+export type {
+  ContractRole,
+  PlayerContract,
+  PlayerContractRole,
+  StaffContractRole,
+  TeamContract,
+} from "./contract";
 export type { Transfer, TransferType } from "./transfer";
 export type { League } from "./league";
 export type { TournamentEventRef } from "./tournament-event";
@@ -37,7 +44,15 @@ export const TRANSFER_TYPES = [
   "departure",
   "benched",
   "loan",
+  "staff",
 ] as const satisfies readonly TransferType[];
+
+export const STAFF_CONTRACT_ROLES = [
+  "coach",
+  "assistant_coach",
+  "analyst",
+  "manager",
+] as const satisfies readonly StaffContractRole[];
 
 export const PlayerAwardTypes = {
   MVP: "mvp",

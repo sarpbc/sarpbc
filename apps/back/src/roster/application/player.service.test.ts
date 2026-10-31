@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
-import { Contract, Player, PlayerPhoto, PlayerStatus, Team } from "../domain/roster";
+import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus, Team } from "../domain/roster";
 import { PlayerService } from "./player.service";
 import type { PhotoQueries, PlayerQueries, RosterWriteScope } from "./ports";
 
@@ -153,6 +153,34 @@ describe("PlayerService roster moves", () => {
     await expect(service.joinTeam(player.id, move(oldTeam.id))).rejects.toBeInstanceOf(
       ConflictError,
     );
+    expect(stores.contracts.save).not.toHaveBeenCalled();
+  });
+
+  it("opens a staff contract on the current team and keeps the player contract", async () => {
+    const result = await service.joinTeam(player.id, {
+      ...move(oldTeam.id),
+      role: ContractRole.COACH,
+    });
+    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
+    expect(history[1]).toMatchObject({
+      role: ContractRole.ACTIVE,
+      startDate: new Date("2025-02-01"),
+      endDate: new Date("2026-10-23"),
+    });
+    expect(result.opened).toMatchObject({
+      team: oldTeam,
+      role: ContractRole.COACH,
+      startDate: new Date("2026-10-23"),
+      endDate: null,
+    });
+    expect(player.currentRole()).toBe(ContractRole.COACH);
+  });
+
+  it("rejects a staff move into the role the player already holds", async () => {
+    history[1].role = ContractRole.COACH;
+    await expect(
+      service.joinTeam(player.id, { ...move(oldTeam.id), role: ContractRole.COACH }),
+    ).rejects.toBeInstanceOf(ConflictError);
     expect(stores.contracts.save).not.toHaveBeenCalled();
   });
 

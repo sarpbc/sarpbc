@@ -74,6 +74,21 @@ describe("deriveTransfers", () => {
     ]);
   });
 
+  it("reports a staff contract start as a staff move and its end as a departure", () => {
+    expect(
+      summary([
+        contract("player", kc, "2023-01-01", "2025-09-01"),
+        contract("coach", kc, "2025-09-01", "2026-06-01", ContractRole.COACH),
+        contract("analyst", vitality, "2026-07-01", null, ContractRole.ANALYST),
+      ]),
+    ).toEqual([
+      ["staff", "2026-07-01", "vitality"],
+      ["departure", "2026-06-01", "kc"],
+      ["staff", "2025-09-01", "kc"],
+      ["arrival", "2023-01-01", "kc"],
+    ]);
+  });
+
   it("keeps the source of each end of a contract", () => {
     const [departure, arrival] = deriveTransfers(
       [contract("v", vitality, "2022-01-10", "2025-06-01")],

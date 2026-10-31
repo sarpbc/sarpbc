@@ -1,4 +1,4 @@
-import { ContractRole, PlayerStatus, RosterRole } from "../domain/roster";
+import { ContractRole, PlayerStatus } from "../domain/roster";
 import type { DataSource } from "../../common/domain/data-source";
 export interface CreatePlayerInput {
   name: string;
@@ -11,7 +11,6 @@ export interface CreatePlayerInput {
   imageUrl?: string;
   slug?: string;
   status?: PlayerStatus;
-  role?: RosterRole;
 }
 
 export interface UpdatePlayerInput {
@@ -24,13 +23,16 @@ export interface UpdatePlayerInput {
   imageUrl?: string;
   slug?: string;
   status?: PlayerStatus;
-  role?: RosterRole;
 }
 
 export interface RosterMoveInput {
   teamId: string;
   effectiveDate: string;
   sourceUrl: string;
+}
+
+export interface JoinTeamInput extends RosterMoveInput {
+  role?: ContractRole;
 }
 
 export interface LeaveTeamInput extends RosterMoveInput {

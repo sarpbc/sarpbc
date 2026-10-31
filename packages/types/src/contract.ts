@@ -1,4 +1,8 @@
-export type ContractRole = "active" | "benched" | "loaned";
+export type PlayerContractRole = "active" | "benched" | "loaned";
+
+export type StaffContractRole = "coach" | "assistant_coach" | "analyst" | "manager";
+
+export type ContractRole = PlayerContractRole | StaffContractRole;
 
 export interface PlayerContract {
   id: string;

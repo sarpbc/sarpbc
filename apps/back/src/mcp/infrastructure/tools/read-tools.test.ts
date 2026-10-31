@@ -1,10 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
+import { Player, Team } from "../../../roster/domain/roster";
 import { registerReadTools } from "./read-tools";
 
 function setup() {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-  const team = { id: "t1", slug: "scouted", name: "Scouted", source: "startgg", players: [] };
-  const player = { id: "p1", slug: "scout", name: "Scout", source: "startgg", team };
+  const team = Object.assign(new Team(), {
+    id: "t1",
+    slug: "scouted",
+    name: "Scouted",
+    source: "startgg",
+  });
+  const player = Object.assign(new Player(), {
+    id: "p1",
+    slug: "scout",
+    name: "Scout",
+    source: "startgg",
+    team,
+  });
   const matchService = {
     findUpcomingAndCount: vi.fn().mockResolvedValue([[], 0]),
     findLiveAndCount: vi.fn().mockResolvedValue([[], 0]),
@@ -56,6 +68,7 @@ describe("MCP read tools", () => {
     expect(await json("search_teams", { query: "Scouted" })).toEqual([startgg]);
     expect(await json("get_player", { idOrSlug: "scout" })).toMatchObject({
       source: "startgg",
+      role: "active",
       team: { id: "t1", source: "startgg" },
     });
     expect(await json("get_team", { idOrSlug: "scouted" })).toMatchObject({ source: "startgg" });

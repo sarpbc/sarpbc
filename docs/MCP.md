@@ -78,16 +78,18 @@ Write tools (staff permission required):
 
 Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 
-| Tool                      | Permission       | Description once approved                                                                                  |
-| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| `add_player_to_team`      | `players.manage` | Close the player's open contracts and open one with the new team                                           |
-| `remove_player_from_team` | `players.manage` | Close the contract and set the player `free_agent` or `retired`                                            |
-| `create_player`           | `players.manage` | Create a player without a team (name, country, status, role)                                               |
-| `update_player`           | `players.manage` | Update name, country, status (`active`, `free_agent`, `retired`) or role (`player`, `coach`, `substitute`) |
-| `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                                        |
-| `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                               |
-| `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                     |
-| `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team               |
+| Tool                      | Permission       | Description once approved                                                                    |
+| ------------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
+| `add_player_to_team`      | `players.manage` | Close the player's open contracts and open one with the new team and contract role           |
+| `remove_player_from_team` | `players.manage` | Close the contract and set the player `free_agent` or `retired`                              |
+| `create_player`           | `players.manage` | Create a player without a team (name, country, status)                                       |
+| `update_player`           | `players.manage` | Update name, country or status (`active`, `free_agent`, `retired`)                           |
+| `create_team`             | `teams.manage`   | Create a team (name, country, logo)                                                          |
+| `update_team`             | `teams.manage`   | Update name, country or logo, or mark an empty team inactive                                 |
+| `merge_players`           | `players.manage` | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player       |
+| `merge_teams`             | `teams.manage`   | Move a duplicate's contracts, current players and tournament participations to the kept team |
+
+Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who becomes coach gets a new staff contract with `add_player_to_team` on the same team, so their past contracts stay player contracts. The role shown on player and team pages comes from the current contract.
 
 `list_roster_proposals` (`players.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
 

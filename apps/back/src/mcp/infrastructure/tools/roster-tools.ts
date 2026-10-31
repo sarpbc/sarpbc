@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
-import { ContractRole, PlayerStatus, ROSTER_ROLES } from "../../../roster/domain/roster";
+import { ContractRole, PlayerStatus } from "../../../roster/domain/roster";
 import {
   ROSTER_PROPOSAL_STATUSES,
   type RosterChange,
@@ -31,7 +31,9 @@ const effectiveDateSchema = contractDateSchema.describe(
 
 const contractRoleSchema = z
   .enum(ContractRole)
-  .describe("Contract role: active, benched, or loaned. Defaults to active.");
+  .describe(
+    "Contract role. Players: active, benched, or loaned. Staff: coach, assistant_coach, analyst, or manager. Defaults to active. When a player moves into a staff role, open a new contract with that role instead of changing their past player contracts.",
+  );
 
 const countrySchema = z
   .string()
@@ -41,10 +43,6 @@ const countrySchema = z
 const playerStatusSchema = z
   .enum([PlayerStatus.ACTIVE, PlayerStatus.FREE_AGENT, PlayerStatus.RETIRED])
   .describe("Career status.");
-
-const rosterRoleSchema = z
-  .enum(ROSTER_ROLES)
-  .describe("Roster role: player, coach, or substitute.");
 
 const REVIEW_NOTE =
   "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
@@ -71,17 +69,18 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "add_player_to_team",
     {
       description:
-        "Propose adding a player to a team's current roster. Requires players.manage. Once approved, closes the player's open contracts at effectiveDate and opens a new one, so roster history is kept. Check get_player and get_team first.",
+        "Propose adding a player or staff member to a team's current roster. Requires players.manage. Once approved, closes the player's open contracts at effectiveDate and opens a new one with the given role, so roster history is kept. Use the same team with a new role when a player becomes coach. Check get_player and get_team first.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         teamId: z.string().uuid().describe("Team UUID."),
         effectiveDate: effectiveDateSchema,
+        role: contractRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
     },
-    async ({ sourceUrl, ...input }) =>
+    async ({ sourceUrl, role, ...input }) =>
       runWriteTool(user, "add_player_to_team", "players.manage", () =>
-        propose({ kind: "add_player_to_team", ...input }, sourceUrl),
+        propose({ kind: "add_player_to_team", ...input, contractRole: role }, sourceUrl),
       ),
   );
 
@@ -119,11 +118,10 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
         name: z.string().min(1).max(255).describe("In-game name."),
         country: countrySchema.optional(),
         status: playerStatusSchema.optional(),
-        role: rosterRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
     },
-    async ({ name, country, status, role, sourceUrl }) =>
+    async ({ name, country, status, sourceUrl }) =>
       runWriteTool(user, "create_player", "players.manage", () =>
         propose(
           {
@@ -131,7 +129,6 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
             name,
             nationality: country,
             status: status ?? PlayerStatus.FREE_AGENT,
-            role,
           },
           sourceUrl,
         ),
@@ -142,21 +139,20 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     "update_player",
     {
       description:
-        "Propose updating a player's name, country, status, or role. Requires players.manage. Use add_player_to_team and remove_player_from_team to change teams.",
+        "Propose updating a player's name, country, or status. Requires players.manage. Use add_player_to_team and remove_player_from_team to change teams or roles.",
       inputSchema: {
         playerId: z.string().uuid().describe("Player UUID."),
         name: z.string().min(1).max(255).optional().describe("In-game name."),
         country: countrySchema.optional(),
         status: playerStatusSchema.optional(),
-        role: rosterRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
     },
-    async ({ playerId, name, country, status, role, sourceUrl }) =>
+    async ({ playerId, name, country, status, sourceUrl }) =>
       runWriteTool(user, "update_player", "players.manage", () => {
-        requireUpdateFields({ name, country, status, role });
+        requireUpdateFields({ name, country, status });
         return propose(
-          { kind: "update_player", playerId, name, nationality: country, status, role },
+          { kind: "update_player", playerId, name, nationality: country, status },
           sourceUrl,
         );
       }),

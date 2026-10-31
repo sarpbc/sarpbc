@@ -281,7 +281,15 @@
           "default": "'active'",
           "comment": null,
           "collation": null,
-          "enumItems": ["active", "benched", "loaned"],
+          "enumItems": [
+            "active",
+            "benched",
+            "loaned",
+            "coach",
+            "assistant_coach",
+            "analyst",
+            "manager"
+          ],
           "mappedType": "enum"
         },
         "start_date": {
@@ -332,8 +340,8 @@
       "checks": [
         {
           "name": "contract_role_check",
-          "expression": "\"role\" in ('active', 'benched', 'loaned')",
-          "definition": "check (\"role\" in ('active', 'benched', 'loaned'))",
+          "expression": "\"role\" in ('active', 'benched', 'loaned', 'coach', 'assistant_coach', 'analyst', 'manager')",
+          "definition": "check (\"role\" in ('active', 'benched', 'loaned', 'coach', 'assistant_coach', 'analyst', 'manager'))",
           "columnName": "role"
         }
       ],
