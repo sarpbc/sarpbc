@@ -37,6 +37,10 @@ export default () => ({
     port: Number(process.env.REDIS_PORT ?? 6379),
     password: process.env.REDIS_PASSWORD || undefined,
   },
+  twitch: {
+    clientId: process.env.TWITCH_CLIENT_ID?.trim() || undefined,
+    clientSecret: process.env.TWITCH_CLIENT_SECRET?.trim() || undefined,
+  },
   posthog: {
     token: process.env.POSTHOG_PROJECT_TOKEN,
     host: process.env.POSTHOG_HOST || "https://eu.i.posthog.com",

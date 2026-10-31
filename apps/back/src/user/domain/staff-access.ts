@@ -19,6 +19,7 @@ export const STAFF_PERMISSIONS = [
   "tournaments.manage",
   "pickems.manage",
   "users.manage",
+  "streamers.manage",
 ] as const;
 
 export type StaffPermission = (typeof STAFF_PERMISSIONS)[number];
