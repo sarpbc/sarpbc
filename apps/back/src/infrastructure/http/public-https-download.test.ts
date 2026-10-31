@@ -1,38 +1,44 @@
 import { EventEmitter } from "node:events";
-import { lookup, type LookupOptions } from "node:dns";
 import type { RequestOptions } from "node:https";
-import { request } from "node:https";
 import { PassThrough } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { InvalidInputError } from "../../common/domain/errors";
 import { downloadPublicHttps, isPublicAddress } from "./public-https-download";
 
-vi.mock("node:https", () => ({ request: vi.fn() }));
-vi.mock("node:dns", () => ({ lookup: vi.fn() }));
+const fakes = vi.hoisted(() => ({
+  addresses: new Map<string, string[]>(),
+  request: vi.fn<(url: URL, options: RequestOptions) => EventEmitter>(),
+}));
+
+vi.mock("node:https", () => ({ request: fakes.request }));
+vi.mock("node:dns/promises", () => ({
+  lookup: async (hostname: string) =>
+    (fakes.addresses.get(hostname) ?? []).map((address) => ({
+      address,
+      family: address.includes(":") ? 6 : 4,
+    })),
+}));
 
 type Reply = { status: number; headers?: Record<string, string>; body?: string[] } | "hang";
 
-const limits = { maxBytes: 16, timeoutMs: 1_000, maxRedirects: 2 };
+const limits = {
+  maxBytes: 16,
+  timeoutMs: 1_000,
+  maxRedirects: 2,
+  isAllowedHost: (hostname: string) => !hostname.endsWith("liquipedia.net"),
+};
 
 function resolveDns(addresses: Record<string, string[]>) {
-  vi.mocked(lookup).mockImplementation(((
-    hostname: string,
-    _options: LookupOptions,
-    callback: (error: Error | null, addresses: { address: string; family: number }[]) => void,
-  ) =>
-    callback(
-      null,
-      (addresses[hostname] ?? []).map((address) => ({
-        address,
-        family: address.includes(":") ? 6 : 4,
-      })),
-    )) as never);
+  fakes.addresses = new Map(Object.entries(addresses));
 }
 
 function serve(routes: Record<string, Reply>) {
-  vi.mocked(request).mockImplementation(((url: URL, options: RequestOptions) => {
+  fakes.request.mockImplementation((url, options) => {
+    const { lookup, signal } = options;
+    if (!lookup || !signal) throw new Error("The request must use the guarded lookup and a signal");
     const req = Object.assign(new EventEmitter(), {
       end: () =>
-        options.lookup!(url.hostname, { all: true }, (error) => {
+        lookup(url.hostname, { all: true }, (error) => {
           if (error) {
             req.emit("error", error);
             return;
@@ -40,9 +46,7 @@ function serve(routes: Record<string, Reply>) {
           const reply = routes[url.href];
           if (!reply) throw new Error(`Unexpected request to ${url.href}`);
           if (reply === "hang") {
-            options.signal!.addEventListener("abort", () =>
-              req.emit("error", new Error("aborted")),
-            );
+            signal.addEventListener("abort", () => req.emit("error", new Error("aborted")));
             return;
           }
           const response = Object.assign(new PassThrough(), {
@@ -55,7 +59,7 @@ function serve(routes: Record<string, Reply>) {
         }),
     });
     return req;
-  }) as never);
+  });
 }
 
 const download = (url: string, overrides: Partial<typeof limits> = {}) =>
@@ -76,6 +80,8 @@ describe("isPublicAddress", () => {
     "fe80::1",
     "fd00:ec2::254",
     "::ffff:127.0.0.1",
+    "::127.0.0.1",
+    "::a9fe:a9fe",
     "::ffff:a9fe:a9fe",
     "64:ff9b::a9fe:a9fe",
     "not-an-ip",
@@ -90,7 +96,7 @@ describe("isPublicAddress", () => {
 
 describe("downloadPublicHttps", () => {
   beforeEach(() => {
-    vi.mocked(request).mockReset();
+    fakes.request.mockReset();
     resolveDns({
       "kcorp.gg": ["104.16.0.1"],
       "cdn.kcorp.gg": ["104.16.0.2", "2606:4700::1"],
@@ -105,7 +111,10 @@ describe("downloadPublicHttps", () => {
     const bytes = await download("https://kcorp.gg/logo.png");
 
     expect(new TextDecoder().decode(bytes)).toBe("logobytes");
-    expect(vi.mocked(request).mock.calls[0]![1]).toMatchObject({ method: "GET", agent: false });
+    expect(fakes.request).toHaveBeenCalledWith(
+      new URL("https://kcorp.gg/logo.png"),
+      expect.objectContaining({ method: "GET", agent: false }),
+    );
   });
 
   it.each([
@@ -116,9 +125,10 @@ describe("downloadPublicHttps", () => {
     ["https://localhost/logo.png", "private, loopback or link-local"],
     ["https://user:pass@kcorp.gg/logo.png", "credentials"],
     ["https://kcorp.gg:8443/logo.png", "default https port"],
+    ["https://liquipedia.net/commons/images/kc.png", "not an accepted source"],
   ])("rejects %s before connecting", async (url, message) => {
     await expect(download(url)).rejects.toThrow(message);
-    expect(request).not.toHaveBeenCalled();
+    expect(fakes.request).not.toHaveBeenCalled();
   });
 
   it.each(["https://metadata.kcorp.gg/logo.png", "https://internal.kcorp.gg/logo.png"])(
@@ -143,6 +153,8 @@ describe("downloadPublicHttps", () => {
     ["http://cdn.kcorp.gg/a", "must use https"],
     ["https://10.0.0.1/a", "private, loopback or link-local"],
     ["https://metadata.kcorp.gg/a", "private, loopback or link-local"],
+    ["https://liquipedia.net/commons/images/kc.png", "not an accepted source"],
+    ["https://www.liquipedia.net/kc.png", "not an accepted source"],
   ])("re-checks the redirect target %s", async (location, message) => {
     serve({
       "https://kcorp.gg/logo.png": { status: 301, headers: { location } },
@@ -150,6 +162,15 @@ describe("downloadPublicHttps", () => {
     });
 
     await expect(download("https://kcorp.gg/logo.png")).rejects.toThrow(message);
+  });
+
+  it("rejects an invalid redirect location as invalid input", async () => {
+    serve({ "https://kcorp.gg/logo.png": { status: 302, headers: { location: "https://[::1" } } });
+
+    const download$ = download("https://kcorp.gg/logo.png");
+
+    await expect(download$).rejects.toBeInstanceOf(InvalidInputError);
+    await expect(download$).rejects.toThrow("invalid location");
   });
 
   it("stops after the redirect limit", async () => {

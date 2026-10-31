@@ -1,13 +1,15 @@
-import { lookup as dnsLookup, type LookupAddress } from "node:dns";
+import type { LookupAddress, LookupOptions } from "node:dns";
+import { lookup as dnsLookup } from "node:dns/promises";
 import { request } from "node:https";
 import type { IncomingMessage } from "node:http";
 import { BlockList, isIP, type LookupFunction } from "node:net";
 import { InvalidInputError } from "../../common/domain/errors";
 
-export interface PublicDownloadLimits {
+export interface PublicDownloadOptions {
   maxBytes: number;
   timeoutMs: number;
   maxRedirects: number;
+  isAllowedHost: (hostname: string) => boolean;
 }
 
 const BLOCKED_SUBNETS: [string, number, "ipv4" | "ipv6"][] = [
@@ -26,8 +28,7 @@ const BLOCKED_SUBNETS: [string, number, "ipv4" | "ipv6"][] = [
   ["203.0.113.0", 24, "ipv4"],
   ["224.0.0.0", 4, "ipv4"],
   ["240.0.0.0", 4, "ipv4"],
-  ["::", 128, "ipv6"],
-  ["::1", 128, "ipv6"],
+  ["::", 96, "ipv6"],
   ["64:ff9b::", 96, "ipv6"],
   ["64:ff9b:1::", 48, "ipv6"],
   ["100::", 64, "ipv6"],
@@ -49,13 +50,13 @@ export function isPublicAddress(address: string): boolean {
 }
 
 export const publicOnlyLookup: LookupFunction = (hostname, options, callback) => {
-  dnsLookup(hostname, { all: true, family: options.family }, (error, addresses) => {
-    if (error) {
-      callback(error, "", 0);
+  void resolvePublicAddresses(hostname, options.family).then((resolved) => {
+    if (resolved instanceof Error) {
+      callback(resolved, "", 0);
       return;
     }
-    const resolved = addresses as LookupAddress[];
-    if (resolved.length === 0 || resolved.some(({ address }) => !isPublicAddress(address))) {
+    const [first] = resolved;
+    if (!first) {
       callback(privateAddressError(), "", 0);
       return;
     }
@@ -63,24 +64,40 @@ export const publicOnlyLookup: LookupFunction = (hostname, options, callback) =>
       callback(null, resolved);
       return;
     }
-    callback(null, resolved[0]!.address, resolved[0]!.family);
+    callback(null, first.address, first.family);
   });
 };
 
+async function resolvePublicAddresses(
+  hostname: string,
+  family: LookupOptions["family"],
+): Promise<LookupAddress[] | Error> {
+  try {
+    const resolved = await dnsLookup(hostname, { all: true, family });
+    if (resolved.some(({ address }) => !isPublicAddress(address))) return privateAddressError();
+    return resolved;
+  } catch (error) {
+    return error instanceof Error ? error : new Error(String(error));
+  }
+}
+
 export async function downloadPublicHttps(
   url: URL,
-  limits: PublicDownloadLimits,
+  options: PublicDownloadOptions,
 ): Promise<Uint8Array> {
-  const signal = AbortSignal.timeout(limits.timeoutMs);
+  const signal = AbortSignal.timeout(options.timeoutMs);
   let current = url;
   for (let redirects = 0; ; redirects += 1) {
-    requirePublicHttpsUrl(current);
+    requirePublicHttpsUrl(current, options.isAllowedHost);
     const response = await get(current, signal);
     const status = response.statusCode ?? 0;
     if (status >= 300 && status < 400 && response.headers.location) {
       response.resume();
-      if (redirects >= limits.maxRedirects) {
+      if (redirects >= options.maxRedirects) {
         throw new InvalidInputError("The image URL redirected too many times.");
+      }
+      if (!URL.canParse(response.headers.location, current)) {
+        throw new InvalidInputError("The image URL redirected to an invalid location.");
       }
       current = new URL(response.headers.location, current);
       continue;
@@ -89,11 +106,11 @@ export async function downloadPublicHttps(
       response.resume();
       throw new InvalidInputError(`The image URL answered HTTP ${status}.`);
     }
-    return readBody(response, limits.maxBytes, signal);
+    return readBody(response, options.maxBytes, signal);
   }
 }
 
-function requirePublicHttpsUrl(url: URL): void {
+function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => boolean): void {
   if (url.protocol !== "https:") {
     throw new InvalidInputError("The image URL and its redirects must use https.");
   }
@@ -106,6 +123,9 @@ function requirePublicHttpsUrl(url: URL): void {
   const host = url.hostname.replace(/^\[|\]$/g, "");
   if (isIP(host) && !isPublicAddress(host)) throw privateAddressError();
   if (/(^|\.)localhost\.?$/i.test(host)) throw privateAddressError();
+  if (!isAllowedHost(host)) {
+    throw new InvalidInputError(`The image URL host "${host}" is not an accepted source.`);
+  }
 }
 
 function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
