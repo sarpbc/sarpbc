@@ -153,7 +153,7 @@ const description = computed(() =>
 setPageSeo({
   title: title.value,
   description: description.value,
-  image: team.value?.imageUrl || undefined,
+  image: team.value?.logoLightUrl || team.value?.imageUrl || undefined,
 });
 </script>
 
