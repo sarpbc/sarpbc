@@ -110,7 +110,11 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           ]
         : change.prizes.map((prize) => ({
             key: `prize-${prize.teamId}`,
-            label: t("page.proposals.fields.placement", { placement: prize.placement }),
+            label: t(
+              "page.proposals.fields.placement",
+              { placement: prize.placement },
+              prize.placement,
+            ),
             value: [
               nameOf(prize.teamId),
               formatAmount(prize.amount, prize.currency),

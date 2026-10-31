@@ -257,7 +257,7 @@
         "sourceUrl": "Source",
         "tournamentId": "Tournoi",
         "prizes": "Gains",
-        "placement": "{placement}e place"
+        "placement": "{placement}re place | {placement}e place"
       },
       "playerStatus": {
         "active": "Actif",
@@ -407,13 +407,17 @@
         "players": "Joueurs",
         "selectTeam": "Choisir une équipe",
         "selectPlayers": "Facultatif",
+        "notParticipantOption": "{name} (hors participants)",
+        "notOnRosterOption": "{name} (hors effectif du tournoi)",
         "add": "Ajouter un gain",
         "remove": "Retirer le gain",
         "save": "Enregistrer la répartition",
         "saved": "Répartition des gains enregistrée",
         "saveError": "Impossible d’enregistrer la répartition des gains",
         "errors": {
-          "amount": "Saisissez un montant entier d’au moins 1.",
+          "amount": "Saisissez un montant entier entre 1 et {max}.",
+          "notParticipant": "Cette équipe ne participe pas au tournoi. Retirez ce gain ou ajoutez-la aux participants.",
+          "notOnRoster": "Certains joueurs ne figurent pas dans l’effectif de l’équipe pour ce tournoi.",
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
         }
