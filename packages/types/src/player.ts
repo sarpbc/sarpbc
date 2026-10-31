@@ -1,3 +1,4 @@
+import type { ContractRole } from "./contract";
 import type { Team } from "./team";
 
 export interface Player {
@@ -9,8 +10,7 @@ export interface Player {
   firstName?: string | null;
   lastName?: string | null;
   imageUrl?: string;
-  /** PandaScore role (e.g. "Coach"); null/undefined for standard players. */
-  role?: string | null;
+  role?: ContractRole | null;
   photos?: string[];
   slug: string;
 }

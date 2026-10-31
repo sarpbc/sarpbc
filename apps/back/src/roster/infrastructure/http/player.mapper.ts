@@ -1,5 +1,5 @@
 import type { DataSource } from "../../../common/domain/data-source";
-import { Player, Team } from "../../domain/roster";
+import { ContractRole, Player, Team } from "../../domain/roster";
 
 export interface TeamSummaryResponse {
   id: string;
@@ -18,7 +18,7 @@ export interface PlayerResponse {
   firstName: string | null;
   lastName: string | null;
   imageUrl: string | null;
-  role: string | null;
+  role: ContractRole | null;
   source: DataSource;
   team: TeamSummaryResponse | null;
   photos?: string[];
@@ -57,7 +57,7 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     firstName: player.firstName,
     lastName: player.lastName,
     imageUrl: player.imageUrl,
-    role: player.role,
+    role: player.currentRole(),
     source: player.source,
     team: player.team ? mapTeamSummary(player.team) : null,
   };

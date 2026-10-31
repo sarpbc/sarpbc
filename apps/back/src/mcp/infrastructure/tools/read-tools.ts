@@ -108,7 +108,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     "list_contracts",
     {
       description:
-        "List a player's contracts, past and current, oldest first, with their sources. Read it before create_contract or update_contract so a period is not recorded twice.",
+        "List a player's contracts, past and current, oldest first, with their player or staff role and sources. Read it before create_contract or update_contract so a period is not recorded twice.",
       inputSchema: {
         idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
       },

@@ -281,7 +281,15 @@
           "default": "'active'",
           "comment": null,
           "collation": null,
-          "enumItems": ["active", "benched", "loaned"],
+          "enumItems": [
+            "active",
+            "benched",
+            "loaned",
+            "coach",
+            "assistant_coach",
+            "analyst",
+            "manager"
+          ],
           "mappedType": "enum"
         },
         "start_date": {
@@ -321,6 +329,15 @@
       },
       "indexes": [
         {
+          "columnNames": ["player_id", "team_id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "contract_open_player_team_idx",
+          "primary": false,
+          "unique": false,
+          "where": "\"end_date\" is null"
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -332,8 +349,8 @@
       "checks": [
         {
           "name": "contract_role_check",
-          "expression": "\"role\" in ('active', 'benched', 'loaned')",
-          "definition": "check (\"role\" in ('active', 'benched', 'loaned'))",
+          "expression": "\"role\" in ('active', 'benched', 'loaned', 'coach', 'assistant_coach', 'analyst', 'manager')",
+          "definition": "check (\"role\" in ('active', 'benched', 'loaned', 'coach', 'assistant_coach', 'analyst', 'manager'))",
           "columnName": "role"
         }
       ],

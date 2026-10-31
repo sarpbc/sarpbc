@@ -1,6 +1,7 @@
+import { CONTRACT_ROLES } from "@sarpbc/types";
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
-import { Contract, Player, ROSTER_ROLES, Team, rosterRoleLabel } from "./roster";
+import { Contract, ContractRole, Player, Team } from "./roster";
 
 describe("roster policies", () => {
   it("archives only a different nonempty profile photo", () => {
@@ -63,8 +64,50 @@ describe("contracts", () => {
     );
     expect(contract.endDate).toBeNull();
   });
+});
 
-  it("stores roster roles in the PandaScore format", () => {
-    expect(ROSTER_ROLES.map(rosterRoleLabel)).toEqual([null, "Coach", "Substitute"]);
+describe("current role", () => {
+  const team = Object.assign(new Team(), { id: "kc" });
+
+  it("comes from the current contract over the imported profile role", () => {
+    const player = Object.assign(new Player(), {
+      team,
+      role: "Coach",
+      contractRole: ContractRole.BENCHED,
+    });
+    expect(player.currentRole()).toBe(ContractRole.BENCHED);
+    player.contractRole = ContractRole.ANALYST;
+    expect(player.currentRole()).toBe(ContractRole.ANALYST);
+  });
+
+  it("keeps contract roles aligned with the shared role list", () => {
+    expect(Object.values(ContractRole)).toEqual([...CONTRACT_ROLES]);
+  });
+
+  it("falls back to the imported staff role when the current team has no contract", () => {
+    const role = (pandascoreRole: string | null) =>
+      Object.assign(new Player(), { team, role: pandascoreRole }).currentRole();
+    expect(role("Coach")).toBe(ContractRole.COACH);
+    expect(role("Assistant Coach")).toBe(ContractRole.ASSISTANT_COACH);
+    expect(role(" head-coach ")).toBe(ContractRole.COACH);
+    expect(role("Co-Coach")).toBe(ContractRole.ASSISTANT_COACH);
+    expect(role("Analyst")).toBe(ContractRole.ANALYST);
+    expect(role("Manager")).toBe(ContractRole.MANAGER);
+    expect(role("Staff")).toBe(ContractRole.MANAGER);
+    expect(role("Substitute")).toBe(ContractRole.ACTIVE);
+    expect(role(null)).toBe(ContractRole.ACTIVE);
+  });
+
+  it("normalizes a long separator run from an imported role in linear time", () => {
+    const payload = `head${" -".repeat(50_000)}\tcoach${" ".repeat(50_000)}!`;
+    const player = Object.assign(new Player(), { team, role: payload });
+    const started = performance.now();
+    expect(player.currentRole()).toBe(ContractRole.ACTIVE);
+    expect(performance.now() - started).toBeLessThan(100);
+  });
+
+  it("is empty without a current team", () => {
+    const player = Object.assign(new Player(), { role: "Coach", contractRole: null });
+    expect(player.currentRole()).toBeNull();
   });
 });

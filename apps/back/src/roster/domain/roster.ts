@@ -21,27 +21,36 @@ export enum ContractRole {
   ACTIVE = "active",
   BENCHED = "benched",
   LOANED = "loaned",
+  COACH = "coach",
+  ASSISTANT_COACH = "assistant_coach",
+  ANALYST = "analyst",
+  MANAGER = "manager",
 }
 export enum PlayerStatus {
   ACTIVE = "active",
   FREE_AGENT = "free_agent",
   RETIRED = "retired",
 }
-export const ROSTER_ROLES = ["player", "coach", "substitute"] as const;
-export type RosterRole = (typeof ROSTER_ROLES)[number];
-/** Stored in PandaScore's role format, where standard roster players have no role. */
-export function rosterRoleLabel(role: RosterRole): string | null {
-  switch (role) {
-    case "player":
-      return null;
+function roleFromPandascore(role: string | null): ContractRole {
+  switch (
+    role
+      ?.trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_")
+  ) {
     case "coach":
-      return "Coach";
-    case "substitute":
-      return "Substitute";
-    default: {
-      const unreachable: never = role;
-      return unreachable;
-    }
+    case "head_coach":
+      return ContractRole.COACH;
+    case "assistant_coach":
+    case "co_coach":
+      return ContractRole.ASSISTANT_COACH;
+    case "analyst":
+      return ContractRole.ANALYST;
+    case "manager":
+    case "staff":
+      return ContractRole.MANAGER;
+    default:
+      return ContractRole.ACTIVE;
   }
 }
 export class Team {
@@ -78,6 +87,7 @@ export class Player {
   lastName: string | null = null;
   imageUrl: string | null = null;
   role: string | null = null;
+  contractRole: ContractRole | null = null;
   status = PlayerStatus.ACTIVE;
   slug = "";
   pandascoreId: number | null = null;
@@ -95,6 +105,10 @@ export class Player {
     this.nationality = input.nationality ?? null;
     if (!this.imageUrl && input.imageUrl) this.imageUrl = input.imageUrl;
     if (input.role !== undefined) this.role = input.role;
+  }
+  currentRole(): ContractRole | null {
+    if (!this.team) return null;
+    return this.contractRole ?? roleFromPandascore(this.role);
   }
   replaceProfilePhoto(url: string | null): string | null {
     const archived = this.imageUrl && this.imageUrl !== url ? this.imageUrl : null;

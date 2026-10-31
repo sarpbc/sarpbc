@@ -7,6 +7,7 @@ export function mapTransfer({ id, type, date, sourceUrl, contract }: Transfer): 
     id,
     type,
     date: date.toISOString().slice(0, 10),
+    role: contract.role,
     sourceUrl,
     player: {
       id: player.id,

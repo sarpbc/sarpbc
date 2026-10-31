@@ -17,7 +17,7 @@ export function mapPlayerSummary(player: Player) {
     name: player.name,
     nationality: player.nationality,
     status: player.status,
-    role: player.role,
+    role: player.currentRole(),
     source: player.source,
     team: player.team
       ? {
@@ -72,6 +72,7 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
       id: player.id,
       slug: player.slug,
       name: player.name,
+      role: player.currentRole(),
       source: player.source,
       url: playerUrl(player.slug),
     })),

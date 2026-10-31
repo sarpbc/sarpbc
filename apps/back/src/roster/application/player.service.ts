@@ -1,6 +1,6 @@
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { CreatePlayerInput, LeaveTeamInput, RosterMoveInput, UpdatePlayerInput } from "./inputs";
-import { Contract, Player, PlayerPhoto, PlayerStatus, rosterRoleLabel } from "../domain/roster";
+import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
+import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus } from "../domain/roster";
 import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
 import type { PlayerSearchProps } from "./search-props";
 
@@ -48,7 +48,6 @@ export class PlayerService {
       player.imageUrl = dto.imageUrl ?? null;
       player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
       if (dto.status !== undefined) player.status = dto.status;
-      if (dto.role !== undefined) player.role = rosterRoleLabel(dto.role);
       if (dto.source !== undefined) player.source = dto.source;
 
       if (await players.findBySlug(player.slug)) {
@@ -79,7 +78,6 @@ export class PlayerService {
       if (dto.nationality !== undefined) player.nationality = dto.nationality;
       if (dto.slug !== undefined) player.slug = dto.slug;
       if (dto.status !== undefined) player.status = dto.status;
-      if (dto.role !== undefined) player.role = rosterRoleLabel(dto.role);
 
       if (dto.imageUrl !== undefined) {
         const archived = player.replaceProfilePhoto(dto.imageUrl);
@@ -108,7 +106,7 @@ export class PlayerService {
     });
   }
 
-  async joinTeam(playerId: string, input: RosterMoveInput): Promise<RosterMove> {
+  async joinTeam(playerId: string, input: JoinTeamInput): Promise<RosterMove> {
     return this.transaction.run(async ({ players, teams, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
@@ -116,9 +114,12 @@ export class PlayerService {
       if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
 
       const effectiveDate = new Date(input.effectiveDate);
+      const role = input.role ?? ContractRole.ACTIVE;
       const open = await openContracts(contracts, playerId);
-      if (open.some((contract) => contract.team.id === team.id)) {
-        throw new ConflictError(`${player.name} already has an open contract with ${team.name}`);
+      if (open.some((contract) => contract.team.id === team.id && contract.role === role)) {
+        throw new ConflictError(
+          `${player.name} already has an open contract with ${team.name} in this role`,
+        );
       }
       for (const contract of open) {
         contract.close(effectiveDate, input.sourceUrl);
@@ -129,10 +130,12 @@ export class PlayerService {
       contract.player = player;
       contract.team = team;
       contract.startDate = effectiveDate;
+      contract.role = role;
       contract.joinSourceUrl = input.sourceUrl;
       await contracts.save(contract);
 
       player.team = team;
+      player.contractRole = role;
       player.status = PlayerStatus.ACTIVE;
       await players.save(player);
       return { player, opened: contract, closed: open };
@@ -157,6 +160,7 @@ export class PlayerService {
 
       if (player.team?.id === input.teamId) {
         player.team = null;
+        player.contractRole = null;
         player.status = input.status;
       }
       await players.save(player);

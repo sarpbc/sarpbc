@@ -17,6 +17,11 @@ function joinType(role: ContractRole): TransferType {
       return "benched";
     case ContractRole.LOANED:
       return "loan";
+    case ContractRole.COACH:
+    case ContractRole.ASSISTANT_COACH:
+    case ContractRole.ANALYST:
+    case ContractRole.MANAGER:
+      return "staff";
     default: {
       const unreachable: never = role;
       return unreachable;

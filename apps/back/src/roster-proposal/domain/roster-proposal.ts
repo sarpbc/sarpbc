@@ -1,9 +1,15 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { ContractRole, PlayerStatus, RosterRole } from "../../roster/domain/roster";
+import type { ContractRole, PlayerStatus } from "../../roster/domain/roster";
 import type { StaffPermission } from "../../user/domain/staff-access";
 
 export type RosterChange =
-  | { kind: "add_player_to_team"; playerId: string; teamId: string; effectiveDate: string }
+  | {
+      kind: "add_player_to_team";
+      playerId: string;
+      teamId: string;
+      effectiveDate: string;
+      contractRole?: ContractRole;
+    }
   | {
       kind: "remove_player_from_team";
       playerId: string;
@@ -16,7 +22,6 @@ export type RosterChange =
       name: string;
       nationality?: string;
       status: PlayerStatus;
-      role?: RosterRole;
     }
   | {
       kind: "update_player";
@@ -24,7 +29,6 @@ export type RosterChange =
       name?: string;
       nationality?: string;
       status?: PlayerStatus;
-      role?: RosterRole;
     }
   | { kind: "create_team"; name: string; location?: string; imageUrl?: string }
   | {

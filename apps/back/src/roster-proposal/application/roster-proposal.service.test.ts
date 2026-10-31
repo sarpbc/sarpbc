@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Contract, Player, PlayerStatus, Team } from "../../roster/domain/roster";
+import { Contract, ContractRole, Player, PlayerStatus, Team } from "../../roster/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -129,6 +129,29 @@ describe("RosterProposalService", () => {
       sourceUrl: source,
     });
     expect(approved).toMatchObject({ status: "applied", reviewedById: "admin", entityId: "zen" });
+  });
+
+  it("applies a roster move with its staff role", async () => {
+    const { id } = await service.propose(
+      {
+        kind: "add_player_to_team",
+        playerId: "zen",
+        teamId: "kc",
+        effectiveDate: "2026-10-24",
+        contractRole: ContractRole.COACH,
+      },
+      source,
+      "journalist",
+    );
+
+    await service.approve(id, "admin");
+
+    expect(players.joinTeam).toHaveBeenCalledWith("zen", {
+      teamId: "kc",
+      effectiveDate: "2026-10-24",
+      sourceUrl: source,
+      role: ContractRole.COACH,
+    });
   });
 
   it("flags players created from a start.gg source", async () => {

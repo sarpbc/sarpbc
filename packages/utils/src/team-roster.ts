@@ -1,27 +1,24 @@
-/** Rocket League active roster size (excluding staff). */
+import { STAFF_CONTRACT_ROLES, type ContractRole, type StaffContractRole } from "@sarpbc/types";
+
 export const ACTIVE_ROSTER_LIMIT = 3;
 
-/**
- * PandaScore / Liquipedia-style staff roles that should not appear in the
- * active 3-player lineup on team pages.
- */
-const TEAM_STAFF_ROLE_PATTERN =
-  /^(coach|co-?coach|assistant(\s|-)?coach|head(\s|-)?coach|manager|analyst|staff)$/i;
-
-export function isTeamStaffRole(role: string | null | undefined): boolean {
-  if (role == null) return false;
-  const normalized = role.trim();
-  if (!normalized) return false;
-  return TEAM_STAFF_ROLE_PATTERN.test(normalized);
+export function isStaffContractRole(
+  role: ContractRole | null | undefined,
+): role is StaffContractRole {
+  return STAFF_CONTRACT_ROLES.some((staffRole) => staffRole === role);
 }
 
-export function isActiveRosterPlayer(player: { role?: string | null }): boolean {
-  return !isTeamStaffRole(player.role);
+export function isActiveRosterPlayer(player: { role?: ContractRole | null }): boolean {
+  return player.role === "active" || player.role == null;
 }
 
-export function selectActiveRosterPlayers<T extends { role?: string | null }>(
+export function selectActiveRosterPlayers<T extends { role?: ContractRole | null }>(
   players: T[],
   limit: number = ACTIVE_ROSTER_LIMIT,
 ): T[] {
   return players.filter(isActiveRosterPlayer).slice(0, limit);
+}
+
+export function selectTeamStaff<T extends { role?: ContractRole | null }>(players: T[]): T[] {
+  return players.filter((player) => isStaffContractRole(player.role));
 }
