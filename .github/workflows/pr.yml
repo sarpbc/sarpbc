@@ -68,6 +68,8 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
             admin:
               - 'apps/admin/**'
               - 'packages/**'
@@ -75,6 +77,8 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
+              - '.nvmrc'
+              - '.github/workflows/**'
 
   quality:
     name: Lint and format
@@ -136,9 +140,9 @@ jobs:
           pnpm --filter @sarpbc/utils test
 
       - name: Migration names
-        run: node apps/back/scripts/check-migrations.mjs
+        run: pnpm --filter back test:migrations
         env:
-          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || '' }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || '' }}
 
       - name: Architecture and HTTP contracts
         run: |
@@ -218,23 +222,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check results
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          results=(
-            "${{ needs.changes.result }}"
-            "${{ needs.quality.result }}"
-            "${{ needs.backend.result }}"
-            "${{ needs.frontend.result }}"
-            "${{ needs.admin.result }}"
-          )
-
-          for result in "${results[@]}"; do
-            case "$result" in
-              success|skipped) ;;
+          check() {
+            case "$2" in
+              success) ;;
+              skipped)
+                if [ "$EVENT_NAME" = "push" ] && [ "$1" != "changes" ]; then
+                  echo "Job $1 was skipped on push, every job must run on main."
+                  exit 1
+                fi
+                ;;
               *)
-                echo "A required job finished with status: $result"
+                echo "Job $1 finished with status: $2"
                 exit 1
                 ;;
             esac
-          done
+          }
 
-          echo "All executed jobs succeeded (path-skipped jobs ignored)."
+          check changes "${{ needs.changes.result }}"
+          check quality "${{ needs.quality.result }}"
+          check backend "${{ needs.backend.result }}"
+          check frontend "${{ needs.frontend.result }}"
+          check admin "${{ needs.admin.result }}"
+
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "All jobs succeeded."
+          else
+            echo "All executed jobs succeeded (path-skipped jobs ignored)."
+          fi
