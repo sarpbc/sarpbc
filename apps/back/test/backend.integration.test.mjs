@@ -426,6 +426,35 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
     );
 
+    await check(
+      "article match blocks scope matches to a team through its participations",
+      async () => {
+        const [index] = await orm.em
+          .getConnection()
+          .execute(
+            `select indexdef from pg_indexes where indexname = 'tournament_participant_team_id_index'`,
+          );
+        assert.match(index.indexdef, /(team_id)/);
+        const keys = [
+          `team:${team.id}:1`,
+          `team:${otherTeam.id}:5`,
+          `tournament:${tournament.id}:5`,
+          "team:00000000-0000-4000-8000-000000000000:5",
+        ];
+        const { blocks } = (
+          await request("GET", `/matches/blocks?${keys.map((key) => `block=${key}`).join("&")}`)
+        ).json();
+        for (const key of keys.slice(0, 3)) {
+          assert.deepEqual(
+            blocks[key].map((item) => [item.id, item.state]),
+            [[match.id, "upcoming"]],
+            key,
+          );
+        }
+        assert.deepEqual(blocks[keys[3]], []);
+      },
+    );
+
     await check("per-game VOD links persist as validated jsonb on the match", async () => {
       const vods = [
         { game: 2, url: "https://youtu.be/second?t=1h2m3s", language: "FR" },

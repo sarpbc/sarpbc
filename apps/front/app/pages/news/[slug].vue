@@ -29,7 +29,7 @@ if (!article.value) {
 }
 
 provideNewsMatchBlocks(
-  () => `news-matches-${slug.value}-${locale.value}`,
+  () => `news-matches-${slug.value}`,
   () => (article.value ? [article.value.content] : []),
 );
 

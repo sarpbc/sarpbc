@@ -6,8 +6,9 @@ describe("MatchRepository", () => {
   function repository() {
     const repo = Object.create(MatchRepository.prototype) as MatchRepository;
     const findAndCount = vi.fn().mockResolvedValue([[], 0]);
-    Object.assign(repo, { findAndCount });
-    return { repo, findAndCount };
+    const find = vi.fn().mockResolvedValue([]);
+    Object.assign(repo, { findAndCount, find });
+    return { repo, findAndCount, find };
   }
 
   it("filters start.gg matches and tournaments but not start.gg participants", async () => {
@@ -24,13 +25,25 @@ describe("MatchRepository", () => {
   });
 
   it("scopes results to a team's participations", async () => {
-    const repo = Object.create(MatchRepository.prototype) as MatchRepository;
-    const find = vi.fn().mockResolvedValue([]);
-    Object.assign(repo, { find });
+    const { repo, find } = repository();
     await repo.findResults({ teamId: "falcons", limit: 5 });
     expect(find).toHaveBeenCalledWith(
       { endAt: { $ne: null }, participants: { team: { id: "falcons" } } },
       expect.objectContaining({ limit: 5, orderBy: { endAt: "DESC" } }),
+    );
+  });
+
+  it("only treats recently started matches as live when given a window", async () => {
+    const { repo, find } = repository();
+    const liveSince = new Date("2026-10-31T12:00:00Z");
+    await repo.findLive({ teamId: "falcons", liveSince, limit: 5 });
+    expect(find).toHaveBeenCalledWith(
+      {
+        beginAt: { $lte: expect.any(Date), $gte: liveSince },
+        endAt: null,
+        participants: { team: { id: "falcons" } },
+      },
+      expect.objectContaining({ limit: 5 }),
     );
   });
 

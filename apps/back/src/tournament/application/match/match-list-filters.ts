@@ -12,6 +12,7 @@ export interface MatchListQueryOptions {
   /** User-facing tournament (League entity). */
   leagueId?: string;
   teamId?: string;
+  liveSince?: Date;
   /** Excludes start.gg matches and tournaments, whose data may not be redistributed. */
   redistributableOnly?: boolean;
 }

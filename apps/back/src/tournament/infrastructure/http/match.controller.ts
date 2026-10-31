@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
-import { parseNewsMatchBlockKey, type NewsMatchBlock } from "@sarpbc/utils";
-import type { MatchBlocksResponse } from "@sarpbc/types";
+import { Controller, Get, Header, Param, Query } from "@nestjs/common";
+import { NEWS_MATCH_BLOCKS_PER_REQUEST, parseNewsMatchBlockKey } from "@sarpbc/utils";
+import type { MatchBlockSelector, MatchBlocksResponse } from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
@@ -9,12 +9,12 @@ import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pi
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors";
 
-const MAX_MATCH_BLOCKS = 20;
-
-function parseMatchBlockKeys(raw?: string | string[]): Map<string, NewsMatchBlock> {
+function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSelector> {
   const keys = [...new Set(raw === undefined ? [] : Array.isArray(raw) ? raw : [raw])];
-  if (keys.length === 0 || keys.length > MAX_MATCH_BLOCKS) {
-    throw new InvalidInputError(`Request between 1 and ${MAX_MATCH_BLOCKS} match blocks.`);
+  if (keys.length === 0 || keys.length > NEWS_MATCH_BLOCKS_PER_REQUEST) {
+    throw new InvalidInputError(
+      `Request between 1 and ${NEWS_MATCH_BLOCKS_PER_REQUEST} match blocks.`,
+    );
   }
   return new Map(
     keys.map((key) => {
@@ -122,13 +122,14 @@ export class MatchController {
   }
 
   @Get("blocks")
+  @Header("Cache-Control", "public, max-age=10")
   async findBlocks(@Query("block") block?: string | string[]): Promise<MatchBlocksResponse> {
     const blocks = parseMatchBlockKeys(block);
-    const found = await this.matchService.findBlocks([...blocks.values()]);
+    const now = new Date();
+    const found = await this.matchService.findBlocks([...blocks.values()], now);
     const commentCounts = await this.replyService.countByTargetIds("match", [
       ...new Set(found.flat().map((match) => match.id)),
     ]);
-    const now = new Date();
 
     return {
       blocks: Object.fromEntries(

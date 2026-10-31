@@ -254,10 +254,14 @@ describe("API smoke (e2e)", () => {
     const response = await request(app.getHttpServer())
       .get(`/matches/blocks?block=match:${grandFinal.id}&block=team:${team}:5`)
       .expect(200);
-    expect(matchService.findBlocks).toHaveBeenLastCalledWith([
-      { kind: "match", id: grandFinal.id },
-      { kind: "team", id: team, limit: 5 },
-    ]);
+    expect(matchService.findBlocks).toHaveBeenLastCalledWith(
+      [
+        { kind: "match", id: grandFinal.id },
+        { kind: "team", id: team, limit: 5 },
+      ],
+      expect.any(Date),
+    );
+    expect(response.headers["cache-control"]).toBe("public, max-age=10");
     expect(Object.keys(response.body.blocks)).toEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
     expect(response.body.blocks[`team:${team}:5`][0]).toMatchObject({
       publicId: 7250,
@@ -269,6 +273,12 @@ describe("API smoke (e2e)", () => {
   it("rejects missing or malformed match blocks", async () => {
     await request(app.getHttpServer()).get("/matches/blocks").expect(400);
     await request(app.getHttpServer()).get("/matches/blocks?block=team:falcons:5").expect(400);
+    const tooMany = Array.from(
+      { length: 21 },
+      (_, index) =>
+        `block=match:0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f${String(index).padStart(2, "0")}`,
+    ).join("&");
+    await request(app.getHttpServer()).get(`/matches/blocks?${tooMany}`).expect(400);
   });
 
   it("lists transfers with coerced pagination and period filters", async () => {

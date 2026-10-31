@@ -1,6 +1,10 @@
 import type { InjectionKey } from "vue";
 import type { MatchBlockItem, MatchBlocksResponse } from "@sarpbc/types";
-import { extractNewsMatchBlocks, newsMatchBlockKey } from "@sarpbc/utils";
+import {
+  NEWS_MATCH_BLOCKS_PER_REQUEST,
+  extractNewsMatchBlocks,
+  newsMatchBlockKey,
+} from "@sarpbc/utils";
 import type { AsyncDataRequestStatus } from "#app";
 import { apiFetch } from "~/utils/apiFetch";
 
@@ -10,6 +14,12 @@ type NewsMatchBlocks = {
 };
 
 const NEWS_MATCH_BLOCKS: InjectionKey<NewsMatchBlocks> = Symbol("news-match-blocks");
+
+function chunk<T>(values: readonly T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
+    values.slice(index * size, (index + 1) * size),
+  );
+}
 
 export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: () => string[]) {
   const blockKeys = computed(() => [
@@ -21,14 +31,12 @@ export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: 
   const { data, status } = useAsyncData(
     () => toValue(key),
     async (): Promise<Record<string, MatchBlockItem[]>> => {
-      if (blockKeys.value.length === 0) {
-        return {};
-      }
-      const response = await apiFetch<MatchBlocksResponse>("/matches/blocks", {
-        method: "GET",
-        query: { block: blockKeys.value },
-      });
-      return response.blocks;
+      const responses = await Promise.all(
+        chunk(blockKeys.value, NEWS_MATCH_BLOCKS_PER_REQUEST).map((block) =>
+          apiFetch<MatchBlocksResponse>("/matches/blocks", { method: "GET", query: { block } }),
+        ),
+      );
+      return Object.fromEntries(responses.flatMap((response) => Object.entries(response.blocks)));
     },
     { watch: [blockKeys], default: () => ({}) },
   );

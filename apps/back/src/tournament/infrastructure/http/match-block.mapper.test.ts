@@ -55,6 +55,11 @@ describe("mapMatchBlockItem", () => {
     expect(mapMatchBlockItem(finishedStatus, NOW, 0).state).toBe("finished");
   });
 
+  it("does not keep a match without an end live for hours", () => {
+    const stale = match({ beginAt: new Date("2026-10-30T18:00:00Z") });
+    expect(mapMatchBlockItem(stale, NOW, 0).state).toBe("finished");
+  });
+
   it("flags start.gg matches and matches of start.gg tournaments for credit", () => {
     expect(mapMatchBlockItem(match({}), NOW, 0).startgg).toBe(false);
     expect(mapMatchBlockItem(match({ source: "startgg" }), NOW, 0).startgg).toBe(true);
