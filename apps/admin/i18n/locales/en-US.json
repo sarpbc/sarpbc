@@ -436,6 +436,7 @@
         "insertPlayer": "Player Tag",
         "insertTeam": "Team Tag",
         "insertTweet": "X Post",
+        "insertMatches": "Matches",
         "insertTable": "Table",
         "tweet": {
           "title": "Insert X Post",
@@ -443,6 +444,28 @@
           "urlPlaceholder": "https://x.com/user/status/…",
           "urlInvalid": "Paste a full X post URL (x.com/…/status/…).",
           "insert": "Insert Post"
+        },
+        "matches": {
+          "title": "Insert Matches",
+          "editTitle": "Edit Matches",
+          "kind": {
+            "match": "One match",
+            "matches": "Selection",
+            "tournament": "Tournament",
+            "team": "Team"
+          },
+          "tournamentLabel": "Tournament",
+          "tournamentPlaceholder": "Search tournaments…",
+          "teamLabel": "Team",
+          "change": "Change",
+          "matchesLabel": "Matches",
+          "selected": "{count} of {max} selected",
+          "limitLabel": "Matches shown",
+          "limitHint": "Live first, then upcoming, then latest results",
+          "insert": "Insert Matches",
+          "update": "Update Matches",
+          "edit": "Edit",
+          "remove": "Remove"
         },
         "tableAddRowBefore": "Add Row Before",
         "tableAddRowAfter": "Add Row After",
@@ -632,6 +655,13 @@
     "viewOnX": "View on X",
     "tweetUnavailable": "This X post could not be loaded. Open it on X",
     "tweetOnX": "Post by {name} on X",
-    "tweetImage": "Image {index} from the X post"
+    "tweetImage": "Image {index} from the X post",
+    "matchLive": "Live",
+    "matchFinal": "Final",
+    "matchTbd": "TBD",
+    "matchDataBy": "Match data provided by",
+    "matchesInvalid": "This match block is invalid. Edit it to pick matches again.",
+    "matchesUnavailable": "These matches could not be loaded.",
+    "matchesEmpty": "No matches yet."
   }
 }

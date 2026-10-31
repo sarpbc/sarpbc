@@ -91,6 +91,7 @@ export default defineNuxtConfig({
         player: "SarpPlayerTag",
         team: "SarpTeamTag",
         tweet: "SarpTweetTag",
+        matches: "NewsMatchBlockPreview",
       },
     },
   },

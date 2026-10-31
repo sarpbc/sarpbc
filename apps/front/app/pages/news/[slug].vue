@@ -28,6 +28,11 @@ if (!article.value) {
   });
 }
 
+provideNewsMatchBlocks(
+  () => `news-matches-${slug.value}-${locale.value}`,
+  () => (article.value ? [article.value.content] : []),
+);
+
 const newsType = computed(() => resolveNewsType(article.value?.type));
 const minutes = computed(() => readingTimeMinutes(article.value?.content ?? ""));
 

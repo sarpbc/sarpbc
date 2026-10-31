@@ -18,6 +18,7 @@ interface MatchListFilter {
   beginAt?: { $gte?: Date; $lte?: Date };
   endAt?: null | { $ne: null };
   tournament?: MatchTournamentScopeFilter;
+  participants?: { team: { id: string } };
   source?: { $ne: DataSource };
 }
 
@@ -62,11 +63,13 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
     const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
       tournamentId,
       leagueId,
+      teamId,
       redistributableOnly,
     });
 
@@ -84,11 +87,13 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
     const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
       tournamentId,
       leagueId,
+      teamId,
       redistributableOnly,
     });
     return this.findAndCount(query, {
@@ -105,11 +110,13 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
     const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
       tournamentId,
       leagueId,
+      teamId,
       redistributableOnly,
     });
 
@@ -127,11 +134,13 @@ export class MatchRepository extends EntityRepository<Match> {
     todayOnly = false,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
     const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly), {
       tournamentId,
       leagueId,
+      teamId,
       redistributableOnly,
     });
     return this.findAndCount(query, {
@@ -147,6 +156,7 @@ export class MatchRepository extends EntityRepository<Match> {
     offset = 0,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<Match[]> {
     const query = this.mergeScopeFilters(
@@ -154,6 +164,7 @@ export class MatchRepository extends EntityRepository<Match> {
       {
         tournamentId,
         leagueId,
+        teamId,
         redistributableOnly,
       },
     );
@@ -171,6 +182,7 @@ export class MatchRepository extends EntityRepository<Match> {
     offset = 0,
     tournamentId,
     leagueId,
+    teamId,
     redistributableOnly,
   }: MatchListQueryOptions): Promise<[Match[], number]> {
     const query = this.mergeScopeFilters(
@@ -178,6 +190,7 @@ export class MatchRepository extends EntityRepository<Match> {
       {
         tournamentId,
         leagueId,
+        teamId,
         redistributableOnly,
       },
     );
@@ -188,6 +201,10 @@ export class MatchRepository extends EntityRepository<Match> {
       orderBy: { endAt: "DESC" },
       populate: [...LIST_POPULATE],
     });
+  }
+
+  async findByIds(ids: string[]): Promise<Match[]> {
+    return this.find({ id: { $in: ids } }, { populate: [...LIST_POPULATE] });
   }
 
   async findDetail(ref: EntityRef): Promise<Match | null> {
@@ -290,6 +307,7 @@ export class MatchRepository extends EntityRepository<Match> {
     const query: MatchListFilter = { ...base };
     const tournamentFilter = this.buildTournamentFilter(scope);
     if (tournamentFilter) query.tournament = tournamentFilter;
+    if (scope.teamId) query.participants = { team: { id: scope.teamId } };
     if (scope.redistributableOnly) {
       query.source = { $ne: "startgg" };
     }

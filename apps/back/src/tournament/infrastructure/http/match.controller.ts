@@ -1,10 +1,31 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
+import { parseNewsMatchBlockKey, type NewsMatchBlock } from "@sarpbc/utils";
+import type { MatchBlocksResponse } from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
-import { mapMatchListItem, withPublicSlug } from "./match-list.mapper";
+import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
+import { InvalidInputError } from "../../../common/domain/errors";
+
+const MAX_MATCH_BLOCKS = 20;
+
+function parseMatchBlockKeys(raw?: string | string[]): Map<string, NewsMatchBlock> {
+  const keys = [...new Set(raw === undefined ? [] : Array.isArray(raw) ? raw : [raw])];
+  if (keys.length === 0 || keys.length > MAX_MATCH_BLOCKS) {
+    throw new InvalidInputError(`Request between 1 and ${MAX_MATCH_BLOCKS} match blocks.`);
+  }
+  return new Map(
+    keys.map((key) => {
+      const block = parseNewsMatchBlockKey(key);
+      if (!block) {
+        throw new InvalidInputError(`Invalid match block "${key}".`);
+      }
+      return [key, block];
+    }),
+  );
+}
 
 function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
   return {
@@ -97,6 +118,27 @@ export class MatchController {
     return {
       results: attachCommentCounts(results.map(mapMatchListItem), commentCounts),
       total,
+    };
+  }
+
+  @Get("blocks")
+  async findBlocks(@Query("block") block?: string | string[]): Promise<MatchBlocksResponse> {
+    const blocks = parseMatchBlockKeys(block);
+    const found = await this.matchService.findBlocks([...blocks.values()]);
+    const commentCounts = await this.replyService.countByTargetIds("match", [
+      ...new Set(found.flat().map((match) => match.id)),
+    ]);
+    const now = new Date();
+
+    return {
+      blocks: Object.fromEntries(
+        [...blocks.keys()].map((key, index) => [
+          key,
+          (found[index] ?? []).map((match) =>
+            mapMatchBlockItem(match, now, commentCounts.get(match.id) ?? 0),
+          ),
+        ]),
+      ),
     };
   }
 
