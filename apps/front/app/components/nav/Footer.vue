@@ -82,6 +82,9 @@ const socialLinks = computed<SocialLink[]>(() => [
 <template>
   <footer class="w-full">
     <div class="mx-auto w-full max-w-7xl px-2 pt-8 pb-8 xl:px-0">
+      <ClientOnly>
+        <LazyNavLiveStreamers />
+      </ClientOnly>
       <div class="grid grid-cols-2 gap-px border border-default bg-(--ui-border) md:grid-cols-4">
         <div class="col-span-2 flex flex-col gap-3 bg-default p-4 md:col-span-1">
           <ULink :to="localePath('/')" class="w-fit" :aria-label="$t('components.header.home')">

@@ -744,6 +744,38 @@
     "permissions": ["\"images.manage\""]
   },
   {
+    "controller": "\"streamers\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"streamers.manage\""]
+  },
+  {
+    "controller": "\"streamers\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"streamers.manage\""]
+  },
+  {
+    "controller": "\"streamers\"",
+    "verb": "GET",
+    "path": "\"live\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"streamers\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"streamers.manage\""]
+  },
+  {
     "controller": "\"team\"",
     "verb": "DELETE",
     "path": "\":id/contract/:contractId\"",

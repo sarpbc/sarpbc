@@ -130,6 +130,11 @@
         "community": "Communauté",
         "company": "Entreprise",
         "legal": "Légal"
+      },
+      "live": {
+        "title": "En direct sur Twitch",
+        "viewers": "{count} spectateur | {count} spectateurs",
+        "linkLabel": "{name} est en direct sur Twitch avec {viewers} : {title}"
       }
     },
     "legal": {
