@@ -31,6 +31,7 @@ import { StorageModule } from "./storage/infrastructure/storage.module";
 import { PatModule } from "./pat/infrastructure/pat.module";
 import { McpModule } from "./mcp/infrastructure/mcp.module";
 import { RosterProposalModule } from "./roster-proposal/infrastructure/roster-proposal.module";
+import { StreamerModule } from "./streamer/infrastructure/streamer.module";
 import mikroOrmConfig from "./mikro-orm.config";
 
 @Module({
@@ -73,6 +74,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     PatModule,
     McpModule,
     RosterProposalModule,
+    StreamerModule,
   ],
   providers: [
     {

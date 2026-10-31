@@ -63,7 +63,8 @@
       "openMenu": "Ouvrir la navigation",
       "drawerDescription": "Navigation du staff",
       "backToSite": "Retour au site",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "streamers": "Streamers en direct"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -117,6 +118,43 @@
         "confirmButton": "Révoquer le Jeton",
         "success": "Jeton révoqué",
         "failed": "Impossible de révoquer le jeton. Réessayez."
+      }
+    },
+    "streamers": {
+      "title": "Streamers en direct",
+      "description": "Chaînes Twitch affichées dans le pied de page public lorsqu'elles diffusent du Rocket League.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les streamers. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "count": "{count} chaîne | {count} chaînes",
+      "columns": {
+        "login": "Identifiant Twitch",
+        "displayName": "Nom affiché",
+        "createdAt": "Ajoutée le"
+      },
+      "empty": {
+        "title": "Aucune chaîne",
+        "description": "Ajoutez une chaîne Twitch pour l'afficher dans le pied de page lorsqu'elle diffuse du Rocket League."
+      },
+      "add": {
+        "button": "Ajouter une Chaîne",
+        "title": "Ajouter une Chaîne",
+        "loginLabel": "Identifiant Twitch",
+        "loginHint": "4 à 25 lettres minuscules, chiffres ou tirets bas, comme dans twitch.tv/identifiant.",
+        "loginPlaceholder": "ex. zenrll",
+        "displayNameLabel": "Nom affiché",
+        "displayNameHint": "Facultatif. Par défaut, le nom affiché sur Twitch.",
+        "displayNamePlaceholder": "ex. Zen",
+        "submit": "Ajouter la Chaîne",
+        "success": "Chaîne ajoutée",
+        "failed": "Impossible d'ajouter la chaîne. Vérifiez l'identifiant et réessayez."
+      },
+      "remove": {
+        "title": "Retirer la Chaîne",
+        "confirm": "Retirer « {login} » du bandeau des directs ?",
+        "confirmButton": "Retirer la Chaîne",
+        "success": "Chaîne retirée",
+        "failed": "Impossible de retirer la chaîne. Réessayez."
       }
     },
     "forum": {

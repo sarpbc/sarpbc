@@ -49,6 +49,9 @@ export function permissionForAdminPath(path: string): PermissionRequirement | "s
   if (withoutLocale === "/users" || withoutLocale.startsWith("/users/")) {
     return "users.manage";
   }
+  if (withoutLocale === "/streamers" || withoutLocale.startsWith("/streamers/")) {
+    return "streamers.manage";
+  }
   if (withoutLocale === "/pickems" || withoutLocale.startsWith("/pickems/")) {
     return "pickems.manage";
   }

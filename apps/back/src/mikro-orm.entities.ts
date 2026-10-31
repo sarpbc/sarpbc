@@ -36,6 +36,7 @@ import { ReplyNotificationSchema } from "./notification/infrastructure/persisten
 import { PersonalAccessTokenSchema } from "./pat/infrastructure/persistence/personal-access-token.entity";
 import { UserSchema } from "./user/infrastructure/persistence/user.entity";
 import { RosterProposalSchema } from "./roster-proposal/infrastructure/persistence/roster-proposal.entity";
+import { TwitchStreamerSchema } from "./streamer/infrastructure/persistence/twitch-streamer.entity";
 
 export const mikroOrmEntities = [
   UserSchema,
@@ -63,4 +64,5 @@ export const mikroOrmEntities = [
   PickemChoiceSchema,
   AirRiddleSchema,
   ImageSchema,
+  TwitchStreamerSchema,
 ];

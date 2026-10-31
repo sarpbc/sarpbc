@@ -82,6 +82,12 @@ export function useAdminNavLinks() {
         permission: "users.manage",
       },
       {
+        label: t("page.nav.streamers"),
+        icon: "i-fluent-live-24-regular",
+        to: localePath("/streamers"),
+        permission: "streamers.manage",
+      },
+      {
         label: t("page.nav.tokens"),
         icon: "i-fluent-key-24-regular",
         to: localePath("/tokens"),
