@@ -6,7 +6,7 @@ export const ROCKET_LEAGUE_GAME_ID = "30921";
 export const HELIX_LOGINS_PER_REQUEST = 100;
 
 const STREAMS_URL = "https://api.twitch.tv/helix/streams";
-const REQUEST_TIMEOUT_MS = 5_000;
+export const STREAMS_REQUEST_TIMEOUT_MS = 5_000;
 
 const streamsResponse = z.object({
   data: z.array(
@@ -67,7 +67,7 @@ export class TwitchHelixSource implements LiveStreamSource {
   private request(url: URL, token: string): Promise<Response> {
     return fetch(url, {
       headers: { "Client-Id": this.clientId, Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(STREAMS_REQUEST_TIMEOUT_MS),
     });
   }
 }

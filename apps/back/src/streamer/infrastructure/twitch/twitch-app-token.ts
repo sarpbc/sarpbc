@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const REFRESH_MARGIN_MS = 5 * 60_000;
-const REQUEST_TIMEOUT_MS = 5_000;
+export const TOKEN_REQUEST_TIMEOUT_MS = 5_000;
 
 const tokenResponse = z.object({
   access_token: z.string().min(1),
@@ -15,7 +15,7 @@ export interface TwitchCredentials {
 }
 
 export class TwitchAppToken {
-  private cached: { value: string; expiresAt: number } | null = null;
+  private cached: { value: string; refreshAt: number } | null = null;
   private pending: Promise<string> | null = null;
 
   constructor(
@@ -24,7 +24,7 @@ export class TwitchAppToken {
   ) {}
 
   async get(): Promise<string> {
-    if (this.cached && this.now() < this.cached.expiresAt - REFRESH_MARGIN_MS) {
+    if (this.cached && this.now() < this.cached.refreshAt) {
       return this.cached.value;
     }
     this.pending ??= this.request().finally(() => {
@@ -45,15 +45,16 @@ export class TwitchAppToken {
         client_secret: this.credentials.clientSecret,
         grant_type: "client_credentials",
       }),
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(TOKEN_REQUEST_TIMEOUT_MS),
     });
     if (!response.ok) {
       throw new Error(`Twitch token request failed with status ${response.status}`);
     }
     const token = tokenResponse.parse(await response.json());
+    const lifetimeMs = token.expires_in * 1000;
     this.cached = {
       value: token.access_token,
-      expiresAt: this.now() + token.expires_in * 1000,
+      refreshAt: this.now() + lifetimeMs - Math.min(REFRESH_MARGIN_MS, lifetimeMs / 2),
     };
     return token.access_token;
   }

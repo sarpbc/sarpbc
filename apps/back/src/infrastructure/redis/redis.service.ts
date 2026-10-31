@@ -3,6 +3,12 @@ import { ConfigService } from "@nestjs/config";
 import * as Redis from "ioredis";
 import { log } from "evlog";
 
+const SET_WHILE_HELD_SCRIPT = `if redis.call("GET", KEYS[1]) == ARGV[1] then
+  redis.call("SET", KEYS[2], ARGV[2], "EX", ARGV[3])
+  return 1
+end
+return 0`;
+
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private client!: Redis.Redis;
@@ -39,6 +45,25 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async setIfAbsent(key: string, value: string, ttlInSeconds: number): Promise<boolean> {
     return (await this.client.set(key, value, "EX", ttlInSeconds, "NX")) === "OK";
+  }
+
+  async setWhileHeld(
+    lockKey: string,
+    lockValue: string,
+    key: string,
+    value: string,
+    ttlInSeconds: number,
+  ): Promise<boolean> {
+    const written = await this.client.eval(
+      SET_WHILE_HELD_SCRIPT,
+      2,
+      lockKey,
+      key,
+      lockValue,
+      value,
+      ttlInSeconds,
+    );
+    return written === 1;
   }
 
   async get(key: string): Promise<string | null> {
