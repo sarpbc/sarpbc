@@ -326,7 +326,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       },
     },
     async ({ page, limit }) =>
-      runStaffReadTool(user, "news.manage", async () => {
+      runStaffReadTool(user, ["news.manage"], async () => {
         const result = await ctx.newsService.findAll(page ?? 0, limit ?? DEFAULT_NEWS_LIMIT);
         return {
           data: result.data.map(mapNewsListItem),
@@ -347,7 +347,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       },
     },
     async ({ idOrSlug }) =>
-      runStaffReadTool(user, "news.manage", async () => {
+      runStaffReadTool(user, ["news.manage"], async () => {
         const article = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
         return mapNewsAdminArticle(article);
       }),

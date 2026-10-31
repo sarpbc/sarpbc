@@ -27,13 +27,10 @@ export async function runReadTool(handler: () => Promise<unknown>): Promise<Call
 
 export async function runStaffReadTool(
   user: PatUser,
-  permissions: StaffPermission | readonly StaffPermission[],
+  permissions: readonly StaffPermission[],
   handler: () => Promise<unknown>,
 ): Promise<CallToolResult> {
-  const denied = denyIfMissingPermission(
-    user,
-    typeof permissions === "string" ? [permissions] : permissions,
-  );
+  const denied = denyIfMissingPermission(user, permissions);
   if (denied) {
     return denied;
   }
