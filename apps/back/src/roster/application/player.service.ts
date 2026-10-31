@@ -142,25 +142,36 @@ export class PlayerService {
   async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<RosterMove> {
     return this.transaction.run(async ({ players, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
-
-      const closed = (await openContracts(contracts, playerId)).filter(
-        (contract) => contract.team.id === input.teamId,
-      );
-      // Players imported from PandaScore have a current team but no contract row.
-      if (closed.length === 0 && player.team?.id !== input.teamId) {
+      const career = await contracts.findByPlayer(playerId);
+      const open = career.filter((contract) => contract.endDate === null);
+      const closing = open.filter((contract) => contract.team.id === input.teamId);
+      // No contract and a different current team is a mistake. A departure already stored
+      // for this date is the same move recorded twice, so the later remove is a no-op.
+      if (
+        closing.length === 0 &&
+        player.team?.id !== input.teamId &&
+        !departedOn(career, input.teamId, input.effectiveDate)
+      ) {
         throw new InvalidInputError(`${player.name} is not on team "${input.teamId}"`);
       }
-      for (const contract of closed) {
+      for (const contract of closing) {
         contract.close(new Date(input.effectiveDate), input.sourceUrl);
         await contracts.save(contract);
       }
 
-      if (player.team?.id === input.teamId) {
+      const remaining = open.filter((contract) => contract.endDate === null);
+      if (remaining.length === 1) {
+        const current = remaining[0].team;
+        if (player.team?.id !== current.id) {
+          player.team = current;
+          player.status = PlayerStatus.ACTIVE;
+        }
+      } else if (remaining.length === 0 && player.team?.id === input.teamId) {
         player.team = null;
         player.status = input.status;
       }
       await players.save(player);
-      return { player, opened: null, closed };
+      return { player, opened: null, closed: closing };
     });
   }
 
@@ -249,6 +260,15 @@ export class PlayerService {
 
 async function openContracts(contracts: ContractWriter, playerId: string): Promise<Contract[]> {
   return (await contracts.findByPlayer(playerId)).filter((contract) => contract.endDate === null);
+}
+
+function departedOn(career: Contract[], teamId: string, effectiveDate: string): boolean {
+  return career.some(
+    (contract) =>
+      contract.team.id === teamId &&
+      contract.endDate !== null &&
+      contract.endDate.toISOString().slice(0, 10) === effectiveDate,
+  );
 }
 
 function requireUnmerged(player: Player | null, id: string): Player {
