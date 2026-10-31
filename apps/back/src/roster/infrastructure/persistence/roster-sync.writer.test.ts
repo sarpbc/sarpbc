@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Player, Team } from "./player.entities";
+import { Contract, Player, Team } from "./player.entities";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import type { EntityManager } from "@mikro-orm/postgresql";
 describe("RosterSyncWriter", () => {
@@ -38,12 +38,27 @@ describe("RosterSyncWriter", () => {
       slug: "comm",
       team: new Team(),
     });
-    em.findOne.mockResolvedValue(player);
+    em.findOne.mockImplementation(async (entity) => (entity === Player ? player : null));
     const writer = new RosterSyncWriter(manager);
     await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, "new-team");
     expect(player.team?.id).toBe("new-team");
     await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, null);
     expect(player.team).toBeNull();
+  });
+  it("keeps the team of an open contract over the provider's current team", async () => {
+    const team = Object.assign(new Team(), { id: "agg" });
+    const player = Object.assign(new Player(), { id: "p3", pandascoreId: 3, slug: "joyo", team });
+    const contract = Object.assign(new Contract(), { player, team, endDate: null });
+    em.findOne.mockImplementation(async (entity, where) => {
+      if (entity === Player && where.pandascoreId === 3) return player;
+      if (entity === Contract && where.player === "p3" && where.endDate === null) return contract;
+      return null;
+    });
+    const writer = new RosterSyncWriter(manager);
+    await writer.upsertPlayer({ pandascoreId: 3, name: "Joyo", slug: "joyo" }, null);
+    expect(player.team).toBe(team);
+    await writer.upsertPlayer({ pandascoreId: 3, name: "Joyo", slug: "joyo" }, "kaydop-corp");
+    expect(player.team).toBe(team);
   });
   it("reuses new identities before commit rather than creating duplicate records", async () => {
     const writer = new RosterSyncWriter(manager);
