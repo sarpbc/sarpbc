@@ -16,7 +16,7 @@
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "node --test src/internal-api.test.ts"
+    "test": "node --test src/internal-api.test.ts src/twitch.test.ts"
   },
   "dependencies": {
     "@sarpbc/types": "workspace:*",

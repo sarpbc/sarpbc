@@ -140,7 +140,7 @@
         "button": "Add Channel",
         "title": "Add Channel",
         "loginLabel": "Twitch Login",
-        "loginHint": "4 to 25 lowercase letters, digits or underscores, as in twitch.tv/login.",
+        "loginHint": "Up to 25 lowercase letters, digits or underscores, not starting with an underscore, as in twitch.tv/login.",
         "loginPlaceholder": "e.g. zenrll",
         "displayNameLabel": "Display Name",
         "displayNameHint": "Optional. Defaults to the name shown on Twitch.",

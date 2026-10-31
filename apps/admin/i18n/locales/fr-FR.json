@@ -140,7 +140,7 @@
         "button": "Ajouter une Chaîne",
         "title": "Ajouter une Chaîne",
         "loginLabel": "Identifiant Twitch",
-        "loginHint": "4 à 25 lettres minuscules, chiffres ou tirets bas, comme dans twitch.tv/identifiant.",
+        "loginHint": "Jusqu’à 25 lettres minuscules, chiffres ou tirets bas, sans tiret bas au début, comme dans twitch.tv/identifiant.",
         "loginPlaceholder": "ex. zenrll",
         "displayNameLabel": "Nom affiché",
         "displayNameHint": "Facultatif. Par défaut, le nom affiché sur Twitch.",
