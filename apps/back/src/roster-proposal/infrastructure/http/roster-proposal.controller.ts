@@ -35,7 +35,7 @@ function mapProposal(proposal: RosterProposal) {
 export class RosterProposalController {
   constructor(private readonly proposals: RosterProposalService) {}
 
-  @RequirePermissions("players.manage", "teams.manage")
+  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get()
   async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryDto) {
@@ -43,7 +43,7 @@ export class RosterProposalController {
     return { proposals: proposals.map(mapProposal), names };
   }
 
-  @RequirePermissions("players.manage", "teams.manage")
+  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/approve")
   @HttpCode(HttpStatus.OK)
@@ -51,7 +51,7 @@ export class RosterProposalController {
     return { proposal: mapProposal(await this.proposals.approve(id, userId)) };
   }
 
-  @RequirePermissions("players.manage", "teams.manage")
+  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/reject")
   @HttpCode(HttpStatus.OK)

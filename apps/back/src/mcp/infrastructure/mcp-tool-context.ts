@@ -8,6 +8,7 @@ import type { RosterProposalService } from "../../roster-proposal/application/ro
 import type { SearchService } from "../../search/application/search.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentService } from "../../tournament/application/tournament.service";
+import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 
 export interface McpToolContext {
   user: PatUser;
@@ -20,4 +21,5 @@ export interface McpToolContext {
   matchService: MatchService;
   newsService: NewsService;
   rosterProposalService: RosterProposalService;
+  tournamentPrizeService: TournamentPrizeService;
 }

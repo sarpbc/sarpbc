@@ -1,6 +1,7 @@
 import { InvalidInputError } from "../../common/domain/errors";
 import type { ContractRole, PlayerStatus, RosterRole } from "../../roster/domain/roster";
 import type { StaffPermission } from "../../user/domain/staff-access";
+import type { PrizeEntry } from "../../tournament/domain/prize-distribution";
 
 export type RosterChange =
   | { kind: "add_player_to_team"; playerId: string; teamId: string; effectiveDate: string }
@@ -53,7 +54,8 @@ export type RosterChange =
       startDate?: string;
       endDate?: string | null;
       contractRole?: ContractRole;
-    };
+    }
+  | { kind: "set_tournament_prizes"; tournamentId: string; prizes: PrizeEntry[] };
 
 export type RosterChangeKind = RosterChange["kind"];
 
@@ -75,6 +77,8 @@ export function requiredPermission(kind: RosterChangeKind): StaffPermission {
     case "update_team":
     case "merge_teams":
       return "teams.manage";
+    case "set_tournament_prizes":
+      return "tournaments.manage";
     default: {
       const exhaustive: never = kind;
       return exhaustive;

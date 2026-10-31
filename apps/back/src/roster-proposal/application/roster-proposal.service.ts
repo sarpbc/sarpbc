@@ -11,6 +11,8 @@ import {
   type RosterProposalStatus,
 } from "../domain/roster-proposal";
 import type { UserService } from "../../user/application/user.service";
+import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
+import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
 import type { RosterProposalTransaction, RosterProposalStore } from "./ports";
 
 export interface RosterProposalList {
@@ -23,6 +25,7 @@ type Teams = Pick<TeamService, "findById" | "create" | "update">;
 type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
+type Prizes = Pick<TournamentPrizeService, "findByTournamentId" | "setDistribution">;
 
 const LIST_LIMIT = 100;
 
@@ -35,6 +38,7 @@ export class RosterProposalService {
     private readonly contracts: Contracts,
     private readonly merges: Merges,
     private readonly staff: Staff,
+    private readonly prizes: Prizes,
   ) {}
 
   async propose(
@@ -45,6 +49,10 @@ export class RosterProposalService {
     await this.requireReferences(change);
     if (change.kind === "update_contract") {
       await this.requireContract(change.playerId, change.contractId);
+    }
+    if (change.kind === "set_tournament_prizes") {
+      assertPrizeDistribution(change.prizes);
+      await this.prizes.findByTournamentId(change.tournamentId);
     }
     const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
     await this.store.save(proposal);
@@ -57,6 +65,13 @@ export class RosterProposalService {
       players: [...new Set(proposals.flatMap(({ change }) => referencedPlayerIds(change)))],
       teams: [...new Set(proposals.flatMap(({ change }) => referencedTeamIds(change)))],
       users: [...new Set(proposals.map(({ proposedById }) => proposedById))],
+      tournaments: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "set_tournament_prizes" ? [change.tournamentId] : [],
+          ),
+        ),
+      ],
     });
     return { proposals, names };
   }
@@ -139,6 +154,9 @@ export class RosterProposalService {
         const input = { teamId, startDate, endDate, role: contractRole, sourceUrl };
         return (await this.contracts.revisePeriod(playerId, contractId, input)).id;
       }
+      case "set_tournament_prizes":
+        await this.prizes.setDistribution(change.tournamentId, change.prizes);
+        return change.tournamentId;
       default: {
         const exhaustive: never = change;
         return exhaustive;
@@ -185,6 +203,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
       return [change.playerId];
     case "merge_players":
       return [change.keptId, change.duplicateId];
+    case "set_tournament_prizes":
+      return change.prizes.flatMap(({ playerIds }) => playerIds);
     case "create_player":
     case "create_team":
     case "update_team":
@@ -209,6 +229,8 @@ function referencedTeamIds(change: RosterChange): string[] {
       return change.teamId ? [change.teamId] : [];
     case "merge_teams":
       return [change.keptId, change.duplicateId];
+    case "set_tournament_prizes":
+      return change.prizes.map(({ teamId }) => teamId);
     case "create_player":
     case "update_player":
     case "create_team":
