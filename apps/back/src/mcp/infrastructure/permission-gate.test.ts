@@ -57,7 +57,7 @@ describe("permission-gate", () => {
 
   describe("runStaffReadTool", () => {
     it("returns isError when the role lacks the permission", async () => {
-      const result = await runStaffReadTool(journalist, "tournaments.manage", async () => ({
+      const result = await runStaffReadTool(journalist, ["tournaments.manage"], async () => ({
         ok: true,
       }));
 
@@ -66,7 +66,7 @@ describe("permission-gate", () => {
     });
 
     it("returns JSON content when the role has the permission", async () => {
-      const result = await runStaffReadTool(journalist, "news.manage", async () => ({
+      const result = await runStaffReadTool(journalist, ["news.manage"], async () => ({
         slug: "zen-joins-karmine-corp",
       }));
 
