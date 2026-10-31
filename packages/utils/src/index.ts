@@ -79,3 +79,4 @@ export {
   type NewsLocalizableFields,
   type LocalizedNewsFields,
 } from "./news-locale.ts";
+export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api.ts";

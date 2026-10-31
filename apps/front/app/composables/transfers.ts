@@ -1,5 +1,6 @@
 import type { MaybeRef } from "vue";
 import type { Transfer } from "~/types/transfer";
+import { apiFetch } from "~/utils/apiFetch";
 
 export interface TransferQuery {
   team?: string;
@@ -10,15 +11,10 @@ export interface TransferQuery {
 export async function getTransfers(
   query: TransferQuery,
 ): Promise<{ transfers: Transfer[]; total: number }> {
-  const config = useRuntimeConfig();
-  const res = await $fetch<{ transfers?: Transfer[]; count?: number }>(
-    `${config.public.apiBase}/transfers`,
-    {
-      method: "GET",
-      credentials: "include",
-      params: query,
-    },
-  );
+  const res = await apiFetch<{ transfers?: Transfer[]; count?: number }>(`/transfers`, {
+    method: "GET",
+    params: query,
+  });
   const transfers = res.transfers ?? [];
   return { transfers, total: res.count ?? transfers.length };
 }

@@ -198,6 +198,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     indexnowKey: "",
+    apiBaseServer: "",
+    apiInternalToken: "",
     public: {
       apiBase: apiBase,
       adminUrl: adminUrl,

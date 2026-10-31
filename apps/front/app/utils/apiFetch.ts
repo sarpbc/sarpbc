@@ -1,1 +1,1 @@
-export { apiFetch } from "@sarpbc/composables/apiFetch";
+export { apiFetch, createApiClient } from "@sarpbc/composables/apiFetch";

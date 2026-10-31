@@ -1,4 +1,5 @@
 import type { NewsType } from "@sarpbc/types";
+import { apiFetch } from "~/utils/apiFetch";
 
 export type NewsArticleListItem = {
   id: string;
@@ -39,12 +40,10 @@ export async function createNewsArticle(body: {
   imageUrl?: string;
   type?: NewsType;
 }): Promise<NewsArticle | null> {
-  const config = useRuntimeConfig();
   try {
-    return await $fetch<NewsArticle>(`${config.public.apiBase}/news`, {
+    return await apiFetch<NewsArticle>(`/news`, {
       method: "POST",
       body,
-      credentials: "include",
     });
   } catch (error) {
     console.error("Error creating news article:", error);
@@ -58,20 +57,16 @@ export async function getNewsArticles(
   locale?: string,
   type?: NewsType,
 ): Promise<PaginatedNewsArticles> {
-  const config = useRuntimeConfig();
-  return $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news`, {
+  return apiFetch<PaginatedNewsArticles>(`/news`, {
     method: "GET",
-    credentials: "include",
     query: type ? { page, limit, locale, type } : { page, limit, locale },
   });
 }
 
 export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek | null> {
-  const config = useRuntimeConfig();
   try {
-    return await $fetch<NewsWeek>(`${config.public.apiBase}/news/weeks/${week}`, {
+    return await apiFetch<NewsWeek>(`/news/weeks/${week}`, {
       method: "GET",
-      credentials: "include",
       query: { locale },
     });
   } catch (error) {
@@ -81,11 +76,9 @@ export async function getNewsWeek(week: string, locale?: string): Promise<NewsWe
 }
 
 export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<PaginatedNewsArticles> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<PaginatedNewsArticles>(`${config.public.apiBase}/news/admin`, {
+    const res = await apiFetch<PaginatedNewsArticles>(`/news/admin`, {
       method: "GET",
-      credentials: "include",
       query: { page, limit },
     });
 
@@ -97,20 +90,16 @@ export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<Pagina
 }
 
 export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {
-  const config = useRuntimeConfig();
-  return $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
+  return apiFetch<NewsArticle>(`/news/${slug}`, {
     method: "GET",
-    credentials: "include",
     query: { locale },
   });
 }
 
 export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<NewsArticle>(`${config.public.apiBase}/news/admin/${slug}`, {
+    const res = await apiFetch<NewsArticle>(`/news/admin/${slug}`, {
       method: "GET",
-      credentials: "include",
     });
 
     return res;
@@ -129,12 +118,10 @@ export async function editNewsArticle(
     type?: NewsType;
   },
 ): Promise<NewsArticle | null> {
-  const config = useRuntimeConfig();
   try {
-    return await $fetch<NewsArticle>(`${config.public.apiBase}/news/${slug}`, {
+    return await apiFetch<NewsArticle>(`/news/${slug}`, {
       method: "PATCH",
       body,
-      credentials: "include",
     });
   } catch (error) {
     console.error("Error editing news article:", error);
@@ -143,11 +130,9 @@ export async function editNewsArticle(
 }
 
 export async function publishNewsArticle(slug: string): Promise<boolean> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/news/${slug}/publish`, {
+    await apiFetch(`/news/${slug}/publish`, {
       method: "PATCH",
-      credentials: "include",
       body: {},
     });
 
@@ -159,11 +144,9 @@ export async function publishNewsArticle(slug: string): Promise<boolean> {
 }
 
 export async function unpublishNewsArticle(slug: string): Promise<boolean> {
-  const config = useRuntimeConfig();
   try {
-    await $fetch(`${config.public.apiBase}/news/${slug}/unpublish`, {
+    await apiFetch(`/news/${slug}/unpublish`, {
       method: "PATCH",
-      credentials: "include",
       body: {},
     });
 

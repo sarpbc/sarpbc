@@ -8,6 +8,7 @@ import {
   type NewsSitemapMetaResponse,
 } from "~/utils/sitemap";
 import { getFetchStatusCode } from "./match-og";
+import { apiFetch } from "~/utils/apiFetch";
 
 const SITEMAP_CACHE_CONTROL = "public, max-age=300";
 
@@ -30,10 +31,9 @@ function rethrowSitemapFetchError(cause: unknown): never {
 }
 
 export async function handleSitemapIndex(event: H3Event): Promise<string> {
-  const config = useRuntimeConfig();
   let meta: NewsSitemapMetaResponse;
   try {
-    meta = await $fetch<NewsSitemapMetaResponse>(`${config.public.apiBase}/news/sitemap`);
+    meta = await apiFetch<NewsSitemapMetaResponse>(`/news/sitemap`);
   } catch (cause) {
     rethrowSitemapFetchError(cause);
   }
@@ -53,12 +53,9 @@ export async function handleNewsSitemapChunk(
     throw createError({ statusCode: 404, statusMessage: "News sitemap chunk not found" });
   }
 
-  const config = useRuntimeConfig();
   let response: NewsSitemapChunkResponse;
   try {
-    response = await $fetch<NewsSitemapChunkResponse>(
-      `${config.public.apiBase}/news/sitemap/${chunk}`,
-    );
+    response = await apiFetch<NewsSitemapChunkResponse>(`/news/sitemap/${chunk}`);
   } catch (cause) {
     rethrowSitemapFetchError(cause);
   }

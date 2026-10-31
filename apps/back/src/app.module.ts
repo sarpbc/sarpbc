@@ -1,4 +1,4 @@
-import { ExecutionContext, Module } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { EvlogModule } from "evlog/nestjs";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
@@ -7,7 +7,7 @@ import { UserModule } from "./user/infrastructure/user.module";
 import { AuthModule } from "./auth/infrastructure/auth.module";
 import { RosterModule } from "./roster/infrastructure/roster.module";
 import { SearchModule } from "./search/infrastructure/search.module";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { RedisModule } from "./infrastructure/redis/redis.module";
@@ -15,6 +15,7 @@ import { HealthModule } from "./infrastructure/health/health.module";
 import configuration from "./infrastructure/config/configuration";
 import { validateEnv } from "./infrastructure/config/env.validation";
 import { AllExceptionsFilter } from "./common/infrastructure/http/filters/all-exceptions.filter";
+import { createClientThrottleOptions } from "./infrastructure/http/client-throttle";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ScheduleModule } from "@nestjs/schedule";
 import { GameModule } from "./game/infrastructure/game.module";
@@ -40,19 +41,11 @@ import mikroOrmConfig from "./mikro-orm.config";
       validate: validateEnv,
     }),
     EvlogModule.forRoot(),
-    ThrottlerModule.forRoot({
-      skipIf: (context: ExecutionContext) => {
-        const request = context.switchToHttp().getRequest<{ ip?: string }>();
-        const ip = request.ip;
-        return ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
-      },
-      throttlers: [
-        {
-          name: "default",
-          ttl: 60_000,
-          limit: 100,
-        },
-      ],
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        createClientThrottleOptions(config.get<string>("internalApiToken")),
     }),
     PostHogModule,
     MikroOrmModule.forRoot({

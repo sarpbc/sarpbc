@@ -1,5 +1,6 @@
 import type { Player } from "~/types/player";
 import type { Team } from "~/types/team";
+import { apiFetch } from "~/utils/apiFetch";
 
 export interface SearchResult {
   teams: Team[];
@@ -8,11 +9,9 @@ export interface SearchResult {
 }
 
 export async function searchTeamsAndPlayers({ query }: { query?: string }): Promise<SearchResult> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<Partial<SearchResult>>(`${config.public.apiBase}/search`, {
+    const res = await apiFetch<Partial<SearchResult>>(`/search`, {
       method: "GET",
-      credentials: "include",
       params: {
         q: query,
         type: "all",

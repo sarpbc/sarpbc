@@ -4,6 +4,7 @@ import type {
   MatchResultsResponse,
   UpcomingMatchesResponse,
 } from "~/types/matches";
+import { apiFetch } from "~/utils/apiFetch";
 import { parseMatchResults } from "~/utils/parseMatchResult";
 
 function parseMatchListItem(item: MatchListItem): MatchListItem {
@@ -20,34 +21,29 @@ export type MatchesListQuery = {
   tournamentId?: string;
 };
 
-function buildMatchesUrl(path: string, query?: MatchesListQuery): string {
-  const config = useRuntimeConfig();
-  const url = new URL(`${config.public.apiBase}${path}`);
-
+function matchesPath(path: string, query?: MatchesListQuery): string {
+  const params = new URLSearchParams();
   if (query?.limit !== undefined) {
-    url.searchParams.set("limit", String(query.limit));
+    params.set("limit", String(query.limit));
   }
   if (query?.offset !== undefined && query.offset > 0) {
-    url.searchParams.set("offset", String(query.offset));
+    params.set("offset", String(query.offset));
   }
   if (query?.leagueId) {
-    url.searchParams.set("leagueId", query.leagueId);
+    params.set("leagueId", query.leagueId);
   }
   if (query?.tournamentId) {
-    url.searchParams.set("tournamentId", query.tournamentId);
+    params.set("tournamentId", query.tournamentId);
   }
-
-  return url.toString();
+  const search = params.toString();
+  return search ? `${path}?${search}` : path;
 }
 
-export async function getUpcomingMatches(
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
-  const res = await $fetch<UpcomingMatchesResponse>(buildMatchesUrl("/matches/upcoming", query), {
-    method: "GET",
-    credentials: "include",
-  });
+function isSidebarQuery(query?: MatchesListQuery): boolean {
+  return !query?.limit && !query?.offset && !query?.leagueId && !query?.tournamentId;
+}
 
+function normalizeUpcoming(res: UpcomingMatchesResponse): UpcomingMatchesResponse {
   const live = (res.live ?? []).map(parseMatchListItem);
   const upcoming = (res.upcoming ?? []).map(parseMatchListItem);
 
@@ -60,12 +56,7 @@ export async function getUpcomingMatches(
   };
 }
 
-export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  const res = await $fetch<MatchResultsResponse>(buildMatchesUrl("/matches/results", query), {
-    method: "GET",
-    credentials: "include",
-  });
-
+function normalizeResults(res: MatchResultsResponse): MatchResultsResponse {
   const results = (res.results ?? []).map(parseMatchListItem);
 
   return {
@@ -74,11 +65,75 @@ export async function getMatchesResults(query?: MatchesListQuery): Promise<Match
   };
 }
 
-export async function getMatchById(id: string): Promise<MatchDetailResponse> {
-  const config = useRuntimeConfig();
-  const response = await $fetch<MatchDetailResponse>(`${config.public.apiBase}/matches/${id}`, {
+const SIDEBAR_MAX_AGE_MS = 30_000;
+
+type Slot<T> = {
+  expiresAt: number;
+  value: T;
+};
+
+type SidebarCache<T> = {
+  slot?: Slot<T>;
+  pending?: Promise<T>;
+};
+
+const upcomingSidebar: SidebarCache<UpcomingMatchesResponse> = {};
+const resultsSidebar: SidebarCache<MatchResultsResponse> = {};
+
+function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> {
+  if (cache.slot && cache.slot.expiresAt > Date.now()) {
+    return Promise.resolve(cache.slot.value);
+  }
+  if (cache.pending) {
+    return cache.pending;
+  }
+  const request = load()
+    .then((value) => {
+      cache.slot = { expiresAt: Date.now() + SIDEBAR_MAX_AGE_MS, value };
+      return value;
+    })
+    .finally(() => {
+      cache.pending = undefined;
+    });
+  cache.pending = request;
+  return request;
+}
+
+export async function fetchUpcomingMatches(
+  query?: MatchesListQuery,
+): Promise<UpcomingMatchesResponse> {
+  const res = await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
-    credentials: "include",
+  });
+  return normalizeUpcoming(res);
+}
+
+export async function fetchMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+  const res = await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
+    method: "GET",
+  });
+  return normalizeResults(res);
+}
+
+export async function getUpcomingMatches(
+  query?: MatchesListQuery,
+): Promise<UpcomingMatchesResponse> {
+  if (import.meta.server && isSidebarQuery(query)) {
+    return loadSidebar(upcomingSidebar, () => fetchUpcomingMatches(query));
+  }
+  return fetchUpcomingMatches(query);
+}
+
+export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+  if (import.meta.server && isSidebarQuery(query)) {
+    return loadSidebar(resultsSidebar, () => fetchMatchesResults(query));
+  }
+  return fetchMatchesResults(query);
+}
+
+export async function getMatchById(id: string): Promise<MatchDetailResponse> {
+  const response = await apiFetch<MatchDetailResponse>(`/matches/${id}`, {
+    method: "GET",
   });
 
   return {

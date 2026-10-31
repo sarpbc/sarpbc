@@ -15,15 +15,10 @@ import {
 } from "~/utils/apiError";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ recentPosts: PostPreview[] }>(
-      `${config.public.apiBase}/forum/preview`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+    const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
+      method: "GET",
+    });
 
     return res.recentPosts || [];
   } catch (error) {
@@ -33,11 +28,9 @@ export async function getRecentForumActivities(): Promise<PostPreview[]> {
 }
 
 export async function getTopics(): Promise<Topic[]> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ topics: Topic[] }>(`${config.public.apiBase}/forum/topics`, {
+    const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
       method: "GET",
-      credentials: "include",
     });
 
     return res.topics || [];
@@ -48,21 +41,17 @@ export async function getTopics(): Promise<Topic[]> {
 }
 
 export async function getPosts(): Promise<PostShort[]> {
-  const config = useRuntimeConfig();
-  const res = await $fetch<{ posts: PostShort[] }>(`${config.public.apiBase}/posts`, {
+  const res = await apiFetch<{ posts: PostShort[] }>(`/posts`, {
     method: "GET",
-    credentials: "include",
   });
 
   return res.posts || [];
 }
 
 export async function getPostById(id: string): Promise<ForumPost | null> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ post: ForumPost }>(`${config.public.apiBase}/posts/${id}`, {
+    const res = await apiFetch<{ post: ForumPost }>(`/posts/${id}`, {
       method: "GET",
-      credentials: "include",
     });
 
     return res.post || null;

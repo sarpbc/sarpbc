@@ -1,11 +1,10 @@
 import type { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
+import { apiFetch } from "~/utils/apiFetch";
 
 export async function getTodayAirRiddleLength(): Promise<number> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{ length?: number }>(`${config.public.apiBase}/air-riddle/today`, {
+    const res = await apiFetch<{ length?: number }>(`/air-riddle/today`, {
       method: "GET",
-      credentials: "include",
     });
 
     return res.length || 0;
@@ -19,15 +18,13 @@ export async function guessAirRiddle(
   guess: string,
   last?: boolean,
 ): Promise<{ result: AirRiddleResultEnum[]; error?: string; answer?: string }> {
-  const config = useRuntimeConfig();
   try {
-    const res = await $fetch<{
+    const res = await apiFetch<{
       results: AirRiddleResultEnum[];
       error?: string;
       answer?: string;
-    }>(`${config.public.apiBase}/air-riddle/guess`, {
+    }>(`/air-riddle/guess`, {
       method: "POST",
-      credentials: "include",
       body: { guess, last },
     });
 

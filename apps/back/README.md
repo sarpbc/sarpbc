@@ -22,6 +22,8 @@ pnpm dev:back
 
 API base: http://localhost:4001
 
+The HTTP server trusts loopback and private-network proxies, then keys the default limit (100 requests per minute) on the visitor address. When that hop is a Cloudflare edge, the visitor address is `CF-Connecting-IP`. A direct client cannot choose their bucket by sending that header. Requests that present `INTERNAL_API_TOKEN` in `x-sarpbc-internal` are limited separately at 400 requests per minute, keyed by the public address in `x-sarpbc-client` when that header is present. Without the token the client header is ignored. Leave the token unset in local development; loopback calls are already skipped.
+
 Bring your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). See root [README.md](../../README.md).
 
 ## Database migrations

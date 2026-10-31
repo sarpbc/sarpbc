@@ -1,9 +1,10 @@
 import { NestFactory } from "@nestjs/core";
-import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ConfigService } from "@nestjs/config";
 import { initLogger } from "evlog";
 import { AppModule } from "./app.module";
 import { configureApp } from "./configure-app";
+import { createHttpAdapter } from "./infrastructure/http/fastify-adapter";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -32,7 +33,7 @@ if (isProduction) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, createHttpAdapter());
 
   await configureApp(app);
 

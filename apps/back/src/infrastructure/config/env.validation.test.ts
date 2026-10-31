@@ -18,6 +18,28 @@ describe("validateEnv", () => {
     expect(validateEnv({ INDEXNOW_KEY: "" }).INDEXNOW_KEY).toBe("");
   });
 
+  it("treats a blank internal API token as unset", () => {
+    expect(validateEnv({}).INTERNAL_API_TOKEN).toBeUndefined();
+    expect(validateEnv({ INTERNAL_API_TOKEN: "" }).INTERNAL_API_TOKEN).toBeUndefined();
+    expect(validateEnv({ INTERNAL_API_TOKEN: "   " }).INTERNAL_API_TOKEN).toBeUndefined();
+  });
+
+  it("accepts a long internal API token", () => {
+    expect(validateEnv({ INTERNAL_API_TOKEN: "internal-api-token-value" }).INTERNAL_API_TOKEN).toBe(
+      "internal-api-token-value",
+    );
+  });
+
+  it("rejects a short internal API token without including its value in the error", () => {
+    const invalid = "short-token";
+    expect(() => validateEnv({ INTERNAL_API_TOKEN: invalid })).toThrow(/INTERNAL_API_TOKEN/);
+    try {
+      validateEnv({ INTERNAL_API_TOKEN: invalid });
+    } catch (error) {
+      expect(String(error)).not.toContain(invalid);
+    }
+  });
+
   it("rejects malformed IndexNow credentials without including their value in the error", () => {
     const invalid = "invalid/indexnow/credential";
     expect(() => validateEnv({ INDEXNOW_KEY: invalid })).toThrow(/INDEXNOW_KEY/);

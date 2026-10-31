@@ -145,6 +145,7 @@ jobs:
         run: |
           pnpm --filter back typecheck
           pnpm --filter back typecheck:tests
+          pnpm --filter @sarpbc/utils test
 
       - name: Architecture and HTTP contracts
         run: |

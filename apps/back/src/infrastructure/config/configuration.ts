@@ -31,6 +31,7 @@ export default () => ({
     key: process.env.INDEXNOW_KEY ?? "",
   },
   port: Number(process.env.PORT ?? 4001),
+  internalApiToken: process.env.INTERNAL_API_TOKEN || undefined,
   redis: {
     host: process.env.REDIS_HOST || "redis",
     port: Number(process.env.REDIS_PORT ?? 6379),
