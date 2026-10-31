@@ -221,6 +221,15 @@ setPageSeo({
                   </span>
                 </dd>
               </div>
+              <div
+                v-if="currentPlayer.team && currentPlayer.role"
+                class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4"
+              >
+                <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.role") }}</dt>
+                <dd class="min-w-0 text-sm font-medium">
+                  {{ t(`common.contractRole.${currentPlayer.role}`) }}
+                </dd>
+              </div>
             </dl>
           </div>
         </div>

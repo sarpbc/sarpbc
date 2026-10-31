@@ -12,7 +12,11 @@
     "contractRole": {
       "active": "Active",
       "benched": "Benched",
-      "loaned": "Loaned"
+      "loaned": "Loaned",
+      "coach": "Coach",
+      "assistant_coach": "Assistant Coach",
+      "analyst": "Analyst",
+      "manager": "Manager"
     },
     "cancel": "Cancel",
     "retry": "Retry",
@@ -1205,6 +1209,7 @@
         "seoDescriptionWithName": "View {name}'s profile, upcoming matches, and recent results",
         "seoDescriptionDefault": "Player profile, upcoming matches, and recent results",
         "currentTeam": "Current Team",
+        "role": "Role",
         "nationality": "Nationality",
         "age": "Age",
         "xYears": "{years} years",
@@ -1328,6 +1333,7 @@
         "seoDescriptionDefault": "Team roster, upcoming matches, and recent results",
         "location": "Location",
         "players": "Players",
+        "staff": "Staff",
         "playersCount": "{count} player | {count} players",
         "statistics": "Statistics",
         "teamStatisticsComingSoon": "Team statistics coming soon...",

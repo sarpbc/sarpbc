@@ -52,6 +52,14 @@ function roleRank(role: ContractRole): number {
       return 1;
     case "loaned":
       return 2;
+    case "coach":
+      return 3;
+    case "assistant_coach":
+      return 4;
+    case "analyst":
+      return 5;
+    case "manager":
+      return 6;
     default: {
       const exhaustive: never = role;
       return exhaustive;
