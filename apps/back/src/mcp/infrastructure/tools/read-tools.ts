@@ -171,7 +171,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     "get_tournament",
     {
       description:
-        "Get full tournament detail including bracket matches, participants, and public tournament URL.",
+        "Get full tournament detail, including matches, the public URL, and registered participants (participant id plus team id, slug and name). start.gg tournaments are not returned.",
       inputSchema: {
         id: z.string().min(1).describe("Tournament UUID."),
       },

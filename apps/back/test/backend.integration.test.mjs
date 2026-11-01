@@ -1261,30 +1261,99 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         (await orm.em.fork().find("TournamentParticipant", { tournament: tournamentId })).map(
           ({ id }) => id,
         );
-      const tournamentWith = async (tournamentSource) => {
-        const { id } = await callTool("create_tournament", {
+      const createCup = (tournamentSource) =>
+        callTool("create_tournament", {
           name: `MCP ${tournamentSource} Cup`,
           beginAt: "2026-10-20",
           endAt: "2026-10-30",
           teamIds: [alpha, scoutedTeam],
           source: tournamentSource,
         });
-        await callTool("create_match", {
-          tournamentId: id,
-          name: `MCP ${tournamentSource} Final`,
-          participantIds: await participantIds(id),
-        });
-        return id;
-      };
-      const manualCup = await tournamentWith("manual");
-      const startggCup = await tournamentWith("startgg");
+      const teamNames = (participants) => participants.map(({ team }) => team.name).sort();
+      const manualCreated = await createCup("manual");
+      const manualCup = manualCreated.id;
+      assert.deepEqual(teamNames(manualCreated.participants), ["MCP Alpha", "MCP Startgg Team"]);
+      for (const participant of manualCreated.participants) {
+        assert.ok(participant.id);
+        assert.ok(participant.team.slug);
+        assert.ok(participant.team.id);
+      }
+      const detail = await callTool("get_tournament", { id: manualCup });
       assert.deepEqual(
-        (await callTool("get_tournament", { id: manualCup })).matches.map(({ participants }) =>
-          participants.map(({ team }) => team.name).sort(),
-        ),
-        [["MCP Alpha", "MCP Startgg Team"]],
-        "a start.gg team does not hide a redistributable match",
+        detail.participants.map(({ id, team }) => [id, team.id, team.slug, team.name]).sort(),
+        manualCreated.participants
+          .map(({ id, team }) => [id, team.id, team.slug, team.name])
+          .sort(),
       );
+      const slugs = detail.participants.map(({ team }) => team.slug);
+      const bySlug = await callTool("create_match", {
+        tournamentId: manualCup,
+        name: "MCP manual by slug",
+        teams: slugs,
+      });
+      assert.deepEqual(
+        bySlug.participants.map(({ id }) => id).sort(),
+        detail.participants.map(({ id }) => id).sort(),
+      );
+      const byTeamId = await callTool("create_match", {
+        tournamentId: manualCup,
+        name: "MCP manual by team id",
+        teams: detail.participants.map(({ team }) => team.id),
+      });
+      assert.equal(byTeamId.participants.length, 2);
+      const byParticipant = await callTool("create_match", {
+        tournamentId: manualCup,
+        name: "MCP manual by participant",
+        participantIds: detail.participants.map(({ id }) => id),
+      });
+      assert.equal(byParticipant.participants.length, 2);
+      const betaTeam = await callTool("get_team", { idOrSlug: beta });
+      assert.deepEqual(
+        await callTool("create_match", {
+          tournamentId: manualCup,
+          name: "MCP outsider",
+          teams: [betaTeam.slug, slugs[0]],
+        }),
+        { error: true },
+      );
+      assert.deepEqual(
+        await callTool("create_match", {
+          tournamentId: manualCup,
+          name: "MCP missing team",
+          teams: ["not-a-team", slugs[0]],
+        }),
+        { error: true },
+      );
+      const updated = await callTool("update_tournament", {
+        tournamentId: manualCup,
+        teamIds: [alpha, scoutedTeam],
+      });
+      assert.deepEqual(
+        updated.participants.map(({ team }) => team.id).sort(),
+        [alpha, scoutedTeam].sort(),
+      );
+      const manualMatches = (await callTool("get_tournament", { id: manualCup })).matches;
+      assert.equal(manualMatches.length, 3);
+      for (const match of manualMatches) {
+        assert.deepEqual(teamNames(match.participants), ["MCP Alpha", "MCP Startgg Team"]);
+      }
+      const startggCreated = await createCup("startgg");
+      const startggCup = startggCreated.id;
+      assert.equal(startggCreated.participants, undefined);
+      const startggMatch = await callTool("create_match", {
+        tournamentId: startggCup,
+        name: "MCP startgg Final",
+        participantIds: await participantIds(startggCup),
+      });
+      assert.ok(startggMatch.id);
+      assert.equal(startggMatch.participants, undefined);
+      const startggByTeam = await callTool("create_match", {
+        tournamentId: startggCup,
+        name: "MCP startgg by team",
+        teams: slugs,
+      });
+      assert.ok(startggByTeam.id);
+      assert.equal(startggByTeam.participants, undefined);
       assert.deepEqual(await callTool("get_tournament", { id: startggCup }), { error: true });
       const listed = (await callTool("get_tournaments", { limit: 100 })).map(({ id }) => id);
       assert.ok(listed.includes(manualCup));

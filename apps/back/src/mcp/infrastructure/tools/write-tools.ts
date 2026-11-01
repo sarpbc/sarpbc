@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { NEWS_TYPES } from "@sarpbc/types";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
@@ -12,7 +12,8 @@ import {
 import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
 import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
-import { mapMatchListResponse } from "../mappers";
+import { mapListedParticipants, mapMatchListResponse } from "../mappers";
+import { resolveMatchParticipantIds } from "./resolve-match-participants";
 import { requireUpdateFields } from "./update-fields";
 
 const MATCH_BLOCK_FORMAT =
@@ -207,7 +208,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_match",
     {
       description:
-        "Create a tournament match between existing tournament participants. Requires tournaments.manage.",
+        "Create a tournament match. Requires tournaments.manage. Pass participantIds (tournament participant UUIDs from get_tournament) and/or teams (team UUIDs or slugs from search_teams or get_tournament). Every team must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID the match belongs to."),
         name: z.string().min(1).describe("Match display name."),
@@ -220,12 +221,22 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
         numberOfGames: z.number().int().optional().describe("Best-of series length."),
         participantIds: z
           .array(z.string().min(1))
-          .min(2)
-          .describe("Tournament participant UUIDs (at least two)."),
+          .optional()
+          .describe(
+            "Tournament participant UUIDs from get_tournament. Optional when teams is set. At least two different sides in total.",
+          ),
+        teams: z
+          .array(z.string().min(1))
+          .optional()
+          .describe(
+            "Team UUIDs or slugs. Each one must already be registered in the tournament and is resolved to its participant id. Optional when participantIds is set.",
+          ),
         results: z
           .array(matchResultSchema)
           .optional()
-          .describe("Per-participant scores. Sets the winner when status is finished."),
+          .describe(
+            "Per-participant scores, keyed by tournament participant UUID from get_tournament. Sets the winner when status is finished.",
+          ),
       },
     },
     async ({
@@ -236,16 +247,28 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       status,
       numberOfGames,
       participantIds,
+      teams,
       results,
     }) =>
       runWriteTool(user, "create_match", "tournaments.manage", async () => {
+        const tournament = await ctx.tournamentService.findById(tournamentId);
+        if (!tournament) {
+          throw new NotFoundException(
+            `Tournament "${tournamentId}" was not found. Use get_tournaments to list available events.`,
+          );
+        }
+        const participants = await resolveMatchParticipantIds(
+          tournament,
+          { participantIds, teams },
+          ctx.teamService,
+        );
         const match = await ctx.matchService.upsertMatch(tournamentId, {
           name,
           beginAt: beginAt ? new Date(beginAt) : undefined,
           endAt: endAt ? new Date(endAt) : undefined,
           status,
           numberOfGames,
-          participantIds,
+          participantIds: participants.map((participant) => participant.id),
           results,
         });
 
@@ -255,6 +278,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             id: match.id,
             name: match.name,
             tournamentId,
+            ...mapListedParticipants(tournament.source, participants),
             url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
@@ -265,7 +289,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "set_match_winner",
     {
       description:
-        "Set the winner of a finished match by tournament participant id. Requires tournaments.manage.",
+        "Set the winner of a finished match by tournament participant id from get_tournament. Requires tournaments.manage.",
       inputSchema: {
         matchId: z.string().min(1).describe("Match UUID."),
         winnerId: z.string().min(1).describe("Tournament participant UUID of the winning team."),
@@ -350,7 +374,9 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .array(z.object({ participantId: z.string().min(1), score: z.number().int().min(0) }))
           .min(2)
           .optional()
-          .describe("Score of every match participant, keyed by tournament participant UUID."),
+          .describe(
+            "Score of every match participant, keyed by tournament participant UUID from get_tournament.",
+          ),
       },
     },
     async ({ matchId, beginAt, endAt, status, results }) =>
@@ -372,7 +398,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_tournament",
     {
       description:
-        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool.",
+        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
       inputSchema: {
         name: z.string().min(1).max(255).describe("Tournament display name."),
         slug: z
@@ -397,7 +423,9 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
         teamIds: z
           .array(z.string().uuid())
           .optional()
-          .describe("Team UUIDs to register as participants. Use search_teams to find ids."),
+          .describe(
+            "Team UUIDs to register as participants. Use search_teams to find ids. The response lists each participant id.",
+          ),
         source: z
           .enum(["manual", "startgg"])
           .optional()
@@ -418,6 +446,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             name: tournament.name,
             slug: tournament.slug,
             source: tournament.source,
+            ...mapListedParticipants(tournament.source, tournament.participants),
             url: tournamentUrl(tournament),
           },
         };
@@ -428,7 +457,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "update_tournament",
     {
       description:
-        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields.",
+        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields. The response includes participants for manual and PandaScore tournaments.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
@@ -457,7 +486,9 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
         teamIds: z
           .array(z.string().uuid())
           .optional()
-          .describe("Replace participating teams with this list of team UUIDs."),
+          .describe(
+            "Replace participating teams with this list of team UUIDs. The response lists each participant id.",
+          ),
       },
     },
     async ({ tournamentId, ...input }) =>
@@ -474,6 +505,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             source: tournament.source,
             imageUrl: tournament.imageUrl,
             endAt: tournament.endAt,
+            ...mapListedParticipants(tournament.source, tournament.participants),
             url: tournamentUrl(tournament),
           },
         };

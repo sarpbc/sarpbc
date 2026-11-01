@@ -1,6 +1,6 @@
-import { isRedistributable } from "../../common/domain/data-source";
+import { isRedistributable, type DataSource } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
-import type { Match, Tournament } from "../../tournament/domain/competition";
+import type { Match, Tournament, TournamentParticipant } from "../../tournament/domain/competition";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import { adminNewsEditUrl, matchUrl, newsUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
@@ -98,6 +98,23 @@ export function mapTournamentListItem(tournament: Tournament) {
   };
 }
 
+export function mapTournamentParticipant(participant: TournamentParticipant) {
+  return {
+    id: participant.id,
+    team: {
+      id: participant.team.id,
+      slug: participant.team.slug,
+      name: participant.team.name,
+    },
+  };
+}
+
+/** start.gg tournaments stay out of MCP responses, including write confirmations. */
+export function mapListedParticipants(source: DataSource, participants: TournamentParticipant[]) {
+  if (!isRedistributable(source)) return {};
+  return { participants: participants.map(mapTournamentParticipant) };
+}
+
 export function mapTournamentDetail(tournament: Tournament) {
   return {
     ...mapTournamentListItem(tournament),
@@ -107,6 +124,7 @@ export function mapTournamentDetail(tournament: Tournament) {
     winner: tournament.winner
       ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
       : null,
+    ...mapListedParticipants(tournament.source, tournament.participants),
     matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
   };
 }
