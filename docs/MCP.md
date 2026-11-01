@@ -44,19 +44,19 @@ Staff AI assistants can call the SARPBC API through a [Model Context Protocol](h
 
 Read tools (any valid PAT):
 
-| Tool                    | Description                              |
-| ----------------------- | ---------------------------------------- |
-| `search_players`        | Search players by name                   |
-| `search_teams`          | Search teams by name                     |
-| `get_player`            | Player profile by slug or id             |
-| `get_team`              | Team profile and roster by slug or id    |
-| `get_tournaments`       | List tournaments (`activeOnly`, `limit`) |
-| `get_tournament`        | Tournament detail with matches           |
-| `get_upcoming_matches`  | Upcoming and live matches                |
-| `get_match_results`     | Recent finished match results            |
-| `get_tournament_prizes` | Prize distribution of a tournament stage |
-| `get_team_earnings`     | Team earnings by year, per currency      |
-| `get_player_earnings`   | Player earnings by year, per currency    |
+| Tool                    | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `search_players`        | Search players by name                          |
+| `search_teams`          | Search teams by name                            |
+| `get_player`            | Player profile by slug or id                    |
+| `get_team`              | Team profile and roster by slug or id           |
+| `get_tournaments`       | List tournaments (`activeOnly`, `limit`)        |
+| `get_tournament`        | Tournament detail with matches and participants |
+| `get_upcoming_matches`  | Upcoming and live matches                       |
+| `get_match_results`     | Recent finished match results                   |
+| `get_tournament_prizes` | Prize distribution of a tournament stage        |
+| `get_team_earnings`     | Team earnings by year, per currency             |
+| `get_player_earnings`   | Player earnings by year, per currency           |
 
 News tools (`news.manage`):
 
@@ -71,7 +71,7 @@ Write tools (staff permission required):
 
 | Tool                         | Permission           | Description                                                                              |
 | ---------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
-| `create_match`               | `tournaments.manage` | Create a tournament match                                                                |
+| `create_match`               | `tournaments.manage` | Create a match from participant ids and/or team ids or slugs                             |
 | `set_match_winner`           | `tournaments.manage` | Set match winner by participant id                                                       |
 | `update_match`               | `tournaments.manage` | Correct score, status or dates of a manual match                                         |
 | `set_match_game_vods`        | `tournaments.manage` | Replace the Twitch/YouTube VOD links of one game, with their ISO 639-1 language          |
@@ -109,6 +109,10 @@ Players, teams, tournaments and matches record a `source`: `pandascore`, `manual
 Prize distributions record, per tournament stage, a placement, a whole amount in the currency the source states, a team and optionally the players who share it. Each team must be a participant of the stage and each player must be on that team's stage roster, whether the distribution comes from the admin editor or an approved proposal. `propose_tournament_prizes` refuses start.gg tournaments. Amounts are never converted: totals are given per currency, and a prize that lists players is split equally between them on player earnings, rounded to the minor unit of its currency (no cents for JPY or KRW). The overall prize pool stays the one synced from PandaScore (`prizepool`). Prize distributions of start.gg tournaments appear on the site with a start.gg credit, but `get_tournament_prizes`, `get_team_earnings` and `get_player_earnings` do not return them: the earnings tools exclude them in the query and `get_tournament_prizes` answers not found after reading the distribution, like start.gg tournaments and matches.
 
 `get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
+
+`get_tournament` includes `participants` for manual and PandaScore tournaments. Each entry is the tournament participant `id` plus the team `id`, `slug` and `name`. A start.gg team registered in one of those tournaments is included. start.gg tournaments themselves stay hidden, and their participants are not returned by `create_tournament`, `update_tournament` or `create_match`.
+
+`create_match` still accepts `participantIds`. It also accepts `teams`, a list of team UUIDs or slugs, and resolves each one to the participant registered in that tournament. Calls that pass only `participantIds` are unchanged. A team that does not exist, or that is not registered in the tournament, is rejected with an error that names the team. At least two different sides are required, counting `participantIds` and `teams` together. `results`, `set_match_winner` and `update_match` still key scores and winners by tournament participant id. Those ids come from `get_tournament` or from the `participants` field on the `create_match` response.
 
 VOD links are stored per game on the match. Only https `twitch.tv`, `youtube.com` and `youtu.be` URLs are accepted, optionally timestamped with `t=` (`123` or `1h2m3s`); the source is derived from the host and duplicate URLs within a game are dropped. MCP reads do not return VODs, and VODs of start.gg matches only appear where the match itself does.
 

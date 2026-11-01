@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Player, Team } from "../../../roster/domain/roster";
+import { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
 import { registerReadTools } from "./read-tools";
 
 function setup() {
@@ -22,9 +23,39 @@ function setup() {
     findLiveAndCount: vi.fn().mockResolvedValue([[], 0]),
     findResultsAndCount: vi.fn().mockResolvedValue([[], 0]),
   };
+  const manualCup = Object.assign(new Tournament(), {
+    id: "manual-cup",
+    name: "Coupe",
+    slug: "coupe",
+    source: "manual",
+    imageUrl: null,
+    event: { id: "event", slug: "coupe", name: "Coupe" },
+    beginAt: null,
+    endAt: null,
+    pickemsEnabled: false,
+    league: null,
+    description: null,
+    tier: null,
+    hasBracket: false,
+    winner: null,
+    matches: [],
+    participants: [
+      Object.assign(new TournamentParticipant(), {
+        id: "part-kc",
+        team: Object.assign(new Team(), {
+          id: "team-kc",
+          slug: "karmine-corp",
+          name: "Karmine Corp",
+          source: "startgg",
+        }),
+      }),
+    ],
+  });
   const tournamentService = {
     find: vi.fn().mockResolvedValue([[], 0]),
-    findById: vi.fn().mockResolvedValue({ id: "c1", source: "startgg" }),
+    findById: vi.fn(async (id: string) =>
+      id === manualCup.id ? manualCup : { id, source: "startgg" },
+    ),
   };
   const searchService = {
     searchPlayers: vi.fn().mockResolvedValue([player]),
@@ -74,8 +105,17 @@ describe("MCP read tools", () => {
     expect(await json("get_team", { idOrSlug: "scouted" })).toMatchObject({ source: "startgg" });
   });
 
-  it("hides start.gg tournaments", async () => {
-    const { call } = setup();
+  it("returns registered participants and hides start.gg tournaments", async () => {
+    const { call, json } = setup();
+    expect(await json("get_tournament", { id: "manual-cup" })).toMatchObject({
+      id: "manual-cup",
+      participants: [
+        {
+          id: "part-kc",
+          team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
+        },
+      ],
+    });
     expect((await call("get_tournament", { id: "c1" })).isError).toBe(true);
   });
 });
