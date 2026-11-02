@@ -424,7 +424,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .array(z.string().uuid())
           .optional()
           .describe(
-            "Team UUIDs to register as participants. Use search_teams to find ids. The response lists each participant id.",
+            "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. The response lists each participant id.",
           ),
         source: z
           .enum(["manual", "startgg"])
@@ -487,7 +487,20 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .array(z.string().uuid())
           .optional()
           .describe(
-            "Replace participating teams with this list of team UUIDs. The response lists each participant id.",
+            "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. The response lists each participant id.",
+          ),
+        rosters: z
+          .array(
+            z.object({
+              teamId: z.string().uuid().describe("Team UUID of an existing participant."),
+              playerIds: z
+                .array(z.string().uuid())
+                .describe("Player UUIDs who played this tournament for the team."),
+            }),
+          )
+          .optional()
+          .describe(
+            "Manual tournaments only. Replace the tournament roster of the listed participants; other participants keep theirs. Applied after teamIds.",
           ),
       },
     },

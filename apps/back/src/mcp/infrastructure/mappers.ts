@@ -106,6 +106,7 @@ export function mapTournamentParticipant(participant: TournamentParticipant) {
       slug: participant.team.slug,
       name: participant.team.name,
     },
+    players: participant.players.map(({ id, name }) => ({ id, name })),
   };
 }
 
