@@ -345,7 +345,12 @@
         "errors": {
           "nameRequired": "Enter a tournament name before saving.",
           "endBeforeStart": "End date must be on or after the start date."
-        }
+        },
+        "event": "Event",
+        "newEvent": "New event named after the tournament",
+        "eventHelp": "Stages of the same event share one public page. Pick an existing event to add this tournament as a stage.",
+        "eventMoveHelp": "Saving moves the tournament to this event. Its public URL changes and its old event keeps its name.",
+        "eventSharedHelp": "This tournament is a stage of a shared event. Change the event name or URL from the Events page."
       },
       "match": {
         "status": "Status",
@@ -431,6 +436,66 @@
           "notOnRoster": "Some players are not on the team's tournament roster.",
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
+        }
+      },
+      "retry": "Try Again",
+      "events": {
+        "title": "Events",
+        "subtitle": "Events group tournament stages, such as a pool and its finals, under one public page. Only manual events are listed. An event without stages stays hidden from the public site.",
+        "empty": "No manual events yet. Create one, then attach tournaments to it from the tournament form.",
+        "loadError": "Could not load events.",
+        "loadOneError": "Could not load this event. It may not exist anymore.",
+        "noStages": "No stages",
+        "save": "Save Event",
+        "saveFailed": "Could not save the event. Check the fields and try again.",
+        "columns": {
+          "name": "Event",
+          "stages": "Stages"
+        },
+        "create": {
+          "action": "Create Event",
+          "title": "Create Event",
+          "subtitle": "Create an empty event, then add tournaments to it as stages.",
+          "saved": "Event created"
+        },
+        "edit": {
+          "title": "Edit Event",
+          "subtitle": "Renaming the event or changing its slug updates the public URL of every stage.",
+          "synced": "The PandaScore sync manages this event, so it cannot be edited here.",
+          "saved": "Event saved",
+          "unchanged": "Nothing to save"
+        },
+        "form": {
+          "name": "Name",
+          "namePlaceholder": "Coupe de France 2026",
+          "nameRequired": "Enter an event name before saving.",
+          "slugHint": "Sets the public event URL (/tournaments/your-slug). Leave empty to generate it from the name.",
+          "clearLeague": "Remove league"
+        },
+        "stages": {
+          "title": "Stages",
+          "hint": "To add or move a tournament, open it and pick this event in its Event field.",
+          "empty": "This event has no stages yet. It stays hidden from the public site until one is added."
+        }
+      },
+      "leagues": {
+        "title": "Leagues",
+        "subtitle": "Leagues appear on events and tournaments. Manual leagues can be fully edited. Leagues synced from PandaScore only accept a new image.",
+        "empty": "No leagues yet.",
+        "loadError": "Could not load leagues.",
+        "create": "Create League",
+        "edit": "Edit League",
+        "save": "Save League",
+        "created": "League created",
+        "saved": "League saved",
+        "saveFailed": "Could not save the league. Check the fields and try again.",
+        "syncedHint": "PandaScore manages this league. You can only change its image.",
+        "form": {
+          "name": "Name",
+          "nameRequired": "Enter a league name before saving.",
+          "slugHint": "Leave empty to generate it from the name.",
+          "url": "Website",
+          "image": "Logo"
         }
       }
     },

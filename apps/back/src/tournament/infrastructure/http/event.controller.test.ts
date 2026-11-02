@@ -47,9 +47,16 @@ describe("EventController", () => {
   const events = { list: vi.fn(), find: vi.fn(), findStageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
+  const catalog = {
+    manualEvents: vi.fn(),
+    findEvent: vi.fn(),
+    createEvent: vi.fn(),
+    updateEvent: vi.fn(),
+  };
   const controller = new EventController(
     events as never,
     new CachedTournamentRead(tournaments, redis),
+    catalog as never,
   );
 
   beforeEach(() => {
@@ -136,5 +143,53 @@ describe("EventController", () => {
     expect(listed.count).toBe(1);
     expect(listed.events[0].stages.map((s) => s.name)).toEqual(["Playoffs", "Group A"]);
     expect(listed.events[0].stages[0]).not.toHaveProperty("matches");
+  });
+
+  it("lists manual events for staff, including empty ones, with their stages", async () => {
+    const empty = Object.assign(new TournamentEvent(), {
+      id: "empty",
+      slug: "cdf",
+      name: "CDF",
+    });
+    const manualStages = [...stages.values()].map((s) =>
+      Object.assign(new Tournament(), s, { source: "manual" }),
+    );
+    catalog.manualEvents.mockResolvedValue([
+      { event, stages: manualStages },
+      { event: empty, stages: [] },
+    ]);
+    const listed = await controller.listManual();
+    expect(listed.events.map((e) => [e.id, e.editable, e.stages.length])).toEqual([
+      ["event", true, 2],
+      ["empty", true, 0],
+    ]);
+    expect(listed.events[0].stages[0]).toMatchObject({
+      id: "playoffs",
+      source: "manual",
+    });
+  });
+
+  it("marks an event followed by the PandaScore sync as not editable", async () => {
+    const synced = Object.assign(new TournamentEvent(), {
+      ...event,
+      pandascoreSerieId: 7,
+    });
+    catalog.findEvent.mockResolvedValue({ event: synced, stages: [] });
+    expect((await controller.findManual("event")).event).toMatchObject({
+      id: "event",
+      editable: false,
+    });
+  });
+
+  it("creates and updates events through the catalog", async () => {
+    catalog.createEvent.mockResolvedValue({ event, stages: [] });
+    catalog.updateEvent.mockResolvedValue({ event, stages: [] });
+    expect(await controller.create({ name: event.name })).toMatchObject({
+      event: { id: "event", slug: event.slug, stages: [] },
+    });
+    await controller.update("event", { leagueId: null });
+    expect(catalog.updateEvent).toHaveBeenCalledWith("event", {
+      leagueId: null,
+    });
   });
 });

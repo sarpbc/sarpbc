@@ -1,11 +1,18 @@
 <script lang="ts" setup>
+import type { TournamentDetail } from "@sarpbc/types";
 import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
 import type { Team } from "~/types/team";
-import type { TournamentLeagueOption } from "~/composables/tournaments";
+import type { ManualEvent, TournamentLeague } from "~/composables/tournaments";
+
+const NEW_EVENT = "new";
 
 const props = defineProps<{
   modelValue: ManualTournamentFormState;
-  leagues: TournamentLeagueOption[];
+  /** The saved tournament when editing, null when creating. */
+  original: TournamentDetail | null;
+  events: ManualEvent[];
+  eventsPending?: boolean;
+  leagues: TournamentLeague[];
   teams: Team[];
   teamsPending?: boolean;
   slugAuto?: boolean;
@@ -30,11 +37,42 @@ const imageUrl = computed({
   set: (value: string) => updateField("imageUrl", value),
 });
 
-const leagueOptions = computed(() =>
-  props.leagues.map((league) => ({
-    value: league.id,
-    label: league.name,
-  })),
+const eventOptions = computed(() => {
+  const options = props.events.map((event) => ({ value: event.id, label: event.name }));
+  const current = props.original?.event;
+  if (current && !options.some((option) => option.value === current.id))
+    options.unshift({ value: current.id, label: current.name });
+  return props.original
+    ? options
+    : [{ value: NEW_EVENT, label: t("page.tournaments.form.newEvent") }, ...options];
+});
+
+const eventId = computed({
+  get: () => props.modelValue.eventId || NEW_EVENT,
+  set: (value: string) => updateField("eventId", value === NEW_EVENT ? "" : value),
+});
+
+/** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
+const sharesEvent = computed(() => {
+  const original = props.original;
+  if (!original) return false;
+  const event = props.events.find((candidate) => candidate.id === original.event.id);
+  return !event || event.stages.length !== 1 || event.name !== original.name;
+});
+const showsSlug = computed(
+  () => editsEventSlug(props.modelValue, props.original) && !sharesEvent.value,
+);
+const movesEvent = computed(
+  () => !!props.original && props.modelValue.eventId !== props.original.event.id,
+);
+const eventHelp = computed(() => {
+  if (movesEvent.value) return t("page.tournaments.form.eventMoveHelp");
+  if (sharesEvent.value) return t("page.tournaments.form.eventSharedHelp");
+  return t("page.tournaments.form.eventHelp");
+});
+
+const leagueItems = computed(() =>
+  leagueOptions(props.leagues, t("page.tournaments.source.pandascore")),
 );
 
 const teamSearch = ref("");
@@ -54,11 +92,13 @@ function updateField<K extends keyof ManualTournamentFormState>(
   emit("update:modelValue", { ...props.modelValue, [key]: value });
 }
 
+// One emit: props.modelValue stays stale until the parent re-renders, so a second emit would drop the name.
 function onNameInput(value: string) {
-  updateField("name", value);
-  if (props.slugAuto) {
-    updateField("slug", suggestTournamentSlug(value));
-  }
+  emit("update:modelValue", {
+    ...props.modelValue,
+    name: value,
+    slug: props.slugAuto ? suggestTournamentSlug(value) : props.modelValue.slug,
+  });
 }
 
 function onSlugInput(value: string) {
@@ -92,7 +132,19 @@ function isTeamSelected(teamId: string): boolean {
       />
     </UFormField>
 
+    <UFormField :label="$t('page.tournaments.form.event')" name="eventId" :help="eventHelp">
+      <USelectMenu
+        v-model="eventId"
+        :items="eventOptions"
+        value-key="value"
+        label-key="label"
+        :loading="eventsPending"
+        class="w-full"
+      />
+    </UFormField>
+
     <UFormField
+      v-if="showsSlug"
       :label="$t('page.tournaments.form.slug')"
       name="slug"
       :hint="$t('page.tournaments.form.slugHint')"
@@ -120,7 +172,7 @@ function isTeamSelected(teamId: string): boolean {
       <UFormField :label="$t('page.tournaments.form.league')" name="leagueId">
         <USelect
           :model-value="state.leagueId || undefined"
-          :items="leagueOptions"
+          :items="leagueItems"
           value-key="value"
           label-key="label"
           class="w-full"

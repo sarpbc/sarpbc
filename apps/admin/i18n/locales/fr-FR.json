@@ -345,7 +345,12 @@
         "errors": {
           "nameRequired": "Saisissez un nom de tournoi avant d’enregistrer.",
           "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début."
-        }
+        },
+        "event": "Événement",
+        "newEvent": "Nouvel événement au nom du tournoi",
+        "eventHelp": "Les phases d'un même événement partagent une page publique. Choisissez un événement existant pour y ajouter ce tournoi comme phase.",
+        "eventMoveHelp": "L'enregistrement déplace le tournoi dans cet événement. Son URL publique change et son ancien événement garde son nom.",
+        "eventSharedHelp": "Ce tournoi est une phase d'un événement partagé. Modifiez le nom ou l'URL de l'événement depuis la page Événements."
       },
       "match": {
         "status": "Statut",
@@ -431,6 +436,66 @@
           "notOnRoster": "Certains joueurs ne figurent pas dans l’effectif de l’équipe pour ce tournoi.",
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
+        }
+      },
+      "retry": "Réessayer",
+      "events": {
+        "title": "Événements",
+        "subtitle": "Les événements regroupent des phases de tournoi, comme une poule et ses finales, sur une seule page publique. Seuls les événements manuels sont listés. Un événement sans phase reste masqué sur le site public.",
+        "empty": "Aucun événement manuel pour l'instant. Créez-en un, puis rattachez-y des tournois depuis le formulaire du tournoi.",
+        "loadError": "Impossible de charger les événements.",
+        "loadOneError": "Impossible de charger cet événement. Il n'existe peut-être plus.",
+        "noStages": "Aucune phase",
+        "save": "Enregistrer l'événement",
+        "saveFailed": "Impossible d'enregistrer l'événement. Vérifiez les champs et réessayez.",
+        "columns": {
+          "name": "Événement",
+          "stages": "Phases"
+        },
+        "create": {
+          "action": "Créer un événement",
+          "title": "Créer un événement",
+          "subtitle": "Créez un événement vide, puis ajoutez-y des tournois comme phases.",
+          "saved": "Événement créé"
+        },
+        "edit": {
+          "title": "Modifier l'événement",
+          "subtitle": "Renommer l'événement ou changer son slug modifie l'URL publique de chaque phase.",
+          "synced": "Cet événement est géré par la synchronisation PandaScore et ne peut pas être modifié ici.",
+          "saved": "Événement enregistré",
+          "unchanged": "Aucune modification à enregistrer"
+        },
+        "form": {
+          "name": "Nom",
+          "namePlaceholder": "Coupe de France 2026",
+          "nameRequired": "Saisissez un nom d'événement avant d'enregistrer.",
+          "slugHint": "Définit l'URL publique de l'événement (/tournaments/votre-slug). Laissez vide pour la générer à partir du nom.",
+          "clearLeague": "Retirer la ligue"
+        },
+        "stages": {
+          "title": "Phases",
+          "hint": "Pour ajouter ou déplacer un tournoi, ouvrez-le et choisissez cet événement dans son champ Événement.",
+          "empty": "Cet événement n'a pas encore de phase. Il reste masqué sur le site public tant qu'aucune n'est ajoutée."
+        }
+      },
+      "leagues": {
+        "title": "Ligues",
+        "subtitle": "Les ligues s'affichent sur les événements et les tournois. Les ligues manuelles sont entièrement modifiables. Celles synchronisées depuis PandaScore n'acceptent qu'une nouvelle image.",
+        "empty": "Aucune ligue pour l'instant.",
+        "loadError": "Impossible de charger les ligues.",
+        "create": "Créer une ligue",
+        "edit": "Modifier la ligue",
+        "save": "Enregistrer la ligue",
+        "created": "Ligue créée",
+        "saved": "Ligue enregistrée",
+        "saveFailed": "Impossible d'enregistrer la ligue. Vérifiez les champs et réessayez.",
+        "syncedHint": "Cette ligue est gérée par PandaScore. Seule son image peut être modifiée.",
+        "form": {
+          "name": "Nom",
+          "nameRequired": "Saisissez un nom de ligue avant d'enregistrer.",
+          "slugHint": "Laissez vide pour le générer à partir du nom.",
+          "url": "Site web",
+          "image": "Logo"
         }
       }
     },

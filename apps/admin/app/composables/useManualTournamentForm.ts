@@ -3,6 +3,8 @@ import type { ManualTournamentInput } from "./tournaments";
 
 export interface ManualTournamentFormState {
   name: string;
+  /** Empty when creating the tournament with a new event of its own. */
+  eventId: string;
   slug: string;
   tier: string;
   leagueId: string;
@@ -15,6 +17,7 @@ export interface ManualTournamentFormState {
 export function createEmptyTournamentFormState(): ManualTournamentFormState {
   return {
     name: "",
+    eventId: "",
     slug: "",
     tier: "",
     leagueId: "",
@@ -45,6 +48,7 @@ export function formatDateForInput(date: Date | string | null | undefined): stri
 export function tournamentToFormState(tournament: TournamentDetail): ManualTournamentFormState {
   return {
     name: tournament.name ?? "",
+    eventId: tournament.event.id,
     slug: tournament.event.slug,
     tier: tournament.tier ?? "",
     leagueId: tournament.league?.id ?? "",
@@ -55,21 +59,31 @@ export function tournamentToFormState(tournament: TournamentDetail): ManualTourn
   };
 }
 
+/** The slug belongs to the event, so it only applies while the tournament keeps its event. */
+export function editsEventSlug(
+  state: ManualTournamentFormState,
+  original: TournamentDetail | null,
+): boolean {
+  return original ? state.eventId === original.event.id : !state.eventId;
+}
+
 export function buildManualTournamentPayload(
   state: ManualTournamentFormState,
-  mode: "create" | "update",
+  original: TournamentDetail | null,
 ) {
   const payload: ManualTournamentInput = {
     name: state.name.trim(),
   };
 
   const trimmedSlug = state.slug.trim();
-  if (trimmedSlug) {
+  if (!editsEventSlug(state, original)) {
+    payload.eventId = state.eventId;
+  } else if (trimmedSlug && trimmedSlug !== original?.event.slug) {
     payload.slug = trimmedSlug;
   }
 
   const trimmedTier = state.tier.trim();
-  if (mode === "update") {
+  if (original) {
     payload.tier = trimmedTier || null;
   } else if (trimmedTier) {
     payload.tier = trimmedTier;

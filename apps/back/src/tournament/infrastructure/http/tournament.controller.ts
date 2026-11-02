@@ -19,6 +19,7 @@ import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
+import { CreateLeagueDto, UpdateLeagueDto } from "./dto/manual-catalog.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -36,7 +37,12 @@ import {
   mapTournamentMatchListItem,
   withPublicSlug,
 } from "./match-list.mapper";
-import { mapTournament, mapTournamentDetail, mapTournamentListItem } from "./tournament.mapper";
+import {
+  mapLeague,
+  mapTournament,
+  mapTournamentDetail,
+  mapTournamentListItem,
+} from "./tournament.mapper";
 
 @Controller("tournaments")
 export class TournamentController {
@@ -69,7 +75,24 @@ export class TournamentController {
   @Get("leagues")
   async findLeagues() {
     const leagues = await this.catalogService.leagues();
-    return { leagues: leagues.map(({ id, name }) => ({ id, name })) };
+    return { leagues: leagues.map(mapLeague) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post("leagues")
+  async createLeague(@Body({ schema: CreateLeagueDto }) dto: CreateLeagueDto) {
+    return { league: mapLeague(await this.catalogService.createLeague(dto)) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Patch("leagues/:leagueId")
+  async updateLeague(
+    @Param("leagueId") leagueId: string,
+    @Body({ schema: UpdateLeagueDto }) dto: UpdateLeagueDto,
+  ) {
+    return { league: mapLeague(await this.catalogService.updateLeague(leagueId, dto)) };
   }
 
   @RequirePermissions("tournaments.manage")

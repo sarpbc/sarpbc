@@ -1,10 +1,15 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { NotFoundError } from "../../../common/domain/errors";
 import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
+import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
+import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { EventService } from "../../application/event.service";
+import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
-import { mapEvent, type TournamentPathResponse } from "./event.mapper";
+import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
+import { mapEvent, mapStaffEvent, type TournamentPathResponse } from "./event.mapper";
 import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
@@ -14,6 +19,7 @@ export class EventController {
   constructor(
     private readonly eventService: EventService,
     private readonly tournamentRead: CachedTournamentRead,
+    private readonly catalogService: ManualCatalogService,
   ) {}
 
   @Get()
@@ -30,6 +36,35 @@ export class EventController {
       ),
       count,
     };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Get("manual")
+  async listManual() {
+    const listings = await this.catalogService.manualEvents();
+    return { events: listings.map(mapStaffEvent) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Get("manual/:id")
+  async findManual(@Param("id") id: string) {
+    return { event: mapStaffEvent(await this.catalogService.findEvent(id)) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post()
+  async create(@Body({ schema: CreateEventDto }) dto: CreateEventDto) {
+    return { event: mapStaffEvent(await this.catalogService.createEvent(dto)) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body({ schema: UpdateEventDto }) dto: UpdateEventDto) {
+    return { event: mapStaffEvent(await this.catalogService.updateEvent(id, dto)) };
   }
 
   @Get("resolve/:event")

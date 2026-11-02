@@ -20,8 +20,16 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-const [{ data: leagues }, { data: teamsData, status: teamsStatus }] = await Promise.all([
+const [
+  { data: leagues },
+  { data: events, status: eventsStatus },
+  { data: teamsData, status: teamsStatus },
+] = await Promise.all([
   useLazyAsyncData("admin-tournament-leagues", () => getTournamentLeagues(), {
+    server: false,
+    default: () => [],
+  }),
+  useLazyAsyncData("admin-manual-events", () => getManualEvents(), {
     server: false,
     default: () => [],
   }),
@@ -46,7 +54,7 @@ async function handleSubmit() {
 
   isSaving.value = true;
   try {
-    const created = await createTournament(buildManualTournamentPayload(formState.value, "create"));
+    const created = await createTournament(buildManualTournamentPayload(formState.value, null));
     if (!created) {
       toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
       return;
@@ -96,6 +104,9 @@ async function handleSubmit() {
         <TournamentManualForm
           v-model="formState"
           v-model:slug-auto="slugAuto"
+          :original="null"
+          :events="events ?? []"
+          :events-pending="eventsStatus === 'pending'"
           :leagues="leagues ?? []"
           :teams="teams"
           :teams-pending="teamsStatus === 'pending'"

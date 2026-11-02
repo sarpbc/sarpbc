@@ -82,6 +82,22 @@
   {
     "controller": "\"events\"",
     "verb": "GET",
+    "path": "\"manual/:id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
+    "path": "\"manual\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
     "path": "\"resolve/:event/:stage\"",
     "status": null,
     "guards": [],
@@ -94,6 +110,22 @@
     "status": null,
     "guards": [],
     "permissions": []
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
   },
   {
     "controller": "\"forum/topics\"",
@@ -1001,6 +1033,14 @@
   },
   {
     "controller": "\"tournaments\"",
+    "verb": "PATCH",
+    "path": "\"leagues/:leagueId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
     "verb": "POST",
     "path": "\":id/awards\"",
     "status": null,
@@ -1035,6 +1075,14 @@
     "controller": "\"tournaments\"",
     "verb": "POST",
     "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "POST",
+    "path": "\"leagues\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]
