@@ -1,7 +1,9 @@
+import type { EventListing } from "../../application/ports";
 import type { StageTab } from "../../domain/tournament-path";
-import { compareStages, type TournamentEvent } from "../../domain/tournament-event";
+import { compareStages, isEventSynced, type TournamentEvent } from "../../domain/tournament-event";
 import {
   mapLeague,
+  mapTournamentListItem,
   type LeagueResponse,
   type TournamentDetailResponse,
   type TournamentResponse,
@@ -61,5 +63,12 @@ export function mapEvent<Stage extends EventStage>(
       Math.max,
     ),
     stages: ordered,
+  };
+}
+
+export function mapStaffEvent({ event, stages }: EventListing) {
+  return {
+    ...mapEvent(event, stages.map(mapTournamentListItem)),
+    editable: !isEventSynced(event, stages),
   };
 }

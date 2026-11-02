@@ -108,6 +108,8 @@ export interface EventListing {
 export interface EventQueries {
   list(options: TournamentListOptions): Promise<[EventListing[], number]>;
   find(idOrSlug: string): Promise<EventListing | null>;
+  /** Events that do not follow a PandaScore serie, newest first, including empty ones. */
+  unsynced(): Promise<EventListing[]>;
   stageId(eventSlug: string, stageSlug: string): Promise<string | null>;
 }
 export interface MatchWriter {

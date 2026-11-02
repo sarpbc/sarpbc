@@ -102,7 +102,19 @@ async function updatePage(value: number) {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <div class="flex flex-row gap-2">
+      <div class="flex flex-row flex-wrap gap-2">
+        <UButton
+          variant="ghost"
+          icon="i-fluent-calendar-ltr-24-regular"
+          :label="$t('page.tournaments.events.title')"
+          :to="localePath('/tournaments/events')"
+        />
+        <UButton
+          variant="ghost"
+          icon="i-fluent-ribbon-24-regular"
+          :label="$t('page.tournaments.leagues.title')"
+          :to="localePath('/tournaments/leagues')"
+        />
         <UButton
           variant="soft"
           icon="i-fluent-add-24-regular"

@@ -69,6 +69,26 @@ export class CompetitionEventQueries implements EventQueries {
     );
     return { event: toTournamentEvent(row), stages: stages.map(toTournament) };
   }
+  async unsynced(): Promise<EventListing[]> {
+    const rows = await this.em.find(
+      TournamentEvent,
+      { pandascoreSerieId: null },
+      { populate: ["league"], orderBy: { createdAt: QueryOrder.DESC, id: QueryOrder.ASC } },
+    );
+    if (!rows.length) return [];
+    const stages = await this.em.find(
+      Tournament,
+      { event: { $in: rows.map((row) => row.id) } },
+      {
+        orderBy: { beginAt: QueryOrder.ASC_NULLS_LAST, id: QueryOrder.ASC },
+        populate: ["league", "event", "winner.team", "participants.team"],
+      },
+    );
+    return rows.map((row) => ({
+      event: toTournamentEvent(row),
+      stages: stages.filter((stage) => stage.event.id === row.id).map(toTournament),
+    }));
+  }
   async stageId(eventSlug: string, stageSlug: string) {
     const row = await this.em.findOne(Tournament, { slug: stageSlug, event: { slug: eventSlug } });
     return row?.id ?? null;

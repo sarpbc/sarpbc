@@ -42,6 +42,7 @@ describe("ManualCatalogService", () => {
       return event ? { event, stages: [] } : null;
     }),
     stageId: vi.fn(),
+    unsynced: vi.fn(),
   };
   const cache = { invalidateTournament: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() };
@@ -120,6 +121,21 @@ describe("ManualCatalogService", () => {
       InvalidInputError,
     );
     expect(eventWriter.save).not.toHaveBeenCalled();
+  });
+
+  it("lists only events the staff can edit, empty ones included", async () => {
+    const event = (id: string, pandascoreSerieId: number | null = null) =>
+      Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
+    queries.unsynced.mockResolvedValue([
+      { event: event("empty"), stages: [] },
+      { event: event("manual"), stages: [{ id: "pool", source: "manual" }] },
+      { event: event("mixed"), stages: [{ id: "swiss", source: "pandascore" }] },
+      { event: event("serie", 3), stages: [] },
+    ]);
+    expect((await service.manualEvents()).map(({ event }) => event.id)).toEqual([
+      "empty",
+      "manual",
+    ]);
   });
 
   it("creates a manual league with a slug from its name", async () => {

@@ -1,7 +1,7 @@
 import { allocateSlug, eventSlug, toSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { League } from "../domain/competition";
-import { TournamentEvent, assertEventEditable } from "../domain/tournament-event";
+import { TournamentEvent, assertEventEditable, isEventSynced } from "../domain/tournament-event";
 import { assertLeagueUpdateAllowed } from "../domain/tournament-source";
 import { explicitEventSlug, requireEvent, requireLeague } from "./event-placement";
 import type {
@@ -54,6 +54,11 @@ export class ManualCatalogService {
       await tournaments.saveLeague(league);
       return league;
     });
+  }
+  async manualEvents(): Promise<EventListing[]> {
+    return (await this.events.unsynced()).filter(
+      ({ event, stages }) => !isEventSynced(event, stages),
+    );
   }
   async findEvent(idOrSlug: string): Promise<EventListing> {
     const found = await this.events.find(idOrSlug);

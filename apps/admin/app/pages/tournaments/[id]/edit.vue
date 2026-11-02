@@ -38,8 +38,16 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-const [{ data: leagues }, { data: teamsData, status: teamsStatus }] = await Promise.all([
+const [
+  { data: leagues },
+  { data: events, status: eventsStatus },
+  { data: teamsData, status: teamsStatus },
+] = await Promise.all([
   useLazyAsyncData("admin-tournament-leagues", () => getTournamentLeagues(), {
+    server: false,
+    default: () => [],
+  }),
+  useLazyAsyncData("admin-manual-events", () => getManualEvents(), {
     server: false,
     default: () => [],
   }),
@@ -68,7 +76,7 @@ async function handleSubmit() {
     const updated = await updateTournament(
       tournamentId.value,
       isManual.value
-        ? buildManualTournamentPayload(formState.value, "update")
+        ? buildManualTournamentPayload(formState.value, tournament.value)
         : { imageUrl: formState.value.imageUrl.trim() || null },
     );
     if (!updated) {
@@ -147,6 +155,9 @@ async function handleSubmit() {
             v-if="isManual"
             v-model="formState"
             v-model:slug-auto="slugAuto"
+            :original="tournament"
+            :events="events ?? []"
+            :events-pending="eventsStatus === 'pending'"
             :leagues="leagues ?? []"
             :teams="teams"
             :teams-pending="teamsStatus === 'pending'"

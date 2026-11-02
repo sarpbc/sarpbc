@@ -3,7 +3,7 @@ import { NotFoundException } from "@nestjs/common";
 import { TournamentController } from "./tournament.controller";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
-import { Tournament } from "../../domain/competition";
+import { League, Tournament } from "../../domain/competition";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
 
 describe("TournamentController.findOne", () => {
@@ -47,5 +47,76 @@ describe("TournamentController.findOne", () => {
     );
     const result = await controller.findOne("t1");
     expect(result.tournament).toMatchObject({ id: "t1", matches: [], participants: [] });
+  });
+});
+
+describe("TournamentController leagues", () => {
+  const catalog = {
+    leagues: vi.fn(),
+    createLeague: vi.fn(),
+    updateLeague: vi.fn(),
+  };
+  const controller = new TournamentController(
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    {} as never,
+    catalog as never,
+  );
+  const manual = Object.assign(new League(), {
+    id: "l1",
+    name: "Coupe de France",
+    slug: "coupe-de-france",
+  });
+  const synced = Object.assign(new League(), {
+    id: "l2",
+    name: "RLCS",
+    pandascoreId: 4,
+  });
+
+  beforeEach(() => vi.resetAllMocks());
+
+  it("lists leagues with the fields staff edit and their PandaScore id", async () => {
+    catalog.leagues.mockResolvedValue([manual, synced]);
+    expect(await controller.findLeagues()).toEqual({
+      leagues: [
+        {
+          id: "l1",
+          pandascoreId: null,
+          name: "Coupe de France",
+          slug: "coupe-de-france",
+          url: null,
+          imageUrl: null,
+        },
+        {
+          id: "l2",
+          pandascoreId: 4,
+          name: "RLCS",
+          slug: null,
+          url: null,
+          imageUrl: null,
+        },
+      ],
+    });
+  });
+
+  it("creates and updates a league through the catalog", async () => {
+    catalog.createLeague.mockResolvedValue(manual);
+    catalog.updateLeague.mockResolvedValue({
+      ...synced,
+      imageUrl: "https://cdn/rlcs.png",
+    });
+    expect(await controller.createLeague({ name: "Coupe de France" })).toMatchObject({
+      league: { id: "l1", slug: "coupe-de-france" },
+    });
+    expect(await controller.updateLeague("l2", { imageUrl: "https://cdn/rlcs.png" })).toMatchObject(
+      { league: { id: "l2", imageUrl: "https://cdn/rlcs.png" } },
+    );
+    expect(catalog.updateLeague).toHaveBeenCalledWith("l2", {
+      imageUrl: "https://cdn/rlcs.png",
+    });
   });
 });
