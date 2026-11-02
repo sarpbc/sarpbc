@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
 import { Tournament, TournamentParticipant } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
-import { Team } from "../../roster/domain/roster";
+import { ContractRole, Player, Team } from "../../roster/domain/roster";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
 describe("ManualTournamentService", () => {
@@ -15,6 +15,8 @@ describe("ManualTournamentService", () => {
     removeParticipant: vi.fn(),
     saveParticipant: vi.fn(),
     league: vi.fn(),
+    playersExist: vi.fn(),
+    teamPlayers: vi.fn(),
   };
   const stored = new Map<string, TournamentEvent>();
   const eventWriter = {
@@ -69,6 +71,72 @@ describe("ManualTournamentService", () => {
     });
     writer.participants.mockResolvedValue([]);
     writer.teamsExist.mockResolvedValue(true);
+    writer.playersExist.mockResolvedValue(true);
+    writer.teamPlayers.mockResolvedValue([]);
+  });
+  const member = (id: string, contractRole: ContractRole | null, role: string | null = null) =>
+    Object.assign(new Player(), {
+      id,
+      team: Object.assign(new Team(), { id: "vitality" }),
+      contractRole,
+      role,
+    });
+  it("snapshots the active players of a team joining a manual tournament", async () => {
+    tournament.source = "manual";
+    writer.teamPlayers.mockResolvedValue([
+      member("diaz", ContractRole.ACTIVE),
+      member("legacy", null),
+      member("sub", ContractRole.BENCHED),
+      member("coach", ContractRole.COACH),
+      member("ps-coach", null, "Coach"),
+    ]);
+    await service.update("ewc", { teamIds: ["vitality"] });
+    expect(writer.teamPlayers).toHaveBeenCalledWith("vitality");
+    expect(writer.saveParticipant).toHaveBeenCalledWith(
+      expect.objectContaining({ teamId: "vitality", playerIds: ["diaz", "legacy"] }),
+    );
+  });
+  it("keeps the roster of a team that is already participating", async () => {
+    tournament.source = "manual";
+    const team = Object.assign(new Team(), { id: "vitality" });
+    writer.participants.mockResolvedValue([
+      Object.assign(new TournamentParticipant(), { id: "p", team }),
+    ]);
+    await service.update("ewc", { teamIds: ["vitality"] });
+    expect(writer.teamPlayers).not.toHaveBeenCalled();
+    expect(writer.saveParticipant).not.toHaveBeenCalled();
+  });
+  it("replaces the roster of listed participants only", async () => {
+    tournament.source = "manual";
+    const team = Object.assign(new Team(), { id: "ikkaku" });
+    writer.participants.mockResolvedValue([
+      Object.assign(new TournamentParticipant(), { id: "p", team }),
+    ]);
+    await service.update("ewc", {
+      rosters: [{ teamId: "ikkaku", playerIds: ["exotiik", "rezears", "yujin"] }],
+    });
+    expect(writer.playersExist).toHaveBeenCalledWith(["exotiik", "rezears", "yujin"]);
+    expect(writer.saveParticipant).toHaveBeenCalledExactlyOnceWith({
+      id: "p",
+      tournamentId: "ewc",
+      teamId: "ikkaku",
+      playerIds: ["exotiik", "rezears", "yujin"],
+    });
+  });
+  it("rejects a roster for a team that is not participating", async () => {
+    tournament.source = "manual";
+    await expect(
+      service.update("ewc", { rosters: [{ teamId: "ikkaku", playerIds: [] }] }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+  it("rejects a roster with unknown players", async () => {
+    tournament.source = "manual";
+    writer.playersExist.mockResolvedValue(false);
+    await expect(
+      service.update("ewc", { rosters: [{ teamId: "ikkaku", playerIds: ["ghost"] }] }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.saveParticipant).not.toHaveBeenCalled();
   });
   it("edits artwork and invalidates only after commit", async () => {
     const result = await service.update("ewc", { imageUrl: " https://cdn.example/ewc.png " });
@@ -91,6 +159,7 @@ describe("ManualTournamentService", () => {
     { leagueId: null },
     { beginAt: null },
     { teamIds: [] },
+    { rosters: [] },
   ])("rejects PandaScore-owned fields %p", async (patch) => {
     await expect(service.update("ewc", { ...patch, imageUrl: null })).rejects.toBeInstanceOf(
       InvalidInputError,

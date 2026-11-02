@@ -12,8 +12,13 @@ export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;
   source?: "manual" | "startgg";
 }
+export interface ParticipantRosterInput {
+  teamId: string;
+  playerIds: string[];
+}
 export interface UpdateTournamentInput extends ManualTournamentFields {
   name?: string;
+  rosters?: ParticipantRosterInput[];
 }
 export interface UpsertMatchInput {
   name: string;

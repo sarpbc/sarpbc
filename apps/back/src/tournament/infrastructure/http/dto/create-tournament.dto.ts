@@ -35,7 +35,20 @@ export const CreateTournamentDto = tournamentWriteSchema.extend({
   source: z.enum(["manual", "startgg"]).optional(),
 });
 export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
+const participantRoster = z.strictObject({
+  teamId: z.uuidv4(),
+  playerIds: z
+    .array(z.uuidv4())
+    .refine((ids) => new Set(ids).size === ids.length, "Each player can only be listed once."),
+});
 export const UpdateTournamentDto = tournamentWriteSchema.extend({
   name: tournamentName.optional(),
+  rosters: z
+    .array(participantRoster)
+    .refine(
+      (rosters) => new Set(rosters.map((roster) => roster.teamId)).size === rosters.length,
+      "Each team can only have one roster.",
+    )
+    .optional(),
 });
 export type UpdateTournamentDto = z.infer<typeof UpdateTournamentDto>;

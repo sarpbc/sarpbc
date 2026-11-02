@@ -4,7 +4,12 @@ import { isUuid } from "../../common/domain/entity-ref";
 import { Tournament, assertParticipantRemovable } from "../domain/competition";
 import { TournamentEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
-import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
+import { ContractRole } from "../../roster/domain/roster";
+import type {
+  CreateTournamentInput,
+  ParticipantRosterInput,
+  UpdateTournamentInput,
+} from "./inputs";
 import type {
   CompetitionCache,
   CompetitionDiagnostics,
@@ -73,6 +78,8 @@ export class ManualTournamentService {
         await this.updateEvent(events, tournament, input);
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);
+        if (input.rosters !== undefined)
+          await this.setRosters(tournaments, tournament, input.rosters);
       }
       await tournaments.save(tournament);
     });
@@ -148,8 +155,39 @@ export class ManualTournamentService {
           id: crypto.randomUUID(),
           tournamentId: tournament.id,
           teamId,
-          playerIds: [],
+          playerIds: await this.activeRoster(writer, teamId),
         });
+    }
+  }
+  /** Copied once when the team joins, so later transfers do not rewrite the tournament's history. */
+  private async activeRoster(writer: TournamentWriter, teamId: string) {
+    return (await writer.teamPlayers(teamId))
+      .filter((player) => player.currentRole() === ContractRole.ACTIVE)
+      .map((player) => player.id);
+  }
+  private async setRosters(
+    writer: TournamentWriter,
+    tournament: Tournament,
+    rosters: ParticipantRosterInput[],
+  ) {
+    const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
+    if (playerIds.length && !(await writer.playersExist(playerIds)))
+      throw new InvalidInputError(
+        "One or more players were not found. Refresh the player list and try again.",
+      );
+    const participants = await writer.participants(tournament.id);
+    for (const roster of rosters) {
+      const participant = participants.find((p) => p.team.id === roster.teamId);
+      if (!participant)
+        throw new InvalidInputError(
+          `Team "${roster.teamId}" is not a participant of this tournament. Add it to teamIds first.`,
+        );
+      await writer.saveParticipant({
+        id: participant.id,
+        tournamentId: tournament.id,
+        teamId: roster.teamId,
+        playerIds: roster.playerIds,
+      });
     }
   }
 }

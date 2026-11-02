@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DataSource } from "../../common/domain/data-source";
-import { Team } from "../../roster/domain/roster";
+import { Player, Team } from "../../roster/domain/roster";
 import { Tournament, TournamentParticipant, type Match } from "../../tournament/domain/competition";
 import { isRedistributableMatch, mapListedParticipants, mapTournamentDetail } from "./mappers";
 
@@ -50,19 +50,21 @@ describe("mapTournamentDetail participants", () => {
         Object.assign(new TournamentParticipant(), {
           id: "part-kc",
           team: club,
+          players: [Object.assign(new Player(), { id: "player-vatira", name: "Vatira" })],
         }),
       ],
       matches: [match("startgg", source, "startgg")],
     });
   }
 
-  it("lists participant ids and team identity, including a start.gg team", () => {
+  it("lists participant ids, team identity and roster, including a start.gg team", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
     const detail = mapTournamentDetail(cup("manual"));
     expect(detail.participants).toEqual([
       {
         id: "part-kc",
         team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
+        players: [{ id: "player-vatira", name: "Vatira" }],
       },
     ]);
     expect(detail.matches).toEqual([]);

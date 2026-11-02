@@ -19,6 +19,7 @@ import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
 import type { MatchDecided } from "../domain/match-decided";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
+import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
@@ -82,6 +83,8 @@ export interface TournamentWriter {
     participantId: string,
   ): Promise<ParticipantReferences>;
   teamsExist(ids: string[]): Promise<boolean>;
+  playersExist(ids: string[]): Promise<boolean>;
+  teamPlayers(teamId: string): Promise<Player[]>;
 }
 export interface EventStage {
   id: string;

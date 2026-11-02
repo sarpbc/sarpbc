@@ -1,7 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode, UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
 import { ConflictError } from "../../../common/domain/errors";
-import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
+import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
 import type * as Model from "../../domain/competition";
@@ -159,6 +159,17 @@ export class CompetitionTournamentWriter implements TournamentWriter {
   }
   async teamsExist(ids: string[]) {
     return (await this.em.count(Team, { id: { $in: ids } })) === ids.length;
+  }
+  async playersExist(ids: string[]) {
+    return (await this.em.count(Player, { id: { $in: ids } })) === ids.length;
+  }
+  async teamPlayers(teamId: string) {
+    const rows = await this.em.find(
+      Player,
+      { team: { id: teamId }, mergedInto: null },
+      { populate: ["team"], orderBy: { name: "asc" } },
+    );
+    return rows.map(toPlayer);
   }
   async participantReferences(tournamentId: string, participantId: string) {
     const [tournamentWinner, matchParticipant, matchWinner, results] = await Promise.all([

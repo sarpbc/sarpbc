@@ -12,6 +12,7 @@ export function assertTournamentUpdateAllowed(
     beginAt?: string | null;
     endAt?: string | null;
     teamIds?: string[];
+    rosters?: unknown[];
   },
 ): void {
   switch (source) {

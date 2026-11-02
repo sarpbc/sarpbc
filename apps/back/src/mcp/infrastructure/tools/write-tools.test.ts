@@ -178,8 +178,16 @@ describe("create_match participants", () => {
       results: undefined,
     });
     expect(body.participants).toEqual([
-      { id: "p-kc", team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" } },
-      { id: "p-m8", team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" } },
+      {
+        id: "p-kc",
+        team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
+        players: [],
+      },
+      {
+        id: "p-m8",
+        team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" },
+        players: [],
+      },
     ]);
   });
 
