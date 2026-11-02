@@ -376,7 +376,7 @@ export class CompetitionEventWriter implements EventWriter {
       { event: eventId },
       { orderBy: { beginAt: "ASC", id: "ASC" } },
     );
-    return rows.map(({ id, name }) => ({ id, name }));
+    return rows.map(({ id, name, source }) => ({ id, name, source }));
   }
   async save(model: TournamentEvent) {
     const row =

@@ -1,5 +1,7 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef } from "@sarpbc/types";
+import type { DataSource } from "../../common/domain/data-source";
+import { InvalidInputError } from "../../common/domain/errors";
 import type { League } from "./competition";
 
 export class TournamentEvent {
@@ -10,6 +12,36 @@ export class TournamentEvent {
   league: League | null = null;
   createdAt = new Date();
   updatedAt = new Date();
+}
+
+/** The sync renames an event that follows a serie or holds a PandaScore stage. */
+export function isEventSynced(
+  event: TournamentEvent,
+  stages: ReadonlyArray<{ source: DataSource }>,
+): boolean {
+  return event.pandascoreSerieId !== null || stages.some((stage) => stage.source === "pandascore");
+}
+
+export function assertEventEditable(
+  event: TournamentEvent,
+  stages: ReadonlyArray<{ source: DataSource }>,
+): void {
+  if (isEventSynced(event, stages))
+    throw new InvalidInputError(
+      "This event is managed by the PandaScore sync. Only manual events can be edited.",
+    );
+}
+
+/**
+ * A manual tournament created without an event gets an event of its own, named after it. Only that
+ * event follows the tournament's name, slug and league; a shared or separately named event does not.
+ */
+export function ownsEvent(
+  event: TournamentEvent,
+  stageIds: readonly string[],
+  tournament: { id: string; name: string },
+): boolean {
+  return stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
 }
 
 export function toEventRef(event: TournamentEvent): TournamentEventRef {

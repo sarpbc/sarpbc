@@ -152,13 +152,14 @@ describe("create_match participants", () => {
         endAt?: string;
         source?: "manual" | "startgg";
         teamIds?: string[];
+        eventId?: string;
       },
     ) => {
       const result = await registered(name)[2](args);
       const text = result.content[0].text as string;
       return { result, text, body: result.isError ? null : JSON.parse(text) };
     };
-    return { matchService, tournamentService, registered, call };
+    return { matchService, tournamentService, manualTournamentService, registered, call };
   }
 
   it("resolves team slugs to participant ids and returns them", async () => {
@@ -264,6 +265,16 @@ describe("create_match participants", () => {
     ]);
     const updated = await call("update_tournament", { tournamentId: "cup", name: "Coupe" });
     expect(updated.body.participants).toHaveLength(2);
+  });
+
+  it("passes the target event of a stage and returns it", async () => {
+    const { manualTournamentService, call } = setup();
+    const eventId = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
+    const created = await call("create_tournament", { name: "Finals", eventId });
+    expect(manualTournamentService.create).toHaveBeenCalledWith({ name: "Finals", eventId });
+    expect(created.body.event).toEqual({ id: "event", slug: "cdf", name: "Coupe" });
+    await call("update_tournament", { tournamentId: "cup", eventId });
+    expect(manualTournamentService.update).toHaveBeenCalledWith("cup", { eventId });
   });
 
   it("accepts teams without participantIds and requires tournaments.manage", async () => {

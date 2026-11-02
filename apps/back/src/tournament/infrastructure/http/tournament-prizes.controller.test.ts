@@ -52,6 +52,7 @@ describe("TournamentController prizes", () => {
       module.get(PlayerAwardService),
       prizes,
       prizesRead,
+      {} as never,
     );
   });
 

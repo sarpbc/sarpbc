@@ -1,8 +1,7 @@
 import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { isUuid } from "../../common/domain/entity-ref";
+import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { Tournament, assertParticipantRemovable } from "../domain/competition";
-import { TournamentEvent, toEventRef } from "../domain/tournament-event";
+import { TournamentEvent, ownsEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
 import { ContractRole } from "../../roster/domain/roster";
 import type {
@@ -18,6 +17,7 @@ import type {
   TournamentQueries,
   TournamentWriter,
 } from "./ports";
+import { explicitEventSlug, placeStage, requireEvent, requireLeague } from "./event-placement";
 export class ManualTournamentService {
   constructor(
     private readonly reads: TournamentQueries,
@@ -25,31 +25,25 @@ export class ManualTournamentService {
     private readonly cache: CompetitionCache,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
-  async findLeagues() {
-    return (await this.reads.leagues({ limit: 200 })).map(({ id, name }) => ({ id, name }));
-  }
   async create(input: CreateTournamentInput): Promise<Tournament> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
       const tournament = new Tournament();
       tournament.source = input.source ?? "manual";
       tournament.pandascoreId = null;
       tournament.name = input.name;
-      tournament.slug = stageSlug(input.name);
       tournament.tier = input.tier?.trim() || null;
       tournament.imageUrl = input.imageUrl?.trim() || null;
       tournament.beginAt = input.beginAt ? new Date(input.beginAt) : null;
       tournament.endAt = input.endAt ? new Date(input.endAt) : null;
       tournament.assertDateOrder();
-      tournament.league = await this.league(tournaments, input.leagueId);
-      const event = Object.assign(new TournamentEvent(), {
-        name: input.name,
-        league: tournament.league,
-      });
-      event.slug = input.slug
-        ? await this.explicitSlug(events, input.slug, event.id)
-        : await allocateSlug(eventSlug(input.name, null), (slug) => events.slugTaken(slug, null));
-      await events.save(event);
-      tournament.event = toEventRef(event);
+      tournament.league = await requireLeague(tournaments, input.leagueId);
+      if (input.eventId) {
+        if (input.slug !== undefined) throw sharedEventSlugError();
+        await placeStage(events, tournament, await requireEvent(events, input.eventId));
+      } else {
+        tournament.slug = stageSlug(input.name);
+        tournament.event = toEventRef(await this.createOwnEvent(events, tournament, input.slug));
+      }
       await tournaments.save(tournament);
       if (input.teamIds?.length)
         await this.syncParticipants(tournaments, tournament, input.teamIds);
@@ -62,6 +56,7 @@ export class ManualTournamentService {
       const tournament = await tournaments.load(id);
       if (!tournament) throw new NotFoundError('Tournament with id "' + id + '" was not found.');
       assertTournamentUpdateAllowed(tournament.source, input);
+      const previousName = tournament.name;
       if (input.name !== undefined) tournament.name = input.name;
       if (input.tier !== undefined) tournament.tier = input.tier?.trim() || null;
       if (input.beginAt !== undefined)
@@ -74,8 +69,8 @@ export class ManualTournamentService {
         if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
       } else {
         if (input.leagueId !== undefined)
-          tournament.league = await this.league(tournaments, input.leagueId);
-        await this.updateEvent(events, tournament, input);
+          tournament.league = await requireLeague(tournaments, input.leagueId);
+        await this.updateEvent(events, tournament, previousName, input);
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);
         if (input.rosters !== undefined)
@@ -96,41 +91,48 @@ export class ManualTournamentService {
       throw new NotFoundError('Tournament with id "' + id + '" was not found after save.');
     return tournament;
   }
-  private async league(writer: TournamentWriter, id: string | null | undefined) {
-    if (!id) return null;
-    const league = await writer.league(id);
-    if (!league)
-      throw new NotFoundError(
-        'League with id "' + id + '" was not found. Choose a league from the list.',
-      );
-    return league;
+  private async createOwnEvent(
+    events: EventWriter,
+    tournament: Tournament,
+    slug: string | undefined,
+  ): Promise<TournamentEvent> {
+    const event = Object.assign(new TournamentEvent(), {
+      name: tournament.name,
+      league: tournament.league,
+    });
+    event.slug = slug
+      ? await explicitEventSlug(events, slug, event.id)
+      : await allocateSlug(eventSlug(tournament.name, null), (taken) =>
+          events.slugTaken(taken, null),
+        );
+    await events.save(event);
+    return event;
   }
-  /** A manual tournament is the single stage of its own event, which carries its name and URL. */
+  /** Moves the stage to another event, or keeps the event it owns in step with it. */
   private async updateEvent(
     events: EventWriter,
     tournament: Tournament,
+    previousName: string,
     input: UpdateTournamentInput,
   ) {
-    const event = await events.load(tournament.event.id);
-    if (!event) throw new NotFoundError("The event of this tournament was not found.");
+    if (input.eventId !== undefined && input.eventId !== tournament.event.id) {
+      if (input.slug !== undefined) throw sharedEventSlugError();
+      await placeStage(events, tournament, await requireEvent(events, input.eventId));
+      return;
+    }
+    const event = await requireEvent(events, tournament.event.id);
+    const stageIds = (await events.stages(event.id)).map((stage) => stage.id);
+    if (!ownsEvent(event, stageIds, { id: tournament.id, name: previousName })) {
+      if (input.slug !== undefined && toSlug(input.slug) !== event.slug)
+        throw sharedEventSlugError();
+      return;
+    }
     event.name = tournament.name;
     event.league = tournament.league;
     if (input.slug !== undefined)
-      event.slug = await this.explicitSlug(events, input.slug, event.id);
+      event.slug = await explicitEventSlug(events, input.slug, event.id);
     await events.save(event);
     tournament.event = toEventRef(event);
-  }
-  private async explicitSlug(events: EventWriter, raw: string, eventId: string) {
-    const slug = toSlug(raw);
-    if (!slug || isUuid(slug))
-      throw new InvalidInputError(
-        "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs-2026).",
-      );
-    if (await events.slugTaken(slug, eventId))
-      throw new ConflictError(
-        `An event with the slug "${slug}" already exists. Choose a different slug.`,
-      );
-    return slug;
   }
   private async syncParticipants(
     writer: TournamentWriter,
@@ -190,4 +192,10 @@ export class ManualTournamentService {
       });
     }
   }
+}
+
+function sharedEventSlugError() {
+  return new InvalidInputError(
+    "This tournament is a stage of a shared event, so it has no slug of its own. Change the slug on the event instead.",
+  );
 }

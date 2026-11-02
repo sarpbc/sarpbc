@@ -6,6 +6,7 @@ export function assertTournamentUpdateAllowed(
   patch: {
     imageUrl?: string | null;
     name?: string;
+    eventId?: string;
     slug?: string;
     tier?: string | null;
     leagueId?: string | null;
@@ -73,4 +74,17 @@ export function claimForPandascore(
   tournament.source = "pandascore";
   tournament.pandascoreId = pandascoreId;
   tournament.endAtCorrected = tournament.endAt !== null && providerEndAt === null;
+}
+
+export function assertLeagueUpdateAllowed(
+  league: { pandascoreId: number | null },
+  patch: { name?: string; slug?: string | null; url?: string | null; imageUrl?: string | null },
+): void {
+  if (league.pandascoreId === null) return;
+  const { imageUrl, ...syncedFields } = patch;
+  if (imageUrl !== undefined && Object.values(syncedFields).every((value) => value === undefined))
+    return;
+  throw new InvalidInputError(
+    "Only the image can be edited on a PandaScore league. Send imageUrl alone.",
+  );
 }

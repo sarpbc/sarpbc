@@ -57,9 +57,10 @@ export class EventController {
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
       case "event": {
-        const found = await this.eventService.findBySlug(path.eventSlug);
-        if (!found) throw new NotFoundError(MISSING);
-        const stages = await Promise.all(found.stageIds.map((id) => this.stage(id)));
+        const found = await this.eventService.find(path.eventSlug);
+        // An event left empty by moving its stages elsewhere stays stored but is not public.
+        if (!found?.stages.length) throw new NotFoundError(MISSING);
+        const stages = await Promise.all(found.stages.map(({ id }) => this.stage(id)));
         return { kind: "event", event: mapEvent(found.event, stages) };
       }
       default: {

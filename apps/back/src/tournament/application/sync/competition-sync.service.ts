@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { allocateSlug, eventSlug, stageSlug } from "@sarpbc/utils";
+import { allocateSlug, eventSlug } from "@sarpbc/utils";
 import { Team } from "../../../roster/domain/roster";
 import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
@@ -26,6 +26,7 @@ import type {
   UpsertTournamentCommand,
 } from "../feed";
 import { upsertMatchInTransaction } from "../match/write-match";
+import { placeStage } from "../event-placement";
 
 type IncidentChange = Exclude<CompetitionIncident, { changeType: "deletion" }>;
 type IncidentDeletion = Extract<CompetitionIncident, { changeType: "deletion" }>;
@@ -201,7 +202,7 @@ export class CompetitionSyncService {
     for (const stage of stages) {
       const tournament = await scope.tournaments.load(stage.id);
       if (!tournament) continue;
-      await this.placeStage(scope.events, tournament, into);
+      await placeStage(scope.events, tournament, into);
       await scope.tournaments.save(tournament);
     }
     await scope.events.remove(from.id);
@@ -236,7 +237,7 @@ export class CompetitionSyncService {
       tournament.league,
     );
     if (event.id === previousEventId) tournament.event = toEventRef(event);
-    else await this.placeStage(scope.events, tournament, event);
+    else await placeStage(scope.events, tournament, event);
     await scope.tournaments.save(tournament);
     if (previousEventId && previousEventId !== event.id) {
       const remaining = await scope.events.stages(previousEventId);
@@ -381,12 +382,6 @@ export class CompetitionSyncService {
     event.league = league;
     await events.save(event);
     return { event, renamed };
-  }
-  private async placeStage(events: EventWriter, tournament: Tournament, event: TournamentEvent) {
-    tournament.slug = await allocateSlug(stageSlug(tournament.name), (slug) =>
-      events.stageSlugTaken(event.id, slug, tournament.id),
-    );
-    tournament.event = toEventRef(event);
   }
   private async applyLeague(scope: CompetitionWriteScope, command: UpsertLeagueCommand) {
     let league = await scope.tournaments.leagueByPandascoreId(command.pandascoreId);

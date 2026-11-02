@@ -1,5 +1,6 @@
 import type { OfficialMatchStream } from "../domain/official-match-stream";
 export interface ManualTournamentFields {
+  eventId?: string;
   slug?: string;
   tier?: string | null;
   leagueId?: string | null;
@@ -19,6 +20,28 @@ export interface ParticipantRosterInput {
 export interface UpdateTournamentInput extends ManualTournamentFields {
   name?: string;
   rosters?: ParticipantRosterInput[];
+}
+export interface CreateEventInput {
+  name: string;
+  slug?: string;
+  leagueId?: string | null;
+}
+export interface UpdateEventInput {
+  name?: string;
+  slug?: string;
+  leagueId?: string | null;
+}
+export interface CreateLeagueInput {
+  name: string;
+  slug?: string | null;
+  url?: string | null;
+  imageUrl?: string | null;
+}
+export interface UpdateLeagueInput {
+  name?: string;
+  slug?: string | null;
+  url?: string | null;
+  imageUrl?: string | null;
 }
 export interface UpsertMatchInput {
   name: string;

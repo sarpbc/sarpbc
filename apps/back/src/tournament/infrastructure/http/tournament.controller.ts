@@ -24,6 +24,7 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { TournamentService } from "../../application/tournament.service";
 import { ManualTournamentService } from "../../application/manual-tournament.service";
+import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
@@ -47,6 +48,7 @@ export class TournamentController {
     private playerAwardService: PlayerAwardService,
     private tournamentPrizeService: TournamentPrizeService,
     private tournamentPrizesRead: CachedTournamentPrizesRead,
+    private catalogService: ManualCatalogService,
   ) {}
 
   @Get()
@@ -66,8 +68,8 @@ export class TournamentController {
 
   @Get("leagues")
   async findLeagues() {
-    const leagues = await this.manualTournamentService.findLeagues();
-    return { leagues };
+    const leagues = await this.catalogService.leagues();
+    return { leagues: leagues.map(({ id, name }) => ({ id, name })) };
   }
 
   @RequirePermissions("tournaments.manage")

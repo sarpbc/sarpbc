@@ -211,7 +211,10 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
         "Create a tournament match. Requires tournaments.manage. Pass participantIds (tournament participant UUIDs from get_tournament) and/or teams (team UUIDs or slugs from search_teams or get_tournament). Every team must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID the match belongs to."),
-        name: z.string().min(1).describe("Match display name."),
+        name: z
+          .string()
+          .min(1)
+          .describe("Match display name carrying its round (e.g. Semi-final 1, Grand Final)."),
         beginAt: z.string().optional().describe("Scheduled start time (ISO 8601 date string)."),
         endAt: z.string().optional().describe("Scheduled or actual end time (ISO 8601)."),
         status: z
@@ -398,15 +401,28 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "create_tournament",
     {
       description:
-        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
+        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
       inputSchema: {
-        name: z.string().min(1).max(255).describe("Tournament display name."),
+        name: z
+          .string()
+          .min(1)
+          .max(255)
+          .describe("Tournament display name; the stage name when eventId is set (e.g. Finals)."),
+        eventId: z
+          .string()
+          .uuid()
+          .optional()
+          .describe(
+            "Event UUID to add this tournament to as a stage. Omit to create its own event.",
+          ),
         slug: z
           .string()
           .min(1)
           .max(255)
           .optional()
-          .describe("Optional event URL slug. Generated from the name when omitted."),
+          .describe(
+            "Optional URL slug of the new event. Generated from the name when omitted. Not allowed with eventId.",
+          ),
         tier: z
           .string()
           .max(50)
@@ -446,6 +462,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             name: tournament.name,
             slug: tournament.slug,
             source: tournament.source,
+            event: tournament.event,
             ...mapListedParticipants(tournament.source, tournament.participants),
             url: tournamentUrl(tournament),
           },
@@ -457,11 +474,23 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     "update_tournament",
     {
       description:
-        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields. The response includes participants for manual and PandaScore tournaments.",
+        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields. eventId moves a manual tournament to another event as one of its stages; the event it leaves stays stored but drops off the site once it has no stage. A tournament that has an event of its own keeps that event's name, slug and league in step with its own; rename or re-slug a shared event with update_event. The response includes participants for manual and PandaScore tournaments.",
       inputSchema: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
         name: z.string().min(1).max(255).optional().describe("Tournament display name."),
-        slug: z.string().min(1).max(255).optional().describe("Event URL slug."),
+        eventId: z
+          .string()
+          .uuid()
+          .optional()
+          .describe("Event UUID to move this manual tournament to, from list_events or get_event."),
+        slug: z
+          .string()
+          .min(1)
+          .max(255)
+          .optional()
+          .describe(
+            "URL slug of the event this tournament has of its own. Not allowed with eventId.",
+          ),
         tier: z
           .string()
           .max(50)
@@ -518,6 +547,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             source: tournament.source,
             imageUrl: tournament.imageUrl,
             endAt: tournament.endAt,
+            event: tournament.event,
             ...mapListedParticipants(tournament.source, tournament.participants),
             url: tournamentUrl(tournament),
           },

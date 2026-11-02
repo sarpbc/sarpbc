@@ -19,7 +19,7 @@ import {
 
 export interface LeagueResponse {
   id: string;
-  pandascoreId: number;
+  pandascoreId: number | null;
   name: string;
   slug: string | null;
   url: string | null;

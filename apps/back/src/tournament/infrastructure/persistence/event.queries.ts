@@ -3,6 +3,7 @@ import { QueryOrder, raw } from "@mikro-orm/core";
 import { Tournament, TournamentEvent } from "./tournament.entities";
 import { toTournament, toTournamentEvent } from "./competition.mapper";
 import { stageFilter } from "./competition.queries";
+import { isUuid } from "../../../common/domain/entity-ref";
 import type { EventListing, EventQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 export class CompetitionEventQueries implements EventQueries {
@@ -51,11 +52,22 @@ export class CompetitionEventQueries implements EventQueries {
       count,
     ];
   }
-  async bySlug(slug: string) {
-    const row = await this.em.findOne(TournamentEvent, { slug }, { populate: ["league"] });
+  async find(idOrSlug: string): Promise<EventListing | null> {
+    const row = await this.em.findOne(
+      TournamentEvent,
+      isUuid(idOrSlug) ? { id: idOrSlug.toLowerCase() } : { slug: idOrSlug },
+      { populate: ["league"] },
+    );
     if (!row) return null;
-    const stages = await this.em.find(Tournament, { event: row.id });
-    return { event: toTournamentEvent(row), stageIds: stages.map((stage) => stage.id) };
+    const stages = await this.em.find(
+      Tournament,
+      { event: row.id },
+      {
+        orderBy: { beginAt: QueryOrder.ASC_NULLS_LAST, id: QueryOrder.ASC },
+        populate: ["league", "event", "winner.team", "participants.team"],
+      },
+    );
+    return { event: toTournamentEvent(row), stages: stages.map(toTournament) };
   }
   async stageId(eventSlug: string, stageSlug: string) {
     const row = await this.em.findOne(Tournament, { slug: stageSlug, event: { slug: eventSlug } });

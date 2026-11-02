@@ -44,7 +44,7 @@ const stages = new Map(
 );
 
 describe("EventController", () => {
-  const events = { list: vi.fn(), findBySlug: vi.fn(), findStageId: vi.fn() };
+  const events = { list: vi.fn(), find: vi.fn(), findStageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
   const controller = new EventController(
@@ -56,8 +56,8 @@ describe("EventController", () => {
     vi.resetAllMocks();
     redis.get.mockResolvedValue(null);
     tournaments.findById.mockImplementation(async (id: string) => stages.get(id) ?? null);
-    events.findBySlug.mockImplementation(async (slug: string) =>
-      slug === event.slug ? { event, stageIds: [...stages.keys()] } : null,
+    events.find.mockImplementation(async (slug: string) =>
+      slug === event.slug ? { event, stages: [...stages.values()] } : null,
     );
     events.findStageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
       eventSlug === event.slug && stageSlug === "playoffs" ? "playoffs" : null,
@@ -66,7 +66,7 @@ describe("EventController", () => {
 
   it("resolves an event with its stages newest first and event-level facts", async () => {
     const resolved = await controller.resolveEvent("RLCS-Major-Paris-2026");
-    expect(events.findBySlug).toHaveBeenCalledWith("rlcs-major-paris-2026");
+    expect(events.find).toHaveBeenCalledWith("rlcs-major-paris-2026");
     expect(resolved).toMatchObject({
       kind: "event",
       event: {
@@ -117,6 +117,11 @@ describe("EventController", () => {
         ? controller.resolveEvent(segments[0])
         : controller.resolveStage(segments[0], segments[1]);
     await expect(request).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("answers 404 for an event whose stages all moved to another event", async () => {
+    events.find.mockResolvedValue({ event, stages: [] });
+    await expect(controller.resolveEvent(event.slug)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it("lists events with their stages and the total event count", async () => {

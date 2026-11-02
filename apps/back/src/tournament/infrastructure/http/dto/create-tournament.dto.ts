@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 const tournamentWriteSchema = z.strictObject({
+  eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
   slug: z
     .string()
     .trim()
