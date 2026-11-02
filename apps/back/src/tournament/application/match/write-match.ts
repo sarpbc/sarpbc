@@ -33,6 +33,7 @@ export async function upsertMatchInTransaction(
         ? "startgg"
         : "manual";
   }
+  const previousEndAt = match.endAt;
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;
   match.endAt = input.endAt ?? null;
@@ -77,6 +78,7 @@ export async function upsertMatchInTransaction(
       if (match.winner) match.status = "finished";
     }
   }
+  match.stampEnd(previousEndAt ?? new Date());
   await writer.save(match);
   return match;
 }
@@ -91,6 +93,7 @@ export async function setWinnerInTransaction(
   if (!winner) throw new InvalidInputError("Winner must be a participant in this match");
   match.winner = winner;
   match.status = "finished";
+  match.stampEnd(new Date());
   await writer.save(match);
   return match;
 }
@@ -106,6 +109,8 @@ export async function updateMatchInTransaction(
   if (input.beginAt !== undefined) match.beginAt = input.beginAt;
   if (input.endAt !== undefined) match.endAt = input.endAt;
   if (input.status !== undefined) match.status = input.status;
+  if (input.status !== undefined && input.status !== "finished" && input.endAt === undefined)
+    match.endAt = null;
   if (input.results) {
     const ids = new Set(match.participants.map((p) => p.id));
     if (input.results.some((r) => !ids.has(r.participantId)))
@@ -129,6 +134,7 @@ export async function updateMatchInTransaction(
     if (winner || input.results) match.winner = winner;
     if (match.winner) match.status = "finished";
   }
+  match.stampEnd(new Date());
   await writer.save(match);
   return match;
 }
