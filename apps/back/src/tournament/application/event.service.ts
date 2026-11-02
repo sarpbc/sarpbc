@@ -5,8 +5,8 @@ export class EventService {
   list(options: TournamentListOptions = {}) {
     return this.events.list(options);
   }
-  findBySlug(slug: string) {
-    return this.events.bySlug(slug);
+  find(idOrSlug: string) {
+    return this.events.find(idOrSlug);
   }
   findStageId(eventSlug: string, stageSlug: string) {
     return this.events.stageId(eventSlug, stageSlug);

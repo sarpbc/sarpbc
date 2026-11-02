@@ -1,5 +1,7 @@
 import type { MatchService } from "../../tournament/application/match/match.service";
 import type { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
+import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
+import type { EventService } from "../../tournament/application/event.service";
 import type { NewsService } from "../../news/application/news.service";
 import type { PatUser } from "../../pat/application/pat.service";
 import type { ContractService } from "../../roster/application/contract.service";
@@ -18,6 +20,8 @@ export interface McpToolContext {
   teamService: TeamService;
   tournamentService: TournamentService;
   manualTournamentService: ManualTournamentService;
+  catalogService: ManualCatalogService;
+  eventService: EventService;
   matchService: MatchService;
   newsService: NewsService;
   rosterProposalService: RosterProposalService;

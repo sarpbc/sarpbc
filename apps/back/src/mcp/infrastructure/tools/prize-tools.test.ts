@@ -71,6 +71,8 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
     teamService: module.get(TeamService),
     tournamentService: module.get(TournamentService),
     manualTournamentService: module.get(ManualTournamentService),
+    catalogService: {} as never,
+    eventService: {} as never,
     matchService: module.get(MatchService),
     newsService: module.get(NewsService),
     rosterProposalService: module.get(RosterProposalService),

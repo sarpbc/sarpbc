@@ -10,7 +10,7 @@ import type { MatchVod } from "@sarpbc/types";
 
 export class League {
   id: string = v4();
-  pandascoreId!: number;
+  pandascoreId: number | null = null;
   name!: string;
   slug: string | null = null;
   url: string | null = null;
@@ -107,7 +107,7 @@ export const LeagueSchema = defineEntity({
   class: League,
   properties: {
     id: p.string().primary(),
-    pandascoreId: p.integer().unique(),
+    pandascoreId: p.integer().nullable().unique(),
     name: p.string(),
     slug: p.string().nullable(),
     url: p.string().nullable(),

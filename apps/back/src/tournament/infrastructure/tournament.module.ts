@@ -21,6 +21,7 @@ import { CompetitionEventQueries } from "./persistence/event.queries";
 import { TournamentCron } from "./jobs/tournament.cron";
 import { TournamentService } from "../application/tournament.service";
 import { ManualTournamentService } from "../application/manual-tournament.service";
+import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
 import { PlayerAwardService } from "../application/player-award.service";
 import { TournamentPrizeService } from "../application/tournament-prize.service";
@@ -179,6 +180,28 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionCacheAdapter],
     },
     {
+      provide: ManualCatalogService,
+      useFactory: (
+        em: EntityManager,
+        reads: CompetitionQueries,
+        tx: MikroOrmCompetitionTransaction,
+        cache: CompetitionCacheAdapter,
+      ) =>
+        new ManualCatalogService(
+          reads,
+          new CompetitionEventQueries(em),
+          tx,
+          cache,
+          competitionDiagnostics,
+        ),
+      inject: [
+        EntityManager,
+        CompetitionQueries,
+        MikroOrmCompetitionTransaction,
+        CompetitionCacheAdapter,
+      ],
+    },
+    {
       provide: MatchService,
       useFactory: (
         reads: CompetitionQueries,
@@ -218,6 +241,8 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
   exports: [
     TournamentService,
     ManualTournamentService,
+    ManualCatalogService,
+    EventService,
     MatchService,
     PlayerAwardService,
     TournamentPrizeService,

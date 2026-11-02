@@ -26,6 +26,7 @@ describe("TournamentController.findOne", () => {
         { error: vi.fn() },
       ),
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
+      {} as never,
     );
     redis.get.mockResolvedValue(null);
   });

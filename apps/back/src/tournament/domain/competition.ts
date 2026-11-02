@@ -7,7 +7,7 @@ import type { DataSource } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors";
 export class League {
   id = v4();
-  pandascoreId!: number;
+  pandascoreId: number | null = null;
   name = "";
   slug: string | null = null;
   url: string | null = null;

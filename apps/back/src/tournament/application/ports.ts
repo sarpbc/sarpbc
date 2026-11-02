@@ -89,6 +89,7 @@ export interface TournamentWriter {
 export interface EventStage {
   id: string;
   name: string;
+  source: DataSource;
 }
 export interface EventWriter {
   load(id: string): Promise<TournamentEvent | null>;
@@ -106,7 +107,7 @@ export interface EventListing {
 }
 export interface EventQueries {
   list(options: TournamentListOptions): Promise<[EventListing[], number]>;
-  bySlug(slug: string): Promise<{ event: TournamentEvent; stageIds: string[] } | null>;
+  find(idOrSlug: string): Promise<EventListing | null>;
   stageId(eventSlug: string, stageSlug: string): Promise<string | null>;
 }
 export interface MatchWriter {

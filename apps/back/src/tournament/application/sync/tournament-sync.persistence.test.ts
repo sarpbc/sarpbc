@@ -51,7 +51,7 @@ function memoryStore() {
     saveParticipant: vi.fn(),
     leagueByPandascoreId: vi.fn(async (id: number) => leagues.get(id) ?? null),
     saveLeague: vi.fn(async (league: League) => {
-      leagues.set(league.pandascoreId, copy(league));
+      if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(league));
     }),
   };
   const eventWriter: EventWriter = {
@@ -80,7 +80,7 @@ function memoryStore() {
     stages: async (eventId) =>
       all()
         .filter((t) => t.event.id === eventId)
-        .map(({ id, name }) => ({ id, name })),
+        .map(({ id, name, source }) => ({ id, name, source })),
     save: async (event) => {
       events.set(event.id, copy(event));
     },

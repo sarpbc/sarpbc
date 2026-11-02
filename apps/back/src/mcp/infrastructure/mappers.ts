@@ -1,9 +1,24 @@
 import { isRedistributable, type DataSource } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
-import type { Match, Tournament, TournamentParticipant } from "../../tournament/domain/competition";
+import type {
+  League,
+  Match,
+  Tournament,
+  TournamentParticipant,
+} from "../../tournament/domain/competition";
+import { isEventSynced } from "../../tournament/domain/tournament-event";
+import type { EventListing } from "../../tournament/application/ports";
 import type { NewsArticleAdminResponse } from "../../news/application/news.service";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
-import { adminNewsEditUrl, matchUrl, newsUrl, playerUrl, teamUrl, tournamentUrl } from "./urls";
+import {
+  adminNewsEditUrl,
+  eventUrl,
+  matchUrl,
+  newsUrl,
+  playerUrl,
+  teamUrl,
+  tournamentUrl,
+} from "./urls";
 
 /** start.gg teams may play in a redistributable match; only the match and tournament source count. */
 export function isRedistributableMatch(match: Match): boolean {
@@ -96,6 +111,43 @@ export function mapTournamentListItem(tournament: Tournament) {
     league: tournament.league ? { id: tournament.league.id, name: tournament.league.name } : null,
     url: tournamentUrl(tournament),
   };
+}
+
+export function mapLeague(league: League) {
+  return {
+    id: league.id,
+    name: league.name,
+    slug: league.slug,
+    url: league.url,
+    imageUrl: league.imageUrl,
+    source: league.pandascoreId === null ? "manual" : "pandascore",
+  };
+}
+
+/** Stages are the event's phases, earliest first; start.gg stages stay out of MCP reads. */
+export function mapEvent({ event, stages }: EventListing) {
+  const phases = stages
+    .filter((stage) => isRedistributable(stage.source))
+    .sort((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
+  const days = (dates: Array<Date | null>) =>
+    dates.filter((date): date is Date => date !== null).map((date) => date.getTime());
+  const starts = days(phases.map((phase) => phase.beginAt)),
+    ends = days(phases.map((phase) => phase.endAt));
+  return {
+    id: event.id,
+    slug: event.slug,
+    name: event.name,
+    editable: !isEventSynced(event, stages),
+    league: event.league ? { id: event.league.id, name: event.league.name } : null,
+    beginAt: starts.length ? new Date(Math.min(...starts)) : null,
+    endAt: ends.length ? new Date(Math.max(...ends)) : null,
+    stages: phases.map((phase) => ({ ...mapTournamentListItem(phase), tier: phase.tier })),
+    url: eventUrl(event.slug),
+  };
+}
+
+function timeOf(date: Date | null): number {
+  return date?.getTime() ?? Number.POSITIVE_INFINITY;
 }
 
 export function mapTournamentParticipant(participant: TournamentParticipant) {
