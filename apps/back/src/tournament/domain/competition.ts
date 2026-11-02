@@ -69,6 +69,10 @@ export class Match {
   hasEnded(): boolean {
     return this.status === "finished" || this.endAt !== null;
   }
+  /** Match lists read `endAt` as the end marker, so a finished match must carry one. */
+  stampEnd(at: Date): void {
+    if (this.status === "finished") this.endAt ??= at;
+  }
   isDecided(): boolean {
     return this.winner !== null && this.hasEnded();
   }

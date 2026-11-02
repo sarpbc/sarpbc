@@ -51,6 +51,20 @@ describe("Match writes", () => {
     expect(writer.save).toHaveBeenCalledWith(match);
   });
 
+  it("keeps the first end date of a finished match synced without one", async () => {
+    const endAt = new Date("2026-11-02T19:12:00Z");
+    writer.byPandascoreId.mockResolvedValue(
+      Object.assign(new Match(), { tournament, pandascoreId: 7, status: "finished", endAt }),
+    );
+    const match = await upsertMatchInTransaction(writer, tournament.id, {
+      name: "Final",
+      participantIds: ["a", "b"],
+      pandascoreId: 7,
+      status: "finished",
+    });
+    expect(match.endAt).toEqual(endAt);
+  });
+
   it("rejects participants belonging to another tournament", async () => {
     await expect(
       upsertMatchInTransaction(writer, tournament.id, {
@@ -90,6 +104,7 @@ describe("Match writes", () => {
     writer.load.mockResolvedValue(Object.assign(new Match(), { participants }));
     const match = await setWinnerInTransaction(writer, "match", "b");
     expect(match).toMatchObject({ status: "finished", winner: { id: "b" } });
+    expect(match.endAt).toBeInstanceOf(Date);
     expect(writer.save).toHaveBeenCalledWith(match);
   });
 });
@@ -166,6 +181,30 @@ describe("Manual match corrections", () => {
     );
     const match = await updateMatchInTransaction(writer, "match", { status: "finished" });
     expect(match).toMatchObject({ status: "finished", winner: { id: "b" } });
+  });
+
+  it("ends a match finished without an end date at the time of the update", async () => {
+    writer.load.mockResolvedValue(
+      Object.assign(manualMatch(), { status: "running", winner: null }),
+    );
+    const before = new Date();
+    const match = await updateMatchInTransaction(writer, "match", { status: "finished" });
+    expect(match.endAt?.getTime()).toBeGreaterThanOrEqual(before.getTime());
+  });
+
+  it("keeps the end date staff send with a finished status", async () => {
+    writer.load.mockResolvedValue(
+      Object.assign(manualMatch(), { status: "running", winner: null }),
+    );
+    const endAt = new Date("2026-11-02T19:12:00Z");
+    const match = await updateMatchInTransaction(writer, "match", { status: "finished", endAt });
+    expect(match.endAt).toEqual(endAt);
+  });
+
+  it("clears the end date when the match is reopened", async () => {
+    writer.load.mockResolvedValue(Object.assign(manualMatch(), { endAt: new Date() }));
+    const match = await updateMatchInTransaction(writer, "match", { status: "running" });
+    expect(match.endAt).toBeNull();
   });
 
   it("refuses PandaScore-synced matches", async () => {
