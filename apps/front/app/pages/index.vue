@@ -84,9 +84,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         :caption="activePickemTournament ? 'none' : 'lead'"
         :title="week || activePickemTournament ? undefined : $t('page.home.latest')"
       >
-        <SCard v-if="week">
-          <NewsWeekRow :week="week" />
-        </SCard>
+        <NewsWeekRow v-if="week" :week="week" class="hub-lone-row" />
         <SRail
           v-if="hasArticlesColumn"
           :caption="week ? 'section' : 'none'"

@@ -26,6 +26,8 @@ const hideEmptyLeadOnMobile = computed(
   () => caption === "lead" && !title && !slots.caption && !slots.title,
 );
 
+const hasCaption = computed(() => Boolean(title || slots.caption || slots.title));
+
 const captionHeightClass = computed(() => {
   switch (caption) {
     case "lead":
@@ -61,6 +63,7 @@ const captionAlignClass = computed(() => {
       v-if="caption !== 'none'"
       :class="[
         'flex-col-reverse pb-2 text-sm font-medium text-highlighted',
+        hasCaption ? 'rail-caption' : 'rail-caption-empty',
         hideEmptyLeadOnMobile ? 'hidden md:flex' : 'flex',
         captionHeightClass,
         captionAlignClass,

@@ -53,7 +53,7 @@ const upcomingTitle = computed(() => {
             :source="SOURCE"
             status="live"
           >
-            <MatchRow :match="match" :live="true" />
+            <MatchRow :match="match" :live="true" compact />
           </MatchDiscoveryLink>
           <SListItem
             v-if="hasHiddenLive"
@@ -69,7 +69,7 @@ const upcomingTitle = computed(() => {
             :source="SOURCE"
             status="upcoming"
           >
-            <MatchRow :match="match" />
+            <MatchRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
       </SCard>
@@ -88,7 +88,7 @@ const upcomingTitle = computed(() => {
             :source="SOURCE"
             status="finished"
           >
-            <MatchResultRow :match="match" stacked />
+            <MatchResultRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
       </SCard>

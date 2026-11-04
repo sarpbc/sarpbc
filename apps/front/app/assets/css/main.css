@@ -53,6 +53,7 @@
 
 :root {
   --ui-radius: 0rem;
+  --ui-panel: var(--ui-bg-muted);
   --ui-bg-inverted-pressed: color-mix(in oklch, var(--ui-bg-inverted) 90%, var(--color-ink-950));
   --ui-link: var(--color-blue-600);
   --ui-link-hover: var(--color-blue-700);
@@ -64,7 +65,8 @@
   color-scheme: dark;
   --ui-bg: var(--color-ink-950);
   --ui-bg-muted: var(--color-ink-900);
-  --ui-bg-elevated: var(--color-ink-850);
+  --ui-bg-elevated: var(--color-ink-800);
+  --ui-panel: var(--color-ink-850);
   --ui-border: var(--color-ink-800);
   --ui-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
   --ui-link-hover: var(--color-blue-400);
@@ -265,6 +267,49 @@
 /* Snap a full-border block under a lead caption to whole rows so content growth never pushes later blocks off the rail grid. Chromium-only; falls back to content height. */
 @utility h-row-grid {
   height: calc-size(auto, round(up, size, var(--spacing-row)));
+}
+
+/* Soft hub: filled panels with their titles above them. Title (36px) plus panel padding (4px top and bottom) equals one row, so rows stay on the 44px grid across columns. */
+.hub-soft .frame {
+  outline: none;
+  background: var(--ui-panel);
+}
+
+.hub-soft .frame:has(.interactive-surface) {
+  padding-block: 0.25rem;
+}
+
+.hub-soft .cross-ticks {
+  display: none;
+}
+
+.hub-soft .rail-caption-empty {
+  height: 2.5rem;
+}
+
+.hub-soft .rail-caption {
+  height: 2.25rem;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0 0.75rem 0.5rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hub-soft .hub-lone-row {
+  margin-bottom: 0.25rem;
+  padding-inline: 0.75rem;
+  background: var(--ui-panel);
+}
+
+.hub-soft .hub-lone-row:hover {
+  background: var(--ui-bg-elevated);
+}
+
+.hub-soft .frame .interactive-surface {
+  width: auto;
+  margin-inline: 0.25rem;
 }
 
 html {

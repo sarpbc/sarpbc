@@ -45,6 +45,6 @@ const activities = computed(() => recentForumActivities.value ?? []);
         </ClientOnly>
       </SCard>
     </SRail>
-    <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
+    <LazyGameSidebarPromo class="hidden w-full md:block" hydrate-on-idle />
   </div>
 </template>
