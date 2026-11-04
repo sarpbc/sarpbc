@@ -14,7 +14,7 @@ useHead({
     { name: "viewport", content: "width=device-width, initial-scale=1" },
     {
       name: "theme-color",
-      content: computed(() => (colorMode.value === "dark" ? "#010101" : "#ffffff")),
+      content: computed(() => (colorMode.value === "dark" ? "#020305" : "#ffffff")),
     },
   ],
   link: [{ rel: "icon", href: "/favicon.ico" }],

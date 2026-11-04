@@ -75,11 +75,11 @@ const memberNames = (members: TeamRosterEra["members"]) =>
         </div>
       </div>
 
-      <SCard v-else-if="hasError" flush-top>
+      <SCard v-else-if="hasError">
         <SErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
       </SCard>
 
-      <SCard v-else-if="eras.length === 0" flush-top>
+      <SCard v-else-if="eras.length === 0">
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

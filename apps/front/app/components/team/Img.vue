@@ -84,7 +84,7 @@ watch(src, () => {
       :class="[
         boxClasses[size],
         fallbackRadiusClasses[size],
-        'flex items-center justify-center bg-elevated',
+        'flex items-center justify-center bg-muted',
       ]"
     >
       <UIcon name="i-fluent-people-team-24-regular" :class="[iconClasses[size], 'text-muted']" />

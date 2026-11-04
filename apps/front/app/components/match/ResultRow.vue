@@ -2,15 +2,8 @@
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
 
-const {
-  match,
-  divider = true,
-  dividerTop = false,
-} = defineProps<{
+const { match } = defineProps<{
   match: MatchRowItem;
-  divider?: boolean;
-  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
-  dividerTop?: boolean;
 }>();
 
 const teamA = computed(() => match.participants?.[0]);
@@ -42,7 +35,7 @@ function participantClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider" :divider-top="dividerTop" class="min-w-0">
+  <SListItem size="default" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs"

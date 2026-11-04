@@ -106,8 +106,8 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
           <template #caption>
             <USkeleton class="h-3 w-40" />
           </template>
-          <SCard flush-bottom flush-top>
-            <SListItem v-for="row in 3" :key="row" divider class="gap-3">
+          <SCard>
+            <SListItem v-for="row in 3" :key="row" class="gap-3">
               <USkeleton class="h-3 max-w-32 flex-1" />
               <USkeleton class="h-3 w-24 sm:w-32" />
               <USkeleton class="h-3 w-20" />

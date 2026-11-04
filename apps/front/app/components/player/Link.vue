@@ -7,9 +7,9 @@ defineProps<{
 </script>
 
 <template>
-  <SListItem divider :to="$localePath(`/player/${player.slug}`)" class="min-w-0 gap-3">
+  <SListItem :to="$localePath(`/player/${player.slug}`)" class="min-w-0 gap-3">
     <PlayerImg :player-name="player.name" :img="player.imageUrl" size="list" />
-    <h2 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+    <h2 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ player.name }}
     </h2>
     <span class="w-28 shrink-0 truncate text-xs text-muted sm:w-40">

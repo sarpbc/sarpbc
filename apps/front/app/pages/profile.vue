@@ -260,11 +260,10 @@ setPageSeo({
           </div>
         </template>
 
-        <SCard flush-bottom flush-top>
+        <SCard>
           <SListItem
             v-for="notification in notifications"
             :key="notification.id"
-            divider
             :to="localePath(notification.targetPath)"
             :class="{ 'bg-elevated': !notification.readAt }"
             @click="onNotificationClick(notification)"

@@ -48,8 +48,8 @@ function entryMeta(entry: EarningsEntry): string {
         </h2>
       </template>
 
-      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
-        <SListItem v-for="index in 3" :key="index" divider>
+      <SCard v-if="pending" aria-live="polite">
+        <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
               <USkeleton class="h-3.5 w-3/5 max-w-48" />
@@ -60,12 +60,12 @@ function entryMeta(entry: EarningsEntry): string {
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="error" flush-top>
+      <SCard v-else-if="error">
         <SErrorState :message="t('common.prizes.earnings.error')" @retry="refresh()" />
       </SCard>
 
-      <SCard v-else-if="years.length > 0" flush-bottom flush-top>
-        <SListItem divider class="justify-between gap-4">
+      <SCard v-else-if="years.length > 0">
+        <SListItem class="justify-between gap-4">
           <span class="text-sm text-muted">{{ t("common.prizes.earnings.total") }}</span>
           <span class="text-sm font-medium text-highlighted tabular-nums">
             {{ formatTotals(totals) }}
@@ -73,7 +73,7 @@ function entryMeta(entry: EarningsEntry): string {
         </SListItem>
 
         <template v-for="year in years" :key="year.year ?? 'undated'">
-          <SListItem divider class="justify-between gap-4 bg-elevated/50">
+          <SListItem class="justify-between gap-4 bg-elevated/50">
             <h3 class="text-sm font-medium tabular-nums">
               {{ year.year ?? t("common.prizes.earnings.undated") }}
             </h3>
@@ -82,7 +82,6 @@ function entryMeta(entry: EarningsEntry): string {
           <SListItem
             v-for="entry in year.entries"
             :key="entry.id"
-            divider
             :to="
               $localePath(tournamentStagePath(entry.tournament.event.slug, entry.tournament.slug))
             "
@@ -112,7 +111,7 @@ function entryMeta(entry: EarningsEntry): string {
         </p>
       </SCard>
 
-      <SCard v-else flush-top>
+      <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-money-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

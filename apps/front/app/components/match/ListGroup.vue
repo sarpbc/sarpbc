@@ -49,7 +49,7 @@ const blocks = computed((): ListBlock[] => {
     <div v-for="block in blocks" :key="block.key" class="w-full flex flex-col">
       <h3
         v-if="block.dateLabel"
-        class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned"
+        class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted"
       >
         {{ block.dateLabel }}
       </h3>
@@ -64,8 +64,6 @@ const blocks = computed((): ListBlock[] => {
         </template>
 
         <SCard
-          flush-bottom
-          flush-top
           class="flex flex-col"
           :class="
             variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined

@@ -36,7 +36,7 @@ defineExpose({
     variant="soft"
     color="neutral"
     :ui="{
-      base: 'border border-transparent',
+      base: 'border border-transparent bg-default',
     }"
     @update:model-value="updateSearch"
     @focus="handleFocus"

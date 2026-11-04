@@ -337,7 +337,7 @@ watch(
         <h2 id="pickem-leaderboard-title" class="sr-only">
           {{ t("page.game.pickems.detail.tabs.leaderboard") }}
         </h2>
-        <SCard class="flex min-h-row-triple flex-col p-4" flush-top>
+        <SCard class="flex min-h-row-triple flex-col p-4">
           <div
             v-if="sessionReady && !isSignedIn"
             class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -428,13 +428,12 @@ watch(
           <h2 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
             {{ formatDayHeaderDate(dayGroup.date, locale) }}
           </h2>
-          <SCard flush-bottom flush-top>
+          <SCard>
             <SListItem
               v-for="match in dayGroup.matches"
               :id="`pickem-match-${match.id}`"
               :key="match.id"
               size="default"
-              divider
             >
               <div class="grid w-full grid-cols-3 items-stretch gap-2">
                 <UButton

@@ -36,30 +36,37 @@ function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
 
 <template>
   <SCard class="flex h-row items-center">
-    <nav class="flex w-full items-center justify-between gap-2 px-2" :aria-label="t('common.page')">
-      <ULink
+    <nav
+      class="flex w-full items-center justify-between gap-2 px-1.5"
+      :aria-label="t('common.page')"
+    >
+      <UButton
+        color="neutral"
+        variant="ghost"
+        size="xs"
         :disabled="!hasPrevious"
         :to="previousTo"
-        as="link"
-        class="flex flex-row items-center gap-1 text-sm font-medium text-muted enabled:hover:text-highlighted disabled:cursor-default"
+        class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
         @click="scrollToTopOnNavigate($event, hasPrevious)"
       >
         {{ t("common.previous") }}
-      </ULink>
+      </UButton>
 
       <div class="text-sm text-muted tabular-nums">
         {{ t("common.page") }} {{ currentPage }} / {{ totalPages }}
       </div>
 
-      <ULink
+      <UButton
+        color="neutral"
+        variant="ghost"
+        size="xs"
         :disabled="!hasNext"
         :to="nextTo"
-        as="link"
-        class="flex flex-row items-center gap-1 text-sm font-medium text-muted enabled:hover:text-highlighted disabled:cursor-default"
+        class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
         @click="scrollToTopOnNavigate($event, hasNext)"
       >
         {{ t("common.next") }}
-      </ULink>
+      </UButton>
     </nav>
   </SCard>
 </template>

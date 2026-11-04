@@ -127,7 +127,7 @@ Full mapping: [references/tokens.md](TOKENS.md)
 
 Hierarchy: **borders + tonal surfaces first**, shadows second.
 
-- Cards: `border border-default` (see `SCard`, `SCrossCard`)
+- Cards: `frame` + `cross-ticks` (see `SCard`, `SCrossCard`)
 - Popovers/menus: default Nuxt UI elevation
 - Avoid heavy shadows on flat dashboard tables
 

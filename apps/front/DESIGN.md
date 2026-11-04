@@ -30,7 +30,7 @@ sarpbc.org has two public design modes. Same tokens and components; different de
 
 - Shell: `NavHeader` → 12-col grid (match rail | main | forum/game rail) → `NavFooter`.
 - Columns share a **row rhythm** via fixed-height primitives (see [Grid module](#grid-module)). Align with tokens + column wrappers — not ad-hoc `mt-*` / `pt-*` tuning between rails.
-- Signature motif: `SCrossCard` (corner crosses) on title bands.
+- Signature motif: white corner ticks (`cross-ticks`) mark the page's primary block only: `SCard main` (the news list on the homepage) and `SCrossCard` title bands.
 - Homepage (`/`) stays a **news hub**. No marketing hero or pick'em promo as the primary story (product decision 2026-07-30).
 
 ### Marketing (`/about`)
@@ -54,17 +54,20 @@ Configured in `app/app.config.ts`:
 | Primary | `blue`                                            |
 | Neutral | `ink` (custom scale in `app/assets/css/main.css`) |
 
-`ink` is a Linear/Resend-style near-black cool charcoal (canvas `#010101`, surfaces `#080a0d` → `#14171c`) tuned to brand blue `#2B7FFF`.
+`ink` is defined in OKLCH with one hue (256) and one chroma (0.008): only lightness changes between steps, so every grey reads as the same cool charcoal. Dark surfaces climb in even 4-point steps: page `950` (L 10%), image fallbacks `900` (14%), hover `850` (18%), borders `800` (22%), accented `700` (26%). Text steps keep their contrast: `200` (91%), `300` (82%), `400` (68%), `500` (50%). Add or change a step by picking its lightness, never a hex.
+
+In dark mode `--ui-bg` is `ink-950`, `--ui-bg-muted` is `ink-900`, `--ui-bg-elevated` is `ink-850` and `--ui-border` is `ink-800`, so hover and borders are two different greys.
 
 Use semantic classes — not raw hex:
 
-| Intent              | Class                           |
-| ------------------- | ------------------------------- |
-| Page surface        | `bg-default`                    |
-| Subtle fill / hover | `bg-elevated`                   |
-| Borders             | `border-default`                |
-| Primary action      | `color="primary"` on `@nuxt/ui` |
-| Destructive         | `color="error"`                 |
+| Intent            | Class                           |
+| ----------------- | ------------------------------- |
+| Page surface      | `bg-default`                    |
+| Hover / selection | `bg-elevated`                   |
+| Image fallbacks   | `bg-muted`                      |
+| Borders           | `border-default`                |
+| Primary action    | `color="primary"` on `@nuxt/ui` |
+| Destructive       | `color="error"`                 |
 
 ### Text hierarchy (black → white)
 
@@ -74,13 +77,11 @@ Ink strength on light surfaces. Never put caption chrome and list titles on the 
 | ------------------------- | ------------------ | ----------------------------- | --------------------------------------------------- |
 | 1 · Near black            | `text-highlighted` | Emphasis / selected           | Active states, strong headings when needed          |
 | 2 · Primary ink           | `text-default`     | Body                          | Default copy                                        |
-| 3 · Mid gray              | `text-toned`       | Soft chrome                   | `SRail` captions (`Recent Activity`)                |
+| 3 · Mid gray              | `text-toned`       | Soft chrome                   | Unresolved or tied results                          |
 | 4 · Light gray            | `text-muted`       | Nav / meta / dense rail links | Header links, forum rail titles, counts, timestamps |
 | 5 · Faintest              | `text-dimmed`      | Disabled / placeholders       | Inactive controls, TBD                              |
 
-**Rail rule (forum):** caption = `text-toned`; row title = `text-muted`; row meta = `text-muted`. Caption stays slightly stronger via `font-medium` + larger `text-sm` vs row `text-xs`.
-
-Note: on `ink`, keep caption/title steps distinct — avoid pairing `text-highlighted` with `text-toned` on the same density.
+**One hierarchy for every list:** caption = `text-sm font-medium text-highlighted`; row label = `text-default` at normal weight; row meta (times, dates, counts) = `text-muted`. On hover a row takes `bg-elevated` and its label turns `text-highlighted` (`group-hover:text-highlighted`, `SListItem` with `to` is the `group`); meta never changes.
 
 Color signals **state** (live, error, success) — not decoration. One primary action per view.
 
@@ -98,18 +99,18 @@ Text links in news prose and `SLink variant="accent"` use `--ui-link` (the Soute
 
 Prefer system / Nuxt UI sans. Mono for IDs, codes, and aligned stats (`font-mono`, `tabular-nums`).
 
-| Role                  | Classes                                                               |
-| --------------------- | --------------------------------------------------------------------- |
-| Page title (hub band) | `text-xl font-medium` inside `h-row-header`                           |
-| Section / rail label  | `text-sm font-medium text-toned`                                      |
-| Forum rail list links | `text-xs font-normal text-muted`                                      |
-| List meta             | `text-xs text-muted`                                                  |
-| Result winner         | `font-medium text-highlighted` (loser: `text-muted`)                  |
-| Article title         | `text-3xl md:text-4xl font-medium tracking-tight`                     |
-| Article body          | `text-lg` (18px)                                                      |
-| Article H2 / H3       | `text-2xl` / `text-xl`, `font-medium text-highlighted`                |
-| Match hero            | Score `text-4xl tabular-nums`; team names `text-base`; meta `text-sm` |
-| Marketing H1          | Larger (`text-2xl`–`text-3xl`), `tracking-tight`, more lead-in space  |
+| Role                  | Classes                                                                 |
+| --------------------- | ----------------------------------------------------------------------- |
+| Page title (hub band) | `text-xl font-medium` inside `h-row-header`                             |
+| Section / rail label  | `text-sm font-medium text-highlighted`                                  |
+| List row label        | `text-default` (`text-row` in the main column, `text-xs` in rails)      |
+| List meta             | `text-xs text-muted`; clock times, scores and counts add `tabular-nums` |
+| Result winner         | `font-medium text-highlighted` (loser: `text-muted`)                    |
+| Article title         | `text-3xl md:text-4xl font-medium tracking-tight`                       |
+| Article body          | `text-lg` (18px)                                                        |
+| Article H2 / H3       | `text-2xl` / `text-xl`, `font-medium text-highlighted`                  |
+| Match hero            | Score `text-4xl tabular-nums`; team names `text-base`; meta `text-sm`   |
+| Marketing H1          | Larger (`text-2xl`–`text-3xl`), `tracking-tight`, more lead-in space    |
 
 **Two weights:** `font-normal` (400) and `font-medium` (500). Medium is the only emphasis weight — titles, headings, captions, links, `strong`, winners — and matches Nuxt UI's controls. Do not use `font-semibold` or `font-bold`; emphasis beyond medium comes from size and the text hierarchy, not weight. UI labels default to `text-sm` (14px).
 
@@ -129,12 +130,12 @@ Hub lists and rails sit on a **4px base** with a modular **row scale**. Tokens l
 | **row-double**   | `--spacing-row-double`   | `5.5rem`                        | 88    | `h-row-double`                     | Rare 2× cells                                                            |
 | **row-triple**   | `--spacing-row-triple`   | `calc(row × 3)` (~`8.25rem`)    | ~132  | `h-row-triple`                     | Featured news row with hero thumb (3× default row)                       |
 | **row-stack**    | `--spacing-row-stack`    | `calc(row × 6)` (`16.5rem`)     | 264   | `min-h-row-stack`                  | Directory empty/error body                                               |
-| **card-s**       | `--spacing-card-s`       | `calc(row × 4 + 1px)`           | 177   | `min-h-card-s`                     | Small padded card (`SCard size="s"`)                                     |
-| **card-m**       | `--spacing-card-m`       | `calc(row × 6 + 1px)`           | 265   | `min-h-card-m`                     | Medium padded card (`SCard size="m"`)                                    |
-| **card-l**       | `--spacing-card-l`       | `calc(row × 8 + 1px)`           | 353   | `min-h-card-l`                     | Large padded card / forms (`SCard size="l"`)                             |
+| **card-s**       | `--spacing-card-s`       | `calc(row × 4)`                 | 176   | `min-h-card-s`                     | Small padded card (`SCard size="s"`)                                     |
+| **card-m**       | `--spacing-card-m`       | `calc(row × 6)`                 | 264   | `min-h-card-m`                     | Medium padded card (`SCard size="m"`)                                    |
+| **card-l**       | `--spacing-card-l`       | `calc(row × 8)`                 | 352   | `min-h-card-l`                     | Large padded card / forms (`SCard size="l"`)                             |
 | **rail-caption** | `--spacing-rail-caption` | `4.5rem`                        | 72    | `h-rail-caption`                   | **Lead** rail only (first in a hub column); = page title 56 + `gap-4` 16 |
 
-Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row` plus **1px**. Even multiples also land on compact rail rows (3 compact = 2 row). The extra pixel is the padded card’s bottom border — flush list cards only have a top border, with the last row’s `border-b` closing the box. `SCard size` applies the matching `min-h-card-*` and `h-row-snap`, which rounds extra growth to `n × row-double + 1px`. List cards (`flushBottom` + `SListItem`) stay content-sized — they are already exact row stacks.
+Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row`, so they also land on compact rail rows (3 compact = 2 row). `SCard` draws its edge with the `frame` utility, a 1px outline inset over the content, so the edge adds no height and a hovered row never covers it. On `SCard main`, `cross-ticks` paints the four corner ticks above the rows. `SCard size` applies the matching `min-h-card-*` and `h-row-snap`, which rounds extra growth to `n × row-double`. List cards stay content-sized: they are exact row stacks.
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
@@ -160,22 +161,22 @@ Shared list/rail components (`SListItem`, `SRail`, `SHubColumn` — epic SAR-85)
 
 Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times.
 
-| Primitive        | Role                                                                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `SCard`          | Bordered box (`border-default`); `flushBottom` for list stacks; `size` `s` \| `m` \| `l` for padded bodies on the row grid         |
-| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta), `inline` (entity names) or `accent` (standalone text links). No hover sound.        |
-| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link + divider; use with `flushBottom`                           |
-| `SBadgeLive`     | Live status with text + color                                                                                                      |
-| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)                     |
-| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                              |
-| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                          |
-| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                              |
-| `SErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list     |
-| `SEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                           |
-| `SPagination`    | Previous / page / next bar on one `h-row`                                                                                          |
-| `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                            |
-| `SSegmented`     | Mutually exclusive views of one list (e.g. upcoming / past), placed in the section caption. Underline tabs are for navigation only |
+| Primitive        | Role                                                                                                                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SCard`          | Framed box (`frame`: outer edge only, no fill); `main` adds the corner ticks to the page's primary block; `size` `s` \| `m` \| `l` for padded bodies on the row grid |
+| `SCrossCard`     | Hub title band / featured block with corner crosses                                                                                                                  |
+| `SLink`          | Internal link — `variant`: `muted` (nav/meta), `inline` (entity names) or `accent` (standalone text links). No hover sound.                                          |
+| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link; rows have no separators                                                                      |
+| `SBadgeLive`     | Live status with text + color                                                                                                                                        |
+| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (44px, default)                                                       |
+| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                                                |
+| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                                                            |
+| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                                                                |
+| `SErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list                                       |
+| `SEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                                                             |
+| `SPagination`    | Previous / page / next bar on one `h-row`                                                                                                                            |
+| `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                                                              |
+| `SSegmented`     | Mutually exclusive views of one list (e.g. upcoming / past), placed in the section caption. Underline tabs are for navigation only                                   |
 
 #### Actions and interactive states
 
@@ -205,31 +206,31 @@ Use `UButton` directly. Every button picks one rung of this ladder; no other col
 | `header`                | `h-row-header`, `min-h-row-header`   | 56px       |
 | `double`                | `h-row-double`, `min-h-row-double`   | 88px       |
 
-Props: `to` (renders `NuxtLink` with hover/focus), `divider` (bottom border — include on every row including last when the parent is `flushBottom`). Default slot; override padding via `class` (default `px-2`).
+Props: `to` (renders `NuxtLink` with hover/focus and marks the row as the hover `group`). Default slot; override padding via `class` (default `px-2`).
 
 #### `SCard` sizes
 
 Padded bodies (forms, prose, empty states) — not list stacks.
 
-| `size` prop | Utilities                    | Token         |
-| ----------- | ---------------------------- | ------------- |
-| `s`         | `min-h-card-s`, `h-row-snap` | 4 × row + 1px |
-| `m`         | `min-h-card-m`, `h-row-snap` | 6 × row + 1px |
-| `l`         | `min-h-card-l`, `h-row-snap` | 8 × row + 1px |
+| `size` prop | Utilities                    | Token   |
+| ----------- | ---------------------------- | ------- |
+| `s`         | `min-h-card-s`, `h-row-snap` | 4 × row |
+| `m`         | `min-h-card-m`, `h-row-snap` | 6 × row |
+| `l`         | `min-h-card-l`, `h-row-snap` | 8 × row |
 
-Omit `size` on `flushBottom` list cards. Prefer `size="l"` over `min-h-row-triple` on forms.
+Omit `size` on list cards. Prefer `size="l"` over `min-h-row-triple` on forms.
 
 ### Rails & list rows
 
-- **Rails** (match lateral, forum preview, game promo): wrap each section in `SRail` — caption `flex-col-reverse pb-1 pl-2` + `text-toned`, then bordered card/rows in the default slot. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`). Lead captions keep the hairline after 72px out of the caption itself (an in-caption rule shifts the label and card 1px above neighbouring columns). List cards under a lead caption are `flush-top` with `divider-top` on the first row, so row stacks start on the same pixel in every column (3 compact forum rows = 1 double news row = 2 match rows); padded cards keep their own `border-t`. Below `md` there is no sidebar to align with: lead captions shrink to `h-row`, and an empty lead caption (`SHubPageBody` without `#caption`) is hidden. Section captions (`h-row`) own an in-row `border-b`; their list cards are `flush-top` so the hairline stays inside the 44px slot. When the content below brings its own captions (grouped match lists) or free-standing bordered cards, use `caption="plain"` (same band, no hairline) so no rule floats over empty space. Forum row titles use `text-muted`.
+- **Rails** (match lateral, forum preview, game promo, homepage transfers): wrap each section in `SRail` — caption `flex-col-reverse pb-2 pl-2` + `text-highlighted`, then an `SCard` in the default slot. Captions carry no rule: the card's frame is the only line. Use `caption="lead"` on the **first** rail in a hub column (72px / `h-rail-caption`, aligns with `SHubPageHeader` + `gap-4`), so row stacks start on the same pixel in every column (3 compact forum rows = 1 double news row = 2 match rows). Below `md` there is no sidebar to align with: lead captions shrink to `h-row`, and an empty lead caption (`SHubPageBody` without `#caption`) is hidden. Section captions are a plain `h-row` band. The right rail keeps its compact rows and `mt-4` gaps on purpose: below its first card it does not follow the 44px grid, because full-height rows would be too large there. On the homepage the right rail shows the latest transfers under the mini-games as player image, then team logo and arrow, with a free-agent icon on the side where the player has no recorded team; below `md` the full transfer list stays in the main column.
 - **Hub columns**: `layouts/default.vue` wraps columns in `SHubColumn`. The match rail stays `hidden md:flex` on an outer wrapper (avoid `hidden` vs `flex` clash on the column root). Forum rail uses `variant="rail"` (`mt-4 md:mt-0` for mobile stack). Main uses `variant="main"` (no column top padding — pages own title bands). Do not add per-rail `pt-8` or `md:h-18` offsets.
 - **Detail page bodies**: wrap main-column detail pages in `SHubPageBody` (`SRail caption="lead"` + `gap-4` body). Keep `#caption` empty when used only for rail alignment (match detail). Put the scoreboard / hero / sections in the default slot; secondary meta (tournament, status, format) belongs under the hero card, not in the caption band. Caption is flush above the first body child (no gap) so card tops line up with sidebar cards. Use `captionAlign="center"` (default) or `start` for left labels when caption content is present.
-- **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Every row including the last owns `border-b`. Parent list cards use `SCard flush-bottom` so the last row closes the box (no double bottom edge, equal `h-row` heights). After `SHubPageHeader` (or any stack where the card would otherwise add `border-t`), also `flush-top` and put `divider-top` on the first row — card `border-t` sits 1px above the row fill. The mobile match “view all” footer is an extra row with its own `border-b`. The forum Create Post button sits outside the list card at full width and owns its top and bottom borders; the last conversation replaces its bottom divider with 1px of padding to preserve text alignment.
-- **Match event groups** (`MatchListGroup`): wrap each tournament in `SRail caption="section"` + `SCard flush-bottom flush-top`. Upcoming lists and pick’em days group by local day first (`h-row` date caption, no `border-b` — the event rail caption owns the hairline).
+- **List rows**: `SListItem` for news (`NewsRow`) and match rows (`MatchRow`, `MatchResultRow`); fixed height from the grid module. Rows have no separators: the 44px rhythm and the hover fill separate them, and the parent `SCard` frame closes the list. The forum Create Post action is the last row of its list card.
+- **Match event groups** (`MatchListGroup`): wrap each tournament in `SRail caption="section"` + `SCard`. Upcoming lists and pick’em days group by local day first (`h-row` date caption).
 - **Tournament event groups** (`TournamentListGroup`): the API returns events with their stages, newest first. Each event gets an `SRail caption="section"` carrying the small logo, the event name (linking to the event page), LAN/Online and prize pool; each stage is one `h-row` with name, dates and team count.
 - **Tournament event page** (`/tournaments/{event}`): `SHubPageBody` with an event hero card (league, event name, status, dates, format, prize pool, stage count, champion once finished), then one section per stage, newest first. Each section's caption links the stage name to its page and shows its dates and status; the stage bracket sits below in an `SCard`. Stage pages show the event name as a link above their title.
-- **Directories** (`/player`, `/team`): `SLetterFilter` sits flush on the first `SCard flush-bottom flush-top` of `SListItem` rows (square 28px image, name, team or location meta) — its bottom border is the list's top rule, so no `gap-4` between them.
-- **Dense data cards** (recent form, head-to-head, results): same `SCard flush-bottom` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells (`size="s"` \| `"m"` \| `"l"`) for prose / forms / centered empty states.
+- **Directories** (`/player`, `/team`): `SLetterFilter` sits directly above the first `SCard` of `SListItem` rows (square 28px image, name, team or location meta), with no `gap-4` between them.
+- **Dense data cards** (recent form, head-to-head, results): same `SCard` + `SListItem` stack — **not** `p-4` / nested elevated pills. Wrap titled blocks in `SRail` (default section caption); do not use `section` + `gap-3` + bare `h2`. Reserve padded `SCard` shells (`size="s"` \| `"m"` \| `"l"`) for prose / forms / centered empty states.
 - **Discussion threads**: Each comment is a discrete bordered box (header / body / actions), not a divider row in a flush card. Nested replies use `CommentThreadConnector` L-shaped branches with `mt-4` so the elbow meets the child header (`h-8`). Root comments stack with `gap-4`. Composer is its own `SCard`. Primary action is Reply; permalink / report / moderation live in a more-actions popover.
 - **Don't** put marketing cards in the hub hero/main column.
 

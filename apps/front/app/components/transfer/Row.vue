@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import type { Transfer, TransferType } from "~/types/transfer";
+import type { Transfer } from "~/types/transfer";
 
 const { transfer, showTeam = true } = defineProps<{
   transfer: Transfer;
@@ -13,25 +13,6 @@ const dateDf = computed(
   () => new DateFormatter(locale.value, { dateStyle: "medium", timeZone: "UTC" }),
 );
 
-function typeIcon(type: TransferType): string {
-  switch (type) {
-    case "arrival":
-      return "i-fluent-arrow-down-24-regular";
-    case "departure":
-      return "i-fluent-arrow-up-24-regular";
-    case "benched":
-      return "i-fluent-pause-24-regular";
-    case "loan":
-      return "i-fluent-arrow-swap-24-regular";
-    case "staff":
-      return "i-fluent-briefcase-24-regular";
-    default: {
-      const exhaustive: never = type;
-      return exhaustive;
-    }
-  }
-}
-
 const typeLabel = computed(() =>
   transfer.type === "staff"
     ? t(`common.contractRole.${transfer.role}`)
@@ -40,7 +21,7 @@ const typeLabel = computed(() =>
 </script>
 
 <template>
-  <SListItem divider class="min-w-0 gap-3">
+  <SListItem class="min-w-0 gap-3">
     <time
       :datetime="transfer.date"
       class="w-20 shrink-0 truncate text-xs text-muted tabular-nums sm:w-24"
@@ -66,7 +47,7 @@ const typeLabel = computed(() =>
       />
     </SLink>
     <span class="flex shrink-0 items-center gap-1.5 text-xs text-muted sm:w-28">
-      <UIcon :name="typeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
+      <UIcon :name="transferTypeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
       <span class="sr-only truncate sm:not-sr-only">
         {{ typeLabel }}
       </span>

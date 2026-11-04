@@ -42,8 +42,8 @@ const showSection = computed(
         </h2>
       </template>
 
-      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
-        <SListItem v-for="index in 3" :key="index" divider>
+      <SCard v-if="pending" aria-live="polite">
+        <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <USkeleton class="h-3.5 w-8 shrink-0" />
             <USkeleton class="size-5 shrink-0" />
@@ -53,14 +53,14 @@ const showSection = computed(
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="error" flush-top>
+      <SCard v-else-if="error">
         <SErrorState :message="t('page.tournaments.id.prizes.error')" @retry="refresh()" />
       </SCard>
 
-      <SCard v-else flush-bottom flush-top>
+      <SCard v-else>
         <ol>
           <li v-for="prize in prizes" :key="prize.id">
-            <SListItem divider :to="$localePath(`/team/${prize.team.slug}`)" class="min-w-0 gap-2">
+            <SListItem :to="$localePath(`/team/${prize.team.slug}`)" class="min-w-0 gap-2">
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>

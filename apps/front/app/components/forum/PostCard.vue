@@ -12,11 +12,10 @@ const { post } = defineProps<Props>();
 <template>
   <SListItem
     size="default"
-    divider
     :to="$localePath(forumPostPath(post.publicId, post.slug))"
     class="min-w-0 gap-3"
   >
-    <h3 class="min-w-0 flex-1 truncate text-sm font-medium text-default">
+    <h3 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ post.title }}
     </h3>
     <span class="hidden w-32 shrink-0 truncate text-xs text-muted sm:block">

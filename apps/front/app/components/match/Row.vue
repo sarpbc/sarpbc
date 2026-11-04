@@ -16,16 +16,11 @@ const hourDf = computed(
 const {
   match,
   live = false,
-  divider = true,
-  dividerTop = false,
   /** When false, always show time only (day headers already provide the date). */
   showDate = true,
 } = defineProps<{
   match: MatchRowItem;
   live?: boolean;
-  divider?: boolean;
-  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
-  dividerTop?: boolean;
   showDate?: boolean;
 }>();
 
@@ -96,7 +91,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider" :divider-top="dividerTop">
+  <SListItem size="default">
     <div
       class="grid w-full items-center gap-x-2"
       :class="
@@ -105,8 +100,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
     >
       <div
         v-if="match.participants"
-        class="flex min-w-0 flex-col gap-0.5 truncate text-xs font-medium"
-        :class="live ? 'text-toned' : 'text-muted'"
+        class="flex min-w-0 flex-col gap-0.5 truncate text-xs text-default group-hover:text-highlighted"
       >
         <span class="truncate" :title="teamAName">{{ teamAName }}</span>
         <span class="truncate" :title="teamBName">{{ teamBName }}</span>

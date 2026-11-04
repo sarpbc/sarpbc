@@ -109,7 +109,7 @@ watch(
         <template #caption>
           <USkeleton class="h-3 w-40" />
         </template>
-        <SCard flush-top class="min-h-row-stack p-2">
+        <SCard class="min-h-row-stack p-2">
           <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
             <USkeleton v-for="cell in 6" :key="cell" class="h-row" />
           </div>
@@ -158,7 +158,7 @@ watch(
               </span>
             </div>
           </template>
-          <SCard flush-top class="overflow-x-auto p-2">
+          <SCard class="overflow-x-auto p-2">
             <TournamentBracket :tournament="stage" />
           </SCard>
         </SRail>

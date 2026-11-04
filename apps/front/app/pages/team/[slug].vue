@@ -161,7 +161,7 @@ setPageSeo({
   <SHubPageBody>
     <div v-if="pending" class="w-full flex min-w-0 flex-col" aria-live="polite">
       <span class="sr-only">{{ t("page.team.slug.loadingTeam") }}</span>
-      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+      <SCard class="flex w-full min-w-0 flex-col">
         <div class="flex min-h-row-stack w-full items-center gap-4 p-4 animate-pulse">
           <div class="size-16 shrink-0 bg-elevated" />
           <div class="flex flex-col gap-2">
@@ -178,7 +178,7 @@ setPageSeo({
     </SCard>
 
     <div v-else-if="team" class="w-full flex min-w-0 flex-col">
-      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+      <SCard class="flex w-full min-w-0 flex-col">
         <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
         <div class="flex h-row-grid w-full min-w-0 flex-col border-t border-default">
           <div

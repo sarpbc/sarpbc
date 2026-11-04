@@ -20,35 +20,30 @@ const activities = computed(() => recentForumActivities.value ?? []);
 <template>
   <div class="w-full flex flex-col">
     <SRail caption="lead" :title="$t('components.forum.recentPosts')">
-      <SCard flush-bottom flush-top>
-        <!-- Preserve the divider pixel as padding when the footer owns the seam. -->
+      <SCard>
         <SListItem
-          v-for="(activity, index) in activities"
+          v-for="activity in activities"
           :key="activity.id"
           size="compact"
-          :divider="!user || index < activities.length - 1"
-          :divider-top="index === 0"
           :to="$localePath(forumPostPath(activity.publicId, activity.slug))"
           :title="activity.title"
-          class="text-xs font-normal text-muted"
-          :class="{ 'pb-px': user && index === activities.length - 1 }"
+          class="text-xs font-normal text-default hover:text-highlighted"
         >
           <div class="min-w-0 flex-1 truncate">{{ activity.title }}</div>
           <div class="shrink-0 tabular-nums text-muted">{{ activity.messageCount }}</div>
         </SListItem>
+        <ClientOnly>
+          <SListItem
+            v-if="user"
+            size="compact"
+            :to="localePath('/forum/new')"
+            :title="$t('components.forum.createPost')"
+            class="text-xs font-normal text-muted hover:text-highlighted"
+          >
+            {{ $t("components.forum.createPost") }}
+          </SListItem>
+        </ClientOnly>
       </SCard>
-      <ClientOnly>
-        <UButton
-          v-if="user"
-          :to="localePath('/forum/new')"
-          color="neutral"
-          variant="outline"
-          size="xs"
-          :label="$t('components.forum.createPost')"
-          :title="$t('components.forum.createPost')"
-          class="h-row-compact min-h-row-compact w-full justify-center font-normal"
-        />
-      </ClientOnly>
     </SRail>
     <LazyGameSidebarPromo class="hidden w-full md:block mt-4" hydrate-on-idle />
   </div>

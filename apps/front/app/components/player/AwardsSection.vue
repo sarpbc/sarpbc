@@ -73,8 +73,8 @@ function metaParts(award: PlayerProfileAward): string[] {
         </h2>
       </template>
 
-      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
-        <SListItem v-for="index in 2" :key="index" divider>
+      <SCard v-if="pending" aria-live="polite">
+        <SListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <USkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -85,15 +85,14 @@ function metaParts(award: PlayerProfileAward): string[] {
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="hasError" flush-top>
+      <SCard v-else-if="hasError">
         <SErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
       </SCard>
 
-      <SCard v-else-if="awards.length > 0" flush-bottom flush-top>
+      <SCard v-else-if="awards.length > 0">
         <SListItem
           v-for="award in awards"
           :key="award.id"
-          divider
           :to="$localePath(tournamentStagePath(award.tournament.event.slug, award.tournament.slug))"
           class="min-w-0"
         >

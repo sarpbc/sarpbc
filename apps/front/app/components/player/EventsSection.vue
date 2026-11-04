@@ -99,7 +99,7 @@ function eventMeta(event: PlayerEventListItem): string {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail caption="plain">
+    <SRail>
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
@@ -132,7 +132,7 @@ function eventMeta(event: PlayerEventListItem): string {
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">
         <div v-if="live.length > 0" class="flex flex-col gap-2">
-          <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
+          <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
             {{ t("page.player.slug.events.live") }}
           </h3>
           <div class="flex flex-col border border-default divide-y divide-default">
@@ -170,7 +170,7 @@ function eventMeta(event: PlayerEventListItem): string {
               </p>
             </div>
             <div class="flex shrink-0 items-center gap-2">
-              <span v-if="tab === 'upcoming'" class="text-xs font-medium text-muted">
+              <span v-if="tab === 'upcoming'" class="text-xs text-muted">
                 {{ statusLabel(event.status) }}
               </span>
               <UBadge
@@ -181,7 +181,7 @@ function eventMeta(event: PlayerEventListItem): string {
               >
                 {{ t("page.player.slug.events.winner") }}
               </UBadge>
-              <span v-else-if="tab === 'past'" class="text-xs font-medium text-muted">
+              <span v-else-if="tab === 'past'" class="text-xs text-muted">
                 {{ statusLabel(event.status) }}
               </span>
             </div>

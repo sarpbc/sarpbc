@@ -1,3 +1,9 @@
+<script setup lang="ts">
+const route = useRoute();
+const getRouteBaseName = useRouteBaseName();
+const isHome = computed(() => getRouteBaseName(route) === "index");
+</script>
+
 <template>
   <main class="w-full min-h-svh flex flex-col items-center">
     <NavHeader />
@@ -17,6 +23,7 @@
           <SHubColumn variant="rail" class="hidden md:col-span-3 md:flex lg:col-span-2">
             <ClientOnly>
               <LazyForumPreview hydrate-on-idle />
+              <LazyTransferRail v-if="isHome" hydrate-on-idle class="mt-4" />
             </ClientOnly>
           </SHubColumn>
         </div>

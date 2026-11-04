@@ -58,7 +58,7 @@ function pointsTooltip(points: number): string {
     </p>
 
     <SRail v-if="showResultsRail" caption="lead" :title="railTitle">
-      <SCard flush-bottom>
+      <SCard>
         <ul v-if="!isWorlds && split" class="flex flex-col">
           <li
             v-for="(placement, index) in split.regionals"

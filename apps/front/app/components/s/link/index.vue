@@ -17,7 +17,7 @@ function variantClasses(value: LinkVariant): string {
     case "muted":
       return "text-muted hover:text-highlighted transition-none";
     case "inline":
-      return "font-medium text-toned hover:text-default transition-none";
+      return "text-default hover:text-highlighted transition-none";
     case "accent":
       return "font-medium text-(--ui-link) hover:text-(--ui-link-hover) transition-none";
     default: {

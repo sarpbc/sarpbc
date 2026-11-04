@@ -42,10 +42,10 @@ function isLive(matchId: string): boolean {
 <template>
   <div v-if="showRail" class="md:hidden w-full flex flex-col mb-2">
     <SRail caption="lead" :title="upcomingTitle">
-      <SCard flush-bottom>
+      <SCard>
         <div class="w-full flex flex-col">
           <template v-if="pending && matches.length === 0">
-            <SListItem v-for="i in 3" :key="i" size="default" divider>
+            <SListItem v-for="i in 3" :key="i" size="default">
               <div class="grid w-full grid-cols-3 items-center gap-2">
                 <div class="col-span-2 flex flex-col gap-1">
                   <USkeleton class="h-3 max-w-28" />
@@ -69,7 +69,6 @@ function isLive(matchId: string): boolean {
         </div>
         <SListItem
           :to="$localePath('/matches')"
-          divider
           class="text-sm font-medium text-muted hover:text-highlighted"
         >
           {{ $t("components.match.viewAll") }}

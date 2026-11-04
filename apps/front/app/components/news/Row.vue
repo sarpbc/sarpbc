@@ -8,7 +8,6 @@ const localePath = useLocalePath();
 
 const props = defineProps<{
   article: NewsArticleListItem;
-  dividerTop?: boolean;
 }>();
 
 const newsType = computed(() => resolveNewsType(props.article.type));
@@ -32,8 +31,6 @@ const rowSize = computed(() => {
 <template>
   <SListItem
     :size="rowSize"
-    divider
-    :divider-top="props.dividerTop"
     :to="localePath(`/news/${props.article.slug}`)"
     class="min-w-0 overflow-hidden"
   >
@@ -57,13 +54,13 @@ const rowSize = computed(() => {
       </div>
       <div class="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
         <h2
-          class="min-w-0 text-base font-medium leading-snug tracking-tight text-default line-clamp-2 sm:line-clamp-1"
+          class="min-w-0 text-row leading-snug text-default line-clamp-2 group-hover:text-highlighted sm:line-clamp-1"
         >
           {{ props.article.title }}
         </h2>
         <p
           v-if="props.article.excerpt"
-          class="min-w-0 text-xs text-toned line-clamp-1 max-sm:hidden"
+          class="min-w-0 text-xs text-muted line-clamp-1 max-sm:hidden"
         >
           {{ props.article.excerpt }}
         </p>
@@ -74,7 +71,7 @@ const rowSize = computed(() => {
     </div>
 
     <div v-else class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-base font-medium tracking-tight text-default">
+      <h2 class="min-w-0 flex-1 truncate text-row text-default group-hover:text-highlighted">
         {{ props.article.title }}
       </h2>
       <p class="shrink-0 text-xs font-normal text-muted tabular-nums">

@@ -259,7 +259,7 @@ const scoreboardLabel = computed(() => {
           </div>
         </SCrossCard>
         <SRail>
-          <SCard flush-top class="p-4">
+          <SCard class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-px animate-pulse">
               <div class="h-24 rounded bg-elevated" />
               <div class="h-24 rounded bg-elevated" />
@@ -341,7 +341,7 @@ const scoreboardLabel = computed(() => {
           v-if="matchStatus !== 'finished'"
           :title="t('page.match.detail.sections.recentForm')"
         >
-          <SCard flush-top>
+          <SCard>
             <div class="grid grid-cols-1 items-stretch md:grid-cols-2">
               <MatchTeamFormCard
                 v-for="(participant, index) in participants"

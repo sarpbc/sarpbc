@@ -36,7 +36,7 @@ function linkLabel(vod: MatchVod): string {
 </script>
 
 <template>
-  <SCard flush-top>
+  <SCard>
     <ul class="flex flex-col divide-y divide-default">
       <li
         v-for="{ game, links } in games"

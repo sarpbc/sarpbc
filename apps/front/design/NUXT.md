@@ -76,7 +76,7 @@ Before adding a new primitive, check `app/components/s/`:
 | `SCrossCard`     | Auth/marketing cards with cross motif                                                      |
 | `SBadgeLive`     | Live status with redundant text                                                            |
 | `SLink`          | Styled internal links                                                                      |
-| `SListItem`      | Hub list row (`size`: compact/default/header/double; optional `to`, `divider`)             |
+| `SListItem`      | Hub list row (`size`: compact/default/header/double; optional `to`)                        |
 | `SRail`          | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
 | `SHubColumn`     | Hub grid column (`rail` \| `main`)                                                         |
 | `SHubPageHeader` | List-page title band                                                                       |

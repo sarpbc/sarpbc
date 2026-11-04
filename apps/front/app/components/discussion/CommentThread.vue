@@ -144,7 +144,7 @@ onMounted(() => {
       />
     </div>
 
-    <SCard v-else-if="error" :flush-top="flushTop">
+    <SCard v-else-if="error">
       <SErrorState :message="t('components.discussion.error')" @retry="refresh()" />
     </SCard>
 
@@ -177,11 +177,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <SCard
-        :flush-top="flushTop && !comments.length"
-        class="min-h-row h-row-grid px-3"
-        :class="user ? 'pb-3' : 'flex items-center'"
-      >
+      <SCard class="min-h-row h-row-grid px-3" :class="user ? 'pb-3' : 'flex items-center'">
         <DiscussionCommentComposer
           :target-type="targetType"
           :target-id="targetId"
