@@ -14,7 +14,16 @@ export interface MatchListItemResponse {
   publicId: number;
   slug: string;
   beginAt: Date | null;
-  participants: { id: string; team: { name: string } }[];
+  participants: {
+    id: string;
+    team: {
+      name: string;
+      imageUrl: string | null;
+      darkModeImageUrl: string | null;
+      logoLightUrl: string | null;
+      logoDarkUrl: string | null;
+    };
+  }[];
   results: { participant: string; score: number }[];
   tournament: {
     id: string;
@@ -37,7 +46,13 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
     beginAt: match.beginAt,
     participants: participants.map((participant) => ({
       id: participant.id,
-      team: { name: participant.team.name },
+      team: {
+        name: participant.team.name,
+        imageUrl: participant.team.imageUrl,
+        darkModeImageUrl: participant.team.darkModeImageUrl,
+        logoLightUrl: participant.team.logoLightUrl,
+        logoDarkUrl: participant.team.logoDarkUrl,
+      },
     })),
     results: results.map((result) => ({
       participant: result.participant.id,

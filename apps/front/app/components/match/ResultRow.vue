@@ -2,8 +2,10 @@
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
 
-const { match } = defineProps<{
+const { match, stacked = false } = defineProps<{
   match: MatchRowItem;
+  /** One team per line, for narrow columns where side-by-side names would truncate. */
+  stacked?: boolean;
 }>();
 
 const teamA = computed(() => match.participants?.[0]);
@@ -37,20 +39,39 @@ function participantClass(participantId: string | undefined): string {
 <template>
   <SListItem size="default" class="min-w-0">
     <div
-      v-if="teamA && teamB"
-      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs"
+      v-if="teamA && teamB && stacked"
+      class="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0.5 text-xs"
     >
-      <span class="truncate" :class="participantClass(teamA.id)">
+      <template v-for="team in [teamA, teamB]" :key="team.id">
+        <TeamImg :team-name="team.team.name" :logo="team.team" size="xs" />
+        <span class="truncate" :class="participantClass(team.id)">
+          {{ team.team.name || $t("components.match.tbd") }}
+        </span>
+        <span class="text-end tabular-nums" :class="participantClass(team.id)">
+          {{ getMatchParticipantScore(match.results, team.id) ?? "–" }}
+        </span>
+      </template>
+    </div>
+    <div
+      v-else-if="teamA && teamB"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto_minmax(0,1fr)] items-center gap-x-1.5 text-xs"
+    >
+      <span class="truncate text-end" :class="participantClass(teamA.id)">
         {{ teamA.team.name || $t("components.match.tbd") }}
       </span>
-      <span class="text-end tabular-nums" :class="participantClass(teamA.id)">
-        {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+      <TeamImg :team-name="teamA.team.name" :logo="teamA.team" size="xs" />
+      <span class="flex items-center gap-1 tabular-nums">
+        <span :class="participantClass(teamA.id)">
+          {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+        </span>
+        <span class="text-muted" aria-hidden="true">-</span>
+        <span :class="participantClass(teamB.id)">
+          {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
+        </span>
       </span>
+      <TeamImg :team-name="teamB.team.name" :logo="teamB.team" size="xs" />
       <span class="truncate" :class="participantClass(teamB.id)">
         {{ teamB.team.name || $t("components.match.tbd") }}
-      </span>
-      <span class="text-end tabular-nums" :class="participantClass(teamB.id)">
-        {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
       </span>
     </div>
   </SListItem>

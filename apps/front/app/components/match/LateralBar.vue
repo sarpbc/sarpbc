@@ -88,7 +88,7 @@ const upcomingTitle = computed(() => {
             :source="SOURCE"
             status="finished"
           >
-            <MatchResultRow :match="match" />
+            <MatchResultRow :match="match" stacked />
           </MatchDiscoveryLink>
         </div>
       </SCard>
