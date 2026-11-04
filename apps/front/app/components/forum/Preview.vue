@@ -38,7 +38,7 @@ const activities = computed(() => recentForumActivities.value ?? []);
             size="compact"
             :to="localePath('/forum/new')"
             :title="$t('components.forum.createPost')"
-            class="text-xs font-normal text-muted hover:text-highlighted"
+            class="border-t border-default text-xs font-normal text-muted hover:text-highlighted"
           >
             {{ $t("components.forum.createPost") }}
           </SListItem>

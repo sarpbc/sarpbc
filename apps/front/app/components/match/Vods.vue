@@ -37,30 +37,35 @@ function linkLabel(vod: MatchVod): string {
 
 <template>
   <SCard>
-    <ul class="flex flex-col divide-y divide-default">
+    <ul v-if="games.length > 0" class="flex flex-col">
       <li
         v-for="{ game, links } in games"
         :key="game"
-        class="flex min-h-row flex-wrap items-center gap-x-4 gap-y-1 px-2 py-2"
+        class="flex min-h-row flex-wrap items-center gap-x-4 gap-y-1 px-2 py-2 text-sm"
       >
-        <span class="w-16 shrink-0 text-sm font-medium text-highlighted tabular-nums">
+        <span class="w-16 shrink-0 text-default tabular-nums">
           {{ t("page.match.detail.vods.game", { number: game }) }}
         </span>
         <ul class="flex min-w-0 flex-wrap gap-x-4 gap-y-1">
           <li v-for="vod in links" :key="vod.url">
-            <a
-              :href="vod.url"
+            <SLink
+              :to="vod.url"
+              external
               target="_blank"
               rel="noopener noreferrer"
+              variant="muted"
               :aria-label="linkLabel(vod)"
-              class="inline-flex items-center gap-1 text-sm font-medium text-(--ui-link) hover:text-(--ui-link-hover)"
+              class="inline-flex items-center gap-1"
             >
               {{ sourceLabel(vod.source) }} · {{ vod.language.toUpperCase() }}
-              <UIcon name="i-fluent-open-16-regular" class="size-3.5" aria-hidden="true" />
-            </a>
+              <UIcon name="i-lucide-arrow-up-right" class="size-4" aria-hidden="true" />
+            </SLink>
           </li>
         </ul>
       </li>
     </ul>
+    <SListItem v-else class="text-sm text-muted">
+      {{ t("page.match.detail.watch.noReplay") }}
+    </SListItem>
   </SCard>
 </template>

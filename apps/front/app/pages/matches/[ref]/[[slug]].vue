@@ -1,10 +1,7 @@
 <script lang="ts" setup>
+import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import {
-  displayMatchScore,
-  getMatchParticipantScore,
-  shouldShowMatchScores,
-} from "~/types/matches";
+import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
@@ -112,8 +109,6 @@ const matchStatus = computed(() => {
   return resolveMatchDiscoveryStatus(match.value);
 });
 
-const showScores = computed(() => shouldShowMatchScores(matchStatus.value));
-
 const heroScoreA = computed(() =>
   match.value && teamA.value
     ? displayMatchScore(getParticipantScore(match.value, teamA.value.id), matchStatus.value)
@@ -124,6 +119,11 @@ const heroScoreB = computed(() =>
     ? displayMatchScore(getParticipantScore(match.value, teamB.value.id), matchStatus.value)
     : "–",
 );
+
+function onVodsSaved(vods: MatchVod[]) {
+  if (!matchDetail.value) return;
+  matchDetail.value = { ...matchDetail.value, match: { ...matchDetail.value.match, vods } };
+}
 
 function heroScoreClass(participantId: string | undefined): string {
   if (!winnerParticipantId.value) return "font-medium text-highlighted";
@@ -281,9 +281,9 @@ const scoreboardLabel = computed(() => {
       <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
       <SCrossCard class="min-h-row-triple h-row-grid">
-        <div class="flex w-full flex-col items-center gap-4 px-2 py-4 sm:px-4">
+        <div class="flex w-full flex-col gap-4 px-2 py-4 sm:px-4">
           <div
-            class="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 text-base sm:gap-x-6"
+            class="grid w-full grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] items-center gap-x-2 text-base sm:gap-x-6"
           >
             <MatchTeamResult
               :participant="teamA"
@@ -291,18 +291,19 @@ const scoreboardLabel = computed(() => {
               class="min-w-0"
             />
 
-            <p
-              v-if="showScores"
-              class="flex items-center gap-2 text-4xl tabular-nums sm:gap-3"
-              aria-hidden="true"
-            >
-              <span :class="heroScoreClass(teamA?.id)">{{ heroScoreA }}</span>
-              <span class="text-dimmed">–</span>
-              <span :class="heroScoreClass(teamB?.id)">{{ heroScoreB }}</span>
-            </p>
-            <p v-else class="text-sm text-muted" aria-hidden="true">
-              {{ t("page.match.detail.versus") }}
-            </p>
+            <MatchKickoff v-if="matchStatus === 'upcoming'" :match="match" class="min-w-0" />
+            <div v-else class="flex min-w-0 flex-col items-center gap-1">
+              <p v-if="match.beginAt" class="text-center text-sm text-muted tabular-nums">
+                {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
+              </p>
+              <p class="flex items-center gap-2 text-4xl tabular-nums sm:gap-3" aria-hidden="true">
+                <span :class="heroScoreClass(teamA?.id)">{{ heroScoreA }}</span>
+                <span class="text-dimmed">–</span>
+                <span :class="heroScoreClass(teamB?.id)">{{ heroScoreB }}</span>
+              </p>
+              <SBadgeLive v-if="matchStatus === 'live'" />
+              <p v-else class="text-sm text-muted">{{ t("page.match.detail.matchOver") }}</p>
+            </div>
 
             <MatchTeamResult
               :participant="teamB"
@@ -310,20 +311,38 @@ const scoreboardLabel = computed(() => {
               class="min-w-0"
             />
           </div>
-
-          <MatchInformation :match="match" :match-status="matchStatus" />
         </div>
       </SCrossCard>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 md:gap-x-4">
+        <SRail :title="t('page.match.detail.sections.information')">
+          <MatchInfoCard :match="match" class="flex-1" />
+        </SRail>
+        <SRail v-if="matchStatus === 'finished'">
+          <template #caption>
+            <div class="flex w-full items-center justify-between gap-2">
+              {{ t("page.match.detail.sections.replay") }}
+              <ClientOnly>
+                <MatchVodAdd :match="match" @saved="onVodsSaved" />
+              </ClientOnly>
+            </div>
+          </template>
+          <MatchVods :vods="match.vods ?? []" class="flex-1" />
+        </SRail>
+        <SRail v-else :title="t('page.match.detail.sections.watch')">
+          <MatchStreams
+            :streams="match.officialStreams ?? []"
+            :live="matchStatus === 'live'"
+            class="flex-1"
+          />
+        </SRail>
+      </div>
 
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
         <SRail :title="t('page.match.detail.sections.rosters')">
           <MatchRosterTable :participants="participants" />
-        </SRail>
-
-        <SRail v-if="match.vods?.length" :title="t('page.match.detail.sections.vods')">
-          <MatchVods :vods="match.vods" />
         </SRail>
 
         <SRail

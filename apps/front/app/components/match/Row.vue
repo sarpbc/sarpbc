@@ -2,6 +2,7 @@
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
+import { shortTeamName } from "~/utils/shortTeamName";
 
 const { locale, t } = useI18n();
 
@@ -110,9 +111,9 @@ function liveScoreClass(score: number | null, other: number | null): string {
       </span>
       <span v-else class="text-muted tabular-nums">{{ schedule?.time }}</span>
       <span class="truncate text-end text-default group-hover:text-highlighted" :title="teamAName">
-        {{ teamAName }}
+        {{ shortTeamName(teamAName) }}
       </span>
-      <TeamImg :team-name="teamAName" :logo="teamA?.team" size="xs" />
+      <TeamImg :team-name="teamA?.team.name" :logo="teamA?.team" size="xs" />
       <span
         class="flex items-center justify-center gap-1 tabular-nums"
         :class="{ 'score-flash': scoreChanged }"
@@ -130,9 +131,9 @@ function liveScoreClass(score: number | null, other: number | null): string {
         </template>
         <span v-else class="text-muted" aria-hidden="true">–</span>
       </span>
-      <TeamImg :team-name="teamBName" :logo="teamB?.team" size="xs" />
+      <TeamImg :team-name="teamB?.team.name" :logo="teamB?.team" size="xs" />
       <span class="truncate text-default group-hover:text-highlighted" :title="teamBName">
-        {{ teamBName }}
+        {{ shortTeamName(teamBName) }}
       </span>
     </div>
   </SListItem>

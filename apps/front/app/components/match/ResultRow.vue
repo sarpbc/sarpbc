@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
+import { shortTeamName } from "~/utils/shortTeamName";
 
 const { match, compact = false } = defineProps<{
   match: MatchRowItem;
@@ -43,7 +44,7 @@ function participantClass(participantId: string | undefined): string {
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
     >
       <span class="truncate text-end" :class="participantClass(teamA.id)" :title="teamA.team.name">
-        {{ teamA.team.name || $t("components.match.tbd") }}
+        {{ shortTeamName(teamA.team.name) || $t("components.match.tbd") }}
       </span>
       <TeamImg :team-name="teamA.team.name" :logo="teamA.team" size="xs" />
       <span class="flex items-center justify-center gap-1 tabular-nums">
@@ -57,7 +58,7 @@ function participantClass(participantId: string | undefined): string {
       </span>
       <TeamImg :team-name="teamB.team.name" :logo="teamB.team" size="xs" />
       <span class="truncate" :class="participantClass(teamB.id)" :title="teamB.team.name">
-        {{ teamB.team.name || $t("components.match.tbd") }}
+        {{ shortTeamName(teamB.team.name) || $t("components.match.tbd") }}
       </span>
     </div>
   </SListItem>

@@ -64,12 +64,7 @@ const showSection = computed(
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>
-              <TeamImg
-                :team-name="prize.team.name"
-                :image-url="prize.team.imageUrl ?? undefined"
-                :dark-mode-image-url="prize.team.darkModeImageUrl ?? undefined"
-                size="xs"
-              />
+              <TeamImg :team-name="prize.team.name" :logo="prize.team" size="xs" />
               <span class="min-w-0 flex-1 truncate text-sm font-medium text-highlighted">
                 {{ prize.team.name }}
               </span>

@@ -106,7 +106,14 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
     numberOfGames: match.numberOfGames,
     participants: match.participants.map((participant) => ({
       id: participant.id,
-      team: { id: participant.team.id, name: participant.team.name },
+      team: {
+        id: participant.team.id,
+        name: participant.team.name,
+        imageUrl: participant.team.imageUrl,
+        darkModeImageUrl: participant.team.darkModeImageUrl,
+        logoLightUrl: participant.team.logoLightUrl,
+        logoDarkUrl: participant.team.logoDarkUrl,
+      },
     })),
     results: match.results.map((result) => ({
       participant: result.participant.id,

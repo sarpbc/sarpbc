@@ -1553,15 +1553,44 @@
         "notFound": "Match not found",
         "error": "Could not load this match. Check your connection and try again.",
         "unknownTeam": "TBD",
-        "versus": "vs",
         "format": "Bo{count}",
+        "matchOver": "Match over",
         "addToCalendar": "Add to Calendar",
         "watchStream": "Watch Stream",
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
           "headToHead": "Head-to-Head",
-          "vods": "VODs"
+          "information": "Information",
+          "watch": "Watch",
+          "replay": "Rewatch"
+        },
+        "info": {
+          "event": "Event",
+          "format": "Format",
+          "round": "Round"
+        },
+        "vodAdd": {
+          "title": "Add a replay",
+          "game": "Game",
+          "url": "Link",
+          "urlPlaceholder": "https://www.twitch.tv/videos/…",
+          "language": "Language",
+          "submit": "Add",
+          "saved": "Replay added",
+          "saveError": "Could not add the replay",
+          "errors": {
+            "invalid-url": "This link is not valid",
+            "not-https": "The link must start with https",
+            "unsupported-host": "Only Twitch and YouTube are supported",
+            "invalid-timestamp": "The link's timestamp is not valid",
+            "invalid-language": "Enter a 2-letter language code (en, fr…)"
+          }
+        },
+        "watch": {
+          "noStream": "No official stream announced",
+          "noReplay": "No replay available",
+          "linkLabel": "Watch on {source}, {language} (opens in a new tab)"
         },
         "h2h": {
           "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",

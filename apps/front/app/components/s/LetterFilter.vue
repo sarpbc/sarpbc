@@ -13,7 +13,7 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
 </script>
 
 <template>
-  <SCard class="flex h-row items-center overflow-x-auto">
+  <SCard class="-mb-px flex h-row items-center overflow-x-auto">
     <nav
       class="flex w-full min-w-max items-center gap-px px-1.5"
       :aria-label="t('common.filterByLetter')"
