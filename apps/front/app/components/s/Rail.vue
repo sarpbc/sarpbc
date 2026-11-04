@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type RailCaption = "lead" | "section" | "plain" | "none";
+type RailCaption = "lead" | "section" | "none";
 type CaptionAlign = "start" | "center";
 
 const {
@@ -12,7 +12,6 @@ const {
   /**
    * `lead` — first rail in a hub column (72px from `md`); aligns with `SHubPageHeader` + gap.
    * `section` — stacked rails / mid-page blocks (44px / `h-row`).
-   * `plain` — 44px band without the hairline, for content that brings its own captions or bordered cards.
    * `none` — no caption band; use after a `h-row-header` + `gap-4` page header.
    */
   caption?: RailCaption;
@@ -32,8 +31,6 @@ const captionHeightClass = computed(() => {
     case "lead":
       return "h-row md:h-rail-caption";
     case "section":
-      return "h-row border-b border-default";
-    case "plain":
       return "h-row";
     case "none":
       return "";
@@ -63,7 +60,8 @@ const captionAlignClass = computed(() => {
     <div
       v-if="caption !== 'none'"
       :class="[
-        'flex-col-reverse pb-1 text-sm font-medium text-toned',
+        'flex-col-reverse pb-2 text-sm font-medium text-highlighted',
+        'rail-caption',
         hideEmptyLeadOnMobile ? 'hidden md:flex' : 'flex',
         captionHeightClass,
         captionAlignClass,

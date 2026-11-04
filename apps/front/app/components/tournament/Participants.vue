@@ -38,7 +38,7 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
         </div>
       </div>
 
-      <SCard v-else flush-top>
+      <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">

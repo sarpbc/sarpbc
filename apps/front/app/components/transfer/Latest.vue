@@ -35,9 +35,9 @@ const allTransfersPath = computed(() => ({
         </div>
       </template>
 
-      <SCard v-if="pending" flush-bottom flush-top aria-live="polite">
+      <SCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
-        <SListItem v-for="index in LATEST_TRANSFERS" :key="index" divider class="gap-3">
+        <SListItem v-for="index in LATEST_TRANSFERS" :key="index" class="gap-3">
           <USkeleton class="h-3 w-20 shrink-0" />
           <USkeleton class="size-7 shrink-0" />
           <USkeleton class="h-3 max-w-40 flex-1" />
@@ -45,11 +45,11 @@ const allTransfersPath = computed(() => ({
         </SListItem>
       </SCard>
 
-      <SCard v-else-if="error" flush-top class="flex min-h-row-stack h-row-grid items-center">
+      <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
         <SErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
       </SCard>
 
-      <SCard v-else-if="transfers.length > 0" flush-bottom flush-top>
+      <SCard v-else-if="transfers.length > 0">
         <TransferRow
           v-for="transfer in transfers"
           :key="transfer.id"
@@ -58,7 +58,7 @@ const allTransfersPath = computed(() => ({
         />
       </SCard>
 
-      <SCard v-else flush-top class="flex min-h-row-stack h-row-grid items-center">
+      <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
         <SEmptyState
           icon="i-fluent-people-swap-24-regular"
           :title="t('components.transfer.empty.title')"

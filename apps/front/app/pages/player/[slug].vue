@@ -154,7 +154,7 @@ setPageSeo({
 <template>
   <SHubPageBody>
     <div class="w-full flex min-w-0 flex-col">
-      <SCard flush-top flush-bottom class="flex w-full min-w-0 flex-col">
+      <SCard class="flex w-full min-w-0 flex-col">
         <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
         <div
           class="flex h-row-grid w-full min-w-0 flex-col gap-3 border-t border-default p-3 sm:flex-row sm:gap-4 sm:p-4"

@@ -55,7 +55,7 @@ function stageHref(event: TournamentEvent<TournamentListItem>, stage: Tournament
         </div>
       </template>
 
-      <SCard flush-bottom flush-top>
+      <SCard>
         <TournamentRow
           v-for="stage in event.stages"
           :key="stage.id"

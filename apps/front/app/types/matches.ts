@@ -1,4 +1,5 @@
 import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
+import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
@@ -41,7 +42,7 @@ export interface MatchListTournament {
 
 export interface MatchListParticipant {
   id: string;
-  team: { name: string };
+  team: ThemedLogo & { name: string };
 }
 
 export interface MatchRowItem {

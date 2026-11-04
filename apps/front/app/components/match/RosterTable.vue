@@ -14,22 +14,21 @@ const rowCount = computed(() =>
 </script>
 
 <template>
-  <SCard flush-top flush-bottom class="grid grid-cols-2">
+  <SCard class="grid grid-cols-2">
     <div
       v-for="(participant, columnIndex) in participants"
       :key="participant.id"
       class="flex min-w-0 flex-col"
       :class="columnIndex === 0 ? 'border-r border-default' : undefined"
     >
-      <SListItem size="default" divider class="min-w-0 gap-2">
+      <SListItem size="default" class="min-w-0 gap-2">
         <TeamImg :team-name="participant.team.name" :logo="participant.team" size="xs" />
-        <h3 class="truncate text-xs font-medium text-toned">{{ participant.team.name }}</h3>
+        <h3 class="truncate text-xs text-default">{{ participant.team.name }}</h3>
       </SListItem>
       <template v-for="rowIndex in rowCount" :key="rowIndex">
         <SListItem
           v-if="participant.players?.[rowIndex - 1]"
           size="double"
-          divider
           :to="$localePath(`/player/${participant.players[rowIndex - 1]!.slug}`)"
           class="min-w-0 gap-3"
         >
@@ -46,7 +45,7 @@ const rowCount = computed(() =>
             <span class="truncate text-sm">{{ participant.players[rowIndex - 1]!.name }}</span>
           </div>
         </SListItem>
-        <SListItem v-else size="double" divider class="min-w-0">
+        <SListItem v-else size="double" class="min-w-0">
           <span v-if="rowIndex === 1" class="self-center truncate text-sm text-muted">
             {{ t("page.match.detail.noRoster") }}
           </span>

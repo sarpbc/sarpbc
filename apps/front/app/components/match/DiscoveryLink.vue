@@ -19,7 +19,7 @@ const to = computed(() =>
   source ? matchDetailTo(match, source) : localePath(matchPath(match.publicId, match.slug)),
 );
 
-const linkClass = computed(() => ["block interactive-surface", attrs.class]);
+const linkClass = computed(() => ["group block interactive-surface", attrs.class]);
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;

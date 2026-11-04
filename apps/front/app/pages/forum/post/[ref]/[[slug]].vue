@@ -73,7 +73,7 @@ watch(
 
 <template>
   <SHubPageBody>
-    <SCard v-if="pending" flush-top flush-bottom aria-live="polite">
+    <SCard v-if="pending" aria-live="polite">
       <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
         <USkeleton class="h-3 w-48" />
         <USkeleton class="h-3 w-32" />
@@ -88,7 +88,7 @@ watch(
     </SCard>
 
     <template v-else-if="post">
-      <SCard flush-top flush-bottom class="h-row-grid">
+      <SCard class="h-row-grid">
         <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
           <h1 class="min-w-0 truncate text-sm font-medium text-default">
             {{ post.title }}

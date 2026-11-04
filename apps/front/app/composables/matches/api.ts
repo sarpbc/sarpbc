@@ -1,3 +1,4 @@
+import type { MatchVod } from "@sarpbc/types";
 import type {
   MatchDetailResponse,
   MatchListItem,
@@ -143,4 +144,15 @@ export async function getMatchById(id: string): Promise<MatchDetailResponse> {
       results: parseMatchResults(response.match.results),
     },
   };
+}
+
+export async function setMatchVods(
+  matchId: string,
+  vods: Array<Omit<MatchVod, "source">>,
+): Promise<MatchVod[]> {
+  const response = await apiFetch<{ match: { vods: MatchVod[] } }>(
+    `/tournaments/matches/${matchId}/vods`,
+    { method: "PUT", body: { vods } },
+  );
+  return response.match.vods;
 }

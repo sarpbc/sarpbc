@@ -81,12 +81,12 @@ const socialLinks = computed<SocialLink[]>(() => [
 
 <template>
   <footer class="w-full">
-    <div class="mx-auto w-full max-w-7xl px-2 pt-8 pb-8 xl:px-0">
-      <ClientOnly>
-        <LazyNavLiveStreamers />
-      </ClientOnly>
-      <div class="grid grid-cols-2 gap-px border border-default bg-(--ui-border) md:grid-cols-4">
-        <div class="col-span-2 flex flex-col gap-3 bg-default p-4 md:col-span-1">
+    <ClientOnly>
+      <LazyNavLiveStreamers />
+    </ClientOnly>
+    <div class="border-t border-default md:px-2 xl:px-0">
+      <div class="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-(--ui-border) md:grid-cols-4">
+        <div class="col-span-2 flex flex-col gap-3 bg-default p-4 md:col-span-1 md:pl-0">
           <ULink :to="localePath('/')" class="w-fit" :aria-label="$t('components.header.home')">
             <img src="/sarpbc.svg" alt="" width="48" height="48" class="size-12" />
           </ULink>
@@ -123,32 +123,35 @@ const socialLinks = computed<SocialLink[]>(() => [
             </ul>
           </div>
         </nav>
+      </div>
+    </div>
 
+    <div class="border-t border-default md:px-2 xl:px-0">
+      <div class="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-(--ui-border) md:grid-cols-4">
         <div
-          class="col-span-2 flex flex-wrap items-center justify-between gap-4 bg-default p-4 md:col-span-1"
+          class="col-span-2 flex flex-wrap items-center justify-between gap-4 bg-default p-4 md:col-span-1 md:pl-0"
         >
           <SettingsLanguageToggle class="-ml-1.5" />
           <SettingsThemeSelect />
         </div>
 
-        <div
-          class="col-span-2 flex flex-col gap-3 bg-default p-4 text-xs text-muted md:col-span-3 md:flex-row md:items-start md:justify-between"
-        >
-          <div class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span>{{ $t("components.footer.copyright", { year }) }}</span>
-              <span>{{ $t("components.footer.dataSource") }}</span>
-            </div>
-            <p>{{ $t("components.footer.disclaimer") }}</p>
+        <div class="col-span-2 flex flex-col gap-2 bg-default p-4 text-xs text-muted">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span>{{ $t("components.footer.copyright", { year }) }}</span>
+            <span>{{ $t("components.footer.dataSource") }}</span>
           </div>
-          <ul class="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <li v-for="link in legalLinks" :key="link.label">
-              <SLink :to="link.to" variant="muted">
-                {{ link.label }}
-              </SLink>
-            </li>
-          </ul>
+          <p>{{ $t("components.footer.disclaimer") }}</p>
         </div>
+
+        <ul
+          class="col-span-2 flex flex-wrap items-start gap-x-4 gap-y-2 bg-default p-4 text-xs text-muted md:col-span-1 md:pr-0"
+        >
+          <li v-for="link in legalLinks" :key="link.label">
+            <SLink :to="link.to" variant="muted">
+              {{ link.label }}
+            </SLink>
+          </li>
+        </ul>
       </div>
     </div>
   </footer>

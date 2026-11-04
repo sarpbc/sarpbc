@@ -87,7 +87,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
     </div>
 
     <SRail caption="lead" :title="t('page.game.career.end.palmarès')">
-      <SCard flush-bottom>
+      <SCard>
         <ul class="flex flex-col">
           <li
             v-for="line in trophyLines"
@@ -112,7 +112,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
     </SRail>
 
     <SRail caption="lead" :title="t('page.game.career.end.seasonRecap')">
-      <SCard flush-bottom>
+      <SCard>
         <ul class="flex flex-col">
           <li
             v-for="season in result.seasons"

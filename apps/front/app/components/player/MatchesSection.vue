@@ -84,7 +84,7 @@ function setTab(nextTab: PlayerMatchesTab) {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail caption="plain">
+    <SRail>
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">

@@ -198,7 +198,7 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
 
 <template>
   <SRail caption="lead" :title="title">
-    <SCard flush-bottom>
+    <SCard>
       <template v-if="kind === 'teams'">
         <ol
           v-for="(section, index) in teamSections"

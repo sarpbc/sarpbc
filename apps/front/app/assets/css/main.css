@@ -4,22 +4,25 @@
 @source "../../../../../packages/ui/src/runtime";
 
 /*
- * Brand neutral `ink` — Linear/Resend-dark cool charcoal (OKLCH hue ~255).
- * Canvas ~#010101, surfaces step through #080a0d → #14171c → #262a30 (Linear-like ladder).
- * Tuned to brand blue #2B7FFF; keep front/admin shades in sync.
+ * Brand neutral `ink`: one hue and chroma, only lightness moves, so every step reads as the same grey.
+ * Dark surfaces (950 → 700) climb in even 4-point steps; 850 exists so hover and border stay distinct.
+ * Keep front/admin shades in sync.
  */
 @theme static {
-  --color-ink-50: #f9fafc;
-  --color-ink-100: #f0f2f4;
-  --color-ink-200: #dee2e6;
-  --color-ink-300: #c3c8ce;
-  --color-ink-400: #9399a0;
-  --color-ink-500: #646971;
-  --color-ink-600: #43484f;
-  --color-ink-700: #262a30;
-  --color-ink-800: #14171c;
-  --color-ink-900: #080a0d;
-  --color-ink-950: #010101;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-row: 0.9375rem;
+  --color-ink-50: oklch(98% 0.008 256);
+  --color-ink-100: oklch(95% 0.008 256);
+  --color-ink-200: oklch(91% 0.008 256);
+  --color-ink-300: oklch(82% 0.008 256);
+  --color-ink-400: oklch(68% 0.008 256);
+  --color-ink-500: oklch(50% 0.008 256);
+  --color-ink-600: oklch(36% 0.008 256);
+  --color-ink-700: oklch(26% 0.008 256);
+  --color-ink-800: oklch(22% 0.008 256);
+  --color-ink-850: oklch(18% 0.008 256);
+  --color-ink-900: oklch(14% 0.008 256);
+  --color-ink-950: oklch(10% 0.008 256);
 }
 
 /* Hub grid module — row heights on the 4px scale. See apps/front/DESIGN.md */
@@ -34,10 +37,9 @@
   --spacing-row-triple: calc(var(--spacing-row) * 3);
   --spacing-row-stack: calc(var(--spacing-row) * 6); /* 264px — directory empty/error body */
   --spacing-px: 1px;
-  /* Padded cards add 1px so the extra bottom border matches flush list stacks (rows + top border only). */
-  --spacing-card-s: calc(var(--spacing-row) * 4 + var(--spacing-px)); /* 177px */
-  --spacing-card-m: calc(var(--spacing-row-stack) + var(--spacing-px)); /* 265px */
-  --spacing-card-l: calc(var(--spacing-row) * 8 + var(--spacing-px)); /* 353px */
+  --spacing-card-s: calc(var(--spacing-row) * 4); /* 176px */
+  --spacing-card-m: var(--spacing-row-stack); /* 264px */
+  --spacing-card-l: calc(var(--spacing-row) * 8); /* 352px */
   --spacing-rail-caption: 4.5rem; /* 72px — lead rail only (header 56 + gap-4 16); section rails use h-row */
   --spacing-cross: 4px; /* SCrossCard corner ticks */
   --radius-scrollbar: 5px;
@@ -60,6 +62,10 @@
 /* Color-mode signal for tooling + forced-colors resilience */
 .dark {
   color-scheme: dark;
+  --ui-bg: var(--color-ink-950);
+  --ui-bg-muted: var(--color-ink-900);
+  --ui-bg-elevated: var(--color-ink-850);
+  --ui-border: var(--color-ink-800);
   --ui-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
   --ui-link-hover: var(--color-blue-400);
 }
@@ -184,6 +190,34 @@
   [class*="border-"] {
     border-color: CanvasText;
   }
+
+  .frame {
+    outline-color: CanvasText;
+  }
+}
+
+/* Card edge drawn over the content box: rows keep exact row heights and a hovered row never covers the edge. */
+@utility frame {
+  outline: 1px solid var(--ui-border);
+  outline-offset: -1px;
+}
+
+/* Signature corner ticks, painted over the frame. Put last in a relative parent so a hovered row never covers them. */
+@utility cross-ticks {
+  --tick: linear-gradient(var(--ui-bg-inverted), var(--ui-bg-inverted));
+  --tick-length: calc(var(--spacing-cross) + var(--spacing-px));
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    var(--tick) left top / var(--tick-length) 1px no-repeat,
+    var(--tick) left top / 1px var(--tick-length) no-repeat,
+    var(--tick) right top / var(--tick-length) 1px no-repeat,
+    var(--tick) right top / 1px var(--tick-length) no-repeat,
+    var(--tick) left bottom / var(--tick-length) 1px no-repeat,
+    var(--tick) left bottom / 1px var(--tick-length) no-repeat,
+    var(--tick) right bottom / var(--tick-length) 1px no-repeat,
+    var(--tick) right bottom / 1px var(--tick-length) no-repeat;
 }
 
 /* One hover and press fill for every clickable row, tile and ghost control, matching Nuxt UI ghost buttons. */
@@ -223,17 +257,23 @@
   }
 }
 
-/* Snap used height to n × row-double + 1px (the extra bottom border vs flush list cards). Chromium-only; named min-h-card-* is the fallback. */
+/* Snap used height to n × row-double. Chromium-only; named min-h-card-* is the fallback. */
 @utility h-row-snap {
-  height: calc-size(
-    auto,
-    round(up, size - var(--spacing-px), var(--spacing-row-double)) + var(--spacing-px)
-  );
+  height: calc-size(auto, round(up, size, var(--spacing-row-double)));
 }
 
 /* Snap a full-border block under a lead caption to whole rows so content growth never pushes later blocks off the rail grid. Chromium-only; falls back to content height. */
 @utility h-row-grid {
   height: calc-size(auto, round(up, size, var(--spacing-row)));
+}
+
+/* Hub panels keep their titles above them. A title is one row tall, so rows stay on the 44px grid across columns. */
+.hub-soft .cross-ticks {
+  display: none;
+}
+
+.hub-soft .rail-caption {
+  height: var(--spacing-row);
 }
 
 html {

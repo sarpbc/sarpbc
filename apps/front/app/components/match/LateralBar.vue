@@ -44,33 +44,32 @@ const upcomingTitle = computed(() => {
 <template>
   <div class="w-full flex flex-col">
     <SRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
-      <SCard flush-bottom flush-top>
+      <SCard>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="(match, index) in visibleLiveMatches"
+            v-for="match in visibleLiveMatches"
             :key="match.id"
             :match="match"
             :source="SOURCE"
             status="live"
           >
-            <MatchRow :match="match" :live="true" :divider-top="index === 0" />
+            <MatchRow :match="match" :live="true" compact />
           </MatchDiscoveryLink>
           <SListItem
             v-if="hasHiddenLive"
             :to="$localePath('/matches')"
-            divider
             class="text-xs font-medium text-muted hover:text-highlighted"
           >
             {{ $t("components.match.viewAll") }}
           </SListItem>
           <MatchDiscoveryLink
-            v-for="(match, index) in upcomingMatches"
+            v-for="match in upcomingMatches"
             :key="match.id"
             :match="match"
             :source="SOURCE"
             status="upcoming"
           >
-            <MatchRow :match="match" :divider-top="liveMatches.length === 0 && index === 0" />
+            <MatchRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
       </SCard>
@@ -80,16 +79,16 @@ const upcomingTitle = computed(() => {
       :caption="hasSchedule ? 'section' : 'lead'"
       :title="$t('components.match.results')"
     >
-      <SCard flush-bottom flush-top>
+      <SCard>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
-            v-for="(match, index) in resultMatches"
+            v-for="match in resultMatches"
             :key="match.id"
             :match="match"
             :source="SOURCE"
             status="finished"
           >
-            <MatchResultRow :match="match" :divider-top="!hasSchedule && index === 0" />
+            <MatchResultRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
       </SCard>

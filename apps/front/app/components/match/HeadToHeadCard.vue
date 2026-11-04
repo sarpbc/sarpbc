@@ -37,8 +37,8 @@ function winnerLabel(winnerTeamId: string | null) {
 </script>
 
 <template>
-  <SCard flush-bottom flush-top class="flex flex-col">
-    <SListItem v-if="hasMeetings" size="default" divider class="min-w-0">
+  <SCard class="flex flex-col">
+    <SListItem v-if="hasMeetings" size="default" class="min-w-0">
       <span class="w-full text-xs font-medium text-muted tabular-nums">
         {{
           t("page.match.detail.h2h.record", {
@@ -51,7 +51,7 @@ function winnerLabel(winnerTeamId: string | null) {
       </span>
     </SListItem>
 
-    <SListItem v-if="!hasMeetings" size="default" divider>
+    <SListItem v-if="!hasMeetings" size="default">
       <p class="text-xs text-pretty text-muted">
         {{ t("page.match.detail.h2h.empty") }}
       </p>
@@ -61,19 +61,18 @@ function winnerLabel(winnerTeamId: string | null) {
       v-for="meeting in headToHead.recentMeetings"
       :key="meeting.id"
       size="default"
-      divider
       :to="localePath(matchPath(meeting.publicId, meeting.slug))"
       class="min-w-0"
     >
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <div class="flex min-w-0 flex-col gap-0.5">
-          <span class="truncate text-toned">{{ meeting.tournamentLabel }}</span>
+          <span class="truncate text-default">{{ meeting.tournamentLabel }}</span>
           <span v-if="meetingDate(meeting)" class="truncate text-muted tabular-nums">
             {{ meetingDate(meeting) }}
           </span>
         </div>
         <div class="flex shrink-0 flex-col items-end gap-0.5 text-right">
-          <span class="font-mono tabular-nums text-toned">
+          <span class="tabular-nums text-default">
             {{
               t("page.match.detail.h2h.score", {
                 scoreA: meeting.scoreA ?? "-",

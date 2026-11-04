@@ -1,16 +1,12 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
+import { shortTeamName } from "~/utils/shortTeamName";
 
-const {
-  match,
-  divider = true,
-  dividerTop = false,
-} = defineProps<{
+const { match, compact = false } = defineProps<{
   match: MatchRowItem;
-  divider?: boolean;
-  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
-  dividerTop?: boolean;
+  /** Dense rail rows: three of them span two default rows. */
+  compact?: boolean;
 }>();
 
 const teamA = computed(() => match.participants?.[0]);
@@ -42,22 +38,27 @@ function participantClass(participantId: string | undefined): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider" :divider-top="dividerTop" class="min-w-0">
+  <SListItem :size="compact ? 'compact' : 'default'" class="min-w-0">
     <div
       v-if="teamA && teamB"
-      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-xs"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
     >
-      <span class="truncate" :class="participantClass(teamA.id)">
-        {{ teamA.team.name || $t("components.match.tbd") }}
+      <span class="truncate text-end" :class="participantClass(teamA.id)" :title="teamA.team.name">
+        {{ shortTeamName(teamA.team.name) || $t("components.match.tbd") }}
       </span>
-      <span class="text-end tabular-nums" :class="participantClass(teamA.id)">
-        {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+      <TeamImg :team-name="teamA.team.name" :logo="teamA.team" size="xs" />
+      <span class="flex items-center justify-center gap-1 tabular-nums">
+        <span :class="participantClass(teamA.id)">
+          {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+        </span>
+        <span class="text-muted" aria-hidden="true">-</span>
+        <span :class="participantClass(teamB.id)">
+          {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
+        </span>
       </span>
-      <span class="truncate" :class="participantClass(teamB.id)">
-        {{ teamB.team.name || $t("components.match.tbd") }}
-      </span>
-      <span class="text-end tabular-nums" :class="participantClass(teamB.id)">
-        {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
+      <TeamImg :team-name="teamB.team.name" :logo="teamB.team" size="xs" />
+      <span class="truncate" :class="participantClass(teamB.id)" :title="teamB.team.name">
+        {{ shortTeamName(teamB.team.name) || $t("components.match.tbd") }}
       </span>
     </div>
   </SListItem>

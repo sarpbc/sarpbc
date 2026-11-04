@@ -84,37 +84,29 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         :caption="activePickemTournament ? 'none' : 'lead'"
         :title="week || activePickemTournament ? undefined : $t('page.home.latest')"
       >
-        <SCard v-if="week" flush-bottom>
-          <NewsWeekRow :week="week" />
-        </SCard>
+        <NewsWeekRow v-if="week" :week="week" class="frame" />
         <SRail
           v-if="hasArticlesColumn"
           :caption="week ? 'section' : 'none'"
           :title="week ? $t('page.home.latest') : undefined"
         >
-          <SCard flush-bottom flush-top>
-            <NewsRow
-              v-for="(article, index) in articles"
-              :key="article.id"
-              :article="article"
-              :divider-top="!week && index === 0"
-            />
-            <SListItem v-if="hasMoreArticles" divider>
-              <button
-                type="button"
-                class="flex h-full w-full items-center gap-2 text-left text-sm font-medium text-muted hover:text-highlighted disabled:cursor-default"
-                :disabled="articlesPending"
-                @click="loadMoreArticles"
-              >
-                <UIcon
-                  v-if="articlesPending"
-                  name="i-fluent-arrow-clockwise-24-regular"
-                  class="size-4 motion-safe:animate-spin"
-                  aria-hidden="true"
-                />
-                {{ articlesPending ? $t("common.loading") : $t("page.home.loadMore") }}
-              </button>
-            </SListItem>
+          <SCard main>
+            <NewsRow v-for="article in articles" :key="article.id" :article="article" />
+            <button
+              v-if="hasMoreArticles"
+              type="button"
+              class="interactive-surface flex h-row w-full items-center gap-2 border-t border-default px-2 text-left text-xs font-normal text-muted hover:text-highlighted disabled:cursor-default"
+              :disabled="articlesPending"
+              @click="loadMoreArticles"
+            >
+              <UIcon
+                v-if="articlesPending"
+                name="i-fluent-arrow-clockwise-24-regular"
+                class="size-4 motion-safe:animate-spin"
+                aria-hidden="true"
+              />
+              {{ articlesPending ? $t("common.loading") : $t("page.home.loadMore") }}
+            </button>
           </SCard>
         </SRail>
       </SRail>
@@ -137,7 +129,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
           />
         </SCard>
       </SRail>
-      <TransferLatest />
+      <TransferLatest class="md:hidden" />
     </div>
   </div>
 </template>

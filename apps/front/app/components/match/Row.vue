@@ -2,6 +2,7 @@
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
 import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
+import { shortTeamName } from "~/utils/shortTeamName";
 
 const { locale, t } = useI18n();
 
@@ -16,16 +17,14 @@ const hourDf = computed(
 const {
   match,
   live = false,
-  divider = true,
-  dividerTop = false,
+  compact = false,
   /** When false, always show time only (day headers already provide the date). */
   showDate = true,
 } = defineProps<{
   match: MatchRowItem;
   live?: boolean;
-  divider?: boolean;
-  /** Top rule inside the row — first row under a lead caption on a `flush-top` card. */
-  dividerTop?: boolean;
+  /** Dense rail rows: three of them span two default rows. */
+  compact?: boolean;
   showDate?: boolean;
 }>();
 
@@ -96,57 +95,46 @@ function liveScoreClass(score: number | null, other: number | null): string {
 </script>
 
 <template>
-  <SListItem size="default" :divider="divider" :divider-top="dividerTop">
+  <SListItem :size="compact ? 'compact' : 'default'">
     <div
-      class="grid w-full items-center gap-x-2"
-      :class="
-        showLiveScore ? 'grid-cols-[minmax(0,1fr)_auto_auto]' : 'grid-cols-[minmax(0,1fr)_auto]'
-      "
+      class="grid w-full min-w-0 grid-cols-[2rem_minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
     >
-      <div
-        v-if="match.participants"
-        class="flex min-w-0 flex-col gap-0.5 truncate text-xs font-medium"
-        :class="live ? 'text-toned' : 'text-muted'"
+      <span v-if="live" class="text-xs font-medium leading-tight text-error">
+        {{ $t("components.match.liveShort") }}
+      </span>
+      <span
+        v-else-if="schedule?.kind === 'tomorrow'"
+        class="flex flex-col text-muted tabular-nums leading-tight"
       >
-        <span class="truncate" :title="teamAName">{{ teamAName }}</span>
-        <span class="truncate" :title="teamBName">{{ teamBName }}</span>
-      </div>
-
-      <div v-if="showLiveScore" class="flex items-center justify-center" aria-hidden="true">
-        <SBadgeLiveDot />
-      </div>
-
-      <div class="flex flex-col items-end justify-center gap-1">
-        <DiscussionCommentCount :count="match.commentCount ?? 0" />
-        <div
-          v-if="showLiveScore"
-          class="flex flex-col items-end gap-0.5 text-xs font-medium tabular-nums"
-          :class="{ 'score-flash': scoreChanged }"
-          aria-live="polite"
-          :aria-label="`${scoreA ?? '–'} – ${scoreB ?? '–'}`"
-        >
-          <span :class="liveScoreClass(scoreA, scoreB)" aria-hidden="true">
-            {{ scoreA ?? "–" }}
-          </span>
-          <span :class="liveScoreClass(scoreB, scoreA)" aria-hidden="true">
-            {{ scoreB ?? "–" }}
-          </span>
-        </div>
-        <SBadgeLive v-else-if="showLiveBadge" />
-        <span
-          v-else-if="schedule?.kind === 'tomorrow'"
-          class="flex flex-col items-end text-end text-xs text-muted font-normal tabular-nums leading-tight"
-        >
-          <span>{{ schedule.label }}</span>
-          <span>{{ schedule.time }}</span>
-        </span>
-        <span
-          v-else-if="schedule?.kind === 'time'"
-          class="text-end text-xs text-muted font-normal tabular-nums"
-        >
-          {{ schedule.time }}
-        </span>
-      </div>
+        <span class="truncate">{{ schedule.label }}</span>
+        <span>{{ schedule.time }}</span>
+      </span>
+      <span v-else class="text-muted tabular-nums">{{ schedule?.time }}</span>
+      <span class="truncate text-end text-default group-hover:text-highlighted" :title="teamAName">
+        {{ shortTeamName(teamAName) }}
+      </span>
+      <TeamImg :team-name="teamA?.team.name" :logo="teamA?.team" size="xs" />
+      <span
+        class="flex items-center justify-center gap-1 tabular-nums"
+        :class="{ 'score-flash': scoreChanged }"
+        aria-live="polite"
+        :aria-label="showLiveScore ? `${scoreA ?? '–'} – ${scoreB ?? '–'}` : undefined"
+      >
+        <template v-if="showLiveScore">
+          <span :class="liveScoreClass(scoreA, scoreB)" aria-hidden="true">{{
+            scoreA ?? "–"
+          }}</span>
+          <span class="text-muted" aria-hidden="true">-</span>
+          <span :class="liveScoreClass(scoreB, scoreA)" aria-hidden="true">{{
+            scoreB ?? "–"
+          }}</span>
+        </template>
+        <span v-else class="text-muted" aria-hidden="true">–</span>
+      </span>
+      <TeamImg :team-name="teamB?.team.name" :logo="teamB?.team" size="xs" />
+      <span class="truncate text-default group-hover:text-highlighted" :title="teamBName">
+        {{ shortTeamName(teamBName) }}
+      </span>
     </div>
   </SListItem>
 </template>

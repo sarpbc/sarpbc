@@ -60,7 +60,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
       <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col">
         <h2
           v-if="showUpcomingSectionTitle"
-          class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned"
+          class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted"
         >
           {{ t("page.tournaments.id.matchSections.upcoming") }}
         </h2>
@@ -69,10 +69,10 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           :key="`upcoming-${dayGroup.dateKey}`"
           class="flex flex-col"
         >
-          <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
+          <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
             {{ formatDayHeader(dayGroup) }}
           </h3>
-          <SCard flush-bottom class="w-full">
+          <SCard class="w-full">
             <MatchLinkRows
               :matches="dayGroup.matches"
               variant="upcoming"
@@ -88,10 +88,10 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
         :key="`completed-${dayGroup.dateKey}`"
         class="flex flex-col"
       >
-        <h3 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
+        <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
           {{ formatDayHeader(dayGroup) }}
         </h3>
-        <SCard flush-bottom class="w-full">
+        <SCard class="w-full">
           <MatchLinkRows :matches="dayGroup.matches" variant="result" :source="SOURCE" />
         </SCard>
       </section>

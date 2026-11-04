@@ -60,12 +60,11 @@ const hasMatches = computed(() => matches.length > 0);
     </SHubPageHeader>
 
     <div>
-      <SCard v-if="pending" flush-bottom class="flex flex-col" aria-live="polite">
+      <SCard v-if="pending" class="flex flex-col" aria-live="polite">
         <SListItem
           v-for="index in 20"
           :key="index"
           size="default"
-          divider
           :class="kind === 'results' ? 'min-w-0' : undefined"
         >
           <div

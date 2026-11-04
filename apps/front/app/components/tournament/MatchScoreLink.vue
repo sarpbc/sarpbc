@@ -2,7 +2,7 @@
 import { matchPath, type ThemedLogo } from "@sarpbc/utils";
 import type { MatchLinkTarget, MatchResult, MatchStatus } from "~/types/matches";
 import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
-import { formatBracketTeamName } from "~/utils/formatBracketTeamName";
+import { shortTeamName } from "~/utils/shortTeamName";
 import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
 const { t } = useI18n();
@@ -75,7 +75,7 @@ const displayTeamA = computed(() => {
     return t("components.match.tbd");
   }
 
-  return bracket ? formatBracketTeamName(teamAName) : teamAName;
+  return bracket ? shortTeamName(teamAName) : teamAName;
 });
 
 const displayTeamB = computed(() => {
@@ -83,7 +83,7 @@ const displayTeamB = computed(() => {
     return t("components.match.tbd");
   }
 
-  return bracket ? formatBracketTeamName(teamBName) : teamBName;
+  return bracket ? shortTeamName(teamBName) : teamBName;
 });
 
 function participantRowClass(participantId: string | undefined): string {
@@ -117,7 +117,7 @@ function participantRowClass(participantId: string | undefined): string {
           participantRowClass(participantAId),
         ]"
       >
-        <TeamImg :team-name="teamAName ?? $t('components.match.tbd')" :logo="teamALogo" size="xs" />
+        <TeamImg :team-name="teamAName" :logo="teamALogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
         <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreA }}</span>
       </div>
@@ -127,7 +127,7 @@ function participantRowClass(participantId: string | undefined): string {
           participantRowClass(participantBId),
         ]"
       >
-        <TeamImg :team-name="teamBName ?? $t('components.match.tbd')" :logo="teamBLogo" size="xs" />
+        <TeamImg :team-name="teamBName" :logo="teamBLogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
         <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreB }}</span>
       </div>

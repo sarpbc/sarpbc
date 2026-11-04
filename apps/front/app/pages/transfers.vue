@@ -46,9 +46,9 @@ setPageSeo({
     </SHubPageHeader>
 
     <div>
-      <SCard v-if="pending" flush-bottom aria-live="polite">
+      <SCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
-        <SListItem v-for="index in 8" :key="index" divider class="gap-3">
+        <SListItem v-for="index in 8" :key="index" class="gap-3">
           <USkeleton class="h-3 w-20 shrink-0" />
           <USkeleton class="size-7 shrink-0" />
           <USkeleton class="h-3 max-w-40 flex-1" />
@@ -61,7 +61,7 @@ setPageSeo({
         <SErrorState :message="t('page.transfers.error')" @retry="refresh()" />
       </SCard>
 
-      <SCard v-else-if="transfers.length > 0" flush-bottom>
+      <SCard v-else-if="transfers.length > 0">
         <TransferRow v-for="transfer in transfers" :key="transfer.id" :transfer="transfer" />
       </SCard>
 

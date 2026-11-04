@@ -1,11 +1,33 @@
 import {
   formatTimeAgo,
   type UseTimeAgoMessages,
+  type UseTimeAgoUnit,
   type UseTimeAgoUnitNamesDefault,
 } from "@vueuse/core";
 
+const RELATIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+// VueUse switches to "last week" from 6 days; days must last the whole relative window.
+const TIME_AGO_UNITS: UseTimeAgoUnit<UseTimeAgoUnitNamesDefault>[] = [
+  { max: 60_000, value: 1_000, name: "second" },
+  { max: 2_760_000, value: 60_000, name: "minute" },
+  { max: 72_000_000, value: 3_600_000, name: "hour" },
+  { max: RELATIVE_WINDOW_MS + 86_400_000, value: 86_400_000, name: "day" },
+  { max: 2_419_200_000, value: 604_800_000, name: "week" },
+  { max: 28_512_000_000, value: 2_592_000_000, name: "month" },
+  { max: Number.POSITIVE_INFINITY, value: 31_536_000_000, name: "year" },
+];
+
 export function formatLocaleTimeAgo(date: Date) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+
+  const now = new Date();
+  if (now.getTime() - date.getTime() > RELATIVE_WINDOW_MS) {
+    return new Intl.DateTimeFormat(locale.value, {
+      day: "numeric",
+      month: "short",
+      ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
+    }).format(date);
+  }
 
   const pf = (past: boolean) => (past ? ".past" : ".future");
   const messages: UseTimeAgoMessages<UseTimeAgoUnitNamesDefault> = {
@@ -45,5 +67,6 @@ export function formatLocaleTimeAgo(date: Date) {
   return formatTimeAgo(date, {
     fullDateFormatter: (date) => date.toLocaleString(),
     messages,
+    units: TIME_AGO_UNITS,
   });
 }

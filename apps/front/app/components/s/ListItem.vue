@@ -3,18 +3,9 @@ type ListItemSize = "compact" | "default" | "header" | "double" | "triple";
 
 defineOptions({ inheritAttrs: false });
 
-const {
-  size = "default",
-  to,
-  divider = false,
-  dividerTop = false,
-} = defineProps<{
+const { size = "default", to } = defineProps<{
   size?: ListItemSize;
   to?: string;
-  /** Required on the last row when the parent Card is `flushBottom`. */
-  divider?: boolean;
-  /** Top rule when the parent Card is `flushTop` — stays inside the row height. */
-  dividerTop?: boolean;
 }>();
 
 const attrs = useAttrs();
@@ -42,9 +33,7 @@ const itemClass = computed(() => [
   "flex w-full",
   size === "triple" || size === "double" ? "p-2 items-stretch" : "px-2 items-center",
   listItemSizeClasses(size),
-  divider && "border-b border-default",
-  dividerTop && "border-t border-default",
-  to && "interactive-surface",
+  to && "group interactive-surface",
   attrs.class,
 ]);
 

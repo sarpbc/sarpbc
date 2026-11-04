@@ -1,19 +1,10 @@
 <script lang="ts" setup>
 type CardSize = "s" | "m" | "l";
 
-const {
-  flushBottom = false,
-  flushTop = false,
-  flushX = false,
-  size,
-} = defineProps<{
-  /** Omit bottom border — last list row’s `border-b` closes the box. */
-  flushBottom?: boolean;
-  /** Omit top border — stack under a rail caption without adding a grid pixel. */
-  flushTop?: boolean;
-  /** Omit left and right borders. */
-  flushX?: boolean;
-  /** Min height on the hub row grid (`n × row-double + 1px`). Grows by `row-double` so both side rails stay aligned. */
+const { size, main = false } = defineProps<{
+  /** The page's primary block: the only card that carries the corner ticks. */
+  main?: boolean;
+  /** Min height on the hub row grid (`n × row-double`). Grows by `row-double` so both side rails stay aligned. */
   size?: CardSize;
 }>();
 
@@ -31,19 +22,11 @@ function cardSizeClasses(value: CardSize): string {
     }
   }
 }
-
-const borderClass = computed(() => {
-  if (!flushX && !flushTop && !flushBottom) {
-    return "border";
-  }
-  return [!flushX && "border-x", !flushTop && "border-t", !flushBottom && "border-b"].filter(
-    Boolean,
-  );
-});
 </script>
 
 <template>
-  <div class="box-border border-default" :class="[borderClass, size && cardSizeClasses(size)]">
+  <div class="frame" :class="[main && 'relative', size && cardSizeClasses(size)]">
     <slot />
+    <span v-if="main" class="cross-ticks" aria-hidden="true" />
   </div>
 </template>

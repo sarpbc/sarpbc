@@ -46,7 +46,17 @@ export interface TournamentMatchListItem {
   beginAt: Date | string | null;
   endAt: Date | string | null;
   numberOfGames: number | null;
-  participants: { id: string; team: { id: string; name: string } }[];
+  participants: {
+    id: string;
+    team: {
+      id: string;
+      name: string;
+      imageUrl: string | null;
+      darkModeImageUrl: string | null;
+      logoLightUrl: string | null;
+      logoDarkUrl: string | null;
+    };
+  }[];
   results: { participant: string; score: number }[];
 }
 

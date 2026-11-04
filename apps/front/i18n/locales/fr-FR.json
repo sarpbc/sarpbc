@@ -201,6 +201,7 @@
       "upcomingMatches": "Matchs à venir",
       "tomorrow": "Demain",
       "results": "Résultats",
+      "liveShort": "En direct",
       "tbd": "À déterminer",
       "live": "En direct",
       "viewAll": "Voir tous les matchs"
@@ -1552,15 +1553,44 @@
         "notFound": "Match introuvable",
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
         "unknownTeam": "À déterminer",
-        "versus": "contre",
         "format": "Bo{count}",
+        "matchOver": "Match terminé",
         "addToCalendar": "Ajouter au calendrier",
         "watchStream": "Regarder le stream",
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
           "headToHead": "Face-à-face",
-          "vods": "VODs"
+          "information": "Informations",
+          "watch": "Regarder",
+          "replay": "Revoir"
+        },
+        "info": {
+          "event": "Tournoi",
+          "format": "Format",
+          "round": "Phase"
+        },
+        "vodAdd": {
+          "title": "Ajouter une rediffusion",
+          "game": "Game",
+          "url": "Lien",
+          "urlPlaceholder": "https://www.twitch.tv/videos/…",
+          "language": "Langue",
+          "submit": "Ajouter",
+          "saved": "Rediffusion ajoutée",
+          "saveError": "Impossible d'ajouter la rediffusion",
+          "errors": {
+            "invalid-url": "Ce lien n'est pas valide",
+            "not-https": "Le lien doit commencer par https",
+            "unsupported-host": "Seuls Twitch et YouTube sont acceptés",
+            "invalid-timestamp": "L'horodatage du lien n'est pas valide",
+            "invalid-language": "Code de langue à 2 lettres attendu (fr, en…)"
+          }
+        },
+        "watch": {
+          "noStream": "Aucun stream officiel annoncé",
+          "noReplay": "Aucune rediffusion disponible",
+          "linkLabel": "Regarder sur {source}, {language} (s’ouvre dans un nouvel onglet)"
         },
         "h2h": {
           "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",

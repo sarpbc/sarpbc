@@ -17,7 +17,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
   <div class="flex h-full min-w-0 flex-col divide-y divide-default">
     <SListItem size="default" class="min-w-0 shrink-0">
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
-        <h3 class="min-w-0 truncate text-toned">{{ teamName }}</h3>
+        <h3 class="min-w-0 truncate text-default">{{ teamName }}</h3>
         <span v-if="teamForm && hasRecentMatches" class="shrink-0 text-muted tabular-nums">
           {{
             t("page.match.detail.formRecord", {
@@ -65,7 +65,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
             }}
           </span>
         </div>
-        <span class="shrink-0 font-mono tabular-nums text-toned">
+        <span class="shrink-0 tabular-nums text-default">
           {{
             t("page.match.detail.formScore", {
               teamScore: recentMatch.score.team ?? "-",

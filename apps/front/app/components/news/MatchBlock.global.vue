@@ -85,8 +85,8 @@ function stateLabel(item: MatchBlockItem): string {
     role="group"
     :aria-label="t('newsTag.matches')"
   >
-    <SCard v-if="pending" flush-top flush-bottom aria-busy="true">
-      <SListItem v-for="index in 2" :key="index" divider>
+    <SCard v-if="pending" aria-busy="true">
+      <SListItem v-for="index in 2" :key="index">
         <div class="flex w-full items-center justify-between gap-3">
           <span class="flex flex-col gap-1.5">
             <USkeleton class="h-3 w-28" />

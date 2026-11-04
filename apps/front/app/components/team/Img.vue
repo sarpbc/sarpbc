@@ -2,7 +2,8 @@
 import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
 
 interface Props {
-  teamName: string;
+  /** Left out while the match slot has no team yet: shows a generic icon instead of an initial. */
+  teamName?: string;
   logo?: ThemedLogo | null;
   size?: "xs" | "list" | "sm" | "md" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
@@ -45,6 +46,15 @@ const iconClasses = {
   xl: "size-12",
 };
 
+const initialClasses = {
+  xs: "text-[10px]",
+  list: "text-sm",
+  sm: "text-lg",
+  md: "text-3xl",
+  lg: "text-5xl",
+  xl: "text-5xl",
+};
+
 const fallbackRadiusClasses = {
   xs: "rounded-xs",
   list: "rounded-xs",
@@ -56,38 +66,66 @@ const fallbackRadiusClasses = {
 
 const { teamName, logo, size = "md", priority = false } = defineProps<Props>();
 
-const colorMode = useColorMode();
-const src = computed(() => resolveThemedLogoUrl(logo, colorMode.value));
-const dim = computed(() => dimensions[size]);
-const failed = ref(false);
-watch(src, () => {
-  failed.value = false;
+// The server cannot know the theme stored in the browser, and hydration does not patch src: let CSS pick the variant.
+const variants = computed(() => {
+  const light = resolveThemedLogoUrl(logo, "light");
+  const dark = resolveThemedLogoUrl(logo, "dark");
+  return light === dark
+    ? [{ src: light, imgClass: "", fallbackClass: "flex" }]
+    : [
+        { src: light, imgClass: "dark:hidden", fallbackClass: "flex dark:hidden" },
+        { src: dark, imgClass: "hidden dark:block", fallbackClass: "hidden dark:flex" },
+      ];
 });
+const initial = computed(() =>
+  teamName
+    ? shortTeamName(teamName)
+        .match(/[\p{L}\p{N}]/u)?.[0]
+        ?.toUpperCase()
+    : undefined,
+);
+const dim = computed(() => dimensions[size]);
+const failedSrcs = ref(new Set<string>());
 </script>
 
 <template>
   <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
-    <NuxtImg
-      v-if="src && !failed"
-      :src="src"
-      :alt="`${teamName} logo`"
-      :width="dim.width"
-      :height="dim.height"
-      :sizes="sizesAttr[size]"
-      :loading="priority ? 'eager' : 'lazy'"
-      :fetchpriority="priority ? 'high' : undefined"
-      :class="[fallbackRadiusClasses[size], 'max-h-full max-w-full object-contain']"
-      @error="failed = true"
-    />
-    <div
-      v-else
-      :class="[
-        boxClasses[size],
-        fallbackRadiusClasses[size],
-        'flex items-center justify-center bg-elevated',
-      ]"
-    >
-      <UIcon name="i-fluent-people-team-24-regular" :class="[iconClasses[size], 'text-muted']" />
-    </div>
+    <template v-for="{ src, imgClass, fallbackClass } in variants" :key="fallbackClass">
+      <NuxtImg
+        v-if="src && !failedSrcs.has(src)"
+        :src="src"
+        :alt="`${teamName} logo`"
+        :width="dim.width"
+        :height="dim.height"
+        :sizes="sizesAttr[size]"
+        :loading="priority ? 'eager' : 'lazy'"
+        :fetchpriority="priority ? 'high' : undefined"
+        :class="[fallbackRadiusClasses[size], imgClass, 'max-h-full max-w-full object-contain']"
+        @error="failedSrcs.add(src)"
+      />
+      <div
+        v-else
+        :class="[
+          boxClasses[size],
+          fallbackRadiusClasses[size],
+          fallbackClass,
+          'items-center justify-center bg-muted',
+        ]"
+      >
+        <span
+          v-if="initial"
+          role="img"
+          :aria-label="`${teamName} logo`"
+          :class="[initialClasses[size], 'font-medium leading-none text-muted']"
+        >
+          {{ initial }}
+        </span>
+        <UIcon
+          v-else
+          name="i-fluent-people-team-24-regular"
+          :class="[iconClasses[size], 'text-muted']"
+        />
+      </div>
+    </template>
   </div>
 </template>

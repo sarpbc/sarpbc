@@ -104,7 +104,7 @@ const headingId = "team-faq-title";
           {{ t("page.team.slug.faq.title") }}
         </h2>
       </template>
-      <SCard flush-top class="divide-y divide-default">
+      <SCard class="divide-y divide-default">
         <details v-for="(item, index) in faqItems" :key="index" class="group px-4 py-3">
           <summary class="text-sm font-medium text-highlighted marker:content-none">
             <span class="flex items-center justify-between gap-3">

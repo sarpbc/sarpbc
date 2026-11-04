@@ -20,7 +20,7 @@ const bracketHeadingId = computed(() => `tournament-bracket-title-${tournament.i
             {{ $t("page.tournaments.id.bracketTitle") }}
           </h2>
         </template>
-        <SCard flush-top class="overflow-x-auto p-2">
+        <SCard class="overflow-x-auto p-2">
           <TournamentBracket :tournament="tournament" />
         </SCard>
       </SRail>
