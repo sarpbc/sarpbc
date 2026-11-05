@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 const project = path.resolve(import.meta.dirname, "..");
@@ -84,26 +83,9 @@ function collectRoutes(sources) {
   return routes.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
-const baselineFromHead = process.argv.includes("--baseline-from-head");
-const sources = baselineFromHead
-  ? execFileSync("git", ["ls-tree", "-r", "--name-only", "HEAD", "apps/back/src"], {
-      cwd: path.resolve(project, "../.."),
-      encoding: "utf8",
-    })
-      .trim()
-      .split("\n")
-      .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
-      .map((file) => ({
-        file,
-        text: execFileSync("git", ["show", `HEAD:${file}`], {
-          cwd: path.resolve(project, "../.."),
-          encoding: "utf8",
-          maxBuffer: 4 * 1024 * 1024,
-        }),
-      }))
-  : filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
+const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
 const actual = collectRoutes(sources);
-if (baselineFromHead || process.argv.includes("--write")) {
+if (process.argv.includes("--write")) {
   fs.mkdirSync(path.dirname(snapshot), { recursive: true });
   fs.writeFileSync(snapshot, `${JSON.stringify(actual, null, 2)}\n`);
   process.stdout.write(`Recorded ${actual.length} HTTP routes.\n`);

@@ -11,7 +11,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
 
 const SCAN_ROOTS = [path.join(FRONT_ROOT, "app")];
-const ALLOWLIST_SEGMENTS = [`${path.sep}components${path.sep}s${path.sep}`];
 const FILE_EXTENSIONS = new Set([".vue", ".ts", ".tsx", ".js", ".jsx"]);
 
 const RULES = [
@@ -43,10 +42,6 @@ async function collectFiles(dir, files = []) {
   return files;
 }
 
-function isAllowlisted(filePath) {
-  return ALLOWLIST_SEGMENTS.some((segment) => filePath.includes(segment));
-}
-
 function scanFile(filePath, content) {
   const violations = [];
   const lines = content.split("\n");
@@ -76,9 +71,6 @@ async function main() {
 
   const violations = [];
   for (const file of files) {
-    if (isAllowlisted(file)) {
-      continue;
-    }
     const content = await readFile(file, "utf8");
     violations.push(...scanFile(file, content));
   }

@@ -5,8 +5,12 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
-const IMPORTS_TYPES = path.join(FRONT_ROOT, ".nuxt/types/imports.d.ts");
+const IMPORTS_TYPES = [".nuxt/types/imports.d.ts", ".nuxt/types/nitro-imports.d.ts"].map((file) =>
+  path.join(FRONT_ROOT, file),
+);
 const OUTPUT = path.join(FRONT_ROOT, ".oxlintrc.generated.json");
+
+const NODE_AND_NUXT_GLOBALS = ["defineNuxtConfig", "process"];
 
 const VUE_MACROS = [
   "defineEmits",
@@ -59,19 +63,28 @@ const BROWSER_GLOBALS = [
 ];
 
 function readAutoImportNames() {
-  let source;
-  try {
-    source = readFileSync(IMPORTS_TYPES, "utf8");
-  } catch {
-    console.error(`Missing ${IMPORTS_TYPES}. Run "pnpm exec nuxt prepare" in apps/front first.`);
-    process.exit(1);
-  }
+  return IMPORTS_TYPES.flatMap((file) => {
+    let source;
+    try {
+      source = readFileSync(file, "utf8");
+    } catch {
+      console.error(`Missing ${file}. Run "pnpm exec nuxt prepare" in apps/front first.`);
+      process.exit(1);
+    }
 
-  return [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    return [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+  });
 }
 
 const globals = Object.fromEntries(
-  [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...BROWSER_GLOBALS])]
+  [
+    ...new Set([
+      ...readAutoImportNames(),
+      ...VUE_MACROS,
+      ...BROWSER_GLOBALS,
+      ...NODE_AND_NUXT_GLOBALS,
+    ]),
+  ]
     .sort()
     .map((name) => [name, "readonly"]),
 );

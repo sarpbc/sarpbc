@@ -92,9 +92,9 @@ test("rejects framework dependencies, aliases, type imports, reexports and forei
     }
     assert.ok(
       architectureViolations([useCase]).some((message) =>
-        message.includes(`application imports ${path.basename(other)}/infrastructure/`),
+        message.includes("use a relative import"),
       ),
-      "resolves aliases before checking the application boundary",
+      "rejects src/ aliases",
     );
     assert.deepEqual(architectureViolations([repository]), []);
     const pure = write(

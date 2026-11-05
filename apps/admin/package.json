@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "postinstall": "nuxt prepare",

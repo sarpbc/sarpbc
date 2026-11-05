@@ -2,6 +2,7 @@ import { test } from "vitest";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -10,6 +11,9 @@ import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
+const composeImage = (name) => compose.match(new RegExp(`image: (${name}:\\S+)`))[1];
+
 test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations", async () => {
   const containers = [];
   const results = [];
@@ -85,7 +89,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
   try {
     const pgPort = await container(
       "postgres",
-      "postgres:18.0-alpine",
+      composeImage("postgres"),
       5432,
       {
         POSTGRES_USER: "integration",
@@ -94,7 +98,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
       ["pg_isready", "-U", "integration", "-d", "integration"],
     );
-    const redisPort = await container("redis", "redis:7.4-alpine", 6379, {}, ["redis-cli", "ping"]);
+    const redisPort = await container("redis", composeImage("redis"), 6379, {}, [
+      "redis-cli",
+      "ping",
+    ]);
     Object.assign(process.env, {
       NODE_ENV: "test",
       PORT: "4001",

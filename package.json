@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/sarpbc/sarpbc.git"
   },
+  "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test:git-names": "node --test scripts/check-git-names.test.mjs",
@@ -14,12 +15,11 @@
     "dev:front": "turbo run dev --filter=front",
     "dev:admin": "turbo run dev --filter=admin",
     "build": "turbo run build",
-    "start": "pnpm --filter back start",
-    "lint": "turbo run lint",
+    "lint": "oxlint scripts && turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "fmt": "turbo run fmt",
-    "fmt:check": "turbo run fmt:check",
-    "test:back": "turbo run test --filter=back"
+    "fmt:check": "oxfmt --check scripts tools docs && turbo run fmt:check",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.90.0",
