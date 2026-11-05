@@ -49,9 +49,9 @@ jobs:
               - '.oxfmtrc.json'
               - '.nvmrc'
               - '.npmrc'
-              - 'lefthook.yml'
               - 'scripts/**'
-              - 'docker-compose.local.yml'
+              - 'tools/**'
+              - 'docs/**'
               - '.github/workflows/**'
             backend:
               - 'apps/back/**'
@@ -62,6 +62,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
             frontend:
               - 'apps/front/**'
@@ -71,6 +72,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
             admin:
               - 'apps/admin/**'
@@ -80,6 +82,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
 
   quality:
@@ -106,14 +109,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: |
-          pnpm exec oxlint scripts
-          pnpm run lint
+        run: pnpm run lint
 
       - name: Format check
-        run: |
-          pnpm exec oxfmt --check scripts
-          pnpm run fmt:check
+        run: pnpm run fmt:check
+
+      - name: Typecheck packages
+        run: pnpm exec turbo run typecheck --filter="./packages/*"
 
   backend:
     name: Backend tests and coverage
@@ -142,7 +144,9 @@ jobs:
         run: |
           pnpm --filter back typecheck
           pnpm --filter back typecheck:tests
-          pnpm --filter @sarpbc/utils test
+
+      - name: Utils tests
+        run: pnpm --filter @sarpbc/utils test
 
       - name: Migration names
         run: pnpm --filter back test:migrations
