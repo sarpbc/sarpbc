@@ -49,7 +49,7 @@ function toEventListItem(tournament: Tournament, teamId: string, now: number): T
   };
 }
 
-export function splitTeamTournaments(
+function splitTeamTournaments(
   tournaments: Tournament[],
   teamId: string,
   now: number,

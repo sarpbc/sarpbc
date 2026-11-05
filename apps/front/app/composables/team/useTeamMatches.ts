@@ -33,7 +33,7 @@ function isLive(match: ProfileMatchListItem, now: number): boolean {
   return Boolean(match.beginAt) && timeOf(match.beginAt) <= now;
 }
 
-export function splitTeamMatches(matches: ProfileMatchListItem[], now: number): TeamMatchSections {
+function splitTeamMatches(matches: ProfileMatchListItem[], now: number): TeamMatchSections {
   const live: ProfileMatchListItem[] = [];
   const upcoming: ProfileMatchListItem[] = [];
   const past: ProfileMatchListItem[] = [];

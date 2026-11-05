@@ -100,16 +100,14 @@ function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise
   return request;
 }
 
-export async function fetchUpcomingMatches(
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
+async function fetchUpcomingMatches(query?: MatchesListQuery): Promise<UpcomingMatchesResponse> {
   const res = await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
   return normalizeUpcoming(res);
 }
 
-export async function fetchMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+async function fetchMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
   const res = await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });

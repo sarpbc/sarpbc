@@ -9,7 +9,7 @@ export interface PlayerTrophyListItem {
   endAt: Date | string | null;
 }
 
-export function toPlayerTrophyListItem(tournament: Tournament): PlayerTrophyListItem {
+function toPlayerTrophyListItem(tournament: Tournament): PlayerTrophyListItem {
   return {
     id: tournament.id,
     path: tournamentStagePath(tournament.event.slug, tournament.slug),

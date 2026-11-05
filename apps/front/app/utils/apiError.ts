@@ -4,8 +4,6 @@ export const FORUM_ERROR_CODES = {
   REPLY_ALREADY_REPORTED: "REPLY_ALREADY_REPORTED",
 } as const;
 
-export type ForumErrorCode = (typeof FORUM_ERROR_CODES)[keyof typeof FORUM_ERROR_CODES];
-
 export {
   getApiErrorStatus,
   getApiErrorBody,

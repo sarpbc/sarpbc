@@ -72,8 +72,6 @@ export interface MatchResultsResponse {
   total: number;
 }
 
-export type MatchesPageData = UpcomingMatchesResponse | MatchResultsResponse;
-
 export interface TeamFormRecord {
   wins: number;
   losses: number;

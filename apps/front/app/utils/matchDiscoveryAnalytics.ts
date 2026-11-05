@@ -26,9 +26,7 @@ export interface MatchDiscoveryDetailTo {
 
 const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
 
-export function isMatchDiscoverySource(
-  value: MatchDiscoveryQueryValue,
-): value is MatchDiscoverySource {
+function isMatchDiscoverySource(value: MatchDiscoveryQueryValue): value is MatchDiscoverySource {
   if (value == null || Array.isArray(value)) {
     return false;
   }

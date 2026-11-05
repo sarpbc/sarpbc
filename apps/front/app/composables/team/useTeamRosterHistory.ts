@@ -157,7 +157,7 @@ function mergeAdjacentEras(
   return merged;
 }
 
-export function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
+function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
   const normalized = normalizeContracts(contracts, now);
   if (normalized.length === 0) return [];
 

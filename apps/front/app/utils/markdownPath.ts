@@ -25,7 +25,7 @@ function lastSegment(pathname: string): string {
   return slash === -1 ? trimmed : trimmed.slice(slash + 1);
 }
 
-export function isInternalOrAssetPath(pathname: string): boolean {
+function isInternalOrAssetPath(pathname: string): boolean {
   if (SKIP_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix))) {
     return true;
   }

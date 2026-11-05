@@ -1,4 +1,4 @@
-import { formatPrizepool, createCurrencyFormatter } from "~/utils/currencyFormatter";
+import { createCurrencyFormatter } from "~/utils/currencyFormatter";
 
 export const useCurrency = () => {
   const { locale } = useI18n();
@@ -12,6 +12,5 @@ export const useCurrency = () => {
 
   return {
     formatTournamentPrizepool,
-    formatPrizepool,
   };
 };

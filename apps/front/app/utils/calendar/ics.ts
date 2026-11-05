@@ -3,7 +3,7 @@ import type { MatchLinkTarget } from "~/types/matches";
 
 /** RFC 5545: fold lines at 75 octets; escape TEXT values. */
 
-export const ICS_PROD_ID = "-//sarpbc.org//EN";
+const ICS_PROD_ID = "-//sarpbc.org//EN";
 export const SITE_ORIGIN = "https://sarpbc.org";
 
 const FOLD_OCTETS = 75;
@@ -38,14 +38,14 @@ export function matchEventUid(id: string): string {
   return `match-${id}@sarpbc.org`;
 }
 
-export function formatIcsUtc(date: Date): string {
+function formatIcsUtc(date: Date): string {
   return date
     .toISOString()
     .replace(/[-:]/g, "")
     .replace(/\.\d{3}/, "");
 }
 
-export function escapeIcsText(value: string): string {
+function escapeIcsText(value: string): string {
   return value
     .replace(/\\/g, "\\\\")
     .replace(/\n/g, "\\n")
@@ -53,7 +53,7 @@ export function escapeIcsText(value: string): string {
     .replace(/,/g, "\\,");
 }
 
-export function foldIcsLine(line: string): string {
+function foldIcsLine(line: string): string {
   const encoder = new TextEncoder();
   if (encoder.encode(line).length <= FOLD_OCTETS) {
     return line;

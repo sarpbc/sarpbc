@@ -58,7 +58,7 @@ function toEventListItem(
   };
 }
 
-export function splitPlayerTournaments(
+function splitPlayerTournaments(
   tournaments: Tournament[],
   playerId: string,
   now: number,
