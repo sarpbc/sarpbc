@@ -54,7 +54,7 @@ export class MatchStatsImport {
 
 export const MatchGameSchema = defineEntity({
   class: MatchGame,
-  uniques: [{ properties: ["ballchasingId"] }],
+  uniques: [{ properties: ["ballchasingId"] }, { properties: ["match", "number"] }],
   indexes: [{ properties: ["match"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),

@@ -440,6 +440,7 @@
           "unknown_teams": "Aucun match de ce tournoi n’oppose ces deux équipes. Vérifiez les rosters et les noms d’équipe.",
           "outside_match_window": "Les équipes correspondent, mais la date du replay ne tombe dans aucun créneau de match. Vérifiez les dates des matchs.",
           "ambiguous_match": "Plusieurs matchs correspondent à ce replay. Vérifiez les dates des matchs.",
+          "match_not_finished": "Le match n’est pas terminé ou son score n’a pas été saisi. Relancez l’import une fois le résultat connu.",
           "match_has_other_stats": "Ce match a déjà des stats issues d’autres replays.",
           "incomplete_series": "Il y a moins de replays que de games au score, l’ordre des games est donc inconnu. Ajoutez les replays manquants au groupe.",
           "inconsistent_series": "Les replays ne concordent pas avec le score ou le format du match. Vérifiez le score."

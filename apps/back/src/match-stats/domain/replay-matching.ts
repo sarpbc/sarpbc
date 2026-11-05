@@ -35,6 +35,7 @@ export interface CandidateMatch {
   id: string;
   beginAt: Date | null;
   endAt: Date | null;
+  finished: boolean;
   numberOfGames: number | null;
   participants: CandidateParticipant[];
   /** Series score by participant id; empty when the match has no recorded result. */
@@ -164,7 +165,7 @@ function seriesProblem(
     wins.set(winner, (wins.get(winner) ?? 0) + 1);
   }
   const played = [...match.scores.values()].reduce((sum, score) => sum + score, 0);
-  if (played === 0) return null;
+  if (!match.finished || played === 0) return "match_not_finished";
   for (const [participantId, won] of wins)
     if (won > (match.scores.get(participantId) ?? 0)) return "inconsistent_series";
   return games.length < played ? "incomplete_series" : null;

@@ -1,5 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { MatchGameStats, MatchGameTeamStats } from "@sarpbc/types";
+import { Match as CompetitionMatch } from "../../../tournament/domain/competition";
 import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import type {
   GameRecord,
@@ -114,6 +115,10 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
       id: match.id,
       beginAt: match.beginAt,
       endAt: match.endAt,
+      finished: Object.assign(new CompetitionMatch(), {
+        status: match.status,
+        endAt: match.endAt,
+      }).hasEnded(),
       numberOfGames: match.numberOfGames,
       participants: match.participants.getItems().map((participant) => ({
         id: participant.id,

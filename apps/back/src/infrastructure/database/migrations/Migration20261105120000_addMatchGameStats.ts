@@ -11,6 +11,9 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
     this.addSql(
       `alter table "match_game" add constraint "match_game_ballchasing_id_unique" unique ("ballchasing_id");`,
     );
+    this.addSql(
+      `alter table "match_game" add constraint "match_game_match_id_number_unique" unique ("match_id", "number");`,
+    );
 
     this.addSql(
       `create table "match_game_player" ("id" uuid not null default gen_random_uuid(), "game_id" uuid not null, "side" text not null, "player_id" uuid null, "name" text not null, "platform" text not null, "platform_id" text null, "goals" int not null, "assists" int not null, "saves" int not null, "shots" int not null, "demolitions" int not null, primary key ("id"));`,

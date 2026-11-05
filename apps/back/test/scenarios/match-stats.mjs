@@ -48,6 +48,14 @@ export async function verifyMatchStats({
     new MikroOrmGameStatsStore(orm.em.fork()).save({ ...game, number: 2 }),
     "the Ballchasing replay id is unique",
   );
+  await assert.rejects(
+    new MikroOrmGameStatsStore(orm.em.fork()).save({
+      ...game,
+      ballchasingId: "integration-replay-other",
+      rocketLeagueId: "RL-other",
+    }),
+    "a match holds one game per number",
+  );
   assert.equal(
     await orm.em.fork().count(MatchGamePlayer, {}),
     2,
@@ -83,6 +91,7 @@ export async function verifyMatchStats({
   assert.deepEqual(candidate.storedReplayIds, ["integration-replay-1"]);
   assert.equal(candidate.participants.length, 2);
   assert.equal(candidate.scores.size, 2);
+  assert.equal(candidate.finished, true);
 
   const imports = new MikroOrmStatsImportStore(orm.em.fork());
   await imports.create({

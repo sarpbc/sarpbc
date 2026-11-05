@@ -25,6 +25,7 @@ const candidate: CandidateMatch = {
   id: "m1",
   beginAt: new Date("2026-06-01T18:00:00Z"),
   endAt: null,
+  finished: true,
   numberOfGames: 5,
   participants: [
     { id: "p-kc", teamName: "Karmine Corp", players: KC.map((name) => ({ id: name, name })) },

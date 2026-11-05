@@ -29,6 +29,7 @@ export type StatsImportUnmatchedReason =
   | "unknown_teams"
   | "outside_match_window"
   | "ambiguous_match"
+  | "match_not_finished"
   | "match_has_other_stats"
   | "incomplete_series"
   | "inconsistent_series";

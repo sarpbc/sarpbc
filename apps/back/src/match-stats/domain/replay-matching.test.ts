@@ -44,6 +44,13 @@ function at(iso: string): Date {
   return new Date(iso);
 }
 
+function won(winner: CandidateParticipant, loser: CandidateParticipant, games = 1) {
+  return new Map([
+    [winner.id, games],
+    [loser.id, 0],
+  ]);
+}
+
 function match(
   id: string,
   participants: CandidateParticipant[],
@@ -54,6 +61,7 @@ function match(
     id,
     beginAt: beginAt ? at(beginAt) : null,
     endAt: null,
+    finished: true,
     numberOfGames: 5,
     participants,
     scores: new Map(),
@@ -131,7 +139,7 @@ describe("assignReplays", () => {
   });
 
   it("recognises tagged and punctuated in-game names without team names", () => {
-    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["KC Vatira", "Atow.", "kc rise"], goals: 1, name: "BLUE" },
@@ -142,7 +150,7 @@ describe("assignReplays", () => {
   });
 
   it("accepts one substitute on the roster majority", () => {
-    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["Vatira", "Atow", "Stand-in"], goals: 1 },
@@ -153,7 +161,7 @@ describe("assignReplays", () => {
   });
 
   it("needs the team name when two substitutes leave a single known player", () => {
-    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const named = replay(
       "2026-06-01T18:10:00Z",
       { names: ["Vatira", "Sub One", "Sub Two"], goals: 1, name: "KARMINE CORP" },
@@ -173,7 +181,9 @@ describe("assignReplays", () => {
 
   it("uses team names alone only when the participant has no known roster", () => {
     const unknownRoster = { ...vit, players: [] };
-    const m = match("m1", [unknownRoster, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [unknownRoster, bds], "2026-06-01T18:00:00Z", {
+      scores: won(unknownRoster, bds),
+    });
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
@@ -199,8 +209,11 @@ describe("assignReplays", () => {
   it("separates rematches between the same teams on different days", () => {
     const groups = match("groups", [kc, bds], "2026-05-28T15:00:00Z", {
       endAt: at("2026-05-28T16:10:00Z"),
+      scores: won(kc, bds),
     });
-    const playoffs = match("playoffs", [bds, kc], "2026-06-01T18:00:00Z");
+    const playoffs = match("playoffs", [bds, kc], "2026-06-01T18:00:00Z", {
+      scores: won(kc, bds),
+    });
     const early = replay(
       "2026-05-28T15:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -219,8 +232,8 @@ describe("assignReplays", () => {
   });
 
   it("splits a same-day upper final and grand final by the latest started match", () => {
-    const upper = match("upper", [kc, bds], "2026-06-01T14:00:00Z");
-    const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z");
+    const upper = match("upper", [kc, bds], "2026-06-01T14:00:00Z", { scores: won(kc, bds) });
+    const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(bds, kc) });
     const upperGame = replay(
       "2026-06-01T14:30:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -268,7 +281,7 @@ describe("assignReplays", () => {
   });
 
   it("tolerates an unknown timezone when a single match fits", () => {
-    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const game = replay(
       "2026-06-01T11:10:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -312,7 +325,7 @@ describe("assignReplays", () => {
   });
 
   it("keeps the first upload of a game and reports the duplicate", () => {
-    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+    const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const original = replay(
       "2026-06-01T18:10:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -398,6 +411,29 @@ describe("assignReplays", () => {
 
     expect(byReplay(assignReplays([game], [m]))).toEqual({
       [game.id]: "unmatched:match_has_other_stats@m1",
+    });
+  });
+
+  it("holds back matches that are not finished or have no recorded score", () => {
+    const live = match("live", [kc, bds], "2026-06-01T18:00:00Z", {
+      finished: false,
+      scores: won(kc, bds),
+    });
+    const unscored = match("unscored", [kc, vit], "2026-06-02T18:00:00Z");
+    const liveGame = replay(
+      "2026-06-01T18:05:00Z",
+      { names: KC_NAMES, goals: 1 },
+      { names: BDS_NAMES, goals: 0 },
+    );
+    const unscoredGame = replay(
+      "2026-06-02T18:05:00Z",
+      { names: KC_NAMES, goals: 1 },
+      { names: VIT_NAMES, goals: 0 },
+    );
+
+    expect(byReplay(assignReplays([liveGame, unscoredGame], [live, unscored]))).toEqual({
+      [liveGame.id]: "unmatched:match_not_finished@live",
+      [unscoredGame.id]: "unmatched:match_not_finished@unscored",
     });
   });
 

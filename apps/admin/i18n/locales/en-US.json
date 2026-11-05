@@ -440,6 +440,7 @@
           "unknown_teams": "No match in this tournament has both teams. Check the rosters and team names.",
           "outside_match_window": "The teams match, but the replay date is outside every match time. Check the match dates.",
           "ambiguous_match": "Several matches fit this replay. Check the match dates.",
+          "match_not_finished": "The match is not finished or has no recorded score. Import again once the result is in.",
           "match_has_other_stats": "This match already has stats from other replays.",
           "incomplete_series": "Fewer replays than games in the score, so game numbers are unknown. Add the missing replays to the group.",
           "inconsistent_series": "The replays do not agree with the match score or format. Check the score."
