@@ -6,13 +6,7 @@ export type { StaffRole, StaffPermission, User } from "./user";
 export type { Player } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
 export type { Team } from "./team";
-export type {
-  ContractRole,
-  PlayerContract,
-  PlayerContractRole,
-  StaffContractRole,
-  TeamContract,
-} from "./contract";
+export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";
 export type { League } from "./league";
 export type { TournamentEventRef } from "./tournament-event";
@@ -75,7 +69,7 @@ export const TRANSFER_TYPES = [
   "staff",
 ] as const satisfies readonly TransferType[];
 
-export const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
+const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
 
 export const STAFF_CONTRACT_ROLES = ["coach", "assistant_coach", "analyst", "manager"] as const;
 

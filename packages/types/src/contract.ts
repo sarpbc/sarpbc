@@ -1,6 +1,4 @@
-import type { CONTRACT_ROLES, PLAYER_CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./index";
-
-export type PlayerContractRole = (typeof PLAYER_CONTRACT_ROLES)[number];
+import type { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./index";
 
 export type StaffContractRole = (typeof STAFF_CONTRACT_ROLES)[number];
 

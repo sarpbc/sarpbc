@@ -6,7 +6,6 @@ export {
   type ApiErrorBody,
 } from "./api-error.ts";
 export {
-  NEWS_EXCERPT_MAX_LENGTH,
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   excerptFromNewsContent,
   newsContentToPlainText,
@@ -14,19 +13,10 @@ export {
 export { readingTimeMinutes } from "./news-reading-time.ts";
 export { INDEXNOW_KEY_PATTERN } from "./indexnow.ts";
 export { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "./twitch.ts";
+export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week.ts";
 export {
-  ISO_WEEK_ID_PATTERN,
-  formatIsoWeekId,
-  isoWeekIdFromDate,
-  isoWeekUtcRange,
-  parseIsoWeekId,
-  type IsoWeekId,
-} from "./iso-week.ts";
-export {
-  NEWS_ENTITY_TAG_PATTERN,
   parseNewsEntityTag,
   serializeNewsEntityTag,
-  type NewsEntityTag,
   type NewsEntityTagKind,
 } from "./news-entity-tag.ts";
 export {
@@ -41,30 +31,20 @@ export {
   parseNewsMatchBlockKey,
   parseNewsMatchTag,
   serializeNewsMatchTag,
-  stripNewsMatchTags,
   type NewsMatchBlock,
   type NewsMatchBlockAttrs,
   type NewsMatchBlockKind,
-  type NewsMatchTag,
 } from "./news-match-block.ts";
 export {
   isTweetImageUrl,
   parseNewsTweetTag,
   parseTweetUrl,
   serializeNewsTweetTag,
-  stripNewsTweetTags,
   tweetImageProxyPath,
-  type NewsTweetTag,
   type ParsedTweetUrl,
   type TweetEmbed,
 } from "./news-tweet-tag.ts";
-export {
-  ACTIVE_ROSTER_LIMIT,
-  isActiveRosterPlayer,
-  isStaffContractRole,
-  selectActiveRosterPlayers,
-  selectTeamStaff,
-} from "./team-roster.ts";
+export { selectActiveRosterPlayers, selectTeamStaff } from "./team-roster.ts";
 export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo.ts";
 export {
   MAX_VODS_PER_GAME,
@@ -72,7 +52,6 @@ export {
   isIso6391Code,
   parseMatchVodUrl,
   type MatchVodUrlError,
-  type ParsedMatchVodUrl,
 } from "./match-vod.ts";
 export {
   MAX_PRIZE_AMOUNT,
@@ -89,7 +68,6 @@ export {
   matchSlug,
   stageSlug,
   toSlug,
-  type MatchSlugInput,
 } from "./entity-slug.ts";
 export {
   forumPostPath,
@@ -102,8 +80,6 @@ export {
   hasFrenchTranslation,
   localizedNewsFields,
   type NewsLocale,
-  type NewsTranslationFields,
-  type NewsLocalizableFields,
   type LocalizedNewsFields,
 } from "./news-locale.ts";
 export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api.ts";
