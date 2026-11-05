@@ -1,1 +1,0 @@
-export const HEALTH_PING_TIMEOUT_MS = 1000;

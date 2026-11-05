@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PandascoreIncidentType } from "./dto/incident.dto";
 import { z } from "zod";
 
 import { PandascoreApiError } from "./pandascore-api.errors";
@@ -11,22 +10,18 @@ export interface PandascoreQueryParams {
   per_page?: string;
   sort?: string;
   since?: string;
-  type?: PandascoreIncidentType[];
   videogame?: string[];
 }
 
 export interface PandascoreRequestOptions {
   params?: PandascoreQueryParams;
-  paginate?: boolean;
   perPage?: number;
   rateLimitMs?: number;
 }
 
 export interface ListIncidentsClientParams {
   since?: Date;
-  type?: PandascoreIncidentType[];
   videogame?: string[];
-  page?: number;
   perPage?: number;
   sort?: "modified_at" | "-modified_at" | "id" | "-id";
 }
@@ -50,16 +45,12 @@ export class PandascoreApiClient {
 
   async listIncidents(params: ListIncidentsClientParams = {}): Promise<unknown[]> {
     const query: PandascoreQueryParams = {
-      page: String(params.page ?? 1),
       per_page: String(params.perPage ?? 100),
       sort: params.sort ?? "modified_at",
     };
 
     if (params.since) {
       query.since = params.since.toISOString();
-    }
-    if (params.type?.length) {
-      query.type = params.type;
     }
     if (params.videogame?.length) {
       query.videogame = params.videogame;

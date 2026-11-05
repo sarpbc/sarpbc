@@ -37,7 +37,7 @@ export class AirRiddleService {
       if (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) return null;
       const player = await this.players.getRandomPlayer();
       if (!player) {
-        this.runtime.skipped("no_player");
+        this.runtime.skipped();
         return null;
       }
       const riddle = {

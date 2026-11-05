@@ -124,6 +124,6 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
 
 export function withPublicSlug(
   match: Match,
-): Omit<Match, "slug" | "hasEnded" | "isDecided" | "stampEnd"> & { slug: string } {
+): Omit<Match, "hasEnded" | "isDecided" | "stampEnd"> & { slug: string } {
   return { ...match, slug: matchPublicSlug(match) };
 }

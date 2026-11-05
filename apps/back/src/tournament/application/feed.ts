@@ -89,9 +89,7 @@ export type CompetitionIncident = { id: number; modifiedAt: Date } & (
 
 export interface ListIncidentsParams {
   since?: Date;
-  type?: IncidentKind[];
   videogame?: string[];
-  page?: number;
   perPage?: number;
   sort?: "modified_at" | "-modified_at" | "id" | "-id";
 }

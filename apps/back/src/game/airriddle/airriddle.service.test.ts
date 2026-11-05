@@ -35,7 +35,7 @@ describe("AirRiddleService", () => {
     players.getRandomPlayer.mockResolvedValue(null);
     expect(await service.createAirRiddle()).toBeNull();
     expect(repository.save).not.toHaveBeenCalled();
-    expect(runtime.skipped).toHaveBeenCalledWith("no_player");
+    expect(runtime.skipped).toHaveBeenCalledOnce();
   });
   it("reports persistence failure without rethrowing", async () => {
     const failure = new Error("db down");

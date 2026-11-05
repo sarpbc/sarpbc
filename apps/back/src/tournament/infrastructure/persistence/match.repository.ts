@@ -53,10 +53,6 @@ const HEAD_TO_HEAD_POPULATE = [
 ] as const;
 
 export class MatchRepository extends EntityRepository<Match> {
-  async findByPandascoreId(pandascoreId: number): Promise<Match | null> {
-    return this.findOne({ pandascoreId });
-  }
-
   async findUpcoming({
     limit = 20,
     offset = 0,

@@ -9,7 +9,7 @@ import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type { TournamentQueries, MatchQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 import type { MatchListQueryOptions } from "../../application/match/match-list-filters";
-export const TOURNAMENT_DETAIL_POPULATE = [
+const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
   "winner.team",

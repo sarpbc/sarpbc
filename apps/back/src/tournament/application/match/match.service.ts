@@ -66,16 +66,8 @@ export class MatchService {
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
 
-  async findUpcoming(options: MatchListQueryOptions = {}): Promise<Match[]> {
-    return (await this.reads.list("upcoming", options))[0];
-  }
-
   async findLive(options: MatchListQueryOptions = {}): Promise<Match[]> {
     return (await this.reads.list("live", options))[0];
-  }
-
-  async findResults(options: MatchListQueryOptions = {}): Promise<Match[]> {
-    return (await this.reads.list("results", options))[0];
   }
 
   async findUpcomingAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {

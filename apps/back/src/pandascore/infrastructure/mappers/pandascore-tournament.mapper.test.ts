@@ -111,7 +111,6 @@ describe("PandascoreTournamentMapper", () => {
               birthday: new Date("2007-01-01"),
               nationality: "FR",
               imageUrl: undefined,
-              teamSlug: "team-vitality",
               role: null,
             },
           ],

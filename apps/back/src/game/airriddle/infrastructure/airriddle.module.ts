@@ -24,7 +24,8 @@ import { RosterModule } from "../../../roster/infrastructure/roster.module";
           dayStart: () => DateTime.now().setZone("Europe/Berlin").startOf("day").toJSDate(),
           now: () => new Date(),
           id: v4,
-          skipped: (reason) => log.info({ component: "AirRiddleService", skipped: true, reason }),
+          skipped: () =>
+            log.info({ component: "AirRiddleService", skipped: true, reason: "no_player" }),
           error: (error) => log.error({ component: "AirRiddleService", error }),
         }),
       inject: [EntityManager, PlayerService],

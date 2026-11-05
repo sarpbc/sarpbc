@@ -57,7 +57,6 @@ describe("PandascoreApiClient", () => {
     const incidents = await client.listIncidents({
       since,
       videogame: ["rl"],
-      type: ["match", "tournament"],
       perPage: 1,
     });
 
@@ -69,9 +68,6 @@ describe("PandascoreApiClient", () => {
     expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
     expect(firstCallUrl).toContain("videogame=rl");
     expect(firstCallUrl).not.toContain("videogame%5B%5D=");
-    expect(firstCallUrl).toContain("type=match");
-    expect(firstCallUrl).toContain("type=tournament");
-    expect(firstCallUrl).not.toContain("type%5B%5D=");
   });
 
   it("getTournaments merges past, upcoming, and running", async () => {

@@ -11,7 +11,7 @@ export class PandascorePlayerMapper {
     };
   }
 
-  static toUpsertCommand(dto: PlayerDto, teamSlug?: string): UpsertPlayerCommand {
+  static toUpsertCommand(dto: PlayerDto): UpsertPlayerCommand {
     return {
       pandascoreId: dto.id,
       name: dto.name,
@@ -22,7 +22,6 @@ export class PandascorePlayerMapper {
       nationality: dto.nationality,
       imageUrl: dto.image_url ?? undefined,
       role: dto.role,
-      teamSlug,
     };
   }
 }
