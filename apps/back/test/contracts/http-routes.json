@@ -960,6 +960,22 @@
     "permissions": ["\"tournaments.manage\""]
   },
   {
+    "controller": "\"tournaments/:id/stats-players\"",
+    "verb": "GET",
+    "path": "\"unlinked\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-players\"",
+    "verb": "PUT",
+    "path": "\"link\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
     "controller": "\"tournaments\"",
     "verb": "DELETE",
     "path": "\":id/awards/:awardId\"",

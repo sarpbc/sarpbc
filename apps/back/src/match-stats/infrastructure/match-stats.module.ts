@@ -6,20 +6,40 @@ import { log } from "evlog";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { MatchGamesService } from "../application/match-games.service";
 import { StatsImportService } from "../application/stats-import.service";
+import { StatsPlayerLinkService } from "../application/stats-player-link.service";
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
 import { StatsImportController } from "./http/stats-import.controller";
-import { MatchGame, MatchGamePlayer, MatchStatsImport } from "./persistence/match-stats.entities";
+import { StatsPlayerLinkController } from "./http/stats-player-link.controller";
+import {
+  MatchGame,
+  MatchGamePlayer,
+  MatchStatsImport,
+  PlayerPlatformLink,
+} from "./persistence/match-stats.entities";
 import {
   MikroOrmGameStatsStore,
+  MikroOrmPlayerLinkStore,
   MikroOrmStatsCandidates,
   MikroOrmStatsImportStore,
 } from "./persistence/match-stats.store";
 import { StatsImportRunner } from "./stats-import.runner";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([MatchGame, MatchGamePlayer, MatchStatsImport]), UserModule],
-  controllers: [StatsImportController],
+  imports: [
+    MikroOrmModule.forFeature([MatchGame, MatchGamePlayer, MatchStatsImport, PlayerPlatformLink]),
+    UserModule,
+  ],
+  controllers: [StatsImportController, StatsPlayerLinkController],
   providers: [
+    {
+      provide: StatsPlayerLinkService,
+      useFactory: (em: EntityManager) =>
+        new StatsPlayerLinkService(
+          new MikroOrmStatsCandidates(em),
+          new MikroOrmPlayerLinkStore(em),
+        ),
+      inject: [EntityManager],
+    },
     {
       provide: MatchGamesService,
       useFactory: (em: EntityManager) => new MatchGamesService(new MikroOrmGameStatsStore(em)),

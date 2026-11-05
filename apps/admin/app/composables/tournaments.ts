@@ -1,11 +1,14 @@
 import type {
   PlayerAwardType,
   StatsImport,
+  StatsPlayerLinkInput,
+  StatsPlayerLinkResult,
   TournamentAwardListItem,
   TournamentDetail,
   TournamentListItem,
   TournamentMatchListItem,
   TournamentPrizes,
+  UnlinkedStatsPlayer,
 } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
@@ -334,5 +337,25 @@ export async function requestStatsImport(
   return apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
     method: "POST",
     body: { group },
+  });
+}
+
+export async function getUnlinkedStatsPlayers(
+  tournamentId: string,
+): Promise<UnlinkedStatsPlayer[]> {
+  const res = await apiFetch<{ players: UnlinkedStatsPlayer[] }>(
+    `/tournaments/${tournamentId}/stats-players/unlinked`,
+    { method: "GET" },
+  );
+  return res.players;
+}
+
+export async function linkStatsPlayer(
+  tournamentId: string,
+  body: StatsPlayerLinkInput,
+): Promise<StatsPlayerLinkResult> {
+  return apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
+    method: "PUT",
+    body,
   });
 }

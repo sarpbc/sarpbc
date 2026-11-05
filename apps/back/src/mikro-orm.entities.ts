@@ -42,6 +42,7 @@ import {
   MatchGameSchema,
   MatchGamePlayerSchema,
   MatchStatsImportSchema,
+  PlayerPlatformLinkSchema,
 } from "./match-stats/infrastructure/persistence/match-stats.entities";
 
 export const mikroOrmEntities = [
@@ -62,6 +63,7 @@ export const mikroOrmEntities = [
   MatchGameSchema,
   MatchGamePlayerSchema,
   MatchStatsImportSchema,
+  PlayerPlatformLinkSchema,
   PlayerAwardSchema,
   TournamentPrizeSchema,
   TopicSchema,

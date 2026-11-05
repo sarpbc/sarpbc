@@ -38,6 +38,13 @@ export class MatchGamePlayer {
   demolitions!: number;
 }
 
+export class PlayerPlatformLink {
+  id!: string;
+  platform!: string;
+  platformId!: string;
+  player!: Player;
+}
+
 export class MatchStatsImport {
   id!: string;
   tournament!: Tournament;
@@ -88,6 +95,18 @@ export const MatchGamePlayerSchema = defineEntity({
     saves: p.integer(),
     shots: p.integer(),
     demolitions: p.integer(),
+  },
+});
+
+export const PlayerPlatformLinkSchema = defineEntity({
+  class: PlayerPlatformLink,
+  uniques: [{ properties: ["platform", "platformId"] }],
+  indexes: [{ properties: ["player"] }],
+  properties: {
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    platform: p.text(),
+    platformId: p.text(),
+    player: p.manyToOne(Player).deleteRule("cascade"),
   },
 });
 

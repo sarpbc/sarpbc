@@ -42,6 +42,9 @@ export type {
   StatsImportItem,
   StatsImportStatus,
   StatsImportUnmatchedReason,
+  StatsPlayerLinkInput,
+  StatsPlayerLinkResult,
+  UnlinkedStatsPlayer,
 } from "./match-stats";
 export type { ForumPost } from "./forum";
 export type {

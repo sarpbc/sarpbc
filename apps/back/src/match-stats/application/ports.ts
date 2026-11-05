@@ -1,4 +1,4 @@
-import type { MatchGameStats } from "@sarpbc/types";
+import type { MatchGameStats, UnlinkedStatsPlayer } from "@sarpbc/types";
 import type { CandidateMatch, ReplaySummary, Side } from "../domain/replay-matching";
 import type { StatsImport } from "../domain/stats-import";
 
@@ -36,6 +36,15 @@ export interface GamePlayerRecord extends ReplayPlayerStats {
   playerId: string | null;
 }
 
+export interface PlatformAccount {
+  platform: string;
+  platformId: string;
+}
+
+export interface PlayerLink extends PlatformAccount {
+  playerId: string;
+}
+
 export interface GameRecord {
   matchId: string;
   number: number;
@@ -47,13 +56,26 @@ export interface GameRecord {
   blueGoals: number;
   orangeGoals: number;
   players: GamePlayerRecord[];
+  /** Links taught by unique roster-name matches; an existing link is never replaced. */
+  learnedLinks: PlayerLink[];
 }
 
 export interface GameStatsStore {
   importedReplayIds(replayIds: string[]): Promise<Set<string>>;
-  /** Saves the game and its player rows atomically. */
+  links(accounts: PlatformAccount[]): Promise<PlayerLink[]>;
+  /**
+   * Saves the game, its player rows and its learned links atomically, and links earlier
+   * unlinked rows of each learned account.
+   */
   save(game: GameRecord): Promise<void>;
   byMatch(matchId: string): Promise<MatchGameStats[]>;
+}
+
+export interface PlayerLinkStore {
+  unlinked(tournamentId: string): Promise<UnlinkedStatsPlayer[]>;
+  onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean>;
+  /** Replaces the account's link and repoints all its stat rows atomically; returns the rows repointed. */
+  link(link: PlayerLink): Promise<number>;
 }
 
 export interface StatsImportStore {

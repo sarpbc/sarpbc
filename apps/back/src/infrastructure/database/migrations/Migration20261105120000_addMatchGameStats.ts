@@ -26,6 +26,16 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
     );
 
     this.addSql(
+      `create table "player_platform_link" ("id" uuid not null default gen_random_uuid(), "platform" text not null, "platform_id" text not null, "player_id" uuid not null, primary key ("id"));`,
+    );
+    this.addSql(
+      `create index "player_platform_link_player_id_index" on "player_platform_link" ("player_id");`,
+    );
+    this.addSql(
+      `alter table "player_platform_link" add constraint "player_platform_link_platform_platform_id_unique" unique ("platform", "platform_id");`,
+    );
+
+    this.addSql(
       `create table "match_stats_import" ("id" uuid not null, "tournament_id" varchar(255) not null, "group_id" text not null, "status" text not null, "total" int null, "processed" int not null default 0, "items" jsonb not null default '[]', "error" text null, "created_at" timestamptz not null, "started_at" timestamptz null, "finished_at" timestamptz null, primary key ("id"));`,
     );
     this.addSql(
@@ -48,6 +58,9 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
       `alter table "match_game_player" add constraint "match_game_player_player_id_foreign" foreign key ("player_id") references "player" ("id") on update cascade on delete set null;`,
     );
     this.addSql(
+      `alter table "player_platform_link" add constraint "player_platform_link_player_id_foreign" foreign key ("player_id") references "player" ("id") on update cascade on delete cascade;`,
+    );
+    this.addSql(
       `alter table "match_stats_import" add constraint "match_stats_import_tournament_id_foreign" foreign key ("tournament_id") references "tournament" ("id") on update cascade on delete cascade;`,
     );
   }
@@ -55,6 +68,7 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
   override down(): void | Promise<void> {
     this.addSql(`drop table if exists "match_game_player" cascade;`);
     this.addSql(`drop table if exists "match_game" cascade;`);
+    this.addSql(`drop table if exists "player_platform_link" cascade;`);
     this.addSql(`drop table if exists "match_stats_import" cascade;`);
   }
 }

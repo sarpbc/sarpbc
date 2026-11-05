@@ -16,7 +16,9 @@ import {
 import { isActive, type StatsImport } from "../domain/stats-import";
 import type {
   BallchasingSource,
+  GameRecord,
   GameStatsStore,
+  PlayerLink,
   ReplayStats,
   StatsCandidates,
   StatsImportStore,
@@ -157,7 +159,11 @@ export class StatsImportService {
       return { ...target, status: "failed", reason: "player_mismatch" };
 
     try {
-      await this.games.save(this.record(assignment, stats, rosters));
+      const accounts = stats.players.flatMap(({ platform, platformId }) =>
+        platformId ? [{ platform, platformId }] : [],
+      );
+      const links = await this.games.links(accounts);
+      await this.games.save(this.record(assignment, stats, rosters, links));
     } catch (error) {
       this.reportFailure(error);
       return { ...target, status: "failed", reason: "save_failed" };
@@ -169,7 +175,19 @@ export class StatsImportService {
     { replay, matchId, gameNumber, sides }: Matched,
     stats: ReplayStats,
     rosters: Map<string, RosterPlayer[]>,
-  ) {
+    links: PlayerLink[],
+  ): GameRecord {
+    const learnedLinks: PlayerLink[] = [];
+    const players = stats.players.map((player) => {
+      const { platform, platformId } = player;
+      const linked = links.find(
+        (link) => link.platform === platform && link.platformId === platformId,
+      );
+      if (linked) return { ...player, playerId: linked.playerId };
+      const playerId = resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []);
+      if (playerId && platformId) learnedLinks.push({ platform, platformId, playerId });
+      return { ...player, playerId };
+    });
     return {
       matchId,
       number: gameNumber,
@@ -180,10 +198,8 @@ export class StatsImportService {
       orangeParticipantId: sides.orange,
       blueGoals: stats.blueGoals,
       orangeGoals: stats.orangeGoals,
-      players: stats.players.map((player) => ({
-        ...player,
-        playerId: resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []),
-      })),
+      players,
+      learnedLinks,
     };
   }
 }

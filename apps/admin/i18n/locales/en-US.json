@@ -453,6 +453,21 @@
           "save_failed": "The stats could not be saved. Run the import again."
         }
       },
+      "statsLinks": {
+        "title": "Unlinked players",
+        "hint": "These stats keep the in-game name because it matches nobody on the team's roster. Choose the player to link the account: every game of this account, in all tournaments, moves to that player and later imports reuse the link.",
+        "loading": "Loading…",
+        "loadError": "Could not load the unlinked players.",
+        "retry": "Try Again",
+        "empty": "Every imported player with an account id is linked.",
+        "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
+        "choose": "Choose a player",
+        "noRoster": "No roster for this team",
+        "playerFor": "Player for {name}",
+        "save": "Link",
+        "saved": "{name} linked",
+        "saveError": "Could not link the player"
+      },
       "prizes": {
         "title": "Prize Distribution",
         "hint": "Enter the amount each team earned, in the currency the source states. Amounts are never converted. Listed players share the prize equally on their profiles.",

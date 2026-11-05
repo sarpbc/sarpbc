@@ -246,5 +246,10 @@ async function submit() {
         </ul>
       </div>
     </div>
+
+    <TournamentStatsPlayerLinks
+      :tournament-id="tournamentId"
+      :refresh-key="latest?.finishedAt ?? null"
+    />
   </section>
 </template>

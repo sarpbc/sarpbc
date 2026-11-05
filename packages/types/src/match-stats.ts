@@ -21,6 +21,27 @@ export interface MatchGameStats {
   teams: MatchGameTeamStats[];
 }
 
+export interface UnlinkedStatsPlayer {
+  platform: string;
+  platformId: string;
+  /** In-game name of the most recent game. */
+  name: string;
+  team: { participantId: string; name: string };
+  games: number;
+  roster: { id: string; name: string }[];
+}
+
+export interface StatsPlayerLinkInput {
+  platform: string;
+  platformId: string;
+  playerId: string;
+}
+
+export interface StatsPlayerLinkResult {
+  link: StatsPlayerLinkInput;
+  linkedRows: number;
+}
+
 export type StatsImportStatus = "pending" | "running" | "completed" | "failed";
 
 export type StatsImportUnmatchedReason =

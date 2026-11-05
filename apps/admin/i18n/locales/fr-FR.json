@@ -453,6 +453,21 @@
           "save_failed": "Les stats n’ont pas pu être enregistrées. Relancez l’import."
         }
       },
+      "statsLinks": {
+        "title": "Joueurs non reliés",
+        "hint": "Ces stats gardent le pseudo en jeu, car il ne correspond à personne dans le roster de l’équipe. Choisissez le joueur à relier au compte : toutes les games de ce compte, dans tous les tournois, lui sont attribuées et les prochains imports réutilisent ce lien.",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les joueurs non reliés.",
+        "retry": "Réessayer",
+        "empty": "Tous les joueurs importés qui ont un identifiant de compte sont reliés.",
+        "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
+        "choose": "Choisir un joueur",
+        "noRoster": "Aucun roster pour cette équipe",
+        "playerFor": "Joueur correspondant à {name}",
+        "save": "Relier",
+        "saved": "{name} relié",
+        "saveError": "Impossible de relier le joueur"
+      },
       "prizes": {
         "title": "Répartition des gains",
         "hint": "Saisissez le montant remporté par chaque équipe, dans la devise indiquée par la source. Les montants ne sont jamais convertis. Les joueurs listés se partagent le gain à parts égales sur leur profil.",

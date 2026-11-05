@@ -1,16 +1,28 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import type { MatchGameStats, MatchGameTeamStats } from "@sarpbc/types";
+import type { MatchGameStats, MatchGameTeamStats, UnlinkedStatsPlayer } from "@sarpbc/types";
 import { Match as CompetitionMatch } from "../../../tournament/domain/competition";
-import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
+import {
+  Match,
+  Tournament,
+  TournamentParticipant,
+} from "../../../tournament/infrastructure/competition-persistence";
 import type {
   GameRecord,
   GameStatsStore,
+  PlatformAccount,
+  PlayerLink,
+  PlayerLinkStore,
   StatsCandidates,
   StatsImportStore,
 } from "../../application/ports";
 import type { CandidateMatch, Side } from "../../domain/replay-matching";
 import type { StatsImport } from "../../domain/stats-import";
-import { MatchGame, MatchGamePlayer, MatchStatsImport } from "./match-stats.entities";
+import {
+  MatchGame,
+  MatchGamePlayer,
+  MatchStatsImport,
+  PlayerPlatformLink,
+} from "./match-stats.entities";
 
 function toTeam(game: MatchGame, side: Side): MatchGameTeamStats {
   return {
@@ -47,8 +59,27 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     return new Set(rows.map((row) => row.ballchasingId));
   }
 
+  async links(accounts: PlatformAccount[]): Promise<PlayerLink[]> {
+    if (accounts.length === 0) return [];
+    const rows = await this.em.find(PlayerPlatformLink, { $or: accounts });
+    return rows.map(toLink);
+  }
+
   async save(game: GameRecord): Promise<void> {
     await this.em.transactional(async (em) => {
+      for (const { playerId, ...account } of game.learnedLinks) {
+        await em.upsert(
+          PlayerPlatformLink,
+          { ...account, player: playerId },
+          { onConflictFields: ["platform", "platformId"], onConflictAction: "ignore" },
+        );
+        const kept = await em.findOneOrFail(PlayerPlatformLink, account, { refresh: true });
+        await em.nativeUpdate(
+          MatchGamePlayer,
+          { ...account, player: null },
+          { player: kept.player },
+        );
+      }
       const row = em.create(MatchGame, {
         match: game.matchId,
         number: game.number,
@@ -90,6 +121,79 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       playedAt: game.playedAt?.toISOString() ?? null,
       teams: [toTeam(game, "blue"), toTeam(game, "orange")],
     }));
+  }
+}
+
+function toLink(row: PlayerPlatformLink): PlayerLink {
+  return { platform: row.platform, platformId: row.platformId, playerId: row.player.id };
+}
+
+export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
+  constructor(private readonly em: EntityManager) {}
+
+  async unlinked(tournamentId: string): Promise<UnlinkedStatsPlayer[]> {
+    const rows = await this.em.find(
+      MatchGamePlayer,
+      { player: null, platformId: { $ne: null }, game: { match: { tournament: tournamentId } } },
+      {
+        populate: [
+          "game.blueParticipant.team",
+          "game.blueParticipant.players",
+          "game.orangeParticipant.team",
+          "game.orangeParticipant.players",
+        ],
+        orderBy: { game: { playedAt: "DESC" } },
+      },
+    );
+    const accounts = new Map<string, UnlinkedStatsPlayer>();
+    for (const row of rows) {
+      const key = JSON.stringify([row.platform, row.platformId]);
+      const known = accounts.get(key);
+      if (known) {
+        known.games += 1;
+        continue;
+      }
+      const participant =
+        row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+      accounts.set(key, {
+        platform: row.platform,
+        platformId: row.platformId!,
+        name: row.name,
+        team: { participantId: participant.id, name: participant.team.name },
+        games: 1,
+        roster: participant.players
+          .getItems()
+          .map(({ id, name }) => ({ id, name }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      });
+    }
+    return [...accounts.values()].sort(
+      (a, b) => a.team.name.localeCompare(b.team.name) || a.name.localeCompare(b.name),
+    );
+  }
+
+  async onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean> {
+    return (
+      (await this.em.count(TournamentParticipant, {
+        tournament: tournamentId,
+        players: playerId,
+      })) > 0
+    );
+  }
+
+  link({ playerId, ...account }: PlayerLink): Promise<number> {
+    return this.em.transactional(async (em) => {
+      await em.upsert(
+        PlayerPlatformLink,
+        { ...account, player: playerId },
+        {
+          onConflictFields: ["platform", "platformId"],
+          onConflictAction: "merge",
+          onConflictMergeFields: ["player"],
+        },
+      );
+      return em.nativeUpdate(MatchGamePlayer, account, { player: playerId });
+    });
   }
 }
 

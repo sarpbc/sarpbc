@@ -11,6 +11,8 @@ import type {
   BallchasingSource,
   GameRecord,
   GameStatsStore,
+  PlatformAccount,
+  PlayerLink,
   ReplayStats,
   StatsCandidates,
   StatsImportStore,
@@ -112,11 +114,20 @@ class MemoryImports implements StatsImportStore {
 
 class MemoryGames implements GameStatsStore {
   saved: GameRecord[] = [];
+  linked: PlayerLink[] = [];
   async importedReplayIds(ids: string[]) {
     return new Set(this.saved.map((game) => game.ballchasingId).filter((id) => ids.includes(id)));
   }
+  async links(accounts: PlatformAccount[]) {
+    return this.linked.filter((link) =>
+      accounts.some((a) => a.platform === link.platform && a.platformId === link.platformId),
+    );
+  }
   async save(game: GameRecord) {
     this.saved.push(game);
+    for (const link of game.learnedLinks)
+      if (!this.linked.some((known) => known.platformId === link.platformId))
+        this.linked.push(link);
   }
   async byMatch() {
     return [];
@@ -224,6 +235,54 @@ describe("StatsImportService.run", () => {
       ["Stand-in", null],
     ]);
     expect(imports.saves.map((save) => save.processed)).toContain(1);
+  });
+
+  it("learns platform links from unique roster-name matches once", async () => {
+    const { service, games } = setup({ replays: [game1, game2] });
+
+    await service.run((await service.request("t1", "pilot-abc123")).id);
+
+    expect(games.saved[0].learnedLinks).toEqual([
+      { platform: "epic", platformId: "Vatira-id", playerId: "Vatira" },
+      { platform: "epic", platformId: "Atow-id", playerId: "Atow" },
+      { platform: "epic", platformId: "M0nkey M00n-id", playerId: "M0nkey M00n" },
+      { platform: "epic", platformId: "Seikoo-id", playerId: "Seikoo" },
+    ]);
+    expect(games.saved[1].learnedLinks).toEqual([]);
+    expect(games.saved[1].players.map((player) => player.playerId)).toEqual([
+      "Vatira",
+      "Atow",
+      null,
+      "M0nkey M00n",
+      "Seikoo",
+      null,
+    ]);
+  });
+
+  it("prefers an existing link over a name match and links stand-ins off the roster", async () => {
+    const { service, games } = setup({ replays: [game1, game2] });
+    games.linked = [
+      { platform: "epic", platformId: "Vatira-id", playerId: "Atow" },
+      { platform: "epic", platformId: "Rise-id", playerId: "outsider" },
+      { platform: "steam", platformId: "Seikoo-id", playerId: "other-platform" },
+    ];
+
+    await service.run((await service.request("t1", "pilot-abc123")).id);
+
+    const [saved] = games.saved;
+    expect(saved.players.map((player) => [player.name, player.playerId])).toEqual([
+      ["Vatira", "Atow"],
+      ["Atow", "Atow"],
+      ["Stand-in", "outsider"],
+      ["M0nkey M00n", "M0nkey M00n"],
+      ["Seikoo", "Seikoo"],
+      ["Stand-in", null],
+    ]);
+    expect(saved.learnedLinks.map((link) => link.platformId)).toEqual([
+      "Atow-id",
+      "M0nkey M00n-id",
+      "Seikoo-id",
+    ]);
   });
 
   it("skips already imported replays on a rerun without fetching their stats", async () => {
