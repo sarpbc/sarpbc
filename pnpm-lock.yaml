@@ -254,7 +254,6 @@ overrides:
   '@intlify/shared': 11.4.16
   '@nuxt/content>zod': ^4.6.7
   body-parser@>=2.0.0 <2.4.0: ^2.4.0
-  brace-expansion@<1.1.21: ^1.1.21
   brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
   brace-expansion@>=4.0.0 <5.0.12: ^5.0.12
   devalue@<5.9.3: ^5.9.3
@@ -534,9 +533,6 @@ importers:
       '@internationalized/date':
         specifier: ^3.12.4
         version: 3.12.4
-      '@intlify/core-base':
-        specifier: 11.4.16
-        version: 11.4.16
       '@mdream/js':
         specifier: ^2.0.3
         version: 2.0.3
@@ -567,18 +563,6 @@ importers:
       '@sarpbc/utils':
         specifier: workspace:*
         version: link:../../packages/utils
-      '@tiptap/core':
-        specifier: 'catalog:'
-        version: 3.32.0(@tiptap/pm@3.32.0)
-      '@tiptap/extension-collaboration':
-        specifier: ^3.32.0
-        version: 3.32.0(@tiptap/core@3.32.0(@tiptap/pm@3.32.0))(@tiptap/pm@3.32.0)(@tiptap/y-tiptap@3.0.10(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-view@1.42.3)(y-protocols@1.0.7(yjs@13.6.33))(yjs@13.6.33))(yjs@13.6.33)
-      '@tiptap/pm':
-        specifier: 'catalog:'
-        version: 3.32.0
-      '@tiptap/vue-3':
-        specifier: 'catalog:'
-        version: 3.32.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.32.0(@tiptap/pm@3.32.0))(@tiptap/pm@3.32.0)(vue@3.5.44(typescript@6.0.3))
       '@vueuse/core':
         specifier: ^15.0.0
         version: 15.0.0(vue@3.5.44(typescript@6.0.3))
@@ -622,36 +606,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
-      debug:
-        specifier: ^4.4.3
-        version: 4.4.3(supports-color@10.2.2)
-      extend:
-        specifier: ^3.0.2
-        version: 3.0.2
-      rehype-raw:
-        specifier: ^7.0.0
-        version: 7.0.0
-      remark-emoji:
-        specifier: ^5.0.2
-        version: 5.0.2
-      remark-gfm:
-        specifier: ^4.0.1
-        version: 4.0.1(supports-color@10.2.2)
-      remark-mdc:
-        specifier: ^3.11.1
-        version: 3.11.1(supports-color@10.2.2)
-      remark-rehype:
-        specifier: ^11.1.2
-        version: 11.1.2
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
-      unist-util-visit:
-        specifier: ^5.1.0
-        version: 5.2.0
       vue-tsc:
         specifier: 'catalog:'
         version: 3.3.13(typescript@6.0.3)
@@ -20514,7 +20471,7 @@ snapshots:
 
   webpack@5.112.2(@swc/core@1.16.20(@swc/helpers@0.5.23))(cssnano@9.9.0(postcss@8.5.32))(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.32)(sharp@0.35.5(@types/node@26.6.6)):
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
       '@types/json-schema': 7.0.15
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
