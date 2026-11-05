@@ -41,6 +41,9 @@ export default () => ({
     clientId: process.env.TWITCH_CLIENT_ID?.trim() || undefined,
     clientSecret: process.env.TWITCH_CLIENT_SECRET?.trim() || undefined,
   },
+  ballchasing: {
+    apiKey: process.env.BALLCHASING_API_KEY?.trim() || undefined,
+  },
   posthog: {
     token: process.env.POSTHOG_PROJECT_TOKEN,
     host: process.env.POSTHOG_HOST || "https://eu.i.posthog.com",

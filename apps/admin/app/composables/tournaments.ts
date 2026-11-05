@@ -1,10 +1,16 @@
 import type {
+  AttachReplayInput,
   PlayerAwardType,
+  StatsImport,
+  StatsPlayerAccounts,
+  StatsPlayerLinkInput,
+  StatsPlayerLinkResult,
   TournamentAwardListItem,
   TournamentDetail,
   TournamentListItem,
   TournamentMatchListItem,
   TournamentPrizes,
+  TournamentStatsGame,
 } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
@@ -315,5 +321,70 @@ export async function setTournamentPrizes(
   return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
     method: "PUT",
     body: { prizes },
+  });
+}
+
+export async function getStatsImports(tournamentId: string): Promise<StatsImport[]> {
+  const res = await apiFetch<{ imports: StatsImport[] }>(
+    `/tournaments/${tournamentId}/stats-imports`,
+    { method: "GET" },
+  );
+  return res.imports;
+}
+
+export async function requestStatsImport(
+  tournamentId: string,
+  group: string,
+): Promise<StatsImport> {
+  return apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
+    method: "POST",
+    body: { group },
+  });
+}
+
+export async function getStatsPlayerAccounts(tournamentId: string): Promise<StatsPlayerAccounts> {
+  return apiFetch<StatsPlayerAccounts>(`/tournaments/${tournamentId}/stats-players`, {
+    method: "GET",
+  });
+}
+
+export async function getTournamentStatsGames(
+  tournamentId: string,
+): Promise<TournamentStatsGame[]> {
+  const res = await apiFetch<{ games: TournamentStatsGame[] }>(
+    `/tournaments/${tournamentId}/stats-games`,
+    { method: "GET" },
+  );
+  return res.games;
+}
+
+export async function attachStatsReplay(
+  tournamentId: string,
+  body: AttachReplayInput,
+): Promise<TournamentStatsGame> {
+  return apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
+    method: "POST",
+    body,
+  });
+}
+
+export async function removeStatsGame(
+  tournamentId: string,
+  matchId: string,
+  number: number,
+): Promise<TournamentStatsGame> {
+  return apiFetch<TournamentStatsGame>(
+    `/tournaments/${tournamentId}/stats-games/${matchId}/${number}`,
+    { method: "DELETE" },
+  );
+}
+
+export async function linkStatsPlayer(
+  tournamentId: string,
+  body: StatsPlayerLinkInput,
+): Promise<StatsPlayerLinkResult> {
+  return apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
+    method: "PUT",
+    body,
   });
 }

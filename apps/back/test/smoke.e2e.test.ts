@@ -7,6 +7,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import request from "supertest";
+import type { MatchGameStats } from "@sarpbc/types";
 import { AuthController } from "../src/auth/infrastructure/http/auth.controller";
 import { authServiceProvider } from "../src/auth/infrastructure/auth.module";
 import { AuthGuard } from "../src/auth/infrastructure/http/auth.guard";
@@ -18,6 +19,7 @@ import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
 import { TweetImageService } from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
+import { MatchGamesService } from "../src/match-stats/application/match-games.service";
 import { MatchService } from "../src/tournament/application/match/match.service";
 import { TransferController } from "../src/roster/infrastructure/http/transfer.controller";
 import { TransferService } from "../src/roster/application/transfer.service";
@@ -101,6 +103,32 @@ describe("API smoke (e2e)", () => {
     findBlocks: vi.fn(async (blocks: unknown[]) => blocks.map(() => [grandFinal])),
   };
 
+  const games: MatchGameStats[] = [
+    {
+      number: 1,
+      ballchasingId: "replay-1",
+      playedAt: "2026-06-01T18:05:00.000Z",
+      teams: [
+        {
+          participantId: "p1",
+          goals: 2,
+          players: [
+            {
+              name: "Vatira",
+              player: null,
+              goals: 2,
+              assists: 0,
+              saves: 1,
+              shots: 3,
+              demolitions: 1,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  const matchGames = { forMatch: vi.fn(async () => games) };
+
   const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
 
   beforeAll(async () => {
@@ -140,6 +168,7 @@ describe("API smoke (e2e)", () => {
           useValue: { countByTargetIds: vi.fn(async () => new Map([[grandFinal.id, 2]])) },
         },
         { provide: MatchService, useValue: matchService },
+        { provide: MatchGamesService, useValue: matchGames },
         { provide: TransferService, useValue: transferService },
         { provide: TeamService, useValue: { findBySlug: vi.fn() } },
         { provide: PlayerService, useValue: { findBySlug: vi.fn() } },
@@ -235,6 +264,8 @@ describe("API smoke (e2e)", () => {
       publicId: 7250,
       slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
     });
+    expect(matchGames.forMatch).toHaveBeenLastCalledWith(grandFinal.id);
+    expect(response.body.games).toEqual(games);
   });
 
   it("serves a match by its legacy id", async () => {

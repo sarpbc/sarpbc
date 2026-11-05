@@ -7,6 +7,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
+import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations", async () => {
@@ -108,6 +109,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       JWT_KEY: "integration-only-key-never-for-production",
       PANDASCORE_API_TOKEN: "integration-not-a-real-token",
       PANDASCORE_SYNC_ON_BOOT: "false",
+      BALLCHASING_API_KEY: "",
       GOOGLE_CLIENT_ID: "integration",
       GOOGLE_CLIENT_SECRET: "",
       GOOGLE_REDIRECT_URI: "http://127.0.0.1/auth/google/callback",
@@ -1665,6 +1667,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           competition,
           outsiderPlayerId: player.id,
         });
+      },
+    );
+
+    await check(
+      "match stats keep one game per Ballchasing replay and number, save players atomically, follow player merges and track imports",
+      async () => {
+        await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
       },
     );
 

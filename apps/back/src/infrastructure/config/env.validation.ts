@@ -17,6 +17,7 @@ const envSchema = z.object({
   INDEXNOW_KEY: z.union([z.literal(""), z.string().regex(INDEXNOW_KEY_PATTERN)]).optional(),
   TWITCH_CLIENT_ID: optionalSecret,
   TWITCH_CLIENT_SECRET: optionalSecret,
+  BALLCHASING_API_KEY: optionalSecret,
   INTERNAL_API_TOKEN: z
     .string()
     .optional()
@@ -41,6 +42,7 @@ export interface ProcessEnv {
   INTERNAL_API_TOKEN?: string;
   TWITCH_CLIENT_ID?: string;
   TWITCH_CLIENT_SECRET?: string;
+  BALLCHASING_API_KEY?: string;
 }
 
 export function validateEnv(config: ProcessEnv) {

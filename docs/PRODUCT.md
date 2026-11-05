@@ -146,9 +146,9 @@ After grilling:
 | ------------ | ------------------------------------------------------------- |
 | North star   | Weekly tournament-week return visits                          |
 | Now          | Match discovery polish, match detail v1.5, Air Riddle UX      |
-| Next         | Game stats pilot (manual replay attach), pick'em surfacing    |
+| Next         | Game stats pilot (staff group import), pick'em surfacing      |
 | Later        | Auto Ballchasing ingestion, push notifications, timeline game |
-| SAR-21 scope | Admin paste replay URL — not platform-wide cron               |
+| SAR-21 scope | Staff import a Ballchasing group per tournament — no cron     |
 
 ---
 
@@ -304,7 +304,7 @@ Epic
 1. Match discovery polish
 2. Match detail v1.5 (H2H, rosters, share cards)
 3. Air Riddle UX (parallel — cheap retention win)
-4. Game stats pilot (manual Ballchasing attach — blocked by match detail traffic)
+4. Game stats pilot (staff-triggered Ballchasing group import, see [GAME_STATS.md](GAME_STATS.md))
 5. Pick'em surfacing at decision moments
 6. Notifications, rankings, fantasy — **Later**
 

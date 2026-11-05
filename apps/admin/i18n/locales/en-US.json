@@ -406,6 +406,73 @@
           "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
         }
       },
+      "statsImport": {
+        "title": "Game Stats",
+        "hint": "Import per-game player stats from a Ballchasing group of this tournament's replays, including its subgroups. Replays are attached only when the teams, rosters and date point to a single match and the games agree with its score. Running the same group again skips games already imported.",
+        "group": "Ballchasing group",
+        "groupPlaceholder": "https://ballchasing.com/group/…",
+        "submit": "Import Stats",
+        "started": "Stats import started",
+        "startError": "Could not start the stats import",
+        "loading": "Loading…",
+        "loadError": "Could not load the stats imports.",
+        "retry": "Try Again",
+        "empty": "No stats imported for this tournament yet.",
+        "summary": "Group {group}, requested {date}",
+        "progress": "{processed} of {total} replays processed",
+        "game": "{match}, game {number}",
+        "attention": "Replays not imported",
+        "status": {
+          "pending": "Pending",
+          "running": "Running",
+          "completed": "Completed",
+          "failed": "Failed"
+        },
+        "counts": {
+          "imported": "Imported",
+          "already": "Already imported",
+          "unmatched": "Unmatched",
+          "failed": "Failed"
+        },
+        "unmatched": {
+          "excluded_by_staff": "Staff removed this game. The import leaves it out; attach it again to bring it back.",
+          "duplicate_replay": "Same game uploaded twice; the other copy is used.",
+          "missing_date": "The replay has no date, so the match cannot be confirmed.",
+          "unknown_teams": "No match in this tournament has both teams. Check the rosters and team names.",
+          "outside_match_window": "The teams match, but the replay date is outside every match time. Check the match dates.",
+          "ambiguous_match": "Several matches fit this replay. Check the match dates.",
+          "match_not_finished": "The match is not finished or has no recorded score. Import again once the result is in.",
+          "match_has_other_stats": "This match already has stats from other replays.",
+          "incomplete_series": "Fewer replays than games in the score, so game numbers are unknown. Add the missing replays to the group.",
+          "inconsistent_series": "The replays do not agree with the match score or format. Check the score."
+        },
+        "failed": {
+          "fetch_failed": "The replay stats could not be fetched from Ballchasing, or were incomplete. Run the import again later.",
+          "replay_not_ready": "Ballchasing has not finished processing this replay. Run the import again later.",
+          "score_mismatch": "The score in the replay stats differs from the Ballchasing replay list.",
+          "player_mismatch": "The replay stats are missing a team.",
+          "save_failed": "The stats could not be saved. Run the import again."
+        }
+      },
+      "statsLinks": {
+        "title": "Unlinked players",
+        "hint": "These stats keep the in-game name because it matches nobody on the team's roster. Choose the player, from the team's roster or another roster of the tournament for a stand-in, to link the account: every game of this account, in all tournaments, moves to that player and later imports reuse the link.",
+        "loading": "Loading…",
+        "loadError": "Could not load the unlinked players.",
+        "retry": "Try Again",
+        "empty": "Every imported player with an account id is linked.",
+        "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
+        "choose": "Choose a player",
+        "playerFor": "Player for {name}",
+        "save": "Link",
+        "saved": "{name} linked",
+        "saveError": "Could not link the player",
+        "linkedTitle": "Linked accounts",
+        "linkedHint": "Accounts linked by name or by staff. Change a wrong link: every game of the account moves to the new player.",
+        "linkedTo": "{name} → {player}",
+        "change": "Change",
+        "changeFor": "Change the player linked to {name}"
+      },
       "prizes": {
         "title": "Prize Distribution",
         "hint": "Enter the amount each team earned, in the currency the source states. Amounts are never converted. Listed players share the prize equally on their profiles.",
@@ -497,6 +564,42 @@
           "url": "Website",
           "image": "Logo"
         }
+      },
+      "statsAttach": {
+        "action": "Attach",
+        "actionFor": "Attach {title} to a game",
+        "attached": "Attached as game {number} of {match}",
+        "title": "Attach replay",
+        "description": "Attach {title} to a game yourself. The team, date and series checks of the import are skipped.",
+        "match": "Match",
+        "matchPlaceholder": "Choose a match",
+        "matchSearch": "Search a team",
+        "game": "Game",
+        "gamePlaceholder": "Choose a game",
+        "gameOption": "Game {number}",
+        "gameTaken": "Game {number} (has stats)",
+        "chooseMatchFirst": "Choose a match first.",
+        "blue": "Blue team",
+        "blueHelp": "The team that played on the blue side in this replay.",
+        "submit": "Attach",
+        "saved": "Replay attached as game {number}",
+        "saveError": "Could not attach the replay"
+      },
+      "statsGames": {
+        "title": "Games with stats",
+        "hint": "Games stored for each match. Removing a game deletes its stats, and later imports leave its replay out.",
+        "loading": "Loading…",
+        "loadError": "Could not load the games with stats.",
+        "retry": "Try Again",
+        "empty": "No game of this tournament has stats yet.",
+        "unknownTeam": "Unknown team",
+        "score": "Game {number}: {blue} {blueGoals}–{orangeGoals} {orange}",
+        "remove": "Remove game {number} of {match}",
+        "confirmTitle": "Remove game stats",
+        "confirm": "Remove the stats of game {number} of {match}? Later imports will leave this replay out until it is attached again.",
+        "confirmButton": "Remove",
+        "removed": "Game {number} removed",
+        "removeError": "Could not remove the game"
       }
     },
     "pickems": {

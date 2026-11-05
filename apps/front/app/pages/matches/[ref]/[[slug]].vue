@@ -66,6 +66,7 @@ if (route.path !== canonicalPath) {
 }
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
 const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
+const games = computed(() => matchDetail.value?.games ?? []);
 
 const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
@@ -340,6 +341,10 @@ const scoreboardLabel = computed(() => {
 
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
+
+        <SRail v-if="games.length > 0" :title="t('page.match.detail.stats.title')">
+          <MatchStatsTable :games="games" :participants="participants" />
+        </SRail>
 
         <SRail :title="t('page.match.detail.sections.rosters')">
           <MatchRosterTable :participants="participants" />

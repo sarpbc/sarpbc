@@ -47,6 +47,7 @@ import { RedisSyncCursor } from "./redis-sync-cursor";
 import type { CompetitionFeed } from "../application/feed";
 import type { SyncCursor } from "../application/ports";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
+import { MatchStatsModule } from "../../match-stats/infrastructure/match-stats.module";
 import { CachedTournamentRead } from "./cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "./cache/cached-tournament-prizes.read";
 import { RedisService } from "../../infrastructure/redis/redis.service";
@@ -68,6 +69,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     RedisModule,
     ConfigModule,
     ReplyModule,
+    MatchStatsModule,
   ],
   controllers: [TournamentController, EventController, MatchController],
   providers: [

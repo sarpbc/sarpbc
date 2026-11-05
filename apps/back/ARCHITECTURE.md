@@ -36,13 +36,16 @@ The following operations share a transaction:
 - Content deletion and dependent replies, notifications, reports, or translations.
 - Player photo replacement or selection, and player or team deletion with dependent roster data.
 - A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
-- A player or team merge: moving contracts, photos, awards, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect.
+- A game's stats, the platform links its unique roster-name matches teach, the linking of earlier rows of those accounts and the clearing of any staff exclusion of its replay; a staff platform link and the repointing of every stat row of that account; a staff game removal and the exclusion of its replay.
+- A player or team merge: moving contracts, photos, awards, game stats, platform links, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect.
 - A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
 Application services publish domain events through feature ports after commit, so a feature reacts to another without importing it. `MatchDecided` is republished on each committed write that leaves a match decided, which lets a re-sync retry a failed handler. Handlers are idempotent and best effort. Pick'em scores picks from this event, and its manual validation endpoint is the recovery path.
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
+
+The repository has no job queue. A staff stats import (`match-stats`) is stored as a `pending` row, then `StatsImportService` schedules its run through the `StatsImportScheduler` port, so HTTP and MCP requests start it the same way. It runs in the API process after the request returns, in its own context. Its status and report live in PostgreSQL. At boot, any import left unfinished by a restart is marked failed. `match-stats` reads competition data only through its own `StatsCandidates` port, and the match detail controller composes its `MatchGamesService` in infrastructure.
 
 ## Ownership and failures
 

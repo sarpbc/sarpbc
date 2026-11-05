@@ -1613,6 +1613,23 @@
             "twitch": "Twitch",
             "youtube": "YouTube"
           }
+        },
+        "stats": {
+          "title": "Game Stats",
+          "games": "Choose a game",
+          "game": "Game {number}",
+          "caption": "Player stats for game {number}",
+          "player": "Player",
+          "teamScore": "{team}, no goals | {team}, 1 goal | {team}, {goals} goals",
+          "columns": {
+            "goals": { "short": "G", "label": "Goals" },
+            "assists": { "short": "A", "label": "Assists" },
+            "saves": { "short": "Sv", "label": "Saves" },
+            "shots": { "short": "Sh", "label": "Shots" },
+            "demolitions": { "short": "D", "label": "Demolitions" }
+          },
+          "source": "Stats from replays on Ballchasing",
+          "replayLink": "Game {number} replay on Ballchasing (opens in a new tab)"
         }
       }
     },

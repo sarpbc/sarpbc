@@ -77,6 +77,9 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
     newsService: module.get(NewsService),
     rosterProposalService: module.get(RosterProposalService),
     tournamentPrizeService: module.get(TournamentPrizeService),
+    statsImportService: {} as never,
+    statsPlayerLinkService: {} as never,
+    manualGameService: {} as never,
   };
   const server = module.get(McpServer);
   registerReadTools(server, ctx);

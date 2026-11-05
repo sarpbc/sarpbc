@@ -406,6 +406,73 @@
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
         }
       },
+      "statsImport": {
+        "title": "Stats des games",
+        "hint": "Importez les stats des joueurs, game par game, depuis un groupe Ballchasing contenant les replays de ce tournoi, sous-groupes compris. Un replay n’est rattaché que si les équipes, les rosters et la date désignent un seul match et que les games concordent avec son score. Relancer le même groupe ignore les games déjà importées.",
+        "group": "Groupe Ballchasing",
+        "groupPlaceholder": "https://ballchasing.com/group/…",
+        "submit": "Importer les stats",
+        "started": "Import des stats lancé",
+        "startError": "Impossible de lancer l’import des stats",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les imports de stats.",
+        "retry": "Réessayer",
+        "empty": "Aucune stat importée pour ce tournoi.",
+        "summary": "Groupe {group}, demandé le {date}",
+        "progress": "{processed} replays traités sur {total}",
+        "game": "{match}, game {number}",
+        "attention": "Replays non importés",
+        "status": {
+          "pending": "En attente",
+          "running": "En cours",
+          "completed": "Terminé",
+          "failed": "Échec"
+        },
+        "counts": {
+          "imported": "Importés",
+          "already": "Déjà importés",
+          "unmatched": "Non rattachés",
+          "failed": "En échec"
+        },
+        "unmatched": {
+          "excluded_by_staff": "Le staff a retiré cette game. L’import l’ignore ; rattachez-la pour la rétablir.",
+          "duplicate_replay": "La même game a été envoyée deux fois ; l’autre copie est utilisée.",
+          "missing_date": "Le replay n’a pas de date, le match ne peut donc pas être confirmé.",
+          "unknown_teams": "Aucun match de ce tournoi n’oppose ces deux équipes. Vérifiez les rosters et les noms d’équipe.",
+          "outside_match_window": "Les équipes correspondent, mais la date du replay ne tombe dans aucun créneau de match. Vérifiez les dates des matchs.",
+          "ambiguous_match": "Plusieurs matchs correspondent à ce replay. Vérifiez les dates des matchs.",
+          "match_not_finished": "Le match n’est pas terminé ou son score n’a pas été saisi. Relancez l’import une fois le résultat connu.",
+          "match_has_other_stats": "Ce match a déjà des stats issues d’autres replays.",
+          "incomplete_series": "Il y a moins de replays que de games au score, l’ordre des games est donc inconnu. Ajoutez les replays manquants au groupe.",
+          "inconsistent_series": "Les replays ne concordent pas avec le score ou le format du match. Vérifiez le score."
+        },
+        "failed": {
+          "fetch_failed": "Les stats du replay n’ont pas pu être récupérées sur Ballchasing, ou étaient incomplètes. Relancez l’import plus tard.",
+          "replay_not_ready": "Ballchasing n’a pas fini de traiter ce replay. Relancez l’import plus tard.",
+          "score_mismatch": "Le score des stats du replay diffère de celui de la liste Ballchasing.",
+          "player_mismatch": "Il manque une équipe dans les stats du replay.",
+          "save_failed": "Les stats n’ont pas pu être enregistrées. Relancez l’import."
+        }
+      },
+      "statsLinks": {
+        "title": "Joueurs non reliés",
+        "hint": "Ces stats gardent le pseudo en jeu, car il ne correspond à personne dans le roster de l’équipe. Choisissez le joueur, dans le roster de l’équipe ou dans un autre roster du tournoi pour un remplaçant, à relier au compte : toutes les games de ce compte, dans tous les tournois, lui sont attribuées et les prochains imports réutilisent ce lien.",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les joueurs non reliés.",
+        "retry": "Réessayer",
+        "empty": "Tous les joueurs importés qui ont un identifiant de compte sont reliés.",
+        "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
+        "choose": "Choisir un joueur",
+        "playerFor": "Joueur correspondant à {name}",
+        "save": "Relier",
+        "saved": "{name} relié",
+        "saveError": "Impossible de relier le joueur",
+        "linkedTitle": "Comptes reliés",
+        "linkedHint": "Comptes reliés par leur pseudo ou par le staff. Corrigez un lien erroné : toutes les games du compte passent au nouveau joueur.",
+        "linkedTo": "{name} → {player}",
+        "change": "Modifier",
+        "changeFor": "Modifier le joueur relié à {name}"
+      },
       "prizes": {
         "title": "Répartition des gains",
         "hint": "Saisissez le montant remporté par chaque équipe, dans la devise indiquée par la source. Les montants ne sont jamais convertis. Les joueurs listés se partagent le gain à parts égales sur leur profil.",
@@ -497,6 +564,42 @@
           "url": "Site web",
           "image": "Logo"
         }
+      },
+      "statsAttach": {
+        "action": "Rattacher",
+        "actionFor": "Rattacher {title} à une game",
+        "attached": "Rattaché comme game {number} de {match}",
+        "title": "Rattacher un replay",
+        "description": "Rattachez vous-même {title} à une game. Les vérifications d’équipes, de date et de série de l’import ne s’appliquent pas.",
+        "match": "Match",
+        "matchPlaceholder": "Choisir un match",
+        "matchSearch": "Rechercher une équipe",
+        "game": "Game",
+        "gamePlaceholder": "Choisir une game",
+        "gameOption": "Game {number}",
+        "gameTaken": "Game {number} (a déjà des stats)",
+        "chooseMatchFirst": "Choisissez d’abord un match.",
+        "blue": "Équipe bleue",
+        "blueHelp": "L’équipe qui jouait côté bleu dans ce replay.",
+        "submit": "Rattacher",
+        "saved": "Replay rattaché comme game {number}",
+        "saveError": "Impossible de rattacher le replay"
+      },
+      "statsGames": {
+        "title": "Games avec stats",
+        "hint": "Games enregistrées pour chaque match. Retirer une game supprime ses stats, et les prochains imports ignorent son replay.",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les games avec stats.",
+        "retry": "Réessayer",
+        "empty": "Aucune game de ce tournoi n’a encore de stats.",
+        "unknownTeam": "Équipe inconnue",
+        "score": "Game {number} : {blue} {blueGoals}–{orangeGoals} {orange}",
+        "remove": "Retirer la game {number} de {match}",
+        "confirmTitle": "Retirer les stats d’une game",
+        "confirm": "Retirer les stats de la game {number} de {match} ? Les prochains imports ignoreront ce replay tant qu’il n’est pas rattaché à nouveau.",
+        "confirmButton": "Retirer",
+        "removed": "Game {number} retirée",
+        "removeError": "Impossible de retirer la game"
       }
     },
     "pickems": {

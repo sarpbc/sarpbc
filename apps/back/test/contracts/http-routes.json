@@ -944,6 +944,62 @@
     "permissions": ["\"teams.manage\""]
   },
   {
+    "controller": "\"tournaments/:id/stats-games\"",
+    "verb": "DELETE",
+    "path": "\":matchId/:number\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-games\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-games\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-imports\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-imports\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.ACCEPTED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-players\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-players\"",
+    "verb": "PUT",
+    "path": "\"link\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
     "controller": "\"tournaments\"",
     "verb": "DELETE",
     "path": "\":id/awards/:awardId\"",
