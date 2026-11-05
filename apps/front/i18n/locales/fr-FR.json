@@ -4,8 +4,6 @@
     "previous": "Précédent",
     "next": "Suivant",
     "page": "Page",
-    "of": "sur",
-    "showing": "Affichage",
     "accept": "Accepter",
     "decline": "Refuser",
     "overview": "Aperçu",
@@ -100,7 +98,6 @@
     }
   },
   "newsTag": {
-    "loading": "Chargement…",
     "error": "Impossible de charger le profil. Réessayez plus tard.",
     "viewProfile": "Voir le profil",
     "noTeam": "Aucune équipe actuelle",
@@ -153,8 +150,7 @@
       "columns": {
         "explore": "Explorer",
         "community": "Communauté",
-        "company": "Entreprise",
-        "legal": "Légal"
+        "company": "Entreprise"
       },
       "live": {
         "title": "En direct sur Twitch",
@@ -167,10 +163,6 @@
     },
     "forum": {
       "createPost": "Créer un post",
-      "editPost": "Modifier le post",
-      "deletePost": "Supprimer le post",
-      "reply": "Répondre",
-      "viewReplies": "Voir les réponses",
       "recentPosts": "Activités récentes",
       "signInToCreate": "Connectez-vous pour créer un post"
     },
@@ -208,35 +200,16 @@
     },
     "tournament": {
       "bracket": {
-        "upperBracket": "Bracket supérieur",
-        "lowerBracket": "Bracket inférieur",
         "missingLinks": "La structure du bracket n'est pas encore disponible. Les matchs sont regroupés par round."
       }
     },
-    "reply": {
-      "validation": {
-        "contentMinLength": "Votre réponse doit contenir au moins 1 caractère",
-        "contentMaxLength": "Votre réponse doit contenir au maximum 2048 caractères"
-      },
-      "messages": {
-        "errorTitle": "Erreur",
-        "errorDescription": "Échec de la création de la réponse.",
-        "rateLimitDescription": "Vous ne pouvez publier qu'une réponse par minute. Attendez et réessayez.",
-        "signInRequired": "Connectez-vous pour répondre à ce fil."
-      },
-      "inputTitle": "Réponse",
-      "inputPlaceholder": "Entrez votre réponse ici...",
-      "submit": "Répondre"
-    },
     "discussion": {
       "heading": "Discussion",
-      "subtitle": "Partagez votre avis avec la communauté.",
       "commentCountAria": "{count} commentaires",
       "loadMore": "Charger plus de commentaires",
       "loadingMore": "Chargement…",
       "permalink": "Lien vers le commentaire",
       "moreActions": "Plus d'actions",
-      "empty": "Aucun commentaire pour le moment. Soyez le premier à lancer la discussion.",
       "error": "Impossible de charger les commentaires. Vérifiez votre connexion et réessayez.",
       "inputTitle": "Commentaire",
       "inputPlaceholder": "Écrire un commentaire…",
@@ -359,9 +332,7 @@
     "home": {
       "latest": "Dernières actus",
       "latestShort": "Short : {title}",
-      "thisWeek": "Cette semaine",
       "shortNewsCount": "{n} short | {n} shorts",
-      "allNews": "Toutes les actus",
       "seo": {
         "title": "Actus & matchs Rocket League {'|'} sarpbc.org",
         "description": "Réunir l'écosystème de l'esport Rocket League en un seul endroit.",
@@ -410,7 +381,6 @@
       },
       "pickems": {
         "title": "Pick'ems",
-        "description": "Faites vos prédictions !",
         "banner": {
           "title": "Les pick'ems sont ouverts pour {event}",
           "cta": "Rejoindre le pick'em"
@@ -438,7 +408,6 @@
             "leaderboard": "Classement"
           },
           "leaderboard": {
-            "title": "Classement",
             "yourRank": "Votre rang : #{rank} sur {total} · {points} pts",
             "noRankYet": "Faites vos picks et attendez les résultats pour apparaître au classement.",
             "points": "{points} pts",
@@ -1191,10 +1160,7 @@
       "seoTitle": "{title} {'|'} sarpbc.org",
       "seoDescriptionDefault": "Retrouvez l'actualité esport Rocket League sur sarpbc.org",
       "readingTime": "{minutes} min de lecture",
-      "commentCount": "{n} commentaire | {n} commentaires",
-      "empty": "Pas encore d’actualité. Revenez bientôt.",
       "error": "Impossible de charger les actualités. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "week": {
         "title": "Cette semaine",
         "range": "{start} – {end}",
@@ -1206,42 +1172,27 @@
       "index": {
         "title": "Joueurs Rocket League : profils et résultats {'|'} sarpbc.org",
         "description": "Explorez les profils des joueurs de l’esport Rocket League sur sarpbc.org. Retrouvez leurs équipes, résultats récents et parcours en tournoi dans l’annuaire.",
-        "ogTitle": "Tous les joueurs - sarpbc.org",
-        "ogDescription": "Parcourez tous les {count} joueurs de la base de données sarpbc.org.",
         "pageTitle": "Répertoire des joueurs",
         "noPlayersFound": "Aucun joueur trouvé",
-        "showing": "Affichage",
-        "of": "sur",
-        "page": "Page",
         "error": "Impossible de charger les joueurs. Vérifiez votre connexion et réessayez."
       },
       "letter": {
         "title": "Joueurs Rocket League commençant par {letter} {'|'} sarpbc.org",
         "description": "Retrouvez les joueurs de l’esport Rocket League dont le nom commence par {letter}. Consultez leurs profils, équipes et résultats récents sur sarpbc.org.",
-        "ogTitle": "Joueurs commençant par {letter} - sarpbc.org",
-        "ogDescription": "Parcourez {count} joueurs dont les noms commencent par {letter}.",
         "pageTitle": "Joueurs - {letter}",
-        "playersFound": "{count} joueur trouvé | {count} joueurs trouvés",
-        "noPlayersFound": "Aucun joueur trouvé",
-        "noPlayersStartingWith": "Il n'y a aucun joueur dont le nom commence par \"{letter}\"",
-        "backToAllPlayers": "Retour à tous les joueurs"
+        "noPlayersStartingWith": "Il n'y a aucun joueur dont le nom commence par \"{letter}\""
       }
     },
     "player": {
       "slug": {
-        "loadingPlayer": "Chargement du joueur...",
-        "errorLoadingPlayer": "Erreur lors du chargement du joueur",
         "failedToLoadPlayerData": "Échec du chargement des données du joueur",
         "playerNotFound": "Joueur introuvable",
-        "playerCouldNotBeFound": "Le joueur \"{slug}\" n'a pas pu être trouvé.",
-        "goBackToHome": "Retour à l'accueil",
         "seoTitleWithName": "{name} - sarpbc.org",
         "seoTitleDefault": "Joueur - sarpbc.org",
         "seoDescriptionWithName": "Voir le profil, les matchs à venir et les résultats récents de {name}",
         "seoDescriptionDefault": "Profil du joueur, matchs à venir et résultats récents",
         "currentTeam": "Équipe actuelle",
         "role": "Rôle",
-        "nationality": "Nationalité",
         "age": "Âge",
         "xYears": "{years} ans",
         "freeAgent": "Sans équipe",
@@ -1280,7 +1231,6 @@
           }
         },
         "tabs": {
-          "label": "Sections du profil joueur",
           "info": "Infos",
           "matches": "Matchs",
           "events": "Événements",
@@ -1330,28 +1280,16 @@
       "index": {
         "title": "Équipes Rocket League : effectifs et résultats {'|'} sarpbc.org",
         "description": "Explorez les équipes de l’esport Rocket League sur sarpbc.org. Parcourez l’annuaire pour retrouver leurs effectifs, résultats récents et participations aux tournois.",
-        "ogTitle": "Toutes les équipes - sarpbc.org",
-        "ogDescription": "Parcourez toutes les {count} équipes de la base de données sarpbc.org.",
         "pageTitle": "Répertoire des équipes",
-        "team": "équipe",
-        "teams": "équipes",
         "noTeamsFound": "Aucune équipe trouvée",
-        "showing": "Affichage",
-        "of": "sur",
-        "page": "Page",
         "error": "Impossible de charger les équipes. Vérifiez votre connexion et réessayez.",
         "activePlayers": "{count} joueur | {count} joueurs"
       },
       "letter": {
         "title": "Équipes Rocket League commençant par {letter} {'|'} sarpbc.org",
         "description": "Retrouvez les équipes de l’esport Rocket League dont le nom commence par {letter}. Consultez leurs effectifs, résultats récents et tournois sur sarpbc.org.",
-        "ogTitle": "Équipes commençant par {letter} - sarpbc.org",
-        "ogDescription": "Parcourez {count} équipes dont les noms commencent par {letter}.",
         "pageTitle": "Équipes - {letter}",
-        "teamsFound": "{count} équipe trouvée | {count} équipes trouvées",
-        "noTeamsFound": "Aucune équipe trouvée",
-        "noTeamsStartingWith": "Il n'y a aucune équipe dont le nom commence par \"{letter}\"",
-        "backToAllTeams": "Retour à toutes les équipes"
+        "noTeamsStartingWith": "Il n'y a aucune équipe dont le nom commence par \"{letter}\""
       }
     },
     "team": {
@@ -1363,14 +1301,9 @@
         "seoTitleDefault": "Équipe - sarpbc.org",
         "seoDescriptionWithName": "Voir l'effectif, les prochains matchs et les derniers résultats de {name}",
         "seoDescriptionDefault": "Effectif, prochains matchs et derniers résultats de l'équipe",
-        "location": "Localisation",
         "players": "Joueurs",
         "staff": "Staff",
-        "playersCount": "{count} joueur | {count} joueurs",
-        "statistics": "Statistiques",
-        "teamStatisticsComingSoon": "Statistiques de l'équipe bientôt disponibles...",
         "tabs": {
-          "label": "Sections du profil équipe",
           "info": "Infos",
           "matches": "Matchs",
           "events": "Événements",
@@ -1379,8 +1312,7 @@
         },
         "roster": {
           "empty": "Aucun joueur n'est actuellement listé.",
-          "emptyHint": "L'effectif actuel apparaîtra ici dès que des contrats seront enregistrés pour cette équipe.",
-          "age": "{years} ans"
+          "emptyHint": "L'effectif actuel apparaîtra ici dès que des contrats seront enregistrés pour cette équipe."
         },
         "faq": {
           "title": "Questions fréquentes",
@@ -1464,7 +1396,6 @@
         "title": "Tournois",
         "description": "Explorez les tournois de l’esport Rocket League sur sarpbc.org. Consultez les brackets, le calendrier des matchs, les résultats et les équipes participantes.",
         "empty": "Aucun tournoi trouvé.",
-        "page": "Page",
         "error": "Impossible de charger les tournois. Vérifiez votre connexion et réessayez.",
         "seoTitle": "Tournois Rocket League : brackets et résultats {'|'} sarpbc.org"
       },
@@ -1526,8 +1457,7 @@
         "viewResults": "Voir les résultats",
         "viewTournaments": "Voir les tournois"
       },
-      "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez.",
-      "unknownSubTournament": "Épreuve inconnue"
+      "error": "Impossible de charger les matchs. Vérifiez votre connexion et réessayez."
     },
     "results": {
       "title": "Résultats",
@@ -1555,8 +1485,6 @@
         "unknownTeam": "À déterminer",
         "format": "Bo{count}",
         "matchOver": "Match terminé",
-        "addToCalendar": "Ajouter au calendrier",
-        "watchStream": "Regarder le stream",
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
@@ -1668,29 +1596,15 @@
       "index": {
         "title": "Forum Rocket League : discussions et communauté {'|'} sarpbc.org",
         "description": "Échangez sur l’esport Rocket League avec la communauté sarpbc.org. Discutez des matchs RLCS, des tournois, des équipes et des joueurs, ou lancez un sujet.",
-        "ogTitle": "Forum sarpbc.org - Communauté Rocket League",
-        "ogDescription": "Connectez-vous avec la communauté Rocket League sur le Forum sarpbc.org. Partagez des stratégies, discutez du gameplay et restez informé des dernières nouvelles de la communauté.",
         "pageTitle": "Forum",
         "createNewPost": "Créer un nouveau post",
         "noPosts": "Aucun post disponible",
-        "loading": "Chargement des posts...",
-        "lastActivity": "Dernière activité",
-        "messages": "messages",
-        "message": "message",
-        "posts": "Posts",
-        "topics": "Sujets",
-        "allTopics": "Tous les sujets",
-        "filterByTopic": "Filtrer par sujet",
-        "searchPosts": "Rechercher des posts...",
-        "clearFilters": "Effacer les filtres",
         "error": "Impossible de charger le forum. Vérifiez votre connexion et réessayez.",
         "emptyHint": "Lancez la première discussion de la communauté."
       },
       "new": {
         "title": "Créer un nouveau post",
         "description": "Créez un nouveau post dans le forum sarpbc.org. Partagez vos pensées, idées et discussions sur Rocket League avec la communauté.",
-        "ogTitle": "Créer un nouveau post | Forum sarpbc.org",
-        "ogDescription": "Rejoignez la conversation ! Créez un nouveau post dans le forum sarpbc.org et partagez vos connaissances Rocket League avec la communauté.",
         "pageTitle": "Créer un nouveau post",
         "form": {
           "title": "Titre",
@@ -1723,9 +1637,6 @@
         "seoTitleDefault": "Post du forum - sarpbc.org",
         "seoDescriptionWithTitle": "Lire \"{title}\" dans le forum sarpbc.org",
         "seoDescriptionDefault": "Post du forum",
-        "author": "Auteur",
-        "topic": "Sujet",
-        "postedOn": "Publié le {date}",
         "signInToReply": "Connectez-vous pour répondre"
       }
     },
@@ -1787,61 +1698,6 @@
         "description": "Suivez les mouvements d'effectifs de l'esport Rocket League sur sarpbc.org : arrivées, départs, mises sur le banc et prêts, avec leurs sources."
       },
       "error": "Impossible de charger les transferts. Vérifiez votre connexion et réessayez."
-    }
-  },
-  "pages": {
-    "accessibility": {
-      "title": "Déclaration d'Accessibilité",
-      "metaDescription": "Notre engagement envers l'accessibilité web et les informations sur les fonctionnalités d'accessibilité de notre site web.",
-      "lastUpdated": "Dernière mise à jour",
-      "lastUpdatedDate": "4 septembre 2025",
-      "commitment": {
-        "title": "Notre Engagement envers l'Accessibilité",
-        "description": "sarpbc.org s'engage à assurer l'accessibilité numérique pour les personnes handicapées. Nous améliorons continuellement l'expérience utilisateur pour tous et appliquons les normes d'accessibilité pertinentes."
-      },
-      "compliance": {
-        "title": "Statut de Conformité",
-        "description": "Les Directives pour l'Accessibilité des Contenus Web (WCAG) définissent les exigences pour les concepteurs et développeurs afin d'améliorer l'accessibilité pour les personnes handicapées. Elles définissent trois niveaux de conformité : Niveau A, Niveau AA et Niveau AAA.",
-        "status": "Ce site web est partiellement conforme aux WCAG 2.1 niveau AA. Partiellement conforme signifie que certaines parties du contenu ne sont pas entièrement conformes à la norme d'accessibilité."
-      },
-      "measures": {
-        "title": "Mesures d'Accessibilité",
-        "description": "Nous avons mis en place les mesures d'accessibilité suivantes :",
-        "keyboard": "Support de navigation au clavier",
-        "screenReader": "Compatibilité avec les lecteurs d'écran",
-        "contrast": "Ratios de contraste de couleur suffisants",
-        "text": "Texte redimensionnable jusqu'à 200% sans perte de fonctionnalité",
-        "images": "Texte alternatif pour les images"
-      },
-      "limitations": {
-        "title": "Limitations Connues",
-        "description": "Malgré nos meilleurs efforts, certaines limitations peuvent exister :",
-        "thirdParty": "Le contenu de tiers peut ne pas être entièrement accessible",
-        "userContent": "Le contenu généré par les utilisateurs peut ne pas respecter les normes d'accessibilité"
-      },
-      "feedback": {
-        "title": "Commentaires et Contact",
-        "description": "Nous accueillons vos commentaires sur l'accessibilité de notre site web. Veuillez nous faire savoir si vous rencontrez des obstacles d'accessibilité :",
-        "email": "Email",
-        "response": "Temps de réponse",
-        "responseTime": "Nous visons à répondre dans les 3 jours ouvrables"
-      },
-      "enforcement": {
-        "title": "Procédure d'Application",
-        "description": "Si vous n'êtes pas satisfait de notre réponse à votre préoccupation d'accessibilité, vous pouvez contacter :",
-        "authority": "Autorité d'Accessibilité",
-        "authorityName": "Défenseur des Droits",
-        "authorityAddress": "TSA 90716, 75334 Paris Cedex 07, France",
-        "website": "Site Web"
-      },
-      "technical": {
-        "title": "Spécifications Techniques",
-        "description": "L'accessibilité de ce site web repose sur les technologies suivantes :",
-        "technologies": "HTML, CSS, JavaScript et attributs ARIA",
-        "assistive": "Conçu pour fonctionner avec les technologies d'assistance",
-        "testing": "Tests réguliers avec les lecteurs d'écran et la navigation au clavier"
-      },
-      "backToHome": "Retour à l'Accueil"
     }
   }
 }

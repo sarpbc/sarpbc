@@ -4,8 +4,6 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page",
-    "of": "of",
-    "showing": "Showing",
     "accept": "Accept",
     "decline": "Decline",
     "overview": "Overview",
@@ -100,7 +98,6 @@
     }
   },
   "newsTag": {
-    "loading": "Loading…",
     "error": "Could not load profile. Try again later.",
     "viewProfile": "View profile",
     "noTeam": "No current team",
@@ -153,8 +150,7 @@
       "columns": {
         "explore": "Explore",
         "community": "Community",
-        "company": "Company",
-        "legal": "Legal"
+        "company": "Company"
       },
       "live": {
         "title": "Live on Twitch",
@@ -167,10 +163,6 @@
     },
     "forum": {
       "createPost": "Create Post",
-      "editPost": "Edit Post",
-      "deletePost": "Delete Post",
-      "reply": "Reply",
-      "viewReplies": "View Replies",
       "recentPosts": "Recent Activity",
       "signInToCreate": "Sign in to create a post"
     },
@@ -208,35 +200,16 @@
     },
     "tournament": {
       "bracket": {
-        "upperBracket": "Upper Bracket",
-        "lowerBracket": "Lower Bracket",
         "missingLinks": "Bracket structure is not available yet. Matches are grouped by round."
       }
     },
-    "reply": {
-      "validation": {
-        "contentMinLength": "Your reply must be at least 1 character",
-        "contentMaxLength": "Your reply must be at most 2048 characters"
-      },
-      "messages": {
-        "errorTitle": "Error",
-        "errorDescription": "Failed to create reply.",
-        "rateLimitDescription": "You can only post one reply per minute. Wait and try again.",
-        "signInRequired": "Sign in to reply to this thread."
-      },
-      "inputTitle": "Reply",
-      "inputPlaceholder": "Enter your reply here...",
-      "submit": "Reply"
-    },
     "discussion": {
       "heading": "Discussion",
-      "subtitle": "Share your take with the community.",
       "commentCountAria": "{count} comments",
       "loadMore": "Load More Comments",
       "loadingMore": "Loading…",
       "permalink": "Link to Comment",
       "moreActions": "More Actions",
-      "empty": "No comments yet. Be the first to start the discussion.",
       "error": "Could not load comments. Check your connection and try again.",
       "inputTitle": "Comment",
       "inputPlaceholder": "Write a comment…",
@@ -359,9 +332,7 @@
     "home": {
       "latest": "Latest",
       "latestShort": "Short: {title}",
-      "thisWeek": "This week",
       "shortNewsCount": "{n} short | {n} shorts",
-      "allNews": "All news",
       "seo": {
         "title": "Rocket League news & matches {'|'} sarpbc.org",
         "description": "Bringing the competitive Rocket League ecosystem into one place.",
@@ -410,7 +381,6 @@
       },
       "pickems": {
         "title": "Pick'ems",
-        "description": "Make your predictions!",
         "banner": {
           "title": "Pick'ems are open for {event}",
           "cta": "Join Pick'em"
@@ -438,7 +408,6 @@
             "leaderboard": "Leaderboard"
           },
           "leaderboard": {
-            "title": "Leaderboard",
             "yourRank": "Your rank: #{rank} of {total} · {points} pts",
             "noRankYet": "Make picks and wait for results to appear on the leaderboard.",
             "points": "{points} pts",
@@ -1191,10 +1160,7 @@
       "seoTitle": "{title} {'|'} sarpbc.org",
       "seoDescriptionDefault": "Read the latest Rocket League esports news on sarpbc.org",
       "readingTime": "{minutes} min read",
-      "commentCount": "{n} comment | {n} comments",
-      "empty": "No news yet. Check back soon.",
       "error": "Could not load news. Check your connection and try again.",
-      "retry": "Try Again",
       "week": {
         "title": "This week",
         "range": "{start} – {end}",
@@ -1206,42 +1172,27 @@
       "index": {
         "title": "Rocket League Players: Profiles and Results {'|'} sarpbc.org",
         "description": "Explore Rocket League esports player profiles on sarpbc.org. Browse the alphabetical directory to find teams, recent match results and tournament history.",
-        "ogTitle": "All Players - sarpbc.org",
-        "ogDescription": "Browse all {count} players in the sarpbc.org database.",
         "pageTitle": "Players Directory",
         "noPlayersFound": "No players found",
-        "showing": "Showing",
-        "of": "of",
-        "page": "Page",
         "error": "Couldn't load players. Check your connection and try again."
       },
       "letter": {
         "title": "Rocket League Players Starting with {letter} {'|'} sarpbc.org",
         "description": "Find Rocket League esports players whose names start with {letter}. Explore their profiles, teams, recent match results and tournament history on sarpbc.org.",
-        "ogTitle": "Players starting with {letter} - sarpbc.org",
-        "ogDescription": "Browse {count} players whose names start with {letter}.",
         "pageTitle": "Players - {letter}",
-        "playersFound": "{count} player found | {count} players found",
-        "noPlayersFound": "No players found",
-        "noPlayersStartingWith": "There are no players whose names start with \"{letter}\"",
-        "backToAllPlayers": "Back to all players"
+        "noPlayersStartingWith": "There are no players whose names start with \"{letter}\""
       }
     },
     "player": {
       "slug": {
-        "loadingPlayer": "Loading player...",
-        "errorLoadingPlayer": "Error Loading Player",
         "failedToLoadPlayerData": "Failed to load player data",
         "playerNotFound": "Player Not Found",
-        "playerCouldNotBeFound": "The player \"{slug}\" could not be found.",
-        "goBackToHome": "Go back to home",
         "seoTitleWithName": "{name} - sarpbc.org",
         "seoTitleDefault": "Player - sarpbc.org",
         "seoDescriptionWithName": "View {name}'s profile, upcoming matches, and recent results",
         "seoDescriptionDefault": "Player profile, upcoming matches, and recent results",
         "currentTeam": "Current Team",
         "role": "Role",
-        "nationality": "Nationality",
         "age": "Age",
         "xYears": "{years} years",
         "freeAgent": "Free agent",
@@ -1280,7 +1231,6 @@
           }
         },
         "tabs": {
-          "label": "Player profile sections",
           "info": "Info",
           "matches": "Matches",
           "events": "Events",
@@ -1330,28 +1280,16 @@
       "index": {
         "title": "Rocket League Teams: Rosters and Results {'|'} sarpbc.org",
         "description": "Explore Rocket League esports teams on sarpbc.org. Browse the alphabetical directory to find rosters, recent match results and tournament appearances.",
-        "ogTitle": "All Teams - sarpbc.org",
-        "ogDescription": "Browse all {count} teams in the sarpbc.org database.",
         "pageTitle": "Teams Directory",
-        "team": "team",
-        "teams": "teams",
         "noTeamsFound": "No teams found",
-        "showing": "Showing",
-        "of": "of",
-        "page": "Page",
         "error": "Couldn't load teams. Check your connection and try again.",
         "activePlayers": "{count} player | {count} players"
       },
       "letter": {
         "title": "Rocket League Teams Starting with {letter} {'|'} sarpbc.org",
         "description": "Find Rocket League esports teams whose names start with {letter}. Explore their rosters, recent match results and tournament appearances on sarpbc.org.",
-        "ogTitle": "Teams starting with {letter} - sarpbc.org",
-        "ogDescription": "Browse {count} teams whose names start with {letter}.",
         "pageTitle": "Teams - {letter}",
-        "teamsFound": "{count} team found | {count} teams found",
-        "noTeamsFound": "No teams found",
-        "noTeamsStartingWith": "There are no teams whose names start with \"{letter}\"",
-        "backToAllTeams": "Back to all teams"
+        "noTeamsStartingWith": "There are no teams whose names start with \"{letter}\""
       }
     },
     "team": {
@@ -1363,14 +1301,9 @@
         "seoTitleDefault": "Team - sarpbc.org",
         "seoDescriptionWithName": "View {name}'s roster, upcoming matches, and recent results",
         "seoDescriptionDefault": "Team roster, upcoming matches, and recent results",
-        "location": "Location",
         "players": "Players",
         "staff": "Staff",
-        "playersCount": "{count} player | {count} players",
-        "statistics": "Statistics",
-        "teamStatisticsComingSoon": "Team statistics coming soon...",
         "tabs": {
-          "label": "Team profile sections",
           "info": "Info",
           "matches": "Matches",
           "events": "Events",
@@ -1379,8 +1312,7 @@
         },
         "roster": {
           "empty": "No players currently listed.",
-          "emptyHint": "The active lineup appears here once contracts are recorded for this team.",
-          "age": "{years} yo"
+          "emptyHint": "The active lineup appears here once contracts are recorded for this team."
         },
         "faq": {
           "title": "Frequently Asked Questions",
@@ -1464,7 +1396,6 @@
         "title": "Tournaments",
         "description": "Explore Rocket League esports tournaments on sarpbc.org. Find event brackets, match schedules, results and participating teams across the competitive scene.",
         "empty": "No tournaments found.",
-        "page": "Page",
         "error": "Couldn't load tournaments. Check your connection and try again.",
         "seoTitle": "Rocket League Tournaments: Brackets & Results {'|'} sarpbc.org"
       },
@@ -1526,8 +1457,7 @@
         "viewResults": "View Results",
         "viewTournaments": "View Tournaments"
       },
-      "error": "Could not load matches. Check your connection and try again.",
-      "unknownSubTournament": "Unknown event"
+      "error": "Could not load matches. Check your connection and try again."
     },
     "results": {
       "title": "Results",
@@ -1555,8 +1485,6 @@
         "unknownTeam": "TBD",
         "format": "Bo{count}",
         "matchOver": "Match over",
-        "addToCalendar": "Add to Calendar",
-        "watchStream": "Watch Stream",
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
@@ -1668,29 +1596,15 @@
       "index": {
         "title": "Rocket League Forum: Community Discussions {'|'} sarpbc.org",
         "description": "Discuss Rocket League esports with the sarpbc.org community. Share opinions on RLCS matches, tournaments, teams and players, or start your own discussion.",
-        "ogTitle": "sarpbc.org Forum - Rocket League Community",
-        "ogDescription": "Connect with the Rocket League community on sarpbc.org Forum. Share strategies, discuss gameplay, and stay updated with the latest community news.",
         "pageTitle": "Forum",
         "createNewPost": "Create New Post",
         "noPosts": "No posts available",
-        "loading": "Loading posts...",
-        "lastActivity": "Last activity",
-        "messages": "messages",
-        "message": "message",
-        "posts": "Posts",
-        "topics": "Topics",
-        "allTopics": "All Topics",
-        "filterByTopic": "Filter by topic",
-        "searchPosts": "Search posts...",
-        "clearFilters": "Clear filters",
         "error": "Couldn't load the forum. Check your connection and try again.",
         "emptyHint": "Start the first community discussion."
       },
       "new": {
         "title": "Create New Post",
         "description": "Create a new post in the sarpbc.org forum. Share your thoughts, ideas, and discussions about Rocket League with the community.",
-        "ogTitle": "Create New Post {'|'} sarpbc.org Forum",
-        "ogDescription": "Join the conversation! Create a new post in the sarpbc.org forum and share your Rocket League insights with the community.",
         "pageTitle": "Create a New Post",
         "form": {
           "title": "Title",
@@ -1723,9 +1637,6 @@
         "seoTitleDefault": "Forum Post - sarpbc.org",
         "seoDescriptionWithTitle": "Read \"{title}\" in the sarpbc.org forum",
         "seoDescriptionDefault": "Forum post",
-        "author": "Author",
-        "topic": "Topic",
-        "postedOn": "Posted on {date}",
         "signInToReply": "Sign in to reply"
       }
     },
@@ -1787,61 +1698,6 @@
         "description": "Follow Rocket League esports roster moves on sarpbc.org: player arrivals, departures, benchings and loans across teams, with sources."
       },
       "error": "Could not load transfers. Check your connection and try again."
-    }
-  },
-  "pages": {
-    "accessibility": {
-      "title": "Accessibility Statement",
-      "metaDescription": "Our commitment to web accessibility and information about the accessibility features of our website.",
-      "lastUpdated": "Last updated",
-      "lastUpdatedDate": "September 4, 2025",
-      "commitment": {
-        "title": "Our Commitment to Accessibility",
-        "description": "sarpbc.org is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards."
-      },
-      "compliance": {
-        "title": "Conformance Status",
-        "description": "The Web Content Accessibility Guidelines (WCAG) defines requirements for designers and developers to improve accessibility for people with disabilities. It defines three levels of conformance: Level A, Level AA, and Level AAA.",
-        "status": "This website is partially conformant with WCAG 2.1 level AA. Partially conformant means that some parts of the content do not fully conform to the accessibility standard."
-      },
-      "measures": {
-        "title": "Accessibility Measures",
-        "description": "We have implemented the following accessibility measures:",
-        "keyboard": "Keyboard navigation support",
-        "screenReader": "Screen reader compatibility",
-        "contrast": "Sufficient color contrast ratios",
-        "text": "Resizable text up to 200% without loss of functionality",
-        "images": "Alternative text for images"
-      },
-      "limitations": {
-        "title": "Known Limitations",
-        "description": "Despite our best efforts, some limitations may exist:",
-        "thirdParty": "Third-party content may not be fully accessible",
-        "userContent": "User-generated content may not meet accessibility standards"
-      },
-      "feedback": {
-        "title": "Feedback and Contact",
-        "description": "We welcome your feedback on the accessibility of our website. Please let us know if you encounter accessibility barriers:",
-        "email": "Email",
-        "response": "Response time",
-        "responseTime": "We aim to respond within 3 business days"
-      },
-      "enforcement": {
-        "title": "Enforcement Procedure",
-        "description": "If you are not satisfied with our response to your accessibility concern, you may contact:",
-        "authority": "Accessibility Authority",
-        "authorityName": "Défenseur des Droits",
-        "authorityAddress": "TSA 90716, 75334 Paris Cedex 07, France",
-        "website": "Website"
-      },
-      "technical": {
-        "title": "Technical Specifications",
-        "description": "Accessibility of this website relies on the following technologies:",
-        "technologies": "HTML, CSS, JavaScript, and ARIA attributes",
-        "assistive": "Designed to work with assistive technologies",
-        "testing": "Regular testing with screen readers and keyboard navigation"
-      },
-      "backToHome": "Back to Home"
     }
   }
 }
