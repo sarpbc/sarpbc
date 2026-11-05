@@ -4,6 +4,7 @@ import type {
   StatsImportItem,
   StatsImportStatus,
   TournamentMatchListItem,
+  TournamentStatsGame,
 } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
@@ -21,7 +22,7 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-function formatDate(value: string | null): string {
+function formatDate(value: Date | string | null): string {
   return value ? dateFormatter.value.format(new Date(value)) : "—";
 }
 
@@ -43,6 +44,29 @@ const latest = computed<StatsImport | null>(() => imports.value?.[0] ?? null);
 const active = computed(
   () => latest.value?.status === "pending" || latest.value?.status === "running",
 );
+
+const {
+  data: games,
+  pending: gamesPending,
+  error: gamesError,
+  refresh: refreshGames,
+} = await useLazyAsyncData(
+  () => `admin-tournament-${props.tournamentId}-stats-games`,
+  () => getTournamentStatsGames(props.tournamentId),
+  { server: false, watch: [() => props.tournamentId, () => latest.value?.finishedAt] },
+);
+
+const attachTarget = ref<StatsImportItem | null>(null);
+const linksVersion = ref(0);
+
+function attachedGame(item: StatsImportItem): TournamentStatsGame | undefined {
+  return games.value?.find((game) => game.ballchasingId === item.replayId);
+}
+
+async function onGamesChanged() {
+  linksVersion.value += 1;
+  await refreshGames();
+}
 
 let timer: ReturnType<typeof setInterval> | undefined;
 watch(
@@ -87,11 +111,15 @@ function statusColor(status: StatsImportStatus) {
   }
 }
 
+function labelOf(match: TournamentMatchListItem): string {
+  const [a, b] = match.participants ?? [];
+  const teams = `${a?.team.name ?? "TBD"} vs ${b?.team.name ?? "TBD"}`;
+  return match.beginAt ? `${teams} · ${formatDate(match.beginAt)}` : teams;
+}
+
 function matchLabel(matchId: string | null): string | null {
   const match = props.matches.find((candidate) => candidate.id === matchId);
-  if (!match) return null;
-  const [a, b] = match.participants ?? [];
-  return `${a?.team.name ?? "TBD"} vs ${b?.team.name ?? "TBD"}`;
+  return match ? labelOf(match) : null;
 }
 
 const ROW_CLASS =
@@ -239,17 +267,57 @@ async function submit() {
               </ULink>
               <span class="text-muted">{{ itemMeta(row) }}</span>
             </div>
-            <span :class="row.status === 'failed' ? 'text-error' : 'text-muted'">
-              {{ itemReason(row) }}
-            </span>
+            <div class="flex shrink-0 flex-col gap-1 sm:items-end">
+              <span :class="row.status === 'failed' ? 'text-error' : 'text-muted'">
+                {{ itemReason(row) }}
+              </span>
+              <span v-if="attachedGame(row)" class="text-success">
+                {{
+                  t("page.tournaments.statsAttach.attached", {
+                    number: attachedGame(row)?.number,
+                    match: matchLabel(attachedGame(row)?.matchId ?? null) ?? "—",
+                  })
+                }}
+              </span>
+              <UButton
+                v-else
+                size="xs"
+                variant="soft"
+                icon="i-fluent-link-24-regular"
+                :label="t('page.tournaments.statsAttach.action')"
+                :aria-label="t('page.tournaments.statsAttach.actionFor', { title: row.title })"
+                :disabled="!games"
+                @click="attachTarget = row"
+              />
+            </div>
           </li>
         </ul>
       </div>
     </div>
 
+    <TournamentStatsGames
+      :tournament-id="tournamentId"
+      :matches="matches"
+      :games="games ?? undefined"
+      :pending="gamesPending"
+      :failed="!!gamesError"
+      :match-label="labelOf"
+      @retry="refreshGames()"
+      @removed="onGamesChanged"
+    />
+
     <TournamentStatsPlayerLinks
       :tournament-id="tournamentId"
-      :refresh-key="latest?.finishedAt ?? null"
+      :refresh-key="`${latest?.finishedAt ?? ''}:${linksVersion}`"
+    />
+
+    <TournamentStatsAttachReplay
+      v-model:target="attachTarget"
+      :tournament-id="tournamentId"
+      :matches="matches"
+      :games="games ?? []"
+      :match-label="labelOf"
+      @attached="onGamesChanged"
     />
   </section>
 </template>

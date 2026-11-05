@@ -1,6 +1,8 @@
 import { Injectable, type OnApplicationBootstrap } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
 import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
+import type { StatsImportScheduler } from "../application/ports";
 import { StatsImportService } from "../application/stats-import.service";
 
 /**
@@ -8,16 +10,16 @@ import { StatsImportService } from "../application/stats-import.service";
  * Its status lives in PostgreSQL; an import cut short by a restart is marked failed at boot.
  */
 @Injectable()
-export class StatsImportRunner implements OnApplicationBootstrap {
+export class StatsImportRunner implements StatsImportScheduler, OnApplicationBootstrap {
   constructor(
     private readonly orm: MikroORM,
-    private readonly service: StatsImportService,
+    // The service schedules through this runner, so it is resolved lazily to avoid a cycle.
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    const interrupted = await RequestContext.create(this.orm.em, () =>
-      this.service.failInterrupted(),
-    );
+    const service = this.moduleRef.get(StatsImportService);
+    const interrupted = await RequestContext.create(this.orm.em, () => service.failInterrupted());
     if (interrupted > 0)
       log.warn({
         component: StatsImportRunner.name,
@@ -26,12 +28,11 @@ export class StatsImportRunner implements OnApplicationBootstrap {
       });
   }
 
-  start(importId: string): void {
+  schedule(task: () => Promise<void>): void {
     setImmediate(() => {
-      RequestContext.create(this.orm.em, () => this.service.run(importId)).catch((error) =>
+      RequestContext.create(this.orm.em, task).catch((error) =>
         log.error({
           component: StatsImportRunner.name,
-          importId,
           error: error instanceof Error ? error : new Error(String(error)),
         }),
       );

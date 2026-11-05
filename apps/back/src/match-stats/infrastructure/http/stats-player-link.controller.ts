@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
-import type { StatsPlayerLinkResult, UnlinkedStatsPlayer } from "@sarpbc/types";
+import type { StatsPlayerAccounts, StatsPlayerLinkResult } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -12,9 +12,9 @@ import { LinkStatsPlayerDto } from "./dto/link-stats-player.dto";
 export class StatsPlayerLinkController {
   constructor(private readonly service: StatsPlayerLinkService) {}
 
-  @Get("unlinked")
-  async unlinked(@Param("id") tournamentId: string): Promise<{ players: UnlinkedStatsPlayer[] }> {
-    return { players: await this.service.unlinked(tournamentId) };
+  @Get()
+  accounts(@Param("id") tournamentId: string): Promise<StatsPlayerAccounts> {
+    return this.service.accounts(tournamentId);
   }
 
   @Put("link")

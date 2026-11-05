@@ -15,6 +15,7 @@ import type {
   PlayerLink,
   ReplayStats,
   StatsCandidates,
+  StatsImportScheduler,
   StatsImportStore,
 } from "./ports";
 import { INTERRUPTED_IMPORT_ERROR, StatsImportService } from "./stats-import.service";
@@ -72,6 +73,8 @@ function statsFor(replay: ReplaySummary): ReplayStats {
       demolitions: index,
     }));
   return {
+    rocketLeagueId: replay.rocketLeagueId,
+    playedAt: replay.playedAt,
     blueGoals: replay.blue.goals,
     orangeGoals: replay.orange.goals,
     players: [
@@ -115,8 +118,19 @@ class MemoryImports implements StatsImportStore {
 class MemoryGames implements GameStatsStore {
   saved: GameRecord[] = [];
   linked: PlayerLink[] = [];
-  async importedReplayIds(ids: string[]) {
-    return new Set(this.saved.map((game) => game.ballchasingId).filter((id) => ids.includes(id)));
+  exclusions = new Set<string>();
+  async locations(ids: string[]) {
+    return new Map(
+      this.saved
+        .filter((game) => ids.includes(game.ballchasingId))
+        .map((game) => [game.ballchasingId, { matchId: game.matchId, number: game.number }]),
+    );
+  }
+  async excluded(ids: string[]) {
+    return new Set(ids.filter((id) => this.exclusions.has(id)));
+  }
+  async attachment() {
+    return null;
   }
   async links(accounts: PlatformAccount[]) {
     return this.linked.filter((link) =>
@@ -125,12 +139,32 @@ class MemoryGames implements GameStatsStore {
   }
   async save(game: GameRecord) {
     this.saved.push(game);
+    this.exclusions.delete(game.ballchasingId);
     for (const link of game.learnedLinks)
       if (!this.linked.some((known) => known.platformId === link.platformId))
         this.linked.push(link);
   }
   async byMatch() {
     return [];
+  }
+  async inTournament() {
+    return [];
+  }
+  async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
+    const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);
+    if (!game) return null;
+    this.saved = this.saved.filter((saved) => saved !== game);
+    this.exclusions.add(game.ballchasingId);
+    return {
+      matchId,
+      number,
+      ballchasingId: game.ballchasingId,
+      playedAt: null,
+      blueParticipantId: game.blueParticipantId,
+      orangeParticipantId: game.orangeParticipantId,
+      blueGoals: game.blueGoals,
+      orangeGoals: game.orangeGoals,
+    };
   }
 }
 
@@ -155,13 +189,21 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
   const games = new MemoryGames();
   const imports = new MemoryImports();
   const reportFailure = vi.fn();
-  const service = new StatsImportService(source, candidates, games, imports, reportFailure);
-  return { service, source, games, imports, reportFailure };
+  const scheduler = { schedule: vi.fn<StatsImportScheduler["schedule"]>() };
+  const service = new StatsImportService(
+    source,
+    candidates,
+    games,
+    imports,
+    scheduler,
+    reportFailure,
+  );
+  return { service, source, games, imports, scheduler, reportFailure };
 }
 
 describe("StatsImportService.request", () => {
-  it("queues a pending import for a valid group link", async () => {
-    const { service, imports } = setup();
+  it("queues a pending import for a valid group link and schedules its run", async () => {
+    const { service, imports, scheduler, source } = setup();
 
     const statsImport = await service.request("t1", "https://ballchasing.com/group/pilot-abc123");
 
@@ -171,6 +213,10 @@ describe("StatsImportService.request", () => {
       status: "pending",
     });
     expect(imports.rows.get(statsImport.id)?.status).toBe("pending");
+    expect(scheduler.schedule).toHaveBeenCalledOnce();
+    await scheduler.schedule.mock.calls[0][0]();
+    expect(imports.rows.get(statsImport.id)?.status).toBe("completed");
+    expect(source.groupReplays).toHaveBeenCalledWith("pilot-abc123");
   });
 
   it("rejects unknown tournaments, invalid groups and a second active import", async () => {
@@ -191,6 +237,7 @@ describe("StatsImportService.request", () => {
       { tournamentExists: vi.fn(), matches: vi.fn() },
       new MemoryGames(),
       imports,
+      { schedule: vi.fn() },
       vi.fn(),
     );
 
@@ -302,6 +349,62 @@ describe("StatsImportService.run", () => {
     ]);
   });
 
+  it("leaves a replay staff removed out of a later run, without fetching it", async () => {
+    const { service, games, imports, source } = setup();
+    await service.run((await service.request("t1", "pilot-abc123")).id);
+    await games.remove("t1", { matchId: "m1", number: 2 });
+    source.replayStats.mockClear();
+
+    const { id } = await service.request("t1", "pilot-abc123");
+    await service.run(id);
+
+    expect(source.replayStats).not.toHaveBeenCalled();
+    expect(games.saved.map((game) => game.ballchasingId)).toEqual(["r1"]);
+    expect(imports.rows.get(id)?.items).toEqual([
+      expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 1 }),
+      expect.objectContaining({ replayId: "r2", status: "unmatched", reason: "excluded_by_staff" }),
+      expect.objectContaining({
+        replayId: "r3",
+        reason: "unknown_teams",
+        matchId: null,
+        blueParticipantId: null,
+      }),
+    ]);
+  });
+
+  it("reports a game staff attached under another number where it is, and adds nothing", async () => {
+    const { service, games, imports, source } = setup({ replays: [game1, game2] });
+    games.saved.push({
+      matchId: "m1",
+      number: 2,
+      ballchasingId: "r1",
+      rocketLeagueId: game1.rocketLeagueId,
+      playedAt: game1.playedAt,
+      blueParticipantId: "p-kc",
+      orangeParticipantId: "p-bds",
+      blueGoals: 2,
+      orangeGoals: 0,
+      players: [],
+      learnedLinks: [],
+    });
+
+    const { id } = await service.request("t1", "pilot-abc123");
+    await service.run(id);
+
+    expect(source.replayStats).not.toHaveBeenCalled();
+    expect(games.saved).toHaveLength(1);
+    expect(imports.rows.get(id)?.items).toEqual([
+      expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 2 }),
+      expect.objectContaining({
+        replayId: "r2",
+        status: "unmatched",
+        reason: "match_has_other_stats",
+        matchId: "m1",
+        blueParticipantId: "p-kc",
+      }),
+    ]);
+  });
+
   it("fails a game whose stats score disagrees with the list, or that is not processed yet", async () => {
     const { service, games, imports, source, reportFailure } = setup();
     source.replayStats
@@ -341,7 +444,14 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(imports.rows.get(id)?.items).toEqual([
-      expect.objectContaining({ replayId: "r1", status: "failed", reason: "fetch_failed" }),
+      expect.objectContaining({
+        replayId: "r1",
+        status: "failed",
+        reason: "fetch_failed",
+        matchId: "m1",
+        gameNumber: 1,
+        blueParticipantId: "p-kc",
+      }),
       expect.objectContaining({ replayId: "r2", status: "failed", reason: "save_failed" }),
     ]);
     expect(imports.rows.get(id)?.status).toBe("completed");

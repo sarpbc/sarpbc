@@ -435,6 +435,7 @@
           "failed": "Failed"
         },
         "unmatched": {
+          "excluded_by_staff": "Staff removed this game. The import leaves it out; attach it again to bring it back.",
           "duplicate_replay": "Same game uploaded twice; the other copy is used.",
           "missing_date": "The replay has no date, so the match cannot be confirmed.",
           "unknown_teams": "No match in this tournament has both teams. Check the rosters and team names.",
@@ -455,18 +456,22 @@
       },
       "statsLinks": {
         "title": "Unlinked players",
-        "hint": "These stats keep the in-game name because it matches nobody on the team's roster. Choose the player to link the account: every game of this account, in all tournaments, moves to that player and later imports reuse the link.",
+        "hint": "These stats keep the in-game name because it matches nobody on the team's roster. Choose the player, from the team's roster or another roster of the tournament for a stand-in, to link the account: every game of this account, in all tournaments, moves to that player and later imports reuse the link.",
         "loading": "Loading…",
         "loadError": "Could not load the unlinked players.",
         "retry": "Try Again",
         "empty": "Every imported player with an account id is linked.",
         "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
         "choose": "Choose a player",
-        "noRoster": "No roster for this team",
         "playerFor": "Player for {name}",
         "save": "Link",
         "saved": "{name} linked",
-        "saveError": "Could not link the player"
+        "saveError": "Could not link the player",
+        "linkedTitle": "Linked accounts",
+        "linkedHint": "Accounts linked by name or by staff. Change a wrong link: every game of the account moves to the new player.",
+        "linkedTo": "{name} → {player}",
+        "change": "Change",
+        "changeFor": "Change the player linked to {name}"
       },
       "prizes": {
         "title": "Prize Distribution",
@@ -559,6 +564,42 @@
           "url": "Website",
           "image": "Logo"
         }
+      },
+      "statsAttach": {
+        "action": "Attach",
+        "actionFor": "Attach {title} to a game",
+        "attached": "Attached as game {number} of {match}",
+        "title": "Attach replay",
+        "description": "Attach {title} to a game yourself. The team, date and series checks of the import are skipped.",
+        "match": "Match",
+        "matchPlaceholder": "Choose a match",
+        "matchSearch": "Search a team",
+        "game": "Game",
+        "gamePlaceholder": "Choose a game",
+        "gameOption": "Game {number}",
+        "gameTaken": "Game {number} (has stats)",
+        "chooseMatchFirst": "Choose a match first.",
+        "blue": "Blue team",
+        "blueHelp": "The team that played on the blue side in this replay.",
+        "submit": "Attach",
+        "saved": "Replay attached as game {number}",
+        "saveError": "Could not attach the replay"
+      },
+      "statsGames": {
+        "title": "Games with stats",
+        "hint": "Games stored for each match. Removing a game deletes its stats, and later imports leave its replay out.",
+        "loading": "Loading…",
+        "loadError": "Could not load the games with stats.",
+        "retry": "Try Again",
+        "empty": "No game of this tournament has stats yet.",
+        "unknownTeam": "Unknown team",
+        "score": "Game {number}: {blue} {blueGoals}–{orangeGoals} {orange}",
+        "remove": "Remove game {number} of {match}",
+        "confirmTitle": "Remove game stats",
+        "confirm": "Remove the stats of game {number} of {match}? Later imports will leave this replay out until it is attached again.",
+        "confirmButton": "Remove",
+        "removed": "Game {number} removed",
+        "removeError": "Could not remove the game"
       }
     },
     "pickems": {

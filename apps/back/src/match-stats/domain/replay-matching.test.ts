@@ -96,7 +96,9 @@ function byReplay(assignments: ReplayAssignment[]) {
       assignment.replay.id,
       assignment.kind === "matched"
         ? `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`
-        : `unmatched:${assignment.reason}${assignment.matchId ? `@${assignment.matchId}` : ""}`,
+        : assignment.kind === "stored"
+          ? `stored:${assignment.matchId}#${assignment.gameNumber}`
+          : `unmatched:${assignment.reason}${assignment.matchId ? `@${assignment.matchId}` : ""}`,
     ]),
   );
 }
@@ -485,7 +487,7 @@ describe("assignReplays", () => {
     });
   });
 
-  it("gives the same numbers when the group is imported again", () => {
+  it("reports stored games where they are when the group is imported again", () => {
     const first = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -501,12 +503,138 @@ describe("assignReplays", () => {
         ["p-kc", 1],
         ["p-bds", 1],
       ]),
-      storedReplayIds: [first.id, second.id],
+      storedReplayIds: [first.id],
+    });
+    const stored = new Map([[first.id, { matchId: "m1", number: 1 }]]);
+
+    expect(byReplay(assignReplays([second, first], [m], stored))).toEqual({
+      [first.id]: "stored:m1#1",
+      [second.id]: "m1#2 blue=p-bds",
+    });
+  });
+
+  describe("after staff changes", () => {
+    const bo5 = (overrides: Partial<CandidateMatch> = {}) =>
+      match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
+        scores: won(kc, bds, 3),
+        ...overrides,
+      });
+    const sweep = () => [
+      replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
+      replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
+      replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
+    ];
+
+    it("reports a removed replay as excluded and holds back its series as incomplete", () => {
+      const [g1, g2, g3] = sweep();
+      const m = bo5({ storedReplayIds: [g1.id, g3.id] });
+      const stored = new Map([
+        [g1.id, { matchId: "m1", number: 1 }],
+        [g3.id, { matchId: "m1", number: 3 }],
+      ]);
+
+      expect(byReplay(assignReplays([g1, g2, g3], [m], stored, new Set([g2.id])))).toEqual({
+        [g1.id]: "stored:m1#1",
+        [g2.id]: "unmatched:excluded_by_staff",
+        [g3.id]: "stored:m1#3",
+      });
     });
 
-    expect(byReplay(assignReplays([second, first], [m]))).toEqual({
-      [first.id]: "m1#1 blue=p-kc",
-      [second.id]: "m1#2 blue=p-bds",
+    it("counts a removed replay as absent, so new games of its series wait", () => {
+      const [g1, g2, g3] = sweep();
+
+      expect(byReplay(assignReplays([g1, g2, g3], [bo5()], new Map(), new Set([g1.id])))).toEqual({
+        [g1.id]: "unmatched:excluded_by_staff",
+        [g2.id]: "unmatched:incomplete_series@m1",
+        [g3.id]: "unmatched:incomplete_series@m1",
+      });
+    });
+
+    it("keeps another upload of a removed or stored game out, earlier or later", () => {
+      const [g1] = sweep();
+      const removedCopy = { ...g1, id: "r-removed-copy", playedAt: at("2026-06-01T18:06:00Z") };
+      const storedCopy = { ...g1, id: "r-stored-copy", playedAt: at("2026-06-01T18:04:00Z") };
+
+      expect(
+        byReplay(assignReplays([g1, removedCopy], [bo5()], new Map(), new Set([removedCopy.id]))),
+      ).toEqual({
+        [g1.id]: "unmatched:duplicate_replay",
+        [removedCopy.id]: "unmatched:excluded_by_staff",
+      });
+      expect(
+        byReplay(
+          assignReplays(
+            [g1, storedCopy],
+            [bo5({ storedReplayIds: [g1.id] })],
+            new Map([[g1.id, { matchId: "m1", number: 1 }]]),
+          ),
+        ),
+      ).toEqual({
+        [g1.id]: "stored:m1#1",
+        [storedCopy.id]: "unmatched:duplicate_replay",
+      });
+    });
+
+    it("never renumbers a game staff attached under another number", () => {
+      const [g1, g2, g3] = sweep();
+      const m = bo5({ storedReplayIds: [g1.id] });
+
+      expect(
+        byReplay(
+          assignReplays([g1, g2, g3], [m], new Map([[g1.id, { matchId: "m1", number: 3 }]])),
+        ),
+      ).toEqual({
+        [g1.id]: "stored:m1#3",
+        [g2.id]: "unmatched:match_has_other_stats@m1",
+        [g3.id]: "unmatched:match_has_other_stats@m1",
+      });
+    });
+
+    it("leaves a game staff attached to another match out of the series it fits", () => {
+      const [g1, g2, g3] = sweep();
+      const other = match("other", [kc, vit], "2026-06-02T18:00:00Z", {
+        storedReplayIds: [g1.id],
+      });
+
+      expect(
+        byReplay(
+          assignReplays(
+            [g1, g2, g3],
+            [bo5(), other],
+            new Map([[g1.id, { matchId: "other", number: 1 }]]),
+          ),
+        ),
+      ).toEqual({
+        [g1.id]: "stored:other#1",
+        [g2.id]: "unmatched:incomplete_series@m1",
+        [g3.id]: "unmatched:incomplete_series@m1",
+      });
+    });
+
+    it("never mixes a match holding a manual game from outside the group", () => {
+      const [g1, g2, g3] = sweep();
+      const m = bo5({ storedReplayIds: ["manual"] });
+
+      expect(byReplay(assignReplays([g1, g2, g3], [m]))).toEqual({
+        [g1.id]: "unmatched:match_has_other_stats@m1",
+        [g2.id]: "unmatched:match_has_other_stats@m1",
+        [g3.id]: "unmatched:match_has_other_stats@m1",
+      });
+    });
+
+    it("completes a series around a game staff attached under its date-order number", () => {
+      const [g1, g2, g3] = sweep();
+      const m = bo5({ storedReplayIds: [g2.id] });
+
+      expect(
+        byReplay(
+          assignReplays([g1, g2, g3], [m], new Map([[g2.id, { matchId: "m1", number: 2 }]])),
+        ),
+      ).toEqual({
+        [g1.id]: "m1#1 blue=p-kc",
+        [g2.id]: "stored:m1#2",
+        [g3.id]: "m1#3 blue=p-kc",
+      });
     });
   });
 

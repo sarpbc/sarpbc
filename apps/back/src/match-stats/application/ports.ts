@@ -1,5 +1,10 @@
-import type { MatchGameStats, UnlinkedStatsPlayer } from "@sarpbc/types";
-import type { CandidateMatch, ReplaySummary, Side } from "../domain/replay-matching";
+import type {
+  MatchGameStats,
+  StatsPlayerAccount,
+  StatsRoster,
+  TournamentStatsGame,
+} from "@sarpbc/types";
+import type { CandidateMatch, GameLocation, ReplaySummary, Side } from "../domain/replay-matching";
 import type { StatsImport } from "../domain/stats-import";
 
 export interface BallchasingSource {
@@ -22,6 +27,8 @@ export interface ReplayPlayerStats {
 }
 
 export interface ReplayStats {
+  rocketLeagueId: string | null;
+  playedAt: Date | null;
   blueGoals: number;
   orangeGoals: number;
   players: ReplayPlayerStats[];
@@ -60,19 +67,33 @@ export interface GameRecord {
   learnedLinks: PlayerLink[];
 }
 
+export interface GameAttachment extends GameLocation {
+  tournamentName: string;
+  teams: [string, string];
+}
+
 export interface GameStatsStore {
-  importedReplayIds(replayIds: string[]): Promise<Set<string>>;
+  /** Where each of these replays is stored, for those that are. */
+  locations(replayIds: string[]): Promise<Map<string, GameLocation>>;
+  /** The replays among these that staff removed. */
+  excluded(replayIds: string[]): Promise<Set<string>>;
+  attachment(replayId: string): Promise<GameAttachment | null>;
   links(accounts: PlatformAccount[]): Promise<PlayerLink[]>;
   /**
-   * Saves the game, its player rows and its learned links atomically, and links earlier
-   * unlinked rows of each learned account.
+   * Saves the game, its player rows and its learned links atomically, links earlier unlinked
+   * rows of each learned account and clears any staff exclusion of the replay.
    */
   save(game: GameRecord): Promise<void>;
   byMatch(matchId: string): Promise<MatchGameStats[]>;
+  inTournament(tournamentId: string): Promise<TournamentStatsGame[]>;
+  /** Deletes the game with its player rows and excludes its replay atomically. */
+  remove(tournamentId: string, location: GameLocation): Promise<TournamentStatsGame | null>;
 }
 
 export interface PlayerLinkStore {
-  unlinked(tournamentId: string): Promise<UnlinkedStatsPlayer[]>;
+  /** Every game account with a platform id that played in the tournament. */
+  accounts(tournamentId: string): Promise<StatsPlayerAccount[]>;
+  rosters(tournamentId: string): Promise<StatsRoster[]>;
   onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean>;
   /** Replaces the account's link and repoints all its stat rows atomically; returns the rows repointed. */
   link(link: PlayerLink): Promise<number>;
@@ -85,4 +106,9 @@ export interface StatsImportStore {
   latest(tournamentId: string, limit: number): Promise<StatsImport[]>;
   /** Marks pending or running imports as failed; returns how many changed. */
   failUnfinished(error: string): Promise<number>;
+}
+
+/** Runs a queued import outside the request that queued it. */
+export interface StatsImportScheduler {
+  schedule(task: () => Promise<void>): void;
 }

@@ -1,6 +1,8 @@
 import type {
+  AttachReplayInput,
   PlayerAwardType,
   StatsImport,
+  StatsPlayerAccounts,
   StatsPlayerLinkInput,
   StatsPlayerLinkResult,
   TournamentAwardListItem,
@@ -8,7 +10,7 @@ import type {
   TournamentListItem,
   TournamentMatchListItem,
   TournamentPrizes,
-  UnlinkedStatsPlayer,
+  TournamentStatsGame,
 } from "@sarpbc/types";
 
 export async function getAllTournaments(query?: {
@@ -340,14 +342,41 @@ export async function requestStatsImport(
   });
 }
 
-export async function getUnlinkedStatsPlayers(
+export async function getStatsPlayerAccounts(tournamentId: string): Promise<StatsPlayerAccounts> {
+  return apiFetch<StatsPlayerAccounts>(`/tournaments/${tournamentId}/stats-players`, {
+    method: "GET",
+  });
+}
+
+export async function getTournamentStatsGames(
   tournamentId: string,
-): Promise<UnlinkedStatsPlayer[]> {
-  const res = await apiFetch<{ players: UnlinkedStatsPlayer[] }>(
-    `/tournaments/${tournamentId}/stats-players/unlinked`,
+): Promise<TournamentStatsGame[]> {
+  const res = await apiFetch<{ games: TournamentStatsGame[] }>(
+    `/tournaments/${tournamentId}/stats-games`,
     { method: "GET" },
   );
-  return res.players;
+  return res.games;
+}
+
+export async function attachStatsReplay(
+  tournamentId: string,
+  body: AttachReplayInput,
+): Promise<TournamentStatsGame> {
+  return apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
+    method: "POST",
+    body,
+  });
+}
+
+export async function removeStatsGame(
+  tournamentId: string,
+  matchId: string,
+  number: number,
+): Promise<TournamentStatsGame> {
+  return apiFetch<TournamentStatsGame>(
+    `/tournaments/${tournamentId}/stats-games/${matchId}/${number}`,
+    { method: "DELETE" },
+  );
 }
 
 export async function linkStatsPlayer(

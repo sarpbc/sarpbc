@@ -435,6 +435,7 @@
           "failed": "En échec"
         },
         "unmatched": {
+          "excluded_by_staff": "Le staff a retiré cette game. L’import l’ignore ; rattachez-la pour la rétablir.",
           "duplicate_replay": "La même game a été envoyée deux fois ; l’autre copie est utilisée.",
           "missing_date": "Le replay n’a pas de date, le match ne peut donc pas être confirmé.",
           "unknown_teams": "Aucun match de ce tournoi n’oppose ces deux équipes. Vérifiez les rosters et les noms d’équipe.",
@@ -455,18 +456,22 @@
       },
       "statsLinks": {
         "title": "Joueurs non reliés",
-        "hint": "Ces stats gardent le pseudo en jeu, car il ne correspond à personne dans le roster de l’équipe. Choisissez le joueur à relier au compte : toutes les games de ce compte, dans tous les tournois, lui sont attribuées et les prochains imports réutilisent ce lien.",
+        "hint": "Ces stats gardent le pseudo en jeu, car il ne correspond à personne dans le roster de l’équipe. Choisissez le joueur, dans le roster de l’équipe ou dans un autre roster du tournoi pour un remplaçant, à relier au compte : toutes les games de ce compte, dans tous les tournois, lui sont attribuées et les prochains imports réutilisent ce lien.",
         "loading": "Chargement…",
         "loadError": "Impossible de charger les joueurs non reliés.",
         "retry": "Réessayer",
         "empty": "Tous les joueurs importés qui ont un identifiant de compte sont reliés.",
         "meta": "{team} · {count} game · {platform} {id} | {team} · {count} games · {platform} {id}",
         "choose": "Choisir un joueur",
-        "noRoster": "Aucun roster pour cette équipe",
         "playerFor": "Joueur correspondant à {name}",
         "save": "Relier",
         "saved": "{name} relié",
-        "saveError": "Impossible de relier le joueur"
+        "saveError": "Impossible de relier le joueur",
+        "linkedTitle": "Comptes reliés",
+        "linkedHint": "Comptes reliés par leur pseudo ou par le staff. Corrigez un lien erroné : toutes les games du compte passent au nouveau joueur.",
+        "linkedTo": "{name} → {player}",
+        "change": "Modifier",
+        "changeFor": "Modifier le joueur relié à {name}"
       },
       "prizes": {
         "title": "Répartition des gains",
@@ -559,6 +564,42 @@
           "url": "Site web",
           "image": "Logo"
         }
+      },
+      "statsAttach": {
+        "action": "Rattacher",
+        "actionFor": "Rattacher {title} à une game",
+        "attached": "Rattaché comme game {number} de {match}",
+        "title": "Rattacher un replay",
+        "description": "Rattachez vous-même {title} à une game. Les vérifications d’équipes, de date et de série de l’import ne s’appliquent pas.",
+        "match": "Match",
+        "matchPlaceholder": "Choisir un match",
+        "matchSearch": "Rechercher une équipe",
+        "game": "Game",
+        "gamePlaceholder": "Choisir une game",
+        "gameOption": "Game {number}",
+        "gameTaken": "Game {number} (a déjà des stats)",
+        "chooseMatchFirst": "Choisissez d’abord un match.",
+        "blue": "Équipe bleue",
+        "blueHelp": "L’équipe qui jouait côté bleu dans ce replay.",
+        "submit": "Rattacher",
+        "saved": "Replay rattaché comme game {number}",
+        "saveError": "Impossible de rattacher le replay"
+      },
+      "statsGames": {
+        "title": "Games avec stats",
+        "hint": "Games enregistrées pour chaque match. Retirer une game supprime ses stats, et les prochains imports ignorent son replay.",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les games avec stats.",
+        "retry": "Réessayer",
+        "empty": "Aucune game de ce tournoi n’a encore de stats.",
+        "unknownTeam": "Équipe inconnue",
+        "score": "Game {number} : {blue} {blueGoals}–{orangeGoals} {orange}",
+        "remove": "Retirer la game {number} de {match}",
+        "confirmTitle": "Retirer les stats d’une game",
+        "confirm": "Retirer les stats de la game {number} de {match} ? Les prochains imports ignoreront ce replay tant qu’il n’est pas rattaché à nouveau.",
+        "confirmButton": "Retirer",
+        "removed": "Game {number} retirée",
+        "removeError": "Impossible de retirer la game"
       }
     },
     "pickems": {

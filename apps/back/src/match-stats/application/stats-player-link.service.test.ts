@@ -11,7 +11,10 @@ function setup() {
     matches: vi.fn(),
   };
   const links = {
-    unlinked: vi.fn<PlayerLinkStore["unlinked"]>(async () => []),
+    accounts: vi.fn<PlayerLinkStore["accounts"]>(async () => []),
+    rosters: vi.fn<PlayerLinkStore["rosters"]>(async () => [
+      { participantId: "p1", teamName: "KC", players: [{ id: "kofyr", name: "kofyr" }] },
+    ]),
     onTournamentRoster: vi.fn<PlayerLinkStore["onTournamentRoster"]>(
       async (_tournamentId, playerId) => playerId === "kofyr",
     ),
@@ -41,7 +44,16 @@ describe("StatsPlayerLinkService", () => {
     const { service, links } = setup();
 
     await expect(service.link("missing", link)).rejects.toBeInstanceOf(NotFoundError);
-    await expect(service.unlinked("missing")).rejects.toBeInstanceOf(NotFoundError);
-    expect(links.unlinked).not.toHaveBeenCalled();
+    await expect(service.accounts("missing")).rejects.toBeInstanceOf(NotFoundError);
+    expect(links.accounts).not.toHaveBeenCalled();
+  });
+
+  it("lists the tournament's accounts with every roster of the tournament", async () => {
+    const { service } = setup();
+
+    expect(await service.accounts("t1")).toEqual({
+      players: [],
+      rosters: [{ participantId: "p1", teamName: "KC", players: [{ id: "kofyr", name: "kofyr" }] }],
+    });
   });
 });

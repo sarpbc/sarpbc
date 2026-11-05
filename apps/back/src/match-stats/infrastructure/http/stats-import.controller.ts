@@ -14,7 +14,6 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { StatsImportService } from "../../application/stats-import.service";
 import type { StatsImport } from "../../domain/stats-import";
-import { StatsImportRunner } from "../stats-import.runner";
 import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
 
 function present(statsImport: StatsImport): StatsImportResponse {
@@ -30,10 +29,7 @@ function present(statsImport: StatsImport): StatsImportResponse {
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("tournaments.manage")
 export class StatsImportController {
-  constructor(
-    private readonly service: StatsImportService,
-    private readonly runner: StatsImportRunner,
-  ) {}
+  constructor(private readonly service: StatsImportService) {}
 
   @Get()
   async list(@Param("id") tournamentId: string) {
@@ -47,8 +43,6 @@ export class StatsImportController {
     @Param("id") tournamentId: string,
     @Body({ schema: RequestStatsImportDto }) dto: RequestStatsImportDto,
   ) {
-    const statsImport = await this.service.request(tournamentId, dto.group);
-    this.runner.start(statsImport.id);
-    return present(statsImport);
+    return present(await this.service.request(tournamentId, dto.group));
   }
 }

@@ -39,6 +39,7 @@ import { UserSchema } from "./user/infrastructure/persistence/user.entity";
 import { RosterProposalSchema } from "./roster-proposal/infrastructure/persistence/roster-proposal.entity";
 import { TwitchStreamerSchema } from "./streamer/infrastructure/persistence/twitch-streamer.entity";
 import {
+  MatchGameExclusionSchema,
   MatchGameSchema,
   MatchGamePlayerSchema,
   MatchStatsImportSchema,
@@ -62,6 +63,7 @@ export const mikroOrmEntities = [
   MatchResultSchema,
   MatchGameSchema,
   MatchGamePlayerSchema,
+  MatchGameExclusionSchema,
   MatchStatsImportSchema,
   PlayerPlatformLinkSchema,
   PlayerAwardSchema,

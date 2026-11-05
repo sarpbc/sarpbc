@@ -1,4 +1,4 @@
-import type { UnlinkedStatsPlayer } from "@sarpbc/types";
+import type { StatsPlayerAccounts } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { PlayerLink, PlayerLinkStore, StatsCandidates } from "./ports";
 
@@ -8,9 +8,13 @@ export class StatsPlayerLinkService {
     private readonly links: PlayerLinkStore,
   ) {}
 
-  async unlinked(tournamentId: string): Promise<UnlinkedStatsPlayer[]> {
+  async accounts(tournamentId: string): Promise<StatsPlayerAccounts> {
     await this.requireTournament(tournamentId);
-    return this.links.unlinked(tournamentId);
+    const [players, rosters] = await Promise.all([
+      this.links.accounts(tournamentId),
+      this.links.rosters(tournamentId),
+    ]);
+    return { players, rosters };
   }
 
   async link(tournamentId: string, link: PlayerLink): Promise<number> {

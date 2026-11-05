@@ -1,5 +1,11 @@
-import { EntityManager } from "@mikro-orm/postgresql";
-import type { MatchGameStats, MatchGameTeamStats, UnlinkedStatsPlayer } from "@sarpbc/types";
+import { EntityManager, QueryOrder } from "@mikro-orm/postgresql";
+import type {
+  MatchGameStats,
+  MatchGameTeamStats,
+  StatsPlayerAccount,
+  StatsRoster,
+  TournamentStatsGame,
+} from "@sarpbc/types";
 import { Match as CompetitionMatch } from "../../../tournament/domain/competition";
 import {
   Match,
@@ -7,6 +13,7 @@ import {
   TournamentParticipant,
 } from "../../../tournament/infrastructure/competition-persistence";
 import type {
+  GameAttachment,
   GameRecord,
   GameStatsStore,
   PlatformAccount,
@@ -15,10 +22,11 @@ import type {
   StatsCandidates,
   StatsImportStore,
 } from "../../application/ports";
-import type { CandidateMatch, Side } from "../../domain/replay-matching";
+import type { CandidateMatch, GameLocation, Side } from "../../domain/replay-matching";
 import type { StatsImport } from "../../domain/stats-import";
 import {
   MatchGame,
+  MatchGameExclusion,
   MatchGamePlayer,
   MatchStatsImport,
   PlayerPlatformLink,
@@ -46,17 +54,54 @@ function toTeam(game: MatchGame, side: Side): MatchGameTeamStats {
   };
 }
 
+function toTournamentGame(game: MatchGame): TournamentStatsGame {
+  return {
+    matchId: game.match.id,
+    number: game.number,
+    ballchasingId: game.ballchasingId,
+    playedAt: game.playedAt?.toISOString() ?? null,
+    blueParticipantId: game.blueParticipant.id,
+    orangeParticipantId: game.orangeParticipant.id,
+    blueGoals: game.blueGoals,
+    orangeGoals: game.orangeGoals,
+  };
+}
+
 export class MikroOrmGameStatsStore implements GameStatsStore {
   constructor(private readonly em: EntityManager) {}
 
-  async importedReplayIds(replayIds: string[]): Promise<Set<string>> {
-    if (replayIds.length === 0) return new Set();
+  async locations(replayIds: string[]): Promise<Map<string, GameLocation>> {
+    if (replayIds.length === 0) return new Map();
     const rows = await this.em.find(
       MatchGame,
       { ballchasingId: { $in: replayIds } },
-      { fields: ["ballchasingId"] },
+      { fields: ["ballchasingId", "match", "number"] },
     );
+    return new Map(
+      rows.map((row) => [row.ballchasingId, { matchId: row.match.id, number: row.number }]),
+    );
+  }
+
+  async excluded(replayIds: string[]): Promise<Set<string>> {
+    if (replayIds.length === 0) return new Set();
+    const rows = await this.em.find(MatchGameExclusion, { ballchasingId: { $in: replayIds } });
     return new Set(rows.map((row) => row.ballchasingId));
+  }
+
+  async attachment(replayId: string): Promise<GameAttachment | null> {
+    const game = await this.em.findOne(
+      MatchGame,
+      { ballchasingId: replayId },
+      { populate: ["match.tournament", "blueParticipant.team", "orangeParticipant.team"] },
+    );
+    return game
+      ? {
+          matchId: game.match.id,
+          number: game.number,
+          tournamentName: game.match.tournament.name,
+          teams: [game.blueParticipant.team.name, game.orangeParticipant.team.name],
+        }
+      : null;
   }
 
   async links(accounts: PlatformAccount[]): Promise<PlayerLink[]> {
@@ -67,6 +112,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
   async save(game: GameRecord): Promise<void> {
     await this.em.transactional(async (em) => {
+      await em.nativeDelete(MatchGameExclusion, { ballchasingId: game.ballchasingId });
       for (const { playerId, ...account } of game.learnedLinks) {
         await em.upsert(
           PlayerPlatformLink,
@@ -122,6 +168,33 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       teams: [toTeam(game, "blue"), toTeam(game, "orange")],
     }));
   }
+
+  async inTournament(tournamentId: string): Promise<TournamentStatsGame[]> {
+    const games = await this.em.find(
+      MatchGame,
+      { match: { tournament: tournamentId } },
+      { orderBy: { number: "ASC" } },
+    );
+    return games.map(toTournamentGame);
+  }
+
+  remove(tournamentId: string, location: GameLocation): Promise<TournamentStatsGame | null> {
+    return this.em.transactional(async (em) => {
+      const game = await em.findOne(MatchGame, {
+        match: { id: location.matchId, tournament: tournamentId },
+        number: location.number,
+      });
+      if (!game) return null;
+      const removed = toTournamentGame(game);
+      await em.nativeDelete(MatchGame, { id: game.id });
+      await em.upsert(
+        MatchGameExclusion,
+        { ballchasingId: game.ballchasingId },
+        { onConflictFields: ["ballchasingId"], onConflictAction: "ignore" },
+      );
+      return removed;
+    });
+  }
 }
 
 function toLink(row: PlayerPlatformLink): PlayerLink {
@@ -131,21 +204,16 @@ function toLink(row: PlayerPlatformLink): PlayerLink {
 export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   constructor(private readonly em: EntityManager) {}
 
-  async unlinked(tournamentId: string): Promise<UnlinkedStatsPlayer[]> {
+  async accounts(tournamentId: string): Promise<StatsPlayerAccount[]> {
     const rows = await this.em.find(
       MatchGamePlayer,
-      { player: null, platformId: { $ne: null }, game: { match: { tournament: tournamentId } } },
+      { platformId: { $ne: null }, game: { match: { tournament: tournamentId } } },
       {
-        populate: [
-          "game.blueParticipant.team",
-          "game.blueParticipant.players",
-          "game.orangeParticipant.team",
-          "game.orangeParticipant.players",
-        ],
-        orderBy: { game: { playedAt: "DESC" } },
+        populate: ["player", "game.blueParticipant.team", "game.orangeParticipant.team"],
+        orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
       },
     );
-    const accounts = new Map<string, UnlinkedStatsPlayer>();
+    const accounts = new Map<string, StatsPlayerAccount>();
     for (const row of rows) {
       const key = JSON.stringify([row.platform, row.platformId]);
       const known = accounts.get(key);
@@ -161,15 +229,30 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         name: row.name,
         team: { participantId: participant.id, name: participant.team.name },
         games: 1,
-        roster: participant.players
-          .getItems()
-          .map(({ id, name }) => ({ id, name }))
-          .sort((a, b) => a.name.localeCompare(b.name)),
+        player: row.player ? { id: row.player.id, name: row.player.name } : null,
       });
     }
     return [...accounts.values()].sort(
       (a, b) => a.team.name.localeCompare(b.team.name) || a.name.localeCompare(b.name),
     );
+  }
+
+  async rosters(tournamentId: string): Promise<StatsRoster[]> {
+    const participants = await this.em.find(
+      TournamentParticipant,
+      { tournament: tournamentId },
+      { populate: ["team", "players"] },
+    );
+    return participants
+      .map((participant) => ({
+        participantId: participant.id,
+        teamName: participant.team.name,
+        players: participant.players
+          .getItems()
+          .map(({ id, name }) => ({ id, name }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      }))
+      .sort((a, b) => a.teamName.localeCompare(b.teamName));
   }
 
   async onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean> {

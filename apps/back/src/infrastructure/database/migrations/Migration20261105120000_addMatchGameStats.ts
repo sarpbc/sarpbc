@@ -36,6 +36,10 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
     );
 
     this.addSql(
+      `create table "match_game_exclusion" ("ballchasing_id" text not null, "created_at" timestamptz not null default now(), primary key ("ballchasing_id"));`,
+    );
+
+    this.addSql(
       `create table "match_stats_import" ("id" uuid not null, "tournament_id" varchar(255) not null, "group_id" text not null, "status" text not null, "total" int null, "processed" int not null default 0, "items" jsonb not null default '[]', "error" text null, "created_at" timestamptz not null, "started_at" timestamptz null, "finished_at" timestamptz null, primary key ("id"));`,
     );
     this.addSql(
@@ -69,6 +73,7 @@ export class Migration20261105120000_addMatchGameStats extends Migration {
     this.addSql(`drop table if exists "match_game_player" cascade;`);
     this.addSql(`drop table if exists "match_game" cascade;`);
     this.addSql(`drop table if exists "player_platform_link" cascade;`);
+    this.addSql(`drop table if exists "match_game_exclusion" cascade;`);
     this.addSql(`drop table if exists "match_stats_import" cascade;`);
   }
 }

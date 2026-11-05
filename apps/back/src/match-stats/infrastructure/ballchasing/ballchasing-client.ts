@@ -63,7 +63,13 @@ const detailSide = z.object({
     )
     .default([]),
 });
-const replayDetail = z.object({ blue: detailSide, orange: detailSide });
+const replayDetail = z.object({
+  rocket_league_id: z.string().optional(),
+  date: z.string().optional(),
+  date_has_timezone: z.boolean().optional(),
+  blue: detailSide,
+  orange: detailSide,
+});
 
 type ListedReplay = z.infer<typeof replayList>["list"][number];
 
@@ -75,12 +81,10 @@ function toTeam(side: z.infer<typeof team> | undefined): ReplayTeam {
   };
 }
 
-function playedAt(replay: ListedReplay): Date | null {
-  if (!replay.date) return null;
+function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Date | null {
+  if (!raw) return null;
   // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
-  const value = replay.date_has_tz
-    ? replay.date
-    : `${replay.date.replace(/(Z|[+-]\d\d:\d\d)$/, "")}Z`;
+  const value = hasTimezone ? raw : `${raw.replace(/(Z|[+-]\d\d:\d\d)$/, "")}Z`;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }
@@ -90,7 +94,7 @@ function toSummary(replay: ListedReplay): ReplaySummary {
     id: replay.id,
     rocketLeagueId: replay.rocket_league_id ?? null,
     title: replay.replay_title ?? replay.id,
-    playedAt: playedAt(replay),
+    playedAt: playedAt(replay.date, replay.date_has_tz),
     playedAtHasTimezone: replay.date_has_tz === true,
     blue: toTeam(replay.blue),
     orange: toTeam(replay.orange),
@@ -163,6 +167,8 @@ export class BallchasingClient implements BallchasingSource {
     if (!status.success || !detail.success)
       throw new IntegrationError("Ballchasing returned incomplete stats for a replay.");
     return {
+      rocketLeagueId: detail.data.rocket_league_id ?? null,
+      playedAt: playedAt(detail.data.date, detail.data.date_has_timezone),
       blueGoals: detail.data.blue.stats.core.goals,
       orangeGoals: detail.data.orange.stats.core.goals,
       players: [...toPlayers("blue", detail.data.blue), ...toPlayers("orange", detail.data.orange)],

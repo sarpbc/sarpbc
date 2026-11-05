@@ -48,6 +48,11 @@ export interface SideAssignment {
   orange: string;
 }
 
+export interface GameLocation {
+  matchId: string;
+  number: number;
+}
+
 export type ReplayAssignment =
   | {
       kind: "matched";
@@ -56,7 +61,14 @@ export type ReplayAssignment =
       gameNumber: number;
       sides: SideAssignment;
     }
-  | { kind: "unmatched"; replay: ReplaySummary; reason: UnmatchedReason; matchId: string | null };
+  | { kind: "stored"; replay: ReplaySummary; matchId: string; gameNumber: number }
+  | {
+      kind: "unmatched";
+      replay: ReplaySummary;
+      reason: UnmatchedReason;
+      matchId: string | null;
+      sides: SideAssignment | null;
+    };
 
 const HOUR_MS = 3_600_000;
 const EARLY_START_MS = HOUR_MS;
@@ -149,9 +161,15 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
 }
 
+interface SeriesGame {
+  replay: ReplaySummary;
+  sides: SideAssignment;
+  storedNumber: number | null;
+}
+
 function seriesProblem(
   match: CandidateMatch,
-  games: readonly { replay: ReplaySummary; sides: SideAssignment }[],
+  games: readonly SeriesGame[],
 ): UnmatchedReason | null {
   if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id)))
     return "match_has_other_stats";
@@ -167,36 +185,87 @@ function seriesProblem(
   if (!match.finished || played === 0) return "match_not_finished";
   for (const [participantId, won] of wins)
     if (won > (match.scores.get(participantId) ?? 0)) return "inconsistent_series";
-  return games.length < played ? "incomplete_series" : null;
+  if (games.length < played) return "incomplete_series";
+  // Staff may have attached a game under another number, and the import never renumbers one.
+  if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1))
+    return "match_has_other_stats";
+  return null;
 }
 
 function byPlayedAt(a: ReplaySummary, b: ReplaySummary): number {
   return (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
 }
 
+/**
+ * `stored` locates replays already saved, in any match; they are reported where they are and never
+ * fetched, moved or renumbered. `excluded` holds replays staff removed; they count as absent.
+ */
 export function assignReplays(
   replays: readonly ReplaySummary[],
   matches: readonly CandidateMatch[],
+  stored: ReadonlyMap<string, GameLocation> = new Map(),
+  excluded: ReadonlySet<string> = new Set(),
 ): ReplayAssignment[] {
   const assignments: ReplayAssignment[] = [];
-  const series = new Map<string, { replay: ReplaySummary; sides: SideAssignment }[]>();
+  const series = new Map<string, SeriesGame[]>();
+  // Another upload of a stored or removed game must not come back under a new replay id.
+  const taken = new Set(
+    replays.flatMap((replay) =>
+      replay.rocketLeagueId && (stored.has(replay.id) || excluded.has(replay.id))
+        ? [replay.rocketLeagueId]
+        : [],
+    ),
+  );
   const seen = new Set<string>();
 
   for (const replay of [...replays].sort(byPlayedAt)) {
-    if (replay.rocketLeagueId) {
-      if (seen.has(replay.rocketLeagueId)) {
-        assignments.push({ kind: "unmatched", replay, reason: "duplicate_replay", matchId: null });
+    if (excluded.has(replay.id)) {
+      assignments.push({
+        kind: "unmatched",
+        replay,
+        reason: "excluded_by_staff",
+        matchId: null,
+        sides: null,
+      });
+      continue;
+    }
+    const location = stored.get(replay.id);
+    if (location) {
+      assignments.push({
+        kind: "stored",
+        replay,
+        matchId: location.matchId,
+        gameNumber: location.number,
+      });
+    } else if (replay.rocketLeagueId) {
+      if (seen.has(replay.rocketLeagueId) || taken.has(replay.rocketLeagueId)) {
+        assignments.push({
+          kind: "unmatched",
+          replay,
+          reason: "duplicate_replay",
+          matchId: null,
+          sides: null,
+        });
         continue;
       }
       seen.add(replay.rocketLeagueId);
     }
     const placement = place(replay, matches);
     if (placement.kind === "unmatched") {
-      assignments.push({ kind: "unmatched", replay, reason: placement.reason, matchId: null });
+      if (!location)
+        assignments.push({
+          kind: "unmatched",
+          replay,
+          reason: placement.reason,
+          matchId: null,
+          sides: null,
+        });
       continue;
     }
+    // A game staff attached to another match is absent from the series it would fit.
+    if (location && location.matchId !== placement.matchId) continue;
     const games = series.get(placement.matchId) ?? [];
-    games.push({ replay, sides: placement.sides });
+    games.push({ replay, sides: placement.sides, storedNumber: location?.number ?? null });
     series.set(placement.matchId, games);
   }
 
@@ -204,13 +273,14 @@ export function assignReplays(
     const games = series.get(match.id);
     if (!games) continue;
     const problem = seriesProblem(match, games);
-    games.forEach(({ replay, sides }, index) =>
+    games.forEach(({ replay, sides, storedNumber }, index) => {
+      if (storedNumber !== null) return;
       assignments.push(
         problem
-          ? { kind: "unmatched", replay, reason: problem, matchId: match.id }
+          ? { kind: "unmatched", replay, reason: problem, matchId: match.id, sides }
           : { kind: "matched", replay, matchId: match.id, gameNumber: index + 1, sides },
-      ),
-    );
+      );
+    });
   }
 
   return assignments;

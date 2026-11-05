@@ -45,6 +45,11 @@ export class PlayerPlatformLink {
   player!: Player;
 }
 
+export class MatchGameExclusion {
+  ballchasingId!: string;
+  createdAt = new Date();
+}
+
 export class MatchStatsImport {
   id!: string;
   tournament!: Tournament;
@@ -107,6 +112,14 @@ export const PlayerPlatformLinkSchema = defineEntity({
     platform: p.text(),
     platformId: p.text(),
     player: p.manyToOne(Player).deleteRule("cascade"),
+  },
+});
+
+export const MatchGameExclusionSchema = defineEntity({
+  class: MatchGameExclusion,
+  properties: {
+    ballchasingId: p.text().primary(),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });
 

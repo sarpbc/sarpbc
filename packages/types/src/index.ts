@@ -42,9 +42,13 @@ export type {
   StatsImportItem,
   StatsImportStatus,
   StatsImportUnmatchedReason,
+  AttachReplayInput,
+  StatsPlayerAccount,
+  StatsPlayerAccounts,
   StatsPlayerLinkInput,
   StatsPlayerLinkResult,
-  UnlinkedStatsPlayer,
+  StatsRoster,
+  TournamentStatsGame,
 } from "./match-stats";
 export type { ForumPost } from "./forum";
 export type {

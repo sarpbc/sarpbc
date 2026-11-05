@@ -220,10 +220,12 @@ function replayDetail() {
 }
 
 describe("BallchasingClient.replayStats", () => {
-  it("maps team goals and each player's five stats", async () => {
+  it("maps the date, team goals and each player's five stats", async () => {
     const { instance, fetch } = client(() => json(replayDetail()));
 
     expect(await instance.replayStats("r1")).toEqual({
+      rocketLeagueId: "RL-r1",
+      playedAt: new Date("2026-06-01T18:05:00Z"),
       blueGoals: 2,
       orangeGoals: 0,
       players: [

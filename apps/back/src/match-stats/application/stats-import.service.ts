@@ -1,26 +1,16 @@
 import { v4 } from "uuid";
-import type { StatsImportItem } from "@sarpbc/types";
-import {
-  ApplicationError,
-  ConflictError,
-  IntegrationError,
-  NotFoundError,
-} from "../../common/domain/errors";
+import type { StatsImportFailedReason, StatsImportItem } from "@sarpbc/types";
+import { ApplicationError, ConflictError, NotFoundError } from "../../common/domain/errors";
 import { parseBallchasingGroupId } from "../domain/group-ref";
-import {
-  assignReplays,
-  resolvePlayerId,
-  type ReplayAssignment,
-  type RosterPlayer,
-} from "../domain/replay-matching";
+import { assignReplays, type ReplayAssignment, type RosterPlayer } from "../domain/replay-matching";
 import { isActive, type StatsImport } from "../domain/stats-import";
+import { buildGameRecord, hasBothTeams, platformAccounts, requireBallchasing } from "./game-record";
 import type {
   BallchasingSource,
-  GameRecord,
   GameStatsStore,
-  PlayerLink,
   ReplayStats,
   StatsCandidates,
+  StatsImportScheduler,
   StatsImportStore,
 } from "./ports";
 
@@ -28,24 +18,18 @@ const RECENT_IMPORTS = 5;
 export const INTERRUPTED_IMPORT_ERROR =
   "The import stopped when the API restarted. Run it again; games already imported are skipped.";
 
-type Matched = Extract<ReplayAssignment, { kind: "matched" }>;
-
 export class StatsImportService {
   constructor(
     private readonly source: BallchasingSource | null,
     private readonly candidates: StatsCandidates,
     private readonly games: GameStatsStore,
     private readonly imports: StatsImportStore,
+    private readonly scheduler: StatsImportScheduler,
     private readonly reportFailure: (error: unknown) => void,
   ) {}
 
   async request(tournamentId: string, group: string): Promise<StatsImport> {
-    if (!this.source)
-      throw new IntegrationError({
-        message:
-          "Ballchasing is not configured. Set BALLCHASING_API_KEY on the API and restart it.",
-        code: "ballchasing_not_configured",
-      });
+    requireBallchasing(this.source);
     const groupId = parseBallchasingGroupId(group);
     if (!(await this.candidates.tournamentExists(tournamentId)))
       throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
@@ -69,6 +53,7 @@ export class StatsImportService {
       finishedAt: null,
     };
     await this.imports.create(statsImport);
+    this.scheduler.schedule(() => this.run(statsImport.id));
     return statsImport;
   }
 
@@ -90,13 +75,17 @@ export class StatsImportService {
     try {
       const replays = await this.source.groupReplays(statsImport.groupId);
       const matches = await this.candidates.matches(statsImport.tournamentId);
-      const imported = await this.games.importedReplayIds(replays.map((replay) => replay.id));
+      const replayIds = replays.map((replay) => replay.id);
+      const [stored, excluded] = await Promise.all([
+        this.games.locations(replayIds),
+        this.games.excluded(replayIds),
+      ]);
       const rosters = new Map(
         matches.flatMap((match) =>
           match.participants.map((participant) => [participant.id, participant.players] as const),
         ),
       );
-      const assignments = assignReplays(replays, matches).sort(
+      const assignments = assignReplays(replays, matches, stored, excluded).sort(
         (a, b) =>
           (a.replay.playedAt?.getTime() ?? 0) - (b.replay.playedAt?.getTime() ?? 0) ||
           a.replay.id.localeCompare(b.replay.id),
@@ -105,7 +94,7 @@ export class StatsImportService {
       await this.imports.save(statsImport);
 
       for (const assignment of assignments) {
-        statsImport.items.push(await this.process(this.source, assignment, imported, rosters));
+        statsImport.items.push(await this.process(this.source, assignment, rosters));
         statsImport.processed += 1;
         await this.imports.save(statsImport);
       }
@@ -125,8 +114,7 @@ export class StatsImportService {
   private async process(
     source: BallchasingSource,
     assignment: ReplayAssignment,
-    imported: Set<string>,
-    rosters: Map<string, RosterPlayer[]>,
+    rosters: ReadonlyMap<string, RosterPlayer[]>,
   ): Promise<StatsImportItem> {
     const { replay } = assignment;
     const base = {
@@ -134,72 +122,71 @@ export class StatsImportService {
       title: replay.title,
       playedAt: replay.playedAt?.toISOString() ?? null,
     };
-    if (assignment.kind === "unmatched")
-      return {
-        ...base,
-        status: "unmatched",
-        matchId: assignment.matchId,
-        reason: assignment.reason,
-      };
+    switch (assignment.kind) {
+      case "unmatched":
+        return {
+          ...base,
+          status: "unmatched",
+          matchId: assignment.matchId,
+          blueParticipantId: assignment.sides?.blue ?? null,
+          reason: assignment.reason,
+        };
+      case "stored":
+        return {
+          ...base,
+          status: "already_imported",
+          matchId: assignment.matchId,
+          gameNumber: assignment.gameNumber,
+        };
+      case "matched":
+        break;
+      default: {
+        const exhaustive: never = assignment;
+        return exhaustive;
+      }
+    }
     const target = { ...base, matchId: assignment.matchId, gameNumber: assignment.gameNumber };
-    if (imported.has(replay.id)) return { ...target, status: "already_imported" };
+    const failed = (reason: StatsImportFailedReason): StatsImportItem => ({
+      ...target,
+      blueParticipantId: assignment.sides.blue,
+      status: "failed",
+      reason,
+    });
 
     let stats: ReplayStats | null;
     try {
       stats = await source.replayStats(replay.id);
     } catch (error) {
       this.reportFailure(error);
-      return { ...target, status: "failed", reason: "fetch_failed" };
+      return failed("fetch_failed");
     }
-    if (!stats) return { ...target, status: "failed", reason: "replay_not_ready" };
+    if (!stats) return failed("replay_not_ready");
 
     if (stats.blueGoals !== replay.blue.goals || stats.orangeGoals !== replay.orange.goals)
-      return { ...target, status: "failed", reason: "score_mismatch" };
-    if (!(["blue", "orange"] as const).every((side) => stats.players.some((p) => p.side === side)))
-      return { ...target, status: "failed", reason: "player_mismatch" };
+      return failed("score_mismatch");
+    if (!hasBothTeams(stats)) return failed("player_mismatch");
 
     try {
-      const accounts = stats.players.flatMap(({ platform, platformId }) =>
-        platformId ? [{ platform, platformId }] : [],
+      const links = await this.games.links(platformAccounts(stats));
+      await this.games.save(
+        buildGameRecord(
+          {
+            matchId: assignment.matchId,
+            number: assignment.gameNumber,
+            ballchasingId: replay.id,
+            rocketLeagueId: replay.rocketLeagueId,
+            playedAt: replay.playedAt,
+            sides: assignment.sides,
+          },
+          stats,
+          rosters,
+          links,
+        ),
       );
-      const links = await this.games.links(accounts);
-      await this.games.save(this.record(assignment, stats, rosters, links));
     } catch (error) {
       this.reportFailure(error);
-      return { ...target, status: "failed", reason: "save_failed" };
+      return failed("save_failed");
     }
     return { ...target, status: "imported" };
-  }
-
-  private record(
-    { replay, matchId, gameNumber, sides }: Matched,
-    stats: ReplayStats,
-    rosters: Map<string, RosterPlayer[]>,
-    links: PlayerLink[],
-  ): GameRecord {
-    const learnedLinks: PlayerLink[] = [];
-    const players = stats.players.map((player) => {
-      const { platform, platformId } = player;
-      const linked = links.find(
-        (link) => link.platform === platform && link.platformId === platformId,
-      );
-      if (linked) return { ...player, playerId: linked.playerId };
-      const playerId = resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []);
-      if (playerId && platformId) learnedLinks.push({ platform, platformId, playerId });
-      return { ...player, playerId };
-    });
-    return {
-      matchId,
-      number: gameNumber,
-      ballchasingId: replay.id,
-      rocketLeagueId: replay.rocketLeagueId,
-      playedAt: replay.playedAt,
-      blueParticipantId: sides.blue,
-      orangeParticipantId: sides.orange,
-      blueGoals: stats.blueGoals,
-      orangeGoals: stats.orangeGoals,
-      players,
-      learnedLinks,
-    };
   }
 }
