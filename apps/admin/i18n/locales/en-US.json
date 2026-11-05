@@ -194,7 +194,6 @@
     "moderation": {
       "title": "Comment Moderation",
       "subtitle": "Recent comments across matches, articles, and forum posts. Reported comments appear first.",
-      "loading": "Loading…",
       "loadError": "Could not load comments for moderation.",
       "retry": "Try Again",
       "empty": "No comments to review.",
@@ -645,7 +644,6 @@
       },
       "create": {
         "title": "New Article",
-        "titleField": "Title",
         "slugField": "URL Slug",
         "slugHint": "Used in /news/your-slug. Leave empty to generate from the title.",
         "slugPlaceholder": "my-article",
@@ -900,7 +898,6 @@
     }
   },
   "newsTag": {
-    "loading": "Loading…",
     "error": "Could not load profile. Try again later.",
     "viewProfile": "View profile",
     "noTeam": "No current team",
