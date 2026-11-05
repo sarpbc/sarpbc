@@ -36,7 +36,8 @@ The following operations share a transaction:
 - Content deletion and dependent replies, notifications, reports, or translations.
 - Player photo replacement or selection, and player or team deletion with dependent roster data.
 - A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
-- A player or team merge: moving contracts, photos, awards, game stats, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect.
+- A game's stats, the platform links its unique roster-name matches teach and the linking of earlier rows of those accounts; a staff platform link and the repointing of every stat row of that account.
+- A player or team merge: moving contracts, photos, awards, game stats, platform links, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect.
 - A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 

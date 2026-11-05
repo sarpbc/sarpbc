@@ -11,7 +11,7 @@ Scope: goals, saves, assists, shots and demolitions inflicted, per player and pe
 3. The API lists the group's replays and the replays of every nested child group, page by page.
 4. Each replay is matched to a game from the list metadata alone (see Matching). Only matched replays that are not already stored are requested in detail.
 5. `GET /api/replays/{id}` returns the stats Ballchasing computed. The import fails a game when the request or the response validation fails (`fetch_failed`), when the replay's `status` is not `"ok"` (`replay_not_ready`), when its team goals differ from the list (`score_mismatch`), or when a team has no players (`player_mismatch`).
-6. The game and one row per player are saved in a single transaction (`save_failed` otherwise).
+6. The game, one row per player and the platform links it teaches (see Players) are saved in a single transaction (`save_failed` otherwise).
 7. The report lists every replay as imported, already imported, unmatched (with the reason) or failed (with the reason).
 
 Running the same group again is safe. `match_game.ballchasing_id` is unique, and replays that are already stored are skipped before their details are requested.
@@ -24,8 +24,13 @@ The matching code is pure domain code in `apps/back/src/match-stats/domain/repla
 - **Date.** The replay must fall between one hour before the match's `beginAt` and one hour after its `endAt`, or six hours after `beginAt` when there is no end. When the replay has no timezone, the window widens by 14 hours on each side. When several windows fit, as in an upper final and a grand final on the same day, the replay goes to the latest match whose `beginAt` has passed, so a late game of the upper final never moves to a grand final that has not begun. When none has begun, the one-hour early start cannot tell the matches apart and the replay is ambiguous. Equal start times are ambiguous, and so are overlapping windows when the replay date has no timezone.
 - **Series.** Only finished matches with a recorded series score receive stats. A match is finished when its status is `finished` or it has an `endAt`, the same rule as the rest of the site. Replays placed on any other match are held back as `match_not_finished`, and a later run attaches them once the result is in. All replays placed on a match are ordered by date. The series is rejected when a replay ends in a draw, when there are more replays than the format allows, or when the game winners contradict the recorded score. With fewer replays than games in the score, the game order is unknown and the series is held back as `incomplete_series`. Game numbers follow date order, and a match holds one game per number. A match that already holds stats from other replays is never mixed (`match_has_other_stats`).
 - **Duplicates.** Two uploads with the same Rocket League replay id keep the earlier one.
-- **Players.** A stat row links to a sarpbc.org player when exactly one player on the participant's tournament roster matches. Otherwise the row keeps the in-game name, the platform and the platform id with no player link. Substitutes therefore keep their stats. A player merge moves the duplicate's stat rows to the kept player in the merge transaction.
-- **Known limit: renamed players.** The name in a replay can differ from the roster. In one live replay, `Racer` is the player stored as `kofyr`, with the same Steam id. The `player` table has no platform id, so such a row stays unlinked: `player_id` is null, the name and platform id are kept, and the match page shows the name as plain text. Identity is never inferred by elimination, and there is no mapping table.
+- **Players.** Every stat row keeps the in-game name, the platform and the platform id. It links to a sarpbc.org player in this order:
+  1. A platform link (`player_platform_link`, unique on platform and platform id) wins, even when the player is not on the roster, which covers stand-ins.
+  2. Otherwise, a single player on the participant's tournament roster whose name matches.
+  3. Otherwise the row stays unlinked, and the match page shows the in-game name as plain text. Identity is never inferred by elimination.
+- **Learning.** When step 2 links a row that has a platform id and no platform link exists yet, the import creates the link and links every earlier unlinked row of that account, in the game's transaction. An existing link is never replaced automatically, and a later name match that disagrees leaves it unchanged. The risk: a wrong unique name match teaches a wrong link, which then applies to every later import of that account. Staff correct it with the admin action below.
+- **Renamed players.** The live import of the 2026 World Championship left 79 of 1,224 rows unlinked because Ballchasing's name differed from the roster: `justin.` (`jstn`), `Racer` (`kofyr`), `Aztr` (`AztromicK`), `Cata` (`Catalysm`) and `yan` (`yanxnz`), each with a known Steam id. Staff link them once in the admin app: under the tournament's stats import, "Unlinked players" lists each unlinked account of the tournament with its latest name, team, game count and that team's roster. Choosing a player from a roster of the tournament sets the account's link, replacing any previous one, and repoints every stat row of that account, in all tournaments, in one transaction.
+- **Merges.** A player merge moves the duplicate's stat rows and platform links to the kept player in the merge transaction. Deleting a player deletes its platform links and unlinks its stat rows.
 
 ## Ballchasing API (SAR-37)
 
@@ -58,6 +63,7 @@ No specialised database is needed. Volumes are tiny: a 3v3 game is six rows, and
 
 - `match_game`: one row per game. It holds the match, the game number (unique within the match), the unique `ballchasing_id`, `rocket_league_id`, `played_at`, the blue and orange participants and the score. It cascades with its match.
 - `match_game_player`: one row per player per game. It holds the side, the in-game name, the platform and platform id, a nullable `player_id` (set to null if the player is deleted) and five integer columns.
+- `player_platform_link`: one row per game account (`platform`, `platform_id`, unique together) with its `player_id`. It cascades with the player. The `player` table itself stores no platform id.
 - `match_stats_import`: one row per staff request. It holds the status, the progress and the JSON report of the import. The report is an operational log, not queryable stats.
 
 Match games were not modelled before. The match only stored the series score and per-game VOD links in JSON. This replaces SAR-38's `MatchReplay.statsJson` blob with relational rows, so the stats can be aggregated later without a migration.
@@ -68,7 +74,7 @@ This PR first downloaded each `.replay` file and parsed it with a Rust CLI built
 
 ## Display and licensing
 
-The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. The stats ride on the existing `GET /matches/:ref` response used by the site. They are not exposed through MCP or any other API. In line with SAR-168, no Epic assets are used, and Liquipedia and BLAST.tv are never sources.
+The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. A linked row shows the sarpbc.org player's name with a link to their profile, not the in-game name. The stats ride on the existing `GET /matches/:ref` response used by the site, which carries no platform ids. They are not exposed through MCP or any other API. In line with SAR-168, no Epic assets are used, and Liquipedia and BLAST.tv are never sources.
 
 ## Linear mapping
 
@@ -82,6 +88,6 @@ The match page shows a "Game Stats" section when a match has imported games, wit
 
 ## What remains
 
-- A full live import. The live test compared the parser with `GET /api/replays/{id}` on 5 games and measured the file endpoint's `429` behaviour. The client in this PR has only run against fake responses, including an excerpt of a real detail response.
+- A live import of the 2026 World Championship stored 1,224 player rows, 79 of them unlinked, which motivated platform links. Platform links have not yet been exercised against that live data.
 - SAR-42 pilot runbook: choose the tournament, build or find its group, run the import, review unmatched replays and measure coverage.
 - Possible later work: an in-app retry for a single replay, manual attachment of an unmatched replay, automatic ingestion, and aggregated player stats.
