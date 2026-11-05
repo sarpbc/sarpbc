@@ -16,9 +16,3 @@ export interface Reply {
   createdAt: Date;
   replies: Reply[];
 }
-
-export interface Topic {
-  id: string;
-  title: string;
-  description: string;
-}

@@ -1,7 +1,7 @@
 import { hasPermission } from "@sarpbc/utils";
 import type { StaffPermission, User } from "~/types/user";
 
-export { isStaffUser, hasPermission, canModerateComments } from "@sarpbc/utils";
+export { isStaffUser, hasPermission } from "@sarpbc/utils";
 
 export type PermissionRequirement = StaffPermission | readonly StaffPermission[];
 
@@ -20,14 +20,10 @@ export function meetsRequirement(
     : required.some((permission) => hasPermission(user, permission));
 }
 
-/** Home (`/`) is staff-only — any staff role, no specific permission. */
-export function permissionForAdminPath(path: string): PermissionRequirement | "staff" | null {
+/** Paths without a specific permission are open to any staff role. */
+export function permissionForAdminPath(path: string): PermissionRequirement | "staff" {
   const normalized = path.replace(/\/$/, "") || "/";
   const withoutLocale = normalized.replace(/^\/fr(?=\/|$)/, "") || "/";
-
-  if (withoutLocale === "/" || withoutLocale === "/login") {
-    return withoutLocale === "/login" ? null : "staff";
-  }
 
   if (withoutLocale === "/news" || withoutLocale.startsWith("/news/")) {
     return "news.manage";

@@ -36,7 +36,7 @@ async function handleSyncTournament(tournamentId: string) {
 async function handleEnablePickems(tournamentId: string) {
   enablingTournamentId.value = tournamentId;
   try {
-    const success = await setTournamentPickemsEnabled(tournamentId, true);
+    const success = await setTournamentPickemsEnabled(tournamentId);
     if (success) {
       toast.add({ title: t("page.pickems.enablePickems"), color: "success" });
       await refresh();

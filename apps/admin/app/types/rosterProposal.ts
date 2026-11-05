@@ -1,6 +1,6 @@
 import type { ContractRole } from "./contract";
 
-export type RosterProposalStatus = "pending" | "applied" | "rejected";
+type RosterProposalStatus = "pending" | "applied" | "rejected";
 
 export type RosterChange =
   | {

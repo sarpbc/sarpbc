@@ -14,7 +14,7 @@ export type NewsArticle = {
   contentFr?: string | null;
 };
 
-export type PaginatedNewsArticles = {
+type PaginatedNewsArticles = {
   data: NewsArticle[];
   total: number;
   page: number;

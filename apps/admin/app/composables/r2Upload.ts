@@ -1,9 +1,9 @@
-export type R2UploadResponse = {
+type R2UploadResponse = {
   publicUrl: string;
   key: string;
 };
 
-export type ImageUploadContext = {
+type ImageUploadContext = {
   target: "news" | "tournament";
   articleSlug?: string;
   articleTitle?: string;

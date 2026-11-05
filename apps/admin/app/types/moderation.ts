@@ -1,4 +1,4 @@
-export type ModerationTargetType = "forumPost" | "newsArticle" | "match";
+type ModerationTargetType = "forumPost" | "newsArticle" | "match";
 
 export interface ModerationReply {
   id: string;

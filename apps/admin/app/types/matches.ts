@@ -1,6 +1,6 @@
 import type { Tournament, TournamentParticipant } from "./tournament";
 
-export interface MatchResult {
+interface MatchResult {
   participant: string | { id: string };
   score: number;
 }

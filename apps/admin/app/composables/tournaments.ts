@@ -16,16 +16,12 @@ import type {
 export async function getAllTournaments(query?: {
   limit?: number;
   offset?: number;
-  pickems?: boolean;
-  activeOnly?: boolean;
 }): Promise<{ tournaments: TournamentListItem[]; total: number }> {
-  const { limit, offset, pickems, activeOnly } = query || {};
+  const { limit, offset } = query || {};
   try {
     const params: Record<string, string | number | undefined> = {};
     if (limit !== undefined) params.limit = limit;
     if (offset !== undefined) params.offset = offset;
-    if (pickems !== undefined) params.pickems = pickems ? "true" : "false";
-    if (activeOnly) params.activeOnly = "true";
 
     const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
       "/tournaments",
@@ -87,14 +83,11 @@ export async function getTournamentMatches(
   }
 }
 
-export async function setTournamentPickemsEnabled(
-  tournamentId: string,
-  enabled: boolean,
-): Promise<boolean> {
+export async function setTournamentPickemsEnabled(tournamentId: string): Promise<boolean> {
   try {
     await apiFetch(`/tournaments/${tournamentId}/enable-pickems`, {
       method: "POST",
-      body: { enabled },
+      body: { enabled: true },
     });
     return true;
   } catch (error) {

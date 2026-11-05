@@ -19,14 +19,14 @@ export type UpdatePlayerDto = {
   imageUrl?: string;
 };
 
-export type CreatePlayerContractDto = {
+type CreatePlayerContractDto = {
   teamId: string;
   role: ContractRole;
   startDate: string;
   endDate?: string | null;
 };
 
-export type UpdatePlayerContractDto = {
+type UpdatePlayerContractDto = {
   teamId?: string;
   role?: ContractRole;
   startDate?: string;
@@ -36,23 +36,17 @@ export type UpdatePlayerContractDto = {
 type PlayerListParams = {
   limit: number;
   offset?: number;
-  start?: string;
-  name?: string;
 };
 
 export async function getAllPlayers(query?: {
   limit?: number;
-  search?: string;
   offset?: number;
-  start?: string;
 }): Promise<{ players: Player[]; total: number }> {
   try {
     const params: PlayerListParams = {
       limit: query?.limit ?? 50,
     };
     if (query?.offset && query.offset > 0) params.offset = query.offset;
-    if (query?.start) params.start = query.start;
-    else if (query?.search) params.name = query.search;
 
     const res = await apiFetch<{ players?: Player[]; count?: number }>("/player", {
       method: "GET",
@@ -79,38 +73,23 @@ export async function getPlayerById(id: string): Promise<Player | null> {
 }
 
 export async function createPlayer(body: CreatePlayerDto): Promise<Player | null> {
-  try {
-    const res = await apiFetch<{ player?: Player }>("/player", {
-      method: "POST",
-      body,
-    });
-    return res.player ?? null;
-  } catch (error) {
-    console.error("Error creating player:", error);
-    throw error;
-  }
+  const res = await apiFetch<{ player?: Player }>("/player", {
+    method: "POST",
+    body,
+  });
+  return res.player ?? null;
 }
 
 export async function updatePlayer(id: string, body: UpdatePlayerDto): Promise<Player | null> {
-  try {
-    const res = await apiFetch<{ player?: Player }>(`/player/${id}`, {
-      method: "PATCH",
-      body,
-    });
-    return res.player ?? null;
-  } catch (error) {
-    console.error("Error updating player:", error);
-    throw error;
-  }
+  const res = await apiFetch<{ player?: Player }>(`/player/${id}`, {
+    method: "PATCH",
+    body,
+  });
+  return res.player ?? null;
 }
 
 export async function deletePlayer(id: string): Promise<void> {
-  try {
-    await apiFetch(`/player/${id}`, { method: "DELETE" });
-  } catch (error) {
-    console.error("Error deleting player:", error);
-    throw error;
-  }
+  await apiFetch(`/player/${id}`, { method: "DELETE" });
 }
 
 export async function getPlayerContracts(playerId: string): Promise<PlayerContract[]> {
@@ -128,16 +107,11 @@ export async function createPlayerContract(
   playerId: string,
   body: CreatePlayerContractDto,
 ): Promise<PlayerContract | null> {
-  try {
-    const res = await apiFetch<{ contract?: PlayerContract }>(`/player/${playerId}/contract`, {
-      method: "POST",
-      body,
-    });
-    return res.contract ?? null;
-  } catch (error) {
-    console.error("Error creating player contract:", error);
-    throw error;
-  }
+  const res = await apiFetch<{ contract?: PlayerContract }>(`/player/${playerId}/contract`, {
+    method: "POST",
+    body,
+  });
+  return res.contract ?? null;
 }
 
 export async function updatePlayerContract(
@@ -145,25 +119,15 @@ export async function updatePlayerContract(
   contractId: string,
   body: UpdatePlayerContractDto,
 ): Promise<PlayerContract | null> {
-  try {
-    const res = await apiFetch<{ contract?: PlayerContract }>(
-      `/player/${playerId}/contract/${contractId}`,
-      { method: "PATCH", body },
-    );
-    return res.contract ?? null;
-  } catch (error) {
-    console.error("Error updating player contract:", error);
-    throw error;
-  }
+  const res = await apiFetch<{ contract?: PlayerContract }>(
+    `/player/${playerId}/contract/${contractId}`,
+    { method: "PATCH", body },
+  );
+  return res.contract ?? null;
 }
 
 export async function deletePlayerContract(playerId: string, contractId: string): Promise<void> {
-  try {
-    await apiFetch(`/player/${playerId}/contract/${contractId}`, {
-      method: "DELETE",
-    });
-  } catch (error) {
-    console.error("Error deleting player contract:", error);
-    throw error;
-  }
+  await apiFetch(`/player/${playerId}/contract/${contractId}`, {
+    method: "DELETE",
+  });
 }

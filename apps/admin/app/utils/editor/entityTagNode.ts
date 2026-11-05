@@ -68,7 +68,7 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
   });
 }
 
-export const PlayerTagNode = createEntityTagNode("player", "playerTag");
-export const TeamTagNode = createEntityTagNode("team", "teamTag");
+const PlayerTagNode = createEntityTagNode("player", "playerTag");
+const TeamTagNode = createEntityTagNode("team", "teamTag");
 
 export const entityTagEditorExtensions = [PlayerTagNode, TeamTagNode];

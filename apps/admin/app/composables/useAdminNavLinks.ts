@@ -4,7 +4,7 @@ import {
   type PermissionRequirement,
 } from "~/utils/staff";
 
-export interface AdminNavLink {
+interface AdminNavLink {
   label: string;
   icon: string;
   to: string;

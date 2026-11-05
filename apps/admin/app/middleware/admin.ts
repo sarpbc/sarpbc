@@ -9,16 +9,12 @@ export default defineNuxtRouteMiddleware((to) => {
 
   const user = useUser();
 
-  if (!user.value) {
-    return navigateTo("/login");
-  }
-
   if (!isStaffUser(user.value)) {
     return navigateTo("/login");
   }
 
   const required = permissionForAdminPath(to.path);
-  if (required === null || required === "staff") {
+  if (required === "staff") {
     return;
   }
 
