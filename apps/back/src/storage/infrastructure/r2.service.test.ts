@@ -75,7 +75,6 @@ describe("R2Service", () => {
         articleTitle: "Vitality win",
         imageFilename: "cover.jpg",
         imageContentType: "image/jpeg",
-        imageDeclaredContentType: "image/jpeg",
         environment: expect.any(String),
       }),
     );

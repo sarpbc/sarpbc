@@ -89,7 +89,6 @@ export interface CreateTeamContractInput {
 }
 
 export interface UpdateTeamContractInput {
-  playerId?: string;
   startDate?: string;
   endDate?: string | null;
   role?: ContractRole;

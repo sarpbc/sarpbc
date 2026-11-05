@@ -23,7 +23,7 @@ function setup() {
     findById: vi.fn(async (id: string) => (id === "zen" || id === "zen-dup" ? zen : null)),
     create: vi.fn(async () => Object.assign(new Player(), { id: "new-player" })),
     update: vi.fn(async () => zen),
-    joinTeam: vi.fn(async () => ({ player: zen, opened: null, closed: [] })),
+    joinTeam: vi.fn(async () => zen),
     leaveTeam: vi.fn(),
   };
   const teams = {

@@ -88,99 +88,55 @@ export class R2Service implements ObjectStorage {
     return this.client;
   }
 
-  private extensionForContentType(contentType: ImageContentType, filename?: string): string {
-    if (
-      contentType === "image/jpeg" ||
-      contentType === "image/png" ||
-      contentType === "image/webp" ||
-      contentType === "image/gif"
-    ) {
-      return CONTENT_TYPE_EXTENSIONS[contentType];
-    }
-    if (filename) {
-      const match = filename.toLowerCase().match(/\.([a-z0-9]+)$/);
-      if (match?.[1]) {
-        return match[1];
-      }
-    }
-    return "bin";
-  }
-
   async createImageUploadUrl(
     contentType: ImageContentType,
-    filename: string | undefined,
+    _filename: string | undefined,
     target: ImageUploadTarget,
   ): Promise<R2UploadUrlResponse> {
-    const canonicalType = contentType;
-    const extension = this.extensionForContentType(canonicalType, filename);
-    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${extension}`;
-    const client = this.getClient();
+    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${CONTENT_TYPE_EXTENSIONS[contentType]}`;
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
-      ContentType: canonicalType,
+      ContentType: contentType,
     });
 
-    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
-    const publicBase = this.publicBaseUrl.replace(/\/$/, "");
-    const publicUrl = `${publicBase}/${key}`;
-
-    return { uploadUrl, publicUrl, key };
+    const uploadUrl = await getSignedUrl(this.getClient(), command, { expiresIn: 600 });
+    return { uploadUrl, publicUrl: this.publicUrl(key), key };
   }
 
-  async uploadImage(
+  uploadImage(
     buffer: Uint8Array,
     contentType: ImageContentType,
     filename: string | undefined,
     context: ImageUploadContext,
   ): Promise<R2UploadResponse> {
-    const canonicalType = contentType;
-    const log = createLogger({
-      component: R2Service.name,
-      action: "uploadImage",
-      target: context.target,
-      environment: currentEnvironment(),
-      userId: context.userId,
-      userEmail: context.userEmail,
-      articleSlug: context.articleSlug,
-      articleTitle: context.articleTitle,
-      imageFilename: filename,
-      imageContentType: canonicalType,
-      imageDeclaredContentType: contentType,
-      imageSize: context.size ?? buffer.byteLength,
-      bucket: this.bucket,
-    });
-
-    try {
-      const extension = this.extensionForContentType(canonicalType, filename);
-      const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${extension}`;
-      const client = this.getClient();
-
-      await client.send(
-        new PutObjectCommand({
-          Bucket: this.bucket,
-          Key: key,
-          Body: buffer,
-          ContentType: canonicalType,
-        }),
-      );
-
-      const publicBase = this.publicBaseUrl.replace(/\/$/, "");
-      const publicUrl = `${publicBase}/${key}`;
-      log.set({ key, stored: true });
-      return { publicUrl, key };
-    } catch (error) {
-      log.error(error instanceof Error ? error : new Error(String(error)));
-      if (error instanceof InternalServerErrorException) {
-        throw error;
-      }
-
-      throw new InternalServerErrorException(
-        "Cover image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
-      );
-    } finally {
-      log.emit();
-    }
+    const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${CONTENT_TYPE_EXTENSIONS[contentType]}`;
+    return this.objectOperation(
+      "uploadImage",
+      {
+        key,
+        target: context.target,
+        userId: context.userId,
+        userEmail: context.userEmail,
+        articleSlug: context.articleSlug,
+        articleTitle: context.articleTitle,
+        imageFilename: filename,
+        imageContentType: contentType,
+        imageSize: context.size ?? buffer.byteLength,
+      },
+      async (client) => {
+        await client.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: contentType,
+          }),
+        );
+        return { publicUrl: this.publicUrl(key), key };
+      },
+      "Cover image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
+    );
   }
 
   putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse> {
@@ -227,8 +183,9 @@ export class R2Service implements ObjectStorage {
 
   private async objectOperation<T>(
     action: string,
-    fields: Record<string, string | number>,
+    fields: Record<string, string | number | undefined>,
     work: (client: S3Client) => Promise<T>,
+    failureMessage = "The image could not be stored. Try again.",
   ): Promise<T> {
     const log = createLogger({
       component: R2Service.name,
@@ -244,7 +201,7 @@ export class R2Service implements ObjectStorage {
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
       if (error instanceof InternalServerErrorException) throw error;
-      throw new InternalServerErrorException("The image could not be stored. Try again.");
+      throw new InternalServerErrorException(failureMessage);
     } finally {
       log.emit();
     }

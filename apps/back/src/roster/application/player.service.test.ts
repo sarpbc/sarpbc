@@ -131,14 +131,14 @@ describe("PlayerService roster moves", () => {
     });
   });
 
+  const lastSavedContract = () => vi.mocked(stores.contracts.save).mock.lastCall?.[0];
   const move = (teamId: string) => ({ teamId, effectiveDate: "2026-10-23", sourceUrl: source });
 
   it("closes the open contract and opens a sourced one when a player joins a team", async () => {
-    const result = await service.joinTeam(player.id, move(newTeam.id));
-    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
+    await service.joinTeam(player.id, move(newTeam.id));
     expect(history[1]).toMatchObject({ endDate: new Date("2026-10-23"), leaveSourceUrl: source });
     expect(history[0].endDate).toEqual(new Date("2025-01-01"));
-    expect(result.opened).toMatchObject({
+    expect(lastSavedContract()).toMatchObject({
       team: newTeam,
       startDate: new Date("2026-10-23"),
       endDate: null,
@@ -157,17 +157,16 @@ describe("PlayerService roster moves", () => {
   });
 
   it("opens a staff contract on the current team and keeps the player contract", async () => {
-    const result = await service.joinTeam(player.id, {
+    await service.joinTeam(player.id, {
       ...move(oldTeam.id),
       role: ContractRole.COACH,
     });
-    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
     expect(history[1]).toMatchObject({
       role: ContractRole.ACTIVE,
       startDate: new Date("2025-02-01"),
       endDate: new Date("2026-10-23"),
     });
-    expect(result.opened).toMatchObject({
+    expect(lastSavedContract()).toMatchObject({
       team: oldTeam,
       role: ContractRole.COACH,
       startDate: new Date("2026-10-23"),
@@ -192,16 +191,15 @@ describe("PlayerService roster moves", () => {
   });
 
   it("moves a player to the bench of the same team with a new contract", async () => {
-    const result = await service.joinTeam(player.id, {
+    await service.joinTeam(player.id, {
       ...move(oldTeam.id),
       role: ContractRole.BENCHED,
     });
-    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
     expect(history[1]).toMatchObject({
       role: ContractRole.ACTIVE,
       endDate: new Date("2026-10-23"),
     });
-    expect(result.opened).toMatchObject({
+    expect(lastSavedContract()).toMatchObject({
       team: oldTeam,
       role: ContractRole.BENCHED,
       endDate: null,
@@ -218,11 +216,10 @@ describe("PlayerService roster moves", () => {
   });
 
   it("closes the contract and records the status when a player leaves", async () => {
-    const result = await service.leaveTeam(player.id, {
+    await service.leaveTeam(player.id, {
       ...move(oldTeam.id),
       status: PlayerStatus.RETIRED,
     });
-    expect(result.closed.map((contract) => contract.id)).toEqual(["open"]);
     expect(history[1].leaveSourceUrl).toBe(source);
     expect(player).toMatchObject({ team: null, status: PlayerStatus.RETIRED });
     expect(stores.contracts.delete).not.toHaveBeenCalled();
@@ -230,11 +227,10 @@ describe("PlayerService roster moves", () => {
 
   it("clears an imported current team that has no contract", async () => {
     history = [];
-    const result = await service.leaveTeam(player.id, {
+    await service.leaveTeam(player.id, {
       ...move(oldTeam.id),
       status: PlayerStatus.FREE_AGENT,
     });
-    expect(result.closed).toEqual([]);
     expect(player).toMatchObject({ team: null, status: PlayerStatus.FREE_AGENT });
   });
 
@@ -247,11 +243,11 @@ describe("PlayerService roster moves", () => {
         startDate: new Date("2025-03-01"),
       }),
     );
-    const result = await service.leaveTeam(player.id, {
+    await service.leaveTeam(player.id, {
       ...move(newTeam.id),
       status: PlayerStatus.RETIRED,
     });
-    expect(result.closed.map((contract) => contract.id)).toEqual(["stale"]);
+    expect(history[2].endDate).toEqual(new Date("2026-10-23"));
     expect(player).toMatchObject({ team: oldTeam, status: PlayerStatus.ACTIVE });
   });
 

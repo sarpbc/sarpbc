@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { NEWS_TYPES } from "@sarpbc/types";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runWriteTool } from "../permission-gate";
@@ -34,30 +34,6 @@ const nullableTournamentDateSchema = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
   .nullable()
   .optional();
-
-export function requireNewsUpdateFields(fields: {
-  title?: string;
-  content?: string;
-  titleFr?: string | null;
-  contentFr?: string | null;
-  imageUrl?: string | null;
-  slug?: string;
-  type?: (typeof NEWS_TYPES)[number];
-}): void {
-  if (
-    fields.title === undefined &&
-    fields.content === undefined &&
-    fields.titleFr === undefined &&
-    fields.contentFr === undefined &&
-    fields.imageUrl === undefined &&
-    fields.slug === undefined &&
-    fields.type === undefined
-  ) {
-    throw new BadRequestException(
-      "Provide at least one field to update (title, content, titleFr, contentFr, imageUrl, slug, or type).",
-    );
-  }
-}
 
 export function registerWriteTools(server: McpServer, ctx: McpToolContext): void {
   const { user } = ctx;
@@ -175,7 +151,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     },
     async ({ idOrSlug, title, content, titleFr, contentFr, imageUrl, slug, type }) =>
       runWriteTool(user, "update_news_article", "news.manage", async () => {
-        requireNewsUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug, type });
+        requireUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug, type });
 
         const current = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
         const article = await ctx.newsService.update(current.slug, {

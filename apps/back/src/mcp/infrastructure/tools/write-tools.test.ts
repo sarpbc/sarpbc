@@ -2,26 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { Match, Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
 import { Team } from "../../../roster/domain/roster";
-import { BadRequestException } from "@nestjs/common";
-import { registerWriteTools, requireNewsUpdateFields } from "./write-tools";
-
-describe("requireNewsUpdateFields", () => {
-  it("rejects when no field is provided", () => {
-    expect(() => requireNewsUpdateFields({})).toThrow(BadRequestException);
-  });
-
-  it("accepts a single optional field", () => {
-    expect(() => requireNewsUpdateFields({ title: "Zen joins Karmine Corp" })).not.toThrow();
-  });
-
-  it("accepts a null clear for French or image fields", () => {
-    expect(() => requireNewsUpdateFields({ titleFr: null, imageUrl: null })).not.toThrow();
-  });
-
-  it("accepts a type-only update", () => {
-    expect(() => requireNewsUpdateFields({ type: "article" })).not.toThrow();
-  });
-});
+import { registerWriteTools } from "./write-tools";
 
 describe("set_match_game_vods", () => {
   function setup(role: "admin" | "journalist") {

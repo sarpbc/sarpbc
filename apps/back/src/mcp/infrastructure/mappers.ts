@@ -73,9 +73,7 @@ function isoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function mapTeamSummary(team: Team, players?: Player[]) {
-  const roster = players ?? team.players;
-
+export function mapTeamSummary(team: Team) {
   return {
     id: team.id,
     slug: team.slug,
@@ -85,7 +83,7 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     source: team.source,
     logoLightUrl: team.logoLightUrl,
     logoDarkUrl: team.logoDarkUrl,
-    players: roster.map((player) => ({
+    players: team.players.map((player) => ({
       id: player.id,
       slug: player.slug,
       name: player.name,

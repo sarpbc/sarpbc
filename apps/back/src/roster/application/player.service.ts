@@ -4,12 +4,6 @@ import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus } from "../do
 import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
 import type { PlayerSearchProps } from "./search-props";
 
-export interface RosterMove {
-  player: Player;
-  opened: Contract | null;
-  closed: Contract[];
-}
-
 export class PlayerService {
   constructor(
     private readonly players: PlayerQueries,
@@ -106,7 +100,7 @@ export class PlayerService {
     });
   }
 
-  async joinTeam(playerId: string, input: JoinTeamInput): Promise<RosterMove> {
+  async joinTeam(playerId: string, input: JoinTeamInput): Promise<Player> {
     return this.transaction.run(async ({ players, teams, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
@@ -138,11 +132,11 @@ export class PlayerService {
       player.contractRole = role;
       player.status = PlayerStatus.ACTIVE;
       await players.save(player);
-      return { player, opened: contract, closed: open };
+      return player;
     });
   }
 
-  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<RosterMove> {
+  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<Player> {
     return this.transaction.run(async ({ players, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
 
@@ -164,7 +158,7 @@ export class PlayerService {
         player.status = input.status;
       }
       await players.save(player);
-      return { player, opened: null, closed };
+      return player;
     });
   }
 
