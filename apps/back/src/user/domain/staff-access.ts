@@ -8,7 +8,6 @@ import type {
   StaffPermission as ClientStaffPermission,
   StaffRole as ClientStaffRole,
 } from "@sarpbc/types";
-import type { ApiErrorBody } from "@sarpbc/utils";
 
 export const STAFF_PERMISSIONS = [
   "news.manage",
@@ -36,9 +35,6 @@ const _staffPermissionParity: _StaffPermissionParity = true;
 const _staffRoleParity: _StaffRoleParity = true;
 void _staffPermissionParity;
 void _staffRoleParity;
-
-/** Compile-time link proving `@sarpbc/utils` resolves in the Nest graph. */
-export type NestLinkedApiErrorBody = ApiErrorBody;
 
 export const ROLE_PERMISSIONS = {
   admin: STAFF_PERMISSIONS,

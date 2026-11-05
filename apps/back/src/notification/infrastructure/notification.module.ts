@@ -1,13 +1,11 @@
 import { Module } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { MikroOrmModule } from "@mikro-orm/nestjs";
-import { ReplyNotification } from "./persistence/reply-notification.entity";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { NotificationController } from "./http/notification.controller";
 import { NotificationService } from "../application/notification.service";
 import { MikroNotificationStore } from "./persistence/notification.store";
 @Module({
-  imports: [MikroOrmModule.forFeature([ReplyNotification]), UserModule],
+  imports: [UserModule],
   controllers: [NotificationController],
   providers: [
     {
@@ -16,6 +14,5 @@ import { MikroNotificationStore } from "./persistence/notification.store";
       inject: [EntityManager],
     },
   ],
-  exports: [NotificationService],
 })
 export class NotificationModule {}

@@ -15,8 +15,4 @@ export class TopicRepository extends EntityRepository<Topic> {
   async findByTitle(title: string): Promise<Topic | null> {
     return this.findOne({ title });
   }
-
-  async save(topic: Topic): Promise<void> {
-    this.em.persist(topic);
-  }
 }

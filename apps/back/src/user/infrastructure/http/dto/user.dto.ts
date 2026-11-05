@@ -7,8 +7,6 @@ export class UserDto {
   avatarUrl?: string;
   role?: StaffRole;
   permissions?: StaffPermission[];
-  /** Derived from `role === "admin"`, not a separate assignment. */
-  admin?: boolean;
 }
 
 export class UserListItemDto {

@@ -1,3 +1,5 @@
+export const HEALTH_PING_TIMEOUT_MS = 1000;
+
 export async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
 

@@ -14,9 +14,6 @@ export class UserMapper {
     if (isStaffRole(user.role)) {
       dto.role = user.role;
       dto.permissions = [...permissionsForRole(user.role)];
-      if (user.role === "admin") {
-        dto.admin = true;
-      }
     }
 
     return dto;

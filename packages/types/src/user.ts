@@ -18,9 +18,6 @@ export interface User {
 
   permissions?: StaffPermission[];
 
-  /** Derived from `role === "admin"`, not a separate assignment. */
-  admin?: boolean;
-
   email: string;
 
   userName: string;

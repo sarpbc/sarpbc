@@ -1,6 +1,7 @@
+import { excerptFromNewsContent } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
-import { assertValidMatchBlocks, excerptFromContent } from "../domain/news-content.util";
+import { assertValidMatchBlocks } from "../domain/news-content.util";
 import {
   hasFrenchTranslation,
   localizedNewsFields,
@@ -82,7 +83,6 @@ export class NewsService {
     private readonly transaction: NewsTransaction,
     private readonly replyService: NewsComments,
     private readonly indexing: NewsIndexing,
-    private readonly id: () => string = () => crypto.randomUUID(),
   ) {}
 
   private mapListArticle(
@@ -97,7 +97,7 @@ export class NewsService {
       slug: article.slug,
       createdAt: article.createdAt,
       imageUrl: article.imageUrl,
-      excerpt: excerptFromContent(content),
+      excerpt: excerptFromNewsContent(content),
       commentCount,
       type: article.type,
     };
@@ -180,7 +180,7 @@ export class NewsService {
       }
 
       const article: NewsArticleRecord = {
-        id: this.id(),
+        id: crypto.randomUUID(),
         updatedAt: null,
         title: sanitizePlainText(dto.title),
         content: newsContent(dto.content),

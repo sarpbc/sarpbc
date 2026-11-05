@@ -60,14 +60,6 @@ export class AuthService {
     return this.signTokenPair(user);
   }
 
-  getFrontUrl(): string {
-    return this.destinations.frontUrl;
-  }
-
-  getAdminUrl(): string {
-    return this.destinations.adminUrl;
-  }
-
   resolveOAuthReturnUrl(returnTo: string | undefined): string {
     return returnTo === "admin" ? this.destinations.adminUrl : this.destinations.frontUrl;
   }

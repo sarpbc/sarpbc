@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -105,11 +104,7 @@ export class NewsController {
     @Param("slug") slug: string,
     @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
   ) {
-    const article = await this.newsService.findOneBySlug(slug, parseNewsLocale(locale));
-    if (!article || article.isDraft) {
-      throw new NotFoundException(`News article with slug "${slug}" not found`);
-    }
-    return article;
+    return this.newsService.findOneBySlug(slug, parseNewsLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

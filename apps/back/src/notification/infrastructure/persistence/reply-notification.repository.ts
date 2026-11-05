@@ -9,10 +9,6 @@ interface ReplyNotificationReadFilter {
 }
 
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
-  async save(notification: ReplyNotification): Promise<void> {
-    this.em.persist(notification);
-  }
-
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
     return this.find(
       { recipient: { id: recipientId } },

@@ -1,15 +1,12 @@
 import { Module } from "@nestjs/common";
-import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { UserController } from "./http/user.controller";
 import { UsersController } from "./http/users.controller";
 import { UserService } from "../application/user.service";
-import { User } from "./persistence/user.entity";
 import { MikroUserStore, MikroUserTransaction } from "./persistence/user.store";
 import { passwordHasher } from "./password-hasher";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([User])],
   controllers: [UserController, UsersController],
   providers: [
     {

@@ -82,7 +82,7 @@ export class ReplyService {
 
       const newReply: ReplyRecord = {
         id: this.id(),
-        content: "",
+        content: sanitizePlainText(createReplyDto.content.trim()),
         author: user,
         createdAt: this.now(),
         hiddenAt: null,
@@ -91,9 +91,6 @@ export class ReplyService {
         match: null,
         replyTo: null,
       };
-      newReply.content = sanitizePlainText(createReplyDto.content.trim());
-      newReply.author = user;
-      newReply.hiddenAt = null;
 
       if (!newReply.content) {
         throw new InvalidInputError("Comment cannot be empty. Write something before posting.");
@@ -190,9 +187,6 @@ export class ReplyService {
         reason,
         createdAt: this.now(),
       };
-      report.reply = reply;
-      report.reporter = reporter;
-      report.reason = reason;
 
       await scope.reports.save(report);
 

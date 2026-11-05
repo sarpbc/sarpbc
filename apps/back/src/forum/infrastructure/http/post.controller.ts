@@ -19,9 +19,8 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreatePostDto } from "./post/dto/create-post.dto";
-import { PostCreationStatusDto } from "./post/dto/post-creation-status.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
-import type { CreatedPost } from "../../application/models";
+import type { CreatedPost, PostCreationStatus } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
 
@@ -64,7 +63,7 @@ export class PostController {
 
   @Get("creation-status")
   @UseGuards(AuthGuard)
-  async getCreationStatus(@CurrentUserId() userId: string): Promise<PostCreationStatusDto> {
+  async getCreationStatus(@CurrentUserId() userId: string): Promise<PostCreationStatus> {
     return this.postService.getCreationStatus(userId);
   }
 
