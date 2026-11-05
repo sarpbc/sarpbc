@@ -38,7 +38,9 @@ const teams = computed(() => {
       name:
         participants.find((participant) => participant.id === team.participantId)?.team.name ??
         t("page.match.detail.unknownTeam"),
-      players: [...team.players].sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name)),
+      players: [...team.players].sort(
+        (a, b) => b.goals - a.goals || playerLabel(a).localeCompare(playerLabel(b)),
+      ),
     }));
 });
 
@@ -107,7 +109,11 @@ function playerLabel(row: MatchGamePlayerStats): string {
               </span>
             </th>
           </tr>
-          <tr v-for="row in team.players" :key="row.name" class="h-row border-b border-default">
+          <tr
+            v-for="(row, index) in team.players"
+            :key="index"
+            class="h-row border-b border-default"
+          >
             <th scope="row" class="max-w-0 px-2 text-left font-normal">
               <SLink
                 v-if="row.player"
