@@ -1,6 +1,5 @@
 .git
 .github
-.cursor
 .vscode
 .claude*
 docs
@@ -18,5 +17,3 @@ tools
 **/.env*
 **/*.log
 **/.DS_Store
-apps/front
-apps/admin
