@@ -24,7 +24,7 @@ The matching code is pure domain code in `apps/back/src/match-stats/domain/repla
 - **Date.** The replay must fall between one hour before the match's `beginAt` and one hour after its `endAt`, or six hours after `beginAt` when there is no end. When the replay has no timezone, the window widens by 14 hours on each side. When several windows fit, as in an upper final and a grand final on the same day, the replay goes to the latest match already started. Equal start times are ambiguous, and so are overlapping windows when the replay date has no timezone.
 - **Series.** All replays placed on a match are ordered by date. The series is rejected when a replay ends in a draw, when there are more replays than the format allows, or when the game winners contradict the recorded score. With fewer replays than games in the score, the game order is unknown and the series is held back as `incomplete_series`. Game numbers follow date order. A match that already holds stats from other replays is never mixed (`match_has_other_stats`).
 - **Duplicates.** Two uploads with the same Rocket League replay id keep the earlier one.
-- **Players.** A stat row links to a sarpbc.org player when exactly one player on the participant's tournament roster matches. Otherwise the row keeps the in-game name, the platform and the platform id with no player link. Substitutes therefore keep their stats.
+- **Players.** A stat row links to a sarpbc.org player when exactly one player on the participant's tournament roster matches. Otherwise the row keeps the in-game name, the platform and the platform id with no player link. Substitutes therefore keep their stats. A player merge moves the duplicate's stat rows to the kept player in the merge transaction.
 
 ## Ballchasing API (SAR-37)
 

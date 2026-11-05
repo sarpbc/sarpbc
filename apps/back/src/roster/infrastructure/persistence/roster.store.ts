@@ -6,6 +6,7 @@ import {
   TournamentParticipant,
   TournamentPrize,
 } from "../../../tournament/infrastructure/competition-persistence";
+import { MatchGamePlayer } from "../../../match-stats/infrastructure/match-stats-persistence";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { Contract, Player, PlayerPhoto, Team } from "../../domain/roster";
@@ -373,6 +374,7 @@ function rosterReferences(em: EntityManager): RosterReferences {
       await em.nativeUpdate(Row.Contract, { player: from }, { player: to });
       await em.nativeUpdate(Row.PlayerPhoto, { player: from }, { player: to });
       await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
+      await em.nativeUpdate(MatchGamePlayer, { player: from }, { player: to });
       const participants = await em.find(
         TournamentParticipant,
         { players: from },

@@ -1,10 +1,22 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 
-export async function verifyMatchStats({ orm, request, staffCookie, memberCookie, competition }) {
+export async function verifyMatchStats({
+  app,
+  orm,
+  request,
+  staffCookie,
+  memberCookie,
+  competition,
+}) {
+  const { RequestContext } = await import("@mikro-orm/core");
   const { MikroOrmGameStatsStore, MikroOrmStatsCandidates, MikroOrmStatsImportStore } =
     await import("../../src/match-stats/infrastructure/persistence/match-stats.store.ts");
   const { MatchGamePlayer } =
     await import("../../src/match-stats/infrastructure/persistence/match-stats.entities.ts");
+  const { RosterMergeService } =
+    await import("../../src/roster/application/roster-merge.service.ts");
+  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
   const { tournamentId, participantId, rivalParticipantId, playerId, matchId } = competition;
   const importsUrl = `/tournaments/${tournamentId}/stats-imports`;
 
@@ -91,4 +103,23 @@ export async function verifyMatchStats({ orm, request, staffCookie, memberCookie
   assert.equal(listed.status, "failed");
   assert.equal(listed.error, "restarted");
   assert.equal(listed.processed, 1);
+
+  const em = orm.em.fork();
+  const duplicateId = randomUUID();
+  em.persist(em.create(Player, { id: duplicateId, name: "KC Veteran Twin", slug: duplicateId }));
+  await em.flush();
+  await new MikroOrmGameStatsStore(orm.em.fork()).save({
+    ...game,
+    number: 2,
+    ballchasingId: "integration-replay-2",
+    rocketLeagueId: "RL-2",
+    players: [
+      { ...stat, name: "KC Veteran", platformId: "a", side: "blue", playerId: duplicateId },
+    ],
+  });
+  const merges = app.get(RosterMergeService);
+  await RequestContext.create(orm.em.fork(), () => merges.mergePlayers(playerId, duplicateId));
+  const statRows = (player) => orm.em.fork().count(MatchGamePlayer, { player });
+  assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
+  assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
 }

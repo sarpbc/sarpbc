@@ -1671,9 +1671,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     );
 
     await check(
-      "match stats keep one game per Ballchasing replay, save players atomically and track imports",
+      "match stats keep one game per Ballchasing replay, save players atomically, follow player merges and track imports",
       async () => {
-        await verifyMatchStats({ orm, request, staffCookie, memberCookie, competition });
+        await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
       },
     );
 
