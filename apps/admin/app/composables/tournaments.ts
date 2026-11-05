@@ -1,5 +1,6 @@
 import type {
   PlayerAwardType,
+  StatsImport,
   TournamentAwardListItem,
   TournamentDetail,
   TournamentListItem,
@@ -315,5 +316,23 @@ export async function setTournamentPrizes(
   return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
     method: "PUT",
     body: { prizes },
+  });
+}
+
+export async function getStatsImports(tournamentId: string): Promise<StatsImport[]> {
+  const res = await apiFetch<{ imports: StatsImport[] }>(
+    `/tournaments/${tournamentId}/stats-imports`,
+    { method: "GET" },
+  );
+  return res.imports;
+}
+
+export async function requestStatsImport(
+  tournamentId: string,
+  group: string,
+): Promise<StatsImport> {
+  return apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
+    method: "POST",
+    body: { group },
   });
 }

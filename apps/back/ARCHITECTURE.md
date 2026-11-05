@@ -44,6 +44,8 @@ Application services publish domain events through feature ports after commit, s
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
 
+The repository has no job queue. A staff stats import (`match-stats`) is stored as a `pending` row, then runs in the API process after the request returns, in its own context. Its status and report live in PostgreSQL. At boot, any import left unfinished by a restart is marked failed. `match-stats` reads competition data only through its own `StatsCandidates` port, and the match detail controller composes its `MatchGamesService` in infrastructure.
+
 ## Ownership and failures
 
 Players, teams, tournaments and matches record their `source` (`pandascore`, `manual` or `startgg`). start.gg terms allow display with credit. start.gg players and teams are public everywhere, MCP included; start.gg tournaments and matches are not redistributed, so MCP reads and any open-data export filter them through `isRedistributable` or the `redistributableOnly` list option. Prize distributions and earnings follow their tournament: site responses keep start.gg rows with their `source` for the credit, and MCP earnings reads pass `redistributableOnly`. A start.gg team does not hide the redistributable match it plays in. A merged player or team keeps its row and slug with `mergedInto`; reads by id or slug resolve to the kept entity and listings skip it.

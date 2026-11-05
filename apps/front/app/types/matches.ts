@@ -1,4 +1,4 @@
-import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
+import type { MatchGameStats, MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
@@ -136,6 +136,7 @@ export interface MatchDetailResponse {
   match: Match;
   teamForms: TeamFormsMap;
   headToHead: HeadToHead | null;
+  games: MatchGameStats[];
 }
 
 export interface Match {

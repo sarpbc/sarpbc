@@ -406,6 +406,52 @@
           "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
         }
       },
+      "statsImport": {
+        "title": "Game Stats",
+        "hint": "Import per-game player stats from a Ballchasing group of this tournament's replays, including its subgroups. Replays are attached only when the teams, rosters and date point to a single match and the games agree with its score. Running the same group again skips games already imported.",
+        "group": "Ballchasing group",
+        "groupPlaceholder": "https://ballchasing.com/group/…",
+        "submit": "Import Stats",
+        "started": "Stats import started",
+        "startError": "Could not start the stats import",
+        "loading": "Loading…",
+        "loadError": "Could not load the stats imports.",
+        "retry": "Try Again",
+        "empty": "No stats imported for this tournament yet.",
+        "summary": "Group {group}, requested {date}",
+        "progress": "{processed} of {total} replays processed",
+        "game": "{match}, game {number}",
+        "attention": "Replays not imported",
+        "status": {
+          "pending": "Pending",
+          "running": "Running",
+          "completed": "Completed",
+          "failed": "Failed"
+        },
+        "counts": {
+          "imported": "Imported",
+          "already": "Already imported",
+          "unmatched": "Unmatched",
+          "failed": "Failed"
+        },
+        "unmatched": {
+          "duplicate_replay": "Same game uploaded twice; the other copy is used.",
+          "missing_date": "The replay has no date, so the match cannot be confirmed.",
+          "unknown_teams": "No match in this tournament has both teams. Check the rosters and team names.",
+          "outside_match_window": "The teams match, but the replay date is outside every match time. Check the match dates.",
+          "ambiguous_match": "Several matches fit this replay. Check the match dates.",
+          "match_has_other_stats": "This match already has stats from other replays.",
+          "incomplete_series": "Fewer replays than games in the score, so game numbers are unknown. Add the missing replays to the group.",
+          "inconsistent_series": "The replays do not agree with the match score or format. Check the score."
+        },
+        "failed": {
+          "download_failed": "Ballchasing download failed. Run the import again later.",
+          "parse_failed": "The replay file could not be read.",
+          "score_mismatch": "The replay file score differs from Ballchasing.",
+          "player_mismatch": "The replay file is missing a team.",
+          "save_failed": "The stats could not be saved. Run the import again."
+        }
+      },
       "prizes": {
         "title": "Prize Distribution",
         "hint": "Enter the amount each team earned, in the currency the source states. Amounts are never converted. Listed players share the prize equally on their profiles.",

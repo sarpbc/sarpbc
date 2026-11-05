@@ -39,6 +39,23 @@ pnpm --filter back run mikro:migrate
 
 Integration tests rebuild a fresh PostgreSQL database through these migrations and verify that the resulting schema matches the ORM entities.
 
+## Game stats from Ballchasing
+
+Admins import per-game player stats from a Ballchasing group on a tournament's admin page. The flow, the matching rules and the rate limits are in [docs/GAME_STATS.md](../../docs/GAME_STATS.md).
+
+Local setup needs a Ballchasing key and the Rust parser (Rust 1.96, pinned by `replay-parser/rust-toolchain.toml`):
+
+```bash
+cd apps/back/replay-parser && cargo build --release && cargo test
+```
+
+Then set these in `apps/back/.env`:
+
+- `BALLCHASING_API_KEY`: your key from https://ballchasing.com/upload. Without it the import endpoint returns an error explaining what to set.
+- `REPLAY_PARSER_PATH=./replay-parser/target/release/replay-parser`. Add `.exe` on Windows. The Docker image installs the binary on `PATH`, so production needs no value.
+
+The backend tests that run the parser on the committed replay are skipped until the binary is built. CI builds it first.
+
 ## Live Twitch streamers
 
 The footer strip lists tracked Twitch channels that are live in Rocket League. Set `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` to enable it; without them `GET /streamers/live` returns an empty list and never calls Twitch. Staff with `streamers.manage` edit the channel list in the admin app.

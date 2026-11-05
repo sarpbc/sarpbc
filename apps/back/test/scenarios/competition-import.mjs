@@ -258,5 +258,11 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       .sort(),
     [imported.id, qualifier.id].sort(),
   );
-  return { tournamentId: imported.id, participantId: participant.id, playerId: player.id };
+  return {
+    tournamentId: imported.id,
+    participantId: participant.id,
+    playerId: player.id,
+    matchId: semiView.id,
+    rivalParticipantId: view.participants.find((p) => p.id !== participant.id).id,
+  };
 }

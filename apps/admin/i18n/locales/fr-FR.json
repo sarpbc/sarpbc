@@ -406,6 +406,52 @@
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
         }
       },
+      "statsImport": {
+        "title": "Stats des games",
+        "hint": "Importez les stats des joueurs, game par game, depuis un groupe Ballchasing contenant les replays de ce tournoi, sous-groupes compris. Un replay n’est rattaché que si les équipes, les rosters et la date désignent un seul match et que les games concordent avec son score. Relancer le même groupe ignore les games déjà importées.",
+        "group": "Groupe Ballchasing",
+        "groupPlaceholder": "https://ballchasing.com/group/…",
+        "submit": "Importer les stats",
+        "started": "Import des stats lancé",
+        "startError": "Impossible de lancer l’import des stats",
+        "loading": "Chargement…",
+        "loadError": "Impossible de charger les imports de stats.",
+        "retry": "Réessayer",
+        "empty": "Aucune stat importée pour ce tournoi.",
+        "summary": "Groupe {group}, demandé le {date}",
+        "progress": "{processed} replays traités sur {total}",
+        "game": "{match}, game {number}",
+        "attention": "Replays non importés",
+        "status": {
+          "pending": "En attente",
+          "running": "En cours",
+          "completed": "Terminé",
+          "failed": "Échec"
+        },
+        "counts": {
+          "imported": "Importés",
+          "already": "Déjà importés",
+          "unmatched": "Non rattachés",
+          "failed": "En échec"
+        },
+        "unmatched": {
+          "duplicate_replay": "La même game a été envoyée deux fois ; l’autre copie est utilisée.",
+          "missing_date": "Le replay n’a pas de date, le match ne peut donc pas être confirmé.",
+          "unknown_teams": "Aucun match de ce tournoi n’oppose ces deux équipes. Vérifiez les rosters et les noms d’équipe.",
+          "outside_match_window": "Les équipes correspondent, mais la date du replay ne tombe dans aucun créneau de match. Vérifiez les dates des matchs.",
+          "ambiguous_match": "Plusieurs matchs correspondent à ce replay. Vérifiez les dates des matchs.",
+          "match_has_other_stats": "Ce match a déjà des stats issues d’autres replays.",
+          "incomplete_series": "Il y a moins de replays que de games au score, l’ordre des games est donc inconnu. Ajoutez les replays manquants au groupe.",
+          "inconsistent_series": "Les replays ne concordent pas avec le score ou le format du match. Vérifiez le score."
+        },
+        "failed": {
+          "download_failed": "Le téléchargement depuis Ballchasing a échoué. Relancez l’import plus tard.",
+          "parse_failed": "Le fichier du replay est illisible.",
+          "score_mismatch": "Le score du fichier diffère de celui de Ballchasing.",
+          "player_mismatch": "Il manque une équipe dans le fichier du replay.",
+          "save_failed": "Les stats n’ont pas pu être enregistrées. Relancez l’import."
+        }
+      },
       "prizes": {
         "title": "Répartition des gains",
         "hint": "Saisissez le montant remporté par chaque équipe, dans la devise indiquée par la source. Les montants ne sont jamais convertis. Les joueurs listés se partagent le gain à parts égales sur leur profil.",

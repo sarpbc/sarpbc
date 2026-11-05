@@ -10,6 +10,16 @@ RUN apt-get update \
 
 WORKDIR /app
 
+FROM rust:1.96-slim-bookworm AS replay-parser
+
+WORKDIR /src
+COPY apps/back/replay-parser/Cargo.toml apps/back/replay-parser/Cargo.lock ./
+COPY apps/back/replay-parser/src ./src
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=cargo-registry-back \
+    cargo build --release --locked \
+  && cp target/release/replay-parser /replay-parser
+
 FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
@@ -72,6 +82,7 @@ COPY --from=build --chown=app:app /app/package.json /app/pnpm-lock.yaml /app/pnp
 COPY --from=build --chown=app:app /app/node_modules ./node_modules
 COPY --from=build --chown=app:app /app/packages ./packages
 COPY --from=build --chown=app:app /app/apps/back ./apps/back
+COPY --from=replay-parser /replay-parser /usr/local/bin/replay-parser
 
 LABEL org.opencontainers.image.revision="${APP_RELEASE}"
 

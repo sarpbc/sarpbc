@@ -38,6 +38,11 @@ import { PersonalAccessTokenSchema } from "./pat/infrastructure/persistence/pers
 import { UserSchema } from "./user/infrastructure/persistence/user.entity";
 import { RosterProposalSchema } from "./roster-proposal/infrastructure/persistence/roster-proposal.entity";
 import { TwitchStreamerSchema } from "./streamer/infrastructure/persistence/twitch-streamer.entity";
+import {
+  MatchGameSchema,
+  MatchGamePlayerSchema,
+  MatchStatsImportSchema,
+} from "./match-stats/infrastructure/persistence/match-stats.entities";
 
 export const mikroOrmEntities = [
   UserSchema,
@@ -54,6 +59,9 @@ export const mikroOrmEntities = [
   MatchSchema,
   BracketLinkSchema,
   MatchResultSchema,
+  MatchGameSchema,
+  MatchGamePlayerSchema,
+  MatchStatsImportSchema,
   PlayerAwardSchema,
   TournamentPrizeSchema,
   TopicSchema,

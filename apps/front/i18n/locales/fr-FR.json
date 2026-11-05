@@ -1613,6 +1613,23 @@
             "twitch": "Twitch",
             "youtube": "YouTube"
           }
+        },
+        "stats": {
+          "title": "Stats des games",
+          "games": "Choisir une game",
+          "game": "Game {number}",
+          "caption": "Stats des joueurs pour la game {number}",
+          "player": "Joueur",
+          "teamScore": "{team}, aucun but | {team}, 1 but | {team}, {goals} buts",
+          "columns": {
+            "goals": { "short": "B", "label": "Buts" },
+            "assists": { "short": "PD", "label": "Passes décisives" },
+            "saves": { "short": "Ar", "label": "Arrêts" },
+            "shots": { "short": "Ti", "label": "Tirs" },
+            "demolitions": { "short": "Dé", "label": "Démolitions" }
+          },
+          "source": "Stats issues des replays sur Ballchasing",
+          "replayLink": "Replay de la game {number} sur Ballchasing (s’ouvre dans un nouvel onglet)"
         }
       }
     },

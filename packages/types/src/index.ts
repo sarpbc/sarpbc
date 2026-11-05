@@ -33,6 +33,16 @@ export type {
   MatchVod,
   MatchVodSource,
 } from "./competition";
+export type {
+  MatchGamePlayerStats,
+  MatchGameStats,
+  MatchGameTeamStats,
+  StatsImport,
+  StatsImportFailedReason,
+  StatsImportItem,
+  StatsImportStatus,
+  StatsImportUnmatchedReason,
+} from "./match-stats";
 export type { ForumPost } from "./forum";
 export type {
   EarningsEntry,
