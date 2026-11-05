@@ -31,7 +31,7 @@ Every section has loading, empty and error states. No pageviews, DAU or charts.
 - Role change inline (`USelect`: `member`, `journalist`, `moderator`, `admin`), with a confirmation modal for any change to or from `admin`. `member` stores `role = null`.
 - An admin cannot change their own role (prevents locking out the last admin).
 - Out of scope: impersonation, password reset, ban or deletion.
-- Backend: `GET /users?search=&limit=&offset=` and `PATCH /users/:id/role`, both guarded by `users.manage`. Follows `apps/back/ARCHITECTURE.md`: query and command on `UserService`, port methods on `IUserRepository`, DTO validation in infrastructure.
+- Backend: `GET /users?search=&limit=&offset=` and `PATCH /users/:id/role`, both guarded by `users.manage`. Follows `apps/back/ARCHITECTURE.md`: query and command on `UserService`, persistence behind the user port, DTO validation in infrastructure.
 
 ## Lists
 

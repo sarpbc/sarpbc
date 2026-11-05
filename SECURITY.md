@@ -23,6 +23,6 @@ We will acknowledge receipt when possible and coordinate a fix before any public
 
 ## Scope notes
 
-- Staff roles are assigned in the database by maintainers; there is no public self-service role escalation API.
+- Staff roles are assigned by staff holding `users.manage` through `PATCH /users/:id/role`; there is no public self-service role escalation API.
 - Production secrets must live in the deployment environment (e.g. Dokploy / Docker secrets), never in git.
 - Auth endpoints are rate-limited; please do not load-test production without permission.

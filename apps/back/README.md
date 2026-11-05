@@ -81,6 +81,6 @@ CI requires at least 70% line and statement coverage across the combined project
 
 - Feature modules use `domain`, `application`, and `infrastructure` layers. See [Backend architecture](ARCHITECTURE.md).
 - HTTP errors should be actionable for the Nuxt UI.
-- Run `pnpm --filter back test` before opening a PR.
+- Run the checks listed in [CONTRIBUTING.md](../../CONTRIBUTING.md#pull-requests) before opening a PR.
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md) at the repo root.

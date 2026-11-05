@@ -340,6 +340,6 @@ After three trials, note:
 ## References
 
 - [README — MCP server](../../README.md#mcp-server)
-- MCP implementation: `apps/back/src/mcp/tools/read-tools.ts`, `apps/back/src/mcp/tools/write-tools.ts`
+- MCP implementation: `apps/back/src/mcp/infrastructure/tools/read-tools.ts`, `apps/back/src/mcp/infrastructure/tools/write-tools.ts`
 - Entity tag syntax: `packages/utils/src/news-entity-tag.ts`, tweet tags: `packages/utils/src/news-tweet-tag.ts`, match blocks: `packages/utils/src/news-match-block.ts`
 - Admin news editor: `apps/admin/app/pages/news/`

@@ -30,6 +30,6 @@ The `analyticsConsent` cookie remembers the choice for 180 days. Preferences can
 
 ## Verification
 
-Run the frontend tests, formatting and linting. The PostHog tests cover consent changes during asynchronous SDK loading, pageview deduplication, aborted navigation, withdrawal and URL redaction.
+Run the frontend typecheck, formatting and linting. The frontend has no automated tests, so check consent changes during asynchronous SDK loading, pageview deduplication, aborted navigation, withdrawal and URL redaction by hand.
 
 After deploying, verify with a browser visit that declining sends no PostHog events, acceptance captures the current page once, internal navigation and interactions share a session ID, replay content is masked, and withdrawal stops new tracking. Verify an actual recording in PostHog after enabling Session Replay.

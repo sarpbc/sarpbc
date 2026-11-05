@@ -57,6 +57,9 @@ Read tools (any valid PAT):
 | `get_tournament_prizes` | Prize distribution of a tournament stage        |
 | `get_team_earnings`     | Team earnings by year, per currency             |
 | `get_player_earnings`   | Player earnings by year, per currency           |
+| `list_leagues`          | Leagues with id, name, slug and source          |
+| `list_events`           | Events, newest first, with their stages         |
+| `get_event`             | Event by id or slug with its stages and league  |
 
 News tools (`news.manage`):
 
@@ -78,6 +81,11 @@ Write tools (staff permission required):
 | `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
 | `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
 | `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
+| `sync_pandascore_tournament` | `tournaments.manage` | Import or refresh a tournament by its PandaScore id                                      |
+| `create_league`              | `tournaments.manage` | Create a league for manual events and tournaments                                        |
+| `update_league`              | `tournaments.manage` | Update a league; PandaScore leagues accept `imageUrl` only                               |
+| `create_event`               | `tournaments.manage` | Create an empty manual event, then attach tournaments with `eventId`                     |
+| `update_event`               | `tournaments.manage` | Rename a manual event or change its slug or league; synced events are rejected           |
 
 Game stats tools (`tournaments.manage`). They operate the Ballchasing stats pipeline described in [GAME_STATS.md](GAME_STATS.md) through the same application services as the admin app. They are staff tools and do not make the stats public; no public or read-only tool returns stats or platform ids.
 
