@@ -79,6 +79,19 @@ Write tools (staff permission required):
 | `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
 | `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
 
+Game stats tools (`tournaments.manage`). They operate the Ballchasing stats pipeline described in [GAME_STATS.md](GAME_STATS.md) through the same application services as the admin app. They are staff tools and do not make the stats public; no public or read-only tool returns stats or platform ids.
+
+| Tool                         | Input                                                                  | Description                                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `import_game_stats`          | `tournamentId`, `group`                                                | Start an import from a Ballchasing group link or id; returns its `id` and `status` (`pending`)                     |
+| `get_game_stats_import`      | `tournamentId`, `includeOtherStages?`                                  | Latest import: status, progress, counts per outcome and the replays to review                                      |
+| `list_unlinked_game_players` | `tournamentId`, `includeLinked?`                                       | Game accounts without a sarpbc.org player (all accounts with `includeLinked`), plus every roster of the tournament |
+| `link_game_player`           | `tournamentId`, `platform`, `platformId`, `playerId`                   | Link an account to a player of any roster of the tournament and repoint all its stat rows                          |
+| `attach_replay_to_game`      | `tournamentId`, `matchId`, `replay`, `gameNumber`, `blueParticipantId` | Staff override: attach a Ballchasing replay link or id to one game of a match                                      |
+| `remove_match_game`          | `tournamentId`, `matchId`, `gameNumber`                                | Remove one game and its player rows; later imports report its replay as `excluded_by_staff`                        |
+
+`get_game_stats_import` keeps a large group readable: replays of other stages (`unknown_teams`, `outside_match_window`) are only counted in `otherStages`, and `toReview` lists the other unmatched and failed replays with their `matchId`, `blueParticipantId` and reason. Pass `includeOtherStages: true` to list them in `otherStageReplays`. A typical run: `import_game_stats`, poll `get_game_stats_import` until `completed` or `failed`, fix a misplaced or refused replay with `remove_match_game` and `attach_replay_to_game`, then link renamed players with `list_unlinked_game_players` and `link_game_player`. `attach_replay_to_game` skips the import's team, date and series rules but refuses a match outside the tournament, a blue team outside the match, a game number out of range or already used, a replay already attached (the error says where) and a replay Ballchasing has not processed.
+
 Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 
 | Tool                        | Permission           | Description once approved                                                                                      |

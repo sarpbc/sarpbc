@@ -40,6 +40,8 @@ The NestJS MCP server is for **staff** with a personal access token from the adm
 
 `get_tournament` returns registered `participants` (participant id, team id, slug and name) for manual and PandaScore tournaments. `create_match` accepts those participant ids or team ids and slugs in `teams`. start.gg tournaments stay hidden.
 
+Staff with `tournaments.manage` also operate per-game stats from Ballchasing: `import_game_stats`, `get_game_stats_import`, `list_unlinked_game_players`, `link_game_player`, `attach_replay_to_game` and `remove_match_game`. These are write-permission staff tools; they do not make stats or game account ids public.
+
 Do not expose PATs in public pages or user-facing answers.
 
 ## Contact and trust pages

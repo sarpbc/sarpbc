@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { MatchStatsModule } from "../../match-stats/infrastructure/match-stats.module";
 import { PatModule } from "../../pat/infrastructure/pat.module";
 import { SearchModule } from "../../search/infrastructure/search.module";
 import { RosterModule } from "../../roster/infrastructure/roster.module";
@@ -16,6 +17,7 @@ import { McpServerFactory } from "./mcp-server.factory";
     TournamentModule,
     NewsModule,
     RosterProposalModule,
+    MatchStatsModule,
   ],
   controllers: [McpController],
   providers: [McpServerFactory],
