@@ -141,10 +141,9 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
     return { kind: "placed", matchId: windowed[0].matchId, sides: windowed[0].sides };
   if (!replay.playedAtHasTimezone) return { kind: "unmatched", reason: "ambiguous_match" };
 
-  // Overlapping windows (a same-day rematch): the replay belongs to the latest match already started.
-  const started = windowed
-    .filter(({ begin }) => begin <= played + EARLY_START_MS)
-    .sort((a, b) => b.begin - a.begin);
+  // Overlapping windows (a same-day rematch): the replay belongs to the latest match already begun.
+  // Every windowed match qualifies for the early-start slack, so when none has begun it cannot decide.
+  const started = windowed.filter(({ begin }) => begin <= played).sort((a, b) => b.begin - a.begin);
   if (started.length === 0 || (started.length > 1 && started[0].begin === started[1].begin))
     return { kind: "unmatched", reason: "ambiguous_match" };
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };

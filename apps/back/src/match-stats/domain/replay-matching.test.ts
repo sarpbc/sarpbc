@@ -251,6 +251,54 @@ describe("assignReplays", () => {
     });
   });
 
+  it("keeps a late game of the upper final out of a grand final that has not begun", () => {
+    const upper = match("upper", [kc, bds], "2026-06-01T14:00:00Z", {
+      endAt: at("2026-06-01T17:30:00Z"),
+      scores: won(kc, bds),
+    });
+    const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(bds, kc) });
+    const lateUpperGame = replay(
+      "2026-06-01T17:10:00Z",
+      { names: KC_NAMES, goals: 1 },
+      { names: BDS_NAMES, goals: 0 },
+    );
+
+    expect(byReplay(assignReplays([lateUpperGame], [upper, grand]))).toEqual({
+      [lateUpperGame.id]: "upper#1 blue=p-kc",
+    });
+  });
+
+  it("accepts a match that started early when no other match fits", () => {
+    const groups = match("groups", [kc, bds], "2026-05-28T15:00:00Z", {
+      endAt: at("2026-05-28T16:10:00Z"),
+      scores: won(bds, kc),
+    });
+    const final = match("final", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+    const earlyGame = replay(
+      "2026-06-01T17:20:00Z",
+      { names: KC_NAMES, goals: 1 },
+      { names: BDS_NAMES, goals: 0 },
+    );
+
+    expect(byReplay(assignReplays([earlyGame], [groups, final]))).toEqual({
+      [earlyGame.id]: "final#1 blue=p-kc",
+    });
+  });
+
+  it("refuses to choose between two matches that have not begun", () => {
+    const first = match("a", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+    const second = match("b", [kc, bds], "2026-06-01T18:30:00Z", { scores: won(kc, bds) });
+    const game = replay(
+      "2026-06-01T17:40:00Z",
+      { names: KC_NAMES, goals: 1 },
+      { names: BDS_NAMES, goals: 0 },
+    );
+
+    expect(byReplay(assignReplays([game], [first, second]))).toEqual({
+      [game.id]: "unmatched:ambiguous_match",
+    });
+  });
+
   it("refuses to choose between two matches scheduled at the same time", () => {
     const first = match("a", [kc, bds], "2026-06-01T18:00:00Z");
     const second = match("b", [bds, kc], "2026-06-01T18:00:00Z");
