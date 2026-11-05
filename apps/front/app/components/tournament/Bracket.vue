@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentDetail } from "@sarpbc/types";
-import { buildTournamentBracketView } from "~/utils/tournamentBracket";
+import { buildTournamentBracketView } from "~/utils/bracket";
 
 interface Props {
   tournament: TournamentDetail;

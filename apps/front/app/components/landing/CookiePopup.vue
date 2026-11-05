@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const { t } = useI18n();
 const localePath = useLocalePath();
-const { visible, close, setChoice, hasChoice } = useCookieConsent();
+const { visible, close, setChoice, choice } = useCookieConsent();
 
 // SWR HTML can contain the banner despite a saved browser choice.
 onMounted(() => {
-  if (hasChoice()) {
+  if (choice.value) {
     close();
   }
 });

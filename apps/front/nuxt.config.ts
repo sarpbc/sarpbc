@@ -41,17 +41,11 @@ const apiHeadLinks = apiOriginUrl
 export default defineNuxtConfig({
   app: {
     head: {
-      charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
       link: [
         ...apiHeadLinks,
         { rel: "preload", href: "/sarpbc.svg", as: "image", type: "image/svg+xml" },
       ],
     },
-  },
-
-  build: {
-    analyze: false,
   },
 
   compatibilityDate: "2026-07-01",
@@ -166,12 +160,6 @@ export default defineNuxtConfig({
       gzip: true,
       brotli: true,
     },
-  },
-
-  ssr: true,
-
-  typescript: {
-    typeCheck: false,
   },
 
   routeRules: {

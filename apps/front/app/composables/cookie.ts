@@ -26,19 +26,6 @@ export const useCookieConsent = () => {
     visible.value = false;
   };
 
-  const getChoice = (): CookieChoice | null => {
-    const value = choice.value;
-    if (value === "accepted" || value === "rejected") {
-      return value;
-    }
-
-    return null;
-  };
-
-  const hasChoice = () => getChoice() !== null;
-
-  const isAccepted = () => getChoice() === "accepted";
-
   const setChoice = (value: CookieChoice) => {
     choice.value = value;
     choiceCookie.value = value;
@@ -49,9 +36,6 @@ export const useCookieConsent = () => {
     visible: visible as Ref<boolean>,
     open,
     close,
-    getChoice,
-    hasChoice,
-    isAccepted,
     setChoice,
   };
 };

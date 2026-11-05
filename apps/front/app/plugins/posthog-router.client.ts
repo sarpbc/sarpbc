@@ -6,13 +6,17 @@ import {
 
 export default defineNuxtPlugin(() => {
   const router = useRouter();
-  const { choice, isAccepted } = useCookieConsent();
+  const { choice } = useCookieConsent();
   const config = useRuntimeConfig();
   let lastPageview: string | null = null;
 
   const capturePageview = (fullPath = router.currentRoute.value.fullPath) => {
     const client = getLoadedPostHogClient();
-    if (!isAccepted() || !client?.has_opted_in_capturing() || lastPageview === fullPath) {
+    if (
+      choice.value !== "accepted" ||
+      !client?.has_opted_in_capturing() ||
+      lastPageview === fullPath
+    ) {
       return;
     }
 
@@ -27,7 +31,7 @@ export default defineNuxtPlugin(() => {
   watch(
     choice,
     () => {
-      const accepted = isAccepted();
+      const accepted = choice.value === "accepted";
       setPostHogConsent(accepted);
       lastPageview = null;
       if (!accepted) {
