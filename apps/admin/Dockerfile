@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # Monorepo context: always build from repository root (--file apps/admin/Dockerfile).
-# NODE_VERSION has no default: pass the contents of .nvmrc without the leading "v".
-ARG NODE_VERSION
+ARG NODE_VERSION=24.22.1
 
 FROM node:${NODE_VERSION}-alpine AS base
 
