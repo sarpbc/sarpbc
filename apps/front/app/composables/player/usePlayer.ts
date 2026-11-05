@@ -14,24 +14,6 @@ interface GetAllPlayersResultDto {
   total: number;
 }
 
-interface CreatePlayerDto {
-  name: string;
-  firstName?: string;
-  lastName?: string;
-  nationality?: string;
-  birthday?: string;
-  imageUrl?: string;
-}
-
-interface UpdatePlayerDto {
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  nationality?: string;
-  birthday?: string;
-  imageUrl?: string;
-}
-
 interface GetPlayerResponseDto {
   player?: Player;
 }
@@ -48,10 +30,6 @@ interface PlayerListParams {
   name?: string;
 }
 
-interface PlayerMutationResponseDto {
-  player: Player;
-}
-
 export function usePlayer() {
   const $api = createApiClient();
 
@@ -64,21 +42,6 @@ export function usePlayer() {
           (res) => res.player ?? null,
         ),
       { watch: [slugRef], default: () => null as Player | null },
-    );
-  }
-
-  function getPlayerById(id: MaybeRef<string>) {
-    const idRef = toRef(id);
-    return useAsyncData(
-      () => `player-id-${idRef.value}`,
-      () => $api<GetPlayerResponseDto>(`/player/${idRef.value}`).then((res) => res.player ?? null),
-      {
-        watch: [idRef],
-        default: () => null as Player | null,
-        getCachedData(key, nuxtApp) {
-          return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
-        },
-      },
     );
   }
 
@@ -111,32 +74,8 @@ export function usePlayer() {
     );
   }
 
-  async function createPlayer(body: CreatePlayerDto): Promise<Player> {
-    const res = await $api<PlayerMutationResponseDto>("/player", {
-      method: "POST",
-      body,
-    });
-    return res.player;
-  }
-
-  async function updatePlayer(id: MaybeRef<string>, body: UpdatePlayerDto): Promise<Player> {
-    const res = await $api<PlayerMutationResponseDto>(`/player/${toValue(id)}`, {
-      method: "PATCH",
-      body,
-    });
-    return res.player;
-  }
-
-  async function deletePlayer(id: MaybeRef<string>): Promise<void> {
-    await $api(`/player/${toValue(id)}`, { method: "DELETE" });
-  }
-
   return {
     getPlayerFromSlug,
-    getPlayerById,
     getAllPlayers,
-    createPlayer,
-    updatePlayer,
-    deletePlayer,
   };
 }

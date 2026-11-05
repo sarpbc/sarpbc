@@ -100,18 +100,6 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
   }
 }
 
-export async function syncTournament(tournamentId: string): Promise<boolean> {
-  try {
-    await apiFetch(`/tournaments/${tournamentId}/sync`, {
-      method: "POST",
-    });
-    return true;
-  } catch (error) {
-    console.error("Error syncing tournaments:", error);
-    return false;
-  }
-}
-
 export async function getTournamentMatches(
   tournamentId: string,
 ): Promise<TournamentMatchListItem[]> {
@@ -125,46 +113,5 @@ export async function getTournamentMatches(
   } catch (error) {
     console.error("Error fetching tournament matches:", error);
     return [];
-  }
-}
-
-export async function setTournamentPickemsEnabled(
-  tournamentId: string,
-  enabled: boolean,
-): Promise<boolean> {
-  try {
-    await apiFetch(`/tournaments/${tournamentId}/enable-pickems`, {
-      body: { enabled },
-      method: "POST",
-    });
-    return true;
-  } catch (error) {
-    console.error("Error enabling tournament pick'ems:", error);
-    return false;
-  }
-}
-
-export async function syncTournamentAdditions(): Promise<boolean> {
-  try {
-    await apiFetch("/tournaments/sync/additions", {
-      method: "POST",
-    });
-    return true;
-  } catch (error) {
-    console.error("Error syncing tournament additions:", error);
-    return false;
-  }
-}
-
-export async function setMatchWinner(matchId: string, winnerId: string): Promise<boolean> {
-  try {
-    await apiFetch(`/tournaments/matches/${matchId}/winner`, {
-      method: "PUT",
-      body: { winnerId },
-    });
-    return true;
-  } catch (error) {
-    console.error("Error setting match winner:", error);
-    return false;
   }
 }

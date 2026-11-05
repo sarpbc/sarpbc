@@ -106,15 +106,3 @@ export async function createForumPost(data: {
     return { ok: false, reason: "unknown", message };
   }
 }
-
-export async function deleteForumPost(postId: string): Promise<boolean> {
-  try {
-    await apiFetch(`/posts/${postId}`, {
-      method: "DELETE",
-    });
-    return true;
-  } catch (error) {
-    console.error("Error deleting forum post:", error);
-    return false;
-  }
-}
