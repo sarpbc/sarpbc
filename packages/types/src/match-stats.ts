@@ -35,8 +35,8 @@ export type StatsImportUnmatchedReason =
   | "inconsistent_series";
 
 export type StatsImportFailedReason =
-  | "download_failed"
-  | "parse_failed"
+  | "fetch_failed"
+  | "replay_not_ready"
   | "score_mismatch"
   | "player_mismatch"
   | "save_failed";

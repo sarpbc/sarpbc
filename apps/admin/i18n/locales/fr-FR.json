@@ -446,10 +446,10 @@
           "inconsistent_series": "Les replays ne concordent pas avec le score ou le format du match. Vérifiez le score."
         },
         "failed": {
-          "download_failed": "Le téléchargement depuis Ballchasing a échoué. Relancez l’import plus tard.",
-          "parse_failed": "Le fichier du replay est illisible.",
-          "score_mismatch": "Le score du fichier diffère de celui de Ballchasing.",
-          "player_mismatch": "Il manque une équipe dans le fichier du replay.",
+          "fetch_failed": "Les stats du replay n’ont pas pu être récupérées sur Ballchasing, ou étaient incomplètes. Relancez l’import plus tard.",
+          "replay_not_ready": "Ballchasing n’a pas fini de traiter ce replay. Relancez l’import plus tard.",
+          "score_mismatch": "Le score des stats du replay diffère de celui de la liste Ballchasing.",
+          "player_mismatch": "Il manque une équipe dans les stats du replay.",
           "save_failed": "Les stats n’ont pas pu être enregistrées. Relancez l’import."
         }
       },

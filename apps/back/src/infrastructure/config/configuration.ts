@@ -44,9 +44,6 @@ export default () => ({
   ballchasing: {
     apiKey: process.env.BALLCHASING_API_KEY?.trim() || undefined,
   },
-  replayParser: {
-    path: process.env.REPLAY_PARSER_PATH?.trim() || "replay-parser",
-  },
   posthog: {
     token: process.env.POSTHOG_PROJECT_TOKEN,
     host: process.env.POSTHOG_HOST || "https://eu.i.posthog.com",

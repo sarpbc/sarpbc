@@ -17,8 +17,7 @@ import { isActive, type StatsImport } from "../domain/stats-import";
 import type {
   BallchasingSource,
   GameStatsStore,
-  ParsedReplay,
-  ReplayParser,
+  ReplayStats,
   StatsCandidates,
   StatsImportStore,
 } from "./ports";
@@ -32,7 +31,6 @@ type Matched = Extract<ReplayAssignment, { kind: "matched" }>;
 export class StatsImportService {
   constructor(
     private readonly source: BallchasingSource | null,
-    private readonly parser: ReplayParser,
     private readonly candidates: StatsCandidates,
     private readonly games: GameStatsStore,
     private readonly imports: StatsImportStore,
@@ -144,27 +142,22 @@ export class StatsImportService {
     const target = { ...base, matchId: assignment.matchId, gameNumber: assignment.gameNumber };
     if (imported.has(replay.id)) return { ...target, status: "already_imported" };
 
-    let parsed: ParsedReplay;
+    let stats: ReplayStats | null;
     try {
-      const file = await source.download(replay.id);
-      try {
-        parsed = await this.parser.parse(file);
-      } catch (error) {
-        this.reportFailure(error);
-        return { ...target, status: "failed", reason: "parse_failed" };
-      }
+      stats = await source.replayStats(replay.id);
     } catch (error) {
       this.reportFailure(error);
-      return { ...target, status: "failed", reason: "download_failed" };
+      return { ...target, status: "failed", reason: "fetch_failed" };
     }
+    if (!stats) return { ...target, status: "failed", reason: "replay_not_ready" };
 
-    if (parsed.blueGoals !== replay.blue.goals || parsed.orangeGoals !== replay.orange.goals)
+    if (stats.blueGoals !== replay.blue.goals || stats.orangeGoals !== replay.orange.goals)
       return { ...target, status: "failed", reason: "score_mismatch" };
-    if (!(["blue", "orange"] as const).every((side) => parsed.players.some((p) => p.side === side)))
+    if (!(["blue", "orange"] as const).every((side) => stats.players.some((p) => p.side === side)))
       return { ...target, status: "failed", reason: "player_mismatch" };
 
     try {
-      await this.games.save(this.record(assignment, parsed, rosters));
+      await this.games.save(this.record(assignment, stats, rosters));
     } catch (error) {
       this.reportFailure(error);
       return { ...target, status: "failed", reason: "save_failed" };
@@ -174,7 +167,7 @@ export class StatsImportService {
 
   private record(
     { replay, matchId, gameNumber, sides }: Matched,
-    parsed: ParsedReplay,
+    stats: ReplayStats,
     rosters: Map<string, RosterPlayer[]>,
   ) {
     return {
@@ -185,9 +178,9 @@ export class StatsImportService {
       playedAt: replay.playedAt,
       blueParticipantId: sides.blue,
       orangeParticipantId: sides.orange,
-      blueGoals: parsed.blueGoals,
-      orangeGoals: parsed.orangeGoals,
-      players: parsed.players.map((player) => ({
+      blueGoals: stats.blueGoals,
+      orangeGoals: stats.orangeGoals,
+      players: stats.players.map((player) => ({
         ...player,
         playerId: resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []),
       })),

@@ -20,5 +20,3 @@ tools
 **/.DS_Store
 apps/front
 apps/admin
-apps/back/replay-parser/target
-apps/back/replay-parser/tests

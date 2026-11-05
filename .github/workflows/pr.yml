@@ -138,15 +138,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # The toolchain comes from apps/back/replay-parser/rust-toolchain.toml.
-      - name: Replay parser (format, lint, tests, release build)
-        working-directory: apps/back/replay-parser
-        run: |
-          cargo fmt --check
-          cargo clippy --locked --all-targets -- -D warnings
-          cargo test --locked
-          cargo build --release --locked
-
       - name: Typecheck
         run: |
           pnpm --filter back typecheck

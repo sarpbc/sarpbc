@@ -65,8 +65,10 @@ function json(
 
 function client(routes: (url: string) => Response) {
   const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(String(input)));
-  const sleep = vi.fn(async () => undefined);
   let clock = 0;
+  const sleep = vi.fn(async (ms: number) => {
+    clock += ms;
+  });
   const instance = new BallchasingClient("secret-key", {
     fetch,
     sleep,
@@ -169,48 +171,203 @@ describe("BallchasingClient.groupReplays", () => {
   });
 });
 
-describe("BallchasingClient.download", () => {
-  it("returns the replay bytes", async () => {
-    const { instance, fetch } = client(() => new Response(new Uint8Array([1, 2, 3])));
+// Excerpt of a live GET /api/replays/{id} response.
+function replayDetail() {
+  return {
+    id: "r1",
+    status: "ok",
+    rocket_league_id: "RL-r1",
+    title: "Game r1",
+    date: "2026-06-01T20:05:00+02:00",
+    date_has_timezone: true,
+    blue: {
+      name: "REBELLION",
+      stats: { core: { goals: 2 } },
+      players: [
+        {
+          name: "Firstkiller",
+          id: { platform: "steam", id: "76561198327846028" },
+          stats: {
+            core: { goals: 2, assists: 0, saves: 3, shots: 6 },
+            demo: { inflicted: 0, taken: 1 },
+          },
+        },
+        {
+          name: "Racer",
+          id: { platform: "steam", id: "76561198224723032" },
+          stats: {
+            core: { goals: 0, assists: 0, saves: 1, shots: 2 },
+            demo: { inflicted: 1, taken: 3 },
+          },
+        },
+      ],
+    },
+    orange: {
+      name: "TEAM VITALITY",
+      stats: { core: { goals: 0 } },
+      players: [
+        {
+          name: "zen",
+          id: { platform: "steam", id: "76561198144145654" },
+          stats: {
+            core: { goals: 0, assists: 0, saves: 3, shots: 4 },
+            demo: { inflicted: 4, taken: 0 },
+          },
+        },
+      ],
+    },
+  };
+}
 
-    expect([...(await instance.download("r1"))]).toEqual([1, 2, 3]);
-    expect(String(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1/file`);
-  });
+describe("BallchasingClient.replayStats", () => {
+  it("maps team goals and each player's five stats", async () => {
+    const { instance, fetch } = client(() => json(replayDetail()));
 
-  it("waits out 429 responses, honouring Retry-After, then gives up", async () => {
-    let calls = 0;
-    const { instance, sleep } = client(() => {
-      calls += 1;
-      return calls === 1
-        ? json({ error: "rate limited" }, 429, { "retry-after": "7" })
-        : calls === 2
-          ? json({ error: "rate limited" }, 429)
-          : new Response(new Uint8Array([9]));
+    expect(await instance.replayStats("r1")).toEqual({
+      blueGoals: 2,
+      orangeGoals: 0,
+      players: [
+        {
+          name: "Firstkiller",
+          platform: "steam",
+          platformId: "76561198327846028",
+          side: "blue",
+          goals: 2,
+          assists: 0,
+          saves: 3,
+          shots: 6,
+          demolitions: 0,
+        },
+        {
+          name: "Racer",
+          platform: "steam",
+          platformId: "76561198224723032",
+          side: "blue",
+          goals: 0,
+          assists: 0,
+          saves: 1,
+          shots: 2,
+          demolitions: 1,
+        },
+        {
+          name: "zen",
+          platform: "steam",
+          platformId: "76561198144145654",
+          side: "orange",
+          goals: 0,
+          assists: 0,
+          saves: 3,
+          shots: 4,
+          demolitions: 4,
+        },
+      ],
     });
-
-    expect([...(await instance.download("r1"))]).toEqual([9]);
-    expect(sleep).toHaveBeenCalledWith(7000);
-    expect(sleep).toHaveBeenCalledWith(60_000);
-
-    const limited = client(() => json({ error: "rate limited" }, 429));
-    await expect(limited.instance.download("r1")).rejects.toThrow(/rate limit/);
-    expect(limited.fetch).toHaveBeenCalledTimes(6);
+    expect(String(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1`);
   });
 
-  it("spaces file downloads one second apart", async () => {
-    const { instance, sleep, advance } = client(() => new Response(new Uint8Array([1])));
+  it("counts a number omitted inside a stats object as zero", async () => {
+    const detail = replayDetail();
+    const [firstkiller, racer] = detail.blue.players;
+    const { instance } = client(() =>
+      json({
+        ...detail,
+        blue: {
+          ...detail.blue,
+          players: [{ ...firstkiller, stats: { core: { goals: 2 }, demo: { taken: 1 } } }, racer],
+        },
+        orange: { ...detail.orange, stats: { core: {} } },
+      }),
+    );
 
-    await instance.download("a");
-    await instance.download("b");
-    advance(1500);
-    await instance.download("c");
+    const stats = await instance.replayStats("r1");
 
-    expect(sleep.mock.calls).toEqual([[1000], [500]]);
+    expect(stats?.orangeGoals).toBe(0);
+    expect(stats?.players[0]).toMatchObject({
+      goals: 2,
+      assists: 0,
+      saves: 0,
+      shots: 0,
+      demolitions: 0,
+    });
+  });
+
+  it("refuses a player or team without its stats objects instead of storing zeros", async () => {
+    const detail = replayDetail();
+    const [firstkiller, racer] = detail.blue.players;
+    const withBluePlayer = (player: { [key: string]: Json }) => ({
+      ...detail,
+      blue: { ...detail.blue, players: [firstkiller, player] },
+    });
+    const bodies = [
+      withBluePlayer({ name: racer.name, id: racer.id }),
+      withBluePlayer({ ...racer, stats: { core: racer.stats.core } }),
+      withBluePlayer({ ...racer, stats: { demo: racer.stats.demo } }),
+      { ...detail, orange: { name: detail.orange.name, players: detail.orange.players } },
+    ];
+
+    for (const body of bodies)
+      await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
+        IntegrationError,
+      );
+  });
+
+  it("returns null while Ballchasing is still processing the replay", async () => {
+    const { instance } = client(() => json({ id: "r1", status: "pending" }));
+
+    expect(await instance.replayStats("r1")).toBeNull();
   });
 
   it("reports a replay that disappeared", async () => {
     const { instance } = client(() => json({ error: "not found" }, 404));
 
-    await expect(instance.download("gone")).rejects.toThrow(/no longer available/);
+    await expect(instance.replayStats("gone")).rejects.toThrow(/no longer available/);
+  });
+
+  it("spaces replay calls 500 ms apart", async () => {
+    const { instance, sleep, advance } = client(() => json(replayDetail()));
+
+    await instance.replayStats("a");
+    await instance.replayStats("b");
+    advance(300);
+    await instance.replayStats("c");
+
+    expect(sleep.mock.calls).toEqual([[500], [200]]);
+  });
+});
+
+describe("BallchasingClient rate limiting", () => {
+  it("honours a positive Retry-After", async () => {
+    let calls = 0;
+    const { instance, sleep } = client(() =>
+      ++calls === 1
+        ? json({ error: "rate limited" }, 429, { "retry-after": "7" })
+        : json(replayDetail()),
+    );
+
+    await instance.replayStats("r1");
+
+    expect(sleep.mock.calls).toEqual([[7000]]);
+  });
+
+  it("backs off from one second, doubling, when Retry-After is missing or 0", async () => {
+    let calls = 0;
+    const { instance, sleep } = client(() => {
+      calls += 1;
+      if (calls === 1) return json({ error: "rate limited" }, 429, { "retry-after": "0" });
+      if (calls <= 3) return json({ error: "rate limited" }, 429);
+      return json(replayDetail());
+    });
+
+    await instance.replayStats("r1");
+
+    expect(sleep.mock.calls).toEqual([[1000], [2000], [4000]]);
+  });
+
+  it("fails clearly once the retries are exhausted", async () => {
+    const { instance, fetch, sleep } = client(() => json({ error: "rate limited" }, 429));
+
+    await expect(instance.replayStats("r1")).rejects.toThrow(/rate limit reached/);
+    expect(fetch).toHaveBeenCalledTimes(6);
+    expect(sleep.mock.calls).toEqual([[1000], [2000], [4000], [8000], [16_000]]);
   });
 });

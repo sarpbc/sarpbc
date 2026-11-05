@@ -11,8 +11,7 @@ import type {
   BallchasingSource,
   GameRecord,
   GameStatsStore,
-  ParsedReplay,
-  ReplayParser,
+  ReplayStats,
   StatsCandidates,
   StatsImportStore,
 } from "./ports";
@@ -57,7 +56,7 @@ const stranger: ReplaySummary = {
   blue: { name: null, goals: 1, playerNames: ["x", "y", "z"] },
 };
 
-function parsedFor(replay: ReplaySummary): ParsedReplay {
+function statsFor(replay: ReplaySummary): ReplayStats {
   const side = (names: string[], team: "blue" | "orange") =>
     names.map((name, index) => ({
       name: index === 2 ? "Stand-in" : name,
@@ -124,17 +123,15 @@ class MemoryGames implements GameStatsStore {
   }
 }
 
-function setup(options: { replays?: ReplaySummary[]; parser?: ReplayParser } = {}) {
-  const source: BallchasingSource = {
-    groupReplays: vi.fn(async () => options.replays ?? [game2, stranger, game1]),
-    download: vi.fn(async (id: string) => new TextEncoder().encode(id)),
-  };
-  const parser: ReplayParser = options.parser ?? {
-    parse: vi.fn(async (file: Uint8Array) => {
-      const id = new TextDecoder().decode(file);
-      return parsedFor([game1, game2].find((replay) => replay.id === id) as ReplaySummary);
-    }),
-  };
+function setup(options: { replays?: ReplaySummary[] } = {}) {
+  const source = {
+    groupReplays: vi.fn<BallchasingSource["groupReplays"]>(
+      async () => options.replays ?? [game2, stranger, game1],
+    ),
+    replayStats: vi.fn<BallchasingSource["replayStats"]>(async (id) =>
+      statsFor([game1, game2].find((replay) => replay.id === id) as ReplaySummary),
+    ),
+  } satisfies BallchasingSource;
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
     matches: vi.fn(async () => [
@@ -147,8 +144,8 @@ function setup(options: { replays?: ReplaySummary[]; parser?: ReplayParser } = {
   const games = new MemoryGames();
   const imports = new MemoryImports();
   const reportFailure = vi.fn();
-  const service = new StatsImportService(source, parser, candidates, games, imports, reportFailure);
-  return { service, source, parser, games, imports, reportFailure };
+  const service = new StatsImportService(source, candidates, games, imports, reportFailure);
+  return { service, source, games, imports, reportFailure };
 }
 
 describe("StatsImportService.request", () => {
@@ -180,7 +177,6 @@ describe("StatsImportService.request", () => {
     const { imports } = setup();
     const service = new StatsImportService(
       null,
-      { parse: vi.fn() },
       { tournamentExists: vi.fn(), matches: vi.fn() },
       new MemoryGames(),
       imports,
@@ -207,7 +203,7 @@ describe("StatsImportService.run", () => {
       ["r2", "imported"],
       ["r3", "unmatched"],
     ]);
-    expect(source.download).toHaveBeenCalledTimes(2);
+    expect(source.replayStats).toHaveBeenCalledTimes(2);
     expect(games.saved.map((game) => [game.ballchasingId, game.number])).toEqual([
       ["r1", 1],
       ["r2", 2],
@@ -230,15 +226,15 @@ describe("StatsImportService.run", () => {
     expect(imports.saves.map((save) => save.processed)).toContain(1);
   });
 
-  it("skips already imported replays on a rerun without downloading them", async () => {
+  it("skips already imported replays on a rerun without fetching their stats", async () => {
     const { service, games, imports, source } = setup();
     await service.run((await service.request("t1", "pilot-abc123")).id);
-    vi.mocked(source.download).mockClear();
+    source.replayStats.mockClear();
 
     const { id } = await service.request("t1", "pilot-abc123");
     await service.run(id);
 
-    expect(source.download).not.toHaveBeenCalled();
+    expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.saved).toHaveLength(2);
     expect(imports.rows.get(id)?.items.map((item) => item.status)).toEqual([
       "already_imported",
@@ -247,12 +243,11 @@ describe("StatsImportService.run", () => {
     ]);
   });
 
-  it("fails a game whose parsed score disagrees with Ballchasing, or that cannot be parsed", async () => {
-    const parse = vi
-      .fn<ReplayParser["parse"]>()
-      .mockResolvedValueOnce({ ...parsedFor(game1), blueGoals: 5 })
-      .mockRejectedValueOnce(new Error("boxcars crashed"));
-    const { service, games, imports, reportFailure } = setup({ parser: { parse } });
+  it("fails a game whose stats score disagrees with the list, or that is not processed yet", async () => {
+    const { service, games, imports, source, reportFailure } = setup();
+    source.replayStats
+      .mockResolvedValueOnce({ ...statsFor(game1), blueGoals: 5 })
+      .mockResolvedValueOnce(null);
     const { id } = await service.request("t1", "pilot-abc123");
 
     await service.run(id);
@@ -260,17 +255,17 @@ describe("StatsImportService.run", () => {
     expect(games.saved).toHaveLength(0);
     expect(imports.rows.get(id)?.items.slice(0, 2)).toEqual([
       expect.objectContaining({ replayId: "r1", status: "failed", reason: "score_mismatch" }),
-      expect.objectContaining({ replayId: "r2", status: "failed", reason: "parse_failed" }),
+      expect.objectContaining({ replayId: "r2", status: "failed", reason: "replay_not_ready" }),
     ]);
-    expect(reportFailure).toHaveBeenCalledOnce();
+    expect(reportFailure).not.toHaveBeenCalled();
   });
 
   it("fails a game when the replay is missing a team", async () => {
-    const parse = vi.fn(async () => ({
-      ...parsedFor(game1),
-      players: parsedFor(game1).players.filter((player) => player.side === "blue"),
-    }));
-    const { service, imports } = setup({ parser: { parse }, replays: [game1, game2] });
+    const { service, imports, source } = setup({ replays: [game1, game2] });
+    source.replayStats.mockResolvedValueOnce({
+      ...statsFor(game1),
+      players: statsFor(game1).players.filter((player) => player.side === "blue"),
+    });
     const { id } = await service.request("t1", "pilot-abc123");
 
     await service.run(id);
@@ -278,16 +273,16 @@ describe("StatsImportService.run", () => {
     expect(imports.rows.get(id)?.items[0]).toMatchObject({ reason: "player_mismatch" });
   });
 
-  it("records a download or save failure per game and keeps going", async () => {
+  it("records a fetch or save failure per game and keeps going", async () => {
     const { service, imports, source, games } = setup({ replays: [game1, game2] });
-    vi.mocked(source.download).mockRejectedValueOnce(new IntegrationError("gone"));
+    source.replayStats.mockRejectedValueOnce(new IntegrationError("gone"));
     vi.spyOn(games, "save").mockRejectedValueOnce(new Error("unique violation"));
     const { id } = await service.request("t1", "pilot-abc123");
 
     await service.run(id);
 
     expect(imports.rows.get(id)?.items).toEqual([
-      expect.objectContaining({ replayId: "r1", status: "failed", reason: "download_failed" }),
+      expect.objectContaining({ replayId: "r1", status: "failed", reason: "fetch_failed" }),
       expect.objectContaining({ replayId: "r2", status: "failed", reason: "save_failed" }),
     ]);
     expect(imports.rows.get(id)?.status).toBe("completed");

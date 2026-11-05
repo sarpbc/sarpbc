@@ -5,10 +5,11 @@ import type { StatsImport } from "../domain/stats-import";
 export interface BallchasingSource {
   /** Replays of the group and of all its nested child groups. */
   groupReplays(groupId: string): Promise<ReplaySummary[]>;
-  download(replayId: string): Promise<Uint8Array>;
+  /** Null while Ballchasing has not finished processing the replay. */
+  replayStats(replayId: string): Promise<ReplayStats | null>;
 }
 
-export interface ParsedPlayer {
+export interface ReplayPlayerStats {
   name: string;
   platform: string;
   platformId: string | null;
@@ -20,14 +21,10 @@ export interface ParsedPlayer {
   demolitions: number;
 }
 
-export interface ParsedReplay {
+export interface ReplayStats {
   blueGoals: number;
   orangeGoals: number;
-  players: ParsedPlayer[];
-}
-
-export interface ReplayParser {
-  parse(file: Uint8Array): Promise<ParsedReplay>;
+  players: ReplayPlayerStats[];
 }
 
 export interface StatsCandidates {
@@ -35,7 +32,7 @@ export interface StatsCandidates {
   matches(tournamentId: string): Promise<CandidateMatch[]>;
 }
 
-export interface GamePlayerRecord extends ParsedPlayer {
+export interface GamePlayerRecord extends ReplayPlayerStats {
   playerId: string | null;
 }
 

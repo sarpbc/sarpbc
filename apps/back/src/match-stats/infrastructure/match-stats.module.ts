@@ -8,7 +8,6 @@ import { MatchGamesService } from "../application/match-games.service";
 import { StatsImportService } from "../application/stats-import.service";
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
 import { StatsImportController } from "./http/stats-import.controller";
-import { BoxcarsReplayParser } from "./parser/boxcars-replay-parser";
 import { MatchGame, MatchGamePlayer, MatchStatsImport } from "./persistence/match-stats.entities";
 import {
   MikroOrmGameStatsStore,
@@ -32,7 +31,6 @@ import { StatsImportRunner } from "./stats-import.runner";
         const apiKey = config.get<string>("ballchasing.apiKey");
         return new StatsImportService(
           apiKey ? new BallchasingClient(apiKey) : null,
-          new BoxcarsReplayParser(config.get<string>("replayParser.path") ?? "replay-parser"),
           new MikroOrmStatsCandidates(em),
           new MikroOrmGameStatsStore(em),
           new MikroOrmStatsImportStore(em),
