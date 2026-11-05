@@ -9,12 +9,12 @@ Scope: goals, saves, assists, shots and demolitions inflicted, per player and pe
 1. A staff member with `tournaments.manage` (admins only) pastes a Ballchasing group link or id on the tournament page in the admin app.
 2. `POST /tournaments/:id/stats-imports` records a `pending` import and returns `202`. The API then runs it in the same process. The admin page polls `GET /tournaments/:id/stats-imports` every 3 seconds while the import is `pending` or `running`.
 3. The API lists the group's replays and the replays of every nested child group, page by page.
-4. Each replay is matched to a game from Ballchasing's metadata alone (see Matching). Only matched replays that are not already stored are downloaded.
-5. The `replay-parser` binary reads the `.replay` file. The import fails a game when the file's score differs from Ballchasing's, or when a team is missing.
-6. The game and one row per player are saved in a single transaction.
+4. Each replay is matched to a game from the list metadata alone (see Matching). Only matched replays that are not already stored are requested in detail.
+5. `GET /api/replays/{id}` returns the stats Ballchasing computed. The import fails a game when the request or the response validation fails (`fetch_failed`), when the replay's `status` is not `"ok"` (`replay_not_ready`), when its team goals differ from the list (`score_mismatch`), or when a team has no players (`player_mismatch`).
+6. The game and one row per player are saved in a single transaction (`save_failed` otherwise).
 7. The report lists every replay as imported, already imported, unmatched (with the reason) or failed (with the reason).
 
-Running the same group again is safe. `match_game.ballchasing_id` is unique, and replays that are already stored are skipped before download.
+Running the same group again is safe. `match_game.ballchasing_id` is unique, and replays that are already stored are skipped before their details are requested.
 
 ## Matching
 
@@ -25,23 +25,30 @@ The matching code is pure domain code in `apps/back/src/match-stats/domain/repla
 - **Series.** Only finished matches with a recorded series score receive stats. A match is finished when its status is `finished` or it has an `endAt`, the same rule as the rest of the site. Replays placed on any other match are held back as `match_not_finished`, and a later run attaches them once the result is in. All replays placed on a match are ordered by date. The series is rejected when a replay ends in a draw, when there are more replays than the format allows, or when the game winners contradict the recorded score. With fewer replays than games in the score, the game order is unknown and the series is held back as `incomplete_series`. Game numbers follow date order, and a match holds one game per number. A match that already holds stats from other replays is never mixed (`match_has_other_stats`).
 - **Duplicates.** Two uploads with the same Rocket League replay id keep the earlier one.
 - **Players.** A stat row links to a sarpbc.org player when exactly one player on the participant's tournament roster matches. Otherwise the row keeps the in-game name, the platform and the platform id with no player link. Substitutes therefore keep their stats. A player merge moves the duplicate's stat rows to the kept player in the merge transaction.
+- **Known limit: renamed players.** The name in a replay can differ from the roster. In one live replay, `Racer` is the player stored as `kofyr`, with the same Steam id. The `player` table has no platform id, so such a row stays unlinked: `player_id` is null, the name and platform id are kept, and the match page shows the name as plain text. Identity is never inferred by elimination, and there is no mapping table.
 
 ## Ballchasing API (SAR-37)
 
 Facts from the [official API documentation](https://ballchasing.com/doc/api):
 
 - **Authentication.** The `Authorization` header holds the raw key, with no `Bearer` prefix. The key comes from `BALLCHASING_API_KEY` and is never committed. Without a key the import endpoint answers with an actionable error.
-- **Endpoints used.** `GET /api/groups/{id}` checks that the group exists. `GET /api/replays?group=&count=200` lists the replays directly in a group, and `GET /api/groups?group=&count=200` lists its child groups. Both follow the `next` link. `GET /api/replays/{id}/file` downloads a replay. A `next` link outside `https://ballchasing.com/api/` is refused, so the key never leaves that host.
-- **Fields used.** For each replay: `id`, `rocket_league_id`, `replay_title`, `date`, `date_has_tz`, `blue`/`orange` `name` and `goals`, and the players' `name`. `goals` is absent when it is zero.
+- **Endpoints used.** `GET /api/groups/{id}` checks that the group exists. `GET /api/replays?group=&count=200` lists the replays directly in a group, and `GET /api/groups?group=&count=200` lists its child groups. Both follow the `next` link. `GET /api/replays/{id}` returns one replay's details and stats. A `next` link outside `https://ballchasing.com/api/` is refused, so the key never leaves that host.
+- **List fields used.** For each replay: `id`, `rocket_league_id`, `replay_title`, `date`, `date_has_tz`, `blue`/`orange` `name` and `goals`, and the players' `name`. `goals` is absent when it is zero.
+- **Detail fields used.** `status`, `<side>.stats.core.goals` for the team score, and for each player `name`, `id.platform`, `id.id`, `stats.core.goals`, `assists`, `saves`, `shots` and `stats.demo.inflicted` (stored as demolitions). The detail endpoint spells the timezone flag `date_has_timezone`, the list `date_has_tz`; the import only reads it from the list. Ballchasing omits some zero values, so a number missing inside a present stats object counts as 0. A player without `stats`, `stats.core` or `stats.demo`, or a team without `stats.core`, fails the game with `fetch_failed` rather than storing a false zero.
+- **Source check.** On 5 games compared during a live test, all 125 values (five stats for every player) were identical between the boxcars parser this PR first used and `GET /api/replays/{id}`, demolitions included.
 - **Rate limits** (calls per second, then per hour where capped):
 
-| Endpoint                   | Regular          | Gold               | Diamond            | Champion     | Grand Champion |
-| -------------------------- | ---------------- | ------------------ | ------------------ | ------------ | -------------- |
-| `GET /replays` (list)      | 2/s, 500/h       | 2/s, 1,000/h       | 4/s, 2,000/h       | 8/s          | 16/s           |
-| `GET /replays/{id}/file`   | **1/s, 200/h**   | 2/s, 400/h         | 2/s, 1,000/h       | 2/s, 2,000/h | 2/s            |
-| `GET /groups`, `/groups/x` | 2/s, 500–1,000/h | 2/s, 1,000–2,000/h | 4/s, 2,000–5,000/h | 8/s          | 16/s           |
+| Endpoint                   | Regular          | Gold               | Diamond            | Champion    | Grand Champion |
+| -------------------------- | ---------------- | ------------------ | ------------------ | ----------- | -------------- |
+| `GET /replays` (list)      | 2/s, 500/h       | 2/s, 1,000/h       | 4/s, 2,000/h       | 8/s         | 16/s           |
+| `GET /replays/{id}`        | 2/s, 1,000/h     | not checked        | not checked        | not checked | not checked    |
+| `GET /groups`, `/groups/x` | 2/s, 500–1,000/h | 2/s, 1,000–2,000/h | 4/s, 2,000–5,000/h | 8/s         | 16/s           |
 
-The client spaces calls for the regular tier: 500 ms between list and group calls and one second between downloads. On `429` it waits for `Retry-After`, or 60 seconds without one, up to five times, then fails that game. Rerunning resumes where it stopped. On the regular tier, 200 downloads per hour is about 40 best-of-5 series. A larger tournament needs several runs, or a patron key.
+The client spaces calls for the regular tier: 500 ms between calls of each kind (list, group, replay details). On `429` it waits for a positive `Retry-After`. A missing or `0` value gets an exponential backoff instead: 1 second, then doubling up to five retries (1, 2, 4, 8 and 16 seconds), capped at 30 seconds. After the fifth retry the game fails with `fetch_failed`, and the report keeps going. Rerunning resumes where it stopped.
+
+One detail call per game makes 1,000 calls an hour enough for about 200 best-of-5 series on the regular tier, before the list and group calls, which have their own limits. A tournament above that needs a second run after the hour, or a patron key.
+
+The `429` behaviour that motivated this choice was measured on the replay file endpoint (`GET /replays/{id}/file`), on the regular tier, during the live test: from about the third file it answered `429` with `retry-after: 0`, and the earlier flat 60-second cooldown gave about 54 files an hour. The detail endpoint's behaviour under load has not been measured.
 
 - **Replay availability (RLCS).** Ballchasing has only what someone uploaded. Nothing guarantees that a tournament's replays exist, or when they appear, and this pilot has not checked a real RLCS group. Groups can be private, and a private group answers `404` to other keys. The pilot therefore relies on a staff member finding or building one group per tournament. Ballchasing's "pro" tag is never used.
 
@@ -55,11 +62,9 @@ No specialised database is needed. Volumes are tiny: a 3v3 game is six rows, and
 
 Match games were not modelled before. The match only stored the series score and per-game VOD links in JSON. This replaces SAR-38's `MatchReplay.statsJson` blob with relational rows, so the stats can be aggregated later without a migration.
 
-## Replay parsing
+## Replay files (removed parser)
 
-`apps/back/replay-parser` is a small Rust CLI built on [boxcars](https://github.com/nickbabcock/boxcars). It reads one replay and prints JSON. The API runs it as a child process through the `ReplayParser` application port, so a parser crash fails one game instead of the API. The Docker image builds it in a separate stage and installs it on `PATH`. CI checks its format and lint, runs its tests and builds it before the backend tests, which then parse the committed fixture through the adapter.
-
-The header's `PlayerStats` provide goals, assists, saves and shots. Demolitions are not in the header. The parser counts them from network frames, deduplicates repeated replications and credits the attacker's player. The method is described in the [parser README](../apps/back/replay-parser/README.md). The count matched the game's own counter for every player in all 23 boxcars sample replays that carry it.
+This PR first downloaded each `.replay` file and parsed it with a Rust CLI built on [boxcars](https://github.com/nickbabcock/boxcars) (`apps/back/replay-parser`, with a `ReplayParser` port and a `BoxcarsReplayParser` adapter). The owner replaced it after the live test: file downloads were the bottleneck, and Ballchasing's own stats matched the parser on every value compared. The parser, its Docker stage and its CI job were removed. If replay files are ever needed again, for a stat Ballchasing does not compute, restore the parser from git history (PR #242, introduced in commit `a4bf6537`).
 
 ## Display and licensing
 
@@ -77,6 +82,6 @@ The match page shows a "Game Stats" section when a match has imported games, wit
 
 ## What remains
 
-- A live run. The client has only been tested against fake responses written from the documentation. It has never called the real API.
+- A full live import. The live test compared the parser with `GET /api/replays/{id}` on 5 games and measured the file endpoint's `429` behaviour. The client in this PR has only run against fake responses, including an excerpt of a real detail response.
 - SAR-42 pilot runbook: choose the tournament, build or find its group, run the import, review unmatched replays and measure coverage.
 - Possible later work: an in-app retry for a single replay, manual attachment of an unmatched replay, automatic ingestion, and aggregated player stats.
