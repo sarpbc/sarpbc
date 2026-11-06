@@ -8,7 +8,7 @@
     "./apiFetch": "./src/runtime/composables/apiFetch.ts"
   },
   "scripts": {
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",

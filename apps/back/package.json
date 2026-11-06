@@ -7,7 +7,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "lint": "node scripts/check-architecture.mjs && oxlint .",
+    "lint": "node scripts/check-architecture.mjs && oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix && node scripts/check-architecture.mjs",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",

@@ -18,7 +18,7 @@
     "dev:front": "turbo run dev --filter=front",
     "dev:admin": "turbo run dev --filter=admin",
     "build": "turbo run build",
-    "lint": "oxlint scripts && turbo run lint",
+    "lint": "oxlint --deny-warnings scripts && turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",

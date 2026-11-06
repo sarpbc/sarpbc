@@ -10,7 +10,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",

@@ -6,7 +6,7 @@
     "build": "nuxt build",
     "dev": "nuxt dev --port 4000",
     "postinstall": "nuxt prepare",
-    "lint": "node scripts/generate-oxlint-globals.mjs && oxlint -c .oxlintrc.generated.json . && node scripts/lint-hub-row-heights.mjs",
+    "lint": "node scripts/generate-oxlint-globals.mjs && oxlint --deny-warnings -c .oxlintrc.generated.json . && node scripts/lint-hub-row-heights.mjs",
     "lint:fix": "node scripts/generate-oxlint-globals.mjs && oxlint -c .oxlintrc.generated.json . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
