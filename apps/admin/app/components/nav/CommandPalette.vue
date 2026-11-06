@@ -5,7 +5,6 @@ import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/adminSections";
 import type { Player } from "@sarpbc/types";
 import type { Team } from "@sarpbc/types";
-import type { Tournament } from "~/types/tournament";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -117,7 +116,7 @@ function tournamentItems(): CommandPaletteItem[] {
   if (!canTournaments.value) {
     return [];
   }
-  return results.value.tournaments.map((tournament: Tournament) => ({
+  return results.value.tournaments.map((tournament) => ({
     id: `tournament-${tournament.id}`,
     label: tournamentStageLabel(tournament),
     icon: "i-fluent-trophy-24-regular",

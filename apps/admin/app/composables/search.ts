@@ -1,16 +1,14 @@
-import type { Player } from "@sarpbc/types";
-import type { Team } from "@sarpbc/types";
-import type { Tournament } from "~/types/tournament";
+import type { Player, Team, TournamentListItem } from "@sarpbc/types";
 
 export interface AdminSearchResult {
   players: Player[];
   teams: Team[];
-  tournaments: Tournament[];
+  tournaments: Pick<TournamentListItem, "id" | "name" | "event" | "imageUrl">[];
 }
 
 export async function searchAdminEntities(query: string): Promise<AdminSearchResult> {
   try {
-    const res = await apiFetch<Partial<AdminSearchResult>>("/search", {
+    return await apiFetch<AdminSearchResult>("/search", {
       method: "GET",
       query: {
         q: query,
@@ -18,12 +16,6 @@ export async function searchAdminEntities(query: string): Promise<AdminSearchRes
         limit: 15,
       },
     });
-
-    return {
-      players: res.players ?? [],
-      teams: res.teams ?? [],
-      tournaments: res.tournaments ?? [],
-    };
   } catch {
     return { players: [], teams: [], tournaments: [] };
   }
