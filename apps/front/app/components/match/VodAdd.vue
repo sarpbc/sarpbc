@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import type { MatchVod } from "@sarpbc/types";
-import { isIso6391Code, maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
+import {
+  getApiErrorMessage,
+  hasPermission,
+  isIso6391Code,
+  maxVodGame,
+  parseMatchVodUrl,
+} from "@sarpbc/utils";
 import type { Match } from "~/types/matches";
-import { getApiErrorMessage } from "~/utils/apiError";
-import { hasPermission } from "~/utils/staff";
 
 const { match } = defineProps<{ match: Match }>();
 

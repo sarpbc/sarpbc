@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { parseLocale } from "@sarpbc/utils";
 import { getApiErrorMessage } from "~/utils/apiError";
-import { hasPermission, meetsRequirement, ROSTER_PROPOSAL_PERMISSIONS } from "~/utils/staff";
+import { canModerateComments } from "@sarpbc/utils";
+import { canAccessSection } from "~/utils/adminSections";
 
 const MODERATION_LIMIT = 50;
 const ARTICLE_LIMIT = 5;
@@ -13,18 +14,14 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const user = useUser();
-const navLinks = useAdminNavLinks();
+const shortcuts = useAdminSections();
 
 const items = [{ label: t("page.nav.home") }];
 
-const canNews = computed(() => hasPermission(user.value, "news.manage"));
-const canMatches = computed(() => hasPermission(user.value, "tournaments.manage"));
-const canProposals = computed(() => meetsRequirement(user.value, ROSTER_PROPOSAL_PERMISSIONS));
-const canModeration = computed(() => hasPermission(user.value, "forum.moderate"));
-
-const shortcuts = computed(() =>
-  navLinks.value.filter((link) => !link.target && link.to !== localePath("/")),
-);
+const canNews = computed(() => canAccessSection(user.value, "/news"));
+const canMatches = computed(() => canAccessSection(user.value, "/tournaments"));
+const canProposals = computed(() => canAccessSection(user.value, "/proposals"));
+const canModeration = computed(() => canModerateComments(user.value));
 
 const hasAnyTool = computed(() => shortcuts.value.length > 0);
 

@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import type { Comment, CommentTargetType } from "~/types/discussion";
+import type { ReplyTargetType } from "@sarpbc/types";
+import { canModerateComments } from "@sarpbc/utils";
+import type { Comment } from "~/types/discussion";
 import { commentAnchorId } from "~/utils/commentPermalink";
 
 const { comment, targetType, targetId } = defineProps<{
   comment: Comment;
-  targetType: CommentTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
 }>();
 

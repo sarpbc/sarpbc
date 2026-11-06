@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import { parseLocale } from "@sarpbc/utils";
-import type { RosterChange, RosterProposal } from "~/types/rosterProposal";
-import type { StaffPermission } from "~/types/user";
+import type { RosterProposal } from "@sarpbc/types";
+import { hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 import { getApiErrorMessage } from "~/utils/apiError";
-import { hasPermission } from "~/utils/staff";
 
 const { t, locale } = useI18n();
 const toast = useToast();
@@ -21,32 +19,8 @@ const dateFormatter = computed(
 const user = useUser();
 const reviewingId = ref<string | null>(null);
 
-function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
-  switch (kind) {
-    case "add_player_to_team":
-    case "remove_player_from_team":
-    case "create_player":
-    case "update_player":
-    case "merge_players":
-    case "create_contract":
-    case "update_contract":
-      return "players.manage";
-    case "create_team":
-    case "update_team":
-    case "upload_team_logo":
-    case "merge_teams":
-      return "teams.manage";
-    case "set_tournament_prizes":
-      return "tournaments.manage";
-    default: {
-      const exhaustive: never = kind;
-      return exhaustive;
-    }
-  }
-}
-
 function canReview(proposal: RosterProposal): boolean {
-  return hasPermission(user.value, reviewPermission(proposal.change.kind));
+  return hasPermission(user.value, requiredPermission(proposal.change));
 }
 
 const { status, data, error, refresh } = await useLazyAsyncData(

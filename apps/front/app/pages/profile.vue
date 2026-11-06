@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 import type { AppNotification } from "~/types/notification";
-import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();

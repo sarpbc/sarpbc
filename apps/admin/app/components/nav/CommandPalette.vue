@@ -2,9 +2,9 @@
 import { tournamentStageLabel } from "@sarpbc/utils";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
-import { hasPermission } from "~/utils/staff";
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import { canAccessSection } from "~/utils/adminSections";
+import type { Player } from "@sarpbc/types";
+import type { Team } from "@sarpbc/types";
 import type { Tournament } from "~/types/tournament";
 
 const { t } = useI18n();
@@ -18,9 +18,9 @@ const pending = ref(false);
 const results = ref<AdminSearchResult>({ players: [], teams: [], tournaments: [] });
 const refreshState = ref<"idle" | "loading" | "success" | "error">("idle");
 
-const canPlayers = computed(() => hasPermission(user.value, "players.manage"));
-const canTeams = computed(() => hasPermission(user.value, "teams.manage"));
-const canTournaments = computed(() => hasPermission(user.value, "tournaments.manage"));
+const canPlayers = computed(() => canAccessSection(user.value, "/players"));
+const canTeams = computed(() => canAccessSection(user.value, "/teams"));
+const canTournaments = computed(() => canAccessSection(user.value, "/tournaments"));
 const canSearch = computed(() => canPlayers.value || canTeams.value || canTournaments.value);
 
 defineShortcuts({
