@@ -52,6 +52,37 @@ test("reports a cycle between features' inner layers once and accepts a one-way 
   }
 });
 
+test("allows another feature's persistence only through its facade or infrastructure composition", () => {
+  const { write, violations, cleanup } = fixture();
+  try {
+    write("owner/infrastructure/persistence/owner.entity.ts", "export class Owner {}");
+    write(
+      "owner/infrastructure/owner-persistence.ts",
+      'export { Owner } from "./persistence/owner.entity";',
+    );
+    const viaEntity = write(
+      "probe/infrastructure/persistence/probe.store.ts",
+      'import { Owner } from "../../../owner/infrastructure/persistence/owner.entity";',
+    );
+    const viaFacade = write(
+      "probe/infrastructure/persistence/probe.entity.ts",
+      'import { Owner } from "../../../owner/infrastructure/owner-persistence";',
+    );
+    const composition = write(
+      "probe/infrastructure/composition.ts",
+      'import { Owner } from "../../owner/infrastructure/persistence/owner.entity";',
+    );
+    assert.ok(
+      violations([viaEntity]).some((message) => message.includes("private persistence of owner")),
+      "rejects a non-facade persistence import",
+    );
+    assert.deepEqual(violations([viaFacade]), []);
+    assert.deepEqual(violations([composition]), []);
+  } finally {
+    cleanup();
+  }
+});
+
 test("rejects non-allowlisted packages, aliases, type imports, reexports and foreign repositories", () => {
   const { write, violations, cleanup } = fixture();
   try {

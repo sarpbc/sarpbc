@@ -3,7 +3,7 @@ import type { NewsType } from "@sarpbc/types";
 import { ConflictError } from "../../../common/domain/errors";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { NewsArticle } from "./news-article.entity";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord, NewsSitemapRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";

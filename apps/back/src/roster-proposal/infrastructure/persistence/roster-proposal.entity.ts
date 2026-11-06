@@ -1,5 +1,5 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import type { RosterChange, RosterProposalStatus } from "@sarpbc/types";
 
 export class RosterProposal {

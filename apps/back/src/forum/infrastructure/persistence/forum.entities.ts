@@ -1,5 +1,5 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { PostRepository } from "./post.repository";
 import { PostType } from "../../domain/post-type.enum";
 import { TopicRepository } from "./topic.repository";

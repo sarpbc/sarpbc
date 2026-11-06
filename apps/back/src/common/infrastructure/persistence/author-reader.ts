@@ -1,6 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { Author } from "../../domain/author";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 
 export function authorReader(em: EntityManager) {
   return {

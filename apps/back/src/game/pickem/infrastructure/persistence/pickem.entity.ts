@@ -4,7 +4,7 @@ import {
   Match,
   TournamentParticipant,
 } from "../../../../tournament/infrastructure/competition-persistence";
-import { User } from "../../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../../user/infrastructure/user-persistence";
 
 export class PickemChoice {
   id: string = v4();

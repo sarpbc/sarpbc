@@ -3,7 +3,7 @@ import {
   Match,
   TournamentParticipant,
 } from "../../../../tournament/infrastructure/competition-persistence";
-import { User } from "../../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../../user/infrastructure/user-persistence";
 import { PickemChoice } from "./pickem.entity";
 import type { NamedPick, Pick } from "../../domain/pickem";
 import type {

@@ -1,9 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 
-import {
-  REPLY_HAS_TARGET,
-  REPLY_POPULATE,
-} from "../../../reply/infrastructure/persistence/reply.mapper";
+import { REPLY_HAS_TARGET, REPLY_POPULATE } from "../../../reply/infrastructure/reply-persistence";
 import { ReplyNotification } from "./reply-notification.entity";
 
 interface ReplyNotificationReadFilter {

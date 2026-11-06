@@ -23,7 +23,7 @@ ORM records and domain models are separate representations. Persistence mappers 
 
 The consumer owns each contract it needs from an external provider. `pandascore/` is an infrastructure-only adapter. `PandascoreCompetitionFeed` implements competition's `CompetitionFeed`, and `PandascoreCurrentRosterSource` implements roster's `CurrentRosterSource`. Competition also owns `SyncCursor`, which its own infrastructure implements. The adapters validate provider responses with Zod before mapping them into the consumer's commands.
 
-Feature consumers use application services or consumed ports. Shared relational mappings are exposed through `roster/infrastructure/roster-persistence.ts` and `tournament/infrastructure/competition-persistence.ts`. Private repositories remain private. Source imports use relative paths so the compiled application runs directly in Node.js.
+Feature consumers use application services or consumed ports. Shared relational mappings are exposed only through each feature's persistence facade: `roster/infrastructure/roster-persistence.ts`, `tournament/infrastructure/competition-persistence.ts`, `user/infrastructure/user-persistence.ts`, `forum/infrastructure/forum-persistence.ts`, `news/infrastructure/news-persistence.ts` and `reply/infrastructure/reply-persistence.ts`. Importing another feature's `infrastructure/persistence/**` directly fails `test:architecture`; modules and `composition.ts` files may compose another feature's providers, and `common/` is shared. Private repositories remain private. Source imports use relative paths so the compiled application runs directly in Node.js.
 
 ## Writes and execution contexts
 

@@ -1,6 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { Post, PostTranslation, Topic } from "./forum.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { PostRepository } from "./post.repository";
 import { TopicRepository } from "./topic.repository";
 import { postSnapshot, topicSnapshot } from "./forum.mapper";

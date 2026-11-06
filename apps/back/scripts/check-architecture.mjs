@@ -51,6 +51,7 @@ function importsOf(source) {
   return imports;
 }
 
+const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/;
 const isInner = (file, root) => ["domain", "application"].includes(layer(file, root));
 const featureOf = (file, root) => normalized(file, root).split("/")[0];
 
@@ -185,10 +186,16 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot) {
         const target = normalized(resolved.resolvedFileName, root);
         const feature = origin.split("/")[0];
         const targetFeature = target.split("/")[0];
+        const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
+        const sharedTarget = targetFeature === "common";
         if (
           feature !== targetFeature &&
-          target.includes("/infrastructure/") &&
-          /(?:repository|\.persistence)\.ts$/.test(target)
+          !composes &&
+          !sharedTarget &&
+          !persistenceFacade.test(target) &&
+          (target.includes("/infrastructure/persistence/") ||
+            (target.includes("/infrastructure/") &&
+              /(?:repository|\.persistence)\.ts$/.test(target)))
         ) {
           violations.push(`${origin}: imports private persistence of ${targetFeature}: ${target}`);
         }

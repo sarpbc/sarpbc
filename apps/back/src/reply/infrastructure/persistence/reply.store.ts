@@ -4,10 +4,10 @@ import {
   isForeignKeyViolation,
   isUniqueViolation,
 } from "../../../common/infrastructure/persistence/constraint-violation";
-import { Post } from "../../../forum/infrastructure/persistence/forum.entities";
-import { NewsArticle } from "../../../news/infrastructure/persistence/news-article.entity";
-import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { Post } from "../../../forum/infrastructure/forum-persistence";
+import { NewsArticle } from "../../../news/infrastructure/news-persistence";
+import { Match } from "../../../tournament/infrastructure/competition-persistence";
+import { User } from "../../../user/infrastructure/user-persistence";
 import type { ReplyRecord } from "../../application/models";
 import type { ReplyFindOptions, ReplyReportRecord, ReplyWrites } from "../../application/ports";
 import { replyAlreadyReported, replyStillReferenced } from "../../domain/reply-errors";

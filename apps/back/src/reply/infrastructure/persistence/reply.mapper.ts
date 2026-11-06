@@ -1,9 +1,9 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { ReplyTargetType } from "@sarpbc/types";
-import { Post } from "../../../forum/infrastructure/persistence/forum.entities";
-import { NewsArticle } from "../../../news/infrastructure/persistence/news-article.entity";
-import { toMatchSlug } from "../../../tournament/infrastructure/persistence/competition.mapper";
-import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
+import { Post } from "../../../forum/infrastructure/forum-persistence";
+import { NewsArticle } from "../../../news/infrastructure/news-persistence";
+import { toMatchSlug } from "../../../tournament/infrastructure/competition-persistence";
+import { Match } from "../../../tournament/infrastructure/competition-persistence";
 import type { ReplyRecord } from "../../application/models";
 import { REPLY_TARGETS, type ReplyTargetFields } from "../../domain/reply";
 import type { Reply } from "./reply.entities";

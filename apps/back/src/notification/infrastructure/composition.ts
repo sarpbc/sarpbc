@@ -1,6 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { Reply } from "../../reply/infrastructure/persistence/reply.entities";
-import { User } from "../../user/infrastructure/persistence/user.entity";
+import { Reply } from "../../reply/infrastructure/reply-persistence";
+import { User } from "../../user/infrastructure/user-persistence";
 import { ReplyNotification } from "./persistence/reply-notification.entity";
 export function directReplyNotifications(em: EntityManager) {
   return {
