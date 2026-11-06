@@ -3,23 +3,11 @@ const open = defineModel<boolean>("open", { default: false });
 
 const user = useUser();
 const links = useAdminNavLinks();
-const loggingOut = ref(false);
+const { loggingOut, logout } = useLogout();
 
 const items = computed(() =>
   links.value.map((link) => ({ ...link, onSelect: () => (open.value = false) })),
 );
-
-async function onLogout() {
-  if (loggingOut.value) {
-    return;
-  }
-  loggingOut.value = true;
-  try {
-    await logout();
-  } finally {
-    loggingOut.value = false;
-  }
-}
 </script>
 
 <template>
@@ -63,7 +51,7 @@ async function onLogout() {
           :label="loggingOut ? $t('page.home.loggingOut') : $t('page.home.logout')"
           :loading="loggingOut"
           :disabled="loggingOut"
-          @click="onLogout"
+          @click="logout"
         />
       </div>
     </template>

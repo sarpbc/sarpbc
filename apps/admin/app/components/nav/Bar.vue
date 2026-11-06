@@ -9,7 +9,7 @@ const user = useUser();
 const navOpen = ref(false);
 const userMenuOpen = ref(false);
 const pointerInNav = ref(false);
-const loggingOut = ref(false);
+const { loggingOut, logout } = useLogout();
 
 const links = useAdminNavLinks();
 
@@ -60,18 +60,6 @@ defineShortcuts({
     },
   },
 });
-
-async function onLogout() {
-  if (loggingOut.value) {
-    return;
-  }
-  loggingOut.value = true;
-  try {
-    await logout();
-  } finally {
-    loggingOut.value = false;
-  }
-}
 </script>
 
 <template>
@@ -143,7 +131,7 @@ async function onLogout() {
             :label="loggingOut ? $t('page.home.loggingOut') : $t('page.home.logout')"
             :loading="loggingOut"
             :disabled="loggingOut"
-            @click="onLogout"
+            @click="logout"
           />
         </div>
       </template>

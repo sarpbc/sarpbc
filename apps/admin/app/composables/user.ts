@@ -11,26 +11,39 @@ export async function getProfile(): Promise<User | null> {
   }
 }
 
-export async function logout(): Promise<void> {
+export function useLogout() {
   const user = useUser();
   const localePath = useLocalePath();
   const toast = useToast();
   const { $i18n } = useNuxtApp();
+  const loggingOut = ref(false);
 
-  let confirmed = false;
-  try {
-    const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
-      method: "GET",
-    });
-    confirmed = res.success === true;
-  } catch (error) {
-    console.error("Logout failed:", error);
+  async function logout(): Promise<void> {
+    if (loggingOut.value) {
+      return;
+    }
+    loggingOut.value = true;
+    try {
+      let confirmed = false;
+      try {
+        const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
+          method: "GET",
+        });
+        confirmed = res.success === true;
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+
+      if (!confirmed) {
+        toast.add({ title: $i18n.t("page.home.logoutFailed"), color: "error" });
+        return;
+      }
+      user.value = null;
+      await navigateTo(localePath("/login"));
+    } finally {
+      loggingOut.value = false;
+    }
   }
 
-  if (!confirmed) {
-    toast.add({ title: $i18n.t("page.home.logoutFailed"), color: "error" });
-    return;
-  }
-  user.value = null;
-  await navigateTo(localePath("/login"));
+  return { loggingOut, logout };
 }
