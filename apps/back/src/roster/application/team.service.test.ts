@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../domain/roster";
-import { ContractService } from "./contract.service";
-import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
+import type { RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 import { TeamService } from "./team.service";
-import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError } from "../../common/domain/errors";
 
 describe("Roster workflows", () => {
   let stores: RosterWriteScope;
   let service: TeamService;
-  let contractService: ContractService;
   let team: Team;
   let player: Player;
   let contract: Contract;
@@ -53,7 +51,6 @@ describe("Roster workflows", () => {
         return work(stores);
       },
     };
-    contractService = new ContractService({} as ContractQueries, {} as TeamQueries, transaction);
     service = new TeamService({} as TeamQueries, transaction);
   });
 
@@ -93,16 +90,5 @@ describe("Roster workflows", () => {
     stores.teams.findBySlug = async () => team;
     await expect(service.create({ name: "Vitality" })).rejects.toBeInstanceOf(ConflictError);
     expect(stores.teams.save).not.toHaveBeenCalled();
-  });
-
-  it("uses the unprocessable error for missing contract teams on creation and update", async () => {
-    stores.teams.findById = async () => null;
-    await expect(
-      contractService.create(player.id, { teamId: "missing", startDate: "2026-10-15" }),
-    ).rejects.toBeInstanceOf(UnprocessableError);
-    await expect(
-      contractService.update(player.id, contract.id, { teamId: "missing" }),
-    ).rejects.toBeInstanceOf(UnprocessableError);
-    expect(stores.contracts.save).not.toHaveBeenCalled();
   });
 });

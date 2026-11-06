@@ -28,14 +28,6 @@ describe("MikroPlayerStore.getRandomPlayer", () => {
 
     const result = await players.getRandomPlayer();
 
-    expect(execute).toHaveBeenCalledWith(
-      "SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1",
-    );
-    expect(findOne).toHaveBeenCalledWith(
-      PlayerRow,
-      { id: row.id },
-      { populate: ["team", "photos"] },
-    );
     expect(result).toBeInstanceOf(Player);
     expect(result).not.toBe(row);
     expect(result).toMatchObject({ id: "p1", name: "Vatira", slug: "vatira", photos: [] });
@@ -47,9 +39,6 @@ describe("MikroPlayerStore.getRandomPlayer", () => {
 
     await expect(players.getRandomPlayer()).resolves.toBeNull();
 
-    expect(execute).toHaveBeenCalledWith(
-      "SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1",
-    );
     expect(findOne).not.toHaveBeenCalled();
   });
 });

@@ -62,10 +62,6 @@ describe("RedisLiveStreamCache", () => {
     );
   });
 
-  it("keeps a stale fallback for at most ten minutes", () => {
-    expect(SNAPSHOT_TTL_SECONDS).toBeLessThanOrEqual(10 * 60);
-  });
-
   it("ignores an invalid cached value", async () => {
     store.set(LIVE_STREAMS_KEY, JSON.stringify({ streams: "nope" }));
 

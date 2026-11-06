@@ -129,6 +129,57 @@ export async function verifyCompetitionSyncLookups({
   for (const twin of twins) assert.equal((await view(twin.id)).source, "manual");
 }
 
+export async function verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext }) {
+  const { CompetitionSyncService } =
+    await import("../../src/tournament/application/sync/competition-sync.service.ts");
+  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+  const { randomUUID } = await import("node:crypto");
+  const sync = app.get(CompetitionSyncService);
+  const run = (work) => RequestContext.create(orm.em.fork(), work);
+  const importPlayer = (pandascoreId, slug) =>
+    run(() =>
+      sync.applyIncident({
+        id: pandascoreId,
+        modifiedAt: new Date(),
+        changeType: "creation",
+        kind: "player",
+        command: { player: { pandascoreId, name: slug, slug }, currentTeam: null },
+      }),
+    );
+  const imported = (pandascoreId) => orm.em.fork().findOneOrFail(Player, { pandascoreId });
+
+  const legacy = (
+    await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201)
+  ).json().player;
+  await importPlayer(9951, legacy.slug);
+  assert.equal(
+    (await imported(9951)).id,
+    legacy.id,
+    "a legacy row without a provider id is adopted through its slug",
+  );
+
+  const startgg = randomUUID();
+  const em = orm.em.fork();
+  em.persist(
+    em.create(Player, {
+      id: startgg,
+      name: "Adoption Startgg",
+      slug: "adoption-startgg",
+      source: "startgg",
+    }),
+  );
+  await em.flush();
+  await importPlayer(9952, "adoption-startgg");
+  const created = await imported(9952);
+  assert.notEqual(created.id, startgg, "a start.gg row is never adopted through its slug");
+  assert.equal(created.slug, "adoption-startgg-9952");
+  assert.equal(
+    (await orm.em.fork().findOneOrFail(Player, { id: startgg })).pandascoreId,
+    null,
+    "the start.gg row keeps its source and has no provider id",
+  );
+}
+
 export async function verifyRedistributableScope({
   app,
   orm,
@@ -136,8 +187,9 @@ export async function verifyRedistributableScope({
   staffCookie,
   RequestContext,
 }) {
-  const { MatchService, TournamentPrizeService } =
-    await import("../../src/tournament/application/public.ts");
+  const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
+  const { TournamentPrizeService } =
+    await import("../../src/tournament/application/tournament-prize.service.ts");
   const matches = app.get(MatchService);
   const prizes = app.get(TournamentPrizeService);
   const run = (work) => RequestContext.create(orm.em.fork(), work);

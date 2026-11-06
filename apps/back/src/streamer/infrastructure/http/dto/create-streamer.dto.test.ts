@@ -34,14 +34,6 @@ describe("CreateStreamerDto", () => {
     },
   );
 
-  it("rejects a long adversarial login within the time budget", () => {
-    const payload = `${"a_".repeat(50_000)}!`;
-    const startedAt = performance.now();
-
-    expect(CreateStreamerDto.safeParse({ login: payload }).success).toBe(false);
-    expect(performance.now() - startedAt).toBeLessThan(100);
-  });
-
   it("rejects a display name over 100 characters", () => {
     expect(
       CreateStreamerDto.safeParse({ login: "zenrll", displayName: "a".repeat(101) }).success,

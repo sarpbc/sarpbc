@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 import { Contract, Player, Team } from "../domain/roster";
 import { ContractService } from "./contract.service";
 import type {
@@ -112,6 +112,16 @@ describe("ContractService sourced career periods", () => {
         sourceUrl: source,
       }),
     ).rejects.toThrow(InvalidInputError);
+  });
+
+  it("uses the unprocessable error for a missing team on creation and update", async () => {
+    await expect(
+      service.create("zen", { teamId: "missing", startDate: "2026-10-15" }),
+    ).rejects.toBeInstanceOf(UnprocessableError);
+    await expect(
+      service.update("zen", "kc-2025-06-01", { teamId: "missing" }),
+    ).rejects.toBeInstanceOf(UnprocessableError);
+    expect(career).toHaveLength(1);
   });
 
   it("leaves the current team's departure to roster moves", async () => {

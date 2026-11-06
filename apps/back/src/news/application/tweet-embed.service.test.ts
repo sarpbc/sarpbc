@@ -1,9 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import {
-  InvalidInputError as BadRequestException,
-  IntegrationError as ServiceUnavailableException,
-  NotFoundError,
-} from "../../common/domain/errors";
+import { IntegrationError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { TweetSyndicationGateway } from "../infrastructure/tweet-syndication.gateway";
 import { TweetEmbedService } from "./tweet-embed.service";
 import hereticsReply from "./__fixtures__/tweet-2116198150683734246.json";
@@ -23,9 +19,7 @@ describe("TweetEmbedService", () => {
   });
 
   it("rejects URLs that are not X status posts", async () => {
-    await expect(service.embed("https://x.com/RL_Comm")).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+    await expect(service.embed("https://x.com/RL_Comm")).rejects.toBeInstanceOf(InvalidInputError);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -180,7 +174,7 @@ describe("TweetEmbedService", () => {
     (global.fetch as Mock).mockResolvedValue({ ok: true, status: 200, json: async () => payload });
     await expect(
       service.embed("https://x.com/RL_Comm/status/2095971934320071030"),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).rejects.toBeInstanceOf(IntegrationError);
   });
 
   it("surfaces a service error when X syndication is down", async () => {
@@ -188,6 +182,6 @@ describe("TweetEmbedService", () => {
 
     await expect(
       service.embed("https://x.com/RL_Comm/status/2095971934320071030"),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).rejects.toBeInstanceOf(IntegrationError);
   });
 });

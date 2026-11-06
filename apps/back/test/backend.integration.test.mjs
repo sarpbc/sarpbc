@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mjs";
 import {
   verifyCompetitionSyncLookups,
+  verifyPandascoreAdoption,
   verifyRedistributableScope,
 } from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
@@ -1718,6 +1719,25 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await verifyRedistributableScope({ app, orm, request, staffCookie, RequestContext });
       },
     );
+
+    await check(
+      "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
+      async () => {
+        await verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check("random player draws only players that were not merged away", async () => {
+      const { PlayerService } = await import("../src/roster/application/player.service.ts");
+      const players = app.get(PlayerService);
+      const merged = await orm.em.fork().find(rosterRows.Player, { mergedInto: { $ne: null } });
+      assert(merged.length > 0, "the merge scenarios left redirect rows behind");
+      const mergedIds = new Set(merged.map(({ id }) => id));
+      for (let draw = 0; draw < 40; draw++) {
+        const drawn = await RequestContext.create(orm.em.fork(), () => players.getRandomPlayer());
+        assert(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
+      }
+    });
 
     await check("search projections and real PostgreSQL/Redis health", async () => {
       const found = (

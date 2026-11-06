@@ -6,7 +6,6 @@ import { SearchResult, SearchParams } from "./models/search-result";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { Tournament } from "../../tournament/domain/competition";
 
-/** An "all" search gives each kind half of the page; a single-kind search gets the whole page. */
 function pageForEachKind({ type, limit, offset }: SearchParams) {
   const mixed = type === "all";
   return {

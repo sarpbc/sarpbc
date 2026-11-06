@@ -60,16 +60,11 @@ describe("R2Service", () => {
 
     expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/);
     expect(result.publicUrl).toContain(result.key);
-    expect(createLogger).toHaveBeenCalledWith(
+    expect(sendSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        action: "uploadImage",
-        target: "news",
-        imageContentType: "image/jpeg",
-        imageSize: 4,
-        environment: expect.any(String),
+        input: expect.objectContaining({ Key: result.key, ContentType: "image/jpeg" }),
       }),
     );
-    expect(logger.emit).toHaveBeenCalled();
   });
 
   it("rejects unsupported types before calling R2", async () => {
@@ -87,7 +82,6 @@ describe("R2Service", () => {
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
     expect(logger.error).toHaveBeenCalled();
-    expect(logger.emit).toHaveBeenCalled();
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -152,6 +146,14 @@ describe("R2Service", () => {
         },
       }),
     );
+  });
+
+  it("hides R2 failures behind a safe 500 when copying an object", async () => {
+    sendSpy.mockRejectedValue(new Error("AccessDenied"));
+
+    await expect(
+      r2.copyObject("pending/teams/kc/a.webp", "teams/kc/a.webp"),
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
   it("deletes an object by key", async () => {

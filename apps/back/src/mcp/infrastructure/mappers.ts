@@ -120,7 +120,7 @@ export function mapLeague(league: League) {
   };
 }
 
-/** Stages are the event's phases, earliest first; start.gg stages stay out of MCP reads. */
+/** start.gg stages stay out of MCP reads. */
 export function mapEvent({ event, stages }: EventListing) {
   const phases = stages
     .filter((stage) => isRedistributable(stage.source))

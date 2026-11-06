@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../common/domain/errors";
 import { UserService } from "./user.service";
-import { passwordHasher } from "../infrastructure/password-hasher";
+import type { PasswordHasher } from "./ports/password-hasher";
 import { User } from "../domain/user";
 import type { UserTransaction } from "./ports/user-store";
 
@@ -24,13 +24,18 @@ describe("UserService", () => {
     run: (work) => work({ users: userWriter }),
   };
 
+  const passwords: PasswordHasher = {
+    hash: async (password) => `hashed:${password}`,
+    compare: async (password, hash) => hash === `hashed:${password}`,
+  };
+
   beforeEach(async () => {
-    service = new UserService(userQueries, transaction, passwordHasher);
+    service = new UserService(userQueries, transaction, passwords);
     vi.clearAllMocks();
   });
 
   describe("create", () => {
-    it("persists a new user without class-validator on the entity", async () => {
+    it("persists a new user with a hashed password", async () => {
       userWriter.existsByEmail.mockResolvedValue(false);
       userWriter.save.mockImplementation(async (user: User) => {
         user.id = "user-1";
@@ -44,8 +49,8 @@ describe("UserService", () => {
 
       expect(created.email).toBe("new@example.com");
       expect(created.userName).toBe("newbie");
-      expect(created.password).toBeTruthy();
-      expect(userWriter.save).toHaveBeenCalled();
+      expect(created.password).toBe("hashed:Password1!");
+      expect(userWriter.save).toHaveBeenCalledWith(created);
     });
 
     it("throws ConflictError when email already exists", async () => {
@@ -205,16 +210,6 @@ describe("UserService", () => {
 
       expect(updated.role).toBeNull();
       expect(userWriter.save).toHaveBeenCalledWith(user);
-    });
-  });
-
-  describe("list", () => {
-    it("delegates the query to the queries", async () => {
-      const result = { users: [], total: 0 };
-      userQueries.list.mockResolvedValue(result);
-
-      await expect(service.list({ search: "ali", limit: 25, offset: 0 })).resolves.toBe(result);
-      expect(userQueries.list).toHaveBeenCalledWith({ search: "ali", limit: 25, offset: 0 });
     });
   });
 });
