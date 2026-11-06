@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {
+  MatchBlockSelector,
   MatchBlocksResponse,
   Team,
   TournamentEventRef,
@@ -9,7 +10,6 @@ import {
   NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
   NEWS_MATCH_BLOCK_MAX_MATCHES,
   newsMatchBlockKey,
-  type NewsMatchBlock,
   type NewsMatchBlockKind,
   tournamentStageLabel,
 } from "@sarpbc/utils";
@@ -19,12 +19,12 @@ type TournamentResult = { id: string; name: string; event: TournamentEventRef };
 
 const props = defineProps<{
   open: boolean;
-  block: NewsMatchBlock | null;
+  block: MatchBlockSelector | null;
 }>();
 
 const emit = defineEmits<{
   "update:open": [value: boolean];
-  select: [block: NewsMatchBlock];
+  select: [block: MatchBlockSelector];
 }>();
 
 const { t, locale } = useI18n();
@@ -53,7 +53,7 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-const block = computed((): NewsMatchBlock | null => {
+const block = computed((): MatchBlockSelector | null => {
   if (!source.value) {
     return null;
   }
@@ -81,7 +81,7 @@ function matchLabel(match: TournamentMatchListItem): string {
     : teams;
 }
 
-async function resolveSource(initial: NewsMatchBlock): Promise<Selection | null> {
+async function resolveSource(initial: MatchBlockSelector): Promise<Selection | null> {
   if (initial.kind === "team") {
     const response = await apiFetch<{ team: Team | null }>(`/team/${initial.id}`);
     return response.team ? { id: initial.id, label: response.team.name } : null;

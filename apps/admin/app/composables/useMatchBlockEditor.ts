@@ -1,21 +1,21 @@
 import type { Editor } from "@tiptap/core";
-import type { NewsMatchBlock } from "@sarpbc/utils";
+import type { MatchBlockSelector } from "@sarpbc/types";
 import { matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
 
 const pickerOpen = ref(false);
-const pickerBlock = ref<NewsMatchBlock | null>(null);
-let applyBlock: ((block: NewsMatchBlock) => void) | null = null;
+const pickerBlock = ref<MatchBlockSelector | null>(null);
+let applyBlock: ((block: MatchBlockSelector) => void) | null = null;
 
 function openMatchBlockPicker(
-  block: NewsMatchBlock | null,
-  onApply: (block: NewsMatchBlock) => void,
+  block: MatchBlockSelector | null,
+  onApply: (block: MatchBlockSelector) => void,
 ) {
   pickerBlock.value = block;
   applyBlock = onApply;
   pickerOpen.value = true;
 }
 
-function applyMatchBlock(block: NewsMatchBlock) {
+function applyMatchBlock(block: MatchBlockSelector) {
   try {
     applyBlock?.(block);
   } finally {

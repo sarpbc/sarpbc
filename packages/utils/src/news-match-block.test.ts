@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import type { MatchBlockSelector } from "@sarpbc/types";
 import { newsContentToPlainText } from "./news-content.ts";
 import {
   extractNewsMatchBlocks,
@@ -10,7 +11,6 @@ import {
   parseNewsMatchTag,
   serializeNewsMatchTag,
   stripNewsMatchTags,
-  type NewsMatchBlock,
 } from "./news-match-block.ts";
 
 const MATCH = "0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f11";
@@ -99,10 +99,10 @@ describe("parseNewsMatchTag", () => {
 });
 
 describe("serializeNewsMatchTag", () => {
-  const match: NewsMatchBlock = { kind: "match", id: MATCH };
-  const ids: NewsMatchBlock = { kind: "matches", ids: [OTHER, MATCH] };
-  const tournament: NewsMatchBlock = { kind: "tournament", id: TOURNAMENT, limit: 8 };
-  const team: NewsMatchBlock = { kind: "team", id: TEAM, limit: 5 };
+  const match: MatchBlockSelector = { kind: "match", id: MATCH };
+  const ids: MatchBlockSelector = { kind: "matches", ids: [OTHER, MATCH] };
+  const tournament: MatchBlockSelector = { kind: "tournament", id: TOURNAMENT, limit: 8 };
+  const team: MatchBlockSelector = { kind: "team", id: TEAM, limit: 5 };
 
   it("writes canonical tags", () => {
     assert.equal(serializeNewsMatchTag(match), `:matches{match="${MATCH}"}`);

@@ -4,9 +4,7 @@ export const NEWS_MATCH_BLOCK_MAX_MATCHES = 10;
 export const NEWS_MATCH_BLOCK_DEFAULT_LIMIT = 5;
 export const NEWS_MATCH_BLOCKS_PER_REQUEST = 20;
 
-export type NewsMatchBlock = MatchBlockSelector;
-
-export type NewsMatchBlockKind = NewsMatchBlock["kind"];
+export type NewsMatchBlockKind = MatchBlockSelector["kind"];
 
 export interface NewsMatchBlockAttrs {
   match?: string | null;
@@ -17,7 +15,7 @@ export interface NewsMatchBlockAttrs {
 }
 
 export interface NewsMatchTag {
-  block: NewsMatchBlock;
+  block: MatchBlockSelector;
   raw: string;
 }
 
@@ -78,7 +76,7 @@ function parseAttrs(inner: string): Record<string, string> | null {
   return attrs;
 }
 
-export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): NewsMatchBlock | null {
+export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockSelector | null {
   const present = SELECTORS.filter((name) => {
     const value = attrs[name];
     return value != null && value.trim() !== "";
@@ -112,7 +110,7 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): NewsMatchBl
   }
 }
 
-export function newsMatchBlockToAttrs(block: NewsMatchBlock): NewsMatchBlockAttrs {
+export function newsMatchBlockToAttrs(block: MatchBlockSelector): NewsMatchBlockAttrs {
   switch (block.kind) {
     case "match":
       return { match: block.id };
@@ -140,7 +138,7 @@ export function parseNewsMatchTag(raw: string): NewsMatchTag | null {
   return block ? { block, raw: match[0] } : null;
 }
 
-export function serializeNewsMatchTag(block: NewsMatchBlock): string {
+export function serializeNewsMatchTag(block: MatchBlockSelector): string {
   const attrs = Object.entries(newsMatchBlockToAttrs(block))
     .filter(([, value]) => value != null)
     .map(([name, value]) => `${name}="${value}"`)
@@ -148,7 +146,7 @@ export function serializeNewsMatchTag(block: NewsMatchBlock): string {
   return `:matches{${attrs}}`;
 }
 
-export function newsMatchBlockKey(block: NewsMatchBlock): string {
+export function newsMatchBlockKey(block: MatchBlockSelector): string {
   switch (block.kind) {
     case "match":
       return `match:${block.id}`;
@@ -165,13 +163,13 @@ export function newsMatchBlockKey(block: NewsMatchBlock): string {
   }
 }
 
-export function parseNewsMatchBlockKey(key: string): NewsMatchBlock | null {
+export function parseNewsMatchBlockKey(key: string): MatchBlockSelector | null {
   const [kind, value, limit, ...rest] = key.split(":");
   if (rest.length > 0 || value == null) {
     return null;
   }
 
-  let block: NewsMatchBlock | null;
+  let block: MatchBlockSelector | null;
   switch (kind) {
     case "match":
       block = limit === undefined ? newsMatchBlockFromAttrs({ match: value }) : null;
@@ -282,8 +280,8 @@ function scanNewsMatchTags(content: string): ScannedMatchTag[] {
   });
 }
 
-export function extractNewsMatchBlocks(content: string): NewsMatchBlock[] {
-  const blocks = new Map<string, NewsMatchBlock>();
+export function extractNewsMatchBlocks(content: string): MatchBlockSelector[] {
+  const blocks = new Map<string, MatchBlockSelector>();
   for (const { tag } of scanNewsMatchTags(content)) {
     if (tag) {
       blocks.set(newsMatchBlockKey(tag.block), tag.block);

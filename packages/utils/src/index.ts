@@ -31,7 +31,6 @@ export {
   parseNewsMatchBlockKey,
   parseNewsMatchTag,
   serializeNewsMatchTag,
-  type NewsMatchBlock,
   type NewsMatchBlockAttrs,
   type NewsMatchBlockKind,
 } from "./news-match-block.ts";
