@@ -18,6 +18,59 @@ function filesIn(dir) {
   });
 }
 
+const packagesRoot = path.resolve(project, "../../packages");
+
+function stringConstants() {
+  const constants = new Map();
+  for (const pkg of fs.readdirSync(packagesRoot)) {
+    const dir = path.join(packagesRoot, pkg, "src");
+    if (!fs.existsSync(dir)) continue;
+    for (const file of filesIn(dir)) {
+      const source = ts.createSourceFile(
+        file,
+        fs.readFileSync(file, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+      );
+      for (const statement of source.statements) {
+        if (!ts.isVariableStatement(statement)) continue;
+        for (const declaration of statement.declarationList.declarations) {
+          let value = declaration.initializer;
+          while (value && (ts.isAsExpression(value) || ts.isSatisfiesExpression(value))) {
+            value = value.expression;
+          }
+          if (
+            ts.isIdentifier(declaration.name) &&
+            value &&
+            ts.isArrayLiteralExpression(value) &&
+            value.elements.every(ts.isStringLiteral)
+          ) {
+            constants.set(
+              declaration.name.text,
+              value.elements.map((element) => element.getText(source)),
+            );
+          }
+        }
+      }
+    }
+  }
+  return constants;
+}
+
+const constants = stringConstants();
+
+function decoratorArguments(expression, source) {
+  return expression.arguments.flatMap((argument) => {
+    if (!ts.isSpreadElement(argument)) return [argument.getText(source)];
+    const values = constants.get(argument.expression.getText(source));
+    assert(
+      values,
+      `${source.fileName}: cannot resolve ${argument.getText(source)} to a workspace string array constant`,
+    );
+    return values;
+  });
+}
+
 function decorators(node, source) {
   return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const expression = decorator.expression;
@@ -25,7 +78,7 @@ function decorators(node, source) {
       ? [
           {
             name: expression.expression.text,
-            args: expression.arguments.map((argument) => argument.getText(source)),
+            args: decoratorArguments(expression, source),
           },
         ]
       : [];

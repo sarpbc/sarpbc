@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { RosterProposal as RosterProposalResponse } from "@sarpbc/types";
+import { ROSTER_PROPOSAL_PERMISSIONS } from "@sarpbc/utils";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -36,7 +37,7 @@ function mapProposal(proposal: RosterProposal): RosterProposalResponse {
 export class RosterProposalController {
   constructor(private readonly proposals: RosterProposalService) {}
 
-  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
+  @RequirePermissions(...ROSTER_PROPOSAL_PERMISSIONS)
   @UseGuards(AuthGuard, PermissionGuard)
   @Get()
   async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryDto) {
@@ -44,7 +45,7 @@ export class RosterProposalController {
     return { proposals: proposals.map(mapProposal), names };
   }
 
-  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
+  @RequirePermissions(...ROSTER_PROPOSAL_PERMISSIONS)
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/approve")
   @HttpCode(HttpStatus.OK)
@@ -52,7 +53,7 @@ export class RosterProposalController {
     return { proposal: mapProposal(await this.proposals.approve(id, userId)) };
   }
 
-  @RequirePermissions("players.manage", "teams.manage", "tournaments.manage")
+  @RequirePermissions(...ROSTER_PROPOSAL_PERMISSIONS)
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/reject")
   @HttpCode(HttpStatus.OK)
