@@ -46,7 +46,7 @@ Application services publish domain events through feature ports after commit, s
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
 
-The repository has no job queue. A staff stats import (`match-stats`) is stored as a `pending` row, then `StatsImportService` schedules its run through the `StatsImportScheduler` port, so HTTP and MCP requests start it the same way. It runs in the API process after the request returns, in its own context. Its status and report live in PostgreSQL. At boot, any import left unfinished by a restart is marked failed. `match-stats` reads competition data only through its own `StatsCandidates` port, and the match detail controller composes its `MatchGamesService` in infrastructure.
+The repository has no job queue. A staff stats import (`match-stats`) is stored as a `pending` row, then `StatsImportService` schedules its run through the `StatsImportScheduler` port, so HTTP and MCP requests start it the same way. It runs in the API process after the request returns, in its own context. Its status and report live in PostgreSQL. At boot, any import left unfinished by a restart is marked failed. `match-stats` reads competition data only through its own `StatsCandidates` port, and the match detail controller reads per-game stats through the exported `GAME_STATS_STORE` provider.
 
 ## Ownership and failures
 

@@ -4,10 +4,10 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { log } from "evlog";
 import { ManualGameService } from "../application/manual-game.service";
-import { MatchGamesService } from "../application/match-games.service";
 import { StatsImportService } from "../application/stats-import.service";
 import { StatsPlayerLinkService } from "../application/stats-player-link.service";
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
+import { GAME_STATS_STORE } from "./game-stats.tokens";
 import { StatsGameController } from "./http/stats-game.controller";
 import { StatsImportController } from "./http/stats-import.controller";
 import { StatsPlayerLinkController } from "./http/stats-player-link.controller";
@@ -58,8 +58,8 @@ const BALLCHASING_SOURCE = Symbol("BallchasingSource");
       inject: [EntityManager],
     },
     {
-      provide: MatchGamesService,
-      useFactory: (em: EntityManager) => new MatchGamesService(new MikroOrmGameStatsStore(em)),
+      provide: GAME_STATS_STORE,
+      useFactory: (em: EntityManager) => new MikroOrmGameStatsStore(em),
       inject: [EntityManager],
     },
     {
@@ -95,6 +95,6 @@ const BALLCHASING_SOURCE = Symbol("BallchasingSource");
     },
     StatsImportRunner,
   ],
-  exports: [MatchGamesService, StatsImportService, StatsPlayerLinkService, ManualGameService],
+  exports: [GAME_STATS_STORE, StatsImportService, StatsPlayerLinkService, ManualGameService],
 })
 export class MatchStatsModule {}

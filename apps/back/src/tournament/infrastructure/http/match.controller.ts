@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Param, Query } from "@nestjs/common";
+import { Controller, Get, Header, Inject, Param, Query } from "@nestjs/common";
 import { NEWS_MATCH_BLOCKS_PER_REQUEST, parseNewsMatchBlockKey } from "@sarpbc/utils";
 import type {
   CountedMatchListItem,
@@ -12,7 +12,8 @@ import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
-import { MatchGamesService } from "../../../match-stats/application/match-games.service";
+import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors";
@@ -64,7 +65,7 @@ export class MatchController {
   constructor(
     private matchService: MatchService,
     private replyService: ReplyService,
-    private matchGames: MatchGamesService,
+    @Inject(GAME_STATS_STORE) private gameStats: GameStatsStore,
   ) {}
 
   @Get("upcoming")
@@ -146,7 +147,7 @@ export class MatchController {
   @Get(":ref")
   async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
     const detail = await this.matchService.findDetail(ref);
-    const games = await this.matchGames.forMatch(detail.match.id);
+    const games = await this.gameStats.byMatch(detail.match.id);
     return { ...detail, match: withPublicSlug(detail.match), games };
   }
 }
