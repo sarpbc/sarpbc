@@ -1,20 +1,11 @@
-import type { MatchGameStats, MatchVod, TournamentEventRef } from "@sarpbc/types";
+import type { MatchGameStats, MatchVod } from "@sarpbc/types";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
 export interface MatchResult {
-  participant: string | { id: string };
+  participant: string;
   score: number;
-}
-
-export function resolveMatchResultParticipantId(
-  participant: MatchResult["participant"],
-): string | null {
-  if (typeof participant === "string") {
-    return participant;
-  }
-  return participant.id ?? null;
 }
 
 export function getMatchParticipantScore(
@@ -25,24 +16,9 @@ export function getMatchParticipantScore(
     return null;
   }
 
-  const result = results.find(
-    (entry) => resolveMatchResultParticipantId(entry.participant) === participantId,
-  );
+  const result = results.find((entry) => entry.participant === participantId);
 
   return result?.score ?? null;
-}
-
-export interface MatchListTournament {
-  id: string;
-  name: string;
-  slug: string;
-  event: TournamentEventRef;
-  league?: { id: string; name: string };
-}
-
-export interface MatchListParticipant {
-  id: string;
-  team: ThemedLogo & { name: string };
 }
 
 export interface MatchRowItem {
@@ -50,26 +26,8 @@ export interface MatchRowItem {
   publicId: number;
   slug: string;
   beginAt?: Date | string | null;
-  participants?: MatchListParticipant[];
+  participants?: { id: string; team: ThemedLogo & { name: string } }[];
   results?: MatchResult[];
-  commentCount?: number;
-}
-
-export interface MatchListItem extends MatchRowItem {
-  tournament: MatchListTournament;
-}
-
-export interface UpcomingMatchesResponse {
-  live: MatchListItem[];
-  upcoming: MatchListItem[];
-  liveTotal: number;
-  upcomingTotal: number;
-  total: number;
-}
-
-export interface MatchResultsResponse {
-  results: MatchListItem[];
-  total: number;
 }
 
 export interface TeamFormRecord {
@@ -135,6 +93,11 @@ export interface MatchDetailResponse {
   teamForms: TeamFormsMap;
   headToHead: HeadToHead | null;
   games: MatchGameStats[];
+}
+
+/** The detail endpoint serializes the stored match, so result participants are objects there. */
+export interface MatchDetailWire extends Omit<MatchDetailResponse, "match"> {
+  match: Omit<Match, "results"> & { results: { participant: { id: string }; score: number }[] };
 }
 
 export interface Match {

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { ManualEvent } from "~/composables/tournaments";
+import type { ManualEvent } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t } = useI18n();

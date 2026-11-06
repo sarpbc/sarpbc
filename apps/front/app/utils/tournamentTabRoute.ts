@@ -1,4 +1,4 @@
-import type { TournamentTab } from "~/types/tournament";
+import type { TournamentTab } from "@sarpbc/types";
 
 const TAB_ORDER = {
   overview: 0,

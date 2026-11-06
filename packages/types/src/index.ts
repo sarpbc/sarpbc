@@ -12,11 +12,22 @@ export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team";
 export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
 export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";
-export type { League } from "./league";
-export type { TournamentEventRef } from "./tournament-event";
-export type { NewsType } from "./news";
+export type { League, LeagueInput } from "./league";
+export type {
+  EventInput,
+  ManualEvent,
+  TournamentEvent,
+  TournamentEventRef,
+  TournamentPathResponse,
+  TournamentTab,
+} from "./tournament-event";
+export type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "./news";
 export { DATA_SOURCES } from "./competition";
 export type {
+  CountedMatchListItem,
+  MatchListItem,
+  MatchResultsResponse,
+  UpcomingMatchesResponse,
   ProfileMatchListItem,
   TournamentDetail,
   TournamentDetailMatch,
@@ -50,9 +61,10 @@ export type {
 } from "./match-stats";
 export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
 export { FORUM_ERROR_CODES } from "./forum";
-export type { ForumPost } from "./forum";
+export type { ForumPost, ForumPostListItem } from "./forum";
 export { REPLY_TARGET_TYPES } from "./reply";
-export type { ReplyTargetType } from "./reply";
+export type { PaginatedReplies, Reply, ReplyTargetType } from "./reply";
+export type { R2UploadResponse } from "./storage";
 export { SEARCH_TYPES } from "./search";
 export type { SearchType } from "./search";
 export type {

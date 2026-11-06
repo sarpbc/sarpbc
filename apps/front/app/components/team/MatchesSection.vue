@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { MatchListItem } from "~/types/matches";
+import type { MatchListItem } from "@sarpbc/types";
 
 type TeamMatchesTab = "upcoming" | "past";
 

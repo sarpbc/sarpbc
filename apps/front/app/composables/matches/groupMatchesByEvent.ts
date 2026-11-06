@@ -1,5 +1,5 @@
 import { stageMatchesPath, tournamentStageLabel } from "@sarpbc/utils";
-import type { MatchListItem } from "~/types/matches";
+import type { MatchListItem } from "@sarpbc/types";
 
 export type MatchEventGroup = {
   key: string;

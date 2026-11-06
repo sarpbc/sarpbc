@@ -1,4 +1,4 @@
-import type { MatchResultsResponse } from "~/types/matches";
+import type { MatchResultsResponse } from "@sarpbc/types";
 
 export function useResultsListPage() {
   const page = useOffsetMatchListPage<MatchResultsResponse>({

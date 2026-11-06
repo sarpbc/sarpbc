@@ -1,4 +1,4 @@
-import type { UpcomingMatchesResponse } from "~/types/matches";
+import type { UpcomingMatchesResponse } from "@sarpbc/types";
 import { UPCOMING_MATCHES_KEY } from "~/composables/matches/useUpcomingMatches";
 
 export default defineNuxtPlugin(() => {

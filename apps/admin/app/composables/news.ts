@@ -1,25 +1,4 @@
-import type { NewsType } from "@sarpbc/types";
-
-export type NewsArticle = {
-  id: string;
-  slug: string;
-  title: string;
-  author: string;
-  content: string;
-  createdAt: string;
-  isDraft: boolean;
-  type: NewsType;
-  imageUrl?: string | null;
-  titleFr?: string | null;
-  contentFr?: string | null;
-};
-
-type PaginatedNewsArticles = {
-  data: NewsArticle[];
-  total: number;
-  page: number;
-  limit: number;
-};
+import type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "@sarpbc/types";
 
 export async function createNewsArticle(body: {
   title: string;
@@ -29,9 +8,9 @@ export async function createNewsArticle(body: {
   titleFr?: string | null;
   contentFr?: string | null;
   type?: NewsType;
-}): Promise<NewsArticle | null> {
+}): Promise<NewsArticleAdmin | null> {
   try {
-    return await apiFetch<NewsArticle>("/news", {
+    return await apiFetch<NewsArticleAdmin>("/news", {
       method: "POST",
       body,
     });
@@ -53,9 +32,9 @@ export async function getNewsArticlesAdmin(page = 0, limit = 10): Promise<Pagina
   }
 }
 
-export async function getNewsArticleAdmin(slug: string): Promise<NewsArticle | null> {
+export async function getNewsArticleAdmin(slug: string): Promise<NewsArticleAdmin | null> {
   try {
-    return await apiFetch<NewsArticle>(`/news/admin/${slug}`, {
+    return await apiFetch<NewsArticleAdmin>(`/news/admin/${slug}`, {
       method: "GET",
     });
   } catch (error) {
@@ -75,9 +54,9 @@ export async function editNewsArticle(
     contentFr?: string | null;
     type?: NewsType;
   },
-): Promise<NewsArticle | null> {
+): Promise<NewsArticleAdmin | null> {
   try {
-    return await apiFetch<NewsArticle>(`/news/${slug}`, {
+    return await apiFetch<NewsArticleAdmin>(`/news/${slug}`, {
       method: "PATCH",
       body,
     });
@@ -125,7 +104,7 @@ export async function deleteNewsArticle(slug: string): Promise<boolean> {
   }
 }
 
-export async function getRecentNewsArticles(limit: number): Promise<NewsArticle[]> {
+export async function getRecentNewsArticles(limit: number): Promise<NewsArticleAdmin[]> {
   const res = await apiFetch<PaginatedNewsArticles>("/news/admin", {
     method: "GET",
     query: { page: 0, limit },

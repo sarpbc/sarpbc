@@ -1,6 +1,13 @@
 import { Controller, Get, Header, Param, Query } from "@nestjs/common";
 import { NEWS_MATCH_BLOCKS_PER_REQUEST, parseNewsMatchBlockKey } from "@sarpbc/utils";
-import type { MatchBlockSelector, MatchBlocksResponse } from "@sarpbc/types";
+import type {
+  CountedMatchListItem,
+  MatchBlockSelector,
+  MatchBlocksResponse,
+  MatchListItem,
+  MatchResultsResponse,
+  UpcomingMatchesResponse,
+} from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
@@ -35,10 +42,10 @@ function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchL
   };
 }
 
-function attachCommentCounts<T extends { id: string }>(
-  items: T[],
+function attachCommentCounts(
+  items: MatchListItem[],
   counts: Map<string, number>,
-): Array<T & { commentCount: number }> {
+): CountedMatchListItem[] {
   return items.map((item) => ({
     ...item,
     commentCount: counts.get(item.id) ?? 0,
@@ -60,7 +67,7 @@ export class MatchController {
     @Query("today") today?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ) {
+  ): Promise<UpcomingMatchesResponse> {
     const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
     const searchLimit = Math.min(searchLimitRaw, 100);
@@ -100,7 +107,7 @@ export class MatchController {
     @Query("offset") offset?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ) {
+  ): Promise<MatchResultsResponse> {
     const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
     const searchOffset = offset ? parseInt(offset, 10) : 0;
     const searchLimit = Math.min(searchLimitRaw, 100);

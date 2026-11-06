@@ -10,7 +10,12 @@ import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
 import { assertValidMatchBlocks } from "../domain/news-content.util";
 import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
-import type { NewsType, SupportedLocale } from "@sarpbc/types";
+import type {
+  NewsArticleAdmin,
+  NewsType,
+  PaginatedNewsArticles,
+  SupportedLocale,
+} from "@sarpbc/types";
 /** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
 export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
@@ -56,12 +61,6 @@ export interface NewsArticleResponse {
   isDraft: boolean;
   imageUrl: string | null;
   type: NewsType;
-}
-
-export interface NewsArticleAdminResponse extends NewsArticleResponse {
-  titleFr: string | null;
-  contentFr: string | null;
-  hasFrench: boolean;
 }
 
 export interface NewsWeekResponse {
@@ -117,9 +116,10 @@ export class NewsService {
     };
   }
 
-  private mapAdminArticle(article: NewsArticleRecord): NewsArticleAdminResponse {
+  private mapAdminArticle(article: NewsArticleRecord): NewsArticleAdmin {
     return {
       ...this.mapArticle(article, "en-US"),
+      createdAt: article.createdAt.toISOString(),
       titleFr: article.titleFr,
       contentFr: article.contentFr,
       hasFrench: hasFrenchTranslation(article),
@@ -154,7 +154,7 @@ export class NewsService {
     }
   }
 
-  async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdminResponse> {
+  async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
     return this.transaction.run(async (scope) => {
       const author = await scope.users.findById(userId);
       if (!author) {
@@ -280,15 +280,7 @@ export class NewsService {
     };
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<{
-    data: NewsArticleAdminResponse[];
-    total: number;
-    page: number;
-    limit: number;
-  }> {
+  async findAll(page: number, limit: number): Promise<PaginatedNewsArticles> {
     const [articles, total] = await this.newsRepository.listAdmin(page, limit);
     return {
       data: articles.map((a) => this.mapAdminArticle(a)),
@@ -310,7 +302,7 @@ export class NewsService {
     return this.mapArticle(article, locale);
   }
 
-  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdminResponse> {
+  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdmin> {
     const article = await this.newsRepository.findBySlug(slug);
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
@@ -318,7 +310,7 @@ export class NewsService {
     return this.mapAdminArticle(article);
   }
 
-  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdminResponse> {
+  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdmin> {
     const bySlug = await this.newsRepository.findBySlug(idOrSlug);
     if (bySlug) {
       return this.mapAdminArticle(bySlug);
@@ -342,7 +334,7 @@ export class NewsService {
     return article.id;
   }
 
-  async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdminResponse> {
+  async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdmin> {
     const result = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
       if (!article) {

@@ -3,10 +3,9 @@ import { join } from "node:path";
 import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchById } from "~/composables/matches/api";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import { parseMatchResults } from "~/utils/parseMatchResult";
 import { tournamentStageLabel } from "@sarpbc/utils";
-import { apiFetch } from "~/utils/apiFetch";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
@@ -122,14 +121,7 @@ export function getFetchStatusCode(cause: unknown): number | undefined {
 
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
-    const response = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
-    return {
-      ...response,
-      match: {
-        ...response.match,
-        results: parseMatchResults(response.match.results),
-      },
-    };
+    return await getMatchById(id);
   } catch (cause) {
     const statusCode = getFetchStatusCode(cause);
     if (statusCode === 404) {

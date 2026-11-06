@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import type { LeagueInput, TournamentLeague } from "~/composables/tournaments";
+import type { League, LeagueInput } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t } = useI18n();
@@ -18,7 +18,7 @@ const breadcrumbItems = computed(() => [
   { label: t("page.tournaments.leagues.title") },
 ]);
 
-const columns: TableColumn<TournamentLeague>[] = [
+const columns: TableColumn<League>[] = [
   { id: "image", header: "" },
   { accessorKey: "name", header: t("page.tournaments.leagues.form.name") },
   {
@@ -38,17 +38,17 @@ interface LeagueFormState {
 }
 
 const isOpen = ref(false);
-const editing = ref<TournamentLeague | null>(null);
+const editing = ref<League | null>(null);
 const form = ref<LeagueFormState>({ name: "", slug: "", url: "", imageUrl: "" });
 const isSaving = ref(false);
 const isUploading = ref(false);
 const isSynced = computed(() => editing.value?.pandascoreId != null);
 
-function isPandascore(league: TournamentLeague): boolean {
+function isPandascore(league: League): boolean {
   return league.pandascoreId !== null;
 }
 
-function openForm(league: TournamentLeague | null) {
+function openForm(league: League | null) {
   editing.value = league;
   form.value = {
     name: league?.name ?? "",

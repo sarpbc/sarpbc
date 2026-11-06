@@ -1,5 +1,9 @@
 import type {
   AttachReplayInput,
+  EventInput,
+  League,
+  LeagueInput,
+  ManualEvent,
   PlayerAwardType,
   StatsImport,
   StatsPlayerAccounts,
@@ -129,45 +133,12 @@ export async function setMatchWinner(matchId: string, winnerId: string): Promise
   }
 }
 
-export interface TournamentLeague {
-  id: string;
-  pandascoreId: number | null;
-  name: string;
-  slug: string | null;
-  url: string | null;
-  imageUrl: string | null;
-}
-
 /** A manual league can share its name with a synced one, so synced options say where they come from. */
-export function leagueOptions(leagues: TournamentLeague[], pandascoreLabel: string) {
+export function leagueOptions(leagues: League[], pandascoreLabel: string) {
   return leagues.map((league) => ({
     value: league.id,
     label: league.pandascoreId === null ? league.name : `${league.name} · ${pandascoreLabel}`,
   }));
-}
-
-export interface LeagueInput {
-  name?: string;
-  slug?: string | null;
-  url?: string | null;
-  imageUrl?: string | null;
-}
-
-export interface ManualEvent {
-  id: string;
-  slug: string;
-  name: string;
-  league: { id: string; name: string } | null;
-  beginAt: string | null;
-  endAt: string | null;
-  editable: boolean;
-  stages: TournamentListItem[];
-}
-
-export interface EventInput {
-  name?: string;
-  slug?: string;
-  leagueId?: string | null;
 }
 
 export interface ManualTournamentInput {
@@ -182,23 +153,23 @@ export interface ManualTournamentInput {
   teamIds?: string[];
 }
 
-export async function getTournamentLeagues(): Promise<TournamentLeague[]> {
-  const res = await apiFetch<{ leagues: TournamentLeague[] }>("/tournaments/leagues", {
+export async function getTournamentLeagues(): Promise<League[]> {
+  const res = await apiFetch<{ leagues: League[] }>("/tournaments/leagues", {
     method: "GET",
   });
   return res.leagues;
 }
 
-export async function createLeague(body: LeagueInput): Promise<TournamentLeague> {
-  const res = await apiFetch<{ league: TournamentLeague }>("/tournaments/leagues", {
+export async function createLeague(body: LeagueInput): Promise<League> {
+  const res = await apiFetch<{ league: League }>("/tournaments/leagues", {
     method: "POST",
     body,
   });
   return res.league;
 }
 
-export async function updateLeague(id: string, body: LeagueInput): Promise<TournamentLeague> {
-  const res = await apiFetch<{ league: TournamentLeague }>(`/tournaments/leagues/${id}`, {
+export async function updateLeague(id: string, body: LeagueInput): Promise<League> {
+  const res = await apiFetch<{ league: League }>(`/tournaments/leagues/${id}`, {
     method: "PATCH",
     body,
   });

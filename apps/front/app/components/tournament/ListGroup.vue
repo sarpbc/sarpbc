@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import type { TournamentListItem } from "@sarpbc/types";
+import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
-import type { TournamentEvent } from "~/types/tournament";
 
 const { events, to } = defineProps<{
   events: TournamentEvent<TournamentListItem>[];

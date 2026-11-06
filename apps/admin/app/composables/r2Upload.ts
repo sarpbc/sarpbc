@@ -1,9 +1,5 @@
+import type { R2UploadResponse } from "@sarpbc/types";
 import type { ImageUploadTarget } from "@sarpbc/utils";
-
-type R2UploadResponse = {
-  publicUrl: string;
-  key: string;
-};
 
 type ImageUploadContext = {
   target: ImageUploadTarget;

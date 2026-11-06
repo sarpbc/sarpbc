@@ -1,6 +1,7 @@
 import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
-import type { Match, MatchDetailResponse } from "~/types/matches";
+import type { Match } from "~/types/matches";
+import { getMatchById } from "~/composables/matches/api";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
 import { tournamentStageLabel } from "@sarpbc/utils";
@@ -46,8 +47,7 @@ function rethrowMappedFetchError(
 
 export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
-    const res = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
-    return res.match;
+    return (await getMatchById(id)).match;
   } catch (cause) {
     rethrowMappedFetchError(cause, "Match not found", "Could not load match for calendar");
   }

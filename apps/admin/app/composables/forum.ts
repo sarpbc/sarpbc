@@ -1,13 +1,12 @@
-import type { ForumPost } from "@sarpbc/types";
-import type { PostShort, Reply } from "~/types/forum";
+import type { ForumPost, ForumPostListItem, PaginatedReplies, Reply } from "@sarpbc/types";
 import { apiFetch } from "~/utils/apiFetch";
 
-export async function getPosts(): Promise<PostShort[]> {
+export async function getPosts(): Promise<ForumPostListItem[]> {
   try {
-    const res = await apiFetch<{ posts: PostShort[] }>("/posts", {
+    const res = await apiFetch<{ posts: ForumPostListItem[] }>("/posts", {
       method: "GET",
     });
-    return res.posts || [];
+    return res.posts;
   } catch (error) {
     console.error("Error fetching forum posts:", error);
     return [];
@@ -31,7 +30,7 @@ export async function getPostById(id: string): Promise<ForumPost | null> {
 export async function getPostReplies(postId: string): Promise<Reply[]> {
   const replies: Reply[] = [];
   for (let page = 0; ; page++) {
-    const res = await apiFetch<{ replies: Reply[]; total: number }>("/replies", {
+    const res = await apiFetch<PaginatedReplies>("/replies", {
       method: "GET",
       query: { targetType: "forumPost", targetId: postId, page, limit: REPLIES_PAGE_SIZE },
     });

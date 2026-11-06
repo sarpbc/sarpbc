@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import type { TournamentDetail } from "@sarpbc/types";
+import type { League, ManualEvent, Team, TournamentDetail } from "@sarpbc/types";
 import { toSlug } from "@sarpbc/utils";
 import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
-import type { Team } from "@sarpbc/types";
-import type { ManualEvent, TournamentLeague } from "~/composables/tournaments";
 
 const NEW_EVENT = "new";
 
@@ -13,7 +11,7 @@ const props = defineProps<{
   original: TournamentDetail | null;
   events: ManualEvent[];
   eventsPending?: boolean;
-  leagues: TournamentLeague[];
+  leagues: League[];
   teams: Team[];
   teamsPending?: boolean;
   slugAuto?: boolean;

@@ -14,3 +14,14 @@ export interface ForumPost {
   author: string;
   createdAt: Date | string;
 }
+
+export interface ForumPostListItem {
+  id: string;
+  publicId: number;
+  slug: string;
+  title: string;
+  author: string;
+  createdAt: string;
+  commentCount: number;
+  topic: { id: string; title: string };
+}

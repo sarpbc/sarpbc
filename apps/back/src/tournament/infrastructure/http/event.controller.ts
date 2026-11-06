@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import type { TournamentPathResponse } from "@sarpbc/types";
 import { NotFoundError } from "../../../common/domain/errors";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -9,7 +10,7 @@ import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
-import { mapEvent, mapStaffEvent, type TournamentPathResponse } from "./event.mapper";
+import { mapEvent, mapStaffEvent } from "./event.mapper";
 import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";

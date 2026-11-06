@@ -1,5 +1,4 @@
-import type { Player, Team, TournamentDetail, TournamentEventRef } from "@sarpbc/types";
-import type { League } from "./league";
+import type { League, Player, Team, TournamentEventRef } from "@sarpbc/types";
 import type { Match } from "./matches";
 
 export interface BracketLink {
@@ -43,24 +42,3 @@ export interface TournamentParticipant {
   createdAt: Date;
   updatedAt: Date;
 }
-
-export type TournamentTab = "overview" | "matches";
-
-/** One PandaScore serie or manual tournament. Its stages are `Tournament`s, newest first. */
-export interface TournamentEvent<Stage> {
-  id: string;
-  slug: string;
-  name: string;
-  league: League | null;
-  logoUrl: string | null;
-  prizepool: string | null;
-  type: string | null;
-  beginAt: string | null;
-  endAt: string | null;
-  /** List responses carry list items; the event detail embeds full stages for the brackets. */
-  stages: Stage[];
-}
-
-export type TournamentPathResponse =
-  | { kind: "event"; event: TournamentEvent<TournamentDetail> }
-  | { kind: "stage"; tournament: TournamentDetail; tab: TournamentTab };

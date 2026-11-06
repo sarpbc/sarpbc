@@ -19,18 +19,3 @@ export interface CreateReplyInput {
   matchId?: string;
   replyToId?: string;
 }
-
-export interface ReplyView {
-  id: string;
-  content: string;
-  author: { id: string; userName: string };
-  createdAt: Date;
-  replies: ReplyView[];
-}
-
-export interface PaginatedReplies {
-  replies: ReplyView[];
-  total: number;
-  page: number;
-  limit: number;
-}

@@ -1,4 +1,4 @@
-import type { MatchListItem, UpcomingMatchesResponse } from "~/types/matches";
+import type { MatchListItem, UpcomingMatchesResponse } from "@sarpbc/types";
 
 function matchBeginTime(match: MatchListItem): number {
   return match.beginAt ? new Date(match.beginAt).getTime() : 0;

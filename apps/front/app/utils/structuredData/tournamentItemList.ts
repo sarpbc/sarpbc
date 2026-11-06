@@ -1,6 +1,5 @@
-import type { TournamentListItem } from "@sarpbc/types";
+import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
-import type { TournamentEvent } from "~/types/tournament";
 import { SITE_ORIGIN } from "~/utils/site";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 

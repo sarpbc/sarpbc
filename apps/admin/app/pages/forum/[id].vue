@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Reply } from "~/types/forum";
+import type { Reply } from "@sarpbc/types";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -45,7 +45,7 @@ const flatReplies = computed(() => {
   function walk(replies: Reply[]) {
     for (const reply of replies) {
       items.push(reply);
-      if (reply.replies?.length) {
+      if (reply.replies.length) {
         walk(reply.replies);
       }
     }

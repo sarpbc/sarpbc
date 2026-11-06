@@ -1,9 +1,8 @@
-import type { MatchVod } from "@sarpbc/types";
-import type { UpcomingMatch } from "~/types/matches";
+import type { CountedMatchListItem, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
 import { apiFetch } from "~/utils/apiFetch";
 
-export async function getUpcomingMatches(limit: number): Promise<UpcomingMatch[]> {
-  const res = await apiFetch<{ upcoming: UpcomingMatch[] }>("/matches/upcoming", {
+export async function getUpcomingMatches(limit: number): Promise<CountedMatchListItem[]> {
+  const res = await apiFetch<UpcomingMatchesResponse>("/matches/upcoming", {
     method: "GET",
     query: { limit },
   });

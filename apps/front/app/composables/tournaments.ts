@@ -1,6 +1,11 @@
-import type { TournamentDetail, TournamentListItem, TournamentMatchListItem } from "@sarpbc/types";
+import type {
+  TournamentDetail,
+  TournamentEvent,
+  TournamentListItem,
+  TournamentMatchListItem,
+  TournamentPathResponse,
+} from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
-import type { TournamentEvent, TournamentPathResponse } from "~/types/tournament";
 import { apiFetch } from "~/utils/apiFetch";
 
 function withQuery(path: string, params: URLSearchParams): string {

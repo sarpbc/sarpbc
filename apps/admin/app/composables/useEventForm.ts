@@ -1,4 +1,4 @@
-import type { EventInput, ManualEvent } from "./tournaments";
+import type { EventInput, ManualEvent } from "@sarpbc/types";
 
 export interface EventFormState {
   name: string;

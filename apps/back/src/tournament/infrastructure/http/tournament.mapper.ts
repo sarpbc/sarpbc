@@ -1,5 +1,6 @@
 import type {
   DataSource,
+  League as LeagueResponse,
   TeamSummary,
   TournamentDetail,
   TournamentDetailParticipant,
@@ -13,15 +14,6 @@ import {
   TournamentParticipant,
   matchPublicSlug,
 } from "../../domain/competition";
-
-export interface LeagueResponse {
-  id: string;
-  pandascoreId: number | null;
-  name: string;
-  slug: string | null;
-  url: string | null;
-  imageUrl: string | null;
-}
 
 export interface TournamentParticipantResponse {
   id: string;

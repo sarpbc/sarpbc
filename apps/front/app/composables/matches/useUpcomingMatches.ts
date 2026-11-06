@@ -1,4 +1,4 @@
-import type { UpcomingMatchesResponse } from "~/types/matches";
+import type { UpcomingMatchesResponse } from "@sarpbc/types";
 
 export const UPCOMING_MATCHES_KEY = "upcoming-matches";
 

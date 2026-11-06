@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { TournamentLeague } from "~/composables/tournaments";
+import type { League } from "@sarpbc/types";
 import type { EventFormState } from "~/composables/useEventForm";
 
 const state = defineModel<EventFormState>({ required: true });
-const props = defineProps<{ leagues: TournamentLeague[]; disabled?: boolean }>();
+const props = defineProps<{ leagues: League[]; disabled?: boolean }>();
 
 const { t } = useI18n();
 const leagueItems = computed(() =>

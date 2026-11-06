@@ -1,4 +1,4 @@
-import type { MatchListItem } from "~/types/matches";
+import type { MatchListItem } from "@sarpbc/types";
 import { localDayKey, parseMatchDate } from "~/utils/calendarDay";
 import { groupMatchesByEvent, type MatchEventGroup } from "./groupMatchesByEvent";
 

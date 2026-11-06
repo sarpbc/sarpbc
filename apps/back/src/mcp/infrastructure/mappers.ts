@@ -9,7 +9,7 @@ import type {
 } from "../../tournament/domain/competition";
 import { isEventSynced } from "../../tournament/domain/tournament-event";
 import type { EventListing } from "../../tournament/application/ports";
-import type { NewsArticleAdminResponse } from "../../news/application/news.service";
+import type { NewsArticleAdmin } from "@sarpbc/types";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import {
   adminNewsEditUrl,
@@ -196,7 +196,7 @@ export function mapMatchListResponse(match: Match) {
   };
 }
 
-export function mapNewsListItem(article: NewsArticleAdminResponse) {
+export function mapNewsListItem(article: NewsArticleAdmin) {
   return {
     id: article.id,
     title: article.title,
@@ -213,7 +213,7 @@ export function mapNewsListItem(article: NewsArticleAdminResponse) {
   };
 }
 
-export function mapNewsAdminArticle(article: NewsArticleAdminResponse) {
+export function mapNewsAdminArticle(article: NewsArticleAdmin) {
   return {
     ...mapNewsListItem(article),
     content: article.content,

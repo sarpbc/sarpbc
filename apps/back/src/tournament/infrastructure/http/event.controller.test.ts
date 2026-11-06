@@ -84,8 +84,8 @@ describe("EventController", () => {
         logoUrl: "league.png",
         prizepool: "1000000 United States Dollar",
         type: "offline",
-        beginAt: new Date("2026-05-01T10:00:00Z"),
-        endAt: new Date("2026-05-10T10:00:00Z"),
+        beginAt: "2026-05-01T10:00:00.000Z",
+        endAt: "2026-05-10T10:00:00.000Z",
       },
     });
     if (resolved.kind !== "event") throw new Error("expected an event");

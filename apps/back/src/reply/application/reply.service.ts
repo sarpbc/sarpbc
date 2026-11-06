@@ -1,10 +1,15 @@
-import { FORUM_ERROR_CODES, type ReplyTargetType } from "@sarpbc/types";
+import {
+  FORUM_ERROR_CODES,
+  type PaginatedReplies,
+  type Reply,
+  type ReplyTargetType,
+} from "@sarpbc/types";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizePlainText } from "../../common/domain/html";
 import { replyTarget, sameReplyTarget, replySortOrder } from "../domain/reply";
 import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyReportReason } from "../domain/reply-report-reason";
-import type { ReplyRecord, ReplyView, PaginatedReplies, CreateReplyInput } from "./models";
+import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
 export class ReplyService {
   constructor(
@@ -59,7 +64,7 @@ export class ReplyService {
     return this.replyRepository.countByTargetIds(targetType, targetIds);
   }
 
-  async create(userId: string, createReplyDto: CreateReplyInput): Promise<ReplyView> {
+  async create(userId: string, createReplyDto: CreateReplyInput): Promise<Reply> {
     return this.transaction.run(async (scope) => {
       const target = replyTarget(createReplyDto);
       const oneMinuteAgo = new Date(this.now().getTime() - REPLY_CREATION_COOLDOWN_MS);
@@ -231,9 +236,9 @@ export class ReplyService {
     }
   }
 
-  private toThreadedDtos(replies: ReplyRecord[]): ReplyView[] {
-    const byId = new Map<string, ReplyView>();
-    const roots: ReplyView[] = [];
+  private toThreadedDtos(replies: ReplyRecord[]): Reply[] {
+    const byId = new Map<string, Reply>();
+    const roots: Reply[] = [];
 
     for (const reply of replies) {
       byId.set(reply.id, this.toDto(reply, []));
@@ -252,7 +257,7 @@ export class ReplyService {
     return roots;
   }
 
-  private toDto(reply: ReplyRecord, nested: ReplyView[]): ReplyView {
+  private toDto(reply: ReplyRecord, nested: Reply[]): Reply {
     return {
       id: reply.id,
       content: reply.content,
@@ -260,7 +265,7 @@ export class ReplyService {
         id: reply.author.id,
         userName: reply.author.userName,
       },
-      createdAt: reply.createdAt,
+      createdAt: reply.createdAt.toISOString(),
       replies: nested,
     };
   }

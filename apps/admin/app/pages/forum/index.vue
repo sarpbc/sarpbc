@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { PostShort } from "~/types/forum";
+import type { ForumPostListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -11,7 +11,7 @@ const breadcrumbItems = [
   },
 ];
 
-const columns: TableColumn<PostShort>[] = [
+const columns: TableColumn<ForumPostListItem>[] = [
   {
     accessorKey: "title",
     header: t("page.forum.columns.title"),
@@ -23,7 +23,7 @@ const columns: TableColumn<PostShort>[] = [
   {
     id: "topic",
     header: t("page.forum.columns.topic"),
-    cell: ({ row }) => row.original.topic?.title ?? "-",
+    cell: ({ row }) => row.original.topic.title,
   },
   {
     accessorKey: "createdAt",
@@ -44,14 +44,14 @@ const {
   const posts = await getPosts();
   return { items: posts, total: posts.length };
 });
-const postToDelete = ref<PostShort | null>(null);
+const postToDelete = ref<ForumPostListItem | null>(null);
 
-function selectRow(e: Event, row: TableRow<PostShort>) {
+function selectRow(e: Event, row: TableRow<ForumPostListItem>) {
   e.preventDefault();
   navigateTo(localePath(`/forum/${row.original.id}`));
 }
 
-function openDeleteModal(e: Event, post: PostShort) {
+function openDeleteModal(e: Event, post: ForumPostListItem) {
   e.stopPropagation();
   postToDelete.value = post;
 }

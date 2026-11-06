@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { NewsType } from "@sarpbc/types";
+import type { NewsArticleAdmin, NewsType } from "@sarpbc/types";
 import type { DropdownMenuItem, TableColumn, TableRow } from "@nuxt/ui";
 import { hasFrenchTranslation } from "@sarpbc/utils";
 
@@ -19,7 +19,7 @@ const items = [
   },
 ];
 
-const columns: TableColumn<NewsArticle>[] = [
+const columns: TableColumn<NewsArticleAdmin>[] = [
   {
     accessorKey: "title",
     header: t("page.news.columns.title"),
@@ -67,18 +67,18 @@ const columns: TableColumn<NewsArticle>[] = [
   },
 ];
 
-const newsArticles = ref<NewsArticle[]>([]);
+const newsArticles = ref<NewsArticleAdmin[]>([]);
 const total = ref(0);
 const limit = 25;
 const page = ref(0);
 
-const articleToRename = ref<NewsArticle | null>(null);
+const articleToRename = ref<NewsArticleAdmin | null>(null);
 const isRenameModalOpen = ref(false);
 const renameTitle = ref("");
 const renameTitleFr = ref("");
 const isRenaming = ref(false);
 
-const articleToDelete = ref<NewsArticle | null>(null);
+const articleToDelete = ref<NewsArticleAdmin | null>(null);
 const isDeleteModalOpen = ref(false);
 const isDeleting = ref(false);
 const isPublishing = ref(false);
@@ -104,12 +104,12 @@ watch(
   { immediate: true },
 );
 
-function selectRow(e: Event, row: TableRow<NewsArticle>) {
+function selectRow(e: Event, row: TableRow<NewsArticleAdmin>) {
   e.preventDefault();
   navigateTo(localePath(`/news/${row.original.slug}`));
 }
 
-function articleActions(article: NewsArticle): DropdownMenuItem[][] {
+function articleActions(article: NewsArticleAdmin): DropdownMenuItem[][] {
   return [
     [
       {
@@ -136,14 +136,14 @@ function articleActions(article: NewsArticle): DropdownMenuItem[][] {
   ];
 }
 
-function openRenameModal(article: NewsArticle) {
+function openRenameModal(article: NewsArticleAdmin) {
   articleToRename.value = article;
   renameTitle.value = article.title;
   renameTitleFr.value = article.titleFr ?? "";
   isRenameModalOpen.value = true;
 }
 
-function openDeleteModal(article: NewsArticle) {
+function openDeleteModal(article: NewsArticleAdmin) {
   articleToDelete.value = article;
   isDeleteModalOpen.value = true;
 }
@@ -178,7 +178,7 @@ async function saveTitle() {
   }
 }
 
-async function togglePublish(article: NewsArticle) {
+async function togglePublish(article: NewsArticleAdmin) {
   if (isPublishing.value) {
     return;
   }

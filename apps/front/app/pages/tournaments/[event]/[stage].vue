@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { TournamentTab } from "@sarpbc/types";
 import { stageMatchesPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
-import type { TournamentTab } from "~/types/tournament";
 import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,

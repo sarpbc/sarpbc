@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
+import type { ForumPostListItem } from "@sarpbc/types";
 import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
@@ -32,7 +33,7 @@ export class PostController {
   ) {}
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<{ posts: ForumPostListItem[] }> {
     const posts = await this.postService.find({});
     const commentCounts = await this.replyService.countByTargetIds(
       "forumPost",
@@ -45,7 +46,7 @@ export class PostController {
         slug: forumPostSlug(post.title),
         title: post.title,
         author: post.author.userName,
-        createdAt: post.createdAt,
+        createdAt: post.createdAt.toISOString(),
         commentCount: commentCounts.get(post.id) ?? 0,
         topic: {
           id: post.topic.id,

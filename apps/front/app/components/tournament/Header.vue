@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { TournamentTab } from "@sarpbc/types";
 import { stageMatchesPath, tournamentStagePath } from "@sarpbc/utils";
-import type { TournamentTab } from "~/types/tournament";
 
 const { eventSlug, stageSlug, activeTab } = defineProps<{
   eventSlug: string;

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import type { MatchListItem } from "~/types/matches";
+import type { MatchListItem } from "@sarpbc/types";
 import type { Player } from "@sarpbc/types";
 import type { Team } from "@sarpbc/types";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
