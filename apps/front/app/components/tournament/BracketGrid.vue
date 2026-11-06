@@ -37,7 +37,6 @@ const connectorPaths = computed(() => {
         return null;
       }
 
-      // Upper and lower zones are stacked vertically; skip cross-zone connector lines.
       if (from.zone && to.zone && from.zone !== to.zone) {
         return null;
       }

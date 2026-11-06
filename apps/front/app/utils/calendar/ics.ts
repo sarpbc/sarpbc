@@ -2,8 +2,6 @@ import { matchPath } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
 import { SITE_ORIGIN } from "~/utils/site";
 
-/** RFC 5545: fold lines at 75 octets; escape TEXT values. */
-
 const ICS_PROD_ID = "-//sarpbc.org//EN";
 
 const FOLD_OCTETS = 75;

@@ -7,7 +7,6 @@ const NEW_EVENT = "new";
 
 const props = defineProps<{
   modelValue: ManualTournamentFormState;
-  /** The saved tournament when editing, null when creating. */
   original: TournamentDetail | null;
   events: ManualEvent[];
   eventsPending?: boolean;

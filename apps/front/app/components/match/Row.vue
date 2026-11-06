@@ -60,7 +60,6 @@ const teamBName = computed(() => teamB.value?.team.name ?? t("components.match.t
 const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
 const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
 
-/** Live badge only while the series is still 0–0 (or scores not in yet). */
 const showLiveBadge = computed(() => {
   if (!live) {
     return false;

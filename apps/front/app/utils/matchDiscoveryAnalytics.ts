@@ -1,7 +1,6 @@
 import { isMatchFinished, isMatchLive, matchPath } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
 
-/** Query key carrying discovery source onto the match page for CTR. */
 export const MATCH_DISCOVERY_FROM_QUERY = "from";
 
 export const MATCH_DISCOVERY_SOURCES = [

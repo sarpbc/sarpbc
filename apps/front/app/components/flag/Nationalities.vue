@@ -30,7 +30,6 @@ function lookupStringMap(map: StringLookup, key: string): string | undefined {
 
 const getContinent = (countryCode: string): string => {
   const continentMap = {
-    // Europe
     AD: "EU",
     AL: "EU",
     AT: "EU",
@@ -76,7 +75,6 @@ const getContinent = (countryCode: string): string => {
     UA: "EU",
     GB: "EU",
     VA: "EU",
-    // North America
     US: "NA",
     CA: "NA",
     MX: "NA",
@@ -87,7 +85,6 @@ const getContinent = (countryCode: string): string => {
     NI: "NA",
     CR: "NA",
     PA: "NA",
-    // South America
     AR: "SA",
     BO: "SA",
     BR: "SA",
@@ -102,7 +99,6 @@ const getContinent = (countryCode: string): string => {
     SR: "SA",
     UY: "SA",
     VE: "SA",
-    // Asia
     AF: "AS",
     AM: "AS",
     AZ: "AS",
@@ -151,7 +147,6 @@ const getContinent = (countryCode: string): string => {
     UZ: "AS",
     VN: "AS",
     YE: "AS",
-    // Africa
     DZ: "AF",
     AO: "AF",
     BJ: "AF",
@@ -206,7 +201,6 @@ const getContinent = (countryCode: string): string => {
     UG: "AF",
     ZM: "AF",
     ZW: "AF",
-    // Oceania
     AU: "OC",
     FJ: "OC",
     KI: "OC",

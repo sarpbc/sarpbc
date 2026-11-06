@@ -5,9 +5,6 @@ import { stripNewsTweetTags } from "./news-tweet-tag.ts";
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;
 
-/**
- * Turn `:player` / `:team` MDC tags into their labels before stripping markdown.
- */
 export function newsContentToPlainText(content: string): string {
   const withLabels = replaceNewsEntityTagsWithLabels(
     stripNewsMatchTags(stripNewsTweetTags(content)),
