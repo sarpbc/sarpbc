@@ -42,6 +42,8 @@ Staff AI assistants can call the SARPBC API through a [Model Context Protocol](h
 
 ## Tools
 
+Every tool ends its description with the permission it requires and is refused before it runs when the token's role lacks it. A player or team given as `idOrSlug`, or in `create_match` `teams`, is read as an id first when it is a UUID, then as a slug; any other value is a slug. Tool failures are logged with the tool name and user. A refusal the application words for staff (not found, invalid input, conflict) is returned as the tool error; any other failure returns a generic message and its detail stays in the server log.
+
 Read tools (any valid PAT):
 
 | Tool                    | Description                                     |

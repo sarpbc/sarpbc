@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { League, Tournament } from "../../../tournament/domain/competition";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import type { DataSource } from "@sarpbc/types";
-import { registerEventTools } from "./event-tools";
+import { redistributableCompetition } from "../redistributable-competition";
+import { eventTools } from "./event-tools";
 
 function stage(id: string, source: DataSource, beginAt: string | null) {
   return Object.assign(new Tournament(), {
@@ -17,12 +19,12 @@ function stage(id: string, source: DataSource, beginAt: string | null) {
   });
 }
 
-interface ToolInput {
+type ToolInput = {
   idOrSlug?: string;
   eventId?: string;
   leagueId?: string;
   name?: string;
-}
+};
 
 function setup(role: "admin" | "journalist" = "admin") {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
@@ -47,24 +49,33 @@ function setup(role: "admin" | "journalist" = "admin") {
     createLeague: vi.fn(),
     updateLeague: vi.fn(),
   };
-  const registerTool = vi.fn();
-  registerEventTools(
-    { registerTool } as never,
-    {
-      user: { id: "u1", email: "staff@test.com", role },
+  const eventQueries = { list: vi.fn().mockResolvedValue([[listing], 1]) };
+  const tools = eventTools({
+    catalogService,
+    competition: redistributableCompetition({
       catalogService,
-      events: { list: vi.fn().mockResolvedValue([[listing], 1]) },
-    } as never,
-  );
+      events: eventQueries,
+      tournaments: { find: vi.fn(), findById: vi.fn() },
+      matchService: { list: vi.fn() },
+      tournamentPrizeService: {
+        findByTournamentId: vi.fn(),
+        teamEarnings: vi.fn(),
+        playerEarnings: vi.fn(),
+      },
+    }),
+  });
   const tool = (name: string) => {
-    const call = registerTool.mock.calls.find((c) => c[0] === name);
-    if (!call) throw new Error(`${name} is not registered`);
-    return (input: ToolInput) => call[2](input);
+    const found = tools.find((candidate) => candidate.name === name);
+    if (!found) throw new Error(`${name} is not defined`);
+    return (input: ToolInput) => found.run({ id: "u1", email: "staff@test.com", role }, input);
   };
-  return { catalogService, tool, listing };
+  return { catalogService, eventQueries, tool, listing };
 }
 
-const json = (result: { content: Array<{ text: string }> }) => JSON.parse(result.content[0].text);
+const json = (result: CallToolResult) => {
+  const block = result.content[0];
+  return JSON.parse(block?.type === "text" ? block.text : "null");
+};
 
 describe("event tools", () => {
   it("returns an event's redistributable stages earliest first with its overall dates", async () => {
@@ -91,6 +102,17 @@ describe("event tools", () => {
     expect((await tool("get_event")({ idOrSlug: "cdf" })).isError).toBe(true);
     catalogService.findEvent.mockResolvedValueOnce({ event: listing.event, stages: [] });
     expect(json(await tool("get_event")({ idOrSlug: "cdf" }))).toMatchObject({ stages: [] });
+  });
+
+  it("excludes start.gg events in the list query", async () => {
+    const { tool, eventQueries } = setup();
+    await tool("list_events")({});
+    expect(eventQueries.list).toHaveBeenCalledWith({
+      activeOnly: false,
+      redistributableOnly: true,
+      limit: 20,
+      offset: 0,
+    });
   });
 
   it("reports synced events as not editable", async () => {

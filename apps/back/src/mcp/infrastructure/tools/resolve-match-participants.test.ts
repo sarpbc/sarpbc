@@ -1,8 +1,9 @@
-import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { describe, expect, it, vi } from "vitest";
+import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
 import { Team } from "../../../roster/domain/roster";
 import { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
-import { resolveMatchParticipantIds, type TeamLookup } from "./resolve-match-participants";
+import type { IdOrSlugLookup } from "./find-by-id-or-slug";
+import { resolveMatchParticipantIds } from "./resolve-match-participants";
 
 const KC_ID = "11111111-1111-4111-8111-111111111111";
 const M8_ID = "22222222-2222-4222-8222-222222222222";
@@ -25,7 +26,7 @@ function tournament() {
     name: "Coupe",
     participants: [participant("p-kc", kc), participant("p-m8", m8)],
   });
-  const lookup: TeamLookup = {
+  const lookup: IdOrSlugLookup<Team> = {
     findById: vi.fn(
       async (id: string) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
     ),
@@ -63,10 +64,10 @@ describe("resolveMatchParticipantIds", () => {
     const { cup, lookup } = tournament();
     await expect(
       resolveMatchParticipantIds(cup, { participantIds: ["missing", "p-kc"] }, lookup),
-    ).rejects.toThrow(BadRequestException);
+    ).rejects.toThrow(InvalidInputError);
     await expect(
       resolveMatchParticipantIds(cup, { teams: ["missing-slug", "karmine-corp"] }, lookup),
-    ).rejects.toThrow(NotFoundException);
+    ).rejects.toThrow(NotFoundError);
     await expect(
       resolveMatchParticipantIds(cup, { teams: ["outsider", "karmine-corp"] }, lookup),
     ).rejects.toThrow('Team "Outsider" (outsider) is not registered in "Coupe"');

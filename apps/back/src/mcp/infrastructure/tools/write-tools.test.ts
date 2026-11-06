@@ -2,7 +2,35 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { Match, Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
 import { Team } from "../../../roster/domain/roster";
-import { registerWriteTools } from "./write-tools";
+import type { McpTool, ToolArguments } from "../define-tool";
+import { writeTools, type WriteToolServices } from "./write-tools";
+
+function services(): WriteToolServices {
+  return {
+    newsService: { create: vi.fn(), update: vi.fn(), findOneAdminByIdOrSlug: vi.fn() },
+    tournaments: { findById: vi.fn() },
+    teamService: { findById: vi.fn(), findBySlug: vi.fn() },
+    matchService: {
+      createMatch: vi.fn(),
+      setMatchWinner: vi.fn(),
+      setGameVods: vi.fn(),
+      updateMatch: vi.fn(),
+    },
+    manualTournamentService: { create: vi.fn(), update: vi.fn() },
+    pandascoreTournamentSync: { execute: vi.fn(), executeByPandascoreId: vi.fn() },
+    pandascoreNewTournamentsSync: { execute: vi.fn() },
+  };
+}
+
+function defined(tools: McpTool[], name: string): McpTool {
+  const tool = tools.find((candidate) => candidate.name === name);
+  if (!tool) throw new Error(`${name} is not defined`);
+  return tool;
+}
+
+function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+  return result.content[0]?.text ?? "";
+}
 
 describe("set_match_game_vods", () => {
   function setup(role: "admin" | "journalist") {
@@ -15,27 +43,25 @@ describe("set_match_game_vods", () => {
       tournament: { slug: "playoffs", event: { slug: "worlds" } },
       vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
     });
-    const matchService = { setGameVods: vi.fn().mockResolvedValue(match) };
-    const registerTool = vi.fn();
-    registerWriteTools(
-      { registerTool } as never,
-      {
-        user: { id: "u1", email: "staff@test.com", role },
-        matchService,
-      } as never,
-    );
-    const tool = registerTool.mock.calls.find((call) => call[0] === "set_match_game_vods");
-    if (!tool) throw new Error("set_match_game_vods is not registered");
-    return { matchService, tool };
+    const matchService = {
+      ...services().matchService,
+      setGameVods: vi.fn().mockResolvedValue(match),
+    };
+    const tool = defined(writeTools({ ...services(), matchService }), "set_match_game_vods");
+    return {
+      matchService,
+      tool,
+      run: (input: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, input),
+    };
   }
 
   const links = [{ url: "https://youtu.be/g5?t=95", language: "fr" }];
 
   it("replaces one game's links and returns the match VODs", async () => {
-    const { matchService, tool } = setup("admin");
-    const result = await tool[2]({ matchId: "m1", game: 5, links });
+    const { matchService, run } = setup("admin");
+    const result = await run({ matchId: "m1", game: 5, links });
     expect(matchService.setGameVods).toHaveBeenCalledWith("m1", 5, links);
-    expect(JSON.parse(result.content[0].text)).toEqual({
+    expect(JSON.parse(textOf(result))).toEqual({
       id: "m1",
       vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
       url: expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//),
@@ -44,7 +70,7 @@ describe("set_match_game_vods", () => {
 
   it("validates its input shape", () => {
     const { tool } = setup("admin");
-    const schema = z.object(tool[1].inputSchema);
+    const schema = z.object(tool.inputSchema);
     expect(schema.safeParse({ matchId: "m1", game: 0, links }).success).toBe(false);
     expect(
       schema.safeParse({ matchId: "m1", game: 1, links: [{ url: "x", language: "fra" }] }).success,
@@ -53,8 +79,8 @@ describe("set_match_game_vods", () => {
   });
 
   it("requires tournaments.manage", async () => {
-    const { matchService, tool } = setup("journalist");
-    expect((await tool[2]({ matchId: "m1", game: 5, links })).isError).toBe(true);
+    const { matchService, run } = setup("journalist");
+    expect((await run({ matchId: "m1", game: 5, links })).isError).toBe(true);
     expect(matchService.setGameVods).not.toHaveBeenCalled();
   });
 });
@@ -106,22 +132,14 @@ describe("create_match participants", () => {
       create: vi.fn().mockResolvedValue(tournament),
       update: vi.fn().mockResolvedValue(tournament),
     };
-    const registerTool = vi.fn();
-    registerWriteTools(
-      { registerTool } as never,
-      {
-        user: { id: "u1", email: "staff@test.com", role },
-        matchService,
-        tournaments,
-        teamService,
-        manualTournamentService,
-      } as never,
-    );
-    const registered = (name: string) => {
-      const tool = registerTool.mock.calls.find((call) => call[0] === name);
-      if (!tool) throw new Error(`${name} is not registered`);
-      return tool;
-    };
+    const tools = writeTools({
+      ...services(),
+      matchService: { ...services().matchService, ...matchService },
+      tournaments,
+      teamService,
+      manualTournamentService,
+    });
+    const registered = (name: string) => defined(tools, name);
     const call = async (
       name: string,
       args: {
@@ -136,8 +154,8 @@ describe("create_match participants", () => {
         eventId?: string;
       },
     ) => {
-      const result = await registered(name)[2](args);
-      const text = result.content[0].text as string;
+      const result = await registered(name).run({ id: "u1", email: "staff@test.com", role }, args);
+      const text = textOf(result);
       return { result, text, body: result.isError ? null : JSON.parse(text) };
     };
     return { matchService, tournaments, manualTournamentService, registered, call };
@@ -260,7 +278,7 @@ describe("create_match participants", () => {
 
   it("accepts teams without participantIds and requires tournaments.manage", async () => {
     const { registered, matchService, call } = setup("manual", "journalist");
-    const schema = z.object(registered("create_match")[1].inputSchema);
+    const schema = z.object(registered("create_match").inputSchema);
     expect(
       schema.safeParse({
         tournamentId: "cup",

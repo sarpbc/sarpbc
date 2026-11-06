@@ -7,6 +7,7 @@ import { NewsModule } from "../../news/infrastructure/news.module";
 import { RosterProposalModule } from "../../roster-proposal/infrastructure/roster-proposal.module";
 import { McpController } from "./mcp.controller";
 import { McpServerFactory } from "./mcp-server.factory";
+import { mcpServicesProvider } from "./mcp-services";
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { McpServerFactory } from "./mcp-server.factory";
     MatchStatsModule,
   ],
   controllers: [McpController],
-  providers: [McpServerFactory],
+  providers: [mcpServicesProvider, McpServerFactory],
 })
 export class McpModule {}

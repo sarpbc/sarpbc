@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { StatsImportItem, StatsPlayerAccounts, TournamentStatsGame } from "@sarpbc/types";
 import { ConflictError } from "../../../common/domain/errors";
 import type { StatsImport } from "../../../match-stats/domain/stats-import";
-import { registerGameStatsTools, summarizeStatsImport } from "./game-stats-tools";
+import { gameStatsTools, summarizeStatsImport } from "./game-stats-tools";
 
 const TOOLS = [
   "import_game_stats",
@@ -81,7 +81,7 @@ const game: TournamentStatsGame = {
 
 function setup(role: "admin" | "journalist") {
   const statsImportService = {
-    request: vi.fn(async () => ({ ...statsImport, status: "pending", items: [] })),
+    request: vi.fn(async () => ({ ...statsImport, status: "pending" as const, items: [] })),
     recent: vi.fn(async () => [statsImport]),
   };
   const statsPlayerLinkService = {
@@ -92,23 +92,16 @@ function setup(role: "admin" | "journalist") {
     attach: vi.fn(async () => game),
     remove: vi.fn(async () => game),
   };
-  const registerTool = vi.fn();
-  registerGameStatsTools(
-    { registerTool } as never,
-    {
-      user: { id: "u1", email: "staff@test.com", role },
-      statsImportService,
-      statsPlayerLinkService,
-      manualGameService,
-    } as never,
-  );
+  const tools = gameStatsTools({ statsImportService, statsPlayerLinkService, manualGameService });
   const call = async (name: string, input: Record<string, string | number | boolean>) => {
-    const tool = registerTool.mock.calls.find((registered) => registered[0] === name);
-    if (!tool) throw new Error(`${name} is not registered`);
-    const result = await tool[2](input);
-    return { result, body: result.isError ? null : JSON.parse(result.content[0].text) };
+    const tool = tools.find((defined) => defined.name === name);
+    if (!tool) throw new Error(`${name} is not defined`);
+    const result = await tool.run({ id: "u1", email: "staff@test.com", role }, input);
+    const block = result.content[0];
+    const text = block?.type === "text" ? block.text : "";
+    return { result, text, body: result.isError ? null : JSON.parse(text) };
   };
-  return { registerTool, call, statsImportService, statsPlayerLinkService, manualGameService };
+  return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
 }
 
 describe("summarizeStatsImport", () => {
@@ -130,10 +123,10 @@ describe("summarizeStatsImport", () => {
 });
 
 describe("game stats tools", () => {
-  it("registers every tool", () => {
-    const { registerTool } = setup("admin");
+  it("defines every tool", () => {
+    const { tools } = setup("admin");
 
-    expect(registerTool.mock.calls.map((call) => call[0])).toEqual(TOOLS);
+    expect(tools.map((tool) => tool.name)).toEqual(TOOLS);
   });
 
   it("starts an import and reports the latest one", async () => {
@@ -224,7 +217,7 @@ describe("game stats tools", () => {
       setup("journalist");
 
     for (const name of TOOLS) {
-      const { result } = await call(name, {
+      const { result, text } = await call(name, {
         tournamentId: "t1",
         group: "rlcs-x1",
         platform: "steam",
@@ -236,7 +229,7 @@ describe("game stats tools", () => {
         blueParticipantId: "p1",
       });
       expect(result.isError, name).toBe(true);
-      expect(result.content[0].text).toContain("tournaments.manage");
+      expect(text).toContain("tournaments.manage");
     }
     for (const service of [statsImportService, statsPlayerLinkService, manualGameService])
       for (const method of Object.values(service)) expect(method).not.toHaveBeenCalled();
