@@ -10,9 +10,6 @@ const requiredEnv = {
   GOOGLE_REDIRECT_URI: "http://localhost:4001/auth/google/callback",
   FRONT_URL: "http://localhost:4000",
   ADMIN_URL: "http://localhost:4002",
-  CLOUDFLARE_ACCOUNT_ID: "account",
-  CLOUDFLARE_API_TOKEN: "token",
-  CLOUDFLARE_ACCOUNT_HASH: "hash",
 };
 
 const validateEnv = (overrides: Record<string, string | undefined> = {}) =>

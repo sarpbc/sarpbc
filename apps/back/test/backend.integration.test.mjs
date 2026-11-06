@@ -118,9 +118,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       GOOGLE_REDIRECT_URI: "http://127.0.0.1/auth/google/callback",
       FRONT_URL: "http://127.0.0.1:4000",
       ADMIN_URL: "http://127.0.0.1:4002",
-      CLOUDFLARE_ACCOUNT_ID: "",
-      CLOUDFLARE_API_TOKEN: "",
-      CLOUDFLARE_ACCOUNT_HASH: "",
     });
     await import("reflect-metadata");
     const { initLogger } = await import("evlog");

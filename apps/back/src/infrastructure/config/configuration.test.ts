@@ -9,9 +9,6 @@ const requiredEnv = {
   GOOGLE_CLIENT_ID: "id",
   GOOGLE_CLIENT_SECRET: "secret",
   GOOGLE_REDIRECT_URI: "https://api.sarpbc.org/auth/google/callback",
-  CLOUDFLARE_ACCOUNT_ID: "account",
-  CLOUDFLARE_API_TOKEN: "token",
-  CLOUDFLARE_ACCOUNT_HASH: "hash",
 };
 
 function configure(env: Record<string, string>) {

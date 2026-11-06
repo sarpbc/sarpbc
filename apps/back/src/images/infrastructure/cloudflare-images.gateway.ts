@@ -3,54 +3,48 @@ import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
 import { createLogger } from "evlog";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
-import type { ImageHost } from "../application/ports/image.repository";
+import type { ImageHost, ImageUploadUrl } from "../application/ports/image.repository";
 
-export interface UploadUrlResponse {
-  uploadURL: string;
-  imageId: string;
+interface CloudflareCredentials {
+  accountId: string;
+  apiToken: string;
+  accountHash: string;
 }
 
 @Injectable()
 export class CloudflareImagesGateway implements ImageHost {
-  private readonly accountId: string;
-  private readonly apiToken: string;
-  private readonly accountHash: string;
+  constructor(private readonly configService: ConfigService) {}
 
-  constructor(private readonly configService: ConfigService) {
-    this.accountId = this.configService.get<string>("cloudflare_account_id") ?? "";
-    this.apiToken = this.configService.get<string>("cloudflare_api_token") ?? "";
-    this.accountHash = this.configService.get<string>("cloudflare_account_hash") ?? "";
-  }
-
-  private ensureCredentials(): void {
-    if (!this.accountId || !this.apiToken || !this.accountHash) {
+  private credentials(): CloudflareCredentials {
+    const accountId = this.configService.get<string>("cloudflare_account_id");
+    const apiToken = this.configService.get<string>("cloudflare_api_token");
+    const accountHash = this.configService.get<string>("cloudflare_account_hash");
+    if (!accountId || !apiToken || !accountHash) {
       throw new InternalServerErrorException("Cloudflare credentials are not configured");
     }
+    return { accountId, apiToken, accountHash };
   }
 
-  async getUploadUrl(userId?: string, userEmail?: string): Promise<UploadUrlResponse> {
+  async createUploadUrl(): Promise<ImageUploadUrl> {
+    const { accountId, apiToken } = this.credentials();
     const log = createLogger({
       component: CloudflareImagesGateway.name,
-      action: "getUploadUrl",
+      action: "createUploadUrl",
       environment: nodeEnvironment(),
-      userId,
-      userEmail,
     });
 
     try {
-      this.ensureCredentials();
-
       const form = new FormData();
       form.append("requireSignedURLs", "false");
 
       const response = await axios.post<{
         result: { uploadURL: string; id: string };
       }>(
-        `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/images/v2/direct_upload`,
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v2/direct_upload`,
         form,
         {
           headers: {
-            Authorization: `Bearer ${this.apiToken}`,
+            Authorization: `Bearer ${apiToken}`,
           },
         },
       );
@@ -61,11 +55,6 @@ export class CloudflareImagesGateway implements ImageHost {
         imageId: response.data.result.id,
       };
     } catch (error) {
-      if (error instanceof InternalServerErrorException) {
-        log.error(error);
-        throw error;
-      }
-
       const axiosError = error instanceof AxiosError ? error : undefined;
       log.set({
         cloudflareStatus: axiosError?.response?.status,
@@ -80,7 +69,6 @@ export class CloudflareImagesGateway implements ImageHost {
   }
 
   imageUrl(imageId: string): string {
-    this.ensureCredentials();
-    return `https://imagedelivery.net/${this.accountHash}/${imageId}/public`;
+    return `https://imagedelivery.net/${this.credentials().accountHash}/${imageId}/public`;
   }
 }
