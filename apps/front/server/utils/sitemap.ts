@@ -8,7 +8,6 @@ import {
   type NewsSitemapChunkResponse,
   type NewsSitemapMetaResponse,
 } from "~/utils/sitemap";
-import { apiFetch } from "@sarpbc/composables/apiFetch";
 
 const SITEMAP_CACHE_CONTROL = "public, max-age=300";
 

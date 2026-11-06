@@ -6,7 +6,6 @@ import { getMatchById } from "~/composables/matches/api";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
 import { tournamentStageLabel } from "@sarpbc/utils";
-import { apiFetch } from "@sarpbc/composables/apiFetch";
 
 interface TournamentResponse {
   tournament?: TournamentDetail;
