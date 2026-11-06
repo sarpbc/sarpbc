@@ -1,0 +1,25 @@
+import { Injectable, type OnApplicationBootstrap } from "@nestjs/common";
+import { MikroORM, RequestContext } from "@mikro-orm/core";
+import { log } from "evlog";
+import { StatsImportService } from "../application/stats-import.service";
+
+/** Status lives in PostgreSQL; an import cut short by a restart is marked failed at boot. */
+@Injectable()
+export class InterruptedImportsSweeper implements OnApplicationBootstrap {
+  constructor(
+    private readonly orm: MikroORM,
+    private readonly imports: StatsImportService,
+  ) {}
+
+  async onApplicationBootstrap(): Promise<void> {
+    const interrupted = await RequestContext.create(this.orm.em, () =>
+      this.imports.failInterrupted(),
+    );
+    if (interrupted > 0)
+      log.warn({
+        component: InterruptedImportsSweeper.name,
+        message: "Interrupted stats imports",
+        interrupted,
+      });
+  }
+}

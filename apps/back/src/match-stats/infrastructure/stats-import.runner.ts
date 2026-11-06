@@ -1,32 +1,12 @@
-import { Injectable, type OnApplicationBootstrap } from "@nestjs/common";
-import { ModuleRef } from "@nestjs/core";
+import { Injectable } from "@nestjs/common";
 import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
 import type { StatsImportScheduler } from "../application/ports";
-import { StatsImportService } from "../application/stats-import.service";
 
-/**
- * The repository has no job queue, so an import runs in this process after the request returns.
- * Its status lives in PostgreSQL; an import cut short by a restart is marked failed at boot.
- */
+/** The repository has no job queue, so an import runs in this process after the request returns. */
 @Injectable()
-export class StatsImportRunner implements StatsImportScheduler, OnApplicationBootstrap {
-  constructor(
-    private readonly orm: MikroORM,
-    // The service schedules through this runner, so it is resolved lazily to avoid a cycle.
-    private readonly moduleRef: ModuleRef,
-  ) {}
-
-  async onApplicationBootstrap(): Promise<void> {
-    const service = this.moduleRef.get(StatsImportService);
-    const interrupted = await RequestContext.create(this.orm.em, () => service.failInterrupted());
-    if (interrupted > 0)
-      log.warn({
-        component: StatsImportRunner.name,
-        message: "Interrupted stats imports",
-        interrupted,
-      });
-  }
+export class StatsImportRunner implements StatsImportScheduler {
+  constructor(private readonly orm: MikroORM) {}
 
   schedule(task: () => Promise<void>): void {
     setImmediate(() => {
