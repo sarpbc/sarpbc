@@ -1,4 +1,6 @@
+import { localizedPath, uiLocale } from "@sarpbc/utils";
 import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
+import { SITE_ORIGIN } from "~/utils/site";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
 const DEFAULT_DESCRIPTION =
@@ -32,12 +34,11 @@ interface PageSeoMeta {
 export const useSarpbcSeo = () => {
   const { locales } = useI18n();
   const route = useRoute();
-  const baseUrl = "https://sarpbc.org";
 
   const resolveImageUrl = (image?: string | null): string => {
     const trimmed = image?.trim();
     if (!trimmed) {
-      return `${baseUrl}${DEFAULT_IMAGE_PATH}`;
+      return `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
     }
 
     if (/^https?:\/\//i.test(trimmed)) {
@@ -49,7 +50,7 @@ export const useSarpbcSeo = () => {
     }
 
     const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-    return `${baseUrl}${path}`;
+    return `${SITE_ORIGIN}${path}`;
   };
 
   const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
@@ -91,13 +92,13 @@ export const useSarpbcSeo = () => {
       const alternateLinks = locales.value.map((loc) => ({
         rel: "alternate" as const,
         hreflang: loc.language,
-        href: loc.code === "en" ? `${baseUrl}${cleanPath}` : `${baseUrl}/${loc.code}${cleanPath}`,
+        href: `${SITE_ORIGIN}${localizedPath(cleanPath, uiLocale(loc.code))}`,
       }));
 
       alternateLinks.push({
         rel: "alternate" as const,
         hreflang: "x-default",
-        href: `${baseUrl}${cleanPath}`,
+        href: `${SITE_ORIGIN}${cleanPath}`,
       });
 
       const pageLinks: (
@@ -109,7 +110,7 @@ export const useSarpbcSeo = () => {
         pageLinks.push({
           rel: "alternate",
           type: "text/markdown",
-          href: `${baseUrl}${markdownPathFromHtmlPath(route.path)}`,
+          href: `${SITE_ORIGIN}${markdownPathFromHtmlPath(route.path)}`,
         });
       }
 
@@ -140,7 +141,7 @@ export const useSarpbcSeo = () => {
   };
 
   const getCanonicalUrl = () => {
-    return `${baseUrl}${route.path === "/fr" ? "/fr/" : route.path}`;
+    return `${SITE_ORIGIN}${route.path === "/fr" ? "/fr/" : route.path}`;
   };
 
   return {

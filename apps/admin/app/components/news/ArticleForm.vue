@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { localizedNewsFields, parseNewsLocale } from "@sarpbc/utils";
+import { localizedNewsFields, parseLocale } from "@sarpbc/utils";
 import { newsSurfaceClass } from "~/utils/newsEditorLayout";
 
 const title = defineModel<string>("title", { required: true });
@@ -18,7 +18,7 @@ const preview = computed(() =>
       titleFr: titleFr.value,
       contentFr: contentFr.value,
     },
-    parseNewsLocale(editorLocale.value),
+    parseLocale(editorLocale.value),
   ),
 );
 </script>

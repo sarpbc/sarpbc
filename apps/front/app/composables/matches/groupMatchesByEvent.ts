@@ -1,6 +1,5 @@
-import { tournamentStagePath } from "@sarpbc/utils";
+import { stageMatchesPath, tournamentStageLabel } from "@sarpbc/utils";
 import type { MatchListItem } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 
 export type MatchEventGroup = {
   key: string;
@@ -19,7 +18,7 @@ export function groupMatchesByEvent(matches: MatchListItem[]): MatchEventGroup[]
       group = {
         key: tournament.id,
         displayName: tournamentStageLabel(tournament),
-        matchesPath: `${tournamentStagePath(tournament.event.slug, tournament.slug)}/matches`,
+        matchesPath: stageMatchesPath(tournament.event.slug, tournament.slug),
         matches: [],
       };
       byStage.set(tournament.id, group);

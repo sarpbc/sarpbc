@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { tournamentLabel } from "~/utils/tournamentLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { hasPermission } from "~/utils/staff";
@@ -119,7 +119,7 @@ function tournamentItems(): CommandPaletteItem[] {
   }
   return results.value.tournaments.map((tournament: Tournament) => ({
     id: `tournament-${tournament.id}`,
-    label: tournamentLabel(tournament),
+    label: tournamentStageLabel(tournament),
     icon: "i-fluent-trophy-24-regular",
     avatar: tournament.imageUrl ? { src: tournament.imageUrl, alt: tournament.name } : undefined,
     onSelect() {

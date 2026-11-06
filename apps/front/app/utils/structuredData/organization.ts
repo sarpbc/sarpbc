@@ -1,4 +1,4 @@
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { SITE_ORIGIN } from "~/utils/site";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 
 export const ORGANIZATION_ID = `${SITE_ORIGIN}/#organization`;

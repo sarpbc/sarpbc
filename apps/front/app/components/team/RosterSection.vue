@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { playerPath } from "@sarpbc/utils";
 import type { Player } from "~/types/player";
 
 const { players } = defineProps<{
@@ -21,7 +22,7 @@ const headingId = "team-roster-title";
       <ULink
         v-for="player in players"
         :key="player.id"
-        :to="$localePath(`/player/${player.slug}`)"
+        :to="$localePath(playerPath(player.slug))"
         class="flex min-w-0 flex-col items-center justify-center gap-2 overflow-hidden p-3 border-r border-default touch-manipulation interactive-surface"
       >
         <PlayerImg :player-name="player.name" :img="player.imageUrl" size="lg" />

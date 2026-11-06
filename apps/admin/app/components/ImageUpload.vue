@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { IMAGE_CONTENT_TYPES, MAX_IMAGE_MEGABYTES, type ImageUploadTarget } from "@sarpbc/utils";
+
 const imageUrl = defineModel<string | null>("imageUrl", { default: null });
 
 const props = defineProps<{
-  target: "news" | "tournament";
+  target: ImageUploadTarget;
   disabled?: boolean;
   articleSlug?: string;
   articleTitle?: string;
@@ -66,7 +68,7 @@ function clearCover() {
     <input
       ref="fileInput"
       type="file"
-      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+      :accept="IMAGE_CONTENT_TYPES.join(',')"
       class="hidden"
       :disabled="disabled || isUploading"
       @change="onFileChange"
@@ -113,7 +115,7 @@ function clearCover() {
     <p v-if="isUploading" class="text-sm text-muted">
       {{ t("imageUpload.progress", { percent: progress }) }}
     </p>
-    <p class="text-xs text-muted">{{ t("imageUpload.hint") }}</p>
+    <p class="text-xs text-muted">{{ t("imageUpload.hint", { max: MAX_IMAGE_MEGABYTES }) }}</p>
     <p v-if="displayError" class="text-sm text-error">
       {{ displayError }}
     </p>

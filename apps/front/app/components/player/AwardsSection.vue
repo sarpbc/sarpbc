@@ -2,7 +2,7 @@
 import { DateFormatter } from "@internationalized/date";
 import { PlayerAwardTypes, type PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
 import { tournamentStagePath } from "@sarpbc/utils";
-import { distinctStageName } from "~/utils/tournamentStageLabel";
+import { distinctStageName } from "@sarpbc/utils";
 
 const {
   awards,

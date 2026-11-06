@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentDetail } from "@sarpbc/types";
+import { toSlug } from "@sarpbc/utils";
 import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
 import type { Team } from "~/types/team";
 import type { ManualEvent, TournamentLeague } from "~/composables/tournaments";
@@ -97,7 +98,7 @@ function onNameInput(value: string) {
   emit("update:modelValue", {
     ...props.modelValue,
     name: value,
-    slug: props.slugAuto ? suggestTournamentSlug(value) : props.modelValue.slug,
+    slug: props.slugAuto ? toSlug(value) : props.modelValue.slug,
   });
 }
 

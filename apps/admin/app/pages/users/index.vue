@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import { ASSIGNABLE_ROLES, type AdminUser, type AssignableRole } from "~/types/user";
 import { getApiErrorMessage } from "~/utils/apiError";
@@ -13,7 +14,7 @@ const breadcrumbItems = [{ label: t("page.users.title") }];
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(parseLocale(locale.value), {
       year: "numeric",
       month: "short",
       day: "numeric",

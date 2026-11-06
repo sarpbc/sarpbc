@@ -1,4 +1,4 @@
-import { matchPath } from "@sarpbc/utils";
+import { isMatchFinished, isMatchLive, matchPath } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
 
 /** Query key carrying discovery source onto the match page for CTR. */
@@ -66,18 +66,11 @@ export function resolveMatchDiscoveryStatus(input: {
   status?: string | null;
   now?: number;
 }): MatchDiscoveryStatus {
-  const now = input.now ?? Date.now();
-  const beginAt = input.beginAt ? new Date(input.beginAt).getTime() : null;
-
-  if (input.endAt || input.status === "finished") {
+  if (isMatchFinished(input)) {
     return "finished";
   }
 
-  if (beginAt !== null && beginAt <= now) {
-    return "live";
-  }
-
-  return "upcoming";
+  return isMatchLive(input, input.now ?? Date.now()) ? "live" : "upcoming";
 }
 
 export function buildMatchDetailTo(

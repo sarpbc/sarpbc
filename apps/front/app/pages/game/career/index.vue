@@ -5,10 +5,6 @@ import CareerEnd from "~/components/career/CareerEnd.vue";
 import { encodeCareerResultForShare } from "~/composables/useCareerStorage";
 import { useCareerSimulator } from "~/composables/useCareerSimulator";
 
-definePageMeta({
-  layout: "game",
-});
-
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();

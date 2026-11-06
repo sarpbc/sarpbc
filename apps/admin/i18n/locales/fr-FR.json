@@ -12,7 +12,7 @@
     }
   },
   "imageUpload": {
-    "hint": "JPEG, PNG, WebP ou GIF, jusqu’à 5 Mo",
+    "hint": "JPEG, PNG, WebP ou GIF, jusqu’à {max} Mo",
     "upload": "Importer une Image",
     "replace": "Remplacer l’Image",
     "remove": "Retirer l’Image",

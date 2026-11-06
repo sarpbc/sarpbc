@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { tournamentStagePath } from "@sarpbc/utils";
+import { stageMatchesPath, tournamentStageLabel } from "@sarpbc/utils";
 import type { Match } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 
 const { match } = defineProps<{ match: Match }>();
 
 const { t } = useI18n();
 
-const tournamentMatchesPath = computed(
-  () => `${tournamentStagePath(match.tournament.event.slug, match.tournament.slug)}/matches`,
+const tournamentMatchesPath = computed(() =>
+  stageMatchesPath(match.tournament.event.slug, match.tournament.slug),
 );
 
 const facts = computed(() => {

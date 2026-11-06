@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiLocale } from "@sarpbc/utils";
 import { uiComponentDefaults } from "~/config/ui-component-defaults";
 
 const appConfig = useAppConfig();
@@ -17,7 +18,7 @@ useHead({
   ],
   link: [{ rel: "icon", href: "/favicon.ico" }],
   htmlAttrs: {
-    lang: computed(() => (locale.value === "fr" ? "fr" : "en")),
+    lang: computed(() => uiLocale(locale.value)),
   },
 });
 </script>

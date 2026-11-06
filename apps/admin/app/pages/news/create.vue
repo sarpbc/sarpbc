@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NewsType } from "@sarpbc/types";
+import { toSlug } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -25,19 +26,9 @@ const articleType = ref<NewsType>("short");
 const isSaving = ref(false);
 const isModalOpen = ref(false);
 
-function suggestSlug(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 watch(title, (next) => {
   if (!slugTouched.value) {
-    articleSlug.value = suggestSlug(next);
+    articleSlug.value = toSlug(next);
   }
 });
 
@@ -48,7 +39,7 @@ function onSlugInput(value: string) {
 
 function openSaveModal() {
   if (!slugTouched.value && title.value) {
-    articleSlug.value = suggestSlug(title.value);
+    articleSlug.value = toSlug(title.value);
   }
   isModalOpen.value = true;
 }

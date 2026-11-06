@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { stageMatchesPath, tournamentStagePath } from "@sarpbc/utils";
 import type { TournamentTab } from "~/types/tournament";
 
-const { stagePath, activeTab } = defineProps<{
-  stagePath: string;
+const { eventSlug, stageSlug, activeTab } = defineProps<{
+  eventSlug: string;
+  stageSlug: string;
   activeTab: TournamentTab;
 }>();
 
@@ -11,12 +13,12 @@ const localePath = useLocalePath();
 
 const tabItems = computed(() => [
   {
-    to: localePath(stagePath),
+    to: localePath(tournamentStagePath(eventSlug, stageSlug)),
     label: t("common.overview"),
     active: activeTab === "overview",
   },
   {
-    to: localePath(`${stagePath}/matches`),
+    to: localePath(stageMatchesPath(eventSlug, stageSlug)),
     label: t("general.matches"),
     active: activeTab === "matches",
   },

@@ -1,4 +1,4 @@
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { SITE_ORIGIN } from "~/utils/site";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 import { ORGANIZATION_ID } from "./organization";
 

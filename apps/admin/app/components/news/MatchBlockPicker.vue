@@ -11,6 +11,7 @@ import {
   newsMatchBlockKey,
   type NewsMatchBlock,
   type NewsMatchBlockKind,
+  tournamentStageLabel,
 } from "@sarpbc/utils";
 
 type Selection = { id: string; label: string };
@@ -72,10 +73,6 @@ const block = computed((): NewsMatchBlock | null => {
   }
 });
 
-function tournamentLabel(tournament: TournamentResult): string {
-  return `${tournament.event.name} · ${tournament.name}`;
-}
-
 function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
   const teams = `${teamA?.team.name ?? t("newsTag.matchTbd")} – ${teamB?.team.name ?? t("newsTag.matchTbd")}`;
@@ -95,7 +92,7 @@ async function resolveSource(initial: NewsMatchBlock): Promise<Selection | null>
   });
   const tournament = response.blocks[key]?.[0]?.tournament;
   if (tournament) {
-    return { id: tournament.id, label: tournamentLabel(tournament) };
+    return { id: tournament.id, label: tournamentStageLabel(tournament) };
   }
   return initial.kind === "tournament" ? { id: initial.id, label: initial.id } : null;
 }
@@ -175,7 +172,7 @@ async function runSearch(value: string) {
       });
       results.value = tournaments.map((tournament) => ({
         id: tournament.id,
-        label: tournamentLabel(tournament),
+        label: tournamentStageLabel(tournament),
       }));
     }
   } catch {

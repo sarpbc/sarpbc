@@ -1,8 +1,8 @@
 import type { TeamSummary, TournamentDetail } from "@sarpbc/types";
 import { tournamentStagePath } from "@sarpbc/utils";
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { SITE_ORIGIN } from "~/utils/site";
 import { formatPrizepool } from "~/utils/currencyFormatter";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 

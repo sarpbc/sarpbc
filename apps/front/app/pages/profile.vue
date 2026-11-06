@@ -53,10 +53,7 @@ watch(editOpen, (isOpen) => {
   }
 });
 
-const adminHomeUrl = computed(() => {
-  const base = String(config.public.adminUrl || "https://admin.sarpbc.org").replace(/\/$/, "");
-  return base;
-});
+const adminHomeUrl = computed(() => config.public.adminUrl.replace(/\/$/, ""));
 
 const showStaffConsole = computed(() => isStaffUser(user.value));
 

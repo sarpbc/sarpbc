@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { PatToken } from "~/types/token";
 import { getApiErrorMessage } from "~/utils/apiError";
@@ -17,7 +18,7 @@ const breadcrumbItems = [
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(parseLocale(locale.value), {
       year: "numeric",
       month: "short",
       day: "numeric",

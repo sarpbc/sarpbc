@@ -3,10 +3,6 @@ import CareerEnd from "~/components/career/CareerEnd.vue";
 import { decodeCareerResultFromShare, loadCareerResult } from "~/composables/useCareerStorage";
 import type { CareerResult } from "~/types/career";
 
-definePageMeta({
-  layout: "game",
-});
-
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();

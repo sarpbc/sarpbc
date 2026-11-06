@@ -1,4 +1,5 @@
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { localizedPath, newsPath } from "@sarpbc/utils";
+import { SITE_ORIGIN } from "~/utils/site";
 
 export const SITEMAP_PAGES_PATH = "/sitemaps/pages.xml";
 
@@ -61,13 +62,6 @@ export function parseNewsSitemapChunk(raw: string | undefined): number | null {
   return Number(raw);
 }
 
-export function frenchPath(path: string): string {
-  if (path === "/") {
-    return "/fr/";
-  }
-  return `/fr${path}`;
-}
-
 export function absoluteUrl(path: string, origin: string = SITE_ORIGIN): string {
   if (path === "/") {
     return `${origin}/`;
@@ -107,7 +101,7 @@ ${body}
 
 function pageUrlEntry(page: StaticSitemapPage, origin: string): string {
   const enUrl = absoluteUrl(page.path, origin);
-  const frUrl = absoluteUrl(frenchPath(page.path), origin);
+  const frUrl = absoluteUrl(localizedPath(page.path, "fr"), origin);
   return [enUrl, frUrl]
     .map(
       (url) => `  <url>
@@ -121,9 +115,9 @@ ${hreflangLinks(enUrl, frUrl)}
 }
 
 function newsUrlEntry(entry: NewsSitemapEntry, origin: string): string {
-  const path = `/news/${entry.slug}`;
+  const path = newsPath(entry.slug);
   const enUrl = absoluteUrl(path, origin);
-  const frUrl = absoluteUrl(frenchPath(path), origin);
+  const frUrl = absoluteUrl(localizedPath(path, "fr"), origin);
   return [enUrl, frUrl]
     .map(
       (url) => `  <url>

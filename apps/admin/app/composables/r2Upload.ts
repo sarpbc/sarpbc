@@ -1,10 +1,12 @@
+import type { ImageUploadTarget } from "@sarpbc/utils";
+
 type R2UploadResponse = {
   publicUrl: string;
   key: string;
 };
 
 type ImageUploadContext = {
-  target: "news" | "tournament";
+  target: ImageUploadTarget;
   articleSlug?: string;
   articleTitle?: string;
 };

@@ -8,7 +8,7 @@ import {
   shouldShowMatchScores,
 } from "~/types/matches";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { getPickOutcome, isMatchLockedForPickem, type PickemPickState } from "~/utils/pickems";
 
 const LEADERBOARD_TOP = 10;

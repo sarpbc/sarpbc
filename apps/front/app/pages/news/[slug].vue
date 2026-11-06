@@ -3,6 +3,7 @@ import {
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   excerptFromNewsContent,
   readingTimeMinutes,
+  uiLocale,
 } from "@sarpbc/utils";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 import { NEWS_PROSE_CLASS } from "~/utils/newsProseClass";
@@ -69,7 +70,7 @@ setJsonLd("ld-json-news-article", () => {
     content: article.value.content,
     author: article.value.author,
     imageUrl: article.value.imageUrl,
-    locale: locale.value === "fr" ? "fr" : "en",
+    locale: uiLocale(locale.value),
   });
 });
 </script>

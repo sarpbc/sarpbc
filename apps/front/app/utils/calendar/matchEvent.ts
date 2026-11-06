@@ -1,6 +1,6 @@
 import type { TournamentEventRef } from "@sarpbc/types";
 import type { MatchLinkTarget } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { matchEndAt, matchEventUid, matchPageUrl, type CalendarEvent } from "./ics";
 
 interface CalendarMatch extends MatchLinkTarget {

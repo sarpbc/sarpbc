@@ -3,8 +3,9 @@ import { join } from "node:path";
 import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/types/matches";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { parseMatchResults } from "~/utils/parseMatchResult";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { apiFetch } from "~/utils/apiFetch";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
@@ -26,21 +27,6 @@ function truncate(value: string, maxLength: number): string {
   return `${value.slice(0, maxLength - 1)}…`;
 }
 
-function getMatchStatus(match: MatchDetailResponse["match"]): "live" | "finished" | "upcoming" {
-  const now = Date.now();
-  const beginAt = match.beginAt ? new Date(match.beginAt).getTime() : null;
-
-  if (match.endAt || match.status === "finished") {
-    return "finished";
-  }
-
-  if (beginAt !== null && beginAt <= now) {
-    return "live";
-  }
-
-  return "upcoming";
-}
-
 function getParticipantScore(
   match: MatchDetailResponse["match"],
   participantId: string,
@@ -56,7 +42,7 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const teamAName = truncate(teamA?.team.name ?? "TBD", 28);
   const teamBName = truncate(teamB?.team.name ?? "TBD", 28);
   const tournament = truncate(tournamentStageLabel(match.tournament), 48);
-  const status = getMatchStatus(match);
+  const status = resolveMatchDiscoveryStatus(match);
 
   let centerLine = "vs";
   if (status === "finished" || status === "live") {

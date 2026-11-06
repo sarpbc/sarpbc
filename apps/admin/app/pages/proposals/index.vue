@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { parseLocale } from "@sarpbc/utils";
 import type { RosterChange, RosterProposal } from "~/types/rosterProposal";
 import type { StaffPermission } from "~/types/user";
 import { getApiErrorMessage } from "~/utils/apiError";
@@ -11,7 +12,7 @@ const breadcrumbItems = [{ label: t("page.proposals.title") }];
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(parseLocale(locale.value), {
       dateStyle: "medium",
       timeStyle: "short",
     }),
@@ -87,7 +88,7 @@ function formatValue(key: string, value: string | boolean | null): string {
 }
 
 function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+  return new Intl.NumberFormat(parseLocale(locale.value), {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

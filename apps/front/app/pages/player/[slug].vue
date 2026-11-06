@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
+import { playerPath, teamPath } from "@sarpbc/utils";
 import type { LocationQuery } from "vue-router";
 
 type PlayerProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
@@ -26,10 +27,7 @@ if (!player.value) {
 
 // A merged duplicate's slug resolves to the kept player.
 if (player.value && player.value.slug !== slug.value) {
-  await navigateTo(
-    { path: localePath(`/player/${player.value.slug}`), query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, localePath(playerPath(player.value.slug)));
 }
 
 const currentPlayer = computed(() => player.value!);
@@ -205,7 +203,7 @@ setPageSeo({
                 <dd class="min-w-0 flex justify-end">
                   <SLink
                     v-if="currentPlayer.team"
-                    :to="$localePath(`/team/${currentPlayer.team.slug}`)"
+                    :to="$localePath(teamPath(currentPlayer.team.slug))"
                     variant="inline"
                     class="inline-flex items-center gap-2 min-w-0 text-sm font-medium"
                   >

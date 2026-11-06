@@ -9,25 +9,31 @@ type PostHogPublicConfig = {
 let client: PostHog | null = null;
 let loading: Promise<PostHog | null> | null = null;
 let consentGranted = false;
+let tracingHost = "";
 
 const autocapture: AutocaptureConfig = {
   dom_event_allowlist: ["click", "change", "submit"],
   capture_copied_text: false,
 };
 
-export function setPostHogConsent(accepted: boolean): void {
+export function setPostHogConsent(accepted: boolean, apiBase: string): void {
   consentGranted = accepted;
+  tracingHost = new URL(apiBase).hostname;
+  applyConsent();
+}
+
+function applyConsent(): void {
   if (!client) {
     return;
   }
 
-  if (accepted) {
+  if (consentGranted) {
     client.set_config({
       autocapture,
       capture_pageleave: true,
       capture_heatmaps: true,
       capture_dead_clicks: true,
-      tracing_headers: ["api.sarpbc.org"],
+      tracing_headers: [tracingHost],
     });
     client.opt_in_capturing({ captureEventName: false });
     client.startSessionRecording({
@@ -114,7 +120,7 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
     });
 
     client = posthog;
-    setPostHogConsent(consentGranted);
+    applyConsent();
     return posthog;
   })()
     .catch(() => {

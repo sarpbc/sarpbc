@@ -3,7 +3,7 @@ import type { TeamEventListItem } from "~/composables/team/useTeamTournaments";
 import type { TournamentStatus } from "~/utils/tournamentStatus";
 import { tournamentStagePath } from "@sarpbc/utils";
 import { formatTournamentDateRange } from "~/utils/tournamentStatus";
-import { distinctStageName } from "~/utils/tournamentStageLabel";
+import { distinctStageName } from "@sarpbc/utils";
 
 type TeamEventsTab = "upcoming" | "past";
 

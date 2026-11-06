@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { tournamentLabel } from "~/utils/tournamentLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
 import type { TournamentListItem } from "@sarpbc/types";
 
@@ -70,7 +70,7 @@ async function handleEnablePickems(tournamentId: string) {
           >
             <div class="flex min-w-0 flex-col gap-0.5">
               <p class="truncate text-sm font-medium text-highlighted">
-                {{ tournamentLabel(tournament) }}
+                {{ tournamentStageLabel(tournament) }}
               </p>
               <div v-if="tournament.participants?.length" class="flex flex-row gap-1">
                 <div

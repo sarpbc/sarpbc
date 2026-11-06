@@ -3,7 +3,7 @@ import type { H3Event } from "h3";
 import type { Match, MatchDetailResponse } from "~/types/matches";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import { getFetchStatusCode } from "./match-og";
 import { apiFetch } from "~/utils/apiFetch";
 

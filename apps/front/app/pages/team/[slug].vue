@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TabsItem } from "@nuxt/ui";
-import { selectActiveRosterPlayers, selectTeamStaff } from "@sarpbc/utils";
+import { selectActiveRosterPlayers, selectTeamStaff, teamPath } from "@sarpbc/utils";
 
 type TeamProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
 
@@ -21,10 +21,7 @@ if (!team.value) {
 
 // A merged duplicate's slug resolves to the kept team.
 if (team.value && team.value.slug !== slug.value) {
-  await navigateTo(
-    { path: localePath(`/team/${team.value.slug}`), query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, localePath(teamPath(team.value.slug)));
 }
 
 const {

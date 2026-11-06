@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { teamPath } from "@sarpbc/utils";
 import type { TournamentDetail } from "@sarpbc/types";
 import { STARTGG_URL } from "~/composables/prizes";
 
@@ -60,7 +61,7 @@ const showSection = computed(
       <SCard v-else>
         <ol>
           <li v-for="prize in prizes" :key="prize.id">
-            <SListItem :to="$localePath(`/team/${prize.team.slug}`)" class="min-w-0 gap-2">
+            <SListItem :to="$localePath(teamPath(prize.team.slug))" class="min-w-0 gap-2">
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>

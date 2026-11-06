@@ -1,5 +1,11 @@
-import { excerptFromNewsContent, NEWS_SEO_DESCRIPTION_MAX_LENGTH } from "@sarpbc/utils";
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import {
+  excerptFromNewsContent,
+  localizedPath,
+  newsPath,
+  NEWS_SEO_DESCRIPTION_MAX_LENGTH,
+  type UiLocale,
+} from "@sarpbc/utils";
+import { SITE_ORIGIN } from "~/utils/site";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 import { ORGANIZATION_ID } from "./organization";
 
@@ -22,19 +28,12 @@ export interface BuildNewsArticleJsonLdInput {
   author?: string;
   imageUrl?: string | null;
   origin?: string;
-  locale?: "en" | "fr";
-}
-
-export function newsArticleCanonicalUrl(slug: string, origin = SITE_ORIGIN): string {
-  return `${origin}/news/${slug}`;
+  locale?: UiLocale;
 }
 
 export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): NewsArticleLd {
   const origin = article.origin ?? SITE_ORIGIN;
-  const url =
-    article.locale === "fr"
-      ? `${origin}/fr/news/${article.slug}`
-      : newsArticleCanonicalUrl(article.slug, origin);
+  const url = `${origin}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
   const description =
     excerptFromNewsContent(article.content, NEWS_SEO_DESCRIPTION_MAX_LENGTH) || undefined;
   const authorName = article.author?.trim();

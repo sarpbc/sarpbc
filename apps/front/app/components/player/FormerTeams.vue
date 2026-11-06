@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { teamPath } from "@sarpbc/utils";
 import { DateFormatter } from "@internationalized/date";
 import type { ContractRole, PlayerContract } from "~/types/contract";
 
@@ -34,7 +35,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
         >
           <TeamImg :team-name="contract.team.name" :logo="contract.team" size="sm" />
           <div class="flex-1 min-w-0">
-            <SLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
+            <SLink :to="$localePath(teamPath(contract.team.slug))" variant="inline">
               {{ contract.team.name }}
             </SLink>
             <div class="text-sm text-muted">

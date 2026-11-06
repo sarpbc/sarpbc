@@ -1,5 +1,6 @@
 import type { MaybeRef } from "vue";
 import type { ProfileMatchListItem } from "@sarpbc/types";
+import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 
 const PAST_MATCHES_LIMIT = 10;
 
@@ -21,16 +22,8 @@ function timeOf(value: Date | string | null | undefined): number {
   return value ? new Date(value).getTime() : 0;
 }
 
-function isPast(match: ProfileMatchListItem): boolean {
-  return Boolean(match.endAt) || match.status === "finished";
-}
-
 function isLive(match: ProfileMatchListItem, now: number): boolean {
-  if (match.status && LIVE_STATUSES.has(match.status)) {
-    return true;
-  }
-
-  return Boolean(match.beginAt) && timeOf(match.beginAt) <= now;
+  return Boolean(match.status && LIVE_STATUSES.has(match.status)) || isMatchLive(match, now);
 }
 
 function splitTeamMatches(matches: ProfileMatchListItem[], now: number): TeamMatchSections {
@@ -39,7 +32,7 @@ function splitTeamMatches(matches: ProfileMatchListItem[], now: number): TeamMat
   const past: ProfileMatchListItem[] = [];
 
   for (const match of matches) {
-    if (isPast(match)) {
+    if (isMatchFinished(match)) {
       past.push(match);
     } else if (isLive(match, now)) {
       live.push(match);

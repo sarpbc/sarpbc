@@ -2,7 +2,7 @@
 import type { MatchBlockItem, MatchBlockState } from "@sarpbc/types";
 import { matchPath, newsMatchBlockFromAttrs, newsMatchBlockKey } from "@sarpbc/utils";
 import { getMatchParticipantScore } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 
 const props = defineProps<{
   match?: string;

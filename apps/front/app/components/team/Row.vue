@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { teamPath } from "@sarpbc/utils";
 import type { Team } from "~/types/team";
 
 interface Props {
@@ -13,7 +14,7 @@ const { team } = defineProps<Props>();
     class="flex items-center gap-3"
     variant="ghost"
     color="neutral"
-    :to="$localePath(`/team/${team.slug}`)"
+    :to="$localePath(teamPath(team.slug))"
   >
     <div class="flex-1 min-w-0">
       <div class="flex flex-col">

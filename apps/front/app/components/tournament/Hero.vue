@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { teamPath } from "@sarpbc/utils";
 import type { TeamSummary } from "@sarpbc/types";
 import {
   formatTournamentDateRange,
@@ -118,7 +119,7 @@ const showSubscribeCalendar = computed(
           <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
           {{ " " }}
           <SLink
-            :to="$localePath(`/team/${champion.slug}`)"
+            :to="$localePath(teamPath(champion.slug))"
             variant="inline"
             class="inline-flex items-center min-h-10"
           >

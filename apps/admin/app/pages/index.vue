@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { parseLocale } from "@sarpbc/utils";
 import { getApiErrorMessage } from "~/utils/apiError";
 import { hasPermission, meetsRequirement, ROSTER_PROPOSAL_PERMISSIONS } from "~/utils/staff";
 
@@ -29,7 +30,7 @@ const hasAnyTool = computed(() => shortcuts.value.length > 0);
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(parseLocale(locale.value), {
       dateStyle: "medium",
       timeStyle: "short",
     }),

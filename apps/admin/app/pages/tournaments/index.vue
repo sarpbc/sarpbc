@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { tournamentLabel } from "~/utils/tournamentLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { TournamentListItem } from "@sarpbc/types";
 
@@ -46,7 +46,7 @@ const columns: TableColumn<TournamentListItem>[] = [
   {
     id: "name",
     header: t("page.tournaments.columns.name"),
-    cell: ({ row }) => tournamentLabel(row.original),
+    cell: ({ row }) => tournamentStageLabel(row.original),
   },
   {
     id: "source",

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { parseLocale } from "@sarpbc/utils";
 import type { ModerationReply } from "~/types/moderation";
 import { getApiErrorMessage } from "~/utils/apiError";
 
@@ -17,7 +18,7 @@ const publicSiteUrl = computed(() => String(config.public.publicSiteUrl).replace
 
 const dateFormatter = computed(
   () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+    new Intl.DateTimeFormat(parseLocale(locale.value), {
       dateStyle: "medium",
       timeStyle: "short",
     }),

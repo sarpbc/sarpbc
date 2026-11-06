@@ -32,7 +32,7 @@ export default defineNuxtPlugin(() => {
     choice,
     () => {
       const accepted = choice.value === "accepted";
-      setPostHogConsent(accepted);
+      setPostHogConsent(accepted, config.public.apiBase);
       lastPageview = null;
       if (!accepted) {
         return;

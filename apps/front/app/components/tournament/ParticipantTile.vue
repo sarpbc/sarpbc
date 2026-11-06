@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { playerPath, teamPath } from "@sarpbc/utils";
 import type { TeamSummary, TournamentDetailParticipant } from "@sarpbc/types";
 
 const { team, players } = defineProps<{
@@ -36,7 +37,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
       >
         <SLink
           :id="titleId"
-          :to="$localePath(`/team/${team.slug}`)"
+          :to="$localePath(teamPath(team.slug))"
           variant="muted"
           class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: team.name })"
@@ -49,7 +50,7 @@ const titleId = computed(() => `tournament-roster-title-${team.id}`);
           <SLink
             v-for="player in players"
             :key="player.id"
-            :to="$localePath(`/player/${player.slug}`)"
+            :to="$localePath(playerPath(player.slug))"
             variant="muted"
             class="flex min-h-row-compact items-center gap-2 px-1 text-sm"
           >

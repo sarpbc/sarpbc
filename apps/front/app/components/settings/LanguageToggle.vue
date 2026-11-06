@@ -1,17 +1,16 @@
 <script lang="ts" setup>
+import { uiLocale, type UiLocale } from "@sarpbc/utils";
 import type { TextToggleOption } from "~/components/s/TextToggle.vue";
-
-type GameLocale = "en" | "fr";
 
 const { locale, setLocale, t } = useI18n();
 
-const options = computed<TextToggleOption<GameLocale>[]>(() => [
+const options = computed<TextToggleOption<UiLocale>[]>(() => [
   { value: "en", label: "EN", ariaLabel: t("components.header.languageEn") },
   { value: "fr", label: "FR", ariaLabel: t("components.header.languageFr") },
 ]);
 
-const current = computed<GameLocale>({
-  get: () => (locale.value === "fr" ? "fr" : "en"),
+const current = computed<UiLocale>({
+  get: () => uiLocale(locale.value),
   set: (code) => {
     if (code !== locale.value) {
       void setLocale(code);
