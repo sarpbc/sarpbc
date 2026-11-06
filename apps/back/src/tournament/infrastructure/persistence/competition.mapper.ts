@@ -44,7 +44,6 @@ export const TOURNAMENT_POPULATE = [
   "participants.team",
   "participants.players",
 ] as const;
-/** Relations that toMatch dereferences when a match is loaded for writing. */
 export const MATCH_WRITE_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
   "participants.team",
@@ -150,7 +149,6 @@ export function toTournament(row: Row.Tournament): Tournament {
     matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
   });
 }
-/** Safe on partially loaded rows, such as the match reference behind a reply. */
 export function toMatchSlug(row: Row.Match): string {
   const loaded = wrap(row).isInitialized();
   const tournament =

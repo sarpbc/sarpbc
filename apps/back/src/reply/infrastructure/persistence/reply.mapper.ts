@@ -7,7 +7,6 @@ import type { ReplyRecord } from "../../application/models";
 import { REPLY_TARGETS, type ReplyTargetFields } from "../../domain/reply";
 import type { Reply } from "./reply.entities";
 
-/** Every relation `replySnapshot` reads; each reply query populates all of them. */
 export const REPLY_POPULATE = [
   "author",
   "replyTo",

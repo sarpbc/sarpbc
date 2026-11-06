@@ -156,7 +156,6 @@ export class CompetitionSyncService {
       }
     }
   }
-  /** Renames the event a serie already owns; a serie never creates an event on its own. */
   private async applySerie(
     events: EventWriter,
     command: UpsertSerieCommand,
@@ -173,10 +172,6 @@ export class CompetitionSyncService {
     await events.save(event);
     return { stageIds: stages.map((stage) => stage.id), matches: [] };
   }
-  /**
-   * A merged serie keeps its URL when the target serie has no event yet. Otherwise its stages
-   * join the target event and the old event slug stops resolving.
-   */
   private async mergeSerie(
     scope: CompetitionWriteScope,
     serieId: number,
@@ -332,11 +327,7 @@ export class CompetitionSyncService {
     tournament.endAt = endAt;
     await scope.tournaments.save(tournament);
   }
-  /**
-   * Ordered identity lookup: the serie's event, then the stage's own event or a same-named event
-   * in the league while either still lacks a serie (backfilled events claim their serie on first
-   * sync instead of duplicating under a `-2` slug), else a new event with a frozen slug.
-   */
+  /** Backfilled events claim their serie on first sync instead of duplicating under a `-2` slug. */
   private async resolveEvent(
     events: EventWriter,
     currentEventId: string | null,

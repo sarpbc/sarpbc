@@ -15,7 +15,6 @@ export class TournamentEvent {
   updatedAt = new Date();
 }
 
-/** The sync renames an event that follows a serie or holds a PandaScore stage. */
 export function isEventSynced(
   event: TournamentEvent,
   stages: ReadonlyArray<{ source: DataSource }>,

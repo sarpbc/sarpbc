@@ -110,7 +110,6 @@ export class ManualTournamentService {
     await events.save(event);
     return event;
   }
-  /** Moves the stage to another event, or keeps the event it owns in step with it. */
   private async updateEvent(
     events: EventWriter,
     tournament: Tournament,

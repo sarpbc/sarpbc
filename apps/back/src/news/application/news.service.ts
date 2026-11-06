@@ -250,10 +250,7 @@ export class NewsService {
     };
   }
 
-  /**
-   * Chunk 0 is a stable archive (oldest first); only the last chunk grows.
-   * Per-URL lastmod is `updatedAt ?? createdAt` so edits stay visible to crawlers.
-   */
+  /** Chunk 0 is a stable archive (oldest first); only the last chunk grows. */
   async findPublishedSitemapChunk(chunk: number): Promise<NewsSitemapChunkResponse> {
     if (!Number.isInteger(chunk) || chunk < 0) {
       throw new InvalidInputError("Sitemap chunk must be a non-negative integer.");

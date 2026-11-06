@@ -35,7 +35,6 @@ export async function explicitEventSlug(events: EventWriter, raw: string, eventI
   return slug;
 }
 
-/** Stage slugs are unique within their event, so joining an event can suffix the slug. */
 export async function placeStage(
   events: EventWriter,
   tournament: Tournament,

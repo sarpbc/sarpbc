@@ -18,7 +18,6 @@ import type {
   TournamentQueries,
 } from "./ports";
 
-/** Staff-maintained events and leagues that group manual tournaments. */
 export class ManualCatalogService {
   constructor(
     private readonly reads: TournamentQueries,

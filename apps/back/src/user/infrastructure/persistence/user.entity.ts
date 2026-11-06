@@ -3,7 +3,6 @@ import type { StaffRole } from "@sarpbc/types";
 
 export class User {
   id!: string;
-  /** Pre-configured staff role; null = regular member. Permissions come from ROLE_PERMISSIONS. */
   role: StaffRole | null = null;
   email!: string;
   userName!: string;

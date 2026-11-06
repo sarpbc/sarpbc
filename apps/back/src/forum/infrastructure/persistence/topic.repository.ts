@@ -3,7 +3,6 @@ import { EntityRepository } from "@mikro-orm/core";
 import { Topic } from "./forum.entities";
 
 export class TopicRepository extends EntityRepository<Topic> {
-  /** Always populates `posts` so callers can use `topic.posts.length` safely. */
   async findAllTopics(): Promise<Topic[]> {
     return this.findAll({ populate: ["posts", "posts.author"] });
   }

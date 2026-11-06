@@ -14,7 +14,6 @@ export class PlayerAward {
 
 export const PlayerAwardSchema = defineEntity({
   class: PlayerAward,
-  // One award per type per tournament (MVP, Defensive MVP, …).
   uniques: [{ properties: ["tournament", "awardType"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),

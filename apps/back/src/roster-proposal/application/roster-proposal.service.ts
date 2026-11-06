@@ -109,7 +109,6 @@ export class RosterProposalService {
     return { proposals, names };
   }
 
-  /** Applies the change and records the approval atomically; a failed change stays pending. */
   async approve(id: string, reviewerId: string): Promise<RosterProposal> {
     return this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);

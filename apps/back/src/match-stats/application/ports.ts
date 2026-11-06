@@ -8,7 +8,6 @@ import type { CandidateMatch, GameLocation, ReplaySummary, Side } from "../domai
 import type { StatsImport } from "../domain/stats-import";
 
 export interface BallchasingSource {
-  /** Replays of the group and of all its nested child groups. */
   groupReplays(groupId: string): Promise<ReplaySummary[]>;
   /** Null while Ballchasing has not finished processing the replay. */
   replayStats(replayId: string): Promise<ReplayStats | null>;
@@ -73,9 +72,7 @@ export interface GameAttachment extends GameLocation {
 }
 
 export interface GameStatsStore {
-  /** Where each of these replays is stored, for those that are. */
   locations(replayIds: string[]): Promise<Map<string, GameLocation>>;
-  /** The replays among these that staff removed. */
   excluded(replayIds: string[]): Promise<Set<string>>;
   attachment(replayId: string): Promise<GameAttachment | null>;
   links(accounts: PlatformAccount[]): Promise<PlayerLink[]>;
@@ -91,7 +88,6 @@ export interface GameStatsStore {
 }
 
 export interface PlayerLinkStore {
-  /** Every game account with a platform id that played in the tournament. */
   accounts(tournamentId: string): Promise<StatsPlayerAccount[]>;
   rosters(tournamentId: string): Promise<StatsRoster[]>;
   onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean>;
@@ -104,11 +100,9 @@ export interface StatsImportStore {
   load(id: string): Promise<StatsImport | null>;
   save(statsImport: StatsImport): Promise<void>;
   latest(tournamentId: string, limit: number): Promise<StatsImport[]>;
-  /** Marks pending or running imports as failed; returns how many changed. */
   failUnfinished(error: string): Promise<number>;
 }
 
-/** Runs a queued import outside the request that queued it. */
 export interface StatsImportScheduler {
   schedule(task: () => Promise<void>): void;
 }
