@@ -16,6 +16,6 @@ import { StorageService } from "../application/storage.service";
       inject: [R2Service],
     },
   ],
-  exports: [StorageService],
+  exports: [R2Service],
 })
 export class StorageModule {}

@@ -1,4 +1,3 @@
-import { MAX_IMAGE_MEGABYTES } from "@sarpbc/utils";
 import { Observable } from "rxjs";
 import {
   CallHandler,
@@ -33,7 +32,15 @@ function isMultipartFileTooLarge(error: unknown): boolean {
   return code === "FST_REQ_FILE_TOO_LARGE" || statusCode === 413;
 }
 
-export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
+export interface MultipartMessages {
+  tooLarge: string;
+  unreadable: string;
+}
+
+export function MultipartInterceptor(
+  options: MultipartOptions,
+  messages: MultipartMessages,
+): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
@@ -73,15 +80,10 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
         log.emit();
 
         if (isMultipartFileTooLarge(error)) {
-          throw new PayloadTooLargeException(
-            `Cover image must be ${MAX_IMAGE_MEGABYTES} MB or smaller. Compress the JPEG or pick another file.`,
-          );
+          throw new PayloadTooLargeException(messages.tooLarge);
         }
 
-        throw new HttpException(
-          `The image could not be read. Try a JPEG, PNG, WebP, or GIF under ${MAX_IMAGE_MEGABYTES} MB.`,
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException(messages.unreadable, HttpStatus.BAD_REQUEST);
       }
 
       req.storedFiles = files;

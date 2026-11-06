@@ -28,7 +28,7 @@ import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.mod
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
 import type { CurrentRosterSource } from "../application/ports";
 import { TeamLogoService } from "../application/team-logo.service";
-import { StorageService } from "../../storage/application/storage.service";
+import { R2Service } from "../../storage/infrastructure/r2.service";
 import { StorageModule } from "../../storage/infrastructure/storage.module";
 import { HttpsTeamLogoSource } from "./logo/https-team-logo-source";
 import { R2TeamLogoStorage } from "./logo/r2-team-logo-storage";
@@ -125,13 +125,13 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     },
     {
       provide: TeamLogoService,
-      useFactory: (storage: StorageService) =>
+      useFactory: (storage: R2Service) =>
         new TeamLogoService(
           new HttpsTeamLogoSource(),
           new SharpTeamLogoImages(),
           new R2TeamLogoStorage(storage),
         ),
-      inject: [StorageService],
+      inject: [R2Service],
     },
   ],
   exports: [PlayerService, TeamService, ContractService, RosterMergeService, TeamLogoService],

@@ -16,112 +16,82 @@ import {
   type ImageUploadTarget,
 } from "@sarpbc/utils";
 import type {
-  ImageUploadContext,
   ObjectStorage,
-  R2UploadResponse,
-  R2UploadUrlResponse,
+  ObjectUploadUrl,
+  StoredObject,
 } from "../application/ports/object-storage";
 import { IMAGE_PREFIXES } from "../domain/image-target";
 
+interface R2Connection {
+  client: S3Client;
+  publicUrl(key: string): string;
+}
+
 @Injectable()
 export class R2Service implements ObjectStorage {
-  private readonly accountId: string;
-  private readonly endpoint: string;
-  private readonly accessKeyId: string;
-  private readonly secretAccessKey: string;
-  private readonly bucket: string;
-  private readonly publicBaseUrl: string;
-  private client: S3Client | null = null;
+  private connection: R2Connection | null = null;
 
-  constructor(private readonly configService: ConfigService) {
-    this.accountId =
-      this.configService.get<string>("r2_account_id") ??
-      this.configService.get<string>("cloudflare_account_id") ??
-      "";
-    this.endpoint = this.configService.get<string>("r2_endpoint") ?? "";
-    this.accessKeyId = this.configService.get<string>("r2_access_key_id") ?? "";
-    this.secretAccessKey = this.configService.get<string>("r2_secret_access_key") ?? "";
-    this.bucket = this.configService.get<string>("r2_bucket") ?? "sarpbc-org";
-    this.publicBaseUrl = this.configService.get<string>("r2_public_base_url") ?? "";
-  }
+  constructor(private readonly configService: ConfigService) {}
 
-  private resolveEndpoint(): string {
-    if (this.endpoint) {
-      return this.endpoint.replace(/\/$/, "");
+  private connect(): R2Connection {
+    if (this.connection) {
+      return this.connection;
     }
-    if (this.accountId) {
-      return `https://${this.accountId}.r2.cloudflarestorage.com`;
-    }
-    return "";
-  }
 
-  private ensureConfigured(): void {
-    const endpoint = this.resolveEndpoint();
-    if (
-      !endpoint ||
-      !this.accessKeyId ||
-      !this.secretAccessKey ||
-      !this.bucket ||
-      !this.publicBaseUrl
-    ) {
+    const accountId = this.configService.get<string>("r2_account_id");
+    const endpoint =
+      this.configService.get<string>("r2_endpoint")?.replace(/\/$/, "") ??
+      (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+    const accessKeyId = this.configService.get<string>("r2_access_key_id");
+    const secretAccessKey = this.configService.get<string>("r2_secret_access_key");
+    const publicBaseUrl = this.configService.get<string>("r2_public_base_url");
+    if (!endpoint || !accessKeyId || !secretAccessKey || !publicBaseUrl) {
       throw new InternalServerErrorException(
         "R2 storage is not configured. Set R2 credentials, R2_ENDPOINT (or R2_ACCOUNT_ID), and R2_PUBLIC_BASE_URL.",
       );
     }
+
+    this.connection = {
+      client: new S3Client({
+        region: "auto",
+        endpoint,
+        credentials: { accessKeyId, secretAccessKey },
+      }),
+      publicUrl: (key) => `${publicBaseUrl.replace(/\/$/, "")}/${key}`,
+    };
+    return this.connection;
   }
 
-  private getClient(): S3Client {
-    this.ensureConfigured();
-    if (!this.client) {
-      this.client = new S3Client({
-        region: "auto",
-        endpoint: this.resolveEndpoint(),
-        credentials: {
-          accessKeyId: this.accessKeyId,
-          secretAccessKey: this.secretAccessKey,
-        },
-      });
-    }
-    return this.client;
+  private get bucket(): string {
+    return this.configService.getOrThrow<string>("r2_bucket");
   }
 
   async createImageUploadUrl(
     contentType: ImageContentType,
-    _filename: string | undefined,
     target: ImageUploadTarget,
-  ): Promise<R2UploadUrlResponse> {
-    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
+  ): Promise<ObjectUploadUrl> {
+    const { client, publicUrl } = this.connect();
+    const key = imageKey(target, contentType);
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
       ContentType: contentType,
     });
 
-    const uploadUrl = await getSignedUrl(this.getClient(), command, { expiresIn: 600 });
-    return { uploadUrl, publicUrl: this.publicUrl(key), key };
+    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
+    return { uploadUrl, publicUrl: publicUrl(key), key };
   }
 
   uploadImage(
     buffer: Uint8Array,
     contentType: ImageContentType,
-    filename: string | undefined,
-    context: ImageUploadContext,
-  ): Promise<R2UploadResponse> {
-    const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
+    target: ImageUploadTarget,
+  ): Promise<StoredObject> {
+    const key = imageKey(target, contentType);
     return this.objectOperation(
       "uploadImage",
-      {
-        key,
-        target: context.target,
-        userId: context.userId,
-        userEmail: context.userEmail,
-        articleSlug: context.articleSlug,
-        articleTitle: context.articleTitle,
-        imageFilename: filename,
-        imageContentType: contentType,
-        imageSize: context.size ?? buffer.byteLength,
-      },
-      async (client) => {
+      { key, target, imageContentType: contentType, imageSize: buffer.byteLength },
+      async ({ client, publicUrl }) => {
         await client.send(
           new PutObjectCommand({
             Bucket: this.bucket,
@@ -130,17 +100,17 @@ export class R2Service implements ObjectStorage {
             ContentType: contentType,
           }),
         );
-        return { publicUrl: this.publicUrl(key), key };
+        return { publicUrl: publicUrl(key), key };
       },
-      "Cover image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
+      "Image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
     );
   }
 
-  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse> {
+  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
     return this.objectOperation(
       "putObject",
       { key, imageContentType: contentType, imageSize: bytes.byteLength },
-      async (client) => {
+      async ({ client, publicUrl }) => {
         await client.send(
           new PutObjectCommand({
             Bucket: this.bucket,
@@ -150,13 +120,13 @@ export class R2Service implements ObjectStorage {
             CacheControl: "public, max-age=31536000, immutable",
           }),
         );
-        return { publicUrl: this.publicUrl(key), key };
+        return { publicUrl: publicUrl(key), key };
       },
     );
   }
 
-  copyObject(sourceKey: string, key: string): Promise<R2UploadResponse> {
-    return this.objectOperation("copyObject", { sourceKey, key }, async (client) => {
+  copyObject(sourceKey: string, key: string): Promise<StoredObject> {
+    return this.objectOperation("copyObject", { sourceKey, key }, async ({ client, publicUrl }) => {
       await client.send(
         new CopyObjectCommand({
           Bucket: this.bucket,
@@ -164,26 +134,23 @@ export class R2Service implements ObjectStorage {
           Key: key,
         }),
       );
-      return { publicUrl: this.publicUrl(key), key };
+      return { publicUrl: publicUrl(key), key };
     });
   }
 
   deleteObject(key: string): Promise<void> {
-    return this.objectOperation("deleteObject", { key }, async (client) => {
+    return this.objectOperation("deleteObject", { key }, async ({ client }) => {
       await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
     });
-  }
-
-  private publicUrl(key: string): string {
-    return `${this.publicBaseUrl.replace(/\/$/, "")}/${key}`;
   }
 
   private async objectOperation<T>(
     action: string,
     fields: Record<string, string | number | undefined>,
-    work: (client: S3Client) => Promise<T>,
+    work: (connection: R2Connection) => Promise<T>,
     failureMessage = "The image could not be stored. Try again.",
   ): Promise<T> {
+    const connection = this.connect();
     const log = createLogger({
       component: R2Service.name,
       action,
@@ -192,15 +159,18 @@ export class R2Service implements ObjectStorage {
       ...fields,
     });
     try {
-      const result = await work(this.getClient());
+      const result = await work(connection);
       log.set({ stored: true });
       return result;
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
-      if (error instanceof InternalServerErrorException) throw error;
       throw new InternalServerErrorException(failureMessage);
     } finally {
       log.emit();
     }
   }
+}
+
+function imageKey(target: ImageUploadTarget, contentType: ImageContentType): string {
+  return `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
 }

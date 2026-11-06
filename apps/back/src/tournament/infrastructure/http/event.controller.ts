@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { NotFoundError } from "../../../common/domain/errors";
-import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";

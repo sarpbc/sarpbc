@@ -15,7 +15,7 @@ export const R2UploadDto = R2UploadTargetDto.extend({
 export type R2UploadDto = z.infer<typeof R2UploadDto>;
 export const R2UploadUrlDto = R2UploadTargetDto.extend({
   contentType: z.enum([...IMAGE_CONTENT_TYPES, ...IMAGE_CONTENT_TYPE_ALIASES], {
-    message: "Cover image must be JPEG, PNG, WebP, or GIF.",
+    message: "Image must be JPEG, PNG, WebP, or GIF.",
   }),
   filename: z.string().max(255).optional(),
 });

@@ -3,7 +3,7 @@ import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { configureApp } from "../src/configure-app";
-import { ListTournamentsQueryDto } from "../src/common/infrastructure/http/dto/list-directory-query.dto";
+import { ListTournamentsQueryDto } from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
 import { ListNotificationsQueryDto } from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
 import { CreatePostDto } from "../src/forum/infrastructure/http/post/dto/create-post.dto";
 import { UpdateTournamentDto } from "../src/tournament/infrastructure/http/dto/create-tournament.dto";

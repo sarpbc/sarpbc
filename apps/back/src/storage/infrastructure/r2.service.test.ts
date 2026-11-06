@@ -36,16 +36,17 @@ describe("R2Service", () => {
   } as const;
 
   let sendSpy: MockInstance;
+  let r2: R2Service;
   let service: StorageService;
 
   beforeEach(() => {
     (createLogger as Mock).mockReturnValue(logger);
     sendSpy = vi.spyOn(S3Client.prototype, "send").mockResolvedValue({} as never);
-    service = new StorageService(
-      new R2Service({
-        get: (key: string) => configuredValues[key as keyof typeof configuredValues],
-      } as ConfigService),
-    );
+    r2 = new R2Service({
+      get: (key: string) => configuredValues[key as keyof typeof configuredValues],
+      getOrThrow: (key: string) => configuredValues[key as keyof typeof configuredValues],
+    } as ConfigService);
+    service = new StorageService(r2);
     vi.clearAllMocks();
     (createLogger as Mock).mockReturnValue(logger);
   });
@@ -55,13 +56,7 @@ describe("R2Service", () => {
   });
 
   it("stores a jpg declared as image/jpg", async () => {
-    const result = await service.uploadImage(Buffer.from("jpeg"), "image/jpg", "cover.jpg", {
-      target: "news",
-      userId: "user-1",
-      userEmail: "editor@sarpbc.org",
-      articleSlug: "vitality-win",
-      articleTitle: "Vitality win",
-    });
+    const result = await service.uploadImage(Buffer.from("jpeg"), "image/jpg", "news");
 
     expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/);
     expect(result.publicUrl).toContain(result.key);
@@ -69,12 +64,8 @@ describe("R2Service", () => {
       expect.objectContaining({
         action: "uploadImage",
         target: "news",
-        userId: "user-1",
-        userEmail: "editor@sarpbc.org",
-        articleSlug: "vitality-win",
-        articleTitle: "Vitality win",
-        imageFilename: "cover.jpg",
         imageContentType: "image/jpeg",
+        imageSize: 4,
         environment: expect.any(String),
       }),
     );
@@ -83,7 +74,7 @@ describe("R2Service", () => {
 
   it("rejects unsupported types before calling R2", async () => {
     await expect(
-      service.uploadImage(Buffer.from("x"), "application/pdf", "doc.pdf", { target: "tournament" }),
+      service.uploadImage(Buffer.from("x"), "application/pdf", "tournament"),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(sendSpy).not.toHaveBeenCalled();
   });
@@ -92,11 +83,7 @@ describe("R2Service", () => {
     sendSpy.mockRejectedValue(new Error("AccessDenied"));
 
     await expect(
-      service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "cover.jpg", {
-        target: "news",
-        userId: "user-1",
-        articleSlug: "vitality-win",
-      }),
+      service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
     expect(logger.error).toHaveBeenCalled();
@@ -105,9 +92,7 @@ describe("R2Service", () => {
 
   it("stores tournament artwork separately from news covers", async () => {
     const buffer = Buffer.from("png");
-    const result = await service.uploadImage(buffer, "image/png", "ewc.png", {
-      target: "tournament",
-    });
+    const result = await service.uploadImage(buffer, "image/png", "tournament");
 
     expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/);
     expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
@@ -122,7 +107,7 @@ describe("R2Service", () => {
     const bytes = new Uint8Array([1, 2, 3]);
     const key = "teams/kc/logo-light-0123456789abcdef.webp";
 
-    await expect(service.putObject(key, bytes, "image/webp")).resolves.toEqual({
+    await expect(r2.putObject(key, bytes, "image/webp")).resolves.toEqual({
       key,
       publicUrl: `https://cdn.example/${key}`,
     });
@@ -143,14 +128,14 @@ describe("R2Service", () => {
     sendSpy.mockRejectedValue(new Error("AccessDenied"));
 
     await expect(
-      service.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
+      r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
     expect(logger.error).toHaveBeenCalled();
   });
 
   it("publishes a pending object by copying it under its final key", async () => {
     await expect(
-      service.copyObject(
+      r2.copyObject(
         "pending/teams/kc/logo-dark-0123456789abcdef.webp",
         "teams/kc/logo-dark-0123456789abcdef.webp",
       ),
@@ -170,7 +155,7 @@ describe("R2Service", () => {
   });
 
   it("deletes an object by key", async () => {
-    await service.deleteObject("pending/teams/kc/logo-dark-0123456789abcdef.webp");
+    await r2.deleteObject("pending/teams/kc/logo-dark-0123456789abcdef.webp");
 
     expect(sendSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -180,5 +165,17 @@ describe("R2Service", () => {
         },
       }),
     );
+  });
+
+  it("fails with a clear error when R2 is not configured", async () => {
+    const unconfigured = new R2Service({
+      get: () => undefined,
+      getOrThrow: () => "sarpbc-org",
+    } as unknown as ConfigService);
+
+    await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
+      /R2 storage is not configured/,
+    );
+    expect(sendSpy).not.toHaveBeenCalled();
   });
 });

@@ -31,7 +31,7 @@ import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
-import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import {
   mapProfileMatchListItem,
   mapTournamentMatchListItem,
