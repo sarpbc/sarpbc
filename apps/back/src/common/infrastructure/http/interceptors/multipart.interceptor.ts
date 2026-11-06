@@ -23,12 +23,12 @@ interface MultipartFormFields {
   [fieldname: string]: string;
 }
 
-function isMultipartFileTooLarge(error: unknown): boolean {
-  if (!error || typeof error !== "object") {
+function isMultipartFileTooLarge(cause: unknown): boolean {
+  if (!(cause instanceof Error)) {
     return false;
   }
-  const code = "code" in error ? error.code : undefined;
-  const statusCode = "statusCode" in error ? error.statusCode : undefined;
+  const code = "code" in cause ? cause.code : undefined;
+  const statusCode = "statusCode" in cause ? cause.statusCode : undefined;
   return code === "FST_REQ_FILE_TOO_LARGE" || statusCode === 413;
 }
 

@@ -163,9 +163,30 @@ export function parseCareerStateJson(raw: string | null): CareerState | null {
   }
 }
 
-export function parseCareerResultJson(raw: unknown): CareerResult | null {
-  const result = careerResultSchema.safeParse(raw);
-  return result.success ? result.data : null;
+export function parseCareerResultJson(raw: string): CareerResult | null {
+  try {
+    const result = careerResultSchema.safeParse(JSON.parse(raw));
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
+const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().catch(null));
+
+export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
+  const results = new Map<string, CareerResult>();
+  if (!raw) return results;
+  try {
+    const parsed = careerResultsSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return results;
+    for (const [id, result] of Object.entries(parsed.data)) {
+      if (result) results.set(id, result);
+    }
+  } catch {
+    return new Map();
+  }
+  return results;
 }
 
 /** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
@@ -202,8 +223,7 @@ export function decodeCareerResultFromShare(encoded: string): CareerResult | nul
   try {
     const padded = encoded.replace(/-/g, "+").replace(/_/g, "/");
     const json = decodeURIComponent(atob(padded));
-    const parsed: unknown = JSON.parse(json);
-    return parseCareerResultJson(parsed);
+    return parseCareerResultJson(json);
   } catch {
     return null;
   }

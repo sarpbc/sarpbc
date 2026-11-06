@@ -8,7 +8,12 @@ const STRONG_PLAYER_RANK = 16;
 const TRANSFER_UPGRADE_MARGIN = 2;
 const OFFER_SHORTLIST = 8;
 
-function getUserStanding(rankings: WorldRankings): { rating: number; rank: number } {
+interface UserStanding {
+  rating: number;
+  rank: number;
+}
+
+function getUserStanding(rankings: WorldRankings): UserStanding {
   const user = rankings.players.find((player) => player.isUser);
   return {
     rating: user?.rating ?? 0,

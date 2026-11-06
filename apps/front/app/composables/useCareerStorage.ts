@@ -2,7 +2,7 @@ import type { CareerResult, CareerState } from "~/types/career";
 import {
   decodeCareerResultFromShare,
   encodeCareerResultForShare,
-  parseCareerResultJson,
+  parseCareerResultsJson,
   parseCareerStateJson,
 } from "~/utils/career/careerSchema";
 
@@ -30,34 +30,18 @@ export function clearActiveCareer(): void {
   localStorage.removeItem(CAREER_ACTIVE_STORAGE_KEY);
 }
 
-export function loadCareerResults(): Record<string, CareerResult> {
-  if (!import.meta.client) return {};
-
-  try {
-    const raw = localStorage.getItem(CAREER_RESULTS_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed === null || typeof parsed !== "object") return {};
-
-    const results: Record<string, CareerResult> = {};
-    for (const [id, value] of Object.entries(parsed)) {
-      const result = parseCareerResultJson(value);
-      if (result) results[id] = result;
-    }
-    return results;
-  } catch {
-    return {};
-  }
+export function loadCareerResults(): Map<string, CareerResult> {
+  if (!import.meta.client) return new Map();
+  return parseCareerResultsJson(localStorage.getItem(CAREER_RESULTS_STORAGE_KEY));
 }
 
 export function saveCareerResult(result: CareerResult): void {
   if (!import.meta.client) return;
   const existing = loadCareerResults();
-  existing[result.id] = result;
-  localStorage.setItem(CAREER_RESULTS_STORAGE_KEY, JSON.stringify(existing));
+  existing.set(result.id, result);
+  localStorage.setItem(CAREER_RESULTS_STORAGE_KEY, JSON.stringify(Object.fromEntries(existing)));
 }
 
 export function loadCareerResult(id: string): CareerResult | null {
-  const results = loadCareerResults();
-  return results[id] ?? null;
+  return loadCareerResults().get(id) ?? null;
 }

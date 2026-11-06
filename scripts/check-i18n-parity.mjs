@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function leafKeys(value, prefix = "") {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) return [prefix];
+  if (Object.prototype.toString.call(value) !== "[object Object]") return [prefix];
   return Object.entries(value).flatMap(([key, child]) =>
     leafKeys(child, prefix ? `${prefix}.${key}` : key),
   );

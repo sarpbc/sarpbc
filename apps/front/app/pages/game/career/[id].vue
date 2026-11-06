@@ -20,7 +20,7 @@ onMounted(() => {
     return;
   }
 
-  const encoded = typeof route.query.d === "string" ? route.query.d : null;
+  const encoded = Array.isArray(route.query.d) ? null : route.query.d;
   if (encoded) {
     result.value = decodeCareerResultFromShare(encoded);
   }

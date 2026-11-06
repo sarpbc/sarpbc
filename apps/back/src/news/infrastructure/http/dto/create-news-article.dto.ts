@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { NEWS_TEXT_MAX_LENGTH } from "../../../domain/news-limits";
 import { NEWS_TYPES } from "@sarpbc/types";
+export const NewsCoverImageUrl = z
+  .string()
+  .trim()
+  .max(NEWS_TEXT_MAX_LENGTH)
+  .pipe(z.url({ protocol: /^(https?|ftp)$/, message: "Enter a valid cover image URL." }));
 export const CreateNewsArticleDto = z.strictObject({
   title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),
   content: z.string().min(1),
@@ -15,12 +20,7 @@ export const CreateNewsArticleDto = z.strictObject({
     .trim()
     .transform((value) => value || null)
     .nullish(),
-  imageUrl: z
-    .string()
-    .trim()
-    .max(NEWS_TEXT_MAX_LENGTH)
-    .pipe(z.url({ protocol: /^(https?|ftp)$/, message: "Enter a valid cover image URL." }))
-    .optional(),
+  imageUrl: NewsCoverImageUrl.optional(),
   slug: z
     .string()
     .trim()

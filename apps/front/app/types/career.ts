@@ -92,10 +92,6 @@ export const CAREER_NICKNAME_KEYS = [
 ] as const;
 export type CareerNicknameKey = (typeof CAREER_NICKNAME_KEYS)[number];
 
-export function isCareerNicknameKey(value: unknown): value is CareerNicknameKey {
-  return typeof value === "string" && CAREER_NICKNAME_KEYS.includes(value as never);
-}
-
 export interface CareerDestinyLeanings {
   quit: number;
   streamer: number;

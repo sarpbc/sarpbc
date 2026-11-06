@@ -1,5 +1,6 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import {
+  type EntityName,
   ForeignKeyConstraintViolationException,
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
@@ -26,11 +27,11 @@ const article: NewsArticleRecord = {
 function storeFailingWith(error: Error) {
   const em = {
     findOne: vi.fn().mockResolvedValue(null),
-    getReference: vi.fn((_entity: unknown, id: string) => ({ id })),
+    getReference: vi.fn((_entity: EntityName<object>, id: string) => ({ id })),
     persist: vi.fn(),
     flush: vi.fn().mockRejectedValue(error),
   };
-  return new MikroNewsStore(em as unknown as EntityManager);
+  return new MikroNewsStore(Object.assign(Object.create(EntityManager.prototype), em));
 }
 
 describe("MikroNewsStore.save", () => {

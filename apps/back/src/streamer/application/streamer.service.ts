@@ -8,7 +8,7 @@ import type { TrackedStreamerStore } from "./ports/tracked-streamer-store";
 
 export const LIVE_STREAMS_FRESH_MS = 90_000;
 
-export type StreamerFailureReporter = (operation: string, error: unknown) => void;
+export type StreamerFailureReporter = (operation: string, cause: unknown) => void;
 
 export class StreamerService {
   constructor(

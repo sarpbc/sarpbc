@@ -186,6 +186,6 @@ export interface CompetitionEvents {
   publish(event: MatchDecided): Promise<void>;
 }
 export interface CompetitionDiagnostics {
-  error(message: string, error: unknown): void;
+  error(message: string, cause: unknown): void;
   warn(message: string, context: Record<string, string | number | readonly string[]>): void;
 }

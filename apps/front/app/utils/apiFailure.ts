@@ -7,13 +7,13 @@ interface ApiFailure<Reason extends string> {
 }
 
 export function apiFailure<Reason extends string>(
-  error: unknown,
+  cause: unknown,
   action: string,
   reasons: { codes?: Record<string, Reason>; statuses?: Record<number, Reason> } = {},
 ): ApiFailure<Reason> {
-  const status = getApiErrorStatus(error);
-  const code = getApiErrorCode(error);
-  const message = getApiErrorMessage(error);
+  const status = getApiErrorStatus(cause);
+  const code = getApiErrorCode(cause);
+  const message = getApiErrorMessage(cause);
 
   if (status === 401) {
     return { ok: false, reason: "unauthorized", message };
@@ -26,6 +26,6 @@ export function apiFailure<Reason extends string>(
     return { ok: false, reason, message };
   }
 
-  console.error(`Error ${action}:`, error);
+  console.error(`Error ${action}:`, cause);
   return { ok: false, reason: "unknown", message };
 }

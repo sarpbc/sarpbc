@@ -1,5 +1,6 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import {
+  type EntityName,
   ForeignKeyConstraintViolationException,
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
@@ -24,7 +25,7 @@ function entityManager(flushFailure: Error | null) {
   return {
     getRepository: vi.fn().mockReturnValue({}),
     findOne: vi.fn().mockResolvedValue({ id: reply.id }),
-    getReference: vi.fn((_entity: unknown, id: string) => ({ id })),
+    getReference: vi.fn((_entity: EntityName<object>, id: string) => ({ id })),
     persist: vi.fn(),
     remove: vi.fn(),
     flush: vi.fn(async () => {
@@ -33,7 +34,8 @@ function entityManager(flushFailure: Error | null) {
   };
 }
 
-const asEntityManager = (em: ReturnType<typeof entityManager>) => em as unknown as EntityManager;
+const asEntityManager = (em: ReturnType<typeof entityManager>): EntityManager =>
+  Object.assign(Object.create(EntityManager.prototype), em);
 
 const report = {
   id: "report",

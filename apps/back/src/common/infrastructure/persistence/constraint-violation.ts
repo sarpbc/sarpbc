@@ -3,10 +3,10 @@ import {
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
 
-export const isUniqueViolation = (error: unknown): error is UniqueConstraintViolationException =>
-  error instanceof UniqueConstraintViolationException;
+export const isUniqueViolation = (cause: unknown): cause is UniqueConstraintViolationException =>
+  cause instanceof UniqueConstraintViolationException;
 
 export const isForeignKeyViolation = (
-  error: unknown,
-): error is ForeignKeyConstraintViolationException =>
-  error instanceof ForeignKeyConstraintViolationException;
+  cause: unknown,
+): cause is ForeignKeyConstraintViolationException =>
+  cause instanceof ForeignKeyConstraintViolationException;

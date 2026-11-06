@@ -19,9 +19,8 @@ function messageFromNestBody(responseText: string): string | undefined {
       const joined = parsed.message.filter((item) => item.trim().length > 0).join(" ");
       return joined.length > 0 ? joined : undefined;
     }
-    if (typeof parsed.message === "string" && parsed.message.trim().length > 0) {
-      return parsed.message.trim();
-    }
+    const text = parsed.message?.trim();
+    if (text) return text;
   } catch {
     return undefined;
   }

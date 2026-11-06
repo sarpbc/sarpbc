@@ -1,22 +1,22 @@
 import type { CareerPlacement, CareerRegion, CareerSplitRecord } from "~/types/career";
 
-export const REGIONAL_POINTS: Record<CareerPlacement, number> = {
+export const REGIONAL_POINTS = {
   winner: 10,
   finalist: 7,
   top4: 5,
   top8: 3,
   group: 1,
   unavailable: 0,
-};
+} satisfies Record<CareerPlacement, number>;
 
-export const MAJOR_POINTS: Record<CareerPlacement, number> = {
+export const MAJOR_POINTS = {
   winner: 20,
   finalist: 14,
   top4: 10,
   top8: 6,
   group: 2,
   unavailable: 0,
-};
+} satisfies Record<CareerPlacement, number>;
 
 export function regionalCircuitWeight(region: CareerRegion): number {
   switch (region) {

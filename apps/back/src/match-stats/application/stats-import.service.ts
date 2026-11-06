@@ -25,7 +25,7 @@ export class StatsImportService {
     private readonly games: GameStatsStore,
     private readonly imports: StatsImportStore,
     private readonly scheduler: StatsImportScheduler,
-    private readonly reportFailure: (error: unknown) => void,
+    private readonly reportFailure: (cause: unknown) => void,
   ) {}
 
   async request(tournamentId: string, group: string): Promise<StatsImport> {

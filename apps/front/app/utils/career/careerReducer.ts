@@ -28,6 +28,7 @@ import type {
   CareerCountry,
   CareerDestiny,
   CareerDestinyLeanings,
+  CareerEventOutcome,
   CareerPhase,
   CareerRegion,
   CareerResult,
@@ -462,22 +463,24 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
       const nextStats = applyStatDelta(before, resolved.delta, rng);
       const destiny = choice.destiny ?? {};
 
+      const lastEventOutcome: CareerEventOutcome = {
+        eventId,
+        choiceId: action.choiceId,
+        delta: {
+          rating: nextStats.rating - before.rating,
+          form: nextStats.form - before.form,
+          morale: nextStats.morale - before.morale,
+        },
+        destiny,
+      };
+      if (resolved.failed) lastEventOutcome.failed = true;
+
       return {
         state: {
           ...state,
           stats: nextStats,
           destinyLeanings: applyDestinyLeanings(state.destinyLeanings, destiny),
-          lastEventOutcome: {
-            eventId,
-            choiceId: action.choiceId,
-            delta: {
-              rating: nextStats.rating - before.rating,
-              form: nextStats.form - before.form,
-              morale: nextStats.morale - before.morale,
-            },
-            destiny,
-            ...(resolved.failed ? { failed: true } : {}),
-          },
+          lastEventOutcome,
           phase: "event_result",
         },
         finishedResult: null,

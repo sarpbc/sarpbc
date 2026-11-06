@@ -6,10 +6,10 @@ import { REPLY_TARGETS, replySortOrder, type ReplyTargetFields } from "../../dom
 import { Reply } from "./reply.entities";
 import { REPLY_POPULATE } from "./reply.mapper";
 
-function onTarget(
-  targetType: ReplyTargetType,
-  target: { id: string } | { $in: string[] },
-): Partial<Record<keyof ReplyTargetFields, { id: string } | { $in: string[] }>> {
+type ReplyTargetMatch = { id: string } | { $in: string[] };
+type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatch>>;
+
+function onTarget(targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter {
   return { [REPLY_TARGETS[targetType].field]: target };
 }
 

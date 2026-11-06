@@ -1,5 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
 import { describe, expect, it } from "vitest";
+import type { z } from "zod";
 import { CreateTournamentDto, UpdateTournamentDto } from "./create-tournament.dto";
 import { parseDto } from "./parse-tournament-dto";
 
@@ -24,6 +25,8 @@ describe("MCP tournament input", () => {
       teamIds: ["11111111-1111-4111-8111-111111111111", "11111111-1111-4111-8111-111111111111"],
     },
   ])("returns a bad request for invalid MCP input %j", (input) => {
-    expect(() => parseDto(CreateTournamentDto, input)).toThrow(BadRequestException);
+    expect(() =>
+      parseDto(CreateTournamentDto, input as z.input<typeof CreateTournamentDto>),
+    ).toThrow(BadRequestException);
   });
 });

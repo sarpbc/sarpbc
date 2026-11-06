@@ -2,8 +2,7 @@ import type { EntityManager } from "@mikro-orm/postgresql";
 import type { ReplyTargetType } from "@sarpbc/types";
 import { Post } from "../../../forum/infrastructure/forum-persistence";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
-import { toMatchSlug } from "../../../tournament/infrastructure/competition-persistence";
-import { Match } from "../../../tournament/infrastructure/competition-persistence";
+import { Match, toMatchSlug } from "../../../tournament/infrastructure/competition-persistence";
 import type { ReplyRecord } from "../../application/models";
 import { REPLY_TARGETS, type ReplyTargetFields } from "../../domain/reply";
 import type { Reply } from "./reply.entities";
@@ -37,10 +36,7 @@ const matchFields = (row: Match) => ({
   slug: toMatchSlug(row),
 });
 
-export const REPLY_TARGET_LOADERS: Record<
-  ReplyTargetType,
-  (em: EntityManager, id: string) => Promise<Partial<ReplyTargetFields> | null>
-> = {
+export const REPLY_TARGET_LOADERS = {
   forumPost: async (em, id) => {
     const row = await em.findOne(Post, { id });
     return row && { post: postFields(row) };
@@ -57,7 +53,10 @@ export const REPLY_TARGET_LOADERS: Record<
     );
     return row && { match: matchFields(row) };
   },
-};
+} satisfies Record<
+  ReplyTargetType,
+  (em: EntityManager, id: string) => Promise<Partial<ReplyTargetFields> | null>
+>;
 
 export function replySnapshot(row: Reply): ReplyRecord {
   return {
