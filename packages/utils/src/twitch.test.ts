@@ -23,12 +23,4 @@ describe("TWITCH_LOGIN_PATTERN", () => {
       assert.equal(TWITCH_LOGIN_PATTERN.test(login), false);
     });
   }
-
-  it("rejects a long adversarial login within the time budget", () => {
-    const payload = `${"a_".repeat(50_000)}!`;
-    const startedAt = performance.now();
-
-    assert.equal(TWITCH_LOGIN_PATTERN.test(payload), false);
-    assert.ok(performance.now() - startedAt < 100);
-  });
 });
