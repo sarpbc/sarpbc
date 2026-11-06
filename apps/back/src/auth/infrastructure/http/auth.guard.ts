@@ -4,7 +4,12 @@ import { ConfigService } from "@nestjs/config";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { UserToken } from "../../../common/application/models/user-token";
 import { UserService } from "../../../user/application/user.service";
-import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, setAuthCookies } from "./auth-cookies";
+import {
+  ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE,
+  setAuthCookies,
+  type AuthCookieConfig,
+} from "./auth-cookies";
 import { signAuthTokenPair, verifyAuthToken } from "../jwt-token.gateway";
 import type { AuthTokenType } from "../../application/ports/authentication";
 
@@ -42,7 +47,7 @@ export class AuthGuard implements CanActivate {
     }
 
     const tokens = await signAuthTokenPair(this.jwtService, this.jwtSecret(), refreshUser);
-    setAuthCookies(reply, tokens, this.configService.get<boolean>("production"));
+    setAuthCookies(reply, tokens, this.configService.get<AuthCookieConfig>("authCookie"));
     request.user = refreshUser;
     return true;
   }

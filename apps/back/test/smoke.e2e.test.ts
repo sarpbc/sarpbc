@@ -178,7 +178,7 @@ describe("API smoke (e2e)", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await configureApp(app);
+    await configureApp(app, []);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });

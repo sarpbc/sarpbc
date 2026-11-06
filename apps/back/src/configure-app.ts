@@ -5,16 +5,12 @@ import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 
-export async function configureApp(app: NestFastifyApplication): Promise<void> {
+export async function configureApp(
+  app: NestFastifyApplication,
+  corsOrigins: string[],
+): Promise<void> {
   app.enableCors({
-    origin: [
-      "http://localhost:4000",
-      "http://localhost:4001",
-      "http://localhost:4002",
-      "https://sarpbc.org",
-      "https://www.sarpbc.org",
-      "https://admin.sarpbc.org",
-    ],
+    origin: corsOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   });

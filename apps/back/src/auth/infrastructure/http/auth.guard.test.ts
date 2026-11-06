@@ -41,9 +41,6 @@ describe("AuthGuard", () => {
               if (key === "jwt_token") {
                 return "secret";
               }
-              if (key === "production") {
-                return false;
-              }
               return undefined;
             }),
           },

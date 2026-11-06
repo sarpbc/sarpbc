@@ -8,7 +8,12 @@ import { SignInUserDto } from "../../../user/infrastructure/http/dto/signin-user
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { PostHogService } from "../../../infrastructure/telemetry/posthog.service";
-import { REFRESH_TOKEN_COOKIE, clearAuthCookies, setAuthCookies } from "./auth-cookies";
+import {
+  REFRESH_TOKEN_COOKIE,
+  clearAuthCookies,
+  setAuthCookies,
+  type AuthCookieConfig,
+} from "./auth-cookies";
 
 @Controller("auth")
 export class AuthController {
@@ -18,8 +23,8 @@ export class AuthController {
     private posthog: PostHogService,
   ) {}
 
-  private production(): boolean | undefined {
-    return this.configService.get<boolean>("production");
+  private authCookie(): AuthCookieConfig | undefined {
+    return this.configService.get<AuthCookieConfig>("authCookie");
   }
 
   private async captureAuthEvent(
@@ -42,14 +47,14 @@ export class AuthController {
     @Request() req: FastifyRequest,
   ) {
     const tokens = await this.authService.signIn(userData);
-    setAuthCookies(res, tokens, this.production());
+    setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_logged_in");
     return res.code(200).send({ success: true });
   }
 
   @Get("logout")
   logout(@Res() res: FastifyReply) {
-    clearAuthCookies(res, this.production());
+    clearAuthCookies(res, this.authCookie());
     return res.send({ success: true });
   }
 
@@ -58,7 +63,7 @@ export class AuthController {
   async refresh(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
-      clearAuthCookies(res, this.production());
+      clearAuthCookies(res, this.authCookie());
       return res.code(401).send({
         statusCode: 401,
         message: "Missing auth token in cookie",
@@ -67,14 +72,14 @@ export class AuthController {
 
     const tokens = await this.authService.refreshSession(refreshToken);
     if (!tokens) {
-      clearAuthCookies(res, this.production());
+      clearAuthCookies(res, this.authCookie());
       return res.code(401).send({
         statusCode: 401,
         message: "Invalid or expired token",
       });
     }
 
-    setAuthCookies(res, tokens, this.production());
+    setAuthCookies(res, tokens, this.authCookie());
     return res.code(200).send({ success: true });
   }
 
@@ -86,7 +91,7 @@ export class AuthController {
     @Request() req: FastifyRequest,
   ) {
     const tokens = await this.authService.signUp(userData);
-    setAuthCookies(res, tokens, this.production());
+    setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_signed_up");
     return res.code(200).send({ success: true });
   }
@@ -119,7 +124,7 @@ export class AuthController {
 
     try {
       const tokens = await this.authService.handleGoogleCallback(code);
-      setAuthCookies(res, tokens, this.production());
+      setAuthCookies(res, tokens, this.authCookie());
       return res.code(302).redirect(returnUrl);
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));

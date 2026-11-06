@@ -1,12 +1,9 @@
 import type { FastifyRequest } from "fastify";
-
-export function currentEnvironment(): string {
-  return process.env.NODE_ENV ?? "development";
-}
+import { nodeEnvironment } from "../../../infrastructure/config/env.validation";
 
 export function requestLogContext(request: FastifyRequest) {
   return {
-    environment: currentEnvironment(),
+    environment: nodeEnvironment(),
     path: request.url,
     method: request.method,
     userId: request.user?.id,

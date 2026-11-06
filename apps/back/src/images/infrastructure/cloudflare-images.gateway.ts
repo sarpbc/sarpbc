@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
 import { createLogger } from "evlog";
-import { currentEnvironment } from "../../common/infrastructure/logging/request-log-context";
+import { nodeEnvironment } from "../../infrastructure/config/env.validation";
 import type { ImageHost } from "../application/ports/image.repository";
 
 export interface UploadUrlResponse {
@@ -32,7 +32,7 @@ export class CloudflareImagesGateway implements ImageHost {
     const log = createLogger({
       component: CloudflareImagesGateway.name,
       action: "getUploadUrl",
-      environment: currentEnvironment(),
+      environment: nodeEnvironment(),
       userId,
       userEmail,
     });

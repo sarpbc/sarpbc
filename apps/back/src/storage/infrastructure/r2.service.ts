@@ -9,7 +9,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { createLogger } from "evlog";
-import { currentEnvironment } from "../../common/infrastructure/logging/request-log-context";
+import { nodeEnvironment } from "../../infrastructure/config/env.validation";
 import {
   IMAGE_FILE_EXTENSIONS,
   type ImageContentType,
@@ -187,7 +187,7 @@ export class R2Service implements ObjectStorage {
     const log = createLogger({
       component: R2Service.name,
       action,
-      environment: currentEnvironment(),
+      environment: nodeEnvironment(),
       bucket: this.bucket,
       ...fields,
     });

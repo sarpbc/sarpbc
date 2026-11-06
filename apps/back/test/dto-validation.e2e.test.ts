@@ -45,7 +45,7 @@ describe("native Nest Zod validation over Fastify", () => {
       controllers: [ValidationController],
     }).compile();
     app = module.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await configureApp(app);
+    await configureApp(app, []);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });

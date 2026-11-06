@@ -104,7 +104,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     ]);
     Object.assign(process.env, {
       NODE_ENV: "test",
-      PORT: "4001",
       DB_HOST: "127.0.0.1",
       DB_PORT: String(pgPort),
       DB_NAME: "integration",
@@ -112,11 +111,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       DB_PASSWORD: "integration-only",
       REDIS_HOST: "127.0.0.1",
       REDIS_PORT: String(redisPort),
-      REDIS_PASSWORD: "",
       JWT_KEY: "integration-only-key-never-for-production",
       PANDASCORE_API_TOKEN: "integration-not-a-real-token",
-      PANDASCORE_SYNC_ON_BOOT: "false",
-      BALLCHASING_API_KEY: "",
       GOOGLE_CLIENT_ID: "integration",
       GOOGLE_CLIENT_SECRET: "",
       GOOGLE_REDIRECT_URI: "http://127.0.0.1/auth/google/callback",
@@ -125,14 +121,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       CLOUDFLARE_ACCOUNT_ID: "",
       CLOUDFLARE_API_TOKEN: "",
       CLOUDFLARE_ACCOUNT_HASH: "",
-      R2_ACCESS_KEY_ID: "",
-      R2_SECRET_ACCESS_KEY: "",
-      R2_PUBLIC_BASE_URL: "",
-      R2_ENDPOINT: "",
-      R2_ACCOUNT_ID: "",
-      R2_BUCKET: "integration",
-      POSTHOG_PROJECT_TOKEN: "",
-      POSTHOG_HOST: "http://127.0.0.1:1",
     });
     await import("reflect-metadata");
     const { initLogger } = await import("evlog");
@@ -150,7 +138,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       logger: false,
       abortOnError: false,
     });
-    await configureApp(app);
+    await configureApp(app, ["http://127.0.0.1:4000", "http://127.0.0.1:4002"]);
     const orm = app.get(MikroORM);
     const { default: Redis } = await import("ioredis");
     redis = new Redis({ host: "127.0.0.1", port: redisPort });

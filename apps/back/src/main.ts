@@ -3,17 +3,18 @@ import { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ConfigService } from "@nestjs/config";
 import { initLogger } from "evlog";
 import { AppModule } from "./app.module";
+import { loadEnv } from "./infrastructure/config/env.validation";
 import { configureApp } from "./configure-app";
 import { createHttpAdapter } from "./infrastructure/http/fastify-adapter";
 
-const isProduction = process.env.NODE_ENV === "production";
+const { NODE_ENV, production } = loadEnv();
 
 const loggerEnv = {
   service: "sarpbc-back",
-  environment: process.env.NODE_ENV ?? "development",
+  environment: NODE_ENV,
 };
 
-if (isProduction) {
+if (production) {
   initLogger({
     env: loggerEnv,
     sampling: {
@@ -35,12 +36,10 @@ if (isProduction) {
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, createHttpAdapter());
 
-  await configureApp(app);
-
   const configService = app.get(ConfigService);
-  const port = configService.get<number>("port") ?? 4001;
+  await configureApp(app, configService.getOrThrow<string[]>("corsOrigins"));
 
-  await app.listen(port, "0.0.0.0");
+  await app.listen(configService.getOrThrow<number>("port"), "0.0.0.0");
 }
 
 bootstrap();

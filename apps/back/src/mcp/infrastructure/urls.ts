@@ -6,36 +6,36 @@ import {
   tournamentEventPath,
   tournamentStagePath,
 } from "@sarpbc/utils";
-import { getAdminUrl, getFrontUrl } from "../../infrastructure/config/secrets";
+import { adminUrl, frontUrl } from "../../infrastructure/config/env.validation";
 
 export function playerUrl(slug: string): string {
-  return `${getFrontUrl()}${playerPath(slug)}`;
+  return `${frontUrl()}${playerPath(slug)}`;
 }
 
 export function teamUrl(slug: string): string {
-  return `${getFrontUrl()}${teamPath(slug)}`;
+  return `${frontUrl()}${teamPath(slug)}`;
 }
 
 export function matchUrl(publicId: number, slug: string): string {
-  return `${getFrontUrl()}${matchPath(publicId, slug)}`;
+  return `${frontUrl()}${matchPath(publicId, slug)}`;
 }
 
 export function tournamentUrl(tournament: { slug: string; event: { slug: string } }): string {
-  return `${getFrontUrl()}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
+  return `${frontUrl()}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
 }
 
 export function eventUrl(slug: string): string {
-  return `${getFrontUrl()}${tournamentEventPath(slug)}`;
+  return `${frontUrl()}${tournamentEventPath(slug)}`;
 }
 
 export function newsUrl(slug: string): string {
-  return `${getFrontUrl()}${newsPath(slug)}`;
+  return `${frontUrl()}${newsPath(slug)}`;
 }
 
 export function adminNewsEditUrl(slug: string): string {
-  return `${getAdminUrl()}/news/${slug}`;
+  return `${adminUrl()}/news/${slug}`;
 }
 
 export function adminRosterProposalsUrl(): string {
-  return `${getAdminUrl()}/proposals`;
+  return `${adminUrl()}/proposals`;
 }
