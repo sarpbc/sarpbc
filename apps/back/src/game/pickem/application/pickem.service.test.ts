@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PickemService } from "./pickem.service";
-import type { Pick, PickMatch } from "../domain/pickem";
+import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 describe("PickemService", () => {
   let match: PickMatch, picks: Pick[], service: PickemService;
@@ -21,19 +21,21 @@ describe("PickemService", () => {
     const scope: PickemWrites = {
       userExists: async () => true,
       participantExists: async () => true,
-      match: async () => structuredClone(match),
       pick: async (user, match) =>
         picks.find((p) => p.user.id === user && p.match.id === match) ?? null,
       unscored: async () => picks.filter((p) => !p.scored),
       savePick: async (pick) => {
         if (!picks.some((p) => p.id === pick.id)) picks.push(pick);
       },
-      setWinner: async (_, id) => {
-        match.winnerId = id;
-      },
     };
     service = new PickemService(
-      { list: async () => picks },
+      { list: async () => picks as NamedPick[] },
+      {
+        find: async () => structuredClone(match),
+        decide: async (_, id) => {
+          match.winnerId = id;
+        },
+      },
       { run: async (work) => work(scope) },
       { now: () => new Date("2026-01-01"), id: () => "pick-1", warn },
     );
@@ -43,7 +45,7 @@ describe("PickemService", () => {
     picks.push({
       ...picks[0],
       id: "pick-2",
-      user: { id: "v", userName: "V" },
+      user: { id: "v" },
       pickedParticipant: { id: "b" },
     });
     match.results = [

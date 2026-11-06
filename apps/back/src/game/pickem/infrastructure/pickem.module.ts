@@ -8,24 +8,27 @@ import { PickemChoice } from "./persistence/pickem.entity";
 import { PickemController } from "./http/pickem.controller";
 import { PickemService } from "../application/pickem.service";
 import { MatchDecidedListener } from "./match-decided.listener";
+import { CompetitionPickemMatches } from "./competition-pickem-matches";
+import { MatchService } from "../../../tournament/application/public";
+import { TournamentModule } from "../../../tournament/infrastructure/tournament.module";
 import { UserModule } from "../../../user/infrastructure/user.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([PickemChoice]), UserModule],
+  imports: [MikroOrmModule.forFeature([PickemChoice]), UserModule, TournamentModule],
   controllers: [PickemController],
   providers: [
     {
       provide: PickemService,
-      useFactory: (em: EntityManager) => {
+      useFactory: (em: EntityManager, matches: MatchService) => {
         const store = new MikroPickemStore(em);
         const logger = new Logger(PickemService.name);
-        return new PickemService(store, store, {
+        return new PickemService(store, new CompetitionPickemMatches(matches), store, {
           now: () => new Date(),
           id: v4,
           warn: (message) => logger.warn(message),
         });
       },
-      inject: [EntityManager],
+      inject: [EntityManager, MatchService],
     },
     MatchDecidedListener,
   ],

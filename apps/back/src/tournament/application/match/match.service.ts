@@ -271,8 +271,11 @@ export class MatchService {
     );
     return this.committed(written.id);
   }
+  find(id: string): Promise<Match | null> {
+    return this.reads.detail({ kind: "id", value: id });
+  }
   private async committed(id: string): Promise<Match> {
-    const match = await this.reads.detail({ kind: "id", value: id });
+    const match = await this.find(id);
     if (!match) throw new NotFoundError("Match not found");
     return match;
   }

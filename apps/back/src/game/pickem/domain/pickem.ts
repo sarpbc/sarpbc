@@ -12,12 +12,15 @@ export interface PickMatch {
 }
 export interface Pick {
   id: string;
-  user: { id: string; userName: string };
+  user: { id: string };
   match: { id: string };
   pickedParticipant: { id: string };
   points: number | null;
   scored: boolean;
   createdAt: Date;
+}
+export interface NamedPick extends Pick {
+  user: { id: string; userName: string };
 }
 export function assertPickAllowed(
   match: PickMatch,
