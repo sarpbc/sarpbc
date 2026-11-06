@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { tournamentStageLabel } from "@sarpbc/utils";
+import { watchDebounced } from "@vueuse/core";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
-import { resolveThemedLogoUrl } from "@sarpbc/utils";
+import { resolveThemedLogoUrl, tournamentStageLabel } from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/adminSections";
 import type { Player } from "@sarpbc/types";
 import type { Team } from "@sarpbc/types";
@@ -10,6 +10,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
 const colorMode = useColorMode();
+const reportError = useReportError();
 
 const open = ref(false);
 const searchTerm = ref("");
@@ -34,8 +35,6 @@ defineShortcuts({
   },
 });
 
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
-
 async function runSearch(query: string) {
   const trimmed = query.trim();
   if (!trimmed) {
@@ -46,17 +45,15 @@ async function runSearch(query: string) {
   pending.value = true;
   try {
     results.value = await searchAdminEntities(trimmed);
+  } catch (searchError) {
+    results.value = { players: [], teams: [], tournaments: [] };
+    reportError(searchError);
   } finally {
     pending.value = false;
   }
 }
 
-watch(searchTerm, (value) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    void runSearch(value);
-  }, 250);
-});
+watchDebounced(searchTerm, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 watch(open, (isOpen) => {
   if (!isOpen) {
@@ -127,23 +124,6 @@ function tournamentItems(): CommandPaletteItem[] {
   }));
 }
 
-function refreshIcon(): string {
-  switch (refreshState.value) {
-    case "loading":
-      return "i-fluent-arrow-sync-24-regular";
-    case "success":
-      return "i-fluent-checkmark-24-regular";
-    case "error":
-      return "i-fluent-dismiss-circle-24-regular";
-    case "idle":
-      return "i-fluent-arrow-sync-24-regular";
-    default: {
-      const _exhaustive: never = refreshState.value;
-      return _exhaustive;
-    }
-  }
-}
-
 async function refreshEmptyTournaments(event?: Event) {
   event?.preventDefault();
   if (refreshState.value === "loading" || !canTournaments.value) {
@@ -154,15 +134,12 @@ async function refreshEmptyTournaments(event?: Event) {
   try {
     const emptyTournaments = await getTournamentsWithoutMatches();
     for (const tournament of emptyTournaments) {
-      const success = await syncTournament(tournament.id);
-      if (!success) {
-        refreshState.value = "error";
-        return;
-      }
+      await syncTournament(tournament.id);
     }
     refreshState.value = "success";
-  } catch {
+  } catch (refreshError) {
     refreshState.value = "error";
+    reportError(refreshError);
   }
 }
 
@@ -178,7 +155,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
           id: "refresh-empty-tournaments",
           label: t("page.search.refreshEmptyTournaments"),
           suffix: t("page.search.refreshEmptyTournamentsHint"),
-          icon: refreshIcon(),
+          icon: syncIcon(refreshState.value === "loading" ? "idle" : refreshState.value),
           loading: refreshState.value === "loading",
           onSelect: (event: Event) => {
             void refreshEmptyTournaments(event);

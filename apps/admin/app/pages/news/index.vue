@@ -1,17 +1,14 @@
 <script lang="ts" setup>
 import type { NewsArticleAdmin, NewsType } from "@sarpbc/types";
 import type { DropdownMenuItem, TableColumn, TableRow } from "@nuxt/ui";
-import { hasFrenchTranslation } from "@sarpbc/utils";
+import { getApiErrorMessage, hasFrenchTranslation } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
-const df = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-});
+const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
 const items = [
   {
@@ -50,10 +47,7 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
   {
     accessorKey: "createdAt",
     header: t("page.news.columns.createdAt"),
-    cell: ({ getValue }) => {
-      const date = new Date(getValue() as string);
-      return df.format(date);
-    },
+    cell: ({ getValue }) => dateFormatter.value.format(new Date(getValue() as string)),
   },
   {
     id: "actions",
@@ -67,10 +61,18 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
   },
 ];
 
-const newsArticles = ref<NewsArticleAdmin[]>([]);
-const total = ref(0);
-const limit = 25;
-const page = ref(0);
+const {
+  items: newsArticles,
+  total,
+  page,
+  limit,
+  status,
+  error,
+  refresh,
+} = useAdminList("admin-news-articles", async (range) => {
+  const { data, total } = await getNewsArticlesAdmin(range);
+  return { items: data, total };
+});
 
 const articleToRename = ref<NewsArticleAdmin | null>(null);
 const isRenameModalOpen = ref(false);
@@ -79,30 +81,7 @@ const renameTitleFr = ref("");
 const isRenaming = ref(false);
 
 const articleToDelete = ref<NewsArticleAdmin | null>(null);
-const isDeleteModalOpen = ref(false);
-const isDeleting = ref(false);
 const isPublishing = ref(false);
-
-const { status, data, refresh } = await useLazyAsyncData(
-  () => `admin-news-articles-${page.value}-search`,
-  async () => getNewsArticlesAdmin(page.value * limit, limit),
-  {
-    default: () => ({ data: [], total: 0 }),
-    watch: [page],
-    server: false,
-  },
-);
-
-watch(
-  status,
-  (s) => {
-    if (s === "success" && data.value) {
-      newsArticles.value = data.value.data;
-      total.value = data.value.total;
-    }
-  },
-  { immediate: true },
-);
 
 function selectRow(e: Event, row: TableRow<NewsArticleAdmin>) {
   e.preventDefault();
@@ -130,7 +109,7 @@ function articleActions(article: NewsArticleAdmin): DropdownMenuItem[][] {
         label: t("page.news.actions.delete"),
         icon: "i-fluent-delete-24-regular",
         color: "error",
-        onSelect: () => openDeleteModal(article),
+        onSelect: () => (articleToDelete.value = article),
       },
     ],
   ];
@@ -143,11 +122,6 @@ function openRenameModal(article: NewsArticleAdmin) {
   isRenameModalOpen.value = true;
 }
 
-function openDeleteModal(article: NewsArticleAdmin) {
-  articleToDelete.value = article;
-  isDeleteModalOpen.value = true;
-}
-
 async function saveTitle() {
   if (!articleToRename.value || !renameTitle.value.trim()) {
     return;
@@ -155,17 +129,10 @@ async function saveTitle() {
 
   isRenaming.value = true;
   try {
-    const updated = await editNewsArticle(articleToRename.value.slug, {
+    await editNewsArticle(articleToRename.value.slug, {
       title: renameTitle.value.trim(),
       titleFr: renameTitleFr.value.trim() || null,
     });
-    if (!updated) {
-      toast.add({
-        title: t("page.news.actions.renameFailed"),
-        color: "error",
-      });
-      return;
-    }
     isRenameModalOpen.value = false;
     articleToRename.value = null;
     toast.add({
@@ -173,6 +140,8 @@ async function saveTitle() {
       color: "success",
     });
     await refresh();
+  } catch (renameError) {
+    reportError(renameError, t("page.news.actions.renameFailed"));
   } finally {
     isRenaming.value = false;
   }
@@ -184,54 +153,29 @@ async function togglePublish(article: NewsArticleAdmin) {
   }
   isPublishing.value = true;
   try {
-    const ok = article.isDraft
-      ? await publishNewsArticle(article.slug)
-      : await unpublishNewsArticle(article.slug);
-    if (!ok) {
-      toast.add({
-        title: t("page.news.edit.publishFailed"),
-        color: "error",
-      });
-      return;
+    if (article.isDraft) {
+      await publishNewsArticle(article.slug);
+    } else {
+      await unpublishNewsArticle(article.slug);
     }
     article.isDraft = !article.isDraft;
     toast.add({
       title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
       color: "success",
     });
+  } catch (publishError) {
+    reportError(publishError, t("page.news.edit.publishFailed"));
   } finally {
     isPublishing.value = false;
   }
 }
 
-async function confirmDelete() {
-  if (!articleToDelete.value) {
-    return;
-  }
-  isDeleting.value = true;
-  try {
-    const ok = await deleteNewsArticle(articleToDelete.value.slug);
-    if (!ok) {
-      toast.add({
-        title: t("page.news.actions.deleteFailed"),
-        color: "error",
-      });
-      return;
-    }
-    isDeleteModalOpen.value = false;
-    articleToDelete.value = null;
-    toast.add({
-      title: t("page.news.actions.deleted"),
-      color: "success",
-    });
-    await refresh();
-  } finally {
-    isDeleting.value = false;
-  }
-}
-
-async function updatePage(value: number) {
-  page.value = value;
+async function onDeleted() {
+  toast.add({
+    title: t("page.news.actions.deleted"),
+    color: "success",
+  });
+  await refresh();
 }
 </script>
 
@@ -248,7 +192,12 @@ async function updatePage(value: number) {
       />
     </template>
     <DashboardContent>
-      <ClientOnly>
+      <LoadError
+        v-if="status === 'error'"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
+      <ClientOnly v-else>
         <UTable
           :data="newsArticles"
           :columns="columns"
@@ -280,7 +229,7 @@ async function updatePage(value: number) {
             :page="page"
             :total="total"
             :items-per-page="limit"
-            @update:page="updatePage"
+            @update:page="page = $event"
           />
         </div>
       </ClientOnly>
@@ -321,36 +270,14 @@ async function updatePage(value: number) {
         </template>
       </UModal>
 
-      <UModal
-        v-model:open="isDeleteModalOpen"
+      <ConfirmDeleteModal
+        v-model:target="articleToDelete"
         :title="$t('page.news.actions.delete')"
-        :dismissible="!isDeleting"
-      >
-        <template #body>
-          <p>
-            {{
-              $t("page.news.actions.deleteConfirm", {
-                title: articleToDelete?.title ?? "",
-              })
-            }}
-          </p>
-        </template>
-        <template #footer>
-          <UButton
-            color="error"
-            :loading="isDeleting"
-            :label="$t('page.news.actions.delete')"
-            @click="confirmDelete"
-          />
-          <UButton
-            color="neutral"
-            variant="subtle"
-            :label="$t('common.cancel')"
-            :disabled="isDeleting"
-            @click="isDeleteModalOpen = false"
-          />
-        </template>
-      </UModal>
+        :confirm-label="$t('page.news.actions.delete')"
+        :message="(article) => $t('page.news.actions.deleteConfirm', { title: article.title })"
+        :remove="(article) => deleteNewsArticle(article.slug)"
+        @deleted="onDeleted"
+      />
     </DashboardContent>
   </NuxtLayout>
 </template>

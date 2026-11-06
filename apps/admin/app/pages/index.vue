@@ -1,14 +1,11 @@
 <script lang="ts" setup>
-import { parseLocale } from "@sarpbc/utils";
-import { getApiErrorMessage } from "@sarpbc/utils";
-import { canModerateComments } from "@sarpbc/utils";
+import { canModerateComments, getApiErrorMessage, parseLocale } from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/adminSections";
 
-const MODERATION_LIMIT = 50;
 const ARTICLE_LIMIT = 5;
 const MATCH_LIMIT = 5;
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const router = useRouter();
@@ -25,13 +22,7 @@ const canModeration = computed(() => canModerateComments(user.value));
 
 const hasAnyTool = computed(() => shortcuts.value.length > 0);
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(parseLocale(locale.value), {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 function formatDate(value: string | null): string {
   return value ? dateFormatter.value.format(new Date(value)) : t("page.home.dateUnknown");
@@ -41,14 +32,13 @@ const proposals = useLazyAsyncData("admin-home-proposals", () => getPendingRoste
   server: false,
   immediate: canProposals.value,
 });
-const replies = useLazyAsyncData(
-  "admin-home-replies",
-  () => getModerationReplies(MODERATION_LIMIT),
-  { server: false, immediate: canModeration.value },
-);
+const replies = useLazyAsyncData("admin-home-replies", () => getModerationReplies(), {
+  server: false,
+  immediate: canModeration.value,
+});
 const articles = useLazyAsyncData(
   "admin-home-articles",
-  () => getRecentNewsArticles(ARTICLE_LIMIT),
+  async () => (await getNewsArticlesAdmin({ limit: ARTICLE_LIMIT, offset: 0 })).data,
   { server: false, immediate: canNews.value },
 );
 const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(MATCH_LIMIT), {
@@ -59,7 +49,9 @@ const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(
 const proposalCount = computed(() => proposals.data.value?.proposals.length ?? 0);
 const replyCount = computed(() => replies.data.value?.length ?? 0);
 const replyCountLabel = computed(() =>
-  replyCount.value >= MODERATION_LIMIT ? `${MODERATION_LIMIT}+` : String(replyCount.value),
+  replyCount.value >= MODERATION_REPLIES_LIMIT
+    ? `${MODERATION_REPLIES_LIMIT}+`
+    : String(replyCount.value),
 );
 
 function matchTitle(participants: { team: { name: string } }[]): string {

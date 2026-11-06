@@ -1,24 +1,19 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import { CONTRACT_ROLES, type ContractRole, type Player, type PlayerContract } from "@sarpbc/types";
+import type { ContractRole, PlayerContract } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
+const reportError = useReportError();
 const playerId = route.params.id as string;
 
-const df = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-});
+const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return "-";
-  return df.format(new Date(dateStr));
-};
+const formatDate = (dateStr: string | null) =>
+  dateStr ? dateFormatter.value.format(new Date(dateStr)) : "-";
 
-const player = ref<Player | null>(null);
 const isSavingPlayer = ref(false);
 
 const playerForm = ref({
@@ -28,6 +23,15 @@ const playerForm = ref({
   nationality: "",
   birthday: "",
   imageUrl: "",
+});
+
+const {
+  data: player,
+  status,
+  error,
+  refresh,
+} = await useLazyAsyncData(`admin-player-${playerId}`, () => getPlayerById(playerId), {
+  server: false,
 });
 
 const breadcrumbItems = computed(() => [
@@ -40,26 +44,10 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-const formatDateForInput = (dateStr: string | Date | undefined | null): string => {
-  if (!dateStr) return "";
-  return new Date(dateStr).toISOString().substring(0, 10);
-};
-
-const { data: playerData } = await useLazyAsyncData(
-  `admin-player-${playerId}`,
-  () => getPlayerById(playerId),
-  { server: false },
-);
-
 watch(
-  playerData,
+  player,
   (p) => {
-    if (p && p.id !== playerId) {
-      navigateTo(localePath(`/players/${p.id}`), { replace: true });
-      return;
-    }
     if (p) {
-      player.value = p;
       playerForm.value = {
         name: p.name ?? "",
         firstName: p.firstName ?? "",
@@ -83,31 +71,20 @@ async function savePlayer() {
     if (playerForm.value.nationality) body.nationality = playerForm.value.nationality;
     if (playerForm.value.birthday) body.birthday = playerForm.value.birthday;
     if (playerForm.value.imageUrl) body.imageUrl = playerForm.value.imageUrl;
-    const updated = await updatePlayer(playerId, body);
-    if (updated) {
-      player.value = updated;
-    }
-  } catch (error) {
-    console.error("Failed to save player:", error);
+    player.value = await updatePlayer(playerId, body);
+  } catch (saveError) {
+    reportError(saveError);
   } finally {
     isSavingPlayer.value = false;
   }
 }
 
-const contracts = ref<PlayerContract[]>([]);
 const isContractModalOpen = ref(false);
-const isDeleteContractModalOpen = ref(false);
 const contractToDelete = ref<PlayerContract | null>(null);
-const isDeletingContract = ref(false);
 const isSavingContract = ref(false);
 const editingContract = ref<PlayerContract | null>(null);
 
-const contractRoleOptions: { label: string; value: ContractRole }[] = CONTRACT_ROLES.map(
-  (role) => ({
-    label: t(`common.contractRole.${role}`),
-    value: role,
-  }),
-);
+const contractRoleOptions = useContractRoleOptions();
 
 const contractForm = ref<{
   teamId: string;
@@ -142,20 +119,17 @@ const contractColumns: TableColumn<PlayerContract>[] = [
     header: t("page.players.contracts.columns.endDate"),
     cell: ({ getValue }) => formatDate(getValue() as string | null),
   },
+  { id: "actions", header: "" },
 ];
 
-const { data: contractsData, refresh: refreshContracts } = await useLazyAsyncData(
+const {
+  data: contracts,
+  error: contractsError,
+  refresh: refreshContracts,
+} = await useLazyAsyncData(
   `admin-player-contracts-${playerId}`,
   () => getPlayerContracts(playerId),
-  { server: false },
-);
-
-watch(
-  contractsData,
-  (c) => {
-    if (c) contracts.value = c;
-  },
-  { immediate: true },
+  { server: false, default: () => [] },
 );
 
 function openCreateContractModal() {
@@ -197,30 +171,10 @@ async function saveContract() {
     }
     isContractModalOpen.value = false;
     await refreshContracts();
-  } catch (error) {
-    console.error("Failed to save contract:", error);
+  } catch (saveError) {
+    reportError(saveError);
   } finally {
     isSavingContract.value = false;
-  }
-}
-
-function openDeleteContractModal(contract: PlayerContract) {
-  contractToDelete.value = contract;
-  isDeleteContractModalOpen.value = true;
-}
-
-async function confirmDeleteContract() {
-  if (!contractToDelete.value) return;
-  isDeletingContract.value = true;
-  try {
-    await deletePlayerContract(playerId, contractToDelete.value.id);
-    isDeleteContractModalOpen.value = false;
-    contractToDelete.value = null;
-    await refreshContracts();
-  } catch (error) {
-    console.error("Failed to delete contract:", error);
-  } finally {
-    isDeletingContract.value = false;
   }
 }
 
@@ -238,6 +192,7 @@ const contractModalTitle = computed(() =>
     </template>
     <template #action>
       <UButton
+        v-if="player"
         icon="i-fluent-save-24-regular"
         :label="$t('page.players.save')"
         :loading="isSavingPlayer"
@@ -247,7 +202,13 @@ const contractModalTitle = computed(() =>
     </template>
 
     <DashboardContent>
-      <div class="flex flex-col gap-6">
+      <LoadError
+        v-if="status === 'error'"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
+
+      <div v-else class="flex flex-col gap-6">
         <div>
           <h2 class="mb-3 text-base font-semibold">
             {{ $t("page.players.info.title") }}
@@ -287,7 +248,12 @@ const contractModalTitle = computed(() =>
             />
           </div>
 
-          <UTable :data="contracts" :columns="contractColumns">
+          <LoadError
+            v-if="contractsError"
+            :message="getApiErrorMessage(contractsError) ?? $t('common.loadFailed')"
+            @retry="refreshContracts()"
+          />
+          <UTable v-else :data="contracts" :columns="contractColumns">
             <template #empty>
               {{ $t("page.players.contracts.empty") }}
             </template>
@@ -304,7 +270,7 @@ const contractModalTitle = computed(() =>
                   color="error"
                   variant="ghost"
                   size="xs"
-                  @click="openDeleteContractModal(row.original)"
+                  @click="contractToDelete = row.original"
                 />
               </div>
             </template>
@@ -324,13 +290,7 @@ const contractModalTitle = computed(() =>
             <UInput v-model="contractForm.teamId" class="w-full" />
           </UFormField>
           <UFormField :label="$t('page.players.contracts.fields.role')" required>
-            <USelect
-              v-model="contractForm.role"
-              :options="contractRoleOptions"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-            />
+            <USelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
           </UFormField>
           <UFormField :label="$t('page.players.contracts.fields.startDate')" required>
             <UInput v-model="contractForm.startDate" type="date" class="w-full" />
@@ -358,36 +318,15 @@ const contractModalTitle = computed(() =>
       </template>
     </UModal>
 
-    <UModal
-      v-model:open="isDeleteContractModalOpen"
+    <ConfirmDeleteModal
+      v-model:target="contractToDelete"
       :title="$t('page.players.contracts.delete.title')"
-      :dismissible="!isDeletingContract"
-    >
-      <template #body>
-        <p>
-          {{
-            $t("page.players.contracts.delete.confirm", {
-              team: contractToDelete?.team.name,
-            })
-          }}
-        </p>
-      </template>
-      <template #footer>
-        <UButton
-          icon="i-fluent-delete-24-regular"
-          color="error"
-          :label="$t('page.players.contracts.delete.confirm_button')"
-          :loading="isDeletingContract"
-          @click="confirmDeleteContract"
-        />
-        <UButton
-          color="neutral"
-          variant="subtle"
-          :label="$t('common.cancel')"
-          :disabled="isDeletingContract"
-          @click="isDeleteContractModalOpen = false"
-        />
-      </template>
-    </UModal>
+      :confirm-label="$t('page.players.contracts.delete.confirm_button')"
+      :message="
+        (contract) => $t('page.players.contracts.delete.confirm', { team: contract.team.name })
+      "
+      :remove="(contract) => deletePlayerContract(playerId, contract.id)"
+      @deleted="refreshContracts"
+    />
   </NuxtLayout>
 </template>

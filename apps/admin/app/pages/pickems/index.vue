@@ -1,23 +1,32 @@
 <script lang="ts" setup>
-import { tournamentStageLabel } from "@sarpbc/utils";
-import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
-import type { TournamentListItem } from "@sarpbc/types";
+import {
+  getApiErrorMessage,
+  resolveThemedLogoUrl,
+  tournamentStageLabel,
+  type ThemedLogo,
+} from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 const colorMode = useColorMode();
 
 const enablingTournamentId = ref<string | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
-const { data, status, refresh } = await useLazyAsyncData(
-  "admin-pickems-tournaments",
-  () => getAllTournaments({ limit: 20 }),
-  { server: false },
-);
-
-const tournaments = computed(() => data.value?.tournaments ?? []);
+const {
+  items: tournaments,
+  total,
+  page,
+  limit,
+  status,
+  error,
+  refresh,
+} = useAdminList("admin-pickems-tournaments", async ({ limit, offset }) => {
+  const { tournaments, total } = await getAllTournaments({ limit, offset });
+  return { items: tournaments, total };
+});
 
 const breadcrumbItems = computed(() => [
   {
@@ -30,17 +39,21 @@ function teamLogoSrc(team: ThemedLogo | null | undefined) {
 }
 
 async function handleSyncTournament(tournamentId: string) {
-  await runTournamentSync(tournamentId, refresh);
+  try {
+    await runTournamentSync(tournamentId, refresh);
+  } catch (syncError) {
+    reportError(syncError);
+  }
 }
 
 async function handleEnablePickems(tournamentId: string) {
   enablingTournamentId.value = tournamentId;
   try {
-    const success = await setTournamentPickemsEnabled(tournamentId);
-    if (success) {
-      toast.add({ title: t("page.pickems.enablePickems"), color: "success" });
-      await refresh();
-    }
+    await enableTournamentPickems(tournamentId);
+    toast.add({ title: t("page.pickems.enablePickems"), color: "success" });
+    await refresh();
+  } catch (enableError) {
+    reportError(enableError);
   } finally {
     enablingTournamentId.value = null;
   }
@@ -55,11 +68,16 @@ async function handleEnablePickems(tournamentId: string) {
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <p v-if="status === 'pending'" class="text-sm text-muted">
+        <LoadError
+          v-if="status === 'error'"
+          :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+          @retry="refresh()"
+        />
+        <p v-else-if="status === 'pending'" class="text-sm text-muted">
           {{ $t("page.pickems.loading") }}
         </p>
         <p v-else class="text-sm text-muted">
-          {{ $t("page.pickems.tournamentsCount", { count: tournaments.length }) }}
+          {{ $t("page.pickems.tournamentsCount", { count: total }) }}
         </p>
 
         <div v-if="tournaments.length > 0" class="divide-y divide-default border-y border-default">
@@ -120,9 +138,17 @@ async function handleEnablePickems(tournamentId: string) {
           </div>
         </div>
 
-        <div v-else-if="status !== 'pending'" class="py-8 text-center text-sm text-muted">
+        <div v-else-if="status === 'success'" class="py-8 text-center text-sm text-muted">
           {{ $t("page.pickems.noTournaments") }}
         </div>
+
+        <UPagination
+          v-if="total > limit"
+          :page="page"
+          :total="total"
+          :items-per-page="limit"
+          @update:page="page = $event"
+        />
       </div>
     </DashboardContent>
   </NuxtLayout>

@@ -4,6 +4,7 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const formState = ref(createEmptyTournamentFormState());
 const slugAuto = ref(true);
@@ -21,9 +22,9 @@ const breadcrumbItems = computed(() => [
 ]);
 
 const [
-  { data: leagues },
-  { data: events, status: eventsStatus },
-  { data: teamsData, status: teamsStatus },
+  { data: leagues, error: leaguesError, refresh: refreshLeagues },
+  { data: events, status: eventsStatus, error: eventsError, refresh: refreshEvents },
+  { data: teams, status: teamsStatus, error: teamsError, refresh: refreshTeams },
 ] = await Promise.all([
   useLazyAsyncData("admin-tournament-leagues", () => getTournamentLeagues(), {
     server: false,
@@ -33,13 +34,17 @@ const [
     server: false,
     default: () => [],
   }),
-  useLazyAsyncData("admin-tournament-teams", () => getAllTeams({ limit: 200 }), {
+  useLazyAsyncData("admin-tournament-teams", () => getEveryTeam(), {
     server: false,
-    default: () => ({ teams: [], total: 0 }),
+    default: () => [],
   }),
 ]);
 
-const teams = computed(() => teamsData.value?.teams ?? []);
+const optionsError = computed(() => leaguesError.value ?? eventsError.value ?? teamsError.value);
+
+async function refreshOptions() {
+  await Promise.all([refreshLeagues(), refreshEvents(), refreshTeams()]);
+}
 
 async function handleSubmit() {
   if (isSaving.value || isUploading.value) return;
@@ -55,19 +60,10 @@ async function handleSubmit() {
   isSaving.value = true;
   try {
     const created = await createTournament(buildManualTournamentPayload(formState.value, null));
-    if (!created) {
-      toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
-      return;
-    }
-
     toast.add({ title: t("page.tournaments.create.saved"), color: "success" });
     await navigateTo(localePath(`/tournaments/${created.id}/edit`));
   } catch (error) {
-    console.error("Failed to create tournament:", error);
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.tournaments.form.saveFailed"),
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.form.saveFailed"));
   } finally {
     isSaving.value = false;
   }
@@ -101,7 +97,14 @@ async function handleSubmit() {
           </p>
         </div>
 
+        <LoadError
+          v-if="optionsError"
+          :message="getApiErrorMessage(optionsError) ?? $t('common.loadFailed')"
+          @retry="refreshOptions()"
+        />
+
         <TournamentManualForm
+          v-else
           v-model="formState"
           v-model:slug-auto="slugAuto"
           :original="null"

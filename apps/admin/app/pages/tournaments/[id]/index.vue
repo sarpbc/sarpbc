@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import type { TournamentMatchListItem } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const tournamentId = computed(() => route.params.id as string);
 const settingWinnerMatchId = ref<string | null>(null);
@@ -13,17 +15,31 @@ const vodsOpen = ref(false);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
-const { data: tournament, refresh: refreshTournament } = await useLazyAsyncData(
+const {
+  data: tournament,
+  error: tournamentError,
+  refresh: refreshTournament,
+} = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}`,
   () => getTournamentById(tournamentId.value),
   { server: false, watch: [tournamentId] },
 );
 
-const { data: matches, refresh: refreshMatches } = await useLazyAsyncData(
+const {
+  data: matches,
+  error: matchesError,
+  refresh: refreshMatches,
+} = await useLazyAsyncData(
   () => `admin-tournament-${tournamentId.value}-matches`,
   () => getTournamentMatches(tournamentId.value),
   { server: false, watch: [tournamentId] },
 );
+
+const loadError = computed(() => tournamentError.value ?? matchesError.value);
+
+async function reload() {
+  await Promise.all([refreshTournament(), refreshMatches()]);
+}
 
 const breadcrumbItems = computed(() => [
   {
@@ -59,13 +75,17 @@ function matchScore(match: TournamentMatchListItem): string {
 }
 
 async function handleRefresh() {
-  await runTournamentSync(tournamentId.value, async () => {
-    await Promise.all([
-      refreshTournament(),
-      refreshMatches(),
-      awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
-    ]);
-  });
+  try {
+    await runTournamentSync(tournamentId.value, async () => {
+      await Promise.all([
+        refreshTournament(),
+        refreshMatches(),
+        awardsPanel.value?.refreshAwards() ?? Promise.resolve(),
+      ]);
+    });
+  } catch (syncError) {
+    reportError(syncError);
+  }
 }
 
 function openVods(match: TournamentMatchListItem) {
@@ -76,11 +96,11 @@ function openVods(match: TournamentMatchListItem) {
 async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
   settingWinnerMatchId.value = match.id;
   try {
-    const success = await setMatchWinner(match.id, participantId);
-    if (success) {
-      toast.add({ title: t("page.tournaments.match.setWinner"), color: "success" });
-      await refreshMatches();
-    }
+    await setMatchWinner(match.id, participantId);
+    toast.add({ title: t("page.tournaments.match.setWinner"), color: "success" });
+    await refreshMatches();
+  } catch (winnerError) {
+    reportError(winnerError);
   } finally {
     settingWinnerMatchId.value = null;
   }
@@ -113,7 +133,12 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
     </template>
 
     <DashboardContent>
-      <div class="flex flex-col gap-4">
+      <LoadError
+        v-if="loadError"
+        :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
+        @retry="reload()"
+      />
+      <div v-else class="flex flex-col gap-4">
         <div v-if="tournament" class="flex flex-col gap-1">
           <h1 class="text-2xl font-semibold">{{ tournament.name }}</h1>
           <p v-if="tournament.beginAt" class="text-sm text-muted">

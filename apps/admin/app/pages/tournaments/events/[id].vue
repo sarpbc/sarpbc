@@ -5,6 +5,7 @@ const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const eventId = computed(() => route.params.id as string);
 const formState = ref(eventToFormState(null));
@@ -61,11 +62,7 @@ async function handleSubmit() {
     event.value = await updateEvent(event.value.id, payload);
     toast.add({ title: t("page.tournaments.events.edit.saved"), color: "success" });
   } catch (error) {
-    console.error("Failed to update event:", error);
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.tournaments.events.saveFailed"),
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.events.saveFailed"));
   } finally {
     isSaving.value = false;
   }
@@ -93,7 +90,7 @@ async function handleSubmit() {
           {{ $t("page.tournaments.loading") }}
         </p>
 
-        <TournamentLoadError
+        <LoadError
           v-else-if="status === 'error' || !event"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadOneError')"
           @retry="refresh()"

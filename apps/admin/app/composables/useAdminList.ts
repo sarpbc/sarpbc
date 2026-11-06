@@ -1,21 +1,27 @@
 import type { Ref } from "vue";
 
+type AdminListRange = { limit: number; offset: number; search: string };
 type AdminListPage<T> = { items: T[]; total: number };
 
 export function useAdminList<T>(
   key: string,
-  fetchPage: (range: { limit: number; offset: number }) => Promise<AdminListPage<T>>,
+  fetchPage: (range: AdminListRange) => Promise<AdminListPage<T>>,
 ) {
   const limit = 25;
   const page = ref(1);
+  const search = ref("");
   const items = ref([]) as Ref<T[]>;
   const total = ref(0);
 
-  const { status, data, refresh } = useLazyAsyncData(
-    () => `${key}-${page.value}`,
-    () => fetchPage({ limit, offset: (page.value - 1) * limit }),
-    { watch: [page], server: false },
+  const { status, data, error, refresh } = useLazyAsyncData(
+    () => `${key}-${search.value}-${page.value}`,
+    () => fetchPage({ limit, offset: (page.value - 1) * limit, search: search.value }),
+    { watch: [page, search], server: false },
   );
+
+  watch(search, () => {
+    page.value = 1;
+  });
 
   watch(
     status,
@@ -28,5 +34,5 @@ export function useAdminList<T>(
     { immediate: true },
   );
 
-  return { items, total, page, limit, status, refresh };
+  return { items, total, page, search, limit, status, error, refresh };
 }

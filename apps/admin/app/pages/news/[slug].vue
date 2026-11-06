@@ -1,11 +1,17 @@
 <script lang="ts" setup>
 import type { NewsType } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 const slug = useRoute().params.slug as string;
 
-const { data: article } = await useAsyncData(`admin-news-${slug}`, () => getNewsArticleAdmin(slug));
+const {
+  data: article,
+  error,
+  refresh,
+} = await useAsyncData(`admin-news-${slug}`, () => getNewsArticleAdmin(slug));
 
 const items = computed(() => [
   {
@@ -17,14 +23,31 @@ const items = computed(() => [
   },
 ]);
 
-const title = ref(article.value?.title ?? "");
-const titleFr = ref(article.value?.titleFr ?? "");
-const articleSlug = ref(article.value?.slug ?? "");
-const content = ref(article.value?.content ?? "");
-const contentFr = ref(article.value?.contentFr ?? "");
-const imageUrl = ref<string | null>(article.value?.imageUrl ?? null);
-const articleType = ref<NewsType>(article.value?.type ?? "short");
-const isDraft = ref(article.value?.isDraft ?? true);
+const title = ref("");
+const titleFr = ref("");
+const articleSlug = ref("");
+const content = ref("");
+const contentFr = ref("");
+const imageUrl = ref<string | null>(null);
+const articleType = ref<NewsType>("short");
+const isDraft = ref(true);
+
+watch(
+  article,
+  (loaded) => {
+    if (!loaded) return;
+    title.value = loaded.title;
+    titleFr.value = loaded.titleFr ?? "";
+    articleSlug.value = loaded.slug;
+    content.value = loaded.content;
+    contentFr.value = loaded.contentFr ?? "";
+    imageUrl.value = loaded.imageUrl ?? null;
+    articleType.value = loaded.type ?? "short";
+    isDraft.value = loaded.isDraft;
+  },
+  { immediate: true },
+);
+
 const isSaving = ref(false);
 const isPublishing = ref(false);
 const isModalOpen = ref(false);
@@ -49,13 +72,6 @@ async function saveArticle() {
       imageUrl: imageUrl.value,
       type: articleType.value,
     });
-    if (!updated) {
-      toast.add({
-        title: t("page.news.edit.saveFailed"),
-        color: "error",
-      });
-      return;
-    }
     isModalOpen.value = false;
     toast.add({
       title: t("page.news.edit.saved"),
@@ -64,12 +80,8 @@ async function saveArticle() {
     if (updated.slug !== slug) {
       await navigateTo(localePath(`/news/${updated.slug}`));
     }
-  } catch (error) {
-    console.error("Failed to save article:", error);
-    toast.add({
-      title: t("page.news.edit.saveFailed"),
-      color: "error",
-    });
+  } catch (saveError) {
+    reportError(saveError, t("page.news.edit.saveFailed"));
   } finally {
     isSaving.value = false;
   }
@@ -81,19 +93,18 @@ async function togglePublish() {
   }
   isPublishing.value = true;
   try {
-    const ok = isDraft.value ? await publishNewsArticle(slug) : await unpublishNewsArticle(slug);
-    if (!ok) {
-      toast.add({
-        title: t("page.news.edit.publishFailed"),
-        color: "error",
-      });
-      return;
+    if (isDraft.value) {
+      await publishNewsArticle(slug);
+    } else {
+      await unpublishNewsArticle(slug);
     }
     isDraft.value = !isDraft.value;
     toast.add({
       title: isDraft.value ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
       color: "success",
     });
+  } catch (publishError) {
+    reportError(publishError, t("page.news.edit.publishFailed"));
   } finally {
     isPublishing.value = false;
   }
@@ -202,7 +213,13 @@ async function togglePublish() {
       </UModal>
     </template>
 
+    <LoadError
+      v-if="error"
+      :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+      @retry="refresh()"
+    />
     <NewsArticleForm
+      v-else
       v-model:title="title"
       v-model:title-fr="titleFr"
       v-model:content="content"

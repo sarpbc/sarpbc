@@ -5,6 +5,7 @@ const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const tournamentId = computed(() => route.params.id as string);
 const formState = ref(createEmptyTournamentFormState());
@@ -12,7 +13,12 @@ const slugAuto = ref(false);
 const isSaving = ref(false);
 const isUploading = ref(false);
 
-const { data: tournament, status } = await useLazyAsyncData(
+const {
+  data: tournament,
+  status,
+  error: tournamentError,
+  refresh: refreshTournament,
+} = await useLazyAsyncData(
   () => `admin-tournament-edit-${tournamentId.value}`,
   () => getTournamentById(tournamentId.value),
   { server: false, watch: [tournamentId] },
@@ -39,9 +45,9 @@ const breadcrumbItems = computed(() => [
 ]);
 
 const [
-  { data: leagues },
-  { data: events, status: eventsStatus },
-  { data: teamsData, status: teamsStatus },
+  { data: leagues, error: leaguesError, refresh: refreshLeagues },
+  { data: events, status: eventsStatus, error: eventsError, refresh: refreshEvents },
+  { data: teams, status: teamsStatus, error: teamsError, refresh: refreshTeams },
 ] = await Promise.all([
   useLazyAsyncData("admin-tournament-leagues", () => getTournamentLeagues(), {
     server: false,
@@ -51,13 +57,20 @@ const [
     server: false,
     default: () => [],
   }),
-  useLazyAsyncData("admin-tournament-teams", () => getAllTeams({ limit: 200 }), {
+  useLazyAsyncData("admin-tournament-teams", () => getEveryTeam(), {
     server: false,
-    default: () => ({ teams: [], total: 0 }),
+    default: () => [],
   }),
 ]);
 
-const teams = computed(() => teamsData.value?.teams ?? []);
+const loadError = computed(
+  () => tournamentError.value ?? leaguesError.value ?? eventsError.value ?? teamsError.value,
+);
+
+async function reload() {
+  await Promise.all([refreshTournament(), refreshLeagues(), refreshEvents(), refreshTeams()]);
+}
+
 const isManual = computed(() => tournament.value?.source !== "pandascore");
 
 async function handleSubmit() {
@@ -79,20 +92,11 @@ async function handleSubmit() {
         ? buildManualTournamentPayload(formState.value, tournament.value)
         : { imageUrl: formState.value.imageUrl.trim() || null },
     );
-    if (!updated) {
-      toast.add({ title: t("page.tournaments.form.saveFailed"), color: "error" });
-      return;
-    }
-
     toast.add({ title: t("page.tournaments.edit.saved"), color: "success" });
     tournament.value = updated;
     formState.value = tournamentToFormState(updated);
   } catch (error) {
-    console.error("Failed to update tournament:", error);
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.tournaments.form.saveFailed"),
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.form.saveFailed"));
   } finally {
     isSaving.value = false;
   }
@@ -126,7 +130,13 @@ async function handleSubmit() {
 
     <DashboardContent>
       <div class="flex flex-col gap-6">
-        <div v-if="status === 'pending'" class="text-sm text-muted">
+        <LoadError
+          v-if="loadError"
+          :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
+          @retry="reload()"
+        />
+
+        <div v-else-if="status === 'pending'" class="text-sm text-muted">
           {{ $t("page.tournaments.loading") }}
         </div>
 

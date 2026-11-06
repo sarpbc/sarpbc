@@ -1,9 +1,11 @@
 import type { ModerationReply } from "@sarpbc/types";
 
-export async function getModerationReplies(limit = 50): Promise<ModerationReply[]> {
+export const MODERATION_REPLIES_LIMIT = 50;
+
+export async function getModerationReplies(): Promise<ModerationReply[]> {
   const res = await apiFetch<{ replies: ModerationReply[] }>("/moderation/replies", {
     method: "GET",
-    query: { limit },
+    query: { limit: MODERATION_REPLIES_LIMIT },
   });
-  return res.replies ?? [];
+  return res.replies;
 }

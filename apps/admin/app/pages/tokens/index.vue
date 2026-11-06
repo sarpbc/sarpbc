@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { parseLocale } from "@sarpbc/utils";
+import { TOKEN_NAME_MAX_LENGTH, getApiErrorMessage } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { PatToken } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const toast = useToast();
 const config = useRuntimeConfig();
 
@@ -16,14 +16,7 @@ const breadcrumbItems = [
   },
 ];
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(parseLocale(locale.value), {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }),
-);
+const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
 const columns: TableColumn<PatToken>[] = [
   {
@@ -176,20 +169,11 @@ async function confirmRevoke() {
           {{ $t("page.tokens.loading") }}
         </p>
 
-        <div
+        <LoadError
           v-else-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.tokens.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            :label="$t('page.tokens.retry')"
-            variant="soft"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.tokens.loadError')"
+          @retry="refresh()"
+        />
 
         <template v-else>
           <p v-if="tokens.length > 0" class="text-sm text-muted">
@@ -244,7 +228,7 @@ async function confirmRevoke() {
             <UInput
               v-model="newTokenName"
               :placeholder="$t('page.tokens.create.namePlaceholder')"
-              :maxlength="100"
+              :maxlength="TOKEN_NAME_MAX_LENGTH"
               class="w-full"
               autofocus
             />

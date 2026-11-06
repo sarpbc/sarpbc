@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { Player } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -37,15 +38,18 @@ const columns: TableColumn<Player>[] = [
   },
 ];
 
+const reportError = useReportError();
+
 const {
   items: players,
   total,
   page,
   limit,
   status,
+  error,
   refresh,
-} = useAdminList("admin-players", async (range) => {
-  const { players, total } = await getAllPlayers(range);
+} = useAdminList("admin-players", async ({ limit, offset }) => {
+  const { players, total } = await getAllPlayers({ limit, offset });
   return { items: players, total };
 });
 const playerToDelete = ref<Player | null>(null);
@@ -94,12 +98,10 @@ async function confirmCreate() {
     if (newPlayer.value.birthday) body.birthday = newPlayer.value.birthday;
     if (newPlayer.value.imageUrl) body.imageUrl = newPlayer.value.imageUrl;
     const created = await createPlayer(body);
-    if (created) {
-      isCreateModalOpen.value = false;
-      navigateTo(localePath(`/players/${created.id}`));
-    }
-  } catch (error) {
-    console.error("Failed to create player:", error);
+    isCreateModalOpen.value = false;
+    await navigateTo(localePath(`/players/${created.id}`));
+  } catch (createError) {
+    reportError(createError);
   } finally {
     isCreating.value = false;
   }
@@ -120,7 +122,12 @@ async function confirmCreate() {
     </template>
 
     <DashboardContent>
-      <ClientOnly>
+      <LoadError
+        v-if="status === 'error'"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
+      <ClientOnly v-else>
         <UTable
           :data="players"
           :columns="columns"

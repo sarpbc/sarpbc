@@ -28,13 +28,6 @@ export function createEmptyTournamentFormState(): ManualTournamentFormState {
   };
 }
 
-export function formatDateForInput(date: Date | string | null | undefined): string {
-  if (!date) {
-    return "";
-  }
-  return new Date(date).toISOString().substring(0, 10);
-}
-
 export function tournamentToFormState(tournament: TournamentDetail): ManualTournamentFormState {
   return {
     name: tournament.name ?? "",

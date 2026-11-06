@@ -4,6 +4,7 @@ import {
   type PlayerAwardType,
   type TournamentAwardListItem,
 } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const props = defineProps<{
   tournamentId: string;
@@ -16,13 +17,18 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const toast = useToast();
+const reportError = useReportError();
 
 const assigning = ref(false);
 const removingAwardId = ref<string | null>(null);
 const selectedPlayerId = ref<string>();
 const selectedAwardType = ref<PlayerAwardType>();
 
-const { data: awards, refresh: refreshAwards } = await useLazyAsyncData(
+const {
+  data: awards,
+  error,
+  refresh: refreshAwards,
+} = await useLazyAsyncData(
   () => `admin-tournament-${props.tournamentId}-awards`,
   () => getTournamentAwards(props.tournamentId),
   { server: false, watch: [() => props.tournamentId] },
@@ -91,22 +97,22 @@ async function handleAssignAward() {
 
   assigning.value = true;
   try {
-    const award = await createTournamentAward(props.tournamentId, {
+    await createTournamentAward(props.tournamentId, {
       participantId: entry.participantId,
       playerId: entry.playerId,
       awardType,
     });
-    if (award) {
-      toast.add({
-        title: t("page.tournaments.awards.assigned", {
-          name: entry.playerName,
-          type: t(`page.tournaments.awards.types.${awardType}`),
-        }),
-        color: "success",
-      });
-      selectedPlayerId.value = undefined;
-      await refreshAwards();
-    }
+    toast.add({
+      title: t("page.tournaments.awards.assigned", {
+        name: entry.playerName,
+        type: t(`page.tournaments.awards.types.${awardType}`),
+      }),
+      color: "success",
+    });
+    selectedPlayerId.value = undefined;
+    await refreshAwards();
+  } catch (assignError) {
+    reportError(assignError);
   } finally {
     assigning.value = false;
   }
@@ -115,16 +121,16 @@ async function handleAssignAward() {
 async function handleRemoveAward(award: TournamentAwardListItem) {
   removingAwardId.value = award.id;
   try {
-    const success = await deleteTournamentAward(props.tournamentId, award.id);
-    if (success) {
-      toast.add({
-        title: t("page.tournaments.awards.removed", {
-          type: t(`page.tournaments.awards.types.${award.awardType}`),
-        }),
-        color: "success",
-      });
-      await refreshAwards();
-    }
+    await deleteTournamentAward(props.tournamentId, award.id);
+    toast.add({
+      title: t("page.tournaments.awards.removed", {
+        type: t(`page.tournaments.awards.types.${award.awardType}`),
+      }),
+      color: "success",
+    });
+    await refreshAwards();
+  } catch (removeError) {
+    reportError(removeError);
   } finally {
     removingAwardId.value = null;
   }
@@ -139,6 +145,12 @@ defineExpose({ refreshAwards });
       <h2 class="text-lg font-semibold">{{ $t("page.tournaments.awards.title") }}</h2>
       <p class="text-sm text-muted">{{ $t("page.tournaments.awards.hint") }}</p>
     </div>
+
+    <LoadError
+      v-if="error"
+      :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+      @retry="refreshAwards()"
+    />
 
     <div
       v-for="award in awards ?? []"

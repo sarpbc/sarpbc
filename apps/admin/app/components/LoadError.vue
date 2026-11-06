@@ -9,7 +9,7 @@ defineEmits<{ retry: [] }>();
     <UButton
       icon="i-fluent-arrow-clockwise-24-regular"
       variant="soft"
-      :label="$t('page.tournaments.retry')"
+      :label="$t('common.retry')"
       @click="$emit('retry')"
     />
   </div>

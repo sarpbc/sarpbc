@@ -62,22 +62,12 @@ function confirmMessage(game: TournamentStatsGame): string {
   });
 }
 
-async function remove(game: TournamentStatsGame): Promise<boolean> {
-  try {
-    await removeStatsGame(props.tournamentId, game.matchId, game.number);
-    toast.add({
-      title: t("page.tournaments.statsGames.removed", { number: game.number }),
-      color: "success",
-    });
-    return true;
-  } catch (error) {
-    toast.add({
-      title: t("page.tournaments.statsGames.removeError"),
-      description: getApiErrorMessage(error) ?? undefined,
-      color: "error",
-    });
-    return false;
-  }
+async function remove(game: TournamentStatsGame): Promise<void> {
+  await removeStatsGame(props.tournamentId, game.matchId, game.number);
+  toast.add({
+    title: t("page.tournaments.statsGames.removed", { number: game.number }),
+    color: "success",
+  });
 }
 </script>
 

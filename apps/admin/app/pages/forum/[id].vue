@@ -1,28 +1,28 @@
 <script lang="ts" setup>
-import type { Reply } from "@sarpbc/types";
+import type { ForumPost, Reply } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const postId = computed(() => route.params.id as string);
-const isDeletePostModalOpen = ref(false);
-const isDeleteReplyModalOpen = ref(false);
+const postToDelete = ref<ForumPost | null>(null);
 const replyToDelete = ref<Reply | null>(null);
-const isDeletingPost = ref(false);
-const isDeletingReply = ref(false);
 const hidingReplyId = ref<string | null>(null);
 
 const {
   data: thread,
   status,
+  error,
   refresh,
 } = await useLazyAsyncData(
   () => `admin-forum-post-${postId.value}`,
   async () => {
     const post = await getPostById(postId.value);
-    return post ? { post, replies: await getPostReplies(post.id) } : null;
+    return { post, replies: await getPostReplies(post.id) };
   },
   { server: false, watch: [postId] },
 );
@@ -56,56 +56,18 @@ const flatReplies = computed(() => {
   return items;
 });
 
-function openDeleteReplyModal(reply: Reply) {
-  replyToDelete.value = reply;
-  isDeleteReplyModalOpen.value = true;
-}
-
-async function confirmDeletePost() {
-  isDeletingPost.value = true;
-  try {
-    const success = await deleteForumPost(postId.value);
-    if (success) {
-      await navigateTo(localePath("/forum"));
-    }
-  } finally {
-    isDeletingPost.value = false;
-  }
-}
-
-async function confirmDeleteReply() {
-  if (!replyToDelete.value) return;
-  isDeletingReply.value = true;
-  try {
-    const success = await deleteForumReply(replyToDelete.value.id);
-    if (success) {
-      isDeleteReplyModalOpen.value = false;
-      replyToDelete.value = null;
-      await refresh();
-    }
-  } finally {
-    isDeletingReply.value = false;
-  }
-}
-
 async function hideReply(reply: Reply) {
   if (hidingReplyId.value) return;
   hidingReplyId.value = reply.id;
   try {
-    const success = await hideForumReply(reply.id);
-    if (success) {
-      toast.add({
-        title: t("page.forum.messages.hidden"),
-        color: "success",
-      });
-      await refresh();
-    } else {
-      toast.add({
-        title: t("page.forum.messages.errorTitle"),
-        description: t("page.forum.messages.moderateError"),
-        color: "error",
-      });
-    }
+    await hideForumReply(reply.id);
+    toast.add({
+      title: t("page.forum.messages.hidden"),
+      color: "success",
+    });
+    await refresh();
+  } catch (hideError) {
+    reportError(hideError, t("page.forum.messages.moderateError"));
   } finally {
     hidingReplyId.value = null;
   }
@@ -119,11 +81,12 @@ async function hideReply(reply: Reply) {
     </template>
     <template #action>
       <UButton
+        v-if="post"
         color="error"
         variant="soft"
         icon="i-fluent-delete-24-regular"
         :label="$t('page.forum.delete.postTitle')"
-        @click="isDeletePostModalOpen = true"
+        @click="postToDelete = post"
       />
     </template>
 
@@ -132,9 +95,11 @@ async function hideReply(reply: Reply) {
         {{ $t("page.forum.loading") }}
       </p>
 
-      <p v-else-if="!post" class="text-sm text-muted">
-        {{ $t("page.forum.notFound") }}
-      </p>
+      <LoadError
+        v-else-if="!post"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
 
       <div v-else class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
@@ -177,7 +142,7 @@ async function hideReply(reply: Reply) {
                 variant="ghost"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.forum.delete.replyTitle')"
-                @click="openDeleteReplyModal(reply)"
+                @click="replyToDelete = reply"
               />
             </div>
           </div>
@@ -188,61 +153,23 @@ async function hideReply(reply: Reply) {
         </div>
       </div>
 
-      <UModal
-        v-model:open="isDeletePostModalOpen"
+      <ConfirmDeleteModal
+        v-model:target="postToDelete"
         :title="$t('page.forum.delete.postTitle')"
-        :dismissible="!isDeletingPost"
-      >
-        <template #body>
-          <p>
-            {{
-              $t("page.forum.delete.postConfirm", {
-                title: post?.title ?? "",
-              })
-            }}
-          </p>
-        </template>
-        <template #footer>
-          <UButton
-            color="error"
-            :loading="isDeletingPost"
-            :label="$t('page.forum.delete.confirmButton')"
-            @click="confirmDeletePost"
-          />
-          <UButton
-            color="neutral"
-            variant="subtle"
-            :label="$t('common.cancel')"
-            :disabled="isDeletingPost"
-            @click="isDeletePostModalOpen = false"
-          />
-        </template>
-      </UModal>
+        :confirm-label="$t('page.forum.delete.confirmButton')"
+        :message="(target) => $t('page.forum.delete.postConfirm', { title: target.title })"
+        :remove="(target) => deleteForumPost(target.id)"
+        @deleted="navigateTo(localePath('/forum'))"
+      />
 
-      <UModal
-        v-model:open="isDeleteReplyModalOpen"
+      <ConfirmDeleteModal
+        v-model:target="replyToDelete"
         :title="$t('page.forum.delete.replyTitle')"
-        :dismissible="!isDeletingReply"
-      >
-        <template #body>
-          <p>{{ $t("page.forum.delete.replyConfirm") }}</p>
-        </template>
-        <template #footer>
-          <UButton
-            color="error"
-            :loading="isDeletingReply"
-            :label="$t('page.forum.delete.confirmButton')"
-            @click="confirmDeleteReply"
-          />
-          <UButton
-            color="neutral"
-            variant="subtle"
-            :label="$t('common.cancel')"
-            :disabled="isDeletingReply"
-            @click="isDeleteReplyModalOpen = false"
-          />
-        </template>
-      </UModal>
+        :confirm-label="$t('page.forum.delete.confirmButton')"
+        :message="() => $t('page.forum.delete.replyConfirm')"
+        :remove="(target) => deleteForumReply(target.id)"
+        @deleted="refresh()"
+      />
     </DashboardContent>
   </NuxtLayout>
 </template>

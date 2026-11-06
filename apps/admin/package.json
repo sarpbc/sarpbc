@@ -24,6 +24,7 @@
     "@tiptap/extension-table": "catalog:",
     "@tiptap/pm": "catalog:",
     "@tiptap/vue-3": "catalog:",
+    "@vueuse/core": "^15.0.0",
     "nuxt": "catalog:",
     "vue": "catalog:",
     "vue-i18n": "catalog:",

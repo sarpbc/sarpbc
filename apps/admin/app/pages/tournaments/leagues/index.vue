@@ -6,6 +6,7 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const { data, status, error, refresh } = await useLazyAsyncData(
   "admin-tournament-leagues",
@@ -99,11 +100,7 @@ async function handleSubmit() {
     isOpen.value = false;
     await refresh();
   } catch (error) {
-    console.error("Failed to save league:", error);
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.tournaments.leagues.saveFailed"),
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.leagues.saveFailed"));
   } finally {
     isSaving.value = false;
   }
@@ -134,7 +131,7 @@ const uploadedImageUrl = computed({
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.leagues.subtitle") }}</p>
 
-        <TournamentLoadError
+        <LoadError
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.leagues.loadError')"
           @retry="refresh()"

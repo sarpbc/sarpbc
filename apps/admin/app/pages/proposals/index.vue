@@ -1,20 +1,14 @@
 <script lang="ts" setup>
 import type { RosterProposal } from "@sarpbc/types";
-import { hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const toast = useToast();
+const reportError = useReportError();
 
 const breadcrumbItems = [{ label: t("page.proposals.title") }];
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(parseLocale(locale.value), {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 const user = useUser();
 const reviewingId = ref<string | null>(null);
@@ -28,15 +22,6 @@ const { status, data, error, refresh } = await useLazyAsyncData(
   () => getPendingRosterProposals(),
   { server: false },
 );
-
-watch(error, (loadError) => {
-  if (!loadError) return;
-  toast.add({
-    title: t("page.proposals.loadError"),
-    description: getApiErrorMessage(loadError),
-    color: "error",
-  });
-});
 
 const proposals = computed(() => data.value?.proposals ?? []);
 const names = computed(() => data.value?.names ?? {});
@@ -135,11 +120,7 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
     });
     await refresh();
   } catch (reviewError) {
-    toast.add({
-      title: t("page.proposals.messages.errorTitle"),
-      description: getApiErrorMessage(reviewError) ?? t("page.proposals.messages.reviewError"),
-      color: "error",
-    });
+    reportError(reviewError, t("page.proposals.messages.reviewError"));
   } finally {
     reviewingId.value = null;
   }
@@ -165,20 +146,11 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
           </div>
         </div>
 
-        <div
+        <LoadError
           v-else-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.proposals.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            :label="$t('page.proposals.retry')"
-            variant="soft"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.proposals.loadError')"
+          @retry="refresh()"
+        />
 
         <p v-else-if="proposals.length === 0" class="text-sm text-muted">
           {{ $t("page.proposals.empty") }}

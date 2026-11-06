@@ -3,9 +3,10 @@ import type { ModerationReply } from "@sarpbc/types";
 import { parseLocale } from "@sarpbc/utils";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 const config = useRuntimeConfig();
 
 const breadcrumbItems = [
@@ -16,36 +17,16 @@ const breadcrumbItems = [
 
 const publicSiteUrl = computed(() => String(config.public.publicSiteUrl).replace(/\/$/, ""));
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(parseLocale(locale.value), {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 const hidingReplyId = ref<string | null>(null);
-const isDeleteReplyModalOpen = ref(false);
 const replyToDelete = ref<ModerationReply | null>(null);
-const isDeletingReply = ref(false);
 
 const { status, data, error, refresh } = await useLazyAsyncData(
   "admin-moderation-replies",
-  () => getModerationReplies(50),
+  () => getModerationReplies(),
   { server: false },
 );
-
-watch(error, (loadError) => {
-  if (!loadError) {
-    return;
-  }
-
-  toast.add({
-    title: t("page.moderation.loadError"),
-    description: getApiErrorMessage(loadError),
-    color: "error",
-  });
-});
 
 const replies = computed(() => data.value ?? []);
 
@@ -72,53 +53,25 @@ async function hideReply(reply: ModerationReply) {
   if (hidingReplyId.value) return;
   hidingReplyId.value = reply.id;
   try {
-    const success = await hideForumReply(reply.id);
-    if (success) {
-      toast.add({
-        title: t("page.moderation.messages.hidden"),
-        color: "success",
-      });
-      await refresh();
-    } else {
-      toast.add({
-        title: t("page.moderation.messages.errorTitle"),
-        description: t("page.moderation.messages.moderateError"),
-        color: "error",
-      });
-    }
+    await hideForumReply(reply.id);
+    toast.add({
+      title: t("page.moderation.messages.hidden"),
+      color: "success",
+    });
+    await refresh();
+  } catch (hideError) {
+    reportError(hideError, t("page.moderation.messages.moderateError"));
   } finally {
     hidingReplyId.value = null;
   }
 }
 
-function openDeleteReplyModal(reply: ModerationReply) {
-  replyToDelete.value = reply;
-  isDeleteReplyModalOpen.value = true;
-}
-
-async function confirmDeleteReply() {
-  if (!replyToDelete.value) return;
-  isDeletingReply.value = true;
-  try {
-    const success = await deleteForumReply(replyToDelete.value.id);
-    if (success) {
-      toast.add({
-        title: t("page.moderation.messages.deleted"),
-        color: "success",
-      });
-      isDeleteReplyModalOpen.value = false;
-      replyToDelete.value = null;
-      await refresh();
-    } else {
-      toast.add({
-        title: t("page.moderation.messages.errorTitle"),
-        description: t("page.moderation.messages.moderateError"),
-        color: "error",
-      });
-    }
-  } finally {
-    isDeletingReply.value = false;
-  }
+async function onReplyDeleted() {
+  toast.add({
+    title: t("page.moderation.messages.deleted"),
+    color: "success",
+  });
+  await refresh();
 }
 </script>
 
@@ -142,20 +95,11 @@ async function confirmDeleteReply() {
           </div>
         </div>
 
-        <div
+        <LoadError
           v-else-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.moderation.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            :label="$t('page.moderation.retry')"
-            variant="soft"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.moderation.loadError')"
+          @retry="refresh()"
+        />
 
         <p v-else-if="replies.length === 0" class="text-sm text-muted">
           {{ $t("page.moderation.empty") }}
@@ -200,7 +144,7 @@ async function confirmDeleteReply() {
                   variant="ghost"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.moderation.delete')"
-                  @click="openDeleteReplyModal(reply)"
+                  @click="replyToDelete = reply"
                 />
               </div>
             </div>
@@ -229,30 +173,14 @@ async function confirmDeleteReply() {
         </div>
       </div>
 
-      <UModal
-        v-model:open="isDeleteReplyModalOpen"
+      <ConfirmDeleteModal
+        v-model:target="replyToDelete"
         :title="$t('page.moderation.delete')"
-        :dismissible="!isDeletingReply"
-      >
-        <template #body>
-          <p>{{ $t("page.moderation.deleteConfirm") }}</p>
-        </template>
-        <template #footer>
-          <UButton
-            color="error"
-            :loading="isDeletingReply"
-            :label="$t('page.moderation.deleteConfirmButton')"
-            @click="confirmDeleteReply"
-          />
-          <UButton
-            color="neutral"
-            variant="subtle"
-            :label="$t('common.cancel')"
-            :disabled="isDeletingReply"
-            @click="isDeleteReplyModalOpen = false"
-          />
-        </template>
-      </UModal>
+        :confirm-label="$t('page.moderation.deleteConfirmButton')"
+        :message="() => $t('page.moderation.deleteConfirm')"
+        :remove="(reply) => deleteForumReply(reply.id)"
+        @deleted="onReplyDeleted"
+      />
     </DashboardContent>
   </NuxtLayout>
 </template>

@@ -1,6 +1,14 @@
 <script lang="ts" setup>
 import type { TournamentDetailParticipant, TournamentPrizes } from "@sarpbc/types";
-import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
+import {
+  CURRENCY_CODE_LENGTH,
+  MAX_PRIZE_AMOUNT,
+  MAX_PRIZE_ENTRIES,
+  MAX_PRIZE_PLAYERS,
+  MIN_PRIZE_AMOUNT,
+  MIN_PRIZE_PLACEMENT,
+  isIso4217Code,
+} from "@sarpbc/utils";
 import type { TournamentPrizeInput } from "~/composables/tournaments";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -104,6 +112,9 @@ function teamError(row: PrizeRow): string | undefined {
 }
 
 function playersError(row: PrizeRow): string | undefined {
+  if (row.playerIds.length > MAX_PRIZE_PLAYERS) {
+    return t("page.tournaments.prizes.errors.tooManyPlayers", { max: MAX_PRIZE_PLAYERS });
+  }
   return isParticipant(row.teamId) &&
     row.playerIds.some((playerId) => !isOnRoster(row.teamId, playerId))
     ? t("page.tournaments.prizes.errors.notOnRoster")
@@ -115,7 +126,12 @@ function normalizeCurrency(currency: string): string {
 }
 
 function isValidAmount(amount: number | null): amount is number {
-  return amount !== null && Number.isInteger(amount) && amount >= 1 && amount <= MAX_PRIZE_AMOUNT;
+  return (
+    amount !== null &&
+    Number.isInteger(amount) &&
+    amount >= MIN_PRIZE_AMOUNT &&
+    amount <= MAX_PRIZE_AMOUNT
+  );
 }
 
 function currencyError(currency: string): string | undefined {
@@ -136,7 +152,7 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     !isParticipant(teamId) ||
     playersError(row) ||
     !Number.isInteger(row.placement) ||
-    row.placement < 1 ||
+    row.placement < MIN_PRIZE_PLACEMENT ||
     !isValidAmount(amount) ||
     currencyError(row.currency)
   )
@@ -244,7 +260,12 @@ async function save() {
         class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[6rem_8rem_6rem_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start"
       >
         <UFormField :label="t('page.tournaments.prizes.placement')">
-          <UInputNumber v-model="row.placement" :min="1" :step="1" class="w-full" />
+          <UInputNumber
+            v-model="row.placement"
+            :min="MIN_PRIZE_PLACEMENT"
+            :step="1"
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField
@@ -257,7 +278,7 @@ async function save() {
         >
           <UInputNumber
             v-model="row.amount"
-            :min="1"
+            :min="MIN_PRIZE_AMOUNT"
             :max="MAX_PRIZE_AMOUNT"
             :step="1"
             class="w-full"
@@ -270,7 +291,7 @@ async function save() {
         >
           <UInput
             v-model="row.currency"
-            maxlength="3"
+            :maxlength="CURRENCY_CODE_LENGTH"
             autocomplete="off"
             spellcheck="false"
             class="w-full"

@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import type {
-  MatchBlockSelector,
-  MatchBlocksResponse,
-  Team,
-  TournamentEventRef,
-  TournamentMatchListItem,
-} from "@sarpbc/types";
+import { watchDebounced } from "@vueuse/core";
+import type { MatchBlockSelector, TournamentMatchListItem } from "@sarpbc/types";
 import {
   NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
   NEWS_MATCH_BLOCK_MAX_MATCHES,
@@ -15,7 +10,6 @@ import {
 } from "@sarpbc/utils";
 
 type Selection = { id: string; label: string };
-type TournamentResult = { id: string; name: string; event: TournamentEventRef };
 
 const props = defineProps<{
   open: boolean;
@@ -27,7 +21,8 @@ const emit = defineEmits<{
   select: [block: MatchBlockSelector];
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const reportError = useReportError();
 
 const kind = ref<NewsMatchBlockKind>("match");
 const source = ref<Selection | null>(null);
@@ -49,9 +44,7 @@ const kindItems = computed(() => [
 const searchesTeams = computed(() => kind.value === "team");
 const picksMatches = computed(() => kind.value === "match" || kind.value === "matches");
 
-const dateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 const block = computed((): MatchBlockSelector | null => {
   if (!source.value) {
@@ -83,13 +76,11 @@ function matchLabel(match: TournamentMatchListItem): string {
 
 async function resolveSource(initial: MatchBlockSelector): Promise<Selection | null> {
   if (initial.kind === "team") {
-    const response = await apiFetch<{ team: Team | null }>(`/team/${initial.id}`);
-    return response.team ? { id: initial.id, label: response.team.name } : null;
+    const team = await getTeamById(initial.id);
+    return { id: team.id, label: team.name };
   }
   const key = newsMatchBlockKey(initial);
-  const response = await apiFetch<MatchBlocksResponse>("/matches/blocks", {
-    query: { block: key },
-  });
+  const response = await getMatchBlocks(key);
   const tournament = response.blocks[key]?.[0]?.tournament;
   if (tournament) {
     return { id: tournament.id, label: tournamentStageLabel(tournament) };
@@ -111,7 +102,11 @@ async function reset() {
   results.value = [];
   matches.value = [];
   if (initial) {
-    source.value = await resolveSource(initial).catch(() => null);
+    try {
+      source.value = await resolveSource(initial);
+    } catch (resolveError) {
+      reportError(resolveError);
+    }
   }
 }
 
@@ -142,18 +137,13 @@ watch([source, picksMatches], async ([selected, picking]) => {
   }
   loadingMatches.value = true;
   try {
-    const response = await apiFetch<{ matches: TournamentMatchListItem[] }>(
-      `/tournaments/${selected.id}/matches`,
-    );
-    matches.value = response.matches;
-  } catch {
-    matches.value = [];
+    matches.value = await getTournamentMatches(selected.id);
+  } catch (loadError) {
+    reportError(loadError);
   } finally {
     loadingMatches.value = false;
   }
 });
-
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
 
 async function runSearch(value: string) {
   const trimmed = value.trim();
@@ -164,30 +154,24 @@ async function runSearch(value: string) {
   searching.value = true;
   try {
     if (searchesTeams.value) {
-      const teams = await apiFetch<Team[]>("/search/teams", { query: { q: trimmed, limit: 10 } });
+      const teams = await searchTeams(trimmed);
       results.value = teams.map((team) => ({ id: team.id, label: team.name }));
     } else {
-      const tournaments = await apiFetch<TournamentResult[]>("/search/tournaments", {
-        query: { q: trimmed, limit: 10 },
-      });
+      const tournaments = await searchTournaments(trimmed);
       results.value = tournaments.map((tournament) => ({
         id: tournament.id,
         label: tournamentStageLabel(tournament),
       }));
     }
-  } catch {
+  } catch (searchError) {
     results.value = [];
+    reportError(searchError);
   } finally {
     searching.value = false;
   }
 }
 
-watch(query, (value) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    void runSearch(value);
-  }, 250);
-});
+watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 function choose(selection: Selection) {
   source.value = selection;

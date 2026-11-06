@@ -4,6 +4,7 @@ import { toSlug } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const items = [
   {
@@ -61,25 +62,14 @@ async function saveArticle() {
       imageUrl: imageUrl.value ?? undefined,
       type: articleType.value,
     });
-    if (!created) {
-      toast.add({
-        title: t("page.news.create.saveFailed"),
-        color: "error",
-      });
-      return;
-    }
     isModalOpen.value = false;
     toast.add({
       title: t("page.news.create.saved"),
       color: "success",
     });
     await navigateTo(localePath(`/news/${created.slug}`));
-  } catch (error) {
-    console.error("Failed to save article:", error);
-    toast.add({
-      title: t("page.news.create.saveFailed"),
-      color: "error",
-    });
+  } catch (saveError) {
+    reportError(saveError, t("page.news.create.saveFailed"));
   } finally {
     isSaving.value = false;
   }

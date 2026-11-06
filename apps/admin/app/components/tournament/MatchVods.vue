@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import type { MatchVod, MatchVodSource, TournamentMatchListItem } from "@sarpbc/types";
-import { maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
-import { getApiErrorMessage } from "@sarpbc/utils";
-
-const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/;
+import {
+  getApiErrorMessage,
+  isIso6391Code,
+  LANGUAGE_CODE_LENGTH,
+  maxVodGame,
+  parseMatchVodUrl,
+} from "@sarpbc/utils";
 
 interface VodRow {
   key: number;
@@ -25,6 +28,7 @@ const open = defineModel<boolean>("open", { default: false });
 
 const { t, locale } = useI18n();
 const toast = useToast();
+const reportError = useReportError();
 
 const rows = ref<VodRow[]>([]);
 const loading = ref(false);
@@ -49,7 +53,7 @@ function normalizeLanguage(language: string): string {
 
 function languageFeedback(language: string): FieldFeedback {
   const code = normalizeLanguage(language);
-  return LANGUAGE_CODE_PATTERN.test(code)
+  return isIso6391Code(code)
     ? { help: languageNames.value.of(code) }
     : { error: t("page.tournaments.vods.errors.invalid-language") };
 }
@@ -77,8 +81,7 @@ function urlFeedback(url: string): FieldFeedback {
 
 const canSave = computed(() =>
   rows.value.every(
-    (row) =>
-      parseMatchVodUrl(row.url).ok && LANGUAGE_CODE_PATTERN.test(normalizeLanguage(row.language)),
+    (row) => parseMatchVodUrl(row.url).ok && isIso6391Code(normalizeLanguage(row.language)),
   ),
 );
 
@@ -135,11 +138,7 @@ async function save() {
     toast.add({ title: t("page.tournaments.vods.saved"), color: "success" });
     open.value = false;
   } catch (error) {
-    toast.add({
-      title: t("page.tournaments.vods.saveError"),
-      description: getApiErrorMessage(error) ?? undefined,
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.vods.saveError"));
   } finally {
     saving.value = false;
   }
@@ -199,7 +198,7 @@ async function save() {
           >
             <UInput
               v-model="row.language"
-              maxlength="2"
+              :maxlength="LANGUAGE_CODE_LENGTH"
               autocomplete="off"
               spellcheck="false"
               class="w-full"

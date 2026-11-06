@@ -1,26 +1,19 @@
 <script lang="ts" setup>
-import { parseLocale } from "@sarpbc/utils";
+import { watchDebounced } from "@vueuse/core";
+import { getApiErrorMessage } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { UserListItem } from "@sarpbc/types";
 import { ASSIGNABLE_ROLES, type AssignableRole } from "~/types/user";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
-const LIMIT = 25;
-
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const toast = useToast();
+const reportError = useReportError();
 const currentUser = useUser();
 
 const breadcrumbItems = [{ label: t("page.users.title") }];
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(parseLocale(locale.value), {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }),
-);
+const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
 const roleItems = computed(() =>
   ASSIGNABLE_ROLES.map((role) => ({ value: role, label: t(`page.users.roles.${role}`) })),
@@ -38,34 +31,30 @@ const columns: TableColumn<UserListItem>[] = [
 ];
 
 const searchInput = ref("");
-const search = ref("");
-const page = ref(1);
 const savingId = ref<string | null>(null);
 const pendingChange = ref<{ user: UserListItem; role: AssignableRole } | null>(null);
 const isConfirmOpen = ref(false);
 
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
+const {
+  items: users,
+  total,
+  page,
+  search,
+  limit,
+  status,
+  error,
+  refresh,
+} = useAdminList("admin-users", async (range) => {
+  const { users, total } = await getUsers(range);
+  return { items: users, total };
+});
 
-watch(searchInput, (value) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
+watchDebounced(
+  searchInput,
+  (value) => {
     search.value = value.trim();
-    page.value = 1;
-  }, 300);
-});
-
-onBeforeUnmount(() => {
-  clearTimeout(searchTimer);
-});
-
-const { status, data, error, refresh } = await useLazyAsyncData(
-  () => `admin-users-${search.value}-${page.value}`,
-  () => getUsers({ search: search.value, limit: LIMIT, offset: (page.value - 1) * LIMIT }),
-  {
-    default: () => ({ users: [], total: 0 }),
-    watch: [search, page],
-    server: false,
   },
+  { debounce: SEARCH_DEBOUNCE_MS },
 );
 
 function roleOf(user: UserListItem): AssignableRole {
@@ -96,11 +85,7 @@ async function applyRoleChange(user: UserListItem, role: AssignableRole) {
       color: "success",
     });
   } catch (changeError) {
-    toast.add({
-      title: t("page.users.messages.errorTitle"),
-      description: getApiErrorMessage(changeError) ?? t("page.users.messages.updateError"),
-      color: "error",
-    });
+    reportError(changeError, t("page.users.messages.updateError"));
   } finally {
     savingId.value = null;
     await refresh();
@@ -134,23 +119,14 @@ async function confirmChange() {
           :aria-label="$t('page.users.searchPlaceholder')"
         />
 
-        <div
+        <LoadError
           v-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.users.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            variant="soft"
-            :label="$t('page.users.retry')"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.users.loadError')"
+          @retry="refresh()"
+        />
 
         <ClientOnly v-else>
-          <UTable :data="data.users" :columns="columns" :loading="status === 'pending'" sticky>
+          <UTable :data="users" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ search ? $t("page.users.emptySearch") : $t("page.users.empty") }}
             </template>
@@ -172,14 +148,14 @@ async function confirmChange() {
               />
             </template>
           </UTable>
-          <div v-if="data.total > LIMIT" class="mt-4 flex w-full flex-row justify-between">
+          <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
             <span class="text-muted">
-              {{ $t("page.users.usersCount", { count: data.total }, data.total) }}
+              {{ $t("page.users.usersCount", { count: total }, total) }}
             </span>
             <UPagination
               :page="page"
-              :total="data.total"
-              :items-per-page="LIMIT"
+              :total="total"
+              :items-per-page="limit"
               @update:page="page = $event"
             />
           </div>

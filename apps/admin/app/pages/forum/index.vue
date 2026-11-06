@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { ForumPostListItem } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -39,6 +40,7 @@ const columns: TableColumn<ForumPostListItem>[] = [
 const {
   items: posts,
   status,
+  error,
   refresh,
 } = useAdminList("admin-forum-posts", async () => {
   const posts = await getPosts();
@@ -69,11 +71,17 @@ function openDeleteModal(e: Event, post: ForumPostListItem) {
           {{ $t("page.forum.postsCount", { count: posts.length }) }}
         </p>
 
-        <p v-if="status === 'success' && posts.length === 0" class="text-sm text-muted">
+        <LoadError
+          v-if="status === 'error'"
+          :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+          @retry="refresh()"
+        />
+
+        <p v-else-if="status === 'success' && posts.length === 0" class="text-sm text-muted">
           {{ $t("page.forum.empty") }}
         </p>
 
-        <ClientOnly>
+        <ClientOnly v-if="status !== 'error'">
           <UTable
             v-if="posts.length > 0 || status === 'pending'"
             :data="posts"

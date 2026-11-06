@@ -1,4 +1,10 @@
-import type { CountedMatchListItem, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
+import type {
+  CountedMatchListItem,
+  MatchBlocksResponse,
+  MatchVod,
+  UpcomingMatchesResponse,
+} from "@sarpbc/types";
+import { apiFetch } from "~/utils/apiFetch";
 
 export async function getUpcomingMatches(limit: number): Promise<CountedMatchListItem[]> {
   const res = await apiFetch<UpcomingMatchesResponse>("/matches/upcoming", {
@@ -6,6 +12,10 @@ export async function getUpcomingMatches(limit: number): Promise<CountedMatchLis
     query: { limit },
   });
   return res.upcoming;
+}
+
+export async function getMatchBlocks(blockKey: string): Promise<MatchBlocksResponse> {
+  return apiFetch<MatchBlocksResponse>("/matches/blocks", { query: { block: blockKey } });
 }
 
 export async function getMatchVods(matchId: string): Promise<MatchVod[]> {
