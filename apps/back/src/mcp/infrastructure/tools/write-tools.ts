@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import type { NewsService } from "../../../news/application/news.service";
-import { CreateNewsArticleDto } from "../../../news/infrastructure/http/dto/create-news-article.dto";
-import { UpdateNewsArticleDto } from "../../../news/infrastructure/http/dto/update-news-article.dto";
+import { createNewsArticleFields } from "../../../news/infrastructure/http/dto/create-news-article.dto";
+import { updateNewsArticleFields } from "../../../news/infrastructure/http/dto/update-news-article.dto";
 import type { TeamService } from "../../../roster/application/team.service";
 import type { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import type { MatchService } from "../../../tournament/application/match/match.service";
@@ -11,8 +11,8 @@ import type { SyncNewTournamentsUseCase } from "../../../tournament/application/
 import type { SyncPandascoreTournamentUseCase } from "../../../tournament/application/sync/sync-pandascore-tournament.use-case";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
 import {
-  CreateTournamentDto,
-  UpdateTournamentDto,
+  createTournamentFields,
+  updateTournamentFields,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { defineTool, type McpTool } from "../define-tool";
 import { mapListedParticipants, mapMatchListResponse } from "../mappers";
@@ -62,7 +62,7 @@ export function writeTools({
       description: `Create a news article draft. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components and resolve slugs with search_players / search_teams first; do not use plain names when a slug exists. When the primary source is an X/Twitter post, put the tweet tag on its own line in both English and French bodies (same URL). ${BODY_TAGS} A human must review and publish it in the admin app.`,
       write: true,
       permission: "news.manage",
-      input: describeFields(CreateNewsArticleDto, {
+      input: describeFields(createNewsArticleFields, {
         title: "English article headline.",
         content: "English article body in markdown.",
         titleFr: "Optional French headline.",
@@ -96,7 +96,7 @@ export function writeTools({
       permission: "news.manage",
       input: {
         idOrSlug: z.string().min(1).describe("Current article slug or UUID."),
-        ...describeFields(UpdateNewsArticleDto, {
+        ...describeFields(updateNewsArticleFields, {
           title: "Updated English headline.",
           content: "Updated English body in markdown.",
           titleFr: "Updated French headline, or null to clear.",
@@ -318,7 +318,7 @@ export function writeTools({
         "Create a manual tournament on sarpbc.org. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
       write: true,
       permission: "tournaments.manage",
-      input: describeFields(CreateTournamentDto, {
+      input: describeFields(createTournamentFields, {
         name: "Tournament display name; the stage name when eventId is set (e.g. Finals).",
         eventId: "Event UUID to add this tournament to as a stage. Omit to create its own event.",
         slug: "Optional URL slug of the new event. Generated from the name when omitted. Not allowed with eventId.",
@@ -358,7 +358,7 @@ export function writeTools({
       permission: "tournaments.manage",
       input: {
         tournamentId: z.string().min(1).describe("Tournament UUID to update."),
-        ...describeFields(UpdateTournamentDto, {
+        ...describeFields(updateTournamentFields, {
           name: "Tournament display name.",
           eventId: "Event UUID to move this manual tournament to, from list_events or get_event.",
           slug: "URL slug of the event this tournament has of its own. Not allowed with eventId.",

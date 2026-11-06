@@ -23,11 +23,11 @@ export function idOrSlugField(what: string, example?: string) {
 
 /** The input fields of a REST DTO, with MCP descriptions added, so a tool never keeps a second copy of the DTO's rules. */
 export function describeFields<Fields extends Record<string, z.ZodType>>(
-  dto: z.ZodObject<Fields, z.core.$ZodObjectConfig>,
+  fields: Fields,
   descriptions: { [Field in keyof Fields]?: string },
 ): Fields {
   return Object.fromEntries(
-    Object.entries<z.ZodType>(dto.shape).map(([field, schema]) => {
+    Object.entries<z.ZodType>(fields).map(([field, schema]) => {
       const description = descriptions[field];
       return [field, description ? schema.describe(description) : schema];
     }),

@@ -6,7 +6,7 @@ export const NewsCoverImageUrl = z
   .trim()
   .max(NEWS_TEXT_MAX_LENGTH)
   .pipe(z.url({ protocol: /^(https?|ftp)$/, message: "Enter a valid cover image URL." }));
-export const CreateNewsArticleDto = z.strictObject({
+export const createNewsArticleFields = {
   title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),
   content: z.string().min(1),
   titleFr: z
@@ -28,6 +28,7 @@ export const CreateNewsArticleDto = z.strictObject({
     .max(NEWS_TEXT_MAX_LENGTH)
     .optional(),
   type: z.enum(NEWS_TYPES).optional(),
-});
+};
+export const CreateNewsArticleDto = z.strictObject(createNewsArticleFields);
 
 export type CreateNewsArticleDto = z.infer<typeof CreateNewsArticleDto>;

@@ -1,10 +1,10 @@
 import { z } from "zod";
 import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
 import {
-  CreateEventDto,
-  CreateLeagueDto,
-  UpdateEventDto,
-  UpdateLeagueDto,
+  createEventFields,
+  createLeagueFields,
+  updateEventFields,
+  updateLeagueFields,
 } from "../../../tournament/infrastructure/http/dto/manual-catalog.dto";
 import { defineTool, type McpTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
@@ -36,7 +36,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
         "Create a league for manual events and tournaments. Run list_leagues first to avoid duplicates.",
       write: true,
       permission: "tournaments.manage",
-      input: describeFields(CreateLeagueDto, {
+      input: describeFields(createLeagueFields, {
         name: "League name.",
         slug: "Optional slug. Generated from the name when omitted.",
         url: "Optional official website.",
@@ -56,7 +56,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       permission: "tournaments.manage",
       input: {
         leagueId: z.string().uuid().describe("League UUID from list_leagues."),
-        ...describeFields(UpdateLeagueDto, {
+        ...describeFields(updateLeagueFields, {
           name: "League name.",
           slug: "Slug, or null to clear.",
           url: "Official website, or null to clear.",
@@ -108,7 +108,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
         "Create an empty manual event, then attach tournaments to it with create_tournament or update_tournament eventId. The event page goes public once it has a stage. Run list_events first to avoid duplicates.",
       write: true,
       permission: "tournaments.manage",
-      input: describeFields(CreateEventDto, {
+      input: describeFields(createEventFields, {
         name: "Event name (e.g. Coupe de France 2026).",
         slug: "Optional URL slug. Generated from the name when omitted.",
         leagueId: "Optional league UUID from list_leagues.",
@@ -127,7 +127,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       permission: "tournaments.manage",
       input: {
         eventId: z.string().uuid().describe("Event UUID from get_event or list_events."),
-        ...describeFields(UpdateEventDto, {
+        ...describeFields(updateEventFields, {
           name: "Event name.",
           slug: "Event URL slug.",
           leagueId: "League UUID, or null to clear.",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
-const tournamentWriteSchema = z.strictObject({
+const tournamentWriteFields = {
   eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
   slug: z
     .string()
@@ -29,12 +29,14 @@ const tournamentWriteSchema = z.strictObject({
     .array(z.uuidv4())
     .refine((ids) => new Set(ids).size === ids.length, "Each team can only be added once.")
     .optional(),
-});
+};
 const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
-export const CreateTournamentDto = tournamentWriteSchema.extend({
+export const createTournamentFields = {
+  ...tournamentWriteFields,
   name: tournamentName,
   source: z.enum(["manual", "startgg"]).optional(),
-});
+};
+export const CreateTournamentDto = z.strictObject(createTournamentFields);
 export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
 const participantRoster = z.strictObject({
   teamId: z.uuidv4(),
@@ -42,7 +44,8 @@ const participantRoster = z.strictObject({
     .array(z.uuidv4())
     .refine((ids) => new Set(ids).size === ids.length, "Each player can only be listed once."),
 });
-export const UpdateTournamentDto = tournamentWriteSchema.extend({
+export const updateTournamentFields = {
+  ...tournamentWriteFields,
   name: tournamentName.optional(),
   rosters: z
     .array(participantRoster)
@@ -51,5 +54,6 @@ export const UpdateTournamentDto = tournamentWriteSchema.extend({
       "Each team can only have one roster.",
     )
     .optional(),
-});
+};
+export const UpdateTournamentDto = z.strictObject(updateTournamentFields);
 export type UpdateTournamentDto = z.infer<typeof UpdateTournamentDto>;
