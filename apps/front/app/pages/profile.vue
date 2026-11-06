@@ -141,8 +141,8 @@ const handleLogout = async () => {
   try {
     posthog?.capture("user_logged_out");
     await logout();
-  } catch (error) {
-    console.error("Logout error:", error);
+  } catch {
+    toast.add({ title: t("page.profile.logoutFailed"), color: "error" });
   } finally {
     isLoggingOut.value = false;
     navigateTo(localePath("/"));

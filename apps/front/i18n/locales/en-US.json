@@ -1644,6 +1644,7 @@
       "title": "Profile",
       "description": "Manage your sarpbc.org profile and settings.",
       "logout": "Logout",
+      "logoutFailed": "Could not log out. Try again.",
       "staff": "Staff",
       "editProfile": "Edit Profile",
       "actions": "Profile Actions",
@@ -1679,6 +1680,7 @@
       "toRegister": "Register",
       "errors": {
         "loginFailed": "Could not log in. Check your email and password and try again.",
+        "signUpFailed": "Could not create your account. Check your details and try again.",
         "googleFailed": "Google sign-in failed. Try again or use email and password.",
         "googleLinkFailed": "Could not link Google to your account. Try email and password."
       }

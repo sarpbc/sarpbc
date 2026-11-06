@@ -1644,6 +1644,7 @@
       "title": "Profil",
       "description": "Gérez votre profil et vos paramètres sur sarpbc.org.",
       "logout": "Se déconnecter",
+      "logoutFailed": "Déconnexion impossible. Réessayez.",
       "staff": "Staff",
       "editProfile": "Modifier le profil",
       "actions": "Actions du profil",
@@ -1679,6 +1680,7 @@
       "toRegister": "S'inscrire",
       "errors": {
         "loginFailed": "Connexion impossible. Vérifiez votre email et mot de passe, puis réessayez.",
+        "signUpFailed": "Création du compte impossible. Vérifiez vos informations, puis réessayez.",
         "googleFailed": "Échec de la connexion Google. Réessayez ou utilisez email et mot de passe.",
         "googleLinkFailed": "Impossible de lier Google à votre compte. Essayez email et mot de passe."
       }

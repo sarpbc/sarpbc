@@ -1,5 +1,6 @@
 import { useUser } from "~/composables/state";
-import type { User } from "@sarpbc/types";
+import { fetchProfile, useAuthHydrated } from "~/composables/user";
+import { createApiClient } from "~/utils/apiFetch";
 
 /**
  * Restore the session after hydration when SWR-cached SSR stamped `user = null`
@@ -14,13 +15,13 @@ import type { User } from "@sarpbc/types";
  * (see `ForumPreview`) so idle hydration cannot race this update.
  *
  * Do **not** call `getProfile()` / `apiFetch()` from `onNuxtReady`: those call
- * `useRuntimeConfig()` which requires setup context. Capture `apiBase` during
- * plugin setup and use plain `$fetch` in the idle callback.
+ * `useRuntimeConfig()` which requires setup context. Create the client during
+ * plugin setup and hand it to `fetchProfile`.
  */
 export default defineNuxtPlugin(() => {
   const user = useUser();
-  const authHydrated = useState<boolean>("auth-hydrated", () => false);
-  const apiBase = useRuntimeConfig().public.apiBase as string;
+  const authHydrated = useAuthHydrated();
+  const api = createApiClient();
 
   onNuxtReady(async () => {
     if (authHydrated.value) {
@@ -28,11 +29,7 @@ export default defineNuxtPlugin(() => {
     }
 
     try {
-      const res = await $fetch<{ user?: User }>(`${apiBase}/user/profile`, {
-        method: "GET",
-        credentials: "include",
-      });
-      user.value = res.user ?? null;
+      user.value = await fetchProfile(api);
     } catch {
       if (user.value === undefined) {
         user.value = null;

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-const config = useRuntimeConfig();
+import { getApiErrorMessage } from "@sarpbc/utils";
+
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 setPageSeo({
@@ -7,7 +8,7 @@ setPageSeo({
   description: t("page.register.seoDescription"),
   noIndex: true,
 });
-const posthog = usePostHog();
+const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();
 
 interface RegisterState {
   userName: string;
@@ -21,52 +22,26 @@ const state = reactive<RegisterState>({
   password: "",
 });
 
+const errorMessage = ref<string | null>(null);
+
+onMounted(leaveIfSignedIn);
+
 async function onSubmit(event: Event) {
   event.preventDefault();
+  errorMessage.value = null;
 
-  const res: { success?: boolean } = await $fetch<{
-    success?: boolean;
-  }>(`${config.public.apiBase}/auth/signup`, {
-    method: "POST",
-    body: {
-      userName: state.userName,
-      email: state.email,
-      password: state.password,
-    },
-    credentials: "include",
-  });
-
-  if (res.success === true) {
-    const user = useUser();
-    const profile = await getProfile();
-    user.value = profile;
-
-    if (profile) {
-      posthog?.capture("user_signed_up");
+  try {
+    const signedUp = await submit(
+      "/auth/signup",
+      { userName: state.userName, email: state.email, password: state.password },
+      "user_signed_up",
+    );
+    if (!signedUp) {
+      errorMessage.value = t("page.authentication.errors.signUpFailed");
     }
-
-    navigateTo("/");
-    return;
+  } catch (error) {
+    errorMessage.value = getApiErrorMessage(error) ?? t("page.authentication.errors.signUpFailed");
   }
-}
-
-onMounted(async () => {
-  const user = useUser();
-
-  if (user.value === undefined) {
-    const profile = await getProfile();
-    user.value = profile;
-  }
-
-  if (!user.value) {
-    return;
-  }
-
-  navigateTo("/");
-});
-
-function googleLogin() {
-  window.location.href = `${config.public.apiBase}/auth/google`;
 }
 </script>
 
@@ -117,6 +92,10 @@ function googleLogin() {
           >
             <UInput v-model="state.password" type="password" class="w-full" />
           </UFormField>
+
+          <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
+            {{ errorMessage }}
+          </p>
 
           <UButton
             :label="$t('page.authentication.toRegister')"
