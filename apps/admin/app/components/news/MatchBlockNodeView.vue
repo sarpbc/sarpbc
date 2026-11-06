@@ -2,13 +2,12 @@
 import { NodeViewWrapper } from "@tiptap/vue-3";
 import type { NodeViewProps } from "@tiptap/vue-3";
 import { newsMatchBlockFromAttrs } from "@sarpbc/utils";
-import { useMatchBlockEditor } from "~/composables/useMatchBlockEditor";
 import { matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
 
 const props = defineProps<NodeViewProps>();
 
 const { t } = useI18n();
-const { editMatchBlock } = useMatchBlockEditor();
+const editMatchBlock = useEditMatchBlock();
 
 const block = computed(() => newsMatchBlockFromAttrs(props.node.attrs));
 
