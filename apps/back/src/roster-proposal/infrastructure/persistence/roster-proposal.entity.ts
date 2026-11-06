@@ -1,10 +1,9 @@
 import { defineEntity, p } from "@mikro-orm/core";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
-import type { RosterChange, RosterChangeKind, RosterProposalStatus } from "@sarpbc/types";
+import type { RosterChange, RosterProposalStatus } from "@sarpbc/types";
 
 export class RosterProposal {
   id!: string;
-  kind!: RosterChangeKind;
   change!: RosterChange;
   sourceUrl!: string;
   status: RosterProposalStatus = "pending";
@@ -20,7 +19,6 @@ export const RosterProposalSchema = defineEntity({
   indexes: [{ properties: ["status", "createdAt"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    kind: p.string().$type<RosterChangeKind>(),
     change: p.json().$type<RosterChange>(),
     sourceUrl: p.text(),
     status: p.string().$type<RosterProposalStatus>().default("pending"),

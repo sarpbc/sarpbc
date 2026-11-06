@@ -46,7 +46,6 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         row.createdAt = model.createdAt;
       }
       Object.assign(row, {
-        kind: model.change.kind,
         change: model.change,
         sourceUrl: model.sourceUrl,
         status: model.status,
