@@ -1,7 +1,7 @@
 import type { SearchType } from "@sarpbc/types";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
-import type { TournamentQueries } from "../../tournament/application/public";
+import type { TournamentQueries } from "../../tournament/application/ports";
 import { SearchResult, SearchParams } from "./models/search-result";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { Tournament } from "../../tournament/domain/competition";

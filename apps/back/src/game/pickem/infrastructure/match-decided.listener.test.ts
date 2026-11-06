@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { MATCH_DECIDED } from "../../../tournament/application/public";
+import { MATCH_DECIDED } from "../../../tournament/domain/match-decided";
 import { PickemService } from "../application/pickem.service";
 import { MatchDecidedListener } from "./match-decided.listener";
 

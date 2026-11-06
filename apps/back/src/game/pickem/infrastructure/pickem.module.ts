@@ -9,7 +9,7 @@ import { PickemController } from "./http/pickem.controller";
 import { PickemService } from "../application/pickem.service";
 import { MatchDecidedListener } from "./match-decided.listener";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
-import { MatchService } from "../../../tournament/application/public";
+import { MatchService } from "../../../tournament/application/match/match.service";
 import { TournamentModule } from "../../../tournament/infrastructure/tournament.module";
 
 @Module({

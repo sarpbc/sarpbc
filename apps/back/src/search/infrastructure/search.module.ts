@@ -1,6 +1,6 @@
 import { PlayerService } from "../../roster/application/player.service";
 import { TeamService } from "../../roster/application/team.service";
-import type { TournamentQueries } from "../../tournament/application/public";
+import type { TournamentQueries } from "../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../tournament/infrastructure/competition-queries.tokens";
 import { Module } from "@nestjs/common";
 import { SearchController } from "./http/search.controller";

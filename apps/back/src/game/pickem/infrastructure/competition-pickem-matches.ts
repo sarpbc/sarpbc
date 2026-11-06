@@ -1,4 +1,4 @@
-import type { MatchService } from "../../../tournament/application/public";
+import type { MatchService } from "../../../tournament/application/match/match.service";
 import type { PickemMatches } from "../application/ports";
 
 export class CompetitionPickemMatches implements PickemMatches {
