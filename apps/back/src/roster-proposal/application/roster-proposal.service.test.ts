@@ -57,9 +57,26 @@ function setup() {
     }),
     setDistribution: vi.fn(),
   };
+  const rollingBack = {
+    run: async <T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> => {
+      const before = new Map(
+        [...saved].map(([id, proposal]) => [
+          id,
+          Object.assign(new RosterProposal(), structuredClone(proposal)),
+        ]),
+      );
+      try {
+        return await work(store);
+      } catch (error) {
+        saved.clear();
+        for (const [id, proposal] of before) saved.set(id, proposal);
+        throw error;
+      }
+    },
+  };
   const service = new RosterProposalService(
     store,
-    { run: (work) => work(store) },
+    rollingBack,
     players,
     teams,
     contracts,
@@ -259,6 +276,9 @@ describe("RosterProposalService", () => {
     players.joinTeam.mockRejectedValueOnce(new InvalidInputError("Team is inactive"));
 
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
+
+    expect(saved.get(id)).toMatchObject({ status: "pending", reviewedById: null });
+    expect((await service.list("pending")).proposals).toHaveLength(1);
   });
 
   const prizeEntry = {
