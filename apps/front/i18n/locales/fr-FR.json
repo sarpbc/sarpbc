@@ -157,6 +157,7 @@
     "forum": {
       "createPost": "Créer un post",
       "recentPosts": "Activités récentes",
+      "recentPostsError": "Impossible de charger l'activité récente. Vérifiez votre connexion et réessayez.",
       "signInToCreate": "Connectez-vous pour créer un post"
     },
     "game": {
@@ -1622,7 +1623,8 @@
         },
         "rateLimitWait": "Vous ne pouvez créer qu'un post toutes les {hours} heures. Réessayez à {time}.",
         "statusLoading": "Vérification de vos limites de publication…",
-        "statusLoadError": "Impossible de vérifier vos limites de publication. Actualisez la page et réessayez."
+        "statusLoadError": "Impossible de vérifier vos limites de publication. Actualisez la page et réessayez.",
+        "topicsLoadError": "Impossible de charger les sujets. Actualisez la page et réessayez."
       },
       "post": {
         "failedToLoadPostData": "Échec du chargement des données du post",

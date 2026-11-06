@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { ModerationReply } from "@sarpbc/types";
-import { parseLocale } from "@sarpbc/utils";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, parseLocale } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -14,8 +13,6 @@ const breadcrumbItems = [
     label: t("page.moderation.title"),
   },
 ];
-
-const publicSiteUrl = computed(() => String(config.public.publicSiteUrl).replace(/\/$/, ""));
 
 const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
@@ -46,7 +43,7 @@ function targetTypeLabel(targetType: ModerationReply["targetType"]): string {
 }
 
 function publicTargetUrl(reply: ModerationReply): string {
-  return `${publicSiteUrl.value}${reply.targetPath}`;
+  return `${config.public.publicSiteUrl}${reply.targetPath}`;
 }
 
 async function hideReply(reply: ModerationReply) {

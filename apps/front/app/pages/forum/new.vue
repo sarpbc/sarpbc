@@ -44,6 +44,7 @@ const state = reactive<Partial<Schema>>({
 });
 
 const topics = ref<Topic[]>([]);
+const topicsLoadFailed = ref(false);
 const creationStatus = ref<ForumPostCreationStatus | null>(null);
 const creationStatusLoadState = ref<"loading" | "ready" | "error">("loading");
 
@@ -68,9 +69,16 @@ const rateLimitMessage = computed(() => {
   });
 });
 
+async function loadTopics() {
+  try {
+    topics.value = await getTopics();
+  } catch {
+    topicsLoadFailed.value = true;
+  }
+}
+
 onMounted(async () => {
-  const [loadedTopics, status] = await Promise.all([getTopics(), getForumPostCreationStatus()]);
-  topics.value = loadedTopics;
+  const [, status] = await Promise.all([loadTopics(), getForumPostCreationStatus()]);
 
   if (!status) {
     creationStatusLoadState.value = "error";
@@ -175,7 +183,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           :required="true"
           class="w-full"
         >
-          <div class="flex flex-wrap gap-2">
+          <p v-if="topicsLoadFailed" role="alert" class="text-sm text-error">
+            {{ $t("page.forum.new.topicsLoadError") }}
+          </p>
+          <div v-else class="flex flex-wrap gap-2">
             <UBadge
               v-for="topic in topics"
               :key="topic.id"

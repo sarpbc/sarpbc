@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import type { EarningsEntry, ProfileEarnings } from "@sarpbc/types";
-import { tournamentStagePath } from "@sarpbc/utils";
+import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
 import { STARTGG_URL } from "~/composables/prizes";
-import { distinctStageName } from "@sarpbc/utils";
 
 const { owner, ownerId } = defineProps<{
   owner: "player" | "team";

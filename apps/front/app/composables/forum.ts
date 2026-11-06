@@ -1,41 +1,30 @@
-import { FORUM_ERROR_CODES, type ForumPost } from "@sarpbc/types";
+import {
+  FORUM_ERROR_CODES,
+  type ForumPost,
+  type ForumPostListItem,
+  type PostPreview,
+} from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
-import type {
-  CreateForumPostResult,
-  ForumPostCreationStatus,
-  PostPreview,
-  PostShort,
-  Topic,
-} from "~/types/forum";
+import type { CreateForumPostResult, ForumPostCreationStatus, Topic } from "~/types/forum";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
-  try {
-    const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
-      method: "GET",
-    });
+  const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
+    method: "GET",
+  });
 
-    return res.recentPosts || [];
-  } catch (error) {
-    console.error("Error fetching recent forum activities:", error);
-    return [];
-  }
+  return res.recentPosts || [];
 }
 
 export async function getTopics(): Promise<Topic[]> {
-  try {
-    const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
-      method: "GET",
-    });
+  const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
+    method: "GET",
+  });
 
-    return res.topics || [];
-  } catch (error) {
-    console.error("Error fetching forum topics:", error);
-    return [];
-  }
+  return res.topics || [];
 }
 
-export async function getPosts(): Promise<PostShort[]> {
-  const res = await apiFetch<{ posts: PostShort[] }>(`/posts`, {
+export async function getPosts(): Promise<ForumPostListItem[]> {
+  const res = await apiFetch<{ posts: ForumPostListItem[] }>(`/posts`, {
     method: "GET",
   });
 

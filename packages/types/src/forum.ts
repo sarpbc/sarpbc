@@ -15,6 +15,15 @@ export interface ForumPost {
   createdAt: Date | string;
 }
 
+export interface PostPreview {
+  id: string;
+  publicId: number;
+  slug: string;
+  title: string;
+  messageCount: number;
+  lastActivity: string;
+}
+
 export interface ForumPostListItem {
   id: string;
   publicId: number;

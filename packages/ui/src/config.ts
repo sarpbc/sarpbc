@@ -4,6 +4,10 @@ type PreconnectLink =
   | { rel: "preconnect"; href: string; crossorigin: "anonymous" }
   | { rel: "dns-prefetch"; href: string };
 
+export const DEFAULT_API_BASE = "https://api.sarpbc.org";
+
+export const SITE_ORIGIN = "https://sarpbc.org";
+
 export function apiPreconnectLinks(apiBase: string): PreconnectLink[] {
   try {
     const { origin } = new URL(apiBase);

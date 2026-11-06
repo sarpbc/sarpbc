@@ -1,5 +1,4 @@
-import type { Player } from "@sarpbc/types";
-import type { Team } from "@sarpbc/types";
+import type { Player, Team } from "@sarpbc/types";
 
 export interface SearchResult {
   teams: Team[];

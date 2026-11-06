@@ -6,7 +6,7 @@ export function useEntityTagLink() {
   const { entityTagSiteUrl } = useRuntimeConfig().public.sarpbcUi as ModuleOptions;
 
   function href(path: string): string {
-    return entityTagSiteUrl ? `${entityTagSiteUrl.replace(/\/$/, "")}${path}` : localePath(path);
+    return entityTagSiteUrl ? `${entityTagSiteUrl}${path}` : localePath(path);
   }
 
   function playerHref(slug: string): string {
@@ -17,5 +17,7 @@ export function useEntityTagLink() {
     return href(teamPath(slug));
   }
 
-  return { playerHref, teamHref, opensInNewTab: entityTagSiteUrl !== "" };
+  const linkAttrs = entityTagSiteUrl === "" ? {} : { target: "_blank", rel: "noopener noreferrer" };
+
+  return { playerHref, teamHref, linkAttrs };
 }

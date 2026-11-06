@@ -1,7 +1,5 @@
-import type { ProfileEarnings, ProfileMatchListItem } from "@sarpbc/types";
-import type { Team } from "@sarpbc/types";
+import type { ProfileEarnings, ProfileMatchListItem, Team, TeamContract } from "@sarpbc/types";
 import type { Tournament } from "~/types/tournament";
-import type { TeamContract } from "@sarpbc/types";
 
 export async function getTeamFromSlug(slug: string): Promise<Team | null> {
   const res = await apiFetch<{ team: Team | null }>(`/team/slug/${slug}`, {

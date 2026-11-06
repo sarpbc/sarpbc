@@ -157,6 +157,7 @@
     "forum": {
       "createPost": "Create Post",
       "recentPosts": "Recent Activity",
+      "recentPostsError": "Could not load recent activity. Check your connection and try again.",
       "signInToCreate": "Sign in to create a post"
     },
     "game": {
@@ -1622,7 +1623,8 @@
         },
         "rateLimitWait": "You can only create one post every {hours} hours. Try again at {time}.",
         "statusLoading": "Checking whether you can post…",
-        "statusLoadError": "Could not verify posting limits. Refresh the page and try again."
+        "statusLoadError": "Could not verify posting limits. Refresh the page and try again.",
+        "topicsLoadError": "Could not load topics. Refresh the page and try again."
       },
       "post": {
         "failedToLoadPostData": "Failed to load post data",

@@ -1,5 +1,5 @@
 import { localizedPath, newsPath } from "@sarpbc/utils";
-import { SITE_ORIGIN } from "~/utils/site";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 export const SITEMAP_PAGES_PATH = "/sitemaps/pages.xml";
 

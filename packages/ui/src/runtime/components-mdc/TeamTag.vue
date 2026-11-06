@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { teamHref, playerHref, opensInNewTab } = useEntityTagLink();
+const { teamHref, playerHref, linkAttrs } = useEntityTagLink();
 
 const open = ref(false);
 const pending = ref(false);
@@ -38,9 +38,10 @@ async function loadTeam() {
 
   try {
     const response = await fetchWithEntityTagCache(`team:${props.slug}`, () =>
-      apiFetch<{ team: Team }>(`/team/slug/${encodeURIComponent(props.slug)}`),
+      apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(props.slug)}`),
     );
     team.value = response.team;
+    error.value = response.team === null;
   } catch {
     error.value = true;
   } finally {
@@ -65,8 +66,7 @@ watch(open, (isOpen) => {
   >
     <NuxtLink
       :to="href"
-      :target="opensInNewTab ? '_blank' : undefined"
-      :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+      v-bind="linkAttrs"
       class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       translate="no"
     >
@@ -117,8 +117,7 @@ watch(open, (isOpen) => {
           >
             <NuxtLink
               :to="playerHref(rosterPlayer.slug)"
-              :target="opensInNewTab ? '_blank' : undefined"
-              :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+              v-bind="linkAttrs"
               class="flex h-full min-w-0 flex-col gap-2 p-2 text-muted transition-none hover:bg-elevated hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
               <div

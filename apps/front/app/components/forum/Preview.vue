@@ -4,15 +4,15 @@ import { forumPostPath } from "@sarpbc/utils";
 const localePath = useLocalePath();
 const user = useUser();
 
-const { data: recentForumActivities } = await useLazyAsyncData(
-  `forum-posts-preview`,
-  () => getRecentForumActivities(),
-  {
-    getCachedData(key, nuxtApp) {
-      return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
-    },
+const {
+  data: recentForumActivities,
+  error,
+  refresh,
+} = await useLazyAsyncData(`forum-posts-preview`, () => getRecentForumActivities(), {
+  getCachedData(key, nuxtApp) {
+    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
   },
-);
+});
 
 const activities = computed(() => recentForumActivities.value ?? []);
 </script>
@@ -21,6 +21,11 @@ const activities = computed(() => recentForumActivities.value ?? []);
   <div class="w-full flex flex-col">
     <SRail caption="lead" :title="$t('components.forum.recentPosts')">
       <SCard>
+        <SErrorState
+          v-if="error"
+          :message="$t('components.forum.recentPostsError')"
+          @retry="refresh()"
+        />
         <SListItem
           v-for="activity in activities"
           :key="activity.id"

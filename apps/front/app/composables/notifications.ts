@@ -1,4 +1,4 @@
-import type { AppNotification } from "~/types/notification";
+import type { AppNotification } from "@sarpbc/types";
 
 export async function getNotifications(limit = 30): Promise<AppNotification[]> {
   try {

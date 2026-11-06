@@ -1,6 +1,6 @@
 import { localizedPath, uiLocale } from "@sarpbc/utils";
 import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
-import { SITE_ORIGIN } from "~/utils/site";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
 const DEFAULT_DESCRIPTION =

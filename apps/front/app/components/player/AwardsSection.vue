@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { PlayerAwardType, PlayerProfileAward } from "@sarpbc/types";
-import { tournamentStagePath } from "@sarpbc/utils";
-import { distinctStageName } from "@sarpbc/utils";
+import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
 
 const {
   awards,

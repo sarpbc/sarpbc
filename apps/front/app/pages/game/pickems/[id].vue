@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
-import { matchPath } from "@sarpbc/utils";
+import { matchPath, tournamentStageLabel } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import {
   displayMatchScore,
@@ -8,7 +8,6 @@ import {
   shouldShowMatchScores,
 } from "~/utils/matchScore";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import { tournamentStageLabel } from "@sarpbc/utils";
 import { getPickOutcome, isMatchLockedForPickem, type PickemPickState } from "~/utils/pickems";
 
 const LEADERBOARD_TOP = 10;

@@ -70,9 +70,9 @@ export type {
   TrackedStreamer,
 } from "./staff-console.ts";
 export { FORUM_ERROR_CODES } from "./forum.ts";
-export type { ForumPost, ForumPostListItem } from "./forum.ts";
+export type { ForumPost, ForumPostListItem, PostPreview } from "./forum.ts";
 export { REPLY_TARGET_TYPES } from "./reply.ts";
-export type { PaginatedReplies, Reply, ReplyTargetType } from "./reply.ts";
+export type { AppNotification, PaginatedReplies, Reply, ReplyTargetType } from "./reply.ts";
 export type { R2UploadResponse } from "./storage.ts";
 export { SEARCH_TYPES } from "./search.ts";
 export type { SearchType } from "./search.ts";

@@ -5,7 +5,7 @@ export interface ModuleOptions {
   entityTagSiteUrl: string;
 }
 
-const REQUIRED_MODULES = ["@nuxt/ui", "@nuxtjs/i18n"];
+const REQUIRED_MODULES = ["@nuxt/ui", "@nuxtjs/i18n", "@sarpbc/composables"];
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {

@@ -20,8 +20,6 @@ export function useAdminNavLinks() {
   const sections = useAdminSections();
   const config = useRuntimeConfig();
 
-  const publicSiteUrl = String(config.public.publicSiteUrl).replace(/\/$/, "");
-
   return computed(() => [
     {
       label: t("page.nav.home"),
@@ -32,7 +30,7 @@ export function useAdminNavLinks() {
     {
       label: t("page.nav.backToSite"),
       icon: "i-fluent-arrow-left-24-regular",
-      to: publicSiteUrl,
+      to: config.public.publicSiteUrl,
       target: "_blank",
     },
   ]);

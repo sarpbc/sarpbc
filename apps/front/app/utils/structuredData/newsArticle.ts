@@ -5,7 +5,7 @@ import {
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   type UiLocale,
 } from "@sarpbc/utils";
-import { SITE_ORIGIN } from "~/utils/site";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 import { ORGANIZATION_ID } from "./organization";
 

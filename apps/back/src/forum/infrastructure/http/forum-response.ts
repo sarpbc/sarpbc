@@ -1,3 +1,4 @@
+import type { PostPreview } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import type { PostType } from "../../domain/post-type.enum";
 import type { PostActivity, PostRecord, TopicRecord } from "../../application/models";
@@ -35,7 +36,6 @@ export interface TopicResponse {
 }
 
 export type PostWithSlugResponse = PostResponseFields & { slug: string };
-export type PostActivityResponse = PostActivity & { slug: string };
 
 function postResponse(post: PostRecord): PostResponseFields {
   return {
@@ -64,13 +64,13 @@ export function postWithSlugResponse(post: PostRecord): PostWithSlugResponse {
   return { ...postResponse(post), slug: forumPostSlug(post.title) };
 }
 
-export function postActivityResponse(activity: PostActivity): PostActivityResponse {
+export function postActivityResponse(activity: PostActivity): PostPreview {
   return {
     id: activity.id,
     publicId: activity.publicId,
     title: activity.title,
     messageCount: activity.messageCount,
-    lastActivity: activity.lastActivity,
+    lastActivity: activity.lastActivity.toISOString(),
     slug: forumPostSlug(activity.title),
   };
 }

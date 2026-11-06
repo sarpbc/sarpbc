@@ -1,8 +1,13 @@
 import type { NuxtConfig } from "nuxt/schema";
 import { localizedPath } from "@sarpbc/utils/entity-path";
-import { apiPreconnectLinks, i18nOptions, newsMdcComponentMap } from "@sarpbc/ui/config";
+import {
+  DEFAULT_API_BASE,
+  apiPreconnectLinks,
+  i18nOptions,
+  newsMdcComponentMap,
+} from "@sarpbc/ui/config";
 
-const apiBase = process.env.NUXT_PUBLIC_API_BASE || "https://api.sarpbc.org";
+const apiBase = process.env.NUXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
 const adminUrl = process.env.NUXT_PUBLIC_ADMIN_URL || "https://admin.sarpbc.org";
 
 const contentSwr = { swr: 300 } as const;

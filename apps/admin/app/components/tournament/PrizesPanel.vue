@@ -7,10 +7,10 @@ import {
   MAX_PRIZE_PLAYERS,
   MIN_PRIZE_AMOUNT,
   MIN_PRIZE_PLACEMENT,
+  getApiErrorMessage,
   isIso4217Code,
 } from "@sarpbc/utils";
 import type { TournamentPrizeInput } from "~/composables/tournaments";
-import { getApiErrorMessage } from "@sarpbc/utils";
 
 interface Option {
   value: string;

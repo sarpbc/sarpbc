@@ -1,6 +1,6 @@
 import { matchPath } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
-import { SITE_ORIGIN } from "~/utils/site";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const ICS_PROD_ID = "-//sarpbc.org//EN";
 

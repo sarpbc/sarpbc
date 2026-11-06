@@ -8,7 +8,7 @@ import {
   isMarkdownPagePath,
   markdownPathFromHtmlPath,
 } from "~/utils/markdownPath";
-import { SITE_ORIGIN } from "~/utils/site";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
 const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;

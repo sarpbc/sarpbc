@@ -1,12 +1,16 @@
 <script lang="ts" setup>
 import type { TournamentTab } from "@sarpbc/types";
-import { stageMatchesPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
+import {
+  stageMatchesPath,
+  tournamentEventPath,
+  tournamentStageLabel,
+  tournamentStagePath,
+} from "@sarpbc/utils";
 import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,
   getTournamentChampionTeam,
 } from "~/utils/structuredData/tournamentSportsEvent";
-import { tournamentStageLabel } from "@sarpbc/utils";
 import {
   getTournamentTabFromRouteName,
   getTournamentTabTransitionName,
