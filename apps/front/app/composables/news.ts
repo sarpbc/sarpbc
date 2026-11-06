@@ -41,20 +41,15 @@ export async function getNewsArticles(
 ): Promise<PaginatedNewsArticles> {
   return apiFetch<PaginatedNewsArticles>(`/news`, {
     method: "GET",
-    query: type ? { page, limit, locale, type } : { page, limit, locale },
+    query: { page, limit, locale, type },
   });
 }
 
-export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek | null> {
-  try {
-    return await apiFetch<NewsWeek>(`/news/weeks/${week}`, {
-      method: "GET",
-      query: { locale },
-    });
-  } catch (error) {
-    console.error("Error fetching news week:", error);
-    return null;
-  }
+export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek> {
+  return apiFetch<NewsWeek>(`/news/weeks/${week}`, {
+    method: "GET",
+    query: { locale },
+  });
 }
 
 export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {

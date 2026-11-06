@@ -1414,6 +1414,7 @@
         "bracketTitle": "Bracket du tournoi",
         "bracketEmpty": "Le bracket du tournoi n’est pas encore disponible. Revenez lorsque les matchs auront été annoncés.",
         "noMatches": "Aucun match disponible pour ce tournoi.",
+        "matchesError": "Impossible de charger les matchs de ce tournoi. Vérifiez votre connexion et réessayez.",
         "notFound": "Tournoi introuvable",
         "error": "Impossible de charger ce tournoi. Vérifiez votre connexion et réessayez.",
         "subscribeCalendar": "S'abonner au calendrier",

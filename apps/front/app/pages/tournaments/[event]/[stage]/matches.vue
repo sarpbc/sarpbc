@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
-import { groupTournamentMatchesByDate } from "~/utils/groupMatchesByDate";
 import { formatDayHeaderDate } from "~/utils/dateFormatter";
 import { getTournamentStatus } from "~/utils/tournamentStatus";
 
@@ -13,7 +12,11 @@ const { t, locale } = useI18n();
 const tournamentId = computed(() => tournament.id);
 const SOURCE = "tournament_hub" as const;
 
-const { data: matches } = await useAsyncData(
+const {
+  data: matches,
+  error,
+  refresh,
+} = await useAsyncData(
   () => `tournament-matches-${tournamentId.value}`,
   () => getTournamentMatches(tournamentId.value),
   {
@@ -22,7 +25,21 @@ const { data: matches } = await useAsyncData(
   },
 );
 
-const groupedMatches = computed(() => groupTournamentMatchesByDate(matches.value ?? []));
+const groupedMatches = computed(() => {
+  const all = matches.value ?? [];
+  return {
+    upcoming: groupByDay(
+      all.filter((match) => !match.endAt),
+      (match) => match.beginAt,
+      "asc",
+    ),
+    completed: groupByDay(
+      all.filter((match) => match.endAt),
+      (match) => match.endAt,
+      "desc",
+    ),
+  };
+});
 
 const isFinished = computed(() => getTournamentStatus(tournament) === "finished");
 
@@ -56,7 +73,10 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <div v-if="hasMatches" class="flex flex-col gap-4">
+    <SCard v-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SErrorState :message="t('page.tournaments.id.matchesError')" @retry="refresh()" />
+    </SCard>
+    <div v-else-if="hasMatches" class="flex flex-col gap-4">
       <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col">
         <h2
           v-if="showUpcomingSectionTitle"
@@ -74,7 +94,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           </h3>
           <SCard class="w-full">
             <MatchLinkRows
-              :matches="dayGroup.matches"
+              :matches="dayGroup.items"
               variant="upcoming"
               :source="SOURCE"
               :show-date="false"
@@ -92,7 +112,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
           {{ formatDayHeader(dayGroup) }}
         </h3>
         <SCard class="w-full">
-          <MatchLinkRows :matches="dayGroup.matches" variant="result" :source="SOURCE" />
+          <MatchLinkRows :matches="dayGroup.items" variant="result" :source="SOURCE" />
         </SCard>
       </section>
     </div>

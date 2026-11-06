@@ -72,7 +72,6 @@ const showLiveBadge = computed(() => {
 
 const showLiveScore = computed(() => live && !showLiveBadge.value);
 
-const FLASH_MS = 2000;
 const scoreChanged = ref(false);
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -81,7 +80,7 @@ watch([scoreA, scoreB], () => {
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => {
     scoreChanged.value = false;
-  }, FLASH_MS);
+  }, HIGHLIGHT_MS);
 });
 
 onBeforeUnmount(() => clearTimeout(flashTimer));

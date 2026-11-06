@@ -46,7 +46,7 @@ export function useCommentPermalink() {
     highlightTimeout = setTimeout(() => {
       highlightedCommentId.value = null;
       highlightTimeout = null;
-    }, 2000);
+    }, HIGHLIGHT_MS);
   }
 
   function navigateToComment(commentId: string) {

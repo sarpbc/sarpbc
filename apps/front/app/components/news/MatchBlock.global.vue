@@ -129,7 +129,7 @@ function stateLabel(item: MatchBlockItem): string {
       <p v-if="startgg" class="flex h-row items-center gap-1 pl-2 text-xs text-muted">
         {{ t("newsTag.matchDataBy") }}
         <a
-          href="https://www.start.gg"
+          :href="STARTGG_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-toned transition-none hover:text-highlighted"

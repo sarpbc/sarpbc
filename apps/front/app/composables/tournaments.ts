@@ -8,47 +8,14 @@ import type {
 import { getApiErrorStatus } from "@sarpbc/utils";
 import { apiFetch } from "~/utils/apiFetch";
 
-function withQuery(path: string, params: URLSearchParams): string {
-  const search = params.toString();
-  return search ? `${path}?${search}` : path;
-}
-
-export async function getAllTournaments(query?: {
+interface TournamentListQuery {
   limit?: number;
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-}): Promise<{ tournaments: TournamentListItem[]; total: number }> {
-  const { limit, offset, pickems, activeOnly } = query || {};
-  const params = new URLSearchParams();
-  if (limit !== undefined) {
-    params.set("limit", String(limit));
-  }
-  if (offset !== undefined) {
-    params.set("offset", String(offset));
-  }
-  if (pickems !== undefined) {
-    params.set("pickems", pickems ? "true" : "false");
-  }
-  if (activeOnly) {
-    params.set("activeOnly", "true");
-  }
-
-  const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
-    withQuery("/tournaments", params),
-    { method: "GET" },
-  );
-
-  const tournaments = res.tournaments ?? [];
-  return { tournaments, total: res.count ?? tournaments.length };
 }
 
-export async function getEvents(query: {
-  limit?: number;
-  offset?: number;
-  pickems?: boolean;
-  activeOnly?: boolean;
-}): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> {
+function listPath(path: string, query: TournamentListQuery): string {
   const { limit, offset, pickems, activeOnly } = query;
   const params = new URLSearchParams();
   if (limit !== undefined) {
@@ -63,9 +30,27 @@ export async function getEvents(query: {
   if (activeOnly) {
     params.set("activeOnly", "true");
   }
+  const search = params.toString();
+  return search ? `${path}?${search}` : path;
+}
 
+export async function getAllTournaments(
+  query: TournamentListQuery = {},
+): Promise<{ tournaments: TournamentListItem[]; total: number }> {
+  const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
+    listPath("/tournaments", query),
+    { method: "GET" },
+  );
+
+  const tournaments = res.tournaments ?? [];
+  return { tournaments, total: res.count ?? tournaments.length };
+}
+
+export async function getEvents(
+  query: TournamentListQuery,
+): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> {
   const res = await apiFetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
-    withQuery("/events", params),
+    listPath("/events", query),
     { method: "GET" },
   );
 
@@ -108,15 +93,10 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
 export async function getTournamentMatches(
   tournamentId: string,
 ): Promise<TournamentMatchListItem[]> {
-  try {
-    const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
-      `/tournaments/${tournamentId}/matches`,
-      { method: "GET" },
-    );
+  const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
+    `/tournaments/${tournamentId}/matches`,
+    { method: "GET" },
+  );
 
-    return res.matches ?? [];
-  } catch (error) {
-    console.error("Error fetching tournament matches:", error);
-    return [];
-  }
+  return res.matches ?? [];
 }

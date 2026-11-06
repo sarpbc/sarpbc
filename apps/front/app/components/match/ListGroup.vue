@@ -34,12 +34,12 @@ const blocks = computed((): ListBlock[] => {
     ];
   }
 
-  return groupMatchesByDateThenEvent(matches).map((dayGroup) => ({
+  return groupByDay(matches, (match) => match.beginAt, "asc").map((dayGroup) => ({
     key: dayGroup.dateKey,
     dateLabel: dayGroup.date
       ? formatDayHeaderDate(dayGroup.date, locale.value)
       : t("page.tournaments.id.matchSections.unknownDate"),
-    events: dayGroup.events,
+    events: groupMatchesByEvent(dayGroup.items),
   }));
 });
 </script>

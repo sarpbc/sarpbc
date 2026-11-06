@@ -27,10 +27,6 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
   return search ? `${path}?${search}` : path;
 }
 
-function isSidebarQuery(query?: MatchesListQuery): boolean {
-  return !query?.limit && !query?.offset && !query?.leagueId && !query?.tournamentId;
-}
-
 const SIDEBAR_MAX_AGE_MS = 30_000;
 
 type Slot<T> = {
@@ -65,32 +61,27 @@ function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise
   return request;
 }
 
-function fetchUpcomingMatches(query?: MatchesListQuery): Promise<UpcomingMatchesResponse> {
+export function getUpcomingMatches(query?: MatchesListQuery): Promise<UpcomingMatchesResponse> {
   return apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
 }
 
-function fetchMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+export function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
   return apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });
 }
 
-export async function getUpcomingMatches(
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
-  if (import.meta.server && isSidebarQuery(query)) {
-    return loadSidebar(upcomingSidebar, () => fetchUpcomingMatches(query));
-  }
-  return fetchUpcomingMatches(query);
+/** Rendered on every SSR page: share one response across requests instead of calling the API each time. */
+export function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
+  return import.meta.server
+    ? loadSidebar(upcomingSidebar, getUpcomingMatches)
+    : getUpcomingMatches();
 }
 
-export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  if (import.meta.server && isSidebarQuery(query)) {
-    return loadSidebar(resultsSidebar, () => fetchMatchesResults(query));
-  }
-  return fetchMatchesResults(query);
+export function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
+  return import.meta.server ? loadSidebar(resultsSidebar, getMatchesResults) : getMatchesResults();
 }
 
 export async function getMatchById(id: string): Promise<MatchDetailResponse> {

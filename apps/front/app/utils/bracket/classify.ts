@@ -1,5 +1,6 @@
 import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
 import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./types";
+import { TBD_LABEL } from "~/utils/tbdLabel";
 import { sortMatchesByBeginAt } from "./rows";
 
 export function classifyTournamentBracket(tournament: TournamentDetail): TournamentBracketFormat {
@@ -35,7 +36,7 @@ export function groupMatchesByRound(
   const groups = new Map<string, TournamentDetailMatch[]>();
 
   for (const match of matches) {
-    const round = match.name?.trim() || "TBD";
+    const round = match.name?.trim() || TBD_LABEL;
     const roundMatches = groups.get(round) ?? [];
     roundMatches.push(match);
     groups.set(round, roundMatches);

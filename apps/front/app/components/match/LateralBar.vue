@@ -4,11 +4,15 @@ import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
 
 const { t } = useI18n();
 const { data } = await useUpcomingMatches();
-const { data: results } = await useLazyAsyncData(`matches-results`, () => getMatchesResults(), {
-  getCachedData(key, nuxtApp) {
-    return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+const { data: results } = await useLazyAsyncData(
+  `matches-results`,
+  () => getSidebarMatchesResults(),
+  {
+    getCachedData(key, nuxtApp) {
+      return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
+    },
   },
-});
+);
 
 const SOURCE = "lateral_bar" as const;
 const MAX_LIVE_MATCHES = 5;
