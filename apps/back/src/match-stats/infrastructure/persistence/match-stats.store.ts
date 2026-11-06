@@ -6,7 +6,7 @@ import type {
   StatsRoster,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import { Match as CompetitionMatch } from "../../../tournament/domain/competition";
+import { isMatchFinished } from "@sarpbc/utils";
 import {
   Match,
   Tournament,
@@ -302,10 +302,7 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
       id: match.id,
       beginAt: match.beginAt,
       endAt: match.endAt,
-      finished: Object.assign(new CompetitionMatch(), {
-        status: match.status,
-        endAt: match.endAt,
-      }).hasEnded(),
+      finished: isMatchFinished(match),
       numberOfGames: match.numberOfGames,
       participants: match.participants.getItems().map((participant) => ({
         id: participant.id,
