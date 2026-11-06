@@ -22,46 +22,6 @@ const VUE_MACROS = [
   "withDefaults",
 ];
 
-const BROWSER_GLOBALS = [
-  "AbortController",
-  "CustomEvent",
-  "Element",
-  "Event",
-  "File",
-  "FormData",
-  "HTMLElement",
-  "KeyboardEvent",
-  "MouseEvent",
-  "TextDecoder",
-  "TextEncoder",
-  "URL",
-  "URLSearchParams",
-  "XMLHttpRequest",
-  "alert",
-  "atob",
-  "btoa",
-  "cancelAnimationFrame",
-  "clearInterval",
-  "clearTimeout",
-  "confirm",
-  "console",
-  "crypto",
-  "document",
-  "fetch",
-  "history",
-  "localStorage",
-  "location",
-  "navigator",
-  "performance",
-  "queueMicrotask",
-  "requestAnimationFrame",
-  "sessionStorage",
-  "setInterval",
-  "setTimeout",
-  "structuredClone",
-  "window",
-];
-
 function readAutoImportNames() {
   return IMPORTS_TYPES.flatMap((file) => {
     let source;
@@ -72,25 +32,24 @@ function readAutoImportNames() {
       process.exit(1);
     }
 
-    return [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    const names = [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    if (names.length === 0) {
+      console.error(`No auto-import names found in ${file}. Nuxt changed its format?`);
+      process.exit(1);
+    }
+    return names;
   });
 }
 
 const globals = Object.fromEntries(
-  [
-    ...new Set([
-      ...readAutoImportNames(),
-      ...VUE_MACROS,
-      ...BROWSER_GLOBALS,
-      ...NODE_AND_NUXT_GLOBALS,
-    ]),
-  ]
+  [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...NODE_AND_NUXT_GLOBALS])]
     .sort()
     .map((name) => [name, "readonly"]),
 );
 
 const config = {
   extends: ["../../.oxlintrc.json"],
+  env: { browser: true },
   globals,
   rules: {
     "no-undef": "error",
