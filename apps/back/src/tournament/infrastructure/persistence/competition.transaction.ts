@@ -1,6 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import { LockMode, UniqueConstraintViolationException, type FilterQuery } from "@mikro-orm/core";
+import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { ConflictError } from "../../../common/domain/errors";
+import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
@@ -415,14 +416,8 @@ export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
         return result;
       });
     } catch (error) {
-      if (
-        error instanceof UniqueConstraintViolationException &&
-        error.message.includes("player_award")
-      )
-        throw new ConflictError(
-          awardWriter?.conflictMessage ??
-            "This tournament already has that award. Remove the current award before assigning another player.",
-        );
+      if (isUniqueViolation(error) && awardWriter?.conflictMessage)
+        throw new ConflictError(awardWriter.conflictMessage);
       throw error;
     }
   }

@@ -54,8 +54,7 @@ export class CompetitionAwardQueries implements AwardQueries {
   }
 }
 export class CompetitionAwardWriter implements AwardWriter {
-  conflictMessage =
-    "This tournament already has that award. Remove the current award before assigning another player.";
+  conflictMessage: string | null = null;
   constructor(private readonly em: EntityManager) {}
   async context(tournamentId: string, participantId: string, playerId: string) {
     const [t, p, player] = await Promise.all([

@@ -1,5 +1,7 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { NewsType } from "@sarpbc/types";
+import { ConflictError } from "../../../common/domain/errors";
+import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { NewsArticle } from "./news-article.entity";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
 import type { NewsArticleRecord, NewsSitemapRecord } from "../../application/models";
@@ -99,6 +101,15 @@ export class MikroNewsStore implements NewsStore {
     row.imageUrl = model.imageUrl;
     row.type = model.type;
     this.em.persist(row);
+    try {
+      await this.em.flush();
+    } catch (error) {
+      if (isUniqueViolation(error))
+        throw new ConflictError(
+          "An article with this slug already exists. Choose a different slug.",
+        );
+      throw error;
+    }
   }
   async delete(model: NewsArticleRecord) {
     const row = await this.em.findOne(NewsArticle, { id: model.id });

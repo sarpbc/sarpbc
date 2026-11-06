@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import type { TrackedStreamerStore } from "../../application/ports/tracked-streamer-store";
 import type { TrackedStreamer } from "../../domain/tracked-streamer";
 import { TwitchStreamer } from "./twitch-streamer.entity";
@@ -30,7 +30,7 @@ export class TwitchStreamerRepository implements TrackedStreamerStore {
     try {
       await this.em.persist(streamer).flush();
     } catch (error) {
-      if (error instanceof UniqueConstraintViolationException) {
+      if (isUniqueViolation(error)) {
         this.em.clear();
         return null;
       }
