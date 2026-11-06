@@ -1,6 +1,7 @@
 import { log } from "evlog";
 import type { PatUser } from "../../pat/application/pat.service";
-import { roleHasPermission, StaffPermission } from "../../user/domain/staff-access";
+import type { StaffPermission } from "@sarpbc/types";
+import { roleHasPermission } from "../../user/domain/staff-access";
 import { extractErrorMessage, jsonToolResult, toolErrorResult } from "./tool-result";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 

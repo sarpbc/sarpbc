@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { STAFF_ROLES } from "../../../domain/staff-access";
+import { STAFF_ROLES } from "@sarpbc/types";
 
 export const CHANGEABLE_ROLES = ["member", ...STAFF_ROLES] as const;
 

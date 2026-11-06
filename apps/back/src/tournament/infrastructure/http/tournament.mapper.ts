@@ -1,15 +1,12 @@
 import type {
+  DataSource,
+  TeamSummary,
   TournamentDetail,
   TournamentDetailParticipant,
   TournamentEventRef,
   TournamentListItem,
 } from "@sarpbc/types";
-import type { DataSource } from "../../../common/domain/data-source";
-import {
-  mapPlayer,
-  mapTeamSummary,
-  type TeamSummaryResponse,
-} from "../../../roster/infrastructure/http/player.mapper";
+import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/player.mapper";
 import {
   League,
   Tournament,
@@ -28,7 +25,7 @@ export interface LeagueResponse {
 
 export interface TournamentParticipantResponse {
   id: string;
-  team: TeamSummaryResponse;
+  team: TeamSummary;
   players: ReturnType<typeof mapPlayer>[];
   createdAt: Date;
   updatedAt: Date;

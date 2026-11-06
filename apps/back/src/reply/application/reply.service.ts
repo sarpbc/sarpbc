@@ -1,12 +1,8 @@
+import { FORUM_ERROR_CODES, type ReplyTargetType } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizePlainText } from "../../common/domain/html";
-import {
-  replyTarget,
-  sameReplyTarget,
-  replySortOrder,
-  type ReplyTargetType,
-} from "../domain/reply";
-import { REPLY_CREATION_COOLDOWN_MS, REPLY_ERROR_CODES } from "../domain/reply-limits";
+import { replyTarget, sameReplyTarget, replySortOrder } from "../domain/reply";
+import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyReportReason } from "../domain/reply-report-reason";
 import type { ReplyRecord, ReplyView, PaginatedReplies, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
@@ -71,7 +67,7 @@ export class ReplyService {
       if (latestReply && latestReply.createdAt >= oneMinuteAgo) {
         throw new InvalidInputError({
           message: "You can only create one reply per minute. Wait and try again.",
-          code: REPLY_ERROR_CODES.REPLY_RATE_LIMITED,
+          code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED,
         });
       }
 
@@ -171,7 +167,7 @@ export class ReplyService {
       if (existing) {
         throw new ConflictError({
           message: "You already reported this comment.",
-          code: REPLY_ERROR_CODES.REPLY_ALREADY_REPORTED,
+          code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
         });
       }
 

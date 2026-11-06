@@ -1,6 +1,4 @@
-export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
-
-export type DataSource = (typeof DATA_SOURCES)[number];
+import type { DataSource } from "@sarpbc/types";
 
 /**
  * start.gg terms allow display with credit. Its players and teams are public; its tournaments

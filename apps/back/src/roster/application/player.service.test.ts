@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
-import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus, Team } from "../domain/roster";
+import { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
 import { PlayerService } from "./player.service";
 import type { PhotoQueries, PlayerQueries, RosterWriteScope } from "./ports";
 
@@ -144,7 +144,7 @@ describe("PlayerService roster moves", () => {
       endDate: null,
       joinSourceUrl: source,
     });
-    expect(player).toMatchObject({ team: newTeam, status: PlayerStatus.ACTIVE });
+    expect(player).toMatchObject({ team: newTeam, status: "active" });
     expect(stores.contracts.save).toHaveBeenCalledTimes(2);
     expect(stores.contracts.delete).not.toHaveBeenCalled();
   });
@@ -159,52 +159,52 @@ describe("PlayerService roster moves", () => {
   it("opens a staff contract on the current team and keeps the player contract", async () => {
     await service.joinTeam(player.id, {
       ...move(oldTeam.id),
-      role: ContractRole.COACH,
+      role: "coach",
     });
     expect(history[1]).toMatchObject({
-      role: ContractRole.ACTIVE,
+      role: "active",
       startDate: new Date("2025-02-01"),
       endDate: new Date("2026-10-23"),
     });
     expect(lastSavedContract()).toMatchObject({
       team: oldTeam,
-      role: ContractRole.COACH,
+      role: "coach",
       startDate: new Date("2026-10-23"),
       endDate: null,
     });
-    expect(player.currentRole()).toBe(ContractRole.COACH);
+    expect(player.currentRole()).toBe("coach");
   });
 
   it("rejects a staff move into the role the player already holds", async () => {
-    history[1].role = ContractRole.COACH;
+    history[1].role = "coach";
     await expect(
-      service.joinTeam(player.id, { ...move(oldTeam.id), role: ContractRole.COACH }),
+      service.joinTeam(player.id, { ...move(oldTeam.id), role: "coach" }),
     ).rejects.toBeInstanceOf(ConflictError);
     expect(stores.contracts.save).not.toHaveBeenCalled();
   });
 
   it("names the conflict without exposing the raw role value", async () => {
-    history[1].role = ContractRole.ASSISTANT_COACH;
+    history[1].role = "assistant_coach";
     await expect(
-      service.joinTeam(player.id, { ...move(oldTeam.id), role: ContractRole.ASSISTANT_COACH }),
+      service.joinTeam(player.id, { ...move(oldTeam.id), role: "assistant_coach" }),
     ).rejects.toThrow("Zen already has an open contract with Old in this role");
   });
 
   it("moves a player to the bench of the same team with a new contract", async () => {
     await service.joinTeam(player.id, {
       ...move(oldTeam.id),
-      role: ContractRole.BENCHED,
+      role: "benched",
     });
     expect(history[1]).toMatchObject({
-      role: ContractRole.ACTIVE,
+      role: "active",
       endDate: new Date("2026-10-23"),
     });
     expect(lastSavedContract()).toMatchObject({
       team: oldTeam,
-      role: ContractRole.BENCHED,
+      role: "benched",
       endDate: null,
     });
-    expect(player.currentRole()).toBe(ContractRole.BENCHED);
+    expect(player.currentRole()).toBe("benched");
   });
 
   it("rejects joining an inactive team", async () => {
@@ -218,10 +218,10 @@ describe("PlayerService roster moves", () => {
   it("closes the contract and records the status when a player leaves", async () => {
     await service.leaveTeam(player.id, {
       ...move(oldTeam.id),
-      status: PlayerStatus.RETIRED,
+      status: "retired",
     });
     expect(history[1].leaveSourceUrl).toBe(source);
-    expect(player).toMatchObject({ team: null, status: PlayerStatus.RETIRED });
+    expect(player).toMatchObject({ team: null, status: "retired" });
     expect(stores.contracts.delete).not.toHaveBeenCalled();
   });
 
@@ -229,9 +229,9 @@ describe("PlayerService roster moves", () => {
     history = [];
     await service.leaveTeam(player.id, {
       ...move(oldTeam.id),
-      status: PlayerStatus.FREE_AGENT,
+      status: "free_agent",
     });
-    expect(player).toMatchObject({ team: null, status: PlayerStatus.FREE_AGENT });
+    expect(player).toMatchObject({ team: null, status: "free_agent" });
   });
 
   it("keeps the current team status when closing a stale contract elsewhere", async () => {
@@ -245,15 +245,15 @@ describe("PlayerService roster moves", () => {
     );
     await service.leaveTeam(player.id, {
       ...move(newTeam.id),
-      status: PlayerStatus.RETIRED,
+      status: "retired",
     });
     expect(history[2].endDate).toEqual(new Date("2026-10-23"));
-    expect(player).toMatchObject({ team: oldTeam, status: PlayerStatus.ACTIVE });
+    expect(player).toMatchObject({ team: oldTeam, status: "active" });
   });
 
   it("rejects leaving a team the player is not on", async () => {
     await expect(
-      service.leaveTeam(player.id, { ...move(newTeam.id), status: PlayerStatus.FREE_AGENT }),
+      service.leaveTeam(player.id, { ...move(newTeam.id), status: "free_agent" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(player.team).toBe(oldTeam);
     expect(stores.players.save).not.toHaveBeenCalled();

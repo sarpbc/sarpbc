@@ -1,4 +1,5 @@
-import { isRedistributable, type DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
+import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
 import type {
   League,

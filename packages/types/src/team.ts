@@ -1,13 +1,26 @@
+import type { DataSource } from "./competition";
 import type { Player } from "./player";
 
-export interface Team {
+export const TEAM_LOGO_VARIANTS = ["light", "dark"] as const;
+
+export type TeamLogoVariant = (typeof TEAM_LOGO_VARIANTS)[number];
+
+export interface TeamLogos {
+  imageUrl: string | null;
+  darkModeImageUrl: string | null;
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+}
+
+export interface TeamSummary extends Omit<TeamLogos, "darkModeImageUrl"> {
   id: string;
   name: string;
-  players: Player[];
-  location?: string;
-  imageUrl?: string;
-  darkModeImageUrl?: string;
-  logoLightUrl?: string | null;
-  logoDarkUrl?: string | null;
   slug: string;
+  location: string | null;
+}
+
+export interface Team extends TeamSummary {
+  pandascoreId: number | null;
+  source: DataSource;
+  players: Player[];
 }

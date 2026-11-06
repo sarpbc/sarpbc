@@ -1,5 +1,5 @@
 import { QueryOrder } from "@mikro-orm/core";
-import type { ReplyTargetType } from "../../domain/reply";
+import type { ReplyTargetType } from "@sarpbc/types";
 
 export interface ReplyTargetFilter {
   post?: { id: string };

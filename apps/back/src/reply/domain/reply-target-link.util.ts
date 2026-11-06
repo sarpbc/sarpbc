@@ -1,5 +1,5 @@
 import { forumPostPath, forumPostSlug, matchPath, newsPath } from "@sarpbc/utils";
-import type { ReplyTargetType } from "./reply";
+import type { ReplyTargetType } from "@sarpbc/types";
 
 export type ReplyTargetLink = {
   targetType: ReplyTargetType;

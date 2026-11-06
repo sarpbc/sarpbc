@@ -1,8 +1,12 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 
-export { ContractRole, PlayerStatus } from "../../domain/roster";
-import { ContractRole, PlayerStatus } from "../../domain/roster";
-import type { DataSource } from "../../../common/domain/data-source";
+import {
+  CONTRACT_ROLES,
+  PLAYER_STATUSES,
+  type ContractRole,
+  type DataSource,
+  type PlayerStatus,
+} from "@sarpbc/types";
 
 export class Team {
   id!: string;
@@ -32,7 +36,7 @@ export class Player {
   /** PandaScore role (e.g. "Coach"); null for standard roster players. */
   role: string | null = null;
   contractRole: ContractRole | null = null;
-  status: PlayerStatus = PlayerStatus.ACTIVE;
+  status: PlayerStatus = "active";
   slug!: string;
   pandascoreId: number | null = null;
   source: DataSource = "manual";
@@ -47,7 +51,7 @@ export class Contract {
   team!: Team;
   startDate!: Date;
   endDate: Date | null = null;
-  role: ContractRole = ContractRole.ACTIVE;
+  role: ContractRole = "active";
   joinSourceUrl: string | null = null;
   leaveSourceUrl: string | null = null;
   createdAt = new Date();
@@ -94,16 +98,16 @@ export const PlayerSchema = defineEntity({
     imageUrl: p.string().nullable(),
     role: p.string().nullable(),
     contractRole: p
-      .enum(() => ContractRole)
+      .enum([...CONTRACT_ROLES])
       .nullable()
       .formula(
         (columns) =>
           `(select c."role" from "contract" c where c."player_id" = ${columns.id} and c."team_id" = ${columns.team} and c."end_date" is null order by c."start_date" desc limit 1)`,
       ),
     status: p
-      .enum(() => PlayerStatus)
+      .enum([...PLAYER_STATUSES])
       .columnType("text")
-      .default(PlayerStatus.ACTIVE),
+      .default("active"),
     slug: p.string(),
     pandascoreId: p.integer().nullable().unique(),
     source: p.string().$type<DataSource>().default("manual"),
@@ -129,9 +133,9 @@ export const ContractSchema = defineEntity({
     startDate: p.datetime().type("date"),
     endDate: p.datetime().type("date").nullable(),
     role: p
-      .enum(() => ContractRole)
+      .enum([...CONTRACT_ROLES])
       .columnType("text")
-      .default(ContractRole.ACTIVE),
+      .default("active"),
     joinSourceUrl: p.text().nullable(),
     leaveSourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),

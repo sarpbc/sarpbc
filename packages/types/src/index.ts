@@ -2,18 +2,22 @@ import type { PlayerAwardType } from "./player-award";
 import type { NewsType } from "./news";
 import type { TransferType } from "./transfer";
 
-export type { StaffRole, StaffPermission, User } from "./user";
-export type { Player } from "./player";
+export { STAFF_PERMISSIONS, STAFF_ROLES } from "./user";
+export type { StaffRole, StaffPermission, User, UserListItem } from "./user";
+export { PLAYER_STATUSES } from "./player";
+export type { Player, PlayerStatus } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
-export type { Team } from "./team";
+export { TEAM_LOGO_VARIANTS } from "./team";
+export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team";
+export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
 export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";
 export type { League } from "./league";
 export type { TournamentEventRef } from "./tournament-event";
 export type { NewsType } from "./news";
+export { DATA_SOURCES } from "./competition";
 export type {
   ProfileMatchListItem,
-  TeamSummary,
   TournamentDetail,
   TournamentDetailMatch,
   TournamentDetailParticipant,
@@ -44,15 +48,29 @@ export type {
   StatsRoster,
   TournamentStatsGame,
 } from "./match-stats";
+export { FORUM_ERROR_CODES } from "./forum";
 export type { ForumPost } from "./forum";
+export { REPLY_TARGET_TYPES } from "./reply";
+export type { ReplyTargetType } from "./reply";
+export { SEARCH_TYPES } from "./search";
+export type { SearchType } from "./search";
 export type {
   EarningsEntry,
   EarningsYear,
   PrizeAmount,
+  PrizeEntry,
   ProfileEarnings,
   TournamentPrize,
   TournamentPrizes,
 } from "./prize";
+export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
+export type {
+  RosterChange,
+  RosterChangeKind,
+  RosterProposal,
+  RosterProposalList,
+  RosterProposalStatus,
+} from "./roster-change";
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",
@@ -71,14 +89,3 @@ export const TRANSFER_TYPES = [
   "loan",
   "staff",
 ] as const satisfies readonly TransferType[];
-
-const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
-
-export const STAFF_CONTRACT_ROLES = ["coach", "assistant_coach", "analyst", "manager"] as const;
-
-export const CONTRACT_ROLES = [...PLAYER_CONTRACT_ROLES, ...STAFF_CONTRACT_ROLES] as const;
-
-export const PlayerAwardTypes = {
-  MVP: "mvp",
-  DEFENSIVE_MVP: "defensive_mvp",
-} as const satisfies Record<string, PlayerAwardType>;

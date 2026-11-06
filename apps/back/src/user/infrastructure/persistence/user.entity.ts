@@ -1,5 +1,5 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import type { StaffRole } from "../../domain/staff-access";
+import type { StaffRole } from "@sarpbc/types";
 
 export class User {
   id!: string;

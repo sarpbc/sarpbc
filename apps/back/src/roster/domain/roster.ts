@@ -1,5 +1,5 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { DataSource } from "../../common/domain/data-source";
+import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
 export interface ImportedTeamProfile {
   pandascoreId?: number;
   name: string;
@@ -17,20 +17,6 @@ export interface ImportedPlayerProfile {
   imageUrl?: string;
   role?: string | null;
 }
-export enum ContractRole {
-  ACTIVE = "active",
-  BENCHED = "benched",
-  LOANED = "loaned",
-  COACH = "coach",
-  ASSISTANT_COACH = "assistant_coach",
-  ANALYST = "analyst",
-  MANAGER = "manager",
-}
-export enum PlayerStatus {
-  ACTIVE = "active",
-  FREE_AGENT = "free_agent",
-  RETIRED = "retired",
-}
 function roleFromPandascore(role: string | null): ContractRole {
   switch (
     role
@@ -40,17 +26,17 @@ function roleFromPandascore(role: string | null): ContractRole {
   ) {
     case "coach":
     case "head_coach":
-      return ContractRole.COACH;
+      return "coach";
     case "assistant_coach":
     case "co_coach":
-      return ContractRole.ASSISTANT_COACH;
+      return "assistant_coach";
     case "analyst":
-      return ContractRole.ANALYST;
+      return "analyst";
     case "manager":
     case "staff":
-      return ContractRole.MANAGER;
+      return "manager";
     default:
-      return ContractRole.ACTIVE;
+      return "active";
   }
 }
 export class Team {
@@ -90,7 +76,7 @@ export class Player {
   imageUrl: string | null = null;
   role: string | null = null;
   contractRole: ContractRole | null = null;
-  status = PlayerStatus.ACTIVE;
+  status: PlayerStatus = "active";
   slug = "";
   pandascoreId: number | null = null;
   source: DataSource = "manual";
@@ -124,7 +110,7 @@ export class Contract {
   team!: Team;
   startDate!: Date;
   endDate: Date | null = null;
-  role = ContractRole.ACTIVE;
+  role: ContractRole = "active";
   joinSourceUrl: string | null = null;
   leaveSourceUrl: string | null = null;
   createdAt = new Date();

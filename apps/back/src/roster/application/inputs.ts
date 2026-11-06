@@ -1,5 +1,4 @@
-import { ContractRole, PlayerStatus } from "../domain/roster";
-import type { DataSource } from "../../common/domain/data-source";
+import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
 export interface CreatePlayerInput {
   name: string;
   source?: Exclude<DataSource, "pandascore">;
@@ -36,7 +35,7 @@ export interface JoinTeamInput extends RosterMoveInput {
 }
 
 export interface LeaveTeamInput extends RosterMoveInput {
-  status: PlayerStatus.FREE_AGENT | PlayerStatus.RETIRED;
+  status: Extract<PlayerStatus, "free_agent" | "retired">;
 }
 
 export interface CreateContractInput {

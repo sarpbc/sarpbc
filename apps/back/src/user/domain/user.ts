@@ -1,4 +1,4 @@
-import type { StaffRole } from "./staff-access";
+import type { StaffRole } from "@sarpbc/types";
 
 export class User {
   id!: string;

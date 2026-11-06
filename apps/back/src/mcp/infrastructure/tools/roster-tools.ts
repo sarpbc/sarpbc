@@ -1,14 +1,15 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { BadRequestException } from "@nestjs/common";
 import { z } from "zod";
-import { ContractRole, PlayerStatus } from "../../../roster/domain/roster";
-import { isLiquipediaHost, TEAM_LOGO_VARIANTS } from "../../../roster/domain/team-logo";
 import {
-  ROSTER_PROPOSAL_PERMISSIONS,
+  CONTRACT_ROLES,
+  PLAYER_STATUSES,
   ROSTER_PROPOSAL_STATUSES,
+  TEAM_LOGO_VARIANTS,
   type RosterChange,
-  type RosterProposal,
-} from "../../../roster-proposal/domain/roster-proposal";
+} from "@sarpbc/types";
+import { isLiquipediaHost } from "../../../roster/domain/team-logo";
+import type { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import type { McpToolContext } from "../mcp-tool-context";
 import { runStaffReadTool, runWriteTool } from "../permission-gate";
 import { adminRosterProposalsUrl } from "../urls";
@@ -17,6 +18,7 @@ import {
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,
   MAX_PRIZE_PLAYERS,
+  ROSTER_PROPOSAL_PERMISSIONS,
   isIso4217Code,
 } from "@sarpbc/utils";
 
@@ -39,7 +41,7 @@ const effectiveDateSchema = contractDateSchema.describe(
 );
 
 const contractRoleSchema = z
-  .enum(ContractRole)
+  .enum(CONTRACT_ROLES)
   .describe(
     "Contract role. Players: active, benched, or loaned. Staff: coach, assistant_coach, analyst, or manager. Defaults to active. When a player moves into a staff role, open a new contract with that role instead of changing their past player contracts.",
   );
@@ -49,9 +51,7 @@ const countrySchema = z
   .regex(/^[A-Z]{2}$/, "Use an ISO 3166-1 alpha-2 code")
   .describe("ISO 3166-1 alpha-2 country code (e.g. FR).");
 
-const playerStatusSchema = z
-  .enum([PlayerStatus.ACTIVE, PlayerStatus.FREE_AGENT, PlayerStatus.RETIRED])
-  .describe("Career status.");
+const playerStatusSchema = z.enum(PLAYER_STATUSES).describe("Career status.");
 
 const REVIEW_NOTE =
   "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
@@ -105,7 +105,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
         effectiveDate: effectiveDateSchema,
         sourceUrl: sourceUrlSchema,
         status: z
-          .enum([PlayerStatus.FREE_AGENT, PlayerStatus.RETIRED])
+          .enum(["free_agent", "retired"])
           .optional()
           .describe("Status after leaving. Defaults to free_agent."),
       },
@@ -113,7 +113,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
     async ({ sourceUrl, status, ...input }) =>
       runWriteTool(user, "remove_player_from_team", "players.manage", () =>
         propose(
-          { kind: "remove_player_from_team", ...input, status: status ?? PlayerStatus.FREE_AGENT },
+          { kind: "remove_player_from_team", ...input, status: status ?? "free_agent" },
           sourceUrl,
         ),
       ),
@@ -138,7 +138,7 @@ export function registerRosterTools(server: McpServer, ctx: McpToolContext): voi
             kind: "create_player",
             name,
             nationality: country,
-            status: status ?? PlayerStatus.FREE_AGENT,
+            status: status ?? "free_agent",
           },
           sourceUrl,
         ),

@@ -1,10 +1,10 @@
+import { STAFF_PERMISSIONS } from "@sarpbc/types";
 import { describe, expect, it } from "vitest";
 import {
   isStaffRole,
   permissionsForRole,
   roleHasPermission,
   ROLE_PERMISSIONS,
-  STAFF_PERMISSIONS,
 } from "./staff-access";
 
 describe("staff-access", () => {

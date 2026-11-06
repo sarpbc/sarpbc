@@ -1,3 +1,5 @@
+import type { RosterChange, RosterProposalStatus, TeamLogoVariant } from "@sarpbc/types";
+import { requiredPermission } from "@sarpbc/utils";
 import { sourceFromUrl } from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { ContractService } from "../../roster/application/contract.service";
@@ -5,13 +7,8 @@ import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterMergeService } from "../../roster/application/roster-merge.service";
 import type { TeamLogoService } from "../../roster/application/team-logo.service";
 import type { TeamService } from "../../roster/application/team.service";
-import { teamLogoField, type TeamLogoVariant } from "../../roster/domain/team-logo";
-import {
-  RosterProposal,
-  requiredPermission,
-  type RosterChange,
-  type RosterProposalStatus,
-} from "../domain/roster-proposal";
+import { teamLogoField } from "../../roster/domain/team-logo";
+import { RosterProposal } from "../domain/roster-proposal";
 import type { UserService } from "../../user/application/user.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
@@ -148,7 +145,7 @@ export class RosterProposalService {
   ): Promise<RosterProposal> {
     const proposal = await proposals.findById(id);
     if (!proposal) throw new NotFoundError(`Roster proposal "${id}" not found`);
-    const permission = requiredPermission(proposal.change.kind);
+    const permission = requiredPermission(proposal.change);
     if (!(await this.staff.hasAnyPermission(reviewerId, [permission]))) {
       throw new ForbiddenError(`Reviewing this proposal requires ${permission}`);
     }

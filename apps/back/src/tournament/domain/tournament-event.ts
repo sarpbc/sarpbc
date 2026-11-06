@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef } from "@sarpbc/types";
-import type { DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 import type { League } from "./competition";
 

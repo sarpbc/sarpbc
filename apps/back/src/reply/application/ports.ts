@@ -1,4 +1,5 @@
-import type { ReplyTargetType, ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { ReplyTargetType } from "@sarpbc/types";
+import type { ReplyAuthor, ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
 import type { ReplyReportReason } from "../domain/reply-report-reason";
 export interface ReplyFindOptions {

@@ -1,12 +1,12 @@
+import type { ReplyTargetType, StaffRole } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 
-export type ReplyTargetType = "forumPost" | "newsArticle" | "match";
 export type ReplyTarget = { kind: ReplyTargetType; id: string };
 
 export interface ReplyAuthor {
   id: string;
   userName: string;
-  role?: string | null;
+  role?: StaffRole | null;
 }
 
 interface ReplyTargetRefs {

@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { Tournament, TournamentParticipant } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
-import { ContractRole, Player, Team } from "../../roster/domain/roster";
+import type { ContractRole } from "@sarpbc/types";
+import { Player, Team } from "../../roster/domain/roster";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
 describe("ManualTournamentService", () => {
@@ -90,10 +91,10 @@ describe("ManualTournamentService", () => {
   it("snapshots the active players of a team joining a manual tournament", async () => {
     tournament.source = "manual";
     writer.teamPlayers.mockResolvedValue([
-      member("diaz", ContractRole.ACTIVE),
+      member("diaz", "active"),
       member("legacy", null),
-      member("sub", ContractRole.BENCHED),
-      member("coach", ContractRole.COACH),
+      member("sub", "benched"),
+      member("coach", "coach"),
       member("ps-coach", null, "Coach"),
     ]);
     await service.update("ewc", { teamIds: ["vitality"] });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
-import { Contract, ContractRole, Player, Team } from "../domain/roster";
+import { Contract, Player, Team } from "../domain/roster";
 import { ContractService } from "./contract.service";
 import type {
   ContractQueries,
@@ -61,14 +61,14 @@ describe("ContractService sourced career periods", () => {
       teamId: "vitality",
       startDate: "2022-01-10",
       endDate: "2025-05-31",
-      role: ContractRole.BENCHED,
+      role: "benched",
       sourceUrl: source,
     });
 
     expect(career).toContain(contract);
     expect(career).toHaveLength(2);
     expect(contract).toMatchObject({
-      role: ContractRole.BENCHED,
+      role: "benched",
       joinSourceUrl: source,
       leaveSourceUrl: source,
     });

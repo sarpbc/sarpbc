@@ -2,6 +2,7 @@ import type {
   DataSource,
   PlayerAwardType,
   PlayerProfileAward,
+  PrizeEntry,
   TournamentAwardListItem,
   TournamentPrizes,
 } from "@sarpbc/types";
@@ -23,7 +24,6 @@ import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
-import type { PrizeEntry } from "../domain/prize-distribution";
 import type { EarningsLine } from "./earnings";
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;

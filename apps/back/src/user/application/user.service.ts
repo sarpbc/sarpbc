@@ -3,7 +3,8 @@ import { User } from "../domain/user";
 import type { CreateAccountInput, SignInInput } from "./models/account-input";
 import type { PasswordHasher } from "./ports/password-hasher";
 import type { UserListQuery, UserQueries, UserTransaction } from "./ports/user-store";
-import { roleHasAnyPermission, StaffPermission, StaffRole } from "../domain/staff-access";
+import type { StaffPermission, StaffRole } from "@sarpbc/types";
+import { roleHasAnyPermission } from "../domain/staff-access";
 
 export class UserService {
   constructor(

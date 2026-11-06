@@ -1,6 +1,6 @@
-import type { ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
+import type { PrizeEntry, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { assertPrizeDistribution, type PrizeEntry } from "../domain/prize-distribution";
+import { assertPrizeDistribution } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
 import type {
   CompetitionCache,

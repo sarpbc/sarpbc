@@ -5,7 +5,7 @@ import type { ReplyRecord } from "./models";
 import type { ReplyWriteScope } from "./ports";
 type Match = NonNullable<ReplyRecord["match"]>;
 import { ReplyService } from "./reply.service";
-import { REPLY_ERROR_CODES } from "../domain/reply-limits";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
 
 describe("ReplyService", () => {
   let service: ReplyService;
@@ -121,7 +121,7 @@ describe("ReplyService", () => {
         }),
       ).rejects.toMatchObject({
         detail: expect.objectContaining({
-          code: REPLY_ERROR_CODES.REPLY_RATE_LIMITED,
+          code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED,
         }),
       });
     });

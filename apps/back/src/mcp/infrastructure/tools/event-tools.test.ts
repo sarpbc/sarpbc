@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { League, Tournament } from "../../../tournament/domain/competition";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
-import type { DataSource } from "../../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import { registerEventTools } from "./event-tools";
 
 function stage(id: string, source: DataSource, beginAt: string | null) {

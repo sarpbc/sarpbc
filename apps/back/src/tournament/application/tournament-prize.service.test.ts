@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, PrizeEntry } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { PrizeEntry } from "../domain/prize-distribution";
 import type {
   CompetitionCache,
   CompetitionDiagnostics,

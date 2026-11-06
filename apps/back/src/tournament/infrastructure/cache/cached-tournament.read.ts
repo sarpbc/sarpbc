@@ -2,7 +2,7 @@ import { log } from "evlog";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentService } from "../../application/tournament.service";
-import { DATA_SOURCES } from "../../../common/domain/data-source";
+import { DATA_SOURCES } from "@sarpbc/types";
 import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));

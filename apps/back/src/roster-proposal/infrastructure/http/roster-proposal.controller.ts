@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import type { RosterProposal as RosterProposalResponse } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -17,7 +18,7 @@ import { RosterProposalService } from "../../application/roster-proposal.service
 import type { RosterProposal } from "../../domain/roster-proposal";
 import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.dto";
 
-function mapProposal(proposal: RosterProposal) {
+function mapProposal(proposal: RosterProposal): RosterProposalResponse {
   return {
     id: proposal.id,
     change: proposal.change,
@@ -25,9 +26,9 @@ function mapProposal(proposal: RosterProposal) {
     status: proposal.status,
     proposedById: proposal.proposedById,
     reviewedById: proposal.reviewedById,
-    reviewedAt: proposal.reviewedAt,
+    reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
     entityId: proposal.entityId,
-    createdAt: proposal.createdAt,
+    createdAt: proposal.createdAt.toISOString(),
   };
 }
 

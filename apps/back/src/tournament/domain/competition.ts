@@ -3,7 +3,7 @@ import { isMatchFinished, matchSlug } from "@sarpbc/utils";
 import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
-import type { DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 export class League {
   id = v4();

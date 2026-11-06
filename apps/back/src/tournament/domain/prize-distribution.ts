@@ -1,13 +1,6 @@
+import type { PrizeEntry } from "@sarpbc/types";
 import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
-
-export interface PrizeEntry {
-  placement: number;
-  amount: number;
-  currency: string;
-  teamId: string;
-  playerIds: string[];
-}
 
 export function assertPrizeDistribution(entries: PrizeEntry[]): void {
   if (entries.length > MAX_PRIZE_ENTRIES)

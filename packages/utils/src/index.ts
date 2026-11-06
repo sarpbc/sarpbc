@@ -60,7 +60,13 @@ export {
   currencyFractionDigits,
   isIso4217Code,
 } from "./prize.ts";
-export { isStaffUser, hasPermission, canModerateComments } from "./staff.ts";
+export {
+  ROSTER_PROPOSAL_PERMISSIONS,
+  canModerateComments,
+  hasPermission,
+  isStaffUser,
+  requiredPermission,
+} from "./staff.ts";
 export {
   allocateSlug,
   eventSlug,

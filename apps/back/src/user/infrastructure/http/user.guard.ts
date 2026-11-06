@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from "@
 import { Reflector } from "@nestjs/core";
 import { AuthenticatedRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { STAFF_PERMISSIONS_KEY } from "./decorator/require-permissions.decorator";
-import { StaffPermission } from "../../domain/staff-access";
+import type { StaffPermission } from "@sarpbc/types";
 import { UserService } from "../../application/user.service";
 
 @Injectable()

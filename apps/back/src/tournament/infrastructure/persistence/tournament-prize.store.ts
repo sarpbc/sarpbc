@@ -1,10 +1,9 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, type FilterQuery } from "@mikro-orm/core";
-import type { TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
+import type { PrizeEntry, TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import type { EarningsLine } from "../../application/earnings";
 import type { EarningsScope, PrizeQueries, PrizeWriter } from "../../application/ports";
-import type { PrizeEntry } from "../../domain/prize-distribution";
 import { stageFilter } from "./competition.queries";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";

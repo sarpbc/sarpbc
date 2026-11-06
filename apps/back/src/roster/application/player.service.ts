@@ -1,7 +1,7 @@
 import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
-import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus } from "../domain/roster";
+import { Contract, Player, PlayerPhoto } from "../domain/roster";
 import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
 import type { PlayerSearchProps } from "./search-props";
 
@@ -109,7 +109,7 @@ export class PlayerService {
       if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
 
       const effectiveDate = new Date(input.effectiveDate);
-      const role = input.role ?? ContractRole.ACTIVE;
+      const role = input.role ?? "active";
       const open = await openContracts(contracts, playerId);
       if (open.some((contract) => contract.team.id === team.id && contract.role === role)) {
         throw new ConflictError(
@@ -131,7 +131,7 @@ export class PlayerService {
 
       player.team = team;
       player.contractRole = role;
-      player.status = PlayerStatus.ACTIVE;
+      player.status = "active";
       await players.save(player);
       return player;
     });

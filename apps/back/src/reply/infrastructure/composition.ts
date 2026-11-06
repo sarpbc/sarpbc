@@ -7,7 +7,7 @@ import { toMatchSlug } from "../../tournament/infrastructure/persistence/competi
 import { MATCH_TOURNAMENT_POPULATE } from "../../tournament/infrastructure/persistence/match-populate";
 import { User } from "../../user/infrastructure/persistence/user.entity";
 import { directReplyNotifications } from "../../notification/infrastructure/composition";
-import { REPLY_ERROR_CODES } from "../domain/reply-limits";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
 import { ReplyService } from "../application/reply.service";
 import type { ReplyTransaction, ReplyWriteScope } from "../application/ports";
 import type { ReplyTarget } from "../domain/reply";
@@ -109,7 +109,7 @@ export function transactionalReplies(em: EntityManager): ReplyTransaction {
         )
           throw new ConflictError({
             message: "You already reported this comment.",
-            code: REPLY_ERROR_CODES.REPLY_ALREADY_REPORTED,
+            code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
           });
         throw error;
       }

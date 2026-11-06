@@ -1,13 +1,9 @@
-import type { ForumPost, SupportedLocale } from "@sarpbc/types";
+import { FORUM_ERROR_CODES, type ForumPost, type SupportedLocale } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
-import {
-  FORUM_ERROR_CODES,
-  POST_CREATION_COOLDOWN_HOURS,
-  POST_CREATION_COOLDOWN_MS,
-} from "../domain/forum.constants";
+import { POST_CREATION_COOLDOWN_HOURS, POST_CREATION_COOLDOWN_MS } from "../domain/forum.constants";
 import { PostType } from "../domain/post-type.enum";
 import type {
   NewPostRecord,

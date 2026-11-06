@@ -5,7 +5,7 @@ import { Team } from "../../../roster/infrastructure/roster-persistence";
 import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
-import type { DataSource } from "../../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import type { MatchVod } from "@sarpbc/types";
 
 export class League {

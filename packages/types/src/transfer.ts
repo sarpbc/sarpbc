@@ -1,4 +1,5 @@
 import type { ContractRole } from "./contract";
+import type { TeamLogos } from "./team";
 
 export type TransferType = "arrival" | "departure" | "benched" | "loan" | "staff";
 
@@ -15,13 +16,5 @@ export interface Transfer {
     imageUrl: string | null;
     nationality: string | null;
   };
-  team: {
-    id: string;
-    name: string;
-    slug: string;
-    imageUrl: string | null;
-    darkModeImageUrl: string | null;
-    logoLightUrl: string | null;
-    logoDarkUrl: string | null;
-  };
+  team: TeamLogos & { id: string; name: string; slug: string };
 }

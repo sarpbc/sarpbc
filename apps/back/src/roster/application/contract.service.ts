@@ -7,7 +7,7 @@ import {
   UpdateContractInput,
   UpdateTeamContractInput,
 } from "./inputs";
-import { Contract, ContractRole } from "../domain/roster";
+import { Contract } from "../domain/roster";
 import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 
 export class ContractService {
@@ -166,7 +166,7 @@ export class ContractService {
     contract.team = team;
     contract.startDate = new Date(dto.startDate);
     contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
-    contract.role = dto.role ?? ContractRole.ACTIVE;
+    contract.role = dto.role ?? "active";
     return contract;
   }
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { TournamentPrizes } from "@sarpbc/types";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentPrizeService } from "../../application/tournament-prize.service";
-import { DATA_SOURCES } from "../../../common/domain/data-source";
+import { DATA_SOURCES } from "@sarpbc/types";
 
 const nullableText = z.string().nullable();
 const distribution = z.object({

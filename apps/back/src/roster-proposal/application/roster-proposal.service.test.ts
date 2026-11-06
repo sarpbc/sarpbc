@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Contract, ContractRole, Player, PlayerStatus, Team } from "../../roster/domain/roster";
+import { Contract, Player, Team } from "../../roster/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -166,7 +166,7 @@ describe("RosterProposalService", () => {
         playerId: "zen",
         teamId: "kc",
         effectiveDate: "2026-10-24",
-        contractRole: ContractRole.COACH,
+        contractRole: "coach",
       },
       source,
       "journalist",
@@ -178,13 +178,13 @@ describe("RosterProposalService", () => {
       teamId: "kc",
       effectiveDate: "2026-10-24",
       sourceUrl: source,
-      role: ContractRole.COACH,
+      role: "coach",
     });
   });
 
   it("flags players created from a start.gg source", async () => {
     const { id } = await service.propose(
-      { kind: "create_player", name: "Atow", status: PlayerStatus.FREE_AGENT },
+      { kind: "create_player", name: "Atow", status: "free_agent" },
       "https://www.start.gg/tournament/rlcs/event/main",
       "journalist",
     );
@@ -192,7 +192,7 @@ describe("RosterProposalService", () => {
     expect((await service.approve(id, "admin")).entityId).toBe("new-player");
     expect(players.create).toHaveBeenCalledWith({
       name: "Atow",
-      status: PlayerStatus.FREE_AGENT,
+      status: "free_agent",
       source: "startgg",
     });
   });

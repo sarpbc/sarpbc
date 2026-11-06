@@ -1,6 +1,9 @@
+import type { TeamLogos, TeamSummary } from "./team";
 import type { TournamentEventRef } from "./tournament-event";
 
-export type DataSource = "pandascore" | "manual" | "startgg";
+export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
+
+export type DataSource = (typeof DATA_SOURCES)[number];
 
 export type MatchVodSource = "twitch" | "youtube";
 
@@ -9,16 +12,6 @@ export interface MatchVod {
   url: string;
   language: string;
   source: MatchVodSource;
-}
-
-export interface TeamSummary {
-  id: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  logoLightUrl: string | null;
-  logoDarkUrl: string | null;
-  location: string | null;
 }
 
 export interface TournamentListItem {
@@ -48,14 +41,7 @@ export interface TournamentMatchListItem {
   numberOfGames: number | null;
   participants: {
     id: string;
-    team: {
-      id: string;
-      name: string;
-      imageUrl: string | null;
-      darkModeImageUrl: string | null;
-      logoLightUrl: string | null;
-      logoDarkUrl: string | null;
-    };
+    team: TeamLogos & { id: string; name: string };
   }[];
   results: { participant: string; score: number }[];
 }

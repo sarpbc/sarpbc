@@ -3,7 +3,6 @@ import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { Tournament, assertParticipantRemovable } from "../domain/competition";
 import { TournamentEvent, ownsEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
-import { ContractRole } from "../../roster/domain/roster";
 import type {
   CreateTournamentInput,
   ParticipantRosterInput,
@@ -164,7 +163,7 @@ export class ManualTournamentService {
   /** Copied once when the team joins, so later transfers do not rewrite the tournament's history. */
   private async activeRoster(writer: TournamentWriter, teamId: string) {
     return (await writer.teamPlayers(teamId))
-      .filter((player) => player.currentRole() === ContractRole.ACTIVE)
+      .filter((player) => player.currentRole() === "active")
       .map((player) => player.id);
   }
   private async setRosters(

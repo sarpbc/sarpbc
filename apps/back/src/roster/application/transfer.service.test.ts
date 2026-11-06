@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { Contract, ContractRole, Player, Team } from "../domain/roster";
+import { Contract, Player, Team } from "../domain/roster";
 import type { ContractQueries } from "./ports";
 import { TransferService } from "./transfer.service";
 
@@ -13,7 +13,7 @@ describe("TransferService", () => {
     team: Team,
     startDate: string,
     endDate: string | null,
-    role = ContractRole.ACTIVE,
+    role = "active",
   ) =>
     Object.assign(new Contract(), {
       id,
@@ -26,7 +26,7 @@ describe("TransferService", () => {
   const career = [
     contract("v", vitality, "2022-01-10", "2025-06-01"),
     contract("k", kc, "2025-06-01", "2026-03-01"),
-    contract("kb", kc, "2026-03-01", null, ContractRole.BENCHED),
+    contract("kb", kc, "2026-03-01", null, "benched"),
   ];
 
   function fixture() {
