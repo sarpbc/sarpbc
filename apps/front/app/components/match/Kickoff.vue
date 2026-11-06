@@ -6,9 +6,7 @@ const { locale } = useI18n();
 const { match } = defineProps<{ match: Match }>();
 
 const timeFormatter = computed(() => new Intl.DateTimeFormat(locale.value, { timeStyle: "short" }));
-const dateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }),
-);
+const dateFormatter = computed(() => mediumDateFormatter(locale.value));
 </script>
 
 <template>

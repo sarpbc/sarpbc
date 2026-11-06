@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "@sarpbc/types";
-
-type TeamMatchesTab = "upcoming" | "past";
+import type { EntityKind } from "~/types/entity";
 
 const {
+  kind,
   upcomingMatches,
   pastMatches,
   liveMatches = [],
   pending = false,
   hasError = false,
 } = defineProps<{
+  kind: EntityKind;
   upcomingMatches: MatchListItem[];
   pastMatches: MatchListItem[];
   liveMatches?: MatchListItem[];
@@ -22,19 +23,13 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
+const { tab, emptyIcon, setTab } = useEntityListTab("matches");
 
-const headingId = "team-matches-title";
-
-const tab = computed<TeamMatchesTab>(() => {
-  const value = route.query.matches;
-  return value === "past" ? "past" : "upcoming";
-});
+const headingId = computed(() => `${kind}-matches-title`);
 
 const tabItems = computed(() => [
-  { value: "upcoming" as const, label: t("page.team.slug.matches.tabs.upcoming") },
-  { value: "past" as const, label: t("page.team.slug.matches.tabs.past") },
+  { value: "upcoming" as const, label: t(`page.${kind}.slug.matches.tabs.upcoming`) },
+  { value: "past" as const, label: t(`page.${kind}.slug.matches.tabs.past`) },
 ]);
 
 const activeMatches = computed(() => (tab.value === "past" ? pastMatches : upcomingMatches));
@@ -55,31 +50,6 @@ const listVariant = computed<"upcoming" | "result">(() => {
     }
   }
 });
-
-const emptyIcon = computed(() => {
-  switch (tab.value) {
-    case "upcoming":
-      return "i-fluent-calendar-clock-24-regular";
-    case "past":
-      return "i-fluent-checkmark-circle-24-regular";
-    default: {
-      const exhaustive: never = tab.value;
-      return exhaustive;
-    }
-  }
-});
-
-function setTab(nextTab: TeamMatchesTab) {
-  const query = { ...route.query };
-
-  if (nextTab === "upcoming") {
-    delete query.matches;
-  } else {
-    query.matches = nextTab;
-  }
-
-  router.replace({ query });
-}
 </script>
 
 <template>
@@ -88,13 +58,13 @@ function setTab(nextTab: TeamMatchesTab) {
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
-            {{ t("page.team.slug.matches.sectionTitle") }}
+            {{ t(`page.${kind}.slug.matches.sectionTitle`) }}
           </h2>
           <SSegmented
             :model-value="tab"
             :items="tabItems"
-            :ariaLabel="t('page.team.slug.matches.sectionTitle')"
-            @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
+            :ariaLabel="t(`page.${kind}.slug.matches.sectionTitle`)"
+            @update:model-value="setTab"
           />
         </div>
       </template>
@@ -112,7 +82,7 @@ function setTab(nextTab: TeamMatchesTab) {
       </div>
 
       <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.team.slug.matches.error')" @retry="emit('retry')" />
+        <SErrorState :message="t(`page.${kind}.slug.matches.error`)" @retry="emit('retry')" />
       </SCard>
 
       <div v-else-if="hasMatches" class="flex flex-col gap-4">
@@ -128,10 +98,10 @@ function setTab(nextTab: TeamMatchesTab) {
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
-            {{ t(`page.team.slug.matches.${tab}.empty`) }}
+            {{ t(`page.${kind}.slug.matches.${tab}.empty`) }}
           </p>
           <p class="text-xs text-muted text-pretty">
-            {{ t(`page.team.slug.matches.${tab}.emptyHint`) }}
+            {{ t(`page.${kind}.slug.matches.${tab}.emptyHint`) }}
           </p>
         </div>
       </SCard>

@@ -1,11 +1,7 @@
 <script lang="ts" setup>
-import type { TabsItem } from "@nuxt/ui";
 import { selectActiveRosterPlayers, selectTeamStaff, teamPath } from "@sarpbc/utils";
 
-type TeamProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
-
 const route = useRoute();
-const router = useRouter();
 const localePath = useLocalePath();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -29,7 +25,7 @@ const {
   pending: trophiesPending,
   error: trophiesError,
   refresh: refreshTrophies,
-} = useTeamTrophies(teamId);
+} = useEntityTrophies("team", teamId);
 
 const {
   live: liveEvents,
@@ -38,7 +34,7 @@ const {
   pending: eventsPending,
   error: eventsError,
   refresh: refreshEvents,
-} = useTeamTournaments(teamId);
+} = useEntityTournaments("team", teamId);
 
 const {
   live: liveMatches,
@@ -47,7 +43,7 @@ const {
   pending: matchesPending,
   error: matchesError,
   refresh: refreshMatches,
-} = useTeamMatches(teamId);
+} = useEntityMatches("team", teamId);
 
 const {
   eras: rosterHistoryEras,
@@ -76,65 +72,7 @@ const showRosterHistory = computed(
     rosterHistoryEras.value.length > 0,
 );
 
-function tabFromQuery(): TeamProfileTab {
-  const value = route.query.tab;
-  if (value === "matches" || value === "events" || value === "trophies" || value === "earnings") {
-    return value;
-  }
-  return "info";
-}
-
-function replaceTabQuery(nextTab: TeamProfileTab) {
-  const query: Record<string, string> = {};
-
-  if (route.query.matches) {
-    query.matches = String(route.query.matches);
-  }
-  if (route.query.events) {
-    query.events = String(route.query.events);
-  }
-
-  if (nextTab === "info") {
-    router.replace({ query: {} });
-    return;
-  }
-
-  if (nextTab !== "matches") {
-    delete query.matches;
-  }
-  if (nextTab !== "events") {
-    delete query.events;
-  }
-
-  query.tab = nextTab;
-  router.replace({ query });
-}
-
-const active = ref<string | number>(tabFromQuery());
-
-watch(
-  () => route.query.tab,
-  () => {
-    active.value = tabFromQuery();
-  },
-);
-
-watch(active, (tab) => {
-  const nextTab: TeamProfileTab =
-    tab === "matches" || tab === "events" || tab === "trophies" || tab === "earnings"
-      ? tab
-      : "info";
-  if (nextTab === tabFromQuery()) return;
-  replaceTabQuery(nextTab);
-});
-
-const tabItems = computed<TabsItem[]>(() => [
-  { value: "info", label: t("page.team.slug.tabs.info") },
-  { value: "matches", label: t("page.team.slug.tabs.matches") },
-  { value: "events", label: t("page.team.slug.tabs.events") },
-  { value: "trophies", label: t("page.team.slug.tabs.trophies") },
-  { value: "earnings", label: t("page.team.slug.tabs.earnings") },
-]);
+const { tab, tabItems, setTab } = useEntityTabs("team");
 
 const title = computed(() =>
   team.value?.name
@@ -197,17 +135,18 @@ setPageSeo({
           <TeamRosterSection :players="activeRoster" class="flex-1" />
         </div>
         <UTabs
-          v-model="active"
+          :model-value="tab"
           :items="tabItems"
           :content="false"
           color="neutral"
           variant="link"
           class="w-full"
           :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
+          @update:model-value="setTab"
         />
       </SCard>
 
-      <template v-if="active === 'info'">
+      <template v-if="tab === 'info'">
         <TeamStaffSection v-if="staff.length > 0" :staff="staff" />
         <TeamRosterTimeline
           v-if="showRosterHistory"
@@ -225,8 +164,9 @@ setPageSeo({
         />
       </template>
 
-      <TeamMatchesSection
-        v-else-if="active === 'matches'"
+      <EntityMatchesSection
+        kind="team"
+        v-else-if="tab === 'matches'"
         :upcoming-matches="upcomingMatches"
         :past-matches="pastMatches"
         :live-matches="liveMatches"
@@ -235,8 +175,9 @@ setPageSeo({
         @retry="refreshMatches()"
       />
 
-      <TeamEventsSection
-        v-else-if="active === 'events'"
+      <EntityEventsSection
+        kind="team"
+        v-else-if="tab === 'events'"
         :upcoming-events="upcomingEvents"
         :past-events="pastEvents"
         :live-events="liveEvents"
@@ -245,9 +186,10 @@ setPageSeo({
         @retry="refreshEvents()"
       />
 
-      <EarningsSection v-else-if="active === 'earnings'" owner="team" :owner-id="team.id" />
+      <EarningsSection v-else-if="tab === 'earnings'" owner="team" :owner-id="team.id" />
 
-      <TeamTrophyCabinet
+      <EntityTrophyCabinet
+        kind="team"
         v-else
         :trophies="trophies"
         :pending="trophiesPending"

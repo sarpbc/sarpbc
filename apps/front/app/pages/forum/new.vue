@@ -59,7 +59,9 @@ const rateLimitMessage = computed(() => {
   if (creationStatus.value.canCreate) return null;
   if (!creationStatus.value.nextAvailableAt) return null;
 
-  const nextAt = df(locale.value).format(new Date(creationStatus.value.nextAvailableAt));
+  const nextAt = longDateTimeFormatter(locale.value).format(
+    new Date(creationStatus.value.nextAvailableAt),
+  );
   return t("page.forum.new.rateLimitWait", {
     hours: creationStatus.value.cooldownHours,
     time: nextAt,

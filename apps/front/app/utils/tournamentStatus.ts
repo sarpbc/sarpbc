@@ -64,7 +64,7 @@ export function formatTournamentDateRange(
     return null;
   }
 
-  const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const formatter = mediumDateFormatter(locale);
 
   if (beginAt && endAt) {
     const begin = new Date(beginAt);

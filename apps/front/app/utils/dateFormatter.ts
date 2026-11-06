@@ -1,10 +1,13 @@
 import { DateFormatter } from "@internationalized/date";
 
-export const df = (locale: "fr" | "en" = "en") =>
+export const longDateTimeFormatter = (locale: string) =>
   new DateFormatter(locale, {
     dateStyle: "long",
     timeStyle: "short",
   });
+
+export const mediumDateFormatter = (locale: string) =>
+  new DateFormatter(locale, { dateStyle: "medium" });
 
 const dayHeaderFormatter = (locale: string) =>
   new DateFormatter(locale, {

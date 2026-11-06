@@ -99,7 +99,7 @@ async function onDelete() {
           {{ authorLabel }}
         </span>
         <span class="shrink-0 text-xs text-muted tabular-nums">
-          {{ df(locale).format(new Date(comment.createdAt)) }}
+          {{ longDateTimeFormatter(locale).format(new Date(comment.createdAt)) }}
         </span>
       </div>
 

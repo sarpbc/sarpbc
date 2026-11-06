@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { TeamRosterEra } from "~/composables/team/useTeamRosterHistory";
+import type { TeamRosterEra } from "~/types/roster";
 
 const VISIBLE_ERAS = 6;
 
@@ -23,12 +22,7 @@ const { t, locale } = useI18n();
 const headingId = "team-roster-history-title";
 const showAll = ref(false);
 
-const dateDf = computed(
-  () =>
-    new DateFormatter(locale.value, {
-      dateStyle: "medium",
-    }),
-);
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const visibleEras = computed(() => (showAll.value ? eras : eras.slice(0, VISIBLE_ERAS)));
 
@@ -36,7 +30,7 @@ const hasHiddenEras = computed(() => eras.length > VISIBLE_ERAS);
 
 const formatDate = (value: string | null) => {
   if (!value) return null;
-  return dateDf.value.format(new Date(value));
+  return mediumDate.value.format(new Date(value));
 };
 
 const formatEraRange = (era: TeamRosterEra) => {

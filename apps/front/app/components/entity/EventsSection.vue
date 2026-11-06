@@ -1,22 +1,20 @@
 <script lang="ts" setup>
-import type { PlayerEventListItem } from "~/composables/player/usePlayerTournaments";
-import type { TournamentStatus } from "~/utils/tournamentStatus";
-import { tournamentStagePath } from "@sarpbc/utils";
-import { formatTournamentDateRange } from "~/utils/tournamentStatus";
-import { distinctStageName } from "@sarpbc/utils";
-
-type PlayerEventsTab = "upcoming" | "past";
+import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
+import type { EntityEventListItem, EntityKind } from "~/types/entity";
+import { formatTournamentDateRange, tournamentStatusLabelKey } from "~/utils/tournamentStatus";
 
 const {
+  kind,
   upcomingEvents,
   pastEvents,
   liveEvents = [],
   pending = false,
   hasError = false,
 } = defineProps<{
-  upcomingEvents: PlayerEventListItem[];
-  pastEvents: PlayerEventListItem[];
-  liveEvents?: PlayerEventListItem[];
+  kind: EntityKind;
+  upcomingEvents: EntityEventListItem[];
+  pastEvents: EntityEventListItem[];
+  liveEvents?: EntityEventListItem[];
   pending?: boolean;
   hasError?: boolean;
 }>();
@@ -26,19 +24,13 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-const route = useRoute();
-const router = useRouter();
+const { tab, emptyIcon, setTab } = useEntityListTab("events");
 
-const headingId = "player-events-title";
-
-const tab = computed<PlayerEventsTab>(() => {
-  const value = route.query.events;
-  return value === "past" ? "past" : "upcoming";
-});
+const headingId = computed(() => `${kind}-events-title`);
 
 const tabItems = computed(() => [
-  { value: "upcoming" as const, label: t("page.player.slug.events.tabs.upcoming") },
-  { value: "past" as const, label: t("page.player.slug.events.tabs.past") },
+  { value: "upcoming" as const, label: t(`page.${kind}.slug.events.tabs.upcoming`) },
+  { value: "past" as const, label: t(`page.${kind}.slug.events.tabs.past`) },
 ]);
 
 const activeEvents = computed(() => (tab.value === "past" ? pastEvents : upcomingEvents));
@@ -47,47 +39,7 @@ const live = computed(() => (tab.value === "upcoming" ? liveEvents : []));
 
 const hasEvents = computed(() => live.value.length > 0 || activeEvents.value.length > 0);
 
-const emptyIcon = computed(() => {
-  switch (tab.value) {
-    case "upcoming":
-      return "i-fluent-calendar-clock-24-regular";
-    case "past":
-      return "i-fluent-checkmark-circle-24-regular";
-    default: {
-      const exhaustive: never = tab.value;
-      return exhaustive;
-    }
-  }
-});
-
-function setTab(nextTab: PlayerEventsTab) {
-  const query = { ...route.query };
-
-  if (nextTab === "upcoming") {
-    delete query.events;
-  } else {
-    query.events = nextTab;
-  }
-
-  router.replace({ query });
-}
-
-function statusLabel(status: TournamentStatus): string {
-  switch (status) {
-    case "live":
-      return t("page.tournaments.id.status.live");
-    case "upcoming":
-      return t("page.tournaments.id.status.upcoming");
-    case "finished":
-      return t("page.tournaments.id.status.finished");
-    default: {
-      const exhaustive: never = status;
-      return exhaustive;
-    }
-  }
-}
-
-function eventMeta(event: PlayerEventListItem): string {
+function eventMeta(event: EntityEventListItem): string {
   return [
     distinctStageName(event),
     formatTournamentDateRange(event.beginAt, event.endAt, locale.value),
@@ -103,13 +55,13 @@ function eventMeta(event: PlayerEventListItem): string {
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
-            {{ t("page.player.slug.events.sectionTitle") }}
+            {{ t(`page.${kind}.slug.events.sectionTitle`) }}
           </h2>
           <SSegmented
             :model-value="tab"
             :items="tabItems"
-            :ariaLabel="t('page.player.slug.events.sectionTitle')"
-            @update:model-value="setTab($event === 'past' ? 'past' : 'upcoming')"
+            :ariaLabel="t(`page.${kind}.slug.events.sectionTitle`)"
+            @update:model-value="setTab"
           />
         </div>
       </template>
@@ -127,13 +79,13 @@ function eventMeta(event: PlayerEventListItem): string {
       </div>
 
       <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.player.slug.events.error')" @retry="emit('retry')" />
+        <SErrorState :message="t(`page.${kind}.slug.events.error`)" @retry="emit('retry')" />
       </SCard>
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">
         <div v-if="live.length > 0" class="flex flex-col gap-2">
           <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
-            {{ t("page.player.slug.events.live") }}
+            {{ t(`page.${kind}.slug.events.live`) }}
           </h3>
           <div class="flex flex-col border border-default divide-y divide-default">
             <ULink
@@ -171,7 +123,7 @@ function eventMeta(event: PlayerEventListItem): string {
             </div>
             <div class="flex shrink-0 items-center gap-2">
               <span v-if="tab === 'upcoming'" class="text-xs text-muted">
-                {{ statusLabel(event.status) }}
+                {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
               <UBadge
                 v-if="tab === 'past' && event.isWinner"
@@ -179,10 +131,10 @@ function eventMeta(event: PlayerEventListItem): string {
                 variant="subtle"
                 size="sm"
               >
-                {{ t("page.player.slug.events.winner") }}
+                {{ t(`page.${kind}.slug.events.winner`) }}
               </UBadge>
               <span v-else-if="tab === 'past'" class="text-xs text-muted">
-                {{ statusLabel(event.status) }}
+                {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
             </div>
           </ULink>
@@ -193,10 +145,10 @@ function eventMeta(event: PlayerEventListItem): string {
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
-            {{ t(`page.player.slug.events.${tab}.empty`) }}
+            {{ t(`page.${kind}.slug.events.${tab}.empty`) }}
           </p>
           <p class="text-xs text-muted text-pretty">
-            {{ t(`page.player.slug.events.${tab}.emptyHint`) }}
+            {{ t(`page.${kind}.slug.events.${tab}.emptyHint`) }}
           </p>
         </div>
       </SCard>

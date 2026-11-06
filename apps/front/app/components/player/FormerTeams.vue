@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { teamPath } from "@sarpbc/utils";
-import { DateFormatter } from "@internationalized/date";
 import type { ContractRole, PlayerContract } from "@sarpbc/types";
 
 const { contracts } = defineProps<{
@@ -11,10 +10,10 @@ const { t, locale } = useI18n();
 
 const headingId = "player-former-teams-title";
 
-const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatContractDate = (dateStr: string | null) =>
-  dateStr ? df.value.format(new Date(dateStr)) : t("page.player.slug.contractDateUnknown");
+  dateStr ? mediumDate.value.format(new Date(dateStr)) : t("page.player.slug.contractDateUnknown");
 
 const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
 </script>

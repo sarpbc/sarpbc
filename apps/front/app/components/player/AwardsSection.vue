@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
 import type { PlayerAwardType, PlayerProfileAward } from "@sarpbc/types";
 import { tournamentStagePath } from "@sarpbc/utils";
 import { distinctStageName } from "@sarpbc/utils";
@@ -22,16 +21,11 @@ const { t, locale } = useI18n();
 
 const headingId = "player-awards-title";
 
-const dateDf = computed(
-  () =>
-    new DateFormatter(locale.value, {
-      dateStyle: "medium",
-    }),
-);
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
-  return dateDf.value.format(new Date(value));
+  return mediumDate.value.format(new Date(value));
 };
 
 function awardTypeLabel(awardType: PlayerAwardType): string {

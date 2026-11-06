@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { PlayerTrophyListItem } from "~/composables/player/usePlayerTrophies";
+import type { EntityTrophyListItem } from "~/types/entity";
 import type { Player } from "@sarpbc/types";
 import { resolvePlayerNationalityDemonym } from "~/utils/playerNationalityDemonym";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
@@ -7,7 +7,7 @@ import { formatTrophyHighlightNames } from "~/utils/trophyHighlights";
 
 const { player, trophies } = defineProps<{
   player: Player;
-  trophies: PlayerTrophyListItem[];
+  trophies: EntityTrophyListItem[];
 }>();
 
 const { t, te } = useI18n();

@@ -1,13 +1,14 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { PlayerTrophyListItem } from "~/composables/player/usePlayerTrophies";
+import type { EntityKind, EntityTrophyListItem } from "~/types/entity";
 
 const {
+  kind,
   trophies,
   pending = false,
   hasError = false,
 } = defineProps<{
-  trophies: PlayerTrophyListItem[];
+  kind: EntityKind;
+  trophies: EntityTrophyListItem[];
   pending?: boolean;
   hasError?: boolean;
 }>();
@@ -18,18 +19,13 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
-const headingId = "player-trophies-title";
+const headingId = computed(() => `${kind}-trophies-title`);
 
-const dateDf = computed(
-  () =>
-    new DateFormatter(locale.value, {
-      dateStyle: "medium",
-    }),
-);
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
-  return dateDf.value.format(new Date(value));
+  return mediumDate.value.format(new Date(value));
 };
 </script>
 
@@ -38,7 +34,7 @@ const formatEndDate = (value: Date | string | null) => {
     <SRail>
       <template #caption>
         <h2 :id="headingId">
-          {{ t("page.player.slug.trophies.title") }}
+          {{ t(`page.${kind}.slug.trophies.title`) }}
         </h2>
       </template>
 
@@ -47,15 +43,15 @@ const formatEndDate = (value: Date | string | null) => {
           <div class="flex w-full min-w-0 items-center gap-2">
             <USkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <USkeleton class="h-3.5 w-3/5 max-w-48" />
-              <USkeleton class="h-3 w-2/5 max-w-32" />
+              <USkeleton class="h-3.5 w-40" />
+              <USkeleton class="h-3 w-24" />
             </div>
           </div>
         </SListItem>
       </SCard>
 
       <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.player.slug.trophies.error')" @retry="emit('retry')" />
+        <SErrorState :message="t(`page.${kind}.slug.trophies.error`)" @retry="emit('retry')" />
       </SCard>
 
       <SCard v-else-if="trophies.length > 0">
@@ -87,10 +83,10 @@ const formatEndDate = (value: Date | string | null) => {
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
-            {{ t("page.player.slug.trophies.empty") }}
+            {{ t(`page.${kind}.slug.trophies.empty`) }}
           </p>
           <p class="text-xs text-muted text-pretty">
-            {{ t("page.player.slug.trophies.emptyHint") }}
+            {{ t(`page.${kind}.slug.trophies.emptyHint`) }}
           </p>
         </div>
       </SCard>

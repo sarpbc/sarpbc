@@ -3,8 +3,6 @@ const { t } = useI18n();
 const route = useRoute();
 const { setPageSeo } = useSarpbcSeo();
 
-const { getAllPlayers } = usePlayer();
-
 const PLAYERS_PER_PAGE = 52;
 
 const offset = computed(() => {
@@ -22,12 +20,18 @@ const {
   pending,
   error,
   refresh,
-} = getAllPlayers(
-  computed(() => ({
-    limit: PLAYERS_PER_PAGE,
-    offset: offset.value,
-    start: start.value || undefined,
-  })),
+} = useAsyncData(
+  () => `players-${offset.value}-${start.value}`,
+  () =>
+    getAllPlayers({
+      limit: PLAYERS_PER_PAGE,
+      offset: offset.value,
+      start: start.value || undefined,
+    }),
+  {
+    watch: [offset, start],
+    default: () => ({ players: [], total: 0 }),
+  },
 );
 
 const players = computed(() => playersResponse.value?.players || []);

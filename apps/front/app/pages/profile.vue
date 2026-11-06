@@ -270,7 +270,7 @@ setPageSeo({
                 {{ notificationMessage(notification) }}
               </p>
               <span class="shrink-0 text-xs text-muted tabular-nums">
-                {{ df(locale).format(new Date(notification.createdAt)) }}
+                {{ longDateTimeFormatter(locale).format(new Date(notification.createdAt)) }}
               </span>
             </div>
           </SListItem>

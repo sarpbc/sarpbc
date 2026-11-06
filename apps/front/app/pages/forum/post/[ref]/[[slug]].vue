@@ -93,7 +93,7 @@ watch(
           <div class="flex shrink-0 items-center gap-3 text-xs text-muted">
             <span>{{ post.author }}</span>
             <time :datetime="new Date(post.createdAt).toISOString()" class="tabular-nums">
-              {{ df(locale).format(new Date(post.createdAt)) }}
+              {{ longDateTimeFormatter(locale).format(new Date(post.createdAt)) }}
             </time>
           </div>
         </div>
