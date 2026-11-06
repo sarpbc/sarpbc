@@ -1,13 +1,14 @@
 import type { RedisService } from "../../infrastructure/redis/redis.service";
 import type { SyncCursor } from "../application/ports";
 
-export const PANDASCORE_SYNC_CURSOR_KEY = "pandascore:sync:additions:cursor";
+const CURSOR_KEY = "pandascore:sync:incidents:cursor";
+const CURSOR_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 export class RedisSyncCursor implements SyncCursor {
   constructor(private readonly redisService: RedisService) {}
 
   async getLastSyncAt(): Promise<Date | null> {
-    const value = await this.redisService.get(PANDASCORE_SYNC_CURSOR_KEY);
+    const value = await this.redisService.get(CURSOR_KEY);
     if (!value) {
       return null;
     }
@@ -16,6 +17,6 @@ export class RedisSyncCursor implements SyncCursor {
   }
 
   async setLastSyncAt(date: Date): Promise<void> {
-    await this.redisService.set(PANDASCORE_SYNC_CURSOR_KEY, date.toISOString(), 60 * 60 * 24 * 30);
+    await this.redisService.set(CURSOR_KEY, date.toISOString(), CURSOR_TTL_SECONDS);
   }
 }

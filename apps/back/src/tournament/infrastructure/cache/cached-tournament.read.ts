@@ -7,7 +7,7 @@ import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tour
 
 const date = z.iso.datetime().transform((value) => new Date(value));
 const nullableText = z.string().nullable();
-const team = z.object({
+const team = z.strictObject({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
@@ -16,14 +16,19 @@ const team = z.object({
   logoDarkUrl: nullableText,
   location: nullableText,
 });
-const participant = z.object({
+const participant = z.strictObject({
   id: z.string(),
   team,
   players: z.array(
-    z.object({ id: z.string(), name: z.string(), slug: z.string(), nationality: nullableText }),
+    z.strictObject({
+      id: z.string(),
+      name: z.string(),
+      slug: z.string(),
+      nationality: nullableText,
+    }),
   ),
 });
-const match = z.object({
+const match = z.strictObject({
   id: z.string(),
   publicId: z.number().int().positive(),
   slug: z.string(),
@@ -33,18 +38,18 @@ const match = z.object({
   endAt: date.nullable(),
   numberOfGames: z.number().nullable(),
   winnerId: nullableText,
-  participants: z.array(z.object({ id: z.string(), team })),
-  results: z.array(z.object({ participant: z.string(), score: z.number() })),
+  participants: z.array(z.strictObject({ id: z.string(), team })),
+  results: z.array(z.strictObject({ participant: z.string(), score: z.number() })),
   previousMatches: z.array(
-    z.object({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
+    z.strictObject({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
   ),
 });
-const tournament = z.object({
+const tournament = z.strictObject({
   id: z.string(),
   source: z.enum(DATA_SOURCES),
   name: z.string(),
   slug: z.string(),
-  event: z.object({ id: z.string(), slug: z.string(), name: z.string() }),
+  event: z.strictObject({ id: z.string(), slug: z.string(), name: z.string() }),
   tier: nullableText,
   type: nullableText,
   country: nullableText,
@@ -57,7 +62,7 @@ const tournament = z.object({
   league: z
     .object({ id: z.string(), name: z.string(), imageUrl: nullableText, url: nullableText })
     .nullable(),
-  winner: z.object({ id: z.string(), team }).nullable(),
+  winner: z.strictObject({ id: z.string(), team }).nullable(),
   participants: z.array(participant),
   matches: z.array(match),
 }) satisfies z.ZodType<TournamentDetailResponse>;

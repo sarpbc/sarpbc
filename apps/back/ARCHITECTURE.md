@@ -41,7 +41,7 @@ The following operations share a transaction:
 - A roster proposal approval and the change it applies; a failed change leaves the proposal pending.
 - A manual tournament change, a competition import, or a pick and its eligibility checks.
 
-Application services publish domain events through feature ports after commit, so a feature reacts to another without importing it. `MatchDecided` is republished on each committed write that leaves a match decided, which lets a re-sync retry a failed handler. Handlers are idempotent and best effort. Pick'em scores picks from this event, and its manual validation endpoint is the recovery path.
+Application services publish domain events through feature ports after commit, so a feature reacts to another without importing it. `MatchDecided` is republished on each committed write that leaves a match decided, which lets a re-sync retry a failed handler. Handlers are idempotent and best effort. Pick'em scores picks from this event, and its manual validation endpoint is the recovery path. Competition applies cache invalidation and event publication after every committed write through one operation, `CompetitionAfterCommit.settle`, which is fail-soft. Pick'em never writes competition rows: when it derives a winner it calls `MatchService.setMatchWinner`, so `endAt`, `MatchDecided` and the cache are handled like any other decision, and it reads matches through the same service.
 
 HTTP requests use the MikroORM request context. Scheduled jobs and initialization hooks establish their own contexts in infrastructure. Adapters retain no request-specific managed state on application singletons.
 
@@ -59,7 +59,7 @@ Application failures carry semantic kinds and optional business codes. The HTTP 
 
 A tournament row is a stage of a tournament event. PandaScore serie IDs identify events, a manual tournament is the single stage of its own event, and event and stage slugs are frozen once allocated. A serie merge re-keys the event, or moves its stages into the target event and retires the old slug.
 
-Tournament detail caching stores response DTOs for 60 seconds under `tournament:<id>`. Event pages read their stages through the same cache, so an event or serie rename invalidates every stage of that event. The infrastructure reader validates cached JSON and falls back to PostgreSQL on an invalid value or Redis failure. Writes invalidate after commit. A failed optional invalidation preserves database success and emits a diagnostic. Invalidation does not guarantee immediate freshness against a concurrent cache fill. Permissions and transaction decisions use authoritative database reads.
+Tournament detail caching stores response DTOs for 60 seconds under `tournament:<id>`. Event pages read their stages through the same cache, so an event or serie rename invalidates every stage of that event. The infrastructure reader validates cached JSON and falls back to PostgreSQL on an invalid value or Redis failure. Writes invalidate after commit through `CompetitionAfterCommit`. A failed optional invalidation preserves database success and emits a diagnostic. Invalidation does not guarantee immediate freshness against a concurrent cache fill. Permissions and transaction decisions use authoritative database reads.
 
 ## Design choice
 
