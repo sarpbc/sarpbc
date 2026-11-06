@@ -1,5 +1,6 @@
 import { localizedPath, uiLocale } from "@sarpbc/utils";
 import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
+import { resolveSiteUrl } from "~/utils/siteUrl";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
@@ -35,23 +36,8 @@ export const useSarpbcSeo = () => {
   const { locales } = useI18n();
   const route = useRoute();
 
-  const resolveImageUrl = (image?: string | null): string => {
-    const trimmed = image?.trim();
-    if (!trimmed) {
-      return `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
-    }
-
-    if (/^https?:\/\//i.test(trimmed)) {
-      return trimmed;
-    }
-
-    if (trimmed.startsWith("//")) {
-      return `https:${trimmed}`;
-    }
-
-    const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-    return `${SITE_ORIGIN}${path}`;
-  };
+  const resolveImageUrl = (image?: string | null): string =>
+    resolveSiteUrl(image) ?? `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
 
   const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
     const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";

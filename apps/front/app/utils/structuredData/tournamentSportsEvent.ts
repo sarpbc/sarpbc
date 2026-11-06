@@ -1,7 +1,8 @@
 import type { TeamSummary, TournamentDetail } from "@sarpbc/types";
-import { tournamentStageLabel, tournamentStagePath } from "@sarpbc/utils";
+import { teamPath, tournamentStageLabel, tournamentStagePath } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { formatPrizepool } from "~/utils/currencyFormatter";
+import { resolveSiteUrl } from "~/utils/siteUrl";
 import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 
@@ -87,24 +88,6 @@ export interface BuildTournamentSportsEventOptions {
 
 function isTournamentFormat(value: string): value is TournamentFormat {
   return (TOURNAMENT_FORMATS as readonly string[]).includes(value);
-}
-
-export function resolveStructuredDataUrl(value: string | undefined | null): string | undefined {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("//")) {
-    return `https:${trimmed}`;
-  }
-
-  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  return `${SITE_ORIGIN}${path}`;
 }
 
 export function toIsoDate(value: Date | string | undefined | null): string | undefined {
@@ -238,7 +221,7 @@ function competitorFromTournament(
       compactJsonLd({
         "@type": "SportsTeam",
         name,
-        url: team.slug ? `${SITE_ORIGIN}/team/${team.slug}` : undefined,
+        url: team.slug ? `${SITE_ORIGIN}${teamPath(team.slug)}` : undefined,
       }),
     );
   }
@@ -314,9 +297,7 @@ export function buildTournamentSportsEvent(
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
   const format = formatLabel(tournament.type);
   const champion = getTournamentChampionTeam(tournament);
-  const image =
-    resolveStructuredDataUrl(tournament.imageUrl) ??
-    resolveStructuredDataUrl(tournament.league?.imageUrl);
+  const image = resolveSiteUrl(tournament.imageUrl) ?? resolveSiteUrl(tournament.league?.imageUrl);
   const organizerName = tournament.league?.name?.trim();
   const competitors = competitorFromTournament(tournament);
   const venue = eventVenue(tournament.type, tournament.country, url);
@@ -336,7 +317,7 @@ export function buildTournamentSportsEvent(
       ? compactJsonLd<SportsOrganizationLd>({
           "@type": "SportsOrganization",
           name: organizerName,
-          url: resolveStructuredDataUrl(tournament.league?.url),
+          url: resolveSiteUrl(tournament.league?.url),
         })
       : undefined,
     image,
