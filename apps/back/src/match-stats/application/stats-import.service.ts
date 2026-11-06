@@ -2,7 +2,12 @@ import { v4 } from "uuid";
 import type { StatsImportFailedReason, StatsImportItem } from "@sarpbc/types";
 import { ApplicationError, ConflictError } from "../../common/domain/errors";
 import { parseBallchasingRef } from "../domain/ballchasing-ref";
-import { assignReplays, type ReplayAssignment, type RosterPlayer } from "../domain/replay-matching";
+import {
+  assignReplays,
+  byPlayedAt,
+  type ReplayAssignment,
+  type RosterPlayer,
+} from "../domain/replay-matching";
 import { isActive, type StatsImport } from "../domain/stats-import";
 import {
   buildGameRecord,
@@ -90,10 +95,8 @@ export class StatsImportService {
           match.participants.map((participant) => [participant.id, participant.players] as const),
         ),
       );
-      const assignments = assignReplays(replays, matches, stored, excluded).sort(
-        (a, b) =>
-          (a.replay.playedAt?.getTime() ?? 0) - (b.replay.playedAt?.getTime() ?? 0) ||
-          a.replay.id.localeCompare(b.replay.id),
+      const assignments = assignReplays(replays, matches, stored, excluded).sort((a, b) =>
+        byPlayedAt(a.replay, b.replay),
       );
       statsImport.total = assignments.length;
       await this.imports.save(statsImport);
