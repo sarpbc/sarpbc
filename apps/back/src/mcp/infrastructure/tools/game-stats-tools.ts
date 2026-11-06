@@ -8,7 +8,11 @@ import type { ManualGameService } from "../../../match-stats/application/manual-
 import type { StatsImportService } from "../../../match-stats/application/stats-import.service";
 import type { StatsPlayerLinkService } from "../../../match-stats/application/stats-player-link.service";
 import type { StatsImport } from "../../../match-stats/domain/stats-import";
+import { attachReplayFields } from "../../../match-stats/infrastructure/http/dto/attach-replay.dto";
+import { linkStatsPlayerFields } from "../../../match-stats/infrastructure/http/dto/link-stats-player.dto";
+import { requestStatsImportFields } from "../../../match-stats/infrastructure/http/dto/request-stats-import.dto";
 import { defineTool, type McpTool } from "../define-tool";
+import { describeFields } from "./tool-input";
 
 const OTHER_STAGE_REASONS: readonly StatsImportUnmatchedReason[] = [
   "unknown_teams",
@@ -71,11 +75,9 @@ export function gameStatsTools({
       permission: "tournaments.manage",
       input: {
         tournamentId,
-        group: z
-          .string()
-          .min(1)
-          .max(500)
-          .describe("Ballchasing group link (https://ballchasing.com/group/…) or group id."),
+        ...describeFields(requestStatsImportFields, {
+          group: "Ballchasing group link (https://ballchasing.com/group/…) or group id.",
+        }),
       },
       handler: async ({ tournamentId: id, group }) => {
         const statsImport = await statsImportService.request(id, group);
@@ -130,19 +132,11 @@ export function gameStatsTools({
       permission: "tournaments.manage",
       input: {
         tournamentId,
-        platform: z
-          .string()
-          .trim()
-          .min(1)
-          .max(50)
-          .describe("Platform from list_unlinked_game_players (e.g. steam, epic)."),
-        platformId: z
-          .string()
-          .trim()
-          .min(1)
-          .max(200)
-          .describe("Platform id from list_unlinked_game_players."),
-        playerId: z.string().uuid().describe("Player UUID from one of the tournament's rosters."),
+        ...describeFields(linkStatsPlayerFields, {
+          platform: "Platform from list_unlinked_game_players (e.g. steam, epic).",
+          platformId: "Platform id from list_unlinked_game_players.",
+          playerId: "Player UUID from one of the tournament's rosters.",
+        }),
       },
       handler: async ({ tournamentId: id, platform, platformId, playerId }) => {
         const link = { platform, platformId, playerId };
@@ -159,20 +153,13 @@ export function gameStatsTools({
       permission: "tournaments.manage",
       input: {
         tournamentId,
-        matchId: z
-          .string()
-          .min(1)
-          .describe("Match UUID from get_tournament or get_game_stats_import."),
-        replay: z
-          .string()
-          .min(1)
-          .max(500)
-          .describe("Ballchasing replay link (https://ballchasing.com/replay/…) or replay id."),
-        gameNumber: z.number().int().describe("Game number in the series, starting at 1."),
-        blueParticipantId: z
-          .string()
-          .min(1)
-          .describe("Tournament participant UUID of the team that played blue in this replay."),
+        ...describeFields(attachReplayFields, {
+          matchId: "Match UUID from get_tournament or get_game_stats_import.",
+          replay: "Ballchasing replay link (https://ballchasing.com/replay/…) or replay id.",
+          gameNumber: "Game number in the series, starting at 1.",
+          blueParticipantId:
+            "Tournament participant UUID of the team that played blue in this replay.",
+        }),
       },
       handler: async ({ tournamentId: id, ...input }) => {
         const game = await manualGameService.attach(id, input);
