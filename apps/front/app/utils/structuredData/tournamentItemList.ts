@@ -22,13 +22,11 @@ export interface BuildTournamentItemListOptions {
   events: TournamentEvent<TournamentListItem>[];
   total: number;
   positionOffset?: number;
-  origin?: string;
   name?: string;
 }
 
 export function buildTournamentItemList(options: BuildTournamentItemListOptions): ItemListLd {
-  const origin = options.origin ?? SITE_ORIGIN;
-  const url = `${origin}/tournaments`;
+  const url = `${SITE_ORIGIN}/tournaments`;
   const positionOffset = options.positionOffset ?? 0;
 
   return compactJsonLd({
@@ -42,7 +40,7 @@ export function buildTournamentItemList(options: BuildTournamentItemListOptions)
         "@type": "ListItem",
         position: positionOffset + index + 1,
         name: event.name,
-        url: `${origin}${tournamentEventPath(event.slug)}`,
+        url: `${SITE_ORIGIN}${tournamentEventPath(event.slug)}`,
       }),
     ),
   });

@@ -62,11 +62,8 @@ export function parseNewsSitemapChunk(raw: string | undefined): number | null {
   return Number(raw);
 }
 
-export function absoluteUrl(path: string, origin: string = SITE_ORIGIN): string {
-  if (path === "/") {
-    return `${origin}/`;
-  }
-  return `${origin}${path}`;
+export function absoluteUrl(path: string): string {
+  return `${SITE_ORIGIN}${path}`;
 }
 
 export function escapeXml(value: string): string {
@@ -99,9 +96,9 @@ ${body}
 `;
 }
 
-function pageUrlEntry(page: StaticSitemapPage, origin: string): string {
-  const enUrl = absoluteUrl(page.path, origin);
-  const frUrl = absoluteUrl(localizedPath(page.path, "fr"), origin);
+function pageUrlEntry(page: StaticSitemapPage): string {
+  const enUrl = absoluteUrl(page.path);
+  const frUrl = absoluteUrl(localizedPath(page.path, "fr"));
   return [enUrl, frUrl]
     .map(
       (url) => `  <url>
@@ -114,10 +111,10 @@ ${hreflangLinks(enUrl, frUrl)}
     .join("\n");
 }
 
-function newsUrlEntry(entry: NewsSitemapEntry, origin: string): string {
+function newsUrlEntry(entry: NewsSitemapEntry): string {
   const path = newsPath(entry.slug);
-  const enUrl = absoluteUrl(path, origin);
-  const frUrl = absoluteUrl(localizedPath(path, "fr"), origin);
+  const enUrl = absoluteUrl(path);
+  const frUrl = absoluteUrl(localizedPath(path, "fr"));
   return [enUrl, frUrl]
     .map(
       (url) => `  <url>
@@ -129,15 +126,15 @@ ${hreflangLinks(enUrl, frUrl)}
     .join("\n");
 }
 
-export function buildSitemapIndex(newsChunkCount: number, origin: string = SITE_ORIGIN): string {
+export function buildSitemapIndex(newsChunkCount: number): string {
   const chunks = Math.max(1, newsChunkCount);
   const sitemaps = [
     `  <sitemap>
-    <loc>${escapeXml(absoluteUrl(SITEMAP_PAGES_PATH, origin))}</loc>
+    <loc>${escapeXml(absoluteUrl(SITEMAP_PAGES_PATH))}</loc>
   </sitemap>`,
     ...Array.from({ length: chunks }, (_, chunk) => {
       return `  <sitemap>
-    <loc>${escapeXml(absoluteUrl(newsSitemapPath(chunk), origin))}</loc>
+    <loc>${escapeXml(absoluteUrl(newsSitemapPath(chunk)))}</loc>
   </sitemap>`;
     }),
   ];
@@ -149,15 +146,12 @@ ${sitemaps.join("\n")}
 `;
 }
 
-export function buildPagesUrlset(origin: string = SITE_ORIGIN): string {
-  const body = STATIC_SITEMAP_PAGES.map((page) => pageUrlEntry(page, origin)).join("\n");
+export function buildPagesUrlset(): string {
+  const body = STATIC_SITEMAP_PAGES.map(pageUrlEntry).join("\n");
   return urlsetWrapper(body);
 }
 
-export function buildNewsUrlset(
-  entries: readonly NewsSitemapEntry[],
-  origin: string = SITE_ORIGIN,
-): string {
-  const body = entries.map((entry) => newsUrlEntry(entry, origin)).join("\n");
+export function buildNewsUrlset(entries: readonly NewsSitemapEntry[]): string {
+  const body = entries.map(newsUrlEntry).join("\n");
   return urlsetWrapper(body);
 }

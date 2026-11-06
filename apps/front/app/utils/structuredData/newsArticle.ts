@@ -27,13 +27,11 @@ export interface BuildNewsArticleJsonLdInput {
   content: string;
   author?: string;
   imageUrl?: string | null;
-  origin?: string;
   locale?: UiLocale;
 }
 
 export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): NewsArticleLd {
-  const origin = article.origin ?? SITE_ORIGIN;
-  const url = `${origin}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
+  const url = `${SITE_ORIGIN}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
   const description =
     excerptFromNewsContent(article.content, NEWS_SEO_DESCRIPTION_MAX_LENGTH) || undefined;
   const authorName = article.author?.trim();
