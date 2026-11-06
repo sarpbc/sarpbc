@@ -247,8 +247,37 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         (await request("GET", `/news/${article.slug}?locale=fr-FR`)).json().title,
         "Actualité intégration",
       );
+      const draft = (
+        await request(
+          "POST",
+          "/news",
+          { title: "Integration Secret Draft", content: "<p>Not public</p>" },
+          staffCookie,
+          201,
+        )
+      ).json();
+      await request("GET", `/news/${draft.slug}`, undefined, undefined, 404);
       assert.equal((await request("GET", "/news/sitemap")).json().total, 1);
-      await request("GET", "/news?locale=en-US&page=0&limit=10");
+      assert.deepEqual(
+        (await request("GET", "/news/sitemap/0")).json().data.map(({ slug }) => slug),
+        [article.slug],
+      );
+      const feed = (await request("GET", "/news?locale=en-US&page=0&limit=10")).json();
+      assert.equal(feed.total, 1);
+      assert.deepEqual(
+        feed.data.map(({ slug }) => slug),
+        [article.slug],
+      );
+      assert.equal((await request("GET", "/news?type=short&page=0&limit=10")).json().total, 1);
+      assert.equal((await request("GET", "/news?type=article&page=0&limit=10")).json().total, 0);
+      assert.equal(
+        (await request("GET", "/news/admin?page=0&limit=10", undefined, staffCookie)).json().total,
+        2,
+      );
+      await request("PATCH", `/news/${article.slug}/unpublish`, {}, staffCookie, 204);
+      assert.equal((await request("GET", "/news/sitemap")).json().total, 0);
+      assert.equal((await request("GET", "/news?locale=en-US&page=0&limit=10")).json().total, 0);
+      await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
     });
 
     let team, otherTeam, player;
