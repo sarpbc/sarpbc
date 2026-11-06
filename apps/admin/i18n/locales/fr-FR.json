@@ -27,6 +27,7 @@
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
+      "logoutFailed": "Déconnexion impossible. Réessayez.",
       "forbidden": "Vous n’avez pas accès à cette section",
       "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin.",
       "retry": "Réessayer",

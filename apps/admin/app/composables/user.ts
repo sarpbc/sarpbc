@@ -15,18 +15,23 @@ export async function getProfile(): Promise<User | null> {
 export async function logout(): Promise<void> {
   const user = useUser();
   const localePath = useLocalePath();
+  const toast = useToast();
+  const { $i18n } = useNuxtApp();
 
+  let confirmed = false;
   try {
     const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
       method: "GET",
     });
-    if (res.success === true) {
-      user.value = null;
-      await navigateTo(localePath("/login"));
-      return;
-    }
+    confirmed = res.success === true;
   } catch (error) {
     console.error("Logout failed:", error);
-    throw new Error("Logout failed");
   }
+
+  if (!confirmed) {
+    toast.add({ title: $i18n.t("page.home.logoutFailed"), color: "error" });
+    return;
+  }
+  user.value = null;
+  await navigateTo(localePath("/login"));
 }

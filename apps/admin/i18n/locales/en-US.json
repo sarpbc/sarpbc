@@ -27,6 +27,7 @@
       "signedInAs": "Signed in as",
       "logout": "Log Out",
       "loggingOut": "Logging out…",
+      "logoutFailed": "Could not log out. Try again.",
       "forbidden": "You do not have access to that section",
       "noTools": "No tools are available for your staff role yet. Ask an admin if you need access.",
       "retry": "Try Again",
