@@ -1,6 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { AuthenticatedRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import type { FastifyRequest } from "fastify";
+import { ForbiddenError } from "../../../common/domain/errors";
 import { STAFF_PERMISSIONS_KEY } from "./decorator/require-permissions.decorator";
 import type { StaffPermission } from "@sarpbc/types";
 import { UserService } from "../../application/user.service";
@@ -13,11 +14,10 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: AuthenticatedRequest = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const requestUser = request.user;
+    const requestUser = context.switchToHttp().getRequest<FastifyRequest>().user;
 
     if (!requestUser) {
-      throw new ForbiddenException(
+      throw new ForbiddenError(
         "You must be signed in with a staff account to perform this action.",
       );
     }
@@ -28,14 +28,14 @@ export class PermissionGuard implements CanActivate {
     ]);
 
     if (!required?.length) {
-      throw new ForbiddenException(
+      throw new ForbiddenError(
         "This action is not configured for staff access. Contact a maintainer.",
       );
     }
 
     const allowed = await this.userService.hasAnyPermission(requestUser.id, required);
     if (!allowed) {
-      throw new ForbiddenException(
+      throw new ForbiddenError(
         "You do not have permission for this action. Ask an admin to update your staff role.",
       );
     }

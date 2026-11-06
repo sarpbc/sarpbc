@@ -1,7 +1,6 @@
 import { Injectable, Module, OnModuleInit } from "@nestjs/common";
 import { EntityManager, MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { ForumController } from "./http/forum.controller";
 import { PostController } from "./http/post.controller";
@@ -22,7 +21,7 @@ class TopicInitializer implements OnModuleInit {
   }
 }
 @Module({
-  imports: [UserModule, ReplyModule],
+  imports: [ReplyModule],
   controllers: [ForumController, PostController, TopicController],
   providers: [
     {

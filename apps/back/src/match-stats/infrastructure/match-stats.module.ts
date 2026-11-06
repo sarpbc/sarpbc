@@ -3,7 +3,6 @@ import { ConfigService } from "@nestjs/config";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { log } from "evlog";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { ManualGameService } from "../application/manual-game.service";
 import { MatchGamesService } from "../application/match-games.service";
 import { StatsImportService } from "../application/stats-import.service";
@@ -38,7 +37,6 @@ const BALLCHASING_SOURCE = Symbol("BallchasingSource");
       MatchStatsImport,
       PlayerPlatformLink,
     ]),
-    UserModule,
   ],
   controllers: [StatsImportController, StatsPlayerLinkController, StatsGameController],
   providers: [

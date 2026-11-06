@@ -6,10 +6,9 @@ import { ImagesController } from "./http/images.controller";
 import { ImagesService } from "../application/images.service";
 import { CloudflareImagesGateway } from "./cloudflare-images.gateway";
 import { ImageRepository } from "./persistence/images.repository";
-import { UserModule } from "../../user/infrastructure/user.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Image]), ConfigModule, UserModule],
+  imports: [MikroOrmModule.forFeature([Image]), ConfigModule],
   controllers: [ImagesController],
   providers: [
     CloudflareImagesGateway,

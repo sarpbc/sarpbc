@@ -1,14 +1,14 @@
 import type { JwtService } from "@nestjs/jwt";
 import { z } from "zod";
-import type { UserToken } from "../../common/application/models/user-token";
+import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
 import type {
   AuthTokenPair,
   AuthTokenType,
   SessionTokens,
 } from "../application/ports/authentication";
 
-export const ACCESS_TOKEN_EXPIRES_IN = "2h";
-export const REFRESH_TOKEN_EXPIRES_IN = "30d";
+export const ACCESS_TOKEN_TTL_SECONDS = 2 * 60 * 60;
+export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const payloadSchema = z.object({
   id: z.string().min(1),
@@ -17,49 +17,37 @@ const payloadSchema = z.object({
 });
 type JwtSigner = Pick<JwtService, "signAsync" | "verifyAsync">;
 
-export async function signAuthTokenPair(
-  jwtService: JwtSigner,
-  secret: string,
-  user: UserToken,
-): Promise<AuthTokenPair> {
-  const [accessToken, refreshToken] = await Promise.all([
-    jwtService.signAsync(
-      { id: user.id, email: user.email, typ: "access" },
-      { secret, expiresIn: ACCESS_TOKEN_EXPIRES_IN },
-    ),
-    jwtService.signAsync(
-      { id: user.id, email: user.email, typ: "refresh" },
-      { secret, expiresIn: REFRESH_TOKEN_EXPIRES_IN },
-    ),
-  ]);
-  return { accessToken, refreshToken };
-}
-
-export async function verifyAuthToken(
-  jwtService: JwtSigner,
-  secret: string,
-  token: string,
-  typ: AuthTokenType,
-): Promise<UserToken | null> {
-  try {
-    const parsed = payloadSchema.safeParse(await jwtService.verifyAsync<object>(token, { secret }));
-    return parsed.success && parsed.data.typ === typ
-      ? { id: parsed.data.id, email: parsed.data.email }
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 export class JwtTokenGateway implements SessionTokens {
   constructor(
     private readonly jwt: JwtSigner,
     private readonly secret: string,
   ) {}
-  sign(user: UserToken): Promise<AuthTokenPair> {
-    return signAuthTokenPair(this.jwt, this.secret, user);
+
+  async sign(user: AuthenticatedUser): Promise<AuthTokenPair> {
+    const { secret } = this;
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwt.signAsync(
+        { id: user.id, email: user.email, typ: "access" },
+        { secret, expiresIn: ACCESS_TOKEN_TTL_SECONDS },
+      ),
+      this.jwt.signAsync(
+        { id: user.id, email: user.email, typ: "refresh" },
+        { secret, expiresIn: REFRESH_TOKEN_TTL_SECONDS },
+      ),
+    ]);
+    return { accessToken, refreshToken };
   }
-  verify(token: string, type: AuthTokenType): Promise<UserToken | null> {
-    return verifyAuthToken(this.jwt, this.secret, token, type);
+
+  async verify(token: string, type: AuthTokenType): Promise<AuthenticatedUser | null> {
+    try {
+      const parsed = payloadSchema.safeParse(
+        await this.jwt.verifyAsync<object>(token, { secret: this.secret }),
+      );
+      return parsed.success && parsed.data.typ === type
+        ? { id: parsed.data.id, email: parsed.data.email }
+        : null;
+    } catch {
+      return null;
+    }
   }
 }

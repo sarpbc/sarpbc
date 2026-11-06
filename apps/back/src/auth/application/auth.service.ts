@@ -1,9 +1,10 @@
 import { AuthenticationError } from "../../common/domain/errors";
-import type { UserToken } from "../../common/application/models/user-token";
+import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
 import type { UserService } from "../../user/application/user.service";
 import type { CreateAccountInput, SignInInput } from "../../user/application/models/account-input";
 import type {
   AuthDestinations,
+  AuthSession,
   AuthTokenPair,
   GoogleIdentity,
   OAuthReturnTo,
@@ -18,15 +19,22 @@ export class AuthService {
     private readonly destinations: AuthDestinations,
   ) {}
 
-  signTokenPair(user: UserToken): Promise<AuthTokenPair> {
+  signTokenPair(user: AuthenticatedUser): Promise<AuthTokenPair> {
     return this.tokens.sign({ id: user.id, email: user.email });
   }
 
-  async refreshSession(refreshToken: string): Promise<AuthTokenPair | null> {
-    const payload = await this.tokens.verify(refreshToken, "refresh");
-    if (!payload) return null;
-    const user = await this.userService.findById(payload.id);
-    return user ? this.signTokenPair(user) : null;
+  async authenticate(accessToken: string): Promise<AuthenticatedUser | null> {
+    return this.currentUser(await this.tokens.verify(accessToken, "access"));
+  }
+
+  async refreshSession(refreshToken: string): Promise<AuthSession | null> {
+    const user = await this.currentUser(await this.tokens.verify(refreshToken, "refresh"));
+    return user ? { user, tokens: await this.signTokenPair(user) } : null;
+  }
+
+  private async currentUser(payload: AuthenticatedUser | null): Promise<AuthenticatedUser | null> {
+    const user = payload ? await this.userService.findById(payload.id) : null;
+    return user ? { id: user.id, email: user.email } : null;
   }
 
   async signIn(input: SignInInput): Promise<AuthTokenPair> {

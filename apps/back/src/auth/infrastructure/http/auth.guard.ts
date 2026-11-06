@@ -1,72 +1,49 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { UserToken } from "../../../common/application/models/user-token";
-import { UserService } from "../../../user/application/user.service";
+import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthService } from "../../application/auth.service";
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
   type AuthCookieConfig,
 } from "./auth-cookies";
-import { signAuthTokenPair, verifyAuthToken } from "../jwt-token.gateway";
-import type { AuthTokenType } from "../../application/ports/authentication";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private jwtService: JwtService,
+    private authService: AuthService,
     private configService: ConfigService,
-    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const http = context.switchToHttp();
-    const request = http.getRequest<FastifyRequest & { user?: UserToken }>();
+    const request = http.getRequest<FastifyRequest>();
     const reply = http.getResponse<FastifyReply>();
 
     const accessToken = request.cookies?.[ACCESS_TOKEN_COOKIE];
     const refreshToken = request.cookies?.[REFRESH_TOKEN_COOKIE];
 
-    const accessUser = accessToken ? await this.userFromToken(accessToken, "access") : null;
+    const accessUser = accessToken ? await this.authService.authenticate(accessToken) : null;
     if (accessUser) {
       request.user = accessUser;
       return true;
     }
 
     if (!refreshToken) {
-      throw new UnauthorizedException(
+      throw new AuthenticationError(
         accessToken ? "Invalid or expired token" : "Missing auth token in cookie",
       );
     }
 
-    const refreshUser = await this.userFromToken(refreshToken, "refresh");
-    if (!refreshUser) {
-      throw new UnauthorizedException("Invalid or expired token");
+    const session = await this.authService.refreshSession(refreshToken);
+    if (!session) {
+      throw new AuthenticationError("Invalid or expired token");
     }
 
-    const tokens = await signAuthTokenPair(this.jwtService, this.jwtSecret(), refreshUser);
-    setAuthCookies(reply, tokens, this.configService.get<AuthCookieConfig>("authCookie"));
-    request.user = refreshUser;
+    setAuthCookies(reply, session.tokens, this.configService.get<AuthCookieConfig>("authCookie"));
+    request.user = session.user;
     return true;
-  }
-
-  private jwtSecret(): string {
-    return this.configService.get<string>("jwt_token")!;
-  }
-
-  private async userFromToken(token: string, typ: AuthTokenType): Promise<UserToken | null> {
-    const payload = await verifyAuthToken(this.jwtService, this.jwtSecret(), token, typ);
-    if (!payload) {
-      return null;
-    }
-
-    const user = await this.userService.findById(payload.id);
-    if (!user) {
-      return null;
-    }
-
-    return { id: user.id, email: user.email };
   }
 }

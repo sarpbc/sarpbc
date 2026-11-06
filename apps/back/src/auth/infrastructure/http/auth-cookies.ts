@@ -1,12 +1,10 @@
 import type { CookieSerializeOptions } from "@fastify/cookie";
 import type { FastifyReply } from "fastify";
 import type { AuthTokenPair } from "../../application/ports/authentication";
+import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "../jwt-token.gateway";
 
 export const ACCESS_TOKEN_COOKIE = "access_token";
 export const REFRESH_TOKEN_COOKIE = "refresh_token";
-
-export const ACCESS_TOKEN_TTL_SECONDS = 2 * 60 * 60;
-export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 export interface AuthCookieConfig {
   secure: boolean;

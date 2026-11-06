@@ -40,7 +40,6 @@ import {
   CompetitionEventsAdapter,
   competitionDiagnostics,
 } from "./competition.adapters";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCompetitionFeed } from "../../pandascore/infrastructure/pandascore-competition-feed";
@@ -65,7 +64,6 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       Player,
       Team,
     ]),
-    UserModule,
     PandascoreModule,
     RedisModule,
     ConfigModule,

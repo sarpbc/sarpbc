@@ -1,12 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { R2Service } from "./r2.service";
 import { StorageController } from "./http/storage.controller";
 import { StorageService } from "../application/storage.service";
 
 @Module({
-  imports: [ConfigModule, UserModule],
+  imports: [ConfigModule],
   controllers: [StorageController],
   providers: [
     R2Service,

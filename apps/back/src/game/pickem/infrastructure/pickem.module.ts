@@ -11,10 +11,9 @@ import { MatchDecidedListener } from "./match-decided.listener";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
 import { MatchService } from "../../../tournament/application/public";
 import { TournamentModule } from "../../../tournament/infrastructure/tournament.module";
-import { UserModule } from "../../../user/infrastructure/user.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([PickemChoice]), UserModule, TournamentModule],
+  imports: [MikroOrmModule.forFeature([PickemChoice]), TournamentModule],
   controllers: [PickemController],
   providers: [
     {

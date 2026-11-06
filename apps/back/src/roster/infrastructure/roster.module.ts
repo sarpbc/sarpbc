@@ -22,7 +22,6 @@ import {
   MikroTeamStore,
 } from "./persistence/roster.store";
 import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
@@ -38,7 +37,6 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
   imports: [
     MikroOrmModule.forFeature([Player, Team, Contract, PlayerPhoto]),
     TournamentModule,
-    UserModule,
     PandascoreModule,
     StorageModule,
     ConfigModule,

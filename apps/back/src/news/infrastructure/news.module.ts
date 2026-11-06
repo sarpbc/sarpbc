@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { ReplyService } from "../../reply/application/reply.service";
 import { NewsController } from "./http/news.controller";
@@ -13,7 +12,7 @@ import { MikroNewsStore } from "./persistence/news.store";
 import { transactionalNews } from "./composition";
 import { IndexNowService } from "./indexnow.service";
 @Module({
-  imports: [UserModule, ReplyModule],
+  imports: [ReplyModule],
   controllers: [NewsController],
   providers: [
     IndexNowService,

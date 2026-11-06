@@ -7,6 +7,7 @@ import { CreateUserDto } from "../../../user/infrastructure/http/dto/create-user
 import { SignInUserDto } from "../../../user/infrastructure/http/dto/signin-user.dto";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
+import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { PostHogService } from "../../../infrastructure/telemetry/posthog.service";
 import {
   REFRESH_TOKEN_COOKIE,
@@ -70,8 +71,8 @@ export class AuthController {
       });
     }
 
-    const tokens = await this.authService.refreshSession(refreshToken);
-    if (!tokens) {
+    const session = await this.authService.refreshSession(refreshToken);
+    if (!session) {
       clearAuthCookies(res, this.authCookie());
       return res.code(401).send({
         statusCode: 401,
@@ -79,7 +80,7 @@ export class AuthController {
       });
     }
 
-    setAuthCookies(res, tokens, this.authCookie());
+    setAuthCookies(res, session.tokens, this.authCookie());
     return res.code(200).send({ success: true });
   }
 
@@ -98,7 +99,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get("profile")
-  getProfile(@Request() req: FastifyRequest & { user?: unknown }) {
+  getProfile(@Request() req: AuthenticatedUserRequest) {
     return req.user;
   }
 

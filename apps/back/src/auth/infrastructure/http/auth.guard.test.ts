@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { UnauthorizedException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ExecutionContext } from "@nestjs/common";
-import { UserToken } from "../../../common/application/models/user-token";
-import { UserService } from "../../../user/application/user.service";
+import { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
+import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthService } from "../../application/auth.service";
 import { AuthGuard } from "./auth.guard";
 
 interface AuthGuardTestCookies {
@@ -15,17 +14,14 @@ interface AuthGuardTestCookies {
 
 interface AuthGuardTestRequest {
   cookies?: AuthGuardTestCookies;
-  user?: UserToken;
+  user?: AuthenticatedUser;
 }
 
 describe("AuthGuard", () => {
   let guard: AuthGuard;
-  const jwtService = {
-    verifyAsync: vi.fn(),
-    signAsync: vi.fn().mockResolvedValue("rotated-token"),
-  };
-  const userService = {
-    findById: vi.fn(),
+  const authService = {
+    authenticate: vi.fn(),
+    refreshSession: vi.fn(),
   };
   const setCookie = vi.fn();
 
@@ -33,105 +29,70 @@ describe("AuthGuard", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthGuard,
-        { provide: JwtService, useValue: jwtService },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: vi.fn((key: string) => {
-              if (key === "jwt_token") {
-                return "secret";
-              }
-              return undefined;
-            }),
-          },
-        },
-        { provide: UserService, useValue: userService },
+        { provide: AuthService, useValue: authService },
+        { provide: ConfigService, useValue: { get: vi.fn() } },
       ],
     }).compile();
 
     guard = module.get(AuthGuard);
     vi.clearAllMocks();
-    jwtService.signAsync.mockResolvedValue("rotated-token");
   });
 
-  const createContext = (cookies?: AuthGuardTestCookies): ExecutionContext =>
+  const contextFor = (request: AuthGuardTestRequest): ExecutionContext =>
     ({
       switchToHttp: () => ({
-        getRequest: () => ({ cookies }),
+        getRequest: () => request,
         getResponse: () => ({ setCookie }),
       }),
     }) as ExecutionContext;
 
   it("throws when cookie is missing", async () => {
-    await expect(guard.canActivate(createContext())).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(guard.canActivate(contextFor({}))).rejects.toBeInstanceOf(AuthenticationError);
   });
 
-  it("returns true and attaches user from DB when token is valid", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "access" });
-    userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-    const request: AuthGuardTestRequest = {
-      cookies: { access_token: "valid-token" },
-    };
-    const context = {
-      switchToHttp: () => ({
-        getRequest: () => request,
-        getResponse: () => ({ setCookie }),
-      }),
-    } as ExecutionContext;
+  it("returns true and attaches the user resolved from a valid access token", async () => {
+    authService.authenticate.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+    const request: AuthGuardTestRequest = { cookies: { access_token: "valid-token" } };
 
-    await expect(guard.canActivate(context)).resolves.toBe(true);
+    await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
     expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });
+    expect(authService.authenticate).toHaveBeenCalledWith("valid-token");
   });
 
-  it("attaches current DB email when JWT email is stale", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "old@b.com", typ: "access" });
-    userService.findById.mockResolvedValue({ id: "user-1", email: "new@b.com" });
-    const request: AuthGuardTestRequest = {
-      cookies: { access_token: "valid-token" },
-    };
-    const context = {
-      switchToHttp: () => ({
-        getRequest: () => request,
-        getResponse: () => ({ setCookie }),
-      }),
-    } as ExecutionContext;
+  it("throws when the access token is rejected and there is no refresh token", async () => {
+    authService.authenticate.mockResolvedValue(null);
 
-    await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toEqual({ id: "user-1", email: "new@b.com" });
-  });
-
-  it("throws when user is missing from DB", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "access" });
-    userService.findById.mockResolvedValue(null);
-    const context = createContext({ access_token: "valid-token" });
-
-    await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(
+      guard.canActivate(contextFor({ cookies: { access_token: "valid-token" } })),
+    ).rejects.toBeInstanceOf(AuthenticationError);
   });
 
   it("rotates cookies from a valid refresh token when access is missing", async () => {
-    jwtService.verifyAsync.mockResolvedValue({ id: "user-1", email: "a@b.com", typ: "refresh" });
-    userService.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-    const request: AuthGuardTestRequest = {
-      cookies: { refresh_token: "refresh-token" },
-    };
-    const context = {
-      switchToHttp: () => ({
-        getRequest: () => request,
-        getResponse: () => ({ setCookie }),
-      }),
-    } as ExecutionContext;
+    authService.refreshSession.mockResolvedValue({
+      user: { id: "user-1", email: "a@b.com" },
+      tokens: { accessToken: "new-access", refreshToken: "new-refresh" },
+    });
+    const request: AuthGuardTestRequest = { cookies: { refresh_token: "refresh-token" } };
 
-    await expect(guard.canActivate(context)).resolves.toBe(true);
+    await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
     expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });
     expect(setCookie).toHaveBeenCalledWith(
       "access_token",
-      "rotated-token",
+      "new-access",
       expect.objectContaining({ httpOnly: true }),
     );
     expect(setCookie).toHaveBeenCalledWith(
       "refresh_token",
-      "rotated-token",
+      "new-refresh",
       expect.objectContaining({ httpOnly: true }),
     );
+  });
+
+  it("throws when the refresh token is rejected", async () => {
+    authService.refreshSession.mockResolvedValue(null);
+
+    await expect(
+      guard.canActivate(contextFor({ cookies: { refresh_token: "refresh-token" } })),
+    ).rejects.toBeInstanceOf(AuthenticationError);
   });
 });
