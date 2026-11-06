@@ -58,18 +58,11 @@ export function useCommentPermalink() {
     });
   }
 
-  function tryScrollFromHash(): string | null {
+  function tryScrollFromHash() {
     const commentId = parseCommentHash(route.hash);
-    if (!commentId) {
-      return null;
-    }
-
-    if (scrollToComment(commentId)) {
+    if (commentId && scrollToComment(commentId)) {
       highlightComment(commentId);
-      return commentId;
     }
-
-    return commentId;
   }
 
   onBeforeUnmount(clearHighlightTimer);
@@ -78,6 +71,5 @@ export function useCommentPermalink() {
     highlightedCommentId,
     navigateToComment,
     tryScrollFromHash,
-    highlightComment,
   };
 }
