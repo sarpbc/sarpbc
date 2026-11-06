@@ -2,7 +2,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, raw } from "@mikro-orm/core";
 import { Tournament, TournamentEvent } from "./tournament.entities";
 import { toTournament, toTournamentEvent } from "./competition.mapper";
-import { stageFilter } from "./competition.queries";
+import { stageFilter } from "./stage-filter";
 import { isUuid } from "../../../common/domain/entity-ref";
 import type { EventListing, EventQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";

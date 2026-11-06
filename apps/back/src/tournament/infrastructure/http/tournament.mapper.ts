@@ -14,6 +14,7 @@ import {
   TournamentParticipant,
   matchPublicSlug,
 } from "../../domain/competition";
+import { toEventRef } from "../../domain/tournament-event";
 
 export interface TournamentParticipantResponse {
   id: string;
@@ -81,7 +82,7 @@ export function mapTournamentListItem(
     source: tournament.source,
     name: tournament.name,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     type: tournament.type,
     prizepool: tournament.prizepool,
     imageUrl: tournament.imageUrl,
@@ -111,7 +112,7 @@ export function mapTournament(tournament: Tournament): TournamentResponse {
     name: tournament.name,
     description: tournament.description,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     tier: tournament.tier,
     beginAt: tournament.beginAt,
     endAt: tournament.endAt,
@@ -152,7 +153,7 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
     source: tournament.source,
     name: tournament.name,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     tier: tournament.tier,
     type: tournament.type,
     country: tournament.country,

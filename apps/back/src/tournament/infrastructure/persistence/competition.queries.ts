@@ -4,8 +4,9 @@ import type { EntityRef } from "../../../common/domain/entity-ref";
 import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentRepository } from "./tournament.repository";
 import { MatchRepository } from "./match.repository";
-import { toLeague, toMatch, toTournament } from "./competition.mapper";
+import { TOURNAMENT_POPULATE, toLeague, toMatch, toTournament } from "./competition.mapper";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
+import { stageFilter } from "./stage-filter";
 import type { TournamentQueries, MatchQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 import type {
@@ -23,26 +24,6 @@ const TOURNAMENT_DETAIL_POPULATE = [
   "matches.results",
   "matches.winner",
 ] as const;
-interface StageFilter {
-  pickemsEnabled?: boolean;
-  source?: { $ne: "startgg" };
-  winner?: null;
-  $or?: [{ endAt: null }, { endAt: { $gt: Date } }];
-}
-export function stageFilter({
-  pickems,
-  activeOnly = false,
-  redistributableOnly = false,
-}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">): StageFilter {
-  const where: StageFilter = {};
-  if (pickems !== undefined) where.pickemsEnabled = pickems;
-  if (redistributableOnly) where.source = { $ne: "startgg" };
-  if (activeOnly) {
-    where.winner = null;
-    where.$or = [{ endAt: null }, { endAt: { $gt: new Date() } }];
-  }
-  return where;
-}
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
   async find({ limit = 20, offset = 0, ...filters }: TournamentListOptions) {
@@ -73,9 +54,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     const row = await this.em.findOne(
       Tournament,
       { pandascoreId: id },
-      {
-        populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
-      },
+      { populate: [...TOURNAMENT_POPULATE] },
     );
     return row ? toTournament(row) : null;
   }

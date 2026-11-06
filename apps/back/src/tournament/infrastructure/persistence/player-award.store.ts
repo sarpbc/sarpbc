@@ -6,6 +6,7 @@ import type { AwardQueries, AwardWriter } from "../../application/ports";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
+import { toEventRef } from "../../domain/tournament-event";
 const AWARD_LABELS = {
   mvp: "MVP",
   defensive_mvp: "Defensive MVP",
@@ -40,11 +41,7 @@ export class CompetitionAwardQueries implements AwardQueries {
         name: row.tournament.name,
         slug: row.tournament.slug,
         endAt: row.tournament.endAt,
-        event: {
-          id: row.tournament.event.id,
-          slug: row.tournament.event.slug,
-          name: row.tournament.event.name,
-        },
+        event: toEventRef(row.tournament.event),
       },
     }));
   }

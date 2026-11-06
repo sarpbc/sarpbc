@@ -9,7 +9,8 @@ import {
   matchPublicSlug,
   type TournamentSummary,
 } from "../../domain/competition";
-import { TournamentEvent } from "../../domain/tournament-event";
+import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
+import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
 export function toLeague(row: Row.League): League {
   return Object.assign(new League(), {
@@ -35,11 +36,28 @@ export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
     updatedAt: row.updatedAt,
   });
 }
-function toEventRef(row: Row.TournamentEvent): TournamentEventRef {
+/** Relations that toTournament dereferences; a tournament loaded without them fails in toEventRef. */
+export const TOURNAMENT_POPULATE = [
+  "league",
+  "event",
+  "winner.team",
+  "participants.team",
+  "participants.players",
+] as const;
+/** Relations that toMatch dereferences when a match is loaded for writing. */
+export const MATCH_WRITE_POPULATE = [
+  ...MATCH_TOURNAMENT_POPULATE,
+  "participants.team",
+  "participants.players",
+  "winner.team",
+  "results.participant",
+  "previousMatches.previousMatch",
+] as const;
+export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
   if (!wrap(row).isInitialized())
     throw new Error("Tournament event " + row.id + " is not populated");
-  return { id: row.id, slug: row.slug, name: row.name };
+  return toEventRef(row);
 }
 export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant {
   return Object.assign(new TournamentParticipant(), {
@@ -56,7 +74,7 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
     id: row.id,
     name: row.name,
     slug: row.slug,
-    event: toEventRef(row.event),
+    event: eventRefOf(row.event),
     beginAt: row.beginAt,
     league: row.league ? toLeague(row.league) : null,
     pickemsEnabled: row.pickemsEnabled,
@@ -110,7 +128,7 @@ export function toTournament(row: Row.Tournament): Tournament {
     name: row.name,
     description: row.description,
     slug: row.slug,
-    event: toEventRef(row.event),
+    event: eventRefOf(row.event),
     tier: row.tier,
     beginAt: row.beginAt,
     endAt: row.endAt,

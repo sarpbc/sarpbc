@@ -12,8 +12,9 @@ import type {
   TournamentWriter,
   MatchWriter,
 } from "../../application/ports";
-import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import {
+  MATCH_WRITE_POPULATE,
+  TOURNAMENT_POPULATE,
   toTournament,
   toTournamentEvent,
   toLeague,
@@ -30,13 +31,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
   async load(id: string) {
     const row =
       this.tournaments.get(id) ??
-      (await this.em.findOne(
-        Row.Tournament,
-        { id },
-        {
-          populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
-        },
-      ));
+      (await this.em.findOne(Row.Tournament, { id }, { populate: [...TOURNAMENT_POPULATE] }));
     if (row) this.tournaments.set(row.id, row);
     return row ? toTournament(row) : null;
   }
@@ -46,9 +41,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     const row = await this.em.findOne(
       Row.Tournament,
       { pandascoreId: id },
-      {
-        populate: ["league", "event", "winner.team", "participants.team", "participants.players"],
-      },
+      { populate: [...TOURNAMENT_POPULATE] },
     );
     if (row) this.tournaments.set(row.id, row);
     return row ? toTournament(row) : null;
@@ -202,19 +195,7 @@ export class CompetitionMatchWriter implements MatchWriter {
         { id },
         { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
       );
-      if (row)
-        await this.em.populate(
-          row,
-          [
-            ...MATCH_TOURNAMENT_POPULATE,
-            "participants.team",
-            "participants.players",
-            "winner.team",
-            "results.participant",
-            "previousMatches.previousMatch",
-          ],
-          { refresh: true },
-        );
+      if (row) await this.em.populate(row, [...MATCH_WRITE_POPULATE], { refresh: true });
     }
     if (row) this.staged.set(row.id, row);
     return row ? toMatch(row) : null;
@@ -225,16 +206,7 @@ export class CompetitionMatchWriter implements MatchWriter {
     const row = await this.em.findOne(
       Row.Match,
       { pandascoreId: id },
-      {
-        populate: [
-          ...MATCH_TOURNAMENT_POPULATE,
-          "participants.team",
-          "participants.players",
-          "winner.team",
-          "results.participant",
-          "previousMatches.previousMatch",
-        ],
-      },
+      { populate: [...MATCH_WRITE_POPULATE] },
     );
     if (row) this.staged.set(row.id, row);
     return row ? toMatch(row) : null;
@@ -246,21 +218,8 @@ export class CompetitionMatchWriter implements MatchWriter {
       if (row.tournament.id === tournamentId) byId.set(row.id, row);
     return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
   }
-  async tournament(id: string) {
-    const t = await this.tournaments.load(id);
-    return t
-      ? {
-          id: t.id,
-          name: t.name,
-          slug: t.slug,
-          event: t.event,
-          beginAt: t.beginAt,
-          league: t.league,
-          pickemsEnabled: t.pickemsEnabled,
-          source: t.source,
-          pandascoreId: t.pandascoreId,
-        }
-      : null;
+  tournament(id: string) {
+    return this.tournaments.load(id);
   }
   participants(id: string) {
     return this.tournaments.participants(id);

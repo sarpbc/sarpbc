@@ -44,7 +44,7 @@ export function ownsEvent(
   return stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
 }
 
-export function toEventRef(event: TournamentEvent): TournamentEventRef {
+export function toEventRef(event: TournamentEventRef): TournamentEventRef {
   return { id: event.id, slug: event.slug, name: event.name };
 }
 

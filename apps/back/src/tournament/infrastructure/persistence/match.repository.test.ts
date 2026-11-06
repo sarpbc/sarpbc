@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { MatchRepository } from "./match.repository";
-import { stageFilter } from "./competition.queries";
+import { stageFilter } from "./stage-filter";
 
 describe("MatchRepository", () => {
   function repository() {

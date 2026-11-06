@@ -4,7 +4,7 @@ import type { PrizeEntry, TournamentPrize as TournamentPrizeItem } from "@sarpbc
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import type { EarningsLine } from "../../application/earnings";
 import type { EarningsScope, PrizeQueries, PrizeWriter } from "../../application/ports";
-import { stageFilter } from "./competition.queries";
+import { toEventRef } from "../../domain/tournament-event";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";
 
@@ -44,11 +44,7 @@ function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
       source: tournament.source,
       beginAt: tournament.beginAt?.toISOString() ?? null,
       endAt: tournament.endAt?.toISOString() ?? null,
-      event: {
-        id: tournament.event.id,
-        slug: tournament.event.slug,
-        name: tournament.event.name,
-      },
+      event: toEventRef(tournament.event),
     },
   };
 }
@@ -93,7 +89,12 @@ export class CompetitionPrizeQueries implements PrizeQueries {
   ) {
     return this.em.find(
       TournamentPrize,
-      { $and: [where, { tournament: stageFilter({ redistributableOnly }) }] },
+      {
+        $and: [
+          where,
+          { tournament: redistributableOnly ? { source: { $ne: "startgg" as const } } : {} },
+        ],
+      },
       {
         populate: ["team", "tournament.event", ...populate],
         orderBy: {
