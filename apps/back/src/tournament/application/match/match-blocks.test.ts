@@ -78,8 +78,9 @@ describe("findMatchBlocks", () => {
       NOW,
     );
 
-    expect(reads.page).toHaveBeenCalledTimes(3);
-    expect(reads.page).toHaveBeenCalledWith("upcoming", { limit: 4, teamId: "falcons" });
+    expect(reads.page.mock.calls.filter(([kind]) => kind === "upcoming")).toEqual([
+      ["upcoming", { limit: 4, teamId: "falcons" }],
+    ]);
     expect(short?.map((match) => match.id)).toEqual(["a", "b"]);
     expect(long?.map((match) => match.id)).toEqual(["a", "b", "c", "d"]);
   });

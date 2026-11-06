@@ -12,6 +12,16 @@ import {
   upsertSyncedMatchInTransaction,
 } from "./write-match";
 
+const matchWriterMock = () =>
+  ({
+    load: vi.fn(),
+    byPandascoreId: vi.fn(),
+    save: vi.fn(),
+    tournament: vi.fn(),
+    participants: vi.fn(),
+    timings: vi.fn(),
+  }) satisfies MatchWriter;
+
 describe("Match writes", () => {
   const tournament = Object.assign(new Tournament(), { id: "cup" });
   const participants = ["a", "b"].map((id) =>
@@ -21,14 +31,7 @@ describe("Match writes", () => {
       team: Object.assign(new Team(), { id: `team-${id}` }),
     }),
   );
-  const writer = {
-    load: vi.fn(),
-    byPandascoreId: vi.fn(),
-    save: vi.fn(),
-    tournament: vi.fn(),
-    participants: vi.fn(),
-    timings: vi.fn(),
-  } satisfies MatchWriter;
+  const writer = matchWriterMock();
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -117,14 +120,7 @@ describe("Manual match corrections", () => {
       team: Object.assign(new Team(), { id: `team-${id}` }),
     }),
   );
-  const writer = {
-    load: vi.fn(),
-    byPandascoreId: vi.fn(),
-    save: vi.fn(),
-    tournament: vi.fn(),
-    participants: vi.fn(),
-    timings: vi.fn(),
-  } satisfies MatchWriter;
+  const writer = matchWriterMock();
   const manualMatch = () =>
     Object.assign(new Match(), {
       id: "match",
@@ -231,14 +227,7 @@ describe("Manual match corrections", () => {
 });
 
 describe("Match VOD writes", () => {
-  const writer = {
-    load: vi.fn(),
-    byPandascoreId: vi.fn(),
-    save: vi.fn(),
-    tournament: vi.fn(),
-    participants: vi.fn(),
-    timings: vi.fn(),
-  } satisfies MatchWriter;
+  const writer = matchWriterMock();
   const syncedMatch = () =>
     Object.assign(new Match(), {
       id: "match",
