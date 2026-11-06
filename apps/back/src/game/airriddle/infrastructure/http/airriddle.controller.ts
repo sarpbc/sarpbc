@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { AirRiddleService } from "../../application/airriddle.service";
 import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
-import { captureGameEvent } from "../../../infrastructure/capture-game-event";
+import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
 import { GuessDto } from "./dto/guess.dto";
 
 @Controller("air-riddle")
@@ -21,7 +21,7 @@ export class AirRiddleController {
   @Post("guess")
   async guess(@Body({ schema: GuessDto }) body: GuessDto, @Request() req: FastifyRequest) {
     const { results, error, answer } = await this.airRiddleService.guess(body.guess, body.last);
-    await captureGameEvent(this.posthog, req.headers, "server_airriddle_guess_submitted", {
+    await captureRequestEvent(this.posthog, req.headers, "server_airriddle_guess_submitted", {
       is_last: body.last ?? false,
     });
     return { results, error, answer };

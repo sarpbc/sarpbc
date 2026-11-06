@@ -5,7 +5,7 @@ import { RequirePermissions } from "../../../../user/infrastructure/http/decorat
 import { PermissionGuard } from "../../../../user/infrastructure/http/user.guard";
 import { AuthenticatedUserRequest } from "../../../../common/infrastructure/http/types/authenticated.interface";
 import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
-import { captureGameEvent } from "../../../infrastructure/capture-game-event";
+import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
 import { MakePickDto } from "./dto/make-pick.dto";
 
 @Controller("pickem")
@@ -33,7 +33,7 @@ export class PickemController {
     @Body({ schema: MakePickDto }) body: MakePickDto,
   ) {
     await this.pickemService.makePick(req.user.id, matchId, body.pickedParticipantId);
-    await captureGameEvent(this.posthog, req.headers, "server_pickem_pick_submitted", {
+    await captureRequestEvent(this.posthog, req.headers, "server_pickem_pick_submitted", {
       match_id: matchId,
     });
     return { success: true };

@@ -8,6 +8,7 @@ import { SignInUserDto } from "../../../user/infrastructure/http/dto/signin-user
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import { captureRequestEvent } from "../../../infrastructure/telemetry/capture-request-event";
 import { PostHogService } from "../../../infrastructure/telemetry/posthog.service";
 import {
   REFRESH_TOKEN_COOKIE,
@@ -32,12 +33,7 @@ export class AuthController {
     req: FastifyRequest,
     event: "server_user_logged_in" | "server_user_signed_up",
   ): Promise<void> {
-    this.posthog.capture({
-      distinctId: req.headers["x-posthog-distinct-id"] as string | undefined,
-      event,
-      sessionId: req.headers["x-posthog-session-id"] as string | undefined,
-    });
-    await this.posthog.flush();
+    await captureRequestEvent(this.posthog, req.headers, event);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })

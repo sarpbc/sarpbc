@@ -1,12 +1,10 @@
-import type { PostHogService } from "../../infrastructure/telemetry/posthog.service";
+import type { PostHogProperties, PostHogService } from "./posthog.service";
 
-type Properties = Parameters<PostHogService["capture"]>[0]["properties"];
-
-export async function captureGameEvent(
+export async function captureRequestEvent(
   posthog: PostHogService,
   headers: Record<string, string | string[] | undefined>,
   event: string,
-  properties: Properties,
+  properties?: PostHogProperties,
 ): Promise<void> {
   posthog.capture({
     distinctId: headers["x-posthog-distinct-id"] as string | undefined,
