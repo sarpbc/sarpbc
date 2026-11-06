@@ -7,6 +7,10 @@ import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mjs";
+import {
+  verifyCompetitionSyncLookups,
+  verifyRedistributableScope,
+} from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 
@@ -1698,6 +1702,20 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "match stats keep one game per Ballchasing replay and number, save players atomically, follow player merges and track imports",
       async () => {
         await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
+      },
+    );
+
+    await check(
+      "competition sync files stages under the right event and links manual counterparts in SQL",
+      async () => {
+        await verifyCompetitionSyncLookups({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check(
+      "redistributable scope drops start.gg matches and earnings from lists in SQL",
+      async () => {
+        await verifyRedistributableScope({ app, orm, request, staffCookie, RequestContext });
       },
     );
 
