@@ -1,5 +1,5 @@
 import type { MaybeRef } from "vue";
-import type { PlayerContract } from "~/types/contract";
+import type { PlayerContract } from "@sarpbc/types";
 import { createApiClient } from "~/utils/apiFetch";
 
 interface GetPlayerContractsResponseDto {

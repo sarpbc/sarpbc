@@ -1,6 +1,6 @@
 import type { MaybeRef } from "vue";
 import { CONTRACT_ROLES } from "@sarpbc/types";
-import type { ContractRole, TeamContract } from "~/types/contract";
+import type { ContractRole, TeamContract } from "@sarpbc/types";
 import { getTeamContracts } from "~/composables/team/api";
 
 interface TeamRosterHistoryPayload {

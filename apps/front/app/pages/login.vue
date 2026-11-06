@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const config = useRuntimeConfig();
 const { t } = useI18n();

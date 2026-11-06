@@ -1,4 +1,4 @@
-import type { User } from "~/types/user";
+import type { User } from "@sarpbc/types";
 import { apiFetch } from "~/utils/apiFetch";
 
 export async function getProfile(): Promise<User | null> {

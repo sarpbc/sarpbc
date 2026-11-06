@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { Player } from "@sarpbc/types";
 import { playerPath } from "@sarpbc/utils";
-import type { Player } from "~/types/player";
 
 const { players } = defineProps<{
   players: Player[];

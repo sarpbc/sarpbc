@@ -1,4 +1,4 @@
-import type { ModerationReply } from "~/types/moderation";
+import type { ModerationReply } from "@sarpbc/types";
 import { apiFetch } from "~/utils/apiFetch";
 
 export async function getModerationReplies(limit = 50): Promise<ModerationReply[]> {

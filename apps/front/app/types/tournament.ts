@@ -1,8 +1,6 @@
-import type { TournamentDetail, TournamentEventRef } from "@sarpbc/types";
+import type { Player, Team, TournamentDetail, TournamentEventRef } from "@sarpbc/types";
 import type { League } from "./league";
 import type { Match } from "./matches";
-import type { Player } from "./player";
-import type { Team } from "./team";
 
 export interface BracketLink {
   match: string | { id: string };

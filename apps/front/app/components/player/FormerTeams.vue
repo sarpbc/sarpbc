@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { teamPath } from "@sarpbc/utils";
 import { DateFormatter } from "@internationalized/date";
-import type { ContractRole, PlayerContract } from "~/types/contract";
+import type { ContractRole, PlayerContract } from "@sarpbc/types";
 
 const { contracts } = defineProps<{
   contracts: PlayerContract[];

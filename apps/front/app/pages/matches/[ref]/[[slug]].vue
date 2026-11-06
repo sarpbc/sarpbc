@@ -8,9 +8,7 @@ import {
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
 } from "~/utils/matchDiscoveryAnalytics";
-import { matchPath } from "@sarpbc/utils";
-import { getApiErrorStatus } from "~/utils/apiError";
-import { tournamentStageLabel } from "@sarpbc/utils";
+import { getApiErrorStatus, matchPath, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const route = useRoute();

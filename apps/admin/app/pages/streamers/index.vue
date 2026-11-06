@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
 import { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "@sarpbc/utils";
-import type { TrackedStreamer } from "~/types/streamer";
+import type { TrackedStreamer } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t, locale } = useI18n();

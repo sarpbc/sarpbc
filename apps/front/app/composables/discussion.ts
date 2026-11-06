@@ -1,23 +1,18 @@
+import { FORUM_ERROR_CODES, type ReplyTargetType } from "@sarpbc/types";
+import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from "@sarpbc/utils";
 import type {
   Comment,
-  CommentTargetType,
   CreateCommentResult,
   PaginatedComments,
   ReplyReportReason,
   ReportCommentResult,
 } from "~/types/discussion";
 import { apiFetch } from "~/utils/apiFetch";
-import {
-  FORUM_ERROR_CODES,
-  getApiErrorCode,
-  getApiErrorMessage,
-  getApiErrorStatus,
-} from "~/utils/apiError";
 
 const MAX_REFETCH_LIMIT = 100;
 
 interface GetCommentsQuery {
-  targetType: CommentTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
   page: number;
   limit?: number;
@@ -32,7 +27,7 @@ interface CreateReplyBody {
 }
 
 export async function getCommentsByTarget(
-  targetType: CommentTargetType,
+  targetType: ReplyTargetType,
   targetId: string,
   page = 0,
   limit?: number,
@@ -62,7 +57,7 @@ export function refetchLimitForLoadedPages(loadedPages: number, pageSize: number
 
 export async function createComment(data: {
   content: string;
-  targetType: CommentTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
   replyToId?: string;
 }): Promise<CreateCommentResult> {

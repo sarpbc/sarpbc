@@ -3,7 +3,7 @@ import type { NewsType } from "./news";
 import type { TransferType } from "./transfer";
 
 export { STAFF_PERMISSIONS, STAFF_ROLES } from "./user";
-export type { StaffRole, StaffPermission, User, UserListItem } from "./user";
+export type { StaffRole, StaffPermission, User, UserList, UserListItem } from "./user";
 export { PLAYER_STATUSES } from "./player";
 export type { Player, PlayerStatus } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
@@ -48,6 +48,7 @@ export type {
   StatsRoster,
   TournamentStatsGame,
 } from "./match-stats";
+export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
 export { FORUM_ERROR_CODES } from "./forum";
 export type { ForumPost } from "./forum";
 export { REPLY_TARGET_TYPES } from "./reply";

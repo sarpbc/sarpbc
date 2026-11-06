@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { Transfer } from "@sarpbc/types";
 import { playerPath } from "@sarpbc/utils";
-import type { Transfer } from "~/types/transfer";
 
 const RAIL_TRANSFERS = 5;
 

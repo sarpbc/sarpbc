@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
+import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreateTokenDto } from "./dto/create-token.dto";
@@ -20,9 +21,16 @@ export class PatController {
 
   @UseGuards(AuthGuard)
   @Get("tokens")
-  async listTokens(@CurrentUserId() userId: string) {
+  async listTokens(@CurrentUserId() userId: string): Promise<{ tokens: PatToken[] }> {
     const tokens = await this.patService.listTokens(userId);
-    return { tokens };
+    return {
+      tokens: tokens.map((token) => ({
+        id: token.id,
+        name: token.name,
+        createdAt: token.createdAt.toISOString(),
+        lastUsedAt: token.lastUsedAt?.toISOString() ?? null,
+      })),
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -31,8 +39,14 @@ export class PatController {
   async createToken(
     @CurrentUserId() userId: string,
     @Body({ schema: CreateTokenDto }) dto: CreateTokenDto,
-  ) {
-    return this.patService.createToken(userId, dto.name);
+  ): Promise<CreatedPatToken> {
+    const created = await this.patService.createToken(userId, dto.name);
+    return {
+      id: created.id,
+      name: created.name,
+      createdAt: created.createdAt.toISOString(),
+      token: created.token,
+    };
   }
 
   @UseGuards(AuthGuard)

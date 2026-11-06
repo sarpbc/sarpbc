@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { Team } from "@sarpbc/types";
 import { teamPath } from "@sarpbc/utils";
-import type { Team } from "~/types/team";
 
 interface Props {
   team: Team;

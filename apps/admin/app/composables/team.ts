@@ -1,5 +1,5 @@
-import type { ContractRole, TeamContract } from "~/types/contract";
-import type { Team } from "~/types/team";
+import type { ContractRole, TeamContract } from "@sarpbc/types";
+import type { Team } from "@sarpbc/types";
 
 export type CreateTeamDto = {
   name: string;

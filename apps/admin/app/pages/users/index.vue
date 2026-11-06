@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
-import { ASSIGNABLE_ROLES, type AdminUser, type AssignableRole } from "~/types/user";
+import type { UserListItem } from "@sarpbc/types";
+import { ASSIGNABLE_ROLES, type AssignableRole } from "~/types/user";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const LIMIT = 25;
@@ -25,7 +26,7 @@ const roleItems = computed(() =>
   ASSIGNABLE_ROLES.map((role) => ({ value: role, label: t(`page.users.roles.${role}`) })),
 );
 
-const columns: TableColumn<AdminUser>[] = [
+const columns: TableColumn<UserListItem>[] = [
   { accessorKey: "userName", header: t("page.users.columns.userName") },
   { accessorKey: "email", header: t("page.users.columns.email") },
   { id: "role", header: t("page.users.columns.role") },
@@ -40,7 +41,7 @@ const searchInput = ref("");
 const search = ref("");
 const page = ref(1);
 const savingId = ref<string | null>(null);
-const pendingChange = ref<{ user: AdminUser; role: AssignableRole } | null>(null);
+const pendingChange = ref<{ user: UserListItem; role: AssignableRole } | null>(null);
 const isConfirmOpen = ref(false);
 
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
@@ -67,11 +68,11 @@ const { status, data, error, refresh } = await useLazyAsyncData(
   },
 );
 
-function roleOf(user: AdminUser): AssignableRole {
+function roleOf(user: UserListItem): AssignableRole {
   return user.role ?? "member";
 }
 
-function requestRoleChange(user: AdminUser, role: AssignableRole) {
+function requestRoleChange(user: UserListItem, role: AssignableRole) {
   if (role === roleOf(user)) {
     return;
   }
@@ -83,7 +84,7 @@ function requestRoleChange(user: AdminUser, role: AssignableRole) {
   void applyRoleChange(user, role);
 }
 
-async function applyRoleChange(user: AdminUser, role: AssignableRole) {
+async function applyRoleChange(user: UserListItem, role: AssignableRole) {
   savingId.value = user.id;
   try {
     await changeUserRole(user.id, role);

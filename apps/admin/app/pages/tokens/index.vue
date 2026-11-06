@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
-import type { PatToken } from "~/types/token";
+import type { PatToken } from "@sarpbc/types";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t, locale } = useI18n();

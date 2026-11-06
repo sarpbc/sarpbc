@@ -1,5 +1,5 @@
 import type { MaybeRef } from "vue";
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
 import { createApiClient } from "~/utils/apiFetch";
 
 interface GetAllPlayersQueryDto {

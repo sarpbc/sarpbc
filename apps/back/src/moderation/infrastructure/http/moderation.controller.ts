@@ -1,4 +1,5 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import type { ModerationReply } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -14,8 +15,14 @@ export class ModerationController {
   @Get("replies")
   async listReplies(
     @Query({ schema: ListModerationRepliesQueryDto }) query: ListModerationRepliesQueryDto,
-  ) {
+  ): Promise<{ replies: ModerationReply[] }> {
     const replies = await this.moderationService.listRecentReplies(query.limit);
-    return { replies };
+    return {
+      replies: replies.map((reply) => ({
+        ...reply,
+        createdAt: reply.createdAt.toISOString(),
+        hiddenAt: reply.hiddenAt?.toISOString() ?? null,
+      })),
+    };
   }
 }

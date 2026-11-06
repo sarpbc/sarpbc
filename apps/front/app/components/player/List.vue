@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
 
 interface Props {
   players: Player[];

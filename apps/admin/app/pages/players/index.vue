@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

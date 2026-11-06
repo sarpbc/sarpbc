@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { playerPath, teamPath } from "@sarpbc/utils";
 import { DateFormatter } from "@internationalized/date";
-import type { Transfer } from "~/types/transfer";
+import type { Transfer } from "@sarpbc/types";
 
 const { transfer, showTeam = true } = defineProps<{
   transfer: Transfer;

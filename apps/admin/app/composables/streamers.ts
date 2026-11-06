@@ -1,4 +1,4 @@
-import type { TrackedStreamer } from "~/types/streamer";
+import type { TrackedStreamer } from "@sarpbc/types";
 
 export async function getTrackedStreamers(): Promise<TrackedStreamer[]> {
   const res = await apiFetch<{ streamers: TrackedStreamer[] }>("/streamers", {

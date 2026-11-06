@@ -1,5 +1,5 @@
 import { useUser } from "~/composables/state";
-import type { User } from "~/types/user";
+import type { User } from "@sarpbc/types";
 
 /**
  * Restore the session after hydration when SWR-cached SSR stamped `user = null`

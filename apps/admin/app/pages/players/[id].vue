@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import { CONTRACT_ROLES } from "@sarpbc/types";
-import type { ContractRole, PlayerContract } from "~/types/contract";
-import type { Player } from "~/types/player";
+import { CONTRACT_ROLES, type ContractRole, type Player, type PlayerContract } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

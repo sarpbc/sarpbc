@@ -1,4 +1,5 @@
-import type { ForumPost } from "@sarpbc/types";
+import { FORUM_ERROR_CODES, type ForumPost } from "@sarpbc/types";
+import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from "@sarpbc/utils";
 import type {
   CreateForumPostResult,
   ForumPostCreationStatus,
@@ -7,12 +8,6 @@ import type {
   Topic,
 } from "~/types/forum";
 import { apiFetch } from "~/utils/apiFetch";
-import {
-  FORUM_ERROR_CODES,
-  getApiErrorCode,
-  getApiErrorMessage,
-  getApiErrorStatus,
-} from "~/utils/apiError";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
   try {

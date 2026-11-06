@@ -1,26 +1,3 @@
-import type { Tournament, TournamentParticipant } from "./tournament";
-
-interface MatchResult {
-  participant: string | { id: string };
-  score: number;
-}
-
-export interface Match {
-  id: string;
-  pandascoreId?: number;
-  name: string;
-  beginAt?: Date;
-  endAt?: Date;
-  status?: string;
-  participants?: TournamentParticipant[];
-  winner?: TournamentParticipant;
-  numberOfGames?: number;
-  results?: MatchResult[];
-  createdAt: Date;
-  updatedAt: Date;
-  tournament: Tournament;
-}
-
 export interface UpcomingMatch {
   id: string;
   slug: string;

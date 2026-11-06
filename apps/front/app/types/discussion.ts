@@ -1,5 +1,3 @@
-export type CommentTargetType = "forumPost" | "newsArticle" | "match";
-
 export const REPLY_REPORT_REASONS = [
   "spam",
   "harassment",

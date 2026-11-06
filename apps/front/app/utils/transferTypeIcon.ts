@@ -1,4 +1,4 @@
-import type { TransferType } from "~/types/transfer";
+import type { TransferType } from "@sarpbc/types";
 
 export function transferTypeIcon(type: TransferType): string {
   switch (type) {

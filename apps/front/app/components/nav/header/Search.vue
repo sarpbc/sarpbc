@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import type { Player } from "@sarpbc/types";
+import type { Team } from "@sarpbc/types";
 
 const { t } = useI18n();
 

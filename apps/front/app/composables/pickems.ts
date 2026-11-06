@@ -1,7 +1,7 @@
 import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
 import type { TournamentListItem } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 import { apiFetch } from "~/utils/apiFetch";
 
 export type UserPickemPick = {

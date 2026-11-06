@@ -33,3 +33,8 @@ export interface UserListItem {
   role: StaffRole | null;
   createdAt: string;
 }
+
+export interface UserList {
+  users: UserListItem[];
+  total: number;
+}

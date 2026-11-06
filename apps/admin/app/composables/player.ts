@@ -1,5 +1,5 @@
-import type { ContractRole, PlayerContract } from "~/types/contract";
-import type { Player } from "~/types/player";
+import type { ContractRole, PlayerContract } from "@sarpbc/types";
+import type { Player } from "@sarpbc/types";
 
 export type CreatePlayerDto = {
   name: string;

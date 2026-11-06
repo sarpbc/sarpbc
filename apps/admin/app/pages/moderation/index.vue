@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { ModerationReply } from "@sarpbc/types";
 import { parseLocale } from "@sarpbc/utils";
-import type { ModerationReply } from "~/types/moderation";
 import { getApiErrorMessage } from "~/utils/apiError";
 
 const { t, locale } = useI18n();

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { PlayerTrophyListItem } from "~/composables/player/usePlayerTrophies";
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
 import { resolvePlayerNationalityDemonym } from "~/utils/playerNationalityDemonym";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
 import { formatTrophyHighlightNames } from "~/utils/trophyHighlights";
