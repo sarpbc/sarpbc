@@ -22,7 +22,7 @@ import type { MatchDecided } from "../domain/match-decided";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
-import type { MatchListQueryOptions } from "./match/match-list-filters";
+import type { MatchListKind, MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
 import type { EarningsLine } from "./earnings";
 export interface TournamentQueries {
@@ -44,13 +44,10 @@ export interface TournamentQueries {
   leagues(options: { limit?: number; offset?: number }): Promise<League[]>;
 }
 export interface MatchQueries {
-  list(
-    kind: "upcoming" | "live" | "results",
-    options: MatchListQueryOptions,
-  ): Promise<[Match[], number]>;
-  page(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions): Promise<Match[]>;
+  list(kind: MatchListKind, options: MatchListQueryOptions): Promise<[Match[], number]>;
+  page(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]>;
   byIds(ids: string[]): Promise<Match[]>;
-  recentlyEnded(options: { limit?: number; minutesAgo?: number }): Promise<Match[]>;
+  recentlyEnded(options: { limit: number; minutesAgo: number }): Promise<Match[]>;
   detail(ref: EntityRef): Promise<Match | null>;
   recentByTeam(options: {
     teamId: string;
@@ -190,5 +187,5 @@ export interface CompetitionEvents {
 }
 export interface CompetitionDiagnostics {
   error(message: string, error: unknown): void;
-  warn(message: string, context: { pandascoreId: number; tournamentIds: string[] }): void;
+  warn(message: string, context: Record<string, string | number | readonly string[]>): void;
 }

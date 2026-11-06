@@ -18,11 +18,7 @@ function setup() {
     source: "startgg",
     team,
   });
-  const matchService = {
-    findUpcomingAndCount: vi.fn().mockResolvedValue([[], 0]),
-    findLiveAndCount: vi.fn().mockResolvedValue([[], 0]),
-    findResultsAndCount: vi.fn().mockResolvedValue([[], 0]),
-  };
+  const matchService = { list: vi.fn().mockResolvedValue([[], 0]) };
   const manualCup = Object.assign(new Tournament(), {
     id: "manual-cup",
     name: "Coupe",
@@ -51,7 +47,7 @@ function setup() {
       }),
     ],
   });
-  const tournamentService = {
+  const tournaments = {
     find: vi.fn().mockResolvedValue([[], 0]),
     findById: vi.fn(async (id: string) =>
       id === manualCup.id ? manualCup : { id, source: "startgg" },
@@ -69,27 +65,27 @@ function setup() {
   const registerTool = vi.fn();
   registerReadTools(
     { registerTool } as never,
-    { matchService, tournamentService, searchService, playerService, teamService } as never,
+    { matchService, tournaments, searchService, playerService, teamService } as never,
   );
   const call = (name: string, args = {}) =>
     registerTool.mock.calls.find((tool) => tool[0] === name)?.[2](args);
   const json = async (name: string, args = {}) =>
     JSON.parse((await call(name, args)).content[0].text);
-  return { matchService, tournamentService, call, json };
+  return { matchService, tournaments, call, json };
 }
 
 describe("MCP read tools", () => {
   it("excludes start.gg rows in the list queries so totals and pages stay consistent", async () => {
-    const { matchService, tournamentService, call } = setup();
+    const { matchService, tournaments, call } = setup();
     await call("get_upcoming_matches");
     await call("get_match_results");
     await call("get_tournaments");
 
     const redistributableOnly = expect.objectContaining({ redistributableOnly: true });
-    expect(matchService.findUpcomingAndCount).toHaveBeenCalledWith(redistributableOnly);
-    expect(matchService.findLiveAndCount).toHaveBeenCalledWith(redistributableOnly);
-    expect(matchService.findResultsAndCount).toHaveBeenCalledWith(redistributableOnly);
-    expect(tournamentService.find).toHaveBeenCalledWith(redistributableOnly);
+    expect(matchService.list).toHaveBeenCalledWith("upcoming", redistributableOnly);
+    expect(matchService.list).toHaveBeenCalledWith("live", redistributableOnly);
+    expect(matchService.list).toHaveBeenCalledWith("results", redistributableOnly);
+    expect(tournaments.find).toHaveBeenCalledWith(redistributableOnly);
   });
 
   it("returns start.gg players and teams with their source", async () => {

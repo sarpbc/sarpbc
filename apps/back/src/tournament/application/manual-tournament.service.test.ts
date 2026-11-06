@@ -4,6 +4,7 @@ import { Tournament, TournamentParticipant } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
 import type { ContractRole } from "@sarpbc/types";
 import { Player, Team } from "../../roster/domain/roster";
+import { CompetitionAfterCommit } from "./after-commit";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
 describe("ManualTournamentService", () => {
@@ -50,7 +51,11 @@ describe("ManualTournamentService", () => {
       return result;
     },
   };
-  const service = new ManualTournamentService(reads as never, tx, cache, diagnostics);
+  const service = new ManualTournamentService(
+    reads as never,
+    tx,
+    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+  );
   beforeEach(() => {
     vi.clearAllMocks();
     events.length = 0;

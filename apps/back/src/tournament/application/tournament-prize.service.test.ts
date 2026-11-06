@@ -9,6 +9,7 @@ import type {
   PrizeTransaction,
   PrizeWriter,
 } from "./ports";
+import { CompetitionAfterCommit } from "./after-commit";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
 const entry: PrizeEntry = {
@@ -42,7 +43,11 @@ function setup({
   const transaction: PrizeTransaction = { run: (work) => work({ prizes: writer }) };
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
   const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
-  const service = new TournamentPrizeService(reads, transaction, cache, diagnostics);
+  const service = new TournamentPrizeService(
+    reads,
+    transaction,
+    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+  );
   return { service, reads, writer, cache, diagnostics };
 }
 

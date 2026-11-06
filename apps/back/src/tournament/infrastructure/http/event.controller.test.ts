@@ -44,7 +44,7 @@ const stages = new Map(
 );
 
 describe("EventController", () => {
-  const events = { list: vi.fn(), find: vi.fn(), findStageId: vi.fn() };
+  const events = { list: vi.fn(), find: vi.fn(), stageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
   const catalog = {
@@ -66,7 +66,7 @@ describe("EventController", () => {
     events.find.mockImplementation(async (slug: string) =>
       slug === event.slug ? { event, stages: [...stages.values()] } : null,
     );
-    events.findStageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
+    events.stageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
       eventSlug === event.slug && stageSlug === "playoffs" ? "playoffs" : null,
     );
   });

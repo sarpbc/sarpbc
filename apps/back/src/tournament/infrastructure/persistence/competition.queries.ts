@@ -8,7 +8,10 @@ import { toLeague, toMatch, toTournament } from "./competition.mapper";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type { TournamentQueries, MatchQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
-import type { MatchListQueryOptions } from "../../application/match/match-list-filters";
+import type {
+  MatchListKind,
+  MatchListQueryOptions,
+} from "../../application/match/match-list-filters";
 const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
@@ -142,28 +145,21 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       )
     ).map(toTournament);
   }
-  async list(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions) {
-    const repo = this.em.getRepository<Match, MatchRepository>(Match);
-    const [rows, count] = await (kind === "upcoming"
-      ? repo.findUpcomingAndCount(options)
-      : kind === "live"
-        ? repo.findLiveAndCount(options)
-        : repo.findResultsAndCount(options));
+  async list(kind: MatchListKind, options: MatchListQueryOptions) {
+    const [rows, count] = await this.em
+      .getRepository<Match, MatchRepository>(Match)
+      .listAndCount(kind, options);
     return [rows.map(toMatch), count] as [ReturnType<typeof toMatch>[], number];
   }
-  async page(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions) {
-    const repo = this.em.getRepository<Match, MatchRepository>(Match);
-    const rows = await (kind === "upcoming"
-      ? repo.findUpcoming(options)
-      : kind === "live"
-        ? repo.findLive(options)
-        : repo.findResults(options));
-    return rows.map(toMatch);
+  async page(kind: MatchListKind, options: MatchListQueryOptions) {
+    return (await this.em.getRepository<Match, MatchRepository>(Match).list(kind, options)).map(
+      toMatch,
+    );
   }
   async byIds(ids: string[]) {
     return (await this.em.getRepository<Match, MatchRepository>(Match).findByIds(ids)).map(toMatch);
   }
-  async recentlyEnded(options: { limit?: number; minutesAgo?: number }) {
+  async recentlyEnded(options: { limit: number; minutesAgo: number }) {
     return (
       await this.em.getRepository<Match, MatchRepository>(Match).findRecentlyEnded(options)
     ).map(toMatch);

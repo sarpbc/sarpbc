@@ -1,6 +1,6 @@
 import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
-import type { TournamentService } from "../../tournament/application/tournament.service";
+import type { TournamentQueries } from "../../tournament/application/public";
 import {
   SearchResult,
   SearchParams,
@@ -15,7 +15,7 @@ export class SearchService {
   constructor(
     private readonly playerService: Pick<PlayerService, "find">,
     private readonly teamService: Pick<TeamService, "find">,
-    private readonly tournamentService: Pick<TournamentService, "searchByName">,
+    private readonly tournamentService: Pick<TournamentQueries, "searchByName">,
   ) {}
 
   async search(params: SearchParams): Promise<SearchResult> {

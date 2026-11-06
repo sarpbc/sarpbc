@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Match, TournamentParticipant } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
+import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";
 
 describe("MatchService decided events", () => {
   const participants = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
-  const stored = Object.assign(new Match(), { id: "match", participants });
+  const stored = Object.assign(new Match(), {
+    id: "match",
+    participants,
+    tournament: { id: "cup" },
+  });
   const matches = {
     load: vi.fn(),
     byPandascoreId: vi.fn(),
@@ -19,8 +24,7 @@ describe("MatchService decided events", () => {
   const service = new MatchService(
     reads as never,
     { run: (work: (scope: never) => unknown) => work({ matches } as never) } as never,
-    events,
-    diagnostics,
+    new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, diagnostics),
   );
 
   beforeEach(() => {
@@ -33,14 +37,25 @@ describe("MatchService decided events", () => {
 
   it("publishes MatchDecided once a winner is set", async () => {
     reads.detail.mockResolvedValue(
-      Object.assign(new Match(), { id: "match", status: "finished", winner: participants[0] }),
+      Object.assign(new Match(), {
+        id: "match",
+        status: "finished",
+        winner: participants[0],
+        tournament: { id: "cup" },
+      }),
     );
     await service.setMatchWinner("match", "a");
     expect(events.publish).toHaveBeenCalledWith(matchDecided("match"));
   });
 
   it("stays silent for an undecided match", async () => {
-    reads.detail.mockResolvedValue(Object.assign(new Match(), { id: "match", status: "running" }));
+    reads.detail.mockResolvedValue(
+      Object.assign(new Match(), {
+        id: "match",
+        status: "running",
+        tournament: { id: "cup" },
+      }),
+    );
     await service.upsertMatch("cup", { name: "Final", participantIds: ["a", "b"] });
     expect(events.publish).not.toHaveBeenCalled();
   });
@@ -50,6 +65,7 @@ describe("MatchService decided events", () => {
       id: "match",
       status: "finished",
       winner: participants[0],
+      tournament: { id: "cup" },
     });
     matches.load.mockResolvedValue(decided);
     reads.detail.mockResolvedValue(decided);
@@ -60,7 +76,12 @@ describe("MatchService decided events", () => {
 
   it("returns the match when publication fails", async () => {
     reads.detail.mockResolvedValue(
-      Object.assign(new Match(), { id: "match", status: "finished", winner: participants[0] }),
+      Object.assign(new Match(), {
+        id: "match",
+        status: "finished",
+        winner: participants[0],
+        tournament: { id: "cup" },
+      }),
     );
     events.publish.mockRejectedValue(new Error("listener"));
     await expect(service.setMatchWinner("match", "a")).resolves.toMatchObject({ id: "match" });

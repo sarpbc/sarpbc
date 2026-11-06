@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { PatUser } from "../../pat/application/pat.service";
 import { ManualGameService } from "../../match-stats/application/manual-game.service";
@@ -7,14 +7,19 @@ import { StatsPlayerLinkService } from "../../match-stats/application/stats-play
 import { MatchService } from "../../tournament/application/match/match.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
-import { EventService } from "../../tournament/application/event.service";
+import type { EventQueries, TournamentQueries } from "../../tournament/application/ports";
+import { SyncNewTournamentsUseCase } from "../../tournament/application/sync/sync-new-tournaments.use-case";
+import { SyncPandascoreTournamentUseCase } from "../../tournament/application/sync/sync-pandascore-tournament.use-case";
+import {
+  EVENT_QUERIES,
+  TOURNAMENT_QUERIES,
+} from "../../tournament/infrastructure/competition-queries.tokens";
 import { NewsService } from "../../news/application/news.service";
 import { ContractService } from "../../roster/application/contract.service";
 import { PlayerService } from "../../roster/application/player.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import { SearchService } from "../../search/application/search.service";
 import { TeamService } from "../../roster/application/team.service";
-import { TournamentService } from "../../tournament/application/tournament.service";
 import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { McpToolContext } from "./mcp-tool-context";
 import { registerEventTools } from "./tools/event-tools";
@@ -30,10 +35,12 @@ export class McpServerFactory {
     private readonly playerService: PlayerService,
     private readonly contractService: ContractService,
     private readonly teamService: TeamService,
-    private readonly tournamentService: TournamentService,
+    @Inject(TOURNAMENT_QUERIES) private readonly tournaments: TournamentQueries,
+    private readonly pandascoreTournamentSync: SyncPandascoreTournamentUseCase,
+    private readonly pandascoreNewTournamentsSync: SyncNewTournamentsUseCase,
     private readonly manualTournamentService: ManualTournamentService,
     private readonly catalogService: ManualCatalogService,
-    private readonly eventService: EventService,
+    @Inject(EVENT_QUERIES) private readonly events: EventQueries,
     private readonly matchService: MatchService,
     private readonly newsService: NewsService,
     private readonly rosterProposalService: RosterProposalService,
@@ -58,10 +65,12 @@ export class McpServerFactory {
       playerService: this.playerService,
       contractService: this.contractService,
       teamService: this.teamService,
-      tournamentService: this.tournamentService,
+      tournaments: this.tournaments,
+      pandascoreTournamentSync: this.pandascoreTournamentSync,
+      pandascoreNewTournamentsSync: this.pandascoreNewTournamentsSync,
       manualTournamentService: this.manualTournamentService,
       catalogService: this.catalogService,
-      eventService: this.eventService,
+      events: this.events,
       matchService: this.matchService,
       newsService: this.newsService,
       rosterProposalService: this.rosterProposalService,

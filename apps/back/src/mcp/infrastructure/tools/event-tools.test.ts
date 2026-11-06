@@ -53,7 +53,7 @@ function setup(role: "admin" | "journalist" = "admin") {
     {
       user: { id: "u1", email: "staff@test.com", role },
       catalogService,
-      eventService: { list: vi.fn().mockResolvedValue([[listing], 1]) },
+      events: { list: vi.fn().mockResolvedValue([[listing], 1]) },
     } as never,
   );
   const tool = (name: string) => {

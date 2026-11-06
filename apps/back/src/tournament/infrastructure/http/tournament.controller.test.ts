@@ -17,13 +17,14 @@ describe("TournamentController.findOne", () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
+      {} as never,
       new CachedTournamentRead(tournaments, redis),
       {} as never,
       new TournamentPrizeService(
         { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
         { run: vi.fn() },
-        { invalidateTournament: vi.fn() },
-        { error: vi.fn() },
+        { settle: vi.fn() } as never,
       ),
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
       {} as never,
@@ -57,6 +58,8 @@ describe("TournamentController leagues", () => {
     updateLeague: vi.fn(),
   };
   const controller = new TournamentController(
+    {} as never,
+    {} as never,
     {} as never,
     {} as never,
     {} as never,

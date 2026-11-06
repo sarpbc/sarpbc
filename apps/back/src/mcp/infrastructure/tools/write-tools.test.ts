@@ -95,7 +95,7 @@ describe("create_match participants", () => {
     });
     const clubs = [kc.team, m8.team, outsider];
     const matchService = { upsertMatch: vi.fn().mockResolvedValue(match) };
-    const tournamentService = {
+    const tournaments = {
       findById: vi.fn(async (id: string) => (id === tournament.id ? tournament : null)),
     };
     const teamService = {
@@ -112,7 +112,7 @@ describe("create_match participants", () => {
       {
         user: { id: "u1", email: "staff@test.com", role },
         matchService,
-        tournamentService,
+        tournaments,
         teamService,
         manualTournamentService,
       } as never,
@@ -140,7 +140,7 @@ describe("create_match participants", () => {
       const text = result.content[0].text as string;
       return { result, text, body: result.isError ? null : JSON.parse(text) };
     };
-    return { matchService, tournamentService, manualTournamentService, registered, call };
+    return { matchService, tournaments, manualTournamentService, registered, call };
   }
 
   it("resolves team slugs to participant ids and returns them", async () => {
@@ -187,8 +187,8 @@ describe("create_match participants", () => {
   });
 
   it("reports a missing tournament", async () => {
-    const { tournamentService, matchService, call } = setup();
-    tournamentService.findById.mockResolvedValue(null);
+    const { tournaments, matchService, call } = setup();
+    tournaments.findById.mockResolvedValue(null);
     const { result, text } = await call("create_match", {
       tournamentId: "missing",
       name: "Bo5",

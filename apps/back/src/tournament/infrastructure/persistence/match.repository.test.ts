@@ -13,7 +13,7 @@ describe("MatchRepository", () => {
 
   it("filters start.gg matches and tournaments but not start.gg participants", async () => {
     const { repo, findAndCount } = repository();
-    await repo.findResultsAndCount({ leagueId: "rlcs", redistributableOnly: true });
+    await repo.listAndCount("results", { leagueId: "rlcs", redistributableOnly: true });
     expect(findAndCount).toHaveBeenCalledWith(
       {
         endAt: { $ne: null },
@@ -26,7 +26,7 @@ describe("MatchRepository", () => {
 
   it("scopes results to a team's participations", async () => {
     const { repo, find } = repository();
-    await repo.findResults({ teamId: "falcons", limit: 5 });
+    await repo.list("results", { teamId: "falcons", limit: 5 });
     expect(find).toHaveBeenCalledWith(
       { endAt: { $ne: null }, participants: { team: { id: "falcons" } } },
       expect.objectContaining({ limit: 5, orderBy: { endAt: "DESC" } }),
@@ -36,7 +36,7 @@ describe("MatchRepository", () => {
   it("only treats recently started matches as live when given a window", async () => {
     const { repo, find } = repository();
     const liveSince = new Date("2026-10-31T12:00:00Z");
-    await repo.findLive({ teamId: "falcons", liveSince, limit: 5 });
+    await repo.list("live", { teamId: "falcons", liveSince, limit: 5 });
     expect(find).toHaveBeenCalledWith(
       {
         beginAt: { $lte: expect.any(Date), $gte: liveSince },
@@ -49,7 +49,7 @@ describe("MatchRepository", () => {
 
   it("keeps start.gg rows for public lists", async () => {
     const { repo, findAndCount } = repository();
-    await repo.findResultsAndCount({});
+    await repo.listAndCount("results", {});
     expect(findAndCount).toHaveBeenCalledWith({ endAt: { $ne: null } }, expect.anything());
   });
 });

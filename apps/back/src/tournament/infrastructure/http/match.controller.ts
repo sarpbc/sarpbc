@@ -42,6 +42,13 @@ function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchL
   };
 }
 
+function parsePaging(limit?: string, offset?: string) {
+  return {
+    limit: limit ? parseInt(limit, 10) : undefined,
+    offset: offset ? parseInt(offset, 10) : 0,
+  };
+}
+
 function attachCommentCounts(
   items: MatchListItem[],
   counts: Map<string, number>,
@@ -68,25 +75,15 @@ export class MatchController {
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
   ): Promise<UpcomingMatchesResponse> {
-    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-    const searchLimit = Math.min(searchLimitRaw, 100);
-    const todayOnly = today === "true";
-    const scope = parseListScopeFilters(tournamentId, leagueId);
+    const options = {
+      ...parsePaging(limit, offset),
+      todayOnly: today === "true",
+      ...parseListScopeFilters(tournamentId, leagueId),
+    };
 
     const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-      this.matchService.findUpcomingAndCount({
-        limit: searchLimit,
-        offset: searchOffset,
-        todayOnly,
-        ...scope,
-      }),
-      this.matchService.findLiveAndCount({
-        limit: searchLimit,
-        offset: searchOffset,
-        todayOnly,
-        ...scope,
-      }),
+      this.matchService.list("upcoming", options),
+      this.matchService.list("live", options),
     ]);
 
     const matchIds = [...upcomingMatches, ...liveMatches].map((match) => match.id);
@@ -108,15 +105,9 @@ export class MatchController {
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
   ): Promise<MatchResultsResponse> {
-    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-    const searchLimit = Math.min(searchLimitRaw, 100);
-    const scope = parseListScopeFilters(tournamentId, leagueId);
-
-    const [results, total] = await this.matchService.findResultsAndCount({
-      limit: searchLimit,
-      offset: searchOffset,
-      ...scope,
+    const [results, total] = await this.matchService.list("results", {
+      ...parsePaging(limit, offset),
+      ...parseListScopeFilters(tournamentId, leagueId),
     });
 
     const commentCounts = await this.replyService.countByTargetIds(

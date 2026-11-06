@@ -5,17 +5,14 @@ import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
 import { ConflictError, NotFoundError } from "../../../common/domain/errors";
 import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
-import { matchDecided } from "../../domain/match-decided";
 import { inferEndAt } from "../../domain/tournament-end";
 import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/tournament-source";
+import type { CompetitionAfterCommit } from "../after-commit";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
-  CompetitionCache,
   CompetitionDiagnostics,
   EventWriter,
-  CompetitionEvents,
-  TournamentQueries,
 } from "../ports";
 import type {
   CompetitionIncident,
@@ -41,21 +38,10 @@ interface AppliedTournament {
 
 export class CompetitionSyncService {
   constructor(
-    private readonly reads: TournamentQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly cache: CompetitionCache,
-    private readonly events: CompetitionEvents,
+    private readonly afterCommit: CompetitionAfterCommit,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
-  findTournamentById(id: string) {
-    return this.reads.findById(id);
-  }
-  findTournamentByPandascoreId(id: number) {
-    return this.reads.findByPandascoreId(id);
-  }
-  getKnownTournamentPandascoreIds() {
-    return this.reads.knownPandascoreIds();
-  }
   async upsertTournament(
     command: UpsertTournamentCommand,
     matches: UpsertMatchCommand[] = [],
@@ -67,7 +53,10 @@ export class CompetitionSyncService {
       await this.settleEndAt(scope, tournament);
       return { tournament, stageIds, matches: applied };
     });
-    await this.afterCommit(result);
+    await this.afterCommit.settle({
+      tournamentIds: result.stageIds,
+      decidedMatchIds: result.matches,
+    });
     return result.tournament;
   }
   async applyIncident(
@@ -79,7 +68,11 @@ export class CompetitionSyncService {
         ? this.applyDeletion(scope, incident)
         : this.applyChange(scope, incident, backfill),
     );
-    if (applied) await this.afterCommit(applied);
+    if (applied)
+      await this.afterCommit.settle({
+        tournamentIds: applied.stageIds,
+        decidedMatchIds: applied.matches,
+      });
   }
   private async applyChange(
     scope: CompetitionWriteScope,
@@ -431,21 +424,5 @@ export class CompetitionSyncService {
       if (match.isDecided()) ids.push(match.id);
     }
     return ids;
-  }
-  private async afterCommit({ stageIds, matches }: Applied) {
-    for (const id of stageIds) {
-      try {
-        await this.cache.invalidateTournament(id);
-      } catch (error) {
-        this.diagnostics.error("Tournament cache invalidation failed", error);
-      }
-    }
-    for (const matchId of matches) {
-      try {
-        await this.events.publish(matchDecided(matchId));
-      } catch (error) {
-        this.diagnostics.error("MatchDecided publication failed", error);
-      }
-    }
   }
 }

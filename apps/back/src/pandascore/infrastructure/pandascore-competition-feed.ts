@@ -1,9 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type {
-  CompetitionFeed,
-  CompetitionIncident,
-  ListIncidentsParams,
-} from "../../tournament/application/feed";
+import type { CompetitionFeed, CompetitionIncident } from "../../tournament/application/feed";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { tournamentSchema } from "./dto/tournament.dto";
 import { matchSchema } from "./dto/match.dto";
@@ -38,7 +34,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
       PandascoreMatchMapper.toUpsertCommand(matchSchema.parse(v)),
     );
   }
-  async listIncidents(params: ListIncidentsParams = {}): Promise<CompetitionIncident[]> {
+  async listIncidents(params: { since: Date }): Promise<CompetitionIncident[]> {
     return (await this.apiClient.listIncidents(params)).map((v) => {
       const i = incidentSchema.parse(v),
         base = { id: i.id, modifiedAt: new Date(i.modified_at) };

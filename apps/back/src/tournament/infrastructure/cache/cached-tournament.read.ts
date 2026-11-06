@@ -1,7 +1,7 @@
 import { log } from "evlog";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
-import type { TournamentService } from "../../application/tournament.service";
+import type { TournamentQueries } from "../../application/ports";
 import { DATA_SOURCES } from "@sarpbc/types";
 import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
@@ -62,14 +62,16 @@ const tournament = z.object({
   matches: z.array(match),
 }) satisfies z.ZodType<TournamentDetailResponse>;
 
+export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
+
 export class CachedTournamentRead {
   constructor(
-    private readonly tournaments: Pick<TournamentService, "findById">,
+    private readonly tournaments: Pick<TournamentQueries, "findById">,
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
   async findById(id: string): Promise<TournamentDetailResponse | null> {
-    const key = `tournament:${id}`;
+    const key = tournamentCacheKey(id);
     const cached = await this.readCached(key, id);
     if (cached) return cached;
 

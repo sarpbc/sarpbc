@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CompetitionAfterCommit } from "../after-commit";
 import { CompetitionSyncService } from "./competition-sync.service";
 import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
@@ -147,7 +148,11 @@ describe("Competition synchronization", () => {
       return result;
     },
   };
-  const service = new CompetitionSyncService({} as never, tx, cache, published, diagnostics);
+  const service = new CompetitionSyncService(
+    tx,
+    new CompetitionAfterCommit(cache, published, diagnostics),
+    diagnostics,
+  );
   const rlcsMajor = { pandascoreId: 7, name: "RLCS Major", slug: "rlcs-major" };
   const parisSerie = { pandascoreId: 100, fullName: "Paris 2026", year: 2026 };
   const stageCommand = (fields: Partial<UpsertTournamentCommand>): UpsertTournamentCommand => ({

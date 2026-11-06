@@ -8,7 +8,6 @@ import { ManualTournamentService } from "../../application/manual-tournament.ser
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
-import { TournamentService } from "../../application/tournament.service";
 import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
 import { TournamentController } from "./tournament.controller";
 
@@ -23,8 +22,7 @@ describe("TournamentController prizes", () => {
   const prizes = new TournamentPrizeService(
     { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
     { run: vi.fn() },
-    { invalidateTournament: vi.fn() },
-    { error: vi.fn() },
+    { settle: vi.fn() } as never,
   );
   const findByTournamentId = vi.spyOn(prizes, "findByTournamentId").mockResolvedValue(distribution);
   const setDistribution = vi.spyOn(prizes, "setDistribution").mockResolvedValue(distribution);
@@ -37,7 +35,6 @@ describe("TournamentController prizes", () => {
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        { provide: TournamentService, useValue: {} },
         { provide: ManualTournamentService, useValue: {} },
         { provide: MatchService, useValue: {} },
         { provide: CachedTournamentRead, useValue: {} },
@@ -45,7 +42,9 @@ describe("TournamentController prizes", () => {
       ],
     }).compile();
     controller = new TournamentController(
-      module.get(TournamentService),
+      {} as never,
+      {} as never,
+      {} as never,
       module.get(ManualTournamentService),
       module.get(MatchService),
       module.get(CachedTournamentRead),

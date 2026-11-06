@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { League } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
+import { CompetitionAfterCommit } from "./after-commit";
 import { ManualCatalogService } from "./manual-catalog.service";
 import type { EventStage } from "./ports";
 
@@ -50,8 +51,7 @@ describe("ManualCatalogService", () => {
     { leagues: vi.fn() } as never,
     queries,
     tx,
-    cache,
-    diagnostics,
+    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
   );
 
   beforeEach(() => {

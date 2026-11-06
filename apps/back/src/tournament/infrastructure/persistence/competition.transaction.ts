@@ -1,7 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
-import { ConflictError } from "../../../common/domain/errors";
-import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
@@ -396,29 +394,42 @@ export class CompetitionEventWriter implements EventWriter {
     if (row) this.em.remove(row);
   }
 }
+function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
+  let tournaments: CompetitionTournamentWriter | undefined;
+  let events: CompetitionEventWriter | undefined;
+  let matches: CompetitionMatchWriter | undefined;
+  let rosters: RosterSyncWriter | undefined;
+  let awards: CompetitionAwardWriter | undefined;
+  let prizes: CompetitionPrizeWriter | undefined;
+  const tournamentWriter = () => (tournaments ??= new CompetitionTournamentWriter(em));
+  return {
+    get tournaments() {
+      return tournamentWriter();
+    },
+    get events() {
+      return (events ??= new CompetitionEventWriter(em));
+    },
+    get matches() {
+      return (matches ??= new CompetitionMatchWriter(em, tournamentWriter()));
+    },
+    get rosters() {
+      return (rosters ??= new RosterSyncWriter(em));
+    },
+    get awards() {
+      return (awards ??= new CompetitionAwardWriter(em));
+    },
+    get prizes() {
+      return (prizes ??= new CompetitionPrizeWriter(em));
+    },
+  };
+}
 export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
   constructor(private readonly em: EntityManager) {}
-  async run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
-    let awardWriter: CompetitionAwardWriter | undefined;
-    try {
-      return await this.em.transactional(async (em) => {
-        const tournaments = new CompetitionTournamentWriter(em);
-        awardWriter = new CompetitionAwardWriter(em);
-        const result = await work({
-          tournaments,
-          events: new CompetitionEventWriter(em),
-          matches: new CompetitionMatchWriter(em, tournaments),
-          rosters: new RosterSyncWriter(em),
-          awards: awardWriter,
-          prizes: new CompetitionPrizeWriter(em),
-        });
-        await em.flush();
-        return result;
-      });
-    } catch (error) {
-      if (isUniqueViolation(error) && awardWriter?.conflictMessage)
-        throw new ConflictError(awardWriter.conflictMessage);
-      throw error;
-    }
+  run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
+    return this.em.transactional(async (em) => {
+      const result = await work(lazyWriteScope(em));
+      await em.flush();
+      return result;
+    });
   }
 }

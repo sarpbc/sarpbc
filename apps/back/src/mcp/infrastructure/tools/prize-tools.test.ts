@@ -13,7 +13,6 @@ import { SearchService } from "../../../search/application/search.service";
 import { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../../tournament/application/match/match.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
-import { TournamentService } from "../../../tournament/application/tournament.service";
 import type { McpToolContext } from "../mcp-tool-context";
 import { registerReadTools } from "./read-tools";
 import { registerRosterTools } from "./roster-tools";
@@ -56,7 +55,6 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
       },
       { provide: SearchService, useValue: {} },
       { provide: ContractService, useValue: {} },
-      { provide: TournamentService, useValue: {} },
       { provide: ManualTournamentService, useValue: {} },
       { provide: MatchService, useValue: {} },
       { provide: NewsService, useValue: {} },
@@ -68,10 +66,12 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
     playerService: module.get(PlayerService),
     contractService: module.get(ContractService),
     teamService: module.get(TeamService),
-    tournamentService: module.get(TournamentService),
+    tournaments: {} as never,
+    pandascoreTournamentSync: {} as never,
+    pandascoreNewTournamentsSync: {} as never,
     manualTournamentService: module.get(ManualTournamentService),
     catalogService: {} as never,
-    eventService: {} as never,
+    events: {} as never,
     matchService: module.get(MatchService),
     newsService: module.get(NewsService),
     rosterProposalService: module.get(RosterProposalService),

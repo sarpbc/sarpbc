@@ -16,7 +16,6 @@ import type { McpToolContext } from "../mcp-tool-context";
 import { runReadTool, runStaffReadTool } from "../permission-gate";
 
 const SEARCH_LIMIT = 20;
-const DEFAULT_MATCH_LIMIT = 20;
 const MAX_MATCH_LIMIT = 100;
 const DEFAULT_NEWS_LIMIT = 20;
 const MAX_NEWS_LIMIT = 100;
@@ -157,7 +156,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ activeOnly, limit }) =>
       runReadTool(async () => {
-        const [tournaments] = await ctx.tournamentService.find({
+        const [tournaments] = await ctx.tournaments.find({
           activeOnly: activeOnly ?? false,
           redistributableOnly: true,
           limit: limit ?? 20,
@@ -178,7 +177,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ id }) =>
       runReadTool(async () => {
-        const tournament = await ctx.tournamentService.findById(id);
+        const tournament = await ctx.tournaments.findById(id);
         if (!tournament || !isRedistributable(tournament.source)) {
           throw new NotFoundException(
             `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
@@ -258,14 +257,10 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ limit }) =>
       runReadTool(async () => {
-        const listOptions = {
-          limit: Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT),
-          offset: 0,
-          redistributableOnly: true,
-        };
+        const listOptions = { limit, redistributableOnly: true };
         const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-          ctx.matchService.findUpcomingAndCount(listOptions),
-          ctx.matchService.findLiveAndCount(listOptions),
+          ctx.matchService.list("upcoming", listOptions),
+          ctx.matchService.list("live", listOptions),
         ]);
 
         return {
@@ -295,10 +290,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ limit }) =>
       runReadTool(async () => {
-        const searchLimit = Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT);
-        const [results, total] = await ctx.matchService.findResultsAndCount({
-          limit: searchLimit,
-          offset: 0,
+        const [results, total] = await ctx.matchService.list("results", {
+          limit,
           redistributableOnly: true,
         });
 

@@ -6,6 +6,7 @@ import {
   type TournamentSummary,
 } from "../../../tournament/domain/competition";
 import { matchDecided } from "../../../tournament/domain/match-decided";
+import { CompetitionAfterCommit } from "../../../tournament/application/after-commit";
 import { MatchService } from "../../../tournament/application/match/match.service";
 import { PickemService } from "../application/pickem.service";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
@@ -22,15 +23,16 @@ describe("deciding a match from pick'ems", () => {
         { id: "r1", match: { id: "m" }, participant: { id: "a" }, score: 3 },
         { id: "r2", match: { id: "m" }, participant: { id: "b" }, score: 1 },
       ],
-      tournament: { pickemsEnabled: true } as TournamentSummary,
+      tournament: { id: "cup", pickemsEnabled: true } as TournamentSummary,
     });
     const writer = { load: vi.fn(async () => stored), save: vi.fn(async () => {}) };
     const events = { publish: vi.fn(async () => {}) };
     const competition = new MatchService(
       { detail: async () => stored } as never,
       { run: (work: (scope: never) => unknown) => work({ matches: writer } as never) } as never,
-      events,
-      { error: vi.fn(), warn: vi.fn() },
+      new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, {
+        error: vi.fn(),
+      }),
     );
     const pickems = new PickemService(
       { list: async () => [] },

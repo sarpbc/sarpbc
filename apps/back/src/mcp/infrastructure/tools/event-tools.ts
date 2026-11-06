@@ -87,7 +87,7 @@ export function registerEventTools(server: McpServer, ctx: McpToolContext): void
     },
     async ({ activeOnly, limit, offset }) =>
       runReadTool(async () => {
-        const [listings, count] = await ctx.eventService.list({
+        const [listings, count] = await ctx.events.list({
           activeOnly: activeOnly ?? false,
           redistributableOnly: true,
           limit: limit ?? 20,

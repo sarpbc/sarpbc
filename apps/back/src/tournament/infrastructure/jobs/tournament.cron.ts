@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
@@ -6,7 +6,10 @@ import { createLogger } from "evlog";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "../../application/match/match.service";
-import { TournamentService } from "../../application/tournament.service";
+import type { TournamentQueries } from "../../application/ports";
+import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
+
+const HOUR_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class TournamentCron {
@@ -15,7 +18,7 @@ export class TournamentCron {
     private readonly syncNewTournamentsUseCase: SyncNewTournamentsUseCase,
     private readonly syncPandascoreTournamentUseCase: SyncPandascoreTournamentUseCase,
     private readonly matchService: MatchService,
-    private readonly tournamentService: TournamentService,
+    @Inject(TOURNAMENT_QUERIES) private readonly tournaments: TournamentQueries,
   ) {}
 
   @Cron(CronExpression.EVERY_5_MINUTES)
@@ -27,18 +30,11 @@ export class TournamentCron {
     });
 
     try {
-      const liveMatches = await this.matchService.findLive({
-        limit: 100,
-        offset: 0,
-        todayOnly: false,
-      });
+      const [liveMatches] = await this.matchService.list("live", { limit: 100 });
 
-      const recentlyEndedMatches = await this.matchService.findRecentlyEnded({
-        limit: 100,
-        minutesAgo: 15,
-      });
+      const recentlyEndedMatches = await this.matchService.findRecentlyEnded();
 
-      const activeTournamentIds = await this.tournamentService.findPandascoreActiveIds();
+      const activeTournamentIds = await this.findPandascoreActiveIds(new Date());
 
       const tournamentIds = new Set<string>(activeTournamentIds);
       for (const match of [...liveMatches, ...recentlyEndedMatches]) {
@@ -82,6 +78,16 @@ export class TournamentCron {
     } finally {
       log.emit();
     }
+  }
+
+  private async findPandascoreActiveIds(now: Date): Promise<string[]> {
+    return (
+      await this.tournaments.findPandascoreActive({
+        beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),
+        beganAfter: new Date(now.getTime() - 7 * 24 * HOUR_MS),
+        endsAfter: new Date(now.getTime() - 6 * HOUR_MS),
+      })
+    ).map((t) => t.id);
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

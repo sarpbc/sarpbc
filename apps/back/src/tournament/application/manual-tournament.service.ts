@@ -8,9 +8,8 @@ import type {
   ParticipantRosterInput,
   UpdateTournamentInput,
 } from "./inputs";
+import type { CompetitionAfterCommit } from "./after-commit";
 import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
   CompetitionTransaction,
   EventWriter,
   TournamentQueries,
@@ -21,8 +20,7 @@ export class ManualTournamentService {
   constructor(
     private readonly reads: TournamentQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly cache: CompetitionCache,
-    private readonly diagnostics: CompetitionDiagnostics,
+    private readonly afterCommit: CompetitionAfterCommit,
   ) {}
   async create(input: CreateTournamentInput): Promise<Tournament> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
@@ -77,12 +75,17 @@ export class ManualTournamentService {
       }
       await tournaments.save(tournament);
     });
-    try {
-      await this.cache.invalidateTournament(id);
-    } catch (error) {
-      this.diagnostics.error("Tournament cache invalidation failed", error);
-    }
+    await this.afterCommit.settle({ tournamentIds: [id] });
     return this.detail(id);
+  }
+  async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
+    await this.transaction.run(async ({ tournaments }) => {
+      const tournament = await tournaments.load(id);
+      if (!tournament) throw new NotFoundError("Tournament not found");
+      tournament.pickemsEnabled = enabled;
+      await tournaments.save(tournament);
+    });
+    await this.afterCommit.settle({ tournamentIds: [id] });
   }
   private async detail(id: string) {
     const tournament = await this.reads.findById(id);

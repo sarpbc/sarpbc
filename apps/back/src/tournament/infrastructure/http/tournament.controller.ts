@@ -14,6 +14,7 @@ import {
   BadRequestException,
   ParseIntPipe,
   NotFoundException,
+  Inject,
 } from "@nestjs/common";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
@@ -23,7 +24,10 @@ import { CreateLeagueDto, UpdateLeagueDto } from "./dto/manual-catalog.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { TournamentService } from "../../application/tournament.service";
+import type { TournamentQueries } from "../../application/ports";
+import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
+import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
+import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 import { ManualTournamentService } from "../../application/manual-tournament.service";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { MatchService } from "../../application/match/match.service";
@@ -47,7 +51,9 @@ import {
 @Controller("tournaments")
 export class TournamentController {
   constructor(
-    private tournamentService: TournamentService,
+    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
+    private syncNewTournaments: SyncNewTournamentsUseCase,
+    private syncTournaments: SyncPandascoreTournamentUseCase,
     private manualTournamentService: ManualTournamentService,
     private matchService: MatchService,
     private tournamentRead: CachedTournamentRead,
@@ -59,7 +65,7 @@ export class TournamentController {
 
   @Get()
   async find(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
-    const [tournaments, count] = await this.tournamentService.find({
+    const [tournaments, count] = await this.tournaments.find({
       limit: query.limit,
       offset: query.offset,
       pickems: query.pickems,
@@ -99,7 +105,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("without-matches")
   async findWithoutMatches() {
-    const tournaments = await this.tournamentService.findPandascoreWithoutMatches();
+    const tournaments = await this.tournaments.findPandascoreWithoutMatches();
     return { tournaments };
   }
 
@@ -135,7 +141,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync/additions")
   async syncPandascoreAdditions() {
-    const sync = await this.tournamentService.syncNewTournamentsFromPandascore();
+    const sync = await this.syncNewTournaments.execute();
     return { success: true, sync };
   }
 
@@ -147,7 +153,7 @@ export class TournamentController {
       throw new BadRequestException("pandascoreId must be a positive integer");
     }
 
-    const tournament = await this.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+    const tournament = await this.syncTournaments.executeByPandascoreId(pandascoreId);
     return {
       success: true,
       tournamentId: tournament.id,
@@ -159,7 +165,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post(":id/sync")
   async syncTournamentFromPandascore(@Param("id") id: string) {
-    await this.tournamentService.syncTournamentFromPandascore(id);
+    await this.syncTournaments.execute(id);
     return {
       success: true,
     };
@@ -172,7 +178,7 @@ export class TournamentController {
     @Param("tournamentId") tournamentId: string,
     @Body("enabled") enabled: boolean,
   ) {
-    await this.tournamentService.setTournamentPickemsEnabled(tournamentId, enabled);
+    await this.manualTournamentService.setPickemsEnabled(tournamentId, enabled);
     return { success: true };
   }
 
@@ -266,7 +272,7 @@ export class TournamentController {
 
   @Get("player/:playerId")
   async getTournamentsByPlayer(@Param("playerId") playerId: string) {
-    const tournaments = await this.tournamentService.getTournamentsByPlayer(playerId);
+    const tournaments = await this.tournaments.getTournamentsByPlayer(playerId);
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 

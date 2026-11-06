@@ -230,7 +230,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
       results,
     }) =>
       runWriteTool(user, "create_match", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.findById(tournamentId);
+        const tournament = await ctx.tournaments.findById(tournamentId);
         if (!tournament) {
           throw new NotFoundException(
             `Tournament "${tournamentId}" was not found. Use get_tournaments to list available events.`,
@@ -547,9 +547,9 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     },
     async ({ tournamentId, pandascoreId }) =>
       runWriteTool(user, "link_pandascore_tournament", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.linkPandascoreTournament(
-          tournamentId,
+        const tournament = await ctx.pandascoreTournamentSync.executeByPandascoreId(
           pandascoreId,
+          tournamentId,
         );
         return {
           entityId: tournament.id,
@@ -580,7 +580,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     async ({ tournamentId }) =>
       runWriteTool(user, "trigger_tournament_sync", "tournaments.manage", async () => {
         if (tournamentId) {
-          await ctx.tournamentService.syncTournamentFromPandascore(tournamentId);
+          await ctx.pandascoreTournamentSync.execute(tournamentId);
           return {
             entityId: tournamentId,
             result: {
@@ -591,7 +591,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           };
         }
 
-        const sync = await ctx.tournamentService.syncNewTournamentsFromPandascore();
+        const sync = await ctx.pandascoreNewTournamentsSync.execute();
         return {
           result: {
             success: true,
@@ -617,7 +617,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
     },
     async ({ pandascoreId }) =>
       runWriteTool(user, "sync_pandascore_tournament", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+        const tournament = await ctx.pandascoreTournamentSync.executeByPandascoreId(pandascoreId);
         return {
           entityId: tournament.id,
           result: {
