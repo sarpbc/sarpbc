@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef } from "@sarpbc/types";
 import type { DataSource } from "@sarpbc/types";
+import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 import type { League } from "./competition";
 
@@ -87,7 +88,7 @@ export function eventDisplayName(input: {
 }
 
 function utcDay(date: Date | null): string {
-  return date ? date.toISOString().slice(0, 10) : "";
+  return date ? isoDay(date) : "";
 }
 
 /** Same-day stages start at staggered times (Group B before Group A), so order by day, then name. */

@@ -20,6 +20,7 @@ export {
   TWITCH_LOGIN_PATTERN,
   twitchChannelUrl,
 } from "./twitch.ts";
+export { isoDay } from "./iso-day.ts";
 export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week.ts";
 export {
   newsEntityTagStart,

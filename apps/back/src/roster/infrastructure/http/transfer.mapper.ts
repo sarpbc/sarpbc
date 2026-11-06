@@ -1,4 +1,5 @@
 import type { Transfer as TransferResponse } from "@sarpbc/types";
+import { isoDay } from "@sarpbc/utils";
 import type { Transfer } from "../../domain/transfer";
 
 export function mapTransfer({ id, type, date, sourceUrl, contract }: Transfer): TransferResponse {
@@ -6,7 +7,7 @@ export function mapTransfer({ id, type, date, sourceUrl, contract }: Transfer): 
   return {
     id,
     type,
-    date: date.toISOString().slice(0, 10),
+    date: isoDay(date),
     role: contract.role,
     sourceUrl,
     player: {

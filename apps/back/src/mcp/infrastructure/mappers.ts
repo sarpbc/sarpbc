@@ -1,4 +1,5 @@
 import type { DataSource } from "@sarpbc/types";
+import { isoDay } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
 import type {
@@ -68,10 +69,6 @@ export function mapCareer(player: Player, contracts: Contract[]) {
         leaveSourceUrl: contract.leaveSourceUrl,
       })),
   };
-}
-
-function isoDay(date: Date): string {
-  return date.toISOString().slice(0, 10);
 }
 
 export function mapTeamSummary(team: Team) {
