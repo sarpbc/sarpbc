@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "@sarpbc/types";
 import type { ReplyAuthor } from "../../reply/domain/reply";
 import type { PostType } from "../domain/post-type.enum";
 export interface TopicRecord {
@@ -37,7 +38,7 @@ export interface CreatePostInput {
   title: string;
   content: string;
   topicId: string;
-  translations?: { locale: "en-US" | "fr-FR"; title: string; content: string }[];
+  translations?: { locale: SupportedLocale; title: string; content: string }[];
 }
 export interface CreatedPost {
   publicId: number;

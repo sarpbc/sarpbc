@@ -1,3 +1,4 @@
+import { MAX_IMAGE_MEGABYTES } from "@sarpbc/utils";
 import { Observable } from "rxjs";
 import {
   CallHandler,
@@ -73,12 +74,12 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
 
         if (isMultipartFileTooLarge(error)) {
           throw new PayloadTooLargeException(
-            "Cover image must be 5 MB or smaller. Compress the JPEG or pick another file.",
+            `Cover image must be ${MAX_IMAGE_MEGABYTES} MB or smaller. Compress the JPEG or pick another file.`,
           );
         }
 
         throw new HttpException(
-          "The image could not be read. Try a JPEG, PNG, WebP, or GIF under 5 MB.",
+          `The image could not be read. Try a JPEG, PNG, WebP, or GIF under ${MAX_IMAGE_MEGABYTES} MB.`,
           HttpStatus.BAD_REQUEST,
         );
       }

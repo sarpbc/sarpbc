@@ -10,21 +10,18 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { createLogger } from "evlog";
 import { currentEnvironment } from "../../common/infrastructure/logging/request-log-context";
-import type { ImageContentType } from "../domain/image-upload";
+import {
+  IMAGE_FILE_EXTENSIONS,
+  type ImageContentType,
+  type ImageUploadTarget,
+} from "@sarpbc/utils";
 import type {
   ImageUploadContext,
   ObjectStorage,
   R2UploadResponse,
   R2UploadUrlResponse,
 } from "../application/ports/object-storage";
-import { IMAGE_PREFIXES, type ImageUploadTarget } from "../domain/image-target";
-
-const CONTENT_TYPE_EXTENSIONS = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-} as const;
+import { IMAGE_PREFIXES } from "../domain/image-target";
 
 @Injectable()
 export class R2Service implements ObjectStorage {
@@ -93,7 +90,7 @@ export class R2Service implements ObjectStorage {
     _filename: string | undefined,
     target: ImageUploadTarget,
   ): Promise<R2UploadUrlResponse> {
-    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${CONTENT_TYPE_EXTENSIONS[contentType]}`;
+    const key = `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
@@ -110,7 +107,7 @@ export class R2Service implements ObjectStorage {
     filename: string | undefined,
     context: ImageUploadContext,
   ): Promise<R2UploadResponse> {
-    const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${CONTENT_TYPE_EXTENSIONS[contentType]}`;
+    const key = `${IMAGE_PREFIXES[context.target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
     return this.objectOperation(
       "uploadImage",
       {

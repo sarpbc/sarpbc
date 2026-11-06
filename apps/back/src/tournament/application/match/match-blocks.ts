@@ -1,4 +1,5 @@
 import type { MatchBlockSelector } from "@sarpbc/types";
+import { isMatchLive } from "@sarpbc/utils";
 import type { Match } from "../../domain/competition";
 import type { MatchQueries } from "../ports";
 import type { MatchListQueryOptions } from "./match-list-filters";
@@ -11,10 +12,8 @@ export type MatchBlockReads = Pick<MatchQueries, "byIds" | "page">;
 
 export function isMatchBlockLive(match: Match, now: Date): boolean {
   return (
-    !match.hasEnded() &&
-    match.beginAt !== null &&
-    match.beginAt <= now &&
-    now.getTime() - match.beginAt.getTime() <= MATCH_BLOCK_LIVE_WINDOW_MS
+    isMatchLive(match, now) &&
+    now.getTime() - match.beginAt!.getTime() <= MATCH_BLOCK_LIVE_WINDOW_MS
   );
 }
 

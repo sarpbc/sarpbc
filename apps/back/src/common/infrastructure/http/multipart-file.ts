@@ -1,4 +1,4 @@
-import { canonicalImageContentType } from "../../domain/image-content-type";
+import { canonicalImageContentType } from "@sarpbc/utils";
 import { MultipartFile } from "@fastify/multipart";
 import { FileValidator } from "@nestjs/common/pipes/file/file-validator.interface";
 import { FileTypeValidator, MaxFileSizeValidator } from "@nestjs/common";

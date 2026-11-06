@@ -1,5 +1,4 @@
-import type { ImageUploadTarget } from "../../domain/image-target";
-import type { ImageContentType } from "../../domain/image-upload";
+import type { ImageContentType, ImageUploadTarget } from "@sarpbc/utils";
 
 export interface R2UploadUrlResponse {
   uploadUrl: string;

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { localizedPath, newsPath } from "@sarpbc/utils";
 import { createLogger } from "evlog";
 import type { NewsIndexing } from "../application/ports";
 
@@ -16,10 +17,10 @@ export class IndexNowService implements NewsIndexing {
     const log = createLogger({ component: IndexNowService.name });
     try {
       const origin = new URL(this.configService.getOrThrow<string>("front_url")).origin;
-      const urlList = [...new Set(slugs)].flatMap((slug) => [
-        `${origin}/news/${encodeURIComponent(slug)}`,
-        `${origin}/fr/news/${encodeURIComponent(slug)}`,
-      ]);
+      const urlList = [...new Set(slugs)].flatMap((slug) => {
+        const path = newsPath(encodeURIComponent(slug));
+        return [`${origin}${path}`, `${origin}${localizedPath(path, "fr")}`];
+      });
       const response = await fetch("https://api.indexnow.org/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },

@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { IMAGE_CONTENT_TYPES, MAX_IMAGE_BYTES } from "@sarpbc/utils";
 import type { FastifyRequest } from "fastify";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { Files } from "../../../common/infrastructure/http/decorators/files.decorator";
@@ -19,7 +20,7 @@ import type { Storage } from "../../../common/infrastructure/http/fastify";
 import { R2UploadDto, R2UploadUrlDto } from "./dto/r2-upload-url.dto";
 import { StorageService } from "../../application/storage.service";
 
-const MAX_COVER_BYTES = 5 * 1024 * 1024;
+const IMAGE_FILE_TYPE = new RegExp(`^(${IMAGE_CONTENT_TYPES.join("|")})$`);
 
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("images.manage")
@@ -36,8 +37,8 @@ export class StorageController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(
     MultipartInterceptor({
-      maxFileSize: MAX_COVER_BYTES,
-      fileType: /^image\/(jpeg|png|webp|gif)$/,
+      maxFileSize: MAX_IMAGE_BYTES,
+      fileType: IMAGE_FILE_TYPE,
     }),
   )
   uploadImage(

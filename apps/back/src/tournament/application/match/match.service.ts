@@ -1,6 +1,7 @@
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
+import { winnerFromResults } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
 import type { MatchListQueryOptions } from "./match-list-filters";
@@ -218,23 +219,20 @@ export class MatchService {
       return null;
     }
 
-    const results = match.results;
-    const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score;
-    const opponentScore = results.find((r) => r.participant.id === opponentParticipant.id)?.score;
+    const winnerParticipantId = winnerFromResults(
+      match.results
+        .filter(
+          (r) =>
+            r.participant.id === teamParticipant.id || r.participant.id === opponentParticipant.id,
+        )
+        .map((r) => ({ participantId: r.participant.id, score: r.score })),
+    );
 
-    if (teamScore === undefined || opponentScore === undefined) {
+    if (winnerParticipantId === null) {
       return null;
     }
 
-    if (teamScore > opponentScore) {
-      return "win";
-    }
-
-    if (teamScore < opponentScore) {
-      return "loss";
-    }
-
-    return null;
+    return winnerParticipantId === teamParticipant.id ? "win" : "loss";
   }
 
   async upsertMatch(tournamentId: string, input: UpsertMatchInput): Promise<Match> {

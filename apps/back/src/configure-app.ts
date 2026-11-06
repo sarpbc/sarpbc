@@ -1,4 +1,5 @@
 import { StandardSchemaValidationPipe } from "@nestjs/common";
+import { MAX_IMAGE_BYTES } from "@sarpbc/utils";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
@@ -28,7 +29,7 @@ export async function configureApp(app: NestFastifyApplication): Promise<void> {
 
   await app.register(multipart, {
     limits: {
-      fileSize: 5 * 1024 * 1024,
+      fileSize: MAX_IMAGE_BYTES,
     },
   });
   await app.register(cookie);

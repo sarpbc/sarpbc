@@ -194,7 +194,7 @@ describe("post lookup", () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     const ref = { kind: "publicId", value: 88 } as const;
-    expect(await f.service.findByIdDto(ref, null)).toMatchObject({
+    expect(await f.service.findByIdDto(ref, "fr-FR")).toMatchObject({
       id: stored.id,
       publicId: 88,
       slug: "mon-post-quel-roster",
@@ -214,7 +214,7 @@ describe("post lookup", () => {
   });
   it("reports a missing post as null", async () => {
     const f = setup();
-    expect(await f.service.findByIdDto({ kind: "id", value: stored.id }, null)).toBeNull();
+    expect(await f.service.findByIdDto({ kind: "id", value: stored.id }, "fr-FR")).toBeNull();
   });
   it("deletes by legacy id", async () => {
     const f = setup();

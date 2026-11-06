@@ -1,3 +1,4 @@
+import { SUPPORTED_LOCALES } from "@sarpbc/types";
 import { z } from "zod";
 
 export const CreatePostDto = z.strictObject({
@@ -8,7 +9,7 @@ export const CreatePostDto = z.strictObject({
   translations: z
     .array(
       z.strictObject({
-        locale: z.enum(["en-US", "fr-FR"]),
+        locale: z.enum(SUPPORTED_LOCALES),
         title: z.string().min(1).max(128),
         content: z.string().min(1).max(2048),
       }),

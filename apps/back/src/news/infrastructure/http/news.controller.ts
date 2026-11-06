@@ -17,7 +17,7 @@ import type { FastifyReply } from "fastify";
 import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
 import { PaginationQueryDto } from "../../../common/infrastructure/http/dto/pagination-query.dto";
 import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dto";
-import { parseNewsLocale } from "../../domain/news-locale.util";
+import { parseLocale } from "@sarpbc/utils";
 import { NewsService } from "../../application/news.service";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import { TweetEmbedQueryDto } from "./dto/tweet-embed-query.dto";
@@ -53,7 +53,7 @@ export class NewsController {
 
   @Get()
   findAll(@Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto) {
-    return this.newsService.findAllPublishedArticle(page, limit, parseNewsLocale(locale), type);
+    return this.newsService.findAllPublishedArticle(page, limit, parseLocale(locale), type);
   }
 
   @Get("sitemap")
@@ -89,7 +89,7 @@ export class NewsController {
     @Param("week") week: string,
     @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
   ) {
-    return this.newsService.findPublishedShortsByWeek(week, parseNewsLocale(locale));
+    return this.newsService.findPublishedShortsByWeek(week, parseLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -104,7 +104,7 @@ export class NewsController {
     @Param("slug") slug: string,
     @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
   ) {
-    return this.newsService.findOneBySlug(slug, parseNewsLocale(locale));
+    return this.newsService.findOneBySlug(slug, parseLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

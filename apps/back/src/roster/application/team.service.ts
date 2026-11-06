@@ -1,3 +1,4 @@
+import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
 import { Team } from "../domain/roster";
@@ -43,7 +44,7 @@ export class TeamService {
       team.location = dto.location ?? null;
       team.imageUrl = dto.imageUrl ?? null;
       team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
-      team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+      team.slug = dto.slug ?? (toSlug(dto.name) || "team");
       if (dto.source !== undefined) team.source = dto.source;
 
       if (await teams.findBySlug(team.slug)) {

@@ -1,4 +1,4 @@
-import { forumPostPath, forumPostSlug, matchPath } from "@sarpbc/utils";
+import { forumPostPath, forumPostSlug, matchPath, newsPath } from "@sarpbc/utils";
 import type { ReplyTargetType } from "./reply";
 
 export type ReplyTargetLink = {
@@ -29,7 +29,7 @@ export function resolveReplyTargetLink(reply: ReplyTargetSource): ReplyTargetLin
       targetType: "newsArticle",
       targetId: reply.newsArticle.id,
       targetLabel: reply.newsArticle.title,
-      targetPath: `/news/${reply.newsArticle.slug}`,
+      targetPath: newsPath(reply.newsArticle.slug),
     };
   }
 

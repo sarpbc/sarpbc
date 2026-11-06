@@ -1,6 +1,6 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { ImageUploadTarget } from "../domain/image-target";
-import { imageContentType, MAX_IMAGE_BYTES } from "../domain/image-upload";
+import { MAX_IMAGE_BYTES, MAX_IMAGE_MEGABYTES, type ImageUploadTarget } from "@sarpbc/utils";
+import { imageContentType } from "../domain/image-upload";
 import type {
   ImageUploadContext,
   ObjectStorage,
@@ -27,7 +27,7 @@ export class StorageService {
   ): Promise<R2UploadResponse> {
     const type = imageContentType(contentType);
     if (bytes.byteLength > MAX_IMAGE_BYTES) {
-      throw new InvalidInputError("Cover image must be no larger than 5 MB.");
+      throw new InvalidInputError(`Cover image must be no larger than ${MAX_IMAGE_MEGABYTES} MB.`);
     }
     return this.storage.uploadImage(bytes, type, filename, context);
   }

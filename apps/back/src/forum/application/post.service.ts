@@ -1,4 +1,4 @@
-import type { ForumPost } from "@sarpbc/types";
+import type { ForumPost, SupportedLocale } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -43,10 +43,10 @@ export class PostService {
     return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(ref: EntityRef, locale: string | null): Promise<ForumPost | null> {
+  async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
     const post = await this.findById(ref);
     if (!post) return null;
-    const translation = locale ? post.translations.find((t) => t.locale === locale) : undefined;
+    const translation = post.translations.find((t) => t.locale === locale);
 
     return {
       id: post.id,

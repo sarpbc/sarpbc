@@ -3,7 +3,7 @@ import { InvalidInputError, NotFoundError } from "../../../common/domain/errors"
 import { Match } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
-import { deriveWinnerParticipantId } from "./derive-match-winner";
+import { winnerFromResults } from "@sarpbc/utils";
 import {
   normalizeMatchVods,
   replaceGameVods,
@@ -68,7 +68,7 @@ export async function upsertMatchInTransaction(
     }
   }
   if (match.hasEnded() && input.results) {
-    const winnerId = deriveWinnerParticipantId(
+    const winnerId = winnerFromResults(
       input.results.filter((r): r is { participantId: string; score: number } =>
         Boolean(r.participantId),
       ),
@@ -126,7 +126,7 @@ export async function updateMatchInTransaction(
   if (!finished) {
     match.winner = null;
   } else {
-    const winnerId = deriveWinnerParticipantId(
+    const winnerId = winnerFromResults(
       match.results.map((r) => ({ participantId: r.participant.id, score: r.score })),
     );
     const winner = match.participants.find((p) => p.id === winnerId) ?? null;

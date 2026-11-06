@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { matchSlug } from "@sarpbc/utils";
+import { isMatchFinished, matchSlug } from "@sarpbc/utils";
 import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
@@ -67,7 +67,7 @@ export class Match {
   updatedAt = new Date();
   tournament!: TournamentSummary;
   hasEnded(): boolean {
-    return this.status === "finished" || this.endAt !== null;
+    return isMatchFinished(this);
   }
   /** Match lists read `endAt` as the end marker, so a finished match must carry one. */
   stampEnd(at: Date): void {

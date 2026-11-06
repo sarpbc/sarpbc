@@ -1,3 +1,4 @@
+import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
 import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus } from "../domain/roster";
@@ -40,7 +41,7 @@ export class PlayerService {
       player.birthday = dto.birthday ? new Date(dto.birthday) : null;
       player.nationality = dto.nationality ?? null;
       player.imageUrl = dto.imageUrl ?? null;
-      player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+      player.slug = dto.slug ?? (toSlug(dto.name) || "player");
       if (dto.status !== undefined) player.status = dto.status;
       if (dto.source !== undefined) player.source = dto.source;
 

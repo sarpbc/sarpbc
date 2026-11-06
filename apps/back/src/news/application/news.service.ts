@@ -1,17 +1,16 @@
-import { excerptFromNewsContent } from "@sarpbc/utils";
+import {
+  excerptFromNewsContent,
+  hasFrenchTranslation,
+  isoWeekUtcRange,
+  localizedNewsFields,
+  toSlug,
+} from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
 import { assertValidMatchBlocks } from "../domain/news-content.util";
-import {
-  hasFrenchTranslation,
-  localizedNewsFields,
-  type NewsLocale,
-} from "../domain/news-locale.util";
 import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
-import slugify from "slugify";
-import type { NewsType } from "@sarpbc/types";
-import { isoWeekUtcRange } from "@sarpbc/utils";
+import type { NewsType, SupportedLocale } from "@sarpbc/types";
 /** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
 export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
@@ -87,7 +86,7 @@ export class NewsService {
 
   private mapListArticle(
     article: NewsArticleRecord,
-    locale: NewsLocale,
+    locale: SupportedLocale,
     commentCount = 0,
   ): NewsArticleListItemResponse {
     const { title, content } = localizedNewsFields(article, locale);
@@ -103,7 +102,7 @@ export class NewsService {
     };
   }
 
-  private mapArticle(article: NewsArticleRecord, locale: NewsLocale): NewsArticleResponse {
+  private mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
     const { title, content } = localizedNewsFields(article, locale);
     return {
       id: article.id,
@@ -127,12 +126,8 @@ export class NewsService {
     };
   }
 
-  private normalizeSlug(value: string): string {
-    return slugify(value, { lower: true, strict: true });
-  }
-
   private async generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
-    const base = this.normalizeSlug(source);
+    const base = toSlug(source);
     if (!base) {
       throw new ConflictError(
         "Could not generate a URL slug from that title. Add a slug manually (letters, numbers, hyphens).",
@@ -168,7 +163,7 @@ export class NewsService {
 
       let slug: string;
       if (dto.slug) {
-        slug = this.normalizeSlug(dto.slug);
+        slug = toSlug(dto.slug);
         if (!slug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",
@@ -201,7 +196,7 @@ export class NewsService {
   async findAllPublishedArticle(
     page: number,
     limit: number,
-    locale: NewsLocale = "en-US",
+    locale: SupportedLocale = "en-US",
     type?: NewsType,
   ): Promise<{
     data: NewsArticleListItemResponse[];
@@ -226,7 +221,7 @@ export class NewsService {
 
   async findPublishedShortsByWeek(
     week: string,
-    locale: NewsLocale = "en-US",
+    locale: SupportedLocale = "en-US",
   ): Promise<NewsWeekResponse> {
     const range = isoWeekUtcRange(week);
     if (!range) {
@@ -303,7 +298,10 @@ export class NewsService {
     };
   }
 
-  async findOneBySlug(slug: string, locale: NewsLocale = "en-US"): Promise<NewsArticleResponse> {
+  async findOneBySlug(
+    slug: string,
+    locale: SupportedLocale = "en-US",
+  ): Promise<NewsArticleResponse> {
     const article = await this.newsRepository.findBySlug(slug);
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
@@ -366,7 +364,7 @@ export class NewsService {
         article.imageUrl = dto.imageUrl ?? null;
       }
       if (dto.slug !== undefined) {
-        const nextSlug = this.normalizeSlug(dto.slug);
+        const nextSlug = toSlug(dto.slug);
         if (!nextSlug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",

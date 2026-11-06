@@ -5,6 +5,7 @@ import type {
   TournamentEventRef,
   TournamentMatchListItem,
 } from "@sarpbc/types";
+import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
@@ -77,9 +78,7 @@ function matchBlockState(match: Match, now: Date): MatchBlockState {
   if (isMatchBlockLive(match, now)) {
     return "live";
   }
-  return match.hasEnded() || (match.beginAt !== null && match.beginAt <= now)
-    ? "finished"
-    : "upcoming";
+  return isMatchFinished(match) || isMatchLive(match, now) ? "finished" : "upcoming";
 }
 
 export function mapMatchBlockItem(match: Match, now: Date, commentCount: number): MatchBlockItem {

@@ -1,12 +1,19 @@
-import { matchPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
+import {
+  matchPath,
+  newsPath,
+  playerPath,
+  teamPath,
+  tournamentEventPath,
+  tournamentStagePath,
+} from "@sarpbc/utils";
 import { getAdminUrl, getFrontUrl } from "../../infrastructure/config/secrets";
 
 export function playerUrl(slug: string): string {
-  return `${getFrontUrl()}/player/${slug}`;
+  return `${getFrontUrl()}${playerPath(slug)}`;
 }
 
 export function teamUrl(slug: string): string {
-  return `${getFrontUrl()}/team/${slug}`;
+  return `${getFrontUrl()}${teamPath(slug)}`;
 }
 
 export function matchUrl(publicId: number, slug: string): string {
@@ -22,7 +29,7 @@ export function eventUrl(slug: string): string {
 }
 
 export function newsUrl(slug: string): string {
-  return `${getFrontUrl()}/news/${slug}`;
+  return `${getFrontUrl()}${newsPath(slug)}`;
 }
 
 export function adminNewsEditUrl(slug: string): string {

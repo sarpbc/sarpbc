@@ -10,7 +10,7 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import { forumPostSlug } from "@sarpbc/utils";
+import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { PostService } from "../../application/post.service";
@@ -72,8 +72,7 @@ export class PostController {
     @Param("ref", EntityRefPipe) ref: EntityRef,
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
-    const preferred = (req.headers["accept-language"] || "en-US").split(",")[0];
-    const locale = preferred?.toLowerCase().startsWith("fr") ? "fr-FR" : null;
+    const locale = parseLocale(req.headers["accept-language"]);
     return { post: await this.postService.findByIdDto(ref, locale) };
   }
 
