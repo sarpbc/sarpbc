@@ -98,7 +98,7 @@
       },
       "empty": {
         "title": "Aucun jeton API",
-        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à SARPBC via MCP."
+        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à sarpbc.org via MCP."
       },
       "create": {
         "title": "Créer un Jeton",
@@ -306,7 +306,7 @@
       "create": {
         "action": "Créer un Tournoi",
         "title": "Créer un Tournoi",
-        "subtitle": "Ajoutez un tournoi géré sur SARPBC plutôt que synchronisé depuis PandaScore.",
+        "subtitle": "Ajoutez un tournoi géré sur sarpbc.org plutôt que synchronisé depuis PandaScore.",
         "saved": "Tournoi créé"
       },
       "edit": {

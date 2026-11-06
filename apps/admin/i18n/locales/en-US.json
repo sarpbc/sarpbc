@@ -98,7 +98,7 @@
       },
       "empty": {
         "title": "No API Tokens Yet",
-        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to SARPBC via MCP."
+        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to sarpbc.org via MCP."
       },
       "create": {
         "title": "Create Token",
@@ -306,7 +306,7 @@
       "create": {
         "action": "Create Tournament",
         "title": "Create Tournament",
-        "subtitle": "Add a tournament that is managed on SARPBC instead of synced from PandaScore.",
+        "subtitle": "Add a tournament that is managed on sarpbc.org instead of synced from PandaScore.",
         "saved": "Tournament created"
       },
       "edit": {

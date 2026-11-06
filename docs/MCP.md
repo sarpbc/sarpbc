@@ -1,6 +1,6 @@
 # MCP server
 
-Staff AI assistants can call the SARPBC API through a [Model Context Protocol](https://modelcontextprotocol.io) server mounted on the NestJS backend.
+Staff AI assistants can call the sarpbc.org API through a [Model Context Protocol](https://modelcontextprotocol.io) server mounted on the NestJS backend.
 
 |               |                                                                                                          |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
