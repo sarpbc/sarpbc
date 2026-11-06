@@ -1,4 +1,4 @@
-import type { LiveStreamer } from "~/types/streamer";
+import type { LiveStreamer } from "@sarpbc/types";
 
 export async function getLiveStreamers(): Promise<LiveStreamer[]> {
   const res = await apiFetch<{ streamers?: LiveStreamer[] }>("/streamers/live", {

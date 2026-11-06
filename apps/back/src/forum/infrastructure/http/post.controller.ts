@@ -10,7 +10,7 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import type { ForumPostListItem } from "@sarpbc/types";
+import type { ForumPostCreationStatus, ForumPostListItem } from "@sarpbc/types";
 import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
@@ -22,7 +22,7 @@ import { CurrentUserId } from "../../../user/infrastructure/http/decorator/curre
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
 import { postWithSlugResponse } from "./forum-response";
-import type { CreatedPost, PostCreationStatus } from "../../application/models";
+import type { CreatedPost } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
 
@@ -65,7 +65,7 @@ export class PostController {
 
   @Get("creation-status")
   @UseGuards(AuthGuard)
-  async getCreationStatus(@CurrentUserId() userId: string): Promise<PostCreationStatus> {
+  async getCreationStatus(@CurrentUserId() userId: string): Promise<ForumPostCreationStatus> {
     return this.postService.getCreationStatus(userId);
   }
 

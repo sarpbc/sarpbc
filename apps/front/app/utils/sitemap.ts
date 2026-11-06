@@ -1,23 +1,8 @@
+import type { NewsSitemapEntry } from "@sarpbc/types";
 import { localizedPath, newsPath } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 export const SITEMAP_PAGES_PATH = "/sitemaps/pages.xml";
-
-export interface NewsSitemapEntry {
-  slug: string;
-  lastmod: string;
-}
-
-export interface NewsSitemapMetaResponse {
-  total: number;
-  chunkSize: number;
-  chunkCount: number;
-}
-
-export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
-  chunk: number;
-  data: NewsSitemapEntry[];
-}
 
 export type SitemapChangefreq = "daily" | "weekly" | "monthly";
 

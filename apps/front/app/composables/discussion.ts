@@ -1,11 +1,11 @@
-import { FORUM_ERROR_CODES, type ReplyTargetType } from "@sarpbc/types";
-import type {
-  Comment,
-  CreateCommentResult,
-  PaginatedComments,
-  ReplyReportReason,
-  ReportCommentResult,
-} from "~/types/discussion";
+import {
+  FORUM_ERROR_CODES,
+  type PaginatedReplies,
+  type Reply,
+  type ReplyReportReason,
+  type ReplyTargetType,
+} from "@sarpbc/types";
+import type { CreateCommentResult, ReportCommentResult } from "~/types/discussion";
 
 const MAX_REFETCH_LIMIT = 100;
 
@@ -29,7 +29,7 @@ export async function getCommentsByTarget(
   targetId: string,
   page = 0,
   limit?: number,
-): Promise<PaginatedComments> {
+): Promise<PaginatedReplies> {
   try {
     const query: GetCommentsQuery = {
       targetType,
@@ -39,7 +39,7 @@ export async function getCommentsByTarget(
     if (limit !== undefined) {
       query.limit = limit;
     }
-    return await apiFetch<PaginatedComments>("/replies", {
+    return await apiFetch<PaginatedReplies>("/replies", {
       method: "GET",
       query,
     });
@@ -84,7 +84,7 @@ export async function createComment(data: {
   }
 
   try {
-    const res = await apiFetch<{ reply: Comment }>("/replies", {
+    const res = await apiFetch<{ reply: Reply }>("/replies", {
       method: "POST",
       body,
     });

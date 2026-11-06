@@ -2,6 +2,16 @@ export const REPLY_TARGET_TYPES = ["forumPost", "newsArticle", "match"] as const
 
 export type ReplyTargetType = (typeof REPLY_TARGET_TYPES)[number];
 
+export const REPLY_REPORT_REASONS = [
+  "spam",
+  "harassment",
+  "hate_speech",
+  "off_topic",
+  "other",
+] as const;
+
+export type ReplyReportReason = (typeof REPLY_REPORT_REASONS)[number];
+
 export interface Reply {
   id: string;
   content: string;

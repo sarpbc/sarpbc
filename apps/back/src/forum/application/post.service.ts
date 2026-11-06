@@ -1,4 +1,9 @@
-import { FORUM_ERROR_CODES, type ForumPost, type SupportedLocale } from "@sarpbc/types";
+import {
+  FORUM_ERROR_CODES,
+  type ForumPost,
+  type ForumPostCreationStatus,
+  type SupportedLocale,
+} from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -11,7 +16,6 @@ import type {
   TranslationRecord,
   CreatePostInput,
   CreatedPost,
-  PostCreationStatus,
 } from "./models";
 import type { PostStore, ForumTransaction } from "./ports";
 interface PostCreationEligibility {
@@ -56,7 +60,7 @@ export class PostService {
     };
   }
 
-  async getCreationStatus(userId: string): Promise<PostCreationStatus> {
+  async getCreationStatus(userId: string): Promise<ForumPostCreationStatus> {
     const eligibility = await this.resolvePostCreationEligibility(userId);
 
     return {

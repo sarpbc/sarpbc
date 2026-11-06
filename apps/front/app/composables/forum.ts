@@ -1,11 +1,13 @@
 import {
   FORUM_ERROR_CODES,
   type ForumPost,
+  type ForumPostCreationStatus,
   type ForumPostListItem,
+  type ForumTopic,
   type PostPreview,
 } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
-import type { CreateForumPostResult, ForumPostCreationStatus, Topic } from "~/types/forum";
+import type { CreateForumPostResult } from "~/types/forum";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
   const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
@@ -15,8 +17,8 @@ export async function getRecentForumActivities(): Promise<PostPreview[]> {
   return res.recentPosts || [];
 }
 
-export async function getTopics(): Promise<Topic[]> {
-  const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
+export async function getTopics(): Promise<ForumTopic[]> {
+  const res = await apiFetch<{ topics: ForumTopic[] }>(`/forum/topics`, {
     method: "GET",
   });
 

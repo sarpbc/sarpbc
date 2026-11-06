@@ -2,6 +2,7 @@ import {
   FORUM_ERROR_CODES,
   type PaginatedReplies,
   type Reply,
+  type ReplyReportReason,
   type ReplyTargetType,
 } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
@@ -9,7 +10,6 @@ import { sanitizePlainText } from "../../common/domain/html";
 import { REPLY_TARGETS, replyTarget, sameReplyTarget } from "../domain/reply";
 import { replyAlreadyReported } from "../domain/reply-errors";
 import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
-import type { ReplyReportReason } from "../domain/reply-report-reason";
 import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
 export class ReplyService {

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
+import type { LiveStreamer } from "@sarpbc/types";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
-import type { LiveStream } from "../../domain/live-stream";
 import type {
   LiveStreamCache,
   LiveStreamSnapshot,
@@ -18,7 +18,7 @@ const liveStream = z.object({
   title: z.string(),
   viewerCount: z.number(),
   url: z.string(),
-} satisfies Record<keyof LiveStream, z.ZodType>);
+} satisfies Record<keyof LiveStreamer, z.ZodType>);
 
 const snapshot = z.object({
   fetchedAt: z.iso.datetime().transform((value) => new Date(value)),

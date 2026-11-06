@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
+import type { ForumPostCreationStatus, ForumTopic } from "@sarpbc/types";
 import { forumPostPath } from "@sarpbc/utils";
-import type { ForumPostCreationStatus, Topic } from "~/types/forum";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -43,7 +43,7 @@ const state = reactive<Partial<Schema>>({
   content: "",
 });
 
-const topics = ref<Topic[]>([]);
+const topics = ref<ForumTopic[]>([]);
 const topicsLoadFailed = ref(false);
 const creationStatus = ref<ForumPostCreationStatus | null>(null);
 const creationStatusLoadState = ref<"loading" | "ready" | "error">("loading");

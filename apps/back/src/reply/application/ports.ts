@@ -1,8 +1,7 @@
-import type { ReplyTargetType } from "@sarpbc/types";
+import type { ReplyReportReason, ReplyTargetType } from "@sarpbc/types";
 import type { Author } from "../../common/domain/author";
 import type { ReplyTarget, ReplyTargetFields } from "../domain/reply";
 import type { ReplyRecord } from "./models";
-import type { ReplyReportReason } from "../domain/reply-report-reason";
 export interface ReplyFindOptions {
   includeHidden?: boolean;
   limit?: number;

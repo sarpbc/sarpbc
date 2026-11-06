@@ -25,7 +25,14 @@ export type {
   TournamentPathResponse,
   TournamentTab,
 } from "./tournament-event.ts";
-export type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "./news.ts";
+export type {
+  NewsArticleAdmin,
+  NewsSitemapChunkResponse,
+  NewsSitemapEntry,
+  NewsSitemapMetaResponse,
+  NewsType,
+  PaginatedNewsArticles,
+} from "./news.ts";
 export { DATA_SOURCES } from "./competition.ts";
 export type {
   CountedMatchListItem,
@@ -70,9 +77,22 @@ export type {
   TrackedStreamer,
 } from "./staff-console.ts";
 export { FORUM_ERROR_CODES } from "./forum.ts";
-export type { ForumPost, ForumPostListItem, PostPreview } from "./forum.ts";
-export { REPLY_TARGET_TYPES } from "./reply.ts";
-export type { AppNotification, PaginatedReplies, Reply, ReplyTargetType } from "./reply.ts";
+export type {
+  ForumPost,
+  ForumPostCreationStatus,
+  ForumPostListItem,
+  ForumTopic,
+  PostPreview,
+} from "./forum.ts";
+export { REPLY_REPORT_REASONS, REPLY_TARGET_TYPES } from "./reply.ts";
+export type {
+  AppNotification,
+  PaginatedReplies,
+  Reply,
+  ReplyReportReason,
+  ReplyTargetType,
+} from "./reply.ts";
+export type { LiveStreamer } from "./streamer.ts";
 export type { R2UploadResponse } from "./storage.ts";
 export { SEARCH_TYPES } from "./search.ts";
 export type { SearchType } from "./search.ts";

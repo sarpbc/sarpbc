@@ -1,4 +1,4 @@
-import type { PostPreview } from "@sarpbc/types";
+import type { ForumTopic, PostPreview } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import type { PostType } from "../../domain/post-type.enum";
 import type { PostActivity, PostRecord, TopicRecord } from "../../application/models";
@@ -26,10 +26,7 @@ export interface PostResponseFields {
   translations: TranslationResponse[];
 }
 
-export interface TopicResponse {
-  id: string;
-  title: string;
-  description: string | null;
+export interface TopicResponse extends ForumTopic {
   createdAt: Date;
   updatedAt: Date | null;
   posts: PostResponseFields[];

@@ -13,6 +13,8 @@ import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput 
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
 import type {
   NewsArticleAdmin,
+  NewsSitemapChunkResponse,
+  NewsSitemapMetaResponse,
   NewsType,
   PaginatedNewsArticles,
   SupportedLocale,
@@ -20,22 +22,6 @@ import type {
 /** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
 export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
-
-export interface NewsSitemapEntry {
-  slug: string;
-  lastmod: string;
-}
-
-export interface NewsSitemapMetaResponse {
-  total: number;
-  chunkSize: number;
-  chunkCount: number;
-}
-
-export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
-  chunk: number;
-  data: NewsSitemapEntry[];
-}
 
 export function newsSitemapChunkCount(total: number): number {
   return Math.max(1, Math.ceil(Math.max(total, 0) / NEWS_SITEMAP_CHUNK_SIZE));

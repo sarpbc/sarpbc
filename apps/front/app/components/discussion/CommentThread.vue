@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import type { ReplyTargetType } from "@sarpbc/types";
-import type { Comment, PaginatedComments } from "~/types/discussion";
+import type { PaginatedReplies, Reply, ReplyTargetType } from "@sarpbc/types";
 import { parseCommentHash } from "~/utils/commentPermalink";
 import { findCommentInTree } from "~/utils/commentTree";
 
@@ -27,7 +26,7 @@ provide("commentPermalink", {
 });
 
 const loadedExtraPages = ref(0);
-const appendedReplies = ref<Comment[]>([]);
+const appendedReplies = ref<Reply[]>([]);
 const loadingMore = ref(false);
 
 const {
@@ -35,7 +34,7 @@ const {
   pending,
   error,
   refresh,
-} = await useAsyncData<PaginatedComments>(
+} = await useAsyncData<PaginatedReplies>(
   () => `comments-${targetType}-${targetId}`,
   () => getCommentsByTarget(targetType, targetId, 0),
   {

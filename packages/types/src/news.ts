@@ -21,3 +21,19 @@ export interface PaginatedNewsArticles {
   page: number;
   limit: number;
 }
+
+export interface NewsSitemapEntry {
+  slug: string;
+  lastmod: string;
+}
+
+export interface NewsSitemapMetaResponse {
+  total: number;
+  chunkSize: number;
+  chunkCount: number;
+}
+
+export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
+  chunk: number;
+  data: NewsSitemapEntry[];
+}

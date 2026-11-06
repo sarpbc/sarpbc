@@ -3,7 +3,7 @@ import { Post } from "../../../forum/infrastructure/forum-persistence";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import { Match } from "../../../tournament/infrastructure/competition-persistence";
 import { User } from "../../../user/infrastructure/user-persistence";
-import type { ReplyReportReason } from "../../domain/reply-report-reason";
+import type { ReplyReportReason } from "@sarpbc/types";
 
 export class Reply {
   id!: string;

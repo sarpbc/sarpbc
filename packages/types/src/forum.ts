@@ -15,6 +15,18 @@ export interface ForumPost {
   createdAt: Date | string;
 }
 
+export interface ForumPostCreationStatus {
+  canCreate: boolean;
+  nextAvailableAt: string | null;
+  cooldownHours: number;
+}
+
+export interface ForumTopic {
+  id: string;
+  title: string;
+  description: string | null;
+}
+
 export interface PostPreview {
   id: string;
   publicId: number;

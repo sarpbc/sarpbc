@@ -51,8 +51,3 @@ export interface CreatedPost {
   publicId: number;
   slug: string;
 }
-export interface PostCreationStatus {
-  canCreate: boolean;
-  nextAvailableAt: string | null;
-  cooldownHours: number;
-}

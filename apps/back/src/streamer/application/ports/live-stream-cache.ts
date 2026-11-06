@@ -1,7 +1,7 @@
-import type { LiveStream } from "../../domain/live-stream";
+import type { LiveStreamer } from "@sarpbc/types";
 
 export interface LiveStreamSnapshot {
-  streams: LiveStream[];
+  streams: LiveStreamer[];
   fetchedAt: Date;
 }
 
