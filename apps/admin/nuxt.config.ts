@@ -77,7 +77,6 @@ export default defineNuxtConfig({
     public: {
       apiBase,
       publicSiteUrl: SITE_ORIGIN,
-      sarpbcUi: { entityTagSiteUrl: SITE_ORIGIN },
     },
   },
 
