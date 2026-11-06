@@ -18,7 +18,6 @@ import { NewsService } from "../../news/application/news.service";
 import { ContractService } from "../../roster/application/contract.service";
 import { PlayerService } from "../../roster/application/player.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
-import { SearchService } from "../../search/application/search.service";
 import { TeamService } from "../../roster/application/team.service";
 import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { McpToolContext } from "./mcp-tool-context";
@@ -31,7 +30,6 @@ import { registerWriteTools } from "./tools/write-tools";
 @Injectable()
 export class McpServerFactory {
   constructor(
-    private readonly searchService: SearchService,
     private readonly playerService: PlayerService,
     private readonly contractService: ContractService,
     private readonly teamService: TeamService,
@@ -61,7 +59,6 @@ export class McpServerFactory {
 
     const ctx: McpToolContext = {
       user,
-      searchService: this.searchService,
       playerService: this.playerService,
       contractService: this.contractService,
       teamService: this.teamService,

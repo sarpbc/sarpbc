@@ -58,8 +58,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ query }) =>
       runReadTool(async () => {
-        const players = await ctx.searchService.searchPlayers({
-          query,
+        const players = await ctx.playerService.find({
+          name: query,
           limit: SEARCH_LIMIT,
           offset: 0,
         });
@@ -78,8 +78,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     },
     async ({ query }) =>
       runReadTool(async () => {
-        const teams = await ctx.searchService.searchTeams({
-          query,
+        const teams = await ctx.teamService.find({
+          name: query,
           limit: SEARCH_LIMIT,
           offset: 0,
         });

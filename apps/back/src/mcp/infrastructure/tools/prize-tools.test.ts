@@ -9,7 +9,6 @@ import { PlayerService } from "../../../roster/application/player.service";
 import { TeamService } from "../../../roster/application/team.service";
 import { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import type { RosterChange, StaffRole } from "@sarpbc/types";
-import { SearchService } from "../../../search/application/search.service";
 import { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../../tournament/application/match/match.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
@@ -53,7 +52,6 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
           findById: vi.fn().mockResolvedValue(team),
         },
       },
-      { provide: SearchService, useValue: {} },
       { provide: ContractService, useValue: {} },
       { provide: ManualTournamentService, useValue: {} },
       { provide: MatchService, useValue: {} },
@@ -62,7 +60,6 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
   }).compile();
   const ctx: McpToolContext = {
     user: { id: "u1", email: "staff@test.com", role },
-    searchService: module.get(SearchService),
     playerService: module.get(PlayerService),
     contractService: module.get(ContractService),
     teamService: module.get(TeamService),

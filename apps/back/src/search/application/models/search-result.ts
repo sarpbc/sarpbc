@@ -19,21 +19,3 @@ export interface SearchParams {
   limit: number;
   offset: number;
 }
-
-export interface PlayerSearchParams {
-  query: string;
-  limit: number;
-  offset: number;
-}
-
-export interface TeamSearchParams {
-  query: string;
-  limit: number;
-  offset: number;
-}
-
-export interface TournamentSearchParams {
-  query: string;
-  limit: number;
-  offset: number;
-}

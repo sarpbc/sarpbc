@@ -1,15 +1,23 @@
+import type { SearchType } from "@sarpbc/types";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentQueries } from "../../tournament/application/public";
-import {
-  SearchResult,
-  SearchParams,
-  PlayerSearchParams,
-  TeamSearchParams,
-  TournamentSearchParams,
-} from "./models/search-result";
+import { SearchResult, SearchParams } from "./models/search-result";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { Tournament } from "../../tournament/domain/competition";
+
+/** An "all" search gives each kind half of the page; a single-kind search gets the whole page. */
+function pageForEachKind({ type, limit, offset }: SearchParams) {
+  const mixed = type === "all";
+  return {
+    limit: mixed ? Math.ceil(limit / 2) : limit,
+    offset: mixed ? Math.floor(offset / 2) : offset,
+  };
+}
+
+function includes(type: SearchType, kind: Exclude<SearchType, "all">): boolean {
+  return type === "all" || type === kind;
+}
 
 export class SearchService {
   constructor(
@@ -19,37 +27,16 @@ export class SearchService {
   ) {}
 
   async search(params: SearchParams): Promise<SearchResult> {
-    const { query, type, limit, offset } = params;
-    const sharedLimit = type === "all" ? Math.ceil(limit / 2) : limit;
-    const sharedOffset = type === "all" ? Math.floor(offset / 2) : offset;
+    const { query, type } = params;
+    const page = { name: query, ...pageForEachKind(params) };
 
     let players: Player[] = [];
     let teams: Team[] = [];
     let tournaments: Tournament[] = [];
 
-    if (type === "all" || type === "player") {
-      players = await this.playerService.find({
-        name: query,
-        limit: sharedLimit,
-        offset: sharedOffset,
-      });
-    }
-
-    if (type === "all" || type === "team") {
-      teams = await this.teamService.find({
-        name: query,
-        limit: sharedLimit,
-        offset: sharedOffset,
-      });
-    }
-
-    if (type === "all" || type === "tournament") {
-      tournaments = await this.tournamentService.searchByName({
-        name: query,
-        limit: sharedLimit,
-        offset: sharedOffset,
-      });
-    }
+    if (includes(type, "player")) players = await this.playerService.find(page);
+    if (includes(type, "team")) teams = await this.teamService.find(page);
+    if (includes(type, "tournament")) tournaments = await this.tournamentService.searchByName(page);
 
     return {
       players,
@@ -61,32 +48,5 @@ export class SearchService {
         tournaments: tournaments.length,
       },
     };
-  }
-
-  async searchPlayers(params: PlayerSearchParams) {
-    const { query, limit, offset } = params;
-    return this.playerService.find({
-      name: query,
-      limit,
-      offset,
-    });
-  }
-
-  async searchTeams(params: TeamSearchParams) {
-    const { query, limit, offset } = params;
-    return this.teamService.find({
-      name: query,
-      limit,
-      offset,
-    });
-  }
-
-  async searchTournaments(params: TournamentSearchParams) {
-    const { query, limit, offset } = params;
-    return this.tournamentService.searchByName({
-      name: query,
-      limit,
-      offset,
-    });
   }
 }

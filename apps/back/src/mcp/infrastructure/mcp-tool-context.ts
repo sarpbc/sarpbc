@@ -12,13 +12,11 @@ import type { PatUser } from "../../pat/application/pat.service";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
-import type { SearchService } from "../../search/application/search.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 
 export interface McpToolContext {
   user: PatUser;
-  searchService: SearchService;
   playerService: PlayerService;
   contractService: ContractService;
   teamService: TeamService;

@@ -53,19 +53,19 @@ function setup() {
       id === manualCup.id ? manualCup : { id, source: "startgg" },
     ),
   };
-  const searchService = {
-    searchPlayers: vi.fn().mockResolvedValue([player]),
-    searchTeams: vi.fn().mockResolvedValue([team]),
+  const playerService = {
+    find: vi.fn().mockResolvedValue([player]),
+    findBySlug: vi.fn().mockResolvedValue(player),
   };
-  const playerService = { findBySlug: vi.fn().mockResolvedValue(player) };
   const teamService = {
+    find: vi.fn().mockResolvedValue([team]),
     findBySlug: vi.fn().mockResolvedValue(team),
     findById: vi.fn().mockResolvedValue(team),
   };
   const registerTool = vi.fn();
   registerReadTools(
     { registerTool } as never,
-    { matchService, tournaments, searchService, playerService, teamService } as never,
+    { matchService, tournaments, playerService, teamService } as never,
   );
   const call = (name: string, args = {}) =>
     registerTool.mock.calls.find((tool) => tool[0] === name)?.[2](args);
