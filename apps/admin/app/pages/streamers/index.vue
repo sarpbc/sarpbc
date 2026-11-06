@@ -8,7 +8,6 @@ import {
   twitchChannelUrl,
 } from "@sarpbc/utils";
 import type { TrackedStreamer } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const toast = useToast();

@@ -4,7 +4,6 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { UserListItem } from "@sarpbc/types";
 import { ASSIGNABLE_ROLES, type AssignableRole } from "~/types/user";
-import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const toast = useToast();

@@ -2,7 +2,6 @@
 import { TOKEN_NAME_MAX_LENGTH, getApiErrorMessage } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { PatToken } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const toast = useToast();
