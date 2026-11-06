@@ -1,6 +1,6 @@
-import type { DataSource } from "./competition";
-import type { TeamLogos } from "./team";
-import type { TournamentEventRef } from "./tournament-event";
+import type { DataSource } from "./competition.ts";
+import type { TeamLogos } from "./team.ts";
+import type { TournamentEventRef } from "./tournament-event.ts";
 
 export interface PrizeAmount {
   currency: string;

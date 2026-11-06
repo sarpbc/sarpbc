@@ -17,7 +17,7 @@ function packageWith(files, manifest = {}) {
 
 test("accepts framework-free sources", () => {
   const directory = packageWith({
-    "pure.ts": 'import { z } from "zod";\nexport * from "./other";',
+    "pure.ts": 'import { z } from "zod";\nexport * from "./other.ts";',
   });
   try {
     assert.deepEqual(frameworkViolations(directory), []);
@@ -38,6 +38,17 @@ test("rejects Vue and Nuxt imports and dependencies", () => {
   );
   try {
     assert.equal(frameworkViolations(directory).length, 5);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("rejects relative imports that Node cannot resolve without their extension", () => {
+  const directory = packageWith({
+    "index.ts": 'export { ROLES } from "./roles";\nimport type { Role } from "./roles";',
+  });
+  try {
+    assert.equal(frameworkViolations(directory).length, 2);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

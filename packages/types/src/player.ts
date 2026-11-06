@@ -1,6 +1,6 @@
-import type { DataSource } from "./competition";
-import type { ContractRole } from "./contract";
-import type { TeamSummary } from "./team";
+import type { DataSource } from "./competition.ts";
+import type { ContractRole } from "./contract.ts";
+import type { TeamSummary } from "./team.ts";
 
 export const PLAYER_STATUSES = ["active", "free_agent", "retired"] as const;
 

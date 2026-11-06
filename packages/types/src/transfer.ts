@@ -1,5 +1,5 @@
-import type { ContractRole } from "./contract";
-import type { TeamLogos } from "./team";
+import type { ContractRole } from "./contract.ts";
+import type { TeamLogos } from "./team.ts";
 
 export type TransferType = "arrival" | "departure" | "benched" | "loan" | "staff";
 

@@ -1,4 +1,4 @@
-import type { TournamentEventRef } from "./tournament-event";
+import type { TournamentEventRef } from "./tournament-event.ts";
 
 export type PlayerAwardType = "mvp" | "defensive_mvp";
 
