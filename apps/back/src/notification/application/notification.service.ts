@@ -5,9 +5,8 @@ import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain
 export class NotificationService {
   constructor(private readonly notificationRepository: NotificationStore) {}
 
-  async listForUser(userId: string, limit = 30): Promise<NotificationDto[]> {
-    const cappedLimit = Math.min(Math.max(limit, 1), 50);
-    const notifications = await this.notificationRepository.findForRecipient(userId, cappedLimit);
+  async listForUser(userId: string, limit: number): Promise<NotificationDto[]> {
+    const notifications = await this.notificationRepository.findForRecipient(userId, limit);
 
     return notifications
       .map((notification) => this.toDto(notification))

@@ -121,7 +121,8 @@ export class ReplyRepository {
   ): Promise<Array<{ reply: Reply; reportCount: number }>> {
     type ModerationRow = { id: string; report_count: string };
 
-    const rows = (await this.em.getConnection().execute(`
+    const rows = (await this.em.getConnection().execute(
+      `
         SELECT
           r.id,
           COUNT(rr.id) AS report_count
@@ -129,8 +130,10 @@ export class ReplyRepository {
         LEFT JOIN reply_report rr ON r.id = rr.reply_id
         GROUP BY r.id
         ORDER BY COUNT(rr.id) DESC, r.created_at DESC
-        LIMIT ${limit}
-      `)) as ModerationRow[];
+        LIMIT ?
+      `,
+      [limit],
+    )) as ModerationRow[];
 
     const ids = rows.map((row: ModerationRow) => row.id);
     if (ids.length === 0) {

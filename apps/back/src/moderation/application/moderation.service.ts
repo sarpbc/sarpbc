@@ -6,9 +6,8 @@ import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain
 export class ModerationService {
   constructor(private readonly replies: ModerationReplies) {}
 
-  async listRecentReplies(limit = 50): Promise<ModerationReplyDto[]> {
-    const cappedLimit = Math.min(Math.max(limit, 1), 100);
-    const rows = await this.replies.recentForModeration(cappedLimit);
+  async listRecentReplies(limit: number): Promise<ModerationReplyDto[]> {
+    const rows = await this.replies.recentForModeration(limit);
 
     return rows
       .map(({ reply, reportCount }) => {

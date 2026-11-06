@@ -5,7 +5,7 @@ import { NewsArticle } from "../../../news/infrastructure/persistence/news-artic
 import { toMatchSlug } from "../../../tournament/infrastructure/persistence/competition.mapper";
 import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
 import type { ReplyRecord } from "../../application/models";
-import type { ReplyTargetFields } from "../../domain/reply";
+import { REPLY_TARGETS, type ReplyTargetFields } from "../../domain/reply";
 import type { Reply } from "./reply.entities";
 
 /** Every relation `replySnapshot` reads; each reply query populates all of them. */
@@ -19,6 +19,10 @@ export const REPLY_POPULATE = [
   "match.participants.team",
   "match.tournament.event",
 ] as const;
+
+/** A reply whose target was removed has no page to link to. */
+export const REPLY_HAS_TARGET: Partial<Record<keyof ReplyTargetFields, { $ne: null }>>[] =
+  Object.values(REPLY_TARGETS).map(({ field }) => ({ [field]: { $ne: null } }));
 
 const postFields = (row: Post) => ({ id: row.id, publicId: row.publicId, title: row.title });
 const newsArticleFields = (row: NewsArticle) => ({
