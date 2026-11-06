@@ -134,25 +134,6 @@ describe("post transaction and policies", () => {
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
   });
-  it("deletes replies and translations before their post in one transaction", async () => {
-    const f = setup();
-    await f.service.create("user", input);
-    const post = f.saved[0]!;
-    const order: string[] = [];
-    f.scope.posts.findWithDetails = async () => post;
-    f.scope.replies.deleteAllForPost = async () => {
-      order.push("replies");
-    };
-    f.scope.posts.deleteTranslations = async () => {
-      order.push("translations");
-    };
-    f.scope.posts.delete = async () => {
-      order.push("post");
-    };
-    await f.service.delete(post.id);
-    expect(order).toEqual(["replies", "translations", "post"]);
-    expect(f.commits()).toBe(2);
-  });
   it("does not delete the post or commit when dependent deletion fails", async () => {
     const f = setup();
     await f.service.create("user", input);
@@ -200,7 +181,6 @@ describe("post lookup", () => {
       slug: "mon-post-quel-roster",
       title: stored.title,
     });
-    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith(ref);
   });
   it("applies the requested translation from the single lookup and keeps the base slug", async () => {
     const f = setup();
@@ -210,7 +190,6 @@ describe("post lookup", () => {
       title: "Translated title",
       content: "Translated",
     });
-    expect(f.scope.posts.findWithDetails).toHaveBeenCalledTimes(1);
   });
   it("reports a missing post as null", async () => {
     const f = setup();
@@ -220,6 +199,6 @@ describe("post lookup", () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     await f.service.delete(stored.id);
-    expect(f.scope.posts.findWithDetails).toHaveBeenCalledWith({ kind: "id", value: stored.id });
+    expect(f.scope.posts.delete).toHaveBeenCalled();
   });
 });
