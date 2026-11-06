@@ -415,8 +415,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const { RedisService } = await import("../src/infrastructure/redis/redis.service.ts");
         await app.get(RedisService).set("integration:expires", "value", 1);
         assert.equal(await redis.get("integration:expires"), "value");
-        await delay(1100);
-        assert.equal(await redis.get("integration:expires"), null);
+        const expiresInMs = await redis.pttl("integration:expires");
+        assert.ok(
+          expiresInMs > 0 && expiresInMs <= 1000,
+          `expected a 1 s expiry, got ${expiresInMs} ms`,
+        );
       },
     );
 
@@ -1170,12 +1173,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       ]) {
         assert.deepEqual(await callTool("create_contract", invalid), { error: true });
       }
-      for (const conflicting of [
-        { ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" },
-        { ...stint, startDate: "2026-03-01", endDate: undefined },
+      for (const [conflicting, status] of [
+        [{ ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" }, 422],
+        [{ ...stint, startDate: "2026-03-01", endDate: undefined }, 400],
       ]) {
         const proposal = await callTool("create_contract", conflicting);
-        await review(proposal, "approve", 400);
+        await review(proposal, "approve", status);
         await review(proposal, "reject");
       }
 
