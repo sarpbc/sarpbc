@@ -260,7 +260,7 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 
 ## Motion
 
-`motion-v/nuxt` is available. Use motion for **presence and feedback**, not decoration.
+Use motion (CSS transitions) for **presence and feedback**, not decoration.
 
 | Do                                             | Don't                                      |
 | ---------------------------------------------- | ------------------------------------------ |

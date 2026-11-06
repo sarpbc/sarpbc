@@ -27,7 +27,6 @@
     "@sarpbc/utils": "workspace:*",
     "@vueuse/core": "^15.0.0",
     "evlog": "catalog:",
-    "motion-v": "^2.9.0",
     "nuxt": "catalog:",
     "posthog-js": "^1.441.2",
     "vue": "catalog:",

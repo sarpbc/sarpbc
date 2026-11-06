@@ -11,7 +11,7 @@ apps/front/
 │   ├── app.config.ts    # UI theme (primary: blue, neutral: ink)
 │   ├── assets/css/main.css
 │   ├── components/
-│   │   ├── ui/          # Shared primitives (Card, badge, link)
+│   │   ├── s/           # Shared primitives (Card, badge, link)
 │   │   ├── nav/         # Header, footer, bar
 │   │   └── …            # Feature components
 │   ├── composables/     # useUser, useFetch wrappers, domain logic
@@ -24,12 +24,11 @@ apps/front/
 
 ## Stack Modules
 
-| Module          | Role                                              |
-| --------------- | ------------------------------------------------- |
-| `@nuxt/ui`      | Components, forms, tables, toaster                |
-| `@nuxtjs/i18n`  | en/fr, `prefix_except_default`, `$localePath`     |
-| `@nuxt/content` | News/content pages                                |
-| `motion-v/nuxt` | Animations (use sparingly per Geist motion rules) |
+| Module          | Role                                          |
+| --------------- | --------------------------------------------- |
+| `@nuxt/ui`      | Components, forms, tables, toaster            |
+| `@nuxtjs/i18n`  | en/fr, `prefix_except_default`, `$localePath` |
+| `@nuxt/content` | News/content pages                            |
 
 ## Page Meta & SEO
 
@@ -95,7 +94,7 @@ An **event** is one PandaScore serie or one manual tournament. Each `Tournament`
 Rules:
 
 - Event titles (trophy cabinets, FAQ answers, the tournaments header, awards, list captions) use `event.name`. Never use raw `tournament.name` alone for an event title; it is usually a stage name.
-- A label naming one stage (match groups, match pages, calendar feeds, stage SEO titles) uses `tournamentStageLabel()` from `app/utils/tournamentStageLabel.ts`. It joins the event and stage names without repeating a stage the event is named after.
+- A label naming one stage (match groups, match pages, calendar feeds, stage SEO titles) uses `tournamentStageLabel()` from `@sarpbc/utils`. It joins the event and stage names without repeating a stage the event is named after.
 - Links use `tournamentEventPath(event.slug)` and `tournamentStagePath(event.slug, slug)` from `@sarpbc/utils`; the stage matches tab appends `/matches`. Never build `/tournaments/${id}`. Pick'em pages (`/game/pickems/{id}`) and calendar feeds (`/calendar/tournament/{id}.ics`) stay id-based.
 - The API computes slugs and event names. Do not import slug builders into the front.
 
