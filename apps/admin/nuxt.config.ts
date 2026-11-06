@@ -1,5 +1,6 @@
 import { dirname } from "node:path";
 import { createRequire } from "node:module";
+import { localizedPath } from "@sarpbc/utils/entity-path";
 
 const require = createRequire(import.meta.url);
 const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
@@ -23,6 +24,7 @@ const prosemirrorAliases = Object.fromEntries(
 );
 
 const apiBase = process.env.NUXT_PUBLIC_API_BASE || "https://api.sarpbc.org";
+const loginRule = { appLayout: "login" } as const;
 
 function apiOrigin(base: string): string | undefined {
   try {
@@ -103,8 +105,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/login": { appLayout: "login" },
-    "/fr/login": { appLayout: "login" },
+    "/login": loginRule,
+    [localizedPath("/login", "fr")]: loginRule,
     "/**": { appMiddleware: ["admin"] },
   },
 
