@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
@@ -18,8 +19,6 @@ import {
   updateMatchInTransaction,
 } from "./write-match";
 const RECENT_FORM_LIMIT = 5;
-const DEFAULT_LIST_LIMIT = 20;
-const MAX_LIST_LIMIT = 100;
 
 export interface TeamFormRecord {
   wins: number;
@@ -65,9 +64,9 @@ export class MatchService {
 
   list(
     kind: MatchListKind,
-    { limit = DEFAULT_LIST_LIMIT, ...options }: MatchListQueryOptions = {},
+    { limit = DEFAULT_PAGE_SIZE, ...options }: MatchListQueryOptions = {},
   ): Promise<[Match[], number]> {
-    return this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_LIST_LIMIT) });
+    return this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_PAGE_SIZE) });
   }
 
   async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {

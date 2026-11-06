@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
 import type { NewsService } from "../../../news/application/news.service";
 import type { ContractService } from "../../../roster/application/contract.service";
@@ -17,7 +18,7 @@ import {
 import type { RedistributableCompetition } from "../redistributable-competition";
 import { requireByIdOrSlug } from "./find-by-id-or-slug";
 import { PLAYER_TAG, TEAM_TAG } from "./news-syntax";
-import { DEFAULT_LIST_LIMIT, SEARCH_LIMIT, idOrSlugField, listLimit } from "./tool-input";
+import { SEARCH_LIMIT, idOrSlugField, listLimit } from "./tool-input";
 
 export interface ReadToolServices {
   playerService: Pick<PlayerService, "find" | "findById" | "findBySlug">;
@@ -102,7 +103,7 @@ export function readTools({
       handler: async ({ activeOnly, limit }) => {
         const tournaments = await competition.tournaments({
           activeOnly: activeOnly ?? false,
-          limit: limit ?? DEFAULT_LIST_LIMIT,
+          limit: limit ?? DEFAULT_PAGE_SIZE,
         });
         return tournaments.map(mapTournamentListItem);
       },
@@ -156,8 +157,8 @@ export function readTools({
       input: { limit: listLimit("matches per category") },
       handler: async ({ limit }) => {
         const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-          competition.matches("upcoming", limit ?? DEFAULT_LIST_LIMIT),
-          competition.matches("live", limit ?? DEFAULT_LIST_LIMIT),
+          competition.matches("upcoming", limit ?? DEFAULT_PAGE_SIZE),
+          competition.matches("live", limit ?? DEFAULT_PAGE_SIZE),
         ]);
 
         return {
@@ -176,7 +177,7 @@ export function readTools({
         "List recently finished match results across tournaments, mirroring the public /matches results view.",
       input: { limit: listLimit("results") },
       handler: async ({ limit }) => {
-        const [results, total] = await competition.matches("results", limit ?? DEFAULT_LIST_LIMIT);
+        const [results, total] = await competition.matches("results", limit ?? DEFAULT_PAGE_SIZE);
         return { results: results.map(mapMatchListResponse), total };
       },
     }),
@@ -191,7 +192,7 @@ export function readTools({
         limit: listLimit("articles per page"),
       },
       handler: async ({ page, limit }) => {
-        const result = await newsService.findAll(page ?? 0, limit ?? DEFAULT_LIST_LIMIT);
+        const result = await newsService.findAll(page ?? 0, limit ?? DEFAULT_PAGE_SIZE);
         return {
           data: result.data.map(mapNewsListItem),
           total: result.total,

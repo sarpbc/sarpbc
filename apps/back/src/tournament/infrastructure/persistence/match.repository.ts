@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { EntityRepository } from "@mikro-orm/core";
 import type { DataSource } from "@sarpbc/types";
 import type { EntityRef } from "../../../common/domain/entity-ref";
@@ -139,7 +140,13 @@ export class MatchRepository extends EntityRepository<Match> {
 
   private listQuery(
     kind: MatchListKind,
-    { limit = 20, offset = 0, todayOnly = false, liveSince, ...scope }: MatchListQueryOptions,
+    {
+      limit = DEFAULT_PAGE_SIZE,
+      offset = 0,
+      todayOnly = false,
+      liveSince,
+      ...scope
+    }: MatchListQueryOptions,
   ) {
     switch (kind) {
       case "upcoming":

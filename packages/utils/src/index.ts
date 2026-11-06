@@ -12,7 +12,7 @@ export {
 } from "./news-content.ts";
 export { readingTimeMinutes } from "./news-reading-time.ts";
 export { INDEXNOW_KEY_PATTERN } from "./indexnow.ts";
-export { MAX_PAGE_SIZE } from "./pagination.ts";
+export { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "./pagination.ts";
 export { TOKEN_NAME_MAX_LENGTH } from "./token.ts";
 export {
   TRACKED_STREAMER_NAME_MAX_LENGTH,

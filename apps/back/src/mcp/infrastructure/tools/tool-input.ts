@@ -1,7 +1,6 @@
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
 
-export const DEFAULT_LIST_LIMIT = 20;
-export const MAX_LIST_LIMIT = 100;
 export const SEARCH_LIMIT = 20;
 
 export function listLimit(what: string) {
@@ -9,9 +8,9 @@ export function listLimit(what: string) {
     .number()
     .int()
     .min(1)
-    .max(MAX_LIST_LIMIT)
+    .max(MAX_PAGE_SIZE)
     .optional()
-    .describe(`Maximum ${what} to return (default ${DEFAULT_LIST_LIMIT}, max ${MAX_LIST_LIMIT}).`);
+    .describe(`Maximum ${what} to return (default ${DEFAULT_PAGE_SIZE}, max ${MAX_PAGE_SIZE}).`);
 }
 
 export function idOrSlugField(what: string, example?: string) {

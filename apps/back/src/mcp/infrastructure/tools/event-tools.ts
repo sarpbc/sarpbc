@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
 import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
 import {
@@ -9,7 +10,7 @@ import {
 import { defineTool, type McpTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
 import type { RedistributableCompetition } from "../redistributable-competition";
-import { DEFAULT_LIST_LIMIT, describeFields, listLimit } from "./tool-input";
+import { describeFields, listLimit } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
 
 export interface EventToolServices {
@@ -85,7 +86,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       handler: async ({ activeOnly, limit, offset }) => {
         const [listings, count] = await competition.events({
           activeOnly: activeOnly ?? false,
-          limit: limit ?? DEFAULT_LIST_LIMIT,
+          limit: limit ?? DEFAULT_PAGE_SIZE,
           offset: offset ?? 0,
         });
         return { events: listings.map(mapEvent), count };

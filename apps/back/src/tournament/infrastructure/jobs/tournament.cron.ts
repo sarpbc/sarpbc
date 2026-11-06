@@ -1,3 +1,4 @@
+import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { Inject, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { MikroORM } from "@mikro-orm/postgresql";
@@ -30,7 +31,7 @@ export class TournamentCron {
     });
 
     try {
-      const [liveMatches] = await this.matchService.list("live", { limit: 100 });
+      const [liveMatches] = await this.matchService.list("live", { limit: MAX_PAGE_SIZE });
 
       const recentlyEndedMatches = await this.matchService.findRecentlyEnded();
 
