@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { ReplyReport } from "../../../forum/infrastructure/persistence/forum.entities";
+import { ReplyReport } from "./reply.entities";
 
 export class ReplyReportRepository {
   private readonly rows;

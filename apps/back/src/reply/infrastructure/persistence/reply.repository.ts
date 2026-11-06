@@ -1,7 +1,7 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { ReplyFindOptions as FindByTargetOptions } from "../../application/ports";
 import { QueryOrder, type EntityKey } from "@mikro-orm/core";
-import { Reply } from "../../../forum/infrastructure/persistence/forum.entities";
+import { Reply } from "./reply.entities";
 import type { ReplyTargetType } from "@sarpbc/types";
 import {
   sortOrderForTarget,

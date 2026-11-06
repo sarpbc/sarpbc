@@ -1,5 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { Reply, ReplyReport, Post } from "../../../forum/infrastructure/persistence/forum.entities";
+import { Post } from "../../../forum/infrastructure/persistence/forum.entities";
+import { Reply, ReplyReport } from "./reply.entities";
 import { NewsArticle } from "../../../news/infrastructure/persistence/news-article.entity";
 import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
 import { User } from "../../../user/infrastructure/persistence/user.entity";

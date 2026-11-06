@@ -142,7 +142,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     const { User } = await import("../src/user/infrastructure/persistence/user.entity.ts");
     const rosterRows = await import("../src/roster/infrastructure/persistence/player.entities.ts");
     const { Reply, ReplyReport } =
-      await import("../src/forum/infrastructure/persistence/forum.entities.ts");
+      await import("../src/reply/infrastructure/persistence/reply.entities.ts");
     const { ReplyNotification } =
       await import("../src/notification/infrastructure/persistence/reply-notification.entity.ts");
     const { PersonalAccessToken } =
