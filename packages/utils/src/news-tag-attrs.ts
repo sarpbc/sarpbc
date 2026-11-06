@@ -30,6 +30,10 @@ function findClosingQuote(raw: string, from: number): number {
   return -1;
 }
 
+export function escapeNewsTagAttrValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 function unescapeAttrValue(value: string): string {
   return value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
 }

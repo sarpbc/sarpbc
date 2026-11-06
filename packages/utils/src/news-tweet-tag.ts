@@ -1,4 +1,4 @@
-import { parseNewsTagAttrs } from "./news-tag-attrs.ts";
+import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs.ts";
 
 export interface ParsedTweetUrl {
   id: string;
@@ -36,9 +36,8 @@ const TWEET_STATUS_PATTERN =
 const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{([^}]*)\}(?:\s*\n?::)?/;
 const WHITESPACE = /\s/;
 
-function escapeAttrValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
+const TWEET_BLOCK_OPENER = "::tweet{";
+const TWEET_INLINE_OPENER = ":tweet{";
 
 export function parseTweetUrl(input: string): ParsedTweetUrl | null {
   const trimmed = input.trim();
@@ -87,7 +86,12 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
 export function serializeNewsTweetTag(url: string): string {
   const parsed = parseTweetUrl(url);
   const canonical = parsed?.url ?? url.trim();
-  return `:tweet{url="${escapeAttrValue(canonical)}"}`;
+  return `:tweet{url="${escapeNewsTagAttrValue(canonical)}"}`;
+}
+
+export function newsTweetTagStart(content: string): number {
+  const block = content.indexOf(TWEET_BLOCK_OPENER);
+  return block !== -1 ? block : content.indexOf(TWEET_INLINE_OPENER);
 }
 
 function blockTagEnd(content: string, afterBrace: number): number {
@@ -129,8 +133,8 @@ function replaceTweetTags(
 
 export function stripNewsTweetTags(content: string): string {
   return replaceTweetTags(
-    replaceTweetTags(content, "::tweet{", (afterBrace) => blockTagEnd(content, afterBrace)),
-    ":tweet{",
+    replaceTweetTags(content, TWEET_BLOCK_OPENER, (afterBrace) => blockTagEnd(content, afterBrace)),
+    TWEET_INLINE_OPENER,
     (afterBrace) => afterBrace,
   );
 }

@@ -15,6 +15,7 @@ export { INDEXNOW_KEY_PATTERN } from "./indexnow.ts";
 export { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "./twitch.ts";
 export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week.ts";
 export {
+  newsEntityTagStart,
   parseNewsEntityTag,
   serializeNewsEntityTag,
   type NewsEntityTagKind,
@@ -28,6 +29,7 @@ export {
   newsMatchBlockFromAttrs,
   newsMatchBlockKey,
   newsMatchBlockToAttrs,
+  newsMatchTagStart,
   parseNewsMatchBlockKey,
   parseNewsMatchTag,
   serializeNewsMatchTag,
@@ -36,6 +38,7 @@ export {
 } from "./news-match-block.ts";
 export {
   isTweetImageUrl,
+  newsTweetTagStart,
   parseNewsTweetTag,
   parseTweetUrl,
   serializeNewsTweetTag,

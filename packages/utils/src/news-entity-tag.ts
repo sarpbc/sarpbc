@@ -1,4 +1,4 @@
-import { parseNewsTagAttrs } from "./news-tag-attrs.ts";
+import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs.ts";
 
 export type NewsEntityTagKind = "player" | "team";
 
@@ -14,12 +14,9 @@ interface NewsEntityTagAttrs {
   label?: string;
 }
 
-/** Matches `:player{...}` or `:team{...}` at the start of a string. */
-export const NEWS_ENTITY_TAG_PATTERN = /^:(player|team)\{([^}]*)\}/;
-
-function escapeAttrValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
+const ENTITY_TAG_SOURCE = String.raw`:(player|team)\{([^}]*)\}`;
+const NEWS_ENTITY_TAG_PATTERN = new RegExp(`^${ENTITY_TAG_SOURCE}`);
+const NEWS_ENTITY_TAG_GLOBAL_PATTERN = new RegExp(ENTITY_TAG_SOURCE, "g");
 
 function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
   const attrs: NewsEntityTagAttrs = {};
@@ -33,9 +30,6 @@ function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
   return attrs;
 }
 
-/**
- * Parse an inline MDC entity tag such as `:player{slug="jstn" label="jstn"}`.
- */
 export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
   const match = raw.match(NEWS_ENTITY_TAG_PATTERN);
   if (!match) {
@@ -64,7 +58,18 @@ export function serializeNewsEntityTag(input: {
   slug: string;
   label: string;
 }): string {
-  const slug = escapeAttrValue(input.slug.trim());
-  const label = escapeAttrValue(input.label.trim());
+  const slug = escapeNewsTagAttrValue(input.slug.trim());
+  const label = escapeNewsTagAttrValue(input.label.trim());
   return `:${input.kind}{slug="${slug}" label="${label}"}`;
+}
+
+export function newsEntityTagStart(content: string, kind: NewsEntityTagKind): number {
+  return content.indexOf(`:${kind}{`);
+}
+
+export function replaceNewsEntityTagsWithLabels(content: string): string {
+  return content.replace(
+    NEWS_ENTITY_TAG_GLOBAL_PATTERN,
+    (raw) => parseNewsEntityTag(raw)?.label ?? "",
+  );
 }

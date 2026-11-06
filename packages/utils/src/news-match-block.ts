@@ -1,4 +1,5 @@
 import type { MatchBlockSelector } from "@sarpbc/types";
+import { UUID_PATTERN } from "./entity-slug.ts";
 
 export const NEWS_MATCH_BLOCK_MAX_MATCHES = 10;
 export const NEWS_MATCH_BLOCK_DEFAULT_LIMIT = 5;
@@ -22,9 +23,10 @@ export interface NewsMatchTag {
 const MATCH_TAG_SOURCE = String.raw`::matches\{([^{}]*)\}[ \t]*\r?\n::|::?matches\{([^{}]*)\}`;
 const MATCH_TAG_PATTERN = new RegExp(`^(?:${MATCH_TAG_SOURCE})`);
 const MATCH_TAG_GLOBAL_PATTERN = new RegExp(MATCH_TAG_SOURCE, "g");
+const MATCH_BLOCK_OPENER = "::matches{";
+const MATCH_INLINE_OPENER = ":matches{";
 const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/;
 const LIMIT_PATTERN = /^[1-9]\d*$/;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const BACKTICK_RUN_PATTERN = /`+/g;
 const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})/;
 const MAX_TAG_INDENT = 3;
@@ -294,6 +296,11 @@ export function findInvalidNewsMatchTags(content: string): string[] {
   return scanNewsMatchTags(content)
     .filter(({ tag }) => !tag)
     .map(({ raw }) => raw);
+}
+
+export function newsMatchTagStart(content: string): number {
+  const block = content.indexOf(MATCH_BLOCK_OPENER);
+  return block !== -1 ? block : content.indexOf(MATCH_INLINE_OPENER);
 }
 
 export function stripNewsMatchTags(content: string): string {
