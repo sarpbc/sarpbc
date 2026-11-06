@@ -1,6 +1,5 @@
 import type { Player } from "@sarpbc/types";
 import type { Team } from "@sarpbc/types";
-import { apiFetch } from "~/utils/apiFetch";
 
 export interface SearchResult {
   teams: Team[];

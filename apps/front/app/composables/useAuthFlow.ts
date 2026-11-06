@@ -1,5 +1,3 @@
-import { apiFetch } from "~/utils/apiFetch";
-
 type AuthEvent = "user_logged_in" | "user_signed_up";
 
 export function useAuthFlow() {

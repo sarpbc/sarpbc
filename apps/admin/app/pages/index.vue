@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { parseLocale } from "@sarpbc/utils";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 import { canModerateComments } from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/adminSections";
 

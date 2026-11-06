@@ -1,6 +1,5 @@
 import type { NewsType } from "@sarpbc/types";
 import type { NewsArticle, NewsWeek, PaginatedNewsArticles } from "~/types/news";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getNewsArticles(
   page = 0,

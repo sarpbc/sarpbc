@@ -3,7 +3,7 @@ import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { UserListItem } from "@sarpbc/types";
 import { ASSIGNABLE_ROLES, type AssignableRole } from "~/types/user";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const LIMIT = 25;
 

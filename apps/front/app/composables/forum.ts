@@ -7,7 +7,6 @@ import type {
   PostShort,
   Topic,
 } from "~/types/forum";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
   try {

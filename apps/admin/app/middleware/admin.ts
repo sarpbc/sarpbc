@@ -1,5 +1,4 @@
 import { isStaffUser } from "@sarpbc/utils";
-import { useUser } from "~/composables/state";
 import { canAccessRoute } from "~/utils/adminSections";
 
 export default defineNuxtRouteMiddleware((to) => {

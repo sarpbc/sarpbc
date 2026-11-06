@@ -1,6 +1,5 @@
 import type { MaybeRef } from "vue";
 import type { Transfer } from "@sarpbc/types";
-import { apiFetch } from "~/utils/apiFetch";
 
 export interface TransferQuery {
   team?: string;

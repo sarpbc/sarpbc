@@ -1,5 +1,4 @@
 import type { AppNotification } from "~/types/notification";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getNotifications(limit = 30): Promise<AppNotification[]> {
   try {

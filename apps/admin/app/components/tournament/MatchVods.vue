@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MatchVod, MatchVodSource, TournamentMatchListItem } from "@sarpbc/types";
 import { maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/;
 

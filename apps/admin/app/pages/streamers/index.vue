@@ -2,7 +2,7 @@
 import type { TableColumn } from "@nuxt/ui";
 import { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "@sarpbc/utils";
 import type { TrackedStreamer } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const toast = useToast();

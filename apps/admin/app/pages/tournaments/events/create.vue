@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

@@ -6,7 +6,6 @@ import type {
   TournamentPathResponse,
 } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
-import { apiFetch } from "~/utils/apiFetch";
 
 interface TournamentListQuery {
   limit?: number;

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { SelectItem } from "@nuxt/ui";
 import type { StatsPlayerAccount, StatsRoster } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const props = defineProps<{
   tournamentId: string;

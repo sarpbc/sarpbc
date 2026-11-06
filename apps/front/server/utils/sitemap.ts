@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import { apiFetch } from "@sarpbc/composables/apiFetch";
 import {
   buildNewsUrlset,
   buildPagesUrlset,
@@ -7,7 +8,7 @@ import {
   type NewsSitemapChunkResponse,
   type NewsSitemapMetaResponse,
 } from "~/utils/sitemap";
-import { apiFetch } from "~/utils/apiFetch";
+import { apiFetch } from "@sarpbc/composables/apiFetch";
 
 const SITEMAP_CACHE_CONTROL = "public, max-age=300";
 

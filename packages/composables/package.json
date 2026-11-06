@@ -5,8 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/module.ts",
-    "./apiFetch": "./src/runtime/composables/apiFetch.ts",
-    "./useUser": "./src/runtime/composables/useUser.ts"
+    "./apiFetch": "./src/runtime/composables/apiFetch.ts"
   },
   "scripts": {
     "lint": "oxlint .",

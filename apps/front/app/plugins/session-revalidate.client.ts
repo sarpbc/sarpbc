@@ -1,6 +1,4 @@
-import { useUser } from "~/composables/state";
 import { fetchProfile, useAuthHydrated } from "~/composables/user";
-import { createApiClient } from "~/utils/apiFetch";
 
 /**
  * Restore the session after hydration when SWR-cached SSR stamped `user = null`

@@ -1,6 +1,7 @@
 import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
 import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
-import { apiFetch } from "~/utils/apiFetch";
+// Nitro routes import this file and have no Nuxt auto-imports.
+import { apiFetch } from "@sarpbc/composables/apiFetch";
 
 export type MatchesListQuery = {
   limit?: number;

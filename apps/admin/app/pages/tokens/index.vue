@@ -2,7 +2,7 @@
 import { parseLocale } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { PatToken } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const toast = useToast();

@@ -6,7 +6,6 @@ import {
   newsMatchBlockKey,
 } from "@sarpbc/utils";
 import type { AsyncDataRequestStatus } from "#app";
-import { apiFetch } from "~/utils/apiFetch";
 
 type NewsMatchBlocks = {
   items: Readonly<Ref<Record<string, MatchBlockItem[]>>>;

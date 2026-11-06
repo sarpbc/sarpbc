@@ -1,5 +1,4 @@
 import { getCookie } from "h3";
-import { useUser } from "~/composables/state";
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,

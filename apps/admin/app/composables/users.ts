@@ -1,6 +1,5 @@
 import type { UserList, UserListItem } from "@sarpbc/types";
 import type { AssignableRole } from "~/types/user";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getUsers(query: {
   search?: string;

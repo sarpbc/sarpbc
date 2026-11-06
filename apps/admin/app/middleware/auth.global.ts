@@ -1,4 +1,3 @@
-import { useUser } from "~/composables/state";
 import { getProfile } from "~/composables/user";
 
 export default defineNuxtRouteMiddleware(async () => {

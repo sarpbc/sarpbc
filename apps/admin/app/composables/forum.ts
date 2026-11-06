@@ -1,5 +1,4 @@
 import type { ForumPost, ForumPostListItem, PaginatedReplies, Reply } from "@sarpbc/types";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getPosts(): Promise<ForumPostListItem[]> {
   try {

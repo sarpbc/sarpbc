@@ -6,7 +6,6 @@ import type {
   ProfileEarnings,
   ProfileMatchListItem,
 } from "@sarpbc/types";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getPlayerFromSlug(slug: string): Promise<Player | null> {
   const res = await apiFetch<{ player?: Player }>(`/player/slug/${slug}`, { method: "GET" });

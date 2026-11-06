@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentMatchListItem, TournamentStatsGame } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const props = defineProps<{
   tournamentId: string;

@@ -2,7 +2,7 @@
 import type { TournamentDetailParticipant, TournamentPrizes } from "@sarpbc/types";
 import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
 import type { TournamentPrizeInput } from "~/composables/tournaments";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 interface Option {
   value: string;

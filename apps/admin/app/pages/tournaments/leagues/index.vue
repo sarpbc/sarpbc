@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
 import type { League, LeagueInput } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

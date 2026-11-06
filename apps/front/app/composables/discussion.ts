@@ -6,7 +6,6 @@ import type {
   ReplyReportReason,
   ReportCommentResult,
 } from "~/types/discussion";
-import { apiFetch } from "~/utils/apiFetch";
 
 const MAX_REFETCH_LIMIT = 100;
 

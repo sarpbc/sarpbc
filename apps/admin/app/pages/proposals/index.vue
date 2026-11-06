@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { RosterProposal } from "@sarpbc/types";
 import { hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const toast = useToast();

@@ -6,7 +6,7 @@ import type {
   TournamentMatchListItem,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const POLL_MS = 3000;
 
