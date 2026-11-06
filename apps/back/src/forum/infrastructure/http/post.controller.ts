@@ -21,6 +21,7 @@ import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
+import { postWithSlugResponse } from "./forum-response";
 import type { CreatedPost, PostCreationStatus } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
@@ -59,7 +60,7 @@ export class PostController {
   @Get("topic/:topicId")
   async findByTopic(@Param("topicId") topicId: string) {
     const posts = await this.postService.findByTopicId(topicId);
-    return { posts: posts.map((post) => ({ ...post, slug: forumPostSlug(post.title) })) };
+    return { posts: posts.map(postWithSlugResponse) };
   }
 
   @Get("creation-status")

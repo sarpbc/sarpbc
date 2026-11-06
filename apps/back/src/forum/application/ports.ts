@@ -1,5 +1,11 @@
 import type { EntityRef } from "../../common/domain/entity-ref";
-import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "./models";
+import type {
+  NewPostRecord,
+  PostActivity,
+  PostRecord,
+  TopicRecord,
+  TranslationRecord,
+} from "./models";
 import type { Author } from "../../common/domain/author";
 export interface PostStore {
   findPaginated(options: { limit?: number; offset?: number }): Promise<PostRecord[]>;
@@ -7,15 +13,7 @@ export interface PostStore {
   findById(id: string): Promise<PostRecord | null>;
   findWithDetails(ref: EntityRef): Promise<PostRecord | null>;
   findLatestByUser(id: string): Promise<PostRecord | null>;
-  findRecentActivity(limit: number): Promise<
-    {
-      id: string;
-      publicId: number;
-      title: string;
-      messageCount: number;
-      lastActivity: Date;
-    }[]
-  >;
+  findRecentActivity(limit: number): Promise<PostActivity[]>;
   save(post: NewPostRecord): Promise<void>;
   saveTranslation(translation: TranslationRecord): Promise<void>;
   deleteTranslations(post: PostRecord): Promise<void>;

@@ -7,7 +7,7 @@ export interface TopicRecord {
   description: string | null;
   createdAt: Date;
   updatedAt: Date | null;
-  posts: PostSummary[];
+  posts: PostRecord[];
 }
 export interface PostSummary {
   id: string;
@@ -19,6 +19,13 @@ export interface PostSummary {
   updatedAt: Date | null;
   postType: PostType;
   topic: { id: string; title: string };
+}
+export interface PostActivity {
+  id: string;
+  publicId: number;
+  title: string;
+  messageCount: number;
+  lastActivity: Date;
 }
 export interface TranslationRecord {
   id: string;

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from "@nestjs/common";
-import { forumPostSlug } from "@sarpbc/utils";
 import { TopicService } from "../../application/topic.service";
 import { PostService } from "../../application/post.service";
 import { ReplyService } from "../../../reply/application/reply.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreateReplyDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";
+import { postActivityResponse } from "./forum-response";
 
 @Controller("forum")
 export class ForumController {
@@ -34,7 +34,7 @@ export class ForumController {
   async getPreview() {
     const recentPosts = await this.postService.findRecentActivity(20);
     return {
-      recentPosts: recentPosts.map((post) => ({ ...post, slug: forumPostSlug(post.title) })),
+      recentPosts: recentPosts.map(postActivityResponse),
     };
   }
 

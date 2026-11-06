@@ -1,1 +1,2 @@
 export const REPLY_CREATION_COOLDOWN_MS = 60 * 1000;
+export const REPLY_CONTENT_MAX_LENGTH = 2048;
