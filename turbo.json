@@ -13,10 +13,6 @@
     "lint:fix": {
       "cache": false
     },
-    "fmt": {
-      "cache": false
-    },
-    "fmt:check": {},
     "typecheck": {}
   }
 }
