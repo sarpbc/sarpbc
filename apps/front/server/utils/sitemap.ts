@@ -7,7 +7,6 @@ import {
   type NewsSitemapChunkResponse,
   type NewsSitemapMetaResponse,
 } from "~/utils/sitemap";
-import { getFetchStatusCode } from "./match-og";
 import { apiFetch } from "~/utils/apiFetch";
 
 const SITEMAP_CACHE_CONTROL = "public, max-age=300";
@@ -19,14 +18,9 @@ export function sendXml(event: H3Event, xml: string): string {
 }
 
 function rethrowSitemapFetchError(cause: unknown): never {
-  const statusCode = getFetchStatusCode(cause);
-  if (statusCode === 404) {
-    throw createError({ statusCode: 404, statusMessage: "News sitemap chunk not found" });
-  }
-  throw createError({
-    statusCode: 502,
-    statusMessage: "Could not load news sitemap",
-    cause,
+  rethrowApiError(cause, {
+    notFound: "News sitemap chunk not found",
+    badGateway: "Could not load news sitemap",
   });
 }
 

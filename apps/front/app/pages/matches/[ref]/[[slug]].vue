@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
+import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,

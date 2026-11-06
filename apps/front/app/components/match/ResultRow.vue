@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { shortTeamName } from "~/utils/shortTeamName";
 
 const { match, compact = false } = defineProps<{

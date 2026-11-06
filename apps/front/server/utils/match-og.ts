@@ -1,8 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { getMatchById } from "~/composables/matches/api";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { tournamentStageLabel } from "@sarpbc/utils";
@@ -106,32 +105,13 @@ export function getMatchOgResvgFontOptions() {
   };
 }
 
-const fetchStatusCodeSchema = z.union([
-  z.object({ statusCode: z.number() }).transform((value) => value.statusCode),
-  z.object({ status: z.number() }).transform((value) => value.status),
-  z
-    .object({ response: z.object({ status: z.number() }) })
-    .transform((value) => value.response.status),
-]);
-
-export function getFetchStatusCode(cause: unknown): number | undefined {
-  const parsed = fetchStatusCodeSchema.safeParse(cause);
-  return parsed.success ? parsed.data : undefined;
-}
-
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
     return await getMatchById(id);
   } catch (cause) {
-    const statusCode = getFetchStatusCode(cause);
-    if (statusCode === 404) {
-      throw createError({ statusCode: 404, statusMessage: "Match not found" });
-    }
-
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Could not load match for OG image",
-      cause,
+    rethrowApiError(cause, {
+      notFound: "Match not found",
+      badGateway: "Could not load match for OG image",
     });
   }
 }

@@ -1,5 +1,4 @@
 import { FORUM_ERROR_CODES, type ReplyTargetType } from "@sarpbc/types";
-import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from "@sarpbc/utils";
 import type {
   Comment,
   CreateCommentResult,
@@ -92,19 +91,9 @@ export async function createComment(data: {
     });
     return { ok: true, comment: res.reply };
   } catch (error) {
-    const status = getApiErrorStatus(error);
-    const message = getApiErrorMessage(error);
-    const code = getApiErrorCode(error);
-
-    if (status === 401) {
-      return { ok: false, reason: "unauthorized", message };
-    }
-    if (code === FORUM_ERROR_CODES.REPLY_RATE_LIMITED) {
-      return { ok: false, reason: "rate_limited", message };
-    }
-
-    console.error("Error creating comment:", error);
-    return { ok: false, reason: "unknown", message };
+    return apiFailure(error, "creating comment", {
+      codes: { [FORUM_ERROR_CODES.REPLY_RATE_LIMITED]: "rate_limited" },
+    });
   }
 }
 
@@ -139,18 +128,8 @@ export async function reportComment(
     });
     return { ok: true };
   } catch (error) {
-    const status = getApiErrorStatus(error);
-    const message = getApiErrorMessage(error);
-    const code = getApiErrorCode(error);
-
-    if (status === 401) {
-      return { ok: false, reason: "unauthorized", message };
-    }
-    if (code === FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED) {
-      return { ok: false, reason: "already_reported", message };
-    }
-
-    console.error("Error reporting comment:", error);
-    return { ok: false, reason: "unknown", message };
+    return apiFailure(error, "reporting comment", {
+      codes: { [FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED]: "already_reported" },
+    });
   }
 }

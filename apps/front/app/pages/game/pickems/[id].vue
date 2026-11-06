@@ -6,7 +6,7 @@ import {
   displayMatchScore,
   getMatchParticipantScore,
   shouldShowMatchScores,
-} from "~/types/matches";
+} from "~/utils/matchScore";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { tournamentStageLabel } from "@sarpbc/utils";
 import { getPickOutcome, isMatchLockedForPickem, type PickemPickState } from "~/utils/pickems";

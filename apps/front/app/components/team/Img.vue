@@ -10,58 +10,61 @@ interface Props {
   priority?: boolean;
 }
 
-const boxClasses = {
-  xs: "size-4",
-  list: "size-7",
-  sm: "size-10",
-  md: "size-16",
-  lg: "size-24",
-  xl: "size-24 sm:h-auto sm:min-h-0 sm:w-32 md:w-40 sm:self-stretch",
-};
-
-const dimensions = {
-  xs: { width: 16, height: 16 },
-  list: { width: 28, height: 28 },
-  sm: { width: 40, height: 40 },
-  md: { width: 64, height: 64 },
-  lg: { width: 96, height: 96 },
-  xl: { width: 160, height: 160 },
-};
-
-const sizesAttr = {
-  xs: "16px",
-  list: "28px",
-  sm: "40px",
-  md: "64px",
-  lg: "96px",
-  xl: "(max-width: 640px) 96px, (max-width: 768px) 128px, 160px",
-};
-
-const iconClasses = {
-  xs: "size-2.5",
-  list: "size-4",
-  sm: "size-5",
-  md: "size-8",
-  lg: "size-10",
-  xl: "size-12",
-};
-
-const initialClasses = {
-  xs: "text-[10px]",
-  list: "text-sm",
-  sm: "text-lg",
-  md: "text-3xl",
-  lg: "text-5xl",
-  xl: "text-5xl",
-};
-
-const fallbackRadiusClasses = {
-  xs: "rounded-xs",
-  list: "rounded-xs",
-  sm: "rounded-sm",
-  md: "rounded-md",
-  lg: "rounded-lg",
-  xl: "rounded-lg",
+const SIZES = {
+  xs: {
+    box: "size-4",
+    width: 16,
+    height: 16,
+    sizes: "16px",
+    icon: "size-2.5",
+    initial: "text-[10px]",
+    radius: "rounded-xs",
+  },
+  list: {
+    box: "size-7",
+    width: 28,
+    height: 28,
+    sizes: "28px",
+    icon: "size-4",
+    initial: "text-sm",
+    radius: "rounded-xs",
+  },
+  sm: {
+    box: "size-10",
+    width: 40,
+    height: 40,
+    sizes: "40px",
+    icon: "size-5",
+    initial: "text-lg",
+    radius: "rounded-sm",
+  },
+  md: {
+    box: "size-16",
+    width: 64,
+    height: 64,
+    sizes: "64px",
+    icon: "size-8",
+    initial: "text-3xl",
+    radius: "rounded-md",
+  },
+  lg: {
+    box: "size-24",
+    width: 96,
+    height: 96,
+    sizes: "96px",
+    icon: "size-10",
+    initial: "text-5xl",
+    radius: "rounded-lg",
+  },
+  xl: {
+    box: "size-24 sm:h-auto sm:min-h-0 sm:w-32 md:w-40 sm:self-stretch",
+    width: 160,
+    height: 160,
+    sizes: "(max-width: 640px) 96px, (max-width: 768px) 128px, 160px",
+    icon: "size-12",
+    initial: "text-5xl",
+    radius: "rounded-lg",
+  },
 };
 
 const { teamName, logo, size = "md", priority = false } = defineProps<Props>();
@@ -84,47 +87,38 @@ const initial = computed(() =>
         ?.toUpperCase()
     : undefined,
 );
-const dim = computed(() => dimensions[size]);
+const spec = computed(() => SIZES[size]);
 const failedSrcs = ref(new Set<string>());
 </script>
 
 <template>
-  <div :class="[boxClasses[size], 'flex shrink-0 items-center justify-center']">
+  <div :class="[spec.box, 'flex shrink-0 items-center justify-center']">
     <template v-for="{ src, imgClass, fallbackClass } in variants" :key="fallbackClass">
       <NuxtImg
         v-if="src && !failedSrcs.has(src)"
         :src="src"
         :alt="`${teamName} logo`"
-        :width="dim.width"
-        :height="dim.height"
-        :sizes="sizesAttr[size]"
+        :width="spec.width"
+        :height="spec.height"
+        :sizes="spec.sizes"
         :loading="priority ? 'eager' : 'lazy'"
         :fetchpriority="priority ? 'high' : undefined"
-        :class="[fallbackRadiusClasses[size], imgClass, 'max-h-full max-w-full object-contain']"
+        :class="[spec.radius, imgClass, 'max-h-full max-w-full object-contain']"
         @error="failedSrcs.add(src)"
       />
       <div
         v-else
-        :class="[
-          boxClasses[size],
-          fallbackRadiusClasses[size],
-          fallbackClass,
-          'items-center justify-center bg-muted',
-        ]"
+        :class="[spec.box, spec.radius, fallbackClass, 'items-center justify-center bg-muted']"
       >
         <span
           v-if="initial"
           role="img"
           :aria-label="`${teamName} logo`"
-          :class="[initialClasses[size], 'font-medium leading-none text-muted']"
+          :class="[spec.initial, 'font-medium leading-none text-muted']"
         >
           {{ initial }}
         </span>
-        <UIcon
-          v-else
-          name="i-fluent-people-team-24-regular"
-          :class="[iconClasses[size], 'text-muted']"
-        />
+        <UIcon v-else name="i-fluent-people-team-24-regular" :class="[spec.icon, 'text-muted']" />
       </div>
     </template>
   </div>

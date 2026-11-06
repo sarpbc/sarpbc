@@ -1,5 +1,5 @@
 import { FORUM_ERROR_CODES, type ForumPost } from "@sarpbc/types";
-import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from "@sarpbc/utils";
+import { getApiErrorStatus } from "@sarpbc/utils";
 import type {
   CreateForumPostResult,
   ForumPostCreationStatus,
@@ -83,21 +83,9 @@ export async function createForumPost(data: {
 
     return { ok: true, post };
   } catch (error) {
-    const status = getApiErrorStatus(error);
-    const message = getApiErrorMessage(error);
-    const code = getApiErrorCode(error);
-
-    if (status === 401) {
-      return { ok: false, reason: "unauthorized", message };
-    }
-    if (code === FORUM_ERROR_CODES.POST_RATE_LIMITED) {
-      return { ok: false, reason: "rate_limited", message };
-    }
-    if (status === 409) {
-      return { ok: false, reason: "conflict", message };
-    }
-
-    console.error("Error creating forum post:", error);
-    return { ok: false, reason: "unknown", message };
+    return apiFailure(error, "creating forum post", {
+      codes: { [FORUM_ERROR_CODES.POST_RATE_LIMITED]: "rate_limited" },
+      statuses: { 409: "conflict" },
+    });
   }
 }

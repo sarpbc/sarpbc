@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
 import { shortTeamName } from "~/utils/shortTeamName";
 

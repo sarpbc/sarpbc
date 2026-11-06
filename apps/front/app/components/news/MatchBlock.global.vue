@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MatchBlockItem, MatchBlockState } from "@sarpbc/types";
 import { matchPath, newsMatchBlockFromAttrs, newsMatchBlockKey } from "@sarpbc/utils";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { tournamentStageLabel } from "@sarpbc/utils";
 
 const props = defineProps<{
