@@ -1,10 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import * as Row from "./player.entities";
-import {
-  MatchGamePlayer,
-  PlayerPlatformLink,
-} from "../../../match-stats/infrastructure/match-stats-persistence";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { playerColumns, teamColumns, toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { Contract, Player, PlayerPhoto, Team } from "../../domain/roster";
@@ -20,6 +16,7 @@ import type {
   RosterReferenceMover,
   RosterTransaction,
   RosterWriteScope,
+  SharedTournaments,
   TeamQueries,
   TeamWriter,
 } from "../../application/ports";
@@ -260,7 +257,14 @@ export class MikroRosterTransaction implements RosterTransaction {
   }
 }
 
-function rosterReferences(em: EntityManager, others: RosterReferenceMover): RosterReferenceMover {
+export interface RosterMergeParticipants extends SharedTournaments {
+  movers: readonly RosterReferenceMover[];
+}
+
+function rosterReferences(
+  em: EntityManager,
+  others: RosterMergeParticipants,
+): RosterReferenceMover & SharedTournaments {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
     const open = await em.find(
@@ -295,16 +299,14 @@ function rosterReferences(em: EntityManager, others: RosterReferenceMover): Rost
       await mergeOpenContracts("player", from, to);
       await em.nativeUpdate(Row.Contract, { player: from }, { player: to });
       await em.nativeUpdate(Row.PlayerPhoto, { player: from }, { player: to });
-      await em.nativeUpdate(MatchGamePlayer, { player: from }, { player: to });
-      await em.nativeUpdate(PlayerPlatformLink, { player: from }, { player: to });
-      await others.movePlayer(from, to);
+      for (const mover of others.movers) await mover.movePlayer(from, to);
     },
     moveTeam: async (from, to) => {
       await em.nativeUpdate(Row.Team, { mergedInto: from }, { mergedInto: to });
       await mergeOpenContracts("team", from, to);
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });
-      await others.moveTeam(from, to);
+      for (const mover of others.movers) await mover.moveTeam(from, to);
     },
     sharedTournamentIds: (teamId, otherTeamId) => others.sharedTournamentIds(teamId, otherTeamId),
   };
@@ -313,13 +315,13 @@ function rosterReferences(em: EntityManager, others: RosterReferenceMover): Rost
 export class MikroRosterMergeTransaction implements RosterMergeTransaction {
   constructor(
     private readonly em: EntityManager,
-    private readonly moversFor: (tx: EntityManager) => RosterReferenceMover,
+    private readonly participantsFor: (tx: EntityManager) => RosterMergeParticipants,
   ) {}
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
     return this.em.transactional(async (tx) => {
       const result = await work({
         ...writeScope(tx),
-        references: rosterReferences(tx, this.moversFor(tx)),
+        references: rosterReferences(tx, this.participantsFor(tx)),
       });
       await tx.flush();
       return result;

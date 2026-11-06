@@ -22,6 +22,7 @@ import {
   MikroTeamStore,
 } from "./persistence/roster.store";
 import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
+import { MatchStatsRosterReferences } from "../../match-stats/infrastructure/persistence/roster-references.mover";
 import { TournamentRosterReferences } from "../../tournament/infrastructure/persistence/roster-references.mover";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
@@ -72,7 +73,14 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     {
       provide: MikroRosterMergeTransaction,
       useFactory: (em: EntityManager) =>
-        new MikroRosterMergeTransaction(em, (tx) => new TournamentRosterReferences(tx)),
+        new MikroRosterMergeTransaction(em, (tx) => {
+          const competition = new TournamentRosterReferences(tx);
+          return {
+            movers: [new MatchStatsRosterReferences(tx), competition],
+            sharedTournamentIds: (teamId, otherTeamId) =>
+              competition.sharedTournamentIds(teamId, otherTeamId),
+          };
+        }),
       inject: [EntityManager],
     },
     {

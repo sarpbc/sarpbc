@@ -1,11 +1,11 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
-import type { RosterReferenceMover } from "../../../roster/application/ports";
+import type { RosterReferenceMover, SharedTournaments } from "../../../roster/application/ports";
 import { PlayerAward } from "./player-award.entities";
 import { TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-export class TournamentRosterReferences implements RosterReferenceMover {
+export class TournamentRosterReferences implements RosterReferenceMover, SharedTournaments {
   constructor(private readonly em: EntityManager) {}
 
   async movePlayer(from: string, to: string): Promise<void> {

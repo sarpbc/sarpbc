@@ -52,14 +52,16 @@ export interface RosterWriteScope {
 export interface RosterTransaction {
   run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T>;
 }
-/** Roster owns the merge; every table that references a player or team implements this for its rows. */
+/** Roster owns the merge; every feature whose tables reference a player or team implements this for its rows. */
 export interface RosterReferenceMover {
   movePlayer(fromId: string, toId: string): Promise<void>;
   moveTeam(fromId: string, toId: string): Promise<void>;
+}
+export interface SharedTournaments {
   sharedTournamentIds(teamId: string, otherTeamId: string): Promise<string[]>;
 }
 export interface RosterMergeWriteScope extends RosterWriteScope {
-  references: RosterReferenceMover;
+  references: RosterReferenceMover & SharedTournaments;
 }
 export interface RosterMergeTransaction {
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T>;
