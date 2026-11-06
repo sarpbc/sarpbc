@@ -64,22 +64,9 @@ function summary(item: MatchBlockItem): string {
   });
 }
 
-function stateLabel(item: MatchBlockItem): string {
-  switch (item.state) {
-    case "live":
-      return t("components.match.live");
-    case "finished":
-      return t("newsTag.matchFinal");
-    case "upcoming":
-      return item.beginAt
-        ? t("newsTag.matchUtc", { date: dateFormatter.value.format(new Date(item.beginAt)) })
-        : t("components.match.tbd");
-    default: {
-      const exhaustive: never = item.state;
-      return exhaustive;
-    }
-  }
-}
+const stateLabel = useMatchStateLabel((beginAt) =>
+  t("newsTag.matchUtc", { date: dateFormatter.value.format(beginAt) }),
+);
 </script>
 
 <template>

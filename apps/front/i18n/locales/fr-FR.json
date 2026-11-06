@@ -101,10 +101,7 @@
     "matches": "Matchs",
     "matchVersus": "{teamA} contre {teamB}",
     "matchScore": "{teamA} {scoreA}–{scoreB} {teamB}",
-    "matchFinal": "Terminé",
-    "matchUtc": "{date} UTC",
-    "matchDataBy": "Données des matchs fournies par",
-    "matchesUnavailable": "Impossible de charger ces matchs."
+    "matchUtc": "{date} UTC"
   },
   "general": {
     "news": "Actualités",

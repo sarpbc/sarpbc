@@ -889,12 +889,7 @@
     }
   },
   "newsTag": {
-    "matchLive": "En direct",
-    "matchFinal": "Terminé",
-    "matchTbd": "À déterminer",
-    "matchDataBy": "Données des matchs fournies par",
     "matchesInvalid": "Ce bloc de matchs est invalide. Modifiez-le pour choisir à nouveau les matchs.",
-    "matchesUnavailable": "Impossible de charger ces matchs.",
     "matchesEmpty": "Aucun match pour le moment."
   }
 }

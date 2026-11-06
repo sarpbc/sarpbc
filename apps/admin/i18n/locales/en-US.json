@@ -889,12 +889,7 @@
     }
   },
   "newsTag": {
-    "matchLive": "Live",
-    "matchFinal": "Final",
-    "matchTbd": "TBD",
-    "matchDataBy": "Match data provided by",
     "matchesInvalid": "This match block is invalid. Edit it to pick matches again.",
-    "matchesUnavailable": "These matches could not be loaded.",
     "matchesEmpty": "No matches yet."
   }
 }

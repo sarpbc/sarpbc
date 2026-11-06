@@ -1,4 +1,10 @@
-import { addComponentsDir, createResolver, defineNuxtModule, hasNuxtModule } from "@nuxt/kit";
+import {
+  addComponentsDir,
+  addImports,
+  createResolver,
+  defineNuxtModule,
+  hasNuxtModule,
+} from "@nuxt/kit";
 
 const REQUIRED_MODULES = ["@nuxt/ui", "@nuxtjs/i18n", "@sarpbc/composables"];
 
@@ -22,6 +28,11 @@ export default defineNuxtModule({
     });
 
     // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
+    addImports({
+      name: "useMatchStateLabel",
+      from: resolve("./runtime/composables/useMatchStateLabel"),
+    });
+
     nuxt.options.runtimeConfig.public.publicSiteUrl ||= "";
 
     // @nuxtjs/i18n calls this hook while it sets up, so list this module before it.
