@@ -1,11 +1,4 @@
-export interface PlayerSearchProps {
-  name: string;
-  start: string;
-  limit: number;
-  offset: number;
-}
-
-export interface TeamSearchProps {
+export interface DirectorySearchProps {
   name: string;
   start: string;
   limit: number;
@@ -15,6 +8,4 @@ export interface TeamSearchProps {
 export interface ContractMovementFilter {
   teamId?: string;
   playerId?: string;
-  from?: Date;
-  to?: Date;
 }

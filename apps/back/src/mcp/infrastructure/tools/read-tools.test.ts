@@ -60,7 +60,7 @@ function setup() {
   const playerService = { findBySlug: vi.fn().mockResolvedValue(player) };
   const teamService = {
     findBySlug: vi.fn().mockResolvedValue(team),
-    getTeamWithPlayers: vi.fn().mockResolvedValue(team),
+    findById: vi.fn().mockResolvedValue(team),
   };
   const registerTool = vi.fn();
   registerReadTools(

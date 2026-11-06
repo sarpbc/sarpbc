@@ -81,7 +81,7 @@ describe("ContractService sourced career periods", () => {
         startDate: "2022-01-10",
         sourceUrl: source,
       }),
-    ).rejects.toThrow("add_player_to_team");
+    ).rejects.toThrow("record the move as a roster move");
     expect(career).toHaveLength(1);
   });
 
@@ -117,7 +117,7 @@ describe("ContractService sourced career periods", () => {
   it("leaves the current team's departure to roster moves", async () => {
     await expect(
       service.revisePeriod("zen", "kc-2025-06-01", { endDate: "2025-12-31", sourceUrl: source }),
-    ).rejects.toThrow("remove_player_from_team");
+    ).rejects.toThrow("record the departure as a roster move");
     expect(career[0].endDate).toBeNull();
   });
 

@@ -34,7 +34,7 @@ async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
 
 async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
   const bySlug = await ctx.teamService.findBySlug(idOrSlug);
-  const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
+  const team = await ctx.teamService.findById(bySlug?.id ?? idOrSlug);
   if (team) {
     return team;
   }

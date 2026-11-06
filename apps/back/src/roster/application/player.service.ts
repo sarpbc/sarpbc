@@ -3,7 +3,8 @@ import { ConflictError, InvalidInputError, NotFoundError } from "../../common/do
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
 import { Contract, Player, PlayerPhoto } from "../domain/roster";
 import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
-import type { PlayerSearchProps } from "./search-props";
+import { requireTeam } from "./require-team";
+import type { DirectorySearchProps } from "./search-props";
 
 export class PlayerService {
   constructor(
@@ -12,11 +13,11 @@ export class PlayerService {
     private readonly transaction: RosterTransaction,
   ) {}
 
-  async find(options: Partial<PlayerSearchProps>): Promise<Player[]> {
+  async find(options: Partial<DirectorySearchProps>): Promise<Player[]> {
     return this.players.search(options);
   }
 
-  async findAndCount(options: Partial<PlayerSearchProps>): Promise<[Player[], number]> {
+  async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
     return this.players.searchAndCount(options);
   }
 
@@ -49,12 +50,7 @@ export class PlayerService {
         throw new ConflictError(`A player with slug "${player.slug}" already exists`);
       }
 
-      if (dto.teamId) {
-        const team = await teams.findById(dto.teamId);
-        if (team) {
-          player.team = team;
-        }
-      }
+      if (dto.teamId) player.team = await requireTeam(teams, dto.teamId);
 
       await players.save(player);
       return player;
@@ -86,14 +82,7 @@ export class PlayerService {
       }
 
       if (dto.teamId !== undefined) {
-        if (dto.teamId === null) {
-          player.team = null;
-        } else {
-          const team = await teams.findById(dto.teamId);
-          if (team) {
-            player.team = team;
-          }
-        }
+        player.team = dto.teamId === null ? null : await requireTeam(teams, dto.teamId);
       }
 
       await players.save(player);
@@ -130,7 +119,6 @@ export class PlayerService {
       await contracts.save(contract);
 
       player.team = team;
-      player.contractRole = role;
       player.status = "active";
       await players.save(player);
       return player;
@@ -155,7 +143,6 @@ export class PlayerService {
 
       if (player.team?.id === input.teamId) {
         player.team = null;
-        player.contractRole = null;
         player.status = input.status;
       }
       await players.save(player);

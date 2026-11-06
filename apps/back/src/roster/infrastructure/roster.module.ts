@@ -22,6 +22,7 @@ import {
   MikroTeamStore,
 } from "./persistence/roster.store";
 import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
+import { TournamentRosterReferences } from "../../tournament/infrastructure/persistence/roster-references.mover";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
@@ -70,7 +71,8 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     },
     {
       provide: MikroRosterMergeTransaction,
-      useFactory: (em: EntityManager) => new MikroRosterMergeTransaction(em),
+      useFactory: (em: EntityManager) =>
+        new MikroRosterMergeTransaction(em, (tx) => new TournamentRosterReferences(tx)),
       inject: [EntityManager],
     },
     {
@@ -95,12 +97,9 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     },
     {
       provide: TeamService,
-      useFactory: (
-        teams: MikroTeamStore,
-        transaction: MikroRosterTransaction,
-        sync: SyncPandascoreTeamsUseCase,
-      ) => new TeamService(teams, transaction, sync),
-      inject: [MikroTeamStore, MikroRosterTransaction, SyncPandascoreTeamsUseCase],
+      useFactory: (teams: MikroTeamStore, transaction: MikroRosterTransaction) =>
+        new TeamService(teams, transaction),
+      inject: [MikroTeamStore, MikroRosterTransaction],
     },
     {
       provide: ContractService,
@@ -136,13 +135,13 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
 })
 export class RosterModule implements OnModuleInit {
   constructor(
-    private readonly teamService: TeamService,
+    private readonly syncPandascoreTeams: SyncPandascoreTeamsUseCase,
     private readonly configService: ConfigService,
   ) {}
 
   onModuleInit() {
     if (this.configService.get<boolean>("pandascore_sync_on_boot")) {
-      this.teamService.initializeTeamsFromPandaScore(true).catch((error) => {
+      this.syncPandascoreTeams.seed().catch((error) => {
         log.error({
           component: RosterModule.name,
           job: "module_init",

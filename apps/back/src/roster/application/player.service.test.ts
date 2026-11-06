@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 import { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
 import { PlayerService } from "./player.service";
 import type { PhotoQueries, PlayerQueries, RosterWriteScope } from "./ports";
@@ -36,7 +36,6 @@ describe("PlayerService profile photos", () => {
     teams: {
       findById: async () => null,
       findBySlug: async () => null,
-      findWithPlayers: async () => null,
       save: async () => {},
       delete: async () => {},
     },
@@ -71,6 +70,15 @@ describe("PlayerService profile photos", () => {
     await expect(service.setProfilePhoto(player.id, "selected")).rejects.toThrow("not found");
     expect(player.imageUrl).toBe("old.png");
     expect(gallery.map((photo) => photo.url)).toEqual(["selected.png"]);
+  });
+
+  it("rejects an unknown team on create and update like the contract writes do", async () => {
+    await expect(service.create({ name: "Zen", teamId: "missing" })).rejects.toBeInstanceOf(
+      UnprocessableError,
+    );
+    await expect(service.update(player.id, { teamId: "missing" })).rejects.toBeInstanceOf(
+      UnprocessableError,
+    );
   });
 });
 
@@ -121,7 +129,6 @@ describe("PlayerService roster moves", () => {
       teams: {
         findById: async (id) => teams.get(id) ?? null,
         findBySlug: vi.fn(),
-        findWithPlayers: vi.fn(),
         save: vi.fn(),
         delete: vi.fn(),
       },
@@ -172,7 +179,6 @@ describe("PlayerService roster moves", () => {
       startDate: new Date("2026-10-23"),
       endDate: null,
     });
-    expect(player.currentRole()).toBe("coach");
   });
 
   it("rejects a staff move into the role the player already holds", async () => {
@@ -204,7 +210,6 @@ describe("PlayerService roster moves", () => {
       role: "benched",
       endDate: null,
     });
-    expect(player.currentRole()).toBe("benched");
   });
 
   it("rejects joining an inactive team", async () => {

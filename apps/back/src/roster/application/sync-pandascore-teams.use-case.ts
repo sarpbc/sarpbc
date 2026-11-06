@@ -4,9 +4,11 @@ export class SyncPandascoreTeamsUseCase {
     private readonly writer: CurrentRosterWriter,
     private readonly source: CurrentRosterSource,
   ) {}
-  async execute(cancelIfExistingTeam: boolean): Promise<void> {
-    if (cancelIfExistingTeam && (await this.writer.hasTeams())) return;
-    const roster = await this.source.load();
-    await this.writer.syncCurrentTeams(roster);
+  async seed(): Promise<void> {
+    if (await this.writer.hasTeams()) return;
+    await this.sync();
+  }
+  async sync(): Promise<void> {
+    await this.writer.syncCurrentTeams(await this.source.load());
   }
 }

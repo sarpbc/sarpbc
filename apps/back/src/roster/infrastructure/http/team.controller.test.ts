@@ -19,6 +19,7 @@ describe("TeamController", () => {
     contracts as never,
     tournaments as never,
     prizes,
+    {} as never,
   );
 
   beforeEach(() => {

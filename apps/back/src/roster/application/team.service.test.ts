@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../domain/roster";
 import { ContractService } from "./contract.service";
 import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
-import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
 import { TeamService } from "./team.service";
 import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 
@@ -24,7 +23,6 @@ describe("Roster workflows", () => {
       teams: {
         findById: async () => team,
         findBySlug: vi.fn(),
-        findWithPlayers: async () => team,
         save: vi.fn(),
         delete: vi.fn(),
       },
@@ -56,11 +54,7 @@ describe("Roster workflows", () => {
       },
     };
     contractService = new ContractService({} as ContractQueries, {} as TeamQueries, transaction);
-    const sync = new SyncPandascoreTeamsUseCase(
-      { hasTeams: async () => false, syncCurrentTeams: async () => {} },
-      { load: async () => [] },
-    );
-    service = new TeamService({} as TeamQueries, transaction, sync);
+    service = new TeamService({} as TeamQueries, transaction);
   });
 
   it("deletes contracts and clears current membership with the team in one transaction", async () => {
@@ -73,7 +67,7 @@ describe("Roster workflows", () => {
   });
 
   it("does not mutate contracts or memberships when the team is missing", async () => {
-    stores.teams.findWithPlayers = async () => null;
+    stores.teams.findById = async () => null;
     await expect(service.delete("missing")).rejects.toThrow("not found");
     expect(player.team).toBe(team);
     expect(stores.contracts.delete).not.toHaveBeenCalled();

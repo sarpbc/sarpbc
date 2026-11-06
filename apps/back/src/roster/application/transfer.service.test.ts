@@ -42,7 +42,7 @@ describe("TransferService", () => {
     return { findMovements, service };
   }
 
-  it("passes the team, player and period to the store", async () => {
+  it("passes only the team and player to the store", async () => {
     const { findMovements, service } = fixture();
     const from = new Date("2025-01-01");
     const to = new Date("2025-12-31");
@@ -52,7 +52,7 @@ describe("TransferService", () => {
       now,
     );
 
-    expect(findMovements).toHaveBeenCalledWith({ teamId: "kc", playerId: "zen", from, to });
+    expect(findMovements).toHaveBeenCalledWith({ teamId: "kc", playerId: "zen" });
   });
 
   it("filters by movement type and paginates the newest movements first", async () => {

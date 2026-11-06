@@ -20,7 +20,6 @@ import { CompetitionEventQueries } from "./persistence/event.queries";
 import { EVENT_QUERIES, TOURNAMENT_QUERIES } from "./competition-queries.tokens";
 import { CompetitionAfterCommit } from "../application/after-commit";
 import { TournamentCron } from "./jobs/tournament.cron";
-import { TournamentService } from "../application/tournament.service";
 import { ManualTournamentService } from "../application/manual-tournament.service";
 import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
@@ -166,11 +165,6 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       ],
     },
     {
-      provide: TournamentService,
-      useFactory: (reads: CompetitionQueries) => new TournamentService(reads),
-      inject: [CompetitionQueries],
-    },
-    {
       provide: ManualTournamentService,
       useFactory: (
         reads: CompetitionQueries,
@@ -228,7 +222,6 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
   exports: [
     TOURNAMENT_QUERIES,
     EVENT_QUERIES,
-    TournamentService,
     SyncPandascoreTournamentUseCase,
     SyncNewTournamentsUseCase,
     ManualTournamentService,

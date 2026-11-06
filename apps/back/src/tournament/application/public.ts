@@ -1,4 +1,3 @@
-export { TournamentService } from "./tournament.service";
 export { ManualTournamentService } from "./manual-tournament.service";
 export { MatchService } from "./match/match.service";
 export { PlayerAwardService } from "./player-award.service";

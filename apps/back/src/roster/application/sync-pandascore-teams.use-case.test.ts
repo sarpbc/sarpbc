@@ -19,13 +19,13 @@ describe("SyncPandascoreTeamsUseCase", () => {
       hasTeams: async () => false,
       syncCurrentTeams: vi.fn().mockResolvedValue(undefined),
     };
-    await new SyncPandascoreTeamsUseCase(writer, { load: async () => roster }).execute(false);
+    await new SyncPandascoreTeamsUseCase(writer, { load: async () => roster }).sync();
     expect(writer.syncCurrentTeams).toHaveBeenCalledWith(roster);
   });
   it("skips initialization when teams exist", async () => {
     const source = { load: vi.fn() };
     const writer = { hasTeams: async () => true, syncCurrentTeams: vi.fn() };
-    await new SyncPandascoreTeamsUseCase(writer, source).execute(true);
+    await new SyncPandascoreTeamsUseCase(writer, source).seed();
     expect(source.load).not.toHaveBeenCalled();
     expect(writer.syncCurrentTeams).not.toHaveBeenCalled();
   });

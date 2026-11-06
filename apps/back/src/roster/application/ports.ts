@@ -1,20 +1,19 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
 import type { TeamLogoFormat } from "../domain/team-logo";
 import type { ImportedPlayer } from "./imports";
-import type { ContractMovementFilter, PlayerSearchProps, TeamSearchProps } from "./search-props";
+import type { ContractMovementFilter, DirectorySearchProps } from "./search-props";
 export interface PlayerQueries {
-  search(options: Partial<PlayerSearchProps>): Promise<Player[]>;
-  searchAndCount(options: Partial<PlayerSearchProps>): Promise<[Player[], number]>;
+  search(options: Partial<DirectorySearchProps>): Promise<Player[]>;
+  searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]>;
   findById(id: string): Promise<Player | null>;
   findBySlug(slug: string): Promise<Player | null>;
   getRandomPlayer(): Promise<Player | null>;
 }
 export interface TeamQueries {
-  search(options: Partial<TeamSearchProps>): Promise<Team[]>;
-  searchAndCount(options: Partial<TeamSearchProps>): Promise<[Team[], number]>;
+  search(options: Partial<DirectorySearchProps>): Promise<Team[]>;
+  searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]>;
   findById(id: string): Promise<Team | null>;
   findBySlug(slug: string): Promise<Team | null>;
-  findWithPlayers(id: string): Promise<Team | null>;
 }
 export interface ContractQueries {
   findByPlayer(playerId: string): Promise<Contract[]>;
@@ -26,29 +25,21 @@ export interface ContractQueries {
 export interface PhotoQueries {
   findByPlayer(playerId: string): Promise<PlayerPhoto[]>;
 }
-export interface PlayerWriter {
-  findById(id: string): Promise<Player | null>;
-  findBySlug(slug: string): Promise<Player | null>;
+export interface PlayerWriter extends Pick<PlayerQueries, "findById" | "findBySlug"> {
   save(player: Player): Promise<void>;
   delete(player: Player): Promise<void>;
 }
-export interface TeamWriter {
-  findById(id: string): Promise<Team | null>;
-  findBySlug(slug: string): Promise<Team | null>;
-  findWithPlayers(id: string): Promise<Team | null>;
+export interface TeamWriter extends Pick<TeamQueries, "findById" | "findBySlug"> {
   save(team: Team): Promise<void>;
   delete(team: Team): Promise<void>;
 }
-export interface ContractWriter {
+export interface ContractWriter extends Pick<ContractQueries, "findByPlayer" | "findByTeam"> {
   findById(id: string): Promise<Contract | null>;
-  findByPlayer(playerId: string): Promise<Contract[]>;
-  findByTeam(teamId: string): Promise<Contract[]>;
   save(contract: Contract): Promise<void>;
   delete(contract: Contract): Promise<void>;
 }
-export interface PhotoWriter {
+export interface PhotoWriter extends PhotoQueries {
   findById(id: string): Promise<PlayerPhoto | null>;
-  findByPlayer(playerId: string): Promise<PlayerPhoto[]>;
   save(photo: PlayerPhoto): Promise<void>;
   delete(photo: PlayerPhoto): Promise<void>;
 }
@@ -61,13 +52,14 @@ export interface RosterWriteScope {
 export interface RosterTransaction {
   run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T>;
 }
-export interface RosterReferences {
+/** Roster owns the merge; every table that references a player or team implements this for its rows. */
+export interface RosterReferenceMover {
   movePlayer(fromId: string, toId: string): Promise<void>;
   moveTeam(fromId: string, toId: string): Promise<void>;
   sharedTournamentIds(teamId: string, otherTeamId: string): Promise<string[]>;
 }
 export interface RosterMergeWriteScope extends RosterWriteScope {
-  references: RosterReferences;
+  references: RosterReferenceMover;
 }
 export interface RosterMergeTransaction {
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T>;

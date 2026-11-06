@@ -50,7 +50,7 @@ async function setup(role: StaffRole = "admin", source: DataSource = "manual") {
         provide: TeamService,
         useValue: {
           findBySlug: vi.fn().mockResolvedValue(team),
-          getTeamWithPlayers: vi.fn().mockResolvedValue(team),
+          findById: vi.fn().mockResolvedValue(team),
         },
       },
       { provide: SearchService, useValue: {} },
