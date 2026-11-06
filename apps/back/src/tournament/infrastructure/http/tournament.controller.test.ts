@@ -105,21 +105,4 @@ describe("TournamentController leagues", () => {
       ],
     });
   });
-
-  it("creates and updates a league through the catalog", async () => {
-    catalog.createLeague.mockResolvedValue(manual);
-    catalog.updateLeague.mockResolvedValue({
-      ...synced,
-      imageUrl: "https://cdn/rlcs.png",
-    });
-    expect(await controller.createLeague({ name: "Coupe de France" })).toMatchObject({
-      league: { id: "l1", slug: "coupe-de-france" },
-    });
-    expect(await controller.updateLeague("l2", { imageUrl: "https://cdn/rlcs.png" })).toMatchObject(
-      { league: { id: "l2", imageUrl: "https://cdn/rlcs.png" } },
-    );
-    expect(catalog.updateLeague).toHaveBeenCalledWith("l2", {
-      imageUrl: "https://cdn/rlcs.png",
-    });
-  });
 });

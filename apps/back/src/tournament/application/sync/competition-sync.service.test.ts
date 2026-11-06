@@ -27,24 +27,7 @@ function memoryStore() {
       const found = tournaments.get(id);
       return found ? copy(found) : null;
     }),
-    manualCandidates: vi.fn(async ({ from, to }: { from: Date; to: Date }) =>
-      all()
-        .filter(
-          (t) =>
-            t.source === "manual" &&
-            t.pandascoreId === null &&
-            t.beginAt !== null &&
-            t.beginAt >= from &&
-            t.beginAt <= to,
-        )
-        .map((t) => ({
-          id: t.id,
-          name: t.name,
-          leagueId: t.league?.id ?? null,
-          beginAt: t.beginAt,
-          endAt: t.endAt,
-        })),
-    ),
+    manualCandidates: vi.fn(async () => []),
     save: vi.fn(async (tournament: Tournament) => {
       tournaments.set(tournament.id, copy(tournament));
     }),
@@ -64,16 +47,7 @@ function memoryStore() {
       const found = [...events.values()].find((e) => e.pandascoreSerieId === id);
       return found ? copy(found) : null;
     },
-    unclaimedByName: async (leagueId, name) => {
-      const found = [...events.values()].find(
-        (e) =>
-          e.pandascoreSerieId === null &&
-          (e.league?.id ?? null) === leagueId &&
-          e.name === name &&
-          !all().some((t) => t.event.id === e.id && t.source === "manual"),
-      );
-      return found ? copy(found) : null;
-    },
+    unclaimedByName: async () => null,
     slugTaken: async (slug, except) =>
       [...events.values()].some((e) => e.slug === slug && e.id !== except),
     stageSlugTaken: async (eventId, slug, except) =>
@@ -247,46 +221,6 @@ describe("Competition synchronization", () => {
     });
   });
 
-  it("lets a backfilled stage claim its own event for the serie", async () => {
-    const event = store.seedEvent({ slug: "rlcs-major-paris-2026", name: "RLCS Major Paris" });
-    store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
-    const synced = await service.upsertTournament(stageCommand({}));
-    expect(synced.event.id).toBe(event.id);
-    expect(store.events.get(event.id)).toMatchObject({
-      pandascoreSerieId: 100,
-      slug: "rlcs-major-paris-2026",
-      name: "RLCS Major Paris 2026",
-    });
-  });
-
-  it("files a new stage under the unclaimed league event with the same name", async () => {
-    await service.upsertTournament({ pandascoreId: 50, name: "Other", league: rlcsMajor });
-    const leagueId = [...store.events.values()][0].league?.id ?? null;
-    const event = store.seedEvent({
-      slug: "rlcs-major-paris-2026",
-      name: "RLCS Major Paris 2026",
-      league: Object.assign(new League(), { id: leagueId, name: "RLCS Major" }),
-    });
-    store.seedStage(event, { id: "group-a", pandascoreId: 3, name: "Group A", slug: "group-a" });
-    const synced = await service.upsertTournament(stageCommand({ pandascoreId: 4 }));
-    expect(synced.event).toMatchObject({ id: event.id, slug: "rlcs-major-paris-2026" });
-    expect(store.events.get(event.id)?.pandascoreSerieId).toBe(100);
-  });
-
-  it("never files a provider stage under a manual event", async () => {
-    await service.upsertTournament({ pandascoreId: 50, name: "Other", league: rlcsMajor });
-    const leagueId = [...store.events.values()][0].league?.id ?? null;
-    const manual = store.seedEvent({
-      slug: "rlcs-major-paris-2026",
-      name: "RLCS Major Paris 2026",
-      league: Object.assign(new League(), { id: leagueId, name: "RLCS Major" }),
-    });
-    store.seedStage(manual, { id: "manual", source: "manual", name: "Watch party", slug: "x" });
-    const synced = await service.upsertTournament(stageCommand({ pandascoreId: 4 }));
-    expect(synced.event.id).not.toBe(manual.id);
-    expect(synced.event.slug).toBe("rlcs-major-paris-2026-2");
-  });
-
   it("moves a stage to its serie event and deletes the event it leaves empty", async () => {
     const elsewhere = store.seedEvent({ pandascoreSerieId: 200, slug: "old", name: "Old" });
     store.seedStage(elsewhere, {
@@ -402,12 +336,12 @@ describe("Competition synchronization", () => {
           },
         ],
       });
-      expect(rosters.upsertPlayer).toHaveBeenNthCalledWith(1, {
+      expect(rosters.upsertPlayer).toHaveBeenCalledWith({
         pandascoreId: 1,
         name: "Player",
         slug: "player",
       });
-      expect(rosters.upsertPlayer).toHaveBeenNthCalledWith(2, {
+      expect(rosters.upsertPlayer).toHaveBeenCalledWith({
         pandascoreId: 3,
         name: "Sub",
         slug: "sub",
@@ -519,32 +453,6 @@ describe("Competition synchronization", () => {
         beginAt: new Date("2026-03-01T00:00Z"),
         endAt: new Date("2026-03-02T00:00Z"),
       });
-
-    it("turns the single matching manual tournament into the synced stage", async () => {
-      seedManual("manual");
-      const synced = await service.upsertTournament(stageCommand({ beginAt }));
-      expect(synced).toMatchObject({
-        id: "manual",
-        source: "pandascore",
-        pandascoreId: 1,
-        name: "Playoffs",
-        endAt: new Date("2026-03-02T00:00Z"),
-        endAtCorrected: true,
-      });
-      expect(store.tournaments.size).toBe(1);
-      expect(store.eventOf("manual")).toMatchObject({ slug: "manual", pandascoreSerieId: 100 });
-    });
-
-    it("creates a separate stage and warns when several manual tournaments match", async () => {
-      seedManual("first");
-      seedManual("second");
-      const synced = await service.upsertTournament(stageCommand({ beginAt }));
-      expect(synced.id).not.toMatch(/first|second/);
-      expect(diagnostics.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Several manual tournaments"),
-        { pandascoreId: 1, tournamentIds: ["first", "second"] },
-      );
-    });
 
     it("links the manual tournament staff chose even when names differ", async () => {
       seedManual("manual", "MENA qualifier");

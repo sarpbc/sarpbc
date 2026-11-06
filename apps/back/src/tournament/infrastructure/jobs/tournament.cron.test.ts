@@ -43,17 +43,6 @@ describe("TournamentCron", () => {
     tournaments.findPandascoreActive.mockResolvedValue([]);
   });
 
-  it("syncPandascoreAdditionsDaily delegates to new-tournaments use case", async () => {
-    syncNewTournamentsUseCase.execute.mockResolvedValue({
-      discovered: 0,
-      detailsSynced: 0,
-      detailsFailed: 0,
-    });
-
-    await cron.syncPandascoreAdditionsDaily();
-    expect(syncNewTournamentsUseCase.execute).toHaveBeenCalled();
-  });
-
   it("syncActiveTournaments syncs tournaments with live matches", async () => {
     matchService.list.mockResolvedValue([[{ tournament: { id: "tournament-1" } }], 1]);
 

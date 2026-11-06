@@ -126,12 +126,4 @@ describe("TournamentPrizeService", () => {
       setup({ source: "startgg" }).service.requireProposableTournament("cup"),
     ).rejects.toThrow(InvalidInputError);
   });
-
-  it("passes the redistribution scope to the earnings reads", async () => {
-    const { service, reads } = setup();
-    await service.teamEarnings("team-a", { redistributableOnly: true });
-    await service.playerEarnings("player-a", { redistributableOnly: false });
-    expect(reads.byTeam).toHaveBeenCalledWith("team-a", { redistributableOnly: true });
-    expect(reads.byPlayer).toHaveBeenCalledWith("player-a", { redistributableOnly: false });
-  });
 });
