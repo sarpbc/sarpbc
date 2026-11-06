@@ -71,15 +71,38 @@ export {
 } from "./entity-slug.ts";
 export {
   forumPostPath,
+  localizedPath,
   matchPath,
+  newsPath,
+  playerPath,
+  stageMatchesPath,
+  teamPath,
   tournamentEventPath,
   tournamentStagePath,
 } from "./entity-path.ts";
+export { parseLocale, uiLocale, type UiLocale } from "./locale.ts";
 export {
-  parseNewsLocale,
   hasFrenchTranslation,
   localizedNewsFields,
-  type NewsLocale,
   type LocalizedNewsFields,
 } from "./news-locale.ts";
+export {
+  IMAGE_CONTENT_TYPES,
+  IMAGE_CONTENT_TYPE_ALIASES,
+  IMAGE_FILE_EXTENSIONS,
+  IMAGE_UPLOAD_TARGETS,
+  MAX_IMAGE_BYTES,
+  MAX_IMAGE_MEGABYTES,
+  canonicalImageContentType,
+  type ImageContentType,
+  type ImageUploadTarget,
+} from "./image-upload.ts";
+export {
+  isMatchFinished,
+  isMatchLive,
+  winnerFromResults,
+  type MatchLifecycle,
+  type MatchResultScore,
+} from "./match-lifecycle.ts";
+export { distinctStageName, tournamentStageLabel } from "./tournament-label.ts";
 export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api.ts";

@@ -1,6 +1,4 @@
-import type { TournamentEventRef } from "@sarpbc/types";
-
-type EventStage = { name: string; event: TournamentEventRef };
+type EventStage = { name: string; event: { name: string } };
 
 export function distinctStageName(stage: EventStage): string | null {
   const stageName = stage.name.trim();

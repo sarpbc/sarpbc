@@ -59,6 +59,9 @@ export const PLAYER_AWARD_TYPES = [
   "defensive_mvp",
 ] as const satisfies readonly PlayerAwardType[];
 
+export const SUPPORTED_LOCALES = ["en-US", "fr-FR"] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
 export const NEWS_TYPES = ["short", "article"] as const satisfies readonly NewsType[];
 
 export const TRANSFER_TYPES = [
