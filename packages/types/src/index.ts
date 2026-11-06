@@ -79,7 +79,6 @@ export type {
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,
-  RosterChangeKind,
   RosterProposal,
   RosterProposalList,
   RosterProposalStatus,

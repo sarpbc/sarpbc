@@ -69,8 +69,6 @@ export type RosterChange =
     }
   | { kind: "set_tournament_prizes"; tournamentId: string; prizes: PrizeEntry[] };
 
-export type RosterChangeKind = RosterChange["kind"];
-
 export const ROSTER_PROPOSAL_STATUSES = ["pending", "applied", "rejected"] as const;
 
 export type RosterProposalStatus = (typeof ROSTER_PROPOSAL_STATUSES)[number];
