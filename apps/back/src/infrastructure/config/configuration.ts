@@ -15,6 +15,14 @@ function sharedParentDomain(urls: string[]): string | undefined {
   return shared.length >= 2 ? `.${shared.reverse().join(".")}` : undefined;
 }
 
+function originWithWww(url: string): string[] {
+  const origin = new URL(url);
+  if (origin.hostname.startsWith("www.")) return [origin.origin];
+  const www = new URL(origin.origin);
+  www.hostname = `www.${origin.hostname}`;
+  return [origin.origin, www.origin];
+}
+
 export function toConfiguration(env: Env) {
   return {
     jwt_token: env.JWT_KEY,
@@ -25,7 +33,7 @@ export function toConfiguration(env: Env) {
     admin_url: env.ADMIN_URL,
     corsOrigins: [
       ...new Set([
-        new URL(env.FRONT_URL).origin,
+        ...(env.production ? originWithWww(env.FRONT_URL) : [new URL(env.FRONT_URL).origin]),
         new URL(env.ADMIN_URL).origin,
         ...(env.production ? [] : DEV_ORIGINS),
       ]),

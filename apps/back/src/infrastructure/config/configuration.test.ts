@@ -23,7 +23,11 @@ describe("toConfiguration", () => {
       ADMIN_URL: "https://admin.sarpbc.org",
     });
 
-    expect(config.corsOrigins).toEqual(["https://sarpbc.org", "https://admin.sarpbc.org"]);
+    expect(config.corsOrigins).toEqual([
+      "https://sarpbc.org",
+      "https://www.sarpbc.org",
+      "https://admin.sarpbc.org",
+    ]);
     expect(config.authCookie).toEqual({ secure: true, domain: ".sarpbc.org" });
   });
 
