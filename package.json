@@ -10,6 +10,9 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test:git-names": "node --test scripts/check-git-names.test.mjs",
+    "test:checks": "node --test scripts/check-i18n-parity.test.mjs scripts/check-package-imports.test.mjs",
+    "check:i18n": "node scripts/check-i18n-parity.mjs",
+    "check:packages": "node scripts/check-package-imports.mjs",
     "dev": "turbo run dev",
     "dev:back": "turbo run dev --filter=back",
     "dev:front": "turbo run dev --filter=front",
@@ -17,8 +20,8 @@
     "build": "turbo run build",
     "lint": "oxlint scripts && turbo run lint",
     "lint:fix": "turbo run lint:fix",
-    "fmt": "turbo run fmt",
-    "fmt:check": "oxfmt --check scripts tools docs && turbo run fmt:check",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check .",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {

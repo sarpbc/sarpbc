@@ -117,6 +117,12 @@ jobs:
       - name: Typecheck packages
         run: pnpm exec turbo run typecheck --filter="./packages/*"
 
+      - name: Locale parity and package boundaries
+        run: |
+          pnpm check:i18n
+          pnpm check:packages
+          pnpm test:checks
+
   backend:
     name: Backend tests and coverage
     needs: changes
