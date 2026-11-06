@@ -85,7 +85,16 @@ function setup(options: { source?: boolean; numberOfGames?: number | null } = {}
     links: vi.fn<GameStatsStore["links"]>(async () => [
       { platform: "steam", platformId: "stand-in-id", playerId: "vatira" },
     ]),
-    save: vi.fn<GameStatsStore["save"]>(async () => undefined),
+    save: vi.fn<GameStatsStore["save"]>(async (record) => ({
+      matchId: record.matchId,
+      number: record.number,
+      ballchasingId: record.ballchasingId,
+      playedAt: record.playedAt?.toISOString() ?? null,
+      blueParticipantId: record.blueParticipantId,
+      orangeParticipantId: record.orangeParticipantId,
+      blueGoals: record.blueGoals,
+      orangeGoals: record.orangeGoals,
+    })),
     byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => []),
     inTournament: vi.fn<GameStatsStore["inTournament"]>(async () => []),
     remove: vi.fn<GameStatsStore["remove"]>(async () => null),

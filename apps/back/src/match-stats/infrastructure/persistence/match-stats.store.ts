@@ -23,7 +23,7 @@ import type {
   StatsImportStore,
 } from "../../application/ports";
 import type { CandidateMatch, GameLocation, Side } from "../../domain/replay-matching";
-import type { StatsImport } from "../../domain/stats-import";
+import { ACTIVE_IMPORT_STATUSES, type StatsImport } from "../../domain/stats-import";
 import {
   MatchGame,
   MatchGameExclusion,
@@ -110,8 +110,8 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     return rows.map(toLink);
   }
 
-  async save(game: GameRecord): Promise<void> {
-    await this.em.transactional(async (em) => {
+  save(game: GameRecord): Promise<TournamentStatsGame> {
+    return this.em.transactional(async (em) => {
       await em.nativeDelete(MatchGameExclusion, { ballchasingId: game.ballchasingId });
       for (const { playerId, ...account } of game.learnedLinks) {
         await em.upsert(
@@ -152,6 +152,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
           shots: player.shots,
           demolitions: player.demolitions,
         });
+      return toTournamentGame(row);
     });
   }
 
@@ -374,7 +375,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
   failUnfinished(error: string): Promise<number> {
     return this.em.nativeUpdate(
       MatchStatsImport,
-      { status: { $in: ["pending", "running"] } },
+      { status: { $in: [...ACTIVE_IMPORT_STATUSES] } },
       { status: "failed", error, finishedAt: new Date() },
     );
   }

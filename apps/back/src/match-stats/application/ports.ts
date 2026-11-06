@@ -80,7 +80,7 @@ export interface GameStatsStore {
    * Saves the game, its player rows and its learned links atomically, links earlier unlinked
    * rows of each learned account and clears any staff exclusion of the replay.
    */
-  save(game: GameRecord): Promise<void>;
+  save(game: GameRecord): Promise<TournamentStatsGame>;
   byMatch(matchId: string): Promise<MatchGameStats[]>;
   inTournament(tournamentId: string): Promise<TournamentStatsGame[]>;
   /** Deletes the game with its player rows and excludes its replay atomically. */

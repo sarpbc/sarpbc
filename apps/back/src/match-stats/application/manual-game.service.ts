@@ -100,17 +100,7 @@ export class ManualGameService {
       rosters,
       await this.games.links(platformAccounts(stats)),
     );
-    await this.games.save(record);
-    return {
-      matchId: record.matchId,
-      number: record.number,
-      ballchasingId: record.ballchasingId,
-      playedAt: record.playedAt?.toISOString() ?? null,
-      blueParticipantId: record.blueParticipantId,
-      orangeParticipantId: record.orangeParticipantId,
-      blueGoals: record.blueGoals,
-      orangeGoals: record.orangeGoals,
-    };
+    return this.games.save(record);
   }
 
   async remove(
