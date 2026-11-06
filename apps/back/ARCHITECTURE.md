@@ -27,7 +27,7 @@ Feature consumers use application services or consumed ports. Shared relational 
 
 ## Writes and execution contexts
 
-Application operations choose atomic boundaries through feature-specific transaction ports. Their infrastructure adapters bind every participating store to the same transactional EntityManager. Staged stores do not independently commit. The transaction resolves after flush and commit.
+Application operations choose atomic boundaries through feature-specific transaction ports. Their infrastructure adapters bind every participating store to the same transactional EntityManager. Staged stores do not independently commit; a store may flush inside the transaction only to turn a unique or foreign-key violation into a typed application error through `isUniqueViolation` or `isForeignKeyViolation` in `common/infrastructure/persistence`. `reply/` owns the `Reply` and `ReplyReport` entities and the one reply creation path; forum and news only delete their replies through `replyDeletion`. The transaction resolves after flush and commit.
 
 The following operations share a transaction:
 

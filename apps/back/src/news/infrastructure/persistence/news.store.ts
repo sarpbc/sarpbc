@@ -4,6 +4,7 @@ import { ConflictError } from "../../../common/domain/errors";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { NewsArticle } from "./news-article.entity";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord, NewsSitemapRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
@@ -49,7 +50,7 @@ export class MikroNewsStore implements NewsStore {
     return (
       await this.em.find(
         NewsArticle,
-        { isDraft: false, type: "short", createdAt: { $gte: start, $lt: end } },
+        { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE, createdAt: { $gte: start, $lt: end } },
         { populate: ["author"], orderBy: { createdAt: "DESC" }, limit },
       )
     ).map(newsSnapshot);

@@ -1,5 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
 import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
+import { DEFAULT_NEWS_TYPE } from "../../domain/news-type";
 import { User } from "../../../user/infrastructure/persistence/user.entity";
 
 export class NewsArticle {
@@ -14,7 +15,7 @@ export class NewsArticle {
   updatedAt: Date | null = null;
   isDraft: boolean = true;
   imageUrl: string | null = null;
-  type: NewsType = "short";
+  type: NewsType = DEFAULT_NEWS_TYPE;
 }
 
 export const NewsArticleSchema = defineEntity({
@@ -42,6 +43,6 @@ export const NewsArticleSchema = defineEntity({
     type: p
       .enum([...NEWS_TYPES])
       .columnType("text")
-      .default("short"),
+      .default(DEFAULT_NEWS_TYPE),
   },
 });

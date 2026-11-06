@@ -8,6 +8,7 @@ import {
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
 import { assertValidMatchBlocks } from "../domain/news-content.util";
+import { DEFAULT_NEWS_TYPE } from "../domain/news-type";
 import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
 import type {
@@ -185,7 +186,7 @@ export class NewsService {
         slug,
         isDraft: true,
         imageUrl: dto.imageUrl ?? null,
-        type: dto.type ?? "short",
+        type: dto.type ?? DEFAULT_NEWS_TYPE,
         createdAt: new Date(),
       };
       await scope.articles.save(article);
