@@ -14,6 +14,7 @@ export async function getProfile(): Promise<User | null> {
 
 export async function logout(): Promise<void> {
   const user = useUser();
+  const localePath = useLocalePath();
 
   try {
     const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
@@ -21,7 +22,7 @@ export async function logout(): Promise<void> {
     });
     if (res.success === true) {
       user.value = null;
-      await navigateTo("/login");
+      await navigateTo(localePath("/login"));
       return;
     }
   } catch (error) {
