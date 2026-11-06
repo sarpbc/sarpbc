@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { Team } from "@sarpbc/types";
-import { selectActiveRosterPlayers, resolveThemedLogoUrl } from "@sarpbc/utils";
+import {
+  ACTIVE_ROSTER_LIMIT,
+  selectActiveRosterPlayers,
+  resolveThemedLogoUrl,
+} from "@sarpbc/utils";
 import { fetchWithEntityTagCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
@@ -19,7 +23,7 @@ const team = ref<Team | null>(null);
 
 const href = computed(() => teamHref(props.slug));
 
-const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []).slice(0, 3));
+const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
 const colorMode = useColorMode();
 const logoSrc = computed(() => resolveThemedLogoUrl(team.value, colorMode.value));
@@ -77,7 +81,7 @@ watch(open, (isOpen) => {
         </div>
         <div class="grid grid-cols-3 border-t border-default">
           <div
-            v-for="index in 3"
+            v-for="index in ACTIVE_ROSTER_LIMIT"
             :key="index"
             class="flex min-w-0 flex-col gap-2 border-r border-default p-2 last:border-r-0"
           >

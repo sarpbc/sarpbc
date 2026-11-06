@@ -46,7 +46,7 @@ export {
   type ParsedTweetUrl,
   type TweetEmbed,
 } from "./news-tweet-tag.ts";
-export { selectActiveRosterPlayers, selectTeamStaff } from "./team-roster.ts";
+export { ACTIVE_ROSTER_LIMIT, selectActiveRosterPlayers, selectTeamStaff } from "./team-roster.ts";
 export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo.ts";
 export {
   MAX_VODS_PER_GAME,
