@@ -1,7 +1,8 @@
-const apiBase =
-  process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
-const adminUrl =
-  process.env.NUXT_PUBLIC_ADMIN_URL || process.env.ADMIN_URL || "https://admin.sarpbc.org";
+import type { NuxtConfig } from "nuxt/schema";
+import { localizedPath } from "@sarpbc/utils/entity-path";
+
+const apiBase = process.env.NUXT_PUBLIC_API_BASE || "https://api.sarpbc.org";
+const adminUrl = process.env.NUXT_PUBLIC_ADMIN_URL || "https://admin.sarpbc.org";
 
 function apiOrigin(base: string): string | undefined {
   try {
@@ -14,6 +15,17 @@ function apiOrigin(base: string): string | undefined {
 const apiOriginUrl = apiOrigin(apiBase);
 
 const contentSwr = { swr: 300 } as const;
+
+type RouteRules = NonNullable<NuxtConfig["routeRules"]>;
+
+function localizedRouteRules(rules: RouteRules): RouteRules {
+  return Object.fromEntries(
+    Object.entries(rules).flatMap(([path, rule]) => [
+      [path, rule],
+      [localizedPath(path, "fr"), rule],
+    ]),
+  );
+}
 const isProduction = process.env.NODE_ENV === "production";
 const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
@@ -162,28 +174,18 @@ export default defineNuxtConfig({
     },
   },
 
-  routeRules: {
+  routeRules: localizedRouteRules({
     "/login": { appLayout: "login" },
-    "/fr/login": { appLayout: "login" },
     "/register": { appLayout: "login" },
-    "/fr/register": { appLayout: "login" },
     "/game/career": { appLayout: "game" },
     "/game/career/**": { appLayout: "game" },
-    "/fr/game/career": { appLayout: "game" },
-    "/fr/game/career/**": { appLayout: "game" },
     "/about": { appLayout: "marketing", ...contentSwr },
-    "/fr/about": { appLayout: "marketing", ...contentSwr },
     "/brand": { appLayout: "marketing", ...contentSwr },
-    "/fr/brand": { appLayout: "marketing", ...contentSwr },
     "/privacy-policy": contentSwr,
-    "/fr/privacy-policy": contentSwr,
     "/terms-of-service": contentSwr,
-    "/fr/terms-of-service": contentSwr,
     "/legal-notice": contentSwr,
-    "/fr/legal-notice": contentSwr,
     "/cookie-policy": contentSwr,
-    "/fr/cookie-policy": contentSwr,
-  },
+  }),
 
   runtimeConfig: {
     indexnowKey: "",
@@ -191,7 +193,7 @@ export default defineNuxtConfig({
     apiInternalToken: "",
     public: {
       apiBase: apiBase,
-      adminUrl: adminUrl,
+      adminUrl,
       posthog: {
         publicKey: posthogPublicKey,
         host: posthogHost,
