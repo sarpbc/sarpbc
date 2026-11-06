@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { newsPath } from "@sarpbc/utils";
 import type { NewsType } from "@sarpbc/types";
-import type { NewsArticleListItem } from "~/composables/news";
+import type { NewsArticleListItem } from "~/types/news";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 import { resolveNewsType } from "~/utils/newsTypeQuery";
 

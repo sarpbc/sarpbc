@@ -24,19 +24,25 @@ export interface CareerStats {
   morale: number;
 }
 
-export type CareerPhase =
-  | "menu"
-  | "onboarding"
-  | "season_intro"
-  | "event"
-  | "event_result"
-  | "stage_result"
-  | "offseason"
-  | "career_end";
+export const CAREER_PHASES = [
+  "menu",
+  "onboarding",
+  "season_intro",
+  "event",
+  "event_result",
+  "stage_result",
+  "offseason",
+  "career_end",
+] as const;
+export type CareerPhase = (typeof CAREER_PHASES)[number];
 
-export type OnboardingStep = "intro" | "region" | "country" | "role" | "background";
+export const ONBOARDING_STEPS = ["intro", "region", "country", "role", "background"] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
-export type CareerStage = "split1" | "split2" | "worlds";
+export const CAREER_STAGES = ["split1", "split2", "worlds"] as const;
+export type CareerStage = (typeof CAREER_STAGES)[number];
+
+export const DEFAULT_PLAYER_NAME = "Rookie";
 
 export function getSplitNumber(stage: CareerStage): number | null {
   switch (stage) {

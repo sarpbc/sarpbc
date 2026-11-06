@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { NewsWeek } from "~/composables/news";
+import type { NewsWeek } from "~/types/news";
 
 const localePath = useLocalePath();
 const { t } = useI18n();

@@ -29,7 +29,7 @@ export {
   type WorldRankings,
   type PlayerCircuitInput,
   snapshotWorldRanking,
-  computeWorldRankings,
+  computeStateRankings,
   getTeamRank,
   pickStartingTeam,
 } from "~/utils/career/rankings";
