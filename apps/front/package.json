@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --port 4000",
     "postinstall": "nuxt prepare",
     "lint": "node scripts/generate-oxlint-globals.mjs && oxlint -c .oxlintrc.generated.json . && node scripts/lint-hub-row-heights.mjs",
     "lint:fix": "node scripts/generate-oxlint-globals.mjs && oxlint -c .oxlintrc.generated.json . --fix",
