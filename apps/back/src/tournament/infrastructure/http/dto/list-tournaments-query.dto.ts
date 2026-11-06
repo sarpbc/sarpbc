@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { OffsetPaginationQueryDto } from "../../../../common/infrastructure/http/dto/offset-pagination-query.dto";
 
 const optionalBoolean = z.preprocess(
@@ -9,7 +10,7 @@ const optionalBoolean = z.preprocess(
 );
 
 export const ListTournamentsQueryDto = OffsetPaginationQueryDto.extend({
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
   pickems: optionalBoolean,
   activeOnly: optionalBoolean,
 });
