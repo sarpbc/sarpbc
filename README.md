@@ -119,7 +119,7 @@ pnpm lint:fix
 ## Links
 
 - [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
+- [Releases](https://github.com/sarpbc/sarpbc/releases)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security](SECURITY.md)
 - [Trademark policy](docs/TRADEMARK.md)

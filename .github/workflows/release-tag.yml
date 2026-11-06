@@ -2,6 +2,7 @@ name: Create Release Tag
 
 on:
   workflow_run:
+    # Must match the name of pr.yml and of its aggregate job (also read as check_name=CI below).
     workflows: [CI]
     types: [completed]
     branches: [main]
@@ -76,21 +77,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
         shell: bash
-        run: |
-          release_date="${TAG#v}"
-          release_date="${release_date%.*}"
-
-          notes_file="$(mktemp)"
-          if [ -f CHANGELOG.md ] && awk -v date="$release_date" '
-            BEGIN { found=0 }
-            /^\#\# \[/ {
-              if (found) exit
-              if (index($0, "[" date "]") > 0) found=1
-              next
-            }
-            found { print }
-          ' CHANGELOG.md > "$notes_file" && [ -s "$notes_file" ]; then
-            gh release create "$TAG" --title "Release $TAG" --notes-file "$notes_file"
-          else
-            gh release create "$TAG" --title "Release $TAG" --generate-notes
-          fi
+        run: gh release create "$TAG" --title "Release $TAG" --generate-notes

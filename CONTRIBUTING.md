@@ -63,10 +63,10 @@ The backend job runs `pnpm --filter back test:migrations`. On pull requests it c
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Change public UI, pages, or copy  | `apps/front` — read [apps/front/README.md](apps/front/README.md) and [DESIGN.md](apps/front/DESIGN.md)         |
 | Change API, data, or auth         | `apps/back` — read [apps/back/README.md](apps/back/README.md) and [ARCHITECTURE.md](apps/back/ARCHITECTURE.md) |
-| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required)                                      |
+| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required; `pnpm check:i18n` enforces it)       |
 | Staff admin console               | `apps/admin`                                                                                                   |
-| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports)                               |
-| Docs, changelog, or OSS process   | Root `README.md`, `CHANGELOG.md`, this file                                                                    |
+| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports, `pnpm check:packages`)        |
+| Docs or OSS process               | Root `README.md`, this file                                                                                    |
 
 ## Project layout
 
@@ -86,6 +86,9 @@ The backend job runs `pnpm --filter back test:migrations`. On pull requests it c
 pnpm lint
 pnpm fmt:check
 pnpm typecheck
+pnpm check:i18n
+pnpm check:packages
+pnpm test:checks
 pnpm --filter @sarpbc/utils test
 pnpm --filter back typecheck:tests
 pnpm --filter back test
