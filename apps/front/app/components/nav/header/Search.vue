@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Player, Team } from "@sarpbc/types";
+import { useTimeoutFn } from "@vueuse/core";
 
 const { t } = useI18n();
 
@@ -14,13 +15,12 @@ const playerList = ref<Player[]>([]);
 
 const DEBOUNCE_MS = 150;
 
-let searchTimeout: NodeJS.Timeout | null = null;
 let latestRequest = 0;
 
+const pendingSearch = useTimeoutFn(refreshSearch, DEBOUNCE_MS, { immediate: false });
+
 function resetResults() {
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
-  }
+  pendingSearch.stop();
   latestRequest++;
   searching.value = false;
   teamList.value = [];
@@ -33,11 +33,8 @@ function updateSearch(value: string) {
   if (search.value.length === 0) {
     resetResults();
   } else {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
     searching.value = true;
-    searchTimeout = setTimeout(refreshSearch, DEBOUNCE_MS);
+    pendingSearch.start();
   }
 
   handleFocus();
