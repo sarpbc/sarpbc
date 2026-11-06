@@ -351,7 +351,7 @@ Verify in codebase before assuming gaps. As of skill authorship, the platform in
 
 Data: PandaScore sync (tournaments/matches), MikroORM + PostgreSQL, Redis.
 
-**Known active epics (Linear):** SAR-23 Match Discovery, SAR-24 Air Riddle UX, SAR-25 Match Detail v1.5, SAR-21 Game Stats Pilot, SAR-26 Pick'em Loop — refresh via Linear MCP before planning.
+**Known active epics (Linear):** SAR-23 Match Discovery, SAR-24 Air Riddle UX, SAR-25 Match Detail v1.5, SAR-21 Game Stats Pilot, SAR-26 Pick'em Loop — refresh from Linear before planning.
 
 ---
 
@@ -366,7 +366,6 @@ Data: PandaScore sync (tournaments/matches), MikroORM + PostgreSQL, Redis.
 - **Blockers:** use `blockedBy` — e.g. game stats epic blocked by match detail v1.5
 - **Shipped work:** mark **Done** with note "Closed after backlog audit YYYY-MM-DD"
 - **Duplicates:** **Canceled** with link to canonical issue
-- **MCP:** `list_issues`, `save_issue` on `plugin-linear-linear`
 
 ---
 
