@@ -88,6 +88,7 @@ pnpm fmt:check
 pnpm typecheck
 pnpm check:i18n
 pnpm check:packages
+pnpm check:node
 pnpm test:checks
 pnpm --filter @sarpbc/utils test
 pnpm --filter back typecheck:tests

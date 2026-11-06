@@ -13,6 +13,7 @@
     "test:checks": "node --test scripts/check-i18n-parity.test.mjs scripts/check-package-imports.test.mjs",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:packages": "node scripts/check-package-imports.mjs",
+    "check:node": "node scripts/check-node-version.mjs",
     "dev": "turbo run dev",
     "dev:back": "turbo run dev --filter=back",
     "dev:front": "turbo run dev --filter=front",

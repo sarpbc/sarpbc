@@ -115,7 +115,7 @@ jobs:
         run: pnpm run fmt:check
 
       - name: Dockerfile Node version
-        run: node scripts/check-node-version.mjs
+        run: pnpm check:node
 
       - name: Typecheck packages
         run: pnpm exec turbo run typecheck --filter="./packages/*"
