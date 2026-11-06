@@ -169,9 +169,9 @@ describe("R2Service", () => {
 
   it("fails with a clear error when R2 is not configured", async () => {
     const unconfigured = new R2Service({
-      get: () => undefined,
-      getOrThrow: () => "sarpbc-org",
-    } as unknown as ConfigService);
+      get: (key: string) => (key === "r2_bucket" ? "sarpbc-org" : undefined),
+      getOrThrow: (key: string) => (key === "r2_bucket" ? "sarpbc-org" : undefined),
+    } as ConfigService);
 
     await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
       /R2 storage is not configured/,

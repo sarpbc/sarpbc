@@ -75,18 +75,8 @@ export function useR2Upload() {
           }
 
           const serverMessage = messageFromNestBody(xhr.responseText);
-          if (xhr.status >= 500) {
-            reject(
-              new Error(
-                serverMessage && serverMessage !== "Internal server error"
-                  ? serverMessage
-                  : "server",
-              ),
-            );
-            return;
-          }
-
-          reject(new Error(serverMessage ?? `Upload failed with status ${xhr.status}`));
+          const fallback = xhr.status >= 500 ? "" : `Upload failed with status ${xhr.status}`;
+          reject(new Error(serverMessage ?? fallback));
         });
 
         xhr.addEventListener("error", () => {

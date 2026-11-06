@@ -20,13 +20,10 @@ watch(isUploading, (value) => emit("update:uploading", value));
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const displayError = computed(() => {
-  if (!error.value || isUploading.value) {
+  if (error.value === null || isUploading.value) {
     return null;
   }
-  if (error.value === "server") {
-    return t("imageUpload.uploadServerError");
-  }
-  return error.value;
+  return error.value || t("imageUpload.uploadServerError");
 });
 
 function openFilePicker() {
@@ -51,8 +48,7 @@ async function onFileChange(event: Event) {
     const message = err instanceof Error ? err.message : "";
     toast.add({
       title: t("imageUpload.uploadFailed"),
-      description:
-        message === "server" || message.length === 0 ? t("imageUpload.uploadServerError") : message,
+      description: message || t("imageUpload.uploadServerError"),
       color: "error",
     });
   }
