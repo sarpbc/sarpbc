@@ -1,18 +1,9 @@
 import type { NuxtConfig } from "nuxt/schema";
 import { localizedPath } from "@sarpbc/utils/entity-path";
+import { apiPreconnectLinks, i18nOptions, newsMdcComponentMap } from "@sarpbc/ui/config";
 
 const apiBase = process.env.NUXT_PUBLIC_API_BASE || "https://api.sarpbc.org";
 const adminUrl = process.env.NUXT_PUBLIC_ADMIN_URL || "https://admin.sarpbc.org";
-
-function apiOrigin(base: string): string | undefined {
-  try {
-    return new URL(base).origin;
-  } catch {
-    return undefined;
-  }
-}
-
-const apiOriginUrl = apiOrigin(apiBase);
 
 const contentSwr = { swr: 300 } as const;
 
@@ -43,18 +34,11 @@ function hostnameFromUrl(base: string | undefined): string | undefined {
 
 const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
 
-const apiHeadLinks = apiOriginUrl
-  ? ([
-      { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
-      { rel: "dns-prefetch", href: apiOriginUrl },
-    ] as const)
-  : [];
-
 export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        ...apiHeadLinks,
+        ...apiPreconnectLinks(apiBase),
         { rel: "preload", href: "/sarpbc.svg", as: "image", type: "image/svg+xml" },
       ],
     },
@@ -69,38 +53,14 @@ export default defineNuxtConfig({
   },
 
   mdc: {
-    components: {
-      map: {
-        player: "SarpPlayerTag",
-        team: "SarpTeamTag",
-        tweet: "SarpTweetTag",
-        matches: "NewsMatchBlock",
-      },
-    },
+    components: { map: newsMdcComponentMap("NewsMatchBlock") },
   },
 
   css: ["~/assets/css/main.css"],
 
   devtools: { enabled: false },
 
-  i18n: {
-    langDir: "locales",
-    locales: [
-      { code: "en", language: "en", file: "en-US.json", name: "English" },
-      { code: "fr", language: "fr", file: "fr-FR.json", name: "Français" },
-    ],
-    defaultLocale: "en",
-    strategy: "prefix_except_default",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-      redirectOn: "root",
-      fallbackLocale: "en",
-    },
-    compilation: {
-      strictMessage: false,
-    },
-  },
+  i18n: i18nOptions,
 
   image: {
     domains: ["cdn.pandascore.co", "imagedelivery.net", ...(r2ImageHost ? [r2ImageHost] : [])],

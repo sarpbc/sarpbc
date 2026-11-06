@@ -1,6 +1,3 @@
-export const newsMdcComponents = {
-  player: "SarpPlayerTag",
-  team: "SarpTeamTag",
-  tweet: "SarpTweetTag",
-  matches: "NewsMatchBlockPreview",
-} as const;
+import { newsMdcComponentMap } from "@sarpbc/ui/config";
+
+export const newsMdcComponents = newsMdcComponentMap("NewsMatchBlockPreview");

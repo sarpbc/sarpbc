@@ -23,10 +23,15 @@ export function parityViolations(directory) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const apps = path.join(repository, "apps");
-  const directories = readdirSync(apps)
-    .map((app) => path.join(apps, app, "i18n", "locales"))
-    .filter((directory) => existsSync(directory));
+  const candidates = [
+    ...readdirSync(path.join(repository, "apps")).map((app) =>
+      path.join(repository, "apps", app, "i18n", "locales"),
+    ),
+    ...readdirSync(path.join(repository, "packages")).map((name) =>
+      path.join(repository, "packages", name, "src", "runtime", "locales"),
+    ),
+  ];
+  const directories = candidates.filter((directory) => existsSync(directory));
   let failed = false;
   for (const directory of directories) {
     const violations = parityViolations(directory);

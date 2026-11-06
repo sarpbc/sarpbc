@@ -1,6 +1,8 @@
 import { dirname } from "node:path";
 import { createRequire } from "node:module";
 import { localizedPath } from "@sarpbc/utils/entity-path";
+import { apiPreconnectLinks, i18nOptions } from "@sarpbc/ui/config";
+import { newsMdcComponents } from "./app/utils/newsMdcComponents";
 
 const require = createRequire(import.meta.url);
 const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
@@ -26,15 +28,7 @@ const prosemirrorAliases = Object.fromEntries(
 const apiBase = process.env.NUXT_PUBLIC_API_BASE || "https://api.sarpbc.org";
 const loginRule = { appLayout: "login" } as const;
 
-function apiOrigin(base: string): string | undefined {
-  try {
-    return new URL(base).origin;
-  } catch {
-    return undefined;
-  }
-}
-
-const apiOriginUrl = apiOrigin(apiBase);
+const publicSiteUrl = "https://sarpbc.org";
 
 export default defineNuxtConfig({
   app: {
@@ -42,12 +36,7 @@ export default defineNuxtConfig({
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
       title: "sarpbc.org Admin",
-      link: apiOriginUrl
-        ? [
-            { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
-            { rel: "dns-prefetch", href: apiOriginUrl },
-          ]
-        : [],
+      link: apiPreconnectLinks(apiBase),
     },
   },
 
@@ -61,36 +50,12 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
 
-  i18n: {
-    langDir: "locales",
-    locales: [
-      { code: "en", language: "en", file: "en-US.json", name: "English" },
-      { code: "fr", language: "fr", file: "fr-FR.json", name: "Français" },
-    ],
-    defaultLocale: "en",
-    strategy: "prefix_except_default",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-      redirectOn: "root",
-      fallbackLocale: "en",
-    },
-    compilation: {
-      strictMessage: false,
-    },
-  },
+  i18n: i18nOptions,
 
   modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
 
   mdc: {
-    components: {
-      map: {
-        player: "SarpPlayerTag",
-        team: "SarpTeamTag",
-        tweet: "SarpTweetTag",
-        matches: "NewsMatchBlockPreview",
-      },
-    },
+    components: { map: newsMdcComponents },
   },
 
   nitro: {
@@ -113,7 +78,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase,
-      publicSiteUrl: "https://sarpbc.org",
+      publicSiteUrl,
+      sarpbcUi: { entityTagSiteUrl: publicSiteUrl },
     },
   },
 

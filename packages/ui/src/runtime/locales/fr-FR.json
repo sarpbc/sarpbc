@@ -1,0 +1,11 @@
+{
+  "newsTag": {
+    "error": "Impossible de charger le profil. Réessayez plus tard.",
+    "viewProfile": "Voir le profil",
+    "noTeam": "Aucune équipe actuelle",
+    "viewOnX": "Voir sur X",
+    "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
+    "tweetOnX": "Post de {name} sur X",
+    "tweetImage": "Image {index} du post X"
+  }
+}
