@@ -93,7 +93,7 @@ if (process.argv.includes("--write")) {
   assert.deepEqual(
     actual,
     JSON.parse(fs.readFileSync(snapshot, "utf8")),
-    "HTTP routes, status overrides, guards and permissions changed",
+    "HTTP routes, status overrides, guards and permissions changed. If intended, run `pnpm --filter back test:contracts --write` then `pnpm --filter back fmt`, and commit test/contracts/http-routes.json.",
   );
   process.stdout.write(`Verified ${actual.length} HTTP route contracts.\n`);
 }
