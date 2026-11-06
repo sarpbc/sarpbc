@@ -22,7 +22,7 @@ import type {
   UpsertSerieCommand,
   UpsertTournamentCommand,
 } from "../feed";
-import { upsertMatchInTransaction } from "../match/write-match";
+import { upsertSyncedMatchInTransaction } from "../match/write-match";
 import { placeStage } from "../event-placement";
 
 type IncidentChange = Exclude<CompetitionIncident, { changeType: "deletion" }>;
@@ -299,7 +299,8 @@ export class CompetitionSyncService {
       stageName: command.name,
     });
     const stage = {
-      fullName: `${eventName} ${command.name}`,
+      eventName,
+      stageName: command.name,
       leagueId: league?.id ?? null,
       beginAt: command.beginAt ?? null,
       endAt: command.endAt ?? null,
@@ -397,6 +398,7 @@ export class CompetitionSyncService {
   ): Promise<string[]> {
     const participants = await scope.tournaments.participants(tournament.id),
       ids: string[] = [];
+    // Bracket links only resolve to matches already written, so earlier matches go first.
     for (const command of [...commands].sort(
       (a, b) => (a.beginAt?.getTime() ?? 0) - (b.beginAt?.getTime() ?? 0),
     )) {
@@ -408,13 +410,9 @@ export class CompetitionSyncService {
             )
           : command.opponentSlugs.map((slug) => participants.find((p) => p.team.slug === slug)?.id)
       ).filter((id): id is string => Boolean(id));
-      const match = await upsertMatchInTransaction(scope.matches, tournament.id, {
+      const match = await upsertSyncedMatchInTransaction(scope.matches, tournament.id, {
         ...command,
         participantIds,
-        previous_matches: command.previousMatches.map((p) => ({
-          type: p.type,
-          match_id: p.matchPandascoreId,
-        })),
         results: command.results.map((r) => ({
           participantId:
             participants.find((p) => p.team.pandascoreId === r.teamPandascoreId)?.id ?? null,

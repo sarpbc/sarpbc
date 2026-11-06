@@ -4,11 +4,12 @@ import { Team } from "../../../roster/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import {
+  createMatchInTransaction,
   setGameVodsInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
   updateMatchInTransaction,
-  upsertMatchInTransaction,
+  upsertSyncedMatchInTransaction,
 } from "./write-match";
 
 describe("Match writes", () => {
@@ -37,7 +38,7 @@ describe("Match writes", () => {
   });
 
   it("derives a finished match winner from scores", async () => {
-    const match = await upsertMatchInTransaction(writer, tournament.id, {
+    const match = await createMatchInTransaction(writer, tournament.id, {
       name: "Final",
       participantIds: ["a", "b"],
       status: "finished",
@@ -56,7 +57,7 @@ describe("Match writes", () => {
     writer.byPandascoreId.mockResolvedValue(
       Object.assign(new Match(), { tournament, pandascoreId: 7, status: "finished", endAt }),
     );
-    const match = await upsertMatchInTransaction(writer, tournament.id, {
+    const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
       name: "Final",
       participantIds: ["a", "b"],
       pandascoreId: 7,
@@ -67,7 +68,7 @@ describe("Match writes", () => {
 
   it("rejects participants belonging to another tournament", async () => {
     await expect(
-      upsertMatchInTransaction(writer, tournament.id, {
+      createMatchInTransaction(writer, tournament.id, {
         name: "Final",
         participantIds: ["a", "outsider"],
       }),
@@ -82,7 +83,7 @@ describe("Match writes", () => {
       officialStreams: [{ language: "en", url: "https://twitch.tv/rocketleague", main: true }],
     });
     writer.byPandascoreId.mockResolvedValue(match);
-    const updated = await upsertMatchInTransaction(writer, tournament.id, {
+    const updated = await upsertSyncedMatchInTransaction(writer, tournament.id, {
       name: "Final",
       pandascoreId: 123,
       participantIds: ["a", "b"],
@@ -299,7 +300,7 @@ describe("Match VOD writes", () => {
     writer.tournament.mockResolvedValue(tournament);
     writer.participants.mockResolvedValue([]);
     writer.byPandascoreId.mockResolvedValue(syncedMatch());
-    const match = await upsertMatchInTransaction(writer, "cup", {
+    const match = await upsertSyncedMatchInTransaction(writer, "cup", {
       name: "Final",
       participantIds: [],
       pandascoreId: 42,

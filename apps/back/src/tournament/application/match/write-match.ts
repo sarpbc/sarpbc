@@ -1,8 +1,8 @@
 import { v4 } from "uuid";
 import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Match } from "../../domain/competition";
+import { Match, type TournamentParticipant } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
-import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
+import type { MatchFields, SyncedMatchInput, UpdateMatchInput } from "../inputs";
 import { winnerFromResults } from "@sarpbc/utils";
 import {
   normalizeMatchVods,
@@ -10,29 +10,24 @@ import {
   type MatchVodInput,
   type MatchVodLink,
 } from "../../domain/match-vod";
-export async function upsertMatchInTransaction(
+async function requireParticipants(
   writer: MatchWriter,
   tournamentId: string,
-  input: UpsertMatchInput,
-): Promise<Match> {
-  const tournament = await writer.tournament(tournamentId);
-  if (!tournament) throw new NotFoundError("Tournament not found");
+  participantIds: string[],
+) {
   const available = await writer.participants(tournamentId),
-    ids = new Set(input.participantIds),
+    ids = new Set(participantIds),
     participants = available.filter((p) => ids.has(p.id));
-  if (participants.length !== input.participantIds.length)
+  if (participants.length !== participantIds.length)
     throw new InvalidInputError("Some participants not found in this tournament");
-  let match = input.pandascoreId ? await writer.byPandascoreId(input.pandascoreId) : null;
-  if (!match) {
-    match = new Match();
-    match.tournament = tournament;
-    match.pandascoreId = input.pandascoreId ?? null;
-    match.source = input.pandascoreId
-      ? "pandascore"
-      : tournament.source === "startgg"
-        ? "startgg"
-        : "manual";
-  }
+  return participants;
+}
+async function saveMatch(
+  writer: MatchWriter,
+  match: Match,
+  participants: TournamentParticipant[],
+  input: MatchFields,
+): Promise<Match> {
   const previousEndAt = match.endAt;
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;
@@ -40,20 +35,6 @@ export async function upsertMatchInTransaction(
   match.status = input.status ?? null;
   match.numberOfGames = input.numberOfGames ?? null;
   match.participants = participants;
-  if (input.officialStreams !== undefined) match.officialStreams = input.officialStreams;
-  if (input.previous_matches?.length) {
-    match.previousMatches = [];
-    for (const link of input.previous_matches) {
-      const previous = await writer.byPandascoreId(link.match_id);
-      if (previous)
-        match.previousMatches.push({
-          id: v4(),
-          match: { id: match.id },
-          previousMatch: { id: previous.id },
-          type: link.type,
-        });
-    }
-  }
   if (input.results) {
     match.results = [];
     for (const r of input.results) {
@@ -81,6 +62,50 @@ export async function upsertMatchInTransaction(
   match.stampEnd(previousEndAt ?? new Date());
   await writer.save(match);
   return match;
+}
+export async function createMatchInTransaction(
+  writer: MatchWriter,
+  tournamentId: string,
+  input: MatchFields,
+): Promise<Match> {
+  const tournament = await writer.tournament(tournamentId);
+  if (!tournament) throw new NotFoundError("Tournament not found");
+  const participants = await requireParticipants(writer, tournamentId, input.participantIds);
+  const match = new Match();
+  match.tournament = tournament;
+  match.source = tournament.source === "startgg" ? "startgg" : "manual";
+  return saveMatch(writer, match, participants, input);
+}
+export async function upsertSyncedMatchInTransaction(
+  writer: MatchWriter,
+  tournamentId: string,
+  input: SyncedMatchInput,
+): Promise<Match> {
+  const tournament = await writer.tournament(tournamentId);
+  if (!tournament) throw new NotFoundError("Tournament not found");
+  const participants = await requireParticipants(writer, tournamentId, input.participantIds);
+  let match = await writer.byPandascoreId(input.pandascoreId);
+  if (!match) {
+    match = new Match();
+    match.tournament = tournament;
+    match.pandascoreId = input.pandascoreId;
+    match.source = "pandascore";
+  }
+  if (input.officialStreams !== undefined) match.officialStreams = input.officialStreams;
+  if (input.previousMatches?.length) {
+    match.previousMatches = [];
+    for (const link of input.previousMatches) {
+      const previous = await writer.byPandascoreId(link.matchPandascoreId);
+      if (previous)
+        match.previousMatches.push({
+          id: v4(),
+          match: { id: match.id },
+          previousMatch: { id: previous.id },
+          type: link.type,
+        });
+    }
+  }
+  return saveMatch(writer, match, participants, input);
 }
 export async function setWinnerInTransaction(
   writer: MatchWriter,

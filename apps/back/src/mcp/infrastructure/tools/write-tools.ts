@@ -241,7 +241,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           { participantIds, teams },
           ctx.teamService,
         );
-        const match = await ctx.matchService.upsertMatch(tournamentId, {
+        const match = await ctx.matchService.createMatch(tournamentId, {
           name,
           beginAt: beginAt ? new Date(beginAt) : undefined,
           endAt: endAt ? new Date(endAt) : undefined,

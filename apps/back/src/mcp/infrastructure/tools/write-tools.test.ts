@@ -94,7 +94,7 @@ describe("create_match participants", () => {
       tournament: { slug: "coupe", event: { slug: "cdf" } },
     });
     const clubs = [kc.team, m8.team, outsider];
-    const matchService = { upsertMatch: vi.fn().mockResolvedValue(match) };
+    const matchService = { createMatch: vi.fn().mockResolvedValue(match) };
     const tournaments = {
       findById: vi.fn(async (id: string) => (id === tournament.id ? tournament : null)),
     };
@@ -150,7 +150,7 @@ describe("create_match participants", () => {
       name: "Bo5",
       teams: ["karmine-corp", "gentle-mates"],
     });
-    expect(matchService.upsertMatch).toHaveBeenCalledWith("cup", {
+    expect(matchService.createMatch).toHaveBeenCalledWith("cup", {
       name: "Bo5",
       beginAt: undefined,
       endAt: undefined,
@@ -180,7 +180,7 @@ describe("create_match participants", () => {
       name: "Bo5",
       participantIds: ["p-m8", "p-kc"],
     });
-    expect(matchService.upsertMatch).toHaveBeenCalledWith(
+    expect(matchService.createMatch).toHaveBeenCalledWith(
       "cup",
       expect.objectContaining({ participantIds: ["p-m8", "p-kc"] }),
     );
@@ -196,7 +196,7 @@ describe("create_match participants", () => {
     });
     expect(result.isError).toBe(true);
     expect(text).toContain('Tournament "missing" was not found');
-    expect(matchService.upsertMatch).not.toHaveBeenCalled();
+    expect(matchService.createMatch).not.toHaveBeenCalled();
   });
 
   it("rejects a team that is not registered without creating a match", async () => {
@@ -208,7 +208,7 @@ describe("create_match participants", () => {
     });
     expect(result.isError).toBe(true);
     expect(text).toContain('Team "Outsider" (outsider) is not registered in "Coupe"');
-    expect(matchService.upsertMatch).not.toHaveBeenCalled();
+    expect(matchService.createMatch).not.toHaveBeenCalled();
   });
 
   it("does not return participants of a start.gg tournament", async () => {
@@ -272,6 +272,6 @@ describe("create_match participants", () => {
       (await call("create_match", { tournamentId: "cup", name: "Bo5", teams: ["a", "b"] })).result
         .isError,
     ).toBe(true);
-    expect(matchService.upsertMatch).not.toHaveBeenCalled();
+    expect(matchService.createMatch).not.toHaveBeenCalled();
   });
 });

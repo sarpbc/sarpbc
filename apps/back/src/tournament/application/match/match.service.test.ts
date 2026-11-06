@@ -56,7 +56,7 @@ describe("MatchService decided events", () => {
         tournament: { id: "cup" },
       }),
     );
-    await service.upsertMatch("cup", { name: "Final", participantIds: ["a", "b"] });
+    await service.createMatch("cup", { name: "Final", participantIds: ["a", "b"] });
     expect(events.publish).not.toHaveBeenCalled();
   });
 

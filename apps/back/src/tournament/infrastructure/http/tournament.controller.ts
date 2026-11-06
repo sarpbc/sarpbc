@@ -240,7 +240,7 @@ export class TournamentController {
     @Param("id") tournamentId: string,
     @Body({ schema: CreateMatchDto }) matchData: CreateMatchDto,
   ) {
-    const match = await this.matchService.upsertMatch(tournamentId, {
+    const match = await this.matchService.createMatch(tournamentId, {
       ...matchData,
       beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
       endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,

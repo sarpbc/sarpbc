@@ -43,16 +43,18 @@ export interface UpdateLeagueInput {
   url?: string | null;
   imageUrl?: string | null;
 }
-export interface UpsertMatchInput {
+export interface MatchFields {
   name: string;
   beginAt?: Date;
   endAt?: Date;
   status?: string;
   numberOfGames?: number;
   participantIds: string[];
-  pandascoreId?: number;
-  previous_matches?: { type: "winner" | "loser"; match_id: number }[];
   results?: { participantId: string | null; score: number }[];
+}
+export interface SyncedMatchInput extends MatchFields {
+  pandascoreId: number;
+  previousMatches?: { type: "winner" | "loser"; matchPandascoreId: number }[];
   officialStreams?: OfficialMatchStream[];
 }
 export interface UpdateMatchInput {

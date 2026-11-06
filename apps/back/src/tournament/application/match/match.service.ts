@@ -8,10 +8,10 @@ import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type { CompetitionTransaction, MatchQueries } from "../ports";
-import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
+import type { MatchFields, UpdateMatchInput } from "../inputs";
 import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
-  upsertMatchInTransaction,
+  createMatchInTransaction,
   setGameVodsInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
@@ -222,9 +222,9 @@ export class MatchService {
     return winnerParticipantId === teamParticipant.id ? "win" : "loss";
   }
 
-  async upsertMatch(tournamentId: string, input: UpsertMatchInput): Promise<Match> {
+  async createMatch(tournamentId: string, input: MatchFields): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
-      upsertMatchInTransaction(matches, tournamentId, input),
+      createMatchInTransaction(matches, tournamentId, input),
     );
     return this.settled(written.id);
   }
