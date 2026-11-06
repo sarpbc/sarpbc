@@ -1,10 +1,16 @@
 import { v4 } from "uuid";
 import type { StatsImportFailedReason, StatsImportItem } from "@sarpbc/types";
-import { ApplicationError, ConflictError, NotFoundError } from "../../common/domain/errors";
-import { parseBallchasingGroupId } from "../domain/group-ref";
+import { ApplicationError, ConflictError } from "../../common/domain/errors";
+import { parseBallchasingRef } from "../domain/ballchasing-ref";
 import { assignReplays, type ReplayAssignment, type RosterPlayer } from "../domain/replay-matching";
 import { isActive, type StatsImport } from "../domain/stats-import";
-import { buildGameRecord, hasBothTeams, platformAccounts, requireBallchasing } from "./game-record";
+import {
+  buildGameRecord,
+  hasBothTeams,
+  platformAccounts,
+  requireBallchasing,
+  requireTournament,
+} from "./game-record";
 import type {
   BallchasingSource,
   GameStatsStore,
@@ -30,9 +36,8 @@ export class StatsImportService {
 
   async request(tournamentId: string, group: string): Promise<StatsImport> {
     requireBallchasing(this.source);
-    const groupId = parseBallchasingGroupId(group);
-    if (!(await this.candidates.tournamentExists(tournamentId)))
-      throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
+    const groupId = parseBallchasingRef("group", group);
+    await requireTournament(this.candidates, tournamentId);
     const [latest] = await this.imports.latest(tournamentId, 1);
     if (latest && isActive(latest))
       throw new ConflictError({

@@ -1,4 +1,4 @@
-import { IntegrationError } from "../../common/domain/errors";
+import { IntegrationError, NotFoundError } from "../../common/domain/errors";
 import { resolvePlayerId, type RosterPlayer, type SideAssignment } from "../domain/replay-matching";
 import type {
   BallchasingSource,
@@ -6,6 +6,7 @@ import type {
   PlatformAccount,
   PlayerLink,
   ReplayStats,
+  StatsCandidates,
 } from "./ports";
 
 export interface GameTarget {
@@ -24,6 +25,14 @@ export function requireBallchasing(source: BallchasingSource | null): Ballchasin
       code: "ballchasing_not_configured",
     });
   return source;
+}
+
+export async function requireTournament(
+  candidates: StatsCandidates,
+  tournamentId: string,
+): Promise<void> {
+  if (!(await candidates.tournamentExists(tournamentId)))
+    throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
 }
 
 export function hasBothTeams(stats: ReplayStats): boolean {

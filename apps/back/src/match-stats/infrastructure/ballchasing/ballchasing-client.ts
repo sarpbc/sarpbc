@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { IntegrationError } from "../../../common/domain/errors";
 import type { BallchasingSource, ReplayPlayerStats, ReplayStats } from "../../application/ports";
+import { BALLCHASING_HOST } from "../../domain/ballchasing-ref";
 import type { ReplaySummary, ReplayTeam, Side } from "../../domain/replay-matching";
 
-export const BALLCHASING_API_URL = "https://ballchasing.com/api";
+export const BALLCHASING_API_URL = `https://${BALLCHASING_HOST}/api`;
 
 type Endpoint = "list" | "group" | "replay";
 

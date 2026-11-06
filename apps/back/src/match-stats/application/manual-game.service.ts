@@ -5,8 +5,14 @@ import {
   NotFoundError,
   UnprocessableError,
 } from "../../common/domain/errors";
-import { parseBallchasingReplayId } from "../domain/replay-ref";
-import { buildGameRecord, hasBothTeams, platformAccounts, requireBallchasing } from "./game-record";
+import { parseBallchasingRef } from "../domain/ballchasing-ref";
+import {
+  buildGameRecord,
+  hasBothTeams,
+  platformAccounts,
+  requireBallchasing,
+  requireTournament,
+} from "./game-record";
 import type { BallchasingSource, GameStatsStore, StatsCandidates } from "./ports";
 
 /** Staff overrides: they skip the series, team and date rules of the import, not its integrity checks. */
@@ -18,14 +24,14 @@ export class ManualGameService {
   ) {}
 
   async list(tournamentId: string): Promise<TournamentStatsGame[]> {
-    await this.requireTournament(tournamentId);
+    await requireTournament(this.candidates, tournamentId);
     return this.games.inTournament(tournamentId);
   }
 
   async attach(tournamentId: string, input: AttachReplayInput): Promise<TournamentStatsGame> {
     const source = requireBallchasing(this.source);
-    const replayId = parseBallchasingReplayId(input.replay);
-    await this.requireTournament(tournamentId);
+    const replayId = parseBallchasingRef("replay", input.replay);
+    await requireTournament(this.candidates, tournamentId);
     const match = (await this.candidates.matches(tournamentId)).find(
       (candidate) => candidate.id === input.matchId,
     );
@@ -112,7 +118,7 @@ export class ManualGameService {
     matchId: string,
     number: number,
   ): Promise<TournamentStatsGame> {
-    await this.requireTournament(tournamentId);
+    await requireTournament(this.candidates, tournamentId);
     const removed = await this.games.remove(tournamentId, { matchId, number });
     if (!removed)
       throw new NotFoundError({
@@ -120,10 +126,5 @@ export class ManualGameService {
         code: "match_game_not_found",
       });
     return removed;
-  }
-
-  private async requireTournament(tournamentId: string): Promise<void> {
-    if (!(await this.candidates.tournamentExists(tournamentId)))
-      throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
   }
 }

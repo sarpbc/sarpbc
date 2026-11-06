@@ -1,5 +1,6 @@
 import type { StatsPlayerAccounts } from "@sarpbc/types";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors";
+import { requireTournament } from "./game-record";
 import type { PlayerLink, PlayerLinkStore, StatsCandidates } from "./ports";
 
 export class StatsPlayerLinkService {
@@ -9,7 +10,7 @@ export class StatsPlayerLinkService {
   ) {}
 
   async accounts(tournamentId: string): Promise<StatsPlayerAccounts> {
-    await this.requireTournament(tournamentId);
+    await requireTournament(this.candidates, tournamentId);
     const [players, rosters] = await Promise.all([
       this.links.accounts(tournamentId),
       this.links.rosters(tournamentId),
@@ -18,17 +19,12 @@ export class StatsPlayerLinkService {
   }
 
   async link(tournamentId: string, link: PlayerLink): Promise<number> {
-    await this.requireTournament(tournamentId);
+    await requireTournament(this.candidates, tournamentId);
     if (!(await this.links.onTournamentRoster(tournamentId, link.playerId)))
       throw new InvalidInputError({
         message: "Choose a player from a roster of this tournament.",
         code: "player_not_on_tournament_roster",
       });
     return this.links.link(link);
-  }
-
-  private async requireTournament(tournamentId: string): Promise<void> {
-    if (!(await this.candidates.tournamentExists(tournamentId)))
-      throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
   }
 }
