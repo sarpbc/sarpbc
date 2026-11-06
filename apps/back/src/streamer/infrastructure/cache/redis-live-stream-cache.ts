@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { LiveStream } from "../../domain/live-stream";
 import type {
   LiveStreamCache,
   LiveStreamSnapshot,
@@ -11,17 +12,17 @@ export const LIVE_STREAMS_LOCK_KEY = "streamers:live:refresh";
 export const SNAPSHOT_TTL_SECONDS = 10 * 60;
 export const LOCK_TTL_SECONDS = 30;
 
+const liveStream = z.object({
+  login: z.string(),
+  displayName: z.string(),
+  title: z.string(),
+  viewerCount: z.number(),
+  url: z.string(),
+} satisfies Record<keyof LiveStream, z.ZodType>);
+
 const snapshot = z.object({
   fetchedAt: z.iso.datetime().transform((value) => new Date(value)),
-  streams: z.array(
-    z.object({
-      login: z.string(),
-      displayName: z.string(),
-      title: z.string(),
-      viewerCount: z.number(),
-      url: z.string(),
-    }),
-  ),
+  streams: z.array(liveStream),
 });
 
 export class RedisLiveStreamCache implements LiveStreamCache {
