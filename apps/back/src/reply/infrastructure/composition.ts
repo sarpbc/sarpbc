@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { authorReader } from "../../common/infrastructure/persistence/author-reader";
+import { authorReader } from "../../user/infrastructure/user-persistence";
 import { directReplyNotifications } from "../../notification/infrastructure/composition";
 import { ReplyService } from "../application/reply.service";
 import type { ReplyTransaction, ReplyWriteScope } from "../application/ports";

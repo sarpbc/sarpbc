@@ -19,7 +19,7 @@ const layer = (file, root) =>
   normalized(file, root)
     .split("/")
     .find((part) => ["domain", "application", "infrastructure"].includes(part));
-const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|slugify|node:crypto)(?:$|\/)/;
+const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/;
 
 function importsOf(source) {
   const imports = [];
@@ -188,6 +188,9 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot) {
         const targetFeature = target.split("/")[0];
         const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
         const sharedTarget = targetFeature === "common";
+        if (feature === "common" && !sharedTarget && targetFeature !== "infrastructure") {
+          violations.push(`${origin}: common imports feature code ${target}`);
+        }
         if (
           feature !== targetFeature &&
           !composes &&

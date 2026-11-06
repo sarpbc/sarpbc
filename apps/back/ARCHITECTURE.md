@@ -77,12 +77,13 @@ pnpm --filter back lint
 pnpm --filter back fmt:check
 pnpm --filter back test:architecture
 pnpm --filter back test:contracts
+pnpm --filter back test:migrations
 pnpm --filter back test
 pnpm --filter back test:e2e
 pnpm --filter back test:integration
 pnpm --filter back test:cov
 ```
 
-The architecture check resolves imports, including type imports, aliases, and reexports, and detects feature cycles in the inner layers. In `domain/` and `application/`, a package import passes only if it is on the allowlist in `scripts/check-architecture.mjs` (`@sarpbc/types`, `@sarpbc/utils`, `uuid`, `slugify`, `node:crypto`); add a package there only when it is pure. Its tests deliberately introduce forbidden dependencies in temporary directories. The HTTP fixture records routes, status overrides, guards, and permissions; behavior tests verify response content separately. After an intended route, guard, or permission change, refresh the fixture with `pnpm --filter back test:contracts --write` followed by `pnpm --filter back fmt`, and review the diff of `test/contracts/http-routes.json`.
+The architecture check resolves imports, including type imports, aliases, and reexports, and detects feature cycles in the inner layers. In `domain/` and `application/`, a package import passes only if it is on the allowlist in `scripts/check-architecture.mjs` (`@sarpbc/types`, `@sarpbc/utils`, `uuid`, `node:crypto`); add a package there only when it is pure. Files under `common/` may import only `common/`, the root `infrastructure/` (configuration) and packages, never a feature folder. Its tests deliberately introduce forbidden dependencies in temporary directories. The HTTP fixture records routes, status overrides, guards, and permissions; behavior tests verify response content separately. After an intended route, guard, or permission change, refresh the fixture with `pnpm --filter back test:contracts --write` followed by `pnpm --filter back fmt`, and review the diff of `test/contracts/http-routes.json`.
 
 Integration verification runs the real application sources under Vitest and uses disposable PostgreSQL and Redis containers. It rebuilds the database with the compiled MikroORM migrations, checks that no migration or schema change remains pending, and exercises real adapters and transaction rollback. A second migration run must apply nothing. The coverage command combines these workflows with unit and HTTP smoke tests. Unit tests and mocked HTTP smoke tests alone do not establish SQL atomicity or Redis semantics.

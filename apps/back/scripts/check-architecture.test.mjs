@@ -122,7 +122,6 @@ test("rejects non-allowlisted packages, aliases, type imports, reexports and for
       "probe/domain/pure.ts",
       [
         'import { v4 } from "uuid";',
-        'import slugify from "slugify";',
         'import { createHash } from "node:crypto";',
         'import type { Role } from "@sarpbc/types";',
         'import { slugOf } from "@sarpbc/utils";',
@@ -130,6 +129,33 @@ test("rejects non-allowlisted packages, aliases, type imports, reexports and for
       ].join("\n"),
     );
     assert.deepEqual(violations([pure]), []);
+  } finally {
+    cleanup();
+  }
+});
+
+test("rejects common importing a feature and accepts common, root infrastructure and packages", () => {
+  const { write, violations, cleanup } = fixture();
+  try {
+    write("user/domain/user.ts", "export interface User {}");
+    write("infrastructure/config/env.ts", "export const env = {};");
+    write("common/domain/shared.ts", "export type Shared = string;");
+    const feature = write(
+      "common/infrastructure/reader.ts",
+      'import type { User } from "../../user/domain/user";',
+    );
+    const allowed = write(
+      "common/infrastructure/config-reader.ts",
+      [
+        'import { env } from "../../infrastructure/config/env";',
+        'import type { Shared } from "../domain/shared";',
+        'import { z } from "zod";',
+      ].join("\n"),
+    );
+    assert.ok(
+      violations([feature]).some((message) => message.includes("common imports feature code")),
+    );
+    assert.deepEqual(violations([allowed]), []);
   } finally {
     cleanup();
   }

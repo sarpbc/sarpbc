@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { authorReader } from "../../common/infrastructure/persistence/author-reader";
+import { authorReader } from "../../user/infrastructure/user-persistence";
 import { replyDeletion } from "../../reply/infrastructure/composition";
 import { MikroNewsStore } from "./persistence/news.store";
 import type { NewsTransaction } from "../application/ports";
