@@ -1,5 +1,5 @@
 import type { SupportedLocale } from "@sarpbc/types";
-import type { ReplyAuthor } from "../../reply/domain/reply";
+import type { Author } from "../../common/domain/author";
 import type { PostType } from "../domain/post-type.enum";
 export interface TopicRecord {
   id: string;
@@ -14,7 +14,7 @@ export interface PostSummary {
   publicId: number;
   title: string;
   content: string;
-  author: ReplyAuthor;
+  author: Author;
   createdAt: Date;
   updatedAt: Date | null;
   postType: PostType;

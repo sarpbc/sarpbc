@@ -1,14 +1,12 @@
-import type { ReplyAuthor } from "../domain/reply";
+import type { Author } from "../../common/domain/author";
+import type { ReplyTargetFields } from "../domain/reply";
 
-export interface ReplyRecord {
+export interface ReplyRecord extends ReplyTargetFields {
   id: string;
   content: string;
   createdAt: Date;
   hiddenAt: Date | null;
-  author: ReplyAuthor;
-  post: { id: string; publicId: number; title: string } | null;
-  newsArticle: { id: string; title: string; slug: string } | null;
-  match: { id: string; publicId: number; name: string; slug: string } | null;
+  author: Author;
   replyTo: { id: string } | null;
 }
 

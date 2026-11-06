@@ -1,10 +1,10 @@
 import type { ReplyTargetType } from "@sarpbc/types";
-import type { ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { Author } from "../../common/domain/author";
+import type { ReplyTarget, ReplyTargetFields } from "../domain/reply";
 import type { ReplyRecord } from "./models";
 import type { ReplyReportReason } from "../domain/reply-report-reason";
 export interface ReplyFindOptions {
   includeHidden?: boolean;
-  order?: "asc" | "desc";
   limit?: number;
   offset?: number;
   rootsOnly?: boolean;
@@ -44,9 +44,9 @@ export interface ReplyWriteScope {
     findByReplyAndReporter(replyId: string, userId: string): Promise<ReplyReportRecord | null>;
     save(report: ReplyReportRecord): Promise<void>;
   };
-  users: { findById(id: string): Promise<ReplyAuthor | null> };
+  users: { findById(id: string): Promise<Author | null> };
   targets: {
-    find(target: ReplyTarget): Promise<Pick<ReplyRecord, "post" | "newsArticle" | "match"> | null>;
+    find(target: ReplyTarget): Promise<ReplyTargetFields | null>;
   };
   notifications: { createForDirectReply(recipientId: string, replyId: string): Promise<void> };
 }

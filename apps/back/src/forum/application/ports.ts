@@ -1,6 +1,6 @@
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "./models";
-import type { ReplyAuthor } from "../../reply/domain/reply";
+import type { Author } from "../../common/domain/author";
 export interface PostStore {
   findPaginated(options: { limit?: number; offset?: number }): Promise<PostRecord[]>;
   findByTopicId(id: string): Promise<PostRecord[]>;
@@ -30,7 +30,7 @@ export interface TopicStore {
 export interface ForumWriteScope {
   posts: PostStore;
   topics: TopicStore;
-  users: { findById(id: string): Promise<ReplyAuthor | null> };
+  users: { findById(id: string): Promise<Author | null> };
   replies: { deleteAllForPost(id: string): Promise<void> };
 }
 export interface ForumTransaction {

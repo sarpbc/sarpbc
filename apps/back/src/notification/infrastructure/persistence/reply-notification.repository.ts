@@ -1,5 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 
+import { REPLY_POPULATE } from "../../../reply/infrastructure/persistence/reply.mapper";
 import { ReplyNotification } from "./reply-notification.entity";
 
 interface ReplyNotificationReadFilter {
@@ -13,15 +14,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
     return this.find(
       { recipient: { id: recipientId } },
       {
-        populate: [
-          "reply",
-          "reply.author",
-          "reply.post",
-          "reply.newsArticle",
-          "reply.match",
-          "reply.match.participants.team",
-          "reply.match.tournament.event",
-        ],
+        populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
         orderBy: { createdAt: "DESC" },
         limit,
       },

@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReplyService } from "./reply.service";
 import type { ReplyWriteScope, ReplyTransaction } from "./ports";
-import type { ReplyAuthor } from "../domain/reply";
+import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 const now = new Date("2026-10-15T12:00:00Z");
-const author: ReplyAuthor = { id: "author", userName: "Fan" };
+const author: Author = { id: "author", userName: "Fan" };
 function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
   return {
     id: "parent",

@@ -1,7 +1,6 @@
 import type { NotificationStore, NotificationRecord } from "./ports";
 import type { NotificationDto } from "./notification.view";
-import { resolveReplyTargetLink } from "../../reply/domain/reply-target-link.util";
-import type { ReplyTargetLink } from "../../reply/domain/reply-target-link.util";
+import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain/reply";
 
 export class NotificationService {
   constructor(private readonly notificationRepository: NotificationStore) {}

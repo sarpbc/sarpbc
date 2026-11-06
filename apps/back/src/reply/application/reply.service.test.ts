@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { ReplyAuthor, ReplyTarget } from "../domain/reply";
+import type { Author } from "../../common/domain/author";
+import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
 import type { ReplyWriteScope } from "./ports";
 type Match = NonNullable<ReplyRecord["match"]>;
@@ -56,7 +57,7 @@ describe("ReplyService", () => {
     vi.clearAllMocks();
   });
 
-  function makeUser(id = "user-1"): ReplyAuthor {
+  function makeUser(id = "user-1"): Author {
     return { id, userName: "fan" };
   }
 
@@ -176,7 +177,6 @@ describe("ReplyService", () => {
       expect(result.replies[0].replies).toHaveLength(1);
       expect(result.replies[0].replies[0].id).toBe("child");
       expect(replyRepository.findByTarget).toHaveBeenCalledWith("match", "m1", {
-        order: "desc",
         limit: 25,
         offset: 0,
         rootsOnly: true,
@@ -194,7 +194,6 @@ describe("ReplyService", () => {
       await service.findByTargetPaginated("forumPost", "p1", 0, 2);
 
       expect(replyRepository.findByTarget).toHaveBeenCalledWith("forumPost", "p1", {
-        order: "asc",
         limit: 2,
         offset: 0,
         rootsOnly: true,
@@ -211,7 +210,6 @@ describe("ReplyService", () => {
       expect(result.total).toBe(40);
       expect(replyRepository.countRootsByTarget).toHaveBeenCalledWith("newsArticle", "n1");
       expect(replyRepository.findByTarget).toHaveBeenCalledWith("newsArticle", "n1", {
-        order: "desc",
         limit: 10,
         offset: 10,
         rootsOnly: true,
