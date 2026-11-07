@@ -27,11 +27,11 @@
     "test:integration": "pnpm run build && vitest run --project integration"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1159.0",
-    "@aws-sdk/s3-request-presigner": "^3.1159.0",
+    "@aws-sdk/client-s3": "^3.1161.0",
+    "@aws-sdk/s3-request-presigner": "^3.1161.0",
     "@fastify/cookie": "^11.1.5",
     "@fastify/helmet": "^13.2.0",
-    "@fastify/multipart": "^10.1.4",
+    "@fastify/multipart": "^10.1.7",
     "@googleapis/oauth2": "^10.0.1",
     "@mikro-orm/cli": "catalog:",
     "@mikro-orm/core": "catalog:",
@@ -56,11 +56,11 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^18.0.8",
     "evlog": "catalog:",
-    "fastify": "5.12.7",
+    "fastify": "5.12.8",
     "ioredis": "^6.0.0",
     "luxon": "^3.7.2",
     "pg": "^8.23.1",
-    "posthog-node": "^5.59.0",
+    "posthog-node": "^5.61.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "sharp": "^0.35.5",
@@ -73,16 +73,16 @@
     "@nestjs/schematics": "12.0.12",
     "@nestjs/testing": "catalog:",
     "@swc-node/register": "^1.12.1",
-    "@swc/core": "^1.16.18",
+    "@swc/core": "^1.16.21",
     "@types/bcrypt": "^6.0.0",
     "@types/luxon": "^3.7.6",
     "@types/node": "catalog:",
     "@types/supertest": "^7.2.1",
-    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/coverage-v8": "^5.1.0",
     "supertest": "^7.3.1",
     "typescript": "catalog:",
     "unplugin-swc": "^2.0.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "mikro-orm": {
     "configPaths": [
