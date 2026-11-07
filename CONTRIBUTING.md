@@ -55,7 +55,7 @@ The `CI` workflow runs on pull requests to `main` and on every push to `main`. O
 
 The backend job runs `pnpm --filter back test:migrations`. On pull requests it compares migrations with the base branch. On pushes to `main` it compares them with the previous `main` commit, so a migration merged out of timestamp order turns `main` red.
 
-The `Back image` workflow builds the back image and starts it against PostgreSQL and Redis on pull requests that touch the back or the packages it loads. It fails when the container stops or `/health/ready` never answers, which tests do not catch: a missing runtime dependency or a migration that cannot load.
+The `Boot back image` job of `CI` builds the back image and starts it against PostgreSQL and Redis, on `main` and on pull requests that touch the back or the packages it loads. It fails when the container stops or `/health/ready` never answers, which tests do not catch: a missing runtime dependency or a migration that cannot load.
 
 `Create Release Tag` tags a `main` commit only after its `CI` push run succeeds. Dokploy deploys from these tags. Running the workflow manually is an escape hatch for a missed tag. It still requires a successful `CI` check on the dispatched commit and fails otherwise.
 
