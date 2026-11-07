@@ -1,5 +1,5 @@
-import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
-import { SITEMAP_KINDS, type SitemapChunkResponse, type SitemapKind } from "@sarpbc/types";
+import { Controller, Get, Param } from "@nestjs/common";
+import { SITEMAP_KINDS, type SitemapKind } from "@sarpbc/types";
 import { NotFoundError } from "../../../common/domain/errors";
 import { SitemapService } from "../../application/sitemap.service";
 
@@ -11,19 +11,11 @@ function isSitemapKind(value: string): value is SitemapKind {
 export class SitemapController {
   constructor(private readonly sitemapService: SitemapService) {}
 
-  @Get()
-  index() {
-    return this.sitemapService.index();
-  }
-
-  @Get(":kind/:chunk")
-  chunk(
-    @Param("kind") kind: string,
-    @Param("chunk", ParseIntPipe) chunk: number,
-  ): Promise<SitemapChunkResponse> {
+  @Get(":kind")
+  entries(@Param("kind") kind: string) {
     if (!isSitemapKind(kind)) {
       throw new NotFoundError(`Sitemap "${kind}" was not found.`);
     }
-    return this.sitemapService.chunk(kind, chunk);
+    return this.sitemapService.entries(kind);
   }
 }

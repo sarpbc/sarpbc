@@ -263,10 +263,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         )
       ).json();
       await request("GET", `/news/${draft.slug}`, undefined, undefined, 404);
-      assert.equal((await request("GET", "/news/sitemap")).json().total, 1);
       assert.deepEqual(
-        (await request("GET", "/news/sitemap/0")).json().data.map(({ slug }) => slug),
-        [article.slug],
+        (await request("GET", "/sitemap/news")).json().map(({ path }) => path),
+        [`/news/${article.slug}`],
       );
       const feed = (await request("GET", "/news?locale=en-US&page=0&limit=10")).json();
       assert.equal(feed.total, 1);
@@ -281,7 +280,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         2,
       );
       await request("PATCH", `/news/${article.slug}/unpublish`, {}, staffCookie, 204);
-      assert.equal((await request("GET", "/news/sitemap")).json().total, 0);
+      assert.deepEqual((await request("GET", "/sitemap/news")).json(), []);
       assert.equal((await request("GET", "/news?locale=en-US&page=0&limit=10")).json().total, 0);
       await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
     });

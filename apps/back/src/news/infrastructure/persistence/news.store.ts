@@ -5,7 +5,7 @@ import { isUniqueViolation } from "../../../common/infrastructure/persistence/co
 import { NewsArticle } from "./news-article.entity";
 import { User } from "../../../user/infrastructure/user-persistence";
 import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
-import type { NewsArticleRecord, NewsSitemapRecord } from "../../application/models";
+import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
   return {
@@ -54,30 +54,6 @@ export class MikroNewsStore implements NewsStore {
         { populate: ["author"], orderBy: { createdAt: "DESC" }, limit },
       )
     ).map(newsSnapshot);
-  }
-  countPublished() {
-    return this.em.count(NewsArticle, { isDraft: false });
-  }
-  async sitemapChunk(offset: number, limit: number): Promise<[NewsSitemapRecord[], number]> {
-    const [rows, total] = await this.em.findAndCount(
-      NewsArticle,
-      { isDraft: false },
-      {
-        fields: ["id", "slug", "createdAt", "updatedAt"],
-        orderBy: { createdAt: "ASC", id: "ASC" },
-        offset,
-        limit,
-      },
-    );
-    return [
-      rows.map((row) => ({
-        id: row.id,
-        slug: row.slug,
-        createdAt: new Date(row.createdAt),
-        updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
-      })),
-      total,
-    ];
   }
   async listAdmin(page: number, limit: number): Promise<[NewsArticleRecord[], number]> {
     const [rows, total] = await this.em.findAndCount(

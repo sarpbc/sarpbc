@@ -1,29 +1,26 @@
-import type { SitemapKind } from "@sarpbc/types";
+import type { MatchSlugSource } from "../../tournament/domain/competition";
 
-export interface TournamentSitemapRow {
-  eventSlug: string;
-  stageSlug: string | null;
+export interface NewsSitemapRow {
+  slug: string;
   lastmod: Date;
 }
 
-export interface MatchSitemapRow {
+export interface StageSitemapRow {
+  slug: string;
+  eventSlug: string;
+  lastmod: Date;
+}
+
+export interface MatchSitemapRow extends MatchSlugSource {
   publicId: number;
-  name: string;
-  eventSlug: string;
-  stageSlug: string;
-  teamNames: [string, string];
+  status: string | null;
   lastmod: Date;
-}
-
-export interface SitemapPage {
-  offset: number;
-  limit: number;
 }
 
 export interface SitemapQueries {
-  counts(): Promise<Record<SitemapKind, number>>;
-  tournaments(page: SitemapPage): Promise<TournamentSitemapRow[]>;
-  matches(page: SitemapPage): Promise<MatchSitemapRow[]>;
-  playerSlugs(page: SitemapPage): Promise<string[]>;
-  teamSlugs(page: SitemapPage): Promise<string[]>;
+  news(): Promise<NewsSitemapRow[]>;
+  stages(): Promise<StageSitemapRow[]>;
+  matches(): Promise<MatchSitemapRow[]>;
+  playerSlugs(): Promise<string[]>;
+  teamSlugs(): Promise<string[]>;
 }

@@ -37,10 +37,8 @@ export async function verifySitemap({ orm, request, tournament }) {
   em.persist(emptyPlayer);
   await em.flush();
 
-  const { chunkCounts } = (await request("GET", "/sitemap")).json();
-  assert.deepEqual(chunkCounts, { tournaments: 1, matches: 1, players: 1, teams: 1 });
   const paths = async (kind) =>
-    (await request("GET", `/sitemap/${kind}/0`)).json().data.map(({ path }) => path);
+    (await request("GET", `/sitemap/${kind}`)).json().map(({ path }) => path);
 
   const stages = await paths("tournaments");
   assert(stages.includes(`/tournaments/${tournament.event.slug}`));
@@ -68,8 +66,7 @@ export async function verifySitemap({ orm, request, tournament }) {
   assert(mergedTeams.length > 0, "the scenario runs after a team merge");
   for (const { slug } of mergedTeams) assert(!teams.includes(`/team/${slug}`));
 
-  await request("GET", "/sitemap/players/9999", undefined, undefined, 404);
-  await request("GET", "/sitemap/news/0", undefined, undefined, 404);
+  await request("GET", "/sitemap/bogus", undefined, undefined, 404);
 
   em.remove([listed, noTeams, oneTeam, tbd, canceled, tbdParticipant, tbdTeam, emptyPlayer]);
   await em.flush();

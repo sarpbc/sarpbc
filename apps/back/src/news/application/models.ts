@@ -25,4 +25,3 @@ export interface CreateNewsArticleInput {
 export type UpdateNewsArticleInput = Omit<Partial<CreateNewsArticleInput>, "imageUrl"> & {
   imageUrl?: string | null;
 };
-export type NewsSitemapRecord = Pick<NewsArticleRecord, "id" | "slug" | "createdAt" | "updatedAt">;

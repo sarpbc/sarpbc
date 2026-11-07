@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -54,16 +53,6 @@ export class NewsController {
   @Get()
   findAll(@Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto) {
     return this.newsService.findAllPublishedArticle(page, limit, parseLocale(locale), type);
-  }
-
-  @Get("sitemap")
-  findSitemapMeta() {
-    return this.newsService.findPublishedSitemapMeta();
-  }
-
-  @Get("sitemap/:chunk")
-  findSitemapChunk(@Param("chunk", ParseIntPipe) chunk: number) {
-    return this.newsService.findPublishedSitemapChunk(chunk);
   }
 
   @Get("embed/tweet")

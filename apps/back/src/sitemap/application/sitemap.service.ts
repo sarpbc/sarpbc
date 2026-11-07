@@ -1,80 +1,63 @@
-import type {
-  SitemapChunkResponse,
-  SitemapEntry,
-  SitemapIndexResponse,
-  SitemapKind,
-} from "@sarpbc/types";
+import type { SitemapEntry, SitemapKind } from "@sarpbc/types";
 import {
+  isKnownTeamName,
   matchPath,
-  matchSlug,
+  newsPath,
   playerPath,
   teamPath,
   tournamentEventPath,
   tournamentStagePath,
 } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { SitemapPage, SitemapQueries } from "./ports";
+import { matchPublicSlug } from "../../tournament/domain/competition";
+import type { MatchSitemapRow, SitemapQueries, StageSitemapRow } from "./ports";
 
-/** Each entity yields one URL per locale, so a chunk holds twice this many URLs. */
-export const SITEMAP_CHUNK_SIZE = 1000;
+function dated(path: string, lastmod: Date): SitemapEntry {
+  return { path, lastmod: lastmod.toISOString() };
+}
+
+function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
+  const eventLastmods = new Map<string, Date>();
+  for (const { eventSlug, lastmod } of stages) {
+    const latest = eventLastmods.get(eventSlug);
+    if (!latest || latest < lastmod) eventLastmods.set(eventSlug, lastmod);
+  }
+  return [
+    ...[...eventLastmods].map(([slug, lastmod]) => dated(tournamentEventPath(slug), lastmod)),
+    ...stages.map(({ eventSlug, slug, lastmod }) =>
+      dated(tournamentStagePath(eventSlug, slug), lastmod),
+    ),
+  ];
+}
+
+function isListedMatch({ status, participants }: MatchSitemapRow): boolean {
+  return (
+    status !== "canceled" &&
+    participants.filter(({ team }) => isKnownTeamName(team.name)).length === 2
+  );
+}
 
 export class SitemapService {
   constructor(private readonly queries: SitemapQueries) {}
 
-  async index(): Promise<SitemapIndexResponse> {
-    const { tournaments, matches, players, teams } = await this.queries.counts();
-    return {
-      chunkCounts: {
-        tournaments: Math.ceil(tournaments / SITEMAP_CHUNK_SIZE),
-        matches: Math.ceil(matches / SITEMAP_CHUNK_SIZE),
-        players: Math.ceil(players / SITEMAP_CHUNK_SIZE),
-        teams: Math.ceil(teams / SITEMAP_CHUNK_SIZE),
-      },
-    };
-  }
-
-  async chunk(kind: SitemapKind, chunk: number): Promise<SitemapChunkResponse> {
-    const offset = chunk * SITEMAP_CHUNK_SIZE;
-    if (chunk < 0 || !Number.isSafeInteger(offset)) {
-      throw new InvalidInputError("Sitemap chunk must be a non-negative integer.");
-    }
-    const data = await this.entries(kind, { offset, limit: SITEMAP_CHUNK_SIZE });
-    if (!data.length) {
-      throw new NotFoundError(`Sitemap chunk ${kind}/${chunk} was not found.`);
-    }
-    return { data };
-  }
-
-  private async entries(kind: SitemapKind, page: SitemapPage): Promise<SitemapEntry[]> {
+  async entries(kind: SitemapKind): Promise<SitemapEntry[]> {
     switch (kind) {
+      case "news":
+        return (await this.queries.news()).map(({ slug, lastmod }) =>
+          dated(newsPath(slug), lastmod),
+        );
       case "tournaments":
-        return (await this.queries.tournaments(page)).map((row) => ({
-          path:
-            row.stageSlug === null
-              ? tournamentEventPath(row.eventSlug)
-              : tournamentStagePath(row.eventSlug, row.stageSlug),
-          lastmod: row.lastmod.toISOString(),
-        }));
+        return tournamentEntries(await this.queries.stages());
       case "matches":
-        return (await this.queries.matches(page)).map((row) => ({
-          path: matchPath(
-            row.publicId,
-            matchSlug({
-              teamNames: row.teamNames,
-              matchName: row.name,
-              eventSlug: row.eventSlug,
-              stageSlug: row.stageSlug,
-            }),
-          ),
-          lastmod: row.lastmod.toISOString(),
-        }));
+        return (await this.queries.matches())
+          .filter(isListedMatch)
+          .map((match) => dated(matchPath(match.publicId, matchPublicSlug(match)), match.lastmod));
       case "players":
-        return (await this.queries.playerSlugs(page)).map((slug) => ({
+        return (await this.queries.playerSlugs()).map((slug) => ({
           path: playerPath(slug),
           lastmod: null,
         }));
       case "teams":
-        return (await this.queries.teamSlugs(page)).map((slug) => ({
+        return (await this.queries.teamSlugs()).map((slug) => ({
           path: teamPath(slug),
           lastmod: null,
         }));

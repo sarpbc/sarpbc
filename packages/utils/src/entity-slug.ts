@@ -57,11 +57,13 @@ function roundLabel(matchName: string | null | undefined): string | null {
   return /tbd/i.test(name) ? null : name;
 }
 
+export function isKnownTeamName(name: string | null | undefined): boolean {
+  const trimmed = name?.trim();
+  return Boolean(trimmed) && !/^tbd$/i.test(trimmed!);
+}
+
 export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchSlugInput): string {
-  const [teamA, teamB] = teamNames.map((name) => {
-    const trimmed = name?.trim();
-    return trimmed && !/^tbd$/i.test(trimmed) ? trimmed : null;
-  });
+  const [teamA, teamB] = teamNames.map((name) => (isKnownTeamName(name) ? name!.trim() : null));
   const [first, second] =
     teamA && teamB && toSlug(teamA) > toSlug(teamB) ? [teamB, teamA] : [teamA, teamB];
   const lead = first && second ? [first, "vs", second] : [roundLabel(matchName)];

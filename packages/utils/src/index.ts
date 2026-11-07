@@ -85,6 +85,7 @@ export {
   allocateSlug,
   eventSlug,
   forumPostSlug,
+  isKnownTeamName,
   matchSlug,
   stageSlug,
   toSlug,
