@@ -3,8 +3,7 @@ import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { z } from "zod";
 
-// Production runs migrations from src through Node's type stripping, where extensionless relative
-// imports fail to resolve. Keep this file free of app imports: it is a frozen copy of the domain rules.
+// Keep this file free of app imports: it is a frozen copy of the domain rules.
 const GENERIC_STAGE_NAMES = new Set([
   "playoffs",
   "group stage",

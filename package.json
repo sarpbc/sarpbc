@@ -15,7 +15,7 @@
     "check:packages": "node scripts/check-package-imports.mjs",
     "check:node": "node scripts/check-node-version.mjs",
     "dev": "turbo run dev",
-    "dev:back": "turbo run dev --filter=back",
+    "dev:back": "turbo run dev --filter=back...",
     "dev:front": "turbo run dev --filter=front",
     "dev:admin": "turbo run dev --filter=admin",
     "build": "turbo run build",

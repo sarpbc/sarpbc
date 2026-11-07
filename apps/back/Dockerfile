@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
       --filter ./packages/types...
 
 RUN pnpm --filter ./apps/back run build \
-  && test -f /app/apps/back/dist/mikro-orm.config.js \
+  && test -f /app/apps/back/dist/migrate.js \
   && test -f /app/apps/back/dist/main.js \
   && test -d /app/apps/back/dist/infrastructure/database/migrations \
   && chmod +x /app/apps/back/entrypoint.sh
@@ -47,9 +47,6 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
 FROM base AS runtime
 
 ENV NODE_ENV=production
-# Node can strip types, so the MikroORM CLI would otherwise load src/mikro-orm.config.ts, whose
-# imports resolve to package sources that only a bundler can read.
-ENV MIKRO_ORM_CLI_PREFER_TS=false
 
 ARG APP_RELEASE=unknown
 
