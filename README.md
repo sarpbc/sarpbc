@@ -43,7 +43,7 @@ cp apps/admin/.env.example apps/admin/.env
 cp apps/back/.env.example apps/back/.env
 ```
 
-Use your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). PandaScore data is subject to **their** terms; bring your own API token. Never commit real secrets; local `.env` files are gitignored. Production secrets belong in Dokploy / Docker secrets only.
+Use your own third-party keys (PandaScore, Google OAuth, Cloudflare Images). PandaScore data is subject to **their** terms; bring your own API token. Never commit real secrets; local `.env` files are gitignored. Production secrets belong in the deployment environment only.
 
 ### Build
 

@@ -2,7 +2,7 @@ import { fetchProfile, useAuthHydrated } from "~/composables/user";
 
 /**
  * Restore the session after hydration when SWR-cached SSR stamped `user = null`
- * (Nitro SWR ignores cookies — see SAR-73).
+ * (Nitro SWR ignores cookies).
  *
  * Uses `onNuxtReady`, which waits for `app:suspense:resolve` then an idle callback —
  * so we do not mutate `user` during hydration. Revalidating earlier (middleware /

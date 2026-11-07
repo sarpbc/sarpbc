@@ -98,13 +98,13 @@
       },
       "empty": {
         "title": "Aucun jeton API",
-        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à sarpbc.org via MCP."
+        "description": "Les jetons API vous permettent de connecter un assistant IA à sarpbc.org via MCP."
       },
       "create": {
         "title": "Créer un Jeton",
         "button": "Créer un Jeton",
         "nameLabel": "Nom du Jeton",
-        "namePlaceholder": "ex. Cursor sur MacBook",
+        "namePlaceholder": "ex. Assistant IA sur mon portable",
         "submit": "Créer un Jeton",
         "failed": "Impossible de créer le jeton. Vérifiez le nom et réessayez."
       },

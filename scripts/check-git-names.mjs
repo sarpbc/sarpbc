@@ -31,7 +31,7 @@ function checkTrailers(message, label) {
   const trailer = message.match(agentTrailerPattern)?.[0];
   if (trailer) {
     throw new Error(
-      `Invalid ${label}: remove ${JSON.stringify(trailer.trim())}. Agents such as Claude, Codex and Cursor are not credited as co-authors.`,
+      `Invalid ${label}: remove ${JSON.stringify(trailer.trim())}. Agents are not credited as co-authors.`,
     );
   }
 }

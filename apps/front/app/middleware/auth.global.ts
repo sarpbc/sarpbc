@@ -12,7 +12,7 @@ import {
  * SSR skips the profile request when the httpOnly access_token cookie is absent.
  *
  * Nitro SWR routeRules ignore request cookies, so cached SSR can stamp `user = null`
- * even when a valid access_token cookie exists (see SAR-73). Do **not** revalidate
+ * even when a valid access_token cookie exists. Do **not** revalidate
  * that stamp in this middleware on the client — mutating `user` before / during
  * hydration (especially with `Lazy*` + `hydrate-on-idle` in the default layout)
  * mismatches the SWR HTML and can crash the app. Post-hydrate revalidation lives in

@@ -98,13 +98,13 @@
       },
       "empty": {
         "title": "No API Tokens Yet",
-        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to sarpbc.org via MCP."
+        "description": "API tokens let you connect an AI assistant to sarpbc.org via MCP."
       },
       "create": {
         "title": "Create Token",
         "button": "Create Token",
         "nameLabel": "Token Name",
-        "namePlaceholder": "e.g. Cursor on MacBook",
+        "namePlaceholder": "e.g. AI assistant on my laptop",
         "submit": "Create Token",
         "failed": "Could not create token. Check the name and try again."
       },

@@ -1,4 +1,4 @@
-# Game stats pilot (SAR-21)
+# Game stats pilot
 
 Stats fans leave a sarpbc.org match page for Ballchasing or Octane. The pilot shows per-game player stats on the match page for one pilot tournament. Success metric: the share of the pilot tournament's finished matches that have stats attached.
 
@@ -41,7 +41,7 @@ The matching code is pure domain code in `apps/back/src/match-stats/domain/repla
 - **Renamed players.** The live import of the 2026 World Championship left 79 of 1,224 rows unlinked because Ballchasing's name differed from the roster: `justin.` (`jstn`), `Racer` (`kofyr`), `Aztr` (`AztromicK`), `Cata` (`Catalysm`) and `yan` (`yanxnz`), each with a known Steam id. Staff link them once in the admin app: under the tournament's stats import, "Unlinked players" lists each unlinked account of the tournament with its latest name, team and game count (`GET /tournaments/:id/stats-players`). The player list offers the team's roster first, then the tournament's other rosters, for a stand-in. Choosing a player sets the account's link, replacing any previous one, and repoints every stat row of that account, in all tournaments, in one transaction (`PUT /tournaments/:id/stats-players/link`). "Linked accounts" lists the accounts already linked, with their in-game name and player, and a change action that corrects a wrong learned link the same way.
 - **Merges.** A player merge moves the duplicate's stat rows and platform links to the kept player in the merge transaction. Deleting a player deletes its platform links and unlinks its stat rows.
 
-## Ballchasing API (SAR-37)
+## Ballchasing API
 
 Facts from the [official API documentation](https://ballchasing.com/doc/api):
 
@@ -76,7 +76,7 @@ No specialised database is needed. Volumes are tiny: a 3v3 game is six rows, and
 - `match_game_exclusion`: one row per Ballchasing replay id that staff removed, so the import leaves it out. A manual attach of that replay deletes the row.
 - `match_stats_import`: one row per staff request. It holds the status, the progress and the JSON report of the import. The report is an operational log, not queryable stats.
 
-Match games were not modelled before. The match only stored the series score and per-game VOD links in JSON. This replaces SAR-38's `MatchReplay.statsJson` blob with relational rows, so the stats can be aggregated later without a migration.
+Match games were not modelled before. The match only stored the series score and per-game VOD links in JSON. This replaces the earlier `MatchReplay.statsJson` blob with relational rows, so the stats can be aggregated later without a migration.
 
 ## Replay files (removed parser)
 
@@ -84,20 +84,10 @@ This PR first downloaded each `.replay` file and parsed it with a Rust CLI built
 
 ## Display and licensing
 
-The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. A linked row shows the sarpbc.org player's name with a link to their profile, not the in-game name. The stats ride on the existing `GET /matches/:ref` response used by the site, which carries no platform ids, and no other public API exposes them. MCP has staff tools that manage imports, games and player links under `tournaments.manage` (see [MCP.md](MCP.md)); they do not make the stats public, and no public or read-only MCP tool returns them. In line with SAR-168, no Epic assets are used, and Liquipedia and BLAST.tv are never sources.
-
-## Linear mapping
-
-| Issue  | Status in this PR                                                                                                                                                                                                                                                                        |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SAR-37 | This document.                                                                                                                                                                                                                                                                           |
-| SAR-38 | Relational `match_game` and `match_game_player` tables instead of `MatchReplay.statsJson`.                                                                                                                                                                                               |
-| SAR-39 | Replaced by the tournament group import. It keeps the admin-only guard, the pending, running, completed and failed statuses, a per-replay report and en/fr copy. Its manual need, attaching one replay to a game, is covered by the staff attach action in the tournament's stats panel. |
-| SAR-41 | Stats table on the match page, Ballchasing attribution, en/fr copy. Loading and error states are the page's own, because the stats arrive with the match.                                                                                                                                |
-| SAR-42 | Not done. The pilot runbook comes next.                                                                                                                                                                                                                                                  |
+The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. A linked row shows the sarpbc.org player's name with a link to their profile, not the in-game name. The stats ride on the existing `GET /matches/:ref` response used by the site, which carries no platform ids, and no other public API exposes them. MCP has staff tools that manage imports, games and player links under `tournaments.manage` (see [MCP.md](MCP.md)); they do not make the stats public, and no public or read-only MCP tool returns them. No Epic assets are used, and Liquipedia and BLAST.tv are never sources.
 
 ## What remains
 
 - A live import of the 2026 World Championship stored 1,224 player rows, 79 of them unlinked, which motivated platform links. Platform links have not yet been exercised against that live data.
-- SAR-42 pilot runbook: choose the tournament, build or find its group, run the import, review unmatched replays and measure coverage.
+- Pilot runbook: choose the tournament, build or find its group, run the import, review unmatched replays and measure coverage.
 - Possible later work: an in-app retry for a single replay, automatic ingestion, and aggregated player stats.

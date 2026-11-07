@@ -10,22 +10,7 @@ Staff AI assistants can call the sarpbc.org API through a [Model Context Protoco
 
 ## Client configuration
 
-**Claude Desktop** (`claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "sarpbc": {
-      "url": "https://api.sarpbc.org/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_PAT_HERE"
-      }
-    }
-  }
-}
-```
-
-**Cursor** (`.cursor/mcp.json`):
+Add the server to your MCP client's configuration:
 
 ```json
 {
