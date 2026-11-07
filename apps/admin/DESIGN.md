@@ -20,7 +20,7 @@ Replaces the logo and shortcut-button page. Sections render only when the user h
 | Upcoming matches        | `tournaments.manage`                | `GET /matches/upcoming`          |
 | Shortcuts               | any, filtered by `meetsRequirement` | same links as the navigation     |
 
-Queues: roster proposals (`GET /roster-proposals?status=pending`, `players.manage` or `teams.manage`) and latest replies to moderate (`GET /moderation/replies`, `forum.moderate`). Each queue card links to its page; an empty queue says so. Verified-account queues (SAR-166) join later.
+Queues: roster proposals (`GET /roster-proposals?status=pending`, `players.manage` or `teams.manage`) and latest replies to moderate (`GET /moderation/replies`, `forum.moderate`). Each queue card links to its page; an empty queue says so. Verified-account queues join later.
 
 Every section has loading, empty and error states. No pageviews, DAU or charts.
 

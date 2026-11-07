@@ -6,7 +6,7 @@ PostHog runs only in production, with a project token and the visitor's explicit
 
 Before deploying, configure the EU PostHog project used by `NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN`:
 
-- Session Replay and Heatmaps are already enabled on project `192444` (`sarpbc.org`), as verified through the connected PostHog MCP. Its project token matches the production site.
+- Session Replay and Heatmaps are already enabled on project `192444` (`sarpbc.org`). Its project token matches the production site.
 - Recording retention is currently 30 days. Keep the project's retention settings and the privacy policy aligned when changing retention for recordings or events.
 - Ensure the tracking proxy serves ingestion, flags and SDK assets. The configured host is `https://t.sarpbc.org`.
 

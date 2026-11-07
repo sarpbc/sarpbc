@@ -38,8 +38,8 @@ Use one of these types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `tes
 
 - Branches: `<type>/<kebab-case-description>`, for example `feat/player-search` or `fix/159-localized-seo`. The permanent `main` branch is exempt.
 - Commit subjects and PR titles: `<type>(optional-scope): description`, for example `fix(back): repair player sync`. Use `!` before the colon for breaking changes, such as `feat(api)!: change player response`.
-- Prefixes such as `codex/`, `cursor/`, `claude/`, `codex:`, `cursor:`, and `claude:` are rejected. The same naming rules apply to people and agents.
-- Agents are not credited as co-authors. Commit messages and PR descriptions with a `Co-authored-by:` trailer naming Claude, Codex, Cursor, Anthropic, or OpenAI, or with a `Claude-Session:`-style trailer, are rejected. Turn off your tool's commit attribution setting.
+- Tool or agent name prefixes are rejected. The same naming rules apply to people and agents.
+- Agents are not credited as co-authors. Commit messages and PR descriptions with a `Co-authored-by:` trailer naming an AI agent or its vendor, or with an agent session trailer, are rejected. Turn off your tool's commit attribution setting.
 
 `pnpm install` installs Lefthook. The hooks check the current branch before commits, commit messages before saving, and destination branches before pushes. Tags and branch deletions are exempt from the push check.
 
@@ -57,7 +57,7 @@ The backend job runs `pnpm --filter back test:migrations`. On pull requests it c
 
 The `Boot back image` job of `CI` builds the back image and starts it against PostgreSQL and Redis, on `main` and on pull requests that touch the back or the packages it loads. It fails when the container stops or `/health/ready` never answers, which tests do not catch: a missing runtime dependency or a migration that cannot load.
 
-`Create Release Tag` tags a `main` commit only after its `CI` push run succeeds. Dokploy deploys from these tags. Running the workflow manually is an escape hatch for a missed tag. It still requires a successful `CI` check on the dispatched commit and fails otherwise.
+`Create Release Tag` tags a `main` commit only after its `CI` push run succeeds. Deployments use these tags. Running the workflow manually is an escape hatch for a missed tag. It still requires a successful `CI` check on the dispatched commit and fails otherwise.
 
 ## Start here
 

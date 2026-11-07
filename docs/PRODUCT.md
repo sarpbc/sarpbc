@@ -1,6 +1,6 @@
 # sarpbc.org product principles
 
-**Version 1.0.0** · Product: [sarpbc.org](https://sarpbc.org) · Backlog: [Linear — Sarpbc team](https://linear.app/sarpbc)
+**Version 1.0.0** · Product: [sarpbc.org](https://sarpbc.org)
 
 > Optimized for AI agents evolving the sarpbc.org roadmap and translating product intent into shippable work. Humans may use it too.
 
@@ -8,7 +8,7 @@
 
 ## Abstract
 
-This guide combines **outcome-driven product management** with a **relentless grilling framework** for scope decisions. Every feature must tie to user problems and measurable value. Agents audit backlogs against the monorepo, challenge assumptions, delete unnecessary work, and produce Linear-ready tickets.
+This guide combines **outcome-driven product management** with a **relentless grilling framework** for scope decisions. Every feature must tie to user problems and measurable value. Agents audit backlogs against the monorepo, challenge assumptions, delete unnecessary work, and produce ready-to-implement tickets.
 
 ---
 
@@ -23,7 +23,7 @@ This guide combines **outcome-driven product management** with a **relentless gr
 7. [Roadmap Horizons](#7-roadmap-horizons) — HIGH
 8. [Strategic Lens](#8-strategic-lens) — MEDIUM
 9. [Product Context (sarpbc.org)](#9-product-context-sarpbcorg) — MEDIUM
-10. [Linear Conventions](#10-linear-conventions) — MEDIUM
+10. [Backlog Conventions](#10-backlog-conventions) — MEDIUM
 11. [Output Format](#11-output-format) — HIGH
 
 ---
@@ -104,7 +104,7 @@ Evaluate all ideas through: **"Would this make fans come back more often?"**
 
 **Impact: CRITICAL**
 
-Run a `/grilling` session before committing to scope or creating/updating Linear issues. Be opinionated. Force decisions.
+Run a grilling session before committing to scope or creating/updating backlog issues. Be opinionated. Force decisions.
 
 ### 3.1 Mandatory Questions (`grill-questions`)
 
@@ -130,7 +130,7 @@ Ask and answer each question. Do not skip.
 - Cancel tickets with no metric and no MVP.
 - Document **decisions locked** in a table after the grill.
 
-### 3.3 Grilling → Linear (`grill-to-linear`)
+### 3.3 Grilling → Backlog (`grill-to-backlog`)
 
 After grilling:
 
@@ -142,13 +142,13 @@ After grilling:
 
 ### 3.4 Example Decision Table
 
-| Decision     | Outcome                                                       |
-| ------------ | ------------------------------------------------------------- |
-| North star   | Weekly tournament-week return visits                          |
-| Now          | Match discovery polish, match detail v1.5, Air Riddle UX      |
-| Next         | Game stats pilot (staff group import), pick'em surfacing      |
-| Later        | Auto Ballchasing ingestion, push notifications, timeline game |
-| SAR-21 scope | Staff import a Ballchasing group per tournament — no cron     |
+| Decision         | Outcome                                                       |
+| ---------------- | ------------------------------------------------------------- |
+| North star       | Weekly tournament-week return visits                          |
+| Now              | Match discovery polish, match detail v1.5, Air Riddle UX      |
+| Next             | Game stats pilot (staff group import), pick'em surfacing      |
+| Later            | Auto Ballchasing ingestion, push notifications, timeline game |
+| Game stats scope | Staff import a Ballchasing group per tournament — no cron     |
 
 ---
 
@@ -156,7 +156,7 @@ After grilling:
 
 **Impact: HIGH**
 
-When given existing tickets (Linear or otherwise):
+When given existing tickets:
 
 ### Step 1 — Categorize
 
@@ -336,7 +336,7 @@ Continuously evaluate opportunities in:
 
 **Impact: MEDIUM**
 
-Verify in codebase before assuming gaps. As of skill authorship, the platform includes:
+Verify in codebase before assuming gaps. The platform includes:
 
 | Area        | Public                      | Admin                           |
 | ----------- | --------------------------- | ------------------------------- |
@@ -351,19 +351,16 @@ Verify in codebase before assuming gaps. As of skill authorship, the platform in
 
 Data: PandaScore sync (tournaments/matches), MikroORM + PostgreSQL, Redis.
 
-**Known active epics (Linear):** SAR-23 Match Discovery, SAR-24 Air Riddle UX, SAR-25 Match Detail v1.5, SAR-21 Game Stats Pilot, SAR-26 Pick'em Loop — refresh from Linear before planning.
-
 ---
 
-## 10. Linear Conventions
+## 10. Backlog Conventions
 
 **Impact: MEDIUM**
 
-- **Team:** `Sarpbc`
 - **Epics:** parent issues; prefix title `Epic: …`
 - **Labels:** `Feature`, `Improvement`, `Bug` (existing)
 - **States:** `Todo` (Now), `Backlog` (Next/Later), `Done`, `Canceled`
-- **Blockers:** use `blockedBy` — e.g. game stats epic blocked by match detail v1.5
+- **Blockers:** link the blocking issue — e.g. game stats epic blocked by match detail v1.5
 - **Shipped work:** mark **Done** with note "Closed after backlog audit YYYY-MM-DD"
 - **Duplicates:** **Canceled** with link to canonical issue
 
@@ -380,7 +377,7 @@ Always produce when doing a full PM session:
 3. **Grilling summary** — questions answered + decisions locked
 4. **Priority recommendations** — opinionated Now / Next / Later
 5. **New roadmap** — organized horizons
-6. **Ready-to-implement tickets** — epics, stories, tasks (create in Linear if asked)
+6. **Ready-to-implement tickets** — epics, stories, tasks (create them if asked)
 
 Be opinionated. Challenge assumptions. Delete unnecessary work. Optimize for user value and shipping velocity.
 
@@ -389,7 +386,6 @@ Be opinionated. Challenge assumptions. Delete unnecessary work. Optimize for use
 ## References
 
 - Repo index: [AGENTS.md](../AGENTS.md)
-- Linear: https://linear.app/sarpbc
 - Site map hint: `apps/front/public/llms.txt`
 - Design copy/i18n: `apps/front/DESIGN.md`
 - Technical boundaries: `apps/back/ARCHITECTURE.md`

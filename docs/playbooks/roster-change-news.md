@@ -1,19 +1,17 @@
 # Roster-change news agent playbook
 
-**Linear:** [SAR-127](https://linear.app/sarpbc/issue/SAR-127/roster-change-news-agent-workflow-client-side-research-mcp-drafting)
-
-Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the sarpbc.org MCP server supplies entity data and `create_news_draft` / `update_news_article`. **Humans always review and publish** in the admin app.
+Repeatable workflow for an MCP client to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the sarpbc.org MCP server supplies entity data and `create_news_draft` / `update_news_article`. **Humans always review and publish** in the admin app.
 
 ## Prerequisites
 
 | Requirement    | Details                                                                                            |
 | -------------- | -------------------------------------------------------------------------------------------------- |
-| MCP client     | Claude Desktop, Cursor, or any client with **web search** and MCP tool use                         |
+| MCP client     | Any client with **web search** and MCP tool use                                                    |
 | sarpbc.org MCP | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                             |
 | Auth           | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
 | Permission     | `news.manage` on your staff role (required for news list/get/create/update tools)                  |
 
-Client configuration examples live in the root [README.md](../../README.md#mcp-server).
+Client configuration lives in [MCP.md](../MCP.md#client-configuration).
 
 ### MCP tools used in this playbook
 
@@ -326,20 +324,20 @@ Run this playbook on **2–3 real roster changes** during an active tournament c
 
 After three trials, note:
 
-- Whether admin player/team updates should become a follow-up ticket (explicitly out of scope for SAR-127 unless editing becomes the bottleneck).
+- Whether admin player/team updates should become a follow-up ticket (explicitly out of scope unless editing becomes the bottleneck).
 - Prompt template tweaks (headline patterns, French phrasing).
 - Any missing MCP read fields that would have saved editor time.
 
 ---
 
-## Out of scope (SAR-127)
+## Out of scope
 
 - Twitter/X **API**, RSS, scrapers, scheduled monitoring (oEmbed display of a pasted post URL is in scope)
 - Auto-publish or MCP publish tool
 
 ## References
 
-- [README — MCP server](../../README.md#mcp-server)
+- [MCP server](../MCP.md)
 - MCP implementation: `apps/back/src/mcp/infrastructure/tools/read-tools.ts`, `apps/back/src/mcp/infrastructure/tools/write-tools.ts`
 - Entity tag syntax: `packages/utils/src/news-entity-tag.ts`, tweet tags: `packages/utils/src/news-tweet-tag.ts`, match blocks: `packages/utils/src/news-match-block.ts`
 - Admin news editor: `apps/admin/app/pages/news/`

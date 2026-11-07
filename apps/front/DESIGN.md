@@ -143,7 +143,7 @@ Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row`, so
 
 Padded content keeps its position at the top when the card snaps taller; extra grid space belongs at the bottom. Discussion composers use a `h-row` label band so the textarea starts on the next match-row boundary. Submit actions align right with `px-4`. Button presses change the background only; do not scale them.
 
-Legacy → target (migrations under SAR-85):
+Legacy → target:
 
 | Avoid                          | Prefer                                                |
 | ------------------------------ | ----------------------------------------------------- |
@@ -153,7 +153,7 @@ Legacy → target (migrations under SAR-85):
 | `py-[2.75px]!` + `leading-5.5` | `h-row-compact` (+ consistent leading)                |
 | `max-h-8.25`                   | `h-row-compact` or an explicit compact control height |
 
-Shared list/rail components (`SListItem`, `SRail`, `SHubColumn` — epic SAR-85) encode these sizes so pages don't re-declare heights. `SListItem` maps `size` prop → row utilities (see below).
+Shared list/rail components (`SListItem`, `SRail`, `SHubColumn`) encode these sizes so pages don't re-declare heights. `SListItem` maps `size` prop → row utilities (see below).
 
 ---
 
@@ -307,4 +307,4 @@ API messages from NestJS often surface in toasts — keep them actionable (see [
 
 ---
 
-_Owned with epic [SAR-85](https://linear.app/sarpbc/issue/SAR-85). Grid tokens: `app/assets/css/main.css`._
+_Grid tokens: `app/assets/css/main.css`._

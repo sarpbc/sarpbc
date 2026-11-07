@@ -1,5 +1,5 @@
 /**
- * Staff access model (SAR-81):
+ * Staff access model:
  * - Permissions are what code checks.
  * - Roles are pre-configured permission bundles assigned on the user.
  */
