@@ -24,10 +24,13 @@ COPY apps/back ./apps/back
 # node_modules (e.g. packages/utils → @sarpbc/types) are linked for nest/tsc.
 # `--filter ./apps/back...` alone links packages into apps/back/node_modules only;
 # nest/tsc then fails resolving imports from packages/utils/src/*.ts.
+# Without packages/types, `pnpm run` finds it has no modules directory and reinstalls
+# with a narrower scope, which removes slugify (a utils-only dependency) from the virtual store.
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store \
       --filter ./apps/back... \
-      --filter ./packages/utils...
+      --filter ./packages/utils... \
+      --filter ./packages/types...
 
 RUN pnpm --filter ./apps/back run build \
   && test -f /app/apps/back/dist/mikro-orm.config.js \
