@@ -1,101 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { NEWS_SITEMAP_CHUNK_SIZE, NewsService, newsSitemapChunkCount } from "./news.service";
-import type { NewsArticleRecord, NewsSitemapRecord } from "./models";
+import { InvalidInputError } from "../../common/domain/errors";
+import { NewsService } from "./news.service";
+import type { NewsArticleRecord } from "./models";
 import type { NewsTransaction, NewsWriteScope } from "./ports";
-
-describe("newsSitemapChunkCount", () => {
-  it("always exposes at least chunk 0 so the index can list a news urlset", () => {
-    expect(newsSitemapChunkCount(0)).toBe(1);
-  });
-
-  it("fills complete 1,000-URL archives before opening a new chunk", () => {
-    expect(newsSitemapChunkCount(1)).toBe(1);
-    expect(newsSitemapChunkCount(NEWS_SITEMAP_CHUNK_SIZE)).toBe(1);
-    expect(newsSitemapChunkCount(NEWS_SITEMAP_CHUNK_SIZE + 1)).toBe(2);
-  });
-});
-
-describe("NewsService sitemap", () => {
-  let service: NewsService;
-  const newsRepository = {
-    countPublished: vi.fn(),
-    sitemapChunk: vi.fn(),
-  };
-
-  beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
-    vi.clearAllMocks();
-  });
-
-  function publishedArticle(
-    overrides: Pick<NewsSitemapRecord, "slug"> & Partial<NewsSitemapRecord>,
-  ): NewsSitemapRecord {
-    return {
-      id: overrides.id ?? "id-1",
-      slug: overrides.slug,
-      createdAt: overrides.createdAt ?? new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: overrides.updatedAt ?? null,
-    };
-  }
-
-  describe("findPublishedSitemapChunk", () => {
-    it("rejects a negative chunk index", async () => {
-      await expect(service.findPublishedSitemapChunk(-1)).rejects.toBeInstanceOf(InvalidInputError);
-      expect(newsRepository.sitemapChunk).not.toHaveBeenCalled();
-    });
-
-    it("404s chunks past the archive", async () => {
-      newsRepository.sitemapChunk.mockResolvedValue([[], 1]);
-
-      await expect(service.findPublishedSitemapChunk(1)).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("returns each slug with its last modification date", async () => {
-      newsRepository.sitemapChunk.mockResolvedValue([
-        [
-          publishedArticle({
-            id: "older",
-            slug: "published-one",
-            createdAt: new Date("2026-01-01T00:00:00.000Z"),
-            updatedAt: null,
-          }),
-          publishedArticle({
-            id: "newer",
-            slug: "published-two",
-            createdAt: new Date("2026-02-01T00:00:00.000Z"),
-            updatedAt: new Date("2026-03-01T12:00:00.000Z"),
-          }),
-        ],
-        2,
-      ]);
-
-      const result = await service.findPublishedSitemapChunk(0);
-
-      expect(result.data.map((entry) => entry.slug)).toEqual(["published-one", "published-two"]);
-      expect(result.data[0]?.lastmod).toBe("2026-01-01T00:00:00.000Z");
-      expect(result.data[1]?.lastmod).toBe("2026-03-01T12:00:00.000Z");
-      expect(result).toMatchObject({
-        total: 2,
-        chunk: 0,
-        chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
-        chunkCount: 1,
-      });
-    });
-
-    it("serves an empty chunk 0 when nothing is published yet", async () => {
-      newsRepository.sitemapChunk.mockResolvedValue([[], 0]);
-
-      await expect(service.findPublishedSitemapChunk(0)).resolves.toEqual({
-        total: 0,
-        chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
-        chunkCount: 1,
-        chunk: 0,
-        data: [],
-      });
-    });
-  });
-});
 
 describe("NewsService findPublishedShortsByWeek", () => {
   let service: NewsService;
@@ -139,8 +46,6 @@ describe("news publication notifications", () => {
     findById: vi.fn(),
     listPublished: vi.fn(),
     listWeek: vi.fn(),
-    countPublished: vi.fn(),
-    sitemapChunk: vi.fn(),
     listAdmin: vi.fn(),
     save: vi.fn(),
     delete: vi.fn(),

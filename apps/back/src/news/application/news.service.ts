@@ -13,19 +13,11 @@ import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput 
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
 import type {
   NewsArticleAdmin,
-  NewsSitemapChunkResponse,
-  NewsSitemapMetaResponse,
   NewsType,
   PaginatedNewsArticles,
   SupportedLocale,
 } from "@sarpbc/types";
-/** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
-export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
-
-export function newsSitemapChunkCount(total: number): number {
-  return Math.max(1, Math.ceil(Math.max(total, 0) / NEWS_SITEMAP_CHUNK_SIZE));
-}
 
 export interface NewsArticleListItemResponse {
   id: string;
@@ -224,43 +216,6 @@ export class NewsService {
       start: range.start,
       end: range.end,
       items: articles.map((article) => this.mapArticle(article, locale)),
-    };
-  }
-
-  async findPublishedSitemapMeta(): Promise<NewsSitemapMetaResponse> {
-    const total = await this.newsRepository.countPublished();
-    return {
-      total,
-      chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
-      chunkCount: newsSitemapChunkCount(total),
-    };
-  }
-
-  /** Chunk 0 is a stable archive (oldest first); only the last chunk grows. */
-  async findPublishedSitemapChunk(chunk: number): Promise<NewsSitemapChunkResponse> {
-    if (!Number.isInteger(chunk) || chunk < 0) {
-      throw new InvalidInputError("Sitemap chunk must be a non-negative integer.");
-    }
-
-    const offset = chunk * NEWS_SITEMAP_CHUNK_SIZE;
-    const [articles, total] = await this.newsRepository.sitemapChunk(
-      offset,
-      NEWS_SITEMAP_CHUNK_SIZE,
-    );
-    const chunkCount = newsSitemapChunkCount(total);
-    if (chunk >= chunkCount) {
-      throw new NotFoundError(`News sitemap chunk ${chunk} was not found.`);
-    }
-
-    return {
-      total,
-      chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
-      chunkCount,
-      chunk,
-      data: articles.map((article) => ({
-        slug: article.slug,
-        lastmod: (article.updatedAt ?? article.createdAt).toISOString(),
-      })),
     };
   }
 

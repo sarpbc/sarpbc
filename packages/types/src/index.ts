@@ -21,14 +21,9 @@ export type {
   TournamentPathResponse,
   TournamentTab,
 } from "./tournament-event";
-export type {
-  NewsArticleAdmin,
-  NewsSitemapChunkResponse,
-  NewsSitemapEntry,
-  NewsSitemapMetaResponse,
-  NewsType,
-  PaginatedNewsArticles,
-} from "./news";
+export type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "./news";
+export { SITEMAP_KINDS } from "./sitemap";
+export type { SitemapEntry, SitemapKind } from "./sitemap";
 export { DATA_SOURCES } from "./competition";
 export type {
   CountedMatchListItem,

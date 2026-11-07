@@ -1,4 +1,4 @@
-import type { NewsArticleRecord, NewsSitemapRecord } from "./models";
+import type { NewsArticleRecord } from "./models";
 import type { NewsType } from "@sarpbc/types";
 import type { Author } from "../../common/domain/author";
 export interface NewsQueries {
@@ -10,8 +10,6 @@ export interface NewsQueries {
     type?: NewsType,
   ): Promise<[NewsArticleRecord[], number]>;
   listWeek(start: Date, end: Date, limit: number): Promise<NewsArticleRecord[]>;
-  countPublished(): Promise<number>;
-  sitemapChunk(offset: number, limit: number): Promise<[NewsSitemapRecord[], number]>;
   listAdmin(page: number, limit: number): Promise<[NewsArticleRecord[], number]>;
 }
 export interface NewsWriteScope {

@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
@@ -244,7 +245,10 @@ export class CompetitionMatchWriter implements MatchWriter {
       endAt: model.endAt,
       status: model.status,
       numberOfGames: model.numberOfGames,
-      officialStreams: model.officialStreams,
+      // jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
+      officialStreams: isDeepStrictEqual(row.officialStreams, model.officialStreams)
+        ? row.officialStreams
+        : model.officialStreams,
       vods: model.vods,
     });
     row.tournament = this.em.getReference(Row.Tournament, model.tournament.id);

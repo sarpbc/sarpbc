@@ -322,22 +322,6 @@
   {
     "controller": "\"news\"",
     "verb": "GET",
-    "path": "\"sitemap/:chunk\"",
-    "status": null,
-    "guards": [],
-    "permissions": []
-  },
-  {
-    "controller": "\"news\"",
-    "verb": "GET",
-    "path": "\"sitemap\"",
-    "status": null,
-    "guards": [],
-    "permissions": []
-  },
-  {
-    "controller": "\"news\"",
-    "verb": "GET",
     "path": "\"weeks/:week\"",
     "status": null,
     "guards": [],
@@ -771,6 +755,14 @@
     "controller": "\"search\"",
     "verb": "GET",
     "path": "\"tournaments\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"sitemap\"",
+    "verb": "GET",
+    "path": "\":kind\"",
     "status": null,
     "guards": [],
     "permissions": []

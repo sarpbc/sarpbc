@@ -1,7 +1,9 @@
 import type { NuxtConfig } from "nuxt/schema";
+import { SITEMAP_KINDS } from "@sarpbc/types";
 import { localizedPath } from "@sarpbc/utils/entity-path";
 import {
   DEFAULT_API_BASE,
+  SITE_ORIGIN,
   apiPreconnectLinks,
   i18nOptions,
   newsMdcComponentMap,
@@ -94,7 +96,29 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@nuxt/content",
     "@nuxt/image",
+    "@nuxtjs/sitemap",
   ],
+
+  site: {
+    url: SITE_ORIGIN,
+  },
+
+  sitemap: {
+    xsl: false,
+    credits: false,
+    sitemaps: {
+      pages: {
+        includeAppSources: true,
+        exclude: ["/login", "/register", "/profile", "/forum/new"],
+      },
+      ...Object.fromEntries(
+        SITEMAP_KINDS.map((kind) => [
+          kind,
+          { sources: [`/api/__sitemap__/${kind}`], chunks: true },
+        ]),
+      ),
+    },
+  },
 
   evlog: {
     env: {

@@ -14,6 +14,7 @@ import {
 } from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
+import { verifySitemap } from "./scenarios/sitemap.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
@@ -262,10 +263,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         )
       ).json();
       await request("GET", `/news/${draft.slug}`, undefined, undefined, 404);
-      assert.equal((await request("GET", "/news/sitemap")).json().total, 1);
       assert.deepEqual(
-        (await request("GET", "/news/sitemap/0")).json().data.map(({ slug }) => slug),
-        [article.slug],
+        (await request("GET", "/sitemap/news")).json().map(({ path }) => path),
+        [`/news/${article.slug}`],
       );
       const feed = (await request("GET", "/news?locale=en-US&page=0&limit=10")).json();
       assert.equal(feed.total, 1);
@@ -280,7 +280,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         2,
       );
       await request("PATCH", `/news/${article.slug}/unpublish`, {}, staffCookie, 204);
-      assert.equal((await request("GET", "/news/sitemap")).json().total, 0);
+      assert.deepEqual((await request("GET", "/sitemap/news")).json(), []);
       assert.equal((await request("GET", "/news?locale=en-US&page=0&limit=10")).json().total, 0);
       await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
     });
@@ -1726,6 +1726,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
       async () => {
         await verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check(
+      "sitemap lists public entities and leaves out merged, empty, canceled and TBD rows",
+      async () => {
+        await verifySitemap({ orm, request, tournament });
       },
     );
 
