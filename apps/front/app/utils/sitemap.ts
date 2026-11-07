@@ -1,4 +1,9 @@
-import type { NewsSitemapEntry } from "@sarpbc/types";
+import {
+  SITEMAP_KINDS,
+  type NewsSitemapEntry,
+  type SitemapEntry,
+  type SitemapKind,
+} from "@sarpbc/types";
 import { localizedPath, newsPath } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
@@ -37,7 +42,15 @@ export function newsSitemapPath(chunk: number): string {
   return `/news/${chunk}/news-sitemap.xml`;
 }
 
-export function parseNewsSitemapChunk(raw: string | undefined): number | null {
+export function contentSitemapPath(kind: SitemapKind, chunk: number): string {
+  return `/sitemaps/${kind}/${chunk}/sitemap.xml`;
+}
+
+export function parseSitemapKind(raw: string | undefined): SitemapKind | null {
+  return SITEMAP_KINDS.find((kind) => kind === raw) ?? null;
+}
+
+export function parseSitemapChunk(raw: string | undefined): number | null {
   if (raw === undefined || raw === "") {
     return null;
   }
@@ -96,37 +109,44 @@ ${hreflangLinks(enUrl, frUrl)}
     .join("\n");
 }
 
-function newsUrlEntry(entry: NewsSitemapEntry): string {
-  const path = newsPath(entry.slug);
+function contentUrlEntry({ path, lastmod }: SitemapEntry): string {
   const enUrl = absoluteUrl(path);
   const frUrl = absoluteUrl(localizedPath(path, "fr"));
+  const lastmodLine = lastmod
+    ? `\n    <lastmod>${escapeXml(formatSitemapLastmod(lastmod))}</lastmod>`
+    : "";
   return [enUrl, frUrl]
     .map(
       (url) => `  <url>
     <loc>${escapeXml(url)}</loc>
-${hreflangLinks(enUrl, frUrl)}
-    <lastmod>${escapeXml(formatSitemapLastmod(entry.lastmod))}</lastmod>
+${hreflangLinks(enUrl, frUrl)}${lastmodLine}
   </url>`,
     )
     .join("\n");
 }
 
-export function buildSitemapIndex(newsChunkCount: number): string {
-  const chunks = Math.max(1, newsChunkCount);
-  const sitemaps = [
-    `  <sitemap>
-    <loc>${escapeXml(absoluteUrl(SITEMAP_PAGES_PATH))}</loc>
-  </sitemap>`,
-    ...Array.from({ length: chunks }, (_, chunk) => {
-      return `  <sitemap>
-    <loc>${escapeXml(absoluteUrl(newsSitemapPath(chunk)))}</loc>
+function sitemapIndexEntry(path: string): string {
+  return `  <sitemap>
+    <loc>${escapeXml(absoluteUrl(path))}</loc>
   </sitemap>`;
-    }),
+}
+
+export function buildSitemapIndex(
+  newsChunkCount: number,
+  chunkCounts: Record<SitemapKind, number>,
+): string {
+  const newsChunks = Math.max(1, newsChunkCount);
+  const paths = [
+    SITEMAP_PAGES_PATH,
+    ...Array.from({ length: newsChunks }, (_, chunk) => newsSitemapPath(chunk)),
+    ...SITEMAP_KINDS.flatMap((kind) =>
+      Array.from({ length: chunkCounts[kind] }, (_, chunk) => contentSitemapPath(kind, chunk)),
+    ),
   ];
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemaps.join("\n")}
+${paths.map(sitemapIndexEntry).join("\n")}
 </sitemapindex>
 `;
 }
@@ -137,6 +157,12 @@ export function buildPagesUrlset(): string {
 }
 
 export function buildNewsUrlset(entries: readonly NewsSitemapEntry[]): string {
-  const body = entries.map(newsUrlEntry).join("\n");
+  return buildContentUrlset(
+    entries.map(({ slug, lastmod }) => ({ path: newsPath(slug), lastmod })),
+  );
+}
+
+export function buildContentUrlset(entries: readonly SitemapEntry[]): string {
+  const body = entries.map(contentUrlEntry).join("\n");
   return urlsetWrapper(body);
 }

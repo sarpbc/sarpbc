@@ -32,6 +32,7 @@ import { McpModule } from "./mcp/infrastructure/mcp.module";
 import { RosterProposalModule } from "./roster-proposal/infrastructure/roster-proposal.module";
 import { StreamerModule } from "./streamer/infrastructure/streamer.module";
 import { MatchStatsModule } from "./match-stats/infrastructure/match-stats.module";
+import { SitemapModule } from "./sitemap/infrastructure/sitemap.module";
 import mikroOrmConfig from "./mikro-orm.config";
 
 @Module({
@@ -75,6 +76,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     RosterProposalModule,
     StreamerModule,
     MatchStatsModule,
+    SitemapModule,
   ],
   providers: [
     {

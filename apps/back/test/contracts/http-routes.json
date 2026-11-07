@@ -776,6 +776,22 @@
     "permissions": []
   },
   {
+    "controller": "\"sitemap\"",
+    "verb": "GET",
+    "path": "\":kind/:chunk\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"sitemap\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"storage/r2\"",
     "verb": "POST",
     "path": "\"upload-url\"",

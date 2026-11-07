@@ -29,6 +29,13 @@ export type {
   NewsType,
   PaginatedNewsArticles,
 } from "./news";
+export { SITEMAP_KINDS } from "./sitemap";
+export type {
+  SitemapChunkResponse,
+  SitemapEntry,
+  SitemapIndexResponse,
+  SitemapKind,
+} from "./sitemap";
 export { DATA_SOURCES } from "./competition";
 export type {
   CountedMatchListItem,

@@ -21,7 +21,7 @@ The homepage description is the brand tagline: "Bringing the competitive Rocket 
 
 The 17 October 2026 summary contains categories and counts, without affected URLs. Export the URL details for the image ALT warning before changing images. Empty ALT text is valid for decorative images, including a logo whose link already has an accessible name.
 
-Prioritize informative titles and descriptions on the homepage, match lists, tournament lists, player and team directories, forum, and games. Keep French and English canonicals separate. Login and registration use `noindex` and stay outside the sitemap. The public sitemap lists each locale URL and its reciprocal language alternates.
+Prioritize informative titles and descriptions on the homepage, match lists, tournament lists, player and team directories, forum, and games. Keep French and English canonicals separate. Login and registration use `noindex` and stay outside the sitemap. The public sitemap lists each locale URL and its reciprocal language alternates. Beyond the static pages and news, it lists tournament events and stages, players and teams with a contract, a current team or a tournament appearance (or a roster, for teams), and matches that are not canceled and have two known teams. Merged players and teams stay out. Players and teams have no `lastmod` because they record no modification date.
 
 The inbound-link warning needs editorial work. Potential actions are:
 

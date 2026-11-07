@@ -14,6 +14,7 @@ import {
 } from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
+import { verifySitemap } from "./scenarios/sitemap.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
@@ -1726,6 +1727,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
       async () => {
         await verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check(
+      "sitemap lists public entities and leaves out merged, empty, canceled and TBD rows",
+      async () => {
+        await verifySitemap({ orm, request, tournament });
       },
     );
 
