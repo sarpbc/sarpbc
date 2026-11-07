@@ -41,10 +41,13 @@ export interface TournamentQueries {
   getTournamentsWonByTeam(id: string): Promise<Tournament[]>;
   knownPandascoreIds(): Promise<Set<number>>;
   findByPandascoreId(id: number): Promise<Tournament | null>;
-  leagues(options: { limit?: number; offset?: number }): Promise<League[]>;
+  leagues(options: { limit: number; offset?: number }): Promise<League[]>;
 }
 export interface MatchQueries {
-  list(kind: MatchListKind, options: MatchListQueryOptions): Promise<[Match[], number]>;
+  list(
+    kind: MatchListKind,
+    options: MatchListQueryOptions & { limit: number },
+  ): Promise<[Match[], number]>;
   page(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]>;
   byIds(ids: string[]): Promise<Match[]>;
   recentlyEnded(options: { limit: number; minutesAgo: number }): Promise<Match[]>;

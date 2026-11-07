@@ -26,7 +26,7 @@ const TOURNAMENT_DETAIL_POPULATE = [
 ] as const;
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
-  async find({ limit = 20, offset = 0, ...filters }: TournamentListOptions) {
+  async find({ limit, offset = 0, ...filters }: TournamentListOptions) {
     const [rows, count] = await this.em.findAndCount(Tournament, stageFilter(filters), {
       limit,
       offset,
@@ -76,7 +76,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     );
     return new Set(rows.flatMap((r) => (r.pandascoreId === null ? [] : [r.pandascoreId])));
   }
-  async leagues({ limit = 20, offset = 0 }: { limit?: number; offset?: number }) {
+  async leagues({ limit, offset = 0 }: { limit: number; offset?: number }) {
     return (await this.em.find(League, {}, { limit, offset, orderBy: { name: "ASC" } })).map(
       toLeague,
     );

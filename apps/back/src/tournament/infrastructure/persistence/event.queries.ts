@@ -9,7 +9,7 @@ import type { TournamentListOptions } from "../../application/inputs";
 export class CompetitionEventQueries implements EventQueries {
   constructor(private readonly em: EntityManager) {}
   async list({
-    limit = 20,
+    limit,
     offset = 0,
     ...filters
   }: TournamentListOptions): Promise<[EventListing[], number]> {

@@ -64,7 +64,7 @@ export interface UpdateMatchInput {
   results?: { participantId: string; score: number }[];
 }
 export interface TournamentListOptions {
-  limit?: number;
+  limit: number;
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
