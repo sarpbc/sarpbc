@@ -47,6 +47,8 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
 FROM base AS runtime
 
 ENV NODE_ENV=production
+# Dependencies are installed at build time; otherwise pnpm run tries to reinstall them at every start.
+ENV pnpm_config_verify_deps_before_run=false
 
 ARG APP_RELEASE=unknown
 
