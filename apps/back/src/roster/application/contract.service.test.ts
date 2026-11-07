@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
-import { Contract, ContractRole, Player, Team } from "../domain/roster";
+import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
+import { Contract, Player, Team } from "../domain/roster";
 import { ContractService } from "./contract.service";
 import type {
   ContractQueries,
@@ -61,14 +61,14 @@ describe("ContractService sourced career periods", () => {
       teamId: "vitality",
       startDate: "2022-01-10",
       endDate: "2025-05-31",
-      role: ContractRole.BENCHED,
+      role: "benched",
       sourceUrl: source,
     });
 
     expect(career).toContain(contract);
     expect(career).toHaveLength(2);
     expect(contract).toMatchObject({
-      role: ContractRole.BENCHED,
+      role: "benched",
       joinSourceUrl: source,
       leaveSourceUrl: source,
     });
@@ -81,7 +81,7 @@ describe("ContractService sourced career periods", () => {
         startDate: "2022-01-10",
         sourceUrl: source,
       }),
-    ).rejects.toThrow("add_player_to_team");
+    ).rejects.toThrow("record the move as a roster move");
     expect(career).toHaveLength(1);
   });
 
@@ -114,10 +114,20 @@ describe("ContractService sourced career periods", () => {
     ).rejects.toThrow(InvalidInputError);
   });
 
+  it("uses the unprocessable error for a missing team on creation and update", async () => {
+    await expect(
+      service.create("zen", { teamId: "missing", startDate: "2026-10-15" }),
+    ).rejects.toBeInstanceOf(UnprocessableError);
+    await expect(
+      service.update("zen", "kc-2025-06-01", { teamId: "missing" }),
+    ).rejects.toBeInstanceOf(UnprocessableError);
+    expect(career).toHaveLength(1);
+  });
+
   it("leaves the current team's departure to roster moves", async () => {
     await expect(
       service.revisePeriod("zen", "kc-2025-06-01", { endDate: "2025-12-31", sourceUrl: source }),
-    ).rejects.toThrow("remove_player_from_team");
+    ).rejects.toThrow("record the departure as a roster move");
     expect(career[0].endDate).toBeNull();
   });
 

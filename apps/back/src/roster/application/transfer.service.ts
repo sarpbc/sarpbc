@@ -5,6 +5,8 @@ import type { ContractMovementFilter } from "./search-props";
 
 export interface TransferSearchProps extends ContractMovementFilter {
   type?: TransferType;
+  from?: Date;
+  to?: Date;
   limit: number;
   offset: number;
 }
@@ -13,15 +15,15 @@ export class TransferService {
   constructor(private readonly contracts: ContractQueries) {}
 
   async findAndCount(
-    { type, limit, offset, ...filter }: TransferSearchProps,
+    { type, from, to, limit, offset, ...filter }: TransferSearchProps,
     now = new Date(),
   ): Promise<[Transfer[], number]> {
     const contracts = await this.contracts.findMovements(filter);
     const transfers = deriveTransfers(contracts, now).filter(
       (transfer) =>
         (!type || transfer.type === type) &&
-        (!filter.from || transfer.date >= filter.from) &&
-        (!filter.to || transfer.date <= filter.to),
+        (!from || transfer.date >= from) &&
+        (!to || transfer.date <= to),
     );
     return [transfers.slice(offset, offset + limit), transfers.length];
   }

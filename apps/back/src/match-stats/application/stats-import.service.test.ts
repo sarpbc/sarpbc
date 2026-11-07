@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { TournamentStatsGame } from "@sarpbc/types";
 import {
   ConflictError,
   IntegrationError,
@@ -115,6 +116,19 @@ class MemoryImports implements StatsImportStore {
   }
 }
 
+function toTournamentGame(game: GameRecord): TournamentStatsGame {
+  return {
+    matchId: game.matchId,
+    number: game.number,
+    ballchasingId: game.ballchasingId,
+    playedAt: null,
+    blueParticipantId: game.blueParticipantId,
+    orangeParticipantId: game.orangeParticipantId,
+    blueGoals: game.blueGoals,
+    orangeGoals: game.orangeGoals,
+  };
+}
+
 class MemoryGames implements GameStatsStore {
   saved: GameRecord[] = [];
   linked: PlayerLink[] = [];
@@ -143,6 +157,7 @@ class MemoryGames implements GameStatsStore {
     for (const link of game.learnedLinks)
       if (!this.linked.some((known) => known.platformId === link.platformId))
         this.linked.push(link);
+    return toTournamentGame(game);
   }
   async byMatch() {
     return [];
@@ -155,16 +170,7 @@ class MemoryGames implements GameStatsStore {
     if (!game) return null;
     this.saved = this.saved.filter((saved) => saved !== game);
     this.exclusions.add(game.ballchasingId);
-    return {
-      matchId,
-      number,
-      ballchasingId: game.ballchasingId,
-      playedAt: null,
-      blueParticipantId: game.blueParticipantId,
-      orangeParticipantId: game.orangeParticipantId,
-      blueGoals: game.blueGoals,
-      orangeGoals: game.orangeGoals,
-    };
+    return toTournamentGame(game);
   }
 }
 

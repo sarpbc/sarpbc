@@ -49,7 +49,6 @@ describe("RosterMergeService", () => {
       teams: {
         findById: async (id) => teams.get(id) ?? null,
         findBySlug: vi.fn(),
-        findWithPlayers: vi.fn(),
         save: vi.fn(async () => {}),
         delete: vi.fn(),
       },

@@ -260,7 +260,7 @@ Copy for meta lines: `page.hub.headers.*` in locale files. Keep meta factual —
 
 ## Motion
 
-`motion-v/nuxt` is available. Use motion for **presence and feedback**, not decoration.
+Use motion (CSS transitions) for **presence and feedback**, not decoration.
 
 | Do                                             | Don't                                      |
 | ---------------------------------------------- | ------------------------------------------ |
@@ -289,7 +289,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see [
 
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
-3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. CI enforces this via `scripts/lint-hub-row-heights.mjs` (wired into `pnpm lint`).
+3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. `scripts/lint-hub-row-heights.mjs` (wired into `pnpm lint`) bans a fixed list of literal classes (`h-11.25`, `h-11.5`, `h-8.25`, `h-67`, `mt-11`, `leading-5.5`, `py-[`); other arbitrary heights are caught in review.
 4. **Primitives first:** `@nuxt/ui` → existing `S*` (`app/components/s/`) → new `S*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.

@@ -23,7 +23,6 @@ export class TopicService {
   constructor(
     private readonly topicRepository: TopicStore,
     private readonly transaction: ForumTransaction,
-    private readonly id: () => string = () => crypto.randomUUID(),
   ) {}
 
   async initializeTopics(): Promise<void> {
@@ -32,15 +31,13 @@ export class TopicService {
         const exists = await scope.topics.findByTitle(topicData.title);
         if (!exists) {
           const topic: TopicRecord = {
-            id: this.id(),
+            id: crypto.randomUUID(),
             title: topicData.title,
             description: topicData.description,
             posts: [],
             createdAt: new Date(),
             updatedAt: null,
           };
-          topic.title = topicData.title;
-          topic.description = topicData.description;
           await scope.topics.save(topic);
         }
       }

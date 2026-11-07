@@ -7,7 +7,6 @@ export const CreateMatchDto = z.strictObject({
   status: z.string().optional(),
   numberOfGames: z.number().optional(),
   participantIds: z.array(z.string()).min(2),
-  pandascoreId: z.number().optional(),
 });
 export type CreateMatchDto = z.infer<typeof CreateMatchDto>;
 export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watchDebounced } from "@vueuse/core";
 import type { Player, Team } from "@sarpbc/types";
 import { resolveThemedLogoUrl, type NewsEntityTagKind } from "@sarpbc/utils";
 
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const colorMode = useColorMode();
+const reportError = useReportError();
 
 const query = ref("");
 const pending = ref(false);
@@ -31,8 +33,6 @@ const placeholder = computed(() =>
     : t("page.news.editor.picker.placeholderTeam"),
 );
 
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
-
 async function runSearch(searchQuery: string) {
   const trimmed = searchQuery.trim();
   if (!trimmed) {
@@ -42,13 +42,11 @@ async function runSearch(searchQuery: string) {
 
   pending.value = true;
   try {
-    const path =
-      props.kind === "player"
-        ? `/search/players?q=${encodeURIComponent(trimmed)}&limit=10`
-        : `/search/teams?q=${encodeURIComponent(trimmed)}&limit=10`;
-    results.value = await apiFetch<Player[] | Team[]>(path);
-  } catch {
+    results.value =
+      props.kind === "player" ? await searchPlayers(trimmed) : await searchTeams(trimmed);
+  } catch (searchError) {
     results.value = [];
+    reportError(searchError);
   } finally {
     pending.value = false;
   }
@@ -60,17 +58,11 @@ watch(
     if (isOpen) {
       query.value = "";
       results.value = [];
-      void runSearch("");
     }
   },
 );
 
-watch(query, (value) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    void runSearch(value);
-  }, 250);
-});
+watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 function onSelect(item: Player | Team) {
   emit("update:open", false);

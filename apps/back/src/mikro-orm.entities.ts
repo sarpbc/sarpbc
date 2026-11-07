@@ -11,9 +11,8 @@ import {
   TopicSchema,
   PostSchema,
   PostTranslationSchema,
-  ReplySchema,
-  ReplyReportSchema,
 } from "./forum/infrastructure/persistence/forum.entities";
+import { ReplySchema, ReplyReportSchema } from "./reply/infrastructure/persistence/reply.entities";
 import { ImageSchema } from "./images/infrastructure/persistence/image.entity";
 import { NewsArticleSchema } from "./news/infrastructure/persistence/news-article.entity";
 import {

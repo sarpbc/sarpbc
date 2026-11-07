@@ -1,6 +1,11 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
-import { parseNewsEntityTag, serializeNewsEntityTag, type NewsEntityTagKind } from "@sarpbc/utils";
+import {
+  newsEntityTagStart,
+  parseNewsEntityTag,
+  serializeNewsEntityTag,
+  type NewsEntityTagKind,
+} from "@sarpbc/utils";
 import EntityTagNodeView from "~/components/news/EntityTagNodeView.vue";
 
 function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
@@ -35,7 +40,7 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
     markdownTokenizer: {
       name: nodeName,
       level: "inline" as const,
-      start: (src: string) => src.indexOf(`:${kind}{`),
+      start: (src: string) => newsEntityTagStart(src, kind),
       tokenize: (src: string) => {
         const parsed = parseNewsEntityTag(src);
         if (!parsed || parsed.kind !== kind) {
@@ -68,7 +73,7 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
   });
 }
 
-export const PlayerTagNode = createEntityTagNode("player", "playerTag");
-export const TeamTagNode = createEntityTagNode("team", "teamTag");
+const PlayerTagNode = createEntityTagNode("player", "playerTag");
+const TeamTagNode = createEntityTagNode("team", "teamTag");
 
 export const entityTagEditorExtensions = [PlayerTagNode, TeamTagNode];

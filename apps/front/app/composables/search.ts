@@ -1,6 +1,4 @@
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
-import { apiFetch } from "~/utils/apiFetch";
+import type { Player, Team } from "@sarpbc/types";
 
 export interface SearchResult {
   teams: Team[];
@@ -10,24 +8,13 @@ export interface SearchResult {
 
 export async function searchTeamsAndPlayers({ query }: { query?: string }): Promise<SearchResult> {
   try {
-    const res = await apiFetch<Partial<SearchResult>>(`/search`, {
+    return await apiFetch<SearchResult>(`/search`, {
       method: "GET",
       params: {
         q: query,
         type: "all",
       },
     });
-
-    const searchResult: SearchResult = {
-      teams: res.teams ?? [],
-      players: res.players ?? [],
-      total: {
-        teams: res.total?.teams ?? 0,
-        players: res.total?.players ?? 0,
-      },
-    };
-
-    return searchResult;
   } catch {
     return { teams: [], players: [], total: { teams: 0, players: 0 } };
   }

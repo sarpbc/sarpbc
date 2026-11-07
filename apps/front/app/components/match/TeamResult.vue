@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { teamPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
 
 const { t } = useI18n();
@@ -18,7 +19,7 @@ const nameClass = computed(() => {
   <div class="flex flex-col items-center justify-center">
     <SLink
       v-if="participant?.team.slug"
-      :to="$localePath(`/team/${participant.team.slug}`)"
+      :to="$localePath(teamPath(participant.team.slug))"
       variant="muted"
       class="flex max-w-full flex-col items-center justify-center gap-2 text-center text-balance break-words"
       :class="nameClass"

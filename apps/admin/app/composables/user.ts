@@ -1,5 +1,4 @@
-import type { User } from "~/types/user";
-import { apiFetch } from "~/utils/apiFetch";
+import type { User } from "@sarpbc/types";
 
 export async function getProfile(): Promise<User | null> {
   try {
@@ -12,20 +11,39 @@ export async function getProfile(): Promise<User | null> {
   }
 }
 
-export async function logout(): Promise<void> {
+export function useLogout() {
   const user = useUser();
+  const localePath = useLocalePath();
+  const toast = useToast();
+  const { $i18n } = useNuxtApp();
+  const loggingOut = ref(false);
 
-  try {
-    const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
-      method: "GET",
-    });
-    if (res.success === true) {
-      user.value = null;
-      await navigateTo("/login");
+  async function logout(): Promise<void> {
+    if (loggingOut.value) {
       return;
     }
-  } catch (error) {
-    console.error("Logout failed:", error);
-    throw new Error("Logout failed");
+    loggingOut.value = true;
+    try {
+      let confirmed = false;
+      try {
+        const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
+          method: "GET",
+        });
+        confirmed = res.success === true;
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+
+      if (!confirmed) {
+        toast.add({ title: $i18n.t("page.home.logoutFailed"), color: "error" });
+        return;
+      }
+      user.value = null;
+      await navigateTo(localePath("/login"));
+    } finally {
+      loggingOut.value = false;
+    }
   }
+
+  return { loggingOut, logout };
 }

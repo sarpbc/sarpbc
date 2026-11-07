@@ -23,16 +23,24 @@ interface MultipartFormFields {
   [fieldname: string]: string;
 }
 
-function isMultipartFileTooLarge(error: unknown): boolean {
-  if (!error || typeof error !== "object") {
+function isMultipartFileTooLarge(cause: unknown): boolean {
+  if (!(cause instanceof Error)) {
     return false;
   }
-  const code = "code" in error ? error.code : undefined;
-  const statusCode = "statusCode" in error ? error.statusCode : undefined;
+  const code = "code" in cause ? cause.code : undefined;
+  const statusCode = "statusCode" in cause ? cause.statusCode : undefined;
   return code === "FST_REQ_FILE_TOO_LARGE" || statusCode === 413;
 }
 
-export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestInterceptor> {
+export interface MultipartMessages {
+  tooLarge: string;
+  unreadable: string;
+}
+
+export function MultipartInterceptor(
+  options: MultipartOptions,
+  messages: MultipartMessages,
+): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
@@ -72,15 +80,10 @@ export function MultipartInterceptor(options: MultipartOptions = {}): Type<NestI
         log.emit();
 
         if (isMultipartFileTooLarge(error)) {
-          throw new PayloadTooLargeException(
-            "Cover image must be 5 MB or smaller. Compress the JPEG or pick another file.",
-          );
+          throw new PayloadTooLargeException(messages.tooLarge);
         }
 
-        throw new HttpException(
-          "The image could not be read. Try a JPEG, PNG, WebP, or GIF under 5 MB.",
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException(messages.unreadable, HttpStatus.BAD_REQUEST);
       }
 
       req.storedFiles = files;

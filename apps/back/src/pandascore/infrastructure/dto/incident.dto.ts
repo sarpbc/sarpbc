@@ -46,4 +46,3 @@ export const incidentSchema = z.union([
   }),
 ]);
 export type PandascoreIncidentDto = z.infer<typeof incidentSchema>;
-export type PandascoreIncidentType = PandascoreIncidentDto["type"];

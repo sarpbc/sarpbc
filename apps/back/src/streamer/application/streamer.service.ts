@@ -1,6 +1,7 @@
+import type { LiveStreamer } from "@sarpbc/types";
 import { twitchChannelUrl } from "@sarpbc/utils";
 import { ConflictError, NotFoundError } from "../../common/domain/errors";
-import { byViewerCount, type LiveStream } from "../domain/live-stream";
+import { byViewerCount } from "../domain/live-stream";
 import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamCache, LiveStreamSnapshot } from "./ports/live-stream-cache";
 import type { LiveStreamSource } from "./ports/live-stream-source";
@@ -8,7 +9,7 @@ import type { TrackedStreamerStore } from "./ports/tracked-streamer-store";
 
 export const LIVE_STREAMS_FRESH_MS = 90_000;
 
-export type StreamerFailureReporter = (operation: string, error: unknown) => void;
+export type StreamerFailureReporter = (operation: string, cause: unknown) => void;
 
 export class StreamerService {
   constructor(
@@ -39,7 +40,7 @@ export class StreamerService {
     await this.invalidate();
   }
 
-  async listLive(): Promise<LiveStream[]> {
+  async listLive(): Promise<LiveStreamer[]> {
     if (!this.source) return [];
 
     let snapshot: LiveStreamSnapshot | null;
@@ -54,7 +55,7 @@ export class StreamerService {
     }
     if (claim === null) return snapshot?.streams ?? [];
 
-    let streams: LiveStream[];
+    let streams: LiveStreamer[];
     try {
       streams = await this.fetchLive(this.source);
     } catch (error) {
@@ -70,7 +71,7 @@ export class StreamerService {
     return streams;
   }
 
-  private async fetchLive(source: LiveStreamSource): Promise<LiveStream[]> {
+  private async fetchLive(source: LiveStreamSource): Promise<LiveStreamer[]> {
     const tracked = await this.streamers.list();
     if (tracked.length === 0) return [];
 

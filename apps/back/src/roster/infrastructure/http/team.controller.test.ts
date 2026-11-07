@@ -1,25 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Team } from "../../domain/roster";
 import { TeamController } from "./team.controller";
-import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 
 describe("TeamController", () => {
   const kept = Object.assign(new Team(), { id: "kept", name: "Kept" });
   const teams = { findById: vi.fn() };
   const contracts = { getFormerPlayersByTeam: vi.fn(), getContractsByTeam: vi.fn() };
   const tournaments = { getTournamentsWonByTeam: vi.fn(), getTournamentsByTeam: vi.fn() };
-  const prizes = new TournamentPrizeService(
-    { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
-    { run: vi.fn() },
-    { invalidateTournament: vi.fn() },
-    { error: vi.fn() },
-  );
-  const teamEarnings = vi.spyOn(prizes, "teamEarnings");
+  const teamEarnings = vi.fn();
+  const prizes = { teamEarnings } as never;
   const controller = new TeamController(
     teams as never,
     contracts as never,
     tournaments as never,
     prizes,
+    {} as never,
   );
 
   beforeEach(() => {

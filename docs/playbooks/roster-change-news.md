@@ -2,16 +2,16 @@
 
 **Linear:** [SAR-127](https://linear.app/sarpbc/issue/SAR-127/roster-change-news-agent-workflow-client-side-research-mcp-drafting)
 
-Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the SARPBC MCP server supplies entity data and `create_news_draft` / `update_news_article`. **Humans always review and publish** in the admin app.
+Repeatable workflow for an MCP client (Claude Desktop, Cursor, etc.) to turn a roster-change announcement into **sourced, bilingual news drafts** on sarpbc.org. The agent does client-side web research; the sarpbc.org MCP server supplies entity data and `create_news_draft` / `update_news_article`. **Humans always review and publish** in the admin app.
 
 ## Prerequisites
 
-| Requirement | Details                                                                                            |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| MCP client  | Claude Desktop, Cursor, or any client with **web search** and MCP tool use                         |
-| SARPBC MCP  | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                             |
-| Auth        | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
-| Permission  | `news.manage` on your staff role (required for news list/get/create/update tools)                  |
+| Requirement    | Details                                                                                            |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| MCP client     | Claude Desktop, Cursor, or any client with **web search** and MCP tool use                         |
+| sarpbc.org MCP | `POST https://api.sarpbc.org/mcp` (local: `http://localhost:4001/mcp`)                             |
+| Auth           | Personal access token from admin → **Tokens** (`/tokens`). Header: `Authorization: Bearer <token>` |
+| Permission     | `news.manage` on your staff role (required for news list/get/create/update tools)                  |
 
 Client configuration examples live in the root [README.md](../../README.md#mcp-server).
 
@@ -79,7 +79,7 @@ Capture before proceeding:
 
 ## 2. Verification (client-side web search)
 
-Use the MCP client’s **own web search** — not SARPBC tools. The API has no social scrapers or RSS ingestion.
+Use the MCP client’s **own web search** — not sarpbc.org tools. The API has no social scrapers or RSS ingestion.
 
 ### What counts as verified
 
@@ -115,7 +115,7 @@ When a primary source appears later, **update or replace** the draft before publ
 
 ## 3. Entity resolution (MCP read tools)
 
-Resolve every player and team to SARPBC slugs before drafting. Use returned `url` fields for internal links in copy and entity tags.
+Resolve every player and team to sarpbc.org slugs before drafting. Use returned `url` fields for internal links in copy and entity tags.
 
 ### Resolution order
 
@@ -168,7 +168,7 @@ Do not paraphrase the post _instead of_ embedding it. Keep a short lead, then th
 
 ## 4. Drafting
 
-### SARPBC news style (roster changes)
+### sarpbc.org news style (roster changes)
 
 | Element           | Guidance                                                                                                                                |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -194,8 +194,8 @@ You are a sarpbc.org staff writer covering Rocket League esports. Create bilingu
 
 ## Facts (verified)
 - Move type: {{signing | departure | bench | other}}
-- Player: {{display name}} (SARPBC slug: {{player-slug or "none"}})
-- Team: {{display name}} (SARPBC slug: {{team-slug or "none"}})
+- Player: {{display name}} (sarpbc.org slug: {{player-slug or "none"}})
+- Team: {{display name}} (sarpbc.org slug: {{team-slug or "none"}})
 - Prior team (if known): {{name}} (slug: {{slug or "none"}})
 - Primary source URL: {{url}}
 - Source tier: {{primary | secondary}}
@@ -221,7 +221,7 @@ Paste JSON from get_player / get_team here for accuracy.
    - Same structure and facts as English.
    - Same entity tags (slugs are locale-neutral) and the same :tweet{url="…"} line.
 
-3. Call create_news_draft once via SARPBC MCP:
+3. Call create_news_draft once via sarpbc.org MCP:
    - title / content = English headline and body
    - titleFr / contentFr = French headline and body
    - slug = {{en-slug}} (shared; /fr uses the same URL)
@@ -273,7 +273,7 @@ Editor completes this in the admin app (`adminEditUrl`). **Do not auto-publish.*
 - [ ] Quotes are verbatim from the source — no fabricated statements
 - [ ] Dates and tournament names correct
 
-### SARPBC data
+### sarpbc.org data
 
 - [ ] `:player` / `:team` tags use correct slugs (preview in admin)
 - [ ] `:tweet` cards render (or fallback link if X is unavailable)
@@ -340,6 +340,6 @@ After three trials, note:
 ## References
 
 - [README — MCP server](../../README.md#mcp-server)
-- MCP implementation: `apps/back/src/mcp/tools/read-tools.ts`, `apps/back/src/mcp/tools/write-tools.ts`
+- MCP implementation: `apps/back/src/mcp/infrastructure/tools/read-tools.ts`, `apps/back/src/mcp/infrastructure/tools/write-tools.ts`
 - Entity tag syntax: `packages/utils/src/news-entity-tag.ts`, tweet tags: `packages/utils/src/news-tweet-tag.ts`, match blocks: `packages/utils/src/news-match-block.ts`
 - Admin news editor: `apps/admin/app/pages/news/`

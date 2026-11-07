@@ -56,8 +56,6 @@ describe("PandascoreApiClient", () => {
     const since = new Date("2025-01-01T00:00:00Z");
     const incidents = await client.listIncidents({
       since,
-      videogame: ["rl"],
-      type: ["match", "tournament"],
       perPage: 1,
     });
 
@@ -69,9 +67,6 @@ describe("PandascoreApiClient", () => {
     expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
     expect(firstCallUrl).toContain("videogame=rl");
     expect(firstCallUrl).not.toContain("videogame%5B%5D=");
-    expect(firstCallUrl).toContain("type=match");
-    expect(firstCallUrl).toContain("type=tournament");
-    expect(firstCallUrl).not.toContain("type%5B%5D=");
   });
 
   it("getTournaments merges past, upcoming, and running", async () => {
@@ -115,6 +110,16 @@ describe("PandascoreApiClient", () => {
 
     const result = await client.getTournamentById(999);
     expect(result).toBeNull();
+  });
+
+  it("getTournamentById rethrows failures other than 404 instead of reporting not found", async () => {
+    (global.fetch as Mock).mockResolvedValue({
+      ok: false,
+      status: 429,
+      statusText: "Too Many Requests",
+    });
+
+    await expect(client.getTournamentById(999)).rejects.toMatchObject({ status: 429 });
   });
 
   it("request throws PandascoreApiError on failure", async () => {

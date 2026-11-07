@@ -3,16 +3,16 @@ import { loadPostHogClient } from "~/utils/posthog-client";
 
 type PostHogClient = Pick<PostHog, "capture">;
 export function usePostHog(): PostHogClient {
-  const { isAccepted } = useCookieConsent();
+  const { choice } = useCookieConsent();
   const config = useRuntimeConfig();
 
   const run = (fn: (client: PostHog) => void) => {
-    if (!import.meta.client || !isAccepted()) {
+    if (!import.meta.client || choice.value !== "accepted") {
       return;
     }
 
     void loadPostHogClient(config.public.posthog).then((client) => {
-      if (isAccepted() && client?.has_opted_in_capturing()) {
+      if (choice.value === "accepted" && client?.has_opted_in_capturing()) {
         fn(client);
       }
     });

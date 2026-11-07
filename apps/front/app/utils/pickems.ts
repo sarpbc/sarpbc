@@ -1,3 +1,4 @@
+import { isMatchFinished, isMatchLive, type MatchLifecycle } from "@sarpbc/utils";
 import type { Match } from "~/types/matches";
 
 interface PickemTournamentState {
@@ -22,19 +23,11 @@ export function isPickemTournamentActive(
 }
 
 export function isPickemOpenForMatch(match: Match, now = Date.now()): boolean {
-  if (!match.tournament?.pickemsEnabled) return false;
-  if (match.endAt || match.status === "finished") return false;
-  if (match.beginAt && new Date(match.beginAt).getTime() <= now) return false;
-  return true;
+  return Boolean(match.tournament?.pickemsEnabled) && !isMatchLockedForPickem(match, now);
 }
 
-export function isMatchLockedForPickem(
-  match: { beginAt: Date | string | null; endAt: Date | string | null; status: string | null },
-  now = Date.now(),
-): boolean {
-  if (match.endAt || match.status === "finished") return true;
-  if (match.beginAt && new Date(match.beginAt).getTime() <= now) return true;
-  return false;
+export function isMatchLockedForPickem(match: MatchLifecycle, now = Date.now()): boolean {
+  return isMatchFinished(match) || isMatchLive(match, now);
 }
 
 export type PickemPickState = {

@@ -1,39 +1,25 @@
-import type { ImageUploadTarget } from "../../domain/image-target";
-import type { ImageContentType } from "../../domain/image-upload";
+import type { ImageContentType, ImageUploadTarget } from "@sarpbc/utils";
 
-export interface R2UploadUrlResponse {
+export interface StoredObject {
+  publicUrl: string;
+  key: string;
+}
+
+export interface ObjectUploadUrl extends StoredObject {
   uploadUrl: string;
-  publicUrl: string;
-  key: string;
-}
-
-export interface R2UploadResponse {
-  publicUrl: string;
-  key: string;
-}
-
-export interface ImageUploadContext {
-  target: ImageUploadTarget;
-  userId?: string;
-  userEmail?: string;
-  articleSlug?: string;
-  articleTitle?: string;
-  size?: number;
 }
 
 export interface ObjectStorage {
   createImageUploadUrl(
     contentType: ImageContentType,
-    filename: string | undefined,
     target: ImageUploadTarget,
-  ): Promise<R2UploadUrlResponse>;
+  ): Promise<ObjectUploadUrl>;
   uploadImage(
     bytes: Uint8Array,
     contentType: ImageContentType,
-    filename: string | undefined,
-    context: ImageUploadContext,
-  ): Promise<R2UploadResponse>;
-  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<R2UploadResponse>;
-  copyObject(sourceKey: string, key: string): Promise<R2UploadResponse>;
+    target: ImageUploadTarget,
+  ): Promise<StoredObject>;
+  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject>;
+  copyObject(sourceKey: string, key: string): Promise<StoredObject>;
   deleteObject(key: string): Promise<void>;
 }

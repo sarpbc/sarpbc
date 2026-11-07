@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
 
 const { staff } = defineProps<{
   staff: Player[];

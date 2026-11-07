@@ -87,49 +87,4 @@ describe("RosterSyncWriter", () => {
     expect(team.slug).toBe("local");
     expect(team.imageUrl).toBe("local.png");
   });
-
-  it("adopts a legacy slug only when the row has no provider identity", async () => {
-    const player = Object.assign(new Player(), { id: "legacy", slug: "comm" });
-    em.findOne.mockImplementation(async (entity, where) =>
-      entity === Player && where.slug === "comm" && where.pandascoreId === null ? player : null,
-    );
-    const result = await new RosterSyncWriter(manager).upsertPlayer({
-      pandascoreId: 2,
-      name: "Comm",
-      slug: "comm",
-    });
-    expect(result.id).toBe("legacy");
-    expect(player.pandascoreId).toBe(2);
-    expect(player.slug).toBe("comm");
-  });
-
-  it("never adopts a start.gg row through the slug fallback", async () => {
-    await new RosterSyncWriter(manager).upsertPlayer({
-      pandascoreId: 3,
-      name: "Atow",
-      slug: "atow",
-    });
-    await new RosterSyncWriter(manager).upsertTeam({ name: "Vitality", slug: "vitality" });
-    const excludesStartgg = expect.objectContaining({ source: { $ne: "startgg" } });
-    expect(em.findOne).toHaveBeenCalledWith(Player, excludesStartgg);
-    expect(em.findOne).toHaveBeenCalledWith(Team, excludesStartgg);
-  });
-
-  it("suffixes a conflicting slug without overwriting a different provider identity", async () => {
-    const other = Object.assign(new Player(), { id: "other", pandascoreId: 1, slug: "zen" });
-    em.findOne.mockImplementation(async (entity, where) =>
-      entity === Player && where.slug === "zen" && !("pandascoreId" in where) ? other : null,
-    );
-    const result = await new RosterSyncWriter(manager).upsertPlayer({
-      pandascoreId: 2,
-      name: "Zen",
-      slug: "zen",
-    });
-    const created = em.persist.mock.calls[0][0];
-    expect(result.id).not.toBe("other");
-    expect(created.slug).toBe("zen-2");
-    expect(created.pandascoreId).toBe(2);
-    expect(other.pandascoreId).toBe(1);
-    expect(other.slug).toBe("zen");
-  });
 });

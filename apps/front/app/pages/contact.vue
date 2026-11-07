@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { uiLocale } from "@sarpbc/utils";
+
 const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
-const localeCode = computed(() => (locale.value === "fr" ? "fr" : "en"));
+const localeCode = computed(() => uiLocale(locale.value));
 
 const { data: doc } = await useAsyncData(
   "contact",

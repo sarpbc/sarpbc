@@ -1,5 +1,4 @@
-import type { AppNotification } from "~/types/notification";
-import { apiFetch } from "~/utils/apiFetch";
+import type { AppNotification } from "@sarpbc/types";
 
 export async function getNotifications(limit = 30): Promise<AppNotification[]> {
   try {
@@ -7,7 +6,7 @@ export async function getNotifications(limit = 30): Promise<AppNotification[]> {
       method: "GET",
       query: { limit },
     });
-    return res.notifications ?? [];
+    return res.notifications;
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return [];
@@ -19,7 +18,7 @@ export async function getUnreadNotificationCount(): Promise<number> {
     const res = await apiFetch<{ count: number }>("/notifications/unread-count", {
       method: "GET",
     });
-    return res.count ?? 0;
+    return res.count;
   } catch (error) {
     console.error("Error fetching unread notification count:", error);
     return 0;
@@ -32,7 +31,7 @@ export async function markNotificationsRead(ids?: string[]): Promise<number> {
       method: "PATCH",
       body: ids?.length ? { ids } : {},
     });
-    return res.marked ?? 0;
+    return res.marked;
   } catch (error) {
     console.error("Error marking notifications read:", error);
     return 0;

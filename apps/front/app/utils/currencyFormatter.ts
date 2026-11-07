@@ -19,7 +19,10 @@ function currencyCodeFor(name: string): string {
   return "USD";
 }
 
-export function formatPrizepool(prizepool: string | undefined | null): string {
+export function formatPrizepool(
+  prizepool: string | undefined | null,
+  locale: string = "en-US",
+): string {
   if (!prizepool) return "";
 
   const parts = prizepool.trim().split(" ");
@@ -31,7 +34,7 @@ export function formatPrizepool(prizepool: string | undefined | null): string {
   const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
 
   try {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currencyCode,
       minimumFractionDigits: 0,
@@ -40,33 +43,6 @@ export function formatPrizepool(prizepool: string | undefined | null): string {
   } catch {
     return `$${amount.toLocaleString()}`;
   }
-}
-
-export function createCurrencyFormatter(locale: string = "en-US") {
-  return {
-    format(prizepool: string | undefined | null): string {
-      if (!prizepool) return "";
-
-      const parts = prizepool.trim().split(" ");
-      if (parts.length < 2) return prizepool;
-
-      const amount = parseFloat((parts[0] ?? "").replaceAll(",", ""));
-      if (isNaN(amount)) return prizepool;
-
-      const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
-
-      try {
-        return new Intl.NumberFormat(locale, {
-          style: "currency",
-          currency: currencyCode,
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(amount);
-      } catch {
-        return `$${amount.toLocaleString()}`;
-      }
-    },
-  };
 }
 
 export function formatPrizeAmount(amount: number, currency: string, locale: string): string {

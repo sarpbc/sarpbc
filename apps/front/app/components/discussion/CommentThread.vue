@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Comment, CommentTargetType, PaginatedComments } from "~/types/discussion";
+import type { PaginatedReplies, Reply, ReplyTargetType } from "@sarpbc/types";
 import { parseCommentHash } from "~/utils/commentPermalink";
 import { findCommentInTree } from "~/utils/commentTree";
 
@@ -8,7 +8,7 @@ const {
   targetId,
   flushTop = false,
 } = defineProps<{
-  targetType: CommentTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
   /** Sits under an `SRail` section caption, which already draws the top hairline. */
   flushTop?: boolean;
@@ -26,7 +26,7 @@ provide("commentPermalink", {
 });
 
 const loadedExtraPages = ref(0);
-const appendedReplies = ref<Comment[]>([]);
+const appendedReplies = ref<Reply[]>([]);
 const loadingMore = ref(false);
 
 const {
@@ -34,7 +34,7 @@ const {
   pending,
   error,
   refresh,
-} = await useAsyncData<PaginatedComments>(
+} = await useAsyncData<PaginatedReplies>(
   () => `comments-${targetType}-${targetId}`,
   () => getCommentsByTarget(targetType, targetId, 0),
   {

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Contract, ContractRole, Player, Team } from "../../domain/roster";
+import { Contract, Player, Team } from "../../domain/roster";
 import { TransferController } from "./transfer.controller";
 
 describe("TransferController", () => {
@@ -16,7 +16,7 @@ describe("TransferController", () => {
     player: zen,
     team: kc,
     startDate: new Date("2025-06-01"),
-    role: ContractRole.ACTIVE,
+    role: "active",
     joinSourceUrl: "https://x.com/KarmineCorp/status/1",
   });
   const transfers = { findAndCount: vi.fn() };

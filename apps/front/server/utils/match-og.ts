@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import * as z from "zod";
 import type { MatchDetailResponse } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
-import { parseMatchResults } from "~/utils/parseMatchResult";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
-import { apiFetch } from "~/utils/apiFetch";
+import { getMatchParticipantScore } from "~/utils/matchScore";
+import { TBD_LABEL } from "~/utils/tbdLabel";
+import { getMatchById } from "~/composables/matches/api";
+import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { tournamentStageLabel } from "@sarpbc/utils";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
@@ -26,21 +26,6 @@ function truncate(value: string, maxLength: number): string {
   return `${value.slice(0, maxLength - 1)}…`;
 }
 
-function getMatchStatus(match: MatchDetailResponse["match"]): "live" | "finished" | "upcoming" {
-  const now = Date.now();
-  const beginAt = match.beginAt ? new Date(match.beginAt).getTime() : null;
-
-  if (match.endAt || match.status === "finished") {
-    return "finished";
-  }
-
-  if (beginAt !== null && beginAt <= now) {
-    return "live";
-  }
-
-  return "upcoming";
-}
-
 function getParticipantScore(
   match: MatchDetailResponse["match"],
   participantId: string,
@@ -53,10 +38,10 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const participants = match.participants ?? [];
   const teamA = participants[0];
   const teamB = participants[1];
-  const teamAName = truncate(teamA?.team.name ?? "TBD", 28);
-  const teamBName = truncate(teamB?.team.name ?? "TBD", 28);
+  const teamAName = truncate(teamA?.team.name ?? TBD_LABEL, 28);
+  const teamBName = truncate(teamB?.team.name ?? TBD_LABEL, 28);
   const tournament = truncate(tournamentStageLabel(match.tournament), 48);
-  const status = getMatchStatus(match);
+  const status = resolveMatchDiscoveryStatus(match);
 
   let centerLine = "vs";
   if (status === "finished" || status === "live") {
@@ -121,39 +106,13 @@ export function getMatchOgResvgFontOptions() {
   };
 }
 
-const fetchStatusCodeSchema = z.union([
-  z.object({ statusCode: z.number() }).transform((value) => value.statusCode),
-  z.object({ status: z.number() }).transform((value) => value.status),
-  z
-    .object({ response: z.object({ status: z.number() }) })
-    .transform((value) => value.response.status),
-]);
-
-export function getFetchStatusCode(cause: unknown): number | undefined {
-  const parsed = fetchStatusCodeSchema.safeParse(cause);
-  return parsed.success ? parsed.data : undefined;
-}
-
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
-    const response = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
-    return {
-      ...response,
-      match: {
-        ...response.match,
-        results: parseMatchResults(response.match.results),
-      },
-    };
+    return await getMatchById(id);
   } catch (cause) {
-    const statusCode = getFetchStatusCode(cause);
-    if (statusCode === 404) {
-      throw createError({ statusCode: 404, statusMessage: "Match not found" });
-    }
-
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Could not load match for OG image",
-      cause,
+    rethrowApiError(cause, {
+      notFound: "Match not found",
+      badGateway: "Could not load match for OG image",
     });
   }
 }

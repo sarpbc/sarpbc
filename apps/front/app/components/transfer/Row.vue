@@ -1,6 +1,7 @@
 <script lang="ts" setup>
+import { playerPath, teamPath } from "@sarpbc/utils";
 import { DateFormatter } from "@internationalized/date";
-import type { Transfer } from "~/types/transfer";
+import type { Transfer } from "@sarpbc/types";
 
 const { transfer, showTeam = true } = defineProps<{
   transfer: Transfer;
@@ -29,7 +30,7 @@ const typeLabel = computed(() =>
       {{ dateDf.format(new Date(transfer.date)) }}
     </time>
     <SLink
-      :to="$localePath(`/player/${transfer.player.slug}`)"
+      :to="$localePath(playerPath(transfer.player.slug))"
       variant="inline"
       class="flex min-w-0 flex-1 items-center gap-2"
     >
@@ -54,7 +55,7 @@ const typeLabel = computed(() =>
     </span>
     <SLink
       v-if="showTeam"
-      :to="$localePath(`/team/${transfer.team.slug}`)"
+      :to="$localePath(teamPath(transfer.team.slug))"
       variant="inline"
       class="flex w-28 min-w-0 shrink-0 items-center gap-2 sm:w-40"
     >

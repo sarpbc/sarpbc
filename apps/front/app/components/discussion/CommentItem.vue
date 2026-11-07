@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import type { Comment, CommentTargetType } from "~/types/discussion";
+import type { Reply, ReplyTargetType } from "@sarpbc/types";
+import { canModerateComments } from "@sarpbc/utils";
 import { commentAnchorId } from "~/utils/commentPermalink";
 
 const { comment, targetType, targetId } = defineProps<{
-  comment: Comment;
-  targetType: CommentTargetType;
+  comment: Reply;
+  targetType: ReplyTargetType;
   targetId: string;
 }>();
 
@@ -97,7 +98,7 @@ async function onDelete() {
           {{ authorLabel }}
         </span>
         <span class="shrink-0 text-xs text-muted tabular-nums">
-          {{ df(locale).format(new Date(comment.createdAt)) }}
+          {{ longDateTimeFormatter(locale).format(new Date(comment.createdAt)) }}
         </span>
       </div>
 

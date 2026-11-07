@@ -1,6 +1,9 @@
 {
   "common": {
     "cancel": "Cancel",
+    "retry": "Try Again",
+    "requestFailed": "The action failed. Try again.",
+    "loadFailed": "Could not load this page. Check your connection and try again.",
     "contractRole": {
       "active": "Active",
       "benched": "Benched",
@@ -12,7 +15,7 @@
     }
   },
   "imageUpload": {
-    "hint": "JPEG, PNG, WebP or GIF, up to 5 MB",
+    "hint": "JPEG, PNG, WebP or GIF, up to {max} MB",
     "upload": "Upload Image",
     "replace": "Replace Image",
     "remove": "Remove Image",
@@ -27,9 +30,9 @@
       "signedInAs": "Signed in as",
       "logout": "Log Out",
       "loggingOut": "Logging out…",
+      "logoutFailed": "Could not log out. Try again.",
       "forbidden": "You do not have access to that section",
       "noTools": "No tools are available for your staff role yet. Ask an admin if you need access.",
-      "retry": "Try Again",
       "loadError": "Could not load this section. Check your connection and try again.",
       "dateUnknown": "Date to be confirmed",
       "tbd": "Teams to be confirmed",
@@ -85,7 +88,6 @@
       "title": "API Tokens",
       "loading": "Loading…",
       "loadError": "Could not load tokens. Check your connection and try again.",
-      "retry": "Try Again",
       "tokensCount": "{count} token | {count} tokens",
       "lastUsedNever": "Never",
       "copyFailed": "Could not copy to clipboard. Select the text and copy it manually.",
@@ -96,7 +98,7 @@
       },
       "empty": {
         "title": "No API Tokens Yet",
-        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to SARPBC via MCP."
+        "description": "API tokens let you connect an AI assistant (Claude, Cursor) to sarpbc.org via MCP."
       },
       "create": {
         "title": "Create Token",
@@ -129,7 +131,6 @@
       "description": "Twitch channels shown in the public footer when they stream Rocket League.",
       "loading": "Loading…",
       "loadError": "Could not load streamers. Check your connection and try again.",
-      "retry": "Try Again",
       "count": "{count} channel | {count} channels",
       "columns": {
         "login": "Twitch Login",
@@ -165,7 +166,6 @@
       "title": "Forum",
       "loading": "Loading…",
       "empty": "No forum posts yet.",
-      "notFound": "Post not found.",
       "postsCount": "{count} posts",
       "hide": "Hide",
       "columns": {
@@ -187,16 +187,13 @@
       },
       "messages": {
         "hidden": "Comment hidden",
-        "errorTitle": "Could not moderate comment",
         "moderateError": "Could not moderate this comment. Try again."
       }
     },
     "moderation": {
       "title": "Comment Moderation",
       "subtitle": "Recent comments across matches, articles, and forum posts. Reported comments appear first.",
-      "loading": "Loading…",
       "loadError": "Could not load comments for moderation.",
-      "retry": "Try Again",
       "empty": "No comments to review.",
       "hide": "Hide",
       "delete": "Delete Comment",
@@ -213,7 +210,6 @@
       "messages": {
         "hidden": "Comment hidden",
         "deleted": "Comment deleted",
-        "errorTitle": "Could not moderate comment",
         "moderateError": "Could not moderate this comment. Try again."
       }
     },
@@ -221,7 +217,6 @@
       "title": "Roster Proposals",
       "subtitle": "Sourced roster, player, team and prize distribution changes proposed through the MCP. Nothing applies until a staff member approves it.",
       "loadError": "Could not load roster proposals.",
-      "retry": "Try Again",
       "empty": "No roster proposals to review.",
       "approve": "Approve",
       "reject": "Reject",
@@ -284,7 +279,6 @@
       "messages": {
         "approved": "Proposal approved and applied",
         "rejected": "Proposal rejected",
-        "errorTitle": "Could not review proposal",
         "reviewError": "Could not review this proposal. Try again."
       }
     },
@@ -312,7 +306,7 @@
       "create": {
         "action": "Create Tournament",
         "title": "Create Tournament",
-        "subtitle": "Add a tournament that is managed on SARPBC instead of synced from PandaScore.",
+        "subtitle": "Add a tournament that is managed on sarpbc.org instead of synced from PandaScore.",
         "saved": "Tournament created"
       },
       "edit": {
@@ -501,11 +495,11 @@
           "amount": "Enter a whole amount between 1 and {max}.",
           "notParticipant": "This team does not take part in the tournament. Remove this prize or add the team as a participant.",
           "notOnRoster": "Some players are not on the team's tournament roster.",
+          "tooManyPlayers": "A placement can credit up to {max} players.",
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
         }
       },
-      "retry": "Try Again",
       "events": {
         "title": "Events",
         "subtitle": "Events group tournament stages, such as a pool and its finals, under one public page. Only manual events are listed. An event without stages stays hidden from the public site.",
@@ -598,8 +592,7 @@
         "confirmTitle": "Remove game stats",
         "confirm": "Remove the stats of game {number} of {match}? Later imports will leave this replay out until it is attached again.",
         "confirmButton": "Remove",
-        "removed": "Game {number} removed",
-        "removeError": "Could not remove the game"
+        "removed": "Game {number} removed"
       }
     },
     "pickems": {
@@ -645,7 +638,6 @@
       },
       "create": {
         "title": "New Article",
-        "titleField": "Title",
         "slugField": "URL Slug",
         "slugHint": "Used in /news/your-slug. Leave empty to generate from the title.",
         "slugPlaceholder": "my-article",
@@ -678,8 +670,7 @@
         "renameFailed": "Could not save the title. Try again.",
         "delete": "Delete Article",
         "deleteConfirm": "Delete “{title}”? This cannot be undone.",
-        "deleted": "Article deleted",
-        "deleteFailed": "Could not delete the article. Try again."
+        "deleted": "Article deleted"
       },
       "cover": {
         "label": "Cover Image"
@@ -870,7 +861,6 @@
       "title": "Users",
       "searchPlaceholder": "Search by name or email",
       "loadError": "Could not load users. Check your connection and try again.",
-      "retry": "Try Again",
       "empty": "No users yet.",
       "emptySearch": "No users match this search.",
       "usersCount": "{count} user | {count} users",
@@ -894,26 +884,12 @@
       },
       "messages": {
         "updated": "{user} is now {role}.",
-        "errorTitle": "Role not changed",
         "updateError": "Could not change this role. Try again."
       }
     }
   },
   "newsTag": {
-    "loading": "Loading…",
-    "error": "Could not load profile. Try again later.",
-    "viewProfile": "View profile",
-    "noTeam": "No current team",
-    "viewOnX": "View on X",
-    "tweetUnavailable": "This X post could not be loaded. Open it on X",
-    "tweetOnX": "Post by {name} on X",
-    "tweetImage": "Image {index} from the X post",
-    "matchLive": "Live",
-    "matchFinal": "Final",
-    "matchTbd": "TBD",
-    "matchDataBy": "Match data provided by",
     "matchesInvalid": "This match block is invalid. Edit it to pick matches again.",
-    "matchesUnavailable": "These matches could not be loaded.",
     "matchesEmpty": "No matches yet."
   }
 }

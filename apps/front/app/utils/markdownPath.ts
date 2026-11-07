@@ -1,3 +1,5 @@
+import { localizedPath } from "@sarpbc/utils";
+
 const SKIP_PREFIXES = ["/_nuxt", "/__nuxt", "/og/", "/_ipx", "/_icon"];
 
 const STATIC_EXTENSIONS = new Set([
@@ -25,7 +27,7 @@ function lastSegment(pathname: string): string {
   return slash === -1 ? trimmed : trimmed.slice(slash + 1);
 }
 
-export function isInternalOrAssetPath(pathname: string): boolean {
+function isInternalOrAssetPath(pathname: string): boolean {
   if (SKIP_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix))) {
     return true;
   }
@@ -40,14 +42,9 @@ export function isInternalOrAssetPath(pathname: string): boolean {
   return STATIC_EXTENSIONS.has(ext);
 }
 
-const PRIVATE_HTML_PATHS = new Set([
-  "/login",
-  "/register",
-  "/profile",
-  "/fr/login",
-  "/fr/register",
-  "/fr/profile",
-]);
+const PRIVATE_HTML_PATHS = new Set(
+  ["/login", "/register", "/profile"].flatMap((path) => [path, localizedPath(path, "fr")]),
+);
 
 export function isMarkdownPagePath(pathname: string): boolean {
   if (!pathname.endsWith(".md")) {

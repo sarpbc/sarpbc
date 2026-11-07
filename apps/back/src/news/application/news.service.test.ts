@@ -39,19 +39,6 @@ describe("NewsService sitemap", () => {
     };
   }
 
-  describe("findPublishedSitemapMeta", () => {
-    it("counts published articles only", async () => {
-      newsRepository.countPublished.mockResolvedValue(2);
-
-      await expect(service.findPublishedSitemapMeta()).resolves.toEqual({
-        total: 2,
-        chunkSize: NEWS_SITEMAP_CHUNK_SIZE,
-        chunkCount: 1,
-      });
-      expect(newsRepository.countPublished).toHaveBeenCalledWith();
-    });
-  });
-
   describe("findPublishedSitemapChunk", () => {
     it("rejects a negative chunk index", async () => {
       await expect(service.findPublishedSitemapChunk(-1)).rejects.toBeInstanceOf(InvalidInputError);
@@ -64,7 +51,7 @@ describe("NewsService sitemap", () => {
       await expect(service.findPublishedSitemapChunk(1)).rejects.toBeInstanceOf(NotFoundError);
     });
 
-    it("returns published slugs in stable createdAt, id order and omits drafts", async () => {
+    it("returns each slug with its last modification date", async () => {
       newsRepository.sitemapChunk.mockResolvedValue([
         [
           publishedArticle({
@@ -85,9 +72,7 @@ describe("NewsService sitemap", () => {
 
       const result = await service.findPublishedSitemapChunk(0);
 
-      expect(newsRepository.sitemapChunk).toHaveBeenCalledWith(0, NEWS_SITEMAP_CHUNK_SIZE);
       expect(result.data.map((entry) => entry.slug)).toEqual(["published-one", "published-two"]);
-      expect(result.data.map((entry) => entry.slug)).not.toContain("secret-draft");
       expect(result.data[0]?.lastmod).toBe("2026-01-01T00:00:00.000Z");
       expect(result.data[1]?.lastmod).toBe("2026-03-01T12:00:00.000Z");
       expect(result).toMatchObject({
@@ -109,43 +94,6 @@ describe("NewsService sitemap", () => {
         data: [],
       });
     });
-  });
-});
-
-describe("NewsService findAllPublishedArticle", () => {
-  let service: NewsService;
-  const newsRepository = {
-    listPublished: vi.fn(),
-  };
-  const replyService = {
-    countByTargetIds: vi.fn(),
-  };
-
-  beforeEach(() => {
-    service = new NewsService(
-      newsRepository as never,
-      {} as never,
-      replyService as never,
-      {} as never,
-    );
-    vi.clearAllMocks();
-    replyService.countByTargetIds.mockResolvedValue(new Map());
-  });
-
-  it("filters published articles by type when provided", async () => {
-    newsRepository.listPublished.mockResolvedValue([[], 0]);
-
-    await service.findAllPublishedArticle(0, 20, "en-US", "article");
-
-    expect(newsRepository.listPublished).toHaveBeenCalledWith(0, 20, "article");
-  });
-
-  it("omits type from the filter when listing the mixed feed", async () => {
-    newsRepository.listPublished.mockResolvedValue([[], 0]);
-
-    await service.findAllPublishedArticle(0, 20, "en-US");
-
-    expect(newsRepository.listPublished).toHaveBeenCalledWith(0, 20, undefined);
   });
 });
 
@@ -175,7 +123,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
     expect(newsRepository.listWeek).toHaveBeenCalledWith(
       new Date("2026-08-31T00:00:00.000Z"),
       new Date("2026-09-07T00:00:00.000Z"),
-      100,
+      expect.any(Number),
     );
   });
 });

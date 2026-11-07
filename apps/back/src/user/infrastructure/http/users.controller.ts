@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import type { UserList } from "@sarpbc/types";
 import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "./decorator/current-user.decorator";
@@ -24,7 +25,7 @@ export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryDto) {
+  async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryDto): Promise<UserList> {
     const { users, total } = await this.userService.list(query);
     return { users: users.map(UserMapper.toListItemDto), total };
   }

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import type { MatchBlockItem, MatchBlockState } from "@sarpbc/types";
-import { matchPath, newsMatchBlockFromAttrs, newsMatchBlockKey } from "@sarpbc/utils";
-import { getMatchParticipantScore } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import {
+  matchPath,
+  newsMatchBlockFromAttrs,
+  newsMatchBlockKey,
+  tournamentStageLabel,
+} from "@sarpbc/utils";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 
 const props = defineProps<{
   match?: string;
@@ -60,22 +64,9 @@ function summary(item: MatchBlockItem): string {
   });
 }
 
-function stateLabel(item: MatchBlockItem): string {
-  switch (item.state) {
-    case "live":
-      return t("components.match.live");
-    case "finished":
-      return t("newsTag.matchFinal");
-    case "upcoming":
-      return item.beginAt
-        ? t("newsTag.matchUtc", { date: dateFormatter.value.format(new Date(item.beginAt)) })
-        : t("components.match.tbd");
-    default: {
-      const exhaustive: never = item.state;
-      return exhaustive;
-    }
-  }
-}
+const stateLabel = useMatchStateLabel((beginAt) =>
+  t("newsTag.matchUtc", { date: dateFormatter.value.format(beginAt) }),
+);
 </script>
 
 <template>
@@ -129,7 +120,7 @@ function stateLabel(item: MatchBlockItem): string {
       <p v-if="startgg" class="flex h-row items-center gap-1 pl-2 text-xs text-muted">
         {{ t("newsTag.matchDataBy") }}
         <a
-          href="https://www.start.gg"
+          :href="STARTGG_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-toned transition-none hover:text-highlighted"

@@ -1,4 +1,4 @@
-import type { ReplyTargetType } from "../../reply/domain/reply";
+import type { ReplyTargetType } from "@sarpbc/types";
 
 export type ModerationReplyDto = {
   id: string;

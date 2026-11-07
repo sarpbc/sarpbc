@@ -1,8 +1,12 @@
-import { toPlayer, toTeam } from "./roster.mapper";
+import { playerColumns, teamColumns, toPlayer, toTeam } from "./roster.mapper";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Contract, Player, Team } from "./player.entities";
-import { availablePlayerSlug, findPandascorePlayer } from "./find-pandascore-player";
+import {
+  availablePlayerSlug,
+  findPandascorePlayer,
+  findPandascoreTeam,
+} from "./pandascore-adoption";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../application/imports";
 export class RosterSyncWriter {
   private readonly teams = new Map<string, Team>();
@@ -11,16 +15,7 @@ export class RosterSyncWriter {
   async upsertTeam(input: UpsertTeamCommand): Promise<{ id: string }> {
     const key = input.pandascoreId !== undefined ? String(input.pandascoreId) : input.slug;
     const existing =
-      this.teams.get(key) ??
-      (input.pandascoreId !== undefined
-        ? await this.em.findOne(Team, { pandascoreId: input.pandascoreId })
-        : null) ??
-      (await this.em.findOne(Team, {
-        slug: input.slug,
-        pandascoreId: null,
-        mergedInto: null,
-        source: { $ne: "startgg" },
-      }));
+      this.teams.get(key) ?? (await findPandascoreTeam(this.em, input.pandascoreId, input.slug));
     const row = existing ?? new Team();
     if (!existing) {
       row.id = v4();
@@ -29,14 +24,7 @@ export class RosterSyncWriter {
     this.teams.set(key, row);
     const model = toTeam(row, false);
     model.synchronizeProfile(input);
-    Object.assign(row, {
-      name: model.name,
-      pandascoreId: model.pandascoreId,
-      source: model.source,
-      location: model.location,
-      imageUrl: model.imageUrl,
-      darkModeImageUrl: model.darkModeImageUrl,
-    });
+    Object.assign(row, teamColumns(model));
     this.em.persist(row);
     return { id: row.id };
   }
@@ -55,17 +43,7 @@ export class RosterSyncWriter {
     this.players.set(input.pandascoreId, row);
     const model = toPlayer(row);
     model.synchronizeProfile(input);
-    Object.assign(row, {
-      pandascoreId: model.pandascoreId,
-      source: model.source,
-      name: model.name,
-      firstName: model.firstName,
-      lastName: model.lastName,
-      birthday: model.birthday,
-      nationality: model.nationality,
-      imageUrl: model.imageUrl,
-      role: model.role,
-    });
+    Object.assign(row, playerColumns(model));
     if (currentTeamId !== undefined && !(existing && (await this.hasOpenContract(row.id))))
       row.team = currentTeamId === null ? null : this.em.getReference(Team, currentTeamId);
     this.em.persist(row);

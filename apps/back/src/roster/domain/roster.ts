@@ -1,5 +1,6 @@
-import { InvalidInputError } from "../../common/domain/errors";
-import type { DataSource } from "../../common/domain/data-source";
+import { isoDay } from "@sarpbc/utils";
+import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
+import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
 export interface ImportedTeamProfile {
   pandascoreId?: number;
   name: string;
@@ -17,20 +18,6 @@ export interface ImportedPlayerProfile {
   imageUrl?: string;
   role?: string | null;
 }
-export enum ContractRole {
-  ACTIVE = "active",
-  BENCHED = "benched",
-  LOANED = "loaned",
-  COACH = "coach",
-  ASSISTANT_COACH = "assistant_coach",
-  ANALYST = "analyst",
-  MANAGER = "manager",
-}
-export enum PlayerStatus {
-  ACTIVE = "active",
-  FREE_AGENT = "free_agent",
-  RETIRED = "retired",
-}
 function roleFromPandascore(role: string | null): ContractRole {
   switch (
     role
@@ -40,18 +27,25 @@ function roleFromPandascore(role: string | null): ContractRole {
   ) {
     case "coach":
     case "head_coach":
-      return ContractRole.COACH;
+      return "coach";
     case "assistant_coach":
     case "co_coach":
-      return ContractRole.ASSISTANT_COACH;
+      return "assistant_coach";
     case "analyst":
-      return ContractRole.ANALYST;
+      return "analyst";
     case "manager":
     case "staff":
-      return ContractRole.MANAGER;
+      return "manager";
     default:
-      return ContractRole.ACTIVE;
+      return "active";
   }
+}
+function linkPandascore(
+  target: { pandascoreId: number | null; source: DataSource },
+  pandascoreId: number,
+): void {
+  target.pandascoreId = pandascoreId;
+  target.source = "pandascore";
 }
 export class Team {
   id = "";
@@ -67,12 +61,12 @@ export class Team {
   pandascoreId: number | null = null;
   source: DataSource = "manual";
   mergedIntoId: string | null = null;
+  linkPandascore(pandascoreId: number): void {
+    linkPandascore(this, pandascoreId);
+  }
   synchronizeProfile(input: ImportedTeamProfile): void {
     this.name = input.name;
-    if (input.pandascoreId !== undefined) {
-      this.pandascoreId = input.pandascoreId;
-      this.source = "pandascore";
-    }
+    if (input.pandascoreId !== undefined) this.linkPandascore(input.pandascoreId);
     if (input.location !== undefined) this.location = input.location;
     if (!this.imageUrl && input.imageUrl) this.imageUrl = input.imageUrl;
     if (!this.darkModeImageUrl && input.darkModeImageUrl)
@@ -90,16 +84,18 @@ export class Player {
   imageUrl: string | null = null;
   role: string | null = null;
   contractRole: ContractRole | null = null;
-  status = PlayerStatus.ACTIVE;
+  status: PlayerStatus = "active";
   slug = "";
   pandascoreId: number | null = null;
   source: DataSource = "manual";
   mergedIntoId: string | null = null;
   contracts: Contract[] = [];
   photos: PlayerPhoto[] = [];
+  linkPandascore(pandascoreId: number): void {
+    linkPandascore(this, pandascoreId);
+  }
   synchronizeProfile(input: ImportedPlayerProfile): void {
-    this.pandascoreId = input.pandascoreId;
-    this.source = "pandascore";
+    this.linkPandascore(input.pandascoreId);
     this.name = input.name;
     this.firstName = input.firstName ?? null;
     this.lastName = input.lastName ?? null;
@@ -124,7 +120,7 @@ export class Contract {
   team!: Team;
   startDate!: Date;
   endDate: Date | null = null;
-  role = ContractRole.ACTIVE;
+  role: ContractRole = "active";
   joinSourceUrl: string | null = null;
   leaveSourceUrl: string | null = null;
   createdAt = new Date();
@@ -146,12 +142,12 @@ export class Contract {
     const stored = others.find((other) => other.id === this.id);
     if (stored && !stored.endDate && stored.team.id === currentTeamId && this.endDate) {
       throw new InvalidInputError(
-        `This contract is the player's current ${stored.team.name} contract; record the departure with remove_player_from_team.`,
+        `This contract is the player's current ${stored.team.name} contract; record the departure as a roster move instead.`,
       );
     }
     if (!this.endDate && this.team.id !== currentTeamId) {
       throw new InvalidInputError(
-        `An open contract must be with the player's current team; give ${this.team.name} an end date or record the move with add_player_to_team.`,
+        `An open contract must be with the player's current team; give ${this.team.name} an end date or record the move as a roster move.`,
       );
     }
     const overlap = others.find(
@@ -162,16 +158,13 @@ export class Contract {
         this.startDate < (other.endDate ?? FOREVER),
     );
     if (overlap) {
-      throw new InvalidInputError(
+      throw new UnprocessableError(
         `This period overlaps contract "${overlap.id}" with ${this.team.name} (${isoDay(overlap.startDate)} to ${overlap.endDate ? isoDay(overlap.endDate) : "now"}); update that contract instead.`,
       );
     }
   }
 }
 const FOREVER = new Date(8.64e15);
-function isoDay(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
 export class PlayerPhoto {
   id = "";
   player!: Player;

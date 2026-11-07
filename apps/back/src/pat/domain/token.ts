@@ -1,4 +1,4 @@
-import type { StaffRole } from "../../user/domain/staff-access";
+import type { StaffRole } from "@sarpbc/types";
 
 export interface StoredToken {
   id: string;

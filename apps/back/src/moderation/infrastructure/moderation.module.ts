@@ -1,11 +1,10 @@
 import { Module } from "@nestjs/common";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { ReplyService } from "../../reply/application/reply.service";
 import { ModerationController } from "./http/moderation.controller";
 import { ModerationService } from "../application/moderation.service";
 @Module({
-  imports: [UserModule, ReplyModule],
+  imports: [ReplyModule],
   controllers: [ModerationController],
   providers: [
     {

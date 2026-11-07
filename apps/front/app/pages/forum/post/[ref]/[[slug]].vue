@@ -42,10 +42,7 @@ if (!post.value) {
 const { publicId, slug } = post.value;
 const canonicalPath = localePath(forumPostPath(publicId, slug));
 if (route.path !== canonicalPath) {
-  await navigateTo(
-    { path: canonicalPath, query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, canonicalPath);
 }
 
 const title = computed(() =>
@@ -96,7 +93,7 @@ watch(
           <div class="flex shrink-0 items-center gap-3 text-xs text-muted">
             <span>{{ post.author }}</span>
             <time :datetime="new Date(post.createdAt).toISOString()" class="tabular-nums">
-              {{ df(locale).format(new Date(post.createdAt)) }}
+              {{ longDateTimeFormatter(locale).format(new Date(post.createdAt)) }}
             </time>
           </div>
         </div>

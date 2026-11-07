@@ -1,4 +1,4 @@
-import { newsContentToPlainText } from "./news-content.ts";
+import { newsContentToPlainText } from "./news-content";
 
 const WORDS_PER_MINUTE = 200;
 

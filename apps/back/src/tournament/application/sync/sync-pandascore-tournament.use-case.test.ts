@@ -6,11 +6,12 @@ describe("SyncPandascoreTournamentUseCase", () => {
     getTournamentBrackets: vi.fn(),
     getTournamentMatches: vi.fn(),
   };
-  const sync = { findTournamentById: vi.fn(), upsertTournament: vi.fn() };
-  const useCase = new SyncPandascoreTournamentUseCase(feed as never, sync as never);
+  const reads = { findById: vi.fn() };
+  const sync = { upsertTournament: vi.fn() };
+  const useCase = new SyncPandascoreTournamentUseCase(feed as never, reads, sync as never);
   beforeEach(() => {
     vi.clearAllMocks();
-    sync.findTournamentById.mockResolvedValue({
+    reads.findById.mockResolvedValue({
       id: "t1",
       source: "pandascore",
       pandascoreId: 42,
@@ -30,14 +31,20 @@ describe("SyncPandascoreTournamentUseCase", () => {
     expect(
       hasBracket ? feed.getTournamentMatches : feed.getTournamentBrackets,
     ).not.toHaveBeenCalled();
-    expect(sync.upsertTournament).toHaveBeenCalledWith(command, []);
+    expect(sync.upsertTournament).toHaveBeenCalledWith(command, [], undefined);
   });
   it("protects manual tournaments before fetching", async () => {
-    sync.findTournamentById.mockResolvedValue({ id: "manual", source: "manual" });
+    reads.findById.mockResolvedValue({ id: "manual", source: "manual" });
     await expect(useCase.execute("manual")).rejects.toThrow(
       "Cannot sync a manual tournament from PandaScore",
     );
     expect(feed.getTournamentById).not.toHaveBeenCalled();
+  });
+  it("reports a transient provider failure instead of a missing tournament", async () => {
+    feed.getTournamentById.mockRejectedValue(new Error("429 Too Many Requests"));
+    await expect(useCase.executeByPandascoreId(42)).rejects.toThrow("429");
+    await expect(useCase.execute("t1")).rejects.toThrow("429");
+    expect(sync.upsertTournament).not.toHaveBeenCalled();
   });
   it("fetches all provider data before opening the write operation", async () => {
     feed.getTournamentById.mockResolvedValue({ pandascoreId: 42, name: "Cup" });

@@ -1,21 +1,18 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { LocationQuery } from "vue-router";
-
-type PlayerProfileTab = "info" | "matches" | "events" | "trophies" | "earnings";
+import { playerPath, teamPath } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const route = useRoute();
-const router = useRouter();
 const localePath = useLocalePath();
 
 const slug = computed(() => route.params.slug as string);
 
-const { getPlayerFromSlug } = usePlayer();
-const { getPlayerOldTeams } = usePlayerContract();
-
-const { data: player, error: playerError } = await getPlayerFromSlug(slug);
+const { data: player, error: playerError } = await useAsyncData(
+  () => `player-slug-${slug.value}`,
+  () => getPlayerFromSlug(slug.value),
+  { watch: [slug] },
+);
 
 if (!player.value) {
   throwEntityLoadError(playerError.value, {
@@ -26,23 +23,24 @@ if (!player.value) {
 
 // A merged duplicate's slug resolves to the kept player.
 if (player.value && player.value.slug !== slug.value) {
-  await navigateTo(
-    { path: localePath(`/player/${player.value.slug}`), query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, localePath(playerPath(player.value.slug)));
 }
 
 const currentPlayer = computed(() => player.value!);
 const playerId = computed(() => player.value?.id ?? "");
 
-const { data: oldTeams } = await getPlayerOldTeams(playerId);
+const { data: oldTeams } = await useAsyncData(
+  () => `player-old-teams-${playerId.value}`,
+  () => getPlayerOldTeams(playerId.value),
+  { watch: [playerId], default: () => [] },
+);
 
 const {
   trophies,
   pending: trophiesPending,
   error: trophiesError,
   refresh: refreshTrophies,
-} = usePlayerTrophies(playerId);
+} = useEntityTrophies("player", playerId);
 
 const {
   awards,
@@ -63,7 +61,7 @@ const {
   pending: matchesPending,
   error: matchesError,
   refresh: refreshMatches,
-} = usePlayerMatches(playerId);
+} = useEntityMatches("player", playerId);
 
 const {
   live: liveEvents,
@@ -72,9 +70,9 @@ const {
   pending: eventsPending,
   error: eventsError,
   refresh: refreshEvents,
-} = usePlayerTournaments(playerId);
+} = useEntityTournaments("player", playerId);
 
-const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const realName = computed(() =>
   [currentPlayer.value.firstName, currentPlayer.value.lastName]
@@ -87,48 +85,7 @@ const birthday = computed(() =>
   currentPlayer.value.birthday ? new Date(currentPlayer.value.birthday) : null,
 );
 
-function parsePlayerTab(value: LocationQuery[string] | number | undefined): PlayerProfileTab {
-  if (value === "matches" || value === "events" || value === "trophies" || value === "earnings") {
-    return value;
-  }
-  return "info";
-}
-
-const tab = computed<PlayerProfileTab>(() => parsePlayerTab(route.query.tab));
-
-const tabItems = computed(() => [
-  { value: "info" as const, label: t("page.player.slug.tabs.info") },
-  { value: "matches" as const, label: t("page.player.slug.tabs.matches") },
-  { value: "events" as const, label: t("page.player.slug.tabs.events") },
-  { value: "trophies" as const, label: t("page.player.slug.tabs.trophies") },
-  { value: "earnings" as const, label: t("page.player.slug.tabs.earnings") },
-]);
-
-function setTab(nextTab: PlayerProfileTab) {
-  const query: Record<string, string> = {};
-
-  if (route.query.matches) {
-    query.matches = String(route.query.matches);
-  }
-  if (route.query.events) {
-    query.events = String(route.query.events);
-  }
-
-  if (nextTab === "info") {
-    router.replace({ query: {} });
-    return;
-  }
-
-  if (nextTab !== "matches") {
-    delete query.matches;
-  }
-  if (nextTab !== "events") {
-    delete query.events;
-  }
-
-  query.tab = nextTab;
-  router.replace({ query });
-}
+const { tab, tabItems, setTab } = useEntityTabs("player");
 
 const title = computed(() =>
   currentPlayer.value.name
@@ -192,7 +149,7 @@ setPageSeo({
                       side: 'top',
                       sideOffset: 4,
                     }"
-                    :text="df.format(birthday)"
+                    :text="mediumDate.format(birthday)"
                   >
                     <span class="text-sm font-medium tabular-nums">
                       {{ t("page.player.slug.xYears", { years: getAgeFromBirthday(birthday) }) }}
@@ -205,7 +162,7 @@ setPageSeo({
                 <dd class="min-w-0 flex justify-end">
                   <SLink
                     v-if="currentPlayer.team"
-                    :to="$localePath(`/team/${currentPlayer.team.slug}`)"
+                    :to="$localePath(teamPath(currentPlayer.team.slug))"
                     variant="inline"
                     class="inline-flex items-center gap-2 min-w-0 text-sm font-medium"
                   >
@@ -241,7 +198,7 @@ setPageSeo({
           variant="link"
           class="w-full"
           :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
-          @update:model-value="setTab(parsePlayerTab($event))"
+          @update:model-value="setTab"
         />
       </SCard>
 
@@ -250,7 +207,8 @@ setPageSeo({
         <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
       </template>
 
-      <PlayerMatchesSection
+      <EntityMatchesSection
+        kind="player"
         v-else-if="tab === 'matches'"
         :upcoming-matches="upcomingMatches"
         :past-matches="pastMatches"
@@ -260,7 +218,8 @@ setPageSeo({
         @retry="refreshMatches()"
       />
 
-      <PlayerEventsSection
+      <EntityEventsSection
+        kind="player"
         v-else-if="tab === 'events'"
         :upcoming-events="upcomingEvents"
         :past-events="pastEvents"
@@ -273,7 +232,8 @@ setPageSeo({
       <EarningsSection v-else-if="tab === 'earnings'" owner="player" :owner-id="playerId" />
 
       <template v-else>
-        <PlayerTrophyCabinet
+        <EntityTrophyCabinet
+          kind="player"
           :trophies="trophies"
           :pending="trophiesPending"
           :has-error="Boolean(trophiesError)"

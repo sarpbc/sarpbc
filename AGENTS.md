@@ -57,6 +57,7 @@ the project's architecture, design or delivery conventions.
 - `types` and `utils` must remain framework-independent.
 - Never import Vue or Nuxt into `types` or `utils`.
 - Use `workspace:*` for internal dependencies.
+- Relative imports in `types` and `utils` have no file extension. Vite consumes their sources; the back loads their CommonJS `dist/`, built by `pnpm --filter @sarpbc/utils... run build`.
 
 ---
 

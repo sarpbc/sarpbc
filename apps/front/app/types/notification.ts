@@ -1,4 +1,4 @@
-export type NotificationTargetType = "forumPost" | "newsArticle" | "match";
+import type { ReplyTargetType } from "@sarpbc/types";
 
 export interface AppNotification {
   id: string;
@@ -11,7 +11,7 @@ export interface AppNotification {
       userName: string;
     };
   };
-  targetType: NotificationTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
   targetLabel: string;
   targetPath: string;

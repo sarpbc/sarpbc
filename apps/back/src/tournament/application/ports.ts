@@ -2,6 +2,7 @@ import type {
   DataSource,
   PlayerAwardType,
   PlayerProfileAward,
+  PrizeEntry,
   TournamentAwardListItem,
   TournamentPrizes,
 } from "@sarpbc/types";
@@ -21,9 +22,8 @@ import type { MatchDecided } from "../domain/match-decided";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
-import type { MatchListQueryOptions } from "./match/match-list-filters";
+import type { MatchListKind, MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
-import type { PrizeEntry } from "../domain/prize-distribution";
 import type { EarningsLine } from "./earnings";
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;
@@ -41,16 +41,16 @@ export interface TournamentQueries {
   getTournamentsWonByTeam(id: string): Promise<Tournament[]>;
   knownPandascoreIds(): Promise<Set<number>>;
   findByPandascoreId(id: number): Promise<Tournament | null>;
-  leagues(options: { limit?: number; offset?: number }): Promise<League[]>;
+  leagues(options: { limit: number; offset?: number }): Promise<League[]>;
 }
 export interface MatchQueries {
   list(
-    kind: "upcoming" | "live" | "results",
-    options: MatchListQueryOptions,
+    kind: MatchListKind,
+    options: MatchListQueryOptions & { limit: number },
   ): Promise<[Match[], number]>;
-  page(kind: "upcoming" | "live" | "results", options: MatchListQueryOptions): Promise<Match[]>;
+  page(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]>;
   byIds(ids: string[]): Promise<Match[]>;
-  recentlyEnded(options: { limit?: number; minutesAgo?: number }): Promise<Match[]>;
+  recentlyEnded(options: { limit: number; minutesAgo: number }): Promise<Match[]>;
   detail(ref: EntityRef): Promise<Match | null>;
   recentByTeam(options: {
     teamId: string;
@@ -189,6 +189,6 @@ export interface CompetitionEvents {
   publish(event: MatchDecided): Promise<void>;
 }
 export interface CompetitionDiagnostics {
-  error(message: string, error: unknown): void;
-  warn(message: string, context: { pandascoreId: number; tournamentIds: string[] }): void;
+  error(message: string, cause: unknown): void;
+  warn(message: string, context: Record<string, string | number | readonly string[]>): void;
 }

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import { ExecutionContext } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { AuthenticationError } from "../../../common/domain/errors";
 import { PatAuthGuard } from "./pat.guard";
 import { PatService, PatUser } from "../../application/pat.service";
 
@@ -36,7 +37,7 @@ describe("PatAuthGuard", () => {
   };
 
   it("throws when the authorization header is missing", async () => {
-    await expect(guard.canActivate(createContext())).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(guard.canActivate(createContext())).rejects.toBeInstanceOf(AuthenticationError);
   });
 
   it("attaches the resolved user for a valid bearer token", async () => {

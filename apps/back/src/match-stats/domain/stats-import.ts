@@ -14,6 +14,8 @@ export interface StatsImport {
   finishedAt: Date | null;
 }
 
+export const ACTIVE_IMPORT_STATUSES: readonly StatsImportStatus[] = ["pending", "running"];
+
 export function isActive(statsImport: Pick<StatsImport, "status">): boolean {
-  return statsImport.status === "pending" || statsImport.status === "running";
+  return ACTIVE_IMPORT_STATUSES.includes(statsImport.status);
 }

@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { forumPostPath } from "@sarpbc/utils";
-import type { PostShort } from "~/types/forum";
+import type { ForumPostListItem } from "@sarpbc/types";
 
 interface Props {
-  post: PostShort;
+  post: ForumPostListItem;
 }
 
 const { post } = defineProps<Props>();
@@ -22,7 +22,7 @@ const { post } = defineProps<Props>();
       {{ post.author }}
     </span>
     <span class="flex w-10 shrink-0 justify-end">
-      <DiscussionCommentCount :count="post.commentCount ?? 0" />
+      <DiscussionCommentCount :count="post.commentCount" />
     </span>
     <span class="w-24 shrink-0 truncate text-end text-xs text-muted tabular-nums sm:w-28">
       {{ formatLocaleTimeAgo(new Date(post.createdAt)) }}

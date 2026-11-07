@@ -1,5 +1,5 @@
 import { SetMetadata } from "@nestjs/common";
-import { StaffPermission } from "../../../domain/staff-access";
+import type { StaffPermission } from "@sarpbc/types";
 
 export const STAFF_PERMISSIONS_KEY = "staffPermissions";
 

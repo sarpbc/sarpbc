@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
+import { stageMatchesPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
 import type { TournamentDetail } from "@sarpbc/types";
 import { getTournamentChampionTeam } from "~/utils/structuredData/tournamentSportsEvent";
 import {
@@ -43,8 +43,12 @@ const canonicalPath = computed(() => {
     case "event":
       return localePath(tournamentEventPath(target.event.slug));
     case "stage": {
-      const stagePath = tournamentStagePath(target.tournament.event.slug, target.tournament.slug);
-      return localePath(target.tab === "matches" ? `${stagePath}/matches` : stagePath);
+      const stage = target.tournament;
+      return localePath(
+        target.tab === "matches"
+          ? stageMatchesPath(stage.event.slug, stage.slug)
+          : tournamentStagePath(stage.event.slug, stage.slug),
+      );
     }
     default: {
       const _exhaustive: never = target;
@@ -54,10 +58,7 @@ const canonicalPath = computed(() => {
 });
 
 if (canonicalPath.value && route.path !== canonicalPath.value) {
-  await navigateTo(
-    { path: canonicalPath.value, query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, canonicalPath.value);
 }
 
 const event = computed(() => (resolved.value?.kind === "event" ? resolved.value.event : null));

@@ -1,11 +1,12 @@
 import type {
   CareerPlacement,
+  CareerState,
   CareerRankSnapshotEntry,
   CareerRegion,
   CareerSplitRecord,
   CareerWorldState,
 } from "~/types/career";
-import { USER_ROSTER_ID } from "~/types/career";
+import { DEFAULT_PLAYER_NAME, USER_ROSTER_ID } from "~/types/career";
 import type { CareerWorldTeam } from "~/data/career/world";
 import { WORLD_TEAMS, getWorldTeamsByRegion } from "~/data/career/world";
 import { computeCircuitPoints } from "~/utils/career/points";
@@ -95,11 +96,7 @@ function npcSplitPointsByTeam(
   return new Map();
 }
 
-export function computeWorldRankings(
-  _careerId: string,
-  player: PlayerCircuitInput,
-  world: CareerWorldState,
-): WorldRankings {
+function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldState): WorldRankings {
   const completedSplits = player.splits.length;
   const freezeToSnapshot =
     completedSplits === 0 && world.rankSnapshot != null && world.rankSnapshot.length > 0;
@@ -182,4 +179,20 @@ export function pickStartingTeam(region: CareerRegion): string {
   const teams = getWorldTeamsByRegion(region);
   const weakest = [...teams].sort((a, b) => a.baseStrength - b.baseStrength)[0];
   return weakest!.id;
+}
+
+export function computeStateRankings(state: CareerState): WorldRankings {
+  return computeWorldRankings(
+    {
+      name: state.playerName || DEFAULT_PLAYER_NAME,
+      teamId: state.currentTeamId || null,
+      rating: state.stats.rating,
+      region: state.region,
+      season: state.currentSeason,
+      splits: state.currentSplits,
+      worlds: state.currentWorlds,
+      previousPoints: state.seasonRecords[state.seasonRecords.length - 1]?.points ?? null,
+    },
+    state.world,
+  );
 }

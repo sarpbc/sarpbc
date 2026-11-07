@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
+import { playerPath } from "@sarpbc/utils";
 
 interface Props {
   player: Player;
@@ -13,7 +14,7 @@ const { player } = defineProps<Props>();
     class="flex items-center gap-2"
     variant="ghost"
     color="neutral"
-    :to="$localePath(`/player/${player.slug}`)"
+    :to="$localePath(playerPath(player.slug))"
   >
     <FlagIcon :nationality="player.nationality" size="sm" />
 

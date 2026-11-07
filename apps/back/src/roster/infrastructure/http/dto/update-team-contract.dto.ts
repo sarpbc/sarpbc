@@ -1,11 +1,10 @@
 import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
-import { ContractRole } from "../../../domain/roster";
+import { CONTRACT_ROLES } from "@sarpbc/types";
 export const UpdateTeamContractDto = z.strictObject({
-  playerId: z.uuid().optional(),
   startDate: isoDateSchema.optional(),
   endDate: isoDateSchema.nullable().optional(),
-  role: z.enum(ContractRole).optional(),
+  role: z.enum(CONTRACT_ROLES).optional(),
 });
 
 export type UpdateTeamContractDto = z.infer<typeof UpdateTeamContractDto>;

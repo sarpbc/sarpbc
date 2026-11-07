@@ -1,4 +1,4 @@
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 import { ORGANIZATION_ID } from "./organization";
 
@@ -12,19 +12,16 @@ export interface WebSiteLd extends JsonLdNode {
 }
 
 export interface BuildWebSiteOptions {
-  origin?: string;
   description: string;
   inLanguage?: string[];
 }
 
 export function buildWebSite(options: BuildWebSiteOptions): WebSiteLd {
-  const origin = options.origin ?? SITE_ORIGIN;
-
   return compactJsonLd<WebSiteLd>({
     "@context": SCHEMA_ORG,
     "@type": "WebSite",
     name: "sarpbc.org",
-    url: origin,
+    url: SITE_ORIGIN,
     description: options.description,
     inLanguage: options.inLanguage ?? ["en", "fr"],
     publisher: {

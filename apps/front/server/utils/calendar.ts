@@ -1,11 +1,11 @@
 import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
-import type { Match, MatchDetailResponse } from "~/types/matches";
+import { apiFetch } from "@sarpbc/composables/apiFetch";
+import type { Match } from "~/types/matches";
+import { getMatchById } from "~/composables/matches/api";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
-import { getFetchStatusCode } from "./match-og";
-import { apiFetch } from "~/utils/apiFetch";
+import { tournamentStageLabel } from "@sarpbc/utils";
 
 interface TournamentResponse {
   tournament?: TournamentDetail;
@@ -28,28 +28,14 @@ export function parseIcsSlug(pathname: string): string | null {
   return match?.[1] ?? null;
 }
 
-function rethrowMappedFetchError(
-  cause: unknown,
-  notFoundMessage: string,
-  badGatewayMessage: string,
-): never {
-  const statusCode = getFetchStatusCode(cause);
-  if (statusCode === 404) {
-    throw createError({ statusCode: 404, statusMessage: notFoundMessage });
-  }
-  throw createError({
-    statusCode: 502,
-    statusMessage: badGatewayMessage,
-    cause,
-  });
-}
-
 export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
-    const res = await apiFetch<MatchDetailResponse>(`/matches/${id}`);
-    return res.match;
+    return (await getMatchById(id)).match;
   } catch (cause) {
-    rethrowMappedFetchError(cause, "Match not found", "Could not load match for calendar");
+    rethrowApiError(cause, {
+      notFound: "Match not found",
+      badGateway: "Could not load match for calendar",
+    });
   }
 }
 
@@ -65,11 +51,10 @@ export async function fetchTournamentForCalendar(
       apiFetch<TournamentMatchesResponse>(`/tournaments/${id}/matches`),
     ]);
   } catch (cause) {
-    rethrowMappedFetchError(
-      cause,
-      "Tournament not found",
-      "Could not load tournament for calendar",
-    );
+    rethrowApiError(cause, {
+      notFound: "Tournament not found",
+      badGateway: "Could not load tournament for calendar",
+    });
   }
 
   if (!tournamentRes.tournament) {

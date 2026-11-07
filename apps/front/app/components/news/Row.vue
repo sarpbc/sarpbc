@@ -1,6 +1,7 @@
 <script lang="ts" setup>
+import { newsPath } from "@sarpbc/utils";
 import type { NewsType } from "@sarpbc/types";
-import type { NewsArticleListItem } from "~/composables/news";
+import type { NewsArticleListItem } from "~/types/news";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 import { resolveNewsType } from "~/utils/newsTypeQuery";
 
@@ -31,7 +32,7 @@ const rowSize = computed(() => {
 <template>
   <SListItem
     :size="rowSize"
-    :to="localePath(`/news/${props.article.slug}`)"
+    :to="localePath(newsPath(props.article.slug))"
     class="min-w-0 overflow-hidden"
   >
     <div

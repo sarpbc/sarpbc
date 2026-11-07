@@ -1,39 +1,28 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
-import { hasPermission, meetsRequirement, ROSTER_PROPOSAL_PERMISSIONS } from "~/utils/staff";
+import { canModerateComments, getApiErrorMessage, parseLocale } from "@sarpbc/utils";
+import { canAccessSection } from "~/utils/adminSections";
 
-const MODERATION_LIMIT = 50;
 const ARTICLE_LIMIT = 5;
 const MATCH_LIMIT = 5;
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const user = useUser();
-const navLinks = useAdminNavLinks();
+const shortcuts = useAdminSections();
 
 const items = [{ label: t("page.nav.home") }];
 
-const canNews = computed(() => hasPermission(user.value, "news.manage"));
-const canMatches = computed(() => hasPermission(user.value, "tournaments.manage"));
-const canProposals = computed(() => meetsRequirement(user.value, ROSTER_PROPOSAL_PERMISSIONS));
-const canModeration = computed(() => hasPermission(user.value, "forum.moderate"));
-
-const shortcuts = computed(() =>
-  navLinks.value.filter((link) => !link.target && link.to !== localePath("/")),
-);
+const canNews = computed(() => canAccessSection(user.value, "/news"));
+const canMatches = computed(() => canAccessSection(user.value, "/tournaments"));
+const canProposals = computed(() => canAccessSection(user.value, "/proposals"));
+const canModeration = computed(() => canModerateComments(user.value));
 
 const hasAnyTool = computed(() => shortcuts.value.length > 0);
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 function formatDate(value: string | null): string {
   return value ? dateFormatter.value.format(new Date(value)) : t("page.home.dateUnknown");
@@ -43,14 +32,13 @@ const proposals = useLazyAsyncData("admin-home-proposals", () => getPendingRoste
   server: false,
   immediate: canProposals.value,
 });
-const replies = useLazyAsyncData(
-  "admin-home-replies",
-  () => getModerationReplies(MODERATION_LIMIT),
-  { server: false, immediate: canModeration.value },
-);
+const replies = useLazyAsyncData("admin-home-replies", () => getModerationReplies(), {
+  server: false,
+  immediate: canModeration.value,
+});
 const articles = useLazyAsyncData(
   "admin-home-articles",
-  () => getRecentNewsArticles(ARTICLE_LIMIT),
+  async () => (await getNewsArticlesAdmin({ limit: ARTICLE_LIMIT, offset: 0 })).data,
   { server: false, immediate: canNews.value },
 );
 const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(MATCH_LIMIT), {
@@ -61,7 +49,9 @@ const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(
 const proposalCount = computed(() => proposals.data.value?.proposals.length ?? 0);
 const replyCount = computed(() => replies.data.value?.length ?? 0);
 const replyCountLabel = computed(() =>
-  replyCount.value >= MODERATION_LIMIT ? `${MODERATION_LIMIT}+` : String(replyCount.value),
+  replyCount.value >= MODERATION_REPLIES_LIMIT
+    ? `${MODERATION_REPLIES_LIMIT}+`
+    : String(replyCount.value),
 );
 
 function matchTitle(participants: { team: { name: string } }[]): string {

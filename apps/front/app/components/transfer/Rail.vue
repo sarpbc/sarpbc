@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { Transfer } from "~/types/transfer";
+import type { Transfer } from "@sarpbc/types";
+import { playerPath } from "@sarpbc/utils";
 
 const RAIL_TRANSFERS = 5;
 
@@ -50,7 +51,7 @@ function transferLabel(transfer: Transfer): string {
         <SListItem
           v-for="transfer in transfers"
           :key="transfer.id"
-          :to="localePath(`/player/${transfer.player.slug}`)"
+          :to="localePath(playerPath(transfer.player.slug))"
           :title="transferLabel(transfer)"
           :aria-label="transferLabel(transfer)"
           class="gap-2 text-muted"

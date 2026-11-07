@@ -1,4 +1,6 @@
-import { isRedistributable, type DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
+import { isoDay } from "@sarpbc/utils";
+import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
 import type {
   League,
@@ -8,7 +10,7 @@ import type {
 } from "../../tournament/domain/competition";
 import { isEventSynced } from "../../tournament/domain/tournament-event";
 import type { EventListing } from "../../tournament/application/ports";
-import type { NewsArticleAdminResponse } from "../../news/application/news.service";
+import type { NewsArticleAdmin } from "@sarpbc/types";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import {
   adminNewsEditUrl,
@@ -69,13 +71,7 @@ export function mapCareer(player: Player, contracts: Contract[]) {
   };
 }
 
-function isoDay(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-export function mapTeamSummary(team: Team, players?: Player[]) {
-  const roster = players ?? team.players;
-
+export function mapTeamSummary(team: Team) {
   return {
     id: team.id,
     slug: team.slug,
@@ -85,7 +81,7 @@ export function mapTeamSummary(team: Team, players?: Player[]) {
     source: team.source,
     logoLightUrl: team.logoLightUrl,
     logoDarkUrl: team.logoDarkUrl,
-    players: roster.map((player) => ({
+    players: team.players.map((player) => ({
       id: player.id,
       slug: player.slug,
       name: player.name,
@@ -124,7 +120,7 @@ export function mapLeague(league: League) {
   };
 }
 
-/** Stages are the event's phases, earliest first; start.gg stages stay out of MCP reads. */
+/** start.gg stages stay out of MCP reads. */
 export function mapEvent({ event, stages }: EventListing) {
   const phases = stages
     .filter((stage) => isRedistributable(stage.source))
@@ -197,7 +193,7 @@ export function mapMatchListResponse(match: Match) {
   };
 }
 
-export function mapNewsListItem(article: NewsArticleAdminResponse) {
+export function mapNewsListItem(article: NewsArticleAdmin) {
   return {
     id: article.id,
     title: article.title,
@@ -214,7 +210,7 @@ export function mapNewsListItem(article: NewsArticleAdminResponse) {
   };
 }
 
-export function mapNewsAdminArticle(article: NewsArticleAdminResponse) {
+export function mapNewsAdminArticle(article: NewsArticleAdmin) {
   return {
     ...mapNewsListItem(article),
     content: article.content,

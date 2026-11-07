@@ -10,7 +10,8 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import { forumPostSlug } from "@sarpbc/utils";
+import type { ForumPostCreationStatus, ForumPostListItem } from "@sarpbc/types";
+import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { PostService } from "../../application/post.service";
@@ -19,8 +20,8 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreatePostDto } from "./post/dto/create-post.dto";
-import { PostCreationStatusDto } from "./post/dto/post-creation-status.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
+import { postWithSlugResponse } from "./forum-response";
 import type { CreatedPost } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
@@ -33,7 +34,7 @@ export class PostController {
   ) {}
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<{ posts: ForumPostListItem[] }> {
     const posts = await this.postService.find({});
     const commentCounts = await this.replyService.countByTargetIds(
       "forumPost",
@@ -46,7 +47,7 @@ export class PostController {
         slug: forumPostSlug(post.title),
         title: post.title,
         author: post.author.userName,
-        createdAt: post.createdAt,
+        createdAt: post.createdAt.toISOString(),
         commentCount: commentCounts.get(post.id) ?? 0,
         topic: {
           id: post.topic.id,
@@ -59,12 +60,12 @@ export class PostController {
   @Get("topic/:topicId")
   async findByTopic(@Param("topicId") topicId: string) {
     const posts = await this.postService.findByTopicId(topicId);
-    return { posts: posts.map((post) => ({ ...post, slug: forumPostSlug(post.title) })) };
+    return { posts: posts.map(postWithSlugResponse) };
   }
 
   @Get("creation-status")
   @UseGuards(AuthGuard)
-  async getCreationStatus(@CurrentUserId() userId: string): Promise<PostCreationStatusDto> {
+  async getCreationStatus(@CurrentUserId() userId: string): Promise<ForumPostCreationStatus> {
     return this.postService.getCreationStatus(userId);
   }
 
@@ -73,8 +74,7 @@ export class PostController {
     @Param("ref", EntityRefPipe) ref: EntityRef,
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
-    const preferred = (req.headers["accept-language"] || "en-US").split(",")[0];
-    const locale = preferred?.toLowerCase().startsWith("fr") ? "fr-FR" : null;
+    const locale = parseLocale(req.headers["accept-language"]);
     return { post: await this.postService.findByIdDto(ref, locale) };
   }
 

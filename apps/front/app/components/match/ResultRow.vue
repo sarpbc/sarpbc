@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
-import { getMatchParticipantScore, resolveMatchResultParticipantId } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { shortTeamName } from "~/utils/shortTeamName";
 
 const { match, compact = false } = defineProps<{
@@ -19,10 +19,10 @@ const winnerParticipantId = computed(() => {
 
   const [first, second] = match.results;
   if (first!.score > second!.score) {
-    return resolveMatchResultParticipantId(first!.participant);
+    return first!.participant;
   }
   if (second!.score > first!.score) {
-    return resolveMatchResultParticipantId(second!.participant);
+    return second!.participant;
   }
 
   return null;

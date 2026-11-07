@@ -192,7 +192,7 @@ function seriesProblem(
   return null;
 }
 
-function byPlayedAt(a: ReplaySummary, b: ReplaySummary): number {
+export function byPlayedAt(a: ReplaySummary, b: ReplaySummary): number {
   return (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
 }
 

@@ -1,47 +1,32 @@
-import type { ForumPost } from "@sarpbc/types";
-import type {
-  CreateForumPostResult,
-  ForumPostCreationStatus,
-  PostPreview,
-  PostShort,
-  Topic,
-} from "~/types/forum";
-import { apiFetch } from "~/utils/apiFetch";
 import {
   FORUM_ERROR_CODES,
-  getApiErrorCode,
-  getApiErrorMessage,
-  getApiErrorStatus,
-} from "~/utils/apiError";
+  type ForumPost,
+  type ForumPostCreationStatus,
+  type ForumPostListItem,
+  type ForumTopic,
+  type PostPreview,
+} from "@sarpbc/types";
+import { getApiErrorStatus } from "@sarpbc/utils";
+import type { CreateForumPostResult } from "~/types/forum";
 
 export async function getRecentForumActivities(): Promise<PostPreview[]> {
-  try {
-    const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
-      method: "GET",
-    });
+  const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
+    method: "GET",
+  });
 
-    return res.recentPosts || [];
-  } catch (error) {
-    console.error("Error fetching recent forum activities:", error);
-    return [];
-  }
+  return res.recentPosts || [];
 }
 
-export async function getTopics(): Promise<Topic[]> {
-  try {
-    const res = await apiFetch<{ topics: Topic[] }>(`/forum/topics`, {
-      method: "GET",
-    });
+export async function getTopics(): Promise<ForumTopic[]> {
+  const res = await apiFetch<{ topics: ForumTopic[] }>(`/forum/topics`, {
+    method: "GET",
+  });
 
-    return res.topics || [];
-  } catch (error) {
-    console.error("Error fetching forum topics:", error);
-    return [];
-  }
+  return res.topics || [];
 }
 
-export async function getPosts(): Promise<PostShort[]> {
-  const res = await apiFetch<{ posts: PostShort[] }>(`/posts`, {
+export async function getPosts(): Promise<ForumPostListItem[]> {
+  const res = await apiFetch<{ posts: ForumPostListItem[] }>(`/posts`, {
     method: "GET",
   });
 
@@ -88,33 +73,9 @@ export async function createForumPost(data: {
 
     return { ok: true, post };
   } catch (error) {
-    const status = getApiErrorStatus(error);
-    const message = getApiErrorMessage(error);
-    const code = getApiErrorCode(error);
-
-    if (status === 401) {
-      return { ok: false, reason: "unauthorized", message };
-    }
-    if (code === FORUM_ERROR_CODES.POST_RATE_LIMITED) {
-      return { ok: false, reason: "rate_limited", message };
-    }
-    if (status === 409) {
-      return { ok: false, reason: "conflict", message };
-    }
-
-    console.error("Error creating forum post:", error);
-    return { ok: false, reason: "unknown", message };
-  }
-}
-
-export async function deleteForumPost(postId: string): Promise<boolean> {
-  try {
-    await apiFetch(`/posts/${postId}`, {
-      method: "DELETE",
+    return apiFailure(error, "creating forum post", {
+      codes: { [FORUM_ERROR_CODES.POST_RATE_LIMITED]: "rate_limited" },
+      statuses: { 409: "conflict" },
     });
-    return true;
-  } catch (error) {
-    console.error("Error deleting forum post:", error);
-    return false;
   }
 }

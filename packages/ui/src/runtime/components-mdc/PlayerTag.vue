@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { playerHref, teamHref, opensInNewTab } = useEntityTagLink();
+const { playerHref, teamHref, linkAttrs } = useEntityTagLink();
 
 const open = ref(false);
 const pending = ref(false);
@@ -68,8 +68,7 @@ watch(open, (isOpen) => {
   >
     <NuxtLink
       :to="href"
-      :target="opensInNewTab ? '_blank' : undefined"
-      :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+      v-bind="linkAttrs"
       class="font-medium text-primary transition-none hover:text-highlighted"
       translate="no"
     >
@@ -124,8 +123,7 @@ watch(open, (isOpen) => {
         <NuxtLink
           v-if="player.team"
           :to="teamHref(player.team.slug)"
-          :target="opensInNewTab ? '_blank' : undefined"
-          :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+          v-bind="linkAttrs"
           class="flex h-row min-w-0 items-center gap-2 border-t border-default px-3 text-muted transition-none hover:bg-elevated hover:text-highlighted"
         >
           <img
@@ -143,8 +141,7 @@ watch(open, (isOpen) => {
 
         <NuxtLink
           :to="href"
-          :target="opensInNewTab ? '_blank' : undefined"
-          :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+          v-bind="linkAttrs"
           class="flex h-row items-center justify-between gap-2 border-t border-default px-3 text-sm font-medium text-muted transition-none hover:bg-elevated hover:text-highlighted"
         >
           {{ t("newsTag.viewProfile") }}

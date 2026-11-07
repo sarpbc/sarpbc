@@ -1,28 +1,31 @@
 <script setup lang="ts">
+import { useTimeoutFn } from "@vueuse/core";
+
+const NAV_CLOSE_DELAY_MS = 120;
+
 const localePath = useLocalePath();
 const user = useUser();
 
 const navOpen = ref(false);
 const userMenuOpen = ref(false);
 const pointerInNav = ref(false);
-const loggingOut = ref(false);
-
-let closeTimer: ReturnType<typeof setTimeout> | undefined;
+const { loggingOut, logout } = useLogout();
 
 const links = useAdminNavLinks();
 
-function openNav() {
-  clearTimeout(closeTimer);
-  navOpen.value = true;
-}
-
-function scheduleCloseNav() {
-  clearTimeout(closeTimer);
-  closeTimer = setTimeout(() => {
+const { start: scheduleCloseNav, stop: cancelCloseNav } = useTimeoutFn(
+  () => {
     if (!pointerInNav.value && !userMenuOpen.value) {
       navOpen.value = false;
     }
-  }, 120);
+  },
+  NAV_CLOSE_DELAY_MS,
+  { immediate: false },
+);
+
+function openNav() {
+  cancelCloseNav();
+  navOpen.value = true;
 }
 
 function onNavEnter() {
@@ -57,22 +60,6 @@ defineShortcuts({
     },
   },
 });
-
-onBeforeUnmount(() => {
-  clearTimeout(closeTimer);
-});
-
-async function onLogout() {
-  if (loggingOut.value) {
-    return;
-  }
-  loggingOut.value = true;
-  try {
-    await logout();
-  } finally {
-    loggingOut.value = false;
-  }
-}
 </script>
 
 <template>
@@ -144,7 +131,7 @@ async function onLogout() {
             :label="loggingOut ? $t('page.home.loggingOut') : $t('page.home.logout')"
             :loading="loggingOut"
             :disabled="loggingOut"
-            @click="onLogout"
+            @click="logout"
           />
         </div>
       </template>

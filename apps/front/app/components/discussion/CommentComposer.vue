@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { CommentTargetType } from "~/types/discussion";
+import type { ReplyTargetType } from "@sarpbc/types";
 
 const {
   targetType,
@@ -9,7 +9,7 @@ const {
   replyToId = undefined,
   autofocus = false,
 } = defineProps<{
-  targetType: CommentTargetType;
+  targetType: ReplyTargetType;
   targetId: string;
   replyToId?: string;
   autofocus?: boolean;

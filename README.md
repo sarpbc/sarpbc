@@ -13,14 +13,7 @@ We welcome pull requests. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, PR 
 
 **New here?** Pick a [good first issue](https://github.com/sarpbc/sarpbc/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
-Before opening a PR:
-
-```bash
-pnpm lint
-pnpm fmt:check
-pnpm --filter back test
-pnpm --filter front build
-```
+Run the checks listed in [CONTRIBUTING.md](CONTRIBUTING.md#pull-requests) before opening a PR.
 
 ## Quick start
 
@@ -30,8 +23,8 @@ pnpm --filter front build
 
 ### Prerequisites
 
-- Node.js 24.22.1
-- pnpm 10+
+- Node.js, as pinned in [`.nvmrc`](.nvmrc)
+- pnpm, as pinned by `packageManager` in [`package.json`](package.json)
 - Docker and Docker Compose for local databases
 
 ### Install
@@ -113,7 +106,7 @@ The code should be reusable by the community: fork it, self-host it, fix bugs, a
 ## Useful commands
 
 ```bash
-pnpm dev          # front + back (+ admin if present) in parallel
+pnpm dev          # front + back + admin in parallel
 pnpm dev:front
 pnpm dev:admin
 pnpm dev:back
@@ -126,7 +119,7 @@ pnpm lint:fix
 ## Links
 
 - [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
+- [Releases](https://github.com/sarpbc/sarpbc/releases)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security](SECURITY.md)
 - [Trademark policy](docs/TRADEMARK.md)

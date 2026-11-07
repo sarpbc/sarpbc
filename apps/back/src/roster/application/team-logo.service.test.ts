@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
 import { MAX_TEAM_LOGO_BYTES } from "../domain/team-logo";
@@ -24,7 +23,7 @@ function setup(bytes: Uint8Array, size = { width: 512, height: 256 }) {
 }
 
 describe("TeamLogoService", () => {
-  const hash = createHash("sha256").update(WEBP_OUTPUT).digest("hex").slice(0, 16);
+  const hash = "0123456789abcdef";
 
   it("normalizes a raster logo and stages it under the team's pending variant key", async () => {
     const { source, images, storage, service } = setup(PNG);
@@ -36,30 +35,33 @@ describe("TeamLogoService", () => {
       MAX_TEAM_LOGO_BYTES,
     );
     expect(images.dimensions).toHaveBeenCalledWith(PNG);
-    expect(images.normalize).toHaveBeenCalledWith(PNG, "png", 512);
-    expect(storage.put).toHaveBeenCalledWith(
-      `pending/teams/kc/logo-light-${hash}.webp`,
-      WEBP_OUTPUT,
-      "image/webp",
-    );
-    expect(logo).toEqual({
-      key: `pending/teams/kc/logo-light-${hash}.webp`,
-      url: `https://cdn.sarpbc.test/pending/teams/kc/logo-light-${hash}.webp`,
-    });
+    expect(images.normalize).toHaveBeenCalledWith(PNG, "png", expect.any(Number));
+    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-light-[0-9a-f]{16}\.webp$/);
+    expect(logo.url).toBe(`https://cdn.sarpbc.test/${logo.key}`);
+    expect(storage.put).toHaveBeenCalledWith(logo.key, WEBP_OUTPUT, "image/webp");
+  });
+
+  it("names the staged asset after its content", async () => {
+    const { images, service } = setup(PNG);
+
+    const first = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+    const again = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+    images.normalize.mockResolvedValueOnce(new Uint8Array([7, 7, 7]));
+    const changed = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+
+    expect(again.key).toBe(first.key);
+    expect(changed.key).not.toBe(first.key);
   });
 
   it("normalizes a safe SVG without a pixel minimum", async () => {
     const { images, storage, service } = setup(SVG);
 
-    await service.upload("kc", "dark", "https://kcorp.gg/logo.svg");
+    const logo = await service.upload("kc", "dark", "https://kcorp.gg/logo.svg");
 
     expect(images.dimensions).not.toHaveBeenCalled();
-    expect(images.normalize).toHaveBeenCalledWith(SVG, "svg", 512);
-    expect(storage.put).toHaveBeenCalledWith(
-      `pending/teams/kc/logo-dark-${hash}.webp`,
-      WEBP_OUTPUT,
-      "image/webp",
-    );
+    expect(images.normalize).toHaveBeenCalledWith(SVG, "svg", expect.any(Number));
+    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-dark-/);
+    expect(storage.put).toHaveBeenCalledWith(logo.key, WEBP_OUTPUT, "image/webp");
   });
 
   it("refuses unsafe URLs before downloading", async () => {

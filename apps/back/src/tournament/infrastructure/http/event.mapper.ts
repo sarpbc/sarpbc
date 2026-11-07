@@ -1,47 +1,22 @@
+import type { ManualEvent, TournamentEvent as TournamentEventResponse } from "@sarpbc/types";
 import type { EventListing } from "../../application/ports";
-import type { StageTab } from "../../domain/tournament-path";
 import { compareStages, isEventSynced, type TournamentEvent } from "../../domain/tournament-event";
-import {
-  mapLeague,
-  mapTournamentListItem,
-  type LeagueResponse,
-  type TournamentDetailResponse,
-  type TournamentResponse,
-} from "./tournament.mapper";
+import { mapLeague, mapTournamentListItem, type TournamentResponse } from "./tournament.mapper";
 
 type EventStage = Pick<
   TournamentResponse,
   "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
 >;
 
-export interface EventListItemResponse<Stage extends EventStage> {
-  id: string;
-  slug: string;
-  name: string;
-  league: LeagueResponse | null;
-  logoUrl: string | null;
-  prizepool: string | null;
-  type: string | null;
-  beginAt: Date | null;
-  endAt: Date | null;
-  stages: Stage[];
-}
-
-export type EventDetailResponse = EventListItemResponse<TournamentDetailResponse>;
-
-export type TournamentPathResponse =
-  | { kind: "event"; event: EventDetailResponse }
-  | { kind: "stage"; tournament: TournamentDetailResponse; tab: StageTab };
-
-function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): Date | null {
+function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): string | null {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
-  return times.length ? new Date(pick(...times)) : null;
+  return times.length ? new Date(pick(...times)).toISOString() : null;
 }
 
 export function mapEvent<Stage extends EventStage>(
   event: TournamentEvent,
   stages: Stage[],
-): EventListItemResponse<Stage> {
+): TournamentEventResponse<Stage> {
   const ordered = [...stages].sort(compareStages);
   const [newest] = ordered;
   // Only the main stage carries the prize pool; its type wins over qualifier stages.
@@ -66,7 +41,7 @@ export function mapEvent<Stage extends EventStage>(
   };
 }
 
-export function mapStaffEvent({ event, stages }: EventListing) {
+export function mapStaffEvent({ event, stages }: EventListing): ManualEvent {
   return {
     ...mapEvent(event, stages.map(mapTournamentListItem)),
     editable: !isEventSynced(event, stages),

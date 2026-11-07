@@ -5,17 +5,14 @@ import { Tournament, League } from "../../domain/competition";
 import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
 import { ConflictError, NotFoundError } from "../../../common/domain/errors";
 import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
-import { matchDecided } from "../../domain/match-decided";
 import { inferEndAt } from "../../domain/tournament-end";
 import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/tournament-source";
+import type { CompetitionAfterCommit } from "../after-commit";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
-  CompetitionCache,
   CompetitionDiagnostics,
   EventWriter,
-  CompetitionEvents,
-  TournamentQueries,
 } from "../ports";
 import type {
   CompetitionIncident,
@@ -25,7 +22,7 @@ import type {
   UpsertSerieCommand,
   UpsertTournamentCommand,
 } from "../feed";
-import { upsertMatchInTransaction } from "../match/write-match";
+import { upsertSyncedMatchInTransaction } from "../match/write-match";
 import { placeStage } from "../event-placement";
 
 type IncidentChange = Exclude<CompetitionIncident, { changeType: "deletion" }>;
@@ -41,21 +38,10 @@ interface AppliedTournament {
 
 export class CompetitionSyncService {
   constructor(
-    private readonly reads: TournamentQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly cache: CompetitionCache,
-    private readonly events: CompetitionEvents,
+    private readonly afterCommit: CompetitionAfterCommit,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
-  findTournamentById(id: string) {
-    return this.reads.findById(id);
-  }
-  findTournamentByPandascoreId(id: number) {
-    return this.reads.findByPandascoreId(id);
-  }
-  getKnownTournamentPandascoreIds() {
-    return this.reads.knownPandascoreIds();
-  }
   async upsertTournament(
     command: UpsertTournamentCommand,
     matches: UpsertMatchCommand[] = [],
@@ -67,7 +53,10 @@ export class CompetitionSyncService {
       await this.settleEndAt(scope, tournament);
       return { tournament, stageIds, matches: applied };
     });
-    await this.afterCommit(result);
+    await this.afterCommit.settle({
+      tournamentIds: result.stageIds,
+      decidedMatchIds: result.matches,
+    });
     return result.tournament;
   }
   async applyIncident(
@@ -79,7 +68,11 @@ export class CompetitionSyncService {
         ? this.applyDeletion(scope, incident)
         : this.applyChange(scope, incident, backfill),
     );
-    if (applied) await this.afterCommit(applied);
+    if (applied)
+      await this.afterCommit.settle({
+        tournamentIds: applied.stageIds,
+        decidedMatchIds: applied.matches,
+      });
   }
   private async applyChange(
     scope: CompetitionWriteScope,
@@ -163,7 +156,6 @@ export class CompetitionSyncService {
       }
     }
   }
-  /** Renames the event a serie already owns; a serie never creates an event on its own. */
   private async applySerie(
     events: EventWriter,
     command: UpsertSerieCommand,
@@ -180,10 +172,6 @@ export class CompetitionSyncService {
     await events.save(event);
     return { stageIds: stages.map((stage) => stage.id), matches: [] };
   }
-  /**
-   * A merged serie keeps its URL when the target serie has no event yet. Otherwise its stages
-   * join the target event and the old event slug stops resolving.
-   */
   private async mergeSerie(
     scope: CompetitionWriteScope,
     serieId: number,
@@ -306,7 +294,8 @@ export class CompetitionSyncService {
       stageName: command.name,
     });
     const stage = {
-      fullName: `${eventName} ${command.name}`,
+      eventName,
+      stageName: command.name,
       leagueId: league?.id ?? null,
       beginAt: command.beginAt ?? null,
       endAt: command.endAt ?? null,
@@ -338,11 +327,7 @@ export class CompetitionSyncService {
     tournament.endAt = endAt;
     await scope.tournaments.save(tournament);
   }
-  /**
-   * Ordered identity lookup: the serie's event, then the stage's own event or a same-named event
-   * in the league while either still lacks a serie (backfilled events claim their serie on first
-   * sync instead of duplicating under a `-2` slug), else a new event with a frozen slug.
-   */
+  /** Backfilled events claim their serie on first sync instead of duplicating under a `-2` slug. */
   private async resolveEvent(
     events: EventWriter,
     currentEventId: string | null,
@@ -404,6 +389,7 @@ export class CompetitionSyncService {
   ): Promise<string[]> {
     const participants = await scope.tournaments.participants(tournament.id),
       ids: string[] = [];
+    // Bracket links only resolve to matches already written, so earlier matches go first.
     for (const command of [...commands].sort(
       (a, b) => (a.beginAt?.getTime() ?? 0) - (b.beginAt?.getTime() ?? 0),
     )) {
@@ -415,13 +401,9 @@ export class CompetitionSyncService {
             )
           : command.opponentSlugs.map((slug) => participants.find((p) => p.team.slug === slug)?.id)
       ).filter((id): id is string => Boolean(id));
-      const match = await upsertMatchInTransaction(scope.matches, tournament.id, {
+      const match = await upsertSyncedMatchInTransaction(scope.matches, tournament.id, {
         ...command,
         participantIds,
-        previous_matches: command.previousMatches.map((p) => ({
-          type: p.type,
-          match_id: p.matchPandascoreId,
-        })),
         results: command.results.map((r) => ({
           participantId:
             participants.find((p) => p.team.pandascoreId === r.teamPandascoreId)?.id ?? null,
@@ -431,21 +413,5 @@ export class CompetitionSyncService {
       if (match.isDecided()) ids.push(match.id);
     }
     return ids;
-  }
-  private async afterCommit({ stageIds, matches }: Applied) {
-    for (const id of stageIds) {
-      try {
-        await this.cache.invalidateTournament(id);
-      } catch (error) {
-        this.diagnostics.error("Tournament cache invalidation failed", error);
-      }
-    }
-    for (const matchId of matches) {
-      try {
-        await this.events.publish(matchDecided(matchId));
-      } catch (error) {
-        this.diagnostics.error("MatchDecided publication failed", error);
-      }
-    }
   }
 }

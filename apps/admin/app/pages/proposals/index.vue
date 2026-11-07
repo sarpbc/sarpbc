@@ -1,51 +1,20 @@
 <script lang="ts" setup>
-import type { RosterChange, RosterProposal } from "~/types/rosterProposal";
-import type { StaffPermission } from "~/types/user";
-import { getApiErrorMessage } from "~/utils/apiError";
-import { hasPermission } from "~/utils/staff";
+import type { RosterProposal } from "@sarpbc/types";
+import { getApiErrorMessage, hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const toast = useToast();
+const reportError = useReportError();
 
 const breadcrumbItems = [{ label: t("page.proposals.title") }];
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-);
+const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 const user = useUser();
 const reviewingId = ref<string | null>(null);
 
-function reviewPermission(kind: RosterChange["kind"]): StaffPermission {
-  switch (kind) {
-    case "add_player_to_team":
-    case "remove_player_from_team":
-    case "create_player":
-    case "update_player":
-    case "merge_players":
-    case "create_contract":
-    case "update_contract":
-      return "players.manage";
-    case "create_team":
-    case "update_team":
-    case "upload_team_logo":
-    case "merge_teams":
-      return "teams.manage";
-    case "set_tournament_prizes":
-      return "tournaments.manage";
-    default: {
-      const exhaustive: never = kind;
-      return exhaustive;
-    }
-  }
-}
-
 function canReview(proposal: RosterProposal): boolean {
-  return hasPermission(user.value, reviewPermission(proposal.change.kind));
+  return hasPermission(user.value, requiredPermission(proposal.change));
 }
 
 const { status, data, error, refresh } = await useLazyAsyncData(
@@ -53,15 +22,6 @@ const { status, data, error, refresh } = await useLazyAsyncData(
   () => getPendingRosterProposals(),
   { server: false },
 );
-
-watch(error, (loadError) => {
-  if (!loadError) return;
-  toast.add({
-    title: t("page.proposals.loadError"),
-    description: getApiErrorMessage(loadError),
-    color: "error",
-  });
-});
 
 const proposals = computed(() => data.value?.proposals ?? []);
 const names = computed(() => data.value?.names ?? {});
@@ -87,7 +47,7 @@ function formatValue(key: string, value: string | boolean | null): string {
 }
 
 function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat(locale.value === "fr" ? "fr-FR" : "en-US", {
+  return new Intl.NumberFormat(parseLocale(locale.value), {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
@@ -160,11 +120,7 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
     });
     await refresh();
   } catch (reviewError) {
-    toast.add({
-      title: t("page.proposals.messages.errorTitle"),
-      description: getApiErrorMessage(reviewError) ?? t("page.proposals.messages.reviewError"),
-      color: "error",
-    });
+    reportError(reviewError, t("page.proposals.messages.reviewError"));
   } finally {
     reviewingId.value = null;
   }
@@ -190,20 +146,11 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
           </div>
         </div>
 
-        <div
+        <LoadError
           v-else-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.proposals.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            :label="$t('page.proposals.retry')"
-            variant="soft"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.proposals.loadError')"
+          @retry="refresh()"
+        />
 
         <p v-else-if="proposals.length === 0" class="text-sm text-muted">
           {{ $t("page.proposals.empty") }}

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { TokenStore } from "../../application/ports/token-store";
 import type { StoredToken, TokenSummary } from "../../domain/token";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { PersonalAccessToken } from "./personal-access-token.entity";
 
 function summary(token: PersonalAccessToken): TokenSummary {

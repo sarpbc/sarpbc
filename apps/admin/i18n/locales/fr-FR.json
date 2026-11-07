@@ -1,6 +1,9 @@
 {
   "common": {
     "cancel": "Annuler",
+    "retry": "Réessayer",
+    "requestFailed": "L’action a échoué. Réessayez.",
+    "loadFailed": "Impossible de charger cette page. Vérifiez votre connexion et réessayez.",
     "contractRole": {
       "active": "Actif",
       "benched": "Remplaçant",
@@ -12,7 +15,7 @@
     }
   },
   "imageUpload": {
-    "hint": "JPEG, PNG, WebP ou GIF, jusqu’à 5 Mo",
+    "hint": "JPEG, PNG, WebP ou GIF, jusqu’à {max} Mo",
     "upload": "Importer une Image",
     "replace": "Remplacer l’Image",
     "remove": "Retirer l’Image",
@@ -27,9 +30,9 @@
       "signedInAs": "Connecté en tant que",
       "logout": "Se Déconnecter",
       "loggingOut": "Déconnexion…",
+      "logoutFailed": "Déconnexion impossible. Réessayez.",
       "forbidden": "Vous n’avez pas accès à cette section",
       "noTools": "Aucun outil n’est disponible pour votre rôle staff. Demandez l’accès à un admin.",
-      "retry": "Réessayer",
       "loadError": "Impossible de charger cette section. Vérifiez votre connexion et réessayez.",
       "dateUnknown": "Date à confirmer",
       "tbd": "Équipes à confirmer",
@@ -85,7 +88,6 @@
       "title": "Jetons API",
       "loading": "Chargement…",
       "loadError": "Impossible de charger les jetons. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "tokensCount": "{count} jeton | {count} jetons",
       "lastUsedNever": "Jamais",
       "copyFailed": "Impossible de copier dans le presse-papiers. Sélectionnez le texte et copiez-le manuellement.",
@@ -96,7 +98,7 @@
       },
       "empty": {
         "title": "Aucun jeton API",
-        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à SARPBC via MCP."
+        "description": "Les jetons API vous permettent de connecter un assistant IA (Claude, Cursor) à sarpbc.org via MCP."
       },
       "create": {
         "title": "Créer un Jeton",
@@ -129,7 +131,6 @@
       "description": "Chaînes Twitch affichées dans le pied de page public lorsqu'elles diffusent du Rocket League.",
       "loading": "Chargement…",
       "loadError": "Impossible de charger les streamers. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "count": "{count} chaîne | {count} chaînes",
       "columns": {
         "login": "Identifiant Twitch",
@@ -165,7 +166,6 @@
       "title": "Forum",
       "loading": "Chargement…",
       "empty": "Aucun message de forum pour le moment.",
-      "notFound": "Message introuvable.",
       "postsCount": "{count} messages",
       "hide": "Masquer",
       "columns": {
@@ -187,16 +187,13 @@
       },
       "messages": {
         "hidden": "Commentaire masqué",
-        "errorTitle": "Impossible de modérer le commentaire",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
       }
     },
     "moderation": {
       "title": "Modération des commentaires",
       "subtitle": "Commentaires récents sur les matchs, articles et messages du forum. Les commentaires signalés apparaissent en premier.",
-      "loading": "Chargement…",
       "loadError": "Impossible de charger les commentaires à modérer.",
-      "retry": "Réessayer",
       "empty": "Aucun commentaire à examiner.",
       "hide": "Masquer",
       "delete": "Supprimer le commentaire",
@@ -213,7 +210,6 @@
       "messages": {
         "hidden": "Commentaire masqué",
         "deleted": "Commentaire supprimé",
-        "errorTitle": "Impossible de modérer le commentaire",
         "moderateError": "Impossible de modérer ce commentaire. Réessayez."
       }
     },
@@ -221,7 +217,6 @@
       "title": "Propositions de roster",
       "subtitle": "Changements sourcés de rosters, joueurs, équipes et répartitions des gains proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
       "loadError": "Impossible de charger les propositions de roster.",
-      "retry": "Réessayer",
       "empty": "Aucune proposition de roster à examiner.",
       "approve": "Valider",
       "reject": "Refuser",
@@ -284,7 +279,6 @@
       "messages": {
         "approved": "Proposition validée et appliquée",
         "rejected": "Proposition refusée",
-        "errorTitle": "Impossible d'examiner la proposition",
         "reviewError": "Impossible d'examiner cette proposition. Réessayez."
       }
     },
@@ -312,7 +306,7 @@
       "create": {
         "action": "Créer un Tournoi",
         "title": "Créer un Tournoi",
-        "subtitle": "Ajoutez un tournoi géré sur SARPBC plutôt que synchronisé depuis PandaScore.",
+        "subtitle": "Ajoutez un tournoi géré sur sarpbc.org plutôt que synchronisé depuis PandaScore.",
         "saved": "Tournoi créé"
       },
       "edit": {
@@ -501,11 +495,11 @@
           "amount": "Saisissez un montant entier entre 1 et {max}.",
           "notParticipant": "Cette équipe ne participe pas au tournoi. Retirez ce gain ou ajoutez-la aux participants.",
           "notOnRoster": "Certains joueurs ne figurent pas dans l’effectif de l’équipe pour ce tournoi.",
+          "tooManyPlayers": "Une place peut créditer jusqu’à {max} joueurs.",
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
         }
       },
-      "retry": "Réessayer",
       "events": {
         "title": "Événements",
         "subtitle": "Les événements regroupent des phases de tournoi, comme une poule et ses finales, sur une seule page publique. Seuls les événements manuels sont listés. Un événement sans phase reste masqué sur le site public.",
@@ -598,8 +592,7 @@
         "confirmTitle": "Retirer les stats d’une game",
         "confirm": "Retirer les stats de la game {number} de {match} ? Les prochains imports ignoreront ce replay tant qu’il n’est pas rattaché à nouveau.",
         "confirmButton": "Retirer",
-        "removed": "Game {number} retirée",
-        "removeError": "Impossible de retirer la game"
+        "removed": "Game {number} retirée"
       }
     },
     "pickems": {
@@ -645,7 +638,6 @@
       },
       "create": {
         "title": "Nouvel Article",
-        "titleField": "Titre",
         "slugField": "Slug d’URL",
         "slugHint": "Utilisé dans /news/votre-slug. Laissez vide pour le générer depuis le titre.",
         "slugPlaceholder": "mon-article",
@@ -678,8 +670,7 @@
         "renameFailed": "Impossible d’enregistrer le titre. Réessayez.",
         "delete": "Supprimer l’Article",
         "deleteConfirm": "Supprimer « {title} » ? Cette action est irréversible.",
-        "deleted": "Article supprimé",
-        "deleteFailed": "Impossible de supprimer l’article. Réessayez."
+        "deleted": "Article supprimé"
       },
       "cover": {
         "label": "Image de couverture"
@@ -870,7 +861,6 @@
       "title": "Utilisateurs",
       "searchPlaceholder": "Rechercher par nom ou e-mail",
       "loadError": "Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.",
-      "retry": "Réessayer",
       "empty": "Aucun utilisateur pour le moment.",
       "emptySearch": "Aucun utilisateur ne correspond à cette recherche.",
       "usersCount": "{count} utilisateur | {count} utilisateurs",
@@ -894,26 +884,12 @@
       },
       "messages": {
         "updated": "{user} est désormais {role}.",
-        "errorTitle": "Rôle non modifié",
         "updateError": "Impossible de modifier ce rôle. Réessayez."
       }
     }
   },
   "newsTag": {
-    "loading": "Chargement…",
-    "error": "Impossible de charger le profil. Réessayez plus tard.",
-    "viewProfile": "Voir le profil",
-    "noTeam": "Aucune équipe actuelle",
-    "viewOnX": "Voir sur X",
-    "tweetUnavailable": "Impossible de charger ce post X. L’ouvrir sur X",
-    "tweetOnX": "Post de {name} sur X",
-    "tweetImage": "Image {index} du post X",
-    "matchLive": "En direct",
-    "matchFinal": "Terminé",
-    "matchTbd": "À déterminer",
-    "matchDataBy": "Données des matchs fournies par",
     "matchesInvalid": "Ce bloc de matchs est invalide. Modifiez-le pour choisir à nouveau les matchs.",
-    "matchesUnavailable": "Impossible de charger ces matchs.",
     "matchesEmpty": "Aucun match pour le moment."
   }
 }

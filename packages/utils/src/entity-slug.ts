@@ -2,7 +2,7 @@ import slugify from "slugify";
 
 const MAX_SLUG_LENGTH = 120;
 const YEAR_PATTERN = /\b(?:19|20)\d{2}\b/;
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface MatchSlugInput {
   teamNames: readonly [string | null | undefined, string | null | undefined];

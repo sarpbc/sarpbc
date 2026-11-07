@@ -1,4 +1,5 @@
-import type { RosterProposal, RosterProposalStatus } from "../domain/roster-proposal";
+import type { RosterProposalStatus } from "@sarpbc/types";
+import type { RosterProposal } from "../domain/roster-proposal";
 
 export interface RosterProposalStore {
   /** Locks the row inside a transaction so a proposal is reviewed once. */

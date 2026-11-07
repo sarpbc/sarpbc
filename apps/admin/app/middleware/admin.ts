@@ -1,29 +1,20 @@
-import { useUser } from "~/composables/state";
-import { isStaffUser, meetsRequirement, permissionForAdminPath } from "~/utils/staff";
+import { isStaffUser } from "@sarpbc/utils";
+import { canAccessRoute } from "~/utils/adminSections";
 
 export default defineNuxtRouteMiddleware((to) => {
-  const path = to.path.replace(/\/$/, "") || "/";
-  if (path === "/login" || path === "/fr/login") {
+  const baseName = useRouteBaseName()(to);
+  if (baseName === "login") {
     return;
   }
 
   const user = useUser();
-
-  if (!user.value) {
-    return navigateTo("/login");
-  }
+  const localePath = useLocalePath();
 
   if (!isStaffUser(user.value)) {
-    return navigateTo("/login");
+    return navigateTo(localePath("/login"));
   }
 
-  const required = permissionForAdminPath(to.path);
-  if (required === null || required === "staff") {
-    return;
-  }
-
-  if (!meetsRequirement(user.value, required)) {
-    const localePath = useLocalePath();
+  if (!canAccessRoute(user.value, baseName?.toString())) {
     return navigateTo({
       path: localePath("/"),
       query: { forbidden: "1" },

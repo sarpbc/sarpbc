@@ -2,14 +2,23 @@ import { test } from "vitest";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mjs";
+import {
+  verifyCompetitionSyncLookups,
+  verifyPandascoreAdoption,
+  verifyRedistributableScope,
+} from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
+const composeImage = (name) => compose.match(new RegExp(`image: (${name}:\\S+)`))[1];
+
 test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations", async () => {
   const containers = [];
   const results = [];
@@ -85,7 +94,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
   try {
     const pgPort = await container(
       "postgres",
-      "postgres:18.0-alpine",
+      composeImage("postgres"),
       5432,
       {
         POSTGRES_USER: "integration",
@@ -94,10 +103,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       },
       ["pg_isready", "-U", "integration", "-d", "integration"],
     );
-    const redisPort = await container("redis", "redis:7.4-alpine", 6379, {}, ["redis-cli", "ping"]);
+    const redisPort = await container("redis", composeImage("redis"), 6379, {}, [
+      "redis-cli",
+      "ping",
+    ]);
     Object.assign(process.env, {
       NODE_ENV: "test",
-      PORT: "4001",
       DB_HOST: "127.0.0.1",
       DB_PORT: String(pgPort),
       DB_NAME: "integration",
@@ -105,27 +116,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       DB_PASSWORD: "integration-only",
       REDIS_HOST: "127.0.0.1",
       REDIS_PORT: String(redisPort),
-      REDIS_PASSWORD: "",
       JWT_KEY: "integration-only-key-never-for-production",
       PANDASCORE_API_TOKEN: "integration-not-a-real-token",
-      PANDASCORE_SYNC_ON_BOOT: "false",
-      BALLCHASING_API_KEY: "",
       GOOGLE_CLIENT_ID: "integration",
       GOOGLE_CLIENT_SECRET: "",
       GOOGLE_REDIRECT_URI: "http://127.0.0.1/auth/google/callback",
       FRONT_URL: "http://127.0.0.1:4000",
       ADMIN_URL: "http://127.0.0.1:4002",
-      CLOUDFLARE_ACCOUNT_ID: "",
-      CLOUDFLARE_API_TOKEN: "",
-      CLOUDFLARE_ACCOUNT_HASH: "",
-      R2_ACCESS_KEY_ID: "",
-      R2_SECRET_ACCESS_KEY: "",
-      R2_PUBLIC_BASE_URL: "",
-      R2_ENDPOINT: "",
-      R2_ACCOUNT_ID: "",
-      R2_BUCKET: "integration",
-      POSTHOG_PROJECT_TOKEN: "",
-      POSTHOG_HOST: "http://127.0.0.1:1",
     });
     await import("reflect-metadata");
     const { initLogger } = await import("evlog");
@@ -143,14 +140,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       logger: false,
       abortOnError: false,
     });
-    await configureApp(app);
+    await configureApp(app, ["http://127.0.0.1:4000", "http://127.0.0.1:4002"]);
     const orm = app.get(MikroORM);
     const { default: Redis } = await import("ioredis");
     redis = new Redis({ host: "127.0.0.1", port: redisPort });
     const { User } = await import("../src/user/infrastructure/persistence/user.entity.ts");
     const rosterRows = await import("../src/roster/infrastructure/persistence/player.entities.ts");
     const { Reply, ReplyReport } =
-      await import("../src/forum/infrastructure/persistence/forum.entities.ts");
+      await import("../src/reply/infrastructure/persistence/reply.entities.ts");
     const { ReplyNotification } =
       await import("../src/notification/infrastructure/persistence/reply-notification.entity.ts");
     const { PersonalAccessToken } =
@@ -255,8 +252,37 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         (await request("GET", `/news/${article.slug}?locale=fr-FR`)).json().title,
         "Actualité intégration",
       );
+      const draft = (
+        await request(
+          "POST",
+          "/news",
+          { title: "Integration Secret Draft", content: "<p>Not public</p>" },
+          staffCookie,
+          201,
+        )
+      ).json();
+      await request("GET", `/news/${draft.slug}`, undefined, undefined, 404);
       assert.equal((await request("GET", "/news/sitemap")).json().total, 1);
-      await request("GET", "/news?locale=en-US&page=0&limit=10");
+      assert.deepEqual(
+        (await request("GET", "/news/sitemap/0")).json().data.map(({ slug }) => slug),
+        [article.slug],
+      );
+      const feed = (await request("GET", "/news?locale=en-US&page=0&limit=10")).json();
+      assert.equal(feed.total, 1);
+      assert.deepEqual(
+        feed.data.map(({ slug }) => slug),
+        [article.slug],
+      );
+      assert.equal((await request("GET", "/news?type=short&page=0&limit=10")).json().total, 1);
+      assert.equal((await request("GET", "/news?type=article&page=0&limit=10")).json().total, 0);
+      assert.equal(
+        (await request("GET", "/news/admin?page=0&limit=10", undefined, staffCookie)).json().total,
+        2,
+      );
+      await request("PATCH", `/news/${article.slug}/unpublish`, {}, staffCookie, 204);
+      assert.equal((await request("GET", "/news/sitemap")).json().total, 0);
+      assert.equal((await request("GET", "/news?locale=en-US&page=0&limit=10")).json().total, 0);
+      await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
     });
 
     let team, otherTeam, player;
@@ -393,6 +419,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(byPublicId.match.slug, match.slug);
         await request("GET", `/matches/${match.publicId + 1000}`, undefined, undefined, 404);
         await request("GET", "/matches/not-a-match", undefined, undefined, 404);
+        await request("GET", "/matches/upcoming?limit=abc", undefined, undefined, 400);
+        await request("GET", "/matches/results?offset=-1", undefined, undefined, 400);
         const listed = (
           await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)
         ).json();
@@ -423,8 +451,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const { RedisService } = await import("../src/infrastructure/redis/redis.service.ts");
         await app.get(RedisService).set("integration:expires", "value", 1);
         assert.equal(await redis.get("integration:expires"), "value");
-        await delay(1100);
-        assert.equal(await redis.get("integration:expires"), null);
+        const expiresInMs = await redis.pttl("integration:expires");
+        assert.ok(
+          expiresInMs > 0 && expiresInMs <= 1000,
+          `expected a 1 s expiry, got ${expiresInMs} ms`,
+        );
       },
     );
 
@@ -1178,12 +1209,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       ]) {
         assert.deepEqual(await callTool("create_contract", invalid), { error: true });
       }
-      for (const conflicting of [
-        { ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" },
-        { ...stint, startDate: "2026-03-01", endDate: undefined },
+      for (const [conflicting, status] of [
+        [{ ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" }, 422],
+        [{ ...stint, startDate: "2026-03-01", endDate: undefined }, 400],
       ]) {
         const proposal = await callTool("create_contract", conflicting);
-        await review(proposal, "approve", 400);
+        await review(proposal, "approve", status);
         await review(proposal, "reject");
       }
 
@@ -1676,6 +1707,39 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
       },
     );
+
+    await check(
+      "competition sync files stages under the right event and links manual counterparts in SQL",
+      async () => {
+        await verifyCompetitionSyncLookups({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check(
+      "redistributable scope drops start.gg matches and earnings from lists in SQL",
+      async () => {
+        await verifyRedistributableScope({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check(
+      "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
+      async () => {
+        await verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext });
+      },
+    );
+
+    await check("random player draws only players that were not merged away", async () => {
+      const { PlayerService } = await import("../src/roster/application/player.service.ts");
+      const players = app.get(PlayerService);
+      const merged = await orm.em.fork().find(rosterRows.Player, { mergedInto: { $ne: null } });
+      assert(merged.length > 0, "the merge scenarios left redirect rows behind");
+      const mergedIds = new Set(merged.map(({ id }) => id));
+      for (let draw = 0; draw < 40; draw++) {
+        const drawn = await RequestContext.create(orm.em.fork(), () => players.getRandomPlayer());
+        assert(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
+      }
+    });
 
     await check("search projections and real PostgreSQL/Redis health", async () => {
       const found = (

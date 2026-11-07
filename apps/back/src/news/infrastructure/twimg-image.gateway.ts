@@ -1,19 +1,17 @@
-import { isTweetImageUrl } from "@sarpbc/utils";
+import {
+  canonicalImageContentType,
+  IMAGE_CONTENT_TYPES,
+  isTweetImageUrl,
+  MAX_IMAGE_BYTES,
+} from "@sarpbc/utils";
 import { ApplicationError, IntegrationError, NotFoundError } from "../../common/domain/errors";
-import { canonicalImageContentType } from "../../common/domain/image-content-type";
 import type { TweetImage, TweetImageGateway } from "../application/tweet-image.service";
 
 const FETCH_TIMEOUT_MS = 5_000;
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 2;
 const TWIMG_ORIGIN = "https://pbs.twimg.com";
-const IMAGE_CONTENT_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/avif",
-]);
+// X also serves AVIF, which the cover upload does not accept.
+const TWIMG_CONTENT_TYPES = new Set<string>([...IMAGE_CONTENT_TYPES, "image/avif"]);
 
 function unavailable(): IntegrationError {
   return new IntegrationError("Could not load this image from X. Try again in a moment.");
@@ -66,7 +64,7 @@ async function readImage(response: Response): Promise<TweetImage> {
   if (
     !response.ok ||
     !response.body ||
-    !IMAGE_CONTENT_TYPES.has(contentType) ||
+    !TWIMG_CONTENT_TYPES.has(contentType) ||
     Number(response.headers.get("content-length")) > MAX_IMAGE_BYTES
   ) {
     await response.body?.cancel();

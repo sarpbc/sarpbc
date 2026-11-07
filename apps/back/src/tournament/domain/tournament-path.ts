@@ -1,9 +1,8 @@
+import type { TournamentTab } from "@sarpbc/types";
 import { isUuid } from "../../common/domain/entity-ref";
 
-export type StageTab = "overview" | "matches";
-
 export type TournamentPath =
-  | { kind: "legacyStage"; id: string; tab: StageTab }
+  | { kind: "legacyStage"; id: string; tab: TournamentTab }
   | { kind: "event"; eventSlug: string }
   | { kind: "stage"; eventSlug: string; stageSlug: string };
 

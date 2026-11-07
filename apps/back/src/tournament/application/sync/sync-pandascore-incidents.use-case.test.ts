@@ -4,12 +4,14 @@ import type { CompetitionIncident } from "../feed";
 describe("PandaScore incidents", () => {
   const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
     cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },
-    sync = { applyIncident: vi.fn(), findTournamentByPandascoreId: vi.fn() },
+    reads = { findByPandascoreId: vi.fn() },
+    sync = { applyIncident: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() };
   const now = new Date("2026-10-15T12:00:00Z");
   const service = new SyncPandascoreIncidentsUseCase(
     feed as never,
     cursor,
+    reads,
     sync as never,
     diagnostics,
     () => now,
@@ -28,9 +30,7 @@ describe("PandaScore incidents", () => {
     cursor.getLastSyncAt.mockResolvedValue(null);
     feed.listIncidents.mockResolvedValue([]);
     await service.execute();
-    expect(feed.listIncidents).toHaveBeenCalledWith(
-      expect.objectContaining({ since: new Date("2026-10-14T12:00:00Z") }),
-    );
+    expect(feed.listIncidents).toHaveBeenCalledWith({ since: new Date("2026-10-14T12:00:00Z") });
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(now);
   });
   it.each(["tournament", "team", "league"] as const)(
@@ -56,27 +56,45 @@ describe("PandaScore incidents", () => {
       expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
     },
   );
-  it("waits for each incident transaction before advancing and continues failures", async () => {
-    const incidents: CompetitionIncident[] = [
-      { ...base, kind: "team", command: { name: "A", slug: "a" } },
-      {
-        ...base,
-        id: 2,
-        modifiedAt: new Date("2026-10-15T11:00:00Z"),
-        kind: "team",
-        command: { name: "B", slug: "b" },
-      },
-    ];
+  const team = (id: number, modifiedAt: string): CompetitionIncident => ({
+    ...base,
+    id,
+    modifiedAt: new Date(modifiedAt),
+    kind: "team",
+    command: { name: "T" + id, slug: "t" + id },
+  });
+  it("keeps processing after a failure but does not move the cursor past it", async () => {
+    const incidents = [team(1, "2026-10-15T10:00:00Z"), team(2, "2026-10-15T11:00:00Z")];
     feed.listIncidents.mockResolvedValue(incidents);
     sync.applyIncident
       .mockRejectedValueOnce(new Error("rollback"))
       .mockResolvedValueOnce(undefined);
     await service.execute();
     expect(sync.applyIncident).toHaveBeenCalledTimes(2);
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(incidents[1].modifiedAt);
+    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-15T09:59:59.999Z"));
     expect(cursor.setLastSyncAt.mock.invocationCallOrder[0]).toBeGreaterThan(
       sync.applyIncident.mock.invocationCallOrder[1],
     );
+  });
+  it("stops the cursor before the earliest of several failures", async () => {
+    const incidents = [
+      team(1, "2026-10-15T09:00:00Z"),
+      team(2, "2026-10-15T10:00:00Z"),
+      team(3, "2026-10-15T11:00:00Z"),
+    ];
+    feed.listIncidents.mockResolvedValue(incidents);
+    sync.applyIncident
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("b"))
+      .mockRejectedValueOnce(new Error("c"));
+    await service.execute();
+    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-15T09:59:59.999Z"));
+  });
+  it("never moves the cursor back before where this run started", async () => {
+    feed.listIncidents.mockResolvedValue([team(1, "2026-10-14T00:00:00Z")]);
+    sync.applyIncident.mockRejectedValueOnce(new Error("rollback"));
+    await service.execute();
+    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-14T00:00:00Z"));
   });
   it("hands deletions to the sync without a backfill and advances the cursor", async () => {
     const incident = {
@@ -98,7 +116,7 @@ describe("PandaScore incidents", () => {
       command: { pandascoreId: 8, tournamentPandascoreId: 42 },
     };
     feed.listIncidents.mockResolvedValue([incident]);
-    sync.findTournamentByPandascoreId.mockResolvedValue(null);
+    reads.findByPandascoreId.mockResolvedValue(null);
     const tournament = { pandascoreId: 42, name: "Cup" };
     feed.getTournamentById.mockResolvedValue(tournament);
     await service.execute();

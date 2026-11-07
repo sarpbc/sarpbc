@@ -1,8 +1,8 @@
 import type { TeamSummary, TournamentDetail } from "@sarpbc/types";
-import { tournamentStagePath } from "@sarpbc/utils";
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { teamPath, tournamentStageLabel, tournamentStagePath } from "@sarpbc/utils";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { formatPrizepool } from "~/utils/currencyFormatter";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { resolveSiteUrl } from "~/utils/siteUrl";
 import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 
@@ -83,33 +83,11 @@ export interface SportsEventLd extends JsonLdNode {
 
 export interface BuildTournamentSportsEventOptions {
   includeContext?: boolean;
-  origin?: string;
   now?: number;
 }
 
 function isTournamentFormat(value: string): value is TournamentFormat {
   return (TOURNAMENT_FORMATS as readonly string[]).includes(value);
-}
-
-export function resolveStructuredDataUrl(
-  value: string | undefined | null,
-  origin = SITE_ORIGIN,
-): string | undefined {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("//")) {
-    return `https:${trimmed}`;
-  }
-
-  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  return `${origin}${path}`;
 }
 
 export function toIsoDate(value: Date | string | undefined | null): string | undefined {
@@ -228,7 +206,6 @@ export function getTournamentChampionTeam(
 
 function competitorFromTournament(
   tournament: Pick<TournamentDetail, "participants">,
-  origin: string,
 ): SportsTeamLd[] | undefined {
   const teams = new Map<string, SportsTeamLd>();
 
@@ -244,7 +221,7 @@ function competitorFromTournament(
       compactJsonLd({
         "@type": "SportsTeam",
         name,
-        url: team.slug ? `${origin}/team/${team.slug}` : undefined,
+        url: team.slug ? `${SITE_ORIGIN}${teamPath(team.slug)}` : undefined,
       }),
     );
   }
@@ -315,17 +292,14 @@ export function buildTournamentSportsEvent(
   tournament: TournamentDetail,
   options: BuildTournamentSportsEventOptions = {},
 ): SportsEventLd {
-  const origin = options.origin ?? SITE_ORIGIN;
-  const url = `${origin}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
+  const url = `${SITE_ORIGIN}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
   const status = getTournamentStatus(tournament, options.now);
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
   const format = formatLabel(tournament.type);
   const champion = getTournamentChampionTeam(tournament);
-  const image =
-    resolveStructuredDataUrl(tournament.imageUrl, origin) ??
-    resolveStructuredDataUrl(tournament.league?.imageUrl, origin);
+  const image = resolveSiteUrl(tournament.imageUrl) ?? resolveSiteUrl(tournament.league?.imageUrl);
   const organizerName = tournament.league?.name?.trim();
-  const competitors = competitorFromTournament(tournament, origin);
+  const competitors = competitorFromTournament(tournament);
   const venue = eventVenue(tournament.type, tournament.country, url);
 
   const event = compactJsonLd<SportsEventLd>({
@@ -343,7 +317,7 @@ export function buildTournamentSportsEvent(
       ? compactJsonLd<SportsOrganizationLd>({
           "@type": "SportsOrganization",
           name: organizerName,
-          url: resolveStructuredDataUrl(tournament.league?.url, origin),
+          url: resolveSiteUrl(tournament.league?.url),
         })
       : undefined,
     image,

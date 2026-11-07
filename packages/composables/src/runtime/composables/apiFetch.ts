@@ -37,6 +37,8 @@ export function createApiClient() {
       const headers = new Headers(options.headers);
       let event: ServerRequest | undefined;
       try {
+        // Nitro routes call apiFetch with no Nuxt context: their type program has no
+        // useRequestEvent, and at runtime the call throws.
         // @ts-ignore
         event = useRequestEvent();
       } catch {

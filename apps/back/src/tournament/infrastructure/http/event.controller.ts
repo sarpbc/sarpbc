@@ -1,15 +1,27 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
+import type { TournamentPathResponse } from "@sarpbc/types";
 import { NotFoundError } from "../../../common/domain/errors";
-import { ListTournamentsQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { EventService } from "../../application/event.service";
+import type { EventQueries } from "../../application/ports";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { EVENT_QUERIES } from "../competition-queries.tokens";
 import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
-import { mapEvent, mapStaffEvent, type TournamentPathResponse } from "./event.mapper";
+import { mapEvent, mapStaffEvent } from "./event.mapper";
 import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
@@ -17,14 +29,14 @@ const MISSING = "This tournament page does not exist. Check the address or brows
 @Controller("events")
 export class EventController {
   constructor(
-    private readonly eventService: EventService,
+    @Inject(EVENT_QUERIES) private readonly events: EventQueries,
     private readonly tournamentRead: CachedTournamentRead,
     private readonly catalogService: ManualCatalogService,
   ) {}
 
   @Get()
   async list(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
-    const [listings, count] = await this.eventService.list({
+    const [listings, count] = await this.events.list({
       limit: query.limit,
       offset: query.offset,
       pickems: query.pickems,
@@ -87,12 +99,12 @@ export class EventController {
       case "legacyStage":
         return { kind: "stage", tournament: await this.stage(path.id), tab: path.tab };
       case "stage": {
-        const id = await this.eventService.findStageId(path.eventSlug, path.stageSlug);
+        const id = await this.events.stageId(path.eventSlug, path.stageSlug);
         if (!id) throw new NotFoundError(MISSING);
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
       case "event": {
-        const found = await this.eventService.find(path.eventSlug);
+        const found = await this.events.find(path.eventSlug);
         // An event left empty by moving its stages elsewhere stays stored but is not public.
         if (!found?.stages.length) throw new NotFoundError(MISSING);
         const stages = await Promise.all(found.stages.map(({ id }) => this.stage(id)));

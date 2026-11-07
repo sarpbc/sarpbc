@@ -1,45 +1,7 @@
-import type { DataSource } from "../../../common/domain/data-source";
-import { ContractRole, Player, Team } from "../../domain/roster";
+import type { Player as PlayerResponse, Team as TeamResponse, TeamSummary } from "@sarpbc/types";
+import type { Player, Team } from "../../domain/roster";
 
-export interface TeamSummaryResponse {
-  id: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  logoLightUrl: string | null;
-  logoDarkUrl: string | null;
-  location: string | null;
-}
-
-export interface PlayerResponse {
-  id: string;
-  name: string;
-  slug: string;
-  birthday: Date | null;
-  nationality: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  imageUrl: string | null;
-  role: ContractRole | null;
-  source: DataSource;
-  team: TeamSummaryResponse | null;
-  photos?: string[];
-}
-
-export interface TeamResponse {
-  id: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  logoLightUrl: string | null;
-  logoDarkUrl: string | null;
-  location: string | null;
-  pandascoreId: number | null;
-  source: DataSource;
-  players: PlayerResponse[];
-}
-
-export function mapTeamSummary(team: Team): TeamSummaryResponse {
+export function mapTeamSummary(team: Team): TeamSummary {
   return {
     id: team.id,
     name: team.name,
@@ -52,13 +14,11 @@ export function mapTeamSummary(team: Team): TeamSummaryResponse {
 }
 
 export function mapPlayer(player: Player, options?: { includePhotos?: boolean }): PlayerResponse {
-  const photos = options?.includePhotos ? player.photos : [];
-
   const response: PlayerResponse = {
     id: player.id,
     name: player.name,
     slug: player.slug,
-    birthday: player.birthday,
+    birthday: player.birthday?.toISOString() ?? null,
     nationality: player.nationality,
     firstName: player.firstName,
     lastName: player.lastName,
@@ -68,20 +28,14 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     team: player.team ? mapTeamSummary(player.team) : null,
   };
   if (options?.includePhotos) {
-    response.photos = photos.map((photo) => photo.url);
+    response.photos = player.photos.map((photo) => photo.url);
   }
   return response;
 }
 
 export function mapTeam(team: Team): TeamResponse {
   return {
-    id: team.id,
-    name: team.name,
-    slug: team.slug,
-    imageUrl: team.imageUrl,
-    logoLightUrl: team.logoLightUrl,
-    logoDarkUrl: team.logoDarkUrl,
-    location: team.location,
+    ...mapTeamSummary(team),
     pandascoreId: team.pandascoreId,
     source: team.source,
     players: team.players.map((player) => mapPlayer(player)),

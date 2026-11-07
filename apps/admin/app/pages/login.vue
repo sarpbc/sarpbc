@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
-import { isStaffUser } from "~/utils/staff";
+import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 
 const config = useRuntimeConfig();
 const toast = useToast();

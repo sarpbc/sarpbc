@@ -4,7 +4,6 @@ import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { log } from "evlog";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { RedisService } from "../../infrastructure/redis/redis.service";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { StreamerService } from "../application/streamer.service";
 import { RedisLiveStreamCache } from "./cache/redis-live-stream-cache";
 import { StreamerController } from "./http/streamer.controller";
@@ -13,7 +12,7 @@ import { TwitchStreamerRepository } from "./persistence/twitch-streamer.reposito
 import { createTwitchSource } from "./twitch/create-twitch-source";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([TwitchStreamer]), RedisModule, UserModule],
+  imports: [MikroOrmModule.forFeature([TwitchStreamer]), RedisModule],
   controllers: [StreamerController],
   providers: [
     TwitchStreamerRepository,

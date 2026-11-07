@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PandascoreIncidentType } from "./dto/incident.dto";
 import { z } from "zod";
 
 import { PandascoreApiError } from "./pandascore-api.errors";
@@ -11,25 +10,21 @@ export interface PandascoreQueryParams {
   per_page?: string;
   sort?: string;
   since?: string;
-  type?: PandascoreIncidentType[];
   videogame?: string[];
 }
 
 export interface PandascoreRequestOptions {
   params?: PandascoreQueryParams;
-  paginate?: boolean;
   perPage?: number;
   rateLimitMs?: number;
 }
 
 export interface ListIncidentsClientParams {
-  since?: Date;
-  type?: PandascoreIncidentType[];
-  videogame?: string[];
-  page?: number;
+  since: Date;
   perPage?: number;
-  sort?: "modified_at" | "-modified_at" | "id" | "-id";
 }
+
+const VIDEOGAME = "rl";
 
 @Injectable()
 export class PandascoreApiClient {
@@ -48,33 +43,17 @@ export class PandascoreApiClient {
     this.apiToken = apiToken;
   }
 
-  async listIncidents(params: ListIncidentsClientParams = {}): Promise<unknown[]> {
-    const query: PandascoreQueryParams = {
-      page: String(params.page ?? 1),
-      per_page: String(params.perPage ?? 100),
-      sort: params.sort ?? "modified_at",
-    };
-
-    if (params.since) {
-      query.since = params.since.toISOString();
-    }
-    if (params.type?.length) {
-      query.type = params.type;
-    }
-    if (params.videogame?.length) {
-      query.videogame = params.videogame;
-    }
-
+  async listIncidents({ since, perPage = 100 }: ListIncidentsClientParams): Promise<unknown[]> {
     return this.paginateAll("/incidents", {
-      params: query,
-      perPage: params.perPage ?? 100,
+      params: { sort: "modified_at", since: since.toISOString(), videogame: [VIDEOGAME] },
+      perPage,
     });
   }
 
   async getTournaments(): Promise<unknown[]> {
-    const pastTournaments = await this.paginateAll("/rl/tournaments/past");
-    const upcomingTournaments = await this.paginateAll("/rl/tournaments/upcoming");
-    const runningTournaments = await this.paginateAll("/rl/tournaments/running");
+    const pastTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/past`);
+    const upcomingTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/upcoming`);
+    const runningTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/running`);
     const allTournaments = [...pastTournaments, ...upcomingTournaments, ...runningTournaments];
     const byId = new Map<number, unknown>();
     for (const tournament of allTournaments) {
@@ -90,16 +69,8 @@ export class PandascoreApiClient {
     try {
       return await this.request(`/tournaments/${tournamentId}`);
     } catch (error) {
-      if (error instanceof PandascoreApiError && error.status === 404) {
-        return null;
-      }
-      log.warn({
-        component: PandascoreApiClient.name,
-        tournamentId,
-        message: "Failed to fetch tournament",
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
+      if (error instanceof PandascoreApiError && error.status === 404) return null;
+      throw error;
     }
   }
 
@@ -112,7 +83,7 @@ export class PandascoreApiClient {
   }
 
   async getRocketLeaguePlayers(): Promise<unknown[]> {
-    return this.paginateAll("/rl/players", {
+    return this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },
       rateLimitMs: 200,
     });

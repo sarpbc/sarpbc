@@ -1,9 +1,10 @@
 import { getCookie } from "h3";
-import { useUser } from "~/composables/state";
-import { getProfile } from "~/composables/user";
-
-const ACCESS_TOKEN_COOKIE = "access_token";
-const REFRESH_TOKEN_COOKIE = "refresh_token";
+import {
+  ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE,
+  getProfile,
+  useAuthHydrated,
+} from "~/composables/user";
 
 /**
  * `undefined` = unknown, `null` = guest, `User` = authenticated.
@@ -22,7 +23,7 @@ const REFRESH_TOKEN_COOKIE = "refresh_token";
  */
 export default defineNuxtRouteMiddleware(async () => {
   const user = useUser();
-  const authHydrated = useState<boolean>("auth-hydrated", () => false);
+  const authHydrated = useAuthHydrated();
 
   if (user.value !== undefined) {
     return;

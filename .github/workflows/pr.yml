@@ -49,12 +49,13 @@ jobs:
               - '.oxfmtrc.json'
               - '.nvmrc'
               - '.npmrc'
-              - 'lefthook.yml'
               - 'scripts/**'
-              - 'docker-compose.local.yml'
+              - 'tools/**'
+              - 'docs/**'
               - '.github/workflows/**'
             backend:
               - 'apps/back/**'
+              - '.dockerignore'
               - 'packages/types/**'
               - 'packages/utils/**'
               - 'package.json'
@@ -62,6 +63,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
             frontend:
               - 'apps/front/**'
@@ -71,6 +73,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
             admin:
               - 'apps/admin/**'
@@ -80,6 +83,7 @@ jobs:
               - 'pnpm-workspace.yaml'
               - 'turbo.json'
               - '.nvmrc'
+              - '.npmrc'
               - '.github/workflows/**'
 
   quality:
@@ -106,14 +110,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: |
-          pnpm exec oxlint scripts
-          pnpm run lint
+        run: pnpm run lint
 
       - name: Format check
+        run: pnpm run fmt:check
+
+      - name: Dockerfile Node version
+        run: pnpm check:node
+
+      - name: Typecheck packages
+        run: pnpm exec turbo run typecheck --filter="./packages/*"
+
+      - name: Locale parity and package boundaries
         run: |
-          pnpm exec oxfmt --check scripts
-          pnpm run fmt:check
+          pnpm check:i18n
+          pnpm check:packages
+          pnpm test:checks
 
   backend:
     name: Backend tests and coverage
@@ -142,7 +154,9 @@ jobs:
         run: |
           pnpm --filter back typecheck
           pnpm --filter back typecheck:tests
-          pnpm --filter @sarpbc/utils test
+
+      - name: Utils tests
+        run: pnpm --filter @sarpbc/utils test
 
       - name: Migration names
         run: pnpm --filter back test:migrations
@@ -161,6 +175,93 @@ jobs:
           JWT_KEY: test-jwt-key
           FRONT_URL: http://localhost:4000
           ADMIN_URL: http://localhost:4002
+
+  back-image:
+    name: Boot back image
+    needs: changes
+    if: ${{ !cancelled() && (github.event_name == 'push' || needs.changes.outputs.backend == 'true') }}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.0-alpine
+        env:
+          POSTGRES_USER: sarpbc
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: sarpbc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sarpbc -d sarpbc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.4.1
+
+      - name: Build image
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          file: apps/back/Dockerfile
+          load: true
+          push: false
+          tags: sarpbc-back:boot
+
+      - name: Start container
+        run: |
+          docker run -d --name back --network host \
+            -e DB_HOST=localhost \
+            -e DB_PORT=5432 \
+            -e DB_USER=sarpbc \
+            -e DB_PASSWORD=password \
+            -e DB_NAME=sarpbc \
+            -e REDIS_HOST=localhost \
+            -e REDIS_PORT=6379 \
+            -e PORT=4001 \
+            -e JWT_KEY=boot-check-only-secret-key-0123456789abcdef \
+            -e FRONT_URL=https://sarpbc.org \
+            -e ADMIN_URL=https://admin.sarpbc.org \
+            -e PANDASCORE_API_TOKEN=boot-check \
+            -e PANDASCORE_SYNC_ON_BOOT=false \
+            -e GOOGLE_CLIENT_ID=boot-check \
+            -e GOOGLE_CLIENT_SECRET=boot-check \
+            -e GOOGLE_REDIRECT_URI=https://sarpbc.org/auth/google/callback \
+            sarpbc-back:boot
+
+      - name: Wait until ready
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -fsS -o /dev/null http://localhost:4001/health/ready; then
+              echo "Ready after attempt $attempt."
+              exit 0
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' back)" != "true" ]; then
+              echo "The container stopped before it was ready."
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "The container was not ready in time."
+          exit 1
+
+      - name: Container logs
+        if: always()
+        run: docker logs back
 
   frontend:
     name: Frontend typecheck and build
@@ -226,7 +327,7 @@ jobs:
 
   ci:
     name: CI
-    needs: [changes, quality, backend, frontend, admin]
+    needs: [changes, quality, backend, back-image, frontend, admin]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -253,6 +354,7 @@ jobs:
           check changes "${{ needs.changes.result }}"
           check quality "${{ needs.quality.result }}"
           check backend "${{ needs.backend.result }}"
+          check back-image "${{ needs.back-image.result }}"
           check frontend "${{ needs.frontend.result }}"
           check admin "${{ needs.admin.result }}"
 

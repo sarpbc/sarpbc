@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { TeamLogoVariant } from "@sarpbc/types";
 import {
   detectTeamLogoFormat,
   MAX_TEAM_LOGO_BYTES,
@@ -9,7 +10,6 @@ import {
   requireTeamLogoDimensions,
   requireTeamLogoUrl,
   TEAM_LOGO_PIXELS,
-  type TeamLogoVariant,
 } from "../domain/team-logo";
 import type { StoredTeamLogo, TeamLogoImages, TeamLogoSource, TeamLogoStorage } from "./ports";
 

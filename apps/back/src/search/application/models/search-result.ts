@@ -1,7 +1,6 @@
+import type { SearchType } from "@sarpbc/types";
 import type { Player, Team } from "../../../roster/domain/roster";
 import type { Tournament } from "../../../tournament/domain/competition";
-
-export type SearchType = "player" | "team" | "tournament" | "all";
 
 export interface SearchResult {
   players: Player[];
@@ -17,24 +16,6 @@ export interface SearchResult {
 export interface SearchParams {
   query: string;
   type: SearchType;
-  limit: number;
-  offset: number;
-}
-
-export interface PlayerSearchParams {
-  query: string;
-  limit: number;
-  offset: number;
-}
-
-export interface TeamSearchParams {
-  query: string;
-  limit: number;
-  offset: number;
-}
-
-export interface TournamentSearchParams {
-  query: string;
   limit: number;
   offset: number;
 }

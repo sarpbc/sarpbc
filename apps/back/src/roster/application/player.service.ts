@@ -1,14 +1,10 @@
+import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
-import { Contract, ContractRole, Player, PlayerPhoto, PlayerStatus } from "../domain/roster";
+import { Contract, Player, PlayerPhoto } from "../domain/roster";
 import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
-import type { PlayerSearchProps } from "./search-props";
-
-export interface RosterMove {
-  player: Player;
-  opened: Contract | null;
-  closed: Contract[];
-}
+import { requireTeam } from "./require-team";
+import type { DirectorySearchProps } from "./search-props";
 
 export class PlayerService {
   constructor(
@@ -17,11 +13,11 @@ export class PlayerService {
     private readonly transaction: RosterTransaction,
   ) {}
 
-  async find(options: Partial<PlayerSearchProps>): Promise<Player[]> {
+  async find(options: Partial<DirectorySearchProps>): Promise<Player[]> {
     return this.players.search(options);
   }
 
-  async findAndCount(options: Partial<PlayerSearchProps>): Promise<[Player[], number]> {
+  async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
     return this.players.searchAndCount(options);
   }
 
@@ -46,7 +42,7 @@ export class PlayerService {
       player.birthday = dto.birthday ? new Date(dto.birthday) : null;
       player.nationality = dto.nationality ?? null;
       player.imageUrl = dto.imageUrl ?? null;
-      player.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+      player.slug = dto.slug ?? (toSlug(dto.name) || "player");
       if (dto.status !== undefined) player.status = dto.status;
       if (dto.source !== undefined) player.source = dto.source;
 
@@ -54,12 +50,7 @@ export class PlayerService {
         throw new ConflictError(`A player with slug "${player.slug}" already exists`);
       }
 
-      if (dto.teamId) {
-        const team = await teams.findById(dto.teamId);
-        if (team) {
-          player.team = team;
-        }
-      }
+      if (dto.teamId) player.team = await requireTeam(teams, dto.teamId);
 
       await players.save(player);
       return player;
@@ -91,14 +82,7 @@ export class PlayerService {
       }
 
       if (dto.teamId !== undefined) {
-        if (dto.teamId === null) {
-          player.team = null;
-        } else {
-          const team = await teams.findById(dto.teamId);
-          if (team) {
-            player.team = team;
-          }
-        }
+        player.team = dto.teamId === null ? null : await requireTeam(teams, dto.teamId);
       }
 
       await players.save(player);
@@ -106,7 +90,7 @@ export class PlayerService {
     });
   }
 
-  async joinTeam(playerId: string, input: JoinTeamInput): Promise<RosterMove> {
+  async joinTeam(playerId: string, input: JoinTeamInput): Promise<Player> {
     return this.transaction.run(async ({ players, teams, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
@@ -114,7 +98,7 @@ export class PlayerService {
       if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
 
       const effectiveDate = new Date(input.effectiveDate);
-      const role = input.role ?? ContractRole.ACTIVE;
+      const role = input.role ?? "active";
       const open = await openContracts(contracts, playerId);
       if (open.some((contract) => contract.team.id === team.id && contract.role === role)) {
         throw new ConflictError(
@@ -135,14 +119,13 @@ export class PlayerService {
       await contracts.save(contract);
 
       player.team = team;
-      player.contractRole = role;
-      player.status = PlayerStatus.ACTIVE;
+      player.status = "active";
       await players.save(player);
-      return { player, opened: contract, closed: open };
+      return player;
     });
   }
 
-  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<RosterMove> {
+  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<Player> {
     return this.transaction.run(async ({ players, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
 
@@ -160,11 +143,10 @@ export class PlayerService {
 
       if (player.team?.id === input.teamId) {
         player.team = null;
-        player.contractRole = null;
         player.status = input.status;
       }
       await players.save(player);
-      return { player, opened: null, closed };
+      return player;
     });
   }
 

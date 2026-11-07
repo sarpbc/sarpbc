@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { BracketSectionLayout } from "~/utils/tournamentBracket";
+import type { BracketSectionLayout } from "~/utils/bracket";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import {
   BRACKET_COLUMN_GAP,
@@ -10,7 +10,7 @@ import {
   bracketMatchLeft,
   bracketMatchTop,
   bracketTeamRowCenterY,
-} from "~/utils/tournamentBracket";
+} from "~/utils/bracket";
 
 const { layout } = defineProps<{
   layout: BracketSectionLayout;
@@ -37,7 +37,6 @@ const connectorPaths = computed(() => {
         return null;
       }
 
-      // Upper and lower zones are stacked vertically; skip cross-zone connector lines.
       if (from.zone && to.zone && from.zone !== to.zone) {
         return null;
       }

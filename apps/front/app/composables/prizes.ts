@@ -1,6 +1,5 @@
 import type { PrizeAmount, TournamentPrizes } from "@sarpbc/types";
 import { formatPrizeAmount } from "~/utils/currencyFormatter";
-import { apiFetch } from "~/utils/apiFetch";
 
 export const STARTGG_URL = "https://www.start.gg";
 

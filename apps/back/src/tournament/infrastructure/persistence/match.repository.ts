@@ -1,9 +1,10 @@
 import { EntityRepository } from "@mikro-orm/core";
-import type { DataSource } from "../../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match } from "./tournament.entities";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type {
+  MatchListKind,
   MatchListQueryOptions,
   MatchListScopeFilters,
 } from "../../application/match/match-list-filters";
@@ -34,16 +35,7 @@ const DETAIL_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
-const TEAM_FORM_POPULATE = [
-  "participants.team",
-  "results",
-  "results.participant",
-  "winner",
-  "winner.team",
-  ...MATCH_TOURNAMENT_POPULATE,
-] as const;
-
-const HEAD_TO_HEAD_POPULATE = [
+const FINISHED_POPULATE = [
   "participants.team",
   "results",
   "results.participant",
@@ -53,156 +45,14 @@ const HEAD_TO_HEAD_POPULATE = [
 ] as const;
 
 export class MatchRepository extends EntityRepository<Match> {
-  async findByPandascoreId(pandascoreId: number): Promise<Match | null> {
-    return this.findOne({ pandascoreId });
+  list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
+    const { where, orderBy, limit, offset } = this.listQuery(kind, options);
+    return this.find(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
-  async findUpcoming({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-    tournamentId,
-    leagueId,
-    teamId,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<Match[]> {
-    const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
-      tournamentId,
-      leagueId,
-      teamId,
-      redistributableOnly,
-    });
-
-    return this.find(query, {
-      limit,
-      offset,
-      orderBy: { beginAt: "ASC" },
-      populate: [...LIST_POPULATE],
-    });
-  }
-
-  async findUpcomingAndCount({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-    tournamentId,
-    leagueId,
-    teamId,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<[Match[], number]> {
-    const query = this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), {
-      tournamentId,
-      leagueId,
-      teamId,
-      redistributableOnly,
-    });
-    return this.findAndCount(query, {
-      limit,
-      offset,
-      orderBy: { beginAt: "ASC" },
-      populate: [...LIST_POPULATE],
-    });
-  }
-
-  async findLive({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-    tournamentId,
-    leagueId,
-    teamId,
-    liveSince,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<Match[]> {
-    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly, liveSince), {
-      tournamentId,
-      leagueId,
-      teamId,
-      redistributableOnly,
-    });
-
-    return this.find(query, {
-      limit,
-      offset,
-      orderBy: { beginAt: "ASC" },
-      populate: [...LIST_POPULATE],
-    });
-  }
-
-  async findLiveAndCount({
-    limit = 20,
-    offset = 0,
-    todayOnly = false,
-    tournamentId,
-    leagueId,
-    teamId,
-    liveSince,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<[Match[], number]> {
-    const query = this.mergeScopeFilters(this.buildLiveQuery(todayOnly, liveSince), {
-      tournamentId,
-      leagueId,
-      teamId,
-      redistributableOnly,
-    });
-    return this.findAndCount(query, {
-      limit,
-      offset,
-      orderBy: { beginAt: "ASC" },
-      populate: [...LIST_POPULATE],
-    });
-  }
-
-  async findResults({
-    limit = 20,
-    offset = 0,
-    tournamentId,
-    leagueId,
-    teamId,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<Match[]> {
-    const query = this.mergeScopeFilters(
-      { endAt: { $ne: null } },
-      {
-        tournamentId,
-        leagueId,
-        teamId,
-        redistributableOnly,
-      },
-    );
-
-    return this.find(query, {
-      limit,
-      offset,
-      orderBy: { endAt: "DESC" },
-      populate: [...LIST_POPULATE],
-    });
-  }
-
-  async findResultsAndCount({
-    limit = 20,
-    offset = 0,
-    tournamentId,
-    leagueId,
-    teamId,
-    redistributableOnly,
-  }: MatchListQueryOptions): Promise<[Match[], number]> {
-    const query = this.mergeScopeFilters(
-      { endAt: { $ne: null } },
-      {
-        tournamentId,
-        leagueId,
-        teamId,
-        redistributableOnly,
-      },
-    );
-
-    return this.findAndCount(query, {
-      limit,
-      offset,
-      orderBy: { endAt: "DESC" },
-      populate: [...LIST_POPULATE],
-    });
+  listAndCount(kind: MatchListKind, options: MatchListQueryOptions): Promise<[Match[], number]> {
+    const { where, orderBy, limit, offset } = this.listQuery(kind, options);
+    return this.findAndCount(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
   async findByIds(ids: string[]): Promise<Match[]> {
@@ -234,7 +84,7 @@ export class MatchRepository extends EntityRepository<Match> {
       {
         limit,
         orderBy: { endAt: "DESC" },
-        populate: [...TEAM_FORM_POPULATE],
+        populate: [...FINISHED_POPULATE],
       },
     );
   }
@@ -262,17 +112,17 @@ export class MatchRepository extends EntityRepository<Match> {
       {
         limit,
         orderBy: { endAt: "DESC" },
-        populate: [...HEAD_TO_HEAD_POPULATE],
+        populate: [...FINISHED_POPULATE],
       },
     );
   }
 
   async findRecentlyEnded({
-    limit = 100,
-    minutesAgo = 15,
+    limit,
+    minutesAgo,
   }: {
-    limit?: number;
-    minutesAgo?: number;
+    limit: number;
+    minutesAgo: number;
   }): Promise<Match[]> {
     const now = new Date();
     const cutoffTime = new Date(now.getTime() - minutesAgo * 60 * 1000);
@@ -285,6 +135,39 @@ export class MatchRepository extends EntityRepository<Match> {
         populate: [...LIST_POPULATE],
       },
     );
+  }
+
+  private listQuery(
+    kind: MatchListKind,
+    { limit, offset = 0, todayOnly = false, liveSince, ...scope }: MatchListQueryOptions,
+  ) {
+    switch (kind) {
+      case "upcoming":
+        return {
+          where: this.mergeScopeFilters(this.buildUpcomingQuery(todayOnly), scope),
+          orderBy: { beginAt: "ASC" } as const,
+          limit,
+          offset,
+        };
+      case "live":
+        return {
+          where: this.mergeScopeFilters(this.buildLiveQuery(todayOnly, liveSince), scope),
+          orderBy: { beginAt: "ASC" } as const,
+          limit,
+          offset,
+        };
+      case "results":
+        return {
+          where: this.mergeScopeFilters({ endAt: { $ne: null } }, scope),
+          orderBy: { endAt: "DESC" } as const,
+          limit,
+          offset,
+        };
+      default: {
+        const unreachable: never = kind;
+        return unreachable;
+      }
+    }
   }
 
   private buildUpcomingQuery(todayOnly: boolean): MatchListFilter {

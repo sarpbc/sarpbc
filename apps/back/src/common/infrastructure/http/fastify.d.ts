@@ -1,4 +1,5 @@
 import type { CookieSerializeOptions, UnsignResult } from "@fastify/cookie";
+import type { AuthenticatedUser } from "../../application/models/authenticated-user";
 
 declare namespace Storage {
   interface MultipartFile {
@@ -14,10 +15,7 @@ declare module "fastify" {
   interface FastifyRequest {
     storedFiles: Record<string, Storage.MultipartFile[]>;
     body: unknown;
-    user?: {
-      id: string;
-      email: string;
-    };
+    user?: AuthenticatedUser;
   }
 
   interface FastifyReply {

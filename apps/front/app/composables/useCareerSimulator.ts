@@ -14,7 +14,7 @@ import {
 } from "~/utils/career/careerReducer";
 import {
   computeSeasonPoints,
-  computeWorldRankings,
+  computeStateRankings,
   getTeamRank,
   qualifiesForWorlds,
 } from "~/utils/career/simulation";
@@ -58,26 +58,7 @@ export function useCareerSimulator() {
     state.value = createInitialCareerState();
   }
 
-  const previousSeasonPoints = computed(
-    () => state.value.seasonRecords[state.value.seasonRecords.length - 1]?.points ?? null,
-  );
-
-  const worldRankings = computed(() =>
-    computeWorldRankings(
-      state.value.id,
-      {
-        name: state.value.playerName || "Rookie",
-        teamId: state.value.currentTeamId || null,
-        rating: state.value.stats.rating,
-        region: state.value.region,
-        season: state.value.currentSeason,
-        splits: state.value.currentSplits,
-        worlds: state.value.currentWorlds,
-        previousPoints: previousSeasonPoints.value,
-      },
-      state.value.world,
-    ),
-  );
+  const worldRankings = computed(() => computeStateRankings(state.value));
 
   const currentTeamName = computed(
     () => getWorldTeamById(state.value.currentTeamId)?.name ?? state.value.currentTeamId,

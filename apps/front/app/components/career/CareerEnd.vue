@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { isCareerNicknameKey, type CareerResult, type CareerSeasonRecord } from "~/types/career";
-import { pickCareerNickname } from "~/utils/career/nickname";
+import type { CareerResult, CareerSeasonRecord } from "~/types/career";
 
 const props = defineProps<{
   result: CareerResult;
@@ -33,12 +32,7 @@ const trophyLines = computed(() => {
   }));
 });
 
-const nickname = computed(() => {
-  const key = isCareerNicknameKey(props.result.nicknameKey)
-    ? props.result.nicknameKey
-    : pickCareerNickname(props.result);
-  return t(`page.game.career.end.nicknames.${key}`);
-});
+const nickname = computed(() => t(`page.game.career.end.nicknames.${props.result.nicknameKey}`));
 
 function majorSummary(season: CareerSeasonRecord, split: number): string {
   const record = season.splits.find((entry) => entry.split === split);

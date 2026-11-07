@@ -9,6 +9,7 @@ yarn.lock
 
 # builds
 dist/
+dist-test/
 build/
 .nuxt/
 apps/front/.oxlintrc.generated.json

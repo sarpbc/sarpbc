@@ -1,12 +1,16 @@
 <script lang="ts" setup>
-import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
-import type { TournamentTab } from "~/types/tournament";
+import type { TournamentTab } from "@sarpbc/types";
+import {
+  stageMatchesPath,
+  tournamentEventPath,
+  tournamentStageLabel,
+  tournamentStagePath,
+} from "@sarpbc/utils";
 import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,
   getTournamentChampionTeam,
 } from "~/utils/structuredData/tournamentSportsEvent";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
 import {
   getTournamentTabFromRouteName,
   getTournamentTabTransitionName,
@@ -47,25 +51,17 @@ const activeTab = computed<TournamentTab>(() =>
 );
 
 const { tournament: resolvedStage, tab: resolvedTab } = resolved.value;
-const resolvedStagePath = tournamentStagePath(resolvedStage.event.slug, resolvedStage.slug);
 const canonicalPath = localePath(
   resolvedTab === "matches" || activeTab.value === "matches"
-    ? `${resolvedStagePath}/matches`
-    : resolvedStagePath,
+    ? stageMatchesPath(resolvedStage.event.slug, resolvedStage.slug)
+    : tournamentStagePath(resolvedStage.event.slug, resolvedStage.slug),
 );
 if (route.path !== canonicalPath) {
-  await navigateTo(
-    { path: canonicalPath, query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, canonicalPath);
 }
 
 const tournament = computed(() =>
   resolved.value?.kind === "stage" ? resolved.value.tournament : null,
-);
-
-const stagePath = computed(() =>
-  tournament.value ? tournamentStagePath(tournament.value.event.slug, tournament.value.slug) : "",
 );
 
 const teamCount = computed(() => tournament.value?.participants?.length ?? 0);
@@ -167,7 +163,11 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
             {{ tournament.event.name }}
           </SLink>
         </template>
-        <TournamentHeader :stage-path="stagePath" :active-tab="activeTab" />
+        <TournamentHeader
+          :event-slug="tournament.event.slug"
+          :stage-slug="tournament.slug"
+          :active-tab="activeTab"
+        />
       </TournamentHero>
       <div class="tournament-tab-outlet overflow-hidden">
         <NuxtPage :transition="tabTransition" :tournament="tournament" />

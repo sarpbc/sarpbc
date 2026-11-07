@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
-import { parseNewsTweetTag, serializeNewsTweetTag } from "@sarpbc/utils";
+import { newsTweetTagStart, parseNewsTweetTag, serializeNewsTweetTag } from "@sarpbc/utils";
 import TweetTagNodeView from "~/components/news/TweetTagNodeView.vue";
 
 export const TweetTagNode = Node.create({
@@ -32,13 +32,7 @@ export const TweetTagNode = Node.create({
   markdownTokenizer: {
     name: "tweetTag",
     level: "block" as const,
-    start: (src: string) => {
-      const block = src.indexOf("::tweet{");
-      if (block !== -1) {
-        return block;
-      }
-      return src.indexOf(":tweet{");
-    },
+    start: newsTweetTagStart,
     tokenize: (src: string) => {
       const parsed = parseNewsTweetTag(src.trimStart());
       if (!parsed) {

@@ -1,3 +1,4 @@
+import { winnerFromResults } from "@sarpbc/utils";
 import { matchPublicSlug, type Match } from "../../domain/competition";
 
 export interface HeadToHeadMeeting {
@@ -48,15 +49,19 @@ export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string):
     return null;
   }
 
-  const results = match.results;
-  const scoreA = results.find((r) => r.participant.id === teamAParticipant.id)?.score;
-  const scoreB = results.find((r) => r.participant.id === teamBParticipant.id)?.score;
+  const winnerParticipantId = winnerFromResults(
+    match.results
+      .filter(
+        (r) => r.participant.id === teamAParticipant.id || r.participant.id === teamBParticipant.id,
+      )
+      .map((r) => ({ participantId: r.participant.id, score: r.score })),
+  );
 
-  if (scoreA === undefined || scoreB === undefined || scoreA === scoreB) {
+  if (winnerParticipantId === null) {
     return null;
   }
 
-  return scoreA > scoreB ? teamAId : teamBId;
+  return winnerParticipantId === teamAParticipant.id ? teamAId : teamBId;
 }
 
 export function mapHeadToHeadMeeting(

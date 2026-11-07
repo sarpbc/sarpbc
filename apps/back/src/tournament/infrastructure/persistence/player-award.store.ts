@@ -1,9 +1,16 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import { ConflictError } from "../../../common/domain/errors";
+import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import type { AwardQueries, AwardWriter } from "../../application/ports";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
+import { toEventRef } from "../../domain/tournament-event";
+const AWARD_LABELS = {
+  mvp: "MVP",
+  defensive_mvp: "Defensive MVP",
+} as const satisfies Record<PlayerAwardType, string>;
 function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
   return {
     id: row.id,
@@ -34,11 +41,7 @@ export class CompetitionAwardQueries implements AwardQueries {
         name: row.tournament.name,
         slug: row.tournament.slug,
         endAt: row.tournament.endAt,
-        event: {
-          id: row.tournament.event.id,
-          slug: row.tournament.event.slug,
-          name: row.tournament.event.name,
-        },
+        event: toEventRef(row.tournament.event),
       },
     }));
   }
@@ -54,8 +57,6 @@ export class CompetitionAwardQueries implements AwardQueries {
   }
 }
 export class CompetitionAwardWriter implements AwardWriter {
-  conflictMessage =
-    "This tournament already has that award. Remove the current award before assigning another player.";
   constructor(private readonly em: EntityManager) {}
   async context(tournamentId: string, participantId: string, playerId: string) {
     const [t, p, player] = await Promise.all([
@@ -95,12 +96,19 @@ export class CompetitionAwardWriter implements AwardWriter {
     );
     row.player = await this.em.findOneOrFail(Player, { id: input.playerId });
     row.awardType = input.awardType;
-    this.conflictMessage =
-      row.tournament.name +
-      " already has a " +
-      (input.awardType === "mvp" ? "MVP" : "Defensive MVP") +
-      " award. Remove the current award before assigning another player.";
     this.em.persist(row);
+    try {
+      await this.em.flush();
+    } catch (error) {
+      if (isUniqueViolation(error))
+        throw new ConflictError(
+          row.tournament.name +
+            " already has a " +
+            AWARD_LABELS[input.awardType] +
+            " award. Remove the current award before assigning another player.",
+        );
+      throw error;
+    }
     return toTournamentItem(row);
   }
   async remove(tournamentId: string, id: string) {

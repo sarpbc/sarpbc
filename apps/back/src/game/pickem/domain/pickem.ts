@@ -1,3 +1,4 @@
+import { isMatchFinished, winnerFromResults } from "@sarpbc/utils";
 import { InvalidInputError } from "../../../common/domain/errors";
 export interface PickMatch {
   id: string;
@@ -11,12 +12,15 @@ export interface PickMatch {
 }
 export interface Pick {
   id: string;
-  user: { id: string; userName: string };
+  user: { id: string };
   match: { id: string };
   pickedParticipant: { id: string };
   points: number | null;
   scored: boolean;
   createdAt: Date;
+}
+export interface NamedPick extends Pick {
+  user: { id: string; userName: string };
 }
 export function assertPickAllowed(
   match: PickMatch,
@@ -32,7 +36,7 @@ export function assertPickAllowed(
     throw new InvalidInputError(
       "This match has already started. Picks are locked for this series.",
     );
-  if (match.endAt || match.status === "finished")
+  if (isMatchFinished(match))
     throw new InvalidInputError("This match is finished. Picks are locked.");
   if (!match.participantIds.includes(participantId))
     throw new InvalidInputError(
@@ -43,16 +47,8 @@ export function assertPickAllowed(
 }
 export function derivePickWinner(match: PickMatch): string | null {
   if (match.winnerId) return match.winnerId;
-  if (match.results.length < 2) return null;
-  const sorted = [...match.results].sort((a, b) => b.score - a.score);
-  const first = sorted[0],
-    second = sorted[1];
-  return first &&
-    second &&
-    first.score > second.score &&
-    match.participantIds.includes(first.participantId)
-    ? first.participantId
-    : null;
+  const leader = winnerFromResults(match.results);
+  return leader && match.participantIds.includes(leader) ? leader : null;
 }
 export function scorePick(pick: Pick, winnerId: string): void {
   if (pick.scored) return;

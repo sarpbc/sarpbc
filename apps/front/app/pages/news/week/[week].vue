@@ -15,16 +15,16 @@ if (!parseIsoWeekId(weekId.value)) {
   });
 }
 
-const { data: week } = await useAsyncData(
+const { data: week, error: weekError } = await useAsyncData(
   () => `news-week-${weekId.value}-${locale.value}`,
   () => getNewsWeek(weekId.value, locale.value),
   { watch: [weekId, locale] },
 );
 
 if (!week.value || week.value.items.length === 0) {
-  throw createError({
-    statusCode: 404,
-    message: t("page.news.articleNotFound"),
+  throwEntityLoadError(weekError.value, {
+    notFound: t("page.news.articleNotFound"),
+    failed: t("page.news.error"),
   });
 }
 

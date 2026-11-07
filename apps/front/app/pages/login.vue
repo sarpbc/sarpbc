@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
-const config = useRuntimeConfig();
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 setPageSeo({
@@ -9,9 +8,7 @@ setPageSeo({
   description: t("page.login.seoDescription"),
   noIndex: true,
 });
-const route = useRoute();
-const localePath = useLocalePath();
-const posthog = usePostHog();
+const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();
 
 interface LoginState {
   email: string;
@@ -26,28 +23,7 @@ const state = reactive<LoginState>({
 const pending = ref(false);
 const errorMessage = ref<string | null>(null);
 
-function safeRedirectTarget(): string {
-  const raw = route.query.redirect;
-  if (Array.isArray(raw) || raw == null || !raw.startsWith("/") || raw.startsWith("//")) {
-    return localePath("/");
-  }
-  return raw;
-}
-
-onMounted(async () => {
-  const user = useUser();
-
-  if (user.value === undefined) {
-    const profile = await getProfile();
-    user.value = profile;
-  }
-
-  if (!user.value) {
-    return;
-  }
-
-  navigateTo(safeRedirectTarget());
-});
+onMounted(leaveIfSignedIn);
 
 async function onSubmit(event: Event) {
   event.preventDefault();
@@ -59,40 +35,19 @@ async function onSubmit(event: Event) {
   errorMessage.value = null;
 
   try {
-    const res: { success?: boolean } = await $fetch<{
-      success?: boolean;
-    }>(`${config.public.apiBase}/auth/login`, {
-      method: "POST",
-      body: {
-        email: state.email.trim(),
-        password: state.password,
-      },
-      credentials: "include",
-    });
-
-    if (res.success === true) {
-      const user = useUser();
-      const profile = await getProfile();
-      user.value = profile;
-
-      if (profile) {
-        posthog?.capture("user_logged_in");
-      }
-
-      navigateTo(safeRedirectTarget());
-      return;
+    const signedIn = await submit(
+      "/auth/login",
+      { email: state.email.trim(), password: state.password },
+      "user_logged_in",
+    );
+    if (!signedIn) {
+      errorMessage.value = t("page.authentication.errors.loginFailed");
     }
-
-    errorMessage.value = t("page.authentication.errors.loginFailed");
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed");
   } finally {
     pending.value = false;
   }
-}
-
-function googleLogin() {
-  window.location.href = `${config.public.apiBase}/auth/google`;
 }
 </script>
 

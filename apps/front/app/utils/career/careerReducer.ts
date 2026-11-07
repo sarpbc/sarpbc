@@ -5,7 +5,7 @@ import { resolveEventOutcome, buildEventOutcomeContext } from "~/utils/career/ev
 import { createCareerWorld, moveUserToTeam, tickNpcRatings } from "~/utils/career/roster";
 import {
   computeCircuitPoints,
-  computeWorldRankings,
+  computeStateRankings,
   createRng,
   deriveTrophies,
   getSplitFeedback,
@@ -28,6 +28,7 @@ import type {
   CareerCountry,
   CareerDestiny,
   CareerDestinyLeanings,
+  CareerEventOutcome,
   CareerPhase,
   CareerRegion,
   CareerResult,
@@ -38,6 +39,7 @@ import type {
   OnboardingStep,
 } from "~/types/career";
 import {
+  DEFAULT_PLAYER_NAME,
   applyDestinyLeanings,
   emptyDestinyLeanings,
   getRecommendedDestiny,
@@ -118,24 +120,6 @@ export function createInitialCareerState(): CareerState {
     lastEventOutcome: null,
     result: null,
   };
-}
-
-function playerCircuitInput(state: CareerState) {
-  const previousSeasonPoints = state.seasonRecords[state.seasonRecords.length - 1]?.points ?? null;
-  return {
-    name: state.playerName || "Rookie",
-    teamId: state.currentTeamId || null,
-    rating: state.stats.rating,
-    region: state.region,
-    season: state.currentSeason,
-    splits: state.currentSplits,
-    worlds: state.currentWorlds,
-    previousPoints: previousSeasonPoints,
-  };
-}
-
-function rankingsFor(state: CareerState) {
-  return computeWorldRankings(state.id, playerCircuitInput(state), state.world);
 }
 
 function currentTeamName(state: CareerState): string {
@@ -222,7 +206,7 @@ function runStageSimulation(
     }
     case "worlds": {
       const player = fieldPlayer(next, skip);
-      const ranking = rankingsFor(next);
+      const ranking = computeStateRankings(next);
       const qualified = ranking.teams
         .filter((entry) => qualifiesForWorlds(entry.rank, ranking.teams.length))
         .map((entry) => entry.team.id);
@@ -263,7 +247,10 @@ function endSeason(state: CareerState): CareerState {
     points: computeCircuitPoints(state.currentSplits),
     ratingEnd: state.stats.rating,
   };
-  const rankings = rankingsFor({ ...state, seasonRecords: [...state.seasonRecords, record] });
+  const rankings = computeStateRankings({
+    ...state,
+    seasonRecords: [...state.seasonRecords, record],
+  });
   const offerSeed = hashString(`${state.id}:offer:${state.currentSeason}`);
   const resolution = resolveOffseasonContracts(
     state.currentSeason,
@@ -295,7 +282,7 @@ function endSeason(state: CareerState): CareerState {
 }
 
 function goToWorldsOrEndSeason(state: CareerState): CareerState {
-  const ranking = rankingsFor(state);
+  const ranking = computeStateRankings(state);
   const rank = getTeamRank(ranking, state.currentTeamId);
   const qualified =
     state.currentSplits.length >= SPLITS_PER_SEASON &&
@@ -335,7 +322,7 @@ function finishCareer(state: CareerState, destiny: CareerDestiny): CareerReduceR
   const trophies = deriveTrophies(state.seasonRecords);
   const result: CareerResult = {
     id: state.id,
-    playerName: state.playerName || "Rookie",
+    playerName: state.playerName || DEFAULT_PLAYER_NAME,
     region: state.region,
     country: state.country,
     role: state.role,
@@ -476,22 +463,24 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
       const nextStats = applyStatDelta(before, resolved.delta, rng);
       const destiny = choice.destiny ?? {};
 
+      const lastEventOutcome: CareerEventOutcome = {
+        eventId,
+        choiceId: action.choiceId,
+        delta: {
+          rating: nextStats.rating - before.rating,
+          form: nextStats.form - before.form,
+          morale: nextStats.morale - before.morale,
+        },
+        destiny,
+      };
+      if (resolved.failed) lastEventOutcome.failed = true;
+
       return {
         state: {
           ...state,
           stats: nextStats,
           destinyLeanings: applyDestinyLeanings(state.destinyLeanings, destiny),
-          lastEventOutcome: {
-            eventId,
-            choiceId: action.choiceId,
-            delta: {
-              rating: nextStats.rating - before.rating,
-              form: nextStats.form - before.form,
-              morale: nextStats.morale - before.morale,
-            },
-            destiny,
-            ...(resolved.failed ? { failed: true } : {}),
-          },
+          lastEventOutcome,
           phase: "event_result",
         },
         finishedResult: null,

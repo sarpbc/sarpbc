@@ -1,0 +1,77 @@
+import { describe, expect, it } from "vitest";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { McpServerFactory } from "./mcp-server.factory";
+import type { McpServices } from "./mcp-services";
+
+const TOOL_NAMES = [
+  "search_players",
+  "search_teams",
+  "get_player",
+  "list_contracts",
+  "get_team",
+  "get_tournaments",
+  "get_tournament",
+  "get_tournament_prizes",
+  "get_team_earnings",
+  "get_player_earnings",
+  "get_upcoming_matches",
+  "get_match_results",
+  "list_news_articles",
+  "get_news_article",
+  "list_leagues",
+  "create_league",
+  "update_league",
+  "list_events",
+  "get_event",
+  "create_event",
+  "update_event",
+  "create_news_draft",
+  "update_news_article",
+  "create_match",
+  "set_match_winner",
+  "set_match_game_vods",
+  "update_match",
+  "create_tournament",
+  "update_tournament",
+  "link_pandascore_tournament",
+  "trigger_tournament_sync",
+  "sync_pandascore_tournament",
+  "add_player_to_team",
+  "remove_player_from_team",
+  "create_player",
+  "update_player",
+  "create_team",
+  "update_team",
+  "upload_team_logo",
+  "merge_players",
+  "merge_teams",
+  "create_contract",
+  "update_contract",
+  "propose_tournament_prizes",
+  "list_roster_proposals",
+  "import_game_stats",
+  "get_game_stats_import",
+  "list_unlinked_game_players",
+  "link_game_player",
+  "attach_replay_to_game",
+  "remove_match_game",
+];
+
+describe("McpServerFactory", () => {
+  it("serves every tool with a JSON schema and a stated permission", async () => {
+    const factory = new McpServerFactory({} as McpServices);
+    const server = factory.createServer({ id: "u1", email: "staff@test.com", role: "admin" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "1.0.0" });
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    const { tools } = await client.listTools();
+
+    expect(tools.map((tool) => tool.name).sort()).toEqual([...TOOL_NAMES].sort());
+    for (const tool of tools.filter((candidate) => candidate.name.startsWith("create_"))) {
+      expect(tool.description, tool.name).toMatch(/Requires \w+\.manage\.$/);
+    }
+    await client.close();
+  });
+});

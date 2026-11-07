@@ -1,6 +1,7 @@
 import type { MatchVodSource } from "@sarpbc/types";
 
-const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/;
+export const LANGUAGE_CODE_LENGTH = 2;
+const LANGUAGE_CODE_PATTERN = new RegExp(`^[a-z]{${LANGUAGE_CODE_LENGTH}}$`);
 const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language", fallback: "none" });
 
 export function isIso6391Code(value: string): boolean {

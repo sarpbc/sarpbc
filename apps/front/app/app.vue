@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiLocale } from "@sarpbc/utils";
 import { uiComponentDefaults } from "~/config/ui-component-defaults";
 
 const appConfig = useAppConfig();
@@ -10,8 +11,6 @@ setPageSeo();
 
 useHead({
   meta: [
-    { charset: "utf-8" },
-    { name: "viewport", content: "width=device-width, initial-scale=1" },
     {
       name: "theme-color",
       content: computed(() => (colorMode.value === "dark" ? "#020305" : "#ffffff")),
@@ -19,7 +18,7 @@ useHead({
   ],
   link: [{ rel: "icon", href: "/favicon.ico" }],
   htmlAttrs: {
-    lang: computed(() => (locale.value === "fr" ? "fr" : "en")),
+    lang: computed(() => uiLocale(locale.value)),
   },
 });
 </script>

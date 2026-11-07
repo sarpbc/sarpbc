@@ -1,5 +1,8 @@
 import { dirname } from "node:path";
 import { createRequire } from "node:module";
+import { localizedPath } from "@sarpbc/utils/entity-path";
+import { DEFAULT_API_BASE, SITE_ORIGIN, apiPreconnectLinks, i18nOptions } from "@sarpbc/ui/config";
+import { newsMdcComponents } from "./app/utils/newsMdcComponents";
 
 const require = createRequire(import.meta.url);
 const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
@@ -22,22 +25,8 @@ const prosemirrorAliases = Object.fromEntries(
   prosemirrorPackages.map((name) => [name, prosemirrorAlias(name)]),
 );
 
-const apiBase =
-  process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
-const publicSiteUrl =
-  process.env.NUXT_PUBLIC_PUBLIC_SITE_URL ||
-  process.env.PUBLIC_SITE_URL ||
-  (process.env.NODE_ENV === "production" ? "https://sarpbc.org" : "http://localhost:4000");
-
-function apiOrigin(base: string): string | undefined {
-  try {
-    return new URL(base).origin;
-  } catch {
-    return undefined;
-  }
-}
-
-const apiOriginUrl = apiOrigin(apiBase);
+const apiBase = process.env.NUXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
+const loginRule = { appLayout: "login" } as const;
 
 export default defineNuxtConfig({
   app: {
@@ -45,12 +34,7 @@ export default defineNuxtConfig({
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
       title: "sarpbc.org Admin",
-      link: apiOriginUrl
-        ? [
-            { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
-            { rel: "dns-prefetch", href: apiOriginUrl },
-          ]
-        : [],
+      link: apiPreconnectLinks(apiBase),
     },
   },
 
@@ -64,36 +48,12 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
 
-  i18n: {
-    langDir: "locales",
-    locales: [
-      { code: "en", language: "en", file: "en-US.json", name: "English" },
-      { code: "fr", language: "fr", file: "fr-FR.json", name: "Français" },
-    ],
-    defaultLocale: "en",
-    strategy: "prefix_except_default",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-      redirectOn: "root",
-      fallbackLocale: "en",
-    },
-    compilation: {
-      strictMessage: false,
-    },
-  },
+  i18n: i18nOptions,
 
   modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
 
   mdc: {
-    components: {
-      map: {
-        player: "SarpPlayerTag",
-        team: "SarpTeamTag",
-        tweet: "SarpTweetTag",
-        matches: "NewsMatchBlockPreview",
-      },
-    },
+    components: { map: newsMdcComponents },
   },
 
   nitro: {
@@ -108,15 +68,15 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/login": { appLayout: "login" },
-    "/fr/login": { appLayout: "login" },
+    "/login": loginRule,
+    [localizedPath("/login", "fr")]: loginRule,
     "/**": { appMiddleware: ["admin"] },
   },
 
   runtimeConfig: {
     public: {
-      apiBase: apiBase,
-      publicSiteUrl: publicSiteUrl,
+      apiBase,
+      publicSiteUrl: SITE_ORIGIN,
     },
   },
 

@@ -6,7 +6,6 @@ Set a new random IndexNow key in the deployment environment before deploying the
 2. Submit `https://sarpbc.org/sitemap_index.xml` under **Sitemaps** in Bing Webmaster Tools if it is not already registered.
 3. Publish or update an article through the staff application. Check **IndexNow** in Bing Webmaster Tools for its English and French URLs.
 4. Inspect an English page and its French translation in Bing. Each page must declare its own canonical URL.
-5. Run `pnpm --filter front test:seo https://sarpbc.org` after deployment with `INDEXNOW_KEY` set privately in the command environment. Do not pass the value on the command line. For local verification, start the front and pass its base URL instead.
 
 The verification file must be publicly readable for the IndexNow protocol. Knowing its key and location allows third parties to submit notifications for that host, so avoid publishing them elsewhere. The key grants no access to the application or Bing account. The frontend runtime setting is server-only. Missing configuration disables notifications and makes the verification route return 404.
 
@@ -20,7 +19,7 @@ HTTP `200` means the notification was received. HTTP `202` means key verificatio
 
 The homepage description is the brand tagline: "Bringing the competitive Rocket League ecosystem into one place." Keep it and its French translation. A description-length warning alone does not justify replacing brand copy. The homepage title stays "Rocket League news & matches | sarpbc.org", with the literal separator escaped for vue-i18n.
 
-The 17 October 2026 summary contains categories and counts, without affected URLs. Export the URL details for the image ALT warning before changing images. Empty ALT text is valid for decorative images, including a logo whose link already has an accessible name. The HTML parser in `test:seo` checks attribute presence, including abbreviated empty attributes.
+The 17 October 2026 summary contains categories and counts, without affected URLs. Export the URL details for the image ALT warning before changing images. Empty ALT text is valid for decorative images, including a logo whose link already has an accessible name.
 
 Prioritize informative titles and descriptions on the homepage, match lists, tournament lists, player and team directories, forum, and games. Keep French and English canonicals separate. Login and registration use `noindex` and stay outside the sitemap. The public sitemap lists each locale URL and its reciprocal language alternates.
 

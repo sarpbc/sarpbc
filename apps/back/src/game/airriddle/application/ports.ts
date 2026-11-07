@@ -11,6 +11,6 @@ export interface RiddleRuntime {
   dayStart(): Date;
   now(): Date;
   id(): string;
-  skipped(reason: string): void;
+  skipped(): void;
   error(error: Error): void;
 }

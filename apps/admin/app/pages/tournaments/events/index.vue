@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { ManualEvent } from "~/composables/tournaments";
-import { getApiErrorMessage } from "~/utils/apiError";
+import type { ManualEvent } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -60,7 +60,7 @@ function selectRow(e: Event, row: TableRow<ManualEvent>) {
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.events.subtitle") }}</p>
 
-        <TournamentLoadError
+        <LoadError
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadError')"
           @retry="refresh()"

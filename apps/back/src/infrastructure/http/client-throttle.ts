@@ -11,20 +11,7 @@ import {
 const PUBLIC_LIMIT = 100;
 const SSR_LIMIT = 400;
 
-export type ClientRateLimits = {
-  publicLimit: number;
-  ssrLimit: number;
-};
-
-const DEFAULT_LIMITS: ClientRateLimits = {
-  publicLimit: PUBLIC_LIMIT,
-  ssrLimit: SSR_LIMIT,
-};
-
-export function createClientThrottleOptions(
-  internalApiToken: string | undefined,
-  limits: ClientRateLimits = DEFAULT_LIMITS,
-) {
+export function createClientThrottleOptions(internalApiToken: string | undefined) {
   return {
     skipIf: (context: ExecutionContext) =>
       isDirectLoopback(context.switchToHttp().getRequest() as ClientRequest),
@@ -44,8 +31,8 @@ export function createClientThrottleOptions(
             context.switchToHttp().getRequest() as ClientRequest,
             internalApiToken,
           )
-            ? limits.ssrLimit
-            : limits.publicLimit,
+            ? SSR_LIMIT
+            : PUBLIC_LIMIT,
       },
     ],
   };

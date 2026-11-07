@@ -1,111 +1,79 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { NEWS_TYPES } from "@sarpbc/types";
-import type { McpToolContext } from "../mcp-tool-context";
-import { runWriteTool } from "../permission-gate";
-import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
-import {
-  CreateTournamentDto,
-  UpdateTournamentDto,
-} from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
-import { parseDto } from "../../../tournament/infrastructure/http/dto/parse-tournament-dto";
-import { matchPublicSlug } from "../../../tournament/domain/competition";
 import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
+import type { NewsService } from "../../../news/application/news.service";
+import { createNewsArticleFields } from "../../../news/infrastructure/http/dto/create-news-article.dto";
+import { updateNewsArticleFields } from "../../../news/infrastructure/http/dto/update-news-article.dto";
+import type { TeamService } from "../../../roster/application/team.service";
+import type { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
+import type { MatchService } from "../../../tournament/application/match/match.service";
+import type { TournamentQueries } from "../../../tournament/application/ports";
+import type { SyncNewTournamentsUseCase } from "../../../tournament/application/sync/sync-new-tournaments.use-case";
+import type { SyncPandascoreTournamentUseCase } from "../../../tournament/application/sync/sync-pandascore-tournament.use-case";
+import { matchPublicSlug } from "../../../tournament/domain/competition";
+import {
+  createTournamentFields,
+  updateTournamentFields,
+} from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
+import { defineTool, type McpTool } from "../define-tool";
 import { mapListedParticipants, mapMatchListResponse } from "../mappers";
+import { tournamentNotFound } from "../redistributable-competition";
+import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
+import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
+import { describeFields, toPatchedDate } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
-
-const MATCH_BLOCK_FORMAT =
-  'Embed live match scores with a match block on its own line, using match, tournament or team UUIDs from get_tournament, get_upcoming_matches, get_match_results or search_teams: `:matches{match="<match id>"}` for one match, `:matches{ids="<match id>,<match id>"}` for a manual selection (up to 10, in that order), `:matches{tournament="<tournament id>" limit="5"}` or `:matches{team="<team id>" limit="5"}` for live, then upcoming, then latest matches (limit 1-10, default 5). Quote every attribute value with double quotes. Use the same block in English and French bodies.';
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
   score: z.number(),
 });
 
-const tournamentDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
-  .optional();
+const NEWS_TYPE_MEANING =
+  "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).";
 
-const nullableTournamentDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
-  .nullable()
-  .optional();
-
-export function requireNewsUpdateFields(fields: {
-  title?: string;
-  content?: string;
-  titleFr?: string | null;
-  contentFr?: string | null;
-  imageUrl?: string | null;
-  slug?: string;
-  type?: (typeof NEWS_TYPES)[number];
-}): void {
-  if (
-    fields.title === undefined &&
-    fields.content === undefined &&
-    fields.titleFr === undefined &&
-    fields.contentFr === undefined &&
-    fields.imageUrl === undefined &&
-    fields.slug === undefined &&
-    fields.type === undefined
-  ) {
-    throw new BadRequestException(
-      "Provide at least one field to update (title, content, titleFr, contentFr, imageUrl, slug, or type).",
-    );
-  }
+export interface WriteToolServices {
+  newsService: Pick<NewsService, "create" | "update" | "findOneAdminByIdOrSlug">;
+  tournaments: Pick<TournamentQueries, "findById">;
+  teamService: Pick<TeamService, "findById" | "findBySlug">;
+  matchService: Pick<
+    MatchService,
+    "createMatch" | "setMatchWinner" | "setGameVods" | "updateMatch"
+  >;
+  manualTournamentService: Pick<ManualTournamentService, "create" | "update">;
+  pandascoreTournamentSync: Pick<
+    SyncPandascoreTournamentUseCase,
+    "execute" | "executeByPandascoreId"
+  >;
+  pandascoreNewTournamentsSync: Pick<SyncNewTournamentsUseCase, "execute">;
 }
 
-export function registerWriteTools(server: McpServer, ctx: McpToolContext): void {
-  const { user } = ctx;
-
-  server.registerTool(
-    "create_news_draft",
-    {
-      description:
-        'Create a news article draft. Requires news.manage. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}` — resolve slugs with search_players / search_teams first, and do not use plain names when a slug exists. When the primary source is an X/Twitter post, put `:tweet{url="https://x.com/…/status/…"}` on its own line in both English and French bodies (same URL). ' +
-        MATCH_BLOCK_FORMAT +
-        " A human must review and publish it in the admin app.",
-      inputSchema: {
-        title: z.string().min(1).describe("English article headline."),
-        content: z
-          .string()
-          .min(1)
-          .describe(
-            'English article body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line. ' +
-              MATCH_BLOCK_FORMAT,
-          ),
-        titleFr: z.string().min(1).optional().describe("Optional French headline."),
-        contentFr: z
-          .string()
-          .min(1)
-          .optional()
-          .describe(
-            "Optional French body in markdown. Use the same player/team/tweet/match tags as English.",
-          ),
-        imageUrl: z.string().url().optional().describe("Optional cover image URL."),
-        slug: z
-          .string()
-          .min(1)
-          .optional()
-          .describe("Optional URL slug. Generated from the English title when omitted."),
-        type: z
-          .enum(NEWS_TYPES)
-          .optional()
-          .describe(
-            "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories). Defaults to short.",
-          ),
-      },
-    },
-    async ({ title, content, titleFr, contentFr, imageUrl, slug, type }) =>
-      runWriteTool(user, "create_news_draft", "news.manage", async () => {
-        const article = await ctx.newsService.create(
-          { title, content, titleFr, contentFr, imageUrl, slug, type },
-          user.id,
-        );
+export function writeTools({
+  newsService,
+  tournaments,
+  teamService,
+  matchService,
+  manualTournamentService,
+  pandascoreTournamentSync,
+  pandascoreNewTournamentsSync,
+}: WriteToolServices): McpTool[] {
+  return [
+    defineTool({
+      name: "create_news_draft",
+      description: `Create a news article draft. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components and resolve slugs with search_players / search_teams first; do not use plain names when a slug exists. When the primary source is an X/Twitter post, put the tweet tag on its own line in both English and French bodies (same URL). ${BODY_TAGS} A human must review and publish it in the admin app.`,
+      write: true,
+      permission: "news.manage",
+      input: describeFields(createNewsArticleFields, {
+        title: "English article headline.",
+        content: "English article body in markdown.",
+        titleFr: "Optional French headline.",
+        contentFr:
+          "Optional French body in markdown. Use the same player/team/tweet/match tags as English.",
+        imageUrl: "Optional cover image URL.",
+        slug: "Optional URL slug. Generated from the English title when omitted.",
+        type: `${NEWS_TYPE_MEANING} Defaults to short.`,
+      }),
+      handler: async (input, user) => {
+        const article = await newsService.create(input, user.id);
         return {
           entityId: article.id,
           result: {
@@ -118,75 +86,32 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             note: "Draft created. A staff member must review and publish it in the admin app.",
           },
         };
-      }),
-  );
-
-  server.registerTool(
-    "update_news_article",
-    {
-      description:
-        'Update an existing news article. Requires news.manage. Pass only the fields to change. Pass null for titleFr, contentFr, or imageUrl to clear them. Does not publish — a human must review and publish in the admin app. When mentioning a player or team, you MUST use `:player{slug="…" label="…"}` and `:team{slug="…" label="…"}`. Embed X posts with `:tweet{url="https://x.com/…/status/…"}` on its own line. ' +
-        MATCH_BLOCK_FORMAT,
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Current article slug or UUID."),
-        title: z.string().min(1).max(255).optional().describe("Updated English headline."),
-        content: z
-          .string()
-          .min(1)
-          .optional()
-          .describe(
-            'Updated English body in markdown. Mention players with `:player{slug="<slug>" label="<name>"}` and teams with `:team{slug="<slug>" label="<name>"}`. Embed X posts with `:tweet{url="https://x.com/<handle>/status/<id>"}` on its own line. ' +
-              MATCH_BLOCK_FORMAT,
-          ),
-        titleFr: z
-          .string()
-          .min(1)
-          .max(255)
-          .nullable()
-          .optional()
-          .describe("Updated French headline, or null to clear."),
-        contentFr: z
-          .string()
-          .min(1)
-          .nullable()
-          .optional()
-          .describe(
-            "Updated French body in markdown, or null to clear. Keep the same tweet and match tags.",
-          ),
-        imageUrl: z
-          .string()
-          .url()
-          .nullable()
-          .optional()
-          .describe("Updated cover image URL, or null to clear."),
-        slug: z
-          .string()
-          .min(1)
-          .max(255)
-          .optional()
-          .describe("New URL slug. Leave omitted to keep the current slug."),
-        type: z
-          .enum(NEWS_TYPES)
-          .optional()
-          .describe(
-            "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).",
-          ),
       },
-    },
-    async ({ idOrSlug, title, content, titleFr, contentFr, imageUrl, slug, type }) =>
-      runWriteTool(user, "update_news_article", "news.manage", async () => {
-        requireNewsUpdateFields({ title, content, titleFr, contentFr, imageUrl, slug, type });
+    }),
 
-        const current = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
-        const article = await ctx.newsService.update(current.slug, {
-          title,
-          content,
-          titleFr,
-          contentFr,
-          imageUrl,
-          slug,
-          type,
-        });
+    defineTool({
+      name: "update_news_article",
+      description: `Update an existing news article. Pass only the fields to change. Pass null for titleFr, contentFr, or imageUrl to clear them. Does not publish: a human must review and publish in the admin app. When mentioning a player or team, you MUST use the custom MDC components. ${BODY_TAGS}`,
+      write: true,
+      permission: "news.manage",
+      input: {
+        idOrSlug: z.string().min(1).describe("Current article slug or UUID."),
+        ...describeFields(updateNewsArticleFields, {
+          title: "Updated English headline.",
+          content: "Updated English body in markdown.",
+          titleFr: "Updated French headline, or null to clear.",
+          contentFr:
+            "Updated French body in markdown, or null to clear. Keep the same tweet and match tags.",
+          imageUrl: "Updated cover image URL, or null to clear.",
+          slug: "New URL slug. Leave omitted to keep the current slug.",
+          type: NEWS_TYPE_MEANING,
+        }),
+      },
+      handler: async ({ idOrSlug, ...fields }) => {
+        requireUpdateFields(fields);
+
+        const current = await newsService.findOneAdminByIdOrSlug(idOrSlug);
+        const article = await newsService.update(current.slug, fields);
 
         return {
           entityId: article.id,
@@ -201,15 +126,16 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             note: "Article updated. Publishing remains a human action in the admin app.",
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "create_match",
-    {
+    defineTool({
+      name: "create_match",
       description:
-        "Create a tournament match. Requires tournaments.manage. Pass participantIds (tournament participant UUIDs from get_tournament) and/or teams (team UUIDs or slugs from search_teams or get_tournament). Every team must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
-      inputSchema: {
+        "Create a tournament match. Pass participantIds (tournament participant UUIDs from get_tournament) and/or teams (team UUIDs or slugs from search_teams or get_tournament). Every team must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         tournamentId: z.string().min(1).describe("Tournament UUID the match belongs to."),
         name: z
           .string()
@@ -241,31 +167,25 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             "Per-participant scores, keyed by tournament participant UUID from get_tournament. Sets the winner when status is finished.",
           ),
       },
-    },
-    async ({
-      tournamentId,
-      name,
-      beginAt,
-      endAt,
-      status,
-      numberOfGames,
-      participantIds,
-      teams,
-      results,
-    }) =>
-      runWriteTool(user, "create_match", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.findById(tournamentId);
-        if (!tournament) {
-          throw new NotFoundException(
-            `Tournament "${tournamentId}" was not found. Use get_tournaments to list available events.`,
-          );
-        }
+      handler: async ({
+        tournamentId,
+        name,
+        beginAt,
+        endAt,
+        status,
+        numberOfGames,
+        participantIds,
+        teams,
+        results,
+      }) => {
+        const tournament = await tournaments.findById(tournamentId);
+        if (!tournament) throw tournamentNotFound(tournamentId);
         const participants = await resolveMatchParticipantIds(
           tournament,
           { participantIds, teams },
-          ctx.teamService,
+          teamService,
         );
-        const match = await ctx.matchService.upsertMatch(tournamentId, {
+        const match = await matchService.createMatch(tournamentId, {
           name,
           beginAt: beginAt ? new Date(beginAt) : undefined,
           endAt: endAt ? new Date(endAt) : undefined,
@@ -285,22 +205,21 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "set_match_winner",
-    {
+    defineTool({
+      name: "set_match_winner",
       description:
-        "Set the winner of a finished match by tournament participant id from get_tournament. Requires tournaments.manage.",
-      inputSchema: {
+        "Set the winner of a finished match by tournament participant id from get_tournament.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         matchId: z.string().min(1).describe("Match UUID."),
         winnerId: z.string().min(1).describe("Tournament participant UUID of the winning team."),
       },
-    },
-    async ({ matchId, winnerId }) =>
-      runWriteTool(user, "set_match_winner", "tournaments.manage", async () => {
-        const match = await ctx.matchService.setMatchWinner(matchId, winnerId);
+      handler: async ({ matchId, winnerId }) => {
+        const match = await matchService.setMatchWinner(matchId, winnerId);
         return {
           entityId: match.id,
           result: {
@@ -309,15 +228,16 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "set_match_game_vods",
-    {
+    defineTool({
+      name: "set_match_game_vods",
       description:
-        "Replace the VOD links of one game of a match (any source, PandaScore included). Requires tournaments.manage. Links are https twitch.tv, youtube.com or youtu.be URLs, optionally timestamped with t= (seconds or 1h2m3s); the source is derived from the host. Pass an empty list to clear the game. Returns every VOD link of the match.",
-      inputSchema: {
+        "Replace the VOD links of one game of a match (any source, PandaScore included). Links are https twitch.tv, youtube.com or youtu.be URLs, optionally timestamped with t= (seconds or 1h2m3s); the source is derived from the host. Pass an empty list to clear the game. Returns every VOD link of the match.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         matchId: z.string().min(1).describe("Match UUID."),
         game: z.number().int().min(1).describe("Game number in the series, starting at 1."),
         links: z
@@ -338,10 +258,8 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .max(MAX_VODS_PER_GAME)
           .describe("VOD links for this game; replaces the existing ones."),
       },
-    },
-    async ({ matchId, game, links }) =>
-      runWriteTool(user, "set_match_game_vods", "tournaments.manage", async () => {
-        const match = await ctx.matchService.setGameVods(matchId, game, links);
+      handler: async ({ matchId, game, links }) => {
+        const match = await matchService.setGameVods(matchId, game, links);
         return {
           entityId: match.id,
           result: {
@@ -350,15 +268,16 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: matchUrl(match.publicId, matchPublicSlug(match)),
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "update_match",
-    {
+    defineTool({
+      name: "update_match",
       description:
-        "Correct the score, status, or dates of a manual match (pandascoreId is null). Requires tournaments.manage. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner.",
-      inputSchema: {
+        "Correct the score, status, or dates of a manual match (pandascoreId is null). Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         matchId: z.string().min(1).describe("Match UUID."),
         beginAt: z
           .string()
@@ -381,79 +300,40 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             "Score of every match participant, keyed by tournament participant UUID from get_tournament.",
           ),
       },
-    },
-    async ({ matchId, beginAt, endAt, status, results }) =>
-      runWriteTool(user, "update_match", "tournaments.manage", async () => {
+      handler: async ({ matchId, beginAt, endAt, status, results }) => {
         requireUpdateFields({ beginAt, endAt, status, results });
-        const toDate = (value: string | null | undefined) =>
-          value === undefined ? undefined : value === null ? null : new Date(value);
-        const match = await ctx.matchService.updateMatch(matchId, {
-          beginAt: toDate(beginAt),
-          endAt: toDate(endAt),
+        const match = await matchService.updateMatch(matchId, {
+          beginAt: toPatchedDate(beginAt),
+          endAt: toPatchedDate(endAt),
           status,
           results,
         });
         return { entityId: match.id, result: mapMatchListResponse(match) };
-      }),
-  );
-
-  server.registerTool(
-    "create_tournament",
-    {
-      description:
-        "Create a manual tournament on sarpbc.org. Requires tournaments.manage. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
-      inputSchema: {
-        name: z
-          .string()
-          .min(1)
-          .max(255)
-          .describe("Tournament display name; the stage name when eventId is set (e.g. Finals)."),
-        eventId: z
-          .string()
-          .uuid()
-          .optional()
-          .describe(
-            "Event UUID to add this tournament to as a stage. Omit to create its own event.",
-          ),
-        slug: z
-          .string()
-          .min(1)
-          .max(255)
-          .optional()
-          .describe(
-            "Optional URL slug of the new event. Generated from the name when omitted. Not allowed with eventId.",
-          ),
-        tier: z
-          .string()
-          .max(50)
-          .optional()
-          .describe("Optional competitive tier label (e.g. S-Tier)."),
-        leagueId: z
-          .string()
-          .uuid()
-          .optional()
-          .describe("Optional league UUID from get_tournaments listings."),
-        beginAt: tournamentDateSchema.describe("Start date (YYYY-MM-DD)."),
-        endAt: tournamentDateSchema.describe("End date (YYYY-MM-DD)."),
-        imageUrl: z.string().url().max(255).optional().describe("Optional cover image URL."),
-        teamIds: z
-          .array(z.string().uuid())
-          .optional()
-          .describe(
-            "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. The response lists each participant id.",
-          ),
-        source: z
-          .enum(["manual", "startgg"])
-          .optional()
-          .describe(
-            "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
-          ),
       },
-    },
-    async (input) =>
-      runWriteTool(user, "create_tournament", "tournaments.manage", async () => {
-        const dto = await parseDto(CreateTournamentDto, input);
-        const tournament = await ctx.manualTournamentService.create(dto);
+    }),
+
+    defineTool({
+      name: "create_tournament",
+      description:
+        "Create a manual tournament on sarpbc.org. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
+      write: true,
+      permission: "tournaments.manage",
+      input: describeFields(createTournamentFields, {
+        name: "Tournament display name; the stage name when eventId is set (e.g. Finals).",
+        eventId: "Event UUID to add this tournament to as a stage. Omit to create its own event.",
+        slug: "Optional URL slug of the new event. Generated from the name when omitted. Not allowed with eventId.",
+        tier: "Optional competitive tier label (e.g. S-Tier).",
+        leagueId: "Optional league UUID from list_leagues.",
+        beginAt: "Start date (YYYY-MM-DD).",
+        endAt: "End date (YYYY-MM-DD).",
+        imageUrl: "Optional cover image URL.",
+        teamIds:
+          "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. The response lists each participant id.",
+        source:
+          "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
+      }),
+      handler: async (input) => {
+        const tournament = await manualTournamentService.create(input);
 
         return {
           entityId: tournament.id,
@@ -467,76 +347,34 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: tournamentUrl(tournament),
           },
         };
-      }),
-  );
-
-  server.registerTool(
-    "update_tournament",
-    {
-      description:
-        "Update a tournament. Requires tournaments.manage. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields. eventId moves a manual tournament to another event as one of its stages; the event it leaves stays stored but drops off the site once it has no stage. A tournament that has an event of its own keeps that event's name, slug and league in step with its own; rename or re-slug a shared event with update_event. The response includes participants for manual and PandaScore tournaments.",
-      inputSchema: {
-        tournamentId: z.string().min(1).describe("Tournament UUID to update."),
-        name: z.string().min(1).max(255).optional().describe("Tournament display name."),
-        eventId: z
-          .string()
-          .uuid()
-          .optional()
-          .describe("Event UUID to move this manual tournament to, from list_events or get_event."),
-        slug: z
-          .string()
-          .min(1)
-          .max(255)
-          .optional()
-          .describe(
-            "URL slug of the event this tournament has of its own. Not allowed with eventId.",
-          ),
-        tier: z
-          .string()
-          .max(50)
-          .nullable()
-          .optional()
-          .describe("Competitive tier label, or null to clear."),
-        leagueId: z
-          .string()
-          .uuid()
-          .nullable()
-          .optional()
-          .describe("League UUID, or null to clear the league."),
-        beginAt: nullableTournamentDateSchema.describe("Start date (YYYY-MM-DD), or null."),
-        endAt: nullableTournamentDateSchema.describe("End date (YYYY-MM-DD), or null."),
-        imageUrl: z
-          .string()
-          .url()
-          .max(255)
-          .nullable()
-          .optional()
-          .describe("Cover image URL, or null."),
-        teamIds: z
-          .array(z.string().uuid())
-          .optional()
-          .describe(
-            "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. The response lists each participant id.",
-          ),
-        rosters: z
-          .array(
-            z.object({
-              teamId: z.string().uuid().describe("Team UUID of an existing participant."),
-              playerIds: z
-                .array(z.string().uuid())
-                .describe("Player UUIDs who played this tournament for the team."),
-            }),
-          )
-          .optional()
-          .describe(
-            "Manual tournaments only. Replace the tournament roster of the listed participants; other participants keep theirs. Applied after teamIds.",
-          ),
       },
-    },
-    async ({ tournamentId, ...input }) =>
-      runWriteTool(user, "update_tournament", "tournaments.manage", async () => {
-        const dto = await parseDto(UpdateTournamentDto, input);
-        const tournament = await ctx.manualTournamentService.update(tournamentId, dto);
+    }),
+
+    defineTool({
+      name: "update_tournament",
+      description:
+        "Update a tournament. For PandaScore-synced tournaments, send only imageUrl and/or endAt; all other fields are managed by the sync. An endAt sent on a synced tournament is kept as a staff correction that the sync no longer overwrites (closes a stage PandaScore left open); pass endAt null to hand the end date back to the sync. Manual tournaments accept all listed fields. eventId moves a manual tournament to another event as one of its stages; the event it leaves stays stored but drops off the site once it has no stage. A tournament that has an event of its own keeps that event's name, slug and league in step with its own; rename or re-slug a shared event with update_event. The response includes participants for manual and PandaScore tournaments.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        tournamentId: z.string().min(1).describe("Tournament UUID to update."),
+        ...describeFields(updateTournamentFields, {
+          name: "Tournament display name.",
+          eventId: "Event UUID to move this manual tournament to, from list_events or get_event.",
+          slug: "URL slug of the event this tournament has of its own. Not allowed with eventId.",
+          tier: "Competitive tier label, or null to clear.",
+          leagueId: "League UUID, or null to clear the league.",
+          beginAt: "Start date (YYYY-MM-DD), or null.",
+          endAt: "End date (YYYY-MM-DD), or null.",
+          imageUrl: "Cover image URL, or null.",
+          teamIds:
+            "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. The response lists each participant id.",
+          rosters:
+            "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team); other participants keep theirs. Applied after teamIds.",
+        }),
+      },
+      handler: async ({ tournamentId, ...input }) => {
+        const tournament = await manualTournamentService.update(tournamentId, input);
 
         return {
           entityId: tournament.id,
@@ -552,15 +390,16 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: tournamentUrl(tournament),
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "link_pandascore_tournament",
-    {
+    defineTool({
+      name: "link_pandascore_tournament",
       description:
-        "Link a manual tournament to its PandaScore tournament when the sync did not match it automatically. Requires tournaments.manage. The manual tournament becomes the synced stage (keeping its id, URLs and image) and PandaScore fills its details and matches, so no duplicate is created. Fails if that PandaScore tournament is already imported as another tournament.",
-      inputSchema: {
+        "Link a manual tournament to its PandaScore tournament when the sync did not match it automatically. The manual tournament becomes the synced stage (keeping its id, URLs and image) and PandaScore fills its details and matches, so no duplicate is created. Fails if that PandaScore tournament is already imported as another tournament.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         tournamentId: z.string().uuid().describe("Manual tournament UUID to link."),
         pandascoreId: z
           .number()
@@ -568,12 +407,10 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
           .positive()
           .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
       },
-    },
-    async ({ tournamentId, pandascoreId }) =>
-      runWriteTool(user, "link_pandascore_tournament", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.linkPandascoreTournament(
-          tournamentId,
+      handler: async ({ tournamentId, pandascoreId }) => {
+        const tournament = await pandascoreTournamentSync.executeByPandascoreId(
           pandascoreId,
+          tournamentId,
         );
         return {
           entityId: tournament.id,
@@ -585,63 +422,51 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: tournamentUrl(tournament),
           },
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "trigger_tournament_sync",
-    {
+    defineTool({
+      name: "trigger_tournament_sync",
       description:
-        "Trigger a PandaScore sync. Requires tournaments.manage. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then apply PandaScore incidents (creations and updates).",
-      inputSchema: {
+        "Trigger a PandaScore sync. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then apply PandaScore incidents (creations and updates).",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         tournamentId: z
           .string()
           .min(1)
           .optional()
           .describe("Local tournament UUID to sync. Omit to run the global new-tournament sync."),
       },
-    },
-    async ({ tournamentId }) =>
-      runWriteTool(user, "trigger_tournament_sync", "tournaments.manage", async () => {
+      handler: async ({ tournamentId }) => {
         if (tournamentId) {
-          await ctx.tournamentService.syncTournamentFromPandascore(tournamentId);
+          await pandascoreTournamentSync.execute(tournamentId);
           return {
             entityId: tournamentId,
-            result: {
-              success: true,
-              tournamentId,
-              scope: "single",
-            },
+            result: { success: true, tournamentId, scope: "single" },
           };
         }
 
-        const sync = await ctx.tournamentService.syncNewTournamentsFromPandascore();
-        return {
-          result: {
-            success: true,
-            scope: "new_tournaments",
-            sync,
-          },
-        };
-      }),
-  );
+        const sync = await pandascoreNewTournamentsSync.execute();
+        return { result: { success: true, scope: "new_tournaments", sync } };
+      },
+    }),
 
-  server.registerTool(
-    "sync_pandascore_tournament",
-    {
+    defineTool({
+      name: "sync_pandascore_tournament",
       description:
-        "Import or refresh a tournament by its PandaScore numeric ID (e.g. 21623 for EWC 2026 Group A). Requires tournaments.manage. Use when a tournament exists on PandaScore but is missing from sarpbc.",
-      inputSchema: {
+        "Import or refresh a tournament by its PandaScore numeric ID (e.g. 21623 for EWC 2026 Group A). Use when a tournament exists on PandaScore but is missing from sarpbc.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         pandascoreId: z
           .number()
           .int()
           .positive()
           .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
       },
-    },
-    async ({ pandascoreId }) =>
-      runWriteTool(user, "sync_pandascore_tournament", "tournaments.manage", async () => {
-        const tournament = await ctx.tournamentService.syncTournamentByPandascoreId(pandascoreId);
+      handler: async ({ pandascoreId }) => {
+        const tournament = await pandascoreTournamentSync.executeByPandascoreId(pandascoreId);
         return {
           entityId: tournament.id,
           result: {
@@ -651,6 +476,7 @@ export function registerWriteTools(server: McpServer, ctx: McpToolContext): void
             url: tournamentUrl(tournament),
           },
         };
-      }),
-  );
+      },
+    }),
+  ];
 }

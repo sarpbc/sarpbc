@@ -1,6 +1,6 @@
 import { BlockList, isIP } from "node:net";
 import { timingSafeEqual } from "node:crypto";
-import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api.ts";
+import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const CLOUDFLARE_IPV4 = [
   "173.245.48.0/20",
@@ -119,15 +119,12 @@ export function isPublicIp(value: string | undefined): boolean {
 
 function header(headers: ClientRequest["headers"], name: string): string | undefined {
   const value = headers?.[name] ?? headers?.[name.toLowerCase()];
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : undefined;
-  }
-  if (Array.isArray(value) && value.length === 1) {
-    const trimmed = value[0]?.trim();
+  if (Array.isArray(value)) {
+    const trimmed = value.length === 1 ? value[0]?.trim() : undefined;
     return trimmed ? trimmed : undefined;
   }
-  return undefined;
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
 }
 
 export function resolveClientAddress(request: ClientRequest): string {
@@ -146,7 +143,7 @@ export function resolveClientAddress(request: ClientRequest): string {
 
 export function peerAddress(request: ClientRequest): string | undefined {
   const address = request.socket?.remoteAddress ?? request.raw?.socket?.remoteAddress;
-  return typeof address === "string" ? canonicalIp(address) : undefined;
+  return address ? canonicalIp(address) : undefined;
 }
 
 export function isDirectLoopback(request: ClientRequest): boolean {
@@ -175,23 +172,17 @@ export function addressSeenByTrustedProxy(
 }
 
 function joinedHeader(value: string | string[] | undefined | null): string | undefined {
-  if (typeof value === "string") {
-    return value;
-  }
   if (Array.isArray(value)) {
     return value.join(",");
   }
-  return undefined;
+  return value ?? undefined;
 }
 
 function singleHeader(value: string | string[] | undefined | null): string | undefined {
-  if (typeof value === "string") {
-    return value;
+  if (Array.isArray(value)) {
+    return value.length === 1 ? value[0] : undefined;
   }
-  if (Array.isArray(value) && value.length === 1) {
-    return value[0];
-  }
-  return undefined;
+  return value ?? undefined;
 }
 
 export function visitorAddressFromProxy(input: {

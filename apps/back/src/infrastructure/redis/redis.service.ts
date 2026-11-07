@@ -17,9 +17,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.client = new Redis.Redis({
-      host: this.configService.get<string>("redis.host") || "redis",
-      port: this.configService.get<number>("redis.port") ?? 6379,
-      password: this.configService.get<string>("redis.password") || undefined,
+      host: this.configService.get<string>("redis.host"),
+      port: this.configService.get<number>("redis.port"),
+      password: this.configService.get<string>("redis.password"),
     });
 
     this.client.on("error", (error: Error) => {
@@ -39,8 +39,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.ping();
   }
 
-  async set(key: string, otp: string, ttlInSeconds: number): Promise<void> {
-    await this.client.set(key, otp, "EX", ttlInSeconds);
+  async set(key: string, value: string, ttlInSeconds: number): Promise<void> {
+    await this.client.set(key, value, "EX", ttlInSeconds);
   }
 
   async setIfAbsent(key: string, value: string, ttlInSeconds: number): Promise<boolean> {

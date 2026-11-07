@@ -1,7 +1,10 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
-import { NotFoundException } from "@nestjs/common";
-import { isRedistributable } from "../../../common/domain/data-source";
+import type { NewsService } from "../../../news/application/news.service";
+import type { ContractService } from "../../../roster/application/contract.service";
+import type { PlayerService } from "../../../roster/application/player.service";
+import type { TeamService } from "../../../roster/application/team.service";
+import { defineTool, type McpTool } from "../define-tool";
 import {
   mapCareer,
   mapMatchListResponse,
@@ -12,260 +15,150 @@ import {
   mapTournamentDetail,
   mapTournamentListItem,
 } from "../mappers";
-import type { McpToolContext } from "../mcp-tool-context";
-import { runReadTool, runStaffReadTool } from "../permission-gate";
+import type { RedistributableCompetition } from "../redistributable-competition";
+import { requireByIdOrSlug } from "./find-by-id-or-slug";
+import { PLAYER_TAG, TEAM_TAG } from "./news-syntax";
+import { SEARCH_LIMIT, idOrSlugField, listLimit } from "./tool-input";
 
-const SEARCH_LIMIT = 20;
-const DEFAULT_MATCH_LIMIT = 20;
-const MAX_MATCH_LIMIT = 100;
-const DEFAULT_NEWS_LIMIT = 20;
-const MAX_NEWS_LIMIT = 100;
-
-async function resolvePlayer(ctx: McpToolContext, idOrSlug: string) {
-  const player =
-    (await ctx.playerService.findBySlug(idOrSlug)) ?? (await ctx.playerService.findById(idOrSlug));
-  if (player) {
-    return player;
-  }
-
-  throw new NotFoundException(
-    `Player "${idOrSlug}" was not found. Try search_players to find the correct slug or id.`,
-  );
+export interface ReadToolServices {
+  playerService: Pick<PlayerService, "find" | "findById" | "findBySlug">;
+  teamService: Pick<TeamService, "find" | "findById" | "findBySlug">;
+  contractService: Pick<ContractService, "getContractsByPlayer">;
+  newsService: Pick<NewsService, "findAll" | "findOneAdminByIdOrSlug">;
+  competition: RedistributableCompetition;
 }
 
-async function resolveTeam(ctx: McpToolContext, idOrSlug: string) {
-  const bySlug = await ctx.teamService.findBySlug(idOrSlug);
-  const team = await ctx.teamService.getTeamWithPlayers(bySlug?.id ?? idOrSlug);
-  if (team) {
-    return team;
-  }
-
-  throw new NotFoundException(
-    `Team "${idOrSlug}" was not found. Try search_teams to find the correct slug or id.`,
-  );
-}
-
-export function registerReadTools(server: McpServer, ctx: McpToolContext): void {
-  const { user } = ctx;
-
-  server.registerTool(
-    "search_players",
-    {
-      description:
-        'Search Rocket League players by name. Returns matching players with id, slug, team, and public profile URL. When drafting news, use the slug in `:player{slug="…" label="…"}`.',
-      inputSchema: {
+export function readTools({
+  playerService,
+  teamService,
+  contractService,
+  newsService,
+  competition,
+}: ReadToolServices): McpTool[] {
+  return [
+    defineTool({
+      name: "search_players",
+      description: `Search Rocket League players by name. Returns matching players with id, slug, team, and public profile URL. When drafting news, use the slug in \`${PLAYER_TAG}\`.`,
+      input: {
         query: z.string().min(1).describe("Player name or partial name to search for."),
       },
-    },
-    async ({ query }) =>
-      runReadTool(async () => {
-        const players = await ctx.searchService.searchPlayers({
-          query,
-          limit: SEARCH_LIMIT,
-          offset: 0,
-        });
+      handler: async ({ query }) => {
+        const players = await playerService.find({ name: query, limit: SEARCH_LIMIT, offset: 0 });
         return players.map(mapPlayerSummary);
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "search_teams",
-    {
-      description:
-        'Search Rocket League teams by name. Returns matching teams with id, slug, and public profile URL. When drafting news, use the slug in `:team{slug="…" label="…"}`.',
-      inputSchema: {
+    defineTool({
+      name: "search_teams",
+      description: `Search Rocket League teams by name. Returns matching teams with id, slug, and public profile URL. When drafting news, use the slug in \`${TEAM_TAG}\`.`,
+      input: {
         query: z.string().min(1).describe("Team name or partial name to search for."),
       },
-    },
-    async ({ query }) =>
-      runReadTool(async () => {
-        const teams = await ctx.searchService.searchTeams({
-          query,
-          limit: SEARCH_LIMIT,
-          offset: 0,
-        });
-        return teams.map((team) => mapTeamSummary(team));
-      }),
-  );
+      handler: async ({ query }) => {
+        const teams = await teamService.find({ name: query, limit: SEARCH_LIMIT, offset: 0 });
+        return teams.map(mapTeamSummary);
+      },
+    }),
 
-  server.registerTool(
-    "get_player",
-    {
+    defineTool({
+      name: "get_player",
       description:
         "Get a player profile by slug or UUID. Returns core player fields, current team, and the public profile URL.",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
-      },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const player = await resolvePlayer(ctx, idOrSlug);
-        return mapPlayerSummary(player);
-      }),
-  );
+      input: { idOrSlug: idOrSlugField("Player", "zen-rl") },
+      handler: async ({ idOrSlug }) =>
+        mapPlayerSummary(await requireByIdOrSlug(playerService, idOrSlug, "Player")),
+    }),
 
-  server.registerTool(
-    "list_contracts",
-    {
+    defineTool({
+      name: "list_contracts",
       description:
         "List a player's contracts, past and current, oldest first, with their player or staff role and sources. Read it before create_contract or update_contract so a period is not recorded twice.",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
+      input: { idOrSlug: idOrSlugField("Player", "zen-rl") },
+      handler: async ({ idOrSlug }) => {
+        const player = await requireByIdOrSlug(playerService, idOrSlug, "Player");
+        return mapCareer(player, await contractService.getContractsByPlayer(player.id));
       },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const player = await resolvePlayer(ctx, idOrSlug);
-        return mapCareer(player, await ctx.contractService.getContractsByPlayer(player.id));
-      }),
-  );
+    }),
 
-  server.registerTool(
-    "get_team",
-    {
+    defineTool({
+      name: "get_team",
       description:
         "Get a team profile by slug or UUID, including the current roster when available.",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Team slug or internal UUID."),
-      },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const team = await resolveTeam(ctx, idOrSlug);
-        return mapTeamSummary(team);
-      }),
-  );
+      input: { idOrSlug: idOrSlugField("Team") },
+      handler: async ({ idOrSlug }) =>
+        mapTeamSummary(await requireByIdOrSlug(teamService, idOrSlug, "Team")),
+    }),
 
-  server.registerTool(
-    "get_tournaments",
-    {
+    defineTool({
+      name: "get_tournaments",
       description:
         "List tournaments on sarpbc.org. Use activeOnly to focus on open events with pick'ems still available.",
-      inputSchema: {
+      input: {
         activeOnly: z
           .boolean()
           .optional()
           .describe("When true, return only active tournaments (no winner, not ended)."),
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(100)
-          .optional()
-          .describe("Maximum number of tournaments to return (default 20)."),
+        limit: listLimit("tournaments"),
       },
-    },
-    async ({ activeOnly, limit }) =>
-      runReadTool(async () => {
-        const [tournaments] = await ctx.tournamentService.find({
+      handler: async ({ activeOnly, limit }) => {
+        const tournaments = await competition.tournaments({
           activeOnly: activeOnly ?? false,
-          redistributableOnly: true,
-          limit: limit ?? 20,
-          offset: 0,
+          limit: limit ?? DEFAULT_PAGE_SIZE,
         });
         return tournaments.map(mapTournamentListItem);
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "get_tournament",
-    {
+    defineTool({
+      name: "get_tournament",
       description:
         "Get full tournament detail, including matches, the public URL, and registered participants (participant id plus team id, slug and name). start.gg tournaments are not returned.",
-      inputSchema: {
-        id: z.string().min(1).describe("Tournament UUID."),
-      },
-    },
-    async ({ id }) =>
-      runReadTool(async () => {
-        const tournament = await ctx.tournamentService.findById(id);
-        if (!tournament || !isRedistributable(tournament.source)) {
-          throw new NotFoundException(
-            `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
-          );
-        }
-        return mapTournamentDetail(tournament);
-      }),
-  );
+      input: { id: z.string().min(1).describe("Tournament UUID.") },
+      handler: async ({ id }) => mapTournamentDetail(await competition.tournament(id)),
+    }),
 
-  server.registerTool(
-    "get_tournament_prizes",
-    {
+    defineTool({
+      name: "get_tournament_prizes",
       description:
         "Get a tournament stage prize distribution: placement, amount and ISO 4217 currency per team, with the players it lists. prizepool is the overall prize pool synced from PandaScore. Amounts are never converted between currencies.",
-      inputSchema: {
-        id: z.string().min(1).describe("Tournament UUID."),
-      },
-    },
-    async ({ id }) =>
-      runReadTool(async () => {
-        const distribution = await ctx.tournamentPrizeService.findByTournamentId(id);
-        if (!isRedistributable(distribution.source)) {
-          throw new NotFoundException(
-            `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
-          );
-        }
+      input: { id: z.string().min(1).describe("Tournament UUID.") },
+      handler: async ({ id }) => {
+        const distribution = await competition.prizeDistribution(id);
         return { tournamentId: id, prizepool: distribution.prizepool, prizes: distribution.prizes };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "get_team_earnings",
-    {
+    defineTool({
+      name: "get_team_earnings",
       description:
         "Get a team prize earnings by year, with totals per currency (amounts are never converted).",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Team slug or internal UUID."),
+      input: { idOrSlug: idOrSlugField("Team") },
+      handler: async ({ idOrSlug }) => {
+        const team = await requireByIdOrSlug(teamService, idOrSlug, "Team");
+        return competition.teamEarnings(team.id);
       },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const team = await resolveTeam(ctx, idOrSlug);
-        return ctx.tournamentPrizeService.teamEarnings(team.id, { redistributableOnly: true });
-      }),
-  );
+    }),
 
-  server.registerTool(
-    "get_player_earnings",
-    {
+    defineTool({
+      name: "get_player_earnings",
       description:
         "Get a player prize earnings by year, with totals per currency (amounts are never converted). A prize that lists players is split equally between them.",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Player slug (e.g. zen-rl) or internal UUID."),
+      input: { idOrSlug: idOrSlugField("Player", "zen-rl") },
+      handler: async ({ idOrSlug }) => {
+        const player = await requireByIdOrSlug(playerService, idOrSlug, "Player");
+        return competition.playerEarnings(player.id);
       },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const player = await resolvePlayer(ctx, idOrSlug);
-        return ctx.tournamentPrizeService.playerEarnings(player.id, { redistributableOnly: true });
-      }),
-  );
+    }),
 
-  server.registerTool(
-    "get_upcoming_matches",
-    {
+    defineTool({
+      name: "get_upcoming_matches",
       description:
         "List upcoming and live matches across tournaments, mirroring the public /matches page.",
-      inputSchema: {
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(MAX_MATCH_LIMIT)
-          .optional()
-          .describe("Maximum matches per category (default 20, max 100)."),
-      },
-    },
-    async ({ limit }) =>
-      runReadTool(async () => {
-        const listOptions = {
-          limit: Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT),
-          offset: 0,
-          redistributableOnly: true,
-        };
+      input: { limit: listLimit("matches per category") },
+      handler: async ({ limit }) => {
         const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-          ctx.matchService.findUpcomingAndCount(listOptions),
-          ctx.matchService.findLiveAndCount(listOptions),
+          competition.matches("upcoming", limit ?? DEFAULT_PAGE_SIZE),
+          competition.matches("live", limit ?? DEFAULT_PAGE_SIZE),
         ]);
 
         return {
@@ -275,81 +168,48 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
           liveTotal,
           total: upcomingTotal + liveTotal,
         };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "get_match_results",
-    {
+    defineTool({
+      name: "get_match_results",
       description:
         "List recently finished match results across tournaments, mirroring the public /matches results view.",
-      inputSchema: {
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(MAX_MATCH_LIMIT)
-          .optional()
-          .describe("Maximum number of results to return (default 20, max 100)."),
+      input: { limit: listLimit("results") },
+      handler: async ({ limit }) => {
+        const [results, total] = await competition.matches("results", limit ?? DEFAULT_PAGE_SIZE);
+        return { results: results.map(mapMatchListResponse), total };
       },
-    },
-    async ({ limit }) =>
-      runReadTool(async () => {
-        const searchLimit = Math.min(limit ?? DEFAULT_MATCH_LIMIT, MAX_MATCH_LIMIT);
-        const [results, total] = await ctx.matchService.findResultsAndCount({
-          limit: searchLimit,
-          offset: 0,
-          redistributableOnly: true,
-        });
+    }),
 
-        return {
-          results: results.map(mapMatchListResponse),
-          total,
-        };
-      }),
-  );
-
-  server.registerTool(
-    "list_news_articles",
-    {
+    defineTool({
+      name: "list_news_articles",
       description:
-        "List news articles including drafts. Requires news.manage. Returns titles and slugs without full body — use get_news_article before editing.",
-      inputSchema: {
+        "List news articles including drafts. Returns titles and slugs without full body — use get_news_article before editing.",
+      permission: "news.manage",
+      input: {
         page: z.number().int().min(0).optional().describe("0-based page index (default 0)."),
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(MAX_NEWS_LIMIT)
-          .optional()
-          .describe(`Page size (default ${DEFAULT_NEWS_LIMIT}, max ${MAX_NEWS_LIMIT}).`),
+        limit: listLimit("articles per page"),
       },
-    },
-    async ({ page, limit }) =>
-      runStaffReadTool(user, ["news.manage"], async () => {
-        const result = await ctx.newsService.findAll(page ?? 0, limit ?? DEFAULT_NEWS_LIMIT);
+      handler: async ({ page, limit }) => {
+        const result = await newsService.findAll(page ?? 0, limit ?? DEFAULT_PAGE_SIZE);
         return {
           data: result.data.map(mapNewsListItem),
           total: result.total,
           page: result.page,
           limit: result.limit,
         };
-      }),
-  );
-
-  server.registerTool(
-    "get_news_article",
-    {
-      description:
-        "Get a news article by slug or UUID, including unpublished drafts and both English and French fields. Requires news.manage. Use this before update_news_article.",
-      inputSchema: {
-        idOrSlug: z.string().min(1).describe("Article slug (e.g. zen-joins-karmine-corp) or UUID."),
       },
-    },
-    async ({ idOrSlug }) =>
-      runStaffReadTool(user, ["news.manage"], async () => {
-        const article = await ctx.newsService.findOneAdminByIdOrSlug(idOrSlug);
-        return mapNewsAdminArticle(article);
-      }),
-  );
+    }),
+
+    defineTool({
+      name: "get_news_article",
+      description:
+        "Get a news article by slug or UUID, including unpublished drafts and both English and French fields. Use this before update_news_article.",
+      permission: "news.manage",
+      input: { idOrSlug: idOrSlugField("Article", "zen-joins-karmine-corp") },
+      handler: async ({ idOrSlug }) =>
+        mapNewsAdminArticle(await newsService.findOneAdminByIdOrSlug(idOrSlug)),
+    }),
+  ];
 }

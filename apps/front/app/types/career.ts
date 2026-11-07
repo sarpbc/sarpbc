@@ -24,19 +24,25 @@ export interface CareerStats {
   morale: number;
 }
 
-export type CareerPhase =
-  | "menu"
-  | "onboarding"
-  | "season_intro"
-  | "event"
-  | "event_result"
-  | "stage_result"
-  | "offseason"
-  | "career_end";
+export const CAREER_PHASES = [
+  "menu",
+  "onboarding",
+  "season_intro",
+  "event",
+  "event_result",
+  "stage_result",
+  "offseason",
+  "career_end",
+] as const;
+export type CareerPhase = (typeof CAREER_PHASES)[number];
 
-export type OnboardingStep = "intro" | "region" | "country" | "role" | "background";
+export const ONBOARDING_STEPS = ["intro", "region", "country", "role", "background"] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
-export type CareerStage = "split1" | "split2" | "worlds";
+export const CAREER_STAGES = ["split1", "split2", "worlds"] as const;
+export type CareerStage = (typeof CAREER_STAGES)[number];
+
+export const DEFAULT_PLAYER_NAME = "Rookie";
 
 export function getSplitNumber(stage: CareerStage): number | null {
   switch (stage) {
@@ -85,10 +91,6 @@ export const CAREER_NICKNAME_KEYS = [
   "lanTourist",
 ] as const;
 export type CareerNicknameKey = (typeof CAREER_NICKNAME_KEYS)[number];
-
-export function isCareerNicknameKey(value: unknown): value is CareerNicknameKey {
-  return typeof value === "string" && CAREER_NICKNAME_KEYS.includes(value as never);
-}
 
 export interface CareerDestinyLeanings {
   quit: number;
@@ -245,7 +247,6 @@ export const STARTING_AGE = 16;
 /** Seasons 1–7 are ages 16–22. The stay-or-retire prompt starts after that. */
 export const PEAK_SEASONS = 7;
 export const SPLITS_PER_SEASON = 2;
-export const MIN_EVENTS_BEFORE_SPLIT = 1;
 export const MAX_EVENTS_BEFORE_SPLIT = 3;
 export const REGIONALS_PER_SPLIT = 3;
 export const MAJOR_QUALIFICATION_POINTS = 10;

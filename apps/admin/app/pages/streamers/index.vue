@@ -1,10 +1,15 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import { TWITCH_LOGIN_PATTERN, twitchChannelUrl } from "@sarpbc/utils";
-import type { TrackedStreamer } from "~/types/streamer";
-import { getApiErrorMessage } from "~/utils/apiError";
+import {
+  TRACKED_STREAMER_NAME_MAX_LENGTH,
+  TWITCH_LOGIN_MAX_LENGTH,
+  TWITCH_LOGIN_PATTERN,
+  getApiErrorMessage,
+  twitchChannelUrl,
+} from "@sarpbc/utils";
+import type { TrackedStreamer } from "@sarpbc/types";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const toast = useToast();
 
 const breadcrumbItems = [
@@ -13,14 +18,7 @@ const breadcrumbItems = [
   },
 ];
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(locale.value, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }),
-);
+const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
 const columns: TableColumn<TrackedStreamer>[] = [
   {
@@ -148,20 +146,11 @@ async function confirmRemove() {
           {{ $t("page.streamers.loading") }}
         </p>
 
-        <div
+        <LoadError
           v-else-if="status === 'error'"
-          class="flex flex-col items-start gap-3 rounded-lg border border-default p-6"
-        >
-          <p class="text-sm text-muted">
-            {{ getApiErrorMessage(error) ?? $t("page.streamers.loadError") }}
-          </p>
-          <UButton
-            icon="i-fluent-arrow-clockwise-24-regular"
-            :label="$t('page.streamers.retry')"
-            variant="soft"
-            @click="refresh()"
-          />
-        </div>
+          :message="getApiErrorMessage(error) ?? $t('page.streamers.loadError')"
+          @retry="refresh()"
+        />
 
         <template v-else>
           <p v-if="streamers.length > 0" class="text-sm text-muted">
@@ -226,7 +215,7 @@ async function confirmRemove() {
             <UInput
               v-model="newLogin"
               :placeholder="$t('page.streamers.add.loginPlaceholder')"
-              :maxlength="25"
+              :maxlength="TWITCH_LOGIN_MAX_LENGTH"
               autocomplete="off"
               class="w-full"
               autofocus
@@ -240,7 +229,7 @@ async function confirmRemove() {
             <UInput
               v-model="newDisplayName"
               :placeholder="$t('page.streamers.add.displayNamePlaceholder')"
-              :maxlength="100"
+              :maxlength="TRACKED_STREAMER_NAME_MAX_LENGTH"
               class="w-full"
             />
           </UFormField>

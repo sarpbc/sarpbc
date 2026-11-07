@@ -1,16 +1,14 @@
 <script lang="ts" setup>
 import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { displayMatchScore, getMatchParticipantScore } from "~/types/matches";
+import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
 } from "~/utils/matchDiscoveryAnalytics";
-import { matchPath } from "@sarpbc/utils";
-import { getApiErrorStatus } from "~/utils/apiError";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { getApiErrorStatus, matchPath, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -59,10 +57,7 @@ const match = computed(() => matchDetail.value?.match ?? null);
 const { publicId, slug } = matchDetail.value.match;
 const canonicalPath = localePath(matchPath(publicId, slug));
 if (route.path !== canonicalPath) {
-  await navigateTo(
-    { path: canonicalPath, query: route.query, hash: route.hash },
-    { redirectCode: 301, replace: true },
-  );
+  await redirectToCanonical(route, canonicalPath);
 }
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
 const headToHead = computed(() => matchDetail.value?.headToHead ?? null);

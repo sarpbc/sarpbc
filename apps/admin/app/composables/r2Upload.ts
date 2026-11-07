@@ -1,10 +1,8 @@
-export type R2UploadResponse = {
-  publicUrl: string;
-  key: string;
-};
+import type { R2UploadResponse } from "@sarpbc/types";
+import type { ImageUploadTarget } from "@sarpbc/utils";
 
-export type ImageUploadContext = {
-  target: "news" | "tournament";
+type ImageUploadContext = {
+  target: ImageUploadTarget;
   articleSlug?: string;
   articleTitle?: string;
 };
@@ -21,9 +19,8 @@ function messageFromNestBody(responseText: string): string | undefined {
       const joined = parsed.message.filter((item) => item.trim().length > 0).join(" ");
       return joined.length > 0 ? joined : undefined;
     }
-    if (typeof parsed.message === "string" && parsed.message.trim().length > 0) {
-      return parsed.message.trim();
-    }
+    const text = parsed.message?.trim();
+    if (text) return text;
   } catch {
     return undefined;
   }
@@ -73,18 +70,8 @@ export function useR2Upload() {
           }
 
           const serverMessage = messageFromNestBody(xhr.responseText);
-          if (xhr.status >= 500) {
-            reject(
-              new Error(
-                serverMessage && serverMessage !== "Internal server error"
-                  ? serverMessage
-                  : "server",
-              ),
-            );
-            return;
-          }
-
-          reject(new Error(serverMessage ?? `Upload failed with status ${xhr.status}`));
+          const fallback = xhr.status >= 500 ? "" : `Upload failed with status ${xhr.status}`;
+          reject(new Error(serverMessage ?? fallback));
         });
 
         xhr.addEventListener("error", () => {

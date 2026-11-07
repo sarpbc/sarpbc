@@ -3,15 +3,13 @@ import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { Tournament, assertParticipantRemovable } from "../domain/competition";
 import { TournamentEvent, ownsEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
-import { ContractRole } from "../../roster/domain/roster";
 import type {
   CreateTournamentInput,
   ParticipantRosterInput,
   UpdateTournamentInput,
 } from "./inputs";
+import type { CompetitionAfterCommit } from "./after-commit";
 import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
   CompetitionTransaction,
   EventWriter,
   TournamentQueries,
@@ -22,8 +20,7 @@ export class ManualTournamentService {
   constructor(
     private readonly reads: TournamentQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly cache: CompetitionCache,
-    private readonly diagnostics: CompetitionDiagnostics,
+    private readonly afterCommit: CompetitionAfterCommit,
   ) {}
   async create(input: CreateTournamentInput): Promise<Tournament> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
@@ -78,12 +75,17 @@ export class ManualTournamentService {
       }
       await tournaments.save(tournament);
     });
-    try {
-      await this.cache.invalidateTournament(id);
-    } catch (error) {
-      this.diagnostics.error("Tournament cache invalidation failed", error);
-    }
+    await this.afterCommit.settle({ tournamentIds: [id] });
     return this.detail(id);
+  }
+  async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
+    await this.transaction.run(async ({ tournaments }) => {
+      const tournament = await tournaments.load(id);
+      if (!tournament) throw new NotFoundError("Tournament not found");
+      tournament.pickemsEnabled = enabled;
+      await tournaments.save(tournament);
+    });
+    await this.afterCommit.settle({ tournamentIds: [id] });
   }
   private async detail(id: string) {
     const tournament = await this.reads.findById(id);
@@ -108,7 +110,6 @@ export class ManualTournamentService {
     await events.save(event);
     return event;
   }
-  /** Moves the stage to another event, or keeps the event it owns in step with it. */
   private async updateEvent(
     events: EventWriter,
     tournament: Tournament,
@@ -164,7 +165,7 @@ export class ManualTournamentService {
   /** Copied once when the team joins, so later transfers do not rewrite the tournament's history. */
   private async activeRoster(writer: TournamentWriter, teamId: string) {
     return (await writer.teamPlayers(teamId))
-      .filter((player) => player.currentRole() === ContractRole.ACTIVE)
+      .filter((player) => player.currentRole() === "active")
       .map((player) => player.id);
   }
   private async setRosters(

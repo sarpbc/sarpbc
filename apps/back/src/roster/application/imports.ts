@@ -1,24 +1,11 @@
-export interface UpsertPlayerCommand {
-  pandascoreId: number;
-  name: string;
+import type { ImportedPlayerProfile, ImportedTeamProfile } from "../domain/roster";
+
+export interface UpsertPlayerCommand extends ImportedPlayerProfile {
   slug: string;
-  firstName?: string;
-  lastName?: string;
-  birthday?: Date;
-  nationality?: string;
-  imageUrl?: string;
-  /** PandaScore role string (e.g. "Coach"); omitted/undefined means leave unchanged on update. */
-  role?: string | null;
-  teamSlug?: string;
 }
 
-export interface UpsertTeamCommand {
-  pandascoreId?: number;
-  name: string;
+export interface UpsertTeamCommand extends ImportedTeamProfile {
   slug: string;
-  location?: string;
-  imageUrl?: string;
-  darkModeImageUrl?: string;
 }
 
 export interface ImportedPlayer {

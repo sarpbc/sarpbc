@@ -1,10 +1,21 @@
 import { v4 } from "uuid";
 import type { StatsImportFailedReason, StatsImportItem } from "@sarpbc/types";
-import { ApplicationError, ConflictError, NotFoundError } from "../../common/domain/errors";
-import { parseBallchasingGroupId } from "../domain/group-ref";
-import { assignReplays, type ReplayAssignment, type RosterPlayer } from "../domain/replay-matching";
+import { ApplicationError, ConflictError } from "../../common/domain/errors";
+import { parseBallchasingRef } from "../domain/ballchasing-ref";
+import {
+  assignReplays,
+  byPlayedAt,
+  type ReplayAssignment,
+  type RosterPlayer,
+} from "../domain/replay-matching";
 import { isActive, type StatsImport } from "../domain/stats-import";
-import { buildGameRecord, hasBothTeams, platformAccounts, requireBallchasing } from "./game-record";
+import {
+  buildGameRecord,
+  hasBothTeams,
+  platformAccounts,
+  requireBallchasing,
+  requireTournament,
+} from "./game-record";
 import type {
   BallchasingSource,
   GameStatsStore,
@@ -25,14 +36,13 @@ export class StatsImportService {
     private readonly games: GameStatsStore,
     private readonly imports: StatsImportStore,
     private readonly scheduler: StatsImportScheduler,
-    private readonly reportFailure: (error: unknown) => void,
+    private readonly reportFailure: (cause: unknown) => void,
   ) {}
 
   async request(tournamentId: string, group: string): Promise<StatsImport> {
     requireBallchasing(this.source);
-    const groupId = parseBallchasingGroupId(group);
-    if (!(await this.candidates.tournamentExists(tournamentId)))
-      throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
+    const groupId = parseBallchasingRef("group", group);
+    await requireTournament(this.candidates, tournamentId);
     const [latest] = await this.imports.latest(tournamentId, 1);
     if (latest && isActive(latest))
       throw new ConflictError({
@@ -85,10 +95,8 @@ export class StatsImportService {
           match.participants.map((participant) => [participant.id, participant.players] as const),
         ),
       );
-      const assignments = assignReplays(replays, matches, stored, excluded).sort(
-        (a, b) =>
-          (a.replay.playedAt?.getTime() ?? 0) - (b.replay.playedAt?.getTime() ?? 0) ||
-          a.replay.id.localeCompare(b.replay.id),
+      const assignments = assignReplays(replays, matches, stored, excluded).sort((a, b) =>
+        byPlayedAt(a.replay, b.replay),
       );
       statsImport.total = assignments.length;
       await this.imports.save(statsImport);

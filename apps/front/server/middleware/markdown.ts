@@ -8,9 +8,10 @@ import {
   isMarkdownPagePath,
   markdownPathFromHtmlPath,
 } from "~/utils/markdownPath";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
-const LLMS_TXT_LINK = '<https://sarpbc.org/llms.txt>; rel="describedby"';
+const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
 
 async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
   const response = await useNitroApp().localFetch(`${htmlPath}${search}`, {

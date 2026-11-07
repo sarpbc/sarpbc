@@ -1,5 +1,5 @@
 import { InvalidInputError } from "../../common/domain/errors";
-import type { DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 
 export function assertTournamentUpdateAllowed(
   source: DataSource,

@@ -2,21 +2,30 @@
   "name": "@sarpbc/utils",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "sideEffects": false,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "require": "./dist/index.js",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "require": "./dist/*.js",
+      "default": "./src/*.ts"
+    }
   },
   "scripts": {
-    "lint": "oxlint .",
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "node --test src/*.test.ts"
+    "test": "pnpm --filter @sarpbc/types build && tsc -p tsconfig.test.json && node --test \"dist-test/**/*.test.js\""
   },
   "dependencies": {
     "@sarpbc/types": "workspace:*",

@@ -1,11 +1,19 @@
-import { Controller, Get, Header, Param, Query } from "@nestjs/common";
+import { Controller, Get, Header, Inject, Param, Query } from "@nestjs/common";
 import { NEWS_MATCH_BLOCKS_PER_REQUEST, parseNewsMatchBlockKey } from "@sarpbc/utils";
-import type { MatchBlockSelector, MatchBlocksResponse } from "@sarpbc/types";
+import type {
+  CountedMatchListItem,
+  MatchBlockSelector,
+  MatchBlocksResponse,
+  MatchListItem,
+  MatchResultsResponse,
+  UpcomingMatchesResponse,
+} from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
-import { MatchGamesService } from "../../../match-stats/application/match-games.service";
+import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors";
@@ -35,10 +43,28 @@ function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchL
   };
 }
 
-function attachCommentCounts<T extends { id: string }>(
-  items: T[],
+function parsePagingValue(name: string, value?: string): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new InvalidInputError(`Invalid ${name} "${value}".`);
+  }
+  return parsed;
+}
+
+function parsePaging(limit?: string, offset?: string) {
+  return {
+    limit: parsePagingValue("limit", limit),
+    offset: parsePagingValue("offset", offset) ?? 0,
+  };
+}
+
+function attachCommentCounts(
+  items: MatchListItem[],
   counts: Map<string, number>,
-): Array<T & { commentCount: number }> {
+): CountedMatchListItem[] {
   return items.map((item) => ({
     ...item,
     commentCount: counts.get(item.id) ?? 0,
@@ -50,7 +76,7 @@ export class MatchController {
   constructor(
     private matchService: MatchService,
     private replyService: ReplyService,
-    private matchGames: MatchGamesService,
+    @Inject(GAME_STATS_STORE) private gameStats: GameStatsStore,
   ) {}
 
   @Get("upcoming")
@@ -60,26 +86,16 @@ export class MatchController {
     @Query("today") today?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ) {
-    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-    const searchLimit = Math.min(searchLimitRaw, 100);
-    const todayOnly = today === "true";
-    const scope = parseListScopeFilters(tournamentId, leagueId);
+  ): Promise<UpcomingMatchesResponse> {
+    const options = {
+      ...parsePaging(limit, offset),
+      todayOnly: today === "true",
+      ...parseListScopeFilters(tournamentId, leagueId),
+    };
 
     const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-      this.matchService.findUpcomingAndCount({
-        limit: searchLimit,
-        offset: searchOffset,
-        todayOnly,
-        ...scope,
-      }),
-      this.matchService.findLiveAndCount({
-        limit: searchLimit,
-        offset: searchOffset,
-        todayOnly,
-        ...scope,
-      }),
+      this.matchService.list("upcoming", options),
+      this.matchService.list("live", options),
     ]);
 
     const matchIds = [...upcomingMatches, ...liveMatches].map((match) => match.id);
@@ -100,16 +116,10 @@ export class MatchController {
     @Query("offset") offset?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ) {
-    const searchLimitRaw = limit ? parseInt(limit, 10) : 20;
-    const searchOffset = offset ? parseInt(offset, 10) : 0;
-    const searchLimit = Math.min(searchLimitRaw, 100);
-    const scope = parseListScopeFilters(tournamentId, leagueId);
-
-    const [results, total] = await this.matchService.findResultsAndCount({
-      limit: searchLimit,
-      offset: searchOffset,
-      ...scope,
+  ): Promise<MatchResultsResponse> {
+    const [results, total] = await this.matchService.list("results", {
+      ...parsePaging(limit, offset),
+      ...parseListScopeFilters(tournamentId, leagueId),
     });
 
     const commentCounts = await this.replyService.countByTargetIds(
@@ -148,7 +158,7 @@ export class MatchController {
   @Get(":ref")
   async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
     const detail = await this.matchService.findDetail(ref);
-    const games = await this.matchGames.forMatch(detail.match.id);
+    const games = await this.gameStats.byMatch(detail.match.id);
     return { ...detail, match: withPublicSlug(detail.match), games };
   }
 }

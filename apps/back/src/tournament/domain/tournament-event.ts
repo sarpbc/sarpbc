@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef } from "@sarpbc/types";
-import type { DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
+import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 import type { League } from "./competition";
 
@@ -14,7 +15,6 @@ export class TournamentEvent {
   updatedAt = new Date();
 }
 
-/** The sync renames an event that follows a serie or holds a PandaScore stage. */
 export function isEventSynced(
   event: TournamentEvent,
   stages: ReadonlyArray<{ source: DataSource }>,
@@ -44,7 +44,7 @@ export function ownsEvent(
   return stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
 }
 
-export function toEventRef(event: TournamentEvent): TournamentEventRef {
+export function toEventRef(event: TournamentEventRef): TournamentEventRef {
   return { id: event.id, slug: event.slug, name: event.name };
 }
 
@@ -87,7 +87,7 @@ export function eventDisplayName(input: {
 }
 
 function utcDay(date: Date | null): string {
-  return date ? date.toISOString().slice(0, 10) : "";
+  return date ? isoDay(date) : "";
 }
 
 /** Same-day stages start at staggered times (Group B before Group A), so order by day, then name. */

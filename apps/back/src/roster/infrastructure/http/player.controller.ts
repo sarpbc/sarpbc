@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   NotFoundException,
   Param,
   ParseUUIDPipe,
@@ -28,9 +29,10 @@ import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 import { MatchService } from "../../../tournament/application/match/match.service";
-import { TournamentService } from "../../../tournament/application/tournament.service";
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import type { TournamentQueries } from "../../../tournament/application/ports";
+import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
 
 @Controller("player")
 export class PlayerController {
@@ -38,7 +40,7 @@ export class PlayerController {
     private playerService: PlayerService,
     private contractService: ContractService,
     private matchService: MatchService,
-    private tournamentService: TournamentService,
+    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
     private playerAwardService: PlayerAwardService,
     private tournamentPrizeService: TournamentPrizeService,
   ) {}
@@ -151,7 +153,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const trophies = await this.tournamentService.getTournamentsWonByPlayer(player.id);
+    const trophies = await this.tournaments.getTournamentsWonByPlayer(player.id);
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
@@ -183,7 +185,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const tournaments = await this.tournamentService.getTournamentsByPlayer(player.id);
+    const tournaments = await this.tournaments.getTournamentsByPlayer(player.id);
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 

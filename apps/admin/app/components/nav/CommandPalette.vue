@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { tournamentLabel } from "~/utils/tournamentLabel";
+import { watchDebounced } from "@vueuse/core";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
-import { resolveThemedLogoUrl } from "@sarpbc/utils";
-import { hasPermission } from "~/utils/staff";
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
-import type { Tournament } from "~/types/tournament";
+import { resolveThemedLogoUrl, tournamentStageLabel } from "@sarpbc/utils";
+import { canAccessSection } from "~/utils/adminSections";
+import type { Player, Team } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
 const colorMode = useColorMode();
+const reportError = useReportError();
 
 const open = ref(false);
 const searchTerm = ref("");
@@ -18,9 +17,9 @@ const pending = ref(false);
 const results = ref<AdminSearchResult>({ players: [], teams: [], tournaments: [] });
 const refreshState = ref<"idle" | "loading" | "success" | "error">("idle");
 
-const canPlayers = computed(() => hasPermission(user.value, "players.manage"));
-const canTeams = computed(() => hasPermission(user.value, "teams.manage"));
-const canTournaments = computed(() => hasPermission(user.value, "tournaments.manage"));
+const canPlayers = computed(() => canAccessSection(user.value, "/players"));
+const canTeams = computed(() => canAccessSection(user.value, "/teams"));
+const canTournaments = computed(() => canAccessSection(user.value, "/tournaments"));
 const canSearch = computed(() => canPlayers.value || canTeams.value || canTournaments.value);
 
 defineShortcuts({
@@ -35,8 +34,6 @@ defineShortcuts({
   },
 });
 
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
-
 async function runSearch(query: string) {
   const trimmed = query.trim();
   if (!trimmed) {
@@ -47,17 +44,15 @@ async function runSearch(query: string) {
   pending.value = true;
   try {
     results.value = await searchAdminEntities(trimmed);
+  } catch (searchError) {
+    results.value = { players: [], teams: [], tournaments: [] };
+    reportError(searchError);
   } finally {
     pending.value = false;
   }
 }
 
-watch(searchTerm, (value) => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    void runSearch(value);
-  }, 250);
-});
+watchDebounced(searchTerm, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 watch(open, (isOpen) => {
   if (!isOpen) {
@@ -117,32 +112,15 @@ function tournamentItems(): CommandPaletteItem[] {
   if (!canTournaments.value) {
     return [];
   }
-  return results.value.tournaments.map((tournament: Tournament) => ({
+  return results.value.tournaments.map((tournament) => ({
     id: `tournament-${tournament.id}`,
-    label: tournamentLabel(tournament),
+    label: tournamentStageLabel(tournament),
     icon: "i-fluent-trophy-24-regular",
     avatar: tournament.imageUrl ? { src: tournament.imageUrl, alt: tournament.name } : undefined,
     onSelect() {
       closeAndGo(`/tournaments/${tournament.id}`);
     },
   }));
-}
-
-function refreshIcon(): string {
-  switch (refreshState.value) {
-    case "loading":
-      return "i-fluent-arrow-sync-24-regular";
-    case "success":
-      return "i-fluent-checkmark-24-regular";
-    case "error":
-      return "i-fluent-dismiss-circle-24-regular";
-    case "idle":
-      return "i-fluent-arrow-sync-24-regular";
-    default: {
-      const _exhaustive: never = refreshState.value;
-      return _exhaustive;
-    }
-  }
 }
 
 async function refreshEmptyTournaments(event?: Event) {
@@ -155,15 +133,12 @@ async function refreshEmptyTournaments(event?: Event) {
   try {
     const emptyTournaments = await getTournamentsWithoutMatches();
     for (const tournament of emptyTournaments) {
-      const success = await syncTournament(tournament.id);
-      if (!success) {
-        refreshState.value = "error";
-        return;
-      }
+      await syncTournament(tournament.id);
     }
     refreshState.value = "success";
-  } catch {
+  } catch (refreshError) {
     refreshState.value = "error";
+    reportError(refreshError);
   }
 }
 
@@ -179,7 +154,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
           id: "refresh-empty-tournaments",
           label: t("page.search.refreshEmptyTournaments"),
           suffix: t("page.search.refreshEmptyTournamentsHint"),
-          icon: refreshIcon(),
+          icon: syncIcon(refreshState.value === "loading" ? "idle" : refreshState.value),
           loading: refreshState.value === "loading",
           onSelect: (event: Event) => {
             void refreshEmptyTournaments(event);

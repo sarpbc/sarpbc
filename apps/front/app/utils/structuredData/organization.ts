@@ -1,4 +1,4 @@
-import { SITE_ORIGIN } from "~/utils/calendar/ics";
+import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
 
 export const ORGANIZATION_ID = `${SITE_ORIGIN}/#organization`;
@@ -22,12 +22,10 @@ export interface OrganizationLd extends JsonLdNode {
 }
 
 export interface BuildOrganizationOptions {
-  origin?: string;
   contactPagePath?: string;
 }
 
 export function buildOrganization(options: BuildOrganizationOptions = {}): OrganizationLd {
-  const origin = options.origin ?? SITE_ORIGIN;
   const contactPagePath = options.contactPagePath ?? "/contact";
 
   return compactJsonLd({
@@ -35,8 +33,8 @@ export function buildOrganization(options: BuildOrganizationOptions = {}): Organ
     "@type": "Organization",
     "@id": ORGANIZATION_ID,
     name: "sarpbc.org",
-    url: origin,
-    logo: `${origin}/sarpbc.svg`,
+    url: SITE_ORIGIN,
+    logo: `${SITE_ORIGIN}/sarpbc.svg`,
     email: "contact@sarpbc.org",
     sameAs: ["https://x.com/SARPBCorg"],
     contactPoint: [
@@ -44,7 +42,7 @@ export function buildOrganization(options: BuildOrganizationOptions = {}): Organ
         "@type": "ContactPoint",
         email: "contact@sarpbc.org",
         contactType: "customer support",
-        url: `${origin}${contactPagePath}`,
+        url: `${SITE_ORIGIN}${contactPagePath}`,
       }),
     ],
   });

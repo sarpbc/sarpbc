@@ -1,5 +1,5 @@
-import type { ContractRole, TeamContract } from "~/types/contract";
-import type { Team } from "~/types/team";
+import type { ContractRole, Team, TeamContract } from "@sarpbc/types";
+import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 
 export type CreateTeamDto = {
   name: string;
@@ -13,156 +13,87 @@ export type UpdateTeamDto = {
   imageUrl?: string;
 };
 
-type TeamListParams = {
-  limit: number;
-  offset?: number;
-  start?: string;
-  name?: string;
+type TeamContractDto = {
+  playerId: string;
+  role: ContractRole;
+  startDate: string;
+  endDate?: string | null;
 };
 
-export async function getAllTeams(query?: {
-  limit?: number;
-  search?: string;
-  offset?: number;
-  start?: string;
+export async function getAllTeams(query: {
+  limit: number;
+  offset: number;
 }): Promise<{ teams: Team[]; total: number }> {
-  try {
-    const params: TeamListParams = {
-      limit: query?.limit ?? 50,
-    };
-    if (query?.offset && query.offset > 0) params.offset = query.offset;
-    if (query?.start) params.start = query.start;
-    else if (query?.search) params.name = query.search;
+  const res = await apiFetch<{ teams: Team[]; count: number }>("/team", {
+    method: "GET",
+    query,
+  });
+  return { teams: res.teams, total: res.count };
+}
 
-    const res = await apiFetch<{ teams?: Team[]; count?: number }>("/team", {
-      method: "GET",
-      query: params,
-    });
-    const teams = res.teams ?? [];
-    return { teams, total: res.count ?? teams.length };
-  } catch (error) {
-    console.error("Error fetching teams:", error);
-    return { teams: [], total: 0 };
+export async function getEveryTeam(): Promise<Team[]> {
+  const teams: Team[] = [];
+  for (;;) {
+    const page = await getAllTeams({ limit: MAX_PAGE_SIZE, offset: teams.length });
+    teams.push(...page.teams);
+    if (page.teams.length === 0 || teams.length >= page.total) return teams;
   }
 }
 
-export async function getTeamById(id: string): Promise<Team | null> {
-  try {
-    const res = await apiFetch<{ team?: Team }>(`/team/${id}`, {
-      method: "GET",
-    });
-    return res.team ?? null;
-  } catch (error) {
-    console.error("Error fetching team by id:", error);
-    return null;
-  }
+export async function getTeamById(id: string): Promise<Team> {
+  const res = await apiFetch<{ team: Team | null }>(`/team/${id}`, { method: "GET" });
+  if (!res.team) throw createError({ statusCode: 404, message: "Team not found" });
+  return res.team;
 }
 
-export async function createTeam(body: CreateTeamDto): Promise<Team | null> {
-  try {
-    const res = await apiFetch<{ team?: Team }>("/team", {
-      method: "POST",
-      body,
-    });
-    return res.team ?? null;
-  } catch (error) {
-    console.error("Error creating team:", error);
-    throw error;
-  }
+export async function createTeam(body: CreateTeamDto): Promise<Team> {
+  const res = await apiFetch<{ team: Team }>("/team", { method: "POST", body });
+  return res.team;
 }
 
-export async function updateTeam(id: string, body: UpdateTeamDto): Promise<Team | null> {
-  try {
-    const res = await apiFetch<{ team?: Team }>(`/team/${id}`, {
-      method: "PATCH",
-      body,
-    });
-    return res.team ?? null;
-  } catch (error) {
-    console.error("Error updating team:", error);
-    throw error;
-  }
+export async function updateTeam(id: string, body: UpdateTeamDto): Promise<Team> {
+  const res = await apiFetch<{ team: Team }>(`/team/${id}`, { method: "PATCH", body });
+  return res.team;
 }
 
 export async function deleteTeam(id: string): Promise<void> {
-  try {
-    await apiFetch(`/team/${id}`, { method: "DELETE" });
-  } catch (error) {
-    console.error("Error deleting team:", error);
-    throw error;
-  }
+  await apiFetch(`/team/${id}`, { method: "DELETE" });
 }
 
 export async function syncTeamFromPandascore(): Promise<void> {
-  try {
-    await apiFetch("/team/sync", { method: "POST" });
-  } catch (error) {
-    console.error("Error syncing team:", error);
-    throw error;
-  }
+  await apiFetch("/team/sync", { method: "POST" });
 }
 
 export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
-  try {
-    const res = await apiFetch<{ contracts?: TeamContract[] }>(`/team/${teamId}/contract`, {
-      method: "GET",
-    });
-    return res.contracts ?? [];
-  } catch {
-    return [];
-  }
+  const res = await apiFetch<{ contracts: TeamContract[] }>(`/team/${teamId}/contract`, {
+    method: "GET",
+  });
+  return res.contracts;
 }
 
 export async function createTeamContract(
   teamId: string,
-  body: {
-    playerId: string;
-    role: ContractRole;
-    startDate: string;
-    endDate?: string | null;
-  },
-): Promise<TeamContract | null> {
-  try {
-    const res = await apiFetch<{ contract?: TeamContract }>(`/team/${teamId}/contract`, {
-      method: "POST",
-      body,
-    });
-    return res.contract ?? null;
-  } catch (error) {
-    console.error("Error creating team contract:", error);
-    throw error;
-  }
+  body: TeamContractDto,
+): Promise<TeamContract> {
+  const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract`, {
+    method: "POST",
+    body,
+  });
+  return res.contract;
 }
 
 export async function updateTeamContract(
   teamId: string,
   contractId: string,
-  body: {
-    playerId?: string;
-    role?: ContractRole;
-    startDate?: string;
-    endDate?: string | null;
-  },
-): Promise<TeamContract | null> {
-  try {
-    const res = await apiFetch<{ contract?: TeamContract }>(
-      `/team/${teamId}/contract/${contractId}`,
-      { method: "PATCH", body },
-    );
-    return res.contract ?? null;
-  } catch (error) {
-    console.error("Error updating team contract:", error);
-    throw error;
-  }
+  body: Partial<TeamContractDto>,
+): Promise<TeamContract> {
+  const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract/${contractId}`, {
+    method: "PATCH",
+    body,
+  });
+  return res.contract;
 }
 
 export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
-  try {
-    await apiFetch(`/team/${teamId}/contract/${contractId}`, {
-      method: "DELETE",
-    });
-  } catch (error) {
-    console.error("Error deleting team contract:", error);
-    throw error;
-  }
+  await apiFetch(`/team/${teamId}/contract/${contractId}`, { method: "DELETE" });
 }

@@ -1,4 +1,4 @@
-import { NotFoundError, UnprocessableError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors";
 import {
   CreateContractInput,
   CreateTeamContractInput,
@@ -7,8 +7,9 @@ import {
   UpdateContractInput,
   UpdateTeamContractInput,
 } from "./inputs";
-import { Contract, ContractRole } from "../domain/roster";
+import { Contract } from "../domain/roster";
 import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
+import { requireTeam } from "./require-team";
 
 export class ContractService {
   constructor(
@@ -79,7 +80,7 @@ export class ContractService {
   async create(playerId: string, dto: CreateContractInput): Promise<Contract> {
     return this.transaction.run(async (scope) => {
       const contract = await this.build(scope, playerId, dto);
-      await scope.contracts.save(contract);
+      await this.saveInCareer(scope, contract);
       return contract;
     });
   }
@@ -130,7 +131,7 @@ export class ContractService {
     dto: UpdateContractInput,
   ): Promise<Contract> {
     const contract = await this.edit(scope, playerId, contractId, dto);
-    await scope.contracts.save(contract);
+    await this.saveInCareer(scope, contract);
     return contract;
   }
 
@@ -156,17 +157,12 @@ export class ContractService {
       throw new NotFoundError(`Player with id "${playerId}" not found`);
     }
 
-    const team = await teams.findById(dto.teamId);
-    if (!team) {
-      throw new UnprocessableError(`Team with id "${dto.teamId}" not found`);
-    }
-
     const contract = new Contract();
     contract.player = player;
-    contract.team = team;
+    contract.team = await requireTeam(teams, dto.teamId);
     contract.startDate = new Date(dto.startDate);
     contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
-    contract.role = dto.role ?? ContractRole.ACTIVE;
+    contract.role = dto.role ?? "active";
     return contract;
   }
 
@@ -181,13 +177,7 @@ export class ContractService {
       throw new NotFoundError(`Contract with id "${contractId}" not found`);
     }
 
-    if (dto.teamId) {
-      const team = await teams.findById(dto.teamId);
-      if (!team) {
-        throw new UnprocessableError(`Team with id "${dto.teamId}" not found`);
-      }
-      contract.team = team;
-    }
+    if (dto.teamId) contract.team = await requireTeam(teams, dto.teamId);
 
     if (dto.startDate !== undefined) {
       contract.startDate = new Date(dto.startDate);

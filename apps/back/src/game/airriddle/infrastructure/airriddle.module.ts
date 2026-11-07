@@ -5,6 +5,7 @@ import { log } from "evlog";
 import { PlayerService } from "../../../roster/application/player.service";
 import { MikroDailyRiddles } from "./persistence/airriddle.store";
 import { AirRiddleJob } from "./airriddle.job";
+import { RIDDLE_TIME_ZONE } from "./riddle-time-zone";
 import { Module } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { AirRiddle } from "./persistence/airriddle.entity";
@@ -21,10 +22,11 @@ import { RosterModule } from "../../../roster/infrastructure/roster.module";
       provide: AirRiddleService,
       useFactory: (em: EntityManager, players: PlayerService) =>
         new AirRiddleService(new MikroDailyRiddles(em), players, {
-          dayStart: () => DateTime.now().setZone("Europe/Berlin").startOf("day").toJSDate(),
+          dayStart: () => DateTime.now().setZone(RIDDLE_TIME_ZONE).startOf("day").toJSDate(),
           now: () => new Date(),
           id: v4,
-          skipped: (reason) => log.info({ component: "AirRiddleService", skipped: true, reason }),
+          skipped: () =>
+            log.info({ component: "AirRiddleService", skipped: true, reason: "no_player" }),
           error: (error) => log.error({ component: "AirRiddleService", error }),
         }),
       inject: [EntityManager, PlayerService],

@@ -1,165 +1,144 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
-import { NotFoundException } from "@nestjs/common";
-import { isRedistributable } from "../../../common/domain/data-source";
+import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
+import {
+  createEventFields,
+  createLeagueFields,
+  updateEventFields,
+  updateLeagueFields,
+} from "../../../tournament/infrastructure/http/dto/manual-catalog.dto";
+import { defineTool, type McpTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
-import type { McpToolContext } from "../mcp-tool-context";
-import { runReadTool, runWriteTool } from "../permission-gate";
+import type { RedistributableCompetition } from "../redistributable-competition";
+import { describeFields, listLimit } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
 
-const slugSchema = z.string().trim().min(1).max(255);
-const urlSchema = z.string().url().max(255);
+export interface EventToolServices {
+  catalogService: Pick<
+    ManualCatalogService,
+    "leagues" | "createLeague" | "updateLeague" | "createEvent" | "updateEvent"
+  >;
+  competition: Pick<RedistributableCompetition, "events" | "event">;
+}
 
-export function registerEventTools(server: McpServer, ctx: McpToolContext): void {
-  const { user } = ctx;
-
-  server.registerTool(
-    "list_leagues",
-    {
+export function eventTools({ catalogService, competition }: EventToolServices): McpTool[] {
+  return [
+    defineTool({
+      name: "list_leagues",
       description:
         "List leagues with id, name, slug and source. manual leagues were created by staff; pandascore leagues come from the sync. Use the id as leagueId on events and tournaments.",
-      inputSchema: {},
-    },
-    async () => runReadTool(async () => (await ctx.catalogService.leagues()).map(mapLeague)),
-  );
+      input: {},
+      handler: async () => (await catalogService.leagues()).map(mapLeague),
+    }),
 
-  server.registerTool(
-    "create_league",
-    {
+    defineTool({
+      name: "create_league",
       description:
-        "Create a league for manual events and tournaments. Requires tournaments.manage. Run list_leagues first to avoid duplicates.",
-      inputSchema: {
-        name: z.string().trim().min(1).max(255).describe("League name."),
-        slug: slugSchema
-          .optional()
-          .describe("Optional slug. Generated from the name when omitted."),
-        url: urlSchema.optional().describe("Optional official website."),
-        imageUrl: urlSchema.optional().describe("Optional logo URL."),
-      },
-    },
-    async (input) =>
-      runWriteTool(user, "create_league", "tournaments.manage", async () => {
-        const league = await ctx.catalogService.createLeague(input);
-        return { entityId: league.id, result: mapLeague(league) };
+        "Create a league for manual events and tournaments. Run list_leagues first to avoid duplicates.",
+      write: true,
+      permission: "tournaments.manage",
+      input: describeFields(createLeagueFields, {
+        name: "League name.",
+        slug: "Optional slug. Generated from the name when omitted.",
+        url: "Optional official website.",
+        imageUrl: "Optional logo URL.",
       }),
-  );
+      handler: async (input) => {
+        const league = await catalogService.createLeague(input);
+        return { entityId: league.id, result: mapLeague(league) };
+      },
+    }),
 
-  server.registerTool(
-    "update_league",
-    {
+    defineTool({
+      name: "update_league",
       description:
-        "Update a league. Requires tournaments.manage. Manual leagues accept every field; PandaScore leagues accept imageUrl only. Pass null to clear slug, url or imageUrl.",
-      inputSchema: {
+        "Update a league. Manual leagues accept every field; PandaScore leagues accept imageUrl only. Pass null to clear slug, url or imageUrl.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         leagueId: z.string().uuid().describe("League UUID from list_leagues."),
-        name: z.string().trim().min(1).max(255).optional().describe("League name."),
-        slug: slugSchema.nullable().optional().describe("Slug, or null to clear."),
-        url: urlSchema.nullable().optional().describe("Official website, or null to clear."),
-        imageUrl: urlSchema.nullable().optional().describe("Logo URL, or null to clear."),
+        ...describeFields(updateLeagueFields, {
+          name: "League name.",
+          slug: "Slug, or null to clear.",
+          url: "Official website, or null to clear.",
+          imageUrl: "Logo URL, or null to clear.",
+        }),
       },
-    },
-    async ({ leagueId, ...input }) =>
-      runWriteTool(user, "update_league", "tournaments.manage", async () => {
+      handler: async ({ leagueId, ...input }) => {
         requireUpdateFields(input);
-        const league = await ctx.catalogService.updateLeague(leagueId, input);
+        const league = await catalogService.updateLeague(leagueId, input);
         return { entityId: league.id, result: mapLeague(league) };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "list_events",
-    {
+    defineTool({
+      name: "list_events",
       description:
         "List events, newest first. An event groups tournament stages (phases) under one public page. Each event lists its stages earliest first with their dates and tier.",
-      inputSchema: {
+      input: {
         activeOnly: z
           .boolean()
           .optional()
           .describe("When true, return only events with a stage that is not over."),
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(100)
-          .optional()
-          .describe("Maximum number of events to return (default 20)."),
+        limit: listLimit("events"),
         offset: z.number().int().min(0).optional().describe("Number of events to skip."),
       },
-    },
-    async ({ activeOnly, limit, offset }) =>
-      runReadTool(async () => {
-        const [listings, count] = await ctx.eventService.list({
+      handler: async ({ activeOnly, limit, offset }) => {
+        const [listings, count] = await competition.events({
           activeOnly: activeOnly ?? false,
-          redistributableOnly: true,
-          limit: limit ?? 20,
+          limit: limit ?? DEFAULT_PAGE_SIZE,
           offset: offset ?? 0,
         });
         return { events: listings.map(mapEvent), count };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "get_event",
-    {
+    defineTool({
+      name: "get_event",
       description:
         "Get an event by UUID or slug with its stages (tournament phases) earliest first, its league, its overall dates and its public URL. editable is false when the PandaScore sync manages the event. An event whose stages all moved elsewhere is returned with no stages so it can be reused.",
-      inputSchema: {
+      input: {
         idOrSlug: z.string().min(1).describe("Event UUID or slug (first segment of its URL)."),
       },
-    },
-    async ({ idOrSlug }) =>
-      runReadTool(async () => {
-        const listing = await ctx.catalogService.findEvent(idOrSlug);
-        if (
-          listing.stages.length &&
-          !listing.stages.some((stage) => isRedistributable(stage.source))
-        )
-          throw new NotFoundException(`Event "${idOrSlug}" was not found.`);
-        return mapEvent(listing);
-      }),
-  );
+      handler: async ({ idOrSlug }) => mapEvent(await competition.event(idOrSlug)),
+    }),
 
-  server.registerTool(
-    "create_event",
-    {
+    defineTool({
+      name: "create_event",
       description:
-        "Create an empty manual event, then attach tournaments to it with create_tournament or update_tournament eventId. Requires tournaments.manage. The event page goes public once it has a stage. Run list_events first to avoid duplicates.",
-      inputSchema: {
-        name: z.string().trim().min(1).max(255).describe("Event name (e.g. Coupe de France 2026)."),
-        slug: slugSchema
-          .optional()
-          .describe("Optional URL slug. Generated from the name when omitted."),
-        leagueId: z.string().uuid().optional().describe("Optional league UUID from list_leagues."),
-      },
-    },
-    async (input) =>
-      runWriteTool(user, "create_event", "tournaments.manage", async () => {
-        const listing = await ctx.catalogService.createEvent(input);
+        "Create an empty manual event, then attach tournaments to it with create_tournament or update_tournament eventId. The event page goes public once it has a stage. Run list_events first to avoid duplicates.",
+      write: true,
+      permission: "tournaments.manage",
+      input: describeFields(createEventFields, {
+        name: "Event name (e.g. Coupe de France 2026).",
+        slug: "Optional URL slug. Generated from the name when omitted.",
+        leagueId: "Optional league UUID from list_leagues.",
+      }),
+      handler: async (input) => {
+        const listing = await catalogService.createEvent(input);
         return { entityId: listing.event.id, result: mapEvent(listing) };
-      }),
-  );
+      },
+    }),
 
-  server.registerTool(
-    "update_event",
-    {
+    defineTool({
+      name: "update_event",
       description:
-        "Rename a manual event, change its URL slug or its league. Requires tournaments.manage. Events managed by the PandaScore sync are rejected. Stages keep their own names; move a stage with update_tournament eventId. Changing the slug changes every stage URL.",
-      inputSchema: {
+        "Rename a manual event, change its URL slug or its league. Events managed by the PandaScore sync are rejected. Stages keep their own names; move a stage with update_tournament eventId. Changing the slug changes every stage URL.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
         eventId: z.string().uuid().describe("Event UUID from get_event or list_events."),
-        name: z.string().trim().min(1).max(255).optional().describe("Event name."),
-        slug: slugSchema.optional().describe("Event URL slug."),
-        leagueId: z
-          .string()
-          .uuid()
-          .nullable()
-          .optional()
-          .describe("League UUID, or null to clear."),
+        ...describeFields(updateEventFields, {
+          name: "Event name.",
+          slug: "Event URL slug.",
+          leagueId: "League UUID, or null to clear.",
+        }),
       },
-    },
-    async ({ eventId, ...input }) =>
-      runWriteTool(user, "update_event", "tournaments.manage", async () => {
+      handler: async ({ eventId, ...input }) => {
         requireUpdateFields(input);
-        const listing = await ctx.catalogService.updateEvent(eventId, input);
+        const listing = await catalogService.updateEvent(eventId, input);
         return { entityId: listing.event.id, result: mapEvent(listing) };
-      }),
-  );
+      },
+    }),
+  ];
 }

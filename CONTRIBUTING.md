@@ -12,8 +12,8 @@ We aim to review pull requests within **7 days**. If yours is waiting longer, co
 
 ## Prerequisites
 
-- Node.js **24.22.1** (see root README)
-- **pnpm** 10+ (enforced via `only-allow`)
+- Node.js, as pinned in [`.nvmrc`](.nvmrc)
+- **pnpm**, as pinned by `packageManager` in [`package.json`](package.json) (enforced via `only-allow`)
 - Docker and Docker Compose for local Postgres + Redis
 
 ## Setup
@@ -45,7 +45,7 @@ Use one of these types: `feat`, `fix`, `perf`, `refactor`, `docs`, `style`, `tes
 
 CI checks the source branch, PR title and description, and every commit introduced by the PR. Rebase onto `main` instead of creating commits with Git's default merge messages. Historical commits already on `main` are excluded. PR title edits rerun the checks, including for squash merges.
 
-Keep the `CI` status check required in GitHub's branch protection for `main` to block merges when naming checks fail. Local hooks can be bypassed.
+Keep both the `CI` and the `Branch and commit names` (workflow `Pull Request Names`) status checks required in GitHub's branch protection for `main`. Naming failures only block merges through the second one. Local hooks can be bypassed.
 
 Run `pnpm test:git-names` to test the naming checks.
 
@@ -55,6 +55,8 @@ The `CI` workflow runs on pull requests to `main` and on every push to `main`. O
 
 The backend job runs `pnpm --filter back test:migrations`. On pull requests it compares migrations with the base branch. On pushes to `main` it compares them with the previous `main` commit, so a migration merged out of timestamp order turns `main` red.
 
+The `Boot back image` job of `CI` builds the back image and starts it against PostgreSQL and Redis, on `main` and on pull requests that touch the back or the packages it loads. It fails when the container stops or `/health/ready` never answers, which tests do not catch: a missing runtime dependency or a migration that cannot load.
+
 `Create Release Tag` tags a `main` commit only after its `CI` push run succeeds. Dokploy deploys from these tags. Running the workflow manually is an escape hatch for a missed tag. It still requires a successful `CI` check on the dispatched commit and fails otherwise.
 
 ## Start here
@@ -63,10 +65,10 @@ The backend job runs `pnpm --filter back test:migrations`. On pull requests it c
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Change public UI, pages, or copy  | `apps/front` — read [apps/front/README.md](apps/front/README.md) and [DESIGN.md](apps/front/DESIGN.md)         |
 | Change API, data, or auth         | `apps/back` — read [apps/back/README.md](apps/back/README.md) and [ARCHITECTURE.md](apps/back/ARCHITECTURE.md) |
-| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required)                                      |
+| Add or change user-facing strings | `apps/front/i18n/locales/en-US.json` **and** `fr-FR.json` (both required; `pnpm check:i18n` enforces it)       |
 | Staff admin console               | `apps/admin`                                                                                                   |
-| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports)                               |
-| Docs, changelog, or OSS process   | Root `README.md`, `CHANGELOG.md`, this file                                                                    |
+| Shared types or utilities         | `packages/types`, `packages/utils` (framework-independent — no Vue/Nuxt imports, `pnpm check:packages`)        |
+| Docs or OSS process               | Root `README.md`, this file                                                                                    |
 
 ## Project layout
 
@@ -85,9 +87,22 @@ The backend job runs `pnpm --filter back test:migrations`. On pull requests it c
 ```bash
 pnpm lint
 pnpm fmt:check
+pnpm typecheck
+pnpm check:i18n
+pnpm check:packages
+pnpm check:node
+pnpm test:checks
+pnpm --filter @sarpbc/utils test
+pnpm --filter back typecheck:tests
 pnpm --filter back test
+pnpm --filter back test:architecture
+pnpm --filter back test:contracts
+pnpm --filter back test:migrations
 pnpm --filter front build
+pnpm --filter admin build
 ```
+
+This is the list CI runs, minus the Docker-based `pnpm --filter back test:cov`. Run the back commands when you touch the API or shared packages, and the front or admin build for the app you changed.
 
 4. User-facing strings in Nuxt apps must use i18n (`en-US` + `fr-FR`). No hardcoded copy in templates.
 5. Backend validation / HTTP errors should be actionable for the UI (what failed + what to do next).
@@ -95,7 +110,7 @@ pnpm --filter front build
 
 ## Recognition
 
-Merged pull requests with non-trivial changes are credited in [CHANGELOG.md](CHANGELOG.md) under the release section (`@username`). Legal attribution for the project as a whole is in [NOTICE](NOTICE).
+Legal attribution for the project as a whole is in [NOTICE](NOTICE).
 
 ## Security
 

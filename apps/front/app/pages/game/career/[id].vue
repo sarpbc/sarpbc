@@ -3,10 +3,6 @@ import CareerEnd from "~/components/career/CareerEnd.vue";
 import { decodeCareerResultFromShare, loadCareerResult } from "~/composables/useCareerStorage";
 import type { CareerResult } from "~/types/career";
 
-definePageMeta({
-  layout: "game",
-});
-
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();
@@ -24,7 +20,7 @@ onMounted(() => {
     return;
   }
 
-  const encoded = typeof route.query.d === "string" ? route.query.d : null;
+  const encoded = Array.isArray(route.query.d) ? null : route.query.d;
   if (encoded) {
     result.value = decodeCareerResultFromShare(encoded);
   }

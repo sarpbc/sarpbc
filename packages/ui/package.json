@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/module.ts"
+    ".": "./src/module.ts",
+    "./config": "./src/config.ts"
   },
   "scripts": {
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
@@ -19,11 +20,14 @@
     "@sarpbc/utils": "workspace:*"
   },
   "devDependencies": {
+    "@nuxtjs/i18n": "catalog:",
     "nuxt": "catalog:",
     "typescript": "catalog:",
     "vue": "catalog:"
   },
   "peerDependencies": {
+    "@nuxt/ui": "catalog:",
+    "@nuxtjs/i18n": "catalog:",
     "nuxt": "catalog:",
     "vue": "catalog:"
   }

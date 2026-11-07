@@ -1,35 +1,27 @@
+import {
+  excerptFromNewsContent,
+  hasFrenchTranslation,
+  isoWeekUtcRange,
+  localizedNewsFields,
+  toSlug,
+} from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
-import { assertValidMatchBlocks, excerptFromContent } from "../domain/news-content.util";
-import {
-  hasFrenchTranslation,
-  localizedNewsFields,
-  type NewsLocale,
-} from "../domain/news-locale.util";
+import { assertValidMatchBlocks } from "../domain/news-content.util";
+import { DEFAULT_NEWS_TYPE } from "../domain/news-type";
 import type { NewsArticleRecord, CreateNewsArticleInput, UpdateNewsArticleInput } from "./models";
 import type { NewsQueries, NewsTransaction, NewsComments, NewsIndexing } from "./ports";
-import slugify from "slugify";
-import type { NewsType } from "@sarpbc/types";
-import { isoWeekUtcRange } from "@sarpbc/utils";
+import type {
+  NewsArticleAdmin,
+  NewsSitemapChunkResponse,
+  NewsSitemapMetaResponse,
+  NewsType,
+  PaginatedNewsArticles,
+  SupportedLocale,
+} from "@sarpbc/types";
 /** Google News and sitemap-file caps; archive chunks stay at this size from day one. */
 export const NEWS_SITEMAP_CHUNK_SIZE = 1000;
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
-
-export interface NewsSitemapEntry {
-  slug: string;
-  lastmod: string;
-}
-
-export interface NewsSitemapMetaResponse {
-  total: number;
-  chunkSize: number;
-  chunkCount: number;
-}
-
-export interface NewsSitemapChunkResponse extends NewsSitemapMetaResponse {
-  chunk: number;
-  data: NewsSitemapEntry[];
-}
 
 export function newsSitemapChunkCount(total: number): number {
   return Math.max(1, Math.ceil(Math.max(total, 0) / NEWS_SITEMAP_CHUNK_SIZE));
@@ -58,12 +50,6 @@ export interface NewsArticleResponse {
   type: NewsType;
 }
 
-export interface NewsArticleAdminResponse extends NewsArticleResponse {
-  titleFr: string | null;
-  contentFr: string | null;
-  hasFrench: boolean;
-}
-
 export interface NewsWeekResponse {
   week: string;
   start: Date;
@@ -82,12 +68,11 @@ export class NewsService {
     private readonly transaction: NewsTransaction,
     private readonly replyService: NewsComments,
     private readonly indexing: NewsIndexing,
-    private readonly id: () => string = () => crypto.randomUUID(),
   ) {}
 
   private mapListArticle(
     article: NewsArticleRecord,
-    locale: NewsLocale,
+    locale: SupportedLocale,
     commentCount = 0,
   ): NewsArticleListItemResponse {
     const { title, content } = localizedNewsFields(article, locale);
@@ -97,13 +82,13 @@ export class NewsService {
       slug: article.slug,
       createdAt: article.createdAt,
       imageUrl: article.imageUrl,
-      excerpt: excerptFromContent(content),
+      excerpt: excerptFromNewsContent(content),
       commentCount,
       type: article.type,
     };
   }
 
-  private mapArticle(article: NewsArticleRecord, locale: NewsLocale): NewsArticleResponse {
+  private mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
     const { title, content } = localizedNewsFields(article, locale);
     return {
       id: article.id,
@@ -118,21 +103,18 @@ export class NewsService {
     };
   }
 
-  private mapAdminArticle(article: NewsArticleRecord): NewsArticleAdminResponse {
+  private mapAdminArticle(article: NewsArticleRecord): NewsArticleAdmin {
     return {
       ...this.mapArticle(article, "en-US"),
+      createdAt: article.createdAt.toISOString(),
       titleFr: article.titleFr,
       contentFr: article.contentFr,
       hasFrench: hasFrenchTranslation(article),
     };
   }
 
-  private normalizeSlug(value: string): string {
-    return slugify(value, { lower: true, strict: true });
-  }
-
   private async generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
-    const base = this.normalizeSlug(source);
+    const base = toSlug(source);
     if (!base) {
       throw new ConflictError(
         "Could not generate a URL slug from that title. Add a slug manually (letters, numbers, hyphens).",
@@ -159,7 +141,7 @@ export class NewsService {
     }
   }
 
-  async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdminResponse> {
+  async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
     return this.transaction.run(async (scope) => {
       const author = await scope.users.findById(userId);
       if (!author) {
@@ -168,7 +150,7 @@ export class NewsService {
 
       let slug: string;
       if (dto.slug) {
-        slug = this.normalizeSlug(dto.slug);
+        slug = toSlug(dto.slug);
         if (!slug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",
@@ -180,7 +162,7 @@ export class NewsService {
       }
 
       const article: NewsArticleRecord = {
-        id: this.id(),
+        id: crypto.randomUUID(),
         updatedAt: null,
         title: sanitizePlainText(dto.title),
         content: newsContent(dto.content),
@@ -190,7 +172,7 @@ export class NewsService {
         slug,
         isDraft: true,
         imageUrl: dto.imageUrl ?? null,
-        type: dto.type ?? "short",
+        type: dto.type ?? DEFAULT_NEWS_TYPE,
         createdAt: new Date(),
       };
       await scope.articles.save(article);
@@ -201,7 +183,7 @@ export class NewsService {
   async findAllPublishedArticle(
     page: number,
     limit: number,
-    locale: NewsLocale = "en-US",
+    locale: SupportedLocale = "en-US",
     type?: NewsType,
   ): Promise<{
     data: NewsArticleListItemResponse[];
@@ -226,7 +208,7 @@ export class NewsService {
 
   async findPublishedShortsByWeek(
     week: string,
-    locale: NewsLocale = "en-US",
+    locale: SupportedLocale = "en-US",
   ): Promise<NewsWeekResponse> {
     const range = isoWeekUtcRange(week);
     if (!range) {
@@ -254,10 +236,7 @@ export class NewsService {
     };
   }
 
-  /**
-   * Chunk 0 is a stable archive (oldest first); only the last chunk grows.
-   * Per-URL lastmod is `updatedAt ?? createdAt` so edits stay visible to crawlers.
-   */
+  /** Chunk 0 is a stable archive (oldest first); only the last chunk grows. */
   async findPublishedSitemapChunk(chunk: number): Promise<NewsSitemapChunkResponse> {
     if (!Number.isInteger(chunk) || chunk < 0) {
       throw new InvalidInputError("Sitemap chunk must be a non-negative integer.");
@@ -285,15 +264,7 @@ export class NewsService {
     };
   }
 
-  async findAll(
-    page: number,
-    limit: number,
-  ): Promise<{
-    data: NewsArticleAdminResponse[];
-    total: number;
-    page: number;
-    limit: number;
-  }> {
+  async findAll(page: number, limit: number): Promise<PaginatedNewsArticles> {
     const [articles, total] = await this.newsRepository.listAdmin(page, limit);
     return {
       data: articles.map((a) => this.mapAdminArticle(a)),
@@ -303,7 +274,10 @@ export class NewsService {
     };
   }
 
-  async findOneBySlug(slug: string, locale: NewsLocale = "en-US"): Promise<NewsArticleResponse> {
+  async findOneBySlug(
+    slug: string,
+    locale: SupportedLocale = "en-US",
+  ): Promise<NewsArticleResponse> {
     const article = await this.newsRepository.findBySlug(slug);
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
@@ -312,7 +286,7 @@ export class NewsService {
     return this.mapArticle(article, locale);
   }
 
-  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdminResponse> {
+  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdmin> {
     const article = await this.newsRepository.findBySlug(slug);
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
@@ -320,7 +294,7 @@ export class NewsService {
     return this.mapAdminArticle(article);
   }
 
-  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdminResponse> {
+  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdmin> {
     const bySlug = await this.newsRepository.findBySlug(idOrSlug);
     if (bySlug) {
       return this.mapAdminArticle(bySlug);
@@ -344,7 +318,7 @@ export class NewsService {
     return article.id;
   }
 
-  async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdminResponse> {
+  async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdmin> {
     const result = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
       if (!article) {
@@ -366,7 +340,7 @@ export class NewsService {
         article.imageUrl = dto.imageUrl ?? null;
       }
       if (dto.slug !== undefined) {
-        const nextSlug = this.normalizeSlug(dto.slug);
+        const nextSlug = toSlug(dto.slug);
         if (!nextSlug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",

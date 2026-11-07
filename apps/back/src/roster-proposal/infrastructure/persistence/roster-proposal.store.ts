@@ -3,8 +3,8 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
-import { Player, Team } from "../../../roster/infrastructure/persistence/player.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import * as Row from "./roster-proposal.entity";
 
@@ -46,7 +46,6 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         row.createdAt = model.createdAt;
       }
       Object.assign(row, {
-        kind: model.change.kind,
         change: model.change,
         sourceUrl: model.sourceUrl,
         status: model.status,

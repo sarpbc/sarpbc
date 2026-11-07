@@ -1,40 +1,28 @@
 <script lang="ts" setup>
-import { tournamentLabel } from "~/utils/tournamentLabel";
+import { getApiErrorMessage, tournamentStageLabel } from "@sarpbc/utils";
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import type { TournamentListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
-const limit = 25;
-const page = ref(1);
 const isSyncingAdditions = ref(false);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
-const tournaments = ref<TournamentListItem[]>([]);
-const total = ref(0);
-
-const { status, data, refresh } = await useLazyAsyncData(
-  () => `admin-tournaments-list-${page.value}`,
-  () => getAllTournaments({ limit, offset: (page.value - 1) * limit }),
-  {
-    default: () => ({ tournaments: [], total: 0 }),
-    watch: [page],
-    server: false,
-  },
-);
-
-watch(
+const {
+  items: tournaments,
+  total,
+  page,
+  limit,
   status,
-  (s) => {
-    if (s === "success" && data.value) {
-      tournaments.value = data.value.tournaments;
-      total.value = data.value.total;
-    }
-  },
-  { immediate: true },
-);
+  error,
+  refresh,
+} = useAdminList("admin-tournaments-list", async ({ limit, offset }) => {
+  const { tournaments, total } = await getAllTournaments({ limit, offset });
+  return { items: tournaments, total };
+});
 
 const breadcrumbItems = computed(() => [
   {
@@ -46,7 +34,7 @@ const columns: TableColumn<TournamentListItem>[] = [
   {
     id: "name",
     header: t("page.tournaments.columns.name"),
-    cell: ({ row }) => tournamentLabel(row.original),
+    cell: ({ row }) => tournamentStageLabel(row.original),
   },
   {
     id: "source",
@@ -76,11 +64,11 @@ function selectRow(e: Event, row: TableRow<TournamentListItem>) {
 async function handleSyncAdditions() {
   isSyncingAdditions.value = true;
   try {
-    const success = await syncTournamentAdditions();
-    if (success) {
-      toast.add({ title: t("page.tournaments.syncAdditions"), color: "success" });
-      await refresh();
-    }
+    await syncTournamentAdditions();
+    toast.add({ title: t("page.tournaments.syncAdditions"), color: "success" });
+    await refresh();
+  } catch (syncError) {
+    reportError(syncError);
   } finally {
     isSyncingAdditions.value = false;
   }
@@ -88,11 +76,11 @@ async function handleSyncAdditions() {
 
 async function handleSyncTournament(e: Event, tournamentId: string) {
   e.stopPropagation();
-  await runTournamentSync(tournamentId, refresh);
-}
-
-async function updatePage(value: number) {
-  page.value = value;
+  try {
+    await runTournamentSync(tournamentId, refresh);
+  } catch (syncError) {
+    reportError(syncError);
+  }
 }
 </script>
 
@@ -131,7 +119,12 @@ async function updatePage(value: number) {
     </template>
 
     <DashboardContent>
-      <ClientOnly>
+      <LoadError
+        v-if="status === 'error'"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
+      <ClientOnly v-else>
         <UTable
           :data="tournaments"
           :columns="columns"
@@ -185,7 +178,7 @@ async function updatePage(value: number) {
             :page="page"
             :total="total"
             :items-per-page="limit"
-            @update:page="updatePage"
+            @update:page="page = $event"
           />
         </div>
       </ClientOnly>

@@ -1,13 +1,6 @@
-import { tournamentStagePath } from "@sarpbc/utils";
-import type { MatchListItem } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
-
-export type MatchEventGroup = {
-  key: string;
-  displayName: string;
-  matchesPath: string;
-  matches: MatchListItem[];
-};
+import { stageMatchesPath, tournamentStageLabel } from "@sarpbc/utils";
+import type { MatchListItem } from "@sarpbc/types";
+import type { MatchEventGroup } from "~/types/matches";
 
 export function groupMatchesByEvent(matches: MatchListItem[]): MatchEventGroup[] {
   const byStage = new Map<string, MatchEventGroup>();
@@ -19,7 +12,7 @@ export function groupMatchesByEvent(matches: MatchListItem[]): MatchEventGroup[]
       group = {
         key: tournament.id,
         displayName: tournamentStageLabel(tournament),
-        matchesPath: `${tournamentStagePath(tournament.event.slug, tournament.slug)}/matches`,
+        matchesPath: stageMatchesPath(tournament.event.slug, tournament.slug),
         matches: [],
       };
       byStage.set(tournament.id, group);

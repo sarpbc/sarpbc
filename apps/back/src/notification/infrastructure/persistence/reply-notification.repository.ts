@@ -1,5 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 
+import { REPLY_HAS_TARGET, REPLY_POPULATE } from "../../../reply/infrastructure/reply-persistence";
 import { ReplyNotification } from "./reply-notification.entity";
 
 interface ReplyNotificationReadFilter {
@@ -8,24 +9,14 @@ interface ReplyNotificationReadFilter {
   id?: { $in: string[] };
 }
 
-export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
-  async save(notification: ReplyNotification): Promise<void> {
-    this.em.persist(notification);
-  }
+const hasTarget = () => REPLY_HAS_TARGET.map((target) => ({ reply: target }));
 
+export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
     return this.find(
-      { recipient: { id: recipientId } },
+      { recipient: { id: recipientId }, $or: hasTarget() },
       {
-        populate: [
-          "reply",
-          "reply.author",
-          "reply.post",
-          "reply.newsArticle",
-          "reply.match",
-          "reply.match.participants.team",
-          "reply.match.tournament.event",
-        ],
+        populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
         orderBy: { createdAt: "DESC" },
         limit,
       },
@@ -36,6 +27,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
     return this.count({
       recipient: { id: recipientId },
       readAt: null,
+      $or: hasTarget(),
     });
   }
 

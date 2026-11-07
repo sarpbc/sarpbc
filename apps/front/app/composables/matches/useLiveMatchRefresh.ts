@@ -1,4 +1,4 @@
-import { useDocumentVisibility } from "@vueuse/core";
+import { useDocumentVisibility, useIntervalFn } from "@vueuse/core";
 
 const LIVE_MATCH_REFRESH_INTERVAL_MS = 20_000;
 
@@ -8,16 +8,15 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
   }
 
   const visibility = useDocumentVisibility();
-  let timer: ReturnType<typeof setInterval> | null = null;
+  const poll = useIntervalFn(
+    () => void refreshNuxtData(toValue(key)),
+    LIVE_MATCH_REFRESH_INTERVAL_MS,
+    {
+      immediate: false,
+    },
+  );
   let stopWatch: (() => void) | null = null;
   let disposed = false;
-
-  function clear() {
-    if (timer !== null) {
-      clearInterval(timer);
-      timer = null;
-    }
-  }
 
   onNuxtReady(() => {
     if (disposed) {
@@ -27,15 +26,13 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
     stopWatch = watch(
       () => hasLive() && visibility.value === "visible",
       (polling) => {
-        clear();
+        poll.pause();
         if (!polling) {
           return;
         }
 
         void refreshNuxtData(toValue(key));
-        timer = setInterval(() => {
-          void refreshNuxtData(toValue(key));
-        }, LIVE_MATCH_REFRESH_INTERVAL_MS);
+        poll.resume();
       },
       { immediate: true },
     );
@@ -45,7 +42,6 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
     onScopeDispose(() => {
       disposed = true;
       stopWatch?.();
-      clear();
     });
   }
 }

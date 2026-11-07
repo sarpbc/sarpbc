@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { LiveStreamer } from "@sarpbc/types";
 import { useIntersectionObserver } from "@vueuse/core";
-import type { LiveStreamer } from "~/types/streamer";
 
 const { t, locale } = useI18n();
 const { streamers, load } = useLiveStreamers();

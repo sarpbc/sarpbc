@@ -4,7 +4,10 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
   const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+  const { TOURNAMENT_QUERIES } =
+    await import("../../src/tournament/infrastructure/competition-queries.tokens.ts");
   const sync = app.get(CompetitionSyncService);
+  const tournaments = app.get(TOURNAMENT_QUERIES);
   const run = (work) => RequestContext.create(orm.em.fork(), work);
   const veteran = {
     pandascoreId: 9101,
@@ -180,12 +183,10 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   );
   assert((await request("GET", `/player/${player.id}/matches`)).json().matches.length >= 2);
   assert.equal(
-    (await run(() => sync.findTournamentByPandascoreId(tournamentCommand.pandascoreId))).id,
+    (await run(() => tournaments.findByPandascoreId(tournamentCommand.pandascoreId))).id,
     imported.id,
   );
-  assert(
-    (await run(() => sync.getKnownTournamentPandascoreIds())).has(tournamentCommand.pandascoreId),
-  );
+  assert((await run(() => tournaments.knownPandascoreIds())).has(tournamentCommand.pandascoreId));
   await run(() =>
     sync.applyIncident({
       id: 3,

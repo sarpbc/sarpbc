@@ -5,11 +5,12 @@ const props = defineProps<{
   title: string;
   confirmLabel: string;
   message: (item: T) => string;
-  remove: (item: T) => Promise<boolean | void>;
+  remove: (item: T) => Promise<void>;
 }>();
 
 const emit = defineEmits<{ deleted: [] }>();
 
+const reportError = useReportError();
 const isDeleting = ref(false);
 const shown = shallowRef<T | null>(target.value);
 
@@ -29,11 +30,11 @@ async function confirm() {
   if (item === null) return;
   isDeleting.value = true;
   try {
-    if ((await props.remove(item)) === false) return;
+    await props.remove(item);
     target.value = null;
     emit("deleted");
   } catch (error) {
-    console.error("Failed to delete:", error);
+    reportError(error);
   } finally {
     isDeleting.value = false;
   }

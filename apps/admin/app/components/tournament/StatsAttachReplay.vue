@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { StatsImportItem, TournamentMatchListItem, TournamentStatsGame } from "@sarpbc/types";
-import { maxVodGame } from "@sarpbc/utils";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage, maxVodGame } from "@sarpbc/utils";
 
 const target = defineModel<StatsImportItem | null>("target", { required: true });
 

@@ -1,78 +1,28 @@
-import type { MatchGameStats, MatchVod, TournamentEventRef } from "@sarpbc/types";
+import type { MatchGameStats, MatchListItem, MatchVod } from "@sarpbc/types";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
 import type { OfficialMatchStream } from "~/utils/officialStream";
 
 export interface MatchResult {
-  participant: string | { id: string };
+  participant: string;
   score: number;
 }
 
-export function resolveMatchResultParticipantId(
-  participant: MatchResult["participant"],
-): string | null {
-  if (typeof participant === "string") {
-    return participant;
-  }
-  return participant.id ?? null;
-}
-
-export function getMatchParticipantScore(
-  results: MatchResult[] | undefined,
-  participantId: string | undefined,
-): number | null {
-  if (!results || !participantId || results.length === 0) {
-    return null;
-  }
-
-  const result = results.find(
-    (entry) => resolveMatchResultParticipantId(entry.participant) === participantId,
-  );
-
-  return result?.score ?? null;
-}
-
-export interface MatchListTournament {
-  id: string;
-  name: string;
-  slug: string;
-  event: TournamentEventRef;
-  league?: { id: string; name: string };
-}
-
-export interface MatchListParticipant {
-  id: string;
-  team: ThemedLogo & { name: string };
-}
+export type MatchEventGroup = {
+  key: string;
+  displayName: string;
+  matchesPath: string;
+  matches: MatchListItem[];
+};
 
 export interface MatchRowItem {
   id: string;
   publicId: number;
   slug: string;
   beginAt?: Date | string | null;
-  participants?: MatchListParticipant[];
+  participants?: { id: string; team: ThemedLogo & { name: string } }[];
   results?: MatchResult[];
-  commentCount?: number;
 }
-
-export interface MatchListItem extends MatchRowItem {
-  tournament: MatchListTournament;
-}
-
-export interface UpcomingMatchesResponse {
-  live: MatchListItem[];
-  upcoming: MatchListItem[];
-  liveTotal: number;
-  upcomingTotal: number;
-  total: number;
-}
-
-export interface MatchResultsResponse {
-  results: MatchListItem[];
-  total: number;
-}
-
-export type MatchesPageData = UpcomingMatchesResponse | MatchResultsResponse;
 
 export interface TeamFormRecord {
   wins: number;
@@ -139,6 +89,11 @@ export interface MatchDetailResponse {
   games: MatchGameStats[];
 }
 
+/** The detail endpoint serializes the stored match, so result participants are objects there. */
+export interface MatchDetailWire extends Omit<MatchDetailResponse, "match"> {
+  match: Omit<Match, "results"> & { results: { participant: { id: string }; score: number }[] };
+}
+
 export interface Match {
   id: string;
   publicId: number;
@@ -163,17 +118,3 @@ export interface Match {
 export type MatchLinkTarget = Pick<Match, "id" | "publicId" | "slug">;
 
 export type MatchStatus = "upcoming" | "live" | "finished";
-
-export function shouldShowMatchScores(status: MatchStatus): boolean {
-  return status === "live" || status === "finished";
-}
-
-export function displayMatchScore(score: number | null, status: MatchStatus): string | null {
-  if (!shouldShowMatchScores(status)) {
-    return null;
-  }
-  if (score === null) {
-    return "–";
-  }
-  return String(score);
-}

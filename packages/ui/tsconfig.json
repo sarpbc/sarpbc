@@ -1,14 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "declaration": false,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true
-  },
-  "include": ["src/module.ts"]
+  "extends": "../tsconfig.base.json",
+  "include": ["src/module.ts", "src/config.ts"]
 }

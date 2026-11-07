@@ -1,4 +1,5 @@
 import type { DataSource } from "./competition";
+import type { TeamLogos } from "./team";
 import type { TournamentEventRef } from "./tournament-event";
 
 export interface PrizeAmount {
@@ -6,17 +7,23 @@ export interface PrizeAmount {
   amount: number;
 }
 
+export interface PrizeEntry {
+  placement: number;
+  amount: number;
+  currency: string;
+  teamId: string;
+  playerIds: string[];
+}
+
 export interface TournamentPrize {
   id: string;
   placement: number;
   amount: number;
   currency: string;
-  team: {
+  team: Pick<TeamLogos, "imageUrl" | "darkModeImageUrl"> & {
     id: string;
     name: string;
     slug: string;
-    imageUrl: string | null;
-    darkModeImageUrl: string | null;
   };
   players: { id: string; name: string; slug: string }[];
 }

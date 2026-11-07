@@ -1,19 +1,18 @@
 import { Node, mergeAttributes, type MarkdownTokenizer } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
-import { newsMatchBlockFromAttrs, parseNewsMatchTag, serializeNewsMatchTag } from "@sarpbc/utils";
+import {
+  newsMatchBlockFromAttrs,
+  newsMatchTagStart,
+  parseNewsMatchTag,
+  serializeNewsMatchTag,
+} from "@sarpbc/utils";
 import MatchBlockNodeView from "~/components/news/MatchBlockNodeView.vue";
 import { EMPTY_MATCH_BLOCK_ATTRS, matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
 
 const matchBlockTokenizer: MarkdownTokenizer = {
   name: "matchBlock",
   level: "block",
-  start: (src: string) => {
-    const block = src.indexOf("::matches{");
-    if (block !== -1) {
-      return block;
-    }
-    return src.indexOf(":matches{");
-  },
+  start: newsMatchTagStart,
   tokenize: (src: string) => {
     const parsed = parseNewsMatchTag(src.trimStart());
     if (!parsed) {

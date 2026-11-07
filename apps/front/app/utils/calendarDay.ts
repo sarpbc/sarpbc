@@ -1,4 +1,4 @@
-export function startOfLocalDay(date: Date): Date {
+function startOfLocalDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
@@ -20,7 +20,7 @@ export function daysFromToday(date: Date, now: Date = new Date()): number {
   return Math.round((target - today) / 86_400_000);
 }
 
-export function isTodayOrTomorrow(date: Date, now: Date = new Date()): boolean {
+function isTodayOrTomorrow(date: Date, now: Date = new Date()): boolean {
   const offset = daysFromToday(date, now);
   return offset >= 0 && offset <= 1;
 }

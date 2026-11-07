@@ -1,5 +1,4 @@
-import type { RosterProposal, RosterProposalList } from "~/types/rosterProposal";
-import { apiFetch } from "~/utils/apiFetch";
+import type { RosterProposal, RosterProposalList } from "@sarpbc/types";
 
 export async function getPendingRosterProposals(): Promise<RosterProposalList> {
   return apiFetch<RosterProposalList>("/roster-proposals", {

@@ -23,7 +23,6 @@ interface GameState {
 
 const loading = ref(true);
 const submitting = ref(false);
-const maxAttempts = 6;
 const error = ref<undefined | string>(undefined);
 const revealedAttempt = ref<number | undefined>(undefined);
 const REVEAL_STAGGER_MS = 60;
@@ -62,7 +61,7 @@ const statusMessage = computed(() => {
   }
   return t("page.game.airriddle.attemptsLeft", {
     current: gameState.attempts.length,
-    max: maxAttempts,
+    max: AIR_RIDDLE_MAX_ATTEMPTS,
   });
 });
 
@@ -70,7 +69,7 @@ const emptyRows = computed(() => {
   if (gameState.isWon || gameState.isGameOver) {
     return 0;
   }
-  return Math.max(0, maxAttempts - gameState.attempts.length - 1);
+  return Math.max(0, AIR_RIDDLE_MAX_ATTEMPTS - gameState.attempts.length - 1);
 });
 
 const tileSize = computed(() => (isMobile.value ? "2.75rem" : "3.5rem"));
@@ -218,7 +217,7 @@ async function submitGuess() {
   try {
     const results = await guessAirRiddle(
       currentGuess.value,
-      gameState.attempts.length === maxAttempts - 1,
+      gameState.attempts.length === AIR_RIDDLE_MAX_ATTEMPTS - 1,
     );
 
     error.value = undefined;
@@ -248,7 +247,7 @@ async function submitGuess() {
     if (isCorrect) {
       gameState.isWon = true;
       posthog?.capture("airriddle_game_won", { attempts: gameState.attempts.length });
-    } else if (gameState.attempts.length >= maxAttempts) {
+    } else if (gameState.attempts.length >= AIR_RIDDLE_MAX_ATTEMPTS) {
       gameState.isGameOver = true;
       posthog?.capture("airriddle_game_lost", { attempts: gameState.attempts.length });
     }

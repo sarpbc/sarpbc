@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Contract, ContractRole, Player, Team } from "./roster";
+import { Contract, Player, Team } from "./roster";
 import { deriveTransfers } from "./transfer";
 
 describe("deriveTransfers", () => {
@@ -13,7 +13,7 @@ describe("deriveTransfers", () => {
     team: Team,
     startDate: string,
     endDate: string | null,
-    role = ContractRole.ACTIVE,
+    role = "active",
   ) =>
     Object.assign(new Contract(), {
       id,
@@ -50,8 +50,8 @@ describe("deriveTransfers", () => {
     expect(
       summary([
         contract("starter", kc, "2024-01-01", "2025-03-01"),
-        contract("bench", kc, "2025-03-01", "2025-08-01", ContractRole.BENCHED),
-        contract("loan", vitality, "2025-04-01", "2025-07-01", ContractRole.LOANED),
+        contract("bench", kc, "2025-03-01", "2025-08-01", "benched"),
+        contract("loan", vitality, "2025-04-01", "2025-07-01", "loaned"),
       ]),
     ).toEqual([
       ["departure", "2025-08-01", "kc"],
@@ -65,7 +65,7 @@ describe("deriveTransfers", () => {
   it("treats a return from the bench as an arrival without a departure", () => {
     expect(
       summary([
-        contract("bench", kc, "2025-01-01", "2025-05-01", ContractRole.BENCHED),
+        contract("bench", kc, "2025-01-01", "2025-05-01", "benched"),
         contract("starter", kc, "2025-05-01", null),
       ]),
     ).toEqual([
@@ -78,8 +78,8 @@ describe("deriveTransfers", () => {
     expect(
       summary([
         contract("player", kc, "2023-01-01", "2025-09-01"),
-        contract("coach", kc, "2025-09-01", "2026-06-01", ContractRole.COACH),
-        contract("analyst", vitality, "2026-07-01", null, ContractRole.ANALYST),
+        contract("coach", kc, "2025-09-01", "2026-06-01", "coach"),
+        contract("analyst", vitality, "2026-07-01", null, "analyst"),
       ]),
     ).toEqual([
       ["staff", "2026-07-01", "vitality"],

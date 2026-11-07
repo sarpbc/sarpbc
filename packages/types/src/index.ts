@@ -2,24 +2,40 @@ import type { PlayerAwardType } from "./player-award";
 import type { NewsType } from "./news";
 import type { TransferType } from "./transfer";
 
-export type { StaffRole, StaffPermission, User } from "./user";
-export type { Player } from "./player";
+export { STAFF_PERMISSIONS, STAFF_ROLES } from "./user";
+export type { StaffRole, StaffPermission, User, UserList, UserListItem } from "./user";
+export { PLAYER_STATUSES } from "./player";
+export type { Player, PlayerStatus } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
-export type { Team } from "./team";
-export type {
-  ContractRole,
-  PlayerContract,
-  PlayerContractRole,
-  StaffContractRole,
-  TeamContract,
-} from "./contract";
+export { TEAM_LOGO_VARIANTS } from "./team";
+export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team";
+export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
+export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";
-export type { League } from "./league";
-export type { TournamentEventRef } from "./tournament-event";
-export type { NewsType } from "./news";
+export type { League, LeagueInput } from "./league";
 export type {
+  EventInput,
+  ManualEvent,
+  TournamentEvent,
+  TournamentEventRef,
+  TournamentPathResponse,
+  TournamentTab,
+} from "./tournament-event";
+export type {
+  NewsArticleAdmin,
+  NewsSitemapChunkResponse,
+  NewsSitemapEntry,
+  NewsSitemapMetaResponse,
+  NewsType,
+  PaginatedNewsArticles,
+} from "./news";
+export { DATA_SOURCES } from "./competition";
+export type {
+  CountedMatchListItem,
+  MatchListItem,
+  MatchResultsResponse,
+  UpcomingMatchesResponse,
   ProfileMatchListItem,
-  TeamSummary,
   TournamentDetail,
   TournamentDetailMatch,
   TournamentDetailParticipant,
@@ -50,20 +66,51 @@ export type {
   StatsRoster,
   TournamentStatsGame,
 } from "./match-stats";
-export type { ForumPost } from "./forum";
+export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
+export { FORUM_ERROR_CODES } from "./forum";
+export type {
+  ForumPost,
+  ForumPostCreationStatus,
+  ForumPostListItem,
+  ForumTopic,
+  PostPreview,
+} from "./forum";
+export { REPLY_REPORT_REASONS, REPLY_TARGET_TYPES } from "./reply";
+export type {
+  AppNotification,
+  PaginatedReplies,
+  Reply,
+  ReplyReportReason,
+  ReplyTargetType,
+} from "./reply";
+export type { LiveStreamer } from "./streamer";
+export type { R2UploadResponse } from "./storage";
+export { SEARCH_TYPES } from "./search";
+export type { SearchType } from "./search";
 export type {
   EarningsEntry,
   EarningsYear,
   PrizeAmount,
+  PrizeEntry,
   ProfileEarnings,
   TournamentPrize,
   TournamentPrizes,
 } from "./prize";
+export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
+export type {
+  RosterChange,
+  RosterProposal,
+  RosterProposalList,
+  RosterProposalStatus,
+} from "./roster-change";
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",
   "defensive_mvp",
 ] as const satisfies readonly PlayerAwardType[];
+
+export const SUPPORTED_LOCALES = ["en-US", "fr-FR"] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 export const NEWS_TYPES = ["short", "article"] as const satisfies readonly NewsType[];
 
@@ -74,14 +121,3 @@ export const TRANSFER_TYPES = [
   "loan",
   "staff",
 ] as const satisfies readonly TransferType[];
-
-export const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
-
-export const STAFF_CONTRACT_ROLES = ["coach", "assistant_coach", "analyst", "manager"] as const;
-
-export const CONTRACT_ROLES = [...PLAYER_CONTRACT_ROLES, ...STAFF_CONTRACT_ROLES] as const;
-
-export const PlayerAwardTypes = {
-  MVP: "mvp",
-  DEFENSIVE_MVP: "defensive_mvp",
-} as const satisfies Record<string, PlayerAwardType>;

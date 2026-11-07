@@ -1,6 +1,7 @@
 import type { TournamentEventRef } from "@sarpbc/types";
 import type { MatchLinkTarget } from "~/types/matches";
-import { tournamentStageLabel } from "~/utils/tournamentStageLabel";
+import { tournamentStageLabel } from "@sarpbc/utils";
+import { TBD_LABEL } from "~/utils/tbdLabel";
 import { matchEndAt, matchEventUid, matchPageUrl, type CalendarEvent } from "./ics";
 
 interface CalendarMatch extends MatchLinkTarget {
@@ -11,7 +12,7 @@ interface CalendarMatch extends MatchLinkTarget {
 }
 
 function participantName(match: CalendarMatch, index: 0 | 1): string {
-  return match.participants?.[index]?.team.name?.trim() || "TBD";
+  return match.participants?.[index]?.team.name?.trim() || TBD_LABEL;
 }
 
 export function isMatchOnCalendar(match: {

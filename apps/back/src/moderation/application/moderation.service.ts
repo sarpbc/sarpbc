@@ -1,14 +1,13 @@
-import type { ReplyModerationReader, ReplyRecord } from "../../reply/application/public";
+import type { ReplyRecord } from "../../reply/application/models";
+import type { ModerationReplies } from "./ports";
 import type { ModerationReplyDto } from "./moderation-reply.view";
-import { resolveReplyTargetLink } from "../../reply/domain/reply-target-link.util";
-import type { ReplyTargetLink } from "../../reply/domain/reply-target-link.util";
+import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain/reply";
 
 export class ModerationService {
-  constructor(private readonly replyRepository: ReplyModerationReader) {}
+  constructor(private readonly replies: ModerationReplies) {}
 
-  async listRecentReplies(limit = 50): Promise<ModerationReplyDto[]> {
-    const cappedLimit = Math.min(Math.max(limit, 1), 100);
-    const rows = await this.replyRepository.recentForModeration(cappedLimit);
+  async listRecentReplies(limit: number): Promise<ModerationReplyDto[]> {
+    const rows = await this.replies.recentForModeration(limit);
 
     return rows
       .map(({ reply, reportCount }) => {

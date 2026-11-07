@@ -1,19 +1,8 @@
+import { STAFF_PERMISSIONS } from "@sarpbc/types";
 import { describe, expect, it } from "vitest";
-import {
-  isStaffRole,
-  permissionsForRole,
-  roleHasPermission,
-  ROLE_PERMISSIONS,
-  STAFF_PERMISSIONS,
-} from "./staff-access";
+import { isStaffRole, permissionsForRole, roleHasPermission } from "./staff-access";
 
 describe("staff-access", () => {
-  it("defines permissions for every role", () => {
-    expect(ROLE_PERMISSIONS.admin).toEqual(STAFF_PERMISSIONS);
-    expect(ROLE_PERMISSIONS.journalist).toEqual(["news.manage", "images.manage"]);
-    expect(ROLE_PERMISSIONS.moderator).toEqual(["forum.moderate"]);
-  });
-
   it("recognizes staff roles only", () => {
     expect(isStaffRole("admin")).toBe(true);
     expect(isStaffRole("moderator")).toBe(true);

@@ -1,10 +1,12 @@
+import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { InvalidInputError } from "../../../common/domain/errors";
 import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
-import { registerRosterTools } from "./roster-tools";
+import { rosterTools } from "./roster-tools";
 
 const TEAM_ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
+const PLAYER_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 const LOGO_URL = `https://cdn.sarpbc.test/teams/${TEAM_ID}/logo-light-0123456789abcdef.webp`;
 const input = {
   teamId: TEAM_ID,
@@ -16,36 +18,45 @@ const input = {
 function setup(role: "admin" | "journalist") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
   const rosterProposalService = {
-    proposeTeamLogo: vi.fn(async (logo: { teamId: string; variant: "light" }, sourceUrl: string) =>
+    propose: vi.fn(async (change: ToolArguments, sourceUrl: string) =>
+      Object.assign(new RosterProposal(), { id: "proposal-1", sourceUrl, change }),
+    ),
+    proposeTeamLogo: vi.fn(async (logo: { teamId: string; variant: string }, sourceUrl: string) =>
       Object.assign(new RosterProposal(), {
         id: "proposal-1",
         sourceUrl,
         change: { kind: "upload_team_logo", ...logo, logoUrl: LOGO_URL },
       }),
     ),
+    list: vi.fn(),
   };
-  const registerTool = vi.fn();
-  registerRosterTools(
-    { registerTool } as never,
-    { user: { id: "u1", email: "staff@test.com", role }, rosterProposalService } as never,
-  );
-  const tool = registerTool.mock.calls.find((call) => call[0] === "upload_team_logo");
-  if (!tool) throw new Error("upload_team_logo is not registered");
-  return { rosterProposalService, tool };
+  const tools = rosterTools({ rosterProposalService });
+  const tool = (name: string) => {
+    const found = tools.find((candidate) => candidate.name === name);
+    if (!found) throw new Error(`${name} is not defined`);
+    return found;
+  };
+  const call = (name: string, args: ToolArguments) =>
+    tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
+  return { rosterProposalService, tool, call };
+}
+
+function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+  return result.content[0]?.text ?? "";
 }
 
 describe("upload_team_logo", () => {
   it("proposes the logo and returns the stored asset for review", async () => {
-    const { rosterProposalService, tool } = setup("admin");
+    const { rosterProposalService, call } = setup("admin");
 
-    const result = await tool[2](input);
+    const result = await call("upload_team_logo", input);
 
     expect(rosterProposalService.proposeTeamLogo).toHaveBeenCalledWith(
       { teamId: TEAM_ID, variant: "light", imageUrl: input.imageUrl },
       input.sourceUrl,
       "u1",
     );
-    expect(JSON.parse(result.content[0].text)).toMatchObject({
+    expect(JSON.parse(textOf(result))).toMatchObject({
       proposalId: "proposal-1",
       kind: "upload_team_logo",
       status: "pending",
@@ -55,7 +66,7 @@ describe("upload_team_logo", () => {
 
   it("validates its input shape and refuses Liquipedia", () => {
     const { tool } = setup("admin");
-    const schema = z.object(tool[1].inputSchema);
+    const schema = z.object(tool("upload_team_logo").inputSchema);
 
     expect(schema.safeParse(input).success).toBe(true);
     for (const invalid of [
@@ -71,12 +82,12 @@ describe("upload_team_logo", () => {
   });
 
   it("returns validation failures as tool errors", async () => {
-    const { rosterProposalService, tool } = setup("admin");
+    const { rosterProposalService, call } = setup("admin");
     rosterProposalService.proposeTeamLogo.mockRejectedValueOnce(
       new InvalidInputError("The logo is 64x64 pixels; it must be at least 128x128."),
     );
 
-    const result = await tool[2](input);
+    const result = await call("upload_team_logo", input);
 
     expect(result).toMatchObject({
       isError: true,
@@ -84,10 +95,87 @@ describe("upload_team_logo", () => {
     });
   });
 
-  it("requires teams.manage", async () => {
-    const { rosterProposalService, tool } = setup("journalist");
+  it("requires teams.manage and says so in its description", async () => {
+    const { rosterProposalService, call, tool } = setup("journalist");
 
-    expect((await tool[2](input)).isError).toBe(true);
+    expect((await call("upload_team_logo", input)).isError).toBe(true);
     expect(rosterProposalService.proposeTeamLogo).not.toHaveBeenCalled();
+    expect(tool("upload_team_logo").description).toContain("Requires teams.manage.");
+  });
+});
+
+describe("roster proposals", () => {
+  it("defaults a removed player to free_agent and a created player to free_agent", async () => {
+    const { rosterProposalService, call } = setup("admin");
+    const move = {
+      playerId: PLAYER_ID,
+      teamId: TEAM_ID,
+      effectiveDate: "2026-11-01",
+      sourceUrl: input.sourceUrl,
+    };
+
+    await call("remove_player_from_team", move);
+    await call("create_player", { name: "Zen", sourceUrl: input.sourceUrl });
+
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "remove_player_from_team", status: "free_agent" }),
+      input.sourceUrl,
+      "u1",
+    );
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "create_player", status: "free_agent" }),
+      input.sourceUrl,
+      "u1",
+    );
+  });
+
+  it("maps role to contractRole and country to nationality", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    await call("add_player_to_team", {
+      playerId: PLAYER_ID,
+      teamId: TEAM_ID,
+      effectiveDate: "2026-11-01",
+      role: "coach",
+      sourceUrl: input.sourceUrl,
+    });
+    await call("update_player", { playerId: PLAYER_ID, country: "FR", sourceUrl: input.sourceUrl });
+
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "add_player_to_team", contractRole: "coach" }),
+      input.sourceUrl,
+      "u1",
+    );
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "update_player", nationality: "FR" }),
+      input.sourceUrl,
+      "u1",
+    );
+  });
+
+  it("rejects a contract that ends before it starts and an update without fields", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    const reversed = await call("create_contract", {
+      playerId: PLAYER_ID,
+      teamId: TEAM_ID,
+      startDate: "2026-06-01",
+      endDate: "2026-01-01",
+      sourceUrl: input.sourceUrl,
+    });
+    const empty = await call("update_team", { teamId: TEAM_ID, sourceUrl: input.sourceUrl });
+
+    expect(textOf(reversed)).toBe("endDate must not precede startDate.");
+    expect(empty.isError).toBe(true);
+    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+  });
+
+  it("lists pending proposals by default", async () => {
+    const { rosterProposalService, call } = setup("admin");
+    rosterProposalService.list.mockResolvedValue({ proposals: [], names: {} });
+
+    await call("list_roster_proposals", {});
+
+    expect(rosterProposalService.list).toHaveBeenCalledWith("pending");
   });
 });

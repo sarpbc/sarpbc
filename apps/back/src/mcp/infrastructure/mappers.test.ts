@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DataSource } from "../../common/domain/data-source";
+import type { DataSource } from "@sarpbc/types";
 import { Player, Team } from "../../roster/domain/roster";
 import { Tournament, TournamentParticipant, type Match } from "../../tournament/domain/competition";
 import { isRedistributableMatch, mapListedParticipants, mapTournamentDetail } from "./mappers";

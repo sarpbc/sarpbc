@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Player } from "../../domain/roster";
 import { PlayerController } from "./player.controller";
-import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 
 describe("PlayerController", () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
@@ -10,13 +9,8 @@ describe("PlayerController", () => {
   const matches = { getMatchesByPlayer: vi.fn() };
   const tournaments = { getTournamentsWonByPlayer: vi.fn(), getTournamentsByPlayer: vi.fn() };
   const awards = { findByPlayerId: vi.fn() };
-  const prizes = new TournamentPrizeService(
-    { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
-    { run: vi.fn() },
-    { invalidateTournament: vi.fn() },
-    { error: vi.fn() },
-  );
-  const playerEarnings = vi.spyOn(prizes, "playerEarnings");
+  const playerEarnings = vi.fn();
+  const prizes = { playerEarnings } as never;
   const controller = new PlayerController(
     players as never,
     contracts as never,

@@ -1,21 +1,18 @@
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
+import { winnerFromResults } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
-import { matchDecided } from "../../domain/match-decided";
-import type { MatchListQueryOptions } from "./match-list-filters";
+import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
-import type {
-  CompetitionDiagnostics,
-  CompetitionEvents,
-  CompetitionTransaction,
-  MatchQueries,
-} from "../ports";
-import type { UpdateMatchInput, UpsertMatchInput } from "../inputs";
+import type { CompetitionAfterCommit } from "../after-commit";
+import type { CompetitionTransaction, MatchQueries } from "../ports";
+import type { MatchFields, UpdateMatchInput } from "../inputs";
 import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
-  upsertMatchInTransaction,
+  createMatchInTransaction,
   setGameVodsInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
@@ -62,32 +59,14 @@ export class MatchService {
   constructor(
     private readonly reads: MatchQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly events: CompetitionEvents,
-    private readonly diagnostics: CompetitionDiagnostics,
+    private readonly afterCommit: CompetitionAfterCommit,
   ) {}
 
-  async findUpcoming(options: MatchListQueryOptions = {}): Promise<Match[]> {
-    return (await this.reads.list("upcoming", options))[0];
-  }
-
-  async findLive(options: MatchListQueryOptions = {}): Promise<Match[]> {
-    return (await this.reads.list("live", options))[0];
-  }
-
-  async findResults(options: MatchListQueryOptions = {}): Promise<Match[]> {
-    return (await this.reads.list("results", options))[0];
-  }
-
-  async findUpcomingAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
-    return this.reads.list("upcoming", options);
-  }
-
-  async findLiveAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
-    return this.reads.list("live", options);
-  }
-
-  async findResultsAndCount(options: MatchListQueryOptions = {}): Promise<[Match[], number]> {
-    return this.reads.list("results", options);
+  list(
+    kind: MatchListKind,
+    { limit = DEFAULT_PAGE_SIZE, ...options }: MatchListQueryOptions = {},
+  ): Promise<[Match[], number]> {
+    return this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_PAGE_SIZE) });
   }
 
   async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {
@@ -100,7 +79,7 @@ export class MatchService {
   }: {
     limit?: number;
     minutesAgo?: number;
-  }): Promise<Match[]> {
+  } = {}): Promise<Match[]> {
     return this.reads.recentlyEnded({ limit, minutesAgo });
   }
 
@@ -226,48 +205,39 @@ export class MatchService {
       return null;
     }
 
-    const results = match.results;
-    const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score;
-    const opponentScore = results.find((r) => r.participant.id === opponentParticipant.id)?.score;
+    const winnerParticipantId = winnerFromResults(
+      match.results
+        .filter(
+          (r) =>
+            r.participant.id === teamParticipant.id || r.participant.id === opponentParticipant.id,
+        )
+        .map((r) => ({ participantId: r.participant.id, score: r.score })),
+    );
 
-    if (teamScore === undefined || opponentScore === undefined) {
+    if (winnerParticipantId === null) {
       return null;
     }
 
-    if (teamScore > opponentScore) {
-      return "win";
-    }
-
-    if (teamScore < opponentScore) {
-      return "loss";
-    }
-
-    return null;
+    return winnerParticipantId === teamParticipant.id ? "win" : "loss";
   }
 
-  async upsertMatch(tournamentId: string, input: UpsertMatchInput): Promise<Match> {
+  async createMatch(tournamentId: string, input: MatchFields): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
-      upsertMatchInTransaction(matches, tournamentId, input),
+      createMatchInTransaction(matches, tournamentId, input),
     );
-    const match = await this.committed(written.id);
-    await this.publishDecided(match);
-    return match;
+    return this.settled(written.id);
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setWinnerInTransaction(matches, matchId, winnerId),
     );
-    const match = await this.committed(written.id);
-    await this.publishDecided(match);
-    return match;
+    return this.settled(written.id);
   }
   async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       updateMatchInTransaction(matches, matchId, input),
     );
-    const match = await this.committed(written.id);
-    await this.publishDecided(match);
-    return match;
+    return this.settled(written.id);
   }
   async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
@@ -281,19 +251,21 @@ export class MatchService {
     );
     return this.committed(written.id);
   }
+  find(id: string): Promise<Match | null> {
+    return this.reads.detail({ kind: "id", value: id });
+  }
   private async committed(id: string): Promise<Match> {
-    const match = await this.reads.detail({ kind: "id", value: id });
+    const match = await this.find(id);
     if (!match) throw new NotFoundError("Match not found");
     return match;
   }
-  private async publishDecided(match: Match) {
-    if (match.isDecided()) {
-      try {
-        await this.events.publish(matchDecided(match.id));
-      } catch (error) {
-        this.diagnostics.error("MatchDecided publication failed", error);
-      }
-    }
+  private async settled(id: string): Promise<Match> {
+    const match = await this.committed(id);
+    await this.afterCommit.settle({
+      tournamentIds: [match.tournament.id],
+      decidedMatchIds: match.isDecided() ? [match.id] : [],
+    });
+    return match;
   }
   async getMatchesByPlayer(id: string) {
     return this.reads.byPlayer(id);

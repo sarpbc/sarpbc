@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { MatchListItem } from "~/types/matches";
+import type { MatchListItem } from "@sarpbc/types";
 import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
 
 type DirectoryKind = "schedule" | "results";

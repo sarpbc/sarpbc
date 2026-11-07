@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import { PlayerAwardTypes, type PlayerAwardType, type PlayerProfileAward } from "@sarpbc/types";
-import { tournamentStagePath } from "@sarpbc/utils";
-import { distinctStageName } from "~/utils/tournamentStageLabel";
+import type { PlayerAwardType, PlayerProfileAward } from "@sarpbc/types";
+import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
 
 const {
   awards,
@@ -22,23 +20,18 @@ const { t, locale } = useI18n();
 
 const headingId = "player-awards-title";
 
-const dateDf = computed(
-  () =>
-    new DateFormatter(locale.value, {
-      dateStyle: "medium",
-    }),
-);
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
-  return dateDf.value.format(new Date(value));
+  return mediumDate.value.format(new Date(value));
 };
 
 function awardTypeLabel(awardType: PlayerAwardType): string {
   switch (awardType) {
-    case PlayerAwardTypes.MVP:
+    case "mvp":
       return t("page.player.slug.awards.types.mvp");
-    case PlayerAwardTypes.DEFENSIVE_MVP:
+    case "defensive_mvp":
       return t("page.player.slug.awards.types.defensive_mvp");
     default: {
       const _exhaustive: never = awardType;

@@ -1,6 +1,7 @@
 import { PlayerService } from "../../roster/application/player.service";
 import { TeamService } from "../../roster/application/team.service";
-import { TournamentService } from "../../tournament/application/tournament.service";
+import type { TournamentQueries } from "../../tournament/application/ports";
+import { TOURNAMENT_QUERIES } from "../../tournament/infrastructure/competition-queries.tokens";
 import { Module } from "@nestjs/common";
 import { SearchController } from "./http/search.controller";
 import { SearchService } from "../application/search.service";
@@ -13,9 +14,9 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
   providers: [
     {
       provide: SearchService,
-      useFactory: (players: PlayerService, teams: TeamService, tournaments: TournamentService) =>
+      useFactory: (players: PlayerService, teams: TeamService, tournaments: TournamentQueries) =>
         new SearchService(players, teams, tournaments),
-      inject: [PlayerService, TeamService, TournamentService],
+      inject: [PlayerService, TeamService, TOURNAMENT_QUERIES],
     },
   ],
   exports: [SearchService],

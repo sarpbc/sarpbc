@@ -1,8 +1,5 @@
+import type { TeamLogoVariant } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
-
-export const TEAM_LOGO_VARIANTS = ["light", "dark"] as const;
-
-export type TeamLogoVariant = (typeof TEAM_LOGO_VARIANTS)[number];
 
 export type TeamLogoFormat = "png" | "webp" | "svg";
 

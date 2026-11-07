@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { matchSchema } from "../dto/match.dto";
 import { PandascoreMatchMapper } from "./pandascore-match.mapper";
 
 describe("PandascoreMatchMapper", () => {
   it("maps match dto to upsert command", () => {
-    const dto = {
+    const dto = matchSchema.parse({
       id: 99,
       name: "Grand Final",
       status: "finished",
@@ -27,7 +28,7 @@ describe("PandascoreMatchMapper", () => {
       ],
       results: [{ team_id: 7, score: 4 }],
       previous_matches: [{ type: "winner", match_id: 88 }],
-    } as never;
+    });
 
     const command = PandascoreMatchMapper.toUpsertCommand(dto);
 
@@ -48,7 +49,7 @@ describe("PandascoreMatchMapper", () => {
   });
 
   it("maps official streams from streams_list", () => {
-    const dto = {
+    const dto = matchSchema.parse({
       id: 1,
       tournament_id: 2,
       name: "Semi",
@@ -64,7 +65,7 @@ describe("PandascoreMatchMapper", () => {
           raw_url: "https://www.twitch.tv/rocketleague",
         },
       ],
-    } as never;
+    });
 
     expect(PandascoreMatchMapper.toUpsertCommand(dto).officialStreams).toEqual([
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },

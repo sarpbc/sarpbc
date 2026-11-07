@@ -1,13 +1,14 @@
-import type { ForumPost } from "@sarpbc/types";
+import {
+  FORUM_ERROR_CODES,
+  type ForumPost,
+  type ForumPostCreationStatus,
+  type SupportedLocale,
+} from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
-import {
-  FORUM_ERROR_CODES,
-  POST_CREATION_COOLDOWN_HOURS,
-  POST_CREATION_COOLDOWN_MS,
-} from "../domain/forum.constants";
+import { POST_CREATION_COOLDOWN_HOURS, POST_CREATION_COOLDOWN_MS } from "../domain/forum.constants";
 import { PostType } from "../domain/post-type.enum";
 import type {
   NewPostRecord,
@@ -15,7 +16,6 @@ import type {
   TranslationRecord,
   CreatePostInput,
   CreatedPost,
-  PostCreationStatus,
 } from "./models";
 import type { PostStore, ForumTransaction } from "./ports";
 interface PostCreationEligibility {
@@ -43,10 +43,10 @@ export class PostService {
     return this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(ref: EntityRef, locale: string | null): Promise<ForumPost | null> {
+  async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
     const post = await this.findById(ref);
     if (!post) return null;
-    const translation = locale ? post.translations.find((t) => t.locale === locale) : undefined;
+    const translation = post.translations.find((t) => t.locale === locale);
 
     return {
       id: post.id,
@@ -60,7 +60,7 @@ export class PostService {
     };
   }
 
-  async getCreationStatus(userId: string): Promise<PostCreationStatus> {
+  async getCreationStatus(userId: string): Promise<ForumPostCreationStatus> {
     const eligibility = await this.resolvePostCreationEligibility(userId);
 
     return {

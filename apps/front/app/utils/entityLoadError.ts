@@ -1,5 +1,5 @@
 import { createError } from "#imports";
-import { getApiErrorStatus } from "~/utils/apiError";
+import { getApiErrorStatus } from "@sarpbc/utils";
 
 /**
  * Detail pages cannot render without their entity. A 404 (or no error at all) means it does not

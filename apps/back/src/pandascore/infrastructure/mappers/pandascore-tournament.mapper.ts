@@ -29,12 +29,9 @@ export class PandascoreTournamentMapper {
   }
 
   static toParticipantCommand(dto: ExpectedRosterDto): UpsertTournamentParticipantCommand {
-    const teamSlug = dto.team.slug;
     return {
       team: PandascoreTeamMapper.toUpsertCommand(dto.team),
-      players: dto.players.map((player) =>
-        PandascorePlayerMapper.toUpsertCommand(player, teamSlug),
-      ),
+      players: dto.players.map((player) => PandascorePlayerMapper.toUpsertCommand(player)),
     };
   }
 }

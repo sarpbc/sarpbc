@@ -1,6 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import { Reply } from "../../../forum/infrastructure/persistence/forum.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { Reply } from "../../../reply/infrastructure/reply-persistence";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { ReplyNotificationRepository } from "./reply-notification.repository";
 
 export class ReplyNotification {

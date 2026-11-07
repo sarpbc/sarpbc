@@ -1,6 +1,9 @@
+import type { TeamLogos, TeamSummary } from "./team";
 import type { TournamentEventRef } from "./tournament-event";
 
-export type DataSource = "pandascore" | "manual" | "startgg";
+export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
+
+export type DataSource = (typeof DATA_SOURCES)[number];
 
 export type MatchVodSource = "twitch" | "youtube";
 
@@ -9,16 +12,6 @@ export interface MatchVod {
   url: string;
   language: string;
   source: MatchVodSource;
-}
-
-export interface TeamSummary {
-  id: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  logoLightUrl: string | null;
-  logoDarkUrl: string | null;
-  location: string | null;
 }
 
 export interface TournamentListItem {
@@ -48,14 +41,7 @@ export interface TournamentMatchListItem {
   numberOfGames: number | null;
   participants: {
     id: string;
-    team: {
-      id: string;
-      name: string;
-      imageUrl: string | null;
-      darkModeImageUrl: string | null;
-      logoLightUrl: string | null;
-      logoDarkUrl: string | null;
-    };
+    team: TeamLogos & { id: string; name: string };
   }[];
   results: { participant: string; score: number }[];
 }
@@ -102,14 +88,12 @@ export interface TournamentDetail {
   matches: TournamentDetailMatch[];
 }
 
-export interface ProfileMatchListItem {
+export interface MatchListItem {
   id: string;
   publicId: number;
   slug: string;
-  status: string | null;
-  beginAt: Date | string | null;
-  endAt: Date | string | null;
-  participants: { id: string; team: { name: string } }[];
+  beginAt: string | null;
+  participants: { id: string; team: TeamLogos & { name: string } }[];
   results: { participant: string; score: number }[];
   tournament: {
     id: string;
@@ -120,6 +104,28 @@ export interface ProfileMatchListItem {
   };
 }
 
+export interface CountedMatchListItem extends MatchListItem {
+  commentCount: number;
+}
+
+export interface UpcomingMatchesResponse {
+  live: CountedMatchListItem[];
+  upcoming: CountedMatchListItem[];
+  liveTotal: number;
+  upcomingTotal: number;
+  total: number;
+}
+
+export interface MatchResultsResponse {
+  results: CountedMatchListItem[];
+  total: number;
+}
+
+export interface ProfileMatchListItem extends MatchListItem {
+  status: string | null;
+  endAt: Date | string | null;
+}
+
 export type MatchBlockSelector =
   | { kind: "match"; id: string }
   | { kind: "matches"; ids: string[] }
@@ -128,23 +134,9 @@ export type MatchBlockSelector =
 
 export type MatchBlockState = "upcoming" | "live" | "finished";
 
-export interface MatchBlockItem {
-  id: string;
-  publicId: number;
-  slug: string;
-  beginAt: Date | string | null;
+export interface MatchBlockItem extends CountedMatchListItem {
   state: MatchBlockState;
   startgg: boolean;
-  commentCount: number;
-  participants: { id: string; team: { name: string } }[];
-  results: { participant: string; score: number }[];
-  tournament: {
-    id: string;
-    name: string;
-    slug: string;
-    event: TournamentEventRef;
-    league?: { id: string; name: string };
-  };
 }
 
 export interface MatchBlocksResponse {

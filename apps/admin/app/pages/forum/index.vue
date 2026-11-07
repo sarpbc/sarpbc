@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { PostShort } from "~/types/forum";
+import type { ForumPostListItem } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -11,7 +12,7 @@ const breadcrumbItems = [
   },
 ];
 
-const columns: TableColumn<PostShort>[] = [
+const columns: TableColumn<ForumPostListItem>[] = [
   {
     accessorKey: "title",
     header: t("page.forum.columns.title"),
@@ -23,7 +24,7 @@ const columns: TableColumn<PostShort>[] = [
   {
     id: "topic",
     header: t("page.forum.columns.topic"),
-    cell: ({ row }) => row.original.topic?.title ?? "-",
+    cell: ({ row }) => row.original.topic.title,
   },
   {
     accessorKey: "createdAt",
@@ -39,19 +40,20 @@ const columns: TableColumn<PostShort>[] = [
 const {
   items: posts,
   status,
+  error,
   refresh,
 } = useAdminList("admin-forum-posts", async () => {
   const posts = await getPosts();
   return { items: posts, total: posts.length };
 });
-const postToDelete = ref<PostShort | null>(null);
+const postToDelete = ref<ForumPostListItem | null>(null);
 
-function selectRow(e: Event, row: TableRow<PostShort>) {
+function selectRow(e: Event, row: TableRow<ForumPostListItem>) {
   e.preventDefault();
   navigateTo(localePath(`/forum/${row.original.id}`));
 }
 
-function openDeleteModal(e: Event, post: PostShort) {
+function openDeleteModal(e: Event, post: ForumPostListItem) {
   e.stopPropagation();
   postToDelete.value = post;
 }
@@ -69,11 +71,17 @@ function openDeleteModal(e: Event, post: PostShort) {
           {{ $t("page.forum.postsCount", { count: posts.length }) }}
         </p>
 
-        <p v-if="status === 'success' && posts.length === 0" class="text-sm text-muted">
+        <LoadError
+          v-if="status === 'error'"
+          :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+          @retry="refresh()"
+        />
+
+        <p v-else-if="status === 'success' && posts.length === 0" class="text-sm text-muted">
           {{ $t("page.forum.empty") }}
         </p>
 
-        <ClientOnly>
+        <ClientOnly v-if="status !== 'error'">
           <UTable
             v-if="posts.length > 0 || status === 'pending'"
             :data="posts"

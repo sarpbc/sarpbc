@@ -1,6 +1,6 @@
 # MCP server
 
-Staff AI assistants can call the SARPBC API through a [Model Context Protocol](https://modelcontextprotocol.io) server mounted on the NestJS backend.
+Staff AI assistants can call the sarpbc.org API through a [Model Context Protocol](https://modelcontextprotocol.io) server mounted on the NestJS backend.
 
 |               |                                                                                                          |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
@@ -42,6 +42,8 @@ Staff AI assistants can call the SARPBC API through a [Model Context Protocol](h
 
 ## Tools
 
+Every tool ends its description with the permission it requires and is refused before it runs when the token's role lacks it. A player or team given as `idOrSlug`, or in `create_match` `teams`, is read as an id first when it is a UUID, then as a slug; any other value is a slug. Tool failures are logged with the tool name and user. A refusal the application words for staff (not found, invalid input, conflict) is returned as the tool error; any other failure returns a generic message and its detail stays in the server log.
+
 Read tools (any valid PAT):
 
 | Tool                    | Description                                     |
@@ -49,6 +51,7 @@ Read tools (any valid PAT):
 | `search_players`        | Search players by name                          |
 | `search_teams`          | Search teams by name                            |
 | `get_player`            | Player profile by slug or id                    |
+| `list_contracts`        | A player's contracts, oldest first, with roles  |
 | `get_team`              | Team profile and roster by slug or id           |
 | `get_tournaments`       | List tournaments (`activeOnly`, `limit`)        |
 | `get_tournament`        | Tournament detail with matches and participants |
@@ -57,6 +60,9 @@ Read tools (any valid PAT):
 | `get_tournament_prizes` | Prize distribution of a tournament stage        |
 | `get_team_earnings`     | Team earnings by year, per currency             |
 | `get_player_earnings`   | Player earnings by year, per currency           |
+| `list_leagues`          | Leagues with id, name, slug and source          |
+| `list_events`           | Events, newest first, with their stages         |
+| `get_event`             | Event by id or slug with its stages and league  |
 
 News tools (`news.manage`):
 
@@ -76,8 +82,14 @@ Write tools (staff permission required):
 | `update_match`               | `tournaments.manage` | Correct score, status or dates of a manual match                                         |
 | `set_match_game_vods`        | `tournaments.manage` | Replace the Twitch/YouTube VOD links of one game, with their ISO 639-1 language          |
 | `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
+| `create_tournament`          | `tournaments.manage` | Create a manual tournament, as a stage of an existing event or with an event of its own  |
 | `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
 | `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
+| `sync_pandascore_tournament` | `tournaments.manage` | Import or refresh a tournament by its PandaScore id                                      |
+| `create_league`              | `tournaments.manage` | Create a league for manual events and tournaments                                        |
+| `update_league`              | `tournaments.manage` | Update a league; PandaScore leagues accept `imageUrl` only                               |
+| `create_event`               | `tournaments.manage` | Create an empty manual event, then attach tournaments with `eventId`                     |
+| `update_event`               | `tournaments.manage` | Rename a manual event or change its slug or league; synced events are rejected           |
 
 Game stats tools (`tournaments.manage`). They operate the Ballchasing stats pipeline described in [GAME_STATS.md](GAME_STATS.md) through the same application services as the admin app. They are staff tools and do not make the stats public; no public or read-only tool returns stats or platform ids.
 
@@ -94,18 +106,21 @@ Game stats tools (`tournaments.manage`). They operate the Ballchasing stats pipe
 
 Roster tools (staff permission and a public `sourceUrl` required). They only queue a proposal: nothing changes until a staff member with the same permission approves it in admin → **Roster proposals** (`/proposals`). A failed approval leaves the proposal pending. Nothing is physically deleted: roster moves close the open contract and record the join and departure sources, teams are marked inactive instead of removed, and merged duplicates stay as redirects.
 
-| Tool                        | Permission           | Description once approved                                                                                      |
-| --------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `add_player_to_team`        | `players.manage`     | Close the player's open contracts and open one with the new team and contract role                             |
-| `remove_player_from_team`   | `players.manage`     | Close the contract and set the player `free_agent` or `retired`                                                |
-| `create_player`             | `players.manage`     | Create a player without a team (name, country, status)                                                         |
-| `update_player`             | `players.manage`     | Update name, country or status (`active`, `free_agent`, `retired`)                                             |
-| `create_team`               | `teams.manage`       | Create a team (name, country, logo)                                                                            |
-| `update_team`               | `teams.manage`       | Update name, country or logo, or mark an empty team inactive                                                   |
-| `upload_team_logo`          | `teams.manage`       | Set the team's `light` or `dark` logo variant from an official asset stored on sarpbc.org                      |
-| `merge_players`             | `players.manage`     | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                         |
-| `merge_teams`               | `teams.manage`       | Move a duplicate's contracts, current players and tournament participations to the kept team                   |
-| `propose_tournament_prizes` | `tournaments.manage` | Replace a tournament stage's prize distribution (placement, amount, ISO 4217 currency, team, optional players) |
+| Tool                        | Permission                                               | Description once approved                                                                                      |
+| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `add_player_to_team`        | `players.manage`                                         | Close the player's open contracts and open one with the new team and contract role                             |
+| `remove_player_from_team`   | `players.manage`                                         | Close the contract and set the player `free_agent` or `retired`                                                |
+| `create_player`             | `players.manage`                                         | Create a player without a team (name, country, status)                                                         |
+| `update_player`             | `players.manage`                                         | Update name, country or status (`active`, `free_agent`, `retired`)                                             |
+| `create_team`               | `teams.manage`                                           | Create a team (name, country, logo)                                                                            |
+| `update_team`               | `teams.manage`                                           | Update name, country or logo, or mark an empty team inactive                                                   |
+| `upload_team_logo`          | `teams.manage`                                           | Set the team's `light` or `dark` logo variant from an official asset stored on sarpbc.org                      |
+| `create_contract`           | `players.manage`                                         | Record a dated contract in a player's career, such as a past stint                                             |
+| `update_contract`           | `players.manage`                                         | Correct a contract's team, dates or role, or reopen it                                                         |
+| `merge_players`             | `players.manage`                                         | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                         |
+| `merge_teams`               | `teams.manage`                                           | Move a duplicate's contracts, current players and tournament participations to the kept team                   |
+| `propose_tournament_prizes` | `tournaments.manage`                                     | Replace a tournament stage's prize distribution (placement, amount, ISO 4217 currency, team, optional players) |
+| `list_roster_proposals`     | `players.manage`, `teams.manage` or `tournaments.manage` | Not queued: lists proposals by status                                                                          |
 
 Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who changes role on the same team, for example from `active` to `benched` or from player to coach, gets a new contract with `add_player_to_team` on that team, so their past contracts keep their role. Proposing the team and role the player already holds is rejected. The role shown on player and team pages comes from the current contract.
 

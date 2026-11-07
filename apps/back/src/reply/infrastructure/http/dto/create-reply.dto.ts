@@ -1,11 +1,15 @@
 import { z } from "zod";
+import { REPLY_CONTENT_MAX_LENGTH } from "../../../domain/reply-limits";
 
 export const ReplyContentDto = z.strictObject({
   content: z
     .string()
     .trim()
     .min(1, "Comment cannot be empty. Write something before posting.")
-    .max(2048, "Comment is too long. Keep it under 2048 characters."),
+    .max(
+      REPLY_CONTENT_MAX_LENGTH,
+      `Comment is too long. Keep it under ${REPLY_CONTENT_MAX_LENGTH} characters.`,
+    ),
   replyToId: z.uuidv4().optional(),
 });
 export type ReplyContentDto = z.infer<typeof ReplyContentDto>;

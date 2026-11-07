@@ -4,11 +4,11 @@ packages:
 
 overrides:
   h3: 1.15.11
-  fastify: 5.12.7
+  fastify: "catalog:"
   prosemirror-model: 1.25.11
   prosemirror-view: 1.42.3
-  vue: 3.5.44
-  vue-i18n: 11.4.16
+  vue: "catalog:"
+  vue-i18n: "catalog:"
   "@intlify/core": 11.4.16
   "@intlify/core-base": 11.4.16
   "@intlify/devtools-types": 11.4.16
@@ -16,7 +16,6 @@ overrides:
   "@intlify/shared": 11.4.16
   "@nuxt/content>zod": ^4.6.7
   "body-parser@>=2.0.0 <2.4.0": ^2.4.0
-  "brace-expansion@<1.1.21": ^1.1.21
   "brace-expansion@>=2.0.0 <2.1.7": ^2.1.7
   "brace-expansion@>=4.0.0 <5.0.12": ^5.0.12
   "devalue@<5.9.3": ^5.9.3
@@ -35,14 +34,12 @@ overrides:
 allowBuilds:
   "@nestjs/core": true
   "@parcel/watcher": true
-  "@posthog/cli": true
   "@swc/core": true
   bcrypt: true
   core-js: true
   esbuild: true
   lefthook: true
   sharp: true
-  unrs-resolver: true
   vue-demi: true
 
 catalog:
@@ -50,9 +47,9 @@ catalog:
   "@types/node": ^26.6.6
   nuxt: ^4.6.4
   "@nuxt/kit": ^4.6.4
-  vue: ^3.5.44
+  vue: 3.5.44
   vue-router: ^5.4.0
-  vue-i18n: ^11.4.16
+  vue-i18n: 11.4.16
   "@nuxt/ui": ^4.12.0
   "@nuxtjs/i18n": ^10.6.0
   "@tiptap/core": ^3.32.0
@@ -64,6 +61,7 @@ catalog:
   "@iconify-json/lucide": ^1.2.148
   "@iconify-json/logos": ^1.2.17
   evlog: ^2.33.1
+  fastify: 5.12.7
   "@nestjs/common": 12.3.2
   "@nestjs/core": 12.3.2
   "@nestjs/platform-fastify": 12.3.2
@@ -71,19 +69,9 @@ catalog:
   "@mikro-orm/cli": ^7.2.5
   "@mikro-orm/core": ^7.2.5
   "@mikro-orm/decorators": ^7.2.5
-  "@mikro-orm/entity-generator": ^7.2.5
   "@mikro-orm/migrations": ^7.2.5
   "@mikro-orm/postgresql": ^7.2.5
-  "@mikro-orm/seeder": ^7.2.5
 
 minimumReleaseAgeExclude:
-  - "@nuxt/kit@4.5.0 || 4.6.3"
-  - "@nuxt/nitro-server@4.5.0 || 4.6.3"
-  - "@nuxt/schema@4.5.0 || 4.6.3"
-  - "@nuxt/vite-builder@4.5.0 || 4.6.3"
-  - nuxt@4.5.0 || 4.6.3
-  - "@posthog/core@1.45.1"
-  - posthog-node@5.46.1
-  - "@nuxt/vite-server@4.6.3"
   - "@nuxt/image@2.2.1"
   - ipx@4.1.0

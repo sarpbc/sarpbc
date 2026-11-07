@@ -9,8 +9,10 @@ export interface ManualCandidate {
   endAt: Date | null;
 }
 
+/** Staff are expected to name a manual tournament "<event name> <stage name>" for it to be linked. */
 export interface ProviderStage {
-  fullName: string;
+  eventName: string;
+  stageName: string;
   leagueId: string | null;
   beginAt: Date | null;
   endAt: Date | null;
@@ -54,7 +56,7 @@ export function findManualCounterpart(
   stage: ProviderStage,
   candidates: readonly ManualCandidate[],
 ): CounterpartMatch {
-  const name = nameKey(stage.fullName);
+  const name = nameKey(stage.eventName + " " + stage.stageName);
   if (!name) return { kind: "none" };
   const ids = candidates
     .filter(

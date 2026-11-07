@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { playerPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
 
 const { participants } = defineProps<{
@@ -29,7 +30,7 @@ const rowCount = computed(() =>
         <SListItem
           v-if="participant.players?.[rowIndex - 1]"
           size="double"
-          :to="$localePath(`/player/${participant.players[rowIndex - 1]!.slug}`)"
+          :to="$localePath(playerPath(participant.players[rowIndex - 1]!.slug))"
           class="min-w-0 gap-3"
         >
           <PlayerImg

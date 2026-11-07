@@ -1,5 +1,5 @@
 import type { TournamentDetailMatch } from "@sarpbc/types";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 
 export function getMatchWinnerParticipantId(match: TournamentDetailMatch): string | null {
   if (match.winnerId) {

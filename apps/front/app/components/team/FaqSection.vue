@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { MatchListItem } from "~/types/matches";
-import type { Player } from "~/types/player";
-import type { Team } from "~/types/team";
+import type { MatchListItem, Player, Team } from "@sarpbc/types";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
 
 const {
@@ -20,7 +17,7 @@ const {
 const { t, locale } = useI18n();
 const { setJsonLd } = useStructuredData();
 
-const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 function opponentName(match: MatchListItem): string {
   const names = (match.participants ?? [])
@@ -41,7 +38,7 @@ function formatMatchLine(match: MatchListItem, live: boolean): string {
   }
 
   const date = match.beginAt
-    ? df.value.format(new Date(match.beginAt))
+    ? mediumDate.value.format(new Date(match.beginAt))
     : t("page.team.slug.faq.upcoming.dateTbd");
 
   return event

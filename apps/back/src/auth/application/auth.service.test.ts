@@ -73,6 +73,48 @@ describe("AuthService", () => {
     });
   });
 
+  describe("session", () => {
+    const tokens = {
+      sign: vi.fn().mockResolvedValue({ accessToken: "access", refreshToken: "refresh" }),
+      verify: vi.fn(),
+    };
+    const sessionUsers = { findById: vi.fn() };
+    const sessions = new AuthService(tokens, {} as never, sessionUsers as never, {
+      frontUrl: "",
+      adminUrl: "",
+    });
+
+    it("authenticates with the current database email, not the token's", async () => {
+      tokens.verify.mockResolvedValue({ id: "user-1", email: "old@b.com" });
+      sessionUsers.findById.mockResolvedValue({ id: "user-1", email: "new@b.com", userName: "x" });
+
+      await expect(sessions.authenticate("jwt")).resolves.toEqual({
+        id: "user-1",
+        email: "new@b.com",
+      });
+      expect(tokens.verify).toHaveBeenCalledWith("jwt", "access");
+    });
+
+    it("rejects a valid token whose user no longer exists", async () => {
+      tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      sessionUsers.findById.mockResolvedValue(null);
+
+      await expect(sessions.authenticate("jwt")).resolves.toBeNull();
+      await expect(sessions.refreshSession("jwt")).resolves.toBeNull();
+    });
+
+    it("refreshes into the user and a new token pair", async () => {
+      tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      sessionUsers.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+
+      await expect(sessions.refreshSession("jwt")).resolves.toEqual({
+        user: { id: "user-1", email: "a@b.com" },
+        tokens: { accessToken: "access", refreshToken: "refresh" },
+      });
+      expect(tokens.verify).toHaveBeenCalledWith("jwt", "refresh");
+    });
+  });
+
   describe("OAuth return destination", () => {
     it("parses returnTo allowlist and defaults to front", () => {
       expect(service.parseOAuthReturnTo("admin")).toBe("admin");

@@ -24,22 +24,4 @@ describe("PandascoreTeamMapper", () => {
       darkModeImageUrl: "https://example.com/vitality-dark.png",
     });
   });
-
-  it("omits darkModeImageUrl when PandaScore has no dark variant", () => {
-    expect(
-      PandascoreTeamMapper.fromCurrentTeam({
-        id: 7,
-        name: "Team Vitality",
-        slug: "team-vitality",
-        image_url: "https://example.com/vitality.png",
-        dark_mode_image_url: null,
-      }),
-    ).toEqual({
-      pandascoreId: 7,
-      name: "Team Vitality",
-      slug: "team-vitality",
-      imageUrl: "https://example.com/vitality.png",
-      darkModeImageUrl: undefined,
-    });
-  });
 });

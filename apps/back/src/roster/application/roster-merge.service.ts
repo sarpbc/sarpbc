@@ -45,10 +45,7 @@ export class RosterMergeService {
       }
 
       await references.movePlayer(merged.id, kept.id);
-      if (!kept.pandascoreId && merged.pandascoreId) {
-        kept.pandascoreId = merged.pandascoreId;
-        kept.source = "pandascore";
-      }
+      if (!kept.pandascoreId && merged.pandascoreId) kept.linkPandascore(merged.pandascoreId);
       if (!kept.team && merged.team) {
         kept.team = merged.team;
         kept.status = merged.status;
@@ -85,10 +82,7 @@ export class RosterMergeService {
       }
 
       await references.moveTeam(merged.id, kept.id);
-      if (!kept.pandascoreId && merged.pandascoreId) {
-        kept.pandascoreId = merged.pandascoreId;
-        kept.source = "pandascore";
-      }
+      if (!kept.pandascoreId && merged.pandascoreId) kept.linkPandascore(merged.pandascoreId);
       kept.location ??= merged.location;
       kept.imageUrl ??= merged.imageUrl;
       kept.darkModeImageUrl ??= merged.darkModeImageUrl;

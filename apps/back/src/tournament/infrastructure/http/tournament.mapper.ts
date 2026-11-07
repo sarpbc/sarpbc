@@ -1,34 +1,24 @@
 import type {
+  DataSource,
+  League as LeagueResponse,
+  TeamSummary,
   TournamentDetail,
   TournamentDetailParticipant,
   TournamentEventRef,
   TournamentListItem,
 } from "@sarpbc/types";
-import type { DataSource } from "../../../common/domain/data-source";
-import {
-  mapPlayer,
-  mapTeamSummary,
-  type TeamSummaryResponse,
-} from "../../../roster/infrastructure/http/player.mapper";
+import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/player.mapper";
 import {
   League,
   Tournament,
   TournamentParticipant,
   matchPublicSlug,
 } from "../../domain/competition";
-
-export interface LeagueResponse {
-  id: string;
-  pandascoreId: number | null;
-  name: string;
-  slug: string | null;
-  url: string | null;
-  imageUrl: string | null;
-}
+import { toEventRef } from "../../domain/tournament-event";
 
 export interface TournamentParticipantResponse {
   id: string;
-  team: TeamSummaryResponse;
+  team: TeamSummary;
   players: ReturnType<typeof mapPlayer>[];
   createdAt: Date;
   updatedAt: Date;
@@ -92,7 +82,7 @@ export function mapTournamentListItem(
     source: tournament.source,
     name: tournament.name,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     type: tournament.type,
     prizepool: tournament.prizepool,
     imageUrl: tournament.imageUrl,
@@ -122,7 +112,7 @@ export function mapTournament(tournament: Tournament): TournamentResponse {
     name: tournament.name,
     description: tournament.description,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     tier: tournament.tier,
     beginAt: tournament.beginAt,
     endAt: tournament.endAt,
@@ -163,7 +153,7 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
     source: tournament.source,
     name: tournament.name,
     slug: tournament.slug,
-    event: { id: tournament.event.id, slug: tournament.event.slug, name: tournament.event.name },
+    event: toEventRef(tournament.event),
     tier: tournament.tier,
     type: tournament.type,
     country: tournament.country,

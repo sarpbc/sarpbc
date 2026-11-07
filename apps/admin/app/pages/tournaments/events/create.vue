@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "~/utils/apiError";
-
+import { getApiErrorMessage } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const formState = ref(eventToFormState(null));
 const isSaving = ref(false);
@@ -35,11 +35,7 @@ async function handleSubmit() {
     toast.add({ title: t("page.tournaments.events.create.saved"), color: "success" });
     await navigateTo(localePath(`/tournaments/events/${created.id}`));
   } catch (error) {
-    console.error("Failed to create event:", error);
-    toast.add({
-      title: getApiErrorMessage(error) ?? t("page.tournaments.events.saveFailed"),
-      color: "error",
-    });
+    reportError(error, t("page.tournaments.events.saveFailed"));
   } finally {
     isSaving.value = false;
   }

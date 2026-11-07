@@ -1,19 +1,7 @@
-import type { MatchVod } from "@sarpbc/types";
-import type {
-  MatchDetailResponse,
-  MatchListItem,
-  MatchResultsResponse,
-  UpcomingMatchesResponse,
-} from "~/types/matches";
-import { apiFetch } from "~/utils/apiFetch";
-import { parseMatchResults } from "~/utils/parseMatchResult";
-
-function parseMatchListItem(item: MatchListItem): MatchListItem {
-  return {
-    ...item,
-    results: parseMatchResults(item.results),
-  };
-}
+import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
+import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
+// Nitro routes import this file and have no Nuxt auto-imports.
+import { apiFetch } from "@sarpbc/composables/apiFetch";
 
 export type MatchesListQuery = {
   limit?: number;
@@ -38,32 +26,6 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
   }
   const search = params.toString();
   return search ? `${path}?${search}` : path;
-}
-
-function isSidebarQuery(query?: MatchesListQuery): boolean {
-  return !query?.limit && !query?.offset && !query?.leagueId && !query?.tournamentId;
-}
-
-function normalizeUpcoming(res: UpcomingMatchesResponse): UpcomingMatchesResponse {
-  const live = (res.live ?? []).map(parseMatchListItem);
-  const upcoming = (res.upcoming ?? []).map(parseMatchListItem);
-
-  return {
-    live,
-    upcoming,
-    liveTotal: res.liveTotal ?? live.length,
-    upcomingTotal: res.upcomingTotal ?? upcoming.length,
-    total: res.total ?? live.length + upcoming.length,
-  };
-}
-
-function normalizeResults(res: MatchResultsResponse): MatchResultsResponse {
-  const results = (res.results ?? []).map(parseMatchListItem);
-
-  return {
-    results,
-    total: res.total ?? results.length,
-  };
 }
 
 const SIDEBAR_MAX_AGE_MS = 30_000;
@@ -100,40 +62,31 @@ function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise
   return request;
 }
 
-export async function fetchUpcomingMatches(
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
-  const res = await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
+export function getUpcomingMatches(query?: MatchesListQuery): Promise<UpcomingMatchesResponse> {
+  return apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
-  return normalizeUpcoming(res);
 }
 
-export async function fetchMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  const res = await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
+export function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+  return apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });
-  return normalizeResults(res);
 }
 
-export async function getUpcomingMatches(
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
-  if (import.meta.server && isSidebarQuery(query)) {
-    return loadSidebar(upcomingSidebar, () => fetchUpcomingMatches(query));
-  }
-  return fetchUpcomingMatches(query);
+/** Rendered on every SSR page: share one response across requests instead of calling the API each time. */
+export function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
+  return import.meta.server
+    ? loadSidebar(upcomingSidebar, getUpcomingMatches)
+    : getUpcomingMatches();
 }
 
-export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  if (import.meta.server && isSidebarQuery(query)) {
-    return loadSidebar(resultsSidebar, () => fetchMatchesResults(query));
-  }
-  return fetchMatchesResults(query);
+export function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
+  return import.meta.server ? loadSidebar(resultsSidebar, getMatchesResults) : getMatchesResults();
 }
 
 export async function getMatchById(id: string): Promise<MatchDetailResponse> {
-  const response = await apiFetch<MatchDetailResponse>(`/matches/${id}`, {
+  const response = await apiFetch<MatchDetailWire>(`/matches/${id}`, {
     method: "GET",
   });
 
@@ -141,7 +94,10 @@ export async function getMatchById(id: string): Promise<MatchDetailResponse> {
     ...response,
     match: {
       ...response.match,
-      results: parseMatchResults(response.match.results),
+      results: response.match.results.map(({ participant, score }) => ({
+        participant: participant.id,
+        score,
+      })),
     },
   };
 }

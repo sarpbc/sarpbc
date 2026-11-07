@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   NotFoundException,
   Param,
   ParseUUIDPipe,
@@ -18,8 +19,10 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { ContractService } from "../../application/contract.service";
-import { TournamentService } from "../../../tournament/application/tournament.service";
+import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import type { TournamentQueries } from "../../../tournament/application/ports";
+import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
@@ -33,8 +36,9 @@ export class TeamController {
   constructor(
     private teamService: TeamService,
     private contractService: ContractService,
-    private tournamentService: TournamentService,
+    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
     private tournamentPrizeService: TournamentPrizeService,
+    private syncPandascoreTeams: SyncPandascoreTeamsUseCase,
   ) {}
 
   @Get()
@@ -70,7 +74,7 @@ export class TeamController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync")
   async syncPandaScoreTeams() {
-    await this.teamService.initializeTeamsFromPandaScore(false);
+    await this.syncPandascoreTeams.sync();
     return { success: true };
   }
 
@@ -80,7 +84,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const trophies = await this.tournamentService.getTournamentsWonByTeam(team.id);
+    const trophies = await this.tournaments.getTournamentsWonByTeam(team.id);
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
@@ -102,7 +106,7 @@ export class TeamController {
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
-    const tournaments = await this.tournamentService.getTournamentsByTeam(team.id);
+    const tournaments = await this.tournaments.getTournamentsByTeam(team.id);
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 

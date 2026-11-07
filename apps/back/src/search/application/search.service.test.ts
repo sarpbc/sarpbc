@@ -37,6 +37,35 @@ describe("SearchService", () => {
     });
   });
 
+  it("splits an odd page across the kinds of an all search without losing a row", async () => {
+    for (const source of [playerService.find, teamService.find, tournamentService.searchByName])
+      source.mockResolvedValue([]);
+
+    await service.search({ query: "rl", type: "all", limit: 5, offset: 3 });
+
+    const page = { name: "rl", limit: 3, offset: 1 };
+    expect(playerService.find).toHaveBeenCalledWith(page);
+    expect(teamService.find).toHaveBeenCalledWith(page);
+    expect(tournamentService.searchByName).toHaveBeenCalledWith(page);
+  });
+
+  it.each([
+    ["player", playerService.find],
+    ["team", teamService.find],
+  ] as const)("searches only %ss when type is %s", async (type, source) => {
+    source.mockResolvedValue([{ id: "x" }]);
+
+    const result = await service.search({ query: "rl", type, limit: 4, offset: 1 });
+
+    expect(source).toHaveBeenCalledWith({ name: "rl", limit: 4, offset: 1 });
+    expect(result.total).toEqual({
+      players: type === "player" ? 1 : 0,
+      teams: type === "team" ? 1 : 0,
+      tournaments: 0,
+    });
+    expect(tournamentService.searchByName).not.toHaveBeenCalled();
+  });
+
   it("searches only tournaments when type is tournament", async () => {
     tournamentService.searchByName.mockResolvedValue([{ id: "t1" }]);
 

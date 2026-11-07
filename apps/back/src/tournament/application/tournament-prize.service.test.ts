@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, PrizeEntry } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { PrizeEntry } from "../domain/prize-distribution";
 import type {
   CompetitionCache,
   CompetitionDiagnostics,
@@ -10,6 +9,7 @@ import type {
   PrizeTransaction,
   PrizeWriter,
 } from "./ports";
+import { CompetitionAfterCommit } from "./after-commit";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
 const entry: PrizeEntry = {
@@ -43,7 +43,11 @@ function setup({
   const transaction: PrizeTransaction = { run: (work) => work({ prizes: writer }) };
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
   const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
-  const service = new TournamentPrizeService(reads, transaction, cache, diagnostics);
+  const service = new TournamentPrizeService(
+    reads,
+    transaction,
+    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+  );
   return { service, reads, writer, cache, diagnostics };
 }
 
@@ -121,13 +125,5 @@ describe("TournamentPrizeService", () => {
     await expect(
       setup({ source: "startgg" }).service.requireProposableTournament("cup"),
     ).rejects.toThrow(InvalidInputError);
-  });
-
-  it("passes the redistribution scope to the earnings reads", async () => {
-    const { service, reads } = setup();
-    await service.teamEarnings("team-a", { redistributableOnly: true });
-    await service.playerEarnings("player-a", { redistributableOnly: false });
-    expect(reads.byTeam).toHaveBeenCalledWith("team-a", { redistributableOnly: true });
-    expect(reads.byPlayer).toHaveBeenCalledWith("player-a", { redistributableOnly: false });
   });
 });

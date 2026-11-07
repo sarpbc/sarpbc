@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { AppNotification } from "~/types/notification";
-import { getApiErrorMessage } from "~/utils/apiError";
+import type { AppNotification } from "@sarpbc/types";
+import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -53,10 +53,7 @@ watch(editOpen, (isOpen) => {
   }
 });
 
-const adminHomeUrl = computed(() => {
-  const base = String(config.public.adminUrl || "https://admin.sarpbc.org").replace(/\/$/, "");
-  return base;
-});
+const adminHomeUrl = computed(() => config.public.adminUrl.replace(/\/$/, ""));
 
 const showStaffConsole = computed(() => isStaffUser(user.value));
 
@@ -144,8 +141,8 @@ const handleLogout = async () => {
   try {
     posthog?.capture("user_logged_out");
     await logout();
-  } catch (error) {
-    console.error("Logout error:", error);
+  } catch {
+    toast.add({ title: t("page.profile.logoutFailed"), color: "error" });
   } finally {
     isLoggingOut.value = false;
     navigateTo(localePath("/"));
@@ -273,7 +270,7 @@ setPageSeo({
                 {{ notificationMessage(notification) }}
               </p>
               <span class="shrink-0 text-xs text-muted tabular-nums">
-                {{ df(locale).format(new Date(notification.createdAt)) }}
+                {{ longDateTimeFormatter(locale).format(new Date(notification.createdAt)) }}
               </span>
             </div>
           </SListItem>

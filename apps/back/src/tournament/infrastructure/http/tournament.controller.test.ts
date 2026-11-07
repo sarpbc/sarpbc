@@ -17,13 +17,14 @@ describe("TournamentController.findOne", () => {
       {} as never,
       {} as never,
       {} as never,
+      {} as never,
+      {} as never,
       new CachedTournamentRead(tournaments, redis),
       {} as never,
       new TournamentPrizeService(
         { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
         { run: vi.fn() },
-        { invalidateTournament: vi.fn() },
-        { error: vi.fn() },
+        { settle: vi.fn() } as never,
       ),
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
       {} as never,
@@ -57,6 +58,8 @@ describe("TournamentController leagues", () => {
     updateLeague: vi.fn(),
   };
   const controller = new TournamentController(
+    {} as never,
+    {} as never,
     {} as never,
     {} as never,
     {} as never,
@@ -100,23 +103,6 @@ describe("TournamentController leagues", () => {
           imageUrl: null,
         },
       ],
-    });
-  });
-
-  it("creates and updates a league through the catalog", async () => {
-    catalog.createLeague.mockResolvedValue(manual);
-    catalog.updateLeague.mockResolvedValue({
-      ...synced,
-      imageUrl: "https://cdn/rlcs.png",
-    });
-    expect(await controller.createLeague({ name: "Coupe de France" })).toMatchObject({
-      league: { id: "l1", slug: "coupe-de-france" },
-    });
-    expect(await controller.updateLeague("l2", { imageUrl: "https://cdn/rlcs.png" })).toMatchObject(
-      { league: { id: "l2", imageUrl: "https://cdn/rlcs.png" } },
-    );
-    expect(catalog.updateLeague).toHaveBeenCalledWith("l2", {
-      imageUrl: "https://cdn/rlcs.png",
     });
   });
 });

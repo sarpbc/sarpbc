@@ -334,7 +334,7 @@ Use Tailwind spacing: `1`=4px, `2`=8px, `3`=12px, `4`=16px, `6`=24px, `8`=32px.
 
 **Impact: MEDIUM**
 
-Project uses `motion-v/nuxt`—apply Geist motion discipline:
+Apply Geist motion discipline:
 
 | Use motion                     | Skip motion              |
 | ------------------------------ | ------------------------ |

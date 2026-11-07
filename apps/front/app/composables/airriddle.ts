@@ -1,5 +1,4 @@
 import type { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
-import { apiFetch } from "~/utils/apiFetch";
 
 export async function getTodayAirRiddleLength(): Promise<number> {
   try {

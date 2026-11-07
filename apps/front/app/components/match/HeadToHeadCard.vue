@@ -13,12 +13,7 @@ const { headToHead, teamAName, teamBName } = defineProps<{
 
 const hasMeetings = computed(() => headToHead.totalMeetings > 0);
 
-const dateFormatter = computed(
-  () =>
-    new Intl.DateTimeFormat(locale.value, {
-      dateStyle: "medium",
-    }),
-);
+const dateFormatter = computed(() => mediumDateFormatter(locale.value));
 
 function meetingDate(meeting: HeadToHead["recentMeetings"][number]) {
   const date = meeting.endAt ?? meeting.beginAt;

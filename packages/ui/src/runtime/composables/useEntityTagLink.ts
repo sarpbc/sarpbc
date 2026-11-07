@@ -1,24 +1,22 @@
+import { playerPath, teamPath } from "@sarpbc/utils";
+
 export function useEntityTagLink() {
   const localePath = useLocalePath();
-  const config = useRuntimeConfig();
+  const publicSiteUrl = useRuntimeConfig().public.publicSiteUrl as string;
+
+  function href(path: string): string {
+    return publicSiteUrl ? `${publicSiteUrl}${path}` : localePath(path);
+  }
 
   function playerHref(slug: string): string {
-    const site = config.public.publicSiteUrl as string | undefined;
-    if (site) {
-      return `${site.replace(/\/$/, "")}/player/${slug}`;
-    }
-    return localePath(`/player/${slug}`);
+    return href(playerPath(slug));
   }
 
   function teamHref(slug: string): string {
-    const site = config.public.publicSiteUrl as string | undefined;
-    if (site) {
-      return `${site.replace(/\/$/, "")}/team/${slug}`;
-    }
-    return localePath(`/team/${slug}`);
+    return href(teamPath(slug));
   }
 
-  const opensInNewTab = computed(() => Boolean(config.public.publicSiteUrl));
+  const linkAttrs = publicSiteUrl === "" ? {} : { target: "_blank", rel: "noopener noreferrer" };
 
-  return { playerHref, teamHref, opensInNewTab };
+  return { playerHref, teamHref, linkAttrs };
 }

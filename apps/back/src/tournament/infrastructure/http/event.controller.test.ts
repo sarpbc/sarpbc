@@ -44,7 +44,7 @@ const stages = new Map(
 );
 
 describe("EventController", () => {
-  const events = { list: vi.fn(), find: vi.fn(), findStageId: vi.fn() };
+  const events = { list: vi.fn(), find: vi.fn(), stageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
   const catalog = {
@@ -66,7 +66,7 @@ describe("EventController", () => {
     events.find.mockImplementation(async (slug: string) =>
       slug === event.slug ? { event, stages: [...stages.values()] } : null,
     );
-    events.findStageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
+    events.stageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
       eventSlug === event.slug && stageSlug === "playoffs" ? "playoffs" : null,
     );
   });
@@ -84,8 +84,8 @@ describe("EventController", () => {
         logoUrl: "league.png",
         prizepool: "1000000 United States Dollar",
         type: "offline",
-        beginAt: new Date("2026-05-01T10:00:00Z"),
-        endAt: new Date("2026-05-10T10:00:00Z"),
+        beginAt: "2026-05-01T10:00:00.000Z",
+        endAt: "2026-05-10T10:00:00.000Z",
       },
     });
     if (resolved.kind !== "event") throw new Error("expected an event");

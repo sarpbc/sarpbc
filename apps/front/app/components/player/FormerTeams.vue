@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { DateFormatter } from "@internationalized/date";
-import type { ContractRole, PlayerContract } from "~/types/contract";
+import { teamPath } from "@sarpbc/utils";
+import type { ContractRole, PlayerContract } from "@sarpbc/types";
 
 const { contracts } = defineProps<{
   contracts: PlayerContract[];
@@ -10,10 +10,10 @@ const { t, locale } = useI18n();
 
 const headingId = "player-former-teams-title";
 
-const df = computed(() => new DateFormatter(locale.value, { dateStyle: "medium" }));
+const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatContractDate = (dateStr: string | null) =>
-  dateStr ? df.value.format(new Date(dateStr)) : t("page.player.slug.contractDateUnknown");
+  dateStr ? mediumDate.value.format(new Date(dateStr)) : t("page.player.slug.contractDateUnknown");
 
 const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
 </script>
@@ -34,7 +34,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
         >
           <TeamImg :team-name="contract.team.name" :logo="contract.team" size="sm" />
           <div class="flex-1 min-w-0">
-            <SLink :to="$localePath(`/team/${contract.team.slug}`)" variant="inline">
+            <SLink :to="$localePath(teamPath(contract.team.slug))" variant="inline">
               {{ contract.team.name }}
             </SLink>
             <div class="text-sm text-muted">

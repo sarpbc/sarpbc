@@ -16,10 +16,10 @@ import { Player, Team } from "../../roster/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
 import { EventController } from "./http/event.controller";
-import { EventService } from "../application/event.service";
 import { CompetitionEventQueries } from "./persistence/event.queries";
+import { EVENT_QUERIES, TOURNAMENT_QUERIES } from "./competition-queries.tokens";
+import { CompetitionAfterCommit } from "../application/after-commit";
 import { TournamentCron } from "./jobs/tournament.cron";
-import { TournamentService } from "../application/tournament.service";
 import { ManualTournamentService } from "../application/manual-tournament.service";
 import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
@@ -39,7 +39,6 @@ import {
   CompetitionEventsAdapter,
   competitionDiagnostics,
 } from "./competition.adapters";
-import { UserModule } from "../../user/infrastructure/user.module";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCompetitionFeed } from "../../pandascore/infrastructure/pandascore-competition-feed";
@@ -64,7 +63,6 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       Player,
       Team,
     ]),
-    UserModule,
     PandascoreModule,
     RedisModule,
     ConfigModule,
@@ -74,15 +72,15 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
   controllers: [TournamentController, EventController, MatchController],
   providers: [
     {
-      provide: EventService,
-      useFactory: (em: EntityManager) => new EventService(new CompetitionEventQueries(em)),
+      provide: EVENT_QUERIES,
+      useFactory: (em: EntityManager) => new CompetitionEventQueries(em),
       inject: [EntityManager],
     },
     {
       provide: CachedTournamentRead,
-      useFactory: (tournaments: TournamentService, redis: RedisService) =>
-        new CachedTournamentRead(tournaments, redis),
-      inject: [TournamentService, RedisService],
+      useFactory: (reads: CompetitionQueries, redis: RedisService) =>
+        new CachedTournamentRead(reads, redis),
+      inject: [CompetitionQueries, RedisService],
     },
     CompetitionCacheAdapter,
     CompetitionEventsAdapter,
@@ -92,6 +90,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       useFactory: (em: EntityManager) => new CompetitionQueries(em),
       inject: [EntityManager],
     },
+    { provide: TOURNAMENT_QUERIES, useExisting: CompetitionQueries },
     {
       provide: MikroOrmCompetitionTransaction,
       useFactory: (em: EntityManager) => new MikroOrmCompetitionTransaction(em),
@@ -103,19 +102,16 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [EntityManager],
     },
     {
+      provide: CompetitionAfterCommit,
+      useFactory: (cache: CompetitionCacheAdapter, events: CompetitionEventsAdapter) =>
+        new CompetitionAfterCommit(cache, events, competitionDiagnostics),
+      inject: [CompetitionCacheAdapter, CompetitionEventsAdapter],
+    },
+    {
       provide: CompetitionSyncService,
-      useFactory: (
-        reads: CompetitionQueries,
-        tx: MikroOrmCompetitionTransaction,
-        cache: CompetitionCacheAdapter,
-        events: CompetitionEventsAdapter,
-      ) => new CompetitionSyncService(reads, tx, cache, events, competitionDiagnostics),
-      inject: [
-        CompetitionQueries,
-        MikroOrmCompetitionTransaction,
-        CompetitionCacheAdapter,
-        CompetitionEventsAdapter,
-      ],
+      useFactory: (tx: MikroOrmCompetitionTransaction, afterCommit: CompetitionAfterCommit) =>
+        new CompetitionSyncService(tx, afterCommit, competitionDiagnostics),
+      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
       provide: RedisSyncCursor,
@@ -124,21 +120,36 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     },
     {
       provide: SyncAllTournamentsUseCase,
-      useFactory: (feed: CompetitionFeed, sync: CompetitionSyncService) =>
-        new SyncAllTournamentsUseCase(feed, sync),
-      inject: [PandascoreCompetitionFeed, CompetitionSyncService],
+      useFactory: (
+        feed: CompetitionFeed,
+        reads: CompetitionQueries,
+        sync: CompetitionSyncService,
+      ) => new SyncAllTournamentsUseCase(feed, reads, sync),
+      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
     },
     {
       provide: SyncPandascoreTournamentUseCase,
-      useFactory: (feed: CompetitionFeed, sync: CompetitionSyncService) =>
-        new SyncPandascoreTournamentUseCase(feed, sync),
-      inject: [PandascoreCompetitionFeed, CompetitionSyncService],
+      useFactory: (
+        feed: CompetitionFeed,
+        reads: CompetitionQueries,
+        sync: CompetitionSyncService,
+      ) => new SyncPandascoreTournamentUseCase(feed, reads, sync),
+      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
     },
     {
       provide: SyncPandascoreIncidentsUseCase,
-      useFactory: (feed: CompetitionFeed, cursor: SyncCursor, sync: CompetitionSyncService) =>
-        new SyncPandascoreIncidentsUseCase(feed, cursor, sync, competitionDiagnostics),
-      inject: [PandascoreCompetitionFeed, RedisSyncCursor, CompetitionSyncService],
+      useFactory: (
+        feed: CompetitionFeed,
+        cursor: SyncCursor,
+        reads: CompetitionQueries,
+        sync: CompetitionSyncService,
+      ) => new SyncPandascoreIncidentsUseCase(feed, cursor, reads, sync, competitionDiagnostics),
+      inject: [
+        PandascoreCompetitionFeed,
+        RedisSyncCursor,
+        CompetitionQueries,
+        CompetitionSyncService,
+      ],
     },
     {
       provide: SyncNewTournamentsUseCase,
@@ -154,53 +165,27 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       ],
     },
     {
-      provide: TournamentService,
-      useFactory: (
-        reads: CompetitionQueries,
-        tx: MikroOrmCompetitionTransaction,
-        all: SyncAllTournamentsUseCase,
-        details: SyncPandascoreTournamentUseCase,
-        additions: SyncNewTournamentsUseCase,
-        cache: CompetitionCacheAdapter,
-      ) => new TournamentService(reads, tx, all, details, additions, cache, competitionDiagnostics),
-      inject: [
-        CompetitionQueries,
-        MikroOrmCompetitionTransaction,
-        SyncAllTournamentsUseCase,
-        SyncPandascoreTournamentUseCase,
-        SyncNewTournamentsUseCase,
-        CompetitionCacheAdapter,
-      ],
-    },
-    {
       provide: ManualTournamentService,
       useFactory: (
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
-        cache: CompetitionCacheAdapter,
-      ) => new ManualTournamentService(reads, tx, cache, competitionDiagnostics),
-      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionCacheAdapter],
+        afterCommit: CompetitionAfterCommit,
+      ) => new ManualTournamentService(reads, tx, afterCommit),
+      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
       provide: ManualCatalogService,
       useFactory: (
-        em: EntityManager,
         reads: CompetitionQueries,
+        events: CompetitionEventQueries,
         tx: MikroOrmCompetitionTransaction,
-        cache: CompetitionCacheAdapter,
-      ) =>
-        new ManualCatalogService(
-          reads,
-          new CompetitionEventQueries(em),
-          tx,
-          cache,
-          competitionDiagnostics,
-        ),
+        afterCommit: CompetitionAfterCommit,
+      ) => new ManualCatalogService(reads, events, tx, afterCommit),
       inject: [
-        EntityManager,
         CompetitionQueries,
+        EVENT_QUERIES,
         MikroOrmCompetitionTransaction,
-        CompetitionCacheAdapter,
+        CompetitionAfterCommit,
       ],
     },
     {
@@ -208,9 +193,9 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       useFactory: (
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
-        events: CompetitionEventsAdapter,
-      ) => new MatchService(reads, tx, events, competitionDiagnostics),
-      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionEventsAdapter],
+        afterCommit: CompetitionAfterCommit,
+      ) => new MatchService(reads, tx, afterCommit),
+      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
       provide: PlayerAwardService,
@@ -223,15 +208,9 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       useFactory: (
         em: EntityManager,
         tx: MikroOrmCompetitionTransaction,
-        cache: CompetitionCacheAdapter,
-      ) =>
-        new TournamentPrizeService(
-          new CompetitionPrizeQueries(em),
-          tx,
-          cache,
-          competitionDiagnostics,
-        ),
-      inject: [EntityManager, MikroOrmCompetitionTransaction, CompetitionCacheAdapter],
+        afterCommit: CompetitionAfterCommit,
+      ) => new TournamentPrizeService(new CompetitionPrizeQueries(em), tx, afterCommit),
+      inject: [EntityManager, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
       provide: CachedTournamentPrizesRead,
@@ -241,10 +220,12 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     },
   ],
   exports: [
-    TournamentService,
+    TOURNAMENT_QUERIES,
+    EVENT_QUERIES,
+    SyncPandascoreTournamentUseCase,
+    SyncNewTournamentsUseCase,
     ManualTournamentService,
     ManualCatalogService,
-    EventService,
     MatchService,
     PlayerAwardService,
     TournamentPrizeService,
@@ -252,7 +233,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
 })
 export class TournamentModule implements OnModuleInit {
   constructor(
-    private readonly tournamentService: TournamentService,
+    private readonly syncAll: SyncAllTournamentsUseCase,
     private readonly configService: ConfigService,
     private readonly orm: MikroORM,
   ) {}
@@ -264,6 +245,6 @@ export class TournamentModule implements OnModuleInit {
   }
   @CreateRequestContext()
   private async startSync() {
-    await this.tournamentService.syncAllTournaments();
+    await this.syncAll.execute();
   }
 }

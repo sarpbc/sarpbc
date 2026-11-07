@@ -1,19 +1,27 @@
-const apiBase =
-  process.env.NUXT_PUBLIC_API_BASE || process.env.API_BASE || "https://api.sarpbc.org";
-const adminUrl =
-  process.env.NUXT_PUBLIC_ADMIN_URL || process.env.ADMIN_URL || "https://admin.sarpbc.org";
+import type { NuxtConfig } from "nuxt/schema";
+import { localizedPath } from "@sarpbc/utils/entity-path";
+import {
+  DEFAULT_API_BASE,
+  apiPreconnectLinks,
+  i18nOptions,
+  newsMdcComponentMap,
+} from "@sarpbc/ui/config";
 
-function apiOrigin(base: string): string | undefined {
-  try {
-    return new URL(base).origin;
-  } catch {
-    return undefined;
-  }
-}
-
-const apiOriginUrl = apiOrigin(apiBase);
+const apiBase = process.env.NUXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
+const adminUrl = process.env.NUXT_PUBLIC_ADMIN_URL || "https://admin.sarpbc.org";
 
 const contentSwr = { swr: 300 } as const;
+
+type RouteRules = NonNullable<NuxtConfig["routeRules"]>;
+
+function localizedRouteRules(rules: RouteRules): RouteRules {
+  return Object.fromEntries(
+    Object.entries(rules).flatMap(([path, rule]) => [
+      [path, rule],
+      [localizedPath(path, "fr"), rule],
+    ]),
+  );
+}
 const isProduction = process.env.NODE_ENV === "production";
 const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
 const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
@@ -31,27 +39,14 @@ function hostnameFromUrl(base: string | undefined): string | undefined {
 
 const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
 
-const apiHeadLinks = apiOriginUrl
-  ? ([
-      { rel: "preconnect", href: apiOriginUrl, crossorigin: "anonymous" },
-      { rel: "dns-prefetch", href: apiOriginUrl },
-    ] as const)
-  : [];
-
 export default defineNuxtConfig({
   app: {
     head: {
-      charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
       link: [
-        ...apiHeadLinks,
+        ...apiPreconnectLinks(apiBase),
         { rel: "preload", href: "/sarpbc.svg", as: "image", type: "image/svg+xml" },
       ],
     },
-  },
-
-  build: {
-    analyze: false,
   },
 
   compatibilityDate: "2026-07-01",
@@ -63,38 +58,14 @@ export default defineNuxtConfig({
   },
 
   mdc: {
-    components: {
-      map: {
-        player: "SarpPlayerTag",
-        team: "SarpTeamTag",
-        tweet: "SarpTweetTag",
-        matches: "NewsMatchBlock",
-      },
-    },
+    components: { map: newsMdcComponentMap("NewsMatchBlock") },
   },
 
   css: ["~/assets/css/main.css"],
 
   devtools: { enabled: false },
 
-  i18n: {
-    langDir: "locales",
-    locales: [
-      { code: "en", language: "en", file: "en-US.json", name: "English" },
-      { code: "fr", language: "fr", file: "fr-FR.json", name: "Français" },
-    ],
-    defaultLocale: "en",
-    strategy: "prefix_except_default",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "i18n_redirected",
-      redirectOn: "root",
-      fallbackLocale: "en",
-    },
-    compilation: {
-      strictMessage: false,
-    },
-  },
+  i18n: i18nOptions,
 
   image: {
     domains: ["cdn.pandascore.co", "imagedelivery.net", ...(r2ImageHost ? [r2ImageHost] : [])],
@@ -168,34 +139,18 @@ export default defineNuxtConfig({
     },
   },
 
-  ssr: true,
-
-  typescript: {
-    typeCheck: false,
-  },
-
-  routeRules: {
+  routeRules: localizedRouteRules({
     "/login": { appLayout: "login" },
-    "/fr/login": { appLayout: "login" },
     "/register": { appLayout: "login" },
-    "/fr/register": { appLayout: "login" },
     "/game/career": { appLayout: "game" },
     "/game/career/**": { appLayout: "game" },
-    "/fr/game/career": { appLayout: "game" },
-    "/fr/game/career/**": { appLayout: "game" },
     "/about": { appLayout: "marketing", ...contentSwr },
-    "/fr/about": { appLayout: "marketing", ...contentSwr },
     "/brand": { appLayout: "marketing", ...contentSwr },
-    "/fr/brand": { appLayout: "marketing", ...contentSwr },
     "/privacy-policy": contentSwr,
-    "/fr/privacy-policy": contentSwr,
     "/terms-of-service": contentSwr,
-    "/fr/terms-of-service": contentSwr,
     "/legal-notice": contentSwr,
-    "/fr/legal-notice": contentSwr,
     "/cookie-policy": contentSwr,
-    "/fr/cookie-policy": contentSwr,
-  },
+  }),
 
   runtimeConfig: {
     indexnowKey: "",
@@ -203,7 +158,7 @@ export default defineNuxtConfig({
     apiInternalToken: "",
     public: {
       apiBase: apiBase,
-      adminUrl: adminUrl,
+      adminUrl,
       posthog: {
         publicKey: posthogPublicKey,
         host: posthogHost,

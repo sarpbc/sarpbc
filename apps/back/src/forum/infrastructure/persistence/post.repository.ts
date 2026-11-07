@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EntityRepository } from "@mikro-orm/core";
 
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import { Post, PostTranslation } from "./forum.entities";
+import { Post } from "./forum.entities";
 
 export class PostRepository extends EntityRepository<Post> {
   async findPaginated({
@@ -81,23 +81,5 @@ export class PostRepository extends EntityRepository<Post> {
       { author: { id: userId } },
       { populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
     );
-  }
-
-  async save(post: Post): Promise<void> {
-    this.em.persist(post);
-  }
-
-  async saveTranslation(translation: PostTranslation): Promise<void> {
-    this.em.persist(translation);
-  }
-
-  async deleteTranslations(post: Post): Promise<void> {
-    for (const translation of post.translations.getItems()) {
-      this.em.remove(translation);
-    }
-  }
-
-  async delete(post: Post): Promise<void> {
-    this.em.remove(post);
   }
 }

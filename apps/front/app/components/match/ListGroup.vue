@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { MatchListItem } from "~/types/matches";
-import type { MatchEventGroup } from "~/composables/matches/groupMatchesByEvent";
+import type { MatchListItem } from "@sarpbc/types";
+import type { MatchEventGroup } from "~/types/matches";
 import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
 import { formatDayHeaderDate } from "~/utils/dateFormatter";
 
@@ -34,12 +34,12 @@ const blocks = computed((): ListBlock[] => {
     ];
   }
 
-  return groupMatchesByDateThenEvent(matches).map((dayGroup) => ({
+  return groupByDay(matches, (match) => match.beginAt, "asc").map((dayGroup) => ({
     key: dayGroup.dateKey,
     dateLabel: dayGroup.date
       ? formatDayHeaderDate(dayGroup.date, locale.value)
       : t("page.tournaments.id.matchSections.unknownDate"),
-    events: dayGroup.events,
+    events: groupMatchesByEvent(dayGroup.items),
   }));
 });
 </script>

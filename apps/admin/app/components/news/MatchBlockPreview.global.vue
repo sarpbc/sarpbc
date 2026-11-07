@@ -61,22 +61,7 @@ function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
   }
 }
 
-function stateLabel(item: MatchBlockItem): string {
-  switch (item.state) {
-    case "live":
-      return t("newsTag.matchLive");
-    case "finished":
-      return t("newsTag.matchFinal");
-    case "upcoming":
-      return item.beginAt
-        ? dateFormatter.value.format(new Date(item.beginAt))
-        : t("newsTag.matchTbd");
-    default: {
-      const exhaustive: never = item.state;
-      return exhaustive;
-    }
-  }
-}
+const stateLabel = useMatchStateLabel((beginAt) => dateFormatter.value.format(beginAt));
 </script>
 
 <template>

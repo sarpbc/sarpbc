@@ -5,8 +5,12 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
-const IMPORTS_TYPES = path.join(FRONT_ROOT, ".nuxt/types/imports.d.ts");
+const IMPORTS_TYPES = [".nuxt/types/imports.d.ts", ".nuxt/types/nitro-imports.d.ts"].map((file) =>
+  path.join(FRONT_ROOT, file),
+);
 const OUTPUT = path.join(FRONT_ROOT, ".oxlintrc.generated.json");
+
+const NODE_AND_NUXT_GLOBALS = ["defineNuxtConfig", "process"];
 
 const VUE_MACROS = [
   "defineEmits",
@@ -18,66 +22,34 @@ const VUE_MACROS = [
   "withDefaults",
 ];
 
-const BROWSER_GLOBALS = [
-  "AbortController",
-  "CustomEvent",
-  "Element",
-  "Event",
-  "File",
-  "FormData",
-  "HTMLElement",
-  "KeyboardEvent",
-  "MouseEvent",
-  "TextDecoder",
-  "TextEncoder",
-  "URL",
-  "URLSearchParams",
-  "XMLHttpRequest",
-  "alert",
-  "atob",
-  "btoa",
-  "cancelAnimationFrame",
-  "clearInterval",
-  "clearTimeout",
-  "confirm",
-  "console",
-  "crypto",
-  "document",
-  "fetch",
-  "history",
-  "localStorage",
-  "location",
-  "navigator",
-  "performance",
-  "queueMicrotask",
-  "requestAnimationFrame",
-  "sessionStorage",
-  "setInterval",
-  "setTimeout",
-  "structuredClone",
-  "window",
-];
-
 function readAutoImportNames() {
-  let source;
-  try {
-    source = readFileSync(IMPORTS_TYPES, "utf8");
-  } catch {
-    console.error(`Missing ${IMPORTS_TYPES}. Run "pnpm exec nuxt prepare" in apps/front first.`);
-    process.exit(1);
-  }
+  return IMPORTS_TYPES.flatMap((file) => {
+    let source;
+    try {
+      source = readFileSync(file, "utf8");
+    } catch {
+      console.error(`Missing ${file}. Run "pnpm exec nuxt prepare" in apps/front first.`);
+      process.exit(1);
+    }
 
-  return [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    const names = [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    if (names.length === 0) {
+      console.error(`No auto-import names found in ${file}. Nuxt changed its format?`);
+      process.exit(1);
+    }
+    return names;
+  });
 }
 
 const globals = Object.fromEntries(
-  [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...BROWSER_GLOBALS])]
+  [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...NODE_AND_NUXT_GLOBALS])]
     .sort()
     .map((name) => [name, "readonly"]),
 );
 
 const config = {
   extends: ["../../.oxlintrc.json"],
+  env: { browser: true },
   globals,
   rules: {
     "no-undef": "error",

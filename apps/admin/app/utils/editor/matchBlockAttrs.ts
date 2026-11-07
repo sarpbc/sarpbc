@@ -1,8 +1,5 @@
-import {
-  newsMatchBlockToAttrs,
-  type NewsMatchBlock,
-  type NewsMatchBlockAttrs,
-} from "@sarpbc/utils";
+import type { MatchBlockSelector } from "@sarpbc/types";
+import { newsMatchBlockToAttrs, type NewsMatchBlockAttrs } from "@sarpbc/utils";
 
 export const EMPTY_MATCH_BLOCK_ATTRS: Required<NewsMatchBlockAttrs> = {
   match: null,
@@ -12,6 +9,6 @@ export const EMPTY_MATCH_BLOCK_ATTRS: Required<NewsMatchBlockAttrs> = {
   limit: null,
 };
 
-export function matchBlockNodeAttrs(block: NewsMatchBlock): Required<NewsMatchBlockAttrs> {
+export function matchBlockNodeAttrs(block: MatchBlockSelector): Required<NewsMatchBlockAttrs> {
   return { ...EMPTY_MATCH_BLOCK_ATTRS, ...newsMatchBlockToAttrs(block) };
 }

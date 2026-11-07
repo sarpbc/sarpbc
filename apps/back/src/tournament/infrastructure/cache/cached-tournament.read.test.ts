@@ -82,11 +82,12 @@ describe("CachedTournamentRead", () => {
     expect(log.warn).toHaveBeenCalledTimes(2);
   });
 
-  it("strips cache fields outside the public response", async () => {
+  it("never serves a cached value with fields outside the public response", async () => {
     const dto = mapTournamentDetail(model);
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, internalSecret: "hidden" }));
     expect(await read.findById("t1")).toEqual(dto);
-    expect(tournaments.findById).not.toHaveBeenCalled();
+    expect(tournaments.findById).toHaveBeenCalledTimes(1);
+    expect(log.warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
   });
 
   it.each(["get", "set"] as const)(

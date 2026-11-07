@@ -1,16 +1,21 @@
-import type { UserToken } from "../../../common/application/models/user-token";
+import type { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
 
 export interface AuthTokenPair {
   accessToken: string;
   refreshToken: string;
 }
 
+export interface AuthSession {
+  user: AuthenticatedUser;
+  tokens: AuthTokenPair;
+}
+
 export type AuthTokenType = "access" | "refresh";
 export type OAuthReturnTo = "front" | "admin";
 
 export interface SessionTokens {
-  sign(user: UserToken): Promise<AuthTokenPair>;
-  verify(token: string, type: AuthTokenType): Promise<UserToken | null>;
+  sign(user: AuthenticatedUser): Promise<AuthTokenPair>;
+  verify(token: string, type: AuthTokenType): Promise<AuthenticatedUser | null>;
 }
 
 export interface GoogleProfile {

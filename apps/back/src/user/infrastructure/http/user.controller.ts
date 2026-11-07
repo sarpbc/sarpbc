@@ -1,13 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Patch,
-  Request,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Patch, Request, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
+import { NotFoundError } from "../../../common/domain/errors";
 import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
@@ -24,7 +17,7 @@ export class UserController {
   async getProfile(@Request() req: AuthenticatedUserRequest) {
     const user = await this.userService.findOneByEmail(req.user.email);
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundError("User not found");
     }
     const userDto = UserMapper.toDto(user);
     return { user: userDto };

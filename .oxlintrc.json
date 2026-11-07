@@ -5,9 +5,6 @@
     "**/dist/**",
     "**/.nuxt/**",
     "**/.output/**",
-    ".agents/",
-    ".github/",
-    ".vscode/",
     "tools/oxlint/"
   ],
   "jsPlugins": [

@@ -18,18 +18,7 @@ defineEmits<{ retry: [] }>();
       <div v-for="n in 3" :key="n" class="h-10 w-full animate-pulse rounded-sm bg-elevated" />
     </div>
 
-    <div
-      v-else-if="status === 'error'"
-      class="flex flex-col items-start gap-3 rounded-lg border border-default p-4"
-    >
-      <p class="text-sm text-muted">{{ errorLabel }}</p>
-      <UButton
-        icon="i-fluent-arrow-clockwise-24-regular"
-        variant="soft"
-        :label="$t('page.home.retry')"
-        @click="$emit('retry')"
-      />
-    </div>
+    <LoadError v-else-if="status === 'error'" :message="errorLabel" @retry="$emit('retry')" />
 
     <p v-else-if="empty" class="rounded-lg border border-default p-4 text-sm text-muted">
       {{ emptyLabel }}

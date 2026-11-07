@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { NewsType } from "@sarpbc/types";
+import { toSlug } from "@sarpbc/utils";
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
+const reportError = useReportError();
 
 const items = [
   {
@@ -25,19 +27,9 @@ const articleType = ref<NewsType>("short");
 const isSaving = ref(false);
 const isModalOpen = ref(false);
 
-function suggestSlug(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 watch(title, (next) => {
   if (!slugTouched.value) {
-    articleSlug.value = suggestSlug(next);
+    articleSlug.value = toSlug(next);
   }
 });
 
@@ -48,7 +40,7 @@ function onSlugInput(value: string) {
 
 function openSaveModal() {
   if (!slugTouched.value && title.value) {
-    articleSlug.value = suggestSlug(title.value);
+    articleSlug.value = toSlug(title.value);
   }
   isModalOpen.value = true;
 }
@@ -70,25 +62,14 @@ async function saveArticle() {
       imageUrl: imageUrl.value ?? undefined,
       type: articleType.value,
     });
-    if (!created) {
-      toast.add({
-        title: t("page.news.create.saveFailed"),
-        color: "error",
-      });
-      return;
-    }
     isModalOpen.value = false;
     toast.add({
       title: t("page.news.create.saved"),
       color: "success",
     });
     await navigateTo(localePath(`/news/${created.slug}`));
-  } catch (error) {
-    console.error("Failed to save article:", error);
-    toast.add({
-      title: t("page.news.create.saveFailed"),
-      color: "error",
-    });
+  } catch (saveError) {
+    reportError(saveError, t("page.news.create.saveFailed"));
   } finally {
     isSaving.value = false;
   }

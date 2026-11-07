@@ -1,6 +1,59 @@
 import type { Tournament } from "~/types/tournament";
-import type { PlayerProfileAward, ProfileEarnings, ProfileMatchListItem } from "@sarpbc/types";
-import { apiFetch } from "~/utils/apiFetch";
+import type {
+  Player,
+  PlayerContract,
+  PlayerProfileAward,
+  ProfileEarnings,
+  ProfileMatchListItem,
+} from "@sarpbc/types";
+
+export async function getPlayerFromSlug(slug: string): Promise<Player | null> {
+  const res = await apiFetch<{ player?: Player }>(`/player/slug/${slug}`, { method: "GET" });
+
+  return res.player ?? null;
+}
+
+interface PlayerListParams {
+  limit: number;
+  offset?: number;
+  start?: string;
+  name?: string;
+}
+
+export async function getAllPlayers(query?: {
+  limit?: number;
+  search?: string;
+  offset?: number;
+  start?: string;
+}): Promise<{ players: Player[]; total: number }> {
+  const params: PlayerListParams = { limit: query?.limit ?? 50 };
+
+  if (query?.offset && query.offset > 0) {
+    params.offset = query.offset;
+  }
+
+  if (query?.start) {
+    params.start = query.start;
+  } else if (query?.search) {
+    params.name = query.search;
+  }
+
+  const res = await apiFetch<{ players?: Player[]; count?: number }>("/player", {
+    method: "GET",
+    params,
+  });
+  const players = res.players ?? [];
+
+  return { players, total: res.count ?? players.length };
+}
+
+export async function getPlayerOldTeams(playerId: string): Promise<PlayerContract[]> {
+  const res = await apiFetch<{ contracts?: PlayerContract[] }>(`/player/${playerId}/old-teams`, {
+    method: "GET",
+  });
+
+  return res.contracts ?? [];
+}
 
 export async function getPlayerMatches(playerId: string): Promise<ProfileMatchListItem[]> {
   const res = await apiFetch<{ matches?: ProfileMatchListItem[] }>(`/player/${playerId}/matches`, {

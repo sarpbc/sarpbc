@@ -1,22 +1,21 @@
+import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
 import { Team } from "../domain/roster";
 import type { RosterTransaction, TeamQueries } from "./ports";
-import type { TeamSearchProps } from "./search-props";
-import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
+import type { DirectorySearchProps } from "./search-props";
 
 export class TeamService {
   constructor(
     private readonly teams: TeamQueries,
     private readonly transaction: RosterTransaction,
-    private readonly syncPandascoreTeamsUseCase: SyncPandascoreTeamsUseCase,
   ) {}
 
-  async find(options: Partial<TeamSearchProps>): Promise<Team[]> {
+  async find(options: Partial<DirectorySearchProps>): Promise<Team[]> {
     return this.teams.search(options);
   }
 
-  async findAndCount(options: Partial<TeamSearchProps>): Promise<[Team[], number]> {
+  async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
     return this.teams.searchAndCount(options);
   }
 
@@ -28,12 +27,8 @@ export class TeamService {
     return this.resolveMerged(await this.teams.findBySlug(slug));
   }
 
-  async getTeamWithPlayers(id: string): Promise<Team | null> {
-    return this.resolveMerged(await this.teams.findWithPlayers(id));
-  }
-
   private async resolveMerged(team: Team | null): Promise<Team | null> {
-    return team?.mergedIntoId ? this.teams.findWithPlayers(team.mergedIntoId) : team;
+    return team?.mergedIntoId ? this.teams.findById(team.mergedIntoId) : team;
   }
 
   async create(dto: CreateTeamInput): Promise<Team> {
@@ -43,7 +38,7 @@ export class TeamService {
       team.location = dto.location ?? null;
       team.imageUrl = dto.imageUrl ?? null;
       team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
-      team.slug = dto.slug ?? dto.name.toLowerCase().replace(/\s+/g, "-");
+      team.slug = dto.slug ?? (toSlug(dto.name) || "team");
       if (dto.source !== undefined) team.source = dto.source;
 
       if (await teams.findBySlug(team.slug)) {
@@ -88,7 +83,7 @@ export class TeamService {
 
   async delete(id: string): Promise<void> {
     return this.transaction.run(async ({ teams, players, contracts }) => {
-      const team = await teams.findWithPlayers(id);
+      const team = await teams.findById(id);
       if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
       for (const contract of await contracts.findByTeam(id)) await contracts.delete(contract);
       for (const player of team.players) {
@@ -97,9 +92,5 @@ export class TeamService {
       }
       await teams.delete(team);
     });
-  }
-
-  async initializeTeamsFromPandaScore(cancelIfExistingTeam: boolean): Promise<void> {
-    await this.syncPandascoreTeamsUseCase.execute(cancelIfExistingTeam);
   }
 }

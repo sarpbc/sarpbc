@@ -1,14 +1,20 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { Reply, ReplyReport, Post } from "../../../forum/infrastructure/persistence/forum.entities";
-import { NewsArticle } from "../../../news/infrastructure/persistence/news-article.entity";
-import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
-import { ReplyRepository } from "./reply.repository";
-import { ReplyReportRepository } from "./reply-report.repository";
-import { replySnapshot } from "./reply.mapper";
-import type { ReplyTargetType } from "../../domain/reply";
+import type { ReplyTargetType } from "@sarpbc/types";
+import {
+  isForeignKeyViolation,
+  isUniqueViolation,
+} from "../../../common/infrastructure/persistence/constraint-violation";
+import { Post } from "../../../forum/infrastructure/forum-persistence";
+import { NewsArticle } from "../../../news/infrastructure/news-persistence";
+import { Match } from "../../../tournament/infrastructure/competition-persistence";
+import { User } from "../../../user/infrastructure/user-persistence";
 import type { ReplyRecord } from "../../application/models";
-import type { ReplyWrites, ReplyFindOptions, ReplyReportRecord } from "../../application/ports";
+import type { ReplyFindOptions, ReplyReportRecord, ReplyWrites } from "../../application/ports";
+import { replyAlreadyReported, replyStillReferenced } from "../../domain/reply-errors";
+import { Reply, ReplyReport } from "./reply.entities";
+import { replySnapshot } from "./reply.mapper";
+import { ReplyRepository } from "./reply.repository";
+
 export class MikroReplyStore implements ReplyWrites {
   private readonly rows: ReplyRepository;
   constructor(private readonly em: EntityManager) {
@@ -60,17 +66,26 @@ export class MikroReplyStore implements ReplyWrites {
   }
   async delete(model: ReplyRecord) {
     const row = await this.em.findOne(Reply, { id: model.id });
-    if (row) this.em.remove(row);
+    if (!row) return;
+    this.em.remove(row);
+    try {
+      await this.em.flush();
+    } catch (error) {
+      if (isForeignKeyViolation(error)) throw replyStillReferenced();
+      throw error;
+    }
   }
 }
 export function replyReports(em: EntityManager) {
-  const rows = new ReplyReportRepository(em);
   return {
     async findByReplyAndReporter(
       replyId: string,
       userId: string,
     ): Promise<ReplyReportRecord | null> {
-      const row = await rows.findByReplyAndReporter(replyId, userId);
+      const row = await em.findOne(ReplyReport, {
+        reply: { id: replyId },
+        reporter: { id: userId },
+      });
       return row
         ? {
             id: row.id,
@@ -89,6 +104,12 @@ export function replyReports(em: EntityManager) {
       row.reason = model.reason;
       row.createdAt = model.createdAt;
       em.persist(row);
+      try {
+        await em.flush();
+      } catch (error) {
+        if (isUniqueViolation(error)) throw replyAlreadyReported();
+        throw error;
+      }
     },
   };
 }

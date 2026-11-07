@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
 import ts from "typescript";
 
 const project = path.resolve(import.meta.dirname, "..");
@@ -19,6 +18,59 @@ function filesIn(dir) {
   });
 }
 
+const packagesRoot = path.resolve(project, "../../packages");
+
+function stringConstants() {
+  const constants = new Map();
+  for (const pkg of fs.readdirSync(packagesRoot)) {
+    const dir = path.join(packagesRoot, pkg, "src");
+    if (!fs.existsSync(dir)) continue;
+    for (const file of filesIn(dir)) {
+      const source = ts.createSourceFile(
+        file,
+        fs.readFileSync(file, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+      );
+      for (const statement of source.statements) {
+        if (!ts.isVariableStatement(statement)) continue;
+        for (const declaration of statement.declarationList.declarations) {
+          let value = declaration.initializer;
+          while (value && (ts.isAsExpression(value) || ts.isSatisfiesExpression(value))) {
+            value = value.expression;
+          }
+          if (
+            ts.isIdentifier(declaration.name) &&
+            value &&
+            ts.isArrayLiteralExpression(value) &&
+            value.elements.every(ts.isStringLiteral)
+          ) {
+            constants.set(
+              declaration.name.text,
+              value.elements.map((element) => element.getText(source)),
+            );
+          }
+        }
+      }
+    }
+  }
+  return constants;
+}
+
+const constants = stringConstants();
+
+function decoratorArguments(expression, source) {
+  return expression.arguments.flatMap((argument) => {
+    if (!ts.isSpreadElement(argument)) return [argument.getText(source)];
+    const values = constants.get(argument.expression.getText(source));
+    assert(
+      values,
+      `${source.fileName}: cannot resolve ${argument.getText(source)} to a workspace string array constant`,
+    );
+    return values;
+  });
+}
+
 function decorators(node, source) {
   return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const expression = decorator.expression;
@@ -26,7 +78,7 @@ function decorators(node, source) {
       ? [
           {
             name: expression.expression.text,
-            args: expression.arguments.map((argument) => argument.getText(source)),
+            args: decoratorArguments(expression, source),
           },
         ]
       : [];
@@ -84,26 +136,9 @@ function collectRoutes(sources) {
   return routes.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
-const baselineFromHead = process.argv.includes("--baseline-from-head");
-const sources = baselineFromHead
-  ? execFileSync("git", ["ls-tree", "-r", "--name-only", "HEAD", "apps/back/src"], {
-      cwd: path.resolve(project, "../.."),
-      encoding: "utf8",
-    })
-      .trim()
-      .split("\n")
-      .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
-      .map((file) => ({
-        file,
-        text: execFileSync("git", ["show", `HEAD:${file}`], {
-          cwd: path.resolve(project, "../.."),
-          encoding: "utf8",
-          maxBuffer: 4 * 1024 * 1024,
-        }),
-      }))
-  : filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
+const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
 const actual = collectRoutes(sources);
-if (baselineFromHead || process.argv.includes("--write")) {
+if (process.argv.includes("--write")) {
   fs.mkdirSync(path.dirname(snapshot), { recursive: true });
   fs.writeFileSync(snapshot, `${JSON.stringify(actual, null, 2)}\n`);
   process.stdout.write(`Recorded ${actual.length} HTTP routes.\n`);
@@ -111,7 +146,7 @@ if (baselineFromHead || process.argv.includes("--write")) {
   assert.deepEqual(
     actual,
     JSON.parse(fs.readFileSync(snapshot, "utf8")),
-    "HTTP routes, status overrides, guards and permissions changed",
+    "HTTP routes, status overrides, guards and permissions changed. If intended, run `pnpm --filter back test:contracts --write` then `pnpm --filter back fmt`, and commit test/contracts/http-routes.json.",
   );
   process.stdout.write(`Verified ${actual.length} HTTP route contracts.\n`);
 }

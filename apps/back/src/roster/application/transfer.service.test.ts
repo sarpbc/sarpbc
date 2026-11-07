@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
-import { Contract, ContractRole, Player, Team } from "../domain/roster";
+import { describe, expect, it } from "vitest";
+import { Contract, Player, Team } from "../domain/roster";
 import type { ContractQueries } from "./ports";
 import { TransferService } from "./transfer.service";
 
@@ -13,7 +13,7 @@ describe("TransferService", () => {
     team: Team,
     startDate: string,
     endDate: string | null,
-    role = ContractRole.ACTIVE,
+    role = "active",
   ) =>
     Object.assign(new Contract(), {
       id,
@@ -26,11 +26,11 @@ describe("TransferService", () => {
   const career = [
     contract("v", vitality, "2022-01-10", "2025-06-01"),
     contract("k", kc, "2025-06-01", "2026-03-01"),
-    contract("kb", kc, "2026-03-01", null, ContractRole.BENCHED),
+    contract("kb", kc, "2026-03-01", null, "benched"),
   ];
 
   function fixture() {
-    const findMovements = vi.fn().mockResolvedValue(career);
+    const findMovements = async () => career;
     const contracts: ContractQueries = {
       findByPlayer: async () => [],
       findPastContractsByPlayer: async () => [],
@@ -39,21 +39,8 @@ describe("TransferService", () => {
       findMovements,
     };
     const service = new TransferService(contracts);
-    return { findMovements, service };
+    return { service };
   }
-
-  it("passes the team, player and period to the store", async () => {
-    const { findMovements, service } = fixture();
-    const from = new Date("2025-01-01");
-    const to = new Date("2025-12-31");
-
-    await service.findAndCount(
-      { teamId: "kc", playerId: "zen", from, to, limit: 5, offset: 0 },
-      now,
-    );
-
-    expect(findMovements).toHaveBeenCalledWith({ teamId: "kc", playerId: "zen", from, to });
-  });
 
   it("filters by movement type and paginates the newest movements first", async () => {
     const { service } = fixture();

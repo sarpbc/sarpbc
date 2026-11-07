@@ -3,6 +3,7 @@ import {
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   excerptFromNewsContent,
   readingTimeMinutes,
+  uiLocale,
 } from "@sarpbc/utils";
 import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
 import { NEWS_PROSE_CLASS } from "~/utils/newsProseClass";
@@ -69,7 +70,7 @@ setJsonLd("ld-json-news-article", () => {
     content: article.value.content,
     author: article.value.author,
     imageUrl: article.value.imageUrl,
-    locale: locale.value === "fr" ? "fr" : "en",
+    locale: uiLocale(locale.value),
   });
 });
 </script>
@@ -101,7 +102,9 @@ setJsonLd("ld-json-news-article", () => {
             </h1>
             <div class="flex w-full flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
               <p v-if="article.author">{{ article.author }}</p>
-              <p class="tabular-nums">{{ df(locale).format(new Date(article.createdAt)) }}</p>
+              <p class="tabular-nums">
+                {{ longDateTimeFormatter(locale).format(new Date(article.createdAt)) }}
+              </p>
               <p>{{ t("page.news.readingTime", { minutes: minutes }) }}</p>
             </div>
           </div>
@@ -124,7 +127,7 @@ setJsonLd("ld-json-news-article", () => {
             <p v-if="article.author">{{ article.author }}</p>
             <span v-else aria-hidden="true" />
             <p class="shrink-0 tabular-nums">
-              {{ df(locale).format(new Date(article.createdAt)) }}
+              {{ longDateTimeFormatter(locale).format(new Date(article.createdAt)) }}
             </p>
           </div>
         </div>

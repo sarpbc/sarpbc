@@ -13,7 +13,6 @@ import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { RedisModule } from "./infrastructure/redis/redis.module";
 import { HealthModule } from "./infrastructure/health/health.module";
 import configuration from "./infrastructure/config/configuration";
-import { validateEnv } from "./infrastructure/config/env.validation";
 import { AllExceptionsFilter } from "./common/infrastructure/http/filters/all-exceptions.filter";
 import { createClientThrottleOptions } from "./infrastructure/http/client-throttle";
 import { EventEmitterModule } from "@nestjs/event-emitter";
@@ -40,7 +39,6 @@ import mikroOrmConfig from "./mikro-orm.config";
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
-      validate: validateEnv,
     }),
     EvlogModule.forRoot(),
     ThrottlerModule.forRootAsync({

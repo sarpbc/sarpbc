@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
-import { getMatchParticipantScore } from "~/types/matches";
+import { getMatchParticipantScore } from "~/utils/matchScore";
 import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
 import { shortTeamName } from "~/utils/shortTeamName";
 
@@ -60,7 +60,6 @@ const teamBName = computed(() => teamB.value?.team.name ?? t("components.match.t
 const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
 const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
 
-/** Live badge only while the series is still 0–0 (or scores not in yet). */
 const showLiveBadge = computed(() => {
   if (!live) {
     return false;
@@ -72,7 +71,6 @@ const showLiveBadge = computed(() => {
 
 const showLiveScore = computed(() => live && !showLiveBadge.value);
 
-const FLASH_MS = 2000;
 const scoreChanged = ref(false);
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -81,7 +79,7 @@ watch([scoreA, scoreB], () => {
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => {
     scoreChanged.value = false;
-  }, FLASH_MS);
+  }, HIGHLIGHT_MS);
 });
 
 onBeforeUnmount(() => clearTimeout(flashTimer));

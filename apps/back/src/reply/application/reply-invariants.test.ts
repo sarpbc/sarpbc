@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReplyService } from "./reply.service";
 import type { ReplyWriteScope, ReplyTransaction } from "./ports";
-import type { ReplyAuthor } from "../domain/reply";
+import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 const now = new Date("2026-10-15T12:00:00Z");
-const author: ReplyAuthor = { id: "author", userName: "Fan" };
+const author: Author = { id: "author", userName: "Fan" };
 function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
   return {
     id: "parent",
@@ -128,9 +129,9 @@ describe("reply invariants without Nest or ORM", () => {
     f.replies.findLatestByUser.mockResolvedValue(
       reply({ createdAt: new Date(now.getTime() - 60000) }),
     );
-    await expect(f.service.create("author", { content: "Hi", postId: "p" })).rejects.toBeInstanceOf(
-      InvalidInputError,
-    );
+    await expect(f.service.create("author", { content: "Hi", postId: "p" })).rejects.toMatchObject({
+      detail: { code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED },
+    });
     expect(f.saved).toEqual([]);
   });
   it("rejects reports on the author own comment", async () => {

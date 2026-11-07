@@ -12,9 +12,6 @@
     "**/dist/**",
     "**/.nuxt/**",
     "**/.output/**",
-    "**/pnpm-lock.yaml",
-    ".agents/",
-    ".github/",
-    ".vscode/"
+    "**/pnpm-lock.yaml"
   ]
 }

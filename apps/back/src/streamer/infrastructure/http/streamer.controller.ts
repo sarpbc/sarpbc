@@ -11,11 +11,22 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
+import type { TrackedStreamer } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
+import type { TrackedStreamer as TrackedStreamerRecord } from "../../domain/tracked-streamer";
 import { StreamerService } from "../../application/streamer.service";
 import { CreateStreamerDto } from "./dto/create-streamer.dto";
+
+function mapTrackedStreamer(streamer: TrackedStreamerRecord): TrackedStreamer {
+  return {
+    id: streamer.id,
+    login: streamer.login,
+    displayName: streamer.displayName,
+    createdAt: streamer.createdAt.toISOString(),
+  };
+}
 
 @Controller("streamers")
 export class StreamerController {
@@ -31,17 +42,19 @@ export class StreamerController {
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("streamers.manage")
   @Get()
-  async list() {
+  async list(): Promise<{ streamers: TrackedStreamer[] }> {
     const streamers = await this.streamerService.list();
-    return { streamers };
+    return { streamers: streamers.map(mapTrackedStreamer) };
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("streamers.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body({ schema: CreateStreamerDto }) dto: CreateStreamerDto) {
-    return this.streamerService.add(dto.login, dto.displayName);
+  async create(
+    @Body({ schema: CreateStreamerDto }) dto: CreateStreamerDto,
+  ): Promise<TrackedStreamer> {
+    return mapTrackedStreamer(await this.streamerService.add(dto.login, dto.displayName));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

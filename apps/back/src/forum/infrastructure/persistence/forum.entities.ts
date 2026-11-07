@@ -1,8 +1,5 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
-import { NewsArticle } from "../../../news/infrastructure/persistence/news-article.entity";
-import type { ReplyReportReason } from "../../../reply/domain/reply-report-reason";
-import { Match } from "../../../tournament/infrastructure/persistence/tournament.entities";
-import { User } from "../../../user/infrastructure/persistence/user.entity";
+import { User } from "../../../user/infrastructure/user-persistence";
 import { PostRepository } from "./post.repository";
 import { PostType } from "../../domain/post-type.enum";
 import { TopicRepository } from "./topic.repository";
@@ -25,7 +22,6 @@ export class Post {
   topic!: Topic;
   author!: User;
   postType: PostType = PostType.DISCUSSION;
-  replies = new Collection<Reply>(this);
   createdAt: Date = new Date();
   updatedAt: Date | null = null;
 }
@@ -38,29 +34,6 @@ export class PostTranslation {
   content!: string;
   createdAt: Date = new Date();
   updatedAt: Date | null = null;
-}
-
-export class Reply {
-  id!: string;
-  content!: string;
-  createdAt: Date = new Date();
-  author!: User;
-  post: Post | null = null;
-  newsArticle: NewsArticle | null = null;
-  match: Match | null = null;
-  replyTo: Reply | null = null;
-  replies = new Collection<Reply>(this);
-  /** When set, reply is hidden from public lists (admin soft-hide). */
-  hiddenAt: Date | null = null;
-  reports = new Collection<ReplyReport>(this);
-}
-
-export class ReplyReport {
-  id!: string;
-  reply!: Reply;
-  reporter!: User;
-  reason!: ReplyReportReason;
-  createdAt: Date = new Date();
 }
 
 export const TopicSchema = defineEntity({
@@ -98,7 +71,6 @@ export const PostSchema = defineEntity({
       .enum(() => PostType)
       .columnType("text")
       .default(PostType.DISCUSSION),
-    replies: p.oneToMany(Reply).mappedBy("post"),
     createdAt: p
       .datetime()
       .type("timestamptz")
@@ -128,44 +100,5 @@ export const PostTranslationSchema = defineEntity({
       .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
-  },
-});
-
-export const ReplySchema = defineEntity({
-  class: Reply,
-  properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    content: p.text(),
-    createdAt: p
-      .datetime()
-      .type("timestamptz")
-      .onCreate(() => new Date()),
-    author: p.manyToOne(User),
-    post: p.manyToOne(Post).nullable(),
-    newsArticle: p.manyToOne(NewsArticle).nullable(),
-    match: p.manyToOne(Match).nullable(),
-    replyTo: p.manyToOne(Reply).nullable(),
-    replies: p.oneToMany(Reply).mappedBy("replyTo"),
-    hiddenAt: p.datetime().type("timestamptz").nullable(),
-    reports: p.oneToMany(ReplyReport).mappedBy("reply"),
-  },
-});
-
-export const ReplyReportSchema = defineEntity({
-  class: ReplyReport,
-  indexes: [
-    { properties: ["reply", "reporter"], options: { unique: true } },
-    { properties: ["reply"] },
-    { properties: ["createdAt"] },
-  ],
-  properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    reply: p.manyToOne(Reply).deleteRule("cascade"),
-    reporter: p.manyToOne(User),
-    reason: p.string(),
-    createdAt: p
-      .datetime()
-      .type("timestamptz")
-      .onCreate(() => new Date()),
   },
 });

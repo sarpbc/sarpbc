@@ -1,21 +1,38 @@
 <script lang="ts" setup>
+import { getApiErrorMessage } from "@sarpbc/utils";
+
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 
 const tournamentId = computed(() => route.params.id as string);
 
-const { data: tournament } = await useLazyAsyncData(
+const {
+  data: tournament,
+  error: tournamentError,
+  refresh: refreshTournament,
+} = await useLazyAsyncData(
   () => `admin-pickems-tournament-${tournamentId.value}`,
   () => getTournamentById(tournamentId.value),
   { server: false, watch: [tournamentId] },
 );
 
-const { data: matches, status } = await useLazyAsyncData(
+const {
+  data: matches,
+  status,
+  error: matchesError,
+  refresh: refreshMatches,
+} = await useLazyAsyncData(
   () => `admin-pickems-${tournamentId.value}-matches`,
   () => getTournamentMatches(tournamentId.value),
   { server: false, watch: [tournamentId] },
 );
+
+const loadError = computed(() => tournamentError.value ?? matchesError.value);
+
+async function reload() {
+  await Promise.all([refreshTournament(), refreshMatches()]);
+}
 
 const displayMatches = computed(() =>
   (matches.value ?? []).filter((match) => (match.participants?.length ?? 0) === 2),
@@ -40,7 +57,12 @@ const breadcrumbItems = computed(() => [
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <p v-if="status === 'pending'" class="text-sm text-muted">
+        <LoadError
+          v-if="loadError"
+          :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
+          @retry="reload()"
+        />
+        <p v-else-if="status === 'pending'" class="text-sm text-muted">
           {{ $t("page.pickems.loading") }}
         </p>
         <p v-else class="text-sm text-muted">

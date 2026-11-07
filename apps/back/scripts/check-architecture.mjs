@@ -14,13 +14,12 @@ const files = parsed.fileNames
   .filter(
     (file) => file.startsWith(sourceRoot) && !file.endsWith(".test.ts") && !file.endsWith(".d.ts"),
   );
-const normalized = (file) => path.relative(sourceRoot, file).split(path.sep).join("/");
-const layer = (file) =>
-  normalized(file)
+const normalized = (file, root) => path.relative(root, file).split(path.sep).join("/");
+const layer = (file, root) =>
+  normalized(file, root)
     .split("/")
     .find((part) => ["domain", "application", "infrastructure"].includes(part));
-const technicalPackage =
-  /^(?:@nestjs\/|@mikro-orm\/|fastify(?:$|\/)|@fastify\/|ioredis(?:$|\/)|@aws-sdk\/|@googleapis\/|axios(?:$|\/)|posthog-node(?:$|\/)|evlog(?:$|\/)|@modelcontextprotocol\/)/;
+const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/;
 
 function importsOf(source) {
   const imports = [];
@@ -52,8 +51,9 @@ function importsOf(source) {
   return imports;
 }
 
-const isInner = (file) => ["domain", "application"].includes(layer(file));
-const featureOf = (file) => normalized(file).split("/")[0];
+const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/;
+const isInner = (file, root) => ["domain", "application"].includes(layer(file, root));
+const featureOf = (file, root) => normalized(file, root).split("/")[0];
 
 function stronglyConnected(graph) {
   const index = new Map();
@@ -133,12 +133,12 @@ function featureCycles(edges) {
     });
 }
 
-export function architectureViolations(sourceFiles = files) {
+export function architectureViolations(sourceFiles = files, root = sourceRoot) {
   const violations = [];
   const featureEdges = [];
   for (const file of sourceFiles) {
-    const origin = normalized(file);
-    const originLayer = layer(file);
+    const origin = normalized(file, root);
+    const originLayer = layer(file, root);
     const source = ts.createSourceFile(
       file,
       fs.readFileSync(file, "utf8"),
@@ -156,35 +156,49 @@ export function architectureViolations(sourceFiles = files) {
         ? { ...module, resolvedFileName: path.resolve(module.resolvedFileName) }
         : undefined;
       if (originLayer === "domain" || originLayer === "application") {
-        if (technicalPackage.test(specifier)) {
-          violations.push(`${origin}: ${originLayer} imports technical package ${specifier}`);
+        const external = !specifier.startsWith(".") && !specifier.startsWith("src/");
+        if (external && !innerLayerPackage.test(specifier)) {
+          violations.push(`${origin}: ${originLayer} imports non-allowlisted package ${specifier}`);
           continue;
         }
-        if (resolved && resolved.resolvedFileName.startsWith(sourceRoot)) {
-          const targetLayer = layer(resolved.resolvedFileName);
+        if (resolved && resolved.resolvedFileName.startsWith(root)) {
+          const targetLayer = layer(resolved.resolvedFileName, root);
           const allowed = originLayer === "domain" ? ["domain"] : ["domain", "application"];
           if (!allowed.includes(targetLayer)) {
             violations.push(
-              `${origin}: ${originLayer} imports ${normalized(resolved.resolvedFileName)}`,
+              `${origin}: ${originLayer} imports ${normalized(resolved.resolvedFileName, root)}`,
             );
           }
           if (
-            isInner(file) &&
-            isInner(resolved.resolvedFileName) &&
-            featureOf(file) !== featureOf(resolved.resolvedFileName)
+            isInner(file, root) &&
+            isInner(resolved.resolvedFileName, root) &&
+            featureOf(file, root) !== featureOf(resolved.resolvedFileName, root)
           ) {
-            featureEdges.push([featureOf(file), featureOf(resolved.resolvedFileName), origin]);
+            featureEdges.push([
+              featureOf(file, root),
+              featureOf(resolved.resolvedFileName, root),
+              origin,
+            ]);
           }
         }
       }
-      if (resolved && resolved.resolvedFileName.startsWith(sourceRoot)) {
-        const target = normalized(resolved.resolvedFileName);
+      if (resolved && resolved.resolvedFileName.startsWith(root)) {
+        const target = normalized(resolved.resolvedFileName, root);
         const feature = origin.split("/")[0];
         const targetFeature = target.split("/")[0];
+        const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
+        const sharedTarget = targetFeature === "common";
+        if (feature === "common" && !sharedTarget && targetFeature !== "infrastructure") {
+          violations.push(`${origin}: common imports feature code ${target}`);
+        }
         if (
           feature !== targetFeature &&
-          target.includes("/infrastructure/") &&
-          /(?:repository|\.persistence)\.ts$/.test(target)
+          !composes &&
+          !sharedTarget &&
+          !persistenceFacade.test(target) &&
+          (target.includes("/infrastructure/persistence/") ||
+            (target.includes("/infrastructure/") &&
+              /(?:repository|\.persistence)\.ts$/.test(target)))
         ) {
           violations.push(`${origin}: imports private persistence of ${targetFeature}: ${target}`);
         }

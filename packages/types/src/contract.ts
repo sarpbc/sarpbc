@@ -1,6 +1,10 @@
-import type { CONTRACT_ROLES, PLAYER_CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./index";
+import type { TeamLogos } from "./team";
 
-export type PlayerContractRole = (typeof PLAYER_CONTRACT_ROLES)[number];
+const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
+
+export const STAFF_CONTRACT_ROLES = ["coach", "assistant_coach", "analyst", "manager"] as const;
+
+export const CONTRACT_ROLES = [...PLAYER_CONTRACT_ROLES, ...STAFF_CONTRACT_ROLES] as const;
 
 export type StaffContractRole = (typeof STAFF_CONTRACT_ROLES)[number];
 
@@ -12,14 +16,10 @@ export interface PlayerContract {
   endDate: string | null;
   role: ContractRole;
   createdAt: string;
-  team: {
+  team: TeamLogos & {
     id: string;
     name: string;
     slug: string;
-    imageUrl: string | null;
-    darkModeImageUrl: string | null;
-    logoLightUrl: string | null;
-    logoDarkUrl: string | null;
     location: string | null;
     pandascoreId: number | null;
   };

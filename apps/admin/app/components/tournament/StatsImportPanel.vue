@@ -6,7 +6,8 @@ import type {
   TournamentMatchListItem,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import { getApiErrorMessage } from "~/utils/apiError";
+import { getApiErrorMessage } from "@sarpbc/utils";
+import { useIntervalFn } from "@vueuse/core";
 
 const POLL_MS = 3000;
 
@@ -68,16 +69,8 @@ async function onGamesChanged() {
   await refreshGames();
 }
 
-let timer: ReturnType<typeof setInterval> | undefined;
-watch(
-  active,
-  (isActive) => {
-    clearInterval(timer);
-    timer = isActive ? setInterval(() => refresh(), POLL_MS) : undefined;
-  },
-  { immediate: true },
-);
-onBeforeUnmount(() => clearInterval(timer));
+const poll = useIntervalFn(() => refresh(), POLL_MS, { immediate: false });
+watch(active, (isActive) => (isActive ? poll.resume() : poll.pause()), { immediate: true });
 
 const counts = computed(() => {
   const items = latest.value?.items ?? [];

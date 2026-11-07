@@ -1,58 +1,65 @@
+export type SyncState = "idle" | "success" | "error";
+
+export function syncIcon(state: SyncState): string {
+  switch (state) {
+    case "success":
+      return "i-fluent-checkmark-24-regular";
+    case "error":
+      return "i-fluent-dismiss-circle-24-regular";
+    case "idle":
+      return "i-fluent-arrow-sync-24-regular";
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
+  }
+}
+
+function syncColor(state: SyncState): "success" | "error" | "primary" {
+  switch (state) {
+    case "success":
+      return "success";
+    case "error":
+      return "error";
+    case "idle":
+      return "primary";
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
+  }
+}
+
 export function useTournamentSyncFeedback() {
   const syncingId = ref<string | null>(null);
-  const syncedIds = ref(new Set<string>());
-  const failedIds = ref(new Set<string>());
+  const states = ref(new Map<string, SyncState>());
 
-  function iconFor(id: string): string {
-    if (syncedIds.value.has(id)) {
-      return "i-fluent-checkmark-24-regular";
-    }
-    if (failedIds.value.has(id)) {
-      return "i-fluent-dismiss-circle-24-regular";
-    }
-    return "i-fluent-arrow-sync-24-regular";
+  function stateOf(id: string): SyncState {
+    return states.value.get(id) ?? "idle";
   }
 
-  function colorFor(id: string): "success" | "error" | "primary" {
-    if (syncedIds.value.has(id)) {
-      return "success";
-    }
-    if (failedIds.value.has(id)) {
-      return "error";
-    }
-    return "primary";
+  function setState(id: string, state: SyncState) {
+    states.value = new Map(states.value).set(id, state);
   }
 
-  async function run(id: string, afterSuccess?: () => Promise<void>): Promise<boolean> {
+  async function run(id: string, afterSuccess?: () => Promise<void>) {
     syncingId.value = id;
     try {
-      const success = await syncTournament(id);
-      const nextSynced = new Set(syncedIds.value);
-      const nextFailed = new Set(failedIds.value);
-      if (success) {
-        nextSynced.add(id);
-        nextFailed.delete(id);
-        syncedIds.value = nextSynced;
-        failedIds.value = nextFailed;
-        await afterSuccess?.();
-      } else {
-        nextFailed.add(id);
-        nextSynced.delete(id);
-        failedIds.value = nextFailed;
-        syncedIds.value = nextSynced;
-      }
-      return success;
+      await syncTournament(id);
+    } catch (error) {
+      setState(id, "error");
+      throw error;
     } finally {
       syncingId.value = null;
     }
+    setState(id, "success");
+    await afterSuccess?.();
   }
 
   return {
     syncingId,
-    syncedIds,
-    failedIds,
-    iconFor,
-    colorFor,
+    iconFor: (id: string) => syncIcon(stateOf(id)),
+    colorFor: (id: string) => syncColor(stateOf(id)),
     run,
   };
 }

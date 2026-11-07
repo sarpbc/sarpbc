@@ -1,4 +1,8 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { ApplicationError } from "../../common/domain/errors";
+
+const INTERNAL_ERROR_MESSAGE =
+  "Something went wrong on the server and was logged. Try again later, or ask an admin to check the logs.";
 
 export function jsonToolResult<T>(data: T): CallToolResult {
   return {
@@ -13,9 +17,7 @@ export function toolErrorResult(message: string): CallToolResult {
   };
 }
 
+/** Only application errors carry messages written for staff; anything else may leak internals. */
 export function extractErrorMessage(cause: unknown): string {
-  if (cause instanceof Error) {
-    return cause.message;
-  }
-  return String(cause);
+  return cause instanceof ApplicationError ? cause.message : INTERNAL_ERROR_MESSAGE;
 }

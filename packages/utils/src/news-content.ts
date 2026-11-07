@@ -1,24 +1,14 @@
-import { parseNewsEntityTag } from "./news-entity-tag.ts";
-import { stripNewsMatchTags } from "./news-match-block.ts";
-import { stripNewsTweetTags } from "./news-tweet-tag.ts";
+import { replaceNewsEntityTagsWithLabels } from "./news-entity-tag";
+import { stripNewsMatchTags } from "./news-match-block";
+import { stripNewsTweetTags } from "./news-tweet-tag";
 
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;
 
-const ENTITY_TAG_GLOBAL_PATTERN = /:(player|team)\{([^}]*)\}/g;
-
-function replaceEntityTagsWithLabels(content: string): string {
-  return content.replace(ENTITY_TAG_GLOBAL_PATTERN, (raw) => {
-    const parsed = parseNewsEntityTag(raw);
-    return parsed?.label ?? "";
-  });
-}
-
-/**
- * Turn `:player` / `:team` MDC tags into their labels before stripping markdown.
- */
 export function newsContentToPlainText(content: string): string {
-  const withLabels = replaceEntityTagsWithLabels(stripNewsMatchTags(stripNewsTweetTags(content)));
+  const withLabels = replaceNewsEntityTagsWithLabels(
+    stripNewsMatchTags(stripNewsTweetTags(content)),
+  );
 
   return withLabels
     .replace(/```[\s\S]*?```/g, " ")

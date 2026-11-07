@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { REPLY_REPORT_REASONS, type ReplyReportReason } from "~/types/discussion";
+import { REPLY_REPORT_REASONS, type ReplyReportReason } from "@sarpbc/types";
 import { reportComment } from "~/composables/discussion";
 
 const open = defineModel<boolean>("open", { required: true });

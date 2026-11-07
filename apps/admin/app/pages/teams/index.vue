@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { TableColumn, TableRow } from "@nuxt/ui";
-import type { Team } from "~/types/team";
+import type { Team } from "@sarpbc/types";
+import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();
@@ -27,15 +28,18 @@ const columns: TableColumn<Team>[] = [
   },
 ];
 
+const reportError = useReportError();
+
 const {
   items: teams,
   total,
   page,
   limit,
   status,
+  error,
   refresh,
-} = useAdminList("admin-teams", async (range) => {
-  const { teams, total } = await getAllTeams(range);
+} = useAdminList("admin-teams", async ({ limit, offset }) => {
+  const { teams, total } = await getAllTeams({ limit, offset });
   return { items: teams, total };
 });
 const teamToDelete = ref<Team | null>(null);
@@ -76,12 +80,10 @@ async function confirmCreate() {
     if (newTeam.value.location) body.location = newTeam.value.location;
     if (newTeam.value.imageUrl) body.imageUrl = newTeam.value.imageUrl;
     const created = await createTeam(body);
-    if (created) {
-      isCreateModalOpen.value = false;
-      navigateTo(localePath(`/teams/${created.id}`));
-    }
-  } catch (error) {
-    console.error("Failed to create team:", error);
+    isCreateModalOpen.value = false;
+    await navigateTo(localePath(`/teams/${created.id}`));
+  } catch (createError) {
+    reportError(createError);
   } finally {
     isCreating.value = false;
   }
@@ -95,8 +97,8 @@ async function onSyncTeams() {
   try {
     await syncTeamFromPandascore();
     await refresh();
-  } catch (error) {
-    console.error("Failed to sync teams:", error);
+  } catch (syncError) {
+    reportError(syncError);
   } finally {
     isSyncing.value = false;
   }
@@ -128,7 +130,12 @@ async function onSyncTeams() {
     </template>
 
     <DashboardContent>
-      <ClientOnly>
+      <LoadError
+        v-if="status === 'error'"
+        :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
+        @retry="refresh()"
+      />
+      <ClientOnly v-else>
         <UTable
           :data="teams"
           :columns="columns"

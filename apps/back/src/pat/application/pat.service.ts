@@ -1,11 +1,12 @@
 import { ForbiddenError, NotFoundError } from "../../common/domain/errors";
-import type { UserToken } from "../../common/application/models/user-token";
-import { isStaffRole, type StaffRole } from "../../user/domain/staff-access";
+import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
+import type { StaffRole } from "@sarpbc/types";
+import { isStaffRole } from "../../user/domain/staff-access";
 import type { UserService } from "../../user/application/user.service";
 import type { TokenSummary } from "../domain/token";
 import type { TokenSecrets, TokenStore } from "./ports/token-store";
 
-export interface PatUser extends UserToken {
+export interface PatUser extends AuthenticatedUser {
   role: StaffRole;
 }
 

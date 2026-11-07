@@ -16,7 +16,7 @@ export class PostHogService implements OnModuleDestroy {
 
     this.client = enabled
       ? new PostHog(token!, {
-          host: configService.get<string>("posthog.host") || "https://eu.i.posthog.com",
+          host: configService.get<string>("posthog.host"),
           flushAt: 1,
           flushInterval: 0,
         })

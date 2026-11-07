@@ -1,17 +1,8 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import * as Row from "./player.entities";
-import {
-  PlayerAward,
-  TournamentParticipant,
-  TournamentPrize,
-} from "../../../tournament/infrastructure/competition-persistence";
-import {
-  MatchGamePlayer,
-  PlayerPlatformLink,
-} from "../../../match-stats/infrastructure/match-stats-persistence";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
-import { toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
+import { playerColumns, teamColumns, toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { Contract, Player, PlayerPhoto, Team } from "../../domain/roster";
 import type {
   ContractQueries,
@@ -22,35 +13,27 @@ import type {
   PlayerWriter,
   RosterMergeTransaction,
   RosterMergeWriteScope,
-  RosterReferences,
+  RosterReferenceMover,
   RosterTransaction,
   RosterWriteScope,
+  SharedTournaments,
   TeamQueries,
   TeamWriter,
 } from "../../application/ports";
-import type {
-  ContractMovementFilter,
-  PlayerSearchProps,
-  TeamSearchProps,
-} from "../../application/search-props";
+import type { ContractMovementFilter, DirectorySearchProps } from "../../application/search-props";
 
 const playerOptions = { populate: ["team", "photos"] as const };
 const teamOptions = { populate: ["players", "players.team"] as const };
 const contractOptions = { populate: ["player", "player.team", "team"] as const };
 
-const playerFilter = ({ name, start }: Partial<PlayerSearchProps>) =>
-  start
-    ? { name: { $ilike: start + "%" }, mergedInto: null }
-    : name
-      ? { name: { $ilike: "%" + name + "%" }, mergedInto: null }
-      : { mergedInto: null };
-
-const teamFilter = ({ name, start }: Partial<TeamSearchProps>) =>
-  name
-    ? { name: { $ilike: "%" + name + "%" }, mergedInto: null }
-    : start
-      ? { name: { $ilike: start + "%" }, mergedInto: null }
-      : { mergedInto: null };
+/** A name search wins over a first-letter filter; both leave out merged duplicates. */
+function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
+  const pattern = name ? `%${name}%` : start ? `${start}%` : null;
+  return {
+    where: { ...(pattern && { name: { $ilike: pattern } }), mergedInto: null },
+    page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
+  };
+}
 
 export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
   constructor(
@@ -58,25 +41,18 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     private readonly locking = false,
   ) {}
 
-  async search(o: Partial<PlayerSearchProps>) {
-    return (
-      await this.em.find(Row.Player, playerFilter({ ...o, start: undefined }), {
-        ...playerOptions,
-        limit: o.limit ?? 25,
-        offset: o.offset ?? 0,
-        orderBy: { name: "asc" },
-      })
-    ).map(toPlayer);
+  async search(options: Partial<DirectorySearchProps>) {
+    const { where, page } = directoryQuery(options);
+    return (await this.em.find(Row.Player, where, { ...playerOptions, ...page })).map(toPlayer);
   }
 
-  async searchAndCount(o: Partial<PlayerSearchProps>) {
-    const [rows, count] = await this.em.findAndCount(Row.Player, playerFilter(o), {
+  async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
+    const { where, page } = directoryQuery(options);
+    const [rows, count] = await this.em.findAndCount(Row.Player, where, {
       ...playerOptions,
-      limit: o.limit ?? 25,
-      offset: o.offset ?? 0,
-      orderBy: { name: "asc" },
+      ...page,
     });
-    return [rows.map(toPlayer), count] as [ReturnType<typeof toPlayer>[], number];
+    return [rows.map(toPlayer), count];
   }
 
   async findById(id: string) {
@@ -111,19 +87,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       ? await this.em.findOneOrFail(Row.Player, { id: model.id })
       : new Row.Player();
     if (!model.id) model.id = v4();
-    Object.assign(row, {
-      id: model.id,
-      name: model.name,
-      slug: model.slug,
-      pandascoreId: model.pandascoreId,
-      birthday: model.birthday,
-      nationality: model.nationality,
-      firstName: model.firstName,
-      lastName: model.lastName,
-      imageUrl: model.imageUrl,
-      role: model.role,
-      status: model.status,
-      source: model.source,
+    Object.assign(row, playerColumns(model), {
       mergedInto: model.mergedIntoId ? this.em.getReference(Row.Player, model.mergedIntoId) : null,
       team: model.team ? this.em.getReference(Row.Team, model.team.id) : null,
     });
@@ -138,25 +102,17 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
 export class MikroTeamStore implements TeamQueries, TeamWriter {
   constructor(private readonly em: EntityManager) {}
 
-  async search(o: Partial<TeamSearchProps>) {
-    return (
-      await this.em.find(Row.Team, teamFilter({ ...o, start: undefined }), {
-        ...teamOptions,
-        limit: o.limit ?? 25,
-        offset: o.offset ?? 0,
-        orderBy: { name: "asc" },
-      })
-    ).map((row) => toTeam(row));
+  async search(options: Partial<DirectorySearchProps>) {
+    const { where, page } = directoryQuery(options);
+    return (await this.em.find(Row.Team, where, { ...teamOptions, ...page })).map((row) =>
+      toTeam(row),
+    );
   }
 
-  async searchAndCount(o: Partial<TeamSearchProps>) {
-    const [rows, count] = await this.em.findAndCount(Row.Team, teamFilter(o), {
-      ...teamOptions,
-      limit: o.limit ?? 25,
-      offset: o.offset ?? 0,
-      orderBy: { name: "asc" },
-    });
-    return [rows.map((row) => toTeam(row)), count] as [ReturnType<typeof toTeam>[], number];
+  async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
+    const { where, page } = directoryQuery(options);
+    const [rows, count] = await this.em.findAndCount(Row.Team, where, { ...teamOptions, ...page });
+    return [rows.map((row) => toTeam(row)), count];
   }
 
   async findById(id: string) {
@@ -169,26 +125,11 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     return row ? toTeam(row) : null;
   }
 
-  async findWithPlayers(id: string) {
-    return this.findById(id);
-  }
-
   async save(model: Team) {
     const row = model.id ? await this.em.findOneOrFail(Row.Team, { id: model.id }) : new Row.Team();
     if (!model.id) model.id = v4();
-    Object.assign(row, {
-      id: model.id,
-      name: model.name,
-      slug: model.slug,
-      pandascoreId: model.pandascoreId,
-      active: model.active,
-      source: model.source,
+    Object.assign(row, teamColumns(model), {
       mergedInto: model.mergedIntoId ? this.em.getReference(Row.Team, model.mergedIntoId) : null,
-      location: model.location,
-      imageUrl: model.imageUrl,
-      darkModeImageUrl: model.darkModeImageUrl,
-      logoLightUrl: model.logoLightUrl,
-      logoDarkUrl: model.logoDarkUrl,
     });
     this.em.persist(row);
   }
@@ -226,12 +167,10 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     return this.list({ team: { id }, endDate: { $ne: null } }, true);
   }
 
-  async findMovements({ teamId, playerId, from, to }: ContractMovementFilter) {
-    const period = { ...(from && { $gte: from }), ...(to && { $lte: to }) };
+  async findMovements({ teamId, playerId }: ContractMovementFilter) {
     const where: FilterQuery<Row.Contract> = {
       ...(teamId && { team: teamId }),
       ...(playerId && { player: playerId }),
-      ...((from || to) && { $or: [{ startDate: period }, { endDate: period }] }),
     };
     return (await this.em.find(Row.Contract, where, { populate: ["player", "team"] })).map(
       toContract,
@@ -318,30 +257,14 @@ export class MikroRosterTransaction implements RosterTransaction {
   }
 }
 
-export async function moveTeamPrizes(
-  em: Pick<EntityManager, "find" | "nativeDelete" | "nativeUpdate">,
-  from: string,
-  to: string,
-): Promise<void> {
-  const prizes = await em.find(
-    TournamentPrize,
-    { team: { $in: [from, to] } },
-    { populate: ["players"] },
-  );
-  const kept = new Map(
-    prizes.filter(({ team }) => team.id === to).map((prize) => [prize.tournament.id, prize]),
-  );
-  const duplicates = prizes.filter(
-    ({ team, tournament }) => team.id === from && kept.has(tournament.id),
-  );
-  for (const duplicate of duplicates)
-    kept.get(duplicate.tournament.id)?.players.add(duplicate.players.getItems());
-  if (duplicates.length > 0)
-    await em.nativeDelete(TournamentPrize, { id: { $in: duplicates.map(({ id }) => id) } });
-  await em.nativeUpdate(TournamentPrize, { team: from }, { team: to });
+export interface RosterMergeParticipants extends SharedTournaments {
+  movers: readonly RosterReferenceMover[];
 }
 
-function rosterReferences(em: EntityManager): RosterReferences {
+function rosterReferences(
+  em: EntityManager,
+  others: RosterMergeParticipants,
+): RosterReferenceMover & SharedTournaments {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
     const open = await em.find(
@@ -376,48 +299,30 @@ function rosterReferences(em: EntityManager): RosterReferences {
       await mergeOpenContracts("player", from, to);
       await em.nativeUpdate(Row.Contract, { player: from }, { player: to });
       await em.nativeUpdate(Row.PlayerPhoto, { player: from }, { player: to });
-      await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
-      await em.nativeUpdate(MatchGamePlayer, { player: from }, { player: to });
-      await em.nativeUpdate(PlayerPlatformLink, { player: from }, { player: to });
-      const participants = await em.find(
-        TournamentParticipant,
-        { players: from },
-        { populate: ["players"] },
-      );
-      for (const participant of participants) {
-        participant.players.remove(em.getReference(Row.Player, from));
-        participant.players.add(em.getReference(Row.Player, to));
-      }
-      const prizes = await em.find(TournamentPrize, { players: from }, { populate: ["players"] });
-      for (const prize of prizes) {
-        prize.players.remove(em.getReference(Row.Player, from));
-        prize.players.add(em.getReference(Row.Player, to));
-      }
+      for (const mover of others.movers) await mover.movePlayer(from, to);
     },
     moveTeam: async (from, to) => {
       await em.nativeUpdate(Row.Team, { mergedInto: from }, { mergedInto: to });
       await mergeOpenContracts("team", from, to);
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });
-      await em.nativeUpdate(TournamentParticipant, { team: from }, { team: to });
-      await moveTeamPrizes(em, from, to);
+      for (const mover of others.movers) await mover.moveTeam(from, to);
     },
-    sharedTournamentIds: async (teamId, otherTeamId) => {
-      const participants = await em.find(
-        TournamentParticipant,
-        { team: teamId, tournament: { participants: { team: otherTeamId } } },
-        { fields: ["tournament"], disableIdentityMap: true },
-      );
-      return [...new Set(participants.map(({ tournament }) => tournament.id))];
-    },
+    sharedTournamentIds: (teamId, otherTeamId) => others.sharedTournamentIds(teamId, otherTeamId),
   };
 }
 
 export class MikroRosterMergeTransaction implements RosterMergeTransaction {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly participantsFor: (tx: EntityManager) => RosterMergeParticipants,
+  ) {}
   run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
     return this.em.transactional(async (tx) => {
-      const result = await work({ ...writeScope(tx), references: rosterReferences(tx) });
+      const result = await work({
+        ...writeScope(tx),
+        references: rosterReferences(tx, this.participantsFor(tx)),
+      });
       await tx.flush();
       return result;
     });

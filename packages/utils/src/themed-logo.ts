@@ -1,9 +1,6 @@
-export interface ThemedLogo {
-  imageUrl?: string | null;
-  darkModeImageUrl?: string | null;
-  logoLightUrl?: string | null;
-  logoDarkUrl?: string | null;
-}
+import type { TeamLogos } from "@sarpbc/types";
+
+export type ThemedLogo = Partial<TeamLogos>;
 
 export function resolveThemedLogoUrl(
   logo: ThemedLogo | null | undefined,

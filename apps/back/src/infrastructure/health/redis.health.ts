@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { HealthIndicatorService } from "@nestjs/terminus";
 import { RedisService } from "../redis/redis.service";
-import { HEALTH_PING_TIMEOUT_MS } from "./health.constants";
-import { withTimeout } from "./with-timeout";
+import { HEALTH_PING_TIMEOUT_MS, withTimeout } from "./with-timeout";
 
 @Injectable()
 export class RedisHealthIndicator {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Contract, ContractRole, Player, PlayerStatus, Team } from "../../roster/domain/roster";
+import { Contract, Player, Team } from "../../roster/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -23,7 +23,7 @@ function setup() {
     findById: vi.fn(async (id: string) => (id === "zen" || id === "zen-dup" ? zen : null)),
     create: vi.fn(async () => Object.assign(new Player(), { id: "new-player" })),
     update: vi.fn(async () => zen),
-    joinTeam: vi.fn(async () => ({ player: zen, opened: null, closed: [] })),
+    joinTeam: vi.fn(async () => zen),
     leaveTeam: vi.fn(),
   };
   const teams = {
@@ -57,9 +57,26 @@ function setup() {
     }),
     setDistribution: vi.fn(),
   };
+  const rollingBack = {
+    run: async <T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> => {
+      const before = new Map(
+        [...saved].map(([id, proposal]) => [
+          id,
+          Object.assign(new RosterProposal(), structuredClone(proposal)),
+        ]),
+      );
+      try {
+        return await work(store);
+      } catch (error) {
+        saved.clear();
+        for (const [id, proposal] of before) saved.set(id, proposal);
+        throw error;
+      }
+    },
+  };
   const service = new RosterProposalService(
     store,
-    { run: (work) => work(store) },
+    rollingBack,
     players,
     teams,
     contracts,
@@ -166,7 +183,7 @@ describe("RosterProposalService", () => {
         playerId: "zen",
         teamId: "kc",
         effectiveDate: "2026-10-24",
-        contractRole: ContractRole.COACH,
+        contractRole: "coach",
       },
       source,
       "journalist",
@@ -178,13 +195,13 @@ describe("RosterProposalService", () => {
       teamId: "kc",
       effectiveDate: "2026-10-24",
       sourceUrl: source,
-      role: ContractRole.COACH,
+      role: "coach",
     });
   });
 
   it("flags players created from a start.gg source", async () => {
     const { id } = await service.propose(
-      { kind: "create_player", name: "Atow", status: PlayerStatus.FREE_AGENT },
+      { kind: "create_player", name: "Atow", status: "free_agent" },
       "https://www.start.gg/tournament/rlcs/event/main",
       "journalist",
     );
@@ -192,7 +209,7 @@ describe("RosterProposalService", () => {
     expect((await service.approve(id, "admin")).entityId).toBe("new-player");
     expect(players.create).toHaveBeenCalledWith({
       name: "Atow",
-      status: PlayerStatus.FREE_AGENT,
+      status: "free_agent",
       source: "startgg",
     });
   });
@@ -259,6 +276,9 @@ describe("RosterProposalService", () => {
     players.joinTeam.mockRejectedValueOnce(new InvalidInputError("Team is inactive"));
 
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
+
+    expect(saved.get(id)).toMatchObject({ status: "pending", reviewedById: null });
+    expect((await service.list("pending")).proposals).toHaveLength(1);
   });
 
   const prizeEntry = {

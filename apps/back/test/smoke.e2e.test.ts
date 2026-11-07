@@ -19,7 +19,7 @@ import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
 import { TweetImageService } from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
-import { MatchGamesService } from "../src/match-stats/application/match-games.service";
+import { GAME_STATS_STORE } from "../src/match-stats/infrastructure/game-stats.tokens";
 import { MatchService } from "../src/tournament/application/match/match.service";
 import { TransferController } from "../src/roster/infrastructure/http/transfer.controller";
 import { TransferService } from "../src/roster/application/transfer.service";
@@ -127,7 +127,7 @@ describe("API smoke (e2e)", () => {
       ],
     },
   ];
-  const matchGames = { forMatch: vi.fn(async () => games) };
+  const matchGames = { byMatch: vi.fn(async () => games) };
 
   const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
 
@@ -168,7 +168,7 @@ describe("API smoke (e2e)", () => {
           useValue: { countByTargetIds: vi.fn(async () => new Map([[grandFinal.id, 2]])) },
         },
         { provide: MatchService, useValue: matchService },
-        { provide: MatchGamesService, useValue: matchGames },
+        { provide: GAME_STATS_STORE, useValue: matchGames },
         { provide: TransferService, useValue: transferService },
         { provide: TeamService, useValue: { findBySlug: vi.fn() } },
         { provide: PlayerService, useValue: { findBySlug: vi.fn() } },
@@ -178,7 +178,7 @@ describe("API smoke (e2e)", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    await configureApp(app);
+    await configureApp(app, []);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });
@@ -264,7 +264,7 @@ describe("API smoke (e2e)", () => {
       publicId: 7250,
       slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
     });
-    expect(matchGames.forMatch).toHaveBeenLastCalledWith(grandFinal.id);
+    expect(matchGames.byMatch).toHaveBeenLastCalledWith(grandFinal.id);
     expect(response.body.games).toEqual(games);
   });
 

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { playerPath } from "@sarpbc/utils";
 import type { MatchGamePlayerStats, MatchGameStats } from "@sarpbc/types";
 import type { TournamentParticipant } from "~/types/tournament";
 
@@ -117,7 +118,7 @@ function playerLabel(row: MatchGamePlayerStats): string {
             <th scope="row" class="max-w-0 px-2 text-left font-normal">
               <SLink
                 v-if="row.player"
-                :to="$localePath(`/player/${row.player.slug}`)"
+                :to="$localePath(playerPath(row.player.slug))"
                 variant="inline"
                 class="block truncate"
               >

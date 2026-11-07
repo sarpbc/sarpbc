@@ -1,5 +1,6 @@
 import type { NewsArticleRecord, NewsSitemapRecord } from "./models";
 import type { NewsType } from "@sarpbc/types";
+import type { Author } from "../../common/domain/author";
 export interface NewsQueries {
   findBySlug(slug: string): Promise<NewsArticleRecord | null>;
   findById(id: string): Promise<NewsArticleRecord | null>;
@@ -18,7 +19,7 @@ export interface NewsWriteScope {
     save(article: NewsArticleRecord): Promise<void>;
     delete(article: NewsArticleRecord): Promise<void>;
   };
-  users: { findById(id: string): Promise<{ id: string; userName: string } | null> };
+  users: { findById(id: string): Promise<Author | null> };
   replies: { deleteAllForTarget(type: "newsArticle", id: string): Promise<void> };
 }
 export interface NewsTransaction {

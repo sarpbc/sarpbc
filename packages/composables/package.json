@@ -5,11 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/module.ts",
-    "./apiFetch": "./src/runtime/composables/apiFetch.ts",
-    "./useUser": "./src/runtime/composables/useUser.ts"
+    "./apiFetch": "./src/runtime/composables/apiFetch.ts"
   },
   "scripts": {
-    "lint": "oxlint .",
+    "lint": "oxlint --deny-warnings .",
     "lint:fix": "oxlint . --fix",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",

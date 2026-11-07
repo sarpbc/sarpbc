@@ -1,31 +1,12 @@
 import type { MaybeRef } from "vue";
-import { CONTRACT_ROLES } from "@sarpbc/types";
-import type { ContractRole, TeamContract } from "~/types/contract";
+import { CONTRACT_ROLES, type TeamContract } from "@sarpbc/types";
 import { getTeamContracts } from "~/composables/team/api";
+import type { TeamRosterEra, TeamRosterEraMember } from "~/types/roster";
 
 interface TeamRosterHistoryPayload {
   contracts: TeamContract[];
   /** Captured with the fetch so server and client build eras identically on hydration. */
   fetchedAt: number;
-}
-
-export interface TeamRosterEraMember {
-  contractId: string;
-  playerId: string;
-  name: string;
-  slug: string;
-  imageUrl: string | null;
-  role: ContractRole;
-}
-
-export interface TeamRosterEra {
-  id: string;
-  start: string;
-  end: string | null;
-  isCurrent: boolean;
-  members: TeamRosterEraMember[];
-  joined: TeamRosterEraMember[];
-  left: TeamRosterEraMember[];
 }
 
 interface NormalizedContract {
@@ -157,7 +138,7 @@ function mergeAdjacentEras(
   return merged;
 }
 
-export function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
+function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
   const normalized = normalizeContracts(contracts, now);
   if (normalized.length === 0) return [];
 

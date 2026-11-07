@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { Player } from "~/types/player";
+import type { Player } from "@sarpbc/types";
+import { playerPath } from "@sarpbc/utils";
 
 defineProps<{
   player: Player;
@@ -7,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <SListItem :to="$localePath(`/player/${player.slug}`)" class="min-w-0 gap-3">
+  <SListItem :to="$localePath(playerPath(player.slug))" class="min-w-0 gap-3">
     <PlayerImg :player-name="player.name" :img="player.imageUrl" size="list" />
     <h2 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ player.name }}

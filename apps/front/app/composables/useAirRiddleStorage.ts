@@ -38,6 +38,8 @@ const airRiddleStoredStateSchema = z.object({
   answer: z.string().optional(),
 });
 
+export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
+
 /** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
 export function getAirRiddleDateKey(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -63,7 +65,11 @@ export function parseAirRiddleStoredState(
     }
 
     const state = parsed.data;
-    if (state.date !== today || state.targetLength <= 0 || state.attempts.length > 6) {
+    if (
+      state.date !== today ||
+      state.targetLength <= 0 ||
+      state.attempts.length > AIR_RIDDLE_MAX_ATTEMPTS
+    ) {
       return null;
     }
 

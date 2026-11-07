@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { Team } from "@sarpbc/types";
-import { selectActiveRosterPlayers, resolveThemedLogoUrl } from "@sarpbc/utils";
+import {
+  ACTIVE_ROSTER_LIMIT,
+  selectActiveRosterPlayers,
+  resolveThemedLogoUrl,
+} from "@sarpbc/utils";
 import { fetchWithEntityTagCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
@@ -10,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { teamHref, playerHref, opensInNewTab } = useEntityTagLink();
+const { teamHref, playerHref, linkAttrs } = useEntityTagLink();
 
 const open = ref(false);
 const pending = ref(false);
@@ -19,7 +23,7 @@ const team = ref<Team | null>(null);
 
 const href = computed(() => teamHref(props.slug));
 
-const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []).slice(0, 3));
+const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
 const colorMode = useColorMode();
 const logoSrc = computed(() => resolveThemedLogoUrl(team.value, colorMode.value));
@@ -34,9 +38,10 @@ async function loadTeam() {
 
   try {
     const response = await fetchWithEntityTagCache(`team:${props.slug}`, () =>
-      apiFetch<{ team: Team }>(`/team/slug/${encodeURIComponent(props.slug)}`),
+      apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(props.slug)}`),
     );
     team.value = response.team;
+    error.value = response.team === null;
   } catch {
     error.value = true;
   } finally {
@@ -61,8 +66,7 @@ watch(open, (isOpen) => {
   >
     <NuxtLink
       :to="href"
-      :target="opensInNewTab ? '_blank' : undefined"
-      :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+      v-bind="linkAttrs"
       class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       translate="no"
     >
@@ -77,7 +81,7 @@ watch(open, (isOpen) => {
         </div>
         <div class="grid grid-cols-3 border-t border-default">
           <div
-            v-for="index in 3"
+            v-for="index in ACTIVE_ROSTER_LIMIT"
             :key="index"
             class="flex min-w-0 flex-col gap-2 border-r border-default p-2 last:border-r-0"
           >
@@ -113,8 +117,7 @@ watch(open, (isOpen) => {
           >
             <NuxtLink
               :to="playerHref(rosterPlayer.slug)"
-              :target="opensInNewTab ? '_blank' : undefined"
-              :rel="opensInNewTab ? 'noopener noreferrer' : undefined"
+              v-bind="linkAttrs"
               class="flex h-full min-w-0 flex-col gap-2 p-2 text-muted transition-none hover:bg-elevated hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
             >
               <div

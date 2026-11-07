@@ -1,0 +1,47 @@
+import type { EntityManager } from "@mikro-orm/postgresql";
+import { Player, Team } from "./player.entities";
+
+/**
+ * The slug lookup only adopts rows stored before the PandaScore id was recorded, never start.gg
+ * rows: adopting one would relabel it as PandaScore data and drop the start.gg credit.
+ */
+const adoptable = (slug: string) => ({
+  slug,
+  pandascoreId: null,
+  mergedInto: null,
+  source: { $ne: "startgg" as const },
+});
+
+/**
+ * PandaScore renames player slugs and has given one player's slug a different person's
+ * name (`zen-aidan-hui` is Alexis "zen" Bernier), so the PandaScore id is the identity.
+ */
+export async function findPandascorePlayer(
+  em: Pick<EntityManager, "findOne">,
+  pandascoreId: number,
+  slug: string,
+): Promise<Player | null> {
+  const byId = await em.findOne(Player, { pandascoreId });
+  if (byId) {
+    return byId;
+  }
+  return em.findOne(Player, adoptable(slug));
+}
+
+export async function findPandascoreTeam(
+  em: Pick<EntityManager, "findOne">,
+  pandascoreId: number | undefined,
+  slug: string,
+): Promise<Team | null> {
+  const byId = pandascoreId !== undefined ? await em.findOne(Team, { pandascoreId }) : null;
+  return byId ?? em.findOne(Team, adoptable(slug));
+}
+
+export async function availablePlayerSlug(
+  em: Pick<EntityManager, "findOne">,
+  pandascoreId: number,
+  slug: string,
+): Promise<string> {
+  const taken = await em.findOne(Player, { slug });
+  return taken ? `${slug}-${pandascoreId}` : slug;
+}

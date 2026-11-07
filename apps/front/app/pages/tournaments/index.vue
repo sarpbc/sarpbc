@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import type { TournamentListItem } from "@sarpbc/types";
+import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
-import type { TournamentEvent } from "~/types/tournament";
 import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
 import { getTournamentStatus } from "~/utils/tournamentStatus";
 

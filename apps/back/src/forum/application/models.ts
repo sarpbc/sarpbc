@@ -1,4 +1,5 @@
-import type { ReplyAuthor } from "../../reply/domain/reply";
+import type { SupportedLocale } from "@sarpbc/types";
+import type { Author } from "../../common/domain/author";
 import type { PostType } from "../domain/post-type.enum";
 export interface TopicRecord {
   id: string;
@@ -6,18 +7,25 @@ export interface TopicRecord {
   description: string | null;
   createdAt: Date;
   updatedAt: Date | null;
-  posts: PostSummary[];
+  posts: PostRecord[];
 }
 export interface PostSummary {
   id: string;
   publicId: number;
   title: string;
   content: string;
-  author: ReplyAuthor;
+  author: Author;
   createdAt: Date;
   updatedAt: Date | null;
   postType: PostType;
   topic: { id: string; title: string };
+}
+export interface PostActivity {
+  id: string;
+  publicId: number;
+  title: string;
+  messageCount: number;
+  lastActivity: Date;
 }
 export interface TranslationRecord {
   id: string;
@@ -37,14 +45,9 @@ export interface CreatePostInput {
   title: string;
   content: string;
   topicId: string;
-  translations?: { locale: "en-US" | "fr-FR"; title: string; content: string }[];
+  translations?: { locale: SupportedLocale; title: string; content: string }[];
 }
 export interface CreatedPost {
   publicId: number;
   slug: string;
-}
-export interface PostCreationStatus {
-  canCreate: boolean;
-  nextAvailableAt: string | null;
-  cooldownHours: number;
 }

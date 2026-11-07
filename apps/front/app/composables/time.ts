@@ -22,11 +22,9 @@ export function formatLocaleTimeAgo(date: Date) {
 
   const now = new Date();
   if (now.getTime() - date.getTime() > RELATIVE_WINDOW_MS) {
-    return new Intl.DateTimeFormat(locale.value, {
-      day: "numeric",
-      month: "short",
-      ...(date.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
-    }).format(date);
+    const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
+    if (date.getFullYear() !== now.getFullYear()) options.year = "numeric";
+    return new Intl.DateTimeFormat(locale.value, options).format(date);
   }
 
   const pf = (past: boolean) => (past ? ".past" : ".future");

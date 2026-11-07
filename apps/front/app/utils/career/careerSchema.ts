@@ -4,9 +4,12 @@ import {
   CAREER_COUNTRIES,
   CAREER_DESTINIES,
   CAREER_NICKNAME_KEYS,
+  CAREER_PHASES,
   CAREER_PLACEMENTS,
   CAREER_REGIONS,
   CAREER_ROLES,
+  CAREER_STAGES,
+  ONBOARDING_STEPS,
   ROSTER_SIZE,
 } from "~/types/career";
 import type { CareerResult, CareerState } from "~/types/career";
@@ -17,18 +20,9 @@ const careerRegionSchema = z.enum(CAREER_REGIONS);
 const careerCountrySchema = z.enum(ALL_COUNTRIES);
 const careerRoleSchema = z.enum(CAREER_ROLES);
 const careerBackgroundSchema = z.enum(CAREER_BACKGROUNDS);
-const careerPhaseSchema = z.enum([
-  "menu",
-  "onboarding",
-  "season_intro",
-  "event",
-  "event_result",
-  "stage_result",
-  "offseason",
-  "career_end",
-]);
-const onboardingStepSchema = z.enum(["intro", "region", "country", "role", "background"]);
-const careerStageSchema = z.enum(["split1", "split2", "worlds"]);
+const careerPhaseSchema = z.enum(CAREER_PHASES);
+const onboardingStepSchema = z.enum(ONBOARDING_STEPS);
+const careerStageSchema = z.enum(CAREER_STAGES);
 const careerPlacementSchema = z.enum(CAREER_PLACEMENTS);
 
 const statsSchema = z.object({
@@ -169,9 +163,30 @@ export function parseCareerStateJson(raw: string | null): CareerState | null {
   }
 }
 
-export function parseCareerResultJson(raw: unknown): CareerResult | null {
-  const result = careerResultSchema.safeParse(raw);
-  return result.success ? result.data : null;
+export function parseCareerResultJson(raw: string): CareerResult | null {
+  try {
+    const result = careerResultSchema.safeParse(JSON.parse(raw));
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
+const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().catch(null));
+
+export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
+  const results = new Map<string, CareerResult>();
+  if (!raw) return results;
+  try {
+    const parsed = careerResultsSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return results;
+    for (const [id, result] of Object.entries(parsed.data)) {
+      if (result) results.set(id, result);
+    }
+  } catch {
+    return new Map();
+  }
+  return results;
 }
 
 /** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
@@ -208,8 +223,7 @@ export function decodeCareerResultFromShare(encoded: string): CareerResult | nul
   try {
     const padded = encoded.replace(/-/g, "+").replace(/_/g, "/");
     const json = decodeURIComponent(atob(padded));
-    const parsed: unknown = JSON.parse(json);
-    return parseCareerResultJson(parsed);
+    return parseCareerResultJson(json);
   } catch {
     return null;
   }

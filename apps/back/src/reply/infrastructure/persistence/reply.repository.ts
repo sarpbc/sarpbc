@@ -1,16 +1,17 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import type { ReplyFindOptions as FindByTargetOptions } from "../../application/ports";
-import { QueryOrder, type EntityKey } from "@mikro-orm/core";
-import { Reply } from "../../../forum/infrastructure/persistence/forum.entities";
-import type { ReplyTargetType } from "../../domain/reply";
-import {
-  sortOrderForTarget,
-  targetFilter,
-  targetGroupByField,
-  targetIdsFilter,
-} from "./reply-target.util";
+import { QueryOrder, type FilterQuery } from "@mikro-orm/core";
+import type { ReplyTargetType } from "@sarpbc/types";
+import type { ReplyFindOptions } from "../../application/ports";
+import { REPLY_TARGETS, replySortOrder, type ReplyTargetFields } from "../../domain/reply";
+import { Reply } from "./reply.entities";
+import { REPLY_POPULATE } from "./reply.mapper";
 
-const POPULATE = ["author", "replyTo", "replyTo.author"] as const;
+type ReplyTargetMatch = { id: string } | { $in: string[] };
+type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatch>>;
+
+function onTarget(targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter {
+  return { [REPLY_TARGETS[targetType].field]: target };
+}
 
 export class ReplyRepository {
   private readonly rows;
@@ -21,43 +22,37 @@ export class ReplyRepository {
   async findByTarget(
     targetType: ReplyTargetType,
     targetId: string,
-    options: FindByTargetOptions = {},
+    options: ReplyFindOptions = {},
   ): Promise<Reply[]> {
-    const {
-      includeHidden = false,
-      order = sortOrderForTarget(targetType),
-      limit,
-      offset,
-      rootsOnly = false,
-    } = options;
+    const { includeHidden = false, limit, offset, rootsOnly = false } = options;
 
-    const where = targetFilter(targetType, targetId, includeHidden);
-    if (rootsOnly) {
-      where.replyTo = null;
-    }
+    const where: FilterQuery<Reply> = onTarget(targetType, { id: targetId });
+    if (!includeHidden) where.hiddenAt = null;
+    if (rootsOnly) where.replyTo = null;
 
     return this.rows.find(where, {
-      populate: [...POPULATE],
-      orderBy: { createdAt: order },
+      populate: [...REPLY_POPULATE],
+      orderBy: { createdAt: replySortOrder(targetType) },
       limit,
       offset,
     });
   }
 
   async findById(id: string): Promise<Reply | null> {
-    return this.rows.findOne({ id }, { populate: ["author"] });
+    return this.rows.findOne({ id }, { populate: [...REPLY_POPULATE] });
   }
 
   async findLatestByUser(userId: string): Promise<Reply | null> {
     return this.rows.findOne(
       { author: { id: userId } },
-      { orderBy: { createdAt: QueryOrder.DESC } },
+      { populate: [...REPLY_POPULATE], orderBy: { createdAt: QueryOrder.DESC } },
     );
   }
 
   async countRootsByTarget(targetType: ReplyTargetType, targetId: string): Promise<number> {
     return this.rows.count({
-      ...targetFilter(targetType, targetId),
+      ...onTarget(targetType, { id: targetId }),
+      hiddenAt: null,
       replyTo: null,
     });
   }
@@ -70,10 +65,8 @@ export class ReplyRepository {
       return new Map();
     }
 
-    // Card badges: all non-hidden replies per target, including nested replies.
-    const groupField = targetGroupByField(targetType);
-    const countsDict = await this.rows.countBy(groupField as EntityKey<Reply>, {
-      where: { ...targetIdsFilter(targetType, targetIds), hiddenAt: null },
+    const countsDict = await this.rows.countBy(REPLY_TARGETS[targetType].field, {
+      where: { ...onTarget(targetType, { $in: targetIds }), hiddenAt: null },
     });
 
     const counts = new Map<string, number>();
@@ -94,10 +87,11 @@ export class ReplyRepository {
 
     const nonRoots = await this.rows.find(
       {
-        ...targetFilter(targetType, targetId),
+        ...onTarget(targetType, { id: targetId }),
+        hiddenAt: null,
         replyTo: { $ne: null },
       },
-      { populate: [...POPULATE], orderBy: { createdAt: QueryOrder.ASC } },
+      { populate: [...REPLY_POPULATE], orderBy: { createdAt: QueryOrder.ASC } },
     );
 
     const collected = new Map<string, Reply>();
@@ -119,7 +113,7 @@ export class ReplyRepository {
   }
 
   async findChildren(replyId: string): Promise<Reply[]> {
-    return this.rows.find({ replyTo: { id: replyId } });
+    return this.rows.find({ replyTo: { id: replyId } }, { populate: [...REPLY_POPULATE] });
   }
 
   async findRecentForModeration(
@@ -127,7 +121,8 @@ export class ReplyRepository {
   ): Promise<Array<{ reply: Reply; reportCount: number }>> {
     type ModerationRow = { id: string; report_count: string };
 
-    const rows = (await this.em.getConnection().execute(`
+    const rows = (await this.em.getConnection().execute(
+      `
         SELECT
           r.id,
           COUNT(rr.id) AS report_count
@@ -135,8 +130,10 @@ export class ReplyRepository {
         LEFT JOIN reply_report rr ON r.id = rr.reply_id
         GROUP BY r.id
         ORDER BY COUNT(rr.id) DESC, r.created_at DESC
-        LIMIT ${limit}
-      `)) as ModerationRow[];
+        LIMIT ?
+      `,
+      [limit],
+    )) as ModerationRow[];
 
     const ids = rows.map((row: ModerationRow) => row.id);
     if (ids.length === 0) {
@@ -145,16 +142,7 @@ export class ReplyRepository {
 
     const replies: Reply[] = await this.rows.find(
       { id: { $in: ids } },
-      {
-        populate: [
-          "author",
-          "post",
-          "newsArticle",
-          "match",
-          "match.participants.team",
-          "match.tournament.event",
-        ],
-      },
+      { populate: [...REPLY_POPULATE] },
     );
 
     const replyById = new Map(replies.map((reply) => [reply.id, reply]));

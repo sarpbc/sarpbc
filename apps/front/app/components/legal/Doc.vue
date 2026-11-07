@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CollectionQueryBuilder, Collections } from "@nuxt/content";
+import { uiLocale } from "@sarpbc/utils";
 
 type LegalPage = Collections["legal"];
 
@@ -9,7 +10,7 @@ const props = defineProps<{
 
 const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
-const localeCode = computed(() => (locale.value === "fr" ? "fr" : "en"));
+const localeCode = computed(() => uiLocale(locale.value));
 
 const queryLegalCollection = queryCollection as (
   collection: "legal",

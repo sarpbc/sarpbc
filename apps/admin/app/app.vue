@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { uiLocale } from "@sarpbc/utils";
 const appConfig = useAppConfig();
 const { locale } = useI18n();
 
@@ -9,7 +10,7 @@ useHead({
   ],
   link: [{ rel: "icon", type: "image/svg+xml", href: "/sarpbc.svg" }],
   htmlAttrs: {
-    lang: computed(() => (locale.value === "fr" ? "fr" : "en")),
+    lang: computed(() => uiLocale(locale.value)),
   },
 });
 </script>

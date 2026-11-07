@@ -1,40 +1,16 @@
 import type {
   MatchBlockItem,
   MatchBlockState,
+  MatchListItem,
   ProfileMatchListItem,
-  TournamentEventRef,
   TournamentMatchListItem,
 } from "@sarpbc/types";
+import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
 
-export interface MatchListItemResponse {
-  id: string;
-  publicId: number;
-  slug: string;
-  beginAt: Date | null;
-  participants: {
-    id: string;
-    team: {
-      name: string;
-      imageUrl: string | null;
-      darkModeImageUrl: string | null;
-      logoLightUrl: string | null;
-      logoDarkUrl: string | null;
-    };
-  }[];
-  results: { participant: string; score: number }[];
-  tournament: {
-    id: string;
-    name: string;
-    slug: string;
-    event: TournamentEventRef;
-    league?: { id: string; name: string };
-  };
-}
-
-export function mapMatchListItem(match: Match): MatchListItemResponse {
+export function mapMatchListItem(match: Match): MatchListItem {
   const participants = match.participants;
   const results = match.results;
   const tournament = match.tournament;
@@ -43,7 +19,7 @@ export function mapMatchListItem(match: Match): MatchListItemResponse {
     id: match.id,
     publicId: match.publicId,
     slug: matchPublicSlug(match),
-    beginAt: match.beginAt,
+    beginAt: match.beginAt?.toISOString() ?? null,
     participants: participants.map((participant) => ({
       id: participant.id,
       team: {
@@ -77,9 +53,7 @@ function matchBlockState(match: Match, now: Date): MatchBlockState {
   if (isMatchBlockLive(match, now)) {
     return "live";
   }
-  return match.hasEnded() || (match.beginAt !== null && match.beginAt <= now)
-    ? "finished"
-    : "upcoming";
+  return isMatchFinished(match) || isMatchLive(match, now) ? "finished" : "upcoming";
 }
 
 export function mapMatchBlockItem(match: Match, now: Date, commentCount: number): MatchBlockItem {
@@ -124,6 +98,6 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
 
 export function withPublicSlug(
   match: Match,
-): Omit<Match, "slug" | "hasEnded" | "isDecided" | "stampEnd"> & { slug: string } {
+): Omit<Match, "hasEnded" | "isDecided" | "stampEnd"> & { slug: string } {
   return { ...match, slug: matchPublicSlug(match) };
 }

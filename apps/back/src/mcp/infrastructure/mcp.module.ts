@@ -1,18 +1,17 @@
 import { Module } from "@nestjs/common";
 import { MatchStatsModule } from "../../match-stats/infrastructure/match-stats.module";
 import { PatModule } from "../../pat/infrastructure/pat.module";
-import { SearchModule } from "../../search/infrastructure/search.module";
 import { RosterModule } from "../../roster/infrastructure/roster.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { NewsModule } from "../../news/infrastructure/news.module";
 import { RosterProposalModule } from "../../roster-proposal/infrastructure/roster-proposal.module";
 import { McpController } from "./mcp.controller";
 import { McpServerFactory } from "./mcp-server.factory";
+import { mcpServicesProvider } from "./mcp-services";
 
 @Module({
   imports: [
     PatModule,
-    SearchModule,
     RosterModule,
     TournamentModule,
     NewsModule,
@@ -20,6 +19,6 @@ import { McpServerFactory } from "./mcp-server.factory";
     MatchStatsModule,
   ],
   controllers: [McpController],
-  providers: [McpServerFactory],
+  providers: [mcpServicesProvider, McpServerFactory],
 })
 export class McpModule {}

@@ -10,23 +10,20 @@ import type {
   UpdateEventInput,
   UpdateLeagueInput,
 } from "./inputs";
+import type { CompetitionAfterCommit } from "./after-commit";
 import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
   CompetitionTransaction,
   EventListing,
   EventQueries,
   TournamentQueries,
 } from "./ports";
 
-/** Staff-maintained events and leagues that group manual tournaments. */
 export class ManualCatalogService {
   constructor(
     private readonly reads: TournamentQueries,
     private readonly events: EventQueries,
     private readonly transaction: CompetitionTransaction,
-    private readonly cache: CompetitionCache,
-    private readonly diagnostics: CompetitionDiagnostics,
+    private readonly afterCommit: CompetitionAfterCommit,
   ) {}
   leagues(): Promise<League[]> {
     return this.reads.leagues({ limit: 200 });
@@ -91,13 +88,7 @@ export class ManualCatalogService {
       await events.save(event);
       return stages.map((stage) => stage.id);
     });
-    for (const stageId of stageIds) {
-      try {
-        await this.cache.invalidateTournament(stageId);
-      } catch (error) {
-        this.diagnostics.error("Tournament cache invalidation failed", error);
-      }
-    }
+    await this.afterCommit.settle({ tournamentIds: stageIds });
     return this.findEvent(id);
   }
 }
