@@ -1,4 +1,4 @@
-import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs.ts";
+import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs";
 
 export type NewsEntityTagKind = "player" | "team";
 

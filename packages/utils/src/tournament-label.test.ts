@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { distinctStageName, tournamentStageLabel } from "./tournament-label.ts";
+import { distinctStageName, tournamentStageLabel } from "./tournament-label";
 
 describe("tournamentStageLabel", () => {
   it("appends the stage name to the event name", () => {

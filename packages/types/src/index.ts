@@ -1,22 +1,18 @@
-import type { PlayerAwardType } from "./player-award.ts";
-import type { NewsType } from "./news.ts";
-import type { TransferType } from "./transfer.ts";
+import type { PlayerAwardType } from "./player-award";
+import type { NewsType } from "./news";
+import type { TransferType } from "./transfer";
 
-export { STAFF_PERMISSIONS, STAFF_ROLES } from "./user.ts";
-export type { StaffRole, StaffPermission, User, UserList, UserListItem } from "./user.ts";
-export { PLAYER_STATUSES } from "./player.ts";
-export type { Player, PlayerStatus } from "./player.ts";
-export type {
-  PlayerAwardType,
-  PlayerProfileAward,
-  TournamentAwardListItem,
-} from "./player-award.ts";
-export { TEAM_LOGO_VARIANTS } from "./team.ts";
-export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team.ts";
-export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract.ts";
-export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract.ts";
-export type { Transfer, TransferType } from "./transfer.ts";
-export type { League, LeagueInput } from "./league.ts";
+export { STAFF_PERMISSIONS, STAFF_ROLES } from "./user";
+export type { StaffRole, StaffPermission, User, UserList, UserListItem } from "./user";
+export { PLAYER_STATUSES } from "./player";
+export type { Player, PlayerStatus } from "./player";
+export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
+export { TEAM_LOGO_VARIANTS } from "./team";
+export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team";
+export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
+export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
+export type { Transfer, TransferType } from "./transfer";
+export type { League, LeagueInput } from "./league";
 export type {
   EventInput,
   ManualEvent,
@@ -24,7 +20,7 @@ export type {
   TournamentEventRef,
   TournamentPathResponse,
   TournamentTab,
-} from "./tournament-event.ts";
+} from "./tournament-event";
 export type {
   NewsArticleAdmin,
   NewsSitemapChunkResponse,
@@ -32,8 +28,8 @@ export type {
   NewsSitemapMetaResponse,
   NewsType,
   PaginatedNewsArticles,
-} from "./news.ts";
-export { DATA_SOURCES } from "./competition.ts";
+} from "./news";
+export { DATA_SOURCES } from "./competition";
 export type {
   CountedMatchListItem,
   MatchListItem,
@@ -52,7 +48,7 @@ export type {
   MatchBlocksResponse,
   MatchVod,
   MatchVodSource,
-} from "./competition.ts";
+} from "./competition";
 export type {
   MatchGamePlayerStats,
   MatchGameStats,
@@ -69,33 +65,28 @@ export type {
   StatsPlayerLinkResult,
   StatsRoster,
   TournamentStatsGame,
-} from "./match-stats.ts";
-export type {
-  CreatedPatToken,
-  ModerationReply,
-  PatToken,
-  TrackedStreamer,
-} from "./staff-console.ts";
-export { FORUM_ERROR_CODES } from "./forum.ts";
+} from "./match-stats";
+export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
+export { FORUM_ERROR_CODES } from "./forum";
 export type {
   ForumPost,
   ForumPostCreationStatus,
   ForumPostListItem,
   ForumTopic,
   PostPreview,
-} from "./forum.ts";
-export { REPLY_REPORT_REASONS, REPLY_TARGET_TYPES } from "./reply.ts";
+} from "./forum";
+export { REPLY_REPORT_REASONS, REPLY_TARGET_TYPES } from "./reply";
 export type {
   AppNotification,
   PaginatedReplies,
   Reply,
   ReplyReportReason,
   ReplyTargetType,
-} from "./reply.ts";
-export type { LiveStreamer } from "./streamer.ts";
-export type { R2UploadResponse } from "./storage.ts";
-export { SEARCH_TYPES } from "./search.ts";
-export type { SearchType } from "./search.ts";
+} from "./reply";
+export type { LiveStreamer } from "./streamer";
+export type { R2UploadResponse } from "./storage";
+export { SEARCH_TYPES } from "./search";
+export type { SearchType } from "./search";
 export type {
   EarningsEntry,
   EarningsYear,
@@ -104,14 +95,14 @@ export type {
   ProfileEarnings,
   TournamentPrize,
   TournamentPrizes,
-} from "./prize.ts";
-export { ROSTER_PROPOSAL_STATUSES } from "./roster-change.ts";
+} from "./prize";
+export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,
   RosterProposal,
   RosterProposalList,
   RosterProposalStatus,
-} from "./roster-change.ts";
+} from "./roster-change";
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",

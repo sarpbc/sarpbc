@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  forumPostPath,
-  matchPath,
-  tournamentEventPath,
-  tournamentStagePath,
-} from "./entity-path.ts";
+import { forumPostPath, matchPath, tournamentEventPath, tournamentStagePath } from "./entity-path";
 import {
   allocateSlug,
   eventSlug,
@@ -13,7 +8,7 @@ import {
   matchSlug,
   stageSlug,
   toSlug,
-} from "./entity-slug.ts";
+} from "./entity-slug";
 
 describe("toSlug", () => {
   it("joins non-empty parts and normalizes accents and punctuation", () => {

@@ -1,4 +1,4 @@
-import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs.ts";
+import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs";
 
 export interface ParsedTweetUrl {
   id: string;

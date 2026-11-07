@@ -1,5 +1,5 @@
-import type { TournamentDetail, TournamentListItem } from "./competition.ts";
-import type { League } from "./league.ts";
+import type { TournamentDetail, TournamentListItem } from "./competition";
+import type { League } from "./league";
 
 export interface TournamentEventRef {
   id: string;

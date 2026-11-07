@@ -1,4 +1,4 @@
-import type { TeamLogos } from "./team.ts";
+import type { TeamLogos } from "./team";
 
 const PLAYER_CONTRACT_ROLES = ["active", "benched", "loaned"] as const;
 

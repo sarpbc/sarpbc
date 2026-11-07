@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseLocale, uiLocale } from "./locale.ts";
+import { parseLocale, uiLocale } from "./locale";
 
 describe("locale codes", () => {
   it("reads any French code, in any case, as fr-FR", () => {

@@ -1,5 +1,5 @@
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { UUID_PATTERN } from "./entity-slug.ts";
+import { UUID_PATTERN } from "./entity-slug";
 
 export const NEWS_MATCH_BLOCK_MAX_MATCHES = 10;
 export const NEWS_MATCH_BLOCK_DEFAULT_LIMIT = 5;

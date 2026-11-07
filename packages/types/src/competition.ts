@@ -1,5 +1,5 @@
-import type { TeamLogos, TeamSummary } from "./team.ts";
-import type { TournamentEventRef } from "./tournament-event.ts";
+import type { TeamLogos, TeamSummary } from "./team";
+import type { TournamentEventRef } from "./tournament-event";
 
 export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
 

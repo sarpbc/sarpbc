@@ -7,7 +7,7 @@ import {
   stageMatchesPath,
   teamPath,
   tournamentStagePath,
-} from "./entity-path.ts";
+} from "./entity-path";
 
 describe("entity paths", () => {
   it("builds profile and news paths from slugs", () => {

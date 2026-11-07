@@ -23,7 +23,7 @@ COPY apps/back ./apps/back
 # Install after package sources are present so workspace package
 # node_modules (e.g. packages/utils → @sarpbc/types) are linked for nest/tsc.
 # `--filter ./apps/back...` alone links packages into apps/back/node_modules only;
-# nest/tsc then fails resolving imports from packages/utils/src/*.ts.
+# nest/tsc then fails resolving imports from the utils sources.
 # Without packages/types, `pnpm run` finds it has no modules directory and reinstalls
 # with a narrower scope, which removes slugify (a utils-only dependency) from the virtual store.
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
@@ -39,7 +39,7 @@ RUN pnpm --filter ./apps/back run build \
   && chmod +x /app/apps/back/entrypoint.sh
 
 RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
-    rm -rf /app/node_modules /app/apps/back/node_modules /app/packages/utils/node_modules \
+    rm -rf /app/node_modules /app/apps/back/node_modules /app/packages/utils/node_modules /app/packages/types/node_modules \
     && pnpm install --frozen-lockfile --prod --store-dir=/pnpm/store \
       --filter ./apps/back... \
       --filter ./packages/utils...
@@ -47,6 +47,9 @@ RUN --mount=type=cache,target=/pnpm/store,id=pnpm-store-back \
 FROM base AS runtime
 
 ENV NODE_ENV=production
+# Node can strip types, so the MikroORM CLI would otherwise load src/mikro-orm.config.ts, whose
+# imports resolve to package sources that only a bundler can read.
+ENV MIKRO_ORM_CLI_PREFER_TS=false
 
 ARG APP_RELEASE=unknown
 

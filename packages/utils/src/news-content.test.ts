@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { excerptFromNewsContent, newsContentToPlainText } from "./news-content.ts";
+import { excerptFromNewsContent, newsContentToPlainText } from "./news-content";
 
 describe("news content", () => {
   it("strips markdown to plain text", () => {

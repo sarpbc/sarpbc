@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { isMatchFinished, isMatchLive, winnerFromResults } from "./match-lifecycle.ts";
+import { isMatchFinished, isMatchLive, winnerFromResults } from "./match-lifecycle";
 
 const now = new Date("2026-01-01T12:00:00Z");
 

@@ -4,30 +4,30 @@ export {
   getApiErrorMessage,
   getApiErrorCode,
   type ApiErrorBody,
-} from "./api-error.ts";
+} from "./api-error";
 export {
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   excerptFromNewsContent,
   newsContentToPlainText,
-} from "./news-content.ts";
-export { readingTimeMinutes } from "./news-reading-time.ts";
-export { INDEXNOW_KEY_PATTERN } from "./indexnow.ts";
-export { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "./pagination.ts";
-export { TOKEN_NAME_MAX_LENGTH } from "./token.ts";
+} from "./news-content";
+export { readingTimeMinutes } from "./news-reading-time";
+export { INDEXNOW_KEY_PATTERN } from "./indexnow";
+export { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "./pagination";
+export { TOKEN_NAME_MAX_LENGTH } from "./token";
 export {
   TRACKED_STREAMER_NAME_MAX_LENGTH,
   TWITCH_LOGIN_MAX_LENGTH,
   TWITCH_LOGIN_PATTERN,
   twitchChannelUrl,
-} from "./twitch.ts";
-export { isoDay } from "./iso-day.ts";
-export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week.ts";
+} from "./twitch";
+export { isoDay } from "./iso-day";
+export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week";
 export {
   newsEntityTagStart,
   parseNewsEntityTag,
   serializeNewsEntityTag,
   type NewsEntityTagKind,
-} from "./news-entity-tag.ts";
+} from "./news-entity-tag";
 export {
   NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
   NEWS_MATCH_BLOCK_MAX_MATCHES,
@@ -43,7 +43,7 @@ export {
   serializeNewsMatchTag,
   type NewsMatchBlockAttrs,
   type NewsMatchBlockKind,
-} from "./news-match-block.ts";
+} from "./news-match-block";
 export {
   isTweetImageUrl,
   newsTweetTagStart,
@@ -53,9 +53,9 @@ export {
   tweetImageProxyPath,
   type ParsedTweetUrl,
   type TweetEmbed,
-} from "./news-tweet-tag.ts";
-export { ACTIVE_ROSTER_LIMIT, selectActiveRosterPlayers, selectTeamStaff } from "./team-roster.ts";
-export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo.ts";
+} from "./news-tweet-tag";
+export { ACTIVE_ROSTER_LIMIT, selectActiveRosterPlayers, selectTeamStaff } from "./team-roster";
+export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo";
 export {
   LANGUAGE_CODE_LENGTH,
   MAX_VODS_PER_GAME,
@@ -63,7 +63,7 @@ export {
   isIso6391Code,
   parseMatchVodUrl,
   type MatchVodUrlError,
-} from "./match-vod.ts";
+} from "./match-vod";
 export {
   CURRENCY_CODE_LENGTH,
   MAX_PRIZE_AMOUNT,
@@ -73,14 +73,14 @@ export {
   MIN_PRIZE_PLACEMENT,
   currencyFractionDigits,
   isIso4217Code,
-} from "./prize.ts";
+} from "./prize";
 export {
   ROSTER_PROPOSAL_PERMISSIONS,
   canModerateComments,
   hasPermission,
   isStaffUser,
   requiredPermission,
-} from "./staff.ts";
+} from "./staff";
 export {
   allocateSlug,
   eventSlug,
@@ -88,7 +88,7 @@ export {
   matchSlug,
   stageSlug,
   toSlug,
-} from "./entity-slug.ts";
+} from "./entity-slug";
 export {
   forumPostPath,
   localizedPath,
@@ -99,13 +99,9 @@ export {
   teamPath,
   tournamentEventPath,
   tournamentStagePath,
-} from "./entity-path.ts";
-export { parseLocale, uiLocale, type UiLocale } from "./locale.ts";
-export {
-  hasFrenchTranslation,
-  localizedNewsFields,
-  type LocalizedNewsFields,
-} from "./news-locale.ts";
+} from "./entity-path";
+export { parseLocale, uiLocale, type UiLocale } from "./locale";
+export { hasFrenchTranslation, localizedNewsFields, type LocalizedNewsFields } from "./news-locale";
 export {
   IMAGE_CONTENT_TYPES,
   IMAGE_CONTENT_TYPE_ALIASES,
@@ -116,13 +112,13 @@ export {
   canonicalImageContentType,
   type ImageContentType,
   type ImageUploadTarget,
-} from "./image-upload.ts";
+} from "./image-upload";
 export {
   isMatchFinished,
   isMatchLive,
   winnerFromResults,
   type MatchLifecycle,
   type MatchResultScore,
-} from "./match-lifecycle.ts";
-export { distinctStageName, tournamentStageLabel } from "./tournament-label.ts";
-export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api.ts";
+} from "./match-lifecycle";
+export { distinctStageName, tournamentStageLabel } from "./tournament-label";
+export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api";

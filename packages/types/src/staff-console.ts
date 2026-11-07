@@ -1,4 +1,4 @@
-import type { ReplyTargetType } from "./reply.ts";
+import type { ReplyTargetType } from "./reply";
 
 export interface TrackedStreamer {
   id: string;

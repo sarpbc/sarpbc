@@ -1,7 +1,7 @@
-import type { ContractRole } from "./contract.ts";
-import type { PlayerStatus } from "./player.ts";
-import type { PrizeEntry } from "./prize.ts";
-import type { TeamLogoVariant } from "./team.ts";
+import type { ContractRole } from "./contract";
+import type { PlayerStatus } from "./player";
+import type { PrizeEntry } from "./prize";
+import type { TeamLogoVariant } from "./team";
 
 export type RosterChange =
   | {

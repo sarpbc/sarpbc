@@ -1,6 +1,6 @@
 import { BlockList, isIP } from "node:net";
 import { timingSafeEqual } from "node:crypto";
-import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api.ts";
+import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const CLOUDFLARE_IPV4 = [
   "173.245.48.0/20",

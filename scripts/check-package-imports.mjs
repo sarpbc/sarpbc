@@ -24,11 +24,8 @@ export function frameworkViolations(directory, root = directory) {
       if (frameworkPackage.test(specifier)) {
         violations.push(`${path.relative(root, file)}: imports ${specifier}`);
       }
-      // Node runs these sources with type stripping, which resolves relative ESM imports only by full file name.
-      if (specifier.startsWith(".") && !specifier.endsWith(".ts")) {
-        violations.push(
-          `${path.relative(root, file)}: imports ${specifier} without its .ts extension`,
-        );
+      if (specifier.startsWith(".") && specifier.endsWith(".ts")) {
+        violations.push(`${path.relative(root, file)}: imports ${specifier} with a .ts extension`);
       }
     }
   }
@@ -53,7 +50,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exitCode = 1;
   } else {
     process.stdout.write(
-      `${frameworkFree.join(" and ")} import no Vue or Nuxt code and name every relative import in full.\n`,
+      `${frameworkFree.join(" and ")} import no Vue or Nuxt code and no relative import names a .ts extension.\n`,
     );
   }
 }

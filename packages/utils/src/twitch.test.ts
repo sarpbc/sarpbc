@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { TWITCH_LOGIN_PATTERN } from "./twitch.ts";
+import { TWITCH_LOGIN_PATTERN } from "./twitch";
 
 describe("TWITCH_LOGIN_PATTERN", () => {
   for (const login of ["a", "ab", "abc", "zenrll", "rocket_league_1", "1v1", "a".repeat(25)]) {

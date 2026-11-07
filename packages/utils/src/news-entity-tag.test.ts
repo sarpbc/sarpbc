@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseNewsEntityTag, serializeNewsEntityTag } from "./news-entity-tag.ts";
+import { parseNewsEntityTag, serializeNewsEntityTag } from "./news-entity-tag";
 
 describe("parseNewsEntityTag", () => {
   it("parses player and team tags", () => {

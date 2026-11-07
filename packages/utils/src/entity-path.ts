@@ -1,4 +1,4 @@
-import type { UiLocale } from "./locale.ts";
+import type { UiLocale } from "./locale";
 
 export function matchPath(publicId: number, slug: string): string {
   return `/matches/${publicId}/${slug}`;

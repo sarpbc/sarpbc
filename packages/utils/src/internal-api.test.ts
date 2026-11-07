@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolveApiBase } from "./internal-api.ts";
+import { resolveApiBase } from "./internal-api";
 
 const PUBLIC = "https://api.sarpbc.org";
 const SERVER = "http://sarpbcorg-back-lc37mk:4001";

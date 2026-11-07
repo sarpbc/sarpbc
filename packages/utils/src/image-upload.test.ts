@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { canonicalImageContentType } from "./image-upload.ts";
+import { canonicalImageContentType } from "./image-upload";
 
 describe("canonicalImageContentType", () => {
   it("maps jpeg aliases used by browsers", () => {

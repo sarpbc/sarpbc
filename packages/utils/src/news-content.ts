@@ -1,6 +1,6 @@
-import { replaceNewsEntityTagsWithLabels } from "./news-entity-tag.ts";
-import { stripNewsMatchTags } from "./news-match-block.ts";
-import { stripNewsTweetTags } from "./news-tweet-tag.ts";
+import { replaceNewsEntityTagsWithLabels } from "./news-entity-tag";
+import { stripNewsMatchTags } from "./news-match-block";
+import { stripNewsTweetTags } from "./news-tweet-tag";
 
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;

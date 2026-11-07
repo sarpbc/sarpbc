@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { newsContentToPlainText } from "./news-content.ts";
+import { newsContentToPlainText } from "./news-content";
 import {
   extractNewsMatchBlocks,
   findInvalidNewsMatchTags,
@@ -11,7 +11,7 @@ import {
   parseNewsMatchTag,
   serializeNewsMatchTag,
   stripNewsMatchTags,
-} from "./news-match-block.ts";
+} from "./news-match-block";
 
 const MATCH = "0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f11";
 const OTHER = "6f1d2b0a-93c4-4e8f-b7a2-5c1e8d4f0a22";

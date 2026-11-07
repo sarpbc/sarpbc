@@ -9,8 +9,8 @@ import {
   isPublicIp,
   resolveClientAddress,
   visitorAddressFromProxy,
-} from "./client-address.ts";
-import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api.ts";
+} from "./client-address";
+import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const TOKEN = "internal-api-token-value";
 

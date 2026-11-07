@@ -1,5 +1,5 @@
-import type { DataSource } from "./competition.ts";
-import type { Player } from "./player.ts";
+import type { DataSource } from "./competition";
+import type { Player } from "./player";
 
 export const TEAM_LOGO_VARIANTS = ["light", "dark"] as const;
 

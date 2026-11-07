@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { hasFrenchTranslation, localizedNewsFields } from "./news-locale.ts";
+import { hasFrenchTranslation, localizedNewsFields } from "./news-locale";
 
 describe("news locale", () => {
   it("requires both French title and body for a translation", () => {

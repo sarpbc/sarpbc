@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseNewsTweetTag, serializeNewsTweetTag, stripNewsTweetTags } from "./news-tweet-tag.ts";
+import { parseNewsTweetTag, serializeNewsTweetTag, stripNewsTweetTags } from "./news-tweet-tag";
 
 const TWEET_URL = "https://x.com/RLEsports/status/1234567890";
 
