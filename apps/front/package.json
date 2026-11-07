@@ -13,7 +13,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@iconify-json/flag": "^1.2.13",
+    "@iconify-json/flag": "^1.2.15",
     "@internationalized/date": "^3.12.4",
     "@mdream/js": "^2.0.3",
     "@nuxt/content": "^3.16.2",
@@ -28,7 +28,7 @@
     "@vueuse/core": "^15.0.0",
     "evlog": "catalog:",
     "nuxt": "catalog:",
-    "posthog-js": "^1.441.2",
+    "posthog-js": "^1.445.4",
     "vue": "catalog:",
     "vue-i18n": "catalog:",
     "vue-router": "catalog:",
