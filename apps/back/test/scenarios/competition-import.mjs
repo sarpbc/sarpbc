@@ -139,6 +139,30 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     { slug: view.event.slug, name: view.event.name },
     { slug: "imported-league-spring-split-2026", name: "Imported League Spring Major" },
   );
+  const { Match, Tournament } =
+    await import("../../src/tournament/infrastructure/persistence/tournament.entities.ts");
+  const rowVersions = async () => {
+    const em = orm.em.fork();
+    const stage = await em.findOneOrFail(Tournament, { id: imported.id });
+    const matches = await em.find(Match, { tournament: imported.id }, { orderBy: { id: "asc" } });
+    return [stage, ...matches].map((row) => [row.id, row.updatedAt.toISOString()]);
+  };
+  const versionsBeforeResync = await rowVersions();
+  await run(() =>
+    sync.upsertTournament(
+      {
+        ...tournamentCommand,
+        name: "Imported Championship Updated",
+        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+      },
+      [semifinal, final],
+    ),
+  );
+  assert.deepEqual(
+    await rowVersions(),
+    versionsBeforeResync,
+    "an unchanged re-sync keeps each stage and match sitemap lastmod",
+  );
   const eventPath = `/events/resolve/${view.event.slug}`;
   assert.equal((await request("GET", eventPath)).json().event.stages[0].id, imported.id);
   assert.equal(
