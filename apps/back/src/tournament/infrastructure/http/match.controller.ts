@@ -43,10 +43,21 @@ function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchL
   };
 }
 
+function parsePagingValue(name: string, value?: string): number | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new InvalidInputError(`Invalid ${name} "${value}".`);
+  }
+  return parsed;
+}
+
 function parsePaging(limit?: string, offset?: string) {
   return {
-    limit: limit ? parseInt(limit, 10) : undefined,
-    offset: offset ? parseInt(offset, 10) : 0,
+    limit: parsePagingValue("limit", limit),
+    offset: parsePagingValue("offset", offset) ?? 0,
   };
 }
 

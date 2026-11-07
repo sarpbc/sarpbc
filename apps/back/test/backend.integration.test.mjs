@@ -419,6 +419,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(byPublicId.match.slug, match.slug);
         await request("GET", `/matches/${match.publicId + 1000}`, undefined, undefined, 404);
         await request("GET", "/matches/not-a-match", undefined, undefined, 404);
+        await request("GET", "/matches/upcoming?limit=abc", undefined, undefined, 400);
+        await request("GET", "/matches/results?offset=-1", undefined, undefined, 400);
         const listed = (
           await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)
         ).json();
