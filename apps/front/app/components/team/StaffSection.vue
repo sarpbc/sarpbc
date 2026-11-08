@@ -19,7 +19,7 @@ const headingId = useId();
         </h2>
       </template>
       <ul
-        class="m-0 flex list-none flex-col divide-y divide-default border-x border-b border-default p-0"
+        class="m-0 flex list-none flex-col divide-y divide-separator border-x border-b border-separator p-0"
       >
         <li v-for="member in staff" :key="member.id" class="p-3">
           <TeamMember

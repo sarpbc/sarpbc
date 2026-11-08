@@ -5,7 +5,7 @@ const { as = "div" } = defineProps<{
 </script>
 
 <template>
-  <component :is="as" class="frame relative flex">
+  <component :is="as" class="relative flex">
     <div class="flex h-full min-h-0 w-full flex-1 items-center">
       <slot />
     </div>

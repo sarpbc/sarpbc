@@ -273,7 +273,7 @@ const scoreboardLabel = computed(() => {
   </SHubPageBody>
 
   <SHubPageBody v-else-if="match">
-    <div class="w-full flex min-w-0 flex-col">
+    <div class="w-full flex min-w-0 flex-col gap-8">
       <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
       <SCrossCard class="min-h-row-triple h-row-grid">
@@ -310,7 +310,7 @@ const scoreboardLabel = computed(() => {
         </div>
       </SCrossCard>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 md:gap-x-4">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
         <SRail :title="t('page.match.detail.sections.information')">
           <MatchInfoCard :match="match" class="flex-1" />
         </SRail>
@@ -367,7 +367,7 @@ const scoreboardLabel = computed(() => {
                 :key="participant.id"
                 :class="
                   index === 0
-                    ? 'max-md:border-b max-md:border-default md:border-r md:border-default'
+                    ? 'max-md:border-b max-md:border-separator md:border-r md:border-separator'
                     : undefined
                 "
                 :team-name="participant.team.name"

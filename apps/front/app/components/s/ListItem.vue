@@ -30,7 +30,7 @@ function listItemSizeClasses(value: ListItemSize): string {
 }
 
 const itemClass = computed(() => [
-  "flex w-full",
+  "flex w-full row-separator",
   size === "triple" || size === "double" ? "p-2 items-stretch" : "px-2 items-center",
   listItemSizeClasses(size),
   to && "group interactive-surface",

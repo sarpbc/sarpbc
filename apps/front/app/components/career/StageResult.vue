@@ -63,7 +63,7 @@ function pointsTooltip(points: number): string {
           <li
             v-for="(placement, index) in split.regionals"
             :key="index"
-            class="border-b border-default px-2 py-1.5 text-sm"
+            class="border-b border-separator px-2 py-1.5 text-sm"
           >
             <div class="flex items-center justify-between gap-2">
               <p class="min-w-0 font-medium">
@@ -80,7 +80,7 @@ function pointsTooltip(points: number): string {
             </div>
           </li>
           <li
-            class="border-b border-default px-2 py-1.5 text-sm"
+            class="border-b border-separator px-2 py-1.5 text-sm"
             :class="split.major ? 'bg-elevated' : undefined"
           >
             <div class="flex items-center justify-between gap-2">
@@ -105,7 +105,7 @@ function pointsTooltip(points: number): string {
           </li>
         </ul>
         <ul v-else-if="isWorlds && worldsPlacement" class="flex flex-col">
-          <li class="border-b border-default px-2 py-1.5 text-sm">
+          <li class="border-b border-separator px-2 py-1.5 text-sm">
             <div class="flex items-center justify-between gap-2">
               <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.worldsPlacementLabel") }}
@@ -122,7 +122,7 @@ function pointsTooltip(points: number): string {
     <div
       v-if="showQualificationBanner"
       class="border p-3 text-center text-sm font-medium"
-      :class="qualifiedForWorlds ? 'border-primary text-primary' : 'border-default text-muted'"
+      :class="qualifiedForWorlds ? 'border-primary text-primary' : 'border-separator text-muted'"
     >
       {{
         qualifiedForWorlds

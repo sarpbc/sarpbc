@@ -21,7 +21,7 @@ const cells = computed(
 
 <template>
   <div
-    class="grid h-[calc(var(--spacing-row-compact)*2)] min-h-[calc(var(--spacing-row-compact)*2)] grid-cols-4 border border-default divide-x divide-default"
+    class="grid h-[calc(var(--spacing-row-compact)*2)] min-h-[calc(var(--spacing-row-compact)*2)] grid-cols-4 border border-separator divide-x divide-separator"
   >
     <div
       v-for="cell in cells"

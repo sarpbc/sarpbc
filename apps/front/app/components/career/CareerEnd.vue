@@ -71,7 +71,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
       </p>
     </div>
 
-    <div class="border border-default p-4 text-center">
+    <div class="border border-separator p-4 text-center">
       <p class="text-xs text-muted">{{ t("page.game.career.end.finalRating") }}</p>
       <p class="text-3xl font-medium tabular-nums">{{ result.finalRating }}</p>
       <p class="mt-2 text-sm text-muted tabular-nums">
@@ -86,7 +86,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
           <li
             v-for="line in trophyLines"
             :key="line.type"
-            class="border-b border-default px-2 py-1.5 text-sm"
+            class="border-b border-separator px-2 py-1.5 text-sm"
           >
             <div class="flex items-center justify-between gap-2">
               <p class="min-w-0 font-medium">
@@ -97,7 +97,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
           </li>
           <li
             v-if="trophyLines.length === 0"
-            class="border-b border-default px-2 py-1.5 text-sm text-muted"
+            class="border-b border-separator px-2 py-1.5 text-sm text-muted"
           >
             {{ t("page.game.career.end.noTrophies") }}
           </li>
@@ -111,7 +111,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
           <li
             v-for="season in result.seasons"
             :key="season.season"
-            class="border-b border-default px-2 py-1.5 text-sm"
+            class="border-b border-separator px-2 py-1.5 text-sm"
           >
             <div class="flex items-center justify-between gap-2">
               <p class="min-w-0 font-medium">

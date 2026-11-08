@@ -266,6 +266,11 @@
         "title": "Aucun transfert enregistré pour le moment.",
         "hint": "Les mouvements apparaissent ici dès que sarpbc.org les enregistre dans les effectifs des équipes."
       }
+    },
+    "entity": {
+      "overview": {
+        "recentMatches": "Derniers matchs"
+      }
     }
   },
   "timeAgo": {
@@ -1264,7 +1269,8 @@
             "answerWithWins": "{name} a remporté {count} titre(s), dont {titles}.",
             "answerNone": "{name} n'a pas encore remporté de titre de tournoi dans nos archives."
           }
-        }
+        },
+        "kicker": "Joueur"
       }
     },
     "teams": {
@@ -1379,7 +1385,8 @@
             "empty": "Aucun match terminé pour le moment.",
             "emptyHint": "Les résultats apparaîtront ici après le premier match de cette équipe."
           }
-        }
+        },
+        "kicker": "Équipe"
       }
     },
     "tournaments": {
@@ -1542,11 +1549,26 @@
           "player": "Joueur",
           "teamScore": "{team}, aucun but | {team}, 1 but | {team}, {goals} buts",
           "columns": {
-            "goals": { "short": "B", "label": "Buts" },
-            "assists": { "short": "PD", "label": "Passes décisives" },
-            "saves": { "short": "Ar", "label": "Arrêts" },
-            "shots": { "short": "Ti", "label": "Tirs" },
-            "demolitions": { "short": "Dé", "label": "Démolitions" }
+            "goals": {
+              "short": "B",
+              "label": "Buts"
+            },
+            "assists": {
+              "short": "PD",
+              "label": "Passes décisives"
+            },
+            "saves": {
+              "short": "Ar",
+              "label": "Arrêts"
+            },
+            "shots": {
+              "short": "Ti",
+              "label": "Tirs"
+            },
+            "demolitions": {
+              "short": "Dé",
+              "label": "Démolitions"
+            }
           },
           "source": "Stats issues des replays sur Ballchasing",
           "replayLink": "Replay de la game {number} sur Ballchasing (s’ouvre dans un nouvel onglet)"

@@ -14,7 +14,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
 </script>
 
 <template>
-  <div class="flex h-full min-w-0 flex-col divide-y divide-default">
+  <div class="flex h-full min-w-0 flex-col divide-y divide-separator">
     <SListItem size="default" class="min-w-0 shrink-0">
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <h3 class="min-w-0 truncate text-default">{{ teamName }}</h3>

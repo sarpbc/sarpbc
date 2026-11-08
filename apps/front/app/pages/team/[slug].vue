@@ -104,7 +104,7 @@ setPageSeo({
             <div class="h-4 w-24 bg-elevated" />
           </div>
         </div>
-        <div class="h-row border-t border-default" />
+        <div class="h-row border-t border-separator" />
       </SCard>
     </div>
 
@@ -112,41 +112,40 @@ setPageSeo({
       <SErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
     </SCard>
 
-    <div v-else-if="team" class="w-full flex min-w-0 flex-col">
-      <SCard class="flex w-full min-w-0 flex-col">
-        <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
-        <div class="flex h-row-grid w-full min-w-0 flex-col border-t border-default">
-          <div
-            class="flex h-row-double min-h-row-double w-full min-w-0 flex-row items-center gap-3 px-3"
-          >
-            <TeamImg class="shrink-0" :team-name="team.name" :logo="team" size="md" priority />
-            <div class="flex min-w-0 flex-col items-start gap-1">
-              <h1 class="text-xl font-medium tracking-tight text-balance">
-                {{ team.name }}
-              </h1>
-              <FlagNationalities
-                v-if="teamNationalities.length > 0"
-                :nationalities="teamNationalities"
-                size="md"
-                :fallback-to-continent="true"
-              />
-            </div>
+    <div v-else-if="team" class="w-full flex min-w-0 flex-col gap-8">
+      <SCrossCard class="w-full min-w-0">
+        <div class="flex w-full min-w-0 flex-row items-center gap-6 px-6 py-8">
+          <TeamImg class="shrink-0" :team-name="team.name" :logo="team" size="lg" priority />
+          <div class="flex min-w-0 flex-col items-start gap-1">
+            <span class="text-xs text-muted">{{ t("page.team.slug.kicker") }}</span>
+            <h1 class="text-3xl font-medium tracking-tight text-highlighted text-balance">
+              {{ team.name }}
+            </h1>
+            <FlagNationalities
+              v-if="teamNationalities.length > 0"
+              :nationalities="teamNationalities"
+              size="md"
+              :fallback-to-continent="true"
+            />
           </div>
-          <TeamRosterSection :players="activeRoster" class="flex-1" />
         </div>
-        <UTabs
-          :model-value="tab"
-          :items="tabItems"
-          :content="false"
-          color="neutral"
-          variant="link"
-          class="w-full"
-          :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
-          @update:model-value="setTab"
-        />
-      </SCard>
+      </SCrossCard>
+
+      <TeamRosterSection :players="activeRoster" />
+
+      <UTabs
+        :model-value="tab"
+        :items="tabItems"
+        :content="false"
+        color="neutral"
+        variant="link"
+        class="w-full"
+        :ui="{ list: 'h-row items-center border-b border-separator py-0 mb-0' }"
+        @update:model-value="setTab"
+      />
 
       <template v-if="tab === 'info'">
+        <EntityOverview kind="team" :past-matches="pastMatches" :trophies="trophies" />
         <TeamStaffSection v-if="staff.length > 0" :staff="staff" />
         <TeamRosterTimeline
           v-if="showRosterHistory"

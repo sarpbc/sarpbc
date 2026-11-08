@@ -81,10 +81,10 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 
 | Token        | Variable                                    | px    | Utilities                          | Use                                                         |
 | ------------ | ------------------------------------------- | ----- | ---------------------------------- | ----------------------------------------------------------- |
-| row          | `--spacing-row` (`2.75rem`)                 | 44    | `h-row`, `min-h-row`               | News link, match row, toolbar                               |
+| row          | `--spacing-row` (`3.25rem`)                 | 52    | `h-row`, `min-h-row`               | News link, match row, toolbar                               |
 | row-compact  | `--spacing-row-compact` (`calc(row × 2/3)`) | ~29.3 | `h-row-compact`                    | Forum rail, game promo — 3 compact = 2 news rows            |
 | row-header   | `--spacing-row-header` (`3.5rem`)           | 56    | `h-row-header`, `min-h-row-header` | Page title band                                             |
-| row-double   | `--spacing-row-double` (`5.5rem`)           | 88    | `h-row-double`                     | Rare 2× cells                                               |
+| row-double   | `--spacing-row-double` (`calc(row × 2)`)    | 104   | `h-row-double`                     | Rare 2× cells                                               |
 | row-triple   | `--spacing-row-triple` (`calc(row × 3)`)    | ~132  | `h-row-triple`                     | Featured news row                                           |
 | row-stack    | `--spacing-row-stack` (`calc(row × 6)`)     | 264   | `min-h-row-stack`                  | Directory empty/error body                                  |
 | card-s       | `--spacing-card-s` (`calc(row × 4)`)        | 176   | `min-h-card-s`                     | Small padded card                                           |

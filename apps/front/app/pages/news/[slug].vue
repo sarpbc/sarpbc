@@ -77,23 +77,24 @@ setJsonLd("ld-json-news-article", () => {
 
 <template>
   <SHubPageBody v-if="article">
-    <div class="flex w-full flex-col">
-      <SCard v-if="newsType === 'article'" class="w-full overflow-hidden md:h-row-grid">
-        <div
-          v-if="article.imageUrl"
-          class="aspect-[2/1] w-full overflow-hidden bg-elevated"
-          :style="{ viewTransitionName: newsCoverTransitionName(article.slug) }"
-        >
-          <NuxtImg
-            :src="article.imageUrl"
-            :alt="article.title"
-            width="1200"
-            height="600"
-            sizes="(max-width: 768px) 100vw, 768px"
-            class="h-full w-full object-cover"
-          />
-        </div>
-        <div class="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4">
+    <div class="flex w-full flex-col gap-8">
+      <article v-if="newsType === 'article'" class="flex w-full flex-col gap-6">
+        <SCrossCard v-if="article.imageUrl" class="w-full">
+          <div
+            class="aspect-[2/1] w-full overflow-hidden bg-elevated"
+            :style="{ viewTransitionName: newsCoverTransitionName(article.slug) }"
+          >
+            <NuxtImg
+              :src="article.imageUrl"
+              :alt="article.title"
+              width="1200"
+              height="600"
+              sizes="(max-width: 768px) 100vw, 768px"
+              class="h-full w-full object-cover"
+            />
+          </div>
+        </SCrossCard>
+        <div class="flex w-full max-w-2xl flex-col gap-6">
           <div class="flex w-full flex-col gap-2">
             <h1
               class="text-3xl font-medium tracking-tight text-highlighted md:text-4xl text-balance"
@@ -116,9 +117,9 @@ setJsonLd("ld-json-news-article", () => {
             ]"
           />
         </div>
-      </SCard>
+      </article>
 
-      <SCard v-else class="w-full flex flex-col gap-4 p-4 md:h-row-grid">
+      <article v-else class="w-full flex flex-col gap-4">
         <div class="flex w-full flex-col gap-1">
           <h1 class="text-3xl font-medium tracking-tight text-highlighted md:text-4xl text-balance">
             {{ article.title }}
@@ -133,7 +134,7 @@ setJsonLd("ld-json-news-article", () => {
         </div>
         <div
           v-if="article.imageUrl"
-          class="w-full overflow-hidden rounded-sm"
+          class="w-full overflow-hidden"
           :style="{ viewTransitionName: newsCoverTransitionName(article.slug) }"
         >
           <NuxtImg
@@ -146,7 +147,7 @@ setJsonLd("ld-json-news-article", () => {
           />
         </div>
         <MDC :value="article.content" :class="NEWS_PROSE_CLASS" />
-      </SCard>
+      </article>
 
       <DiscussionCommentThread
         v-if="newsType === 'article'"

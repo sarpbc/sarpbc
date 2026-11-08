@@ -15,13 +15,8 @@ const rowCount = computed(() =>
 </script>
 
 <template>
-  <SCard class="grid grid-cols-2">
-    <div
-      v-for="(participant, columnIndex) in participants"
-      :key="participant.id"
-      class="flex min-w-0 flex-col"
-      :class="columnIndex === 0 ? 'border-r border-default' : undefined"
-    >
+  <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+    <SCard v-for="participant in participants" :key="participant.id" class="flex min-w-0 flex-col">
       <SListItem size="default" class="min-w-0 gap-2">
         <TeamImg :team-name="participant.team.name" :logo="participant.team" size="xs" />
         <h3 class="truncate text-xs text-default">{{ participant.team.name }}</h3>
@@ -29,14 +24,14 @@ const rowCount = computed(() =>
       <template v-for="rowIndex in rowCount" :key="rowIndex">
         <SListItem
           v-if="participant.players?.[rowIndex - 1]"
-          size="double"
+          size="default"
           :to="$localePath(playerPath(participant.players[rowIndex - 1]!.slug))"
           class="min-w-0 gap-3"
         >
           <PlayerImg
             :player-name="participant.players[rowIndex - 1]!.name"
             :img="participant.players[rowIndex - 1]!.imageUrl"
-            size="row"
+            size="list"
           />
           <div class="flex min-w-0 items-center gap-2">
             <FlagIcon
@@ -46,12 +41,12 @@ const rowCount = computed(() =>
             <span class="truncate text-sm">{{ participant.players[rowIndex - 1]!.name }}</span>
           </div>
         </SListItem>
-        <SListItem v-else size="double" class="min-w-0">
+        <SListItem v-else size="default" class="min-w-0">
           <span v-if="rowIndex === 1" class="self-center truncate text-sm text-muted">
             {{ t("page.match.detail.noRoster") }}
           </span>
         </SListItem>
       </template>
-    </div>
-  </SCard>
+    </SCard>
+  </div>
 </template>

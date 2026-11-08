@@ -370,7 +370,7 @@ watch(
             <li
               v-for="(entry, index) in topLeaderboard"
               :key="entry.userId"
-              class="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-2 text-sm py-1 border-b border-default last:border-b-0"
+              class="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-2 text-sm py-1 border-b border-separator last:border-b-0"
               :class="entry.userId === user?.id ? 'text-highlighted font-medium' : ''"
             >
               <span class="tabular-nums text-muted">{{ index + 1 }}</span>
@@ -389,7 +389,7 @@ watch(
       <SCard v-else-if="matchesByDay.length === 0" class="flex min-h-row-triple flex-col">
         <div
           v-if="sessionReady && !isSignedIn"
-          class="flex flex-col gap-3 border-b border-default p-4 sm:flex-row sm:items-center sm:justify-between"
+          class="flex flex-col gap-3 border-b border-separator p-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <p class="text-sm text-pretty text-muted">
             {{ t("page.game.pickems.detail.signInPrompt") }}

@@ -163,7 +163,7 @@ function onStart() {
           v-for="roleOption in CAREER_ROLES"
           :key="roleOption"
           type="button"
-          class="border border-default p-4 text-left interactive-surface selectable"
+          class="border border-separator p-4 text-left interactive-surface selectable"
           :aria-pressed="props.role === roleOption"
           @click="emit('selectRole', roleOption)"
         >
@@ -192,7 +192,7 @@ function onStart() {
           v-for="bg in CAREER_BACKGROUNDS"
           :key="bg"
           type="button"
-          class="border border-default p-4 text-left interactive-surface selectable"
+          class="border border-separator p-4 text-left interactive-surface selectable"
           :aria-pressed="props.background === bg"
           @click="emit('selectBackground', bg)"
         >

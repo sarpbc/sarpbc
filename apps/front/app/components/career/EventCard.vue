@@ -54,12 +54,12 @@ const decisionLabel = computed(() => {
         {{ t(`${eventKey}.description`) }}
       </p>
     </div>
-    <div class="border border-default">
+    <div class="border border-separator">
       <button
         v-for="choice in event.choices"
         :key="choice.id"
         type="button"
-        class="w-full border-b border-default px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation interactive-surface"
+        class="w-full border-b border-separator px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation interactive-surface"
         @click="emit('choose', choice.id)"
       >
         {{ t(`${eventKey}.choices.${choice.id}.label`) }}

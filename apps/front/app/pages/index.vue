@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { isoWeekIdFromDate } from "@sarpbc/utils";
 import { buildOrganization } from "~/utils/structuredData/organization";
 import { buildWebSite } from "~/utils/structuredData/webSite";
+import { buildNewsFeed } from "~/utils/newsFeed";
 
-const HOMEPAGE_NEWS_LIMIT = 20;
+const HOMEPAGE_NEWS_LIMIT = 30;
 
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -21,43 +21,38 @@ setJsonLd("ld-json-website", () =>
   }),
 );
 
-const currentWeekId = isoWeekIdFromDate(new Date());
-const articleLimit = ref(HOMEPAGE_NEWS_LIMIT);
+const newsLimit = ref(HOMEPAGE_NEWS_LIMIT);
 
-const [
-  { data: weekPage },
-  { data: articlesPage, pending: articlesPending, error: articlesError, refresh: refreshArticles },
-] = await Promise.all([
-  useAsyncData(
-    () => `homepage-week-${locale.value}-${currentWeekId}`,
-    () => getNewsWeek(currentWeekId, locale.value),
-    { watch: [locale] },
-  ),
-  useAsyncData(
-    () => `homepage-articles-${locale.value}`,
-    () => getNewsArticles(0, articleLimit.value, locale.value, "article"),
-    { watch: [locale, articleLimit] },
-  ),
-]);
+const {
+  data: newsPage,
+  pending: newsPending,
+  error: newsError,
+  refresh: refreshNews,
+} = await useAsyncData(
+  () => `homepage-news-${locale.value}`,
+  () => getNewsArticles(0, newsLimit.value, locale.value),
+  { watch: [locale, newsLimit] },
+);
 
-const week = computed(() => {
-  const value = weekPage.value;
-  if (!value || value.items.length === 0) {
-    return null;
-  }
-  return value;
+const newsItems = computed(() => newsPage.value?.data ?? []);
+const feed = computed(() => buildNewsFeed(newsItems.value));
+const featuredArticle = computed(() => {
+  const entry = feed.value.find((item) => item.kind === "article");
+  return entry?.kind === "article" ? entry.article : null;
 });
+const listedEntries = computed(() =>
+  feed.value.filter(
+    (entry) => entry.kind !== "article" || entry.article.id !== featuredArticle.value?.id,
+  ),
+);
+const hasMoreNews = computed(() => (newsPage.value?.total ?? 0) > newsItems.value.length);
+const hasNews = computed(() => feed.value.length > 0);
 
-const articles = computed(() => articlesPage.value?.data ?? []);
-const hasMoreArticles = computed(() => (articlesPage.value?.total ?? 0) > articles.value.length);
-const hasArticlesColumn = computed(() => articles.value.length > 0 || hasMoreArticles.value);
-const hasNewsColumn = computed(() => Boolean(week.value) || hasArticlesColumn.value);
-
-function loadMoreArticles() {
-  if (!hasMoreArticles.value || articlesPending.value) {
+function loadMoreNews() {
+  if (!hasMoreNews.value || newsPending.value) {
     return;
   }
-  articleLimit.value += HOMEPAGE_NEWS_LIMIT;
+  newsLimit.value += HOMEPAGE_NEWS_LIMIT;
 }
 
 const { data: activePickemTournament } = await useLazyAsyncData(
@@ -79,48 +74,50 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         :tournament="activePickemTournament"
         variant="homepage"
       />
-      <SRail
-        v-if="hasNewsColumn"
-        :caption="activePickemTournament ? 'none' : 'lead'"
-        :title="week || activePickemTournament ? undefined : $t('page.home.latest')"
-      >
-        <NewsWeekRow v-if="week" :week="week" class="frame" />
+      <template v-if="hasNews">
+        <SRail v-if="featuredArticle" :caption="activePickemTournament ? 'none' : 'lead'">
+          <NewsFeature :article="featuredArticle" />
+        </SRail>
         <SRail
-          v-if="hasArticlesColumn"
-          :caption="week ? 'section' : 'none'"
-          :title="week ? $t('page.home.latest') : undefined"
+          :caption="featuredArticle || activePickemTournament ? 'section' : 'lead'"
+          :title="$t('page.home.latest')"
+          :class="featuredArticle ? 'mt-8' : undefined"
         >
-          <SCard main>
-            <NewsRow v-for="article in articles" :key="article.id" :article="article" />
+          <SCard>
+            <template v-for="entry in listedEntries">
+              <NewsWeekRow
+                v-if="entry.kind === 'shortWeek'"
+                :key="`week-${entry.week}`"
+                :week="entry.week"
+                :latest="entry.latest"
+              />
+              <NewsRow v-else :key="entry.article.id" :article="entry.article" />
+            </template>
             <button
-              v-if="hasMoreArticles"
+              v-if="hasMoreNews"
               type="button"
-              class="interactive-surface flex h-row w-full items-center gap-2 border-t border-default px-2 text-left text-xs font-normal text-muted hover:text-highlighted disabled:cursor-default"
-              :disabled="articlesPending"
-              @click="loadMoreArticles"
+              class="interactive-surface row-separator flex h-row w-full items-center gap-2 px-2 text-left text-sm font-normal text-muted hover:text-highlighted disabled:cursor-default"
+              :disabled="newsPending"
+              @click="loadMoreNews"
             >
               <UIcon
-                v-if="articlesPending"
+                v-if="newsPending"
                 name="i-fluent-arrow-clockwise-24-regular"
                 class="size-4 motion-safe:animate-spin"
                 aria-hidden="true"
               />
-              {{ articlesPending ? $t("common.loading") : $t("page.home.loadMore") }}
+              {{ newsPending ? $t("common.loading") : $t("page.home.loadMore") }}
             </button>
           </SCard>
         </SRail>
-      </SRail>
+      </template>
       <SRail
         v-else
         :caption="activePickemTournament ? 'none' : 'lead'"
         :title="activePickemTournament ? undefined : $t('page.home.latest')"
       >
         <SCard class="flex min-h-row-stack h-row-grid items-center">
-          <SErrorState
-            v-if="articlesError"
-            :message="$t('page.home.error')"
-            @retry="refreshArticles()"
-          />
+          <SErrorState v-if="newsError" :message="$t('page.home.error')" @retry="refreshNews()" />
           <SEmptyState
             v-else
             icon="i-fluent-news-24-regular"

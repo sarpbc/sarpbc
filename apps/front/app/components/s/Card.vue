@@ -25,7 +25,7 @@ function cardSizeClasses(value: CardSize): string {
 </script>
 
 <template>
-  <div class="frame" :class="[main && 'relative', size && cardSizeClasses(size)]">
+  <div :class="[main ? 'relative' : 'frame', size && cardSizeClasses(size)]">
     <slot />
     <span v-if="main" class="cross-ticks" aria-hidden="true" />
   </div>

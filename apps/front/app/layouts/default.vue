@@ -9,18 +9,18 @@ const isHome = computed(() => getRouteBaseName(route) === "index");
     <NavHeader />
     <div class="hub-soft w-full flex flex-col items-center pt-header pb-6 md:pb-16">
       <div class="w-full max-w-7xl py-4 px-2 xl:px-0">
-        <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-4">
+        <div class="flex flex-col gap-2 md:grid md:grid-cols-12 md:gap-6 lg:gap-8">
           <div class="hidden md:flex md:col-span-3 lg:col-span-3">
             <SHubColumn variant="main">
               <LazyMatchLateralBar hydrate-on-visible />
             </SHubColumn>
           </div>
 
-          <SHubColumn variant="main" class="md:col-span-6 lg:col-span-7">
+          <SHubColumn variant="main" class="md:col-span-6">
             <slot />
           </SHubColumn>
 
-          <SHubColumn variant="rail" class="hidden md:col-span-3 md:flex lg:col-span-2">
+          <SHubColumn variant="rail" class="hidden md:col-span-3 md:flex">
             <ClientOnly>
               <LazyForumPreview hydrate-on-idle />
               <LazyTransferRail v-if="isHome" hydrate-on-idle />

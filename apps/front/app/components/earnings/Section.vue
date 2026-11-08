@@ -100,7 +100,7 @@ function entryMeta(entry: EarningsEntry): string {
 
         <p
           v-if="owner === 'player' || hasStartgg"
-          class="flex min-h-row flex-col justify-center gap-0.5 border-b border-default px-2 py-2 text-xs text-muted"
+          class="flex min-h-row flex-col justify-center gap-0.5 border-b border-separator px-2 py-2 text-xs text-muted"
         >
           <span v-if="owner === 'player'">{{ t("common.prizes.earnings.splitHint") }}</span>
           <span v-if="hasStartgg">

@@ -19,7 +19,7 @@ const model = defineModel<string>({ required: true });
     size="xs"
     :aria-label="ariaLabel"
     :ui="{
-      list: 'rounded-none bg-transparent p-0 border border-default',
+      list: 'rounded-none bg-transparent p-0 border border-separator',
       indicator: 'rounded-none bg-elevated shadow-none inset-y-0',
       trigger: 'rounded-none data-[state=active]:text-highlighted',
     }"

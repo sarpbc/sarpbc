@@ -47,13 +47,13 @@ watch(
     </h1>
 
     <div class="w-full flex flex-col gap-4">
-      <div v-if="doc" class="border border-default p-2 md:p-4">
+      <div v-if="doc" class="border border-separator p-2 md:p-4">
         <ContentRenderer
           :value="doc"
           class="legal-prose text-muted [&_h2]:text-lg [&_h2]:font-medium [&_h2]:text-highlighted [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:first:mt-0 [&_h3]:font-medium [&_h3]:text-highlighted [&_h3]:mb-2 [&_h3]:mt-4 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_ul]:mb-3 [&_a]:text-highlighted [&_a]:hover:text-primary [&_a]:font-medium [&_strong]:font-medium [&_strong]:text-highlighted [&_em]:not-italic [&_em]:block [&_em]:mb-6"
         />
       </div>
-      <div v-else class="border border-default p-4 text-muted">
+      <div v-else class="border border-separator p-4 text-muted">
         {{ $t("components.legal.notFound") }}
       </div>
     </div>

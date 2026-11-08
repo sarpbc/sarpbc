@@ -26,7 +26,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
           {{ t("page.player.slug.formerTeams") }}
         </h2>
       </template>
-      <div class="flex flex-col divide-y divide-default border-x border-b border-default">
+      <div class="flex flex-col divide-y divide-separator border-x border-b border-separator">
         <div
           v-for="contract in contracts"
           :key="contract.id"

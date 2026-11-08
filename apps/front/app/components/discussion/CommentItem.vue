@@ -92,8 +92,8 @@ async function onDelete() {
     class="w-full flex flex-col scroll-mt-24 outline-none"
     :aria-label="authorLabel"
   >
-    <div class="border border-default" :class="{ 'comment-highlight': isHighlighted }">
-      <div class="flex h-8 flex-row items-center justify-between border-b border-default px-3">
+    <div class="border border-separator" :class="{ 'comment-highlight': isHighlighted }">
+      <div class="flex h-8 flex-row items-center justify-between border-b border-separator px-3">
         <span class="truncate font-medium text-sm text-muted" translate="no">
           {{ authorLabel }}
         </span>
@@ -106,7 +106,7 @@ async function onDelete() {
         {{ comment.content }}
       </div>
 
-      <div class="flex flex-row items-center justify-end gap-1 border-t border-default px-2 py-1">
+      <div class="flex flex-row items-center justify-end gap-1 border-t border-separator px-2 py-1">
         <ForumSignInPrompt action="reply">
           <UButton
             square
@@ -204,7 +204,7 @@ async function onDelete() {
     <div v-if="displayReply || hasReplies" class="flex w-full flex-col">
       <div v-if="displayReply && user" class="flex w-full flex-row items-stretch">
         <DiscussionCommentThreadConnector :is-last="!hasReplies" />
-        <div class="mt-4 min-w-0 flex-1 border border-default p-3">
+        <div class="mt-4 min-w-0 flex-1 border border-separator p-3">
           <DiscussionCommentComposer
             :target-type="targetType"
             :target-id="targetId"

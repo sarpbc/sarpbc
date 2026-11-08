@@ -77,7 +77,7 @@ const showSection = computed(
         </ol>
         <p
           v-if="distribution?.source === 'startgg'"
-          class="flex h-row items-center border-b border-default px-2 text-xs text-muted"
+          class="flex h-row items-center border-b border-separator px-2 text-xs text-muted"
         >
           <span>
             {{ t("common.prizes.dataFrom") }}
