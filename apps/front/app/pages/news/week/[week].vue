@@ -77,7 +77,7 @@ setPageSeo({
         v-for="item in week.items"
         :id="item.slug"
         :key="item.id"
-        class="scroll-mt-header border-b border-default px-4 py-5 last:border-b-0"
+        class="scroll-mt-header border-b border-separator px-4 py-5 last:border-b-0"
       >
         <div class="flex w-full flex-col gap-3">
           <div class="flex w-full min-w-0 flex-col gap-1">

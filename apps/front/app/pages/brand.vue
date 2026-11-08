@@ -53,7 +53,7 @@ async function copyHex(): Promise<void> {
     <p class="text-base leading-relaxed text-muted mb-6">
       {{ $t("page.brand.logoBody") }}
     </p>
-    <div class="grid gap-px sm:grid-cols-2 border border-default bg-default">
+    <div class="grid gap-px sm:grid-cols-2 border border-separator bg-default">
       <div class="flex min-h-64 items-center justify-center bg-elevated">
         <img
           src="/sarpbc.svg"
@@ -88,7 +88,7 @@ async function copyHex(): Promise<void> {
     <p class="text-base leading-relaxed text-muted mb-6">
       {{ $t("page.brand.iconBody") }}
     </p>
-    <div class="flex min-h-48 items-center justify-center border border-default bg-elevated">
+    <div class="flex min-h-48 items-center justify-center border border-separator bg-elevated">
       <img
         src="/favicon.ico"
         :alt="$t('page.brand.faviconAlt')"
@@ -109,7 +109,7 @@ async function copyHex(): Promise<void> {
     <p class="text-base leading-relaxed text-muted mb-6">
       {{ $t("page.brand.ogBody") }}
     </p>
-    <div class="flex items-center justify-center border border-default bg-elevated p-6">
+    <div class="flex items-center justify-center border border-separator bg-elevated p-6">
       <img
         src="/og-image.jpg"
         :alt="$t('page.brand.ogAlt')"
@@ -133,7 +133,7 @@ async function copyHex(): Promise<void> {
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
       {{ $t("page.brand.colorTitle") }}
     </h2>
-    <div class="border border-default">
+    <div class="border border-separator">
       <div class="h-40" :style="{ backgroundColor: BRAND_BLUE }" />
       <div class="flex flex-col gap-1 p-4">
         <p class="text-sm font-medium text-highlighted">

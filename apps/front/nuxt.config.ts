@@ -207,7 +207,16 @@ export default defineNuxtConfig({
       },
     },
     optimizeDeps: {
-      include: ["@internationalized/date", "@vueuse/core", "zod"],
+      include: [
+        "@internationalized/date",
+        "@vueuse/core",
+        "zod",
+        // MDC lazy-loads its markdown parser on client navigation. Its own include list starts at
+        // `@nuxtjs/mdc`, which pnpm does not expose to this app, so these CommonJS deps would ship
+        // unbundled and fail with "does not provide an export named 'default'".
+        "@nuxt/content > @nuxtjs/mdc > debug",
+        "@nuxt/content > @nuxtjs/mdc > unified > extend",
+      ],
     },
   },
 });

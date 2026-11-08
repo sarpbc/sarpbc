@@ -132,7 +132,7 @@ const stateLabel = useMatchStateLabel((beginAt) =>
 
     <p
       v-else
-      class="flex min-h-row items-center border border-default bg-default px-3 py-2 text-sm text-muted"
+      class="flex min-h-row items-center border border-separator bg-default px-3 py-2 text-sm text-muted"
     >
       {{ t("newsTag.matchesUnavailable") }}
     </p>

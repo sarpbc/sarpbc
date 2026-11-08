@@ -73,7 +73,7 @@ function playerLabel(row: MatchGamePlayerStats): string {
           }}
         </caption>
         <thead>
-          <tr class="h-row border-b border-default text-xs text-muted">
+          <tr class="h-row border-b border-separator text-xs text-muted">
             <th scope="col" class="px-2 text-left font-normal">
               {{ t("page.match.detail.stats.player") }}
             </th>
@@ -93,7 +93,7 @@ function playerLabel(row: MatchGamePlayerStats): string {
           </tr>
         </thead>
         <tbody v-for="team in teams" :key="team.participantId">
-          <tr class="h-row border-b border-default bg-elevated/50">
+          <tr class="h-row border-b border-separator bg-elevated/50">
             <th scope="rowgroup" colspan="6" class="px-2 text-left text-xs font-normal">
               <span class="sr-only">
                 {{
@@ -113,7 +113,7 @@ function playerLabel(row: MatchGamePlayerStats): string {
           <tr
             v-for="(row, index) in team.players"
             :key="index"
-            class="h-row border-b border-default"
+            class="h-row border-b border-separator"
           >
             <th scope="row" class="max-w-0 px-2 text-left font-normal">
               <SLink

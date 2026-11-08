@@ -77,7 +77,7 @@ function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
   return [
     "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2",
     "hover:border-l-primary hover:bg-elevated",
-    withBottomBorder ? "border-b border-default" : "",
+    withBottomBorder ? "border-b border-separator" : "",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
   ];
 }
@@ -131,12 +131,12 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
     </p>
 
     <template v-if="destinyPromptPending">
-      <div class="border border-default">
+      <div class="border border-separator">
         <button
           v-for="choice in destinyPromptChoices"
           :key="choice.id"
           type="button"
-          class="w-full border-b border-default px-3 py-3 text-left last:border-b-0 touch-manipulation interactive-surface"
+          class="w-full border-b border-separator px-3 py-3 text-left last:border-b-0 touch-manipulation interactive-surface"
           @click="emit('destiny', choice.id)"
         >
           <span class="block text-sm">
@@ -157,7 +157,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
     </template>
 
     <template v-else>
-      <div v-if="showChoiceList" class="border border-default">
+      <div v-if="showChoiceList" class="border border-separator">
         <div
           v-for="(offer, index) in offers"
           :key="offer.teamId"
@@ -224,7 +224,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
           </div>
         </div>
       </div>
-      <div v-else class="border border-default p-3 text-center">
+      <div v-else class="border border-separator p-3 text-center">
         <p class="text-sm text-muted">{{ t("page.game.career.offseason.noOffer") }}</p>
       </div>
 

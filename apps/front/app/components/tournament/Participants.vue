@@ -25,7 +25,7 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
       <!-- Tiles overhang by 1px under the clipped frame so an incomplete last row keeps a closed box. -->
       <div
         v-if="hasTeams"
-        class="grid grid-cols-1 overflow-hidden border-x border-b border-default sm:grid-cols-2 lg:grid-cols-3"
+        class="grid grid-cols-1 overflow-hidden border-x border-b border-separator sm:grid-cols-2 lg:grid-cols-3"
         role="list"
       >
         <div

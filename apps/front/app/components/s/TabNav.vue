@@ -14,7 +14,7 @@ const { items, ariaLabel } = defineProps<{
 </script>
 
 <template>
-  <nav :aria-label="ariaLabel" class="w-full border-t border-default">
+  <nav :aria-label="ariaLabel" class="w-full border-t border-separator">
     <ul class="flex h-row items-stretch">
       <li v-for="item in items" :key="item.label">
         <NuxtLink

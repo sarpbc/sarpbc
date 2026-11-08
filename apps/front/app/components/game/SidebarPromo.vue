@@ -1,24 +1,24 @@
+<script setup lang="ts">
+const games = computed(() => [
+  { to: "/game/airriddle", title: "page.game.airriddle.title" },
+  { to: "/game/career", title: "page.game.career.title" },
+]);
+</script>
+
 <template>
   <SRail :title="$t('components.game.sidebarPromo.heading')">
-    <SCard class="w-full overflow-hidden">
-      <SListItem
-        size="compact"
-        :to="$localePath('/game/airriddle')"
-        :title="$t('page.game.airriddle.title')"
-        class="text-xs font-normal text-default hover:text-highlighted"
+    <div class="grid grid-cols-2 gap-2">
+      <NuxtLink
+        v-for="game in games"
+        :key="game.to"
+        :to="$localePath(game.to)"
+        class="group flex aspect-square flex-col justify-between bg-muted p-3 transition-none hover:bg-elevated"
       >
-        <div class="min-w-0 flex-1 truncate">{{ $t("page.game.airriddle.title") }}</div>
-        <span class="shrink-0 text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
-      </SListItem>
-      <SListItem
-        size="compact"
-        :to="$localePath('/game/career')"
-        :title="$t('page.game.career.title')"
-        class="text-xs font-normal text-default hover:text-highlighted"
-      >
-        <div class="min-w-0 flex-1 truncate">{{ $t("page.game.career.title") }}</div>
-        <span class="shrink-0 text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
-      </SListItem>
-    </SCard>
+        <span class="text-base font-medium leading-tight text-default group-hover:text-highlighted">
+          {{ $t(game.title) }}
+        </span>
+        <span class="text-xs text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
+      </NuxtLink>
+    </div>
   </SRail>
 </template>

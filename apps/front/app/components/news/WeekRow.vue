@@ -1,30 +1,22 @@
 <script lang="ts" setup>
-import type { NewsWeek } from "~/types/news";
+import type { NewsArticleListItem } from "~/types/news";
 
 const localePath = useLocalePath();
 const { t } = useI18n();
 
-const props = defineProps<{
-  week: NewsWeek;
+const { week, latest } = defineProps<{
+  week: string;
+  latest: NewsArticleListItem;
 }>();
-
-const latest = computed(() => props.week.items[0] ?? null);
 </script>
 
 <template>
-  <SListItem
-    v-if="latest"
-    size="default"
-    :to="localePath(`/news/week/${props.week.week}`)"
-    class="min-w-0 overflow-hidden"
-  >
-    <div class="flex w-full min-w-0 items-center justify-between gap-x-3">
-      <h2 class="min-w-0 flex-1 truncate text-row text-default group-hover:text-highlighted">
-        {{ t("page.home.latestShort", { title: latest.title }) }}
-      </h2>
-      <p class="shrink-0 text-xs font-normal text-muted tabular-nums">
-        {{ formatLocaleTimeAgo(new Date(latest.createdAt)) }}
-      </p>
-    </div>
+  <SListItem :to="localePath(`/news/week/${week}`)" class="min-w-0 gap-x-4 overflow-hidden">
+    <h2 class="min-w-0 flex-1 truncate text-row text-default group-hover:text-highlighted">
+      {{ t("page.home.latestShort", { title: latest.title }) }}
+    </h2>
+    <p class="shrink-0 text-xs font-normal text-muted tabular-nums">
+      {{ formatLocaleTimeAgo(new Date(latest.createdAt)) }}
+    </p>
   </SListItem>
 </template>

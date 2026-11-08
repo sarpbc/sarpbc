@@ -57,7 +57,7 @@ function formatDelta(value: number): string {
 
     <ul
       v-if="statRows.length > 0"
-      class="grid h-[calc(var(--spacing-row-compact)*2)] min-h-[calc(var(--spacing-row-compact)*2)] border border-default divide-x divide-default"
+      class="grid h-[calc(var(--spacing-row-compact)*2)] min-h-[calc(var(--spacing-row-compact)*2)] border border-separator divide-x divide-separator"
       :class="deltaGridClass"
     >
       <li

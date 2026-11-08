@@ -285,19 +285,19 @@ setPageSeo({
       </div>
       <div class="flex flex-col items-center gap-6">
         <USkeleton class="h-4 w-40" />
-        <div class="inline-flex flex-col border-l border-t border-default">
+        <div class="inline-flex flex-col border-l border-t border-separator">
           <div class="inline-grid grid-cols-6 gap-0">
             <USkeleton
               v-for="index in 6"
               :key="index"
-              class="size-11 rounded-none border-r border-b border-default sm:size-14"
+              class="size-11 rounded-none border-r border-b border-separator sm:size-14"
             />
           </div>
           <div class="inline-grid grid-cols-6 gap-0">
             <USkeleton
               v-for="index in 6"
               :key="`row-${index}`"
-              class="size-11 rounded-none border-r border-b border-default sm:size-14"
+              class="size-11 rounded-none border-r border-b border-separator sm:size-14"
             />
           </div>
         </div>
@@ -360,11 +360,11 @@ setPageSeo({
               class="pointer-events-none absolute inset-x-0 bottom-full z-10 flex justify-center"
               role="alert"
             >
-              <span class="border border-default bg-elevated px-3 py-1 text-sm text-error">
+              <span class="border border-separator bg-elevated px-3 py-1 text-sm text-error">
                 {{ t(`page.game.airriddle.${error}`) }}
               </span>
             </p>
-            <div class="flex w-full max-w-fit flex-col border-l border-t border-default">
+            <div class="flex w-full max-w-fit flex-col border-l border-t border-separator">
               <div
                 v-for="(attempt, attemptIndex) in gameState.attempts"
                 :key="attemptIndex"

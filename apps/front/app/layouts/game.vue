@@ -4,7 +4,7 @@ const localePath = useLocalePath();
 
 <template>
   <main class="w-full min-h-svh flex flex-col bg-default">
-    <header class="w-full shrink-0 border-b border-default">
+    <header class="w-full shrink-0 border-b border-separator">
       <div class="w-full max-w-7xl mx-auto px-2 xl:px-0 h-12 flex flex-row items-center">
         <ULink
           :to="localePath('/')"

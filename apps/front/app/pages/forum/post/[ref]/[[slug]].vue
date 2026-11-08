@@ -71,11 +71,11 @@ watch(
 <template>
   <SHubPageBody>
     <SCard v-if="pending" aria-live="polite">
-      <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
+      <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
         <USkeleton class="h-3 w-48" />
         <USkeleton class="h-3 w-32" />
       </div>
-      <div class="flex min-h-row items-center border-b border-default px-3">
+      <div class="flex min-h-row items-center border-b border-separator px-3">
         <USkeleton class="h-3 w-2/3" />
       </div>
     </SCard>
@@ -86,7 +86,7 @@ watch(
 
     <template v-else-if="post">
       <SCard class="h-row-grid">
-        <div class="flex h-row items-center justify-between gap-3 border-y border-default px-3">
+        <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
           <h1 class="min-w-0 truncate text-sm font-medium text-default">
             {{ post.title }}
           </h1>
@@ -97,7 +97,7 @@ watch(
             </time>
           </div>
         </div>
-        <div class="flex min-h-row items-center border-b border-default px-3 py-2">
+        <div class="flex min-h-row items-center border-b border-separator px-3 py-2">
           <p class="whitespace-pre-wrap text-sm leading-6 text-default">{{ post.content }}</p>
         </div>
       </SCard>

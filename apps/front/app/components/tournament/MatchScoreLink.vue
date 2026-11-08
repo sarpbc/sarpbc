@@ -103,8 +103,8 @@ function participantRowClass(participantId: string | undefined): string {
       bracket
         ? 'w-full p-0 bg-muted/70 border-0'
         : compact
-          ? 'w-64 min-h-16 p-2 bg-muted/70 border border-transparent hover:border-default'
-          : 'w-full min-w-0 p-2 sm:p-3 bg-muted/70 border border-default',
+          ? 'w-64 min-h-16 p-2 bg-muted/70 border border-transparent hover:border-separator'
+          : 'w-full min-w-0 p-2 sm:p-3 bg-muted/70 border border-separator',
     ]"
     @click="onMatchClick"
   >

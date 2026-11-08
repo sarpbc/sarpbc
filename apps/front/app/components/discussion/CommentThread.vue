@@ -140,7 +140,7 @@ onMounted(() => {
       <div
         v-for="n in 3"
         :key="n"
-        class="h-24 border border-default bg-elevated/40 animate-pulse"
+        class="h-24 border border-separator bg-elevated/40 animate-pulse"
       />
     </div>
 

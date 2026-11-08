@@ -166,7 +166,7 @@ function teamRowClass(entry: RankedTeam): string[] {
   const highlighted = props.hoveredTeamId === entry.team.id;
   return [
     rankingGridClass,
-    "h-row-compact min-h-row-compact border-b border-default border-l-2 text-left text-sm",
+    "h-row-compact min-h-row-compact border-b border-separator border-l-2 text-left text-sm",
     "hover:border-l-primary hover:bg-elevated",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isPlayerTeam ? "bg-elevated font-medium" : "",
@@ -177,7 +177,7 @@ function playerRowClass(entry: RankedPlayer): string[] {
   const highlighted = props.hoveredTeamId === entry.teamId;
   return [
     rankingGridClass,
-    "h-row-compact min-h-row-compact border-b border-default border-l-2 text-sm",
+    "h-row-compact min-h-row-compact border-b border-separator border-l-2 text-sm",
     "hover:border-l-primary hover:bg-elevated",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isUser ? "bg-elevated font-medium" : "",
@@ -204,7 +204,7 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
           v-for="(section, index) in teamSections"
           :key="index"
           class="flex flex-col"
-          :class="index > 0 ? 'border-t border-default' : ''"
+          :class="index > 0 ? 'border-t border-separator' : ''"
         >
           <li
             v-for="entry in section"
@@ -271,11 +271,11 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
             </UTooltip>
           </li>
         </ol>
-        <ol v-if="playerFooterItems.length" class="flex flex-col border-t border-default">
+        <ol v-if="playerFooterItems.length" class="flex flex-col border-t border-separator">
           <template v-for="item in playerFooterItems" :key="playerListKey(item)">
             <li
               v-if="item.type === 'divider'"
-              class="flex h-row-compact min-h-row-compact items-center border-b border-default px-2 text-xs text-muted"
+              class="flex h-row-compact min-h-row-compact items-center border-b border-separator px-2 text-xs text-muted"
             >
               {{ t("page.game.career.rankings.alsoOnRoster") }}
             </li>

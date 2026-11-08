@@ -70,28 +70,25 @@ const showSubscribeCalendar = computed(
 </script>
 
 <template>
-  <SCard class="min-h-row-header">
+  <SCrossCard class="min-h-row-header">
     <div class="w-full flex flex-col">
-      <div class="w-full flex flex-col items-center gap-3 p-4 text-center">
-        <div
-          v-if="logoUrl || leagueName || $slots.kicker"
-          class="flex items-center justify-center gap-2"
-        >
+      <div class="w-full flex flex-col items-start gap-2 px-6 py-8">
+        <div v-if="logoUrl || leagueName || $slots.kicker" class="flex items-center gap-2">
           <img v-if="logoUrl" :src="logoUrl" alt="" class="size-4 object-contain" />
           <slot name="kicker">
-            <p v-if="leagueName" class="text-sm text-muted text-pretty">
+            <p v-if="leagueName" class="text-xs text-muted text-pretty">
               {{ leagueName }}
             </p>
           </slot>
         </div>
 
-        <h1 class="text-xl font-medium tracking-tight text-balance max-w-3xl">
+        <h1 class="max-w-3xl text-3xl font-medium tracking-tight text-highlighted text-balance">
           {{ title }}
         </h1>
 
         <div
           v-if="status || dateRange"
-          class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
+          class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
         >
           <SBadgeLive v-if="status === 'live'" />
           <span v-else-if="statusLabel">{{ statusLabel }}</span>
@@ -106,28 +103,30 @@ const showSubscribeCalendar = computed(
         </div>
 
         <div
-          v-if="metaItems.length > 0"
-          class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
+          v-if="metaItems.length > 0 || (showChampion && champion)"
+          class="mt-4 flex flex-wrap items-center gap-x-8 gap-y-2 text-base text-default"
         >
-          <template v-for="(item, index) in metaItems" :key="item.label">
-            <span v-if="index > 0" aria-hidden="true">·</span>
-            <span :class="{ 'tabular-nums': item.tabular }">{{ item.label }}</span>
-          </template>
-        </div>
-
-        <p v-if="showChampion && champion" class="text-sm text-highlighted text-pretty">
-          <span class="text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
-          {{ " " }}
-          <SLink
-            :to="$localePath(teamPath(champion.slug))"
-            variant="inline"
-            class="inline-flex items-center min-h-10"
+          <span
+            v-for="item in metaItems"
+            :key="item.label"
+            :class="{ 'tabular-nums': item.tabular }"
           >
-            {{ champion.name }}
-          </SLink>
-        </p>
+            {{ item.label }}
+          </span>
+          <span v-if="showChampion && champion" class="inline-flex items-center gap-2">
+            <span class="text-sm text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
+            <SLink
+              :to="$localePath(teamPath(champion.slug))"
+              variant="inline"
+              class="inline-flex min-h-10 items-center gap-2 text-highlighted"
+            >
+              <TeamImg :team-name="champion.name" :logo="champion" size="xs" />
+              {{ champion.name }}
+            </SLink>
+          </span>
+        </div>
       </div>
       <slot />
     </div>
-  </SCard>
+  </SCrossCard>
 </template>

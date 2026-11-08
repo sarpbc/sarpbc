@@ -110,36 +110,38 @@ setPageSeo({
 
 <template>
   <SHubPageBody>
-    <div class="w-full flex min-w-0 flex-col">
-      <SCard class="flex w-full min-w-0 flex-col">
-        <!-- Snapped with its top border so the tab bar below lands on the rail row grid. -->
-        <div
-          class="flex h-row-grid w-full min-w-0 flex-col gap-3 border-t border-default p-3 sm:flex-row sm:gap-4 sm:p-4"
-        >
-          <PlayerImg
-            class="mx-auto shrink-0 sm:mx-0"
-            :player-name="currentPlayer.name"
-            :img="currentPlayer.imageUrl"
-            size="xl"
-            priority
-          />
-          <div class="w-full min-w-0 flex flex-col gap-3 sm:justify-between">
-            <div class="flex min-w-0 flex-col items-start gap-1">
-              <h1 class="text-xl font-medium tracking-tight text-balance">
-                {{ currentPlayer.name }}
-              </h1>
-              <div
-                v-if="currentPlayer.nationality || realName"
-                class="flex min-w-0 flex-row items-center gap-2"
-              >
-                <FlagIcon :nationality="currentPlayer.nationality" size="md" />
-                <span v-if="realName" class="truncate text-sm text-muted">{{ realName }}</span>
-              </div>
+    <div class="w-full flex min-w-0 flex-col gap-8">
+      <SCrossCard class="w-full min-w-0">
+        <div class="grid w-full min-w-0 self-stretch sm:grid-cols-[15rem_minmax(0,1fr)]">
+          <div class="flex aspect-square items-center justify-center overflow-hidden bg-muted">
+            <NuxtImg
+              v-if="currentPlayer.imageUrl"
+              :src="currentPlayer.imageUrl"
+              :alt="currentPlayer.name"
+              width="480"
+              height="480"
+              sizes="100vw sm:240px"
+              preload
+              class="h-full w-full object-cover"
+            />
+            <PlayerImg v-else :player-name="currentPlayer.name" size="xl" />
+          </div>
+          <div class="flex min-w-0 flex-col gap-1 p-6 pb-2">
+            <span class="text-xs text-muted">{{ t("page.player.slug.kicker") }}</span>
+            <h1 class="mt-1 text-3xl font-medium tracking-tight text-highlighted text-balance">
+              {{ currentPlayer.name }}
+            </h1>
+            <div
+              v-if="currentPlayer.nationality || realName"
+              class="flex min-w-0 flex-row items-center gap-2"
+            >
+              <FlagIcon :nationality="currentPlayer.nationality" size="md" />
+              <span v-if="realName" class="truncate text-sm text-muted">{{ realName }}</span>
             </div>
-            <dl class="w-full min-w-0 flex flex-col gap-3">
+            <dl class="mt-auto flex w-full min-w-0 flex-col pt-6">
               <div
                 v-if="birthday"
-                class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4"
+                class="flex h-row min-w-0 flex-row items-center justify-between gap-3 border-t border-separator"
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
                 <dd class="min-w-0">
@@ -157,7 +159,9 @@ setPageSeo({
                   </UTooltip>
                 </dd>
               </div>
-              <div class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4">
+              <div
+                class="flex h-row min-w-0 flex-row items-center justify-between gap-3 border-t border-separator"
+              >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
                 <dd class="min-w-0 flex justify-end">
                   <SLink
@@ -180,7 +184,7 @@ setPageSeo({
               </div>
               <div
                 v-if="currentPlayer.role && currentPlayer.role !== 'active'"
-                class="flex min-w-0 flex-row items-center justify-between gap-3 sm:gap-4"
+                class="flex h-row min-w-0 flex-row items-center justify-between gap-3 border-t border-separator"
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.role") }}</dt>
                 <dd class="min-w-0 text-sm font-medium">
@@ -190,19 +194,21 @@ setPageSeo({
             </dl>
           </div>
         </div>
-        <UTabs
-          :model-value="tab"
-          :items="tabItems"
-          :content="false"
-          color="neutral"
-          variant="link"
-          class="w-full"
-          :ui="{ list: 'h-row items-center border-t py-0 mb-0' }"
-          @update:model-value="setTab"
-        />
-      </SCard>
+      </SCrossCard>
+
+      <UTabs
+        :model-value="tab"
+        :items="tabItems"
+        :content="false"
+        color="neutral"
+        variant="link"
+        class="w-full"
+        :ui="{ list: 'h-row items-center border-b border-separator py-0 mb-0' }"
+        @update:model-value="setTab"
+      />
 
       <template v-if="tab === 'info'">
+        <EntityOverview kind="player" :past-matches="pastMatches" :trophies="trophies" />
         <PlayerFormerTeams v-if="oldTeams && oldTeams.length > 0" :contracts="oldTeams" />
         <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
       </template>

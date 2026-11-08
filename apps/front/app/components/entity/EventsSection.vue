@@ -87,7 +87,7 @@ function eventMeta(event: EntityEventListItem): string {
           <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
             {{ t(`page.${kind}.slug.events.live`) }}
           </h3>
-          <div class="flex flex-col border border-default divide-y divide-default">
+          <div class="flex flex-col border border-separator divide-y divide-separator">
             <ULink
               v-for="event in live"
               :key="event.id"
@@ -107,7 +107,7 @@ function eventMeta(event: EntityEventListItem): string {
 
         <div
           v-if="activeEvents.length > 0"
-          class="flex flex-col border border-default divide-y divide-default"
+          class="flex flex-col border border-separator divide-y divide-separator"
         >
           <ULink
             v-for="event in activeEvents"
