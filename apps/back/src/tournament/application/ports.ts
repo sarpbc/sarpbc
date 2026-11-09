@@ -173,6 +173,9 @@ export interface PrizeWriter {
 export interface PrizeTransaction {
   run<T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>): Promise<T>;
 }
+export interface AwardTransaction {
+  run<T>(work: (scope: Pick<CompetitionWriteScope, "awards">) => Promise<T>): Promise<T>;
+}
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;
   events: EventWriter;

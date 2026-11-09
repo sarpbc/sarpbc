@@ -4,13 +4,13 @@ import type {
   AwardContext,
   AwardParticipantRef,
   AwardQueries,
+  AwardTransaction,
   AwardWriter,
-  CompetitionTransaction,
 } from "./ports";
 export class PlayerAwardService {
   constructor(
     private readonly reads: AwardQueries,
-    private readonly transaction: CompetitionTransaction,
+    private readonly transaction: AwardTransaction,
   ) {}
   async findByPlayerId(id: string) {
     const awards = await this.reads.byPlayer(id);

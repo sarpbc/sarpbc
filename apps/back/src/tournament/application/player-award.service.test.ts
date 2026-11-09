@@ -2,12 +2,12 @@ import type { PlayerAwardType } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { PlayerAwardService } from "./player-award.service";
-import type { AwardContext, AwardWriter, CompetitionTransaction } from "./ports";
+import type { AwardTransaction, AwardWriter } from "./ports";
 
 function setup(source: "manual" | "startgg" = "manual") {
   const given = new Set<PlayerAwardType>();
   const writer = {
-    context: vi.fn(async (tournamentId, participant, playerId): Promise<AwardContext> => {
+    context: vi.fn<AwardWriter["context"]>(async (tournamentId, participant, playerId) => {
       const onTeam =
         "teamId" in participant
           ? participant.teamId === "kc"
@@ -20,17 +20,19 @@ function setup(source: "manual" | "startgg" = "manual") {
         player: playerId === "nobody" ? null : { id: playerId, name: playerId, slug: playerId },
       };
     }),
-    awardTaken: vi.fn(async (_: string, awardType: PlayerAwardType) => given.has(awardType)),
-    create: vi.fn(async (input) => {
+    awardTaken: vi.fn<AwardWriter["awardTaken"]>(async (_, awardType) => given.has(awardType)),
+    create: vi.fn<AwardWriter["create"]>(async (input) => {
       given.add(input.awardType);
-      return { id: "award-1" };
+      return {
+        id: "award-1",
+        awardType: input.awardType,
+        player: { id: input.playerId, name: input.playerId, slug: input.playerId },
+        participant: { id: input.participantId },
+      };
     }),
-    remove: vi.fn(),
-  };
-  const transaction = {
-    run: (work: (scope: { awards: AwardWriter }) => Promise<unknown>) =>
-      work({ awards: writer as unknown as AwardWriter }),
-  } as unknown as CompetitionTransaction;
+    remove: vi.fn<AwardWriter["remove"]>(),
+  } satisfies AwardWriter;
+  const transaction: AwardTransaction = { run: (work) => work({ awards: writer }) };
   const service = new PlayerAwardService({ byPlayer: vi.fn(), byTournament: vi.fn() }, transaction);
   return { service, writer };
 }
