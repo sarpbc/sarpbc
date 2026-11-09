@@ -11,10 +11,9 @@ import {
   buildTournamentSportsEvent,
   getTournamentChampionTeam,
 } from "~/utils/structuredData/tournamentSportsEvent";
-import {
-  getTournamentTabFromRouteName,
-  getTournamentTabTransitionName,
-} from "~/utils/tournamentTabRoute";
+import { getTournamentTabFromRouteName } from "~/utils/tournamentTabRoute";
+
+definePageMeta({ viewTransition: false });
 
 const route = useRoute();
 const { t } = useI18n();
@@ -23,7 +22,8 @@ const getRouteBaseName = useRouteBaseName();
 const { setPageSeo } = useSarpbcSeo();
 const { setJsonLd } = useStructuredData();
 
-const segments = computed(() => [route.params.event as string, route.params.stage as string]);
+// A string, not the segments array: switching Overview / Matches must not refetch the stage.
+const stagePath = computed(() => `${route.params.event as string}/${route.params.stage as string}`);
 
 const {
   data: resolved,
@@ -31,10 +31,10 @@ const {
   error,
   refresh,
 } = await useAsyncData(
-  () => `tournament-path-${segments.value.join("/")}`,
-  () => resolveTournamentPath(segments.value),
+  () => `tournament-path-${stagePath.value}`,
+  () => resolveTournamentPath(stagePath.value.split("/")),
   {
-    watch: [segments],
+    watch: [stagePath],
     default: () => null,
   },
 );
@@ -65,26 +65,6 @@ const tournament = computed(() =>
 );
 
 const teamCount = computed(() => tournament.value?.participants?.length ?? 0);
-
-const tabTransitionName = ref("tournament-tab-left");
-
-const tabTransition = computed(() => ({
-  name: tabTransitionName.value,
-}));
-
-onBeforeRouteUpdate((to, from) => {
-  if (to.params.event !== from.params.event || to.params.stage !== from.params.stage) {
-    return;
-  }
-
-  const nextTransition = getTournamentTabTransitionName(
-    getTournamentTabFromRouteName(getRouteBaseName(from)),
-    getTournamentTabFromRouteName(getRouteBaseName(to)),
-  );
-  if (nextTransition) {
-    tabTransitionName.value = nextTransition;
-  }
-});
 
 const title = computed(() =>
   tournament.value
@@ -169,66 +149,7 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
           :active-tab="activeTab"
         />
       </TournamentHero>
-      <div class="tournament-tab-outlet overflow-hidden">
-        <NuxtPage :transition="tabTransition" :tournament="tournament" />
-      </div>
+      <NuxtPage :tournament="tournament" />
     </template>
   </SHubPageBody>
 </template>
-
-<style>
-.tournament-tab-outlet {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.tournament-tab-outlet > * {
-  grid-area: 1 / 1;
-  min-width: 0;
-}
-
-.tournament-tab-left-enter-active,
-.tournament-tab-left-leave-active,
-.tournament-tab-right-enter-active,
-.tournament-tab-right-leave-active {
-  transition:
-    transform var(--duration-normal) var(--ease-emphasized),
-    opacity var(--duration-normal) var(--ease-emphasized);
-}
-
-.tournament-tab-left-enter-from {
-  opacity: 0;
-  transform: translateX(1.5rem);
-}
-
-.tournament-tab-left-leave-to {
-  opacity: 0;
-  transform: translateX(-1.5rem);
-}
-
-.tournament-tab-right-enter-from {
-  opacity: 0;
-  transform: translateX(-1.5rem);
-}
-
-.tournament-tab-right-leave-to {
-  opacity: 0;
-  transform: translateX(1.5rem);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tournament-tab-left-enter-active,
-  .tournament-tab-left-leave-active,
-  .tournament-tab-right-enter-active,
-  .tournament-tab-right-leave-active {
-    transition: opacity var(--duration-fast) ease;
-  }
-
-  .tournament-tab-left-enter-from,
-  .tournament-tab-left-leave-to,
-  .tournament-tab-right-enter-from,
-  .tournament-tab-right-leave-to {
-    transform: none;
-  }
-}
-</style>

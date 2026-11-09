@@ -36,15 +36,6 @@ const {
 
 const newsItems = computed(() => newsPage.value?.data ?? []);
 const feed = computed(() => buildNewsFeed(newsItems.value));
-const featuredArticle = computed(() => {
-  const entry = feed.value.find((item) => item.kind === "article");
-  return entry?.kind === "article" ? entry.article : null;
-});
-const listedEntries = computed(() =>
-  feed.value.filter(
-    (entry) => entry.kind !== "article" || entry.article.id !== featuredArticle.value?.id,
-  ),
-);
 const hasMoreNews = computed(() => (newsPage.value?.total ?? 0) > newsItems.value.length);
 const hasNews = computed(() => feed.value.length > 0);
 
@@ -75,16 +66,12 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         variant="homepage"
       />
       <template v-if="hasNews">
-        <SRail v-if="featuredArticle" :caption="activePickemTournament ? 'none' : 'lead'">
-          <NewsFeature :article="featuredArticle" />
-        </SRail>
         <SRail
-          :caption="featuredArticle || activePickemTournament ? 'section' : 'lead'"
+          :caption="activePickemTournament ? 'section' : 'lead'"
           :title="$t('page.home.latest')"
-          :class="featuredArticle ? 'mt-8' : undefined"
         >
           <SCard>
-            <template v-for="entry in listedEntries">
+            <template v-for="entry in feed">
               <NewsWeekRow
                 v-if="entry.kind === 'shortWeek'"
                 :key="`week-${entry.week}`"

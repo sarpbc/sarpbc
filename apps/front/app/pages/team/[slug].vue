@@ -133,16 +133,14 @@ setPageSeo({
 
       <TeamRosterSection :players="activeRoster" />
 
-      <UTabs
-        :model-value="tab"
-        :items="tabItems"
-        :content="false"
-        color="neutral"
-        variant="link"
-        class="w-full"
-        :ui="{ list: 'h-row items-center border-b border-separator py-0 mb-0' }"
-        @update:model-value="setTab"
-      />
+      <div class="flex h-row items-center justify-center px-2">
+        <STabs
+          :model-value="tab"
+          :items="tabItems"
+          :ariaLabel="t('page.team.slug.tabsLabel')"
+          @update:model-value="setTab"
+        />
+      </div>
 
       <template v-if="tab === 'info'">
         <EntityOverview kind="team" :past-matches="pastMatches" :trophies="trophies" />

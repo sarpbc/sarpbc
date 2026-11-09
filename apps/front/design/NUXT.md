@@ -72,7 +72,7 @@ Before adding a new primitive, check `app/components/s/`:
 | Component        | Use                                                                                        |
 | ---------------- | ------------------------------------------------------------------------------------------ |
 | `SCard`          | Bordered container                                                                         |
-| `SCrossCard`     | Auth/marketing cards with cross motif                                                      |
+| `SCrossCard`     | Auth/marketing cards, no frame                                                             |
 | `SBadgeLive`     | Live status with redundant text                                                            |
 | `SLink`          | Styled internal links                                                                      |
 | `SListItem`      | Hub list row (`size`: compact/default/header/double; optional `to`)                        |

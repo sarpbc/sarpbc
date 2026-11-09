@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 type CardSize = "s" | "m" | "l";
 
-const { size, main = false } = defineProps<{
-  /** The page's primary block: the only card that carries the corner ticks. */
-  main?: boolean;
+const { size } = defineProps<{
   /** Min height on the hub row grid (`n × row-double`). Grows by `row-double` so both side rails stay aligned. */
   size?: CardSize;
 }>();
@@ -25,8 +23,7 @@ function cardSizeClasses(value: CardSize): string {
 </script>
 
 <template>
-  <div :class="[main ? 'relative' : 'frame', size && cardSizeClasses(size)]">
+  <div :class="['frame', size && cardSizeClasses(size)]">
     <slot />
-    <span v-if="main" class="cross-ticks" aria-hidden="true" />
   </div>
 </template>

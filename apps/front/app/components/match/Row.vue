@@ -9,8 +9,16 @@ const { locale, t } = useI18n();
 const hourDf = computed(
   () =>
     new Intl.DateTimeFormat(locale.value, {
-      hour: "2-digit",
+      hour: "numeric",
       minute: "2-digit",
+    }),
+);
+
+const dayDf = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      day: "numeric",
+      month: "short",
     }),
 );
 
@@ -30,7 +38,8 @@ const {
 
 type ScheduleDisplay =
   | { kind: "time"; time: string }
-  | { kind: "tomorrow"; label: string; time: string };
+  | { kind: "tomorrow"; label: string; time: string }
+  | { kind: "date"; date: string };
 
 const schedule = computed((): ScheduleDisplay | null => {
   const beginAt = parseMatchDate(match.beginAt);
@@ -44,11 +53,14 @@ const schedule = computed((): ScheduleDisplay | null => {
   }
 
   const offset = daysFromToday(beginAt);
+  if (offset === 0) {
+    return { kind: "time", time };
+  }
   if (offset === 1) {
-    return { kind: "tomorrow", label: t("components.match.tomorrow"), time };
+    return { kind: "tomorrow", label: t("components.match.tomorrowShort"), time };
   }
 
-  return { kind: "time", time };
+  return { kind: "date", date: dayDf.value.format(beginAt) };
 });
 
 const teamA = computed(() => match.participants?.[0]);
@@ -59,17 +71,6 @@ const teamBName = computed(() => teamB.value?.team.name ?? t("components.match.t
 
 const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
 const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
-
-const showLiveBadge = computed(() => {
-  if (!live) {
-    return false;
-  }
-  const a = scoreA.value ?? 0;
-  const b = scoreB.value ?? 0;
-  return a === 0 && b === 0;
-});
-
-const showLiveScore = computed(() => live && !showLiveBadge.value);
 
 const scoreChanged = ref(false);
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
@@ -95,38 +96,38 @@ function liveScoreClass(score: number | null, other: number | null): string {
 <template>
   <SListItem :size="compact ? 'compact' : 'default'">
     <div
-      class="grid w-full min-w-0 grid-cols-[2rem_minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto_minmax(0,1fr)] items-center gap-x-1.5 text-xs"
     >
-      <span v-if="live" class="text-xs font-medium leading-tight text-error">
-        {{ $t("components.match.liveShort") }}
-      </span>
-      <span
-        v-else-if="schedule?.kind === 'tomorrow'"
-        class="flex flex-col text-muted tabular-nums leading-tight"
-      >
-        <span class="truncate">{{ schedule.label }}</span>
-        <span>{{ schedule.time }}</span>
-      </span>
-      <span v-else class="text-muted tabular-nums">{{ schedule?.time }}</span>
       <span class="truncate text-end text-default group-hover:text-highlighted" :title="teamAName">
         {{ shortTeamName(teamAName) }}
       </span>
       <TeamImg :team-name="teamA?.team.name" :logo="teamA?.team" size="xs" />
       <span
-        class="flex items-center justify-center gap-1 tabular-nums"
+        class="flex min-w-12 flex-col items-center justify-center text-center tabular-nums leading-tight"
         :class="{ 'score-flash': scoreChanged }"
         aria-live="polite"
-        :aria-label="showLiveScore ? `${scoreA ?? '–'} – ${scoreB ?? '–'}` : undefined"
+        :aria-label="
+          live
+            ? `${$t('components.match.liveShort')} ${scoreA ?? '–'} – ${scoreB ?? '–'}`
+            : undefined
+        "
       >
-        <template v-if="showLiveScore">
-          <span :class="liveScoreClass(scoreA, scoreB)" aria-hidden="true">{{
-            scoreA ?? "–"
-          }}</span>
-          <span class="text-muted" aria-hidden="true">-</span>
-          <span :class="liveScoreClass(scoreB, scoreA)" aria-hidden="true">{{
-            scoreB ?? "–"
-          }}</span>
+        <template v-if="live">
+          <span class="font-medium text-error" aria-hidden="true">
+            {{ $t("components.match.liveShort") }}
+          </span>
+          <span v-if="scoreA !== null || scoreB !== null" class="flex gap-1" aria-hidden="true">
+            <span :class="liveScoreClass(scoreA, scoreB)">{{ scoreA ?? "–" }}</span>
+            <span class="text-muted">-</span>
+            <span :class="liveScoreClass(scoreB, scoreA)">{{ scoreB ?? "–" }}</span>
+          </span>
         </template>
+        <template v-else-if="schedule?.kind === 'tomorrow'">
+          <span class="text-muted">{{ schedule.label }}</span>
+          <span class="text-default">{{ schedule.time }}</span>
+        </template>
+        <span v-else-if="schedule?.kind === 'time'" class="text-default">{{ schedule.time }}</span>
+        <span v-else-if="schedule?.kind === 'date'" class="text-muted">{{ schedule.date }}</span>
         <span v-else class="text-muted" aria-hidden="true">–</span>
       </span>
       <TeamImg :team-name="teamB?.team.name" :logo="teamB?.team" size="xs" />

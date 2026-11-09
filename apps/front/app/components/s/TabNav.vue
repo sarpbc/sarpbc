@@ -14,13 +14,13 @@ const { items, ariaLabel } = defineProps<{
 </script>
 
 <template>
-  <nav :aria-label="ariaLabel" class="w-full border-t border-separator">
-    <ul class="flex h-row items-stretch">
-      <li v-for="item in items" :key="item.label">
+  <nav :aria-label="ariaLabel" class="flex h-row w-full items-center justify-center px-2">
+    <ul class="flex h-7 items-stretch border border-default px-2 text-xs font-medium">
+      <li v-for="item in items" :key="item.label" class="group flex">
         <NuxtLink
           :to="item.to"
           :aria-current="item.active ? 'page' : undefined"
-          class="relative flex h-full items-center px-4 text-sm font-medium text-muted outline-none hover:text-highlighted aria-[current=page]:text-highlighted aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-0 aria-[current=page]:after:bottom-0 aria-[current=page]:after:h-0.5 aria-[current=page]:after:bg-inverted"
+          class="flex items-center px-1 text-muted hover:text-default aria-[current=page]:text-highlighted group-not-first:ps-0 group-not-first:before:me-2 group-not-first:before:font-normal group-not-first:before:text-dimmed group-not-first:before:content-['/']"
         >
           {{ item.label }}
         </NuxtLink>
