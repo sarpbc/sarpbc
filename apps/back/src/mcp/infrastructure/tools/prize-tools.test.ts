@@ -8,7 +8,7 @@ const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const TEAM_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 const SOURCE = "https://example.com/fake-cup/prizes";
 
-function setup(role: StaffRole = "admin") {
+function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
   const rosterProposalService = {
     propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
@@ -20,9 +20,9 @@ function setup(role: StaffRole = "admin") {
     list: vi.fn(),
   };
   const tool = rosterTools({ rosterProposalService }).find(
-    (candidate) => candidate.name === "propose_tournament_prizes",
+    (candidate) => candidate.name === toolName,
   );
-  if (!tool) throw new Error("propose_tournament_prizes is not defined");
+  if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
   return { rosterProposalService, tool, call };
 }
@@ -68,6 +68,58 @@ describe("propose_tournament_prizes", () => {
     ).toBe(false);
     expect(
       schema.safeParse({ ...input, prizes: [{ ...prizes[0], currency: "XYZ" }] }).success,
+    ).toBe(false);
+  });
+});
+
+describe("propose_player_award", () => {
+  const PLAYER_ID = "3a9d4c7e-5b1f-4e2a-8c6d-9f0e1d2c3b4a";
+  const input = {
+    tournamentId: TOURNAMENT_ID,
+    teamId: TEAM_ID,
+    playerId: PLAYER_ID,
+    awardType: "mvp",
+    sourceUrl: SOURCE,
+  };
+  const setupAward = (role?: StaffRole) => setup(role, "propose_player_award");
+
+  it("queues a proposal instead of creating the award", async () => {
+    const { call, rosterProposalService } = setupAward();
+    const result = await call(input);
+
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      {
+        kind: "award_player",
+        tournamentId: TOURNAMENT_ID,
+        teamId: TEAM_ID,
+        playerId: PLAYER_ID,
+        awardType: "mvp",
+      },
+      SOURCE,
+      "u1",
+    );
+    const block = result.content[0];
+    expect(JSON.parse(block?.type === "text" ? block.text : "null")).toMatchObject({
+      kind: "award_player",
+      status: "pending",
+    });
+  });
+
+  it("requires tournaments.manage", async () => {
+    const { call, rosterProposalService } = setupAward("journalist");
+    const result = await call(input);
+    expect(result.isError).toBe(true);
+    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+  });
+
+  it("requires a known award type and a non-Liquipedia source", () => {
+    const schema = z.object(setupAward().tool.inputSchema);
+    expect(schema.safeParse(input).success).toBe(true);
+    expect(schema.safeParse({ ...input, awardType: "top_scorer" }).success).toBe(false);
+    expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);
+    expect(
+      schema.safeParse({ ...input, sourceUrl: "https://liquipedia.net/rocketleague/Fake_Cup" })
+        .success,
     ).toBe(false);
   });
 });

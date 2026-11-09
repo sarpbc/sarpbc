@@ -2,7 +2,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
 import { ConflictError } from "../../../common/domain/errors";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
-import type { AwardQueries, AwardWriter } from "../../application/ports";
+import type { AwardParticipantRef, AwardQueries, AwardWriter } from "../../application/ports";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
@@ -58,18 +58,23 @@ export class CompetitionAwardQueries implements AwardQueries {
 }
 export class CompetitionAwardWriter implements AwardWriter {
   constructor(private readonly em: EntityManager) {}
-  async context(tournamentId: string, participantId: string, playerId: string) {
+  async context(tournamentId: string, participant: AwardParticipantRef, playerId: string) {
     const [t, p, player] = await Promise.all([
       this.em.findOne(Tournament, { id: tournamentId }),
       this.em.findOne(
         TournamentParticipant,
-        { id: participantId, tournament: { id: tournamentId } },
+        {
+          ...("participantId" in participant
+            ? { id: participant.participantId }
+            : { team: { id: participant.teamId } }),
+          tournament: { id: tournamentId },
+        },
         { populate: ["players", "team"] },
       ),
       this.em.findOne(Player, { id: playerId }),
     ]);
     return {
-      tournament: t ? { id: t.id, name: t.name } : null,
+      tournament: t ? { id: t.id, name: t.name, source: t.source } : null,
       participant: p
         ? {
             id: p.id,
@@ -80,6 +85,10 @@ export class CompetitionAwardWriter implements AwardWriter {
       player: player ? { id: player.id, name: player.name, slug: player.slug } : null,
     };
   }
+  async awardTaken(tournamentId: string, awardType: PlayerAwardType) {
+    return (await this.em.count(PlayerAward, { tournament: { id: tournamentId }, awardType })) > 0;
+  }
+
   async create(input: {
     tournamentId: string;
     participantId: string;

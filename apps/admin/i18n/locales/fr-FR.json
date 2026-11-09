@@ -215,7 +215,7 @@
     },
     "proposals": {
       "title": "Propositions de roster",
-      "subtitle": "Changements sourcés de rosters, joueurs, équipes et répartitions des gains proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
+      "subtitle": "Changements sourcés de rosters, joueurs, équipes, répartitions des gains et récompenses proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
       "loadError": "Impossible de charger les propositions de roster.",
       "empty": "Aucune proposition de roster à examiner.",
       "approve": "Valider",
@@ -232,7 +232,8 @@
         "merge_teams": "Fusion d'équipes",
         "create_contract": "Nouveau contrat",
         "update_contract": "Modification du contrat",
-        "set_tournament_prizes": "Répartition des gains"
+        "set_tournament_prizes": "Répartition des gains",
+        "award_player": "Récompense joueur"
       },
       "fields": {
         "playerId": "Joueur",
@@ -253,6 +254,7 @@
         "contractRole": "Rôle sous contrat",
         "sourceUrl": "Source",
         "tournamentId": "Tournoi",
+        "awardType": "Récompense",
         "prizes": "Gains",
         "placement": "{placement}re place | {placement}e place"
       },

@@ -127,13 +127,19 @@ export interface RosterIdentityWriter {
     currentTeamId?: string | null,
   ): Promise<{ id: string }>;
 }
+export type AwardParticipantRef = { participantId: string } | { teamId: string };
 export interface AwardContext {
-  tournament: { id: string; name: string } | null;
+  tournament: { id: string; name: string; source: DataSource } | null;
   participant: { id: string; team: { id: string; name: string }; playerIds: string[] } | null;
   player: { id: string; name: string; slug: string } | null;
 }
 export interface AwardWriter {
-  context(tournamentId: string, participantId: string, playerId: string): Promise<AwardContext>;
+  context(
+    tournamentId: string,
+    participant: AwardParticipantRef,
+    playerId: string,
+  ): Promise<AwardContext>;
+  awardTaken(tournamentId: string, awardType: PlayerAwardType): Promise<boolean>;
   create(input: {
     tournamentId: string;
     participantId: string;
@@ -166,6 +172,9 @@ export interface PrizeWriter {
 }
 export interface PrizeTransaction {
   run<T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>): Promise<T>;
+}
+export interface AwardTransaction {
+  run<T>(work: (scope: Pick<CompetitionWriteScope, "awards">) => Promise<T>): Promise<T>;
 }
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;

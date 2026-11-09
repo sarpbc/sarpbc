@@ -41,6 +41,8 @@ function formatValue(key: string, value: string | boolean | null): string {
       return t(`common.contractRole.${value}`);
     case "variant":
       return t(`page.proposals.logoVariants.${value}`);
+    case "awardType":
+      return t(`page.tournaments.awards.types.${value}`);
     default:
       return nameOf(value);
   }

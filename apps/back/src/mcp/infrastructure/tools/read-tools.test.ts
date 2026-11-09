@@ -63,6 +63,16 @@ function setup() {
     teamEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
     playerEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
   };
+  const playerAwardService = {
+    findByTournamentId: vi.fn().mockResolvedValue([
+      {
+        id: "award-1",
+        awardType: "mvp",
+        player: { id: "p1", name: "Scout", slug: "scout" },
+        participant: { id: "part-kc", team: { id: "team-kc", name: "Karmine Corp" } },
+      },
+    ]),
+  };
   const playerService = {
     find: vi.fn().mockResolvedValue([player]),
     findBySlug: vi.fn().mockResolvedValue(player),
@@ -82,6 +92,7 @@ function setup() {
       matchService,
       tournaments,
       tournamentPrizeService,
+      playerAwardService,
       events: { list: vi.fn() },
       catalogService: { findEvent: vi.fn() },
     }),
@@ -99,6 +110,7 @@ function setup() {
     matchService,
     tournaments,
     tournamentPrizeService,
+    playerAwardService,
     playerService,
     teamService,
     call,
@@ -163,6 +175,27 @@ describe("MCP read tools", () => {
       tournamentId: "c1",
       prizepool: null,
       prizes: [],
+    });
+  });
+
+  it("hides the awards of start.gg tournaments without reading them", async () => {
+    const { call, playerAwardService } = setup();
+    expect((await call("get_tournament_awards", { id: "startgg-cup" })).isError).toBe(true);
+    expect(playerAwardService.findByTournamentId).not.toHaveBeenCalled();
+  });
+
+  it("returns the awards of a redistributable tournament with their player and team", async () => {
+    const { json } = setup();
+    expect(await json("get_tournament_awards", { id: "manual-cup" })).toEqual({
+      tournamentId: "manual-cup",
+      awards: [
+        {
+          id: "award-1",
+          awardType: "mvp",
+          player: { id: "p1", name: "Scout", slug: "scout" },
+          team: { id: "team-kc", name: "Karmine Corp" },
+        },
+      ],
     });
   });
 

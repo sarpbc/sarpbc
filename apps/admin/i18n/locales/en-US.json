@@ -215,7 +215,7 @@
     },
     "proposals": {
       "title": "Roster Proposals",
-      "subtitle": "Sourced roster, player, team and prize distribution changes proposed through the MCP. Nothing applies until a staff member approves it.",
+      "subtitle": "Sourced roster, player, team, prize distribution and award changes proposed through the MCP. Nothing applies until a staff member approves it.",
       "loadError": "Could not load roster proposals.",
       "empty": "No roster proposals to review.",
       "approve": "Approve",
@@ -232,7 +232,8 @@
         "merge_teams": "Merge teams",
         "create_contract": "New contract",
         "update_contract": "Contract update",
-        "set_tournament_prizes": "Prize distribution"
+        "set_tournament_prizes": "Prize distribution",
+        "award_player": "Player award"
       },
       "fields": {
         "playerId": "Player",
@@ -253,6 +254,7 @@
         "contractRole": "Contract role",
         "sourceUrl": "Source",
         "tournamentId": "Tournament",
+        "awardType": "Award",
         "prizes": "Prizes",
         "placement": "Place {placement}"
       },
