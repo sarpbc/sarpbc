@@ -182,7 +182,7 @@
       "todaysMatch": "Today's Matches",
       "tomorrowsMatch": "Tomorrow's Matches",
       "upcomingMatches": "Upcoming Matches",
-      "tomorrow": "Tomorrow",
+      "tomorrowShort": "Tmrw",
       "results": "Results",
       "liveShort": "Live",
       "tbd": "To Be Determined",
@@ -1226,6 +1226,7 @@
             "emptyHint": "Results appear here once this player plays a match."
           }
         },
+        "tabsLabel": "Player sections",
         "tabs": {
           "info": "Info",
           "matches": "Matches",
@@ -1300,6 +1301,7 @@
         "seoDescriptionDefault": "Team roster, upcoming matches, and recent results",
         "players": "Players",
         "staff": "Staff",
+        "tabsLabel": "Team sections",
         "tabs": {
           "info": "Info",
           "matches": "Matches",

@@ -182,7 +182,7 @@
       "todaysMatch": "Matchs d'aujourd'hui",
       "tomorrowsMatch": "Matchs de demain",
       "upcomingMatches": "Matchs à venir",
-      "tomorrow": "Demain",
+      "tomorrowShort": "Dem.",
       "results": "Résultats",
       "liveShort": "En direct",
       "tbd": "À déterminer",
@@ -1226,6 +1226,7 @@
             "emptyHint": "Les résultats apparaîtront ici après le premier match de ce joueur."
           }
         },
+        "tabsLabel": "Sections du joueur",
         "tabs": {
           "info": "Infos",
           "matches": "Matchs",
@@ -1300,6 +1301,7 @@
         "seoDescriptionDefault": "Effectif, prochains matchs et derniers résultats de l'équipe",
         "players": "Joueurs",
         "staff": "Staff",
+        "tabsLabel": "Sections de l'équipe",
         "tabs": {
           "info": "Infos",
           "matches": "Matchs",

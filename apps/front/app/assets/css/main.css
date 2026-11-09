@@ -41,7 +41,6 @@
   --spacing-card-m: var(--spacing-row-stack);
   --spacing-card-l: calc(var(--spacing-row) * 8);
   --spacing-rail-caption: 4.5rem; /* 72px — lead rail only (header 56 + gap-4 16); section rails use h-row */
-  --spacing-cross: 9px; /* corner ticks on the page's primary block */
   --radius-scrollbar: 5px;
   --duration-fast: 150ms;
   --duration-normal: 200ms;
@@ -202,7 +201,7 @@
   }
 }
 
-/* List edges drawn over the content box: rows keep exact row heights and a hovered row never covers the line. */
+/* List top edge drawn over the content box: rows keep exact row heights and a hovered row never covers the line. Lists stay open at the bottom. */
 @utility frame {
   position: relative;
 
@@ -211,36 +210,54 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    border-block: 1px solid var(--ui-separator);
+    border-top: 1px solid var(--ui-separator);
   }
 }
 
 /* Inset so the line adds no height and stays above the row's hover fill. */
 @utility row-separator {
-  box-shadow: inset 0 -1px 0 var(--ui-separator);
+  box-shadow: inset 0 1px 0 var(--ui-separator);
 }
 
-/* Signature corner ticks, painted over the frame. Put last in a relative parent so a hovered row never covers them. */
-@utility cross-ticks {
-  --tick: linear-gradient(var(--ui-bg-inverted), var(--ui-bg-inverted));
-  --tick-length: calc(var(--spacing-cross) + var(--spacing-px));
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    var(--tick) left top / var(--tick-length) 1px no-repeat,
-    var(--tick) left top / 1px var(--tick-length) no-repeat,
-    var(--tick) right top / var(--tick-length) 1px no-repeat,
-    var(--tick) right top / 1px var(--tick-length) no-repeat,
-    var(--tick) left bottom / var(--tick-length) 1px no-repeat,
-    var(--tick) left bottom / 1px var(--tick-length) no-repeat,
-    var(--tick) right bottom / var(--tick-length) 1px no-repeat,
-    var(--tick) right bottom / 1px var(--tick-length) no-repeat;
+/* Rules on the footer's first and last column lines (4 equal cells split by gap-px), which sit a quarter gap plus 0.75px outside the main column. Stretched over the shell's py-4 and md:pb-16 to run from the header line to the footer. */
+@utility hub-column-rules {
+  @variant md {
+    position: relative;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: calc(var(--spacing) * -4);
+      bottom: calc(var(--spacing) * -20);
+      pointer-events: none;
+      border-inline-start: 1px solid var(--ui-border);
+    }
+
+    &::before {
+      left: calc(var(--spacing) * -1.5 - 0.75px);
+    }
+
+    &::after {
+      right: calc(var(--spacing) * -1.5 - 0.75px);
+    }
+  }
+
+  @variant lg {
+    &::before {
+      left: calc(var(--spacing) * -2 - 0.75px);
+    }
+
+    &::after {
+      right: calc(var(--spacing) * -2 - 0.75px);
+    }
+  }
 }
 
 /* One hover and press fill for every clickable row, tile and ghost control, matching Nuxt UI ghost buttons. */
 @utility interactive-surface {
-  transition-property: none;
+  /* !important: ULink's themed base adds transition-colors, emitted after this utility. */
+  transition-property: none !important;
 
   @media (hover: hover) {
     &:hover {

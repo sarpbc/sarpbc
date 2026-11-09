@@ -57,7 +57,7 @@ function eventMeta(event: EntityEventListItem): string {
           <h2 :id="headingId">
             {{ t(`page.${kind}.slug.events.sectionTitle`) }}
           </h2>
-          <SSegmented
+          <STabs
             :model-value="tab"
             :items="tabItems"
             :ariaLabel="t(`page.${kind}.slug.events.sectionTitle`)"
