@@ -1,3 +1,4 @@
+import type { RosterChange } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { Contract, Player, Team } from "../../roster/domain/roster";
@@ -57,6 +58,26 @@ function setup() {
     }),
     setDistribution: vi.fn(),
   };
+  const awardError = (tournamentId: string, playerId: string) => {
+    if (tournamentId === "startgg-cup")
+      return new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
+    if (tournamentId !== "cup")
+      return new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+    if (playerId !== "zen") return new InvalidInputError(`${playerId} is not on the roster`);
+    return null;
+  };
+  const awards = {
+    requireProposable: vi.fn(async (tournamentId: string, _team: string, playerId: string) => {
+      const error = awardError(tournamentId, playerId);
+      if (error) throw error;
+    }),
+    createForTeam: vi.fn(async () => ({
+      id: "award-1",
+      awardType: "mvp" as const,
+      player: { id: "zen", name: "zen", slug: "zen" },
+      participant: { id: "part-kc" },
+    })),
+  };
   const rollingBack = {
     run: async <T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> => {
       const before = new Map(
@@ -88,9 +109,10 @@ function setup() {
       },
     },
     prizes,
+    awards,
     logos,
   );
-  return { saved, store, players, teams, contracts, logos, staff, prizes, service };
+  return { saved, store, players, teams, contracts, logos, staff, prizes, awards, service };
 }
 
 describe("RosterProposalService", () => {
@@ -103,10 +125,11 @@ describe("RosterProposalService", () => {
   let logos: ReturnType<typeof setup>["logos"];
   let staff: ReturnType<typeof setup>["staff"];
   let prizes: ReturnType<typeof setup>["prizes"];
+  let awards: ReturnType<typeof setup>["awards"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, store, players, teams, contracts, logos, staff, prizes, service } = setup());
+    ({ saved, store, players, teams, contracts, logos, staff, prizes, awards, service } = setup());
   });
 
   const addZen = () =>
@@ -319,6 +342,56 @@ describe("RosterProposalService", () => {
       InvalidInputError,
     );
     expect(saved.size).toBe(0);
+  });
+
+  const award: Extract<RosterChange, { kind: "award_player" }> = {
+    kind: "award_player",
+    tournamentId: "cup",
+    teamId: "kc",
+    playerId: "zen",
+    awardType: "mvp",
+  };
+
+  it("applies a sourced award once a tournament manager approves it", async () => {
+    const { id } = await service.propose(award, source, "journalist");
+    expect(awards.createForTeam).not.toHaveBeenCalled();
+
+    const approved = await service.approve(id, "admin");
+
+    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "mvp");
+    expect(approved).toMatchObject({ status: "applied", entityId: "award-1" });
+  });
+
+  it("rejects award proposals the tournament cannot take", async () => {
+    const propose = (change: Partial<typeof award>) =>
+      service.propose({ ...award, ...change }, source, "journalist");
+
+    await expect(propose({ tournamentId: "missing" })).rejects.toThrow(NotFoundError);
+    await expect(propose({ tournamentId: "startgg-cup" })).rejects.toThrow(InvalidInputError);
+    await expect(propose({ playerId: "bench" })).rejects.toThrow(NotFoundError);
+    await expect(propose({ teamId: "nope" })).rejects.toThrow(NotFoundError);
+    awards.requireProposable.mockRejectedValueOnce(new InvalidInputError("already has"));
+    await expect(propose({})).rejects.toThrow(InvalidInputError);
+    expect(saved.size).toBe(0);
+  });
+
+  it("leaves an award proposal pending when approval finds the award already given", async () => {
+    const { id } = await service.propose(award, source, "journalist");
+    awards.createForTeam.mockRejectedValueOnce(new InvalidInputError("already has"));
+
+    await expect(service.approve(id, "admin")).rejects.toThrow(InvalidInputError);
+
+    expect(saved.get(id)).toMatchObject({ status: "pending", entityId: null });
+  });
+
+  it("names the award's tournament, team and player in the proposal list", async () => {
+    await service.propose(award, source, "journalist");
+    await service.list("pending");
+
+    expect(store.names).toHaveBeenCalledWith(
+      expect.objectContaining({ players: ["zen"], teams: ["kc"], tournaments: ["cup"] }),
+    );
   });
 
   it("requires the change permission and reviews a proposal once", async () => {

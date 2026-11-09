@@ -1,4 +1,5 @@
 import type { ContractRole } from "./contract";
+import type { PlayerAwardType } from "./player-award";
 import type { PlayerStatus } from "./player";
 import type { PrizeEntry } from "./prize";
 import type { TeamLogoVariant } from "./team";
@@ -67,7 +68,14 @@ export type RosterChange =
       endDate?: string | null;
       contractRole?: ContractRole;
     }
-  | { kind: "set_tournament_prizes"; tournamentId: string; prizes: PrizeEntry[] };
+  | { kind: "set_tournament_prizes"; tournamentId: string; prizes: PrizeEntry[] }
+  | {
+      kind: "award_player";
+      tournamentId: string;
+      teamId: string;
+      playerId: string;
+      awardType: PlayerAwardType;
+    };
 
 export const ROSTER_PROPOSAL_STATUSES = ["pending", "applied", "rejected"] as const;
 

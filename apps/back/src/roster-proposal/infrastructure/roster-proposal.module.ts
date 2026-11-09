@@ -9,6 +9,7 @@ import { TeamLogoService } from "../../roster/application/team-logo.service";
 import { TeamService } from "../../roster/application/team.service";
 import { UserService } from "../../user/application/user.service";
 import { UserModule } from "../../user/infrastructure/user.module";
+import { PlayerAwardService } from "../../tournament/application/player-award.service";
 import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
@@ -38,6 +39,7 @@ import {
         merges: RosterMergeService,
         users: UserService,
         prizes: TournamentPrizeService,
+        awards: PlayerAwardService,
         logos: TeamLogoService,
       ) =>
         new RosterProposalService(
@@ -49,6 +51,7 @@ import {
           merges,
           users,
           prizes,
+          awards,
           logos,
         ),
       inject: [
@@ -59,6 +62,7 @@ import {
         RosterMergeService,
         UserService,
         TournamentPrizeService,
+        PlayerAwardService,
         TeamLogoService,
       ],
     },
