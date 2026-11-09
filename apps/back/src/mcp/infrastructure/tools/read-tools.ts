@@ -129,6 +129,25 @@ export function readTools({
     }),
 
     defineTool({
+      name: "get_tournament_awards",
+      description:
+        "Get the player awards (MVP, defensive MVP) already recorded for one tournament stage: award id, type, player and team. A stage has at most one award of each type. Read it before propose_player_award.",
+      input: { id: z.string().min(1).describe("Tournament stage UUID.") },
+      handler: async ({ id }) => {
+        const awards = await competition.tournamentAwards(id);
+        return {
+          tournamentId: id,
+          awards: awards.map(({ id: awardId, awardType, player, participant }) => ({
+            id: awardId,
+            awardType,
+            player,
+            team: participant.team,
+          })),
+        };
+      },
+    }),
+
+    defineTool({
       name: "get_team_earnings",
       description:
         "Get a team prize earnings by year, with totals per currency (amounts are never converted).",

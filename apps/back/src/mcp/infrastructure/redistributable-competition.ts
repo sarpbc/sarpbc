@@ -9,6 +9,7 @@ import type {
   EventQueries,
   TournamentQueries,
 } from "../../tournament/application/ports";
+import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 
 export interface RedistributableCompetitionServices {
@@ -20,6 +21,7 @@ export interface RedistributableCompetitionServices {
     TournamentPrizeService,
     "findByTournamentId" | "teamEarnings" | "playerEarnings"
   >;
+  playerAwardService: Pick<PlayerAwardService, "findByTournamentId">;
 }
 
 /**
@@ -44,7 +46,15 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     catalogService,
     matchService,
     tournamentPrizeService,
+    playerAwardService,
   } = services;
+
+  async function tournament(id: string): Promise<Tournament> {
+    const found = await tournamentQueries.findById(id);
+    if (!found || !isRedistributable(found.source)) throw tournamentNotFound(id);
+    return found;
+  }
+
   return {
     async tournaments(options: { activeOnly: boolean; limit: number }): Promise<Tournament[]> {
       const [found] = await tournamentQueries.find({
@@ -55,10 +65,11 @@ export function redistributableCompetition(services: RedistributableCompetitionS
       return found;
     },
 
-    async tournament(id: string): Promise<Tournament> {
-      const tournament = await tournamentQueries.findById(id);
-      if (!tournament || !isRedistributable(tournament.source)) throw tournamentNotFound(id);
-      return tournament;
+    tournament,
+
+    async tournamentAwards(tournamentId: string) {
+      await tournament(tournamentId);
+      return playerAwardService.findByTournamentId(tournamentId);
     },
 
     matches(kind: MatchListKind, limit: number) {

@@ -62,6 +62,7 @@ function setup(role: "admin" | "journalist" = "admin") {
         teamEarnings: vi.fn(),
         playerEarnings: vi.fn(),
       },
+      playerAwardService: { findByTournamentId: vi.fn() },
     }),
   });
   const tool = (name: string) => {

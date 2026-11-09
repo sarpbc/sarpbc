@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   CONTRACT_ROLES,
+  PLAYER_AWARD_TYPES,
   PLAYER_STATUSES,
   ROSTER_PROPOSAL_STATUSES,
   TEAM_LOGO_VARIANTS,
@@ -408,6 +409,27 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
               playerIds: playerIds ?? [],
             })),
           },
+          sourceUrl,
+          user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "propose_player_award",
+      description:
+        "Propose a player award (MVP or defensive MVP) of one tournament stage. Only propose awards the organiser officially announced. Read get_tournament_awards first: a stage has one award of each type. The team must be a participant of the stage and the player must be on that team's stage roster. start.gg tournaments are refused.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        teamId: z.string().uuid().describe("UUID of the team the player represented."),
+        playerId: z.string().uuid().describe("Player UUID."),
+        awardType: z.enum(PLAYER_AWARD_TYPES).describe("Award type: mvp or defensive_mvp."),
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>
+        propose(
+          { kind: "award_player", tournamentId, teamId, playerId, awardType },
           sourceUrl,
           user.id,
         ),
