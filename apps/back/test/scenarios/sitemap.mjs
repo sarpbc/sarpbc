@@ -46,6 +46,8 @@ export async function verifySitemap({ orm, request, tournament }) {
     role: "coach",
   });
   em.persist([coach, coaching]);
+  const stageBeginAt = stage.beginAt;
+  stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
   const paths = async (kind) =>
@@ -74,7 +76,6 @@ export async function verifySitemap({ orm, request, tournament }) {
   assert(staff.includes("/staff/sitemap-coach"));
   assert(!staff.includes("/staff/sitemap-empty-player"));
 
-  assert(stage.beginAt, "the stage has a start date to fall within the tenure");
   const { tournaments: coached } = (
     await request("GET", `/player/${coach.id}/staff-tournaments`)
   ).json();
@@ -104,5 +105,6 @@ export async function verifySitemap({ orm, request, tournament }) {
     coaching,
     coach,
   ]);
+  stage.beginAt = stageBeginAt;
   await em.flush();
 }

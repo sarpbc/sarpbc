@@ -157,11 +157,16 @@ describe("ContractService staff contracts", () => {
       contract("coach", "coach"),
       contract("analyst", "analyst"),
     ];
-    const service = new ContractService(
-      { findByPlayer: async () => career } as unknown as ContractQueries,
-      {} as TeamQueries,
-      { run: async () => undefined as never },
-    );
+    const queries: ContractQueries = {
+      findByPlayer: async () => career,
+      findPastContractsByPlayer: async () => [],
+      findByTeam: async () => [],
+      findFormerPlayersByTeam: async () => [],
+      findMovements: async () => [],
+    };
+    const service = new ContractService(queries, {} as TeamQueries, {
+      run: (work) => work({} as RosterWriteScope),
+    });
 
     const staff = await service.getStaffContractsByPlayer("zen");
 
