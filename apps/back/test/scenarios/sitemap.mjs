@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 export async function verifySitemap({ orm, request, tournament }) {
   const { Match, Tournament, TournamentParticipant } =
     await import("../../src/tournament/infrastructure/persistence/tournament.entities.ts");
-  const { Player, Team } =
+  const { Contract, Player, Team } =
     await import("../../src/roster/infrastructure/persistence/player.entities.ts");
 
   const em = orm.em.fork();
@@ -35,6 +35,19 @@ export async function verifySitemap({ orm, request, tournament }) {
   const emptyPlayer = new Player();
   Object.assign(emptyPlayer, { name: "Sitemap Empty Player", slug: "sitemap-empty-player" });
   em.persist(emptyPlayer);
+  const coach = new Player();
+  Object.assign(coach, { name: "Sitemap Coach", slug: "sitemap-coach" });
+  const coaching = new Contract();
+  Object.assign(coaching, {
+    player: coach,
+    team: participants[0].team,
+    startDate: new Date("2000-01-01"),
+    endDate: null,
+    role: "coach",
+  });
+  em.persist([coach, coaching]);
+  const stageBeginAt = stage.beginAt;
+  stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
   const paths = async (kind) =>
@@ -59,6 +72,18 @@ export async function verifySitemap({ orm, request, tournament }) {
   assert(mergedPlayers.length > 0, "the scenario runs after a player merge");
   for (const { slug } of mergedPlayers) assert(!players.includes(`/player/${slug}`));
 
+  const staff = await paths("staff");
+  assert(staff.includes("/staff/sitemap-coach"));
+  assert(!staff.includes("/staff/sitemap-empty-player"));
+
+  const { tournaments: coached } = (
+    await request("GET", `/player/${coach.id}/staff-tournaments`)
+  ).json();
+  assert(
+    coached.some(({ id }) => id === stage.id),
+    "a staff tenure covers its team's stage",
+  );
+
   const teams = await paths("teams");
   const teamSlug = participants[0].team.slug;
   assert(teams.includes(`/team/${teamSlug}`));
@@ -68,6 +93,18 @@ export async function verifySitemap({ orm, request, tournament }) {
 
   await request("GET", "/sitemap/bogus", undefined, undefined, 404);
 
-  em.remove([listed, noTeams, oneTeam, tbd, canceled, tbdParticipant, tbdTeam, emptyPlayer]);
+  em.remove([
+    listed,
+    noTeams,
+    oneTeam,
+    tbd,
+    canceled,
+    tbdParticipant,
+    tbdTeam,
+    emptyPlayer,
+    coaching,
+    coach,
+  ]);
+  stage.beginAt = stageBeginAt;
   await em.flush();
 }

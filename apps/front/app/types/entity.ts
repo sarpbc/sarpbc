@@ -3,6 +3,8 @@ import type { TournamentStatus } from "~/utils/tournamentStatus";
 
 export type EntityKind = "team" | "player";
 
+export type EntityEventsKind = EntityKind | "staff";
+
 export interface EntityTrophyListItem {
   id: string;
   path: string;

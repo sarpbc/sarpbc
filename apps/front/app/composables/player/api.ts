@@ -55,6 +55,23 @@ export async function getPlayerOldTeams(playerId: string): Promise<PlayerContrac
   return res.contracts ?? [];
 }
 
+export async function getPlayerContracts(playerId: string): Promise<PlayerContract[]> {
+  const res = await apiFetch<{ contracts?: PlayerContract[] }>(`/player/${playerId}/contract`, {
+    method: "GET",
+  });
+
+  return res.contracts ?? [];
+}
+
+export async function getPlayerStaffTournaments(playerId: string): Promise<Tournament[]> {
+  const res = await apiFetch<{ tournaments?: Tournament[] }>(
+    `/player/${playerId}/staff-tournaments`,
+    { method: "GET" },
+  );
+
+  return res.tournaments ?? [];
+}
+
 export async function getPlayerMatches(playerId: string): Promise<ProfileMatchListItem[]> {
   const res = await apiFetch<{ matches?: ProfileMatchListItem[] }>(`/player/${playerId}/matches`, {
     method: "GET",

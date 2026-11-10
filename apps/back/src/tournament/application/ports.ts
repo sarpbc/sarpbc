@@ -25,6 +25,12 @@ import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListKind, MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
 import type { EarningsLine } from "./earnings";
+/** A team's stint, open-ended while `to` is null. */
+export interface TeamTenure {
+  teamId: string;
+  from: Date;
+  to: Date | null;
+}
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;
   searchByName(options: { name: string; limit?: number; offset?: number }): Promise<Tournament[]>;
@@ -37,6 +43,7 @@ export interface TournamentQueries {
   }): Promise<{ id: string }[]>;
   getTournamentsByPlayer(id: string): Promise<Tournament[]>;
   getTournamentsByTeam(id: string): Promise<Tournament[]>;
+  getTournamentsByTeamTenures(tenures: TeamTenure[]): Promise<Tournament[]>;
   getTournamentsWonByPlayer(id: string): Promise<Tournament[]>;
   getTournamentsWonByTeam(id: string): Promise<Tournament[]>;
   knownPandascoreIds(): Promise<Set<number>>;

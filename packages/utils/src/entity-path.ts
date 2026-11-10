@@ -8,6 +8,10 @@ export function forumPostPath(publicId: number, slug: string): string {
   return `/forum/post/${publicId}/${slug}`;
 }
 
+export function staffPath(slug: string): string {
+  return `/staff/${slug}`;
+}
+
 export function playerPath(slug: string): string {
   return `/player/${slug}`;
 }

@@ -54,7 +54,12 @@ export {
   type ParsedTweetUrl,
   type TweetEmbed,
 } from "./news-tweet-tag";
-export { ACTIVE_ROSTER_LIMIT, selectActiveRosterPlayers, selectTeamStaff } from "./team-roster";
+export {
+  ACTIVE_ROSTER_LIMIT,
+  isStaffContractRole,
+  selectActiveRosterPlayers,
+  selectTeamStaff,
+} from "./team-roster";
 export { resolveThemedLogoUrl, type ThemedLogo } from "./themed-logo";
 export {
   LANGUAGE_CODE_LENGTH,
@@ -97,6 +102,7 @@ export {
   newsPath,
   playerPath,
   stageMatchesPath,
+  staffPath,
   teamPath,
   tournamentEventPath,
   tournamentStagePath,

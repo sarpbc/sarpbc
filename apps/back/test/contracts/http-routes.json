@@ -530,6 +530,14 @@
   {
     "controller": "\"player\"",
     "verb": "GET",
+    "path": "\":id/staff-tournaments\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
     "path": "\":id/tournaments\"",
     "status": null,
     "guards": [],

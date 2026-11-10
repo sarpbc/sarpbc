@@ -1,4 +1,11 @@
-export const SITEMAP_KINDS = ["news", "tournaments", "matches", "players", "teams"] as const;
+export const SITEMAP_KINDS = [
+  "news",
+  "tournaments",
+  "matches",
+  "players",
+  "staff",
+  "teams",
+] as const;
 
 export type SitemapKind = (typeof SITEMAP_KINDS)[number];
 

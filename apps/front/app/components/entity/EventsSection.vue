@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
-import type { EntityEventListItem, EntityKind } from "~/types/entity";
+import type { EntityEventListItem, EntityEventsKind } from "~/types/entity";
 import { formatTournamentDateRange, tournamentStatusLabelKey } from "~/utils/tournamentStatus";
 
 const {
@@ -11,7 +11,7 @@ const {
   pending = false,
   hasError = false,
 } = defineProps<{
-  kind: EntityKind;
+  kind: EntityEventsKind;
   upcomingEvents: EntityEventListItem[];
   pastEvents: EntityEventListItem[];
   liveEvents?: EntityEventListItem[];

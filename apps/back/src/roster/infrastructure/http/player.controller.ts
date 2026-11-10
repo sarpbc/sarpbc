@@ -189,6 +189,23 @@ export class PlayerController {
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
+  @Get(":id/staff-tournaments")
+  async getStaffTournaments(@Param("id", ParseUUIDPipe) id: string) {
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const contracts = await this.contractService.getStaffContractsByPlayer(player.id);
+    const tournaments = await this.tournaments.getTournamentsByTeamTenures(
+      contracts.map((contract) => ({
+        teamId: contract.team.id,
+        from: contract.startDate,
+        to: contract.endDate,
+      })),
+    );
+    return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
+  }
+
   @Get(":id/matches")
   async getMatches(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
