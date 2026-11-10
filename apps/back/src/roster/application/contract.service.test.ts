@@ -146,3 +146,25 @@ describe("ContractService sourced career periods", () => {
     ).rejects.toThrow("current team");
   });
 });
+
+describe("ContractService staff contracts", () => {
+  it("keeps only staff roles from a player's career", async () => {
+    const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
+    const contract = (id: string, role: Contract["role"]) =>
+      Object.assign(new Contract(), { id, team: kc, role, startDate: new Date("2024-01-01") });
+    const career = [
+      contract("player", "active"),
+      contract("coach", "coach"),
+      contract("analyst", "analyst"),
+    ];
+    const service = new ContractService(
+      { findByPlayer: async () => career } as unknown as ContractQueries,
+      {} as TeamQueries,
+      { run: async () => undefined as never },
+    );
+
+    const staff = await service.getStaffContractsByPlayer("zen");
+
+    expect(staff.map(({ id }) => id)).toEqual(["coach", "analyst"]);
+  });
+});

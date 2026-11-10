@@ -27,10 +27,9 @@ function wonBy(kind: EntityKind, tournament: Tournament, entityId: string): bool
   }
 }
 
-function splitTournaments(
-  kind: EntityKind,
+export function splitTournaments(
   tournaments: Tournament[],
-  entityId: string,
+  isWinner: (tournament: Tournament) => boolean,
   now: number,
 ): EntitySections<EntityEventListItem> {
   const live: Tournament[] = [];
@@ -72,7 +71,7 @@ function splitTournaments(
     beginAt: tournament.beginAt ?? null,
     endAt: tournament.endAt ?? null,
     status: getTournamentStatus(tournament, now) ?? "finished",
-    isWinner: wonBy(kind, tournament, entityId),
+    isWinner: isWinner(tournament),
   });
 
   return {
@@ -100,9 +99,8 @@ export function useEntityTournaments(kind: EntityKind, entityId: MaybeRef<string
 
   const sections = computed(() =>
     splitTournaments(
-      kind,
       data.value?.tournaments ?? [],
-      idRef.value ?? "",
+      (tournament) => wonBy(kind, tournament, idRef.value ?? ""),
       data.value?.fetchedAt ?? 0,
     ),
   );

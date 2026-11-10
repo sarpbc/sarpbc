@@ -27,6 +27,7 @@ const headingId = useId();
             :slug="member.slug"
             :image-url="member.imageUrl"
             :nationality="member.nationality"
+            staff
             :role="member.role ? t(`common.contractRole.${member.role}`) : undefined"
           />
         </li>

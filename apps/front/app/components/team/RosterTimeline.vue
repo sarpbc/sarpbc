@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { isStaffContractRole } from "@sarpbc/utils";
 import type { TeamRosterEra } from "~/types/roster";
 
 const VISIBLE_ERAS = 6;
@@ -115,6 +116,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                     :slug="member.slug"
                     :image-url="member.imageUrl"
                     :role="member.role === 'active' ? undefined : roleLabel(member.role)"
+                    :staff="isStaffContractRole(member.role)"
                   />
                 </li>
               </ul>

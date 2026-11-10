@@ -1271,7 +1271,46 @@
             "answerNone": "{name} has not won a tournament title on record yet."
           }
         },
-        "kicker": "Player"
+        "kicker": "Player",
+        "staffCareer": "Staff career",
+        "viewStaffProfile": "View staff profile"
+      }
+    },
+    "staff": {
+      "slug": {
+        "kicker": "Staff",
+        "staffNotFound": "Staff Member Not Found",
+        "failedToLoadStaffData": "Failed to load staff data",
+        "seoTitleWithName": "{name} - Staff - sarpbc.org",
+        "seoDescriptionWithName": "Follow {name}'s staff career: teams, roles and events.",
+        "currentTeam": "Current Team",
+        "noCurrentTeam": "No current team",
+        "role": "Role",
+        "playerCareer": "Player career",
+        "viewPlayerProfile": "View player profile",
+        "timeline": {
+          "title": "Staff Career",
+          "current": "Current",
+          "present": "present"
+        },
+        "events": {
+          "sectionTitle": "Events",
+          "error": "Could not load this staff member's events. Check your connection and try again.",
+          "live": "Live Now",
+          "winner": "Winner",
+          "tabs": {
+            "upcoming": "Upcoming",
+            "past": "Past"
+          },
+          "upcoming": {
+            "empty": "No upcoming events.",
+            "emptyHint": "Events appear here when a team this person works for enters a tournament."
+          },
+          "past": {
+            "empty": "No past events yet.",
+            "emptyHint": "Finished tournaments of the teams this person worked for will show up here."
+          }
+        }
       }
     },
     "teams": {

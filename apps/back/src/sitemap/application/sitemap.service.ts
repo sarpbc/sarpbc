@@ -4,6 +4,7 @@ import {
   matchPath,
   newsPath,
   playerPath,
+  staffPath,
   teamPath,
   tournamentEventPath,
   tournamentStagePath,
@@ -54,6 +55,11 @@ export class SitemapService {
       case "players":
         return (await this.queries.playerSlugs()).map((slug) => ({
           path: playerPath(slug),
+          lastmod: null,
+        }));
+      case "staff":
+        return (await this.queries.staffSlugs()).map((slug) => ({
+          path: staffPath(slug),
           lastmod: null,
         }));
       case "teams":

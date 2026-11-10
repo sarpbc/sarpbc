@@ -22,5 +22,6 @@ export interface SitemapQueries {
   stages(): Promise<StageSitemapRow[]>;
   matches(): Promise<MatchSitemapRow[]>;
   playerSlugs(): Promise<string[]>;
+  staffSlugs(): Promise<string[]>;
   teamSlugs(): Promise<string[]>;
 }

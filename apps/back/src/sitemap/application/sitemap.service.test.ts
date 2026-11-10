@@ -8,6 +8,7 @@ describe("SitemapService", () => {
     stages: vi.fn(),
     matches: vi.fn(),
     playerSlugs: vi.fn(),
+    staffSlugs: vi.fn(),
     teamSlugs: vi.fn(),
   };
   const service = new SitemapService(queries);
@@ -78,12 +79,16 @@ describe("SitemapService", () => {
     await expect(service.entries("matches")).resolves.toHaveLength(1);
   });
 
-  it("links players and teams without an unknown modification date", async () => {
+  it("links players, staff and teams without an unknown modification date", async () => {
     queries.playerSlugs.mockResolvedValue(["zen"]);
+    queries.staffSlugs.mockResolvedValue(["coach"]);
     queries.teamSlugs.mockResolvedValue(["vitality"]);
 
     await expect(service.entries("players")).resolves.toEqual([
       { path: "/player/zen", lastmod: null },
+    ]);
+    await expect(service.entries("staff")).resolves.toEqual([
+      { path: "/staff/coach", lastmod: null },
     ]);
     await expect(service.entries("teams")).resolves.toEqual([
       { path: "/team/vitality", lastmod: null },

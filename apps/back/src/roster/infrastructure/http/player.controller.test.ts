@@ -5,9 +5,17 @@ import { PlayerController } from "./player.controller";
 describe("PlayerController", () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
   const players = { findById: vi.fn() };
-  const contracts = { getContractsByPlayer: vi.fn(), getOldTeamsByPlayer: vi.fn() };
+  const contracts = {
+    getContractsByPlayer: vi.fn(),
+    getOldTeamsByPlayer: vi.fn(),
+    getStaffContractsByPlayer: vi.fn(),
+  };
   const matches = { getMatchesByPlayer: vi.fn() };
-  const tournaments = { getTournamentsWonByPlayer: vi.fn(), getTournamentsByPlayer: vi.fn() };
+  const tournaments = {
+    getTournamentsWonByPlayer: vi.fn(),
+    getTournamentsByPlayer: vi.fn(),
+    getTournamentsByTeamTenures: vi.fn(),
+  };
   const awards = { findByPlayerId: vi.fn() };
   const playerEarnings = vi.fn();
   const prizes = { playerEarnings } as never;
@@ -25,9 +33,11 @@ describe("PlayerController", () => {
     players.findById.mockResolvedValue(kept);
     contracts.getContractsByPlayer.mockResolvedValue([]);
     contracts.getOldTeamsByPlayer.mockResolvedValue([]);
+    contracts.getStaffContractsByPlayer.mockResolvedValue([]);
     matches.getMatchesByPlayer.mockResolvedValue([]);
     tournaments.getTournamentsWonByPlayer.mockResolvedValue([]);
     tournaments.getTournamentsByPlayer.mockResolvedValue([]);
+    tournaments.getTournamentsByTeamTenures.mockResolvedValue([]);
     awards.findByPlayerId.mockResolvedValue([]);
     playerEarnings.mockResolvedValue({ totals: [], years: [] });
   });
@@ -40,6 +50,7 @@ describe("PlayerController", () => {
     await controller.getEarnings("merged");
     await controller.getTournaments("merged");
     await controller.getMatches("merged");
+    await controller.getStaffTournaments("merged");
 
     expect(contracts.getContractsByPlayer).toHaveBeenCalledWith("kept");
     expect(contracts.getOldTeamsByPlayer).toHaveBeenCalledWith("kept");
@@ -48,5 +59,22 @@ describe("PlayerController", () => {
     expect(playerEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
     expect(tournaments.getTournamentsByPlayer).toHaveBeenCalledWith("kept");
     expect(matches.getMatchesByPlayer).toHaveBeenCalledWith("kept");
+    expect(contracts.getStaffContractsByPlayer).toHaveBeenCalledWith("kept");
+  });
+
+  it("looks up tournaments over each staff tenure", async () => {
+    const from = new Date("2024-01-01");
+    const to = new Date("2024-12-31");
+    contracts.getStaffContractsByPlayer.mockResolvedValue([
+      { team: { id: "kc" }, startDate: from, endDate: to },
+      { team: { id: "vit" }, startDate: to, endDate: null },
+    ]);
+
+    await controller.getStaffTournaments("kept");
+
+    expect(tournaments.getTournamentsByTeamTenures).toHaveBeenCalledWith([
+      { teamId: "kc", from, to },
+      { teamId: "vit", from: to, to: null },
+    ]);
   });
 });

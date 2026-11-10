@@ -1,4 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
+import { STAFF_CONTRACT_ROLES } from "@sarpbc/types";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import { Contract, Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import {
@@ -79,6 +80,15 @@ export class SitemapStore implements SitemapQueries {
         mergedInto: null,
         $or: [{ team: { $ne: null } }, { contracts: { $some: {} } }, { id: { $in: appeared } }],
       },
+      { fields: ["slug"] },
+    );
+    return rows.map((row) => row.slug);
+  }
+
+  async staffSlugs(): Promise<string[]> {
+    const rows = await this.em.find(
+      Player,
+      { mergedInto: null, contracts: { $some: { role: { $in: [...STAFF_CONTRACT_ROLES] } } } },
       { fields: ["slug"] },
     );
     return rows.map((row) => row.slug);

@@ -1,3 +1,4 @@
+import { isStaffContractRole } from "@sarpbc/utils";
 import { NotFoundError } from "../../common/domain/errors";
 import {
   CreateContractInput,
@@ -20,6 +21,11 @@ export class ContractService {
 
   async getContractsByPlayer(playerId: string): Promise<Contract[]> {
     return this.contracts.findByPlayer(playerId);
+  }
+
+  async getStaffContractsByPlayer(playerId: string): Promise<Contract[]> {
+    const contracts = await this.contracts.findByPlayer(playerId);
+    return contracts.filter((contract) => isStaffContractRole(contract.role));
   }
 
   async getOldTeamsByPlayer(playerId: string): Promise<Contract[]> {

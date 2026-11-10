@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { playerPath, teamPath } from "@sarpbc/utils";
+import { isStaffContractRole, playerPath, staffPath, teamPath } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -33,6 +33,12 @@ const { data: oldTeams } = await useAsyncData(
   () => `player-old-teams-${playerId.value}`,
   () => getPlayerOldTeams(playerId.value),
   { watch: [playerId], default: () => [] },
+);
+
+const hasStaffCareer = computed(
+  () =>
+    isStaffContractRole(currentPlayer.value.role) ||
+    (oldTeams.value ?? []).some((contract) => isStaffContractRole(contract.role)),
 );
 
 const {
@@ -189,6 +195,21 @@ setPageSeo({
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.role") }}</dt>
                 <dd class="min-w-0 text-sm font-medium">
                   {{ t(`common.contractRole.${currentPlayer.role}`) }}
+                </dd>
+              </div>
+              <div
+                v-if="hasStaffCareer"
+                class="flex h-row min-w-0 flex-row items-center justify-between gap-3 border-t border-separator"
+              >
+                <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.staffCareer") }}</dt>
+                <dd class="min-w-0">
+                  <SLink
+                    :to="$localePath(staffPath(currentPlayer.slug))"
+                    variant="inline"
+                    class="text-sm font-medium"
+                  >
+                    {{ t("page.player.slug.viewStaffProfile") }}
+                  </SLink>
                 </dd>
               </div>
             </dl>

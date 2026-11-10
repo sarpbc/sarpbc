@@ -7,7 +7,7 @@ import { MatchRepository } from "./match.repository";
 import { TOURNAMENT_POPULATE, toLeague, toMatch, toTournament } from "./competition.mapper";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { stageFilter } from "./stage-filter";
-import type { TournamentQueries, MatchQueries } from "../../application/ports";
+import type { TournamentQueries, MatchQueries, TeamTenure } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 import type {
   MatchListKind,
@@ -99,6 +99,15 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
   }
   getTournamentsByTeam(id: string) {
     return this.tournamentsByParticipants({ team: { id } });
+  }
+  async getTournamentsByTeamTenures(tenures: TeamTenure[]) {
+    if (tenures.length === 0) return [];
+    return this.tournamentsByParticipants({
+      $or: tenures.map(({ teamId, from, to }) => ({
+        team: { id: teamId },
+        tournament: { beginAt: to ? { $gte: from, $lte: to } : { $gte: from } },
+      })),
+    });
   }
   async getTournamentsWonByPlayer(id: string) {
     return (

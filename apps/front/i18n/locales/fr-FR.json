@@ -1271,7 +1271,46 @@
             "answerNone": "{name} n'a pas encore remporté de titre de tournoi dans nos archives."
           }
         },
-        "kicker": "Joueur"
+        "kicker": "Joueur",
+        "staffCareer": "Carrière staff",
+        "viewStaffProfile": "Voir la fiche staff"
+      }
+    },
+    "staff": {
+      "slug": {
+        "kicker": "Staff",
+        "staffNotFound": "Membre du staff introuvable",
+        "failedToLoadStaffData": "Impossible de charger les données du staff",
+        "seoTitleWithName": "{name} - Staff - sarpbc.org",
+        "seoDescriptionWithName": "Suivez la carrière staff de {name} : équipes, rôles et événements.",
+        "currentTeam": "Équipe actuelle",
+        "noCurrentTeam": "Sans équipe",
+        "role": "Rôle",
+        "playerCareer": "Carrière de joueur",
+        "viewPlayerProfile": "Voir le profil joueur",
+        "timeline": {
+          "title": "Carrière staff",
+          "current": "Actuel",
+          "present": "aujourd'hui"
+        },
+        "events": {
+          "sectionTitle": "Événements",
+          "error": "Impossible de charger les événements de ce membre du staff. Vérifiez votre connexion et réessayez.",
+          "live": "En direct",
+          "winner": "Vainqueur",
+          "tabs": {
+            "upcoming": "À venir",
+            "past": "Passés"
+          },
+          "upcoming": {
+            "empty": "Aucun événement à venir.",
+            "emptyHint": "Les événements apparaîtront ici lorsqu'une équipe encadrée par cette personne sera inscrite à un tournoi."
+          },
+          "past": {
+            "empty": "Aucun événement passé pour le moment.",
+            "emptyHint": "Les tournois terminés des équipes encadrées par cette personne apparaîtront ici."
+          }
+        }
       }
     },
     "teams": {
