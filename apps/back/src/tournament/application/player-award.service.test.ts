@@ -14,9 +14,7 @@ function setup(source: "manual" | "startgg" = "manual") {
           : participant.participantId === "part-kc";
       return {
         tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
-        participant: onTeam
-          ? { id: "part-kc", team: { id: "kc", name: "Karmine Corp" }, playerIds: ["zen"] }
-          : null,
+        participant: onTeam ? { id: "part-kc", name: "Karmine Corp", playerIds: ["zen"] } : null,
         player: playerId === "nobody" ? null : { id: playerId, name: playerId, slug: playerId },
       };
     }),

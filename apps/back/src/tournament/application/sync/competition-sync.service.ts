@@ -234,7 +234,7 @@ export class CompetitionSyncService {
     const participants = await scope.tournaments.participants(tournament.id);
     for (const roster of command.expectedRoster ?? []) {
       const team = await scope.rosters.upsertTeam(roster.team),
-        existingParticipant = participants.find((p) => p.team.id === team.id),
+        existingParticipant = participants.find((p) => p.team?.id === team.id),
         playerIds: string[] = [];
       for (const player of roster.players)
         playerIds.push((await scope.rosters.upsertPlayer(player)).id);
@@ -397,16 +397,16 @@ export class CompetitionSyncService {
       const participantIds = (
         command.opponentPandascoreIds?.length
           ? command.opponentPandascoreIds.map(
-              (id) => participants.find((p) => p.team.pandascoreId === id)?.id,
+              (id) => participants.find((p) => p.team?.pandascoreId === id)?.id,
             )
-          : command.opponentSlugs.map((slug) => participants.find((p) => p.team.slug === slug)?.id)
+          : command.opponentSlugs.map((slug) => participants.find((p) => p.team?.slug === slug)?.id)
       ).filter((id): id is string => Boolean(id));
       const match = await upsertSyncedMatchInTransaction(scope.matches, tournament.id, {
         ...command,
         participantIds,
         results: command.results.map((r) => ({
           participantId:
-            participants.find((p) => p.team.pandascoreId === r.teamPandascoreId)?.id ?? null,
+            participants.find((p) => p.team?.pandascoreId === r.teamPandascoreId)?.id ?? null,
           score: r.score,
         })),
       });

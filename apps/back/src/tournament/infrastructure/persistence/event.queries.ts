@@ -37,7 +37,14 @@ export class CompetitionEventQueries implements EventQueries {
         Tournament,
         { $and: [where, { event: { $in: ids } }] },
         {
-          populate: ["league", "event", "winner.team", "participants.team"],
+          populate: [
+            "league",
+            "event",
+            "winner.team",
+            "winner.players",
+            "participants.team",
+            "participants.players",
+          ],
         },
       ),
     ]);
@@ -64,7 +71,14 @@ export class CompetitionEventQueries implements EventQueries {
       { event: row.id },
       {
         orderBy: { beginAt: QueryOrder.ASC_NULLS_LAST, id: QueryOrder.ASC },
-        populate: ["league", "event", "winner.team", "participants.team"],
+        populate: [
+          "league",
+          "event",
+          "winner.team",
+          "winner.players",
+          "participants.team",
+          "participants.players",
+        ],
       },
     );
     return { event: toTournamentEvent(row), stages: stages.map(toTournament) };
@@ -81,7 +95,14 @@ export class CompetitionEventQueries implements EventQueries {
       { event: { $in: rows.map((row) => row.id) } },
       {
         orderBy: { beginAt: QueryOrder.ASC_NULLS_LAST, id: QueryOrder.ASC },
-        populate: ["league", "event", "winner.team", "participants.team"],
+        populate: [
+          "league",
+          "event",
+          "winner.team",
+          "winner.players",
+          "participants.team",
+          "participants.players",
+        ],
       },
     );
     return rows.map((row) => ({

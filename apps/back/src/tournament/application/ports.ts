@@ -140,7 +140,7 @@ export interface RosterIdentityWriter {
 export type AwardParticipantRef = { participantId: string } | { teamId: string };
 export interface AwardContext {
   tournament: { id: string; name: string; source: DataSource } | null;
-  participant: { id: string; team: { id: string; name: string }; playerIds: string[] } | null;
+  participant: { id: string; name: string; playerIds: string[] } | null;
   player: { id: string; name: string; slug: string } | null;
 }
 export interface AwardWriter {

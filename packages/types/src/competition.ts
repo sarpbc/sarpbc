@@ -5,6 +5,20 @@ export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
 
 export type DataSource = (typeof DATA_SOURCES)[number];
 
+export const TOURNAMENT_FORMATS = ["1v1", "2v2", "3v3"] as const;
+
+export type TournamentFormat = (typeof TOURNAMENT_FORMATS)[number];
+
+export interface ParticipantPlayer {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export type ParticipantRef<TTeam> =
+  | { id: string; team: TTeam; players?: undefined }
+  | { id: string; team: null; players: ParticipantPlayer[] };
+
 export type MatchVodSource = "twitch" | "youtube";
 
 export interface MatchVod {
@@ -17,6 +31,7 @@ export interface MatchVod {
 export interface TournamentListItem {
   id: string;
   source: DataSource;
+  format: TournamentFormat;
   name: string;
   slug: string;
   event: TournamentEventRef;
@@ -28,7 +43,7 @@ export interface TournamentListItem {
   pickemsEnabled: boolean;
   winnerId: string | null;
   league: { id: string; name: string; imageUrl: string | null } | null;
-  participants: { id: string; team: TeamSummary }[];
+  participants: ParticipantRef<TeamSummary>[];
 }
 
 export interface TournamentMatchListItem {
@@ -39,16 +54,13 @@ export interface TournamentMatchListItem {
   beginAt: Date | string | null;
   endAt: Date | string | null;
   numberOfGames: number | null;
-  participants: {
-    id: string;
-    team: TeamLogos & { id: string; name: string };
-  }[];
+  participants: ParticipantRef<TeamLogos & { id: string; name: string }>[];
   results: { participant: string; score: number }[];
 }
 
 export interface TournamentDetailParticipant {
   id: string;
-  team: TeamSummary;
+  team: TeamSummary | null;
   players: { id: string; name: string; slug: string; nationality: string | null }[];
 }
 
@@ -62,7 +74,7 @@ export interface TournamentDetailMatch {
   endAt: Date | string | null;
   numberOfGames: number | null;
   winnerId: string | null;
-  participants: { id: string; team: TeamSummary }[];
+  participants: ParticipantRef<TeamSummary>[];
   results: { participant: string; score: number }[];
   previousMatches: { previousMatch: string; type: "winner" | "loser" }[];
 }
@@ -70,6 +82,7 @@ export interface TournamentDetailMatch {
 export interface TournamentDetail {
   id: string;
   source: DataSource;
+  format: TournamentFormat;
   name: string;
   slug: string;
   event: TournamentEventRef;
@@ -83,7 +96,7 @@ export interface TournamentDetail {
   pickemsEnabled: boolean;
   hasBracket: boolean;
   league: { id: string; name: string; imageUrl: string | null; url: string | null } | null;
-  winner: { id: string; team: TeamSummary } | null;
+  winner: ParticipantRef<TeamSummary> | null;
   participants: TournamentDetailParticipant[];
   matches: TournamentDetailMatch[];
 }
@@ -93,7 +106,7 @@ export interface MatchListItem {
   publicId: number;
   slug: string;
   beginAt: string | null;
-  participants: { id: string; team: TeamLogos & { name: string } }[];
+  participants: ParticipantRef<TeamLogos & { name: string }>[];
   results: { participant: string; score: number }[];
   tournament: {
     id: string;

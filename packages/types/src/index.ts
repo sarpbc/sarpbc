@@ -24,7 +24,7 @@ export type {
 export type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "./news";
 export { SITEMAP_KINDS } from "./sitemap";
 export type { SitemapEntry, SitemapKind } from "./sitemap";
-export { DATA_SOURCES } from "./competition";
+export { DATA_SOURCES, TOURNAMENT_FORMATS } from "./competition";
 export type {
   CountedMatchListItem,
   MatchListItem,
@@ -37,6 +37,9 @@ export type {
   TournamentListItem,
   TournamentMatchListItem,
   DataSource,
+  ParticipantPlayer,
+  ParticipantRef,
+  TournamentFormat,
   MatchBlockItem,
   MatchBlockSelector,
   MatchBlockState,

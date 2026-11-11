@@ -5,7 +5,7 @@ import { Team } from "../../../roster/infrastructure/roster-persistence";
 import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, TournamentFormat } from "@sarpbc/types";
 import type { MatchVod } from "@sarpbc/types";
 
 export class League {
@@ -36,6 +36,7 @@ export class Tournament {
   id: string = v4();
   pandascoreId: number | null = null;
   source: DataSource = "pandascore";
+  format: TournamentFormat = "3v3";
   name!: string;
   description: string | null = null;
   slug!: string;
@@ -62,7 +63,7 @@ export class Tournament {
 export class TournamentParticipant {
   id: string = v4();
   tournament!: Tournament;
-  team!: Team;
+  team: Team | null = null;
   players = new Collection<Player>(this);
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
@@ -147,6 +148,7 @@ export const TournamentSchema = defineEntity({
     id: p.string().primary(),
     pandascoreId: p.integer().nullable().unique(),
     source: p.string().$type<DataSource>().default("pandascore"),
+    format: p.string().$type<TournamentFormat>().default("3v3"),
     name: p.string(),
     description: p.string().nullable(),
     slug: p.string(),
@@ -180,7 +182,7 @@ export const TournamentParticipantSchema = defineEntity({
   properties: {
     id: p.string().primary(),
     tournament: p.manyToOne(Tournament),
-    team: p.manyToOne(Team),
+    team: p.manyToOne(Team).nullable().deleteRule("no action"),
     players: p.manyToMany(Player),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p

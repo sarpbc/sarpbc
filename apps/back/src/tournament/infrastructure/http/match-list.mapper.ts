@@ -9,6 +9,7 @@ import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
+import { mapParticipantRef } from "./participant-ref.mapper";
 
 export function mapMatchListItem(match: Match): MatchListItem {
   const participants = match.participants;
@@ -20,16 +21,15 @@ export function mapMatchListItem(match: Match): MatchListItem {
     publicId: match.publicId,
     slug: matchPublicSlug(match),
     beginAt: match.beginAt?.toISOString() ?? null,
-    participants: participants.map((participant) => ({
-      id: participant.id,
-      team: {
-        name: participant.team.name,
-        imageUrl: participant.team.imageUrl,
-        darkModeImageUrl: participant.team.darkModeImageUrl,
-        logoLightUrl: participant.team.logoLightUrl,
-        logoDarkUrl: participant.team.logoDarkUrl,
-      },
-    })),
+    participants: participants.map((participant) =>
+      mapParticipantRef(participant, (team) => ({
+        name: team.name,
+        imageUrl: team.imageUrl,
+        darkModeImageUrl: team.darkModeImageUrl,
+        logoLightUrl: team.logoLightUrl,
+        logoDarkUrl: team.logoDarkUrl,
+      })),
+    ),
     results: results.map((result) => ({
       participant: result.participant.id,
       score: result.score,
@@ -78,17 +78,16 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
     beginAt: match.beginAt,
     endAt: match.endAt,
     numberOfGames: match.numberOfGames,
-    participants: match.participants.map((participant) => ({
-      id: participant.id,
-      team: {
-        id: participant.team.id,
-        name: participant.team.name,
-        imageUrl: participant.team.imageUrl,
-        darkModeImageUrl: participant.team.darkModeImageUrl,
-        logoLightUrl: participant.team.logoLightUrl,
-        logoDarkUrl: participant.team.logoDarkUrl,
-      },
-    })),
+    participants: match.participants.map((participant) =>
+      mapParticipantRef(participant, (team) => ({
+        id: team.id,
+        name: team.name,
+        imageUrl: team.imageUrl,
+        darkModeImageUrl: team.darkModeImageUrl,
+        logoLightUrl: team.logoLightUrl,
+        logoDarkUrl: team.logoDarkUrl,
+      })),
+    ),
     results: match.results.map((result) => ({
       participant: result.participant.id,
       score: result.score,

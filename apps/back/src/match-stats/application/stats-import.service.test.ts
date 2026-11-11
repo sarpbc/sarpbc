@@ -31,8 +31,8 @@ const candidate: CandidateMatch = {
   finished: true,
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", teamName: "Karmine Corp", players: KC.map((name) => ({ id: name, name })) },
-    { id: "p-bds", teamName: "BDS", players: BDS.map((name) => ({ id: name, name })) },
+    { id: "p-kc", name: "Karmine Corp", players: KC.map((name) => ({ id: name, name })) },
+    { id: "p-bds", name: "BDS", players: BDS.map((name) => ({ id: name, name })) },
   ],
   scores: new Map([
     ["p-kc", 1],

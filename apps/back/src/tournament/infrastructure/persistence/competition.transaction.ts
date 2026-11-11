@@ -72,6 +72,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     Object.assign(row, {
       pandascoreId: model.pandascoreId,
       source: model.source,
+      format: model.format,
       name: model.name,
       description: model.description,
       slug: model.slug,
@@ -141,7 +142,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       row.id = model.id;
     }
     row.tournament = this.em.getReference(Row.Tournament, model.tournamentId);
-    row.team = this.em.getReference(Team, model.teamId);
+    row.team = model.teamId ? this.em.getReference(Team, model.teamId) : null;
     row.players.set(model.playerIds.map((id) => this.em.getReference(Player, id)));
     this.em.persist(row);
     this.participantsStaged.set(row.id, row);

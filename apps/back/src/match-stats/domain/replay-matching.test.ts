@@ -10,7 +10,7 @@ import {
 
 const kc: CandidateParticipant = {
   id: "p-kc",
-  teamName: "Karmine Corp",
+  name: "Karmine Corp",
   players: [
     { id: "vatira", name: "Vatira" },
     { id: "atow", name: "Atow" },
@@ -19,7 +19,7 @@ const kc: CandidateParticipant = {
 };
 const bds: CandidateParticipant = {
   id: "p-bds",
-  teamName: "Team BDS",
+  name: "Team BDS",
   players: [
     { id: "monkey", name: "M0nkey M00n" },
     { id: "seikoo", name: "Seikoo" },
@@ -28,7 +28,7 @@ const bds: CandidateParticipant = {
 };
 const vit: CandidateParticipant = {
   id: "p-vit",
-  teamName: "Team Vitality",
+  name: "Team Vitality",
   players: [
     { id: "zen", name: "zen" },
     { id: "alpha", name: "Alpha54" },
@@ -102,6 +102,51 @@ function byReplay(assignments: ReplayAssignment[]) {
     ]),
   );
 }
+
+describe("assignReplays with player participants", () => {
+  const zen: CandidateParticipant = {
+    id: "p-zen",
+    name: "zen",
+    players: [{ id: "zen", name: "zen" }],
+  };
+  const vatira: CandidateParticipant = {
+    id: "p-vatira",
+    name: "Vatira",
+    players: [{ id: "vatira", name: "Vatira" }],
+  };
+
+  it("orients a 1v1 replay by the player on each side", () => {
+    const final = match("m1v1", [zen, vatira], "2026-06-01T18:00:00Z", {
+      scores: won(vatira, zen),
+      numberOfGames: 1,
+    });
+    const game = replay(
+      "2026-06-01T18:05:00Z",
+      { names: ["Vatira"], goals: 2 },
+      { names: ["zen"], goals: 1 },
+    );
+
+    expect(byReplay(assignReplays([game], [final]))).toEqual({
+      [game.id]: "m1v1#1 blue=p-vatira",
+    });
+  });
+
+  it("leaves a 1v1 replay of other players unmatched", () => {
+    const final = match("m1v1", [zen, vatira], "2026-06-01T18:00:00Z", {
+      scores: won(vatira, zen),
+      numberOfGames: 1,
+    });
+    const game = replay(
+      "2026-06-01T18:05:00Z",
+      { names: ["Atow"], goals: 2 },
+      { names: ["Rise"], goals: 1 },
+    );
+
+    expect(byReplay(assignReplays([game], [final]))).toEqual({
+      [game.id]: "unmatched:unknown_teams",
+    });
+  });
+});
 
 describe("assignReplays", () => {
   it("numbers a complete series by replay date and keeps the sides of each game", () => {

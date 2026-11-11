@@ -13,6 +13,7 @@ import {
   verifyRedistributableScope,
 } from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
+import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 
@@ -1705,6 +1706,20 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "match stats keep one game per Ballchasing replay and number, save players atomically, follow player merges and track imports",
       async () => {
         await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
+      },
+    );
+
+    await check(
+      "1v1 tournaments take existing players as participants, with matches, scores and stats and no team",
+      async () => {
+        await verifyPlayerTournaments({
+          app,
+          orm,
+          request,
+          staffCookie,
+          memberCookie,
+          RequestContext,
+        });
       },
     );
 

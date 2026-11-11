@@ -1,0 +1,171 @@
+import assert from "node:assert/strict";
+
+export async function verifyPlayerTournaments({
+  app,
+  orm,
+  request,
+  staffCookie,
+  memberCookie,
+  RequestContext,
+}) {
+  const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
+  const { Team } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+  const { MikroOrmGameStatsStore, MikroOrmStatsCandidates } =
+    await import("../../src/match-stats/infrastructure/persistence/match-stats.store.ts");
+  const { assignReplays } = await import("../../src/match-stats/domain/replay-matching.ts");
+
+  const createPlayer = async (name) =>
+    (await request("POST", "/player", { name }, staffCookie, 201)).json().player;
+  const solo = await createPlayer("Fake Solo One");
+  const rival = await createPlayer("Fake Solo Two");
+  const teamsBefore = await orm.em.fork().count(Team, {});
+
+  await request(
+    "POST",
+    "/tournaments",
+    { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id]] },
+    memberCookie,
+    403,
+  );
+  await request(
+    "POST",
+    "/tournaments",
+    { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id, rival.id]] },
+    staffCookie,
+    400,
+  );
+  const tournament = (
+    await request(
+      "POST",
+      "/tournaments",
+      { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id], [rival.id]] },
+      staffCookie,
+      201,
+    )
+  ).json().tournament;
+  assert.equal(tournament.format, "1v1");
+  assert(tournament.participants.every((participant) => participant.team === null));
+  assert.deepEqual(
+    tournament.participants.map((participant) => participant.players.map(({ id }) => id)).sort(),
+    [[solo.id], [rival.id]].sort(),
+  );
+  assert.equal(await orm.em.fork().count(Team, {}), teamsBefore, "no team is created for players");
+  const participantOf = (playerId) =>
+    tournament.participants.find((participant) => participant.players[0].id === playerId).id;
+  const soloParticipant = participantOf(solo.id);
+  const rivalParticipant = participantOf(rival.id);
+
+  await request("PATCH", `/tournaments/${tournament.id}`, { format: "3v3" }, staffCookie, 400);
+
+  const playedAt = new Date(Date.now() - 3_600_000);
+  const match = (
+    await request(
+      "POST",
+      `/tournaments/${tournament.id}/matches`,
+      {
+        name: "Final",
+        participantIds: [soloParticipant, rivalParticipant],
+        beginAt: playedAt.toISOString(),
+        status: "running",
+        numberOfGames: 1,
+      },
+      staffCookie,
+      201,
+    )
+  ).json().match;
+  assert.equal(match.slug, "fake-solo-one-vs-fake-solo-two-fake-knockout");
+  const scored = await RequestContext.create(orm.em.fork(), () =>
+    app.get(MatchService).updateMatch(match.id, {
+      status: "finished",
+      results: [
+        { participantId: soloParticipant, score: 1 },
+        { participantId: rivalParticipant, score: 0 },
+      ],
+    }),
+  );
+  assert.equal(scored.winner.id, soloParticipant);
+
+  const detail = (await request("GET", `/tournaments/${tournament.id}`)).json().tournament;
+  assert.equal(detail.format, "1v1");
+  assert.deepEqual(detail.matches[0].winnerId, soloParticipant);
+  assert.deepEqual(
+    detail.matches[0].participants.find((participant) => participant.id === soloParticipant),
+    {
+      id: soloParticipant,
+      team: null,
+      players: [{ id: solo.id, name: solo.name, slug: solo.slug }],
+    },
+  );
+  const results = (await request("GET", `/matches/results?tournamentId=${tournament.id}`)).json();
+  assert.equal(results.results[0].participants[0].team, null);
+  assert.equal(results.results[0].participants[0].players.length, 1);
+  const played = (await request("GET", `/player/${solo.id}/tournaments`)).json().tournaments;
+  assert.deepEqual(
+    played.map(({ id }) => id),
+    [tournament.id],
+  );
+
+  const [candidate] = await new MikroOrmStatsCandidates(orm.em.fork()).matches(tournament.id);
+  assert.deepEqual(candidate.participants.map(({ name }) => name).sort(), [
+    "Fake Solo One",
+    "Fake Solo Two",
+  ]);
+  const [assignment] = assignReplays(
+    [
+      {
+        id: "fake-1v1-replay",
+        rocketLeagueId: "RL-1v1",
+        title: "Fake 1v1",
+        playedAt,
+        playedAtHasTimezone: true,
+        blue: { name: null, goals: 0, playerNames: ["Fake Solo Two"] },
+        orange: { name: null, goals: 2, playerNames: ["Fake Solo One"] },
+      },
+    ],
+    [candidate],
+  );
+  assert.equal(assignment.kind, "matched");
+  assert.deepEqual(assignment.sides, { blue: rivalParticipant, orange: soloParticipant });
+
+  const stat = { platform: "epic", assists: 0, saves: 1, shots: 2, demolitions: 0 };
+  await new MikroOrmGameStatsStore(orm.em.fork()).save({
+    matchId: match.id,
+    number: 1,
+    ballchasingId: "fake-1v1-replay",
+    rocketLeagueId: "RL-1v1",
+    playedAt,
+    blueParticipantId: rivalParticipant,
+    orangeParticipantId: soloParticipant,
+    blueGoals: 0,
+    orangeGoals: 2,
+    players: [
+      {
+        ...stat,
+        name: "Fake Solo Two",
+        platformId: "fake-two",
+        side: "blue",
+        goals: 0,
+        playerId: rival.id,
+      },
+      {
+        ...stat,
+        name: "Fake Solo One",
+        platformId: "fake-one",
+        side: "orange",
+        goals: 2,
+        playerId: solo.id,
+      },
+    ],
+    learnedLinks: [],
+  });
+  const [game] = (await request("GET", `/matches/${match.id}`)).json().games;
+  assert.deepEqual(
+    game.teams.map(({ participantId, players }) => [participantId, players[0].player.id]),
+    [
+      [rivalParticipant, rival.id],
+      [soloParticipant, solo.id],
+    ],
+  );
+  const attachment = await new MikroOrmGameStatsStore(orm.em.fork()).attachment("fake-1v1-replay");
+  assert.deepEqual(attachment.teams, ["Fake Solo Two", "Fake Solo One"]);
+}

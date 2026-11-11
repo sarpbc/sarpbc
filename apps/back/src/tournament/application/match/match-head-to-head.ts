@@ -42,8 +42,8 @@ export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string):
   }
 
   const participants = match.participants;
-  const teamAParticipant = participants.find((p) => p.team.id === teamAId);
-  const teamBParticipant = participants.find((p) => p.team.id === teamBId);
+  const teamAParticipant = participants.find((p) => p.team?.id === teamAId);
+  const teamBParticipant = participants.find((p) => p.team?.id === teamBId);
 
   if (!teamAParticipant || !teamBParticipant) {
     return null;
@@ -70,8 +70,8 @@ export function mapHeadToHeadMeeting(
   teamBId: string,
 ): HeadToHeadMeeting | null {
   const participants = match.participants;
-  const teamAParticipant = participants.find((p) => p.team.id === teamAId);
-  const teamBParticipant = participants.find((p) => p.team.id === teamBId);
+  const teamAParticipant = participants.find((p) => p.team?.id === teamAId);
+  const teamBParticipant = participants.find((p) => p.team?.id === teamBId);
 
   if (!teamAParticipant || !teamBParticipant) {
     return null;

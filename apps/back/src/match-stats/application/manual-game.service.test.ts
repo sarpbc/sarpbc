@@ -27,8 +27,8 @@ const match: CandidateMatch = {
   finished: true,
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", teamName: "Karmine Corp", players: [{ id: "vatira", name: "Vatira" }] },
-    { id: "p-bds", teamName: "BDS", players: [{ id: "seikoo", name: "Seikoo" }] },
+    { id: "p-kc", name: "Karmine Corp", players: [{ id: "vatira", name: "Vatira" }] },
+    { id: "p-bds", name: "BDS", players: [{ id: "seikoo", name: "Seikoo" }] },
   ],
   scores: new Map(),
   storedReplayIds: ["stored-1"],

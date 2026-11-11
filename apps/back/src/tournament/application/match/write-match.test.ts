@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Team } from "../../../roster/domain/roster";
-import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
+import { Player, Team } from "../../../roster/domain/roster";
+import {
+  Match,
+  Tournament,
+  TournamentParticipant,
+  matchPublicSlug,
+} from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import {
   createMatchInTransaction,
@@ -298,5 +303,66 @@ describe("Match VOD writes", () => {
       numberOfGames: 7,
     });
     expect(match.vods).toHaveLength(2);
+  });
+});
+
+describe("Match writes between player participants", () => {
+  const knockout = Object.assign(new Tournament(), {
+    id: "knockout",
+    format: "1v1",
+    slug: "fake-knockout",
+    event: { id: "event", slug: "fake-knockout", name: "Fake Knockout" },
+  });
+  const solo = (id: string, name: string) =>
+    Object.assign(new TournamentParticipant(), {
+      id,
+      tournamentId: knockout.id,
+      team: null,
+      players: [
+        Object.assign(new Player(), { id: `player-${id}`, name, slug: name.toLowerCase() }),
+      ],
+    });
+  const players = [solo("zen", "Zen"), solo("vatira", "Vatira")];
+  const writer = matchWriterMock();
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    writer.tournament.mockResolvedValue(knockout);
+    writer.participants.mockResolvedValue(players);
+  });
+
+  it("writes a 1v1 match, its scores and its winner", async () => {
+    const match = await createMatchInTransaction(writer, knockout.id, {
+      name: "Final",
+      participantIds: ["zen", "vatira"],
+      status: "finished",
+      results: [
+        { participantId: "zen", score: 3 },
+        { participantId: "vatira", score: 1 },
+      ],
+    });
+    expect(match.participants.every((participant) => participant.team === null)).toBe(true);
+    expect(match.winner?.id).toBe("zen");
+    expect(matchPublicSlug(match)).toBe("vatira-vs-zen-fake-knockout");
+  });
+
+  it("corrects the score of a 1v1 match and moves the winner", async () => {
+    writer.load.mockResolvedValue(
+      Object.assign(new Match(), {
+        id: "final",
+        tournament: knockout,
+        participants: players,
+        status: "finished",
+        winner: players[0],
+      }),
+    );
+    const match = await updateMatchInTransaction(writer, "final", {
+      results: [
+        { participantId: "zen", score: 2 },
+        { participantId: "vatira", score: 3 },
+      ],
+    });
+    expect(match.winner?.id).toBe("vatira");
+    expect(match.results.map((result) => result.score)).toEqual([2, 3]);
   });
 });

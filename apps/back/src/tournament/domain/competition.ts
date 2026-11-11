@@ -1,9 +1,9 @@
 import { v4 } from "uuid";
-import { isMatchFinished, matchSlug } from "@sarpbc/utils";
+import { isMatchFinished, matchSlug, participantName, type NamedParticipant } from "@sarpbc/utils";
 import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, TournamentFormat } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 export class League {
   id = v4();
@@ -19,7 +19,7 @@ export class League {
 export class TournamentParticipant {
   id = v4();
   tournamentId = "";
-  team!: Team;
+  team: Team | null = null;
   players: Player[] = [];
   createdAt = new Date();
   updatedAt = new Date();
@@ -79,12 +79,13 @@ export class Match {
 }
 export interface MatchSlugSource {
   name: string;
-  participants: ReadonlyArray<{ team: { name: string } }>;
+  participants: ReadonlyArray<NamedParticipant>;
   tournament: { slug: string; event: { slug: string } };
 }
 export function matchPublicSlug({ name, participants, tournament }: MatchSlugSource): string {
+  const [first, second] = participants;
   return matchSlug({
-    teamNames: [participants[0]?.team.name, participants[1]?.team.name],
+    teamNames: [first && participantName(first), second && participantName(second)],
     matchName: name,
     eventSlug: tournament.event.slug,
     stageSlug: tournament.slug,
@@ -94,6 +95,7 @@ export class Tournament {
   id = v4();
   pandascoreId: number | null = null;
   source: DataSource = "pandascore";
+  format: TournamentFormat = "3v3";
   name = "";
   description: string | null = null;
   /** Stage slug, unique within its event and frozen once allocated. */
@@ -124,7 +126,7 @@ export class Tournament {
 export interface ParticipantSnapshot {
   id: string;
   tournamentId: string;
-  teamId: string;
+  teamId: string | null;
   playerIds: string[];
 }
 export interface ParticipantReferences {

@@ -5,6 +5,7 @@ import type {
   TournamentDetail,
   TournamentDetailParticipant,
   TournamentEventRef,
+  TournamentFormat,
   TournamentListItem,
 } from "@sarpbc/types";
 import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/player.mapper";
@@ -15,10 +16,11 @@ import {
   matchPublicSlug,
 } from "../../domain/competition";
 import { toEventRef } from "../../domain/tournament-event";
+import { mapParticipantRef } from "./participant-ref.mapper";
 
 export interface TournamentParticipantResponse {
   id: string;
-  team: TeamSummary;
+  team: TeamSummary | null;
   players: ReturnType<typeof mapPlayer>[];
   createdAt: Date;
   updatedAt: Date;
@@ -28,6 +30,7 @@ export interface TournamentResponse {
   id: string;
   pandascoreId: number | null;
   source: DataSource;
+  format: TournamentFormat;
   name: string;
   description: string | null;
   slug: string;
@@ -67,7 +70,7 @@ export function mapLeague(league: League | null | undefined): LeagueResponse | n
 function mapParticipant(participant: TournamentParticipant): TournamentParticipantResponse {
   return {
     id: participant.id,
-    team: mapTeamSummary(participant.team),
+    team: participant.team ? mapTeamSummary(participant.team) : null,
     players: participant.players.map((player) => mapPlayer(player)),
     createdAt: participant.createdAt,
     updatedAt: participant.updatedAt,
@@ -80,6 +83,7 @@ export function mapTournamentListItem(
   return {
     id: tournament.id,
     source: tournament.source,
+    format: tournament.format,
     name: tournament.name,
     slug: tournament.slug,
     event: toEventRef(tournament.event),
@@ -97,10 +101,9 @@ export function mapTournamentListItem(
           imageUrl: tournament.league.imageUrl,
         }
       : null,
-    participants: tournament.participants.map((participant) => ({
-      id: participant.id,
-      team: mapTeamSummary(participant.team),
-    })),
+    participants: tournament.participants.map((participant) =>
+      mapParticipantRef(participant, mapTeamSummary),
+    ),
   };
 }
 
@@ -109,6 +112,7 @@ export function mapTournament(tournament: Tournament): TournamentResponse {
     id: tournament.id,
     pandascoreId: tournament.pandascoreId,
     source: tournament.source,
+    format: tournament.format,
     name: tournament.name,
     description: tournament.description,
     slug: tournament.slug,
@@ -134,7 +138,7 @@ export function mapTournament(tournament: Tournament): TournamentResponse {
 function mapDetailParticipant(participant: TournamentParticipant): TournamentDetailParticipant {
   return {
     id: participant.id,
-    team: mapTeamSummary(participant.team),
+    team: participant.team ? mapTeamSummary(participant.team) : null,
     players: participant.players.map((player) => ({
       id: player.id,
       name: player.name,
@@ -151,6 +155,7 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
   return {
     id: tournament.id,
     source: tournament.source,
+    format: tournament.format,
     name: tournament.name,
     slug: tournament.slug,
     event: toEventRef(tournament.event),
@@ -171,9 +176,7 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
           url: tournament.league.url,
         }
       : null,
-    winner: tournament.winner
-      ? { id: tournament.winner.id, team: mapTeamSummary(tournament.winner.team) }
-      : null,
+    winner: tournament.winner ? mapParticipantRef(tournament.winner, mapTeamSummary) : null,
     participants: tournament.participants.map(mapDetailParticipant),
     matches: tournament.matches.map((match) => ({
       id: match.id,
@@ -185,10 +188,9 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
       endAt: match.endAt,
       numberOfGames: match.numberOfGames,
       winnerId: match.winner?.id ?? null,
-      participants: match.participants.map((participant) => ({
-        id: participant.id,
-        team: mapTeamSummary(participant.team),
-      })),
+      participants: match.participants.map((participant) =>
+        mapParticipantRef(participant, mapTeamSummary),
+      ),
       results: match.results.map((result) => ({
         participant: result.participant.id,
         score: result.score,

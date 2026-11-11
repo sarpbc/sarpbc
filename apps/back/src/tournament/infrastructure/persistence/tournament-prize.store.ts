@@ -124,10 +124,11 @@ export class CompetitionPrizeWriter implements PrizeWriter {
       { tournament: tournamentId },
       { populate: ["players"] },
     );
-    return rows.map((row) => ({
-      teamId: row.team.id,
-      playerIds: row.players.getItems().map(({ id }) => id),
-    }));
+    return rows.flatMap((row) =>
+      row.team
+        ? [{ teamId: row.team.id, playerIds: row.players.getItems().map(({ id }) => id) }]
+        : [],
+    );
   }
 
   async replace(tournamentId: string, entries: PrizeEntry[]) {

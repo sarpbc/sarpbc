@@ -1,5 +1,5 @@
 import type { DataSource } from "@sarpbc/types";
-import { isoDay } from "@sarpbc/utils";
+import { isoDay, participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
 import type {
@@ -149,12 +149,11 @@ function timeOf(date: Date | null): number {
 export function mapTournamentParticipant(participant: TournamentParticipant) {
   return {
     id: participant.id,
-    team: {
-      id: participant.team.id,
-      slug: participant.team.slug,
-      name: participant.team.name,
-    },
-    players: participant.players.map(({ id, name }) => ({ id, name })),
+    name: participantName(participant),
+    team: participant.team
+      ? { id: participant.team.id, slug: participant.team.slug, name: participant.team.name }
+      : null,
+    players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
   };
 }
 
@@ -171,7 +170,7 @@ export function mapTournamentDetail(tournament: Tournament) {
     tier: tournament.tier,
     hasBracket: tournament.hasBracket,
     winner: tournament.winner
-      ? { participantId: tournament.winner.id, teamName: tournament.winner.team.name }
+      ? { participantId: tournament.winner.id, name: participantName(tournament.winner) }
       : null,
     ...mapListedParticipants(tournament.source, tournament.participants),
     matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
@@ -188,7 +187,7 @@ export function mapMatchListResponse(match: Match) {
     pandascoreId: match.pandascoreId,
     status: match.status,
     endAt: match.endAt,
-    winner: winner ? { participantId: winner.id, teamName: winner.team.name } : null,
+    winner: winner ? { participantId: winner.id, name: participantName(winner) } : null,
     url: matchUrl(item.publicId, item.slug),
   };
 }
