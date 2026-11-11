@@ -26,6 +26,7 @@ import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
 import { StreamService } from "../application/stream.service";
 import { MatchLineupService } from "../application/match/match-lineup.service";
+import { ViewershipService } from "../application/viewership.service";
 import { PlayerAwardService } from "../application/player-award.service";
 import { TournamentPrizeService } from "../application/tournament-prize.service";
 import { CompetitionSyncService } from "../application/sync/competition-sync.service";
@@ -218,6 +219,11 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      provide: ViewershipService,
+      useFactory: (tx: MikroOrmCompetitionTransaction) => new ViewershipService(tx),
+      inject: [MikroOrmCompetitionTransaction],
+    },
+    {
       provide: PlayerAwardService,
       useFactory: (reads: CompetitionAwardQueries, tx: MikroOrmCompetitionTransaction) =>
         new PlayerAwardService(reads, tx),
@@ -249,6 +255,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     MatchService,
     MatchLineupService,
     StreamService,
+    ViewershipService,
     PlayerAwardService,
     TournamentPrizeService,
   ],

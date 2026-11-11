@@ -6,6 +6,7 @@ import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EventController } from "./event.controller";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
+import { ViewershipService } from "../../application/viewership.service";
 
 const unusedStreams = new StreamService(
   { run: () => Promise.reject(new Error("unused")) },
@@ -15,6 +16,8 @@ const unusedStreams = new StreamService(
     { error: () => {} },
   ),
 );
+
+const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
 
 const STAGE_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 const league = Object.assign(new League(), {
@@ -69,6 +72,7 @@ describe("EventController", () => {
     new CachedTournamentRead(tournaments, redis),
     catalog as never,
     unusedStreams,
+    unusedViewerships,
   );
 
   beforeEach(() => {

@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import { isMatchFinished, matchSlug, participantName, type NamedParticipant } from "@sarpbc/utils";
-import type { MatchVod, Stream, TournamentEventRef } from "@sarpbc/types";
+import type { MatchVod, Stream, TournamentEventRef, Viewership } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import { effectiveStreams, pandascoreStreams } from "./stream";
@@ -66,6 +66,7 @@ export class Match {
   results: MatchResult[] = [];
   officialStreams: OfficialMatchStream[] = [];
   streams: Stream[] = [];
+  viewership: Viewership | null = null;
   vods: MatchVod[] = [];
   createdAt = new Date();
   updatedAt = new Date();

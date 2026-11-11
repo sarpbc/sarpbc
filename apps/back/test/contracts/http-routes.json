@@ -90,6 +90,14 @@
   {
     "controller": "\"events\"",
     "verb": "GET",
+    "path": "\":id/viewership\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
     "path": "\"\"",
     "status": null,
     "guards": [],
@@ -147,6 +155,14 @@
     "controller": "\"events\"",
     "verb": "PUT",
     "path": "\":id/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "PUT",
+    "path": "\":id/viewership\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]
@@ -1122,6 +1138,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
+    "path": "\"matches/:matchId/viewership\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
     "path": "\"matches/team/:teamId\"",
     "status": null,
     "guards": [],
@@ -1251,6 +1275,14 @@
     "controller": "\"tournaments\"",
     "verb": "PUT",
     "path": "\"matches/:matchId/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\"matches/:matchId/viewership\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

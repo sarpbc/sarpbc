@@ -6,7 +6,7 @@ import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { DataSource, TournamentFormat } from "@sarpbc/types";
-import type { MatchVod, Stream } from "@sarpbc/types";
+import type { MatchVod, Stream, Viewership } from "@sarpbc/types";
 
 export class League {
   id: string = v4();
@@ -28,6 +28,7 @@ export class TournamentEvent {
   name!: string;
   league: League | null = null;
   streams: Stream[] = [];
+  viewership: Viewership | null = null;
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   stages = new Collection<Tournament>(this);
@@ -101,6 +102,7 @@ export class Match {
   results = new Collection<MatchResult>(this);
   officialStreams: OfficialMatchStream[] = [];
   streams: Stream[] = [];
+  viewership: Viewership | null = null;
   vods: MatchVod[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
@@ -135,6 +137,7 @@ export const TournamentEventSchema = defineEntity({
     name: p.string(),
     league: p.manyToOne(League).nullable(),
     streams: p.json().$type<Stream[]>().default([]),
+    viewership: p.json().$type<Viewership>().nullable(),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
@@ -216,6 +219,7 @@ export const MatchSchema = defineEntity({
     results: p.oneToMany(MatchResult).mappedBy("match"),
     officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
     streams: p.json().$type<Stream[]>().default([]),
+    viewership: p.json().$type<Viewership>().nullable(),
     vods: p.json().$type<MatchVod[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p

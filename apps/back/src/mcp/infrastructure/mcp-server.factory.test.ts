@@ -56,6 +56,8 @@ const TOOL_NAMES = [
   "set_tournament_streams",
   "set_match_streams",
   "set_match_lineups",
+  "set_event_viewership",
+  "set_match_viewership",
   "propose_delete_match",
   "propose_delete_team",
   "list_roster_proposals",

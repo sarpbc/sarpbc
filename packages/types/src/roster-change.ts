@@ -5,6 +5,7 @@ import type { PlayerStatus } from "./player";
 import type { PrizeEntry } from "./prize";
 import type { StreamInput } from "./stream";
 import type { TeamLogoVariant } from "./team";
+import type { Viewership } from "./viewership";
 
 export type RosterChange =
   | {
@@ -82,6 +83,8 @@ export type RosterChange =
   | { kind: "set_tournament_streams"; tournamentId: string; streams: StreamInput[] }
   | { kind: "set_match_streams"; matchId: string; streams: StreamInput[] }
   | { kind: "set_match_lineups"; matchId: string; lineups: MatchLineupInput[] }
+  | { kind: "set_event_viewership"; eventId: string; viewership: Viewership }
+  | { kind: "set_match_viewership"; matchId: string; viewership: Viewership }
   | { kind: "delete_match"; matchId: string; reason: string }
   | { kind: "delete_team"; teamId: string; reason: string; mergeIntoTeamId?: string };
 

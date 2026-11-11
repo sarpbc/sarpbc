@@ -1,4 +1,4 @@
-import type { MatchLineupInput, RosterChange, StreamInput } from "@sarpbc/types";
+import type { MatchLineupInput, RosterChange, StreamInput, Viewership } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
@@ -12,6 +12,7 @@ import {
   type StreamEditSource,
   type StreamOwner,
 } from "../../tournament/domain/stream";
+import { requireViewership, type ViewershipOwner } from "../../tournament/domain/viewership";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -61,6 +62,16 @@ function setup() {
         throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
     }),
     deleteMatch: vi.fn(matchGuard),
+  };
+  const viewerships = {
+    requireProposable: vi.fn(async (owner: ViewershipOwner, input: Viewership) => {
+      requireViewership(input);
+      if (owner.id === "startgg-match")
+        throw new InvalidInputError("The viewership of a start.gg match cannot be proposed");
+    }),
+    set: vi.fn(async (_: ViewershipOwner, input: Viewership | null) => ({
+      viewership: input && requireViewership(input),
+    })),
   };
   const streams = {
     requireProposable: vi.fn(async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
@@ -168,6 +179,7 @@ function setup() {
     matches,
     streams,
     lineups,
+    viewerships,
   );
   return {
     saved,
@@ -183,6 +195,7 @@ function setup() {
     matches,
     streams,
     lineups,
+    viewerships,
     service,
   };
 }
@@ -202,6 +215,7 @@ describe("RosterProposalService", () => {
   let matches: ReturnType<typeof setup>["matches"];
   let streams: ReturnType<typeof setup>["streams"];
   let lineups: ReturnType<typeof setup>["lineups"];
+  let viewerships: ReturnType<typeof setup>["viewerships"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -219,6 +233,7 @@ describe("RosterProposalService", () => {
       matches,
       streams,
       lineups,
+      viewerships,
       service,
     } = setup());
   });
@@ -855,6 +870,70 @@ describe("RosterProposalService", () => {
 
       await expect(service.approve(id, "admin")).rejects.toThrow("does not play");
       expect(saved.get(id)?.status).toBe("pending");
+    });
+  });
+
+  describe("viewership proposals", () => {
+    const viewership: Viewership = {
+      peakViewers: 52_000,
+      averageViewers: 31_000,
+      scope: "official",
+      measuredAt: null,
+      sourceName: "Esports Charts",
+      sourceUrl: "https://escharts.com/tournaments/rl/fake-open",
+    };
+
+    it("keeps a credited viewership pending until a staff member approves it", async () => {
+      const proposal = await service.propose(
+        { kind: "set_match_viewership", matchId: "match-1", viewership },
+        viewership.sourceUrl,
+        "journalist",
+      );
+
+      expect(proposal).toMatchObject({ status: "pending", change: { viewership } });
+      expect(viewerships.requireProposable).toHaveBeenCalledWith(
+        { kind: "match", id: "match-1" },
+        viewership,
+      );
+      expect(viewerships.set).not.toHaveBeenCalled();
+
+      expect(await service.approve(proposal.id, "admin")).toMatchObject({ entityId: "match-1" });
+      expect(viewerships.set).toHaveBeenCalledExactlyOnceWith(
+        { kind: "match", id: "match-1" },
+        viewership,
+      );
+    });
+
+    it("refuses a missing credit or a start.gg match before recording anything", async () => {
+      await expect(
+        service.propose(
+          {
+            kind: "set_event_viewership",
+            eventId: "event-1",
+            viewership: { ...viewership, sourceName: " " },
+          },
+          viewership.sourceUrl,
+          "journalist",
+        ),
+      ).rejects.toThrow("name of its source");
+      await expect(
+        service.propose(
+          { kind: "set_match_viewership", matchId: "startgg-match", viewership },
+          viewership.sourceUrl,
+          "journalist",
+        ),
+      ).rejects.toThrow("start.gg");
+      expect(saved.size).toBe(0);
+    });
+
+    it("names the event of a pending event viewership", async () => {
+      await service.propose(
+        { kind: "set_event_viewership", eventId: "event-1", viewership },
+        viewership.sourceUrl,
+        "journalist",
+      );
+      await service.list("pending");
+      expect(store.names).toHaveBeenCalledWith(expect.objectContaining({ events: ["event-1"] }));
     });
   });
 });

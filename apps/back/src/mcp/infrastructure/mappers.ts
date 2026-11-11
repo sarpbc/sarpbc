@@ -143,6 +143,7 @@ export function mapEvent({ event, stages }: EventListing) {
     endAt: ends.length ? new Date(Math.max(...ends)) : null,
     stages: phases.map((phase) => ({ ...mapTournamentListItem(phase), tier: phase.tier })),
     streams: redistributableStreams(event.streams),
+    viewership: stages.length === 0 || phases.length > 0 ? event.viewership : null,
     url: eventUrl(event.slug),
   };
 }
@@ -195,6 +196,7 @@ export function mapMatchListResponse(match: Match) {
     endAt: match.endAt,
     winner: winner ? { participantId: winner.id, name: participantName(winner) } : null,
     streams: redistributableStreams(match.watchStreams()),
+    viewership: isRedistributableMatch(match) ? match.viewership : null,
     url: matchUrl(item.publicId, item.slug),
   };
 }

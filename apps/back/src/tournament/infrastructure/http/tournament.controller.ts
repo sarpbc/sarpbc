@@ -42,6 +42,8 @@ import { lineupsFromGames } from "../../domain/match-lineup";
 import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
+import { ViewershipService } from "../../application/viewership.service";
+import { SetViewershipDto } from "./dto/set-viewership.dto";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
@@ -75,6 +77,7 @@ export class TournamentController {
     private streamService: StreamService,
     private lineupService: MatchLineupService,
     @Inject(GAME_STATS_STORE) private gameStats: Pick<GameStatsStore, "byMatch">,
+    private viewershipService: ViewershipService,
   ) {}
 
   @Get()
@@ -310,12 +313,29 @@ export class TournamentController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
+  @Get("matches/:matchId/viewership")
+  getMatchViewership(@Param("matchId") matchId: string) {
+    return this.viewershipService.find({ kind: "match", id: matchId });
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/lineups")
   setMatchLineups(
     @Param("matchId") matchId: string,
     @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsDto,
   ): Promise<MatchLineupsResponse> {
     return this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/viewership")
+  setMatchViewership(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
+  ) {
+    return this.viewershipService.set({ kind: "match", id: matchId }, body.viewership);
   }
 
   @RequirePermissions("tournaments.manage")

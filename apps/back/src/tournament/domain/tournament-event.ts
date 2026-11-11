@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef } from "@sarpbc/types";
-import type { DataSource, Stream } from "@sarpbc/types";
+import type { DataSource, Stream, Viewership } from "@sarpbc/types";
 import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 import type { League } from "./competition";
@@ -12,6 +12,7 @@ export class TournamentEvent {
   name = "";
   league: League | null = null;
   streams: Stream[] = [];
+  viewership: Viewership | null = null;
   createdAt = new Date();
   updatedAt = new Date();
 }
