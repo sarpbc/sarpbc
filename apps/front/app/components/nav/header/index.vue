@@ -116,17 +116,23 @@ const menuToggleLabel = computed(() =>
       </div>
       <div class="h-full flex-row flex-1 justify-end items-center gap-4 hidden md:flex">
         <LazyNavHeaderSearch hydrate-on-visible />
+        <SettingsSpoilerToggle />
         <NavHeaderUser />
       </div>
-      <UButton
-        :icon="!menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'"
-        color="neutral"
-        variant="ghost"
-        class="md:hidden flex items-center justify-center size-10 ml-2"
-        :aria-label="menuToggleLabel"
-        :aria-expanded="menuOpen"
-        @click="toggleMenu()"
-      />
+      <div class="flex items-center md:hidden">
+        <SettingsSpoilerToggle />
+        <UButton
+          :icon="
+            !menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'
+          "
+          color="neutral"
+          variant="ghost"
+          class="flex items-center justify-center size-10 ml-2"
+          :aria-label="menuToggleLabel"
+          :aria-expanded="menuOpen"
+          @click="toggleMenu()"
+        />
+      </div>
     </nav>
     <Transition name="menu">
       <div

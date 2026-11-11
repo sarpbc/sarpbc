@@ -13,8 +13,9 @@ import {
   bracketTeamRowCenterY,
 } from "~/utils/bracket";
 
-const { layout } = defineProps<{
+const { layout, tournamentId } = defineProps<{
   layout: BracketSectionLayout;
+  tournamentId: string;
 }>();
 
 const containerHeight = computed(() => layout.rowCount * BRACKET_ROW_STEP + BRACKET_MATCH_HEIGHT);
@@ -116,6 +117,7 @@ function bracketMatchStatus(match: (typeof layout.matches)[number]) {
           :participant-b-id="match.participantBId"
           :results="match.results"
           :winner-participant-id="match.winnerParticipantId"
+          :tournament-id="tournamentId"
           :match-status="bracketMatchStatus(match)"
           discovery-source="tournament_hub"
           :discovery-status="bracketMatchStatus(match)"

@@ -27,6 +27,7 @@ export interface MatchRowItem {
   beginAt?: Date | string | null;
   participants?: ParticipantRef<ThemedLogo & { name: string }>[];
   results?: MatchResult[];
+  tournament?: { id: string };
 }
 
 export interface TeamFormRecord {

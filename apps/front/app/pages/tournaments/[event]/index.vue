@@ -138,6 +138,7 @@ watch(
         :type="event.type"
         :count-label="t('page.tournaments.event.stagesCount', { count: stageCount })"
         :champion="champion"
+        :spoiler-tournament-ids="event.stages.map((stage) => stage.id)"
       />
 
       <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">

@@ -5,9 +5,14 @@ import type { TeamForm } from "~/types/matches";
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const { teamName, teamForm } = defineProps<{
+const {
+  teamName,
+  teamForm,
+  concealed = false,
+} = defineProps<{
   teamName: string;
   teamForm?: TeamForm;
+  concealed?: boolean;
 }>();
 
 const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
@@ -18,7 +23,10 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
     <SListItem size="default" class="min-w-0 shrink-0">
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <h3 class="min-w-0 truncate text-default">{{ teamName }}</h3>
-        <span v-if="teamForm && hasRecentMatches" class="shrink-0 text-muted tabular-nums">
+        <span
+          v-if="teamForm && hasRecentMatches && !concealed"
+          class="shrink-0 text-muted tabular-nums"
+        >
           {{
             t("page.match.detail.formRecord", {
               wins: teamForm.record.wins,
@@ -45,7 +53,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <div class="flex min-w-0 items-center gap-2">
           <UBadge
-            v-if="recentMatch.outcome"
+            v-if="recentMatch.outcome && !concealed"
             :color="recentMatch.outcome === 'win' ? 'success' : 'error'"
             variant="soft"
             size="sm"
@@ -65,7 +73,8 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
             }}
           </span>
         </div>
-        <span class="shrink-0 tabular-nums text-default">
+        <SpoilerHidden v-if="concealed" :label="t('components.spoiler.resultHidden')" />
+        <span v-else class="shrink-0 tabular-nums text-default">
           {{
             t("page.match.detail.formScore", {
               teamScore: recentMatch.score.team ?? "-",

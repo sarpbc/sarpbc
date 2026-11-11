@@ -271,6 +271,15 @@
       "overview": {
         "recentMatches": "Recent matches"
       }
+    },
+    "spoiler": {
+      "toggle": "Spoiler-Free Mode",
+      "enable": "Hide scores and results",
+      "disable": "Show scores and results",
+      "hidden": "Score hidden",
+      "resultHidden": "Result hidden",
+      "revealScore": "Reveal Score",
+      "revealResults": "Reveal Results"
     }
   },
   "timeAgo": {
@@ -1525,6 +1534,7 @@
         "seoDescriptionLive": "Live match: {teamA} vs {teamB} in {tournament}.",
         "seoDescriptionUpcoming": "Upcoming match: {teamA} vs {teamB} in {tournament} on {date}.",
         "seoDescriptionFinished": "Final score: {teamA} {scoreA} - {scoreB} {teamB} in {tournament}.",
+        "seoDescriptionSpoilerFree": "{teamA} vs {teamB} in {tournament}. Replays and match details.",
         "seoDescriptionDefault": "View match details, team form, and roster on sarpbc.org.",
         "notFound": "Match not found",
         "error": "Could not load this match. Check your connection and try again.",

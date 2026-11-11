@@ -9,6 +9,8 @@ const { tournament } = defineProps<{
 
 const { t } = useI18n();
 const { formatAmount, formatPlacement } = usePrizeFormat();
+const { isConcealed } = useSpoilerFree();
+const concealed = computed(() => isConcealed({ tournamentId: tournament.id }));
 
 const headingId = computed(() => `tournament-prizes-title-${tournament.id}`);
 
@@ -61,7 +63,18 @@ const showSection = computed(
       <SCard v-else>
         <ol>
           <li v-for="prize in prizes" :key="prize.id">
-            <SListItem :to="$localePath(teamPath(prize.team.slug))" class="min-w-0 gap-2">
+            <SListItem v-if="concealed" class="min-w-0 gap-2">
+              <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
+                {{ formatPlacement(prize.placement) }}
+              </span>
+              <span class="min-w-0 flex-1 truncate text-sm text-muted">
+                {{ t("components.spoiler.resultHidden") }}
+              </span>
+              <span class="shrink-0 text-sm font-medium tabular-nums">
+                {{ formatAmount(prize.amount, prize.currency) }}
+              </span>
+            </SListItem>
+            <SListItem v-else :to="$localePath(teamPath(prize.team.slug))" class="min-w-0 gap-2">
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>
