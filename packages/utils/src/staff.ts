@@ -32,9 +32,11 @@ export function requiredPermission(change: RosterChange): StaffPermission {
     case "update_team":
     case "upload_team_logo":
     case "merge_teams":
+    case "delete_team":
       return "teams.manage";
     case "set_tournament_prizes":
     case "award_player":
+    case "delete_match":
       return "tournaments.manage";
     default: {
       const exhaustive: never = change;

@@ -34,7 +34,8 @@ The following operations share a transaction:
 - A reply and its direct-reply notification.
 - A forum post and its translations.
 - Content deletion and dependent replies, notifications, reports, or translations.
-- Player photo replacement or selection, and player or team deletion with dependent roster data.
+- Player photo replacement or selection, and player deletion with dependent roster data.
+- A team, match or empty manual event deletion and the reference checks that refuse it: a PandaScore entity, or a team with players, contracts, merged duplicates, participations, matches or prizes, or a match with picks, comments or bracket matches fed by it. A match deletion removes its scores, incoming bracket links and game stats; standings and records are derived on read. Approving an MCP delete proposal runs the same staff path.
 - A roster move: closing the player's open contracts, opening the new one and updating the current team and status.
 - A game's stats, the platform links its unique roster-name matches teach, the linking of earlier rows of those accounts and the clearing of any staff exclusion of its replay; a staff platform link and the repointing of every stat row of that account; a staff game removal and the exclusion of its replay.
 - A player or team merge: moving contracts, photos, awards, game stats, platform links, prize distributions and tournament participations to the kept entity and recording the duplicate's redirect. Roster owns the `RosterReferenceMover` port; each feature implements it for its own tables inside the merge transaction (`TournamentRosterReferences` for competition, `MatchStatsRosterReferences` for game stats and platform links), so a table that references a player or team carries its merge rule with it.

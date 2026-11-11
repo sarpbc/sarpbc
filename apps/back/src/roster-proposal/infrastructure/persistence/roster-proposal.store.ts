@@ -5,7 +5,7 @@ import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { User } from "../../../user/infrastructure/user-persistence";
-import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
+import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import * as Row from "./roster-proposal.entity";
 
 function toProposal(row: Row.RosterProposal): RosterProposal {
@@ -58,7 +58,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       if (!inTransaction) await em.flush();
     },
     names: async (ids) => {
-      const [players, teams, users, tournaments] = await Promise.all([
+      const [players, teams, users, tournaments, matches] = await Promise.all([
         ids.players.length
           ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
           : [],
@@ -71,6 +71,13 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         ids.tournaments.length
           ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
           : [],
+        ids.matches.length
+          ? em.find(
+              Match,
+              { id: { $in: ids.matches } },
+              { populate: ["participants.team", "tournament.event"] },
+            )
+          : [],
       ]);
       return Object.fromEntries([
         ...players.map((player) => [player.id, player.name]),
@@ -79,6 +86,15 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         ...tournaments.map((tournament) => [
           tournament.id,
           `${tournament.event.name} · ${tournament.name}`,
+        ]),
+        ...matches.map((match) => [
+          match.id,
+          [
+            match.participants.map(({ team }) => team.name).join(" vs "),
+            match.tournament.event.name,
+            match.tournament.name,
+            match.name,
+          ].join(" · "),
         ]),
       ]);
     },

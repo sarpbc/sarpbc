@@ -125,6 +125,10 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     return row ? toTeam(row) : null;
   }
 
+  redirectCount(id: string) {
+    return this.em.count(Row.Team, { mergedInto: id });
+  }
+
   async save(model: Team) {
     const row = model.id ? await this.em.findOneOrFail(Row.Team, { id: model.id }) : new Row.Team();
     if (!model.id) model.id = v4();

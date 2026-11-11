@@ -24,6 +24,10 @@ export async function getMatchVods(matchId: string): Promise<MatchVod[]> {
   return res.match.vods ?? [];
 }
 
+export async function deleteMatch(matchId: string): Promise<void> {
+  await apiFetch(`/tournaments/matches/${matchId}`, { method: "DELETE" });
+}
+
 export async function setMatchVods(
   matchId: string,
   vods: Array<Omit<MatchVod, "source">>,

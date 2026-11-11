@@ -215,7 +215,7 @@
     },
     "proposals": {
       "title": "Roster Proposals",
-      "subtitle": "Sourced roster, player, team, prize distribution and award changes proposed through the MCP. Nothing applies until a staff member approves it.",
+      "subtitle": "Sourced roster, player, team, prize distribution and award changes, and match or team deletions, proposed through the MCP. Nothing applies until a staff member approves it.",
       "loadError": "Could not load roster proposals.",
       "empty": "No roster proposals to review.",
       "approve": "Approve",
@@ -233,7 +233,9 @@
         "create_contract": "New contract",
         "update_contract": "Contract update",
         "set_tournament_prizes": "Prize distribution",
-        "award_player": "Player award"
+        "award_player": "Player award",
+        "delete_match": "Delete match",
+        "delete_team": "Delete team"
       },
       "fields": {
         "playerId": "Player",
@@ -256,7 +258,10 @@
         "tournamentId": "Tournament",
         "awardType": "Award",
         "prizes": "Prizes",
-        "placement": "Place {placement}"
+        "placement": "Place {placement}",
+        "matchId": "Match",
+        "reason": "Reason",
+        "mergeIntoTeamId": "Merge into"
       },
       "playerStatus": {
         "active": "Active",
@@ -282,6 +287,10 @@
         "approved": "Proposal approved and applied",
         "rejected": "Proposal rejected",
         "reviewError": "Could not review this proposal. Try again."
+      },
+      "deletionWarning": {
+        "delete_match": "Approving permanently deletes this match with its scores and game stats, and recomputes standings and team records.",
+        "delete_team": "Approving permanently deletes this team, or merges it into the named team. A team that still has players, contracts, participations, matches or prizes is refused."
       }
     },
     "tournaments": {
@@ -352,7 +361,12 @@
         "status": "Status",
         "score": "Score",
         "setWinner": "Set Winner",
-        "syncScores": "Refresh Scores"
+        "syncScores": "Refresh Scores",
+        "delete": {
+          "action": "Delete",
+          "title": "Delete Match",
+          "confirm": "Delete {match} ({score})? Its scores and game stats are deleted too, and standings and team records are recomputed. This cannot be undone. PandaScore matches, and matches with pick'em picks, comments or later bracket matches, are refused."
+        }
       },
       "awards": {
         "title": "Player Awards",
@@ -539,6 +553,11 @@
           "title": "Stages",
           "hint": "To add or move a tournament, open it and pick this event in its Event field.",
           "empty": "This event has no stages yet. It stays hidden from the public site until one is added."
+        },
+        "delete": {
+          "title": "Delete Event",
+          "confirm": "Delete the empty event {name}? Its public URL stops working. This cannot be undone.",
+          "confirmButton": "Delete"
         }
       },
       "leagues": {
@@ -810,7 +829,7 @@
       },
       "delete": {
         "title": "Delete Team",
-        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "confirm": "Delete {name}? This cannot be undone. A team that still has players, contracts, tournament participations, matches or prizes is refused: merge it into the team it duplicates instead.",
         "confirm_button": "Delete"
       },
       "info": {

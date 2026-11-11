@@ -73,6 +73,14 @@
   },
   {
     "controller": "\"events\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
     "verb": "GET",
     "path": "\"\"",
     "status": null,
@@ -1003,6 +1011,14 @@
     "controller": "\"tournaments\"",
     "verb": "DELETE",
     "path": "\":id/awards/:awardId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "DELETE",
+    "path": "\"matches/:matchId\"",
     "status": "HttpStatus.NO_CONTENT",
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

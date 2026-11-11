@@ -1,6 +1,11 @@
 import type { RosterChange } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import {
+  ConflictError,
+  ForbiddenError,
+  InvalidInputError,
+  NotFoundError,
+} from "../../common/domain/errors";
 import { Contract, Player, Team } from "../../roster/domain/roster";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
@@ -20,6 +25,11 @@ function setup() {
   } satisfies RosterProposalStore;
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
+  const kcCopy = Object.assign(new Team(), { id: "kc-copy", name: "Karmine Corp Esports" });
+  const knownTeams = new Map([kc, kcCopy].map((team) => [team.id, team]));
+  const teamGuard = async (id: string) => {
+    if (id === "kc") throw new ConflictError("Karmine Corp still has 3 contracts");
+  };
   const players = {
     findById: vi.fn(async (id: string) => (id === "zen" || id === "zen-dup" ? zen : null)),
     create: vi.fn(async () => Object.assign(new Player(), { id: "new-player" })),
@@ -28,9 +38,24 @@ function setup() {
     leaveTeam: vi.fn(),
   };
   const teams = {
-    findById: vi.fn(async (id: string) => (id === "kc" ? kc : null)),
+    findById: vi.fn(async (id: string) => knownTeams.get(id) ?? null),
     create: vi.fn(async () => Object.assign(new Team(), { id: "new-team" })),
     update: vi.fn(async () => kc),
+    requireDeletable: vi.fn(teamGuard),
+    delete: vi.fn(teamGuard),
+  };
+  const matchGuard = async (id: string) => {
+    if (id === "missing-match") throw new NotFoundError("Match not found");
+    if (id === "pandascore-match")
+      throw new InvalidInputError("Final is synced from PandaScore and cannot be deleted");
+  };
+  const matches = {
+    requireProposableDeletion: vi.fn(async (id: string) => {
+      await matchGuard(id);
+      if (id === "startgg-match")
+        throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
+    }),
+    deleteMatch: vi.fn(matchGuard),
   };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
@@ -45,7 +70,10 @@ function setup() {
     recordPeriod: vi.fn(async () => Object.assign(new Contract(), { id: "new-contract" })),
     revisePeriod: vi.fn(async () => Object.assign(new Contract(), { id: "zen-kc" })),
   };
-  const merges = { mergePlayers: vi.fn(), mergeTeams: vi.fn() };
+  const merges = {
+    mergePlayers: vi.fn(),
+    mergeTeams: vi.fn(async () => ({ kept: kc, merged: kcCopy })),
+  };
   const permissions: string[] = [];
   const staff = { allowed: true, permissions };
   const prizes = {
@@ -111,8 +139,22 @@ function setup() {
     prizes,
     awards,
     logos,
+    matches,
   );
-  return { saved, store, players, teams, contracts, logos, staff, prizes, awards, service };
+  return {
+    saved,
+    store,
+    players,
+    teams,
+    contracts,
+    merges,
+    logos,
+    staff,
+    prizes,
+    awards,
+    matches,
+    service,
+  };
 }
 
 describe("RosterProposalService", () => {
@@ -126,10 +168,25 @@ describe("RosterProposalService", () => {
   let staff: ReturnType<typeof setup>["staff"];
   let prizes: ReturnType<typeof setup>["prizes"];
   let awards: ReturnType<typeof setup>["awards"];
+  let merges: ReturnType<typeof setup>["merges"];
+  let matches: ReturnType<typeof setup>["matches"];
   let service: RosterProposalService;
 
   beforeEach(() => {
-    ({ saved, store, players, teams, contracts, logos, staff, prizes, awards, service } = setup());
+    ({
+      saved,
+      store,
+      players,
+      teams,
+      contracts,
+      merges,
+      logos,
+      staff,
+      prizes,
+      awards,
+      matches,
+      service,
+    } = setup());
   });
 
   const addZen = () =>
@@ -160,6 +217,7 @@ describe("RosterProposalService", () => {
       teams: ["kc"],
       users: ["journalist"],
       tournaments: [],
+      matches: [],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -510,6 +568,107 @@ describe("RosterProposalService", () => {
         "Reviewing this proposal requires teams.manage",
       );
       expect(teams.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deletions", () => {
+    const deleteMatch = (matchId: string) =>
+      service.propose(
+        { kind: "delete_match", matchId, reason: "Series imported twice" },
+        "",
+        "journalist",
+      );
+    const deleteTeam = (teamId: string, mergeIntoTeamId?: string) =>
+      service.propose(
+        { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
+        "",
+        "journalist",
+      );
+
+    it("records a pending match deletion without deleting anything", async () => {
+      const proposal = await deleteMatch("dup-match");
+
+      expect(proposal).toMatchObject({ status: "pending", sourceUrl: "" });
+      expect(matches.requireProposableDeletion).toHaveBeenCalledWith("dup-match");
+      expect(matches.deleteMatch).not.toHaveBeenCalled();
+    });
+
+    it("refuses to propose deleting a missing, PandaScore or start.gg match", async () => {
+      await expect(deleteMatch("missing-match")).rejects.toThrow(NotFoundError);
+      await expect(deleteMatch("pandascore-match")).rejects.toThrow("synced from PandaScore");
+      await expect(deleteMatch("startgg-match")).rejects.toThrow("start.gg");
+      expect(saved.size).toBe(0);
+    });
+
+    it("deletes the match through the staff deletion path once a tournament manager approves", async () => {
+      const { id } = await deleteMatch("dup-match");
+
+      const approved = await service.approve(id, "admin");
+
+      expect(staff.permissions).toEqual(["tournaments.manage"]);
+      expect(matches.deleteMatch).toHaveBeenCalledExactlyOnceWith("dup-match");
+      expect(approved).toMatchObject({ status: "applied", entityId: "dup-match" });
+    });
+
+    it("keeps a match deletion pending when the guard refuses it at approval", async () => {
+      const { id } = await deleteMatch("dup-match");
+      matches.deleteMatch.mockRejectedValueOnce(new ConflictError("Final still has 2 comments"));
+
+      await expect(service.approve(id, "admin")).rejects.toThrow(ConflictError);
+
+      expect(saved.get(id)).toMatchObject({ status: "pending", entityId: null });
+    });
+
+    it("names the match a pending deletion targets", async () => {
+      await deleteMatch("dup-match");
+
+      await service.list("pending");
+
+      expect(store.names).toHaveBeenCalledWith(expect.objectContaining({ matches: ["dup-match"] }));
+    });
+
+    it("refuses to propose deleting a referenced or missing team", async () => {
+      await expect(deleteTeam("kc")).rejects.toThrow("still has 3 contracts");
+      await expect(deleteTeam("nope")).rejects.toThrow(NotFoundError);
+      expect(saved.size).toBe(0);
+    });
+
+    it("deletes an empty team once a team manager approves", async () => {
+      const { id } = await deleteTeam("kc-copy");
+      expect(teams.delete).not.toHaveBeenCalled();
+
+      const approved = await service.approve(id, "admin");
+
+      expect(staff.permissions).toEqual(["teams.manage"]);
+      expect(teams.delete).toHaveBeenCalledExactlyOnceWith("kc-copy");
+      expect(approved).toMatchObject({ status: "applied", entityId: "kc-copy" });
+    });
+
+    it("keeps a team deletion pending when the team gained references since the proposal", async () => {
+      const { id } = await deleteTeam("kc-copy");
+      teams.delete.mockRejectedValueOnce(
+        new ConflictError("Karmine Corp Esports still has 1 match"),
+      );
+
+      await expect(service.approve(id, "admin")).rejects.toThrow("still has 1 match");
+
+      expect(saved.get(id)?.status).toBe("pending");
+    });
+
+    it("merges into the named team instead of deleting it", async () => {
+      const { id } = await deleteTeam("kc-copy", "kc");
+      expect(teams.requireDeletable).not.toHaveBeenCalled();
+
+      const approved = await service.approve(id, "admin");
+
+      expect(merges.mergeTeams).toHaveBeenCalledExactlyOnceWith("kc", "kc-copy");
+      expect(teams.delete).not.toHaveBeenCalled();
+      expect(approved).toMatchObject({ status: "applied", entityId: "kc" });
+    });
+
+    it("refuses to merge a team into itself or into a missing team", async () => {
+      await expect(deleteTeam("kc-copy", "kc-copy")).rejects.toThrow("into itself");
+      await expect(deleteTeam("kc-copy", "nope")).rejects.toThrow(NotFoundError);
     });
   });
 });

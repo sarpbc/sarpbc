@@ -75,7 +75,9 @@ export type RosterChange =
       teamId: string;
       playerId: string;
       awardType: PlayerAwardType;
-    };
+    }
+  | { kind: "delete_match"; matchId: string; reason: string }
+  | { kind: "delete_team"; teamId: string; reason: string; mergeIntoTeamId?: string };
 
 export const ROSTER_PROPOSAL_STATUSES = ["pending", "applied", "rejected"] as const;
 

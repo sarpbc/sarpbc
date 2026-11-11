@@ -51,6 +51,8 @@ const TOOL_NAMES = [
   "update_contract",
   "propose_tournament_prizes",
   "propose_player_award",
+  "propose_delete_match",
+  "propose_delete_team",
   "list_roster_proposals",
   "import_game_stats",
   "get_game_stats_import",

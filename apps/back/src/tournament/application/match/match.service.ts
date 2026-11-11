@@ -1,14 +1,16 @@
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
-import { NotFoundError } from "../../../common/domain/errors";
+import { isRedistributable } from "../../../common/domain/data-source";
+import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
 import { winnerFromResults } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
+import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type { CompetitionAfterCommit } from "../after-commit";
-import type { CompetitionTransaction, MatchQueries } from "../ports";
+import type { CompetitionTransaction, MatchQueries, MatchWriter } from "../ports";
 import type { MatchFields, UpdateMatchInput } from "../inputs";
 import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
@@ -251,6 +253,25 @@ export class MatchService {
     );
     return this.committed(written.id);
   }
+  async requireProposableDeletion(id: string): Promise<void> {
+    await this.transaction.run(async ({ matches }) => {
+      const match = await matches.load(id);
+      if (!match) throw new NotFoundError("Match not found");
+      if (!isRedistributable(match.source) || !isRedistributable(match.tournament.source))
+        throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
+      await assertDeletable(matches, match);
+    });
+  }
+  async deleteMatch(id: string): Promise<void> {
+    const tournamentId = await this.transaction.run(async ({ matches }) => {
+      const match = await matches.load(id);
+      if (!match) throw new NotFoundError("Match not found");
+      await assertDeletable(matches, match);
+      await matches.remove(id);
+      return match.tournament.id;
+    });
+    await this.afterCommit.settle({ tournamentIds: [tournamentId] });
+  }
   find(id: string): Promise<Match | null> {
     return this.reads.detail({ kind: "id", value: id });
   }
@@ -276,4 +297,7 @@ export class MatchService {
   async getMatchesByTournament(id: string) {
     return this.reads.byTournament(id);
   }
+}
+async function assertDeletable(matches: MatchWriter, match: Match): Promise<void> {
+  assertMatchDeletable(match, await matches.references(match.id));
 }

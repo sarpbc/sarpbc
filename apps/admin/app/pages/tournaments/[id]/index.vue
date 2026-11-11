@@ -12,6 +12,7 @@ const tournamentId = computed(() => route.params.id as string);
 const settingWinnerMatchId = ref<string | null>(null);
 const vodsMatch = ref<TournamentMatchListItem | null>(null);
 const vodsOpen = ref(false);
+const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
@@ -209,6 +210,14 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 :label="`${$t('page.tournaments.match.setWinner')}: ${participant.team.name}`"
                 @click="handleSetWinner(match, participant.id)"
               />
+              <UButton
+                size="xs"
+                color="error"
+                variant="ghost"
+                icon="i-fluent-delete-24-regular"
+                :label="$t('page.tournaments.match.delete.action')"
+                @click="matchToDelete = match"
+              />
             </div>
           </div>
         </div>
@@ -218,6 +227,21 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
         </div>
       </div>
     </DashboardContent>
+
+    <ConfirmDeleteModal
+      v-model:target="matchToDelete"
+      :title="$t('page.tournaments.match.delete.title')"
+      :confirm-label="$t('page.tournaments.match.delete.action')"
+      :message="
+        (target) =>
+          $t('page.tournaments.match.delete.confirm', {
+            match: matchLabel(target),
+            score: matchScore(target),
+          })
+      "
+      :remove="(target) => deleteMatch(target.id)"
+      @deleted="reload()"
+    />
 
     <TournamentMatchVods
       v-if="vodsMatch"

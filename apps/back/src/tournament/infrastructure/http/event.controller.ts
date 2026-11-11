@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Inject,
   Param,
   Patch,
@@ -77,6 +80,14 @@ export class EventController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body({ schema: UpdateEventDto }) dto: UpdateEventDto) {
     return { event: mapStaffEvent(await this.catalogService.updateEvent(id, dto)) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param("id") id: string) {
+    await this.catalogService.deleteEvent(id);
   }
 
   @Get("resolve/:event")

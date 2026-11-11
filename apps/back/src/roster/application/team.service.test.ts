@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../domain/roster";
+import type { TeamCompetitionReferences } from "../domain/team-deletion";
 import type { RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 import { TeamService } from "./team.service";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
@@ -11,6 +12,7 @@ describe("Roster workflows", () => {
   let player: Player;
   let contract: Contract;
   let transactions: number;
+  let competition: TeamCompetitionReferences;
 
   beforeEach(() => {
     team = Object.assign(new Team(), { id: "team" });
@@ -21,6 +23,7 @@ describe("Roster workflows", () => {
       teams: {
         findById: async () => team,
         findBySlug: vi.fn(),
+        redirectCount: async () => 0,
         save: vi.fn(),
         delete: vi.fn(),
       },
@@ -51,23 +54,81 @@ describe("Roster workflows", () => {
         return work(stores);
       },
     };
-    service = new TeamService({} as TeamQueries, transaction);
+    competition = { participations: 0, matches: 0, prizes: 0 };
+    const queries: TeamQueries = {
+      search: vi.fn(),
+      searchAndCount: vi.fn(),
+      findById: vi.fn(),
+      findBySlug: vi.fn(),
+    };
+    service = new TeamService(queries, transaction, {
+      teamReferences: async () => competition,
+    });
   });
 
-  it("deletes contracts and clears current membership with the team in one transaction", async () => {
+  const emptyTeam = () => {
+    team.players = [];
+    stores.contracts.findByTeam = async () => [];
+  };
+
+  it("deletes an unreferenced manual team in one transaction", async () => {
+    emptyTeam();
     await service.delete(team.id);
     expect(transactions).toBe(1);
-    expect(stores.contracts.delete).toHaveBeenCalledWith(contract);
-    expect(player.team).toBeNull();
-    expect(stores.players.save).toHaveBeenCalledWith(player);
-    expect(stores.teams.delete).toHaveBeenCalledWith(team);
+    expect(stores.teams.delete).toHaveBeenCalledExactlyOnceWith(team);
   });
 
-  it("does not mutate contracts or memberships when the team is missing", async () => {
-    stores.teams.findById = async () => null;
-    await expect(service.delete("missing")).rejects.toThrow("not found");
+  it("refuses to delete a team that still has players and contracts", async () => {
+    await expect(service.delete(team.id)).rejects.toThrow(
+      "still has 1 current player, 1 contract.",
+    );
     expect(player.team).toBe(team);
     expect(stores.contracts.delete).not.toHaveBeenCalled();
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("names every competition reference that blocks a deletion", async () => {
+    emptyTeam();
+    competition = { participations: 2, matches: 5, prizes: 1 };
+    await expect(service.delete(team.id)).rejects.toThrow(
+      "2 tournament participations, 5 matches, 1 prize",
+    );
+    await expect(service.requireDeletable(team.id)).rejects.toBeInstanceOf(ConflictError);
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("keeps a team other duplicates were merged into", async () => {
+    emptyTeam();
+    stores.teams.redirectCount = async () => 1;
+    await expect(service.delete(team.id)).rejects.toThrow("1 merged duplicate");
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("refuses to delete a PandaScore team even when it is empty", async () => {
+    emptyTeam();
+    team.source = "pandascore";
+    team.pandascoreId = 128;
+    await expect(service.delete(team.id)).rejects.toThrow("synced from PandaScore");
+    await expect(service.requireDeletable(team.id)).rejects.toBeInstanceOf(InvalidInputError);
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("keeps a merged duplicate as its redirect", async () => {
+    emptyTeam();
+    team.mergedIntoId = "kept";
+    await expect(service.delete(team.id)).rejects.toThrow("kept as its redirect");
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("checks a deletion without deleting", async () => {
+    emptyTeam();
+    await service.requireDeletable(team.id);
+    expect(stores.teams.delete).not.toHaveBeenCalled();
+  });
+
+  it("does not delete anything when the team is missing", async () => {
+    stores.teams.findById = async () => null;
+    await expect(service.delete("missing")).rejects.toThrow("not found");
     expect(stores.teams.delete).not.toHaveBeenCalled();
   });
 

@@ -138,6 +138,10 @@ export async function updateEvent(id: string, body: EventInput): Promise<ManualE
   return res.event;
 }
 
+export async function deleteEvent(id: string): Promise<void> {
+  await apiFetch(`/events/${id}`, { method: "DELETE" });
+}
+
 export async function createTournament(body: ManualTournamentInput): Promise<TournamentDetail> {
   const res = await apiFetch<{ tournament: TournamentDetail }>("/tournaments", {
     method: "POST",

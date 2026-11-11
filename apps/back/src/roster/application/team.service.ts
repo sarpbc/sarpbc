@@ -2,13 +2,20 @@ import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
 import { Team } from "../domain/roster";
-import type { RosterTransaction, TeamQueries } from "./ports";
+import { assertTeamDeletable } from "../domain/team-deletion";
+import type {
+  RosterTransaction,
+  RosterWriteScope,
+  TeamCompetitionUsage,
+  TeamQueries,
+} from "./ports";
 import type { DirectorySearchProps } from "./search-props";
 
 export class TeamService {
   constructor(
     private readonly teams: TeamQueries,
     private readonly transaction: RosterTransaction,
+    private readonly usage: TeamCompetitionUsage,
   ) {}
 
   async find(options: Partial<DirectorySearchProps>): Promise<Team[]> {
@@ -81,16 +88,25 @@ export class TeamService {
     });
   }
 
+  async requireDeletable(id: string): Promise<void> {
+    await this.transaction.run((scope) => this.deletable(scope, id));
+  }
+
   async delete(id: string): Promise<void> {
-    return this.transaction.run(async ({ teams, players, contracts }) => {
-      const team = await teams.findById(id);
-      if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
-      for (const contract of await contracts.findByTeam(id)) await contracts.delete(contract);
-      for (const player of team.players) {
-        player.team = null;
-        await players.save(player);
-      }
-      await teams.delete(team);
+    return this.transaction.run(async (scope) => {
+      await scope.teams.delete(await this.deletable(scope, id));
     });
+  }
+
+  private async deletable({ teams, contracts }: RosterWriteScope, id: string): Promise<Team> {
+    const team = await teams.findById(id);
+    if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+    assertTeamDeletable(team, {
+      players: team.players.length,
+      contracts: (await contracts.findByTeam(id)).length,
+      redirects: await teams.redirectCount(id),
+      ...(await this.usage.teamReferences(id)),
+    });
+    return team;
   }
 }

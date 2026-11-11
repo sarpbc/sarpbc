@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import type { ContractRole, TeamContract } from "@sarpbc/types";
+import type { ContractRole, Team, TeamContract } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
@@ -69,6 +69,8 @@ async function saveTeam() {
     isSavingTeam.value = false;
   }
 }
+
+const teamToDelete = ref<Team | null>(null);
 
 const isContractModalOpen = ref(false);
 const contractToDelete = ref<TeamContract | null>(null);
@@ -181,14 +183,23 @@ const contractModalTitle = computed(() =>
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        v-if="team"
-        icon="i-fluent-save-24-regular"
-        :label="$t('page.teams.save')"
-        :loading="isSavingTeam"
-        :disabled="!teamForm.name"
-        @click="saveTeam"
-      />
+      <div v-if="team" class="flex flex-row gap-2">
+        <UButton
+          v-if="team.source !== 'pandascore'"
+          icon="i-fluent-delete-24-regular"
+          color="error"
+          variant="soft"
+          :label="$t('page.teams.delete.title')"
+          @click="teamToDelete = team"
+        />
+        <UButton
+          icon="i-fluent-save-24-regular"
+          :label="$t('page.teams.save')"
+          :loading="isSavingTeam"
+          :disabled="!teamForm.name"
+          @click="saveTeam"
+        />
+      </div>
     </template>
 
     <DashboardContent>
@@ -298,6 +309,15 @@ const contractModalTitle = computed(() =>
         />
       </template>
     </UModal>
+
+    <ConfirmDeleteModal
+      v-model:target="teamToDelete"
+      :title="$t('page.teams.delete.title')"
+      :confirm-label="$t('page.teams.delete.confirm_button')"
+      :message="(target) => $t('page.teams.delete.confirm', { name: target.name })"
+      :remove="(target) => deleteTeam(target.id)"
+      @deleted="navigateTo(localePath('/teams'))"
+    />
 
     <ConfirmDeleteModal
       v-model:target="contractToDelete"

@@ -270,6 +270,14 @@ export class TournamentController {
     return { match: withPublicSlug(match) };
   }
 
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Delete("matches/:matchId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteMatch(@Param("matchId") matchId: string) {
+    await this.matchService.deleteMatch(matchId);
+  }
+
   @Get("player/:playerId")
   async getTournamentsByPlayer(@Param("playerId") playerId: string) {
     const tournaments = await this.tournaments.getTournamentsByPlayer(playerId);

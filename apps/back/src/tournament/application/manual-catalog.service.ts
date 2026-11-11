@@ -1,5 +1,5 @@
 import { allocateSlug, eventSlug, toSlug } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { League } from "../domain/competition";
 import { TournamentEvent, assertEventEditable, isEventSynced } from "../domain/tournament-event";
 import { assertLeagueUpdateAllowed } from "../domain/tournament-source";
@@ -90,6 +90,18 @@ export class ManualCatalogService {
     });
     await this.afterCommit.settle({ tournamentIds: stageIds });
     return this.findEvent(id);
+  }
+  async deleteEvent(id: string): Promise<void> {
+    await this.transaction.run(async ({ events }) => {
+      const event = await requireEvent(events, id);
+      const stages = await events.stages(event.id);
+      assertEventEditable(event, stages);
+      if (stages.length > 0)
+        throw new ConflictError(
+          `${event.name} still has ${stages.length} ${stages.length === 1 ? "stage" : "stages"}; delete or move them first`,
+        );
+      await events.remove(event.id);
+    });
   }
 }
 
