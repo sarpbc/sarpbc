@@ -370,7 +370,7 @@
       },
       "awards": {
         "title": "Player Awards",
-        "hint": "Assign one MVP and one Defensive MVP for this tournament. Awards appear on player profiles.",
+        "hint": "Assign the awards the organiser announced for this stage, at most one of each type. Awards appear on player profiles.",
         "awardType": "Award Type",
         "assignAction": "Assign Award",
         "selectPlayer": "Select a roster player",
@@ -381,7 +381,10 @@
         "allAssigned": "All award types are assigned for this tournament.",
         "types": {
           "mvp": "MVP",
-          "defensive_mvp": "Defensive MVP"
+          "grand_finals_mvp": "Grand Finals MVP",
+          "offensive_mvp": "Offensive MVP",
+          "defensive_mvp": "Defensive MVP",
+          "breakthrough_player": "Breakthrough Player"
         }
       },
       "vods": {

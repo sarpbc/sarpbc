@@ -112,9 +112,28 @@ describe("propose_player_award", () => {
     expect(rosterProposalService.propose).not.toHaveBeenCalled();
   });
 
+  it("queues a Grand Finals MVP proposal next to the stage MVP", async () => {
+    const { call, rosterProposalService } = setupAward();
+    await call(input);
+    await call({ ...input, awardType: "grand_finals_mvp" });
+
+    expect(rosterProposalService.propose.mock.calls.map(([change]) => change)).toEqual([
+      expect.objectContaining({ kind: "award_player", awardType: "mvp" }),
+      expect.objectContaining({ kind: "award_player", awardType: "grand_finals_mvp" }),
+    ]);
+  });
+
   it("requires a known award type and a non-Liquipedia source", () => {
     const schema = z.object(setupAward().tool.inputSchema);
     expect(schema.safeParse(input).success).toBe(true);
+    for (const awardType of [
+      "grand_finals_mvp",
+      "offensive_mvp",
+      "defensive_mvp",
+      "breakthrough_player",
+    ])
+      expect(schema.safeParse({ ...input, awardType }).success).toBe(true);
+    expect(schema.safeParse({ ...input, awardType: "season_mvp" }).success).toBe(false);
     expect(schema.safeParse({ ...input, awardType: "top_scorer" }).success).toBe(false);
     expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);
     expect(

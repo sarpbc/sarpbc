@@ -421,6 +421,19 @@ describe("RosterProposalService", () => {
     expect(approved).toMatchObject({ status: "applied", entityId: "award-1" });
   });
 
+  it("applies a Grand Finals MVP proposal through the same path as the admin", async () => {
+    const { id } = await service.propose(
+      { ...award, awardType: "grand_finals_mvp" },
+      source,
+      "journalist",
+    );
+
+    expect(awards.requireProposable).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
+    await service.approve(id, "admin");
+
+    expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
+  });
+
   it("rejects award proposals the tournament cannot take", async () => {
     const propose = (change: Partial<typeof award>) =>
       service.propose({ ...award, ...change }, source, "journalist");

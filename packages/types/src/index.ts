@@ -101,7 +101,10 @@ export type {
 
 export const PLAYER_AWARD_TYPES = [
   "mvp",
+  "grand_finals_mvp",
+  "offensive_mvp",
   "defensive_mvp",
+  "breakthrough_player",
 ] as const satisfies readonly PlayerAwardType[];
 
 export const SUPPORTED_LOCALES = ["en-US", "fr-FR"] as const;

@@ -31,8 +31,14 @@ function awardTypeLabel(awardType: PlayerAwardType): string {
   switch (awardType) {
     case "mvp":
       return t("page.player.slug.awards.types.mvp");
+    case "grand_finals_mvp":
+      return t("page.player.slug.awards.types.grand_finals_mvp");
+    case "offensive_mvp":
+      return t("page.player.slug.awards.types.offensive_mvp");
     case "defensive_mvp":
       return t("page.player.slug.awards.types.defensive_mvp");
+    case "breakthrough_player":
+      return t("page.player.slug.awards.types.breakthrough_player");
     default: {
       const _exhaustive: never = awardType;
       return _exhaustive;

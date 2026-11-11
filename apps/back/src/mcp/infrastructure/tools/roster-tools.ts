@@ -424,14 +424,18 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     defineTool({
       name: "propose_player_award",
       description:
-        "Propose a player award (MVP or defensive MVP) of one tournament stage. Only propose awards the organiser officially announced. Read get_tournament_awards first: a stage has one award of each type. The team must be a participant of the stage and the player must be on that team's stage roster. start.gg tournaments are refused.",
+        "Propose a player award of one tournament stage. Only propose awards the organiser officially announced. Use mvp for the tournament or World Championship MVP and grand_finals_mvp for a separate Grand Finals MVP. Read get_tournament_awards first: a stage holds several awards but at most one of each type. The team must be a participant of the stage and the player must be on that team's stage roster. start.gg tournaments are refused.",
       write: true,
       permission: "tournaments.manage",
       input: {
         tournamentId: z.string().uuid().describe("Tournament stage UUID."),
         teamId: z.string().uuid().describe("UUID of the team the player represented."),
         playerId: z.string().uuid().describe("Player UUID."),
-        awardType: z.enum(PLAYER_AWARD_TYPES).describe("Award type: mvp or defensive_mvp."),
+        awardType: z
+          .enum(PLAYER_AWARD_TYPES)
+          .describe(
+            "Award type: mvp, grand_finals_mvp, offensive_mvp, defensive_mvp or breakthrough_player.",
+          ),
         sourceUrl: sourceUrlSchema,
       },
       handler: ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>

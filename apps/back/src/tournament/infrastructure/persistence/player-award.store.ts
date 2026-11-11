@@ -9,7 +9,10 @@ import { PlayerAward } from "./player-award.entities";
 import { toEventRef } from "../../domain/tournament-event";
 const AWARD_LABELS = {
   mvp: "MVP",
+  grand_finals_mvp: "Grand Finals MVP",
+  offensive_mvp: "Offensive MVP",
   defensive_mvp: "Defensive MVP",
+  breakthrough_player: "Breakthrough Player",
 } as const satisfies Record<PlayerAwardType, string>;
 function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
   return {

@@ -1,4 +1,4 @@
-import type { PlayerAwardType } from "@sarpbc/types";
+import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { PlayerAwardService } from "./player-award.service";
@@ -92,5 +92,35 @@ describe("PlayerAwardService by team", () => {
       undefined,
     );
     expect(writer.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds every award type on one stage, including a separate Grand Finals MVP", async () => {
+    const { service, writer } = setup();
+
+    for (const awardType of PLAYER_AWARD_TYPES)
+      await service.createForTeam("cup", "kc", "zen", awardType);
+
+    expect(writer.create.mock.calls.map(([input]) => input.awardType)).toEqual([
+      "mvp",
+      "grand_finals_mvp",
+      "offensive_mvp",
+      "defensive_mvp",
+      "breakthrough_player",
+    ]);
+    await expect(service.createForTeam("cup", "kc", "zen", "grand_finals_mvp")).rejects.toThrow(
+      "Fake Cup already has a grand finals mvp award",
+    );
+  });
+
+  it("refuses start.gg tournaments for the new award types too", async () => {
+    const { service, writer } = setup("startgg");
+
+    await expect(service.createForTeam("cup", "kc", "zen", "grand_finals_mvp")).rejects.toThrow(
+      "Awards of start.gg tournaments cannot be proposed",
+    );
+    await expect(
+      service.requireProposable("cup", "kc", "zen", "breakthrough_player"),
+    ).rejects.toThrow("Awards of start.gg tournaments cannot be proposed");
+    expect(writer.create).not.toHaveBeenCalled();
   });
 });
