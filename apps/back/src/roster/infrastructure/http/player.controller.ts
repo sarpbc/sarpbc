@@ -194,7 +194,7 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const standIns = await this.lineupService.standIns(player.id, { redistributableOnly: false });
+    const standIns = await this.lineupService.standIns(player.id);
     return {
       standIns: standIns.map(({ participantId, match }) => ({
         participantId,

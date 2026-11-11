@@ -21,10 +21,6 @@ export interface StandInMatch {
   match: Match;
 }
 
-export interface StandInScope {
-  redistributableOnly: boolean;
-}
-
 export function lineupSource(match: Pick<Match, "source" | "tournament">): DataSource {
   return isRedistributable(match.tournament.source) ? match.source : match.tournament.source;
 }
@@ -87,7 +83,7 @@ export class MatchLineupService {
     });
   }
 
-  async standIns(playerId: string, { redistributableOnly }: StandInScope): Promise<StandInMatch[]> {
+  async standIns(playerId: string): Promise<StandInMatch[]> {
     const rows = (await this.reads.byPlayer(playerId)).filter(({ rosterIds }) =>
       isStandIn(rosterIds, playerId),
     );
@@ -100,7 +96,7 @@ export class MatchLineupService {
     );
     return rows.flatMap(({ matchId, participantId }) => {
       const match = matches.get(matchId);
-      if (!match || (redistributableOnly && !isRedistributable(lineupSource(match)))) return [];
+      if (!match?.participants.some(({ id }) => id === participantId)) return [];
       return [{ participantId, match }];
     });
   }

@@ -200,7 +200,7 @@ describe("MatchLineupService", () => {
     });
 
     it("lists only the series played outside the participant roster, start.gg included for the site", async () => {
-      const standIns = await service.standIns("delta", { redistributableOnly: false });
+      const standIns = await service.standIns("delta");
 
       expect(standIns.map(({ participantId, match: { id } }) => ({ participantId, id }))).toEqual([
         { participantId: "side-b", id: "startgg-match" },
@@ -208,14 +208,14 @@ describe("MatchLineupService", () => {
       ]);
     });
 
-    it("leaves start.gg series out of redistributed reads", async () => {
-      const standIns = await service.standIns("delta", { redistributableOnly: true });
-      expect(standIns.map(({ match: { id } }) => id)).toEqual(["manual-match"]);
+    it("skips a side that no longer plays the match after a sync", async () => {
+      playerRows = [{ matchId: "manual-match", participantId: "side-gone", rosterIds: [] }];
+      expect(await service.standIns("delta")).toEqual([]);
     });
 
     it("does not read matches for a player who never stood in", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-a", rosterIds: ["delta"] }];
-      expect(await service.standIns("delta", { redistributableOnly: false })).toEqual([]);
+      expect(await service.standIns("delta")).toEqual([]);
       expect(byIds).not.toHaveBeenCalled();
     });
   });
