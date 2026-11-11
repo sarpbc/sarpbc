@@ -12,6 +12,8 @@ const tournamentId = computed(() => route.params.id as string);
 const settingWinnerMatchId = ref<string | null>(null);
 const vodsMatch = ref<TournamentMatchListItem | null>(null);
 const vodsOpen = ref(false);
+const streamsTarget = ref<{ path: string; title: string } | null>(null);
+const streamsOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
@@ -93,6 +95,11 @@ function openVods(match: TournamentMatchListItem) {
   vodsOpen.value = true;
 }
 
+function openStreams(path: string, name: string) {
+  streamsTarget.value = { path, title: t("page.tournaments.streams.title", { name }) };
+  streamsOpen.value = true;
+}
+
 async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
   settingWinnerMatchId.value = match.id;
   try {
@@ -120,6 +127,20 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           icon="i-fluent-edit-24-regular"
           :label="$t('page.tournaments.edit.action')"
           :to="localePath(`/tournaments/${tournamentId}/edit`)"
+        />
+        <UButton
+          v-if="tournament"
+          variant="soft"
+          icon="i-fluent-live-24-regular"
+          :label="$t('page.tournaments.streams.tournamentAction')"
+          @click="openStreams(`/tournaments/${tournamentId}/streams`, tournament.name)"
+        />
+        <UButton
+          v-if="tournament"
+          variant="soft"
+          icon="i-fluent-live-24-regular"
+          :label="$t('page.tournaments.streams.eventAction')"
+          @click="openStreams(`/events/${tournament.event.id}/streams`, tournament.event.name)"
         />
         <UButton
           v-if="tournament?.source === 'pandascore'"
@@ -201,6 +222,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 @click="openVods(match)"
               />
               <UButton
+                size="xs"
+                variant="soft"
+                icon="i-fluent-live-24-regular"
+                :label="$t('page.tournaments.streams.matchAction')"
+                @click="openStreams(`/tournaments/matches/${match.id}/streams`, matchLabel(match))"
+              />
+              <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 size="xs"
@@ -247,6 +275,14 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       v-model:open="vodsOpen"
       :match="vodsMatch"
       :label="matchLabel(vodsMatch)"
+    />
+
+    <StreamEditor
+      v-if="streamsTarget"
+      :key="streamsTarget.path"
+      v-model:open="streamsOpen"
+      :path="streamsTarget.path"
+      :title="streamsTarget.title"
     />
   </NuxtLayout>
 </template>
