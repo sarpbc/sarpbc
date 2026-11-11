@@ -9,6 +9,9 @@ export async function verifyPlayerTournaments({
   RequestContext,
 }) {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
+  const { RosterMergeService } =
+    await import("../../src/roster/application/roster-merge.service.ts");
+  const { ConflictError } = await import("../../src/common/domain/errors.ts");
   const { Team } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
   const { MikroOrmGameStatsStore, MikroOrmStatsCandidates } =
     await import("../../src/match-stats/infrastructure/persistence/match-stats.store.ts");
@@ -168,4 +171,11 @@ export async function verifyPlayerTournaments({
   );
   const attachment = await new MikroOrmGameStatsStore(orm.em.fork()).attachment("fake-1v1-replay");
   assert.deepEqual(attachment.teams, ["Fake Solo Two", "Fake Solo One"]);
+  await assert.rejects(
+    RequestContext.create(orm.em.fork(), () =>
+      app.get(RosterMergeService).mergePlayers(solo.id, rival.id),
+    ),
+    ConflictError,
+    "two players of one 1v1 tournament cannot be merged into one participant",
+  );
 }

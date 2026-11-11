@@ -1,4 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
+import { ConflictError } from "../../../common/domain/errors";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import type {
   RosterReferenceMover,
@@ -16,6 +17,15 @@ export class TournamentRosterReferences
 
   async movePlayer(from: string, to: string): Promise<void> {
     const { em } = this;
+    const clashes = await em.count(TournamentParticipant, {
+      team: null,
+      players: from,
+      tournament: { participants: { team: null, players: to } },
+    });
+    if (clashes > 0)
+      throw new ConflictError(
+        "Both players are participants without a team in the same tournament. Remove one of them from that tournament before merging.",
+      );
     await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
     const participants = await em.find(
       TournamentParticipant,

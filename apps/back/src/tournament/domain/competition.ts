@@ -138,18 +138,18 @@ export interface ParticipantReferences {
 export function assertParticipantRemovable(refs: ParticipantReferences): void {
   if (refs.tournamentWinner)
     throw new InvalidInputError(
-      "Cannot remove a team that is the tournament winner. Clear the winner first.",
+      "Cannot remove a participant that is the tournament winner. Clear the winner first.",
     );
   if (refs.matchParticipant)
     throw new InvalidInputError(
-      "Cannot remove a team that already appears in matches. Remove or reassign those matches first.",
+      "Cannot remove a participant that already appears in matches. Remove or reassign those matches first.",
     );
   if (refs.matchWinner)
     throw new InvalidInputError(
-      "Cannot remove a team that is recorded as a match winner. Clear those winners first.",
+      "Cannot remove a participant that is recorded as a match winner. Clear those winners first.",
     );
   if (refs.results)
     throw new InvalidInputError(
-      "Cannot remove a team that has match results. Remove those results first.",
+      "Cannot remove a participant that has match results. Remove those results first.",
     );
 }

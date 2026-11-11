@@ -17,20 +17,14 @@ const reportError = useReportError();
 const query = ref("");
 const pending = ref(false);
 const results = ref<Player[]>([]);
-const draft = ref<ParticipantPlayer[]>([]);
 
 const size = computed(() => TEAM_SIZE_BY_FORMAT[props.format]);
-const taken = computed(
-  () => new Set([...props.modelValue.flat(), ...draft.value].map(({ id }) => id)),
-);
+const taken = computed(() => new Set(props.modelValue.flat().map(({ id }) => id)));
+const incomplete = computed(() => {
+  const last = props.modelValue.at(-1);
+  return last && last.length < size.value ? last : null;
+});
 const available = computed(() => results.value.filter(({ id }) => !taken.value.has(id)));
-
-watch(
-  () => props.format,
-  () => {
-    draft.value = [];
-  },
-);
 
 async function runSearch(searchQuery: string) {
   const trimmed = searchQuery.trim();
@@ -52,15 +46,15 @@ async function runSearch(searchQuery: string) {
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 function pick(player: Player) {
-  const next = [...draft.value, { id: player.id, name: player.name, slug: player.slug }];
+  const picked = { id: player.id, name: player.name, slug: player.slug };
   query.value = "";
   results.value = [];
-  if (next.length < size.value) {
-    draft.value = next;
-    return;
-  }
-  draft.value = [];
-  emit("update:modelValue", [...props.modelValue, next]);
+  emit(
+    "update:modelValue",
+    incomplete.value
+      ? [...props.modelValue.slice(0, -1), [...incomplete.value, picked]]
+      : [...props.modelValue, [picked]],
+  );
 }
 
 function remove(index: number) {
@@ -99,8 +93,8 @@ function remove(index: number) {
     </ul>
     <p v-else class="text-sm text-muted">{{ $t("page.tournaments.form.playersNone") }}</p>
 
-    <p v-if="draft.length" class="text-sm">
-      {{ $t("page.tournaments.form.playersPartner", { name: draft[0]?.name ?? "" }) }}
+    <p v-if="incomplete" class="text-sm">
+      {{ $t("page.tournaments.form.playersPartner", { name: incomplete[0]?.name ?? "" }) }}
     </p>
 
     <UInput
