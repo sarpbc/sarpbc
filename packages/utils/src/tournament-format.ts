@@ -1,10 +1,10 @@
 import type { TournamentFormat } from "@sarpbc/types";
 
-export const TEAM_SIZE_BY_FORMAT: Record<TournamentFormat, number> = {
+export const TEAM_SIZE_BY_FORMAT = {
   "1v1": 1,
   "2v2": 2,
   "3v3": 3,
-};
+} as const satisfies Record<TournamentFormat, number>;
 
 export interface NamedParticipant {
   team: { name: string } | null;
