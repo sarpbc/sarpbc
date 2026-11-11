@@ -70,6 +70,10 @@ const champion = computed(() => {
 
 const stageCount = computed(() => event.value?.stages.length ?? 0);
 
+const watchStreams = computed(() =>
+  event.value?.stages.length === 1 ? (event.value.stages[0]?.watchStreams ?? []) : [],
+);
+
 function stageMeta(stage: TournamentDetail): string {
   const status = getTournamentStatus(stage);
   return [
@@ -135,6 +139,17 @@ watch(
         :count-label="t('page.tournaments.event.stagesCount', { count: stageCount })"
         :champion="champion"
       />
+
+      <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">
+        <SRail>
+          <template #caption>
+            <h2 id="tournament-event-watch-title">
+              {{ t("page.match.detail.sections.watch") }}
+            </h2>
+          </template>
+          <StreamList :streams="watchStreams" />
+        </SRail>
+      </section>
 
       <section
         v-for="stage in event.stages"

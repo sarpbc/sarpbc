@@ -8,6 +8,7 @@ const { tournament } = defineProps<{
 
 const showPickemCta = computed(() => isPickemTournamentActive(tournament));
 const bracketHeadingId = computed(() => `tournament-bracket-title-${tournament.id}`);
+const watchHeadingId = computed(() => `tournament-watch-title-${tournament.id}`);
 </script>
 
 <template>
@@ -23,6 +24,20 @@ const bracketHeadingId = computed(() => `tournament-bracket-title-${tournament.i
         <SCard class="overflow-x-auto p-2">
           <TournamentBracket :tournament="tournament" />
         </SCard>
+      </SRail>
+    </section>
+    <section
+      v-if="tournament.watchStreams.length > 0"
+      class="w-full"
+      :aria-labelledby="watchHeadingId"
+    >
+      <SRail>
+        <template #caption>
+          <h2 :id="watchHeadingId">
+            {{ $t("page.match.detail.sections.watch") }}
+          </h2>
+        </template>
+        <StreamList :streams="tournament.watchStreams" />
       </SRail>
     </section>
     <TournamentParticipants :tournament="tournament" />
