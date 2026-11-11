@@ -1,5 +1,11 @@
-import type { TeamSummary, TournamentDetail } from "@sarpbc/types";
-import { teamPath, tournamentStageLabel, tournamentStagePath } from "@sarpbc/utils";
+import type { ParticipantRef, TeamSummary, TournamentDetail } from "@sarpbc/types";
+import {
+  participantName,
+  playerPath,
+  teamPath,
+  tournamentStageLabel,
+  tournamentStagePath,
+} from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { formatPrizepool } from "~/utils/currencyFormatter";
 import { resolveSiteUrl } from "~/utils/siteUrl";
@@ -29,6 +35,14 @@ export interface SportsTeamLd extends JsonLdNode {
   name: string;
   url?: string;
 }
+
+export interface PersonLd extends JsonLdNode {
+  "@type": "Person";
+  name: string;
+  url?: string;
+}
+
+export type CompetitorLd = SportsTeamLd | PersonLd;
 
 export interface VirtualLocationLd extends JsonLdNode {
   "@type": "VirtualLocation";
@@ -76,8 +90,8 @@ export interface SportsEventLd extends JsonLdNode {
   image?: string;
   description?: string;
   award?: string;
-  competitor?: SportsTeamLd[];
-  performer?: SportsTeamLd[];
+  competitor?: CompetitorLd[];
+  performer?: CompetitorLd[];
   additionalProperty?: PropertyValueLd[];
 }
 
@@ -197,28 +211,46 @@ export function eventVenue(
   }
 }
 
-export function getTournamentChampionTeam(
+export function getTournamentChampion(
   tournament: Pick<TournamentDetail, "winner">,
-): TeamSummary | null {
-  const team = tournament.winner?.team;
-  return team?.slug ? team : null;
+): ParticipantRef<TeamSummary> | null {
+  const winner = tournament.winner;
+  if (!winner) {
+    return null;
+  }
+  const listed = winner.team ? Boolean(winner.team.slug) : winner.players.length > 0;
+  return listed ? winner : null;
 }
 
 function competitorFromTournament(
   tournament: Pick<TournamentDetail, "participants">,
-): SportsTeamLd[] | undefined {
-  const teams = new Map<string, SportsTeamLd>();
+): CompetitorLd[] | undefined {
+  const competitors = new Map<string, CompetitorLd>();
 
   for (const participant of tournament.participants) {
     const team = participant.team;
-    const name = team.name.trim();
-    if (!name || teams.has(team.id)) {
+    if (!team) {
+      for (const player of participant.players) {
+        competitors.set(
+          player.id,
+          compactJsonLd<PersonLd>({
+            "@type": "Person",
+            name: player.name,
+            url: `${SITE_ORIGIN}${playerPath(player.slug)}`,
+          }),
+        );
+      }
       continue;
     }
 
-    teams.set(
+    const name = team.name.trim();
+    if (!name || competitors.has(team.id)) {
+      continue;
+    }
+
+    competitors.set(
       team.id,
-      compactJsonLd({
+      compactJsonLd<SportsTeamLd>({
         "@type": "SportsTeam",
         name,
         url: team.slug ? `${SITE_ORIGIN}${teamPath(team.slug)}` : undefined,
@@ -226,11 +258,11 @@ function competitorFromTournament(
     );
   }
 
-  if (teams.size === 0) {
+  if (competitors.size === 0) {
     return undefined;
   }
 
-  return [...teams.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...competitors.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function additionalProperties(
@@ -296,7 +328,7 @@ export function buildTournamentSportsEvent(
   const status = getTournamentStatus(tournament, options.now);
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
   const format = formatLabel(tournament.type);
-  const champion = getTournamentChampionTeam(tournament);
+  const champion = getTournamentChampion(tournament);
   const image = resolveSiteUrl(tournament.imageUrl) ?? resolveSiteUrl(tournament.league?.imageUrl);
   const organizerName = tournament.league?.name?.trim();
   const competitors = competitorFromTournament(tournament);
@@ -325,7 +357,7 @@ export function buildTournamentSportsEvent(
       leagueName: organizerName,
       format,
       prizepool,
-      championName: champion?.name,
+      championName: champion ? participantName(champion) : undefined,
       status,
     }),
     award: prizepool,

@@ -8,7 +8,7 @@ import {
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
 } from "~/utils/matchDiscoveryAnalytics";
-import { getApiErrorStatus, matchPath, tournamentStageLabel } from "@sarpbc/utils";
+import { getApiErrorStatus, matchPath, participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -67,12 +67,12 @@ const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
 const teamB = computed(() => participants.value[1]);
 
-function participantName(participant?: TournamentParticipant) {
-  return participant?.team.name ?? t("page.match.detail.unknownTeam");
+function participantLabel(participant?: TournamentParticipant) {
+  return (participant && participantName(participant)) || t("page.match.detail.unknownTeam");
 }
 
 function isTbdTeam(participant?: TournamentParticipant): boolean {
-  return !participant?.team?.name?.trim();
+  return !participant || !participantName(participant).trim();
 }
 
 const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
@@ -158,8 +158,8 @@ const seoTitle = computed(() => {
   }
 
   return t("page.match.detail.seoTitle", {
-    teamA: participantName(teamA.value),
-    teamB: participantName(teamB.value),
+    teamA: participantLabel(teamA.value),
+    teamB: participantLabel(teamB.value),
     tournament: tournamentStageLabel(match.value.tournament),
   });
 });
@@ -170,8 +170,8 @@ const seoDescription = computed(() => {
   }
 
   const tournament = tournamentStageLabel(match.value.tournament);
-  const teamAName = participantName(teamA.value);
-  const teamBName = participantName(teamB.value);
+  const teamAName = participantLabel(teamA.value);
+  const teamBName = participantLabel(teamB.value);
 
   switch (matchStatus.value) {
     case "live":
@@ -225,8 +225,8 @@ watch(
 );
 
 const scoreboardLabel = computed(() => {
-  const a = participantName(teamA.value);
-  const b = participantName(teamB.value);
+  const a = participantLabel(teamA.value);
+  const b = participantLabel(teamB.value);
   if (!match.value || matchStatus.value === "upcoming") {
     return `${a} vs ${b}`;
   }
@@ -351,13 +351,13 @@ const scoreboardLabel = computed(() => {
         >
           <MatchHeadToHeadCard
             :head-to-head="headToHead"
-            :team-a-name="participantName(teamA)"
-            :team-b-name="participantName(teamB)"
+            :team-a-name="participantLabel(teamA)"
+            :team-b-name="participantLabel(teamB)"
           />
         </SRail>
 
         <SRail
-          v-if="matchStatus !== 'finished'"
+          v-if="matchStatus !== 'finished' && participants.some((participant) => participant.team)"
           :title="t('page.match.detail.sections.recentForm')"
         >
           <SCard>
@@ -370,8 +370,8 @@ const scoreboardLabel = computed(() => {
                     ? 'max-md:border-b max-md:border-separator md:border-r md:border-separator'
                     : undefined
                 "
-                :team-name="participant.team.name"
-                :team-form="teamForms[participant.team.id]"
+                :team-name="participantLabel(participant)"
+                :team-form="participant.team ? teamForms[participant.team.id] : undefined"
               />
             </div>
           </SCard>

@@ -210,8 +210,8 @@ function matchCenterPrimary(match: TournamentDetailMatch): string | null {
 
 function openMatchLabel(match: TournamentDetailMatch): string {
   return t("page.game.pickems.detail.openMatch", {
-    teamA: match.participants?.[0]?.team.name ?? t("components.match.tbd"),
-    teamB: match.participants?.[1]?.team.name ?? t("components.match.tbd"),
+    teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
+    teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
   });
 }
 
@@ -445,7 +445,7 @@ watch(
                   :color="teamButtonColor(match, match.participants?.[0]?.id)"
                   @click="pickTeam(match.id, match.participants?.[0]?.id || '')"
                 >
-                  {{ match.participants?.[0]?.team.name }}
+                  {{ slotName(match.participants, 0) }}
                 </UButton>
                 <NuxtLink
                   :to="localePath(matchPath(match.publicId, match.slug))"
@@ -469,7 +469,7 @@ watch(
                   :color="teamButtonColor(match, match.participants?.[1]?.id)"
                   @click="pickTeam(match.id, match.participants?.[1]?.id || '')"
                 >
-                  {{ match.participants?.[1]?.team.name }}
+                  {{ slotName(match.participants, 1) }}
                 </UButton>
               </div>
             </SListItem>

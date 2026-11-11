@@ -1,9 +1,12 @@
 import type { TeamSummary, TournamentDetail, TournamentDetailParticipant } from "@sarpbc/types";
+import { participantName } from "@sarpbc/utils";
 
 type ParticipantPlayer = TournamentDetailParticipant["players"][number];
 
 export interface TournamentParticipantEntry {
-  team: TeamSummary;
+  id: string;
+  name: string;
+  team: TeamSummary | null;
   players: ParticipantPlayer[];
   hasReliableRoster: boolean;
 }
@@ -20,19 +23,23 @@ export function buildTournamentParticipantEntries(
 
   for (const participant of tournament.participants) {
     const team = participant.team;
-    if (!team.slug || seen.has(team.id)) {
+    const key = team?.id ?? participant.id;
+    const listed = team ? Boolean(team.slug) : participant.players.length > 0;
+    if (!listed || seen.has(key)) {
       continue;
     }
-    seen.add(team.id);
+    seen.add(key);
     const players = participant.players
       .filter((player) => player.slug)
       .sort((a, b) => a.name.localeCompare(b.name));
     result.push({
+      id: key,
+      name: participantName(participant),
       team,
       players,
       hasReliableRoster: hasReliableParticipantRoster(participant.players),
     });
   }
 
-  return result.sort((a, b) => a.team.name.localeCompare(b.team.name));
+  return result.sort((a, b) => a.name.localeCompare(b.name));
 }

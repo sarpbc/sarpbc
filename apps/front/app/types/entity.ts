@@ -9,6 +9,7 @@ export interface EntityTrophyListItem {
   id: string;
   path: string;
   displayName: string;
+  formatLabel: string | null;
   endAt: Date | string | null;
 }
 
@@ -17,6 +18,7 @@ export interface EntityEventListItem {
   name: string;
   slug: string;
   event: TournamentEventRef;
+  formatLabel: string | null;
   beginAt: Date | string | null;
   endAt: Date | string | null;
   status: TournamentStatus;

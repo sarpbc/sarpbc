@@ -5,7 +5,7 @@ import { getMatchParticipantScore } from "~/utils/matchScore";
 import { TBD_LABEL } from "~/utils/tbdLabel";
 import { getMatchById } from "~/composables/matches/api";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import { tournamentStageLabel } from "@sarpbc/utils";
+import { participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
@@ -38,8 +38,8 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const participants = match.participants ?? [];
   const teamA = participants[0];
   const teamB = participants[1];
-  const teamAName = truncate(teamA?.team.name ?? TBD_LABEL, 28);
-  const teamBName = truncate(teamB?.team.name ?? TBD_LABEL, 28);
+  const teamAName = truncate(teamA ? participantName(teamA) : TBD_LABEL, 28);
+  const teamBName = truncate(teamB ? participantName(teamB) : TBD_LABEL, 28);
   const tournament = truncate(tournamentStageLabel(match.tournament), 48);
   const status = resolveMatchDiscoveryStatus(match);
 

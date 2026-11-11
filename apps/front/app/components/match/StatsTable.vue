@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { playerPath } from "@sarpbc/utils";
+import { participantName, playerPath } from "@sarpbc/utils";
 import type { MatchGamePlayerStats, MatchGameStats } from "@sarpbc/types";
 import type { TournamentParticipant } from "~/types/tournament";
 
@@ -34,15 +34,16 @@ const teams = computed(() => {
   const order = participants.map((participant) => participant.id);
   return [...current.teams]
     .sort((a, b) => order.indexOf(a.participantId) - order.indexOf(b.participantId))
-    .map((team) => ({
-      ...team,
-      name:
-        participants.find((participant) => participant.id === team.participantId)?.team.name ??
-        t("page.match.detail.unknownTeam"),
-      players: [...team.players].sort(
-        (a, b) => b.goals - a.goals || playerLabel(a).localeCompare(playerLabel(b)),
-      ),
-    }));
+    .map((team) => {
+      const participant = participants.find((entry) => entry.id === team.participantId);
+      return {
+        ...team,
+        name: (participant && participantName(participant)) || t("page.match.detail.unknownTeam"),
+        players: [...team.players].sort(
+          (a, b) => b.goals - a.goals || playerLabel(a).localeCompare(playerLabel(b)),
+        ),
+      };
+    });
 });
 
 const replayUrl = computed(() => `https://ballchasing.com/replay/${game.value?.ballchasingId}`);

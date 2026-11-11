@@ -11,6 +11,8 @@ const { match, compact = false } = defineProps<{
 
 const teamA = computed(() => match.participants?.[0]);
 const teamB = computed(() => match.participants?.[1]);
+const nameA = computed(() => slotName(match.participants, 0) ?? "");
+const nameB = computed(() => slotName(match.participants, 1) ?? "");
 
 const winnerParticipantId = computed(() => {
   if (!match.results || match.results.length < 2) {
@@ -43,10 +45,10 @@ function participantClass(participantId: string | undefined): string {
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
     >
-      <span class="truncate text-end" :class="participantClass(teamA.id)" :title="teamA.team.name">
-        {{ shortTeamName(teamA.team.name) || $t("components.match.tbd") }}
+      <span class="truncate text-end" :class="participantClass(teamA.id)" :title="nameA">
+        {{ shortTeamName(nameA) || $t("components.match.tbd") }}
       </span>
-      <TeamImg :team-name="teamA.team.name" :logo="teamA.team" size="xs" />
+      <TeamImg :team-name="nameA" :logo="teamA.team" size="xs" />
       <span class="flex items-center justify-center gap-1 tabular-nums">
         <span :class="participantClass(teamA.id)">
           {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
@@ -56,9 +58,9 @@ function participantClass(participantId: string | undefined): string {
           {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
         </span>
       </span>
-      <TeamImg :team-name="teamB.team.name" :logo="teamB.team" size="xs" />
-      <span class="truncate" :class="participantClass(teamB.id)" :title="teamB.team.name">
-        {{ shortTeamName(teamB.team.name) || $t("components.match.tbd") }}
+      <TeamImg :team-name="nameB" :logo="teamB.team" size="xs" />
+      <span class="truncate" :class="participantClass(teamB.id)" :title="nameB">
+        {{ shortTeamName(nameB) || $t("components.match.tbd") }}
       </span>
     </div>
   </SListItem>

@@ -66,8 +66,8 @@ const schedule = computed((): ScheduleDisplay | null => {
 const teamA = computed(() => match.participants?.[0]);
 const teamB = computed(() => match.participants?.[1]);
 
-const teamAName = computed(() => teamA.value?.team.name ?? t("components.match.tbd"));
-const teamBName = computed(() => teamB.value?.team.name ?? t("components.match.tbd"));
+const teamAName = computed(() => slotName(match.participants, 0) ?? t("components.match.tbd"));
+const teamBName = computed(() => slotName(match.participants, 1) ?? t("components.match.tbd"));
 
 const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
 const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
@@ -101,7 +101,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
       <span class="truncate text-end text-default group-hover:text-highlighted" :title="teamAName">
         {{ shortTeamName(teamAName) }}
       </span>
-      <TeamImg :team-name="teamA?.team.name" :logo="teamA?.team" size="xs" />
+      <TeamImg :team-name="slotName(match.participants, 0)" :logo="teamA?.team" size="xs" />
       <span
         class="flex min-w-12 flex-col items-center justify-center text-center tabular-nums leading-tight"
         :class="{ 'score-flash': scoreChanged }"
@@ -130,7 +130,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
         <span v-else-if="schedule?.kind === 'date'" class="text-muted">{{ schedule.date }}</span>
         <span v-else class="text-muted" aria-hidden="true">–</span>
       </span>
-      <TeamImg :team-name="teamB?.team.name" :logo="teamB?.team" size="xs" />
+      <TeamImg :team-name="slotName(match.participants, 1)" :logo="teamB?.team" size="xs" />
       <span class="truncate text-default group-hover:text-highlighted" :title="teamBName">
         {{ shortTeamName(teamBName) }}
       </span>

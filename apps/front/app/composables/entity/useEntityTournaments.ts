@@ -68,6 +68,7 @@ export function splitTournaments(
     name: tournament.name,
     slug: tournament.slug,
     event: tournament.event,
+    formatLabel: nonDefaultFormatLabel(tournament.format),
     beginAt: tournament.beginAt ?? null,
     endAt: tournament.endAt ?? null,
     status: getTournamentStatus(tournament, now) ?? "finished",

@@ -13,8 +13,8 @@ const discoveryStatus = computed(() => resolveMatchDiscoveryStatus(match));
   <TournamentMatchScoreLink
     :match="match"
     :name="match.name"
-    :team-a-name="match.participants?.[0]?.team.name"
-    :team-b-name="match.participants?.[1]?.team.name"
+    :team-a-name="slotName(match.participants, 0)"
+    :team-b-name="slotName(match.participants, 1)"
     :participant-a-id="match.participants?.[0]?.id"
     :participant-b-id="match.participants?.[1]?.id"
     :results="match.results"

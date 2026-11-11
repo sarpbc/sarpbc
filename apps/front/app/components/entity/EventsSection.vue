@@ -42,6 +42,7 @@ const hasEvents = computed(() => live.value.length > 0 || activeEvents.value.len
 function eventMeta(event: EntityEventListItem): string {
   return [
     distinctStageName(event),
+    event.formatLabel,
     formatTournamentDateRange(event.beginAt, event.endAt, locale.value),
   ]
     .filter(Boolean)
