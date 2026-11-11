@@ -1564,7 +1564,18 @@
         "watch": {
           "noStream": "Aucun stream officiel annoncé",
           "noReplay": "Aucune rediffusion disponible",
-          "linkLabel": "Regarder sur {source}, {language} (s’ouvre dans un nouvel onglet)"
+          "linkLabel": "Regarder {channel} sur {platform}, {language} (s’ouvre dans un nouvel onglet)",
+          "dataFrom": "Streams référencés par",
+          "platforms": {
+            "twitch": "Twitch",
+            "youtube": "YouTube",
+            "kick": "Kick",
+            "other": "Site web"
+          },
+          "kinds": {
+            "official": "Officiel",
+            "costream": "Co-stream"
+          }
         },
         "h2h": {
           "record": "{teamA} {teamAWins} - {teamBWins} {teamB}",

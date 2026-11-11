@@ -6,7 +6,11 @@ import type { RosterProposalStore, RosterProposalTransaction } from "../../appli
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { User } from "../../../user/infrastructure/user-persistence";
 import { participantName } from "@sarpbc/utils";
-import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
+import {
+  Match,
+  Tournament,
+  TournamentEvent,
+} from "../../../tournament/infrastructure/competition-persistence";
 import * as Row from "./roster-proposal.entity";
 
 function toProposal(row: Row.RosterProposal): RosterProposal {
@@ -59,7 +63,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       if (!inTransaction) await em.flush();
     },
     names: async (ids) => {
-      const [players, teams, users, tournaments, matches] = await Promise.all([
+      const [players, teams, users, tournaments, matches, events] = await Promise.all([
         ids.players.length
           ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
           : [],
@@ -79,11 +83,15 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
               { populate: ["participants.team", "participants.players", "tournament.event"] },
             )
           : [],
+        ids.events.length
+          ? em.find(TournamentEvent, { id: { $in: ids.events } }, { fields: ["id", "name"] })
+          : [],
       ]);
       return Object.fromEntries([
         ...players.map((player) => [player.id, player.name]),
         ...teams.map((team) => [team.id, team.name]),
         ...users.map((user) => [user.id, user.userName]),
+        ...events.map((event) => [event.id, event.name]),
         ...tournaments.map((tournament) => [
           tournament.id,
           `${tournament.event.name} · ${tournament.name}`,

@@ -23,6 +23,7 @@ import { TournamentCron } from "./jobs/tournament.cron";
 import { ManualTournamentService } from "../application/manual-tournament.service";
 import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
+import { StreamService } from "../application/stream.service";
 import { PlayerAwardService } from "../application/player-award.service";
 import { TournamentPrizeService } from "../application/tournament-prize.service";
 import { CompetitionSyncService } from "../application/sync/competition-sync.service";
@@ -198,6 +199,12 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      provide: StreamService,
+      useFactory: (tx: MikroOrmCompetitionTransaction, afterCommit: CompetitionAfterCommit) =>
+        new StreamService(tx, afterCommit),
+      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
+    },
+    {
       provide: PlayerAwardService,
       useFactory: (reads: CompetitionAwardQueries, tx: MikroOrmCompetitionTransaction) =>
         new PlayerAwardService(reads, tx),
@@ -227,6 +234,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     ManualTournamentService,
     ManualCatalogService,
     MatchService,
+    StreamService,
     PlayerAwardService,
     TournamentPrizeService,
   ],

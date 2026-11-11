@@ -16,6 +16,7 @@ import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
+import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
@@ -563,6 +564,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
+
+    await check(
+      "watch streams inherit from event to tournament to match and a match override replaces them",
+      async () => {
+        await verifyStreams({ request, staffCookie, memberCookie, tournament, match });
+      },
+    );
 
     await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
       assert.equal(tournament.slug, "integration-cup");
@@ -1401,6 +1409,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const upcoming = await callTool("get_upcoming_matches", {});
       assert.equal(upcoming.total, upcoming.upcoming.length + upcoming.live.length);
       assert.ok(Array.isArray(await callTool("get_tournaments", {})));
+      await verifyStreamProposals({ request, staffCookie, callTool, review, tournament, match });
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 

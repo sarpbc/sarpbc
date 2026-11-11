@@ -326,8 +326,8 @@ const scoreboardLabel = computed(() => {
           <MatchVods :vods="match.vods ?? []" class="flex-1" />
         </SRail>
         <SRail v-else :title="t('page.match.detail.sections.watch')">
-          <MatchStreams
-            :streams="match.officialStreams ?? []"
+          <StreamList
+            :streams="match.watchStreams ?? []"
             :live="matchStatus === 'live'"
             class="flex-1"
           />

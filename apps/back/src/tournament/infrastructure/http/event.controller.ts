@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from "@nestjs/common";
@@ -20,6 +21,8 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { EventQueries } from "../../application/ports";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
+import { StreamService } from "../../application/stream.service";
+import { SetStreamsDto } from "./dto/set-streams.dto";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EVENT_QUERIES } from "../competition-queries.tokens";
@@ -35,6 +38,7 @@ export class EventController {
     @Inject(EVENT_QUERIES) private readonly events: EventQueries,
     private readonly tournamentRead: CachedTournamentRead,
     private readonly catalogService: ManualCatalogService,
+    private readonly streamService: StreamService,
   ) {}
 
   @Get()
@@ -80,6 +84,20 @@ export class EventController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body({ schema: UpdateEventDto }) dto: UpdateEventDto) {
     return { event: mapStaffEvent(await this.catalogService.updateEvent(id, dto)) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Get(":id/streams")
+  getStreams(@Param("id") id: string) {
+    return this.streamService.find({ kind: "event", id });
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/streams")
+  setStreams(@Param("id") id: string, @Body({ schema: SetStreamsDto }) body: SetStreamsDto) {
+    return this.streamService.set({ kind: "event", id }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")

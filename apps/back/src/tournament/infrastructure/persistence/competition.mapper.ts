@@ -33,6 +33,7 @@ export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
     slug: row.slug,
     name: row.name,
     league: row.league ? toLeague(row.league) : null,
+    streams: row.streams ?? [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -87,6 +88,8 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
     pickemsEnabled: row.pickemsEnabled,
     source: row.source,
     pandascoreId: row.pandascoreId,
+    streams: row.streams ?? [],
+    eventStreams: row.event.streams ?? [],
   };
 }
 export function toMatch(row: Row.Match): Match {
@@ -101,6 +104,7 @@ export function toMatch(row: Row.Match): Match {
     status: row.status,
     numberOfGames: row.numberOfGames,
     officialStreams: row.officialStreams ?? [],
+    streams: row.streams ?? [],
     vods: row.vods ?? [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -148,6 +152,8 @@ export function toTournament(row: Row.Tournament): Tournament {
     imageUrl: row.imageUrl,
     pickemsEnabled: row.pickemsEnabled,
     hasBracket: row.hasBracket,
+    streams: row.streams ?? [],
+    eventStreams: row.event.streams ?? [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     league: row.league ? toLeague(row.league) : null,

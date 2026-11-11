@@ -234,6 +234,9 @@
         "update_contract": "Modification du contrat",
         "set_tournament_prizes": "Répartition des gains",
         "award_player": "Récompense joueur",
+        "set_event_streams": "Streams de l'événement",
+        "set_tournament_streams": "Streams du tournoi",
+        "set_match_streams": "Streams du match",
         "delete_match": "Suppression de match",
         "delete_team": "Suppression d'équipe"
       },
@@ -260,6 +263,9 @@
         "prizes": "Gains",
         "placement": "{placement}re place | {placement}e place",
         "matchId": "Match",
+        "eventId": "Événement",
+        "streams": "Streams",
+        "stream": "Stream {number}",
         "reason": "Motif",
         "mergeIntoTeamId": "Fusionner dans"
       },
@@ -281,7 +287,8 @@
         "yes": "Oui",
         "no": "Non",
         "ongoing": "En cours",
-        "noPrizes": "Vider la répartition"
+        "noPrizes": "Vider la répartition",
+        "noStreams": "Vider la liste"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
@@ -426,6 +433,46 @@
           "not-https": "Utilisez un lien https.",
           "unsupported-host": "Utilisez un lien twitch.tv, youtube.com ou youtu.be.",
           "invalid-timestamp": "Écrivez t= en secondes (123) ou sous la forme 1h2m3s.",
+          "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
+        }
+      },
+      "streams": {
+        "tournamentAction": "Streams du Tournoi",
+        "eventAction": "Streams de l’Événement",
+        "matchAction": "Streams",
+        "title": "Streams · {name}",
+        "description": "Diffusions en direct pour les spectateurs. Les streams saisis ici remplacent ceux hérités du match, du tournoi ou de l’événement.",
+        "url": "URL",
+        "urlPlaceholder": "https://www.twitch.tv/rocketleague",
+        "detectedPlatform": "Plateforme détectée : {platform}",
+        "channel": "Chaîne",
+        "channelPlaceholder": "Nom de la chaîne",
+        "language": "Langue",
+        "kind": "Type",
+        "kinds": {
+          "official": "Officiel",
+          "costream": "Co-stream"
+        },
+        "platforms": {
+          "twitch": "Twitch",
+          "youtube": "YouTube",
+          "kick": "Kick",
+          "other": "Autre"
+        },
+        "add": "Ajouter un Stream",
+        "remove": "Supprimer le Stream",
+        "cancel": "Annuler",
+        "save": "Enregistrer les Streams",
+        "saved": "Streams enregistrés",
+        "saveError": "Impossible d’enregistrer les streams",
+        "empty": "Aucun stream pour l’instant. Ajoutez-en un par chaîne et par langue. | Aucun stream pour l’instant. Le stream hérité s’affiche tant que vous n’en ajoutez pas. | Aucun stream pour l’instant. Les {count} streams hérités s’affichent tant que vous n’en ajoutez pas.",
+        "loading": "Chargement des streams…",
+        "loadError": "Impossible de charger les streams.",
+        "retry": "Réessayer",
+        "errors": {
+          "invalid-url": "Saisissez une URL complète.",
+          "not-https": "Utilisez un lien https.",
+          "channel-required": "Saisissez le nom de la chaîne.",
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
         }
       },

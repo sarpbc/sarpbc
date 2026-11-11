@@ -88,6 +88,8 @@ describe("API smoke (e2e)", () => {
       event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
       beginAt: null,
       league: Object.assign(new League(), { name: "RLCS Major" }),
+      streams: [],
+      eventStreams: [],
     },
   });
   const matchService = {

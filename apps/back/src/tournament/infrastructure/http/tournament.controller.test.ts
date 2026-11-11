@@ -5,6 +5,17 @@ import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { League, Tournament } from "../../domain/competition";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
+import { CompetitionAfterCommit } from "../../application/after-commit";
+import { StreamService } from "../../application/stream.service";
+
+const unusedStreams = new StreamService(
+  { run: () => Promise.reject(new Error("unused")) },
+  new CompetitionAfterCommit(
+    { invalidateTournament: async () => {} },
+    { publish: async () => {} },
+    { error: () => {} },
+  ),
+);
 
 describe("TournamentController.findOne", () => {
   const redis = { get: vi.fn(), set: vi.fn() };
@@ -28,6 +39,7 @@ describe("TournamentController.findOne", () => {
       ),
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
       {} as never,
+      unusedStreams,
     );
     redis.get.mockResolvedValue(null);
   });
@@ -68,6 +80,7 @@ describe("TournamentController leagues", () => {
     {} as never,
     {} as never,
     catalog as never,
+    unusedStreams,
   );
   const manual = Object.assign(new League(), {
     id: "l1",

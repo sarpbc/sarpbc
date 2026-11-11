@@ -1,8 +1,9 @@
 import { v4 } from "uuid";
 import { isMatchFinished, matchSlug, participantName, type NamedParticipant } from "@sarpbc/utils";
-import type { MatchVod, TournamentEventRef } from "@sarpbc/types";
+import type { MatchVod, Stream, TournamentEventRef } from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
+import { effectiveStreams, pandascoreStreams } from "./stream";
 import type { DataSource, TournamentFormat } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 export class League {
@@ -46,6 +47,8 @@ export interface TournamentSummary {
   pickemsEnabled: boolean;
   source: DataSource;
   pandascoreId: number | null;
+  streams: Stream[];
+  eventStreams: Stream[];
 }
 export class Match {
   id = v4();
@@ -62,6 +65,7 @@ export class Match {
   previousMatches: BracketLink[] = [];
   results: MatchResult[] = [];
   officialStreams: OfficialMatchStream[] = [];
+  streams: Stream[] = [];
   vods: MatchVod[] = [];
   createdAt = new Date();
   updatedAt = new Date();
@@ -75,6 +79,16 @@ export class Match {
   }
   isDecided(): boolean {
     return this.winner !== null && this.hasEnded();
+  }
+  inheritedStreams(): Stream[] {
+    return effectiveStreams(
+      pandascoreStreams(this.officialStreams),
+      this.tournament.streams,
+      this.tournament.eventStreams,
+    );
+  }
+  watchStreams(): Stream[] {
+    return effectiveStreams(this.streams, this.inheritedStreams());
   }
 }
 export interface MatchSlugSource {
@@ -114,10 +128,15 @@ export class Tournament {
   league: League | null = null;
   pickemsEnabled = false;
   hasBracket = false;
+  streams: Stream[] = [];
+  eventStreams: Stream[] = [];
   createdAt = new Date();
   updatedAt = new Date();
   matches: Match[] = [];
   participants: TournamentParticipant[] = [];
+  watchStreams(): Stream[] {
+    return effectiveStreams(this.streams, this.eventStreams);
+  }
   assertDateOrder(): void {
     if (this.beginAt && this.endAt && this.endAt < this.beginAt)
       throw new InvalidInputError("End date must be on or after the start date.");

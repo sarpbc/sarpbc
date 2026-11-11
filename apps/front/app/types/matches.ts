@@ -1,7 +1,12 @@
-import type { MatchGameStats, MatchListItem, MatchVod, ParticipantRef } from "@sarpbc/types";
+import type {
+  MatchGameStats,
+  MatchListItem,
+  MatchVod,
+  ParticipantRef,
+  Stream,
+} from "@sarpbc/types";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
-import type { OfficialMatchStream } from "~/utils/officialStream";
 
 export interface MatchResult {
   participant: string;
@@ -111,7 +116,7 @@ export interface Match {
   updatedAt: Date;
   tournament: Tournament;
   previousMatches?: BracketLink[];
-  officialStreams?: OfficialMatchStream[];
+  watchStreams?: Stream[];
   vods?: MatchVod[];
 }
 

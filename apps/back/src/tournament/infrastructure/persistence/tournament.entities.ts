@@ -6,7 +6,7 @@ import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
 import type { DataSource, TournamentFormat } from "@sarpbc/types";
-import type { MatchVod } from "@sarpbc/types";
+import type { MatchVod, Stream } from "@sarpbc/types";
 
 export class League {
   id: string = v4();
@@ -27,6 +27,7 @@ export class TournamentEvent {
   slug!: string;
   name!: string;
   league: League | null = null;
+  streams: Stream[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   stages = new Collection<Tournament>(this);
@@ -54,6 +55,7 @@ export class Tournament {
   league: League | null = null;
   pickemsEnabled = false;
   hasBracket = false;
+  streams: Stream[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   matches = new Collection<Match>(this);
@@ -98,6 +100,7 @@ export class Match {
   previousMatches = new Collection<BracketLink>(this);
   results = new Collection<MatchResult>(this);
   officialStreams: OfficialMatchStream[] = [];
+  streams: Stream[] = [];
   vods: MatchVod[] = [];
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
@@ -131,6 +134,7 @@ export const TournamentEventSchema = defineEntity({
     slug: p.string().unique(),
     name: p.string(),
     league: p.manyToOne(League).nullable(),
+    streams: p.json().$type<Stream[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
@@ -166,6 +170,7 @@ export const TournamentSchema = defineEntity({
     league: p.manyToOne(League).nullable(),
     pickemsEnabled: p.boolean().default(false),
     hasBracket: p.boolean().default(false),
+    streams: p.json().$type<Stream[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
@@ -210,6 +215,7 @@ export const MatchSchema = defineEntity({
     previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
     results: p.oneToMany(MatchResult).mappedBy("match"),
     officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
+    streams: p.json().$type<Stream[]>().default([]),
     vods: p.json().$type<MatchVod[]>().default([]),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p

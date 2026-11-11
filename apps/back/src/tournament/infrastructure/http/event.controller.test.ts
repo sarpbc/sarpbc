@@ -4,6 +4,17 @@ import { League, Tournament } from "../../domain/competition";
 import { TournamentEvent } from "../../domain/tournament-event";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EventController } from "./event.controller";
+import { CompetitionAfterCommit } from "../../application/after-commit";
+import { StreamService } from "../../application/stream.service";
+
+const unusedStreams = new StreamService(
+  { run: () => Promise.reject(new Error("unused")) },
+  new CompetitionAfterCommit(
+    { invalidateTournament: async () => {} },
+    { publish: async () => {} },
+    { error: () => {} },
+  ),
+);
 
 const STAGE_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 const league = Object.assign(new League(), {
@@ -57,6 +68,7 @@ describe("EventController", () => {
     events as never,
     new CachedTournamentRead(tournaments, redis),
     catalog as never,
+    unusedStreams,
   );
 
   beforeEach(() => {

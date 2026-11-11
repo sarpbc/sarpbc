@@ -82,6 +82,14 @@
   {
     "controller": "\"events\"",
     "verb": "GET",
+    "path": "\":id/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
     "path": "\"\"",
     "status": null,
     "guards": [],
@@ -131,6 +139,14 @@
     "controller": "\"events\"",
     "verb": "POST",
     "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "PUT",
+    "path": "\":id/streams\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]
@@ -1050,6 +1066,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
+    "path": "\":id/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
     "path": "\":id\"",
     "status": null,
     "guards": [],
@@ -1070,6 +1094,14 @@
     "status": null,
     "guards": [],
     "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
+    "path": "\"matches/:matchId/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
   },
   {
     "controller": "\"tournaments\"",
@@ -1179,6 +1211,22 @@
     "controller": "\"tournaments\"",
     "verb": "PUT",
     "path": "\":id/prizes\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\":id/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\"matches/:matchId/streams\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

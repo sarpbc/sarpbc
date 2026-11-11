@@ -87,6 +87,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       imageUrl: model.imageUrl,
       pickemsEnabled: model.pickemsEnabled,
       hasBracket: model.hasBracket,
+      streams: unchangedJson(row.streams, model.streams),
     });
     row.event = this.em.getReference(Row.TournamentEvent, model.event.id);
     row.league = model.league ? this.em.getReference(Row.League, model.league.id) : null;
@@ -270,9 +271,8 @@ export class CompetitionMatchWriter implements MatchWriter {
       status: model.status,
       numberOfGames: model.numberOfGames,
       // jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
-      officialStreams: isDeepStrictEqual(row.officialStreams, model.officialStreams)
-        ? row.officialStreams
-        : model.officialStreams,
+      officialStreams: unchangedJson(row.officialStreams, model.officialStreams),
+      streams: unchangedJson(row.streams, model.streams),
       vods: model.vods,
     });
     row.tournament = this.em.getReference(Row.Tournament, model.tournament.id);
@@ -372,6 +372,7 @@ export class CompetitionEventWriter implements EventWriter {
       pandascoreSerieId: model.pandascoreSerieId,
       slug: model.slug,
       name: model.name,
+      streams: unchangedJson(row.streams, model.streams),
     });
     row.league = model.league ? this.em.getReference(Row.League, model.league.id) : null;
     this.em.persist(row);
@@ -380,6 +381,9 @@ export class CompetitionEventWriter implements EventWriter {
     const row = await this.em.findOne(Row.TournamentEvent, { id });
     if (row) this.em.remove(row);
   }
+}
+function unchangedJson<T>(current: T, next: T): T {
+  return isDeepStrictEqual(current, next) ? current : next;
 }
 function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
   let tournaments: CompetitionTournamentWriter | undefined;

@@ -23,6 +23,8 @@ function tournament(source: TournamentSummary["source"]): TournamentSummary {
     pickemsEnabled: false,
     source,
     pandascoreId: null,
+    streams: [],
+    eventStreams: [],
   };
 }
 

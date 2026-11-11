@@ -200,5 +200,6 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
         type: link.type,
       })),
     })),
+    watchStreams: tournament.watchStreams(),
   };
 }

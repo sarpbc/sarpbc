@@ -12,6 +12,7 @@ const eventId = computed(() => route.params.id as string);
 const formState = ref(eventToFormState(null));
 const isSaving = ref(false);
 const eventToDelete = ref<ManualEvent | null>(null);
+const streamsOpen = ref(false);
 
 const {
   data: event,
@@ -77,9 +78,15 @@ async function handleSubmit() {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <div v-if="event?.editable" class="flex flex-row gap-2">
+      <div v-if="event" class="flex flex-row gap-2">
         <UButton
-          v-if="event.stages.length === 0"
+          variant="soft"
+          icon="i-fluent-live-24-regular"
+          :label="$t('page.tournaments.streams.eventAction')"
+          @click="streamsOpen = true"
+        />
+        <UButton
+          v-if="event.editable && event.stages.length === 0"
           icon="i-fluent-delete-24-regular"
           color="error"
           variant="soft"
@@ -87,6 +94,7 @@ async function handleSubmit() {
           @click="eventToDelete = event"
         />
         <UButton
+          v-if="event.editable"
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.events.save')"
           :loading="isSaving"
@@ -174,6 +182,13 @@ async function handleSubmit() {
         </template>
       </div>
     </DashboardContent>
+
+    <StreamEditor
+      v-if="event"
+      v-model:open="streamsOpen"
+      :path="`/events/${event.id}/streams`"
+      :title="$t('page.tournaments.streams.title', { name: event.name })"
+    />
 
     <ConfirmDeleteModal
       v-model:target="eventToDelete"

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { RosterProposal } from "@sarpbc/types";
+import type { RosterProposal, StreamInput } from "@sarpbc/types";
 import { getApiErrorMessage, hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
@@ -60,6 +60,34 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
+function streamRows(
+  targetKey: "eventId" | "tournamentId" | "matchId",
+  targetId: string,
+  streams: StreamInput[],
+): { key: string; label: string; value: string }[] {
+  return [
+    { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
+    ...(streams.length === 0
+      ? [
+          {
+            key: "streams",
+            label: t("page.proposals.fields.streams"),
+            value: t("page.proposals.values.noStreams"),
+          },
+        ]
+      : streams.map((stream, index) => ({
+          key: `stream-${index}`,
+          label: t("page.proposals.fields.stream", { number: index + 1 }),
+          value: [
+            stream.url,
+            stream.language,
+            t(`page.tournaments.streams.kinds.${stream.kind}`),
+            ...(stream.channel ? [stream.channel] : []),
+          ].join(" · "),
+        }))),
+  ];
+}
+
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
   const { change } = proposal;
   if (change.kind === "set_tournament_prizes") {
@@ -91,6 +119,15 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
             ].join(" · "),
           }))),
     ];
+  }
+  if (change.kind === "set_event_streams") {
+    return streamRows("eventId", change.eventId, change.streams);
+  }
+  if (change.kind === "set_tournament_streams") {
+    return streamRows("tournamentId", change.tournamentId, change.streams);
+  }
+  if (change.kind === "set_match_streams") {
+    return streamRows("matchId", change.matchId, change.streams);
   }
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;

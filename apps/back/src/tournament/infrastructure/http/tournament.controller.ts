@@ -31,6 +31,8 @@ import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 import { ManualTournamentService } from "../../application/manual-tournament.service";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { MatchService } from "../../application/match/match.service";
+import { StreamService } from "../../application/stream.service";
+import { SetStreamsDto } from "./dto/set-streams.dto";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
@@ -61,6 +63,7 @@ export class TournamentController {
     private tournamentPrizeService: TournamentPrizeService,
     private tournamentPrizesRead: CachedTournamentPrizesRead,
     private catalogService: ManualCatalogService,
+    private streamService: StreamService,
   ) {}
 
   @Get()
@@ -268,6 +271,40 @@ export class TournamentController {
   ) {
     const match = await this.matchService.setVods(matchId, body.vods);
     return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Get("matches/:matchId/streams")
+  getMatchStreams(@Param("matchId") matchId: string) {
+    return this.streamService.find({ kind: "match", id: matchId });
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/streams")
+  setMatchStreams(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
+  ) {
+    return this.streamService.set({ kind: "match", id: matchId }, body.streams, "manual");
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Get(":id/streams")
+  getTournamentStreams(@Param("id") id: string) {
+    return this.streamService.find({ kind: "tournament", id });
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/streams")
+  setTournamentStreams(
+    @Param("id") id: string,
+    @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
+  ) {
+    return this.streamService.set({ kind: "tournament", id }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")
