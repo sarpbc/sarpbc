@@ -95,8 +95,11 @@ export function mapTournamentMatchListItem(match: Match): TournamentMatchListIte
   };
 }
 
-export function withPublicSlug(
-  match: Match,
-): Omit<Match, "hasEnded" | "isDecided" | "stampEnd"> & { slug: string } {
+export function withPublicSlug(match: Match): Omit<
+  Match,
+  "hasEnded" | "isDecided" | "stampEnd" | "inheritedStreams" | "watchStreams"
+> & {
+  slug: string;
+} {
   return { ...match, slug: matchPublicSlug(match) };
 }

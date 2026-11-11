@@ -4,6 +4,7 @@ import {
   PLAYER_AWARD_TYPES,
   PLAYER_STATUSES,
   ROSTER_PROPOSAL_STATUSES,
+  STREAM_KINDS,
   TEAM_LOGO_VARIANTS,
   type PlayerStatus,
   type RosterChange,
@@ -13,9 +14,12 @@ import {
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,
   MAX_PRIZE_PLAYERS,
+  MAX_STREAMS,
   ROSTER_PROPOSAL_PERMISSIONS,
+  STREAM_CHANNEL_MAX_LENGTH,
   isIso4217Code,
 } from "@sarpbc/utils";
+import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
 import { InvalidInputError } from "../../../common/domain/errors";
 import {
   MAX_TEAM_LOGO_BYTES,
@@ -45,6 +49,41 @@ const sourceUrlSchema = z
   .describe(
     "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
+
+const streamsSchema = z
+  .array(
+    z.object({
+      url: z
+        .string()
+        .min(1)
+        .max(2048)
+        .describe(
+          "https URL of the live channel (twitch.tv, youtube.com, kick.com or another site).",
+        ),
+      language: z
+        .string()
+        .min(2)
+        .max(2)
+        .describe("ISO 639-1 language of the broadcast (e.g. en, fr, de, es)."),
+      kind: z
+        .enum(STREAM_KINDS)
+        .describe("official for the organiser's broadcast, costream for an authorised co-stream."),
+      channel: z
+        .string()
+        .max(STREAM_CHANNEL_MAX_LENGTH)
+        .optional()
+        .describe(
+          "Channel name. Optional for twitch.tv, kick.com and youtube.com/@handle URLs, where it defaults to the channel in the URL.",
+        ),
+    }),
+  )
+  .max(MAX_STREAMS)
+  .describe(
+    "The complete list of live streams; once approved it replaces the current list. An empty list clears it, so the inherited list shows again.",
+  );
+
+const STREAMS_NOTE =
+  "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted. start.gg tournaments and matches are refused. A start.gg sourceUrl marks the streams as start.gg data: the site shows them with credit and they stay out of the MCP.";
 
 const reasonSchema = z
   .string()
@@ -79,6 +118,17 @@ const LOGO_LIMITS = `at most ${MAX_TEAM_LOGO_BYTES / (1024 * 1024)} MB, at least
 
 export interface RosterToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose" | "proposeTeamLogo" | "list">;
+}
+
+function redistributableChange(change: RosterChange, sourceUrl: string): RosterChange {
+  switch (change.kind) {
+    case "set_event_streams":
+    case "set_tournament_streams":
+    case "set_match_streams":
+      return isRedistributable(sourceFromUrl(sourceUrl)) ? change : { ...change, streams: [] };
+    default:
+      return change;
+  }
 }
 
 function proposed(proposal: RosterProposal, sourceUrl: string | undefined): ToolWrite {
@@ -447,6 +497,48 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     }),
 
     defineTool({
+      name: "set_event_streams",
+      description: `Propose the live streams of a tournament event. Nothing changes until a staff member approves it in the admin app. Read get_event first. ${STREAMS_NOTE}`,
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        eventId: z.string().uuid().describe("Event UUID."),
+        streams: streamsSchema,
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ eventId, streams, sourceUrl }, user) =>
+        propose({ kind: "set_event_streams", eventId, streams }, sourceUrl, user.id),
+    }),
+
+    defineTool({
+      name: "set_tournament_streams",
+      description: `Propose the live streams of one tournament stage. Nothing changes until a staff member approves it in the admin app. Read get_tournament first. ${STREAMS_NOTE}`,
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        streams: streamsSchema,
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ tournamentId, streams, sourceUrl }, user) =>
+        propose({ kind: "set_tournament_streams", tournamentId, streams }, sourceUrl, user.id),
+    }),
+
+    defineTool({
+      name: "set_match_streams",
+      description: `Propose the live streams of one match, for a series broadcast on another channel than its tournament (a B stream, a regional channel). Nothing changes until a staff member approves it in the admin app. ${STREAMS_NOTE}`,
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        matchId: z.string().uuid().describe("Match UUID."),
+        streams: streamsSchema,
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ matchId, streams, sourceUrl }, user) =>
+        propose({ kind: "set_match_streams", matchId, streams }, sourceUrl, user.id),
+    }),
+
+    defineTool({
       name: "propose_delete_match",
       description:
         "Propose deleting a match that should not exist, such as a series imported twice. Nothing is deleted until a staff member approves it in the admin app. Once approved, the match is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches. PandaScore and start.gg matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first and run list_roster_proposals to avoid proposing it twice.",
@@ -515,7 +607,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         return {
           proposals: proposals.map((proposal) => ({
             id: proposal.id,
-            change: proposal.change,
+            change: redistributableChange(proposal.change, proposal.sourceUrl),
             sourceUrl: proposal.sourceUrl,
             status: proposal.status,
             entityId: proposal.entityId,

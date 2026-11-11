@@ -1,4 +1,5 @@
 import type { TeamLogos, TeamSummary } from "./team";
+import type { Stream } from "./stream";
 import type { TournamentEventRef } from "./tournament-event";
 
 export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
@@ -99,6 +100,7 @@ export interface TournamentDetail {
   winner: ParticipantRef<TeamSummary> | null;
   participants: TournamentDetailParticipant[];
   matches: TournamentDetailMatch[];
+  watchStreams: Stream[];
 }
 
 export interface MatchListItem {

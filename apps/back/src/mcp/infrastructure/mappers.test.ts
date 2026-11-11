@@ -1,8 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, Stream } from "@sarpbc/types";
 import { Player, Team } from "../../roster/domain/roster";
-import { Tournament, TournamentParticipant, type Match } from "../../tournament/domain/competition";
-import { isRedistributableMatch, mapListedParticipants, mapTournamentDetail } from "./mappers";
+import { Match, Tournament, TournamentParticipant } from "../../tournament/domain/competition";
+import { TournamentEvent } from "../../tournament/domain/tournament-event";
+import {
+  isRedistributableMatch,
+  mapEvent,
+  mapListedParticipants,
+  mapMatchListResponse,
+  mapTournamentDetail,
+  redistributableStreams,
+} from "./mappers";
 
 function match(source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match {
   return {
@@ -76,5 +84,51 @@ describe("mapTournamentDetail participants", () => {
     const tournament = cup("startgg");
     expect(mapTournamentDetail(tournament)).not.toHaveProperty("participants");
     expect(mapListedParticipants(tournament.source, tournament.participants)).toEqual({});
+  });
+});
+
+describe("MCP streams", () => {
+  function listed(url: string, source: DataSource): Stream {
+    return { url, platform: "twitch", channel: url, language: "en", kind: "official", source };
+  }
+  const manual = listed("https://twitch.tv/manual", "manual");
+  const startgg = listed("https://twitch.tv/startgg", "startgg");
+
+  it("drops start.gg streams from tournament and event reads", () => {
+    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+    const tournament = Object.assign(new Tournament(), {
+      id: "cup",
+      slug: "coupe",
+      source: "manual",
+      event: { id: "event", slug: "coupe", name: "Coupe" },
+      streams: [startgg, manual],
+    });
+    expect(mapTournamentDetail(tournament).streams).toEqual([manual]);
+
+    const event = Object.assign(new TournamentEvent(), { slug: "coupe", streams: [startgg] });
+    expect(mapEvent({ event, stages: [] }).streams).toEqual([]);
+  });
+
+  it("drops start.gg streams a match inherits from its tournament", () => {
+    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+    const inherited = Object.assign(new Match(), {
+      publicId: 1,
+      name: "Final",
+      tournament: {
+        id: "cup",
+        name: "Coupe",
+        slug: "coupe",
+        event: { id: "event", slug: "coupe", name: "Coupe" },
+        beginAt: null,
+        league: null,
+        pickemsEnabled: false,
+        source: "manual",
+        pandascoreId: null,
+        streams: [startgg, manual],
+        eventStreams: [],
+      },
+    });
+    expect(mapMatchListResponse(inherited).streams).toEqual([manual]);
+    expect(redistributableStreams([startgg])).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import type { DataSource } from "@sarpbc/types";
+import type { DataSource, Stream } from "@sarpbc/types";
 import { isoDay, participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
@@ -25,6 +25,10 @@ import {
 /** start.gg teams may play in a redistributable match; only the match and tournament source count. */
 export function isRedistributableMatch(match: Match): boolean {
   return isRedistributable(match.source) && isRedistributable(match.tournament.source);
+}
+
+export function redistributableStreams(streams: readonly Stream[]): Stream[] {
+  return streams.filter((stream) => isRedistributable(stream.source));
 }
 
 export function mapPlayerSummary(player: Player) {
@@ -138,6 +142,7 @@ export function mapEvent({ event, stages }: EventListing) {
     beginAt: starts.length ? new Date(Math.min(...starts)) : null,
     endAt: ends.length ? new Date(Math.max(...ends)) : null,
     stages: phases.map((phase) => ({ ...mapTournamentListItem(phase), tier: phase.tier })),
+    streams: redistributableStreams(event.streams),
     url: eventUrl(event.slug),
   };
 }
@@ -174,6 +179,7 @@ export function mapTournamentDetail(tournament: Tournament) {
       : null,
     ...mapListedParticipants(tournament.source, tournament.participants),
     matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
+    streams: redistributableStreams(tournament.watchStreams()),
   };
 }
 
@@ -188,6 +194,7 @@ export function mapMatchListResponse(match: Match) {
     status: match.status,
     endAt: match.endAt,
     winner: winner ? { participantId: winner.id, name: participantName(winner) } : null,
+    streams: redistributableStreams(match.watchStreams()),
     url: matchUrl(item.publicId, item.slug),
   };
 }

@@ -94,6 +94,8 @@ export type {
   TournamentPrize,
   TournamentPrizes,
 } from "./prize";
+export { STREAM_KINDS, STREAM_PLATFORMS } from "./stream";
+export type { Stream, StreamInput, StreamKind, StreamPlatform, StreamsResponse } from "./stream";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,

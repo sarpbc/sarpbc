@@ -159,6 +159,10 @@ export class MatchController {
   async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
     const detail = await this.matchService.findDetail(ref);
     const games = await this.gameStats.byMatch(detail.match.id);
-    return { ...detail, match: withPublicSlug(detail.match), games };
+    return {
+      ...detail,
+      match: { ...withPublicSlug(detail.match), watchStreams: detail.match.watchStreams() },
+      games,
+    };
   }
 }

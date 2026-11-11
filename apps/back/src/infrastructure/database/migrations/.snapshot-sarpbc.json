@@ -767,6 +767,23 @@
           "enumItems": [],
           "mappedType": "json"
         },
+        "streams": {
+          "name": "streams",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "pandascore_id": {
           "name": "pandascore_id",
           "type": "int",
@@ -3612,6 +3629,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "streams": {
+          "name": "streams",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "tier": {
           "name": "tier",

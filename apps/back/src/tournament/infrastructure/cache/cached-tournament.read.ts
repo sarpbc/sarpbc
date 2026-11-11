@@ -2,7 +2,7 @@ import { log } from "evlog";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentQueries } from "../../application/ports";
-import { DATA_SOURCES, TOURNAMENT_FORMATS } from "@sarpbc/types";
+import { DATA_SOURCES, STREAM_KINDS, STREAM_PLATFORMS, TOURNAMENT_FORMATS } from "@sarpbc/types";
 import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));
@@ -52,6 +52,14 @@ const match = z.strictObject({
     z.strictObject({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
   ),
 });
+const stream = z.strictObject({
+  url: z.string(),
+  platform: z.enum(STREAM_PLATFORMS),
+  channel: z.string(),
+  language: z.string(),
+  kind: z.enum(STREAM_KINDS),
+  source: z.enum(DATA_SOURCES),
+});
 const tournament = z.strictObject({
   id: z.string(),
   source: z.enum(DATA_SOURCES),
@@ -74,6 +82,7 @@ const tournament = z.strictObject({
   winner: participantRef.nullable(),
   participants: z.array(participant),
   matches: z.array(match),
+  watchStreams: z.array(stream),
 }) satisfies z.ZodType<TournamentDetailResponse>;
 
 export const tournamentCacheKey = (id: string): string => `tournament:${id}`;

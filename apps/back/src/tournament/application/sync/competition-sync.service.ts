@@ -193,6 +193,10 @@ export class CompetitionSyncService {
       await placeStage(scope.events, tournament, into);
       await scope.tournaments.save(tournament);
     }
+    if (into.streams.length === 0 && from.streams.length > 0) {
+      into.streams = from.streams;
+      await scope.events.save(into);
+    }
     await scope.events.remove(from.id);
     return { stageIds, matches: [] };
   }
@@ -229,7 +233,14 @@ export class CompetitionSyncService {
     await scope.tournaments.save(tournament);
     if (previousEventId && previousEventId !== event.id) {
       const remaining = await scope.events.stages(previousEventId);
-      if (!remaining.length) await scope.events.remove(previousEventId);
+      if (!remaining.length) {
+        const previous = await scope.events.load(previousEventId);
+        if (previous && event.streams.length === 0 && previous.streams.length > 0) {
+          event.streams = previous.streams;
+          await scope.events.save(event);
+        }
+        await scope.events.remove(previousEventId);
+      }
     }
     const participants = await scope.tournaments.participants(tournament.id);
     for (const roster of command.expectedRoster ?? []) {

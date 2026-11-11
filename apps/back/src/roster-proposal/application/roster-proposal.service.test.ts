@@ -1,4 +1,4 @@
-import type { RosterChange } from "@sarpbc/types";
+import type { RosterChange, StreamInput } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
@@ -7,6 +7,11 @@ import {
   NotFoundError,
 } from "../../common/domain/errors";
 import { Contract, Player, Team } from "../../roster/domain/roster";
+import {
+  replaceStreams,
+  type StreamEditSource,
+  type StreamOwner,
+} from "../../tournament/domain/stream";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { RosterProposalStore } from "./ports";
 import { RosterProposalService } from "./roster-proposal.service";
@@ -56,6 +61,17 @@ function setup() {
         throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
     }),
     deleteMatch: vi.fn(matchGuard),
+  };
+  const streams = {
+    requireProposable: vi.fn(async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
+      if (owner.id === "startgg-match")
+        throw new InvalidInputError("Streams of a start.gg match cannot be proposed");
+      replaceStreams([], inputs, "manual");
+    }),
+    set: vi.fn(async (_: StreamOwner, inputs: readonly StreamInput[], from: StreamEditSource) => ({
+      streams: replaceStreams([], inputs, from),
+      inherited: [],
+    })),
   };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
@@ -140,6 +156,7 @@ function setup() {
     awards,
     logos,
     matches,
+    streams,
   );
   return {
     saved,
@@ -153,6 +170,7 @@ function setup() {
     prizes,
     awards,
     matches,
+    streams,
     service,
   };
 }
@@ -170,6 +188,7 @@ describe("RosterProposalService", () => {
   let awards: ReturnType<typeof setup>["awards"];
   let merges: ReturnType<typeof setup>["merges"];
   let matches: ReturnType<typeof setup>["matches"];
+  let streams: ReturnType<typeof setup>["streams"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -185,6 +204,7 @@ describe("RosterProposalService", () => {
       prizes,
       awards,
       matches,
+      streams,
       service,
     } = setup());
   });
@@ -218,6 +238,7 @@ describe("RosterProposalService", () => {
       users: ["journalist"],
       tournaments: [],
       matches: [],
+      events: [],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -682,6 +703,85 @@ describe("RosterProposalService", () => {
     it("refuses to merge a team into itself or into a missing team", async () => {
       await expect(deleteTeam("kc-copy", "kc-copy")).rejects.toThrow("into itself");
       await expect(deleteTeam("kc-copy", "nope")).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("stream proposals", () => {
+    const list: StreamInput[] = [
+      { url: "https://twitch.tv/rlesports", language: "en", kind: "official" },
+      { url: "https://twitch.tv/kameto", language: "fr", kind: "costream" },
+    ];
+    const setMatchStreams = (sourceUrl: string, matchId = "match-1") =>
+      service.propose(
+        { kind: "set_match_streams", matchId, streams: list },
+        sourceUrl,
+        "journalist",
+      );
+
+    it("validates a stream list and keeps it pending until approval", async () => {
+      const proposal = await setMatchStreams(source);
+
+      expect(proposal).toMatchObject({ status: "pending", change: { streams: list } });
+      expect(streams.requireProposable).toHaveBeenCalledWith(
+        { kind: "match", id: "match-1" },
+        list,
+      );
+      expect(streams.set).not.toHaveBeenCalled();
+    });
+
+    it("refuses an invalid list or a start.gg match before recording anything", async () => {
+      await expect(
+        service.propose(
+          {
+            kind: "set_tournament_streams",
+            tournamentId: "stage-1",
+            streams: [{ url: "http://twitch.tv/rl", language: "en", kind: "official" }],
+          },
+          source,
+          "journalist",
+        ),
+      ).rejects.toThrow("must use https");
+      await expect(setMatchStreams(source, "startgg-match")).rejects.toThrow("start.gg");
+      expect(saved.size).toBe(0);
+    });
+
+    it("replaces the whole list on approval and marks start.gg sourced streams", async () => {
+      const manual = await setMatchStreams(source);
+      const startgg = await service.propose(
+        { kind: "set_event_streams", eventId: "event-1", streams: list },
+        "https://www.start.gg/tournament/rl-open",
+        "journalist",
+      );
+
+      expect(await service.approve(manual.id, "admin")).toMatchObject({ entityId: "match-1" });
+      expect(await service.approve(startgg.id, "admin")).toMatchObject({ entityId: "event-1" });
+
+      expect(streams.set).toHaveBeenNthCalledWith(
+        1,
+        { kind: "match", id: "match-1" },
+        list,
+        "manual",
+      );
+      expect(streams.set).toHaveBeenNthCalledWith(
+        2,
+        { kind: "event", id: "event-1" },
+        list,
+        "startgg",
+      );
+      const applied = await streams.set.mock.results[1]?.value;
+      expect(applied.streams.map((stream: { source: string }) => stream.source)).toEqual([
+        "startgg",
+        "startgg",
+      ]);
+    });
+
+    it("asks the reviewer for the tournament permission", async () => {
+      const { id } = await setMatchStreams(source);
+      staff.allowed = false;
+
+      await expect(service.approve(id, "admin")).rejects.toThrow(ForbiddenError);
+      expect(staff.permissions).toContain("tournaments.manage");
+      expect(streams.set).not.toHaveBeenCalled();
     });
   });
 });

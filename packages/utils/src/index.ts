@@ -70,6 +70,14 @@ export {
   type MatchVodUrlError,
 } from "./match-vod";
 export {
+  MAX_STREAMS,
+  STREAM_CHANNEL_MAX_LENGTH,
+  orderStreams,
+  parseStreamUrl,
+  type ParsedStreamUrl,
+  type StreamUrlError,
+} from "./stream";
+export {
   CURRENCY_CODE_LENGTH,
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,
