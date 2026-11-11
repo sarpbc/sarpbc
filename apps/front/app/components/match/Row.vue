@@ -69,13 +69,25 @@ const teamB = computed(() => match.participants?.[1]);
 const teamAName = computed(() => slotName(match.participants, 0) ?? t("components.match.tbd"));
 const teamBName = computed(() => slotName(match.participants, 1) ?? t("components.match.tbd"));
 
-const scoreA = computed(() => getMatchParticipantScore(match.results, teamA.value?.id));
-const scoreB = computed(() => getMatchParticipantScore(match.results, teamB.value?.id));
+const { isConcealed } = useSpoilerFree();
+const concealed = computed(() =>
+  isConcealed({ matchId: match.id, tournamentId: match.tournament?.id }),
+);
+
+const scoreA = computed(() =>
+  concealed.value ? null : getMatchParticipantScore(match.results, teamA.value?.id),
+);
+const scoreB = computed(() =>
+  concealed.value ? null : getMatchParticipantScore(match.results, teamB.value?.id),
+);
 
 const scoreChanged = ref(false);
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
 
 watch([scoreA, scoreB], () => {
+  if (concealed.value) {
+    return;
+  }
   scoreChanged.value = true;
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => {
@@ -108,7 +120,9 @@ function liveScoreClass(score: number | null, other: number | null): string {
         aria-live="polite"
         :aria-label="
           live
-            ? `${$t('components.match.liveShort')} ${scoreA ?? '–'} – ${scoreB ?? '–'}`
+            ? concealed
+              ? `${$t('components.match.liveShort')} ${$t('components.spoiler.hidden')}`
+              : `${$t('components.match.liveShort')} ${scoreA ?? '–'} – ${scoreB ?? '–'}`
             : undefined
         "
       >
@@ -116,7 +130,12 @@ function liveScoreClass(score: number | null, other: number | null): string {
           <span class="font-medium text-error" aria-hidden="true">
             {{ $t("components.match.liveShort") }}
           </span>
-          <span v-if="scoreA !== null || scoreB !== null" class="flex gap-1" aria-hidden="true">
+          <SpoilerHidden v-if="concealed" aria-hidden="true" />
+          <span
+            v-else-if="scoreA !== null || scoreB !== null"
+            class="flex gap-1"
+            aria-hidden="true"
+          >
             <span :class="liveScoreClass(scoreA, scoreB)">{{ scoreA ?? "–" }}</span>
             <span class="text-muted">-</span>
             <span :class="liveScoreClass(scoreB, scoreA)">{{ scoreB ?? "–" }}</span>

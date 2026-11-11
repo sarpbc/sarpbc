@@ -14,8 +14,13 @@ const teamB = computed(() => match.participants?.[1]);
 const nameA = computed(() => slotName(match.participants, 0) ?? "");
 const nameB = computed(() => slotName(match.participants, 1) ?? "");
 
+const { isConcealed } = useSpoilerFree();
+const concealed = computed(() =>
+  isConcealed({ matchId: match.id, tournamentId: match.tournament?.id }),
+);
+
 const winnerParticipantId = computed(() => {
-  if (!match.results || match.results.length < 2) {
+  if (concealed.value || !match.results || match.results.length < 2) {
     return null;
   }
 
@@ -49,7 +54,8 @@ function participantClass(participantId: string | undefined): string {
         {{ shortTeamName(nameA) || $t("components.match.tbd") }}
       </span>
       <TeamImg :team-name="nameA" :logo="teamA.team" size="xs" />
-      <span class="flex items-center justify-center gap-1 tabular-nums">
+      <SpoilerHidden v-if="concealed" />
+      <span v-else class="flex items-center justify-center gap-1 tabular-nums">
         <span :class="participantClass(teamA.id)">
           {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
         </span>

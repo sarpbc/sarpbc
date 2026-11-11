@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { participantName, playerPath, teamPath } from "@sarpbc/utils";
+import { participantName, playerPath, teamPath, type SpoilerRevealTarget } from "@sarpbc/utils";
 import type { ParticipantRef, TeamSummary, TournamentFormat } from "@sarpbc/types";
 import {
   formatTournamentDateRange,
@@ -19,6 +19,7 @@ const {
   champion = null,
   format = null,
   calendarPath = null,
+  spoilerTournamentIds = [],
 } = defineProps<{
   title: string;
   logoUrl?: string | null;
@@ -31,6 +32,7 @@ const {
   champion?: ParticipantRef<TeamSummary> | null;
   format?: TournamentFormat | null;
   calendarPath?: string | null;
+  spoilerTournamentIds?: readonly string[];
 }>();
 
 defineSlots<{
@@ -76,7 +78,23 @@ const championPath = computed(() => {
   return player && others.length === 0 ? playerPath(player.slug) : null;
 });
 
-const showChampion = computed(() => status.value === "finished" && champion != null);
+const { isConcealed } = useSpoilerFree();
+
+const concealed = computed(() =>
+  spoilerTournamentIds.some((tournamentId) => isConcealed({ tournamentId })),
+);
+
+const revealTargets = computed((): SpoilerRevealTarget[] =>
+  spoilerTournamentIds.map((id) => ({ kind: "tournament", id })),
+);
+
+const showReveal = computed(
+  () => concealed.value && (status.value === "live" || status.value === "finished"),
+);
+
+const showChampion = computed(
+  () => status.value === "finished" && champion != null && !concealed.value,
+);
 
 const showSubscribeCalendar = computed(
   () => calendarPath != null && (status.value === "live" || status.value === "upcoming"),
@@ -117,7 +135,7 @@ const showSubscribeCalendar = computed(
         </div>
 
         <div
-          v-if="metaItems.length > 0 || (showChampion && champion)"
+          v-if="metaItems.length > 0 || (showChampion && champion) || showReveal"
           class="mt-4 flex flex-wrap items-center gap-x-8 gap-y-2 text-base text-default"
         >
           <span
@@ -143,6 +161,12 @@ const showSubscribeCalendar = computed(
               {{ championName }}
             </span>
           </span>
+          <SpoilerRevealButton
+            v-if="showReveal"
+            :targets="revealTargets"
+            :label="t('components.spoiler.revealResults')"
+            size="sm"
+          />
         </div>
       </div>
       <slot />

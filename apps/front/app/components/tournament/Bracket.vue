@@ -23,6 +23,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
           v-for="match in bracketView.flatMatches"
           :key="match.id"
           :match="match"
+          :tournament-id="tournament.id"
         />
       </div>
     </template>
@@ -40,7 +41,12 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
           {{ group.round }}
         </h2>
         <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
-          <TournamentFlatMatchRow v-for="match in group.matches" :key="match.id" :match="match" />
+          <TournamentFlatMatchRow
+            v-for="match in group.matches"
+            :key="match.id"
+            :match="match"
+            :tournament-id="tournament.id"
+          />
         </div>
       </section>
     </template>
@@ -49,6 +55,7 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
       <TournamentBracketGrid
         v-if="bracketView.doubleEliminationLayout"
         :layout="bracketView.doubleEliminationLayout"
+        :tournament-id="tournament.id"
       />
       <div
         v-if="bracketView.lowerBracketFlatMatches.length"
@@ -58,12 +65,17 @@ const bracketView = computed(() => buildTournamentBracketView(tournament));
           v-for="match in bracketView.lowerBracketFlatMatches"
           :key="match.id"
           :match="match"
+          :tournament-id="tournament.id"
         />
       </div>
     </template>
 
     <template v-else>
-      <TournamentBracketGrid v-if="bracketView.upperLayout" :layout="bracketView.upperLayout" />
+      <TournamentBracketGrid
+        v-if="bracketView.upperLayout"
+        :layout="bracketView.upperLayout"
+        :tournament-id="tournament.id"
+      />
     </template>
   </div>
 </template>

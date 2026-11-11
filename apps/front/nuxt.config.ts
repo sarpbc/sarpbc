@@ -80,6 +80,8 @@ export default defineNuxtConfig({
       icons: [
         "fluent:text-align-justify-24-regular",
         "fluent:dismiss-24-regular",
+        "fluent:eye-24-regular",
+        "fluent:eye-off-24-regular",
         "fluent:trophy-24-regular",
         "fluent:weather-moon-24-regular",
         "fluent:weather-sunny-24-regular",

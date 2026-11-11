@@ -20,6 +20,7 @@ const {
   participantBId,
   results,
   winnerParticipantId = null,
+  tournamentId,
   compact = false,
   bracket = false,
   matchStatus,
@@ -36,6 +37,7 @@ const {
   participantBId?: string;
   results?: MatchResult[];
   winnerParticipantId?: string | null;
+  tournamentId?: string;
   compact?: boolean;
   bracket?: boolean;
   matchStatus: MatchStatus;
@@ -50,6 +52,9 @@ const detailTo = computed(() => {
   }
   return localePath(matchPath(match.publicId, match.slug));
 });
+
+const { isConcealed } = useSpoilerFree();
+const concealed = computed(() => isConcealed({ matchId: match.id, tournamentId }));
 
 const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
 const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
@@ -87,7 +92,7 @@ const displayTeamB = computed(() => {
 });
 
 function participantRowClass(participantId: string | undefined): string {
-  if (!winnerParticipantId || !participantId) {
+  if (concealed.value || !winnerParticipantId || !participantId) {
     return "";
   }
 
@@ -119,7 +124,10 @@ function participantRowClass(participantId: string | undefined): string {
       >
         <TeamImg :team-name="teamAName" :logo="teamALogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamA }}</span>
-        <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreA }}</span>
+        <template v-if="showScores">
+          <SpoilerHidden v-if="concealed" />
+          <span v-else class="tabular-nums text-xs">{{ displayScoreA }}</span>
+        </template>
       </div>
       <div
         :class="[
@@ -129,7 +137,10 @@ function participantRowClass(participantId: string | undefined): string {
       >
         <TeamImg :team-name="teamBName" :logo="teamBLogo" size="xs" />
         <span class="truncate text-xs">{{ displayTeamB }}</span>
-        <span v-if="showScores" class="tabular-nums text-xs">{{ displayScoreB }}</span>
+        <template v-if="showScores">
+          <SpoilerHidden v-if="concealed" />
+          <span v-else class="tabular-nums text-xs">{{ displayScoreB }}</span>
+        </template>
       </div>
     </template>
 
@@ -144,7 +155,10 @@ function participantRowClass(participantId: string | undefined): string {
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamA }}</span>
         </div>
         <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
-          <template v-if="showScores">{{ displayScoreA }}</template>
+          <template v-if="showScores">
+            <SpoilerHidden v-if="concealed" />
+            <template v-else>{{ displayScoreA }}</template>
+          </template>
         </span>
       </div>
       <div
@@ -157,7 +171,10 @@ function participantRowClass(participantId: string | undefined): string {
           <span :class="['truncate', compact ? 'text-xs' : 'text-sm']">{{ displayTeamB }}</span>
         </div>
         <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
-          <template v-if="showScores">{{ displayScoreB }}</template>
+          <template v-if="showScores">
+            <SpoilerHidden v-if="concealed" />
+            <template v-else>{{ displayScoreB }}</template>
+          </template>
         </span>
       </div>
     </template>

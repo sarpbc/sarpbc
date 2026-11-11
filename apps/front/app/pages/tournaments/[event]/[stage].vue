@@ -93,14 +93,18 @@ watch(
   { immediate: true },
 );
 
+const { isConcealed } = useSpoilerFree();
+
 const tournamentJsonLd = computed(() => {
   if (!tournament.value) {
     return null;
   }
 
-  return buildTournamentSportsEvent(tournament.value, {
-    includeContext: true,
-  });
+  const concealed = isConcealed({ tournamentId: tournament.value.id });
+  return buildTournamentSportsEvent(
+    concealed ? { ...tournament.value, winner: null } : tournament.value,
+    { includeContext: true },
+  );
 });
 
 setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
@@ -134,6 +138,7 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
         :champion="getTournamentChampion(tournament)"
         :format="tournament.format"
         :calendar-path="tournamentCalendarPath(tournament.id)"
+        :spoiler-tournament-ids="[tournament.id]"
       >
         <template #kicker>
           <SLink

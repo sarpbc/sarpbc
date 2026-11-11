@@ -5,10 +5,16 @@ import type { HeadToHead } from "~/types/matches";
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
-const { headToHead, teamAName, teamBName } = defineProps<{
+const {
+  headToHead,
+  teamAName,
+  teamBName,
+  concealed = false,
+} = defineProps<{
   headToHead: HeadToHead;
   teamAName: string;
   teamBName: string;
+  concealed?: boolean;
 }>();
 
 const hasMeetings = computed(() => headToHead.totalMeetings > 0);
@@ -34,7 +40,10 @@ function winnerLabel(winnerTeamId: string | null) {
 <template>
   <SCard class="flex flex-col">
     <SListItem v-if="hasMeetings" size="default" class="min-w-0">
-      <span class="w-full text-xs font-medium text-muted tabular-nums">
+      <span v-if="concealed" class="w-full text-xs font-medium text-muted">
+        {{ t("components.spoiler.resultHidden") }}
+      </span>
+      <span v-else class="w-full text-xs font-medium text-muted tabular-nums">
         {{
           t("page.match.detail.h2h.record", {
             teamA: teamAName,
@@ -66,7 +75,8 @@ function winnerLabel(winnerTeamId: string | null) {
             {{ meetingDate(meeting) }}
           </span>
         </div>
-        <div class="flex shrink-0 flex-col items-end gap-0.5 text-right">
+        <SpoilerHidden v-if="concealed" :label="t('components.spoiler.resultHidden')" />
+        <div v-else class="flex shrink-0 flex-col items-end gap-0.5 text-right">
           <span class="tabular-nums text-default">
             {{
               t("page.match.detail.h2h.score", {

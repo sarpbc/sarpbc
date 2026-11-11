@@ -25,6 +25,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 const { tab, emptyIcon, setTab } = useEntityListTab("events");
+const { isConcealed } = useSpoilerFree();
 
 const headingId = computed(() => `${kind}-events-title`);
 
@@ -127,7 +128,7 @@ function eventMeta(event: EntityEventListItem): string {
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
               <UBadge
-                v-if="tab === 'past' && event.isWinner"
+                v-if="tab === 'past' && event.isWinner && !isConcealed({ tournamentId: event.id })"
                 color="primary"
                 variant="subtle"
                 size="sm"

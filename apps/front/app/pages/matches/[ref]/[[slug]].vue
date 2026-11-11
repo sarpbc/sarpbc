@@ -82,7 +82,7 @@ function getParticipantScore(currentMatch: Match, participantId: string): number
 }
 
 const winnerParticipantId = computed(() => {
-  if (!match.value || !teamA.value || !teamB.value) return null;
+  if (concealed.value || !match.value || !teamA.value || !teamB.value) return null;
 
   if (match.value.winner?.id) {
     return match.value.winner.id;
@@ -104,6 +104,14 @@ const matchStatus = computed(() => {
   }
   return resolveMatchDiscoveryStatus(match.value);
 });
+
+const { isConcealed } = useSpoilerFree();
+const historyConcealed = computed(
+  () =>
+    match.value !== null &&
+    isConcealed({ matchId: match.value.id, tournamentId: match.value.tournament?.id }),
+);
+const concealed = computed(() => historyConcealed.value && matchStatus.value !== "upcoming");
 
 const heroScoreA = computed(() =>
   match.value && teamA.value
@@ -190,6 +198,13 @@ const seoDescription = computed(() => {
           : "",
       });
     case "finished": {
+      if (concealed.value) {
+        return t("page.match.detail.seoDescriptionSpoilerFree", {
+          teamA: teamAName,
+          teamB: teamBName,
+          tournament,
+        });
+      }
       const scoreA = teamA.value ? getParticipantScore(match.value, teamA.value.id) : null;
       const scoreB = teamB.value ? getParticipantScore(match.value, teamB.value.id) : null;
       return t("page.match.detail.seoDescriptionFinished", {
@@ -227,7 +242,7 @@ watch(
 const scoreboardLabel = computed(() => {
   const a = participantLabel(teamA.value);
   const b = participantLabel(teamB.value);
-  if (!match.value || matchStatus.value === "upcoming") {
+  if (!match.value || matchStatus.value === "upcoming" || concealed.value) {
     return `${a} vs ${b}`;
   }
   const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "-") : "-";
@@ -292,7 +307,17 @@ const scoreboardLabel = computed(() => {
               <p v-if="match.beginAt" class="text-center text-sm text-muted tabular-nums">
                 {{ dateTimeFormatter.format(new Date(match.beginAt)) }}
               </p>
-              <p class="flex items-center gap-2 text-4xl tabular-nums sm:gap-3" aria-hidden="true">
+              <SpoilerRevealButton
+                v-if="concealed"
+                :targets="[{ kind: 'match', id: match.id }]"
+                :label="t('components.spoiler.revealScore')"
+                class="my-1"
+              />
+              <p
+                v-else
+                class="flex items-center gap-2 text-4xl tabular-nums sm:gap-3"
+                aria-hidden="true"
+              >
                 <span :class="heroScoreClass(teamA?.id)">{{ heroScoreA }}</span>
                 <span class="text-dimmed">–</span>
                 <span :class="heroScoreClass(teamB?.id)">{{ heroScoreB }}</span>
@@ -337,7 +362,7 @@ const scoreboardLabel = computed(() => {
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
-        <SRail v-if="games.length > 0" :title="t('page.match.detail.stats.title')">
+        <SRail v-if="games.length > 0 && !concealed" :title="t('page.match.detail.stats.title')">
           <MatchStatsTable :games="games" :participants="participants" />
         </SRail>
 
@@ -345,21 +370,44 @@ const scoreboardLabel = computed(() => {
           <MatchRosterTable :participants="participants" />
         </SRail>
 
-        <SRail
-          v-if="matchStatus !== 'finished' && headToHead && teamA && teamB"
-          :title="t('page.match.detail.sections.headToHead')"
-        >
+        <SRail v-if="matchStatus !== 'finished' && headToHead && teamA && teamB">
+          <template #caption>
+            <div class="flex w-full items-center justify-between gap-2">
+              {{ t("page.match.detail.sections.headToHead") }}
+              <SpoilerRevealButton
+                v-if="historyConcealed"
+                :targets="[{ kind: 'match', id: match.id }]"
+                :label="t('components.spoiler.revealResults')"
+                variant="ghost"
+                size="xs"
+                class="-my-1"
+              />
+            </div>
+          </template>
           <MatchHeadToHeadCard
             :head-to-head="headToHead"
             :team-a-name="participantLabel(teamA)"
             :team-b-name="participantLabel(teamB)"
+            :concealed="historyConcealed"
           />
         </SRail>
 
         <SRail
           v-if="matchStatus !== 'finished' && participants.some((participant) => participant.team)"
-          :title="t('page.match.detail.sections.recentForm')"
         >
+          <template #caption>
+            <div class="flex w-full items-center justify-between gap-2">
+              {{ t("page.match.detail.sections.recentForm") }}
+              <SpoilerRevealButton
+                v-if="historyConcealed"
+                :targets="[{ kind: 'match', id: match.id }]"
+                :label="t('components.spoiler.revealResults')"
+                variant="ghost"
+                size="xs"
+                class="-my-1"
+              />
+            </div>
+          </template>
           <SCard>
             <div class="grid grid-cols-1 items-stretch md:grid-cols-2">
               <MatchTeamFormCard
@@ -372,6 +420,7 @@ const scoreboardLabel = computed(() => {
                 "
                 :team-name="participantLabel(participant)"
                 :team-form="participant.team ? teamForms[participant.team.id] : undefined"
+                :concealed="historyConcealed"
               />
             </div>
           </SCard>

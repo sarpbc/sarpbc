@@ -19,6 +19,7 @@ const props = defineProps<{
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const blocks = useNewsMatchBlocks();
+const { isConcealed } = useSpoilerFree();
 
 const block = computed(() => newsMatchBlockFromAttrs(props));
 const items = computed((): MatchBlockItem[] | undefined =>
@@ -51,7 +52,10 @@ function teamName(item: MatchBlockItem, index: number): string {
 }
 
 function summary(item: MatchBlockItem): string {
-  if (item.state === "upcoming") {
+  if (
+    item.state === "upcoming" ||
+    isConcealed({ matchId: item.id, tournamentId: item.tournament.id })
+  ) {
     return t("newsTag.matchVersus", { teamA: teamName(item, 0), teamB: teamName(item, 1) });
   }
   const score = (index: number) =>
