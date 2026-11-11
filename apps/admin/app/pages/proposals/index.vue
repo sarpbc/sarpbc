@@ -164,6 +164,25 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           }))),
     ];
   }
+  if (change.kind === "set_circuit_stage_scale") {
+    return [
+      {
+        key: "circuitId",
+        label: t("page.proposals.fields.circuitId"),
+        value: nameOf(change.circuitId),
+      },
+      {
+        key: "tournamentId",
+        label: t("page.proposals.fields.tournamentId"),
+        value: nameOf(change.tournamentId),
+      },
+      ...change.scale.map((tier) => ({
+        key: `tier-${tier.from}`,
+        label: t("page.proposals.fields.tier", { number: tier.from }),
+        value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
+      })),
+    ];
+  }
   if (change.kind === "set_event_streams") {
     return streamRows("eventId", change.eventId, change.streams);
   }

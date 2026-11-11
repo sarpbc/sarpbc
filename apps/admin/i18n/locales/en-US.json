@@ -71,7 +71,8 @@
       "drawerDescription": "Staff navigation",
       "backToSite": "Back to Site",
       "users": "Users",
-      "streamers": "Live Streamers"
+      "streamers": "Live Streamers",
+      "circuits": "Circuits"
     },
     "search": {
       "placeholder": "Search…",
@@ -241,7 +242,8 @@
         "set_match_viewership": "Match viewership",
         "award_player": "Player award",
         "delete_match": "Delete match",
-        "delete_team": "Delete team"
+        "delete_team": "Delete team",
+        "set_circuit_stage_scale": "Points scale"
       },
       "fields": {
         "playerId": "Player",
@@ -272,7 +274,9 @@
         "lineups": "Lineups",
         "side": "Side {number}",
         "reason": "Reason",
-        "mergeIntoTeamId": "Merge into"
+        "mergeIntoTeamId": "Merge into",
+        "circuitId": "Circuit",
+        "tier": "Places from {number}"
       },
       "playerStatus": {
         "active": "Active",
@@ -1035,6 +1039,83 @@
       "messages": {
         "updated": "{user} is now {role}.",
         "updateError": "Could not change this role. Try again."
+      }
+    },
+    "circuits": {
+      "title": "Circuits",
+      "description": "Points circuits rank teams across several tournament stages. Each stage has an official points scale, copied from its published source.",
+      "loading": "Loading…",
+      "loadError": "Could not load circuits. Check your connection and try again.",
+      "empty": {
+        "title": "No Circuits Yet",
+        "description": "Create a circuit, then attach tournament stages and their official points scales."
+      },
+      "form": {
+        "name": "Name",
+        "slug": "Slug",
+        "slugHint": "Leave empty to generate it from the name.",
+        "description": "Description",
+        "qualificationSpots": "Qualification spots",
+        "qualificationSpotsHint": "Top places highlighted in the standings."
+      },
+      "create": {
+        "button": "New Circuit",
+        "title": "New Circuit",
+        "submit": "Create Circuit",
+        "success": "Circuit created",
+        "failed": "Could not create the circuit."
+      },
+      "edit": {
+        "title": "Circuit details",
+        "submit": "Save Changes",
+        "saved": "Circuit saved",
+        "failed": "Could not save the circuit."
+      },
+      "delete": {
+        "title": "Delete Circuit",
+        "confirm": "Delete {name}? Its stages and points scales are deleted with it.",
+        "confirmButton": "Delete Circuit"
+      },
+      "stages": {
+        "title": "Stages",
+        "hint": "Only PandaScore tournament stages can be attached.",
+        "add": "Add Stage",
+        "edit": "Edit Scale",
+        "empty": "No stages yet. Add a stage, then enter its official points scale.",
+        "tiers": "{count} tier | {count} tiers",
+        "remove": {
+          "title": "Remove Stage",
+          "confirm": "Remove {name} from this circuit? Its points scale is deleted.",
+          "confirmButton": "Remove Stage"
+        }
+      },
+      "picker": {
+        "title": "Add Stage",
+        "hint": "Search for a tournament stage to attach to this circuit.",
+        "placeholder": "Search tournaments",
+        "empty": "No matching tournament stages."
+      },
+      "scale": {
+        "title": "Points Scale",
+        "hint": "Copy the points from the official rules page or announcement. Never estimate or fill in points that are not published.",
+        "sourceUrl": "Source URL",
+        "sourceUrlHint": "Official rules page or announcement",
+        "empty": "No tiers yet. Add a tier for each published placement range.",
+        "from": "From place",
+        "to": "To place",
+        "points": "Points",
+        "addTier": "Add Tier",
+        "removeTier": "Remove tier",
+        "save": "Save Scale",
+        "saveFailed": "Could not save the points scale.",
+        "errors": {
+          "incomplete": "Fill in all three values.",
+          "range": "The last place cannot be before the first place.",
+          "numbers": "Use whole numbers: places from 1 to {maxPlacement}, points from 0 to {maxPoints}.",
+          "overlap": "Place ranges cannot overlap.",
+          "sourceUrl": "Enter a valid http or https URL.",
+          "sourceBlocked": "This website is not accepted as a source. Use the official rules page or announcement."
+        }
       }
     }
   },

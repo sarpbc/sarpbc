@@ -35,6 +35,12 @@ export const ADMIN_SECTIONS = [
     label: "page.nav.tournaments",
   },
   {
+    path: "/circuits",
+    permissions: ["tournaments.manage"],
+    icon: "i-fluent-text-bullet-list-ltr-24-regular",
+    label: "page.nav.circuits",
+  },
+  {
     path: "/pickems",
     permissions: ["pickems.manage"],
     icon: "i-fluent-predictions-24-regular",

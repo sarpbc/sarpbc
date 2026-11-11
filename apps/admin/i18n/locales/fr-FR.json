@@ -71,7 +71,8 @@
       "drawerDescription": "Navigation du staff",
       "backToSite": "Retour au site",
       "users": "Utilisateurs",
-      "streamers": "Streamers en direct"
+      "streamers": "Streamers en direct",
+      "circuits": "Circuits"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -241,7 +242,8 @@
         "set_event_viewership": "Audience de l’événement",
         "set_match_viewership": "Audience du match",
         "delete_match": "Suppression de match",
-        "delete_team": "Suppression d'équipe"
+        "delete_team": "Suppression d'équipe",
+        "set_circuit_stage_scale": "Barème de points"
       },
       "fields": {
         "playerId": "Joueur",
@@ -272,7 +274,9 @@
         "lineups": "Alignements",
         "side": "Camp {number}",
         "reason": "Motif",
-        "mergeIntoTeamId": "Fusionner dans"
+        "mergeIntoTeamId": "Fusionner dans",
+        "circuitId": "Circuit",
+        "tier": "Places à partir de {number}"
       },
       "playerStatus": {
         "active": "Actif",
@@ -1035,6 +1039,83 @@
       "messages": {
         "updated": "{user} est désormais {role}.",
         "updateError": "Impossible de modifier ce rôle. Réessayez."
+      }
+    },
+    "circuits": {
+      "title": "Circuits",
+      "description": "Les circuits de points classent les équipes sur plusieurs étapes de tournoi. Chaque étape a un barème officiel, recopié depuis sa source publiée.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les circuits. Vérifiez votre connexion et réessayez.",
+      "empty": {
+        "title": "Aucun circuit",
+        "description": "Créez un circuit, puis rattachez-y des étapes de tournoi et leurs barèmes de points officiels."
+      },
+      "form": {
+        "name": "Nom",
+        "slug": "Slug",
+        "slugHint": "Laissez vide pour le générer à partir du nom.",
+        "description": "Description",
+        "qualificationSpots": "Places de qualification",
+        "qualificationSpotsHint": "Nombre de premières places mises en avant dans le classement."
+      },
+      "create": {
+        "button": "Nouveau circuit",
+        "title": "Nouveau circuit",
+        "submit": "Créer le circuit",
+        "success": "Circuit créé",
+        "failed": "Impossible de créer le circuit."
+      },
+      "edit": {
+        "title": "Détails du circuit",
+        "submit": "Enregistrer",
+        "saved": "Circuit enregistré",
+        "failed": "Impossible d'enregistrer le circuit."
+      },
+      "delete": {
+        "title": "Supprimer le circuit",
+        "confirm": "Supprimer {name} ? Ses étapes et ses barèmes de points seront supprimés avec lui.",
+        "confirmButton": "Supprimer le circuit"
+      },
+      "stages": {
+        "title": "Étapes",
+        "hint": "Seules les étapes de tournoi PandaScore peuvent être rattachées.",
+        "add": "Ajouter une étape",
+        "edit": "Modifier le barème",
+        "empty": "Aucune étape. Ajoutez une étape, puis saisissez son barème de points officiel.",
+        "tiers": "{count} palier | {count} paliers",
+        "remove": {
+          "title": "Retirer l'étape",
+          "confirm": "Retirer {name} de ce circuit ? Son barème de points sera supprimé.",
+          "confirmButton": "Retirer l'étape"
+        }
+      },
+      "picker": {
+        "title": "Ajouter une étape",
+        "hint": "Recherchez une étape de tournoi à rattacher à ce circuit.",
+        "placeholder": "Rechercher un tournoi",
+        "empty": "Aucune étape de tournoi correspondante."
+      },
+      "scale": {
+        "title": "Barème de points",
+        "hint": "Recopiez les points depuis la page de règles officielle ou l'annonce. N'estimez jamais les points et ne complétez pas ceux qui ne sont pas publiés.",
+        "sourceUrl": "URL de la source",
+        "sourceUrlHint": "Page de règles officielle ou annonce",
+        "empty": "Aucun palier. Ajoutez un palier pour chaque tranche de places publiée.",
+        "from": "De la place",
+        "to": "À la place",
+        "points": "Points",
+        "addTier": "Ajouter un palier",
+        "removeTier": "Retirer le palier",
+        "save": "Enregistrer le barème",
+        "saveFailed": "Impossible d'enregistrer le barème de points.",
+        "errors": {
+          "incomplete": "Renseignez les trois valeurs.",
+          "range": "La dernière place ne peut pas précéder la première.",
+          "numbers": "Utilisez des nombres entiers : places de 1 à {maxPlacement}, points de 0 à {maxPoints}.",
+          "overlap": "Les tranches de places ne doivent pas se chevaucher.",
+          "sourceUrl": "Saisissez une URL http ou https valide.",
+          "sourceBlocked": "Ce site n'est pas accepté comme source. Utilisez la page de règles officielle ou l'annonce."
+        }
       }
     }
   },
