@@ -4,7 +4,7 @@ export const MAX_VIEWERS = 100_000_000;
 export const VIEWERSHIP_SOURCE_NAME_MAX_LENGTH = 80;
 export const VIEWERSHIP_SOURCE_URL_MAX_LENGTH = 2048;
 
-const FORBIDDEN_SOURCE_HOSTS = ["liquipedia.net", "blast.tv"] as const;
+const FORBIDDEN_SOURCE_HOSTS = ["liquipedia.net", "blast.tv", "start.gg"] as const;
 
 export type ViewershipError =
   | "invalid-peak"

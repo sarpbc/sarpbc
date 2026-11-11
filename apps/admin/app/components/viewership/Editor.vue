@@ -2,7 +2,6 @@
 import type { Viewership, ViewershipScope } from "@sarpbc/types";
 import { VIEWERSHIP_SCOPES } from "@sarpbc/types";
 import {
-  MAX_VIEWERS,
   parseViewership,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   VIEWERSHIP_SOURCE_URL_MAX_LENGTH,
@@ -66,7 +65,7 @@ function toLocalInput(iso: string | null): string {
   if (!iso) return "";
   const date = new Date(iso);
   const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-  return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 function toCount(value: string): number {
@@ -203,11 +202,8 @@ function submit() {
         >
           <UInput
             v-model="form.peakViewers"
-            type="number"
             inputmode="numeric"
-            min="0"
-            :max="MAX_VIEWERS"
-            step="1"
+            autocomplete="off"
             class="w-full"
           />
         </UFormField>
@@ -219,11 +215,8 @@ function submit() {
         >
           <UInput
             v-model="form.averageViewers"
-            type="number"
             inputmode="numeric"
-            min="0"
-            :max="MAX_VIEWERS"
-            step="1"
+            autocomplete="off"
             class="w-full"
           />
         </UFormField>
@@ -243,7 +236,7 @@ function submit() {
           :hint="t('page.tournaments.viewership.optional')"
           v-bind="feedback('measuredAt')"
         >
-          <UInput v-model="form.measuredAt" type="datetime-local" class="w-full" />
+          <UInput v-model="form.measuredAt" type="datetime-local" step="1" class="w-full" />
         </UFormField>
 
         <UFormField

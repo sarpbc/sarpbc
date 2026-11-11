@@ -31,6 +31,7 @@ export async function verifyViewership({ request, staffCookie, memberCookie, tou
     { ...ENTRY, sourceUrl: "" },
     { ...ENTRY, sourceUrl: "http://escharts.com/tournaments/rl/integration-cup" },
     { ...ENTRY, sourceUrl: "https://liquipedia.net/rocketleague/Integration_Cup" },
+    { ...ENTRY, sourceUrl: "https://www.start.gg/tournament/integration-cup" },
     { ...ENTRY, averageViewers: ENTRY.peakViewers + 1 },
   ]) {
     await request("PUT", matchPath, { viewership: missing }, staffCookie, 400);

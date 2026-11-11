@@ -64,7 +64,7 @@ describe("viewership tools", () => {
     });
   });
 
-  it("requires an https sourceUrl that is neither Liquipedia nor BLAST.tv, and a source name", () => {
+  it("requires an https sourceUrl outside Liquipedia, BLAST.tv and start.gg, and a source name", () => {
     const schema = z.object(setup("set_match_viewership").tool.inputSchema);
     const input = { matchId: MATCH_ID, ...INPUT };
     expect(schema.safeParse(input).success).toBe(true);
@@ -73,6 +73,7 @@ describe("viewership tools", () => {
       { sourceUrl: "http://escharts.com/tournaments/rl/fake-open" },
       { sourceUrl: "https://liquipedia.net/rocketleague/Fake_Open" },
       { sourceUrl: "https://blast.tv/rl/fake-open" },
+      { sourceUrl: "https://www.start.gg/tournament/fake-open" },
       { sourceName: undefined },
       { sourceName: " " },
       { peakViewers: -1 },

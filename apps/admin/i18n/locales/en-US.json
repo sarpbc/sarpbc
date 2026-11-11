@@ -523,7 +523,7 @@
         "sourceNamePlaceholder": "Esports Charts",
         "sourceUrl": "Source URL",
         "sourceUrlPlaceholder": "https://escharts.com/…",
-        "sourceRules": "Credit a public source such as Esports Charts or a public viewer counter. Liquipedia and BLAST.tv are not accepted, and replay statistics are not viewership.",
+        "sourceRules": "Credit a public source such as Esports Charts or a public viewer counter. Liquipedia, BLAST.tv and start.gg are not accepted, and replay statistics are not viewership.",
         "save": "Save Viewership",
         "saved": "Viewership saved",
         "clear": "Remove Viewership",
@@ -541,7 +541,7 @@
           "source-name-too-long": "Shorten the source name.",
           "invalid-source-url": "Enter the full URL of the source.",
           "source-url-not-https": "Use an https link.",
-          "forbidden-source": "Liquipedia and BLAST.tv are not accepted sources.",
+          "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted sources.",
           "invalid-measured-at": "Enter a valid date and time."
         }
       },

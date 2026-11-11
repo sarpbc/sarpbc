@@ -21,7 +21,7 @@ const ERRORS = {
   "source-name-too-long": `The source name is over ${VIEWERSHIP_SOURCE_NAME_MAX_LENGTH} characters.`,
   "invalid-source-url": "The viewership source URL is not a valid URL.",
   "source-url-not-https": "The viewership source URL must use https.",
-  "forbidden-source": "Liquipedia and BLAST.tv are not accepted viewership sources.",
+  "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources.",
   "invalid-measured-at": "The measurement date is not a valid date.",
 } satisfies Record<ViewershipError, string>;
 

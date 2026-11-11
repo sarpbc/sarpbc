@@ -56,6 +56,7 @@ describe("isForbiddenViewershipSource", () => {
   it("matches the forbidden hosts and their subdomains only", () => {
     assert.equal(isForbiddenViewershipSource("Liquipedia.net"), true);
     assert.equal(isForbiddenViewershipSource("blast.tv"), true);
+    assert.equal(isForbiddenViewershipSource("www.start.gg"), true);
     assert.equal(isForbiddenViewershipSource("notblast.tv"), false);
     assert.equal(isForbiddenViewershipSource("escharts.com"), false);
   });

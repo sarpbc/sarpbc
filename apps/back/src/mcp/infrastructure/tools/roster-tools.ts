@@ -94,10 +94,10 @@ const viewershipSourceUrlSchema = sourceUrlSchema
   .regex(/^https:\/\//, "Use an https URL")
   .refine(
     (url) => !URL.canParse(url) || !isForbiddenViewershipSource(new URL(url).hostname),
-    "Liquipedia and BLAST.tv are not accepted viewership sources",
+    "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources",
   )
   .describe(
-    "Required public https page that states the numbers, such as an Esports Charts page or a public viewer counter. It is shown on the site as the credit. Never Liquipedia or BLAST.tv.",
+    "Required public https page that states the numbers, such as an Esports Charts page or a public viewer counter. It is shown on the site as the credit. Never Liquipedia, BLAST.tv or start.gg.",
   );
 
 const viewershipInput = {
