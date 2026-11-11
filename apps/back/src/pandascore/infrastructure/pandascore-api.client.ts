@@ -82,6 +82,15 @@ export class PandascoreApiClient {
     return this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
+  async getTournamentStandings(tournamentId: number): Promise<unknown[]> {
+    try {
+      return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
+    } catch (error) {
+      if (error instanceof PandascoreApiError && error.status === 404) return [];
+      throw error;
+    }
+  }
+
   async getRocketLeaguePlayers(): Promise<unknown[]> {
     return this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },

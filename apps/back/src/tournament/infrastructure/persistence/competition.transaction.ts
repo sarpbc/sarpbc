@@ -149,6 +149,16 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     this.em.persist(row);
     this.participantsStaged.set(row.id, row);
   }
+  async setPlacements(placements: ReadonlyMap<string, number | null>) {
+    for (const [id, placement] of placements) {
+      const row =
+        this.participantsStaged.get(id) ??
+        (await this.em.findOne(Row.TournamentParticipant, { id }));
+      if (!row || row.placement === placement) continue;
+      row.placement = placement;
+      this.em.persist(row);
+    }
+  }
   async removeParticipant(id: string) {
     const row = await this.em.findOneOrFail(Row.TournamentParticipant, { id });
     this.em.remove(row);

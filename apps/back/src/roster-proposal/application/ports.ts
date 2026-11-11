@@ -16,6 +16,7 @@ export interface RosterNameIds {
   tournaments: string[];
   matches: string[];
   events: string[];
+  circuits: string[];
 }
 
 export interface RosterProposalTransaction {

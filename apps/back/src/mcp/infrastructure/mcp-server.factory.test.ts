@@ -58,6 +58,7 @@ const TOOL_NAMES = [
   "set_match_lineups",
   "set_event_viewership",
   "set_match_viewership",
+  "set_circuit_stage_scale",
   "propose_delete_match",
   "propose_delete_team",
   "list_roster_proposals",
@@ -67,6 +68,8 @@ const TOOL_NAMES = [
   "link_game_player",
   "attach_replay_to_game",
   "remove_match_game",
+  "list_circuits",
+  "get_circuit",
 ];
 
 describe("McpServerFactory", () => {

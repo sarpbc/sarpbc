@@ -1,4 +1,5 @@
 import type { Provider } from "@nestjs/common";
+import { CircuitService } from "../../circuit/application/circuit.service";
 import { ManualGameService } from "../../match-stats/application/manual-game.service";
 import { StatsImportService } from "../../match-stats/application/stats-import.service";
 import { StatsPlayerLinkService } from "../../match-stats/application/stats-player-link.service";
@@ -49,6 +50,7 @@ const SERVICES = {
   statsImportService: StatsImportService,
   statsPlayerLinkService: StatsPlayerLinkService,
   manualGameService: ManualGameService,
+  circuitService: CircuitService,
 };
 
 type Provided<Entry> =

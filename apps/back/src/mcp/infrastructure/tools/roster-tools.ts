@@ -16,6 +16,9 @@ import {
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,
   MAX_PRIZE_PLAYERS,
+  MAX_CIRCUIT_PLACEMENT,
+  MAX_CIRCUIT_POINTS,
+  MAX_CIRCUIT_SCALE_TIERS,
   MAX_STREAMS,
   ROSTER_PROPOSAL_PERMISSIONS,
   MAX_VIEWERS,
@@ -85,6 +88,26 @@ const streamsSchema = z
   .max(MAX_STREAMS)
   .describe(
     "The complete list of live streams; once approved it replaces the current list. An empty list clears it, so the inherited list shows again.",
+  );
+
+const circuitPlacement = z.number().int().min(1).max(MAX_CIRCUIT_PLACEMENT);
+
+const circuitScaleSchema = z
+  .array(
+    z.object({
+      from: circuitPlacement.describe("Best placement of the range (1 for the winner)."),
+      to: circuitPlacement.describe("Worst placement of the range; equal to from for one place."),
+      points: z
+        .number()
+        .int()
+        .min(0)
+        .max(MAX_CIRCUIT_POINTS)
+        .describe("Points awarded to every team finishing in this range."),
+    }),
+  )
+  .max(MAX_CIRCUIT_SCALE_TIERS)
+  .describe(
+    "The complete official scale of this stage, copied from the cited source; ranges must not overlap. Never estimate or invent points. An empty list keeps the stage in the circuit without awarding points.",
   );
 
 const STREAMS_NOTE =
@@ -611,7 +634,26 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         sourceUrl: sourceUrlSchema,
       },
       handler: ({ matchId, lineups, sourceUrl }, user) =>
-        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),
+        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),    }),
+
+    defineTool({
+      name: "set_circuit_stage_scale",
+      description:
+        "Propose the official points scale of one tournament stage in a points circuit, adding the stage to the circuit if needed. Nothing changes until a staff member approves it in the admin app. Points are then computed from the PandaScore final placements of that stage. Read get_circuit and get_tournament first. Only PandaScore stages are accepted; start.gg and manual tournaments are refused.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        circuitId: z.string().uuid().describe("Circuit UUID from list_circuits."),
+        tournamentId: z.string().uuid().describe("PandaScore tournament stage UUID."),
+        scale: circuitScaleSchema,
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ circuitId, tournamentId, scale, sourceUrl }, user) =>
+        propose(
+          { kind: "set_circuit_stage_scale", circuitId, tournamentId, scale },
+          sourceUrl,
+          user.id,
+        ),
     }),
 
     defineTool({

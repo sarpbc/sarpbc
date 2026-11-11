@@ -114,6 +114,7 @@ export {
   toSlug,
 } from "./entity-slug";
 export {
+  circuitPath,
   forumPostPath,
   localizedPath,
   matchPath,
@@ -157,3 +158,11 @@ export {
   type SpoilerRevealTarget,
   type SpoilerScope,
 } from "./spoiler";
+export {
+  CIRCUIT_DESCRIPTION_MAX_LENGTH,
+  CIRCUIT_NAME_MAX_LENGTH,
+  MAX_CIRCUIT_PLACEMENT,
+  MAX_CIRCUIT_POINTS,
+  MAX_CIRCUIT_QUALIFICATION_SPOTS,
+  MAX_CIRCUIT_SCALE_TIERS,
+} from "./circuit";

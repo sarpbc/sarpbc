@@ -1,0 +1,42 @@
+import { z } from "zod";
+import {
+  CIRCUIT_DESCRIPTION_MAX_LENGTH,
+  CIRCUIT_NAME_MAX_LENGTH,
+  MAX_CIRCUIT_PLACEMENT,
+  MAX_CIRCUIT_POINTS,
+  MAX_CIRCUIT_QUALIFICATION_SPOTS,
+  MAX_CIRCUIT_SCALE_TIERS,
+} from "@sarpbc/utils";
+
+const circuitFields = {
+  name: z.string().trim().min(1).max(CIRCUIT_NAME_MAX_LENGTH),
+  slug: z.string().trim().min(1).max(120).optional(),
+  description: z.string().max(CIRCUIT_DESCRIPTION_MAX_LENGTH).nullish(),
+  qualificationSpots: z.number().int().min(1).max(MAX_CIRCUIT_QUALIFICATION_SPOTS).nullish(),
+};
+
+export const CreateCircuitDto = z.strictObject(circuitFields);
+export type CreateCircuitDto = z.infer<typeof CreateCircuitDto>;
+
+export const UpdateCircuitDto = z.strictObject(circuitFields).partial();
+export type UpdateCircuitDto = z.infer<typeof UpdateCircuitDto>;
+
+const placement = z.number().int().min(1).max(MAX_CIRCUIT_PLACEMENT);
+
+export const SetCircuitStageDto = z.strictObject({
+  scale: z
+    .array(
+      z.strictObject({
+        from: placement,
+        to: placement,
+        points: z.number().int().min(0).max(MAX_CIRCUIT_POINTS),
+      }),
+    )
+    .max(MAX_CIRCUIT_SCALE_TIERS),
+  sourceUrl: z
+    .string()
+    .trim()
+    .url()
+    .regex(/^https?:\/\//, "Use an http(s) URL"),
+});
+export type SetCircuitStageDto = z.infer<typeof SetCircuitStageDto>;

@@ -1,4 +1,5 @@
 import {
+  circuitPath,
   matchPath,
   newsPath,
   playerPath,
@@ -26,6 +27,10 @@ export function tournamentUrl(tournament: { slug: string; event: { slug: string 
 
 export function eventUrl(slug: string): string {
   return `${frontUrl()}${tournamentEventPath(slug)}`;
+}
+
+export function circuitUrl(slug: string): string {
+  return `${frontUrl()}${circuitPath(slug)}`;
 }
 
 export function newsUrl(slug: string): string {

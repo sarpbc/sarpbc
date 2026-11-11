@@ -1,3 +1,4 @@
+import type { CircuitScaleTier } from "./circuit";
 import type { ContractRole } from "./contract";
 import type { MatchLineupInput } from "./lineup";
 import type { PlayerAwardType } from "./player-award";
@@ -85,6 +86,12 @@ export type RosterChange =
   | { kind: "set_match_lineups"; matchId: string; lineups: MatchLineupInput[] }
   | { kind: "set_event_viewership"; eventId: string; viewership: Viewership }
   | { kind: "set_match_viewership"; matchId: string; viewership: Viewership }
+  | {
+      kind: "set_circuit_stage_scale";
+      circuitId: string;
+      tournamentId: string;
+      scale: CircuitScaleTier[];
+    }
   | { kind: "delete_match"; matchId: string; reason: string }
   | { kind: "delete_team"; teamId: string; reason: string; mergeIntoTeamId?: string };
 

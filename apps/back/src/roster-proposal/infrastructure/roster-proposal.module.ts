@@ -15,6 +15,8 @@ import { MatchService } from "../../tournament/application/match/match.service";
 import { StreamService } from "../../tournament/application/stream.service";
 import { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import { ViewershipService } from "../../tournament/application/viewership.service";
+import { CircuitService } from "../../circuit/application/circuit.service";
+import { CircuitModule } from "../../circuit/infrastructure/circuit.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
 import { RosterProposalController } from "./http/roster-proposal.controller";
@@ -30,6 +32,7 @@ import {
     RosterModule,
     UserModule,
     TournamentModule,
+    CircuitModule,
   ],
   controllers: [RosterProposalController],
   providers: [
@@ -49,6 +52,7 @@ import {
         streams: StreamService,
         lineups: MatchLineupService,
         viewerships: ViewershipService,
+        circuits: CircuitService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -65,6 +69,7 @@ import {
           streams,
           lineups,
           viewerships,
+          circuits,
         ),
       inject: [
         EntityManager,
@@ -80,6 +85,7 @@ import {
         StreamService,
         MatchLineupService,
         ViewershipService,
+        CircuitService,
       ],
     },
   ],

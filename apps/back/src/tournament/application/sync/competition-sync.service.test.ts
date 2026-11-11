@@ -33,6 +33,7 @@ function memoryStore() {
     }),
     participants: vi.fn(async (): Promise<TournamentParticipant[]> => []),
     saveParticipant: vi.fn(),
+    setPlacements: vi.fn(),
     leagueByPandascoreId: vi.fn(async (id: number) => leagues.get(id) ?? null),
     saveLeague: vi.fn(async (league: League) => {
       if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(league));
@@ -355,6 +356,35 @@ describe("Competition synchronization", () => {
         );
     },
   );
+
+  it("stores PandaScore final ranks as participant placements and clears missing ones", async () => {
+    store.tournamentWriter.participants.mockResolvedValue([
+      Object.assign(new TournamentParticipant(), {
+        id: "dropped",
+        team: Object.assign(new Team(), { id: "old", pandascoreId: 7 }),
+      }),
+      Object.assign(new TournamentParticipant(), { id: "unknown-team", team: null }),
+    ]);
+    await service.upsertTournament({
+      pandascoreId: 42,
+      name: "Playoffs",
+      expectedRoster: [{ team: { pandascoreId: 8, name: "Winner", slug: "winner" }, players: [] }],
+      standings: [
+        { teamPandascoreId: 8, rank: 1 },
+        { teamPandascoreId: 99, rank: 2 },
+      ],
+    });
+
+    const [placements] = store.tournamentWriter.setPlacements.mock.calls[0] ?? [];
+    expect(placements?.get("dropped")).toBeNull();
+    expect(placements?.has("unknown-team")).toBe(false);
+    expect([...(placements?.values() ?? [])].sort()).toEqual([1, null]);
+  });
+
+  it("leaves placements untouched when the feed carries no standings", async () => {
+    await service.upsertTournament({ pandascoreId: 42, name: "Playoffs" });
+    expect(store.tournamentWriter.setPlacements).not.toHaveBeenCalled();
+  });
 
   it("preserves success after a committed write when Redis fails", async () => {
     cache.invalidateTournament.mockRejectedValue(new Error("offline"));

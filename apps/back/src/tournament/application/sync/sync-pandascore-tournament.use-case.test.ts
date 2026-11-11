@@ -5,6 +5,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
     getTournamentById: vi.fn(),
     getTournamentBrackets: vi.fn(),
     getTournamentMatches: vi.fn(),
+    getTournamentStandings: vi.fn(),
   };
   const reads = { findById: vi.fn() };
   const sync = { upsertTournament: vi.fn() };
@@ -20,6 +21,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
     sync.upsertTournament.mockResolvedValue({ id: "t1" });
     feed.getTournamentMatches.mockResolvedValue([]);
     feed.getTournamentBrackets.mockResolvedValue([]);
+    feed.getTournamentStandings.mockResolvedValue([{ teamPandascoreId: 8, rank: 1 }]);
   });
   it.each([true, false])("uses fresh provider hasBracket=%s", async (hasBracket) => {
     const command = { pandascoreId: 42, name: "Playoffs", hasBracket };
@@ -31,7 +33,12 @@ describe("SyncPandascoreTournamentUseCase", () => {
     expect(
       hasBracket ? feed.getTournamentMatches : feed.getTournamentBrackets,
     ).not.toHaveBeenCalled();
-    expect(sync.upsertTournament).toHaveBeenCalledWith(command, [], undefined);
+    expect(feed.getTournamentStandings).toHaveBeenCalledWith(42);
+    expect(sync.upsertTournament).toHaveBeenCalledWith(
+      { ...command, standings: [{ teamPandascoreId: 8, rank: 1 }] },
+      [],
+      undefined,
+    );
   });
   it("protects manual tournaments before fetching", async () => {
     reads.findById.mockResolvedValue({ id: "manual", source: "manual" });

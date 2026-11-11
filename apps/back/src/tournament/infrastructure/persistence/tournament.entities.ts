@@ -68,6 +68,7 @@ export class TournamentParticipant {
   tournament!: Tournament;
   team: Team | null = null;
   players = new Collection<Player>(this);
+  placement: number | null = null;
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
 }
@@ -192,6 +193,7 @@ export const TournamentParticipantSchema = defineEntity({
     tournament: p.manyToOne(Tournament),
     team: p.manyToOne(Team).nullable().deleteRule("no action"),
     players: p.manyToMany(Player),
+    placement: p.integer().nullable(),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()

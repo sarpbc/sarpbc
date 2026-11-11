@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import { verifyCircuits } from "./scenarios/circuits.mjs";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mjs";
 import {
   verifyCompetitionSyncLookups,
@@ -1448,6 +1449,17 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         match,
         startggCupId: startggCup,
         startggMatchId: startggMatch.id,
+      });
+      await verifyCircuits({
+        app,
+        orm,
+        RequestContext,
+        request,
+        staffCookie,
+        memberCookie,
+        callTool,
+        review,
+        tournament,
       });
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });

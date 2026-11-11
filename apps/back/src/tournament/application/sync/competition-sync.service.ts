@@ -243,6 +243,11 @@ export class CompetitionSyncService {
       }
     }
     const participants = await scope.tournaments.participants(tournament.id);
+    const pandascoreTeams = new Map(
+      participants.flatMap((participant) =>
+        participant.team?.pandascoreId ? [[participant.id, participant.team.pandascoreId]] : [],
+      ),
+    );
     for (const roster of command.expectedRoster ?? []) {
       const team = await scope.rosters.upsertTeam(roster.team),
         existingParticipant = participants.find((p) => p.team?.id === team.id),
@@ -250,6 +255,7 @@ export class CompetitionSyncService {
       for (const player of roster.players)
         playerIds.push((await scope.rosters.upsertPlayer(player)).id);
       const participantId = existingParticipant?.id ?? v4();
+      if (roster.team.pandascoreId) pandascoreTeams.set(participantId, roster.team.pandascoreId);
       await scope.tournaments.saveParticipant({
         id: participantId,
         tournamentId: tournament.id,
@@ -268,6 +274,12 @@ export class CompetitionSyncService {
           updatedAt: new Date(),
         };
       }
+    }
+    if (command.standings) {
+      const ranks = new Map(command.standings.map((s) => [s.teamPandascoreId, s.rank]));
+      await scope.tournaments.setPlacements(
+        new Map([...pandascoreTeams].map(([id, teamId]) => [id, ranks.get(teamId) ?? null])),
+      );
     }
     await scope.tournaments.save(tournament);
     const siblings = renamed ? (await scope.events.stages(event.id)).map((stage) => stage.id) : [];

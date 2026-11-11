@@ -31,6 +31,11 @@ export class SyncPandascoreTournamentUseCase {
     const matches = command.hasBracket
       ? await this.feed.getTournamentBrackets(command.pandascoreId)
       : await this.feed.getTournamentMatches(command.pandascoreId);
-    return this.synchronization.upsertTournament(command, matches, linkTournamentId);
+    const standings = await this.feed.getTournamentStandings(command.pandascoreId);
+    return this.synchronization.upsertTournament(
+      { ...command, standings },
+      matches,
+      linkTournamentId,
+    );
   }
 }
