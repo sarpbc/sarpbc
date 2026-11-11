@@ -105,9 +105,9 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     },
     {
       provide: TeamService,
-      useFactory: (teams: MikroTeamStore, transaction: MikroRosterTransaction) =>
-        new TeamService(teams, transaction),
-      inject: [MikroTeamStore, MikroRosterTransaction],
+      useFactory: (teams: MikroTeamStore, transaction: MikroRosterTransaction, em: EntityManager) =>
+        new TeamService(teams, transaction, new TournamentRosterReferences(em)),
+      inject: [MikroTeamStore, MikroRosterTransaction, EntityManager],
     },
     {
       provide: ContractService,

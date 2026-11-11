@@ -10,6 +10,7 @@ import type { TeamService } from "../../roster/application/team.service";
 import { teamLogoField } from "../../roster/domain/team-logo";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { UserService } from "../../user/application/user.service";
+import type { MatchService } from "../../tournament/application/match/match.service";
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
@@ -21,13 +22,14 @@ export interface RosterProposalList {
 }
 
 type Players = Pick<PlayerService, "findById" | "create" | "update" | "joinTeam" | "leaveTeam">;
-type Teams = Pick<TeamService, "findById" | "create" | "update">;
+type Teams = Pick<TeamService, "findById" | "create" | "update" | "requireDeletable" | "delete">;
 type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
 type Prizes = Pick<TournamentPrizeService, "requireProposableTournament" | "setDistribution">;
 type Awards = Pick<PlayerAwardService, "requireProposable" | "createForTeam">;
 type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
+type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
 
 export interface TeamLogoProposal {
   teamId: string;
@@ -49,6 +51,7 @@ export class RosterProposalService {
     private readonly prizes: Prizes,
     private readonly awards: Awards,
     private readonly logos: Logos,
+    private readonly matches: Matches,
   ) {}
 
   async propose(
@@ -67,6 +70,12 @@ export class RosterProposalService {
     if (change.kind === "award_player") {
       const { tournamentId, teamId, playerId, awardType } = change;
       await this.awards.requireProposable(tournamentId, teamId, playerId, awardType);
+    }
+    if (change.kind === "delete_match") {
+      await this.matches.requireProposableDeletion(change.matchId);
+    }
+    if (change.kind === "delete_team") {
+      await this.requireTeamRemoval(change.teamId, change.mergeIntoTeamId);
     }
     const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
     await this.store.save(proposal);
@@ -105,6 +114,13 @@ export class RosterProposalService {
       players: [...new Set(proposals.flatMap(({ change }) => referencedPlayerIds(change)))],
       teams: [...new Set(proposals.flatMap(({ change }) => referencedTeamIds(change)))],
       users: [...new Set(proposals.map(({ proposedById }) => proposedById))],
+      matches: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "delete_match" ? [change.matchId] : [],
+          ),
+        ),
+      ],
       tournaments: [
         ...new Set(
           proposals.flatMap(({ change }) =>
@@ -218,10 +234,29 @@ export class RosterProposalService {
         const { tournamentId, teamId, playerId, awardType } = change;
         return (await this.awards.createForTeam(tournamentId, teamId, playerId, awardType)).id;
       }
+      case "delete_match":
+        await this.matches.deleteMatch(change.matchId);
+        return change.matchId;
+      case "delete_team":
+        if (change.mergeIntoTeamId) {
+          return (await this.merges.mergeTeams(change.mergeIntoTeamId, change.teamId)).kept.id;
+        }
+        await this.teams.delete(change.teamId);
+        return change.teamId;
       default: {
         const exhaustive: never = change;
         return exhaustive;
       }
+    }
+  }
+
+  private async requireTeamRemoval(teamId: string, mergeIntoTeamId: string | undefined) {
+    if (mergeIntoTeamId === undefined) {
+      await this.teams.requireDeletable(teamId);
+      return;
+    }
+    if (mergeIntoTeamId === teamId) {
+      throw new InvalidInputError("A team cannot be merged into itself");
     }
   }
 
@@ -272,6 +307,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "update_team":
     case "upload_team_logo":
     case "merge_teams":
+    case "delete_match":
+    case "delete_team":
       return [];
     default: {
       const exhaustive: never = change;
@@ -296,10 +333,13 @@ function referencedTeamIds(change: RosterChange): string[] {
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
       return change.prizes.map(({ teamId }) => teamId);
+    case "delete_team":
+      return change.mergeIntoTeamId ? [change.teamId, change.mergeIntoTeamId] : [change.teamId];
     case "create_player":
     case "update_player":
     case "create_team":
     case "merge_players":
+    case "delete_match":
       return [];
     default: {
       const exhaustive: never = change;

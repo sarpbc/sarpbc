@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
+import { z } from "zod";
 import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
@@ -182,6 +183,11 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     };
   }
 }
+const matchReferenceCounts = z.object({
+  picks: z.coerce.number().int().nonnegative(),
+  comments: z.coerce.number().int().nonnegative(),
+  nextMatches: z.coerce.number().int().nonnegative(),
+});
 export class CompetitionMatchWriter implements MatchWriter {
   private readonly staged = new Map<string, Row.Match>();
   constructor(
@@ -221,6 +227,23 @@ export class CompetitionMatchWriter implements MatchWriter {
   }
   tournament(id: string) {
     return this.tournaments.load(id);
+  }
+  async references(id: string) {
+    const counts: unknown = await this.em.execute(
+      `select
+        (select count(*) from "pickem_choice" where "match_id" = ?) as "picks",
+        (select count(*) from "reply" where "match_id" = ?) as "comments",
+        (select count(*) from "bracket_link" where "previous_match_id" = ?) as "nextMatches"`,
+      [id, id, id],
+    );
+    const [row] = z.tuple([matchReferenceCounts]).parse(counts);
+    return row;
+  }
+  async remove(id: string) {
+    await this.em.nativeDelete(Row.MatchResult, { match: id });
+    await this.em.nativeDelete(Row.BracketLink, { match: id });
+    await this.em.nativeDelete(Row.Match, { id });
+    this.staged.delete(id);
   }
   participants(id: string) {
     return this.tournaments.participants(id);

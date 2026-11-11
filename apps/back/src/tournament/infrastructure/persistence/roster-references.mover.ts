@@ -1,11 +1,17 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
-import type { RosterReferenceMover, SharedTournaments } from "../../../roster/application/ports";
+import type {
+  RosterReferenceMover,
+  SharedTournaments,
+  TeamCompetitionUsage,
+} from "../../../roster/application/ports";
 import { PlayerAward } from "./player-award.entities";
-import { TournamentParticipant } from "./tournament.entities";
+import { Match, TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-export class TournamentRosterReferences implements RosterReferenceMover, SharedTournaments {
+export class TournamentRosterReferences
+  implements RosterReferenceMover, SharedTournaments, TeamCompetitionUsage
+{
   constructor(private readonly em: EntityManager) {}
 
   async movePlayer(from: string, to: string): Promise<void> {
@@ -39,6 +45,15 @@ export class TournamentRosterReferences implements RosterReferenceMover, SharedT
       { fields: ["tournament"], disableIdentityMap: true },
     );
     return [...new Set(participants.map(({ tournament }) => tournament.id))];
+  }
+
+  async teamReferences(teamId: string) {
+    const [participations, matches, prizes] = await Promise.all([
+      this.em.count(TournamentParticipant, { team: teamId }),
+      this.em.count(Match, { participants: { team: teamId } }),
+      this.em.count(TournamentPrize, { team: teamId }),
+    ]);
+    return { participations, matches, prizes };
   }
 
   private async foldPrizes(from: string, to: string): Promise<void> {

@@ -46,6 +46,13 @@ const sourceUrlSchema = z
     "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
 
+const reasonSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(500)
+  .describe("Why the entity should be removed, for the staff reviewer.");
+
 const contractDateSchema = z.iso.date("Use a real YYYY-MM-DD date");
 
 const effectiveDateSchema = contractDateSchema.describe(
@@ -74,7 +81,7 @@ export interface RosterToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose" | "proposeTeamLogo" | "list">;
 }
 
-function proposed(proposal: RosterProposal, sourceUrl: string): ToolWrite {
+function proposed(proposal: RosterProposal, sourceUrl: string | undefined): ToolWrite {
   return {
     entityId: proposal.id,
     sourceUrl,
@@ -205,7 +212,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     defineTool({
       name: "update_team",
       description:
-        "Propose updating a team's name, country, or logo URL, or marking it inactive. Prefer upload_team_logo for logos. Teams are never deleted; remove current players before setting active to false.",
+        "Propose updating a team's name, country, or logo URL, or marking it inactive. Prefer upload_team_logo for logos. Remove current players before setting active to false. Use propose_delete_team only for a team created by mistake.",
       write: true,
       permission: "teams.manage",
       input: {
@@ -432,6 +439,58 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           { kind: "award_player", tournamentId, teamId, playerId, awardType },
           sourceUrl,
           user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "propose_delete_match",
+      description:
+        "Propose deleting a match that should not exist, such as a series imported twice. Nothing is deleted until a staff member approves it in the admin app. Once approved, the match is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches. PandaScore and start.gg matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first and run list_roster_proposals to avoid proposing it twice.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        matchId: z.string().uuid().describe("Match UUID."),
+        reason: reasonSchema,
+        sourceUrl: sourceUrlSchema
+          .optional()
+          .describe(
+            "Optional public source showing the correct results, such as the official bracket. Never Liquipedia.",
+          ),
+      },
+      handler: async ({ matchId, reason, sourceUrl }, user) =>
+        proposed(
+          await rosterProposalService.propose(
+            { kind: "delete_match", matchId, reason },
+            sourceUrl ?? "",
+            user.id,
+          ),
+          sourceUrl,
+        ),
+    }),
+
+    defineTool({
+      name: "propose_delete_team",
+      description:
+        "Propose removing a team created by mistake, such as an empty duplicate. Nothing is deleted until a staff member approves it in the admin app. Without mergeIntoTeamId, approval deletes the team, and both the proposal and the approval are refused for a PandaScore team or a team with current players, contracts, tournament participations, matches or prizes. With mergeIntoTeamId, approval merges the team into that one instead, like merge_teams: its references move there and it stays as a redirect. Run search_teams and list_roster_proposals first.",
+      write: true,
+      permission: "teams.manage",
+      input: {
+        teamId: z.string().uuid().describe("UUID of the team to remove."),
+        reason: reasonSchema,
+        mergeIntoTeamId: z
+          .string()
+          .uuid()
+          .optional()
+          .describe("UUID of the team this one duplicates. Its references move there on approval."),
+      },
+      handler: async ({ teamId, reason, mergeIntoTeamId }, user) =>
+        proposed(
+          await rosterProposalService.propose(
+            { kind: "delete_team", teamId, reason, mergeIntoTeamId },
+            "",
+            user.id,
+          ),
+          undefined,
         ),
     }),
 

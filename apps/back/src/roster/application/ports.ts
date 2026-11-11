@@ -1,4 +1,5 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
+import type { TeamCompetitionReferences } from "../domain/team-deletion";
 import type { TeamLogoFormat } from "../domain/team-logo";
 import type { ImportedPlayer } from "./imports";
 import type { ContractMovementFilter, DirectorySearchProps } from "./search-props";
@@ -30,6 +31,7 @@ export interface PlayerWriter extends Pick<PlayerQueries, "findById" | "findBySl
   delete(player: Player): Promise<void>;
 }
 export interface TeamWriter extends Pick<TeamQueries, "findById" | "findBySlug"> {
+  redirectCount(id: string): Promise<number>;
   save(team: Team): Promise<void>;
   delete(team: Team): Promise<void>;
 }
@@ -56,6 +58,9 @@ export interface RosterTransaction {
 export interface RosterReferenceMover {
   movePlayer(fromId: string, toId: string): Promise<void>;
   moveTeam(fromId: string, toId: string): Promise<void>;
+}
+export interface TeamCompetitionUsage {
+  teamReferences(teamId: string): Promise<TeamCompetitionReferences>;
 }
 export interface SharedTournaments {
   sharedTournamentIds(teamId: string, otherTeamId: string): Promise<string[]>;

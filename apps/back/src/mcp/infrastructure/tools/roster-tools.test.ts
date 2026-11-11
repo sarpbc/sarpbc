@@ -179,3 +179,123 @@ describe("roster proposals", () => {
     expect(rosterProposalService.list).toHaveBeenCalledWith("pending");
   });
 });
+
+describe("delete proposals", () => {
+  const MATCH_ID = "3b241101-e2bb-4255-8caf-4136c566a962";
+  const KEPT_TEAM_ID = "9c858901-8a57-4791-81fe-4c455b099bc9";
+
+  it("records a pending match deletion with its reason and optional source", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    const unsourced = await call("propose_delete_match", {
+      matchId: MATCH_ID,
+      reason: "Series imported twice",
+    });
+    await call("propose_delete_match", {
+      matchId: MATCH_ID,
+      reason: "Series imported twice",
+      sourceUrl: input.sourceUrl,
+    });
+
+    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
+      1,
+      { kind: "delete_match", matchId: MATCH_ID, reason: "Series imported twice" },
+      "",
+      "u1",
+    );
+    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ kind: "delete_match" }),
+      input.sourceUrl,
+      "u1",
+    );
+    expect(JSON.parse(textOf(unsourced))).toMatchObject({
+      proposalId: "proposal-1",
+      kind: "delete_match",
+      status: "pending",
+      reviewUrl: "https://admin.sarpbc.test/proposals",
+      note: expect.stringContaining("Nothing changed yet"),
+    });
+  });
+
+  it("records a pending team deletion or merge", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    await call("propose_delete_team", { teamId: TEAM_ID, reason: "Empty duplicate" });
+    await call("propose_delete_team", {
+      teamId: TEAM_ID,
+      reason: "Empty duplicate",
+      mergeIntoTeamId: KEPT_TEAM_ID,
+    });
+
+    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
+      1,
+      { kind: "delete_team", teamId: TEAM_ID, reason: "Empty duplicate" },
+      "",
+      "u1",
+    );
+    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
+      2,
+      {
+        kind: "delete_team",
+        teamId: TEAM_ID,
+        reason: "Empty duplicate",
+        mergeIntoTeamId: KEPT_TEAM_ID,
+      },
+      "",
+      "u1",
+    );
+  });
+
+  it("requires an id and a reason and refuses Liquipedia", () => {
+    const { tool } = setup("admin");
+    const match = z.object(tool("propose_delete_match").inputSchema);
+    const team = z.object(tool("propose_delete_team").inputSchema);
+
+    expect(match.safeParse({ matchId: MATCH_ID, reason: "Duplicate" }).success).toBe(true);
+    for (const invalid of [
+      { matchId: "7395", reason: "Duplicate" },
+      { matchId: MATCH_ID, reason: "  " },
+      { matchId: MATCH_ID },
+      {
+        matchId: MATCH_ID,
+        reason: "Duplicate",
+        sourceUrl: "https://liquipedia.net/rocketleague/RLCS",
+      },
+    ]) {
+      expect(match.safeParse(invalid).success).toBe(false);
+    }
+    expect(team.safeParse({ teamId: TEAM_ID, reason: "Duplicate" }).success).toBe(true);
+    expect(
+      team.safeParse({ teamId: TEAM_ID, reason: "Duplicate", mergeIntoTeamId: "kc" }).success,
+    ).toBe(false);
+  });
+
+  it("returns a refused proposal as a tool error", async () => {
+    const { rosterProposalService, call } = setup("admin");
+    rosterProposalService.propose.mockRejectedValueOnce(
+      new InvalidInputError("Group A is synced from PandaScore and cannot be deleted"),
+    );
+
+    const result = await call("propose_delete_match", { matchId: MATCH_ID, reason: "Duplicate" });
+
+    expect(result).toMatchObject({
+      isError: true,
+      content: [{ text: "Group A is synced from PandaScore and cannot be deleted" }],
+    });
+  });
+
+  it("requires the permission that reviews the deletion", async () => {
+    const { rosterProposalService, call, tool } = setup("journalist");
+
+    expect(
+      (await call("propose_delete_match", { matchId: MATCH_ID, reason: "Duplicate" })).isError,
+    ).toBe(true);
+    expect(
+      (await call("propose_delete_team", { teamId: TEAM_ID, reason: "Duplicate" })).isError,
+    ).toBe(true);
+    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(tool("propose_delete_match").description).toContain("Requires tournaments.manage.");
+    expect(tool("propose_delete_team").description).toContain("Requires teams.manage.");
+  });
+});

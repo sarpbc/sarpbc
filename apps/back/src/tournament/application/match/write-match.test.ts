@@ -20,6 +20,8 @@ const matchWriterMock = () =>
     tournament: vi.fn(),
     participants: vi.fn(),
     timings: vi.fn(),
+    references: vi.fn(),
+    remove: vi.fn(),
   }) satisfies MatchWriter;
 
 describe("Match writes", () => {

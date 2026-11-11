@@ -19,6 +19,7 @@ import type { TournamentEvent } from "../domain/tournament-event";
 import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
 import type { MatchDecided } from "../domain/match-decided";
+import type { MatchReferences } from "../domain/match-deletion";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -123,6 +124,8 @@ export interface MatchWriter {
   load(id: string): Promise<Match | null>;
   byPandascoreId(id: number): Promise<Match | null>;
   save(match: Match): Promise<void>;
+  references(id: string): Promise<MatchReferences>;
+  remove(id: string): Promise<void>;
   timings(tournamentId: string): Promise<MatchTiming[]>;
   tournament(id: string): Promise<TournamentSummary | null>;
   participants(tournamentId: string): Promise<TournamentParticipant[]>;

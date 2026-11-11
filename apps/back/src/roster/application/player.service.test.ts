@@ -36,6 +36,7 @@ describe("PlayerService profile photos", () => {
     teams: {
       findById: async () => null,
       findBySlug: async () => null,
+      redirectCount: async () => 0,
       save: async () => {},
       delete: async () => {},
     },
@@ -129,6 +130,7 @@ describe("PlayerService roster moves", () => {
       teams: {
         findById: async (id) => teams.get(id) ?? null,
         findBySlug: vi.fn(),
+        redirectCount: vi.fn(),
         save: vi.fn(),
         delete: vi.fn(),
       },
