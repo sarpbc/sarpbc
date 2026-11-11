@@ -21,6 +21,7 @@ import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
 import { GAME_STATS_STORE } from "../src/match-stats/infrastructure/game-stats.tokens";
 import { MatchService } from "../src/tournament/application/match/match.service";
+import { MatchLineupService } from "../src/tournament/application/match/match-lineup.service";
 import { TransferController } from "../src/roster/infrastructure/http/transfer.controller";
 import { TransferService } from "../src/roster/application/transfer.service";
 import { TeamService } from "../src/roster/application/team.service";
@@ -170,6 +171,7 @@ describe("API smoke (e2e)", () => {
           useValue: { countByTargetIds: vi.fn(async () => new Map([[grandFinal.id, 2]])) },
         },
         { provide: MatchService, useValue: matchService },
+        { provide: MatchLineupService, useValue: { forMatch: vi.fn(async () => []) } },
         { provide: GAME_STATS_STORE, useValue: matchGames },
         { provide: TransferService, useValue: transferService },
         { provide: TeamService, useValue: { findBySlug: vi.fn() } },
