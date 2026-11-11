@@ -562,6 +562,14 @@
   {
     "controller": "\"player\"",
     "verb": "GET",
+    "path": "\":id/stand-ins\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
     "path": "\":id/tournaments\"",
     "status": null,
     "guards": [],
@@ -1098,6 +1106,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
+    "path": "\"matches/:matchId/lineups\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
     "path": "\"matches/:matchId/streams\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -1219,6 +1235,14 @@
     "controller": "\"tournaments\"",
     "verb": "PUT",
     "path": "\":id/streams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\"matches/:matchId/lineups\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

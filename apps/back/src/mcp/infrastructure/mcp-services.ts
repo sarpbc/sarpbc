@@ -10,6 +10,7 @@ import { RosterProposalService } from "../../roster-proposal/application/roster-
 import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../tournament/application/match/match.service";
+import { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import type { EventQueries, TournamentQueries } from "../../tournament/application/ports";
 import { PlayerAwardService } from "../../tournament/application/player-award.service";
 import { SyncNewTournamentsUseCase } from "../../tournament/application/sync/sync-new-tournaments.use-case";
@@ -40,6 +41,7 @@ const SERVICES = {
   catalogService: ManualCatalogService,
   events: query<EventQueries>(EVENT_QUERIES),
   matchService: MatchService,
+  matchLineupService: MatchLineupService,
   newsService: NewsService,
   rosterProposalService: RosterProposalService,
   tournamentPrizeService: TournamentPrizeService,

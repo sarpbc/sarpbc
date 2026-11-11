@@ -11,6 +11,7 @@ import {
   type RosterProposalStatus,
 } from "@sarpbc/types";
 import {
+  MAX_LINEUP_PLAYERS,
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,
   MAX_PRIZE_PLAYERS,
@@ -536,6 +537,37 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       },
       handler: ({ matchId, streams, sourceUrl }, user) =>
         propose({ kind: "set_match_streams", matchId, streams }, sourceUrl, user.id),
+    }),
+
+    defineTool({
+      name: "set_match_lineups",
+      description:
+        "Propose the lineups of one match (series): for each participant, the players who actually played, substitutes and stand-ins included. Nothing changes until a staff member approves it in the admin app; once approved it replaces every lineup of the match, and a participant left out has no lineup. Read get_tournament for the participant ids and rosters and get_match_lineups for the current lineups. A player outside the participant's tournament roster is shown as a stand-in. Every player must already exist: use search_players, and create_player first if needed. start.gg matches and start.gg sources are refused.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        matchId: z.string().uuid().describe("Match UUID."),
+        lineups: z
+          .array(
+            z.object({
+              participantId: z
+                .string()
+                .min(1)
+                .describe(
+                  "Tournament participant id of one side of the match, from get_tournament.",
+                ),
+              playerIds: z
+                .array(z.string().uuid())
+                .max(MAX_LINEUP_PLAYERS)
+                .describe("Player UUIDs who played for this participant, in lineup order."),
+            }),
+          )
+          .max(2)
+          .describe("One entry per side of the match."),
+        sourceUrl: sourceUrlSchema,
+      },
+      handler: ({ matchId, lineups, sourceUrl }, user) =>
+        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),
     }),
 
     defineTool({

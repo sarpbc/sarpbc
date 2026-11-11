@@ -14,6 +14,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import type { PlayerStandIn } from "@sarpbc/types";
 import { PlayerService } from "../../application/player.service";
 import { ContractService } from "../../application/contract.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -29,6 +30,11 @@ import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 import { MatchService } from "../../../tournament/application/match/match.service";
+import {
+  MatchLineupService,
+  lineupSource,
+} from "../../../tournament/application/match/match-lineup.service";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
@@ -43,6 +49,7 @@ export class PlayerController {
     @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
     private playerAwardService: PlayerAwardService,
     private tournamentPrizeService: TournamentPrizeService,
+    private lineupService: MatchLineupService,
   ) {}
 
   @Get()
@@ -177,6 +184,24 @@ export class PlayerController {
       redistributableOnly: false,
     });
     return { earnings };
+  }
+
+  @Get(":id/stand-ins")
+  async getStandIns(
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<{ standIns: PlayerStandIn[] }> {
+    const player = await this.playerService.findById(id);
+    if (!player) {
+      throw new NotFoundException(`Player with id "${id}" not found`);
+    }
+    const standIns = await this.lineupService.standIns(player.id, { redistributableOnly: false });
+    return {
+      standIns: standIns.map(({ participantId, match }) => ({
+        participantId,
+        startgg: !isRedistributable(lineupSource(match)),
+        match: mapProfileMatchListItem(match),
+      })),
+    };
   }
 
   @Get(":id/tournaments")

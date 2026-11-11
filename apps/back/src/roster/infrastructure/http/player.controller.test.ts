@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Player } from "../../domain/roster";
+import { Match, TournamentParticipant } from "../../../tournament/domain/competition";
+import { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
+import type { PlayerLineupRow } from "../../../tournament/application/ports";
 import { PlayerController } from "./player.controller";
 
 describe("PlayerController", () => {
@@ -19,6 +22,44 @@ describe("PlayerController", () => {
   const awards = { findByPlayerId: vi.fn() };
   const playerEarnings = vi.fn();
   const prizes = { playerEarnings } as never;
+  const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
+    Object.assign(new Match(), {
+      id,
+      publicId,
+      name: "Grand Final",
+      source,
+      participants: [
+        Object.assign(new TournamentParticipant(), { id: `${id}-a`, players: [] }),
+        Object.assign(new TournamentParticipant(), { id: `${id}-b`, players: [] }),
+      ],
+      tournament: {
+        id: `${id}-stage`,
+        name: "Main Stage",
+        slug: "main-stage",
+        event: { id: "fake-event", slug: "fake-cup", name: "Fake Cup" },
+        beginAt: null,
+        league: null,
+        pickemsEnabled: false,
+        source,
+        pandascoreId: null,
+        streams: [],
+        eventStreams: [],
+      },
+    });
+  const standInMatches = [
+    standInMatch("startgg-final", "startgg", 7),
+    standInMatch("cup-final", "manual", 8),
+  ];
+  const lineupRows: PlayerLineupRow[] = [
+    { matchId: "startgg-final", participantId: "startgg-final-a", rosterIds: [] },
+    { matchId: "cup-final", participantId: "cup-final-b", rosterIds: ["kept"] },
+  ];
+  const byPlayer = vi.fn(async () => lineupRows);
+  const lineups = new MatchLineupService(
+    { byMatch: async () => [], byPlayer },
+    { byIds: async () => standInMatches },
+    { run: () => Promise.reject(new Error("unused")) },
+  );
   const controller = new PlayerController(
     players as never,
     contracts as never,
@@ -26,6 +67,7 @@ describe("PlayerController", () => {
     tournaments as never,
     awards as never,
     prizes,
+    lineups,
   );
 
   beforeEach(() => {
@@ -51,6 +93,7 @@ describe("PlayerController", () => {
     await controller.getTournaments("merged");
     await controller.getMatches("merged");
     await controller.getStaffTournaments("merged");
+    await controller.getStandIns("merged");
 
     expect(contracts.getContractsByPlayer).toHaveBeenCalledWith("kept");
     expect(contracts.getOldTeamsByPlayer).toHaveBeenCalledWith("kept");
@@ -60,6 +103,19 @@ describe("PlayerController", () => {
     expect(tournaments.getTournamentsByPlayer).toHaveBeenCalledWith("kept");
     expect(matches.getMatchesByPlayer).toHaveBeenCalledWith("kept");
     expect(contracts.getStaffContractsByPlayer).toHaveBeenCalledWith("kept");
+    expect(byPlayer).toHaveBeenCalledWith("kept");
+  });
+
+  it("lists stand-in series for the site, keeping start.gg ones with their credit flag", async () => {
+    const { standIns } = await controller.getStandIns("kept");
+
+    expect(standIns).toEqual([
+      {
+        participantId: "startgg-final-a",
+        startgg: true,
+        match: expect.objectContaining({ id: "startgg-final", publicId: 7 }),
+      },
+    ]);
   });
 
   it("looks up tournaments over each staff tenure", async () => {

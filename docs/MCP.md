@@ -43,6 +43,7 @@ Read tools (any valid PAT):
 | `get_upcoming_matches`  | Upcoming and live matches                       |
 | `get_match_results`     | Recent finished match results                   |
 | `get_tournament_prizes` | Prize distribution of a tournament stage        |
+| `get_match_lineups`     | Players who played each side of a match         |
 | `get_team_earnings`     | Team earnings by year, per currency             |
 | `get_player_earnings`   | Player earnings by year, per currency           |
 | `list_leagues`          | Leagues with id, name, slug and source          |
@@ -108,6 +109,7 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `set_event_streams`         | `tournaments.manage`                                     | Replace the live streams of an event, inherited by its stages without their own list                           |
 | `set_tournament_streams`    | `tournaments.manage`                                     | Replace the live streams of a tournament stage, inherited by its matches without their own list                |
 | `set_match_streams`         | `tournaments.manage`                                     | Replace the live streams of one match, overriding the inherited list                                           |
+| `set_match_lineups`         | `tournaments.manage`                                     | Replace the lineups of one match: the players who actually played each side, stand-ins included                |
 | `list_roster_proposals`     | `players.manage`, `teams.manage` or `tournaments.manage` | Not queued: lists proposals by status                                                                          |
 
 Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who changes role on the same team, for example from `active` to `benched` or from player to coach, gets a new contract with `add_player_to_team` on that team, so their past contracts keep their role. Proposing the team and role the player already holds is rejected. The role shown on player and team pages comes from the current contract.
@@ -121,6 +123,8 @@ A merged duplicate keeps its row and slug; its public page redirects to the kept
 ## Data sources and start.gg
 
 Players, teams, tournaments and matches record a `source`: `pandascore`, `manual` or `startgg`. start.gg allows displaying its data with credit. start.gg players and teams are public: `search_*` and `get_*` return them with `source: "startgg"`, including as participants of PandaScore or manual matches. start.gg tournaments and matches are not redistributed: MCP reads exclude them in the query and open-data exports must filter them the same way. A roster proposal whose `sourceUrl` is on `start.gg` creates `startgg` players and teams; `create_tournament` takes `source: "startgg"` explicitly, and matches added to a start.gg tournament inherit it. The public player, team and tournament responses expose `source` so the site can credit start.gg.
+
+Match lineups record, per match and participant, the players who actually played the series, in order. A player is a stand-in when they are not on that participant's tournament roster; the flag is computed on read, so a roster correction updates it. `set_match_lineups` takes `matchId`, one `{ participantId, playerIds }` entry per side and `sourceUrl`, replaces every lineup of the match once approved, and refuses start.gg matches, start.gg sources, unknown or merged players and a player listed twice. `get_match_lineups` answers not found for a start.gg match; the site shows start.gg lineups with a start.gg credit.
 
 Prize distributions record, per tournament stage, a placement, a whole amount in the currency the source states, a team and optionally the players who share it. Each team must be a participant of the stage and each player must be on that team's stage roster, whether the distribution comes from the admin editor or an approved proposal. `propose_tournament_prizes` refuses start.gg tournaments. Amounts are never converted: totals are given per currency, and a prize that lists players is split equally between them on player earnings, rounded to the minor unit of its currency (no cents for JPY or KRW). The overall prize pool stays the one synced from PandaScore (`prizepool`). Prize distributions of start.gg tournaments appear on the site with a start.gg credit, but `get_tournament_prizes`, `get_team_earnings` and `get_player_earnings` do not return them: the earnings tools exclude them in the query and `get_tournament_prizes` answers not found after reading the distribution, like start.gg tournaments and matches.
 

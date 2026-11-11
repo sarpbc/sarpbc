@@ -57,6 +57,7 @@ function setup(role: "admin" | "journalist" = "admin") {
       events: eventQueries,
       tournaments: { find: vi.fn(), findById: vi.fn() },
       matchService: { list: vi.fn() },
+      matchLineupService: { find: vi.fn() },
       tournamentPrizeService: {
         findByTournamentId: vi.fn(),
         teamEarnings: vi.fn(),

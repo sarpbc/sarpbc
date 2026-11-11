@@ -148,6 +148,23 @@ export function readTools({
     }),
 
     defineTool({
+      name: "get_match_lineups",
+      description:
+        "Get the lineups entered for one match (series): per participant id, the players who actually played, in order. standIn is true for a player who is not on that participant's tournament roster. A match without entered lineups returns an empty list. start.gg matches are not returned. Read it before set_match_lineups.",
+      input: { matchId: z.string().min(1).describe("Match UUID.") },
+      handler: async ({ matchId }) => {
+        const lineups = await competition.matchLineups(matchId);
+        return {
+          matchId,
+          lineups: lineups.map(({ participantId, players }) => ({
+            participantId,
+            players: players.map(({ id, name, slug, standIn }) => ({ id, name, slug, standIn })),
+          })),
+        };
+      },
+    }),
+
+    defineTool({
       name: "get_team_earnings",
       description:
         "Get a team prize earnings by year, with totals per currency (amounts are never converted).",

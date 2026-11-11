@@ -2,6 +2,7 @@ import type {
   DataSource,
   PlayerAwardType,
   PlayerProfileAward,
+  MatchLineupInput,
   PrizeEntry,
   TournamentAwardListItem,
   TournamentPrizes,
@@ -20,6 +21,7 @@ import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
 import type { MatchDecided } from "../domain/match-decided";
 import type { MatchReferences } from "../domain/match-deletion";
+import type { LineupRow } from "../domain/match-lineup";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -186,6 +188,19 @@ export interface PrizeTransaction {
 export interface AwardTransaction {
   run<T>(work: (scope: Pick<CompetitionWriteScope, "awards">) => Promise<T>): Promise<T>;
 }
+export interface PlayerLineupRow {
+  matchId: string;
+  participantId: string;
+  rosterIds: string[];
+}
+export interface LineupQueries {
+  byMatch(matchId: string): Promise<LineupRow[]>;
+  byPlayer(playerId: string): Promise<PlayerLineupRow[]>;
+}
+export interface LineupWriter {
+  activePlayersExist(ids: string[]): Promise<boolean>;
+  replace(matchId: string, lineups: MatchLineupInput[]): Promise<void>;
+}
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;
   events: EventWriter;
@@ -193,6 +208,7 @@ export interface CompetitionWriteScope {
   rosters: RosterIdentityWriter;
   awards: AwardWriter;
   prizes: PrizeWriter;
+  lineups: LineupWriter;
 }
 export interface CompetitionTransaction {
   run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T>;

@@ -94,6 +94,13 @@ export type {
   TournamentPrize,
   TournamentPrizes,
 } from "./prize";
+export type {
+  MatchLineup,
+  MatchLineupInput,
+  MatchLineupPlayer,
+  MatchLineupsResponse,
+  PlayerStandIn,
+} from "./lineup";
 export { STREAM_KINDS, STREAM_PLATFORMS } from "./stream";
 export type { Stream, StreamInput, StreamKind, StreamPlatform, StreamsResponse } from "./stream";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";

@@ -7,6 +7,7 @@ import { League, Tournament } from "../../domain/competition";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
+import { MatchLineupService } from "../../application/match/match-lineup.service";
 
 const unusedStreams = new StreamService(
   { run: () => Promise.reject(new Error("unused")) },
@@ -16,6 +17,13 @@ const unusedStreams = new StreamService(
     { error: () => {} },
   ),
 );
+
+const unusedLineups = new MatchLineupService(
+  { byMatch: async () => [], byPlayer: async () => [] },
+  { byIds: async () => [] },
+  { run: () => Promise.reject(new Error("unused")) },
+);
+const unusedGameStats = { byMatch: async () => [] };
 
 describe("TournamentController.findOne", () => {
   const redis = { get: vi.fn(), set: vi.fn() };
@@ -40,6 +48,8 @@ describe("TournamentController.findOne", () => {
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
       {} as never,
       unusedStreams,
+      unusedLineups,
+      unusedGameStats,
     );
     redis.get.mockResolvedValue(null);
   });
@@ -81,6 +91,8 @@ describe("TournamentController leagues", () => {
     {} as never,
     catalog as never,
     unusedStreams,
+    unusedLineups,
+    unusedGameStats,
   );
   const manual = Object.assign(new League(), {
     id: "l1",

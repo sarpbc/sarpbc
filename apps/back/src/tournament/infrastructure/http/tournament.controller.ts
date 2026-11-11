@@ -16,6 +16,7 @@ import {
   NotFoundException,
   Inject,
 } from "@nestjs/common";
+import type { MatchLineupsResponse } from "@sarpbc/types";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
@@ -33,6 +34,14 @@ import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { MatchService } from "../../application/match/match.service";
 import { StreamService } from "../../application/stream.service";
 import { SetStreamsDto } from "./dto/set-streams.dto";
+import {
+  MatchLineupService,
+  type MatchLineups,
+} from "../../application/match/match-lineup.service";
+import { lineupsFromGames } from "../../domain/match-lineup";
+import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
+import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
@@ -64,6 +73,8 @@ export class TournamentController {
     private tournamentPrizesRead: CachedTournamentPrizesRead,
     private catalogService: ManualCatalogService,
     private streamService: StreamService,
+    private lineupService: MatchLineupService,
+    @Inject(GAME_STATS_STORE) private gameStats: Pick<GameStatsStore, "byMatch">,
   ) {}
 
   @Get()
@@ -292,6 +303,23 @@ export class TournamentController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
+  @Get("matches/:matchId/lineups")
+  getMatchLineups(@Param("matchId") matchId: string): Promise<MatchLineupsResponse> {
+    return this.lineupsResponse(matchId, this.lineupService.find(matchId));
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/lineups")
+  setMatchLineups(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsDto,
+  ): Promise<MatchLineupsResponse> {
+    return this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/streams")
   getTournamentStreams(@Param("id") id: string) {
     return this.streamService.find({ kind: "tournament", id });
@@ -325,5 +353,13 @@ export class TournamentController {
   async getMatchesByTeam(@Param("teamId") teamId: string) {
     const matches = await this.matchService.getMatchesByTeam(teamId);
     return { matches: matches.map(mapProfileMatchListItem) };
+  }
+
+  private async lineupsResponse(
+    matchId: string,
+    pending: Promise<MatchLineups>,
+  ): Promise<MatchLineupsResponse> {
+    const lineups = await pending;
+    return { ...lineups, suggested: lineupsFromGames(await this.gameStats.byMatch(matchId)) };
   }
 }
