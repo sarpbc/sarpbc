@@ -215,7 +215,7 @@
     },
     "proposals": {
       "title": "Propositions de roster",
-      "subtitle": "Changements sourcés de rosters, joueurs, équipes, répartitions des gains et récompenses proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
+      "subtitle": "Changements sourcés de rosters, joueurs, équipes, répartitions des gains et récompenses, et suppressions de matchs ou d'équipes, proposés via le MCP. Rien n'est appliqué avant la validation d'un membre du staff.",
       "loadError": "Impossible de charger les propositions de roster.",
       "empty": "Aucune proposition de roster à examiner.",
       "approve": "Valider",
@@ -233,7 +233,9 @@
         "create_contract": "Nouveau contrat",
         "update_contract": "Modification du contrat",
         "set_tournament_prizes": "Répartition des gains",
-        "award_player": "Récompense joueur"
+        "award_player": "Récompense joueur",
+        "delete_match": "Suppression de match",
+        "delete_team": "Suppression d'équipe"
       },
       "fields": {
         "playerId": "Joueur",
@@ -256,7 +258,10 @@
         "tournamentId": "Tournoi",
         "awardType": "Récompense",
         "prizes": "Gains",
-        "placement": "{placement}re place | {placement}e place"
+        "placement": "{placement}re place | {placement}e place",
+        "matchId": "Match",
+        "reason": "Motif",
+        "mergeIntoTeamId": "Fusionner dans"
       },
       "playerStatus": {
         "active": "Actif",
@@ -282,6 +287,10 @@
         "approved": "Proposition validée et appliquée",
         "rejected": "Proposition refusée",
         "reviewError": "Impossible d'examiner cette proposition. Réessayez."
+      },
+      "deletionWarning": {
+        "delete_match": "L'approbation supprime définitivement ce match, ses scores et ses statistiques de manches, et recalcule les classements et bilans d'équipe.",
+        "delete_team": "L'approbation supprime définitivement cette équipe, ou la fusionne avec l'équipe indiquée. Une équipe qui a encore des joueurs, des contrats, des participations, des matchs ou des gains est refusée."
       }
     },
     "tournaments": {
@@ -352,7 +361,12 @@
         "status": "Statut",
         "score": "Score",
         "setWinner": "Définir le Vainqueur",
-        "syncScores": "Actualiser les Scores"
+        "syncScores": "Actualiser les Scores",
+        "delete": {
+          "action": "Supprimer",
+          "title": "Supprimer le match",
+          "confirm": "Supprimer {match} ({score}) ? Ses scores et ses statistiques de manches sont aussi supprimés, et les classements et bilans d'équipe sont recalculés. Cette action est irréversible. Les matchs PandaScore, et ceux qui ont des pronostics, des commentaires ou des matchs suivants dans le bracket, sont refusés."
+        }
       },
       "awards": {
         "title": "Récompenses Joueur",
@@ -539,6 +553,11 @@
           "title": "Phases",
           "hint": "Pour ajouter ou déplacer un tournoi, ouvrez-le et choisissez cet événement dans son champ Événement.",
           "empty": "Cet événement n'a pas encore de phase. Il reste masqué sur le site public tant qu'aucune n'est ajoutée."
+        },
+        "delete": {
+          "title": "Supprimer l'événement",
+          "confirm": "Supprimer l'événement vide {name} ? Son URL publique ne fonctionnera plus. Cette action est irréversible.",
+          "confirmButton": "Supprimer"
         }
       },
       "leagues": {
@@ -810,7 +829,7 @@
       },
       "delete": {
         "title": "Supprimer l'équipe",
-        "confirm": "Êtes-vous sûr de vouloir supprimer {name} ? Cette action est irréversible.",
+        "confirm": "Supprimer {name} ? Cette action est irréversible. Une équipe qui a encore des joueurs, des contrats, des participations à des tournois, des matchs ou des gains est refusée : fusionnez-la plutôt avec l'équipe qu'elle duplique.",
         "confirm_button": "Supprimer"
       },
       "info": {

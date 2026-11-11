@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { ManualEvent } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
 const route = useRoute();
@@ -10,6 +11,7 @@ const reportError = useReportError();
 const eventId = computed(() => route.params.id as string);
 const formState = ref(eventToFormState(null));
 const isSaving = ref(false);
+const eventToDelete = ref<ManualEvent | null>(null);
 
 const {
   data: event,
@@ -75,13 +77,22 @@ async function handleSubmit() {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
-        v-if="event?.editable"
-        icon="i-fluent-save-24-regular"
-        :label="$t('page.tournaments.events.save')"
-        :loading="isSaving"
-        @click="handleSubmit"
-      />
+      <div v-if="event?.editable" class="flex flex-row gap-2">
+        <UButton
+          v-if="event.stages.length === 0"
+          icon="i-fluent-delete-24-regular"
+          color="error"
+          variant="soft"
+          :label="$t('page.tournaments.events.delete.title')"
+          @click="eventToDelete = event"
+        />
+        <UButton
+          icon="i-fluent-save-24-regular"
+          :label="$t('page.tournaments.events.save')"
+          :loading="isSaving"
+          @click="handleSubmit"
+        />
+      </div>
     </template>
 
     <DashboardContent>
@@ -163,5 +174,14 @@ async function handleSubmit() {
         </template>
       </div>
     </DashboardContent>
+
+    <ConfirmDeleteModal
+      v-model:target="eventToDelete"
+      :title="$t('page.tournaments.events.delete.title')"
+      :confirm-label="$t('page.tournaments.events.delete.confirmButton')"
+      :message="(target) => $t('page.tournaments.events.delete.confirm', { name: target.name })"
+      :remove="(target) => deleteEvent(target.id)"
+      @deleted="navigateTo(localePath('/tournaments/events'))"
+    />
   </NuxtLayout>
 </template>

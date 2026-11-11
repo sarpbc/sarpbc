@@ -148,6 +148,7 @@ async function onSyncTeams() {
           </template>
           <template #actions-cell="{ row }">
             <UButton
+              v-if="row.original.source !== 'pandascore'"
               icon="i-fluent-delete-24-regular"
               color="error"
               variant="ghost"

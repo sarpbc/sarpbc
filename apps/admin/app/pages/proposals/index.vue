@@ -13,6 +13,10 @@ const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short"
 const user = useUser();
 const reviewingId = ref<string | null>(null);
 
+function isDeletion({ change }: RosterProposal): boolean {
+  return change.kind === "delete_match" || change.kind === "delete_team";
+}
+
 function canReview(proposal: RosterProposal): boolean {
   return hasPermission(user.value, requiredPermission(proposal.change));
 }
@@ -166,7 +170,7 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
           >
             <div class="flex flex-row flex-wrap items-center justify-between gap-2">
               <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
-                <UBadge color="primary" variant="subtle">
+                <UBadge :color="isDeletion(proposal) ? 'error' : 'primary'" variant="subtle">
                   {{ $t(`page.proposals.kinds.${proposal.change.kind}`) }}
                 </UBadge>
                 <span class="text-muted" translate="no">{{ nameOf(proposal.proposedById) }}</span>
@@ -224,18 +228,23 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
                   </figure>
                 </dd>
               </template>
-              <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
-              <dd class="break-all">
-                <ULink
-                  :to="proposal.sourceUrl"
-                  external
-                  target="_blank"
-                  class="text-primary hover:underline"
-                >
-                  {{ proposal.sourceUrl }}
-                </ULink>
-              </dd>
+              <template v-if="proposal.sourceUrl">
+                <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
+                <dd class="break-all">
+                  <ULink
+                    :to="proposal.sourceUrl"
+                    external
+                    target="_blank"
+                    class="text-primary hover:underline"
+                  >
+                    {{ proposal.sourceUrl }}
+                  </ULink>
+                </dd>
+              </template>
             </dl>
+            <p v-if="isDeletion(proposal)" class="text-sm text-error">
+              {{ $t(`page.proposals.deletionWarning.${proposal.change.kind}`) }}
+            </p>
           </article>
         </div>
       </div>
