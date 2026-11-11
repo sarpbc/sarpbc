@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { stageMatchesPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
 import type { TournamentDetail } from "@sarpbc/types";
-import { getTournamentChampionTeam } from "~/utils/structuredData/tournamentSportsEvent";
+import { getTournamentChampion } from "~/utils/structuredData/tournamentSportsEvent";
 import {
   formatTournamentShortDateRange,
   getTournamentStatus,
@@ -65,7 +65,7 @@ const event = computed(() => (resolved.value?.kind === "event" ? resolved.value.
 
 const champion = computed(() => {
   const finalStage = event.value?.stages[0];
-  return finalStage ? getTournamentChampionTeam(finalStage) : null;
+  return finalStage ? getTournamentChampion(finalStage) : null;
 });
 
 const stageCount = computed(() => event.value?.stages.length ?? 0);
@@ -73,6 +73,7 @@ const stageCount = computed(() => event.value?.stages.length ?? 0);
 function stageMeta(stage: TournamentDetail): string {
   const status = getTournamentStatus(stage);
   return [
+    nonDefaultFormatLabel(stage.format),
     formatTournamentShortDateRange(stage.beginAt, stage.endAt, locale.value),
     status ? t(tournamentStatusLabelKey(status)) : null,
   ]

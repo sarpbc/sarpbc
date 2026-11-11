@@ -12,7 +12,9 @@ export function assertTournamentUpdateAllowed(
     leagueId?: string | null;
     beginAt?: string | null;
     endAt?: string | null;
+    format?: string;
     teamIds?: string[];
+    playerParticipants?: string[][];
     rosters?: unknown[];
   },
 ): void {

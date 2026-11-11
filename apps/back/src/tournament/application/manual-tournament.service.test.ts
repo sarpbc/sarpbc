@@ -318,4 +318,95 @@ describe("ManualTournamentService", () => {
       service.update("ewc", { beginAt: "2026-10-20", endAt: "2026-10-19" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
   });
+  describe("player participants", () => {
+    const solo = (id: string, playerId: string) =>
+      Object.assign(new TournamentParticipant(), {
+        id,
+        team: null,
+        players: [Object.assign(new Player(), { id: playerId })],
+      });
+    beforeEach(() => {
+      writer.save.mockImplementation(async (saved: Tournament) => {
+        tournament = saved;
+      });
+    });
+    it("creates a 1v1 tournament whose participants are existing players, without a team", async () => {
+      const created = await service.create({
+        name: "Fake Knockout",
+        format: "1v1",
+        playerParticipants: [["zen"], ["vatira"]],
+      });
+      expect(created.format).toBe("1v1");
+      expect(writer.playersExist).toHaveBeenCalledWith(["zen", "vatira"]);
+      expect(writer.teamsExist).not.toHaveBeenCalled();
+      expect(writer.teamPlayers).not.toHaveBeenCalled();
+      expect(writer.saveParticipant.mock.calls.map(([participant]) => participant)).toEqual([
+        expect.objectContaining({ teamId: null, playerIds: ["zen"] }),
+        expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
+      ]);
+    });
+    it("creates a 2v2 tournament with a free duo and an official team", async () => {
+      await service.create({
+        name: "Fake Duo Cup",
+        format: "2v2",
+        teamIds: ["vitality"],
+        playerParticipants: [["zen", "vatira"]],
+      });
+      expect(writer.saveParticipant).toHaveBeenCalledWith(
+        expect.objectContaining({ teamId: "vitality" }),
+      );
+      expect(writer.saveParticipant).toHaveBeenCalledWith(
+        expect.objectContaining({ teamId: null, playerIds: ["zen", "vatira"] }),
+      );
+    });
+    it("defaults to a 3v3 team tournament", async () => {
+      expect((await service.create({ name: "Team Cup" })).format).toBe("3v3");
+      await expect(
+        service.create({ name: "Team Cup", playerParticipants: [["zen"]] }),
+      ).rejects.toBeInstanceOf(InvalidInputError);
+    });
+    it("rejects a team in a 1v1 tournament and an unknown player", async () => {
+      await expect(
+        service.create({ name: "Knockout", format: "1v1", teamIds: ["vitality"] }),
+      ).rejects.toBeInstanceOf(InvalidInputError);
+      writer.playersExist.mockResolvedValue(false);
+      await expect(
+        service.create({ name: "Knockout", format: "1v1", playerParticipants: [["ghost"]] }),
+      ).rejects.toBeInstanceOf(InvalidInputError);
+      expect(writer.saveParticipant).not.toHaveBeenCalled();
+    });
+    it("replaces the players of a 1v1 tournament and keeps those still listed", async () => {
+      tournament = Object.assign(tournament, { source: "manual", format: "1v1" });
+      ownEvent();
+      writer.participants.mockResolvedValue([solo("p-zen", "zen"), solo("p-atow", "atow")]);
+      writer.participantReferences.mockResolvedValue({
+        tournamentWinner: false,
+        matchParticipant: false,
+        matchWinner: false,
+        results: false,
+      });
+      await service.update("ewc", { playerParticipants: [["zen"], ["vatira"]] });
+      expect(writer.removeParticipant).toHaveBeenCalledWith("p-atow");
+      expect(writer.saveParticipant).toHaveBeenCalledTimes(1);
+      expect(writer.saveParticipant).toHaveBeenCalledWith(
+        expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
+      );
+    });
+    it("refuses a format change the current participants do not fit", async () => {
+      tournament = Object.assign(tournament, { source: "manual", format: "1v1" });
+      ownEvent();
+      writer.participants.mockResolvedValue([solo("p-zen", "zen")]);
+      await expect(service.update("ewc", { format: "3v3" })).rejects.toBeInstanceOf(
+        InvalidInputError,
+      );
+      await expect(service.update("ewc", { format: "2v2" })).rejects.toBeInstanceOf(
+        InvalidInputError,
+      );
+    });
+    it("refuses to change the format of a PandaScore tournament", async () => {
+      await expect(service.update("ewc", { format: "1v1" })).rejects.toBeInstanceOf(
+        InvalidInputError,
+      );
+    });
+  });
 });

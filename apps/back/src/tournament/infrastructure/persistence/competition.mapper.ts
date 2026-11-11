@@ -42,6 +42,7 @@ export const MATCH_WRITE_POPULATE = [
   "participants.team",
   "participants.players",
   "winner.team",
+  "winner.players",
   "results.participant",
   "previousMatches.previousMatch",
 ] as const;
@@ -53,14 +54,18 @@ export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
 }
 export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant | null {
   const { tournament, team } = row;
-  if (!wrap(row).isInitialized() || !tournament || !team || !wrap(team).isInitialized()) {
+  const loaded =
+    wrap(row).isInitialized() &&
+    tournament &&
+    (team ? wrap(team).isInitialized() : row.players.isInitialized());
+  if (!loaded) {
     log.warn({ component: "CompetitionMapper", skipped: "participant", participantId: row.id });
     return null;
   }
   return Object.assign(new TournamentParticipant(), {
     id: row.id,
     tournamentId: tournament.id,
-    team: toTeam(team, false),
+    team: team ? toTeam(team, false) : null,
     players: row.players.isInitialized()
       ? row.players
           .getItems()
@@ -127,6 +132,7 @@ export function toTournament(row: Row.Tournament): Tournament {
     id: row.id,
     pandascoreId: row.pandascoreId,
     source: row.source,
+    format: row.format,
     name: row.name,
     description: row.description,
     slug: row.slug,
@@ -159,7 +165,13 @@ export function toMatchSlug(row: Row.Match): string {
   const event = tournament && wrap(tournament.event).isInitialized() ? tournament.event : null;
   return matchPublicSlug({
     name: row.name,
-    participants: loaded && row.participants.isInitialized() ? row.participants.getItems() : [],
+    participants:
+      loaded && row.participants.isInitialized()
+        ? row.participants.getItems().map((participant) => ({
+            team: participant.team,
+            players: participant.players.isInitialized() ? participant.players.getItems() : [],
+          }))
+        : [],
     tournament: { slug: tournament?.slug ?? "", event: { slug: event?.slug ?? "" } },
   });
 }

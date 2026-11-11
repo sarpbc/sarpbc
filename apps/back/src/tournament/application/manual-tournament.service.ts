@@ -1,8 +1,13 @@
 import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Tournament, assertParticipantRemovable } from "../domain/competition";
+import {
+  Tournament,
+  assertParticipantRemovable,
+  type TournamentParticipant,
+} from "../domain/competition";
 import { TournamentEvent, ownsEvent, toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
+import { assertLineupFitsFormat, playerGroupKey } from "../domain/tournament-format";
 import type {
   CreateTournamentInput,
   ParticipantRosterInput,
@@ -28,6 +33,11 @@ export class ManualTournamentService {
       tournament.source = input.source ?? "manual";
       tournament.pandascoreId = null;
       tournament.name = input.name;
+      tournament.format = input.format ?? "3v3";
+      assertLineupFitsFormat(tournament.format, {
+        teamIds: input.teamIds ?? [],
+        playerGroups: input.playerParticipants ?? [],
+      });
       tournament.tier = input.tier?.trim() || null;
       tournament.imageUrl = input.imageUrl?.trim() || null;
       tournament.beginAt = input.beginAt ? new Date(input.beginAt) : null;
@@ -44,6 +54,8 @@ export class ManualTournamentService {
       await tournaments.save(tournament);
       if (input.teamIds?.length)
         await this.syncParticipants(tournaments, tournament, input.teamIds);
+      if (input.playerParticipants?.length)
+        await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
       return tournament.id;
     });
     return this.detail(id);
@@ -68,8 +80,11 @@ export class ManualTournamentService {
         if (input.leagueId !== undefined)
           tournament.league = await requireLeague(tournaments, input.leagueId);
         await this.updateEvent(events, tournament, previousName, input);
+        await this.assertUpdatedLineup(tournaments, tournament, input);
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);
+        if (input.playerParticipants !== undefined)
+          await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
         if (input.rosters !== undefined)
           await this.setRosters(tournaments, tournament, input.rosters);
       }
@@ -147,11 +162,11 @@ export class ManualTournamentService {
     const existing = await writer.participants(tournament.id),
       desired = new Set(teamIds);
     for (const p of existing) {
-      if (desired.has(p.team.id)) continue;
+      if (!p.team || desired.has(p.team.id)) continue;
       assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
       await writer.removeParticipant(p.id);
     }
-    const present = new Set(existing.map((p) => p.team.id));
+    const present = new Set(existing.flatMap((p) => (p.team ? [p.team.id] : [])));
     for (const teamId of teamIds) {
       if (!present.has(teamId))
         await writer.saveParticipant({
@@ -161,6 +176,55 @@ export class ManualTournamentService {
           playerIds: await this.activeRoster(writer, teamId),
         });
     }
+  }
+  private async syncPlayerParticipants(
+    writer: TournamentWriter,
+    tournament: Tournament,
+    groups: string[][],
+  ) {
+    const playerIds = [...new Set(groups.flat())];
+    if (playerIds.length && !(await writer.playersExist(playerIds)))
+      throw new InvalidInputError(
+        "One or more players were not found. Refresh the player list and try again.",
+      );
+    const existing = (await writer.participants(tournament.id)).filter((p) => !p.team),
+      keyOf = (p: TournamentParticipant) => playerGroupKey(p.players.map((player) => player.id)),
+      desired = new Set(groups.map(playerGroupKey));
+    for (const p of existing) {
+      if (desired.has(keyOf(p))) continue;
+      assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
+      await writer.removeParticipant(p.id);
+    }
+    const present = new Set(existing.map(keyOf));
+    for (const group of groups) {
+      if (!present.has(playerGroupKey(group)))
+        await writer.saveParticipant({
+          id: crypto.randomUUID(),
+          tournamentId: tournament.id,
+          teamId: null,
+          playerIds: group,
+        });
+    }
+  }
+  private async assertUpdatedLineup(
+    writer: TournamentWriter,
+    tournament: Tournament,
+    input: UpdateTournamentInput,
+  ) {
+    if (input.format !== undefined) tournament.format = input.format;
+    if (
+      input.format === undefined &&
+      input.teamIds === undefined &&
+      input.playerParticipants === undefined
+    )
+      return;
+    const current = await writer.participants(tournament.id);
+    assertLineupFitsFormat(tournament.format, {
+      teamIds: input.teamIds ?? current.flatMap((p) => (p.team ? [p.team.id] : [])),
+      playerGroups:
+        input.playerParticipants ??
+        current.flatMap((p) => (p.team ? [] : [p.players.map((player) => player.id)])),
+    });
   }
   /** Copied once when the team joins, so later transfers do not rewrite the tournament's history. */
   private async activeRoster(writer: TournamentWriter, teamId: string) {
@@ -180,7 +244,7 @@ export class ManualTournamentService {
       );
     const participants = await writer.participants(tournament.id);
     for (const roster of rosters) {
-      const participant = participants.find((p) => p.team.id === roster.teamId);
+      const participant = participants.find((p) => p.team?.id === roster.teamId);
       if (!participant)
         throw new InvalidInputError(
           `Team "${roster.teamId}" is not a participant of this tournament. Add it to teamIds first.`,

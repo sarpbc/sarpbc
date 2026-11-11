@@ -105,13 +105,13 @@ export class MatchService {
   }
 
   private async buildHeadToHead(match: Match): Promise<HeadToHead | null> {
-    const participants = match.participants;
-    if (participants.length !== 2) {
+    const [teamA, teamB] = match.participants.map((participant) => participant.team);
+    if (match.participants.length !== 2 || !teamA || !teamB) {
       return null;
     }
 
-    const teamAId = participants[0].team.id;
-    const teamBId = participants[1].team.id;
+    const teamAId = teamA.id;
+    const teamBId = teamB.id;
 
     const historicalMatches = await this.reads.betweenTeams({
       teamAId,
@@ -128,8 +128,9 @@ export class MatchService {
     const teamForms: TeamFormsMap = {};
 
     await Promise.all(
-      participants.map(async (participant) => {
-        const teamId = participant.team.id;
+      participants.map(async ({ team }) => {
+        if (!team) return;
+        const teamId = team.id;
         const recent = await this.reads.recentByTeam({
           teamId,
           excludeMatchId: match.id,
@@ -161,10 +162,11 @@ export class MatchService {
 
   private mapTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
     const participants = match.participants;
-    const teamParticipant = participants.find((p) => p.team.id === teamId);
-    const opponentParticipant = participants.find((p) => p.team.id !== teamId);
+    const teamParticipant = participants.find((p) => p.team?.id === teamId);
+    const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
+    const opponent = opponentParticipant?.team;
 
-    if (!teamParticipant || !opponentParticipant) {
+    if (!teamParticipant || !opponentParticipant || !opponent) {
       return null;
     }
 
@@ -180,10 +182,10 @@ export class MatchService {
       beginAt: match.beginAt,
       endAt: match.endAt,
       opponent: {
-        id: opponentParticipant.team.id,
-        name: opponentParticipant.team.name,
-        slug: opponentParticipant.team.slug,
-        imageUrl: opponentParticipant.team.imageUrl,
+        id: opponent.id,
+        name: opponent.name,
+        slug: opponent.slug,
+        imageUrl: opponent.imageUrl,
       },
       score: { team: teamScore, opponent: opponentScore },
       outcome: this.getTeamMatchOutcome(match, teamId),
@@ -200,8 +202,8 @@ export class MatchService {
       return null;
     }
 
-    const teamParticipant = participants.find((p) => p.team.id === teamId);
-    const opponentParticipant = participants.find((p) => p.team.id !== teamId);
+    const teamParticipant = participants.find((p) => p.team?.id === teamId);
+    const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
 
     if (!teamParticipant || !opponentParticipant) {
       return null;

@@ -1,4 +1,4 @@
-import type { TeamSummary, TournamentDetailMatch } from "@sarpbc/types";
+import type { ParticipantRef, TeamSummary, TournamentDetailMatch } from "@sarpbc/types";
 import type { MatchResult } from "~/types/matches";
 
 export type BracketZone = "upper" | "lower";
@@ -22,8 +22,8 @@ export interface BracketLayoutMatch {
   row: number;
   zone?: BracketZone;
   name: string;
-  teamA?: TeamSummary;
-  teamB?: TeamSummary;
+  participantA?: ParticipantRef<TeamSummary>;
+  participantB?: ParticipantRef<TeamSummary>;
   participantAId?: string;
   participantBId?: string;
   results?: MatchResult[];

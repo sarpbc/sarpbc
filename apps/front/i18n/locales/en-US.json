@@ -1471,7 +1471,9 @@
         },
         "participants": {
           "title": "Participating Teams",
+          "titlePlayers": "Participating Players",
           "empty": "Teams not announced yet.",
+          "emptyPlayers": "Players not announced yet.",
           "emptyHint": "Check back when the tournament roster is confirmed.",
           "openRoster": "Show {team} roster",
           "viewTeam": "View {team}",
@@ -1479,6 +1481,7 @@
         },
         "hero": {
           "teamsCount": "{count} team | {count} teams",
+          "playersCount": "{count} player | {count} players",
           "champion": "Champion:"
         },
         "sections": "Tournament sections",

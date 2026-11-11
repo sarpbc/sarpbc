@@ -18,7 +18,13 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
     <SRail>
       <template #caption>
         <h2 :id="headingId" class="text-balance">
-          {{ t("page.tournaments.id.participants.title") }}
+          {{
+            t(
+              tournament.format === "1v1"
+                ? "page.tournaments.id.participants.titlePlayers"
+                : "page.tournaments.id.participants.title",
+            )
+          }}
         </h2>
       </template>
 
@@ -30,11 +36,11 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
       >
         <div
           v-for="entry in participantEntries"
-          :key="entry.team.id"
+          :key="entry.id"
           role="listitem"
           class="-mr-px -mb-px min-w-0"
         >
-          <TournamentParticipantTile :team="entry.team" :players="entry.players" />
+          <TournamentParticipantTile :entry="entry" />
         </div>
       </div>
 
@@ -42,7 +48,13 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
-            {{ t("page.tournaments.id.participants.empty") }}
+            {{
+              t(
+                tournament.format === "1v1"
+                  ? "page.tournaments.id.participants.emptyPlayers"
+                  : "page.tournaments.id.participants.empty",
+              )
+            }}
           </p>
           <p class="text-xs text-muted text-pretty">
             {{ t("page.tournaments.id.participants.emptyHint") }}

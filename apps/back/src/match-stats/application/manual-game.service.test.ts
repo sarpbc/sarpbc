@@ -27,8 +27,8 @@ const match: CandidateMatch = {
   finished: true,
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", teamName: "Karmine Corp", players: [{ id: "vatira", name: "Vatira" }] },
-    { id: "p-bds", teamName: "BDS", players: [{ id: "seikoo", name: "Seikoo" }] },
+    { id: "p-kc", name: "Karmine Corp", players: [{ id: "vatira", name: "Vatira" }] },
+    { id: "p-bds", name: "BDS", players: [{ id: "seikoo", name: "Seikoo" }] },
   ],
   scores: new Map(),
   storedReplayIds: ["stored-1"],
@@ -65,7 +65,13 @@ const input = {
   blueParticipantId: "p-bds",
 };
 
-function setup(options: { source?: boolean; numberOfGames?: number | null } = {}) {
+function setup(
+  options: {
+    source?: boolean;
+    numberOfGames?: number | null;
+    participants?: CandidateMatch["participants"];
+  } = {},
+) {
   const source = {
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(),
     replayStats: vi.fn<BallchasingSource["replayStats"]>(async () => stats),
@@ -73,7 +79,11 @@ function setup(options: { source?: boolean; numberOfGames?: number | null } = {}
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
     matches: vi.fn(async () => [
-      { ...match, numberOfGames: options.numberOfGames === undefined ? 5 : options.numberOfGames },
+      {
+        ...match,
+        numberOfGames: options.numberOfGames === undefined ? 5 : options.numberOfGames,
+        participants: options.participants ?? match.participants,
+      },
     ]),
   };
   const games = {
@@ -130,6 +140,28 @@ describe("ManualGameService.attach", () => {
     ]);
     expect(record.learnedLinks).toEqual([
       { platform: "steam", platformId: "seikoo-id", playerId: "seikoo" },
+    ]);
+  });
+
+  it("attaches a 1v1 replay by player and links each side to its player", async () => {
+    const { service, games } = setup({
+      participants: [
+        { id: "p-stand-in", name: "Stand-in", players: [{ id: "stand-in", name: "Stand-in" }] },
+        { id: "p-seikoo", name: "Seikoo", players: [{ id: "seikoo", name: "Seikoo" }] },
+      ],
+    });
+    games.links.mockResolvedValue([]);
+
+    await service.attach("t1", { ...input, blueParticipantId: "p-seikoo" });
+
+    const [record] = games.save.mock.calls[0];
+    expect(record).toMatchObject({
+      blueParticipantId: "p-seikoo",
+      orangeParticipantId: "p-stand-in",
+    });
+    expect(record.players.map((player) => [player.side, player.playerId])).toEqual([
+      ["blue", "seikoo"],
+      ["orange", "stand-in"],
     ]);
   });
 

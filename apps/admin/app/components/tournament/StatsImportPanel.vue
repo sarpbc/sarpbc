@@ -6,7 +6,7 @@ import type {
   TournamentMatchListItem,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 import { useIntervalFn } from "@vueuse/core";
 
 const POLL_MS = 3000;
@@ -106,7 +106,7 @@ function statusColor(status: StatsImportStatus) {
 
 function labelOf(match: TournamentMatchListItem): string {
   const [a, b] = match.participants ?? [];
-  const teams = `${a?.team.name ?? "TBD"} vs ${b?.team.name ?? "TBD"}`;
+  const teams = `${a ? participantName(a) : "TBD"} vs ${b ? participantName(b) : "TBD"}`;
   return match.beginAt ? `${teams} · ${formatDate(match.beginAt)}` : teams;
 }
 

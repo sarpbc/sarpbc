@@ -120,8 +120,8 @@ export class PlayerAwardService {
       throw new InvalidInputError(
         player.name +
           " is not on the roster for " +
-          participant.team.name +
-          ". Add the player to this team in the tournament roster first.",
+          participant.name +
+          ". Add the player to this participant in the tournament roster first.",
       );
     return { tournament, participant };
   }

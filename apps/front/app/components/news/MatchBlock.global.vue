@@ -47,7 +47,7 @@ const dateFormatter = computed(
 );
 
 function teamName(item: MatchBlockItem, index: number): string {
-  return item.participants[index]?.team.name || t("components.match.tbd");
+  return slotName(item.participants, index) ?? t("components.match.tbd");
 }
 
 function summary(item: MatchBlockItem): string {

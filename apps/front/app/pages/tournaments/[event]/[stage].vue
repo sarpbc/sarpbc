@@ -9,7 +9,7 @@ import {
 import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,
-  getTournamentChampionTeam,
+  getTournamentChampion,
 } from "~/utils/structuredData/tournamentSportsEvent";
 import { getTournamentTabFromRouteName } from "~/utils/tournamentTabRoute";
 
@@ -129,9 +129,10 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
         :prizepool="tournament.prizepool"
         :type="tournament.type"
         :count-label="
-          teamCount > 0 ? t('page.tournaments.id.hero.teamsCount', { count: teamCount }) : null
+          teamCount > 0 ? t(participantsCountKey(tournament.format), { count: teamCount }) : null
         "
-        :champion="getTournamentChampionTeam(tournament)"
+        :champion="getTournamentChampion(tournament)"
+        :format="tournament.format"
         :calendar-path="tournamentCalendarPath(tournament.id)"
       >
         <template #kicker>

@@ -18,9 +18,11 @@ const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
   "winner.team",
+  "winner.players",
   "participants.team",
   "participants.players",
   "matches.participants.team",
+  "matches.participants.players",
   "matches.previousMatches",
   "matches.results",
   "matches.winner",
@@ -32,7 +34,14 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
-      populate: ["league", "event", "winner.team", "participants.team"],
+      populate: [
+        "league",
+        "event",
+        "winner.team",
+        "winner.players",
+        "participants.team",
+        "participants.players",
+      ],
     });
     return [rows.map(toTournament), count] as [ReturnType<typeof toTournament>[], number];
   }
@@ -176,7 +185,13 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return (
       await this.em.find(Match, where, {
         orderBy: { beginAt: "ASC" },
-        populate: [...MATCH_TOURNAMENT_POPULATE, "participants.team", "results", "winner"],
+        populate: [
+          ...MATCH_TOURNAMENT_POPULATE,
+          "participants.team",
+          "participants.players",
+          "results",
+          "winner",
+        ],
       })
     ).map(toMatch);
   }
@@ -193,7 +208,14 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
         { tournament: { id } },
         {
           orderBy: { beginAt: "ASC" },
-          populate: [...MATCH_TOURNAMENT_POPULATE, "participants.team", "results", "winner.team"],
+          populate: [
+            ...MATCH_TOURNAMENT_POPULATE,
+            "participants.team",
+            "participants.players",
+            "results",
+            "winner.team",
+            "winner.players",
+          ],
         },
       )
     ).map(toMatch);

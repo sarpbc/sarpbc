@@ -5,6 +5,7 @@ import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { User } from "../../../user/infrastructure/user-persistence";
+import { participantName } from "@sarpbc/utils";
 import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import * as Row from "./roster-proposal.entity";
 
@@ -75,7 +76,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
           ? em.find(
               Match,
               { id: { $in: ids.matches } },
-              { populate: ["participants.team", "tournament.event"] },
+              { populate: ["participants.team", "participants.players", "tournament.event"] },
             )
           : [],
       ]);
@@ -90,7 +91,9 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         ...matches.map((match) => [
           match.id,
           [
-            match.participants.map(({ team }) => team.name).join(" vs "),
+            match.participants
+              .map(({ team, players }) => participantName({ team, players: players.getItems() }))
+              .join(" vs "),
             match.tournament.event.name,
             match.tournament.name,
             match.name,

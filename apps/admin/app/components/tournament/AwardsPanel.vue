@@ -10,7 +10,7 @@ const props = defineProps<{
   tournamentId: string;
   participants: Array<{
     id: string;
-    team: { name: string };
+    team: { name: string } | null;
     players?: Array<{ id: string; name: string }>;
   }>;
 }>();
@@ -56,7 +56,7 @@ const rosterOptions = computed(() => {
     for (const player of participant.players ?? []) {
       options.push({
         value: player.id,
-        label: `${player.name} (${participant.team.name})`,
+        label: participant.team ? `${player.name} (${participant.team.name})` : player.name,
         participantId: participant.id,
         playerId: player.id,
         playerName: player.name,

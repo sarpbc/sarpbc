@@ -6,7 +6,7 @@ import type {
   StatsRoster,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import { isMatchFinished } from "@sarpbc/utils";
+import { isMatchFinished, participantName } from "@sarpbc/utils";
 import {
   Match,
   Tournament,
@@ -31,6 +31,10 @@ import {
   MatchStatsImport,
   PlayerPlatformLink,
 } from "./match-stats.entities";
+
+function nameOf(participant: TournamentParticipant): string {
+  return participantName({ team: participant.team, players: participant.players.getItems() });
+}
 
 function toTeam(game: MatchGame, side: Side): MatchGameTeamStats {
   return {
@@ -92,14 +96,22 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     const game = await this.em.findOne(
       MatchGame,
       { ballchasingId: replayId },
-      { populate: ["match.tournament", "blueParticipant.team", "orangeParticipant.team"] },
+      {
+        populate: [
+          "match.tournament",
+          "blueParticipant.team",
+          "blueParticipant.players",
+          "orangeParticipant.team",
+          "orangeParticipant.players",
+        ],
+      },
     );
     return game
       ? {
           matchId: game.match.id,
           number: game.number,
           tournamentName: game.match.tournament.name,
-          teams: [game.blueParticipant.team.name, game.orangeParticipant.team.name],
+          teams: [nameOf(game.blueParticipant), nameOf(game.orangeParticipant)],
         }
       : null;
   }
@@ -210,7 +222,13 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
       MatchGamePlayer,
       { platformId: { $ne: null }, game: { match: { tournament: tournamentId } } },
       {
-        populate: ["player", "game.blueParticipant.team", "game.orangeParticipant.team"],
+        populate: [
+          "player",
+          "game.blueParticipant.team",
+          "game.blueParticipant.players",
+          "game.orangeParticipant.team",
+          "game.orangeParticipant.players",
+        ],
         orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
       },
     );
@@ -228,7 +246,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         platform: row.platform,
         platformId: row.platformId!,
         name: row.name,
-        team: { participantId: participant.id, name: participant.team.name },
+        team: { participantId: participant.id, name: nameOf(participant) },
         games: 1,
         player: row.player ? { id: row.player.id, name: row.player.name } : null,
       });
@@ -247,7 +265,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
     return participants
       .map((participant) => ({
         participantId: participant.id,
-        teamName: participant.team.name,
+        teamName: nameOf(participant),
         players: participant.players
           .getItems()
           .map(({ id, name }) => ({ id, name }))
@@ -307,7 +325,7 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
       numberOfGames: match.numberOfGames,
       participants: match.participants.getItems().map((participant) => ({
         id: participant.id,
-        teamName: participant.team.name,
+        name: nameOf(participant),
         players: participant.players.getItems().map(({ id, name }) => ({ id, name })),
       })),
       scores: new Map(

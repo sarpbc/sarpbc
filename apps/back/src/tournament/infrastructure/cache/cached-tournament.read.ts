@@ -2,7 +2,7 @@ import { log } from "evlog";
 import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentQueries } from "../../application/ports";
-import { DATA_SOURCES } from "@sarpbc/types";
+import { DATA_SOURCES, TOURNAMENT_FORMATS } from "@sarpbc/types";
 import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));
@@ -16,9 +16,17 @@ const team = z.strictObject({
   logoDarkUrl: nullableText,
   location: nullableText,
 });
+const participantRef = z.union([
+  z.strictObject({ id: z.string(), team }),
+  z.strictObject({
+    id: z.string(),
+    team: z.null(),
+    players: z.array(z.strictObject({ id: z.string(), name: z.string(), slug: z.string() })),
+  }),
+]);
 const participant = z.strictObject({
   id: z.string(),
-  team,
+  team: team.nullable(),
   players: z.array(
     z.strictObject({
       id: z.string(),
@@ -38,7 +46,7 @@ const match = z.strictObject({
   endAt: date.nullable(),
   numberOfGames: z.number().nullable(),
   winnerId: nullableText,
-  participants: z.array(z.strictObject({ id: z.string(), team })),
+  participants: z.array(participantRef),
   results: z.array(z.strictObject({ participant: z.string(), score: z.number() })),
   previousMatches: z.array(
     z.strictObject({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
@@ -47,6 +55,7 @@ const match = z.strictObject({
 const tournament = z.strictObject({
   id: z.string(),
   source: z.enum(DATA_SOURCES),
+  format: z.enum(TOURNAMENT_FORMATS),
   name: z.string(),
   slug: z.string(),
   event: z.strictObject({ id: z.string(), slug: z.string(), name: z.string() }),
@@ -62,7 +71,7 @@ const tournament = z.strictObject({
   league: z
     .object({ id: z.string(), name: z.string(), imageUrl: nullableText, url: nullableText })
     .nullable(),
-  winner: z.strictObject({ id: z.string(), team }).nullable(),
+  winner: participantRef.nullable(),
   participants: z.array(participant),
   matches: z.array(match),
 }) satisfies z.ZodType<TournamentDetailResponse>;

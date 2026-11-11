@@ -1,3 +1,4 @@
+import type { TournamentFormat } from "@sarpbc/types";
 import type { OfficialMatchStream } from "../domain/official-match-stream";
 export interface ManualTournamentFields {
   eventId?: string;
@@ -7,7 +8,9 @@ export interface ManualTournamentFields {
   beginAt?: string | null;
   endAt?: string | null;
   imageUrl?: string | null;
+  format?: TournamentFormat;
   teamIds?: string[];
+  playerParticipants?: string[][];
 }
 export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;

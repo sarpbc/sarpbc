@@ -148,7 +148,7 @@ export function gameStatsTools({
     defineTool({
       name: "attach_replay_to_game",
       description:
-        "Attach a Ballchasing replay to one game of a match as a staff override, when the import refused or misplaced it. Skips the import's team, date and series rules, but refuses a match outside the tournament, a blue team that is not one of the match's two participants, a game number below 1 or above the format, a number that already has stats, a replay already attached anywhere (the error says where) and a replay Ballchasing has not processed. Players are linked like in the import. Attaching a replay staff removed clears its removal.",
+        "Attach a Ballchasing replay to one game of a match as a staff override, when the import refused or misplaced it. Skips the import's team, date and series rules, but refuses a match outside the tournament, a blue side that is not one of the match's two participants, a game number below 1 or above the format, a number that already has stats, a replay already attached anywhere (the error says where) and a replay Ballchasing has not processed. Players are linked like in the import. Attaching a replay staff removed clears its removal.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -158,7 +158,7 @@ export function gameStatsTools({
           replay: "Ballchasing replay link (https://ballchasing.com/replay/…) or replay id.",
           gameNumber: "Game number in the series, starting at 1.",
           blueParticipantId:
-            "Tournament participant UUID of the team that played blue in this replay.",
+            "Tournament participant UUID of the side that played blue in this replay: a team, or the player (1v1) or duo (2v2) of a participant without a team.",
         }),
       },
       handler: async ({ tournamentId: id, ...input }) => {

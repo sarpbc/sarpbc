@@ -75,21 +75,21 @@ describe("Participant removal", () => {
   it.each([
     {
       reference: "tournamentWinner" as const,
-      message: "Cannot remove a team that is the tournament winner. Clear the winner first.",
+      message: "Cannot remove a participant that is the tournament winner. Clear the winner first.",
     },
     {
       reference: "matchParticipant" as const,
       message:
-        "Cannot remove a team that already appears in matches. Remove or reassign those matches first.",
+        "Cannot remove a participant that already appears in matches. Remove or reassign those matches first.",
     },
     {
       reference: "matchWinner" as const,
       message:
-        "Cannot remove a team that is recorded as a match winner. Clear those winners first.",
+        "Cannot remove a participant that is recorded as a match winner. Clear those winners first.",
     },
     {
       reference: "results" as const,
-      message: "Cannot remove a team that has match results. Remove those results first.",
+      message: "Cannot remove a participant that has match results. Remove those results first.",
     },
   ])("rejects a participant referenced by $reference", ({ reference, message }) => {
     expect(() => assertParticipantRemovable({ ...free, [reference]: true })).toThrow(

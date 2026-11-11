@@ -66,6 +66,9 @@ const formatEndDate = (value: Date | string | null) => {
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium text-highlighted">
                 {{ trophy.displayName }}
+                <span v-if="trophy.formatLabel" class="text-xs font-normal text-muted">
+                  {{ trophy.formatLabel }}
+                </span>
               </p>
               <time
                 v-if="trophy.endAt"

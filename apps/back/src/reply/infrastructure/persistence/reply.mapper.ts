@@ -15,6 +15,7 @@ export const REPLY_POPULATE = [
   "newsArticle",
   "match",
   "match.participants.team",
+  "match.participants.players",
   "match.tournament.event",
 ] as const;
 
@@ -48,7 +49,7 @@ export const REPLY_TARGET_LOADERS = {
     const row = await em.findOne(
       Match,
       { id },
-      { populate: ["participants.team", "tournament.event"] },
+      { populate: ["participants.team", "participants.players", "tournament.event"] },
     );
     return row && { match: matchFields(row) };
   },

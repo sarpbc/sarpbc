@@ -1,6 +1,7 @@
 import type { SitemapEntry, SitemapKind } from "@sarpbc/types";
 import {
   isKnownTeamName,
+  participantName,
   matchPath,
   newsPath,
   playerPath,
@@ -33,7 +34,7 @@ function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
 function isListedMatch({ status, participants }: MatchSitemapRow): boolean {
   return (
     status !== "canceled" &&
-    participants.filter(({ team }) => isKnownTeamName(team.name)).length === 2
+    participants.filter((participant) => isKnownTeamName(participantName(participant))).length === 2
   );
 }
 

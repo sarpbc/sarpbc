@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import type { League, ManualEvent, Team, TournamentDetail } from "@sarpbc/types";
+import {
+  TOURNAMENT_FORMATS,
+  type League,
+  type ManualEvent,
+  type Team,
+  type TournamentDetail,
+} from "@sarpbc/types";
 import { toSlug } from "@sarpbc/utils";
 import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
 
@@ -72,6 +78,8 @@ const eventHelp = computed(() => {
 const leagueItems = computed(() =>
   leagueOptions(props.leagues, t("page.tournaments.source.pandascore")),
 );
+
+const formatItems = TOURNAMENT_FORMATS.map((format) => ({ value: format, label: format }));
 
 const teamSearch = ref("");
 
@@ -206,7 +214,39 @@ function isTeamSelected(teamId: string): boolean {
       @update:uploading="emit('update:uploading', $event)"
     />
 
-    <UFormField :label="$t('page.tournaments.form.teams')" name="teamIds">
+    <UFormField
+      :label="$t('page.tournaments.form.format')"
+      name="format"
+      :help="$t('page.tournaments.form.formatHelp')"
+    >
+      <USelect
+        :model-value="state.format"
+        :items="formatItems"
+        value-key="value"
+        label-key="label"
+        class="w-full sm:w-40"
+        @update:model-value="updateField('format', $event)"
+      />
+    </UFormField>
+
+    <UFormField
+      v-if="state.format !== '3v3'"
+      :label="$t('page.tournaments.form.players')"
+      name="playerParticipants"
+      :help="$t('page.tournaments.form.playersHelp')"
+    >
+      <TournamentPlayerParticipants
+        :model-value="state.playerParticipants"
+        :format="state.format"
+        @update:model-value="updateField('playerParticipants', $event)"
+      />
+    </UFormField>
+
+    <UFormField
+      v-if="state.format !== '1v1'"
+      :label="$t('page.tournaments.form.teams')"
+      name="teamIds"
+    >
       <div class="flex flex-col gap-3 border border-default p-4">
         <UInput
           v-model="teamSearch"

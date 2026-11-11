@@ -15,6 +15,7 @@ function toTrophyListItem(tournament: Tournament): EntityTrophyListItem {
     id: tournament.id,
     path: tournamentStagePath(tournament.event.slug, tournament.slug),
     displayName: tournament.event.name,
+    formatLabel: nonDefaultFormatLabel(tournament.format),
     endAt: tournament.endAt ?? null,
   };
 }

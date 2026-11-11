@@ -27,7 +27,7 @@ export interface RosterPlayer {
 
 export interface CandidateParticipant {
   id: string;
-  teamName: string;
+  name: string;
   players: RosterPlayer[];
 }
 
@@ -95,7 +95,7 @@ function rosterIdentifies(team: ReplayTeam, participant: CandidateParticipant): 
 
 function identifies(team: ReplayTeam, participant: CandidateParticipant): boolean {
   if (rosterIdentifies(team, participant)) return true;
-  const named = team.name !== null && teamNameMatches(team.name, participant.teamName);
+  const named = team.name !== null && teamNameMatches(team.name, participant.name);
   return named && (rosterOverlap(team, participant) >= 1 || participant.players.length === 0);
 }
 

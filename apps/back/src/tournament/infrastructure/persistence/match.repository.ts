@@ -23,7 +23,12 @@ interface MatchListFilter {
   source?: { $ne: DataSource };
 }
 
-const LIST_POPULATE = ["participants.team", "results", ...MATCH_TOURNAMENT_POPULATE] as const;
+const LIST_POPULATE = [
+  "participants.team",
+  "participants.players",
+  "results",
+  ...MATCH_TOURNAMENT_POPULATE,
+] as const;
 
 const DETAIL_POPULATE = [
   "participants.team",
@@ -32,15 +37,18 @@ const DETAIL_POPULATE = [
   "results.participant",
   "winner",
   "winner.team",
+  "winner.players",
   ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
 const FINISHED_POPULATE = [
   "participants.team",
+  "participants.players",
   "results",
   "results.participant",
   "winner",
   "winner.team",
+  "winner.players",
   ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 

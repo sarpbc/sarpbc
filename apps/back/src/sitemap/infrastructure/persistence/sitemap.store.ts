@@ -47,13 +47,14 @@ export class SitemapStore implements SitemapQueries {
       Match,
       {},
       {
-        populate: ["participants.team", "tournament.event"],
+        populate: ["participants.team", "participants.players", "tournament.event"],
         fields: [
           "publicId",
           "name",
           "status",
           "updatedAt",
           "participants.team.name",
+          "participants.players.name",
           "tournament.slug",
           "tournament.event.slug",
         ],
@@ -63,7 +64,10 @@ export class SitemapStore implements SitemapQueries {
       publicId: row.publicId,
       name: row.name,
       status: row.status,
-      participants: row.participants.getItems().map(({ team }) => ({ team: { name: team.name } })),
+      participants: row.participants.getItems().map(({ team, players }) => ({
+        team: team ? { name: team.name } : null,
+        players: players.getItems().map(({ name }) => ({ name })),
+      })),
       tournament: { slug: row.tournament.slug, event: { slug: row.tournament.event.slug } },
       lastmod: new Date(row.updatedAt),
     }));

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { MatchListItem, Player, Team } from "@sarpbc/types";
+import { participantName } from "@sarpbc/utils";
 import { buildFaqPage } from "~/utils/structuredData/faqPage";
 
 const {
@@ -21,7 +22,7 @@ const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 function opponentName(match: MatchListItem): string {
   const names = (match.participants ?? [])
-    .map((participant) => participant.team.name)
+    .map((participant) => participantName(participant))
     .filter((name) => name.length > 0 && name !== team.name);
 
   return names[0] ?? t("page.team.slug.faq.upcoming.unknownOpponent");

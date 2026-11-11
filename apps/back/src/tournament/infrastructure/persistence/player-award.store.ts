@@ -1,5 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import { participantName } from "@sarpbc/utils";
 import { ConflictError } from "../../../common/domain/errors";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import type { AwardParticipantRef, AwardQueries, AwardWriter } from "../../application/ports";
@@ -81,7 +82,7 @@ export class CompetitionAwardWriter implements AwardWriter {
       participant: p
         ? {
             id: p.id,
-            team: { id: p.team.id, name: p.team.name },
+            name: participantName({ team: p.team, players: p.players.getItems() }),
             playerIds: p.players.getItems().map((r) => r.id),
           }
         : null,

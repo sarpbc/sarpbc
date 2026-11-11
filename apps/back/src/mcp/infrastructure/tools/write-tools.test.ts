@@ -10,6 +10,7 @@ function services(): WriteToolServices {
     newsService: { create: vi.fn(), update: vi.fn(), findOneAdminByIdOrSlug: vi.fn() },
     tournaments: { findById: vi.fn() },
     teamService: { findById: vi.fn(), findBySlug: vi.fn() },
+    playerService: { findById: vi.fn(), findBySlug: vi.fn() },
     matchService: {
       createMatch: vi.fn(),
       setMatchWinner: vi.fn(),
@@ -180,11 +181,13 @@ describe("create_match participants", () => {
     expect(body.participants).toEqual([
       {
         id: "p-kc",
+        name: "Karmine Corp",
         team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [],
       },
       {
         id: "p-m8",
+        name: "Gentle Mates",
         team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" },
         players: [],
       },

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { teamPath } from "@sarpbc/utils";
-import type { TeamSummary } from "@sarpbc/types";
+import { participantName, playerPath, teamPath } from "@sarpbc/utils";
+import type { ParticipantRef, TeamSummary, TournamentFormat } from "@sarpbc/types";
 import {
   formatTournamentDateRange,
   getTournamentStatus,
@@ -17,6 +17,7 @@ const {
   type = null,
   countLabel = null,
   champion = null,
+  format = null,
   calendarPath = null,
 } = defineProps<{
   title: string;
@@ -27,7 +28,8 @@ const {
   prizepool?: string | null;
   type?: string | null;
   countLabel?: string | null;
-  champion?: TeamSummary | null;
+  champion?: ParticipantRef<TeamSummary> | null;
+  format?: TournamentFormat | null;
   calendarPath?: string | null;
 }>();
 
@@ -58,8 +60,20 @@ const metaItems = computed(() => {
   const prizepoolLabel = formatTournamentPrizepool(prizepool);
   if (prizepoolLabel) items.push({ label: prizepoolLabel, tabular: true });
   if (countLabel) items.push({ label: countLabel, tabular: true });
+  const formatLabel = nonDefaultFormatLabel(format);
+  if (formatLabel) items.push({ label: formatLabel, tabular: true });
   if (typeLabel.value) items.push({ label: typeLabel.value, tabular: false });
   return items;
+});
+
+const championName = computed(() => (champion ? participantName(champion) : ""));
+
+const championPath = computed(() => {
+  if (champion?.team) {
+    return teamPath(champion.team.slug);
+  }
+  const [player, ...others] = champion?.players ?? [];
+  return player && others.length === 0 ? playerPath(player.slug) : null;
 });
 
 const showChampion = computed(() => status.value === "finished" && champion != null);
@@ -116,13 +130,18 @@ const showSubscribeCalendar = computed(
           <span v-if="showChampion && champion" class="inline-flex items-center gap-2">
             <span class="text-sm text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
             <SLink
-              :to="$localePath(teamPath(champion.slug))"
+              v-if="championPath"
+              :to="$localePath(championPath)"
               variant="inline"
               class="inline-flex min-h-10 items-center gap-2 text-highlighted"
             >
-              <TeamImg :team-name="champion.name" :logo="champion" size="xs" />
-              {{ champion.name }}
+              <TeamImg :team-name="championName" :logo="champion.team" size="xs" />
+              {{ championName }}
             </SLink>
+            <span v-else class="inline-flex min-h-10 items-center gap-2 text-highlighted">
+              <TeamImg :team-name="championName" size="xs" />
+              {{ championName }}
+            </span>
           </span>
         </div>
       </div>

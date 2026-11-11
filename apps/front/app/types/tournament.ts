@@ -1,4 +1,4 @@
-import type { League, Player, Team, TournamentEventRef } from "@sarpbc/types";
+import type { League, Player, Team, TournamentEventRef, TournamentFormat } from "@sarpbc/types";
 import type { Match } from "./matches";
 
 export interface BracketLink {
@@ -15,6 +15,7 @@ export interface Tournament {
   /** Stage slug, unique within its event. */
   slug: string;
   event: TournamentEventRef;
+  format?: TournamentFormat;
   tier?: string;
   beginAt?: Date;
   endAt?: Date;
@@ -37,7 +38,7 @@ export interface Tournament {
 export interface TournamentParticipant {
   id: string;
   tournament: Tournament;
-  team: Team;
+  team: Team | null;
   players?: Player[];
   createdAt: Date;
   updatedAt: Date;

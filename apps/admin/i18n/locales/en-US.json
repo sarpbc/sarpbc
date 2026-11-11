@@ -345,11 +345,21 @@
         "teamsSearch": "Search teams…",
         "teamsLoading": "Loading teams…",
         "teamsEmpty": "No teams match your search.",
+        "format": "Format",
+        "formatHelp": "1v1 tournaments have players as participants and 3v3 tournaments have teams. A 2v2 tournament can have teams and duos without a team.",
+        "players": "Participating Players",
+        "playersHelp": "Search existing players. In 2v2, pick both players of a duo.",
+        "playersSearch": "Search players…",
+        "playersEmpty": "No available players match your search.",
+        "playersNone": "No players yet.",
+        "playersPartner": "Pick the partner of {name}.",
+        "playersRemove": "Remove {name}",
         "save": "Save Tournament",
         "saveFailed": "Could not save tournament. Check the fields and try again.",
         "errors": {
           "nameRequired": "Enter a tournament name before saving.",
-          "endBeforeStart": "End date must be on or after the start date."
+          "endBeforeStart": "End date must be on or after the start date.",
+          "incompletePlayerParticipant": "Each participant needs as many players as the format. Complete or remove the highlighted participants."
         },
         "event": "Event",
         "newEvent": "New event named after the tournament",

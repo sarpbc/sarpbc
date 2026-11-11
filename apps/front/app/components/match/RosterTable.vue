@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { playerPath } from "@sarpbc/utils";
+import { participantName, playerPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
 
 const { participants } = defineProps<{
@@ -18,8 +18,8 @@ const rowCount = computed(() =>
   <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
     <SCard v-for="participant in participants" :key="participant.id" class="flex min-w-0 flex-col">
       <SListItem size="default" class="min-w-0 gap-2">
-        <TeamImg :team-name="participant.team.name" :logo="participant.team" size="xs" />
-        <h3 class="truncate text-xs text-default">{{ participant.team.name }}</h3>
+        <TeamImg :team-name="participantName(participant)" :logo="participant.team" size="xs" />
+        <h3 class="truncate text-xs text-default">{{ participantName(participant) }}</h3>
       </SListItem>
       <template v-for="rowIndex in rowCount" :key="rowIndex">
         <SListItem

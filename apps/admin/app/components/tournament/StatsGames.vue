@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentMatchListItem, TournamentStatsGame } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
 const props = defineProps<{
   tournamentId: string;
@@ -38,10 +38,8 @@ const rows = computed(() => {
 });
 
 function teamName(match: TournamentMatchListItem, participantId: string): string {
-  return (
-    match.participants.find((participant) => participant.id === participantId)?.team.name ??
-    t("page.tournaments.statsGames.unknownTeam")
-  );
+  const participant = match.participants.find((candidate) => candidate.id === participantId);
+  return participant ? participantName(participant) : t("page.tournaments.statsGames.unknownTeam");
 }
 
 function gameLabel(match: TournamentMatchListItem, game: TournamentStatsGame): string {

@@ -3,6 +3,7 @@ import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import type { NewsService } from "../../../news/application/news.service";
 import { createNewsArticleFields } from "../../../news/infrastructure/http/dto/create-news-article.dto";
 import { updateNewsArticleFields } from "../../../news/infrastructure/http/dto/update-news-article.dto";
+import type { PlayerService } from "../../../roster/application/player.service";
 import type { TeamService } from "../../../roster/application/team.service";
 import type { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import type { MatchService } from "../../../tournament/application/match/match.service";
@@ -35,6 +36,7 @@ export interface WriteToolServices {
   newsService: Pick<NewsService, "create" | "update" | "findOneAdminByIdOrSlug">;
   tournaments: Pick<TournamentQueries, "findById">;
   teamService: Pick<TeamService, "findById" | "findBySlug">;
+  playerService: Pick<PlayerService, "findById" | "findBySlug">;
   matchService: Pick<
     MatchService,
     "createMatch" | "setMatchWinner" | "setGameVods" | "updateMatch"
@@ -51,6 +53,7 @@ export function writeTools({
   newsService,
   tournaments,
   teamService,
+  playerService,
   matchService,
   manualTournamentService,
   pandascoreTournamentSync,
@@ -132,7 +135,7 @@ export function writeTools({
     defineTool({
       name: "create_match",
       description:
-        "Create a tournament match. Pass participantIds (tournament participant UUIDs from get_tournament) and/or teams (team UUIDs or slugs from search_teams or get_tournament). Every team must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
+        "Create a tournament match. Pass participantIds (tournament participant UUIDs from get_tournament), teams (team UUIDs or slugs from search_teams or get_tournament) and/or players (player UUIDs or slugs, for 1v1 and 2v2 participants without a team). Every team or player must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -152,13 +155,19 @@ export function writeTools({
           .array(z.string().min(1))
           .optional()
           .describe(
-            "Tournament participant UUIDs from get_tournament. Optional when teams is set. At least two different sides in total.",
+            "Tournament participant UUIDs from get_tournament. Optional when teams or players is set. At least two different sides in total.",
           ),
         teams: z
           .array(z.string().min(1))
           .optional()
           .describe(
-            "Team UUIDs or slugs. Each one must already be registered in the tournament and is resolved to its participant id. Optional when participantIds is set.",
+            "Team UUIDs or slugs. Each one must already be registered in the tournament and is resolved to its participant id. Optional when participantIds or players is set.",
+          ),
+        players: z
+          .array(z.string().min(1))
+          .optional()
+          .describe(
+            "Player UUIDs or slugs of 1v1 or 2v2 participants without a team. Each one is resolved to the participant it plays in; one player of a duo is enough. Optional when participantIds or teams is set.",
           ),
         results: z
           .array(matchResultSchema)
@@ -176,14 +185,15 @@ export function writeTools({
         numberOfGames,
         participantIds,
         teams,
+        players,
         results,
       }) => {
         const tournament = await tournaments.findById(tournamentId);
         if (!tournament) throw tournamentNotFound(tournamentId);
         const participants = await resolveMatchParticipantIds(
           tournament,
-          { participantIds, teams },
-          teamService,
+          { participantIds, teams, players },
+          { teams: teamService, players: playerService },
         );
         const match = await matchService.createMatch(tournamentId, {
           name,
@@ -327,8 +337,12 @@ export function writeTools({
         beginAt: "Start date (YYYY-MM-DD).",
         endAt: "End date (YYYY-MM-DD).",
         imageUrl: "Optional cover image URL.",
+        format:
+          "Team size: 1v1, 2v2 or 3v3 (default). A 1v1 tournament has player participants only, a 3v3 tournament team participants only, a 2v2 tournament either.",
         teamIds:
-          "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. The response lists each participant id.",
+          "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. Not allowed in 1v1. The response lists each participant id.",
+        playerParticipants:
+          "Participants without a team, for 1v1 and 2v2: each entry lists the player UUIDs of one participant (one player in 1v1, two in 2v2). Use search_players to find ids. Never create a team for a single player. The response lists each participant id.",
         source:
           "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
       }),
@@ -367,8 +381,12 @@ export function writeTools({
           beginAt: "Start date (YYYY-MM-DD), or null.",
           endAt: "End date (YYYY-MM-DD), or null.",
           imageUrl: "Cover image URL, or null.",
+          format:
+            "Team size: 1v1, 2v2 or 3v3. The current participants (or the teamIds and playerParticipants sent with it) must fit the new format.",
           teamIds:
-            "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. The response lists each participant id.",
+            "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. Participants without a team are kept. The response lists each participant id.",
+          playerParticipants:
+            "Replace the participants without a team (1v1 players, 2v2 duos) with this list; each entry lists the player UUIDs of one participant. Team participants are kept. The response lists each participant id.",
           rosters:
             "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team); other participants keep theirs. Applied after teamIds.",
         }),
