@@ -44,7 +44,7 @@ export class ManualGameService {
     const orange = match.participants.find(({ id }) => id !== input.blueParticipantId);
     if (match.participants.length !== 2 || !blue || !orange)
       throw new InvalidInputError({
-        message: "Choose one of the match's two teams as the blue side.",
+        message: "Choose one of the match's two participants as the blue side.",
         code: "participant_not_in_match",
       });
     const { gameNumber } = input;

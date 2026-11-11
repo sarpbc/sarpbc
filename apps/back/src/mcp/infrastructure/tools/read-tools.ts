@@ -112,7 +112,7 @@ export function readTools({
     defineTool({
       name: "get_tournament",
       description:
-        "Get full tournament detail, including matches, the public URL, and registered participants (participant id plus team id, slug and name). start.gg tournaments are not returned.",
+        "Get full tournament detail, including matches, the public URL, and format (1v1, 2v2 or 3v3) and registered participants (participant id, display name, team id, slug and name or null for a participant without a team, and players). start.gg tournaments are not returned.",
       input: { id: z.string().min(1).describe("Tournament UUID.") },
       handler: async ({ id }) => mapTournamentDetail(await competition.tournament(id)),
     }),
