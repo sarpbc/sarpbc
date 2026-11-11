@@ -1947,7 +1947,13 @@
           "default": null,
           "comment": null,
           "collation": null,
-          "enumItems": ["mvp", "defensive_mvp"],
+          "enumItems": [
+            "mvp",
+            "grand_finals_mvp",
+            "offensive_mvp",
+            "defensive_mvp",
+            "breakthrough_player"
+          ],
           "mappedType": "enum"
         },
         "created_at": {
@@ -2057,8 +2063,8 @@
       "checks": [
         {
           "name": "player_award_award_type_check",
-          "expression": "\"award_type\" in ('mvp', 'defensive_mvp')",
-          "definition": "check (\"award_type\" in ('mvp', 'defensive_mvp'))",
+          "expression": "\"award_type\" in ('mvp', 'grand_finals_mvp', 'offensive_mvp', 'defensive_mvp', 'breakthrough_player')",
+          "definition": "check (\"award_type\" in ('mvp', 'grand_finals_mvp', 'offensive_mvp', 'defensive_mvp', 'breakthrough_player'))",
           "columnName": "award_type"
         }
       ],

@@ -370,7 +370,7 @@
       },
       "awards": {
         "title": "Récompenses Joueur",
-        "hint": "Attribuez un MVP et un MVP Défensif pour ce tournoi. Les récompenses apparaissent sur les profils joueur.",
+        "hint": "Attribuez les récompenses annoncées par l'organisateur pour cette phase, une au plus par type. Les récompenses apparaissent sur les profils joueur.",
         "awardType": "Type de Récompense",
         "assignAction": "Attribuer la Récompense",
         "selectPlayer": "Sélectionner un joueur du roster",
@@ -381,7 +381,10 @@
         "allAssigned": "Tous les types de récompense sont attribués pour ce tournoi.",
         "types": {
           "mvp": "MVP",
-          "defensive_mvp": "MVP Défensif"
+          "grand_finals_mvp": "MVP de la Grande Finale",
+          "offensive_mvp": "MVP Offensif",
+          "defensive_mvp": "MVP Défensif",
+          "breakthrough_player": "Révélation"
         }
       },
       "vods": {

@@ -131,7 +131,7 @@ export function readTools({
     defineTool({
       name: "get_tournament_awards",
       description:
-        "Get the player awards (MVP, defensive MVP) already recorded for one tournament stage: award id, type, player and team. A stage has at most one award of each type. Read it before propose_player_award.",
+        "Get the player awards already recorded for one tournament stage: award id, type, player and team. A stage has at most one award of each type. Read it before propose_player_award.",
       input: { id: z.string().min(1).describe("Tournament stage UUID.") },
       handler: async ({ id }) => {
         const awards = await competition.tournamentAwards(id);

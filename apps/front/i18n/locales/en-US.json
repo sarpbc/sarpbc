@@ -1207,7 +1207,10 @@
           "awardedOn": "Awarded {date}",
           "types": {
             "mvp": "MVP",
-            "defensive_mvp": "Defensive MVP"
+            "grand_finals_mvp": "Grand Finals MVP",
+            "offensive_mvp": "Offensive MVP",
+            "defensive_mvp": "Defensive MVP",
+            "breakthrough_player": "Breakthrough Player"
           }
         },
         "matches": {

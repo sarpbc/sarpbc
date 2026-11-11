@@ -1,6 +1,11 @@
 import type { TournamentEventRef } from "./tournament-event";
 
-export type PlayerAwardType = "mvp" | "defensive_mvp";
+export type PlayerAwardType =
+  | "mvp"
+  | "grand_finals_mvp"
+  | "offensive_mvp"
+  | "defensive_mvp"
+  | "breakthrough_player";
 
 export interface PlayerProfileAward {
   id: string;
