@@ -345,11 +345,21 @@
         "teamsSearch": "Rechercher des équipes…",
         "teamsLoading": "Chargement des équipes…",
         "teamsEmpty": "Aucune équipe ne correspond à votre recherche.",
+        "format": "Format",
+        "formatHelp": "Les participants d’un tournoi 1v1 sont des joueurs, ceux d’un tournoi 3v3 des équipes. Un tournoi 2v2 accepte des équipes et des duos sans équipe.",
+        "players": "Joueurs Participants",
+        "playersHelp": "Recherchez des joueurs existants. En 2v2, choisissez les deux joueurs d’un duo.",
+        "playersSearch": "Rechercher des joueurs…",
+        "playersEmpty": "Aucun joueur disponible ne correspond à votre recherche.",
+        "playersNone": "Aucun joueur pour l’instant.",
+        "playersPartner": "Choisissez le partenaire de {name}.",
+        "playersRemove": "Retirer {name}",
         "save": "Enregistrer le Tournoi",
         "saveFailed": "Impossible d’enregistrer le tournoi. Vérifiez les champs et réessayez.",
         "errors": {
           "nameRequired": "Saisissez un nom de tournoi avant d’enregistrer.",
-          "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début."
+          "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début.",
+          "incompletePlayerParticipant": "Chaque participant doit compter autant de joueurs que le format. Complétez ou retirez les participants surlignés."
         },
         "event": "Événement",
         "newEvent": "Nouvel événement au nom du tournoi",

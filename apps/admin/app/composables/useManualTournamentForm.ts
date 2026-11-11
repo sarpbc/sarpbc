@@ -1,4 +1,5 @@
-import type { TournamentDetail } from "@sarpbc/types";
+import { TEAM_SIZE_BY_FORMAT } from "@sarpbc/utils";
+import type { ParticipantPlayer, TournamentDetail, TournamentFormat } from "@sarpbc/types";
 import type { ManualTournamentInput } from "./tournaments";
 
 export interface ManualTournamentFormState {
@@ -11,7 +12,9 @@ export interface ManualTournamentFormState {
   beginAt: string;
   endAt: string;
   imageUrl: string;
+  format: TournamentFormat;
   teamIds: string[];
+  playerParticipants: ParticipantPlayer[][];
 }
 
 export function createEmptyTournamentFormState(): ManualTournamentFormState {
@@ -24,7 +27,9 @@ export function createEmptyTournamentFormState(): ManualTournamentFormState {
     beginAt: "",
     endAt: "",
     imageUrl: "",
+    format: "3v3",
     teamIds: [],
+    playerParticipants: [],
   };
 }
 
@@ -38,7 +43,11 @@ export function tournamentToFormState(tournament: TournamentDetail): ManualTourn
     beginAt: formatDateForInput(tournament.beginAt),
     endAt: formatDateForInput(tournament.endAt),
     imageUrl: tournament.imageUrl ?? "",
-    teamIds: tournament.participants.map((participant) => participant.team.id),
+    format: tournament.format,
+    teamIds: tournament.participants.flatMap(({ team }) => (team ? [team.id] : [])),
+    playerParticipants: tournament.participants.flatMap(({ team, players }) =>
+      team ? [] : [players.map(({ id, name, slug }) => ({ id, name, slug }))],
+    ),
   };
 }
 
@@ -78,7 +87,12 @@ export function buildManualTournamentPayload(
 
   const trimmedImageUrl = state.imageUrl.trim();
   payload.imageUrl = trimmedImageUrl || null;
-  payload.teamIds = state.teamIds;
+  payload.format = state.format;
+  payload.teamIds = state.format === "1v1" ? [] : state.teamIds;
+  payload.playerParticipants =
+    state.format === "3v3"
+      ? []
+      : state.playerParticipants.map((players) => players.map(({ id }) => id));
 
   return payload;
 }
@@ -90,6 +104,13 @@ export function validateManualTournamentForm(state: ManualTournamentFormState): 
 
   if (state.beginAt && state.endAt && state.endAt < state.beginAt) {
     return "endBeforeStart";
+  }
+
+  if (
+    state.format !== "3v3" &&
+    state.playerParticipants.some((players) => players.length !== TEAM_SIZE_BY_FORMAT[state.format])
+  ) {
+    return "incompletePlayerParticipant";
   }
 
   return null;

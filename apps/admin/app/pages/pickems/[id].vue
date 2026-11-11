@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -79,8 +79,7 @@ const breadcrumbItems = computed(() => [
             class="flex min-h-row w-full flex-row items-center py-2"
           >
             <p class="truncate text-sm font-medium text-highlighted">
-              {{ match.participants?.[0]?.team.name }} vs
-              {{ match.participants?.[1]?.team.name }}
+              {{ match.participants.map(participantName).join(" vs ") }}
             </p>
           </div>
         </div>

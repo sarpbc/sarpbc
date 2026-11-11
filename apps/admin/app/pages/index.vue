@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import { canModerateComments, getApiErrorMessage, parseLocale } from "@sarpbc/utils";
+import {
+  canModerateComments,
+  getApiErrorMessage,
+  parseLocale,
+  participantName,
+  type NamedParticipant,
+} from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/adminSections";
 
 const ARTICLE_LIMIT = 5;
@@ -54,10 +60,8 @@ const replyCountLabel = computed(() =>
     : String(replyCount.value),
 );
 
-function matchTitle(participants: { team: { name: string } }[]): string {
-  return (
-    participants.map((participant) => participant.team.name).join(" vs ") || t("page.home.tbd")
-  );
+function matchTitle(participants: NamedParticipant[]): string {
+  return participants.map(participantName).join(" vs ") || t("page.home.tbd");
 }
 
 onMounted(() => {

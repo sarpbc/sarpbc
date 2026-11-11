@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { StatsImportItem, TournamentMatchListItem, TournamentStatsGame } from "@sarpbc/types";
-import { getApiErrorMessage, maxVodGame } from "@sarpbc/utils";
+import { getApiErrorMessage, maxVodGame, participantName } from "@sarpbc/utils";
 
 const target = defineModel<StatsImportItem | null>("target", { required: true });
 
@@ -54,7 +54,7 @@ const gameOptions = computed(() => {
 const sideOptions = computed(() =>
   (match.value?.participants ?? []).map((participant) => ({
     value: participant.id,
-    label: participant.team.name,
+    label: participantName(participant),
   })),
 );
 

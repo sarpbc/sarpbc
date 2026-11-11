@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentMatchListItem } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -57,9 +57,8 @@ const displayMatches = computed(() =>
 );
 
 function matchLabel(match: TournamentMatchListItem): string {
-  const teamA = match.participants?.[0]?.team.name ?? "TBD";
-  const teamB = match.participants?.[1]?.team.name ?? "TBD";
-  return `${teamA} vs ${teamB}`;
+  const [teamA, teamB] = match.participants;
+  return `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
 }
 
 function matchScore(match: TournamentMatchListItem): string {
@@ -70,7 +69,7 @@ function matchScore(match: TournamentMatchListItem): string {
   return match.participants
     .map((participant) => {
       const result = match.results?.find((r) => r.participant === participant.id);
-      return `${participant.team.name}: ${result?.score ?? "-"}`;
+      return `${participantName(participant)}: ${result?.score ?? "-"}`;
     })
     .join(" · ");
 }
@@ -207,7 +206,7 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 size="xs"
                 variant="ghost"
                 :loading="settingWinnerMatchId === match.id"
-                :label="`${$t('page.tournaments.match.setWinner')}: ${participant.team.name}`"
+                :label="`${$t('page.tournaments.match.setWinner')}: ${participantName(participant)}`"
                 @click="handleSetWinner(match, participant.id)"
               />
               <UButton

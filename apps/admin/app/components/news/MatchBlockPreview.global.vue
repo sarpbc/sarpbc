@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MatchBlockItem, MatchBlockState, MatchBlocksResponse } from "@sarpbc/types";
-import { newsMatchBlockFromAttrs, newsMatchBlockKey } from "@sarpbc/utils";
+import { newsMatchBlockFromAttrs, newsMatchBlockKey, participantName } from "@sarpbc/utils";
 
 const props = defineProps<{
   match?: string | null;
@@ -37,7 +37,8 @@ const dateFormatter = computed(
 );
 
 function teamName(item: MatchBlockItem, index: number): string {
-  return item.participants[index]?.team.name || t("newsTag.matchTbd");
+  const participant = item.participants[index];
+  return (participant && participantName(participant)) || t("newsTag.matchTbd");
 }
 
 function score(item: MatchBlockItem, index: number): string {

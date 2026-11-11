@@ -4,6 +4,7 @@ import {
   resolveThemedLogoUrl,
   tournamentStageLabel,
   type ThemedLogo,
+  participantName,
 } from "@sarpbc/utils";
 
 const { t } = useI18n();
@@ -99,7 +100,7 @@ async function handleEnablePickems(tournamentId: string) {
                   <img
                     v-if="teamLogoSrc(participant.team)"
                     :src="teamLogoSrc(participant.team)"
-                    :alt="participant.team.name"
+                    :alt="participantName(participant)"
                     class="size-4"
                   />
                 </div>

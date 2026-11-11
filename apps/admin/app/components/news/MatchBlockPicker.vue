@@ -7,6 +7,7 @@ import {
   newsMatchBlockKey,
   type NewsMatchBlockKind,
   tournamentStageLabel,
+  participantName,
 } from "@sarpbc/utils";
 
 type Selection = { id: string; label: string };
@@ -68,7 +69,8 @@ const block = computed((): MatchBlockSelector | null => {
 
 function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
-  const teams = `${teamA?.team.name ?? t("newsTag.matchTbd")} – ${teamB?.team.name ?? t("newsTag.matchTbd")}`;
+  const tbd = t("newsTag.matchTbd");
+  const teams = `${teamA ? participantName(teamA) : tbd} – ${teamB ? participantName(teamB) : tbd}`;
   return match.beginAt
     ? `${teams} · ${dateFormatter.value.format(new Date(match.beginAt))}`
     : teams;

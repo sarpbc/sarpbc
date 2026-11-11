@@ -64,7 +64,8 @@ function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
 watch(distribution, (value) => (rows.value = toRows(value)), { immediate: true });
 
 const rosters = computed(
-  () => new Map(props.participants.map(({ team, players }) => [team.id, players])),
+  () =>
+    new Map(props.participants.flatMap(({ team, players }) => (team ? [[team.id, players]] : []))),
 );
 
 function isParticipant(teamId: string | undefined): boolean {
@@ -76,10 +77,9 @@ function isOnRoster(teamId: string | undefined, playerId: string): boolean {
 }
 
 const teamOptions = computed<Option[]>(() => {
-  const participants = props.participants.map(({ team }) => ({
-    value: team.id,
-    label: team.name,
-  }));
+  const participants = props.participants.flatMap(({ team }) =>
+    team ? [{ value: team.id, label: team.name }] : [],
+  );
   const outsiders = (distribution.value?.prizes ?? [])
     .filter(({ team }) => !isParticipant(team.id))
     .map(({ team }) => ({

@@ -14,6 +14,7 @@ import type {
   TournamentListItem,
   TournamentMatchListItem,
   TournamentPrizes,
+  TournamentFormat,
   TournamentStatsGame,
 } from "@sarpbc/types";
 
@@ -92,7 +93,9 @@ export interface ManualTournamentInput {
   beginAt?: string | null;
   endAt?: string | null;
   imageUrl?: string | null;
+  format?: TournamentFormat;
   teamIds?: string[];
+  playerParticipants?: string[][];
 }
 
 export async function getTournamentLeagues(): Promise<League[]> {
