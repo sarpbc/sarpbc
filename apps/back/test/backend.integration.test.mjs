@@ -1749,6 +1749,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     });
 
     await check("search projections and real PostgreSQL/Redis health", async () => {
+      const { Tournament } =
+        await import("../src/tournament/infrastructure/persistence/tournament.entities.ts");
+      const winnerId = tournament.participants[0].id;
+      await orm.em.fork().nativeUpdate(Tournament, { id: tournament.id }, { winner: winnerId });
+      const crowned = (
+        await request("GET", "/search?q=Integration+Cup&type=tournament&limit=15&offset=0")
+      ).json();
+      assert.equal(crowned.tournaments.find((t) => t.id === tournament.id)?.winner?.id, winnerId);
       const found = (
         await request("GET", "/search?q=Integration&type=all&limit=20&offset=0")
       ).json();

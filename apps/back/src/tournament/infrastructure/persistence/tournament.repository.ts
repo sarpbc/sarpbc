@@ -1,5 +1,6 @@
 import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
 import { Tournament } from "./tournament.entities";
+import { TOURNAMENT_POPULATE } from "./tournament-populate";
 
 export class TournamentRepository extends EntityRepository<Tournament> {
   async searchByName({
@@ -20,7 +21,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
-      populate: ["league", "event"],
+      populate: [...TOURNAMENT_POPULATE],
     });
   }
 

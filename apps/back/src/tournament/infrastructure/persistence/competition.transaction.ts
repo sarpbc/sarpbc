@@ -16,13 +16,13 @@ import type {
 } from "../../application/ports";
 import {
   MATCH_WRITE_POPULATE,
-  TOURNAMENT_POPULATE,
   toTournament,
   toTournamentEvent,
   toLeague,
   toParticipant,
   toMatch,
 } from "./competition.mapper";
+import { TOURNAMENT_POPULATE } from "./tournament-populate";
 import { CompetitionAwardWriter } from "./player-award.store";
 import { CompetitionPrizeWriter } from "./tournament-prize.store";
 export class CompetitionTournamentWriter implements TournamentWriter {
@@ -130,7 +130,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     );
     const byId = new Map<string, Row.TournamentParticipant>(rows.map((r) => [r.id, r]));
     for (const r of this.participantsStaged.values()) if (r.tournament.id === id) byId.set(r.id, r);
-    return [...byId.values()].map(toParticipant);
+    return [...byId.values()].flatMap((row) => toParticipant(row) ?? []);
   }
   async saveParticipant(model: Model.ParticipantSnapshot) {
     let row =
