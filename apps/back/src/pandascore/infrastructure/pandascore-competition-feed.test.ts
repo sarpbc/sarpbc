@@ -47,4 +47,10 @@ describe("PandascoreCompetitionFeed standings", () => {
 
     expect(await feed.getTournamentStandings(42)).toEqual([]);
   });
+
+  it("reports standings as unavailable instead of failing the sync on a plan refusal", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(respond(403, { error: "Forbidden" }));
+
+    expect(await feed.getTournamentStandings(42)).toBeNull();
+  });
 });

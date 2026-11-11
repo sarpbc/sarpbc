@@ -35,7 +35,9 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
     );
   }
   async getTournamentStandings(id: number) {
-    return (await this.apiClient.getTournamentStandings(id)).flatMap((value) => {
+    const standings = await this.apiClient.getTournamentStandings(id);
+    if (standings === null) return null;
+    return standings.flatMap((value) => {
       const { rank, team } = standingSchema.parse(value);
       return team ? [{ teamPandascoreId: team.id, rank }] : [];
     });

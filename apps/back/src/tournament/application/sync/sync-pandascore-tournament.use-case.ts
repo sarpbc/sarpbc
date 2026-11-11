@@ -33,7 +33,7 @@ export class SyncPandascoreTournamentUseCase {
       : await this.feed.getTournamentMatches(command.pandascoreId);
     const standings = await this.feed.getTournamentStandings(command.pandascoreId);
     return this.synchronization.upsertTournament(
-      { ...command, standings },
+      standings ? { ...command, standings } : command,
       matches,
       linkTournamentId,
     );

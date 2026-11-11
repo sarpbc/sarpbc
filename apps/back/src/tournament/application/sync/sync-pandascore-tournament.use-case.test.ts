@@ -40,6 +40,13 @@ describe("SyncPandascoreTournamentUseCase", () => {
       undefined,
     );
   });
+  it("leaves placements untouched when standings are unavailable", async () => {
+    const command = { pandascoreId: 42, name: "Playoffs" };
+    feed.getTournamentById.mockResolvedValue(command);
+    feed.getTournamentStandings.mockResolvedValue(null);
+    await useCase.execute("t1");
+    expect(sync.upsertTournament).toHaveBeenCalledWith(command, [], undefined);
+  });
   it("protects manual tournaments before fetching", async () => {
     reads.findById.mockResolvedValue({ id: "manual", source: "manual" });
     await expect(useCase.execute("manual")).rejects.toThrow(

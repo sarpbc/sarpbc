@@ -99,5 +99,5 @@ export interface CompetitionFeed {
   getTournamentById(id: number): Promise<UpsertTournamentCommand | null>;
   getTournamentBrackets(id: number): Promise<UpsertMatchCommand[]>;
   getTournamentMatches(id: number): Promise<UpsertMatchCommand[]>;
-  getTournamentStandings(id: number): Promise<TournamentStandingCommand[]>;
+  getTournamentStandings(id: number): Promise<TournamentStandingCommand[] | null>;
 }
