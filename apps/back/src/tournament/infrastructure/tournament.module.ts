@@ -12,6 +12,7 @@ import {
 } from "./persistence/tournament.entities";
 import { PlayerAward } from "./persistence/player-award.entities";
 import { TournamentPrize } from "./persistence/tournament-prize.entities";
+import { MatchLineupPlayer } from "./persistence/match-lineup.entities";
 import { Player, Team } from "../../roster/infrastructure/roster-persistence";
 import { TournamentController } from "./http/tournament.controller";
 import { MatchController } from "./http/match.controller";
@@ -24,6 +25,7 @@ import { ManualTournamentService } from "../application/manual-tournament.servic
 import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
 import { StreamService } from "../application/stream.service";
+import { MatchLineupService } from "../application/match/match-lineup.service";
 import { PlayerAwardService } from "../application/player-award.service";
 import { TournamentPrizeService } from "../application/tournament-prize.service";
 import { CompetitionSyncService } from "../application/sync/competition-sync.service";
@@ -35,6 +37,7 @@ import { CompetitionQueries } from "./persistence/competition.queries";
 import { MikroOrmCompetitionTransaction } from "./persistence/competition.transaction";
 import { CompetitionAwardQueries } from "./persistence/player-award.store";
 import { CompetitionPrizeQueries } from "./persistence/tournament-prize.store";
+import { CompetitionLineupQueries } from "./persistence/match-lineup.store";
 import {
   CompetitionCacheAdapter,
   CompetitionEventsAdapter,
@@ -61,6 +64,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       League,
       PlayerAward,
       TournamentPrize,
+      MatchLineupPlayer,
       Player,
       Team,
     ]),
@@ -199,6 +203,15 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
       inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      provide: MatchLineupService,
+      useFactory: (
+        em: EntityManager,
+        reads: CompetitionQueries,
+        tx: MikroOrmCompetitionTransaction,
+      ) => new MatchLineupService(new CompetitionLineupQueries(em), reads, tx),
+      inject: [EntityManager, CompetitionQueries, MikroOrmCompetitionTransaction],
+    },
+    {
       provide: StreamService,
       useFactory: (tx: MikroOrmCompetitionTransaction, afterCommit: CompetitionAfterCommit) =>
         new StreamService(tx, afterCommit),
@@ -234,6 +247,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     ManualTournamentService,
     ManualCatalogService,
     MatchService,
+    MatchLineupService,
     StreamService,
     PlayerAwardService,
     TournamentPrizeService,

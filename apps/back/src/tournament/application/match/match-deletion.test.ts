@@ -50,6 +50,9 @@ describe("MatchService deletion", () => {
     get prizes() {
       return unused();
     },
+    get lineups() {
+      return unused();
+    },
   };
   const transaction: CompetitionTransaction = { run: (work) => work(scope) };
   const reads: MatchQueries = {

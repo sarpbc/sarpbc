@@ -1210,6 +1210,11 @@
           "emptyHint": "Les titres apparaîtront ici lorsque ce joueur remportera un événement.",
           "error": "Impossible de charger le palmarès de ce joueur. Vérifiez votre connexion et réessayez."
         },
+        "standIns": {
+          "title": "Séries jouées en stand-in",
+          "error": "Impossible de charger les séries jouées en stand-in par ce joueur. Vérifiez votre connexion et réessayez.",
+          "forTeam": "Pour {team} contre {opponent}"
+        },
         "awards": {
           "title": "Récompenses",
           "error": "Impossible de charger les récompenses de ce joueur. Vérifiez votre connexion et réessayez.",
@@ -1544,6 +1549,7 @@
         "sections": {
           "recentForm": "Forme récente",
           "rosters": "Rosters",
+          "lineups": "Alignements",
           "headToHead": "Face-à-face",
           "information": "Informations",
           "watch": "Regarder",
@@ -1601,6 +1607,10 @@
         "win": "V",
         "loss": "D",
         "noRoster": "Roster non disponible",
+        "lineups": {
+          "standIn": "Stand-in",
+          "standInHint": "Stand-in : a joué pour cette équipe sans figurer sur son roster inscrit."
+        },
         "vods": {
           "game": "Game {number}",
           "linkLabel": "VOD de la game {game} sur {source}, {language} (s’ouvre dans un nouvel onglet)",

@@ -1210,6 +1210,11 @@
           "emptyHint": "Titles appear here when this player wins an event.",
           "error": "Could not load this player's trophies. Check your connection and try again."
         },
+        "standIns": {
+          "title": "Series as a Stand-in",
+          "error": "Could not load this player's stand-in series. Check your connection and try again.",
+          "forTeam": "For {team} vs {opponent}"
+        },
         "awards": {
           "title": "Awards",
           "error": "Could not load this player's awards. Check your connection and try again.",
@@ -1544,6 +1549,7 @@
         "sections": {
           "recentForm": "Recent Form",
           "rosters": "Rosters",
+          "lineups": "Lineups",
           "headToHead": "Head-to-Head",
           "information": "Information",
           "watch": "Watch",
@@ -1601,6 +1607,10 @@
         "win": "W",
         "loss": "L",
         "noRoster": "Roster not available",
+        "lineups": {
+          "standIn": "Stand-in",
+          "standInHint": "Stand-in: played for this side without being on its registered roster."
+        },
         "vods": {
           "game": "Game {number}",
           "linkLabel": "Game {game} VOD on {source}, {language} (opens in a new tab)",

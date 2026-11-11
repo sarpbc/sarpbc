@@ -32,6 +32,7 @@ import {
 } from "./tournament/infrastructure/persistence/tournament.entities";
 import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/player-award.entities";
 import { TournamentPrizeSchema } from "./tournament/infrastructure/persistence/tournament-prize.entities";
+import { MatchLineupPlayerSchema } from "./tournament/infrastructure/persistence/match-lineup.entities";
 import { ReplyNotificationSchema } from "./notification/infrastructure/persistence/reply-notification.entity";
 import { PersonalAccessTokenSchema } from "./pat/infrastructure/persistence/personal-access-token.entity";
 import { UserSchema } from "./user/infrastructure/persistence/user.entity";
@@ -67,6 +68,7 @@ export const mikroOrmEntities = [
   PlayerPlatformLinkSchema,
   PlayerAwardSchema,
   TournamentPrizeSchema,
+  MatchLineupPlayerSchema,
   TopicSchema,
   PostSchema,
   PostTranslationSchema,

@@ -12,6 +12,8 @@ const tournamentId = computed(() => route.params.id as string);
 const settingWinnerMatchId = ref<string | null>(null);
 const vodsMatch = ref<TournamentMatchListItem | null>(null);
 const vodsOpen = ref(false);
+const lineupsMatch = ref<TournamentMatchListItem | null>(null);
+const lineupsOpen = ref(false);
 const streamsTarget = ref<{ path: string; title: string } | null>(null);
 const streamsOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
@@ -93,6 +95,11 @@ async function handleRefresh() {
 function openVods(match: TournamentMatchListItem) {
   vodsMatch.value = match;
   vodsOpen.value = true;
+}
+
+function openLineups(match: TournamentMatchListItem) {
+  lineupsMatch.value = match;
+  lineupsOpen.value = true;
 }
 
 function openStreams(path: string, name: string) {
@@ -229,6 +236,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 @click="openStreams(`/tournaments/matches/${match.id}/streams`, matchLabel(match))"
               />
               <UButton
+                size="xs"
+                variant="soft"
+                icon="i-fluent-people-team-24-regular"
+                :label="$t('page.tournaments.lineups.action')"
+                @click="openLineups(match)"
+              />
+              <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 size="xs"
@@ -275,6 +289,15 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       v-model:open="vodsOpen"
       :match="vodsMatch"
       :label="matchLabel(vodsMatch)"
+    />
+
+    <TournamentMatchLineups
+      v-if="lineupsMatch && tournament"
+      :key="lineupsMatch.id"
+      v-model:open="lineupsOpen"
+      :match="lineupsMatch"
+      :label="matchLabel(lineupsMatch)"
+      :participants="tournament.participants ?? []"
     />
 
     <StreamEditor

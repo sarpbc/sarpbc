@@ -9,6 +9,7 @@ import type {
   UpcomingMatchesResponse,
 } from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
+import { MatchLineupService } from "../../application/match/match-lineup.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
@@ -76,6 +77,7 @@ export class MatchController {
   constructor(
     private matchService: MatchService,
     private replyService: ReplyService,
+    private lineupService: MatchLineupService,
     @Inject(GAME_STATS_STORE) private gameStats: GameStatsStore,
   ) {}
 
@@ -158,11 +160,15 @@ export class MatchController {
   @Get(":ref")
   async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
     const detail = await this.matchService.findDetail(ref);
-    const games = await this.gameStats.byMatch(detail.match.id);
+    const [games, lineups] = await Promise.all([
+      this.gameStats.byMatch(detail.match.id),
+      this.lineupService.forMatch(detail.match),
+    ]);
     return {
       ...detail,
       match: { ...withPublicSlug(detail.match), watchStreams: detail.match.watchStreams() },
       games,
+      lineups,
     };
   }
 }

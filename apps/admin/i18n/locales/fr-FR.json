@@ -237,6 +237,7 @@
         "set_event_streams": "Streams de l'événement",
         "set_tournament_streams": "Streams du tournoi",
         "set_match_streams": "Streams du match",
+        "set_match_lineups": "Alignements du match",
         "delete_match": "Suppression de match",
         "delete_team": "Suppression d'équipe"
       },
@@ -266,6 +267,8 @@
         "eventId": "Événement",
         "streams": "Streams",
         "stream": "Stream {number}",
+        "lineups": "Alignements",
+        "side": "Camp {number}",
         "reason": "Motif",
         "mergeIntoTeamId": "Fusionner dans"
       },
@@ -288,7 +291,8 @@
         "no": "Non",
         "ongoing": "En cours",
         "noPrizes": "Vider la répartition",
-        "noStreams": "Vider la liste"
+        "noStreams": "Vider la liste",
+        "noLineups": "Vider les alignements"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
@@ -435,6 +439,29 @@
           "invalid-timestamp": "Écrivez t= en secondes (123) ou sous la forme 1h2m3s.",
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
         }
+      },
+      "lineups": {
+        "action": "Alignements",
+        "title": "Alignements · {match}",
+        "description": "Les joueurs qui ont réellement disputé la série, dans l'ordre. Jusqu'à {max} par camp. Un joueur absent du roster inscrit de son camp pour ce tournoi porte le badge stand-in.",
+        "loading": "Chargement des alignements…",
+        "loadError": "Impossible de charger les alignements.",
+        "empty": "Aucun alignement pour l'instant. Le roster inscrit s'affiche sur la page publique.",
+        "standIn": "Stand-in",
+        "remove": "Retirer {name}",
+        "choose": "Choisir un joueur",
+        "chooseFor": "Joueur à ajouter à {name}",
+        "add": "Ajouter",
+        "useRoster": "Utiliser le roster inscrit",
+        "search": "Rechercher n'importe quel joueur",
+        "searchEmpty": "Aucun joueur trouvé",
+        "addTo": "Ajouter à {name}",
+        "suggestedHint": "Les statistiques des games indiquent les joueurs de chaque game.",
+        "suggestedUnnamed": "Aucun joueur sans nom. | 1 joueur des statistiques ne figure dans aucun roster et est ignoré. | {count} joueurs des statistiques ne figurent dans aucun roster et sont ignorés.",
+        "fillSuggested": "Remplir depuis les stats",
+        "save": "Enregistrer les alignements",
+        "saved": "Alignements enregistrés",
+        "saveError": "Impossible d'enregistrer les alignements"
       },
       "streams": {
         "tournamentAction": "Streams du Tournoi",

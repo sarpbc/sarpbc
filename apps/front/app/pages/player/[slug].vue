@@ -61,6 +61,18 @@ const showAwardsSection = computed(
 );
 
 const {
+  standIns,
+  hasStandIns,
+  pending: standInsPending,
+  error: standInsError,
+  refresh: refreshStandIns,
+} = usePlayerStandIns(playerId);
+
+const showStandInsSection = computed(
+  () => standInsPending.value || Boolean(standInsError.value) || hasStandIns.value,
+);
+
+const {
   live: liveMatches,
   upcoming: upcomingMatches,
   past: pastMatches,
@@ -232,16 +244,25 @@ setPageSeo({
         <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
       </template>
 
-      <EntityMatchesSection
-        kind="player"
-        v-else-if="tab === 'matches'"
-        :upcoming-matches="upcomingMatches"
-        :past-matches="pastMatches"
-        :live-matches="liveMatches"
-        :pending="matchesPending"
-        :has-error="Boolean(matchesError)"
-        @retry="refreshMatches()"
-      />
+      <template v-else-if="tab === 'matches'">
+        <EntityMatchesSection
+          kind="player"
+          :upcoming-matches="upcomingMatches"
+          :past-matches="pastMatches"
+          :live-matches="liveMatches"
+          :pending="matchesPending"
+          :has-error="Boolean(matchesError)"
+          @retry="refreshMatches()"
+        />
+
+        <PlayerStandInsSection
+          v-if="showStandInsSection"
+          :stand-ins="standIns"
+          :pending="standInsPending"
+          :has-error="Boolean(standInsError)"
+          @retry="refreshStandIns()"
+        />
+      </template>
 
       <EntityEventsSection
         kind="player"

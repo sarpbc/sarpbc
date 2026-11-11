@@ -3,6 +3,7 @@ import { NotFoundError } from "../../common/domain/errors";
 import type { Tournament } from "../../tournament/domain/competition";
 import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
+import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import type { MatchListKind } from "../../tournament/application/match/match-list-filters";
 import type {
   EventListing,
@@ -22,6 +23,7 @@ export interface RedistributableCompetitionServices {
     "findByTournamentId" | "teamEarnings" | "playerEarnings"
   >;
   playerAwardService: Pick<PlayerAwardService, "findByTournamentId">;
+  matchLineupService: Pick<MatchLineupService, "find">;
 }
 
 /**
@@ -47,6 +49,7 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     matchService,
     tournamentPrizeService,
     playerAwardService,
+    matchLineupService,
   } = services;
 
   async function tournament(id: string): Promise<Tournament> {
@@ -74,6 +77,12 @@ export function redistributableCompetition(services: RedistributableCompetitionS
 
     matches(kind: MatchListKind, limit: number) {
       return matchService.list(kind, { limit, redistributableOnly: true });
+    },
+
+    async matchLineups(matchId: string) {
+      const { source, lineups } = await matchLineupService.find(matchId);
+      if (!isRedistributable(source)) throw new NotFoundError(`Match "${matchId}" was not found.`);
+      return lineups;
     },
 
     async prizeDistribution(tournamentId: string) {

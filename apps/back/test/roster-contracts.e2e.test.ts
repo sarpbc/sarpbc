@@ -17,6 +17,7 @@ import type {
 import { Contract, Player, Team } from "../src/roster/domain/roster";
 import { PlayerController } from "../src/roster/infrastructure/http/player.controller";
 import { MatchService } from "../src/tournament/application/match/match.service";
+import { MatchLineupService } from "../src/tournament/application/match/match-lineup.service";
 import { PlayerAwardService } from "../src/tournament/application/player-award.service";
 import { TournamentPrizeService } from "../src/tournament/application/tournament-prize.service";
 import { TOURNAMENT_QUERIES } from "../src/tournament/infrastructure/competition-queries.tokens";
@@ -64,6 +65,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
         },
         { provide: PlayerService, useValue: {} },
         { provide: MatchService, useValue: {} },
+        { provide: MatchLineupService, useValue: {} },
         { provide: TOURNAMENT_QUERIES, useValue: {} },
         { provide: PlayerAwardService, useValue: {} },
         { provide: TournamentPrizeService, useValue: {} },

@@ -5,7 +5,7 @@ import type {
   TeamLogoVariant,
 } from "@sarpbc/types";
 import { requiredPermission } from "@sarpbc/utils";
-import { sourceFromUrl } from "../../common/domain/data-source";
+import { isRedistributable, sourceFromUrl } from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
@@ -16,6 +16,7 @@ import { teamLogoField } from "../../roster/domain/team-logo";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { UserService } from "../../user/application/user.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
+import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { StreamService } from "../../tournament/application/stream.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
@@ -38,6 +39,7 @@ type Awards = Pick<PlayerAwardService, "requireProposable" | "createForTeam">;
 type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
 type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
 type Streams = Pick<StreamService, "requireProposable" | "set">;
+type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
 
 interface StreamChange {
   owner: StreamOwner;
@@ -66,6 +68,7 @@ export class RosterProposalService {
     private readonly logos: Logos,
     private readonly matches: Matches,
     private readonly streams: Streams,
+    private readonly lineups: Lineups,
   ) {}
 
   async propose(
@@ -87,6 +90,11 @@ export class RosterProposalService {
     }
     if (change.kind === "delete_match") {
       await this.matches.requireProposableDeletion(change.matchId);
+    }
+    if (change.kind === "set_match_lineups") {
+      if (!isRedistributable(sourceFromUrl(sourceUrl)))
+        throw new InvalidInputError("Lineups sourced from start.gg cannot be proposed");
+      await this.lineups.requireProposable(change.matchId, change.lineups);
     }
     const streamChange = streamChangeOf(change);
     if (streamChange) {
@@ -135,7 +143,9 @@ export class RosterProposalService {
       matches: [
         ...new Set(
           proposals.flatMap(({ change }) =>
-            change.kind === "delete_match" || change.kind === "set_match_streams"
+            change.kind === "delete_match" ||
+            change.kind === "set_match_streams" ||
+            change.kind === "set_match_lineups"
               ? [change.matchId]
               : [],
           ),
@@ -270,6 +280,9 @@ export class RosterProposalService {
         await this.streams.set(owner, streams, sourceFromUrl(sourceUrl));
         return owner.id;
       }
+      case "set_match_lineups":
+        await this.lineups.set(change.matchId, change.lineups);
+        return change.matchId;
       case "delete_match":
         await this.matches.deleteMatch(change.matchId);
         return change.matchId;
@@ -338,6 +351,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
       return change.prizes.flatMap(({ playerIds }) => playerIds);
+    case "set_match_lineups":
+      return change.lineups.flatMap(({ playerIds }) => playerIds);
     case "create_player":
     case "create_team":
     case "update_team":
@@ -381,6 +396,7 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "set_event_streams":
     case "set_tournament_streams":
     case "set_match_streams":
+    case "set_match_lineups":
     case "delete_match":
       return [];
     default: {

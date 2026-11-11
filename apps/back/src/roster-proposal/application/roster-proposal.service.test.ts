@@ -1,4 +1,4 @@
-import type { RosterChange, StreamInput } from "@sarpbc/types";
+import type { MatchLineupInput, RosterChange, StreamInput } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
@@ -72,6 +72,16 @@ function setup() {
       streams: replaceStreams([], inputs, from),
       inherited: [],
     })),
+  };
+  const lineups = {
+    requireProposable: vi.fn(async (matchId: string, inputs: readonly MatchLineupInput[]) => {
+      if (matchId === "startgg-match")
+        throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
+      const playerIds = inputs.flatMap(({ playerIds: ids }) => ids);
+      if (new Set(playerIds).size !== playerIds.length)
+        throw new InvalidInputError("A player appears twice in the match lineups");
+    }),
+    set: vi.fn(async () => ({ source: "manual" as const, lineups: [] })),
   };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
@@ -157,6 +167,7 @@ function setup() {
     logos,
     matches,
     streams,
+    lineups,
   );
   return {
     saved,
@@ -171,6 +182,7 @@ function setup() {
     awards,
     matches,
     streams,
+    lineups,
     service,
   };
 }
@@ -189,6 +201,7 @@ describe("RosterProposalService", () => {
   let merges: ReturnType<typeof setup>["merges"];
   let matches: ReturnType<typeof setup>["matches"];
   let streams: ReturnType<typeof setup>["streams"];
+  let lineups: ReturnType<typeof setup>["lineups"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -205,6 +218,7 @@ describe("RosterProposalService", () => {
       awards,
       matches,
       streams,
+      lineups,
       service,
     } = setup());
   });
@@ -782,6 +796,65 @@ describe("RosterProposalService", () => {
       await expect(service.approve(id, "admin")).rejects.toThrow(ForbiddenError);
       expect(staff.permissions).toContain("tournaments.manage");
       expect(streams.set).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("lineup proposals", () => {
+    const sides: MatchLineupInput[] = [
+      { participantId: "part-kc", playerIds: ["zen"] },
+      { participantId: "part-bds", playerIds: [] },
+    ];
+    const setLineups = (sourceUrl: string, matchId = "match-1") =>
+      service.propose(
+        { kind: "set_match_lineups", matchId, lineups: sides },
+        sourceUrl,
+        "journalist",
+      );
+
+    it("validates the lineups and keeps them pending until approval", async () => {
+      const proposal = await setLineups(source);
+
+      expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
+      expect(lineups.requireProposable).toHaveBeenCalledExactlyOnceWith("match-1", sides);
+      expect(players.findById).toHaveBeenCalledWith("zen");
+      expect(lineups.set).not.toHaveBeenCalled();
+    });
+
+    it("replaces the match lineups on approval", async () => {
+      const { id } = await setLineups(source);
+
+      const approved = await service.approve(id, "admin");
+
+      expect(lineups.set).toHaveBeenCalledExactlyOnceWith("match-1", sides);
+      expect(approved).toMatchObject({ status: "applied", entityId: "match-1" });
+      expect(staff.permissions).toContain("tournaments.manage");
+    });
+
+    it("refuses a start.gg match, a start.gg source or an unknown player", async () => {
+      await expect(setLineups(source, "startgg-match")).rejects.toThrow("start.gg match");
+      await expect(setLineups("https://www.start.gg/tournament/rl-open")).rejects.toThrow(
+        "sourced from start.gg",
+      );
+      await expect(
+        service.propose(
+          {
+            kind: "set_match_lineups",
+            matchId: "match-1",
+            lineups: [{ participantId: "part-kc", playerIds: ["ghost"] }],
+          },
+          source,
+          "journalist",
+        ),
+      ).rejects.toThrow(NotFoundError);
+      expect(saved.size).toBe(0);
+    });
+
+    it("leaves the proposal pending when the lineups no longer apply", async () => {
+      const { id } = await setLineups(source);
+      lineups.set.mockRejectedValueOnce(new InvalidInputError("Participant does not play"));
+
+      await expect(service.approve(id, "admin")).rejects.toThrow("does not play");
+      expect(saved.get(id)?.status).toBe("pending");
     });
   });
 });

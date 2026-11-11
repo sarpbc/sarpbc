@@ -1,5 +1,7 @@
 import type {
+  DataSource,
   MatchGameStats,
+  MatchLineup,
   MatchListItem,
   MatchVod,
   ParticipantRef,
@@ -93,6 +95,7 @@ export interface MatchDetailResponse {
   teamForms: TeamFormsMap;
   headToHead: HeadToHead | null;
   games: MatchGameStats[];
+  lineups: MatchLineup[];
 }
 
 /** The detail endpoint serializes the stored match, so result participants are objects there. */
@@ -104,6 +107,7 @@ export interface Match {
   id: string;
   publicId: number;
   pandascoreId?: number;
+  source?: DataSource;
   name: string;
   slug: string;
   beginAt?: Date;

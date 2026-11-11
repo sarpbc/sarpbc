@@ -13,6 +13,7 @@ import { PlayerAwardService } from "../../tournament/application/player-award.se
 import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import { MatchService } from "../../tournament/application/match/match.service";
 import { StreamService } from "../../tournament/application/stream.service";
+import { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
 import { RosterProposalController } from "./http/roster-proposal.controller";
@@ -45,6 +46,7 @@ import {
         logos: TeamLogoService,
         matches: MatchService,
         streams: StreamService,
+        lineups: MatchLineupService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -59,6 +61,7 @@ import {
           logos,
           matches,
           streams,
+          lineups,
         ),
       inject: [
         EntityManager,
@@ -72,6 +75,7 @@ import {
         TeamLogoService,
         MatchService,
         StreamService,
+        MatchLineupService,
       ],
     },
   ],

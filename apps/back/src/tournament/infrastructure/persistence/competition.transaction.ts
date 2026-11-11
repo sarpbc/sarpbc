@@ -25,6 +25,7 @@ import {
 import { TOURNAMENT_POPULATE } from "./tournament-populate";
 import { CompetitionAwardWriter } from "./player-award.store";
 import { CompetitionPrizeWriter } from "./tournament-prize.store";
+import { CompetitionLineupWriter } from "./match-lineup.store";
 export class CompetitionTournamentWriter implements TournamentWriter {
   private readonly tournaments = new Map<string, Row.Tournament>();
   private readonly participantsStaged = new Map<string, Row.TournamentParticipant>();
@@ -392,6 +393,7 @@ function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
   let rosters: RosterSyncWriter | undefined;
   let awards: CompetitionAwardWriter | undefined;
   let prizes: CompetitionPrizeWriter | undefined;
+  let lineups: CompetitionLineupWriter | undefined;
   const tournamentWriter = () => (tournaments ??= new CompetitionTournamentWriter(em));
   return {
     get tournaments() {
@@ -411,6 +413,9 @@ function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
     },
     get prizes() {
       return (prizes ??= new CompetitionPrizeWriter(em));
+    },
+    get lineups() {
+      return (lineups ??= new CompetitionLineupWriter(em));
     },
   };
 }

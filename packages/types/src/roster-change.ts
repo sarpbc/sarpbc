@@ -1,4 +1,5 @@
 import type { ContractRole } from "./contract";
+import type { MatchLineupInput } from "./lineup";
 import type { PlayerAwardType } from "./player-award";
 import type { PlayerStatus } from "./player";
 import type { PrizeEntry } from "./prize";
@@ -80,6 +81,7 @@ export type RosterChange =
   | { kind: "set_event_streams"; eventId: string; streams: StreamInput[] }
   | { kind: "set_tournament_streams"; tournamentId: string; streams: StreamInput[] }
   | { kind: "set_match_streams"; matchId: string; streams: StreamInput[] }
+  | { kind: "set_match_lineups"; matchId: string; lineups: MatchLineupInput[] }
   | { kind: "delete_match"; matchId: string; reason: string }
   | { kind: "delete_team"; teamId: string; reason: string; mergeIntoTeamId?: string };
 

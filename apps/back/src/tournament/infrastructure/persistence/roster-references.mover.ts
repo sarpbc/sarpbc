@@ -6,6 +6,7 @@ import type {
   SharedTournaments,
   TeamCompetitionUsage,
 } from "../../../roster/application/ports";
+import { MatchLineupPlayer } from "./match-lineup.entities";
 import { PlayerAward } from "./player-award.entities";
 import { Match, TournamentParticipant } from "./tournament.entities";
 import { TournamentPrize } from "./tournament-prize.entities";
@@ -27,6 +28,12 @@ export class TournamentRosterReferences
         "Both players are participants without a team in the same tournament. Remove one of them from that tournament before merging.",
       );
     await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
+    const keptLineups = await em.find(MatchLineupPlayer, { player: to }, { fields: ["match"] });
+    await em.nativeDelete(MatchLineupPlayer, {
+      player: from,
+      match: { $in: keptLineups.map(({ match }) => match.id) },
+    });
+    await em.nativeUpdate(MatchLineupPlayer, { player: from }, { player: to });
     const participants = await em.find(
       TournamentParticipant,
       { players: from },

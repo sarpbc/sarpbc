@@ -87,6 +87,7 @@ export {
   currencyFractionDigits,
   isIso4217Code,
 } from "./prize";
+export { MAX_LINEUP_PLAYERS } from "./lineup";
 export {
   ROSTER_PROPOSAL_PERMISSIONS,
   canModerateComments,

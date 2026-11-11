@@ -22,6 +22,26 @@ function setup() {
     team,
   });
   const matchService = { list: vi.fn().mockResolvedValue([[], 0]) };
+  const matchLineupService = {
+    find: vi.fn(async (matchId: string) => ({
+      source: matchId === "startgg-match" ? ("startgg" as const) : ("manual" as const),
+      lineups: [
+        {
+          participantId: "part-kc",
+          players: [
+            {
+              id: "p1",
+              name: "Scout",
+              slug: "scout",
+              imageUrl: null,
+              nationality: "FR",
+              standIn: true,
+            },
+          ],
+        },
+      ],
+    })),
+  };
   const manualCup = Object.assign(new Tournament(), {
     id: "manual-cup",
     name: "Coupe",
@@ -90,6 +110,7 @@ function setup() {
     newsService: { findAll: vi.fn(), findOneAdminByIdOrSlug: vi.fn() },
     competition: redistributableCompetition({
       matchService,
+      matchLineupService,
       tournaments,
       tournamentPrizeService,
       playerAwardService,
@@ -108,6 +129,7 @@ function setup() {
   };
   return {
     matchService,
+    matchLineupService,
     tournaments,
     tournamentPrizeService,
     playerAwardService,
@@ -157,6 +179,23 @@ describe("MCP read tools", () => {
       ],
     });
     expect((await call("get_tournament", { id: "c1" })).isError).toBe(true);
+  });
+
+  it("returns match lineups with stand-in flags and hides start.gg matches", async () => {
+    const { call, json } = setup();
+    expect(await json("get_match_lineups", { matchId: "manual-match" })).toEqual({
+      matchId: "manual-match",
+      lineups: [
+        {
+          participantId: "part-kc",
+          players: [{ id: "p1", name: "Scout", slug: "scout", standIn: true }],
+        },
+      ],
+    });
+    const hidden = await call("get_match_lineups", { matchId: "startgg-match" });
+    expect(hidden.isError).toBe(true);
+    const block = hidden.content[0];
+    expect(block?.type === "text" ? block.text : "").not.toContain("Scout");
   });
 
   it("hides start.gg prize distributions", async () => {
