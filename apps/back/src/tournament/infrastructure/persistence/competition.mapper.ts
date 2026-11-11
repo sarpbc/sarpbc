@@ -1,4 +1,5 @@
 import { wrap } from "@mikro-orm/core";
+import { log } from "evlog";
 import type { TournamentEventRef } from "@sarpbc/types";
 import * as Row from "./tournament.entities";
 import {
@@ -36,14 +37,6 @@ export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
     updatedAt: row.updatedAt,
   });
 }
-/** Relations that toTournament dereferences; a tournament loaded without them fails in toEventRef. */
-export const TOURNAMENT_POPULATE = [
-  "league",
-  "event",
-  "winner.team",
-  "participants.team",
-  "participants.players",
-] as const;
 export const MATCH_WRITE_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
   "participants.team",
@@ -58,12 +51,22 @@ export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
     throw new Error("Tournament event " + row.id + " is not populated");
   return toEventRef(row);
 }
-export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant {
+export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant | null {
+  const { tournament, team } = row;
+  if (!wrap(row).isInitialized() || !tournament || !team || !wrap(team).isInitialized()) {
+    log.warn({ component: "CompetitionMapper", skipped: "participant", participantId: row.id });
+    return null;
+  }
   return Object.assign(new TournamentParticipant(), {
     id: row.id,
-    tournamentId: row.tournament.id,
-    team: toTeam(row.team, false),
-    players: row.players.isInitialized() ? row.players.getItems().map(toPlayer) : [],
+    tournamentId: tournament.id,
+    team: toTeam(team, false),
+    players: row.players.isInitialized()
+      ? row.players
+          .getItems()
+          .filter((player) => wrap(player).isInitialized())
+          .map(toPlayer)
+      : [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -99,7 +102,7 @@ export function toMatch(row: Row.Match): Match {
     tournament: toTournamentSummary(row.tournament),
     winner: row.winner ? toParticipant(row.winner) : null,
     participants: row.participants.isInitialized()
-      ? row.participants.getItems().map(toParticipant)
+      ? row.participants.getItems().flatMap((participant) => toParticipant(participant) ?? [])
       : [],
     results: row.results.isInitialized()
       ? row.results.getItems().map((r) => ({
@@ -144,7 +147,7 @@ export function toTournament(row: Row.Tournament): Tournament {
     league: row.league ? toLeague(row.league) : null,
     winner: row.winner ? toParticipant(row.winner) : null,
     participants: row.participants.isInitialized()
-      ? row.participants.getItems().map(toParticipant)
+      ? row.participants.getItems().flatMap((participant) => toParticipant(participant) ?? [])
       : [],
     matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
   });
