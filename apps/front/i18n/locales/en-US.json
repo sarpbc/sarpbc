@@ -272,6 +272,7 @@
         "recentMatches": "Recent matches"
       }
     },
+<<<<<<< HEAD
     "spoiler": {
       "toggle": "Spoiler-Free Mode",
       "enable": "Hide scores and results",
@@ -280,6 +281,18 @@
       "resultHidden": "Result hidden",
       "revealScore": "Reveal Score",
       "revealResults": "Reveal Results"
+=======
+    "viewership": {
+      "title": "Viewership",
+      "peak": "Peak viewers",
+      "average": "Average viewers",
+      "measuredAt": "Measured on {date}",
+      "source": "Source:",
+      "scope": {
+        "official": "Official broadcasts only",
+        "withCostreams": "Including co-streams"
+      }
+>>>>>>> 41b62b7b (feat(front): show credited viewership on match and event pages)
     }
   },
   "timeAgo": {

@@ -141,6 +141,20 @@ watch(
         :spoiler-tournament-ids="event.stages.map((stage) => stage.id)"
       />
 
+      <section v-if="event.viewership" aria-labelledby="tournament-event-viewership-title">
+        <SRail>
+          <template #caption>
+            <h2 id="tournament-event-viewership-title">
+              {{ t("components.viewership.title") }}
+            </h2>
+          </template>
+          <ViewershipStats
+            :viewership="event.viewership"
+            :startgg="event.stages.every((stage) => stage.source === 'startgg')"
+          />
+        </SRail>
+      </section>
+
       <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">
         <SRail>
           <template #caption>
