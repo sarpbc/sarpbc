@@ -13,6 +13,7 @@ const formState = ref(eventToFormState(null));
 const isSaving = ref(false);
 const eventToDelete = ref<ManualEvent | null>(null);
 const streamsOpen = ref(false);
+const viewershipOpen = ref(false);
 
 const {
   data: event,
@@ -84,6 +85,12 @@ async function handleSubmit() {
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="streamsOpen = true"
+        />
+        <UButton
+          variant="soft"
+          icon="i-fluent-people-audience-24-regular"
+          :label="$t('page.tournaments.viewership.eventAction')"
+          @click="viewershipOpen = true"
         />
         <UButton
           v-if="event.editable && event.stages.length === 0"
@@ -188,6 +195,13 @@ async function handleSubmit() {
       v-model:open="streamsOpen"
       :path="`/events/${event.id}/streams`"
       :title="$t('page.tournaments.streams.title', { name: event.name })"
+    />
+
+    <ViewershipEditor
+      v-if="event"
+      v-model:open="viewershipOpen"
+      :path="`/events/${event.id}/viewership`"
+      :title="$t('page.tournaments.viewership.title', { name: event.name })"
     />
 
     <ConfirmDeleteModal

@@ -16,6 +16,8 @@ const lineupsMatch = ref<TournamentMatchListItem | null>(null);
 const lineupsOpen = ref(false);
 const streamsTarget = ref<{ path: string; title: string } | null>(null);
 const streamsOpen = ref(false);
+const viewershipTarget = ref<{ path: string; title: string } | null>(null);
+const viewershipOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
@@ -107,6 +109,11 @@ function openStreams(path: string, name: string) {
   streamsOpen.value = true;
 }
 
+function openViewership(path: string, name: string) {
+  viewershipTarget.value = { path, title: t("page.tournaments.viewership.title", { name }) };
+  viewershipOpen.value = true;
+}
+
 async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
   settingWinnerMatchId.value = match.id;
   try {
@@ -148,6 +155,15 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="openStreams(`/events/${tournament.event.id}/streams`, tournament.event.name)"
+        />
+        <UButton
+          v-if="tournament"
+          variant="soft"
+          icon="i-fluent-people-audience-24-regular"
+          :label="$t('page.tournaments.viewership.eventAction')"
+          @click="
+            openViewership(`/events/${tournament.event.id}/viewership`, tournament.event.name)
+          "
         />
         <UButton
           v-if="tournament?.source === 'pandascore'"
@@ -243,6 +259,15 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 @click="openLineups(match)"
               />
               <UButton
+                size="xs"
+                variant="soft"
+                icon="i-fluent-people-audience-24-regular"
+                :label="$t('page.tournaments.viewership.matchAction')"
+                @click="
+                  openViewership(`/tournaments/matches/${match.id}/viewership`, matchLabel(match))
+                "
+              />
+              <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 size="xs"
@@ -306,6 +331,14 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       v-model:open="streamsOpen"
       :path="streamsTarget.path"
       :title="streamsTarget.title"
+    />
+
+    <ViewershipEditor
+      v-if="viewershipTarget"
+      :key="viewershipTarget.path"
+      v-model:open="viewershipOpen"
+      :path="viewershipTarget.path"
+      :title="viewershipTarget.title"
     />
   </NuxtLayout>
 </template>
