@@ -129,6 +129,31 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   if (change.kind === "set_match_streams") {
     return streamRows("matchId", change.matchId, change.streams);
   }
+  if (change.kind === "set_match_lineups") {
+    const lineups = change.lineups.flatMap((lineup, index) =>
+      lineup.playerIds.length > 0
+        ? [
+            {
+              key: `lineup-${lineup.participantId}`,
+              label: t("page.proposals.fields.side", { number: index + 1 }),
+              value: lineup.playerIds.map(nameOf).join(", "),
+            },
+          ]
+        : [],
+    );
+    return [
+      { key: "matchId", label: t("page.proposals.fields.matchId"), value: nameOf(change.matchId) },
+      ...(lineups.length === 0
+        ? [
+            {
+              key: "lineups",
+              label: t("page.proposals.fields.lineups"),
+              value: t("page.proposals.values.noLineups"),
+            },
+          ]
+        : lineups),
+    ];
+  }
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
   const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);

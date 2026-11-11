@@ -4,6 +4,8 @@ import type {
   League,
   LeagueInput,
   ManualEvent,
+  MatchLineupInput,
+  MatchLineupsResponse,
   PlayerAwardType,
   StatsImport,
   StatsPlayerAccounts,
@@ -73,6 +75,22 @@ export async function setMatchWinner(matchId: string, winnerId: string): Promise
   await apiFetch(`/tournaments/matches/${matchId}/winner`, {
     method: "PUT",
     body: { winnerId },
+  });
+}
+
+export async function getMatchLineups(matchId: string): Promise<MatchLineupsResponse> {
+  return apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
+    method: "GET",
+  });
+}
+
+export async function setMatchLineups(
+  matchId: string,
+  lineups: MatchLineupInput[],
+): Promise<MatchLineupsResponse> {
+  return apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
+    method: "PUT",
+    body: { lineups },
   });
 }
 

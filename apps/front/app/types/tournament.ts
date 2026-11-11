@@ -1,4 +1,11 @@
-import type { League, Player, Team, TournamentEventRef, TournamentFormat } from "@sarpbc/types";
+import type {
+  DataSource,
+  League,
+  Player,
+  Team,
+  TournamentEventRef,
+  TournamentFormat,
+} from "@sarpbc/types";
 import type { Match } from "./matches";
 
 export interface BracketLink {
@@ -10,6 +17,7 @@ export interface BracketLink {
 export interface Tournament {
   id: string;
   pandascoreId?: number;
+  source?: DataSource;
   name: string;
   description?: string;
   /** Stage slug, unique within its event. */

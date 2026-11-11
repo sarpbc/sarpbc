@@ -3,6 +3,7 @@ import type {
   Player,
   PlayerContract,
   PlayerProfileAward,
+  PlayerStandIn,
   ProfileEarnings,
   ProfileMatchListItem,
 } from "@sarpbc/types";
@@ -94,6 +95,14 @@ export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAw
   });
 
   return res.awards ?? [];
+}
+
+export async function getPlayerStandIns(playerId: string): Promise<PlayerStandIn[]> {
+  const res = await apiFetch<{ standIns: PlayerStandIn[] }>(`/player/${playerId}/stand-ins`, {
+    method: "GET",
+  });
+
+  return res.standIns;
 }
 
 export async function getPlayerEarnings(playerId: string): Promise<ProfileEarnings> {

@@ -62,6 +62,10 @@ if (route.path !== canonicalPath) {
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
 const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
 const games = computed(() => matchDetail.value?.games ?? []);
+const lineups = computed(() => matchDetail.value?.lineups ?? []);
+const startgg = computed(
+  () => match.value?.source === "startgg" || match.value?.tournament.source === "startgg",
+);
 
 const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
@@ -341,8 +345,14 @@ const scoreboardLabel = computed(() => {
           <MatchStatsTable :games="games" :participants="participants" />
         </SRail>
 
-        <SRail :title="t('page.match.detail.sections.rosters')">
-          <MatchRosterTable :participants="participants" />
+        <SRail
+          :title="
+            lineups.length > 0
+              ? t('page.match.detail.sections.lineups')
+              : t('page.match.detail.sections.rosters')
+          "
+        >
+          <MatchRosterTable :participants="participants" :lineups="lineups" :startgg="startgg" />
         </SRail>
 
         <SRail

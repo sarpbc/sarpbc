@@ -236,6 +236,7 @@
         "set_event_streams": "Event streams",
         "set_tournament_streams": "Tournament streams",
         "set_match_streams": "Match streams",
+        "set_match_lineups": "Match lineups",
         "award_player": "Player award",
         "delete_match": "Delete match",
         "delete_team": "Delete team"
@@ -266,6 +267,8 @@
         "eventId": "Event",
         "streams": "Streams",
         "stream": "Stream {number}",
+        "lineups": "Lineups",
+        "side": "Side {number}",
         "reason": "Reason",
         "mergeIntoTeamId": "Merge into"
       },
@@ -288,7 +291,8 @@
         "no": "No",
         "ongoing": "Ongoing",
         "noPrizes": "Clear the distribution",
-        "noStreams": "Clear the list"
+        "noStreams": "Clear the list",
+        "noLineups": "Clear the lineups"
       },
       "messages": {
         "approved": "Proposal approved and applied",
@@ -435,6 +439,29 @@
           "invalid-timestamp": "Write t= in seconds (123) or as 1h2m3s.",
           "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
         }
+      },
+      "lineups": {
+        "action": "Lineups",
+        "title": "Lineups · {match}",
+        "description": "Players who actually played this series, in order. Up to {max} per side. A player missing from the side's tournament roster is shown as a stand-in.",
+        "loading": "Loading lineups…",
+        "loadError": "Could not load lineups.",
+        "empty": "No lineup yet. The registered roster shows on the public page.",
+        "standIn": "Stand-in",
+        "remove": "Remove {name}",
+        "choose": "Choose a player",
+        "chooseFor": "Player to add to {name}",
+        "add": "Add",
+        "useRoster": "Use Registered Roster",
+        "search": "Search any player",
+        "searchEmpty": "No player found",
+        "addTo": "Add to {name}",
+        "suggestedHint": "Game stats list the players who played each game.",
+        "suggestedUnnamed": "No unnamed player. | 1 player from the game stats is on no roster and is left out. | {count} players from the game stats are on no roster and are left out.",
+        "fillSuggested": "Fill From Game Stats",
+        "save": "Save Lineups",
+        "saved": "Lineups saved",
+        "saveError": "Could not save lineups"
       },
       "streams": {
         "tournamentAction": "Tournament Streams",
