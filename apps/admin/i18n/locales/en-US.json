@@ -229,6 +229,8 @@
         "create_team": "New team",
         "update_team": "Team update",
         "upload_team_logo": "Team logo",
+        "add_team_alias": "Former name",
+        "update_team_alias": "Former name update",
         "merge_players": "Merge players",
         "merge_teams": "Merge teams",
         "create_contract": "New contract",
@@ -276,7 +278,11 @@
         "reason": "Reason",
         "mergeIntoTeamId": "Merge into",
         "circuitId": "Circuit",
-        "tier": "Places from {number}"
+        "tier": "Places from {number}",
+        "aliasName": "Former name",
+        "aliasFrom": "From",
+        "aliasTo": "Until",
+        "aliasPandascoreId": "PandaScore team"
       },
       "playerStatus": {
         "active": "Active",
@@ -967,6 +973,52 @@
       },
       "info": {
         "title": "Team Information"
+      },
+      "aliases": {
+        "title": "Former Names",
+        "description": "Rebrands and sponsor names with the dates they were used. Past tournaments and matches show the name in force on their date, and search finds the team by it. Use this instead of merging teams.",
+        "empty": "No former names recorded.",
+        "add": "Add Former Name",
+        "edit": "Edit Former Name",
+        "save": "Save",
+        "saved": "Former name saved",
+        "saveError": "The former name could not be saved",
+        "optional": "Optional",
+        "period": "{from} – {to}",
+        "ongoing": "now",
+        "columns": {
+          "name": "Name",
+          "period": "Period",
+          "source": "Source"
+        },
+        "fields": {
+          "name": "Name",
+          "from": "From",
+          "to": "Until",
+          "toHelp": "The day the team stopped using the name, such as the rebrand date. Leave empty while it is still in use.",
+          "sourceUrl": "Official source",
+          "sourceHelp": "The team, one of its players, the organiser, BLAST, RLEsports or PandaScore. Never Liquipedia.",
+          "logoUrl": "Logo URL",
+          "pandascoreId": "PandaScore team ID",
+          "pandascoreHelp": "Only when PandaScore keeps a separate team record under this name."
+        },
+        "delete": {
+          "title": "Delete Former Name",
+          "confirm": "Delete the former name {name}?",
+          "confirm_button": "Delete"
+        },
+        "errors": {
+          "missing-name": "Enter the name.",
+          "name-too-long": "The name is too long.",
+          "invalid-from": "Enter the first day the name was used.",
+          "invalid-to": "Enter a valid date or leave it empty.",
+          "to-not-after-from": "The end date must come after the start date.",
+          "invalid-source-url": "Enter the http(s) URL of an official source.",
+          "forbidden-source": "Liquipedia is not an accepted source.",
+          "invalid-logo-url": "Enter an https URL.",
+          "forbidden-logo-source": "Liquipedia is not an accepted logo source.",
+          "invalid-pandascore-id": "Enter a positive whole number."
+        }
       },
       "contracts": {
         "title": "Contract History",

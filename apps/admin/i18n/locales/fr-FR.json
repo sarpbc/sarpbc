@@ -229,6 +229,8 @@
         "create_team": "Nouvelle équipe",
         "update_team": "Modification de l'équipe",
         "upload_team_logo": "Logo d'équipe",
+        "add_team_alias": "Ancien nom",
+        "update_team_alias": "Modification d'un ancien nom",
         "merge_players": "Fusion de joueurs",
         "merge_teams": "Fusion d'équipes",
         "create_contract": "Nouveau contrat",
@@ -276,7 +278,11 @@
         "reason": "Motif",
         "mergeIntoTeamId": "Fusionner dans",
         "circuitId": "Circuit",
-        "tier": "Places à partir de {number}"
+        "tier": "Places à partir de {number}",
+        "aliasName": "Ancien nom",
+        "aliasFrom": "Du",
+        "aliasTo": "Jusqu'au",
+        "aliasPandascoreId": "Équipe PandaScore"
       },
       "playerStatus": {
         "active": "Actif",
@@ -967,6 +973,52 @@
       },
       "info": {
         "title": "Informations de l'équipe"
+      },
+      "aliases": {
+        "title": "Anciens noms",
+        "description": "Changements de nom et noms de sponsor, avec leurs dates d'usage. Les tournois et matchs passés affichent le nom en vigueur à leur date, et la recherche retrouve l'équipe par ce nom. À utiliser plutôt qu'une fusion d'équipes.",
+        "empty": "Aucun ancien nom enregistré.",
+        "add": "Ajouter un ancien nom",
+        "edit": "Modifier l'ancien nom",
+        "save": "Enregistrer",
+        "saved": "Ancien nom enregistré",
+        "saveError": "Impossible d'enregistrer l'ancien nom",
+        "optional": "Facultatif",
+        "period": "{from} – {to}",
+        "ongoing": "aujourd'hui",
+        "columns": {
+          "name": "Nom",
+          "period": "Période",
+          "source": "Source"
+        },
+        "fields": {
+          "name": "Nom",
+          "from": "Du",
+          "to": "Jusqu'au",
+          "toHelp": "Le jour où l'équipe a cessé d'utiliser ce nom, par exemple la date du changement. Laisser vide s'il est toujours utilisé.",
+          "sourceUrl": "Source officielle",
+          "sourceHelp": "L'équipe, l'un de ses joueurs, l'organisateur, BLAST, RLEsports ou PandaScore. Jamais Liquipedia.",
+          "logoUrl": "URL du logo",
+          "pandascoreId": "ID d'équipe PandaScore",
+          "pandascoreHelp": "Uniquement si PandaScore garde une fiche d'équipe distincte sous ce nom."
+        },
+        "delete": {
+          "title": "Supprimer l'ancien nom",
+          "confirm": "Supprimer l'ancien nom {name} ?",
+          "confirm_button": "Supprimer"
+        },
+        "errors": {
+          "missing-name": "Saisissez le nom.",
+          "name-too-long": "Le nom est trop long.",
+          "invalid-from": "Saisissez le premier jour d'usage du nom.",
+          "invalid-to": "Saisissez une date valide ou laissez vide.",
+          "to-not-after-from": "La date de fin doit suivre la date de début.",
+          "invalid-source-url": "Saisissez l'URL http(s) d'une source officielle.",
+          "forbidden-source": "Liquipedia n'est pas une source acceptée.",
+          "invalid-logo-url": "Saisissez une URL https.",
+          "forbidden-logo-source": "Liquipedia n'est pas une source de logo acceptée.",
+          "invalid-pandascore-id": "Saisissez un nombre entier positif."
+        }
       },
       "contracts": {
         "title": "Historique des contrats",

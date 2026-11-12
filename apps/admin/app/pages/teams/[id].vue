@@ -227,6 +227,8 @@ const contractModalTitle = computed(() =>
           </div>
         </div>
 
+        <TeamAliases v-if="team" :team-id="teamId" :aliases="team.aliases" @changed="refresh()" />
+
         <div>
           <div class="mb-3 flex flex-row items-center justify-between">
             <h2 class="text-base font-semibold">
