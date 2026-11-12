@@ -382,7 +382,9 @@
         "newEvent": "Nouvel événement au nom du tournoi",
         "eventHelp": "Les phases d'un même événement partagent une page publique. Choisissez un événement existant pour y ajouter ce tournoi comme phase.",
         "eventMoveHelp": "L'enregistrement déplace le tournoi dans cet événement. Son URL publique change et son ancien événement garde son nom.",
-        "eventSharedHelp": "Ce tournoi est une phase d'un événement partagé. Modifiez le nom ou l'URL de l'événement depuis la page Événements."
+        "eventSharedHelp": "Ce tournoi est une phase d'un événement partagé. Modifiez le nom ou l'URL de l'événement depuis la page Événements.",
+        "hasBracket": "Afficher en arbre",
+        "hasBracketHelp": "Affiche cette phase sous forme d’arbre dès que ses matchs sont reliés depuis leur éditeur d’arbre. Impossible de le désactiver tant que des matchs restent reliés."
       },
       "match": {
         "status": "Statut",
@@ -394,6 +396,41 @@
           "title": "Supprimer le match",
           "confirm": "Supprimer {match} ({score}) ? Ses scores et ses statistiques de manches sont aussi supprimés, et les classements et bilans d'équipe sont recalculés. Cette action est irréversible. Les matchs PandaScore, et ceux qui ont des pronostics, des commentaires ou des matchs suivants dans le bracket, sont refusés."
         }
+      },
+      "bracket": {
+        "action": "Arbre",
+        "title": "Arbre · {match}",
+        "description": "Les adversaires de ce match et les matchs qui y mènent. La phase publique dessine l’arbre à partir de ces liens.",
+        "tbd": "À déterminer",
+        "side": "Adversaire {number}",
+        "feeders": "Matchs précédents",
+        "noFeeders": "Aucun match précédent : ce match ouvre l’arbre.",
+        "previousMatch": "Match précédent",
+        "choosePreviousMatch": "Choisissez un match de cette phase",
+        "type": "Envoie son",
+        "types": {
+          "winner": "Vainqueur",
+          "loser": "Perdant"
+        },
+        "addFeeder": "Ajouter un match précédent",
+        "removeFeeder": "Retirer le match précédent",
+        "cancel": "Annuler",
+        "save": "Enregistrer l’arbre",
+        "saved": "Arbre enregistré",
+        "saveError": "Impossible d’enregistrer l’arbre"
+      },
+      "emptyBracket": {
+        "action": "Arbre vide",
+        "title": "Générer un arbre vide",
+        "description": "Crée tous les matchs d’un arbre à élimination directe, non commencés et sans équipes, chaque vainqueur relié au tour suivant. Renseignez chaque match depuis son éditeur d’arbre quand ses équipes sont connues. Pour annuler, supprimez les matchs en partant de la finale.",
+        "teams": "Équipes",
+        "size": "{teams} équipes · {matches} matchs",
+        "numberOfGames": "Format (BO)",
+        "numberOfGamesHelp": "Facultatif, appliqué à chaque match.",
+        "cancel": "Annuler",
+        "create": "Générer",
+        "created": "Arbre vide généré",
+        "createError": "Impossible de générer l’arbre"
       },
       "awards": {
         "title": "Récompenses Joueur",

@@ -1,4 +1,4 @@
-import type { TournamentFormat } from "@sarpbc/types";
+import type { BracketLinkInput, EmptyBracketSize, TournamentFormat } from "@sarpbc/types";
 import type { OfficialMatchStream } from "../domain/official-match-stream";
 export interface ManualTournamentFields {
   eventId?: string;
@@ -11,6 +11,7 @@ export interface ManualTournamentFields {
   format?: TournamentFormat;
   teamIds?: string[];
   playerParticipants?: string[][];
+  hasBracket?: boolean;
 }
 export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;
@@ -55,6 +56,13 @@ export interface MatchFields {
   participantIds: string[];
   results?: { participantId: string | null; score: number }[];
 }
+export interface ManualMatchInput extends MatchFields {
+  previousMatches?: BracketLinkInput[];
+}
+export interface EmptyBracketInput {
+  teams: EmptyBracketSize;
+  numberOfGames?: number;
+}
 export interface SyncedMatchInput extends MatchFields {
   pandascoreId: number;
   previousMatches?: { type: "winner" | "loser"; matchPandascoreId: number }[];
@@ -65,6 +73,8 @@ export interface UpdateMatchInput {
   endAt?: Date | null;
   status?: string;
   results?: { participantId: string; score: number }[];
+  participantIds?: string[];
+  previousMatches?: BracketLinkInput[];
 }
 export interface TournamentListOptions {
   limit: number;

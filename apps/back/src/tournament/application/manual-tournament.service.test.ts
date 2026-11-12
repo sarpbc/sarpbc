@@ -39,6 +39,7 @@ describe("ManualTournamentService", () => {
     ),
     stageSlugTaken: vi.fn(async (_event: string, _slug: string) => false),
   };
+  const matchWriter = { bracket: vi.fn() };
   const cache = { invalidateTournament: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() },
     reads = { findById: vi.fn(), leagues: vi.fn() };
@@ -46,7 +47,11 @@ describe("ManualTournamentService", () => {
   const events: string[] = [];
   const tx = {
     run: async <T>(work: (scope: never) => Promise<T>) => {
-      const result = await work({ tournaments: writer, events: eventWriter } as never);
+      const result = await work({
+        tournaments: writer,
+        events: eventWriter,
+        matches: matchWriter,
+      } as never);
       events.push("commit");
       return result;
     },
@@ -85,6 +90,7 @@ describe("ManualTournamentService", () => {
     writer.teamsExist.mockResolvedValue(true);
     writer.playersExist.mockResolvedValue(true);
     writer.teamPlayers.mockResolvedValue([]);
+    matchWriter.bracket.mockResolvedValue({ hasBracket: false, matches: [] });
   });
   const member = (id: string, contractRole: ContractRole | null, role: string | null = null) =>
     Object.assign(new Player(), {
@@ -188,6 +194,33 @@ describe("ManualTournamentService", () => {
   });
   it("rejects an empty synced patch", async () => {
     await expect(service.update("ewc", {})).rejects.toBeInstanceOf(InvalidInputError);
+  });
+  it("refuses to change the bracket of a PandaScore stage", async () => {
+    await expect(service.update("ewc", { hasBracket: true })).rejects.toThrow(/PandaScore/);
+    await expect(service.update("ewc", { hasBracket: false, imageUrl: null })).rejects.toThrow(
+      /PandaScore/,
+    );
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+  it("enables the bracket of a manual stage", async () => {
+    tournament.source = "manual";
+    expect(await service.update("ewc", { hasBracket: true })).toMatchObject({ hasBracket: true });
+  });
+  it("keeps the bracket of a manual stage while its matches are linked", async () => {
+    tournament.source = "manual";
+    tournament.hasBracket = true;
+    matchWriter.bracket.mockResolvedValue({
+      hasBracket: true,
+      matches: [{ id: "final", previousMatches: [{ previousMatchId: "semi", type: "winner" }] }],
+    });
+    await expect(service.update("ewc", { hasBracket: false })).rejects.toThrow(/bracket links/);
+    matchWriter.bracket.mockResolvedValue({
+      hasBracket: true,
+      matches: [{ id: "final", previousMatches: [] }],
+    });
+    expect(await service.update("ewc", { hasBracket: false })).toMatchObject({
+      hasBracket: false,
+    });
   });
   function ownEvent() {
     tournament.source = "manual";

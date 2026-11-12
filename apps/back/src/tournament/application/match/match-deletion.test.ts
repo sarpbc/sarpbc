@@ -28,6 +28,7 @@ describe("MatchService deletion", () => {
     timings: unused,
     tournament: unused,
     participants: unused,
+    bracket: unused,
     references: async () => references,
     remove: async (id) => {
       removed.push(id);

@@ -13,6 +13,7 @@ function services(): WriteToolServices {
     playerService: { findById: vi.fn(), findBySlug: vi.fn() },
     matchService: {
       createMatch: vi.fn(),
+      createEmptyBracket: vi.fn(),
       setMatchWinner: vi.fn(),
       setGameVods: vi.fn(),
       updateMatch: vi.fn(),
@@ -294,5 +295,87 @@ describe("create_match participants", () => {
         .isError,
     ).toBe(true);
     expect(matchService.createMatch).not.toHaveBeenCalled();
+  });
+});
+
+describe("bracket tools", () => {
+  function setup(source: "manual" | "startgg") {
+    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+    const stage = { slug: "finals", event: { slug: "cdf-2026" }, source, streams: [] };
+    const match = Object.assign(new Match(), {
+      id: "final",
+      publicId: 3,
+      name: "Grand Final",
+      source,
+      tournament: { ...stage, eventStreams: [] },
+      previousMatches: [
+        { id: "l1", match: { id: "final" }, previousMatch: { id: "semi-1" }, type: "winner" },
+      ],
+    });
+    const base = services();
+    const matchService = {
+      ...base.matchService,
+      updateMatch: vi.fn().mockResolvedValue(match),
+      createEmptyBracket: vi.fn().mockResolvedValue([match]),
+    };
+    const tournaments = {
+      findById: vi
+        .fn()
+        .mockResolvedValue(Object.assign(new Tournament(), { id: "finals", ...stage })),
+    };
+    const tools = writeTools({ ...base, matchService, tournaments });
+    const run = (name: string, input: ToolArguments) =>
+      defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
+    return { tools, matchService, run };
+  }
+
+  it("forwards bracket links and participants to update_match", async () => {
+    const { matchService, run } = setup("manual");
+    const previousMatches = [{ previousMatchId: "semi-1", type: "winner" }];
+    const result = await run("update_match", {
+      matchId: "final",
+      participantIds: ["a"],
+      previousMatches,
+    });
+    expect(matchService.updateMatch).toHaveBeenCalledWith(
+      "final",
+      expect.objectContaining({ participantIds: ["a"], previousMatches }),
+    );
+    expect(JSON.parse(textOf(result)).previousMatches).toEqual(previousMatches);
+  });
+
+  it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {
+    const { tools } = setup("manual");
+    const update = z.object(defined(tools, "update_match").inputSchema);
+    const link = { previousMatchId: "m", type: "winner" };
+    expect(
+      update.safeParse({ matchId: "final", previousMatches: [link, link, link] }).success,
+    ).toBe(false);
+    const generate = z.object(defined(tools, "create_empty_bracket").inputSchema);
+    expect(generate.safeParse({ tournamentId: "finals", teams: 8 }).success).toBe(true);
+    expect(generate.safeParse({ tournamentId: "finals", teams: 6 }).success).toBe(false);
+  });
+
+  it("keeps generated start.gg matches out of the response", async () => {
+    const { matchService, run } = setup("startgg");
+    const body = JSON.parse(
+      textOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 })),
+    );
+    expect(matchService.createEmptyBracket).toHaveBeenCalledWith("finals", {
+      teams: 4,
+      numberOfGames: undefined,
+    });
+    expect(body).toMatchObject({ created: 1 });
+    expect(body.matches).toBeUndefined();
+  });
+
+  it("lists generated manual matches with their links", async () => {
+    const { run } = setup("manual");
+    const body = JSON.parse(
+      textOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 })),
+    );
+    expect(body.matches[0].previousMatches).toEqual([
+      { previousMatchId: "semi-1", type: "winner" },
+    ]);
   });
 });

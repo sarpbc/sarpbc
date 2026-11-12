@@ -382,7 +382,9 @@
         "newEvent": "New event named after the tournament",
         "eventHelp": "Stages of the same event share one public page. Pick an existing event to add this tournament as a stage.",
         "eventMoveHelp": "Saving moves the tournament to this event. Its public URL changes and its old event keeps its name.",
-        "eventSharedHelp": "This tournament is a stage of a shared event. Change the event name or URL from the Events page."
+        "eventSharedHelp": "This tournament is a stage of a shared event. Change the event name or URL from the Events page.",
+        "hasBracket": "Show as a bracket",
+        "hasBracketHelp": "Draws this stage as a tree once its matches are linked from their bracket editor. It cannot be turned off while matches are still linked."
       },
       "match": {
         "status": "Status",
@@ -394,6 +396,41 @@
           "title": "Delete Match",
           "confirm": "Delete {match} ({score})? Its scores and game stats are deleted too, and standings and team records are recomputed. This cannot be undone. PandaScore matches, and matches with pick'em picks, comments or later bracket matches, are refused."
         }
+      },
+      "bracket": {
+        "action": "Bracket",
+        "title": "Bracket · {match}",
+        "description": "Sides of this match and the matches that feed it. The public stage draws a tree from these links.",
+        "tbd": "TBD",
+        "side": "Side {number}",
+        "feeders": "Previous matches",
+        "noFeeders": "No previous match. This match opens the bracket.",
+        "previousMatch": "Previous match",
+        "choosePreviousMatch": "Choose a match of this stage",
+        "type": "Sends its",
+        "types": {
+          "winner": "Winner",
+          "loser": "Loser"
+        },
+        "addFeeder": "Add Previous Match",
+        "removeFeeder": "Remove previous match",
+        "cancel": "Cancel",
+        "save": "Save Bracket",
+        "saved": "Bracket saved",
+        "saveError": "Could not save the bracket"
+      },
+      "emptyBracket": {
+        "action": "Empty Bracket",
+        "title": "Generate an Empty Bracket",
+        "description": "Creates every match of a single-elimination tree, not started and without teams, each winner linked to the next round. Fill each match from its bracket editor once its teams are known. To undo, delete the matches from the final backwards.",
+        "teams": "Teams",
+        "size": "{teams} teams · {matches} matches",
+        "numberOfGames": "Best of",
+        "numberOfGamesHelp": "Optional, applied to every match.",
+        "cancel": "Cancel",
+        "create": "Generate",
+        "created": "Empty bracket generated",
+        "createError": "Could not generate the bracket"
       },
       "awards": {
         "title": "Player Awards",

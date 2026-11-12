@@ -11,9 +11,10 @@ import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type { CompetitionTransaction, MatchQueries, MatchWriter } from "../ports";
-import type { MatchFields, UpdateMatchInput } from "../inputs";
+import type { EmptyBracketInput, ManualMatchInput, UpdateMatchInput } from "../inputs";
 import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
+  createEmptyBracketInTransaction,
   createMatchInTransaction,
   setGameVodsInTransaction,
   setVodsInTransaction,
@@ -225,11 +226,18 @@ export class MatchService {
     return winnerParticipantId === teamParticipant.id ? "win" : "loss";
   }
 
-  async createMatch(tournamentId: string, input: MatchFields): Promise<Match> {
+  async createMatch(tournamentId: string, input: ManualMatchInput): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       createMatchInTransaction(matches, tournamentId, input),
     );
     return this.settled(written.id);
+  }
+  async createEmptyBracket(tournamentId: string, input: EmptyBracketInput): Promise<Match[]> {
+    const written = await this.transaction.run(({ matches }) =>
+      createEmptyBracketInTransaction(matches, tournamentId, input),
+    );
+    await this.afterCommit.settle({ tournamentIds: [tournamentId] });
+    return this.reads.byIds(written.map((match) => match.id));
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>

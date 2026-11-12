@@ -1,6 +1,6 @@
 import { InvalidInputError } from "../../../common/domain/errors";
 
-type UpdateFieldValue = string | number | boolean | null | undefined | readonly object[];
+type UpdateFieldValue = string | number | boolean | null | undefined | readonly (object | string)[];
 
 export function requireUpdateFields(fields: Readonly<Record<string, UpdateFieldValue>>): void {
   if (Object.values(fields).every((value) => value === undefined)) {

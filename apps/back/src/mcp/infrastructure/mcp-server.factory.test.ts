@@ -49,6 +49,7 @@ const TOOL_NAMES = [
   "merge_players",
   "merge_teams",
   "create_contract",
+  "create_empty_bracket",
   "update_contract",
   "propose_tournament_prizes",
   "propose_player_award",

@@ -62,6 +62,7 @@ describe("MatchLineupService", () => {
     timings: unused,
     tournament: unused,
     participants: unused,
+    bracket: unused,
     references: unused,
     remove: unused,
   };

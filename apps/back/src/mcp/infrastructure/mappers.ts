@@ -195,6 +195,10 @@ export function mapMatchListResponse(match: Match) {
     status: match.status,
     endAt: match.endAt,
     winner: winner ? { participantId: winner.id, name: participantName(winner) } : null,
+    previousMatches: match.previousMatches.map((link) => ({
+      previousMatchId: link.previousMatch.id,
+      type: link.type,
+    })),
     streams: redistributableStreams(match.watchStreams()),
     viewership: isRedistributableMatch(match) ? match.viewership : null,
     url: matchUrl(item.publicId, item.slug),

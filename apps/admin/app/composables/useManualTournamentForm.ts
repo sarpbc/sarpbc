@@ -15,6 +15,7 @@ export interface ManualTournamentFormState {
   format: TournamentFormat;
   teamIds: string[];
   playerParticipants: ParticipantPlayer[][];
+  hasBracket: boolean;
 }
 
 export function createEmptyTournamentFormState(): ManualTournamentFormState {
@@ -30,6 +31,7 @@ export function createEmptyTournamentFormState(): ManualTournamentFormState {
     format: "3v3",
     teamIds: [],
     playerParticipants: [],
+    hasBracket: false,
   };
 }
 
@@ -48,6 +50,7 @@ export function tournamentToFormState(tournament: TournamentDetail): ManualTourn
     playerParticipants: tournament.participants.flatMap(({ team, players }) =>
       team ? [] : [players.map(({ id, name, slug }) => ({ id, name, slug }))],
     ),
+    hasBracket: tournament.hasBracket,
   };
 }
 
@@ -93,6 +96,7 @@ export function buildManualTournamentPayload(
     state.format === "3v3"
       ? []
       : state.playerParticipants.map((players) => players.map(({ id }) => id));
+  payload.hasBracket = state.hasBracket;
 
   return payload;
 }

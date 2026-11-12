@@ -9,6 +9,7 @@ import {
 } from "../../domain/competition";
 import type { MatchWriter } from "../ports";
 import {
+  createEmptyBracketInTransaction,
   createMatchInTransaction,
   setGameVodsInTransaction,
   setVodsInTransaction,
@@ -27,6 +28,7 @@ const matchWriterMock = () =>
     timings: vi.fn(),
     references: vi.fn(),
     remove: vi.fn(),
+    bracket: vi.fn(),
   }) satisfies MatchWriter;
 
 describe("Match writes", () => {
@@ -364,5 +366,179 @@ describe("Match writes between player participants", () => {
     });
     expect(match.winner?.id).toBe("vatira");
     expect(match.results.map((result) => result.score)).toEqual([2, 3]);
+  });
+});
+
+describe("Manual bracket writes", () => {
+  const stage = Object.assign(new Tournament(), { id: "finals", source: "manual" });
+  const participants = ["a", "b"].map((id) =>
+    Object.assign(new TournamentParticipant(), {
+      id,
+      tournamentId: stage.id,
+      team: Object.assign(new Team(), { id: `team-${id}` }),
+    }),
+  );
+  const writer = matchWriterMock();
+  const semis = [
+    { previousMatchId: "semi-1", type: "winner" },
+    { previousMatchId: "semi-2", type: "winner" },
+  ] as const;
+  const emptyMatch = (overrides: Partial<Match> = {}) =>
+    Object.assign(new Match(), { id: "final", tournament: stage, ...overrides });
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    writer.tournament.mockResolvedValue(stage);
+    writer.participants.mockResolvedValue(participants);
+    writer.bracket.mockResolvedValue({
+      hasBracket: true,
+      matches: [
+        { id: "semi-1", previousMatches: [] },
+        { id: "semi-2", previousMatches: [] },
+        { id: "final", previousMatches: [] },
+      ],
+    });
+  });
+
+  it("creates a final fed by the winners of both semifinals", async () => {
+    const match = await createMatchInTransaction(writer, stage.id, {
+      name: "Grand Final",
+      participantIds: ["a", "b"],
+      previousMatches: [...semis],
+    });
+    expect(
+      match.previousMatches.map(({ previousMatch, type }) => [previousMatch.id, type]),
+    ).toEqual([
+      ["semi-1", "winner"],
+      ["semi-2", "winner"],
+    ]);
+    expect(writer.bracket).toHaveBeenCalledWith(stage.id);
+    expect(writer.save).toHaveBeenCalledWith(match);
+  });
+
+  it("refuses a previous match of another stage", async () => {
+    writer.load.mockResolvedValue(emptyMatch());
+    await expect(
+      updateMatchInTransaction(writer, "final", {
+        previousMatches: [{ previousMatchId: "other-stage", type: "winner" }],
+      }),
+    ).rejects.toThrow(/same stage/);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("refuses links that would close a cycle", async () => {
+    writer.bracket.mockResolvedValue({
+      hasBracket: true,
+      matches: [
+        { id: "semi-1", previousMatches: [] },
+        { id: "semi-2", previousMatches: [] },
+        { id: "final", previousMatches: [...semis] },
+      ],
+    });
+    writer.load.mockResolvedValue(emptyMatch({ id: "semi-1" }));
+    await expect(
+      updateMatchInTransaction(writer, "semi-1", {
+        previousMatches: [{ previousMatchId: "final", type: "winner" }],
+      }),
+    ).rejects.toThrow(/cycle/);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("replaces and clears the links of a manual match", async () => {
+    writer.load.mockResolvedValue(emptyMatch());
+    const linked = await updateMatchInTransaction(writer, "final", {
+      previousMatches: [...semis],
+    });
+    expect(linked.previousMatches).toHaveLength(2);
+    writer.load.mockResolvedValue(linked);
+    const cleared = await updateMatchInTransaction(writer, "final", { previousMatches: [] });
+    expect(cleared.previousMatches).toEqual([]);
+  });
+
+  it("refuses bracket links and participants on a PandaScore match", async () => {
+    const synced = emptyMatch({ pandascoreId: 42, source: "pandascore" });
+    writer.load.mockResolvedValue(synced);
+    await expect(
+      updateMatchInTransaction(writer, "final", { previousMatches: [...semis] }),
+    ).rejects.toThrow(/PandaScore/);
+    await expect(
+      updateMatchInTransaction(writer, "final", { participantIds: ["a", "b"] }),
+    ).rejects.toThrow(/PandaScore/);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("refuses bracket links on a new match of a PandaScore stage", async () => {
+    writer.tournament.mockResolvedValue(
+      Object.assign(new Tournament(), { id: "synced", source: "pandascore", pandascoreId: 7 }),
+    );
+    await expect(
+      createMatchInTransaction(writer, "synced", {
+        name: "Grand Final",
+        participantIds: ["a", "b"],
+        previousMatches: [...semis],
+      }),
+    ).rejects.toThrow(/PandaScore/);
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("fills an empty bracket match with its participants in order", async () => {
+    writer.load.mockResolvedValue(emptyMatch());
+    const match = await updateMatchInTransaction(writer, "final", { participantIds: ["b", "a"] });
+    expect(match.participants.map((participant) => participant.id)).toEqual(["b", "a"]);
+  });
+
+  it("refuses to swap the participants of a scored match without new scores", async () => {
+    writer.load.mockResolvedValue(
+      emptyMatch({
+        participants: [participants[0]].flatMap((participant) => participant ?? []),
+        results: [{ id: "r", match: { id: "final" }, participant: { id: "a" }, score: 2 }],
+      }),
+    );
+    await expect(
+      updateMatchInTransaction(writer, "final", { participantIds: ["b"] }),
+    ).rejects.toThrow(/scores/);
+  });
+
+  it("generates an empty four-team bracket", async () => {
+    writer.bracket.mockResolvedValue({ hasBracket: true, matches: [] });
+    const matches = await createEmptyBracketInTransaction(writer, stage.id, {
+      teams: 4,
+      numberOfGames: 7,
+    });
+    const [semi1, semi2, final] = matches;
+    expect(matches.map((match) => [match.name, match.participants.length])).toEqual([
+      ["Semifinal 1", 0],
+      ["Semifinal 2", 0],
+      ["Grand Final", 0],
+    ]);
+    expect(final?.previousMatches.map(({ previousMatch }) => previousMatch.id)).toEqual([
+      semi1?.id,
+      semi2?.id,
+    ]);
+    expect(matches.every((match) => match.numberOfGames === 7 && match.source === "manual")).toBe(
+      true,
+    );
+    expect(writer.save).toHaveBeenCalledTimes(3);
+  });
+
+  it("generates an empty bracket only on a manual bracket stage without matches", async () => {
+    writer.bracket.mockResolvedValue({ hasBracket: false, matches: [] });
+    await expect(createEmptyBracketInTransaction(writer, stage.id, { teams: 4 })).rejects.toThrow(
+      /Enable the bracket/,
+    );
+    writer.bracket.mockResolvedValue({
+      hasBracket: true,
+      matches: [{ id: "existing", previousMatches: [] }],
+    });
+    await expect(createEmptyBracketInTransaction(writer, stage.id, { teams: 8 })).rejects.toThrow(
+      /already has matches/,
+    );
+    writer.tournament.mockResolvedValue(
+      Object.assign(new Tournament(), { id: "synced", source: "pandascore", pandascoreId: 7 }),
+    );
+    await expect(createEmptyBracketInTransaction(writer, "synced", { teams: 4 })).rejects.toThrow(
+      /PandaScore/,
+    );
+    expect(writer.save).not.toHaveBeenCalled();
   });
 });

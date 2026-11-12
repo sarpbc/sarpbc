@@ -22,12 +22,21 @@ import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
 import { describeFields, toPatchedDate } from "./tool-input";
+import {
+  bracketLinksSchema,
+  emptyBracketTeamsSchema,
+} from "../../../tournament/infrastructure/http/dto/create-match.dto";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { requireUpdateFields } from "./update-fields";
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
   score: z.number(),
 });
+
+const previousMatchesInput = bracketLinksSchema.describe(
+  "Bracket feeders of this manual match: up to two { previousMatchId, type } entries, where previousMatchId is a match UUID of the same stage and type says whether its winner or loser plays here. The stage must have hasBracket enabled. Links must not form a cycle, and the winner (or loser) of a match feeds a single match.",
+);
 
 const NEWS_TYPE_MEANING =
   "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).";
@@ -39,7 +48,7 @@ export interface WriteToolServices {
   playerService: Pick<PlayerService, "findById" | "findBySlug">;
   matchService: Pick<
     MatchService,
-    "createMatch" | "setMatchWinner" | "setGameVods" | "updateMatch"
+    "createMatch" | "createEmptyBracket" | "setMatchWinner" | "setGameVods" | "updateMatch"
   >;
   manualTournamentService: Pick<ManualTournamentService, "create" | "update">;
   pandascoreTournamentSync: Pick<
@@ -175,6 +184,7 @@ export function writeTools({
           .describe(
             "Per-participant scores, keyed by tournament participant UUID from get_tournament. Sets the winner when status is finished.",
           ),
+        previousMatches: previousMatchesInput.optional(),
       },
       handler: async ({
         tournamentId,
@@ -187,6 +197,7 @@ export function writeTools({
         teams,
         players,
         results,
+        previousMatches,
       }) => {
         const tournament = await tournaments.findById(tournamentId);
         if (!tournament) throw tournamentNotFound(tournamentId);
@@ -203,6 +214,7 @@ export function writeTools({
           numberOfGames,
           participantIds: participants.map((participant) => participant.id),
           results,
+          previousMatches,
         });
 
         return {
@@ -284,7 +296,7 @@ export function writeTools({
     defineTool({
       name: "update_match",
       description:
-        "Correct the score, status, or dates of a manual match (pandascoreId is null). Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner.",
+        "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -309,16 +321,72 @@ export function writeTools({
           .describe(
             "Score of every match participant, keyed by tournament participant UUID from get_tournament.",
           ),
+        participantIds: z
+          .array(z.string().min(1))
+          .max(2)
+          .optional()
+          .describe(
+            "Every side of the match, as tournament participant UUIDs from get_tournament, in display order. Replaces the current sides; an empty list empties the match.",
+          ),
+        previousMatches: previousMatchesInput.optional(),
       },
-      handler: async ({ matchId, beginAt, endAt, status, results }) => {
-        requireUpdateFields({ beginAt, endAt, status, results });
+      handler: async ({
+        matchId,
+        beginAt,
+        endAt,
+        status,
+        results,
+        participantIds,
+        previousMatches,
+      }) => {
+        requireUpdateFields({ beginAt, endAt, status, results, participantIds, previousMatches });
         const match = await matchService.updateMatch(matchId, {
           beginAt: toPatchedDate(beginAt),
           endAt: toPatchedDate(endAt),
           status,
           results,
+          participantIds,
+          previousMatches,
         });
         return { entityId: match.id, result: mapMatchListResponse(match) };
+      },
+    }),
+
+    defineTool({
+      name: "create_empty_bracket",
+      description:
+        "Generate an empty single-elimination bracket on a manual stage that has hasBracket enabled and no match yet: 4 teams gives two semifinals and a grand final (3 matches), 8 teams four quarterfinals, two semifinals and a grand final (7 matches), 16 teams 15 matches. Matches are created not started, without teams or dates, each winner linked to the next round. Fill each match later with update_match participantIds and beginAt. To undo, delete the matches from the final backwards.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        tournamentId: z.string().min(1).describe("Manual stage UUID."),
+        teams: emptyBracketTeamsSchema.describe("Number of teams in the bracket: 4, 8 or 16."),
+        numberOfGames: z
+          .number()
+          .int()
+          .min(1)
+          .max(9)
+          .optional()
+          .describe("Best-of length given to every generated match."),
+      },
+      handler: async ({ tournamentId, teams, numberOfGames }) => {
+        const tournament = await tournaments.findById(tournamentId);
+        if (!tournament) throw tournamentNotFound(tournamentId);
+        const matches = await matchService.createEmptyBracket(tournamentId, {
+          teams,
+          numberOfGames,
+        });
+        const result = {
+          tournamentId,
+          created: matches.length,
+          url: tournamentUrl(tournament),
+        };
+        return {
+          entityId: tournamentId,
+          result: isRedistributable(tournament.source)
+            ? { ...result, matches: matches.map(mapMatchListResponse) }
+            : result,
+        };
       },
     }),
 
@@ -345,6 +413,8 @@ export function writeTools({
           "Participants without a team, for 1v1 and 2v2: each entry lists the player UUIDs of one participant (one player in 1v1, two in 2v2). Use search_players to find ids. Never create a team for a single player. The response lists each participant id.",
         source:
           "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
+        hasBracket:
+          "Show this stage as a bracket tree once its matches are linked (previousMatches on create_match or update_match), or generate one with create_empty_bracket.",
       }),
       handler: async (input) => {
         const tournament = await manualTournamentService.create(input);
@@ -389,6 +459,8 @@ export function writeTools({
             "Replace the participants without a team (1v1 players, 2v2 duos) with this list; each entry lists the player UUIDs of one participant. Team participants are kept. The response lists each participant id.",
           rosters:
             "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team); other participants keep theirs. Applied after teamIds.",
+          hasBracket:
+            "Manual tournaments only. true shows the stage as a bracket tree once its matches are linked; false is refused while any of its matches still has bracket links.",
         }),
       },
       handler: async ({ tournamentId, ...input }) => {

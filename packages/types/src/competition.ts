@@ -10,6 +10,17 @@ export const TOURNAMENT_FORMATS = ["1v1", "2v2", "3v3"] as const;
 
 export type TournamentFormat = (typeof TOURNAMENT_FORMATS)[number];
 
+export type BracketLinkType = "winner" | "loser";
+
+export interface BracketLinkInput {
+  previousMatchId: string;
+  type: BracketLinkType;
+}
+
+export const EMPTY_BRACKET_SIZES = [4, 8, 16] as const;
+
+export type EmptyBracketSize = (typeof EMPTY_BRACKET_SIZES)[number];
+
 export interface ParticipantPlayer {
   id: string;
   name: string;
@@ -77,7 +88,7 @@ export interface TournamentDetailMatch {
   winnerId: string | null;
   participants: ParticipantRef<TeamSummary>[];
   results: { participant: string; score: number }[];
-  previousMatches: { previousMatch: string; type: "winner" | "loser" }[];
+  previousMatches: { previousMatch: string; type: BracketLinkType }[];
 }
 
 export interface TournamentDetail {
