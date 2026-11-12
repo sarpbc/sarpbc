@@ -19,8 +19,22 @@ export interface TeamSummary extends Omit<TeamLogos, "darkModeImageUrl"> {
   location: string | null;
 }
 
+export interface TeamAliasInput {
+  name: string;
+  from: string;
+  to: string | null;
+  sourceUrl: string;
+  logoUrl: string | null;
+  pandascoreId: number | null;
+}
+
+export interface TeamAlias extends TeamAliasInput {
+  id: string;
+}
+
 export interface Team extends TeamSummary {
   pandascoreId: number | null;
   source: DataSource;
   players: Player[];
+  aliases: TeamAlias[];
 }

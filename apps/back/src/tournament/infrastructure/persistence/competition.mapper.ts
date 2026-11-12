@@ -12,7 +12,8 @@ import {
 } from "../../domain/competition";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
-import { toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
+import { teamNameAt, toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
+import { teamAt } from "../../../roster/domain/team-alias";
 export function toLeague(row: Row.League): League {
   return Object.assign(new League(), {
     id: row.id,
@@ -54,7 +55,10 @@ export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
     throw new Error("Tournament event " + row.id + " is not populated");
   return toEventRef(row);
 }
-export function toParticipant(row: Row.TournamentParticipant): TournamentParticipant | null {
+export function toParticipant(
+  row: Row.TournamentParticipant,
+  at?: Date | null,
+): TournamentParticipant | null {
   const { tournament, team } = row;
   const loaded =
     wrap(row).isInitialized() &&
@@ -67,7 +71,7 @@ export function toParticipant(row: Row.TournamentParticipant): TournamentPartici
   return Object.assign(new TournamentParticipant(), {
     id: row.id,
     tournamentId: tournament.id,
-    team: team ? toTeam(team, false) : null,
+    team: team ? teamAt(toTeam(team, false), at === undefined ? stageDate(tournament) : at) : null,
     players: row.players.isInitialized()
       ? row.players
           .getItems()
@@ -77,6 +81,12 @@ export function toParticipant(row: Row.TournamentParticipant): TournamentPartici
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
+}
+function stageDate(tournament: Row.Tournament): Date | null {
+  return wrap(tournament).isInitialized() ? tournament.beginAt : null;
+}
+function matchDate(row: Row.Match): Date | null {
+  return row.beginAt ?? stageDate(row.tournament);
 }
 export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
   return {
@@ -111,9 +121,11 @@ export function toMatch(row: Row.Match): Match {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     tournament: toTournamentSummary(row.tournament),
-    winner: row.winner ? toParticipant(row.winner) : null,
+    winner: row.winner ? toParticipant(row.winner, matchDate(row)) : null,
     participants: row.participants.isInitialized()
-      ? row.participants.getItems().flatMap((participant) => toParticipant(participant) ?? [])
+      ? row.participants
+          .getItems()
+          .flatMap((participant) => toParticipant(participant, matchDate(row)) ?? [])
       : [],
     results: row.results.isInitialized()
       ? row.results.getItems().map((r) => ({
@@ -176,7 +188,9 @@ export function toMatchSlug(row: Row.Match): string {
     participants:
       loaded && row.participants.isInitialized()
         ? row.participants.getItems().map((participant) => ({
-            team: participant.team,
+            team: participant.team && {
+              name: teamNameAt(participant.team, loaded ? matchDate(row) : null),
+            },
             players: participant.players.isInitialized() ? participant.players.getItems() : [],
           }))
         : [],

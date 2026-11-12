@@ -7,6 +7,7 @@ import { RosterMergeService } from "../../roster/application/roster-merge.servic
 import { RosterModule } from "../../roster/infrastructure/roster.module";
 import { TeamLogoService } from "../../roster/application/team-logo.service";
 import { TeamService } from "../../roster/application/team.service";
+import { TeamAliasService } from "../../roster/application/team-alias.service";
 import { UserService } from "../../user/application/user.service";
 import { UserModule } from "../../user/infrastructure/user.module";
 import { PlayerAwardService } from "../../tournament/application/player-award.service";
@@ -53,6 +54,7 @@ import {
         lineups: MatchLineupService,
         viewerships: ViewershipService,
         circuits: CircuitService,
+        teamAliases: TeamAliasService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -70,6 +72,7 @@ import {
           lineups,
           viewerships,
           circuits,
+          teamAliases,
         ),
       inject: [
         EntityManager,
@@ -86,6 +89,7 @@ import {
         MatchLineupService,
         ViewershipService,
         CircuitService,
+        TeamAliasService,
       ],
     },
   ],

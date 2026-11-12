@@ -2,8 +2,8 @@ import { MikroORM } from "@mikro-orm/postgresql";
 import { describe, expect, it } from "vitest";
 import { mikroOrmEntities } from "../../../mikro-orm.entities";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
-import { toParticipant, toTournament } from "./competition.mapper";
-import { Tournament, TournamentEvent, TournamentParticipant } from "./tournament.entities";
+import { toMatch, toMatchSlug, toParticipant, toTournament } from "./competition.mapper";
+import { Match, Tournament, TournamentEvent, TournamentParticipant } from "./tournament.entities";
 
 const orm = new MikroORM({
   entities: mikroOrmEntities,
@@ -79,5 +79,50 @@ describe("toParticipant", () => {
     participant.players.add(em.getReference(Player, "unloaded-player"));
 
     expect(toParticipant(participant)?.players.map((p) => p.id)).toEqual(["m0nkey-m00n"]);
+  });
+});
+
+describe("names in force on the date", () => {
+  function renamedStage(beginAt: string) {
+    const tournament = Object.assign(stage(), { beginAt: new Date(beginAt) });
+    const participant = entry(tournament, "fixture");
+    Object.assign(participant.team ?? {}, {
+      name: "Fixture Now",
+      aliases: [
+        {
+          id: "a1",
+          name: "Fixture Origins",
+          from: "2020-01-01",
+          to: "2022-06-01",
+          sourceUrl: "https://x.com/fixture/status/1",
+          logoUrl: null,
+          pandascoreId: null,
+        },
+      ],
+    });
+    return { tournament, participant };
+  }
+
+  it("shows the stage participants under the name they used when the stage began", () => {
+    const { tournament } = renamedStage("2021-05-01T18:00:00Z");
+
+    const team = toTournament(tournament).participants[0]?.team;
+
+    expect(team).toMatchObject({ id: "fixture", name: "Fixture Origins" });
+  });
+
+  it("names a match side after the match date and keeps the slug on the same name", () => {
+    const { tournament, participant } = renamedStage("2022-05-30T18:00:00Z");
+    const match = Object.assign(new Match(), {
+      name: "Final",
+      tournament,
+      beginAt: new Date("2022-06-02T18:00:00Z"),
+    });
+    match.participants.add(participant);
+    match.participants.add(entry(tournament, "opponent"));
+
+    expect(toMatch(match).participants[0]?.team?.name).toBe("Fixture Now");
+    expect(toTournament(tournament).participants[0]?.team?.name).toBe("Fixture Origins");
+    expect(toMatchSlug(match)).toMatch(/^fixture-now-vs-opponent-/);
   });
 });

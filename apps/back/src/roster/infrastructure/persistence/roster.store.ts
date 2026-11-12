@@ -4,6 +4,7 @@ import * as Row from "./player.entities";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { playerColumns, teamColumns, toPlayer, toTeam, toContract, toPhoto } from "./roster.mapper";
 import type { Contract, Player, PlayerPhoto, Team } from "../../domain/roster";
+import type { TeamAlias } from "../../domain/team-alias";
 import type {
   ContractQueries,
   ContractWriter,
@@ -17,6 +18,9 @@ import type {
   RosterTransaction,
   RosterWriteScope,
   SharedTournaments,
+  TeamAliasTransaction,
+  TeamAliasWriteScope,
+  TeamAliasWriter,
   TeamQueries,
   TeamWriter,
 } from "../../application/ports";
@@ -102,15 +106,29 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
 export class MikroTeamStore implements TeamQueries, TeamWriter {
   constructor(private readonly em: EntityManager) {}
 
-  async search(options: Partial<DirectorySearchProps>) {
+  private async teamDirectoryQuery(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
+    if (!options.name) return { where, page };
+    const aliases = await this.em.find(
+      Row.TeamAlias,
+      { name: { $ilike: `%${options.name}%` } },
+      { fields: ["team"] },
+    );
+    if (aliases.length === 0) return { where, page };
+    const { name, ...rest } = where;
+    const formerly = { id: { $in: [...new Set(aliases.map(({ team }) => team.id))] } };
+    return { where: { ...rest, $or: [{ name }, formerly] }, page };
+  }
+
+  async search(options: Partial<DirectorySearchProps>) {
+    const { where, page } = await this.teamDirectoryQuery(options);
     return (await this.em.find(Row.Team, where, { ...teamOptions, ...page })).map((row) =>
       toTeam(row),
     );
   }
 
   async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
-    const { where, page } = directoryQuery(options);
+    const { where, page } = await this.teamDirectoryQuery(options);
     const [rows, count] = await this.em.findAndCount(Row.Team, where, { ...teamOptions, ...page });
     return [rows.map((row) => toTeam(row)), count];
   }
@@ -140,6 +158,43 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
 
   async delete(model: Team) {
     this.em.remove(this.em.getReference(Row.Team, model.id));
+  }
+}
+
+export class MikroTeamAliasStore implements TeamAliasWriter {
+  constructor(private readonly em: EntityManager) {}
+
+  async pandascoreOwner(pandascoreId: number, exceptAliasId: string) {
+    const team = await this.em.findOne(Row.Team, { pandascoreId });
+    if (team) return team.name;
+    const alias = await this.em.findOne(
+      Row.TeamAlias,
+      { pandascoreId, ...(exceptAliasId && { id: { $ne: exceptAliasId } }) },
+      { populate: ["team"] },
+    );
+    return alias ? alias.team.name : null;
+  }
+
+  async save(teamId: string, model: TeamAlias) {
+    const row = model.id
+      ? await this.em.findOneOrFail(Row.TeamAlias, { id: model.id })
+      : new Row.TeamAlias();
+    if (!model.id) model.id = v4();
+    Object.assign(row, {
+      id: model.id,
+      team: this.em.getReference(Row.Team, teamId),
+      name: model.name,
+      validFrom: model.from,
+      validTo: model.to,
+      sourceUrl: model.sourceUrl,
+      logoUrl: model.logoUrl,
+      pandascoreId: model.pandascoreId,
+    });
+    this.em.persist(row);
+  }
+
+  async delete(model: TeamAlias) {
+    this.em.remove(this.em.getReference(Row.TeamAlias, model.id));
   }
 }
 
@@ -261,6 +316,20 @@ export class MikroRosterTransaction implements RosterTransaction {
   }
 }
 
+export class MikroTeamAliasTransaction implements TeamAliasTransaction {
+  constructor(private readonly em: EntityManager) {}
+  run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
+    return this.em.transactional(async (tx) => {
+      const result = await work({
+        teams: new MikroTeamStore(tx),
+        aliases: new MikroTeamAliasStore(tx),
+      });
+      await tx.flush();
+      return result;
+    });
+  }
+}
+
 export interface RosterMergeParticipants extends SharedTournaments {
   movers: readonly RosterReferenceMover[];
 }
@@ -307,6 +376,7 @@ function rosterReferences(
     },
     moveTeam: async (from, to) => {
       await em.nativeUpdate(Row.Team, { mergedInto: from }, { mergedInto: to });
+      await em.nativeUpdate(Row.TeamAlias, { team: from }, { team: to });
       await mergeOpenContracts("team", from, to);
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });

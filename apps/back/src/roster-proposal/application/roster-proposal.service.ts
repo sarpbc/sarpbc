@@ -12,6 +12,7 @@ import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterMergeService } from "../../roster/application/roster-merge.service";
 import type { TeamLogoService } from "../../roster/application/team-logo.service";
 import type { TeamService } from "../../roster/application/team.service";
+import type { TeamAliasService } from "../../roster/application/team-alias.service";
 import { teamLogoField } from "../../roster/domain/team-logo";
 import { RosterProposal } from "../domain/roster-proposal";
 import type { UserService } from "../../user/application/user.service";
@@ -44,6 +45,7 @@ type Streams = Pick<StreamService, "requireProposable" | "set">;
 type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
 type Viewerships = Pick<ViewershipService, "requireProposable" | "set">;
 type Circuits = Pick<CircuitService, "requireStageScale" | "setStageScale">;
+type TeamAliases = Pick<TeamAliasService, "requireProposable" | "add" | "update">;
 
 interface StreamChange {
   owner: StreamOwner;
@@ -75,6 +77,7 @@ export class RosterProposalService {
     private readonly lineups: Lineups,
     private readonly viewerships: Viewerships,
     private readonly circuits: Circuits,
+    private readonly teamAliases: TeamAliases,
   ) {}
 
   async propose(
@@ -120,6 +123,13 @@ export class RosterProposalService {
     }
     if (change.kind === "set_circuit_stage_scale") {
       await this.circuits.requireStageScale(change.circuitId, change.tournamentId, change.scale);
+    }
+    if (change.kind === "add_team_alias") {
+      await this.teamAliases.requireProposable(change.teamId, { ...change.alias, sourceUrl });
+    }
+    if (change.kind === "update_team_alias") {
+      const { teamId, aliasId, alias } = change;
+      await this.teamAliases.requireProposable(teamId, { ...alias, sourceUrl }, aliasId);
     }
     if (change.kind === "delete_team") {
       await this.requireTeamRemoval(change.teamId, change.mergeIntoTeamId);
@@ -284,6 +294,14 @@ export class RosterProposalService {
         const { teamId, variant, logoUrl } = change;
         return (await this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })).id;
       }
+      case "add_team_alias":
+        await this.teamAliases.add(change.teamId, { ...change.alias, sourceUrl });
+        return change.teamId;
+      case "update_team_alias": {
+        const { teamId, aliasId, alias } = change;
+        await this.teamAliases.update(teamId, aliasId, { ...alias, sourceUrl });
+        return teamId;
+      }
       case "merge_players":
         return (await this.merges.mergePlayers(change.keptId, change.duplicateId)).kept.id;
       case "merge_teams":
@@ -400,6 +418,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "create_team":
     case "update_team":
     case "upload_team_logo":
+    case "add_team_alias":
+    case "update_team_alias":
     case "merge_teams":
     case "set_event_streams":
     case "set_tournament_streams":
@@ -424,6 +444,8 @@ function referencedTeamIds(change: RosterChange): string[] {
       return [change.teamId];
     case "update_team":
     case "upload_team_logo":
+    case "add_team_alias":
+    case "update_team_alias":
     case "create_contract":
     case "award_player":
       return [change.teamId];

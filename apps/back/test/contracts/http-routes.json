@@ -938,6 +938,14 @@
   {
     "controller": "\"team\"",
     "verb": "DELETE",
+    "path": "\":id/aliases/:aliasId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "DELETE",
     "path": "\":id/contract/:contractId\"",
     "status": "HttpStatus.NO_CONTENT",
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -1034,6 +1042,14 @@
   {
     "controller": "\"team\"",
     "verb": "POST",
+    "path": "\":id/aliases\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "POST",
     "path": "\":id/contract\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -1051,6 +1067,14 @@
     "controller": "\"team\"",
     "verb": "POST",
     "path": "\"sync\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"teams.manage\""]
+  },
+  {
+    "controller": "\"team\"",
+    "verb": "PUT",
+    "path": "\":id/aliases/:aliasId\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"teams.manage\""]

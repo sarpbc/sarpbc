@@ -4,9 +4,10 @@ import { teamPath } from "@sarpbc/utils";
 
 interface Props {
   team: Team;
+  formerName?: string;
 }
 
-const { team } = defineProps<Props>();
+const { team, formerName } = defineProps<Props>();
 </script>
 
 <template>
@@ -20,6 +21,9 @@ const { team } = defineProps<Props>();
       <div class="flex flex-col">
         <span class="text-highlighted font-medium truncate">
           {{ team.name }}
+        </span>
+        <span v-if="formerName" class="text-xs text-muted truncate">
+          {{ $t("general.formerly", { name: formerName }) }}
         </span>
       </div>
     </div>

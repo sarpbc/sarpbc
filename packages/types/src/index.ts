@@ -8,7 +8,14 @@ export { PLAYER_STATUSES } from "./player";
 export type { Player, PlayerStatus } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
 export { TEAM_LOGO_VARIANTS } from "./team";
-export type { Team, TeamLogos, TeamLogoVariant, TeamSummary } from "./team";
+export type {
+  Team,
+  TeamAlias,
+  TeamAliasInput,
+  TeamLogos,
+  TeamLogoVariant,
+  TeamSummary,
+} from "./team";
 export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
 export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";

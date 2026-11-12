@@ -13,6 +13,7 @@ import {
   NotFoundError,
 } from "../../common/domain/errors";
 import { Contract, Player, Team } from "../../roster/domain/roster";
+import { TeamAlias } from "../../roster/domain/team-alias";
 import {
   replaceStreams,
   type StreamEditSource,
@@ -108,6 +109,14 @@ function setup() {
     }),
     setStageScale: vi.fn(async () => undefined),
   };
+  const teamAliases = {
+    requireProposable: vi.fn(async (_teamId: string, input: { sourceUrl: string }) => {
+      if (input.sourceUrl.includes("liquipedia"))
+        throw new InvalidInputError("Liquipedia is not an accepted source");
+    }),
+    add: vi.fn(async () => new TeamAlias()),
+    update: vi.fn(async () => new TeamAlias()),
+  };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
     upload: vi.fn(async (teamId: string, variant: string) =>
@@ -195,6 +204,7 @@ function setup() {
     lineups,
     viewerships,
     circuits,
+    teamAliases,
   );
   return {
     saved,
@@ -212,6 +222,7 @@ function setup() {
     lineups,
     viewerships,
     circuits,
+    teamAliases,
     service,
   };
 }
@@ -233,6 +244,7 @@ describe("RosterProposalService", () => {
   let lineups: ReturnType<typeof setup>["lineups"];
   let viewerships: ReturnType<typeof setup>["viewerships"];
   let circuits: ReturnType<typeof setup>["circuits"];
+  let teamAliases: ReturnType<typeof setup>["teamAliases"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -252,6 +264,7 @@ describe("RosterProposalService", () => {
       lineups,
       viewerships,
       circuits,
+      teamAliases,
       service,
     } = setup());
   });
@@ -985,6 +998,69 @@ describe("RosterProposalService", () => {
       expect(await service.approve(id, "admin")).toMatchObject({ entityId: "circuit-1" });
       expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", scale, rules);
       expect(staff.permissions).toContain("tournaments.manage");
+    });
+  });
+
+  describe("team aliases", () => {
+    const alias = {
+      name: "Fixture Esports",
+      from: "2023-01-01",
+      to: "2024-06-01",
+      logoUrl: null,
+      pandascoreId: null,
+    };
+
+    it("checks the alias with the proposal source and keeps it pending", async () => {
+      const proposal = await service.propose(
+        { kind: "add_team_alias", teamId: "kc", alias },
+        source,
+        "journalist",
+      );
+
+      expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
+      expect(teamAliases.requireProposable).toHaveBeenCalledWith("kc", {
+        ...alias,
+        sourceUrl: source,
+      });
+      expect(teamAliases.add).not.toHaveBeenCalled();
+    });
+
+    it("refuses a Liquipedia source and an unknown team before recording anything", async () => {
+      await expect(
+        service.propose(
+          { kind: "add_team_alias", teamId: "kc", alias },
+          "https://liquipedia.net/rocketleague/Karmine_Corp",
+          "journalist",
+        ),
+      ).rejects.toThrow("Liquipedia");
+      await expect(
+        service.propose({ kind: "add_team_alias", teamId: "nope", alias }, source, "journalist"),
+      ).rejects.toThrow(NotFoundError);
+      expect(saved.size).toBe(0);
+    });
+
+    it("adds or updates the alias with the proposal source once a team manager approves", async () => {
+      const added = await service.propose(
+        { kind: "add_team_alias", teamId: "kc", alias },
+        source,
+        "journalist",
+      );
+      const updated = await service.propose(
+        { kind: "update_team_alias", teamId: "kc", aliasId: "alias-1", alias },
+        source,
+        "journalist",
+      );
+
+      expect(await service.approve(added.id, "admin")).toMatchObject({ entityId: "kc" });
+      expect(await service.approve(updated.id, "admin")).toMatchObject({ entityId: "kc" });
+      expect(teamAliases.add).toHaveBeenCalledWith("kc", { ...alias, sourceUrl: source });
+      expect(teamAliases.update).toHaveBeenCalledWith("kc", "alias-1", {
+        ...alias,
+        sourceUrl: source,
+      });
+      expect(teams.update).not.toHaveBeenCalled();
+      expect(merges.mergeTeams).not.toHaveBeenCalled();
+      expect(staff.permissions).toEqual(["teams.manage", "teams.manage"]);
     });
   });
 });

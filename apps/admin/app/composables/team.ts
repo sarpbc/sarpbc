@@ -1,4 +1,4 @@
-import type { ContractRole, Team, TeamContract } from "@sarpbc/types";
+import type { ContractRole, Team, TeamAlias, TeamAliasInput, TeamContract } from "@sarpbc/types";
 import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 
 export type CreateTeamDto = {
@@ -96,4 +96,28 @@ export async function updateTeamContract(
 
 export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
   await apiFetch(`/team/${teamId}/contract/${contractId}`, { method: "DELETE" });
+}
+
+export async function addTeamAlias(teamId: string, body: TeamAliasInput): Promise<TeamAlias> {
+  const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases`, {
+    method: "POST",
+    body,
+  });
+  return res.alias;
+}
+
+export async function updateTeamAlias(
+  teamId: string,
+  aliasId: string,
+  body: TeamAliasInput,
+): Promise<TeamAlias> {
+  const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases/${aliasId}`, {
+    method: "PUT",
+    body,
+  });
+  return res.alias;
+}
+
+export async function deleteTeamAlias(teamId: string, aliasId: string): Promise<void> {
+  await apiFetch(`/team/${teamId}/aliases/${aliasId}`, { method: "DELETE" });
 }

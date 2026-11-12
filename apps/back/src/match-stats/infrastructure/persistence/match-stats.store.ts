@@ -325,7 +325,10 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
       numberOfGames: match.numberOfGames,
       participants: match.participants.getItems().map((participant) => ({
         id: participant.id,
-        name: nameOf(participant),
+        teamNames: [
+          nameOf(participant),
+          ...(participant.team?.aliases ?? []).map(({ name }) => name),
+        ],
         players: participant.players.getItems().map(({ id, name }) => ({ id, name })),
       })),
       scores: new Map(

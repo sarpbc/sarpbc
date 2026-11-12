@@ -31,6 +31,8 @@ export function requiredPermission(change: RosterChange): StaffPermission {
     case "create_team":
     case "update_team":
     case "upload_team_logo":
+    case "add_team_alias":
+    case "update_team_alias":
     case "merge_teams":
     case "delete_team":
       return "teams.manage";

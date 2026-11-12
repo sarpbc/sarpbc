@@ -5,7 +5,7 @@ import type { PlayerAwardType } from "./player-award";
 import type { PlayerStatus } from "./player";
 import type { PrizeEntry } from "./prize";
 import type { StreamInput } from "./stream";
-import type { TeamLogoVariant } from "./team";
+import type { TeamAliasInput, TeamLogoVariant } from "./team";
 import type { Viewership } from "./viewership";
 
 export type RosterChange =
@@ -52,6 +52,13 @@ export type RosterChange =
       imageUrl: string;
       logoKey: string;
       logoUrl: string;
+    }
+  | { kind: "add_team_alias"; teamId: string; alias: Omit<TeamAliasInput, "sourceUrl"> }
+  | {
+      kind: "update_team_alias";
+      teamId: string;
+      aliasId: string;
+      alias: Omit<TeamAliasInput, "sourceUrl">;
     }
   | { kind: "merge_players"; keptId: string; duplicateId: string }
   | { kind: "merge_teams"; keptId: string; duplicateId: string }

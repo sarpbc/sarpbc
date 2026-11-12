@@ -217,6 +217,37 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
         : lineups),
     ];
   }
+  if (change.kind === "add_team_alias" || change.kind === "update_team_alias") {
+    const { alias } = change;
+    return [
+      { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+      { key: "aliasName", label: t("page.proposals.fields.aliasName"), value: alias.name },
+      { key: "aliasFrom", label: t("page.proposals.fields.aliasFrom"), value: alias.from },
+      {
+        key: "aliasTo",
+        label: t("page.proposals.fields.aliasTo"),
+        value: alias.to ?? t("page.proposals.values.ongoing"),
+      },
+      ...(alias.logoUrl
+        ? [
+            {
+              key: "aliasLogoUrl",
+              label: t("page.proposals.fields.imageUrl"),
+              value: alias.logoUrl,
+            },
+          ]
+        : []),
+      ...(alias.pandascoreId === null
+        ? []
+        : [
+            {
+              key: "aliasPandascoreId",
+              label: t("page.proposals.fields.aliasPandascoreId"),
+              value: String(alias.pandascoreId),
+            },
+          ]),
+    ];
+  }
   if (change.kind === "set_event_viewership") {
     return viewershipRows("eventId", change.eventId, change.viewership);
   }

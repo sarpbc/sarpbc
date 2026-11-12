@@ -1,4 +1,5 @@
 import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
+import type { TeamAlias } from "../domain/team-alias";
 import type { TeamCompetitionReferences } from "../domain/team-deletion";
 import type { TeamLogoFormat } from "../domain/team-logo";
 import type { ImportedPlayer } from "./imports";
@@ -44,6 +45,18 @@ export interface PhotoWriter extends PhotoQueries {
   findById(id: string): Promise<PlayerPhoto | null>;
   save(photo: PlayerPhoto): Promise<void>;
   delete(photo: PlayerPhoto): Promise<void>;
+}
+export interface TeamAliasWriter {
+  pandascoreOwner(pandascoreId: number, exceptAliasId: string): Promise<string | null>;
+  save(teamId: string, alias: TeamAlias): Promise<void>;
+  delete(alias: TeamAlias): Promise<void>;
+}
+export interface TeamAliasWriteScope {
+  teams: Pick<TeamWriter, "findById">;
+  aliases: TeamAliasWriter;
+}
+export interface TeamAliasTransaction {
+  run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T>;
 }
 export interface RosterWriteScope {
   players: PlayerWriter;

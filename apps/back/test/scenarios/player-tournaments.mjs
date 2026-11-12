@@ -109,9 +109,9 @@ export async function verifyPlayerTournaments({
   );
 
   const [candidate] = await new MikroOrmStatsCandidates(orm.em.fork()).matches(tournament.id);
-  assert.deepEqual(candidate.participants.map(({ name }) => name).sort(), [
-    "Fake Solo One",
-    "Fake Solo Two",
+  assert.deepEqual(candidate.participants.map(({ teamNames }) => teamNames).sort(), [
+    ["Fake Solo One"],
+    ["Fake Solo Two"],
   ]);
   const [assignment] = assignReplays(
     [

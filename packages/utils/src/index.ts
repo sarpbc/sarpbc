@@ -87,6 +87,17 @@ export {
   type ViewershipError,
 } from "./viewership";
 export {
+  TEAM_ALIAS_NAME_MAX_LENGTH,
+  TEAM_ALIAS_URL_MAX_LENGTH,
+  isLiquipediaSourceHost,
+  parseTeamAlias,
+  teamAliasInForce,
+  teamAliasesOverlap,
+  type DatedTeamName,
+  type ParsedTeamAlias,
+  type TeamAliasError,
+} from "./team-alias";
+export {
   CURRENCY_CODE_LENGTH,
   MAX_PRIZE_AMOUNT,
   MAX_PRIZE_ENTRIES,

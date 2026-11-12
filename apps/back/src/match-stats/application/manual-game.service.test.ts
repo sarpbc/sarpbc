@@ -27,8 +27,8 @@ const match: CandidateMatch = {
   finished: true,
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", name: "Karmine Corp", players: [{ id: "vatira", name: "Vatira" }] },
-    { id: "p-bds", name: "BDS", players: [{ id: "seikoo", name: "Seikoo" }] },
+    { id: "p-kc", teamNames: ["Karmine Corp"], players: [{ id: "vatira", name: "Vatira" }] },
+    { id: "p-bds", teamNames: ["BDS"], players: [{ id: "seikoo", name: "Seikoo" }] },
   ],
   scores: new Map(),
   storedReplayIds: ["stored-1"],
@@ -146,8 +146,12 @@ describe("ManualGameService.attach", () => {
   it("attaches a 1v1 replay by player and links each side to its player", async () => {
     const { service, games } = setup({
       participants: [
-        { id: "p-stand-in", name: "Stand-in", players: [{ id: "stand-in", name: "Stand-in" }] },
-        { id: "p-seikoo", name: "Seikoo", players: [{ id: "seikoo", name: "Seikoo" }] },
+        {
+          id: "p-stand-in",
+          teamNames: ["Stand-in"],
+          players: [{ id: "stand-in", name: "Stand-in" }],
+        },
+        { id: "p-seikoo", teamNames: ["Seikoo"], players: [{ id: "seikoo", name: "Seikoo" }] },
       ],
     });
     games.links.mockResolvedValue([]);

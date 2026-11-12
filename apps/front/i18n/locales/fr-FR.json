@@ -112,7 +112,8 @@
     "matches": "Matchs",
     "results": "Résultats",
     "transfers": "Transferts",
-    "circuits": "Circuits"
+    "circuits": "Circuits",
+    "formerly": "Anciennement {name}"
   },
   "components": {
     "cookiePopup": {
@@ -1369,6 +1370,11 @@
         "seoDescriptionDefault": "Effectif, prochains matchs et derniers résultats de l'équipe",
         "players": "Joueurs",
         "staff": "Staff",
+        "nameHistory": {
+          "title": "Anciens noms",
+          "present": "Aujourd'hui",
+          "source": "Source"
+        },
         "tabsLabel": "Sections de l'équipe",
         "tabs": {
           "info": "Infos",

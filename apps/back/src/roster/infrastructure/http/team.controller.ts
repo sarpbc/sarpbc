@@ -11,10 +11,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from "@nestjs/common";
 import { TeamService } from "../../application/team.service";
+import { TeamAliasService } from "../../application/team-alias.service";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -25,16 +27,18 @@ import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
+import { TeamAliasDto } from "./dto/team-alias.dto";
 import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
 import { UpdateTeamContractDto } from "./dto/update-team-contract.dto";
 import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
-import { mapTeam } from "./player.mapper";
+import { mapTeam, mapTeamAlias } from "./player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 
 @Controller("team")
 export class TeamController {
   constructor(
     private teamService: TeamService,
+    private teamAliasService: TeamAliasService,
     private contractService: ContractService,
     @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
     private tournamentPrizeService: TournamentPrizeService,
@@ -159,6 +163,38 @@ export class TeamController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteContract(@Param("id") id: string, @Param("contractId") contractId: string) {
     await this.contractService.deleteForTeam(id, contractId);
+  }
+
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post(":id/aliases")
+  async addAlias(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body({ schema: TeamAliasDto }) dto: TeamAliasDto,
+  ) {
+    return { alias: mapTeamAlias(await this.teamAliasService.add(id, dto)) };
+  }
+
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/aliases/:aliasId")
+  async updateAlias(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("aliasId", ParseUUIDPipe) aliasId: string,
+    @Body({ schema: TeamAliasDto }) dto: TeamAliasDto,
+  ) {
+    return { alias: mapTeamAlias(await this.teamAliasService.update(id, aliasId, dto)) };
+  }
+
+  @RequirePermissions("teams.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Delete(":id/aliases/:aliasId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAlias(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("aliasId", ParseUUIDPipe) aliasId: string,
+  ) {
+    await this.teamAliasService.delete(id, aliasId);
   }
 
   @Get(":id")

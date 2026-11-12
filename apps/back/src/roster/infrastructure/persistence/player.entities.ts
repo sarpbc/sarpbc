@@ -6,6 +6,7 @@ import {
   type ContractRole,
   type DataSource,
   type PlayerStatus,
+  type TeamAlias as TeamAliasRecord,
 } from "@sarpbc/types";
 
 export class Team {
@@ -22,6 +23,19 @@ export class Team {
   pandascoreId: number | null = null;
   source: DataSource = "manual";
   mergedInto: Team | null = null;
+  aliases: TeamAliasRecord[] = [];
+}
+
+export class TeamAlias {
+  id!: string;
+  team!: Team;
+  name!: string;
+  validFrom!: string;
+  validTo: string | null = null;
+  sourceUrl!: string;
+  logoUrl: string | null = null;
+  pandascoreId: number | null = null;
+  createdAt = new Date();
 }
 
 export class Player {
@@ -81,6 +95,28 @@ export const TeamSchema = defineEntity({
     pandascoreId: p.integer().nullable(),
     source: p.string().$type<DataSource>().default("manual"),
     mergedInto: p.manyToOne(Team).nullable().deleteRule("restrict"),
+    aliases: p
+      .json<TeamAliasRecord[]>()
+      .formula(
+        (columns) =>
+          `(select coalesce(json_agg(json_build_object('id', ta."id", 'name', ta."name", 'from', ta."valid_from", 'to', ta."valid_to", 'sourceUrl', ta."source_url", 'logoUrl', ta."logo_url", 'pandascoreId', ta."pandascore_id") order by ta."valid_from"), '[]'::json) from "team_alias" ta where ta."team_id" = ${columns.id})`,
+      ),
+  },
+});
+
+export const TeamAliasSchema = defineEntity({
+  class: TeamAlias,
+  indexes: [{ properties: ["team"] }, { properties: ["name"] }],
+  properties: {
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    team: p.manyToOne(Team).deleteRule("cascade"),
+    name: p.string(),
+    validFrom: p.date(),
+    validTo: p.date().nullable(),
+    sourceUrl: p.text(),
+    logoUrl: p.text().nullable(),
+    pandascoreId: p.integer().nullable().unique(),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });
 

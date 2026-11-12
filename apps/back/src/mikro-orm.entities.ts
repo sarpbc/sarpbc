@@ -20,6 +20,7 @@ import {
   ContractSchema,
   PlayerPhotoSchema,
   TeamSchema,
+  TeamAliasSchema,
 } from "./roster/infrastructure/persistence/player.entities";
 import {
   LeagueSchema,
@@ -54,6 +55,7 @@ export const mikroOrmEntities = [
   UserSchema,
   PersonalAccessTokenSchema,
   TeamSchema,
+  TeamAliasSchema,
   PlayerSchema,
   ContractSchema,
   PlayerPhotoSchema,
