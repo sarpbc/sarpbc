@@ -634,7 +634,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         sourceUrl: sourceUrlSchema,
       },
       handler: ({ matchId, lineups, sourceUrl }, user) =>
-        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),    }),
+        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),
+    }),
 
     defineTool({
       name: "set_circuit_stage_scale",
