@@ -11,6 +11,7 @@ import {
   mapNewsAdminArticle,
   mapNewsListItem,
   mapPlayerSummary,
+  mapTeamAlias,
   mapTeamSummary,
   mapTournamentDetail,
   mapTournamentListItem,
@@ -50,7 +51,7 @@ export function readTools({
 
     defineTool({
       name: "search_teams",
-      description: `Search Rocket League teams by name. Returns matching teams with id, slug, and public profile URL. When drafting news, use the slug in \`${TEAM_TAG}\`.`,
+      description: `Search Rocket League teams by current or former name. Returns matching teams with id, slug, dated former names, and public profile URL. A former name found here is the same team: never create or merge a team for a rebrand. When drafting news, use the slug in \`${TEAM_TAG}\`.`,
       input: {
         query: z.string().min(1).describe("Team name or partial name to search for."),
       },
@@ -83,10 +84,21 @@ export function readTools({
     defineTool({
       name: "get_team",
       description:
-        "Get a team profile by slug or UUID, including the current roster when available.",
+        "Get a team profile by slug or UUID, including the current roster when available and its dated former names (formerNames).",
       input: { idOrSlug: idOrSlugField("Team") },
       handler: async ({ idOrSlug }) =>
         mapTeamSummary(await requireByIdOrSlug(teamService, idOrSlug, "Team")),
+    }),
+
+    defineTool({
+      name: "list_team_aliases",
+      description:
+        "List a team's dated former names (rebrands and sponsor names), oldest first, with their period, source, optional logo and optional PandaScore team id. Past tournaments and matches show the name in force on their date. Read it before add_team_alias or update_team_alias.",
+      input: { idOrSlug: idOrSlugField("Team") },
+      handler: async ({ idOrSlug }) => {
+        const team = await requireByIdOrSlug(teamService, idOrSlug, "Team");
+        return { teamId: team.id, name: team.name, aliases: team.aliases.map(mapTeamAlias) };
+      },
     }),
 
     defineTool({

@@ -1,7 +1,12 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { STAFF_CONTRACT_ROLES } from "@sarpbc/types";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
-import { Contract, Player, Team } from "../../../roster/infrastructure/roster-persistence";
+import {
+  Contract,
+  Player,
+  Team,
+  teamNameAt,
+} from "../../../roster/infrastructure/roster-persistence";
 import {
   Match,
   Tournament,
@@ -53,9 +58,12 @@ export class SitemapStore implements SitemapQueries {
           "name",
           "status",
           "updatedAt",
+          "beginAt",
           "participants.team.name",
+          "participants.team.aliases",
           "participants.players.name",
           "tournament.slug",
+          "tournament.beginAt",
           "tournament.event.slug",
         ],
       },
@@ -65,7 +73,7 @@ export class SitemapStore implements SitemapQueries {
       name: row.name,
       status: row.status,
       participants: row.participants.getItems().map(({ team, players }) => ({
-        team: team ? { name: team.name } : null,
+        team: team ? { name: teamNameAt(team, row.beginAt ?? row.tournament.beginAt) } : null,
         players: players.getItems().map(({ name }) => ({ name })),
       })),
       tournament: { slug: row.tournament.slug, event: { slug: row.tournament.event.slug } },

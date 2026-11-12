@@ -19,6 +19,7 @@ import {
   MikroPlayerStore,
   MikroRosterMergeTransaction,
   MikroRosterTransaction,
+  MikroTeamAliasTransaction,
   MikroTeamStore,
 } from "./persistence/roster.store";
 import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
@@ -29,6 +30,7 @@ import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.mod
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
 import type { CurrentRosterSource } from "../application/ports";
 import { TeamLogoService } from "../application/team-logo.service";
+import { TeamAliasService } from "../application/team-alias.service";
 import { R2Service } from "../../storage/infrastructure/r2.service";
 import { StorageModule } from "../../storage/infrastructure/storage.module";
 import { HttpsTeamLogoSource } from "./logo/https-team-logo-source";
@@ -129,6 +131,11 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
       inject: [MikroRosterMergeTransaction],
     },
     {
+      provide: TeamAliasService,
+      useFactory: (em: EntityManager) => new TeamAliasService(new MikroTeamAliasTransaction(em)),
+      inject: [EntityManager],
+    },
+    {
       provide: TeamLogoService,
       useFactory: (storage: R2Service) =>
         new TeamLogoService(
@@ -139,7 +146,14 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
       inject: [R2Service],
     },
   ],
-  exports: [PlayerService, TeamService, ContractService, RosterMergeService, TeamLogoService],
+  exports: [
+    PlayerService,
+    TeamService,
+    TeamAliasService,
+    ContractService,
+    RosterMergeService,
+    TeamLogoService,
+  ],
 })
 export class RosterModule implements OnModuleInit {
   constructor(

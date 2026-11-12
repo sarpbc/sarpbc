@@ -10,7 +10,7 @@ import {
 
 const kc: CandidateParticipant = {
   id: "p-kc",
-  name: "Karmine Corp",
+  teamNames: ["Karmine Corp"],
   players: [
     { id: "vatira", name: "Vatira" },
     { id: "atow", name: "Atow" },
@@ -19,7 +19,7 @@ const kc: CandidateParticipant = {
 };
 const bds: CandidateParticipant = {
   id: "p-bds",
-  name: "Team BDS",
+  teamNames: ["Team BDS"],
   players: [
     { id: "monkey", name: "M0nkey M00n" },
     { id: "seikoo", name: "Seikoo" },
@@ -28,7 +28,7 @@ const bds: CandidateParticipant = {
 };
 const vit: CandidateParticipant = {
   id: "p-vit",
-  name: "Team Vitality",
+  teamNames: ["Team Vitality"],
   players: [
     { id: "zen", name: "zen" },
     { id: "alpha", name: "Alpha54" },
@@ -106,12 +106,12 @@ function byReplay(assignments: ReplayAssignment[]) {
 describe("assignReplays with player participants", () => {
   const zen: CandidateParticipant = {
     id: "p-zen",
-    name: "zen",
+    teamNames: ["zen"],
     players: [{ id: "zen", name: "zen" }],
   };
   const vatira: CandidateParticipant = {
     id: "p-vatira",
-    name: "Vatira",
+    teamNames: ["Vatira"],
     players: [{ id: "vatira", name: "Vatira" }],
   };
 
@@ -230,6 +230,20 @@ describe("assignReplays", () => {
     const unknownRoster = { ...vit, players: [] };
     const m = match("m1", [unknownRoster, bds], "2026-06-01T18:00:00Z", {
       scores: won(unknownRoster, bds),
+    });
+    const game = replay(
+      "2026-06-01T18:10:00Z",
+      { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
+      { names: BDS_NAMES, goals: 1, name: "BDS" },
+    );
+
+    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-vit" });
+  });
+
+  it("recognises a former name of the team", () => {
+    const renamed = { ...vit, teamNames: ["Fixture Now", "Team Vitality"], players: [] };
+    const m = match("m1", [renamed, bds], "2026-06-01T18:00:00Z", {
+      scores: won(renamed, bds),
     });
     const game = replay(
       "2026-06-01T18:10:00Z",

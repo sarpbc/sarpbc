@@ -1,5 +1,7 @@
+import { isoDay, teamAliasInForce } from "@sarpbc/utils";
 import * as Record from "./player.entities";
 import { Player, Team, Contract, PlayerPhoto } from "../../domain/roster";
+import { TeamAlias } from "../../domain/team-alias";
 
 const TEAM_COLUMNS = [
   "id",
@@ -43,6 +45,7 @@ export const playerColumns = (model: Player) => pick(model, PLAYER_COLUMNS);
 export function toTeam(row: Record.Team, includePlayers = true): Team {
   const team = Object.assign(new Team(), pick(row, TEAM_COLUMNS), {
     mergedIntoId: row.mergedInto?.id ?? null,
+    aliases: (row.aliases ?? []).map((alias) => Object.assign(new TeamAlias(), alias)),
   });
   if (includePlayers && row.players.isInitialized())
     team.players = row.players.getItems().map((p) => toPlayer(p));
@@ -78,4 +81,8 @@ export function toPhoto(row: Record.PlayerPhoto): PlayerPhoto {
     url: row.url,
     createdAt: new Date(row.createdAt),
   });
+}
+export function teamNameAt(row: Pick<Record.Team, "name" | "aliases">, at: Date | null): string {
+  if (!at) return row.name;
+  return teamAliasInForce(row.aliases ?? [], isoDay(new Date(at)))?.name ?? row.name;
 }

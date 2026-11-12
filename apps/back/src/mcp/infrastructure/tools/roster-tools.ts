@@ -23,8 +23,11 @@ import {
   ROSTER_PROPOSAL_PERMISSIONS,
   MAX_VIEWERS,
   STREAM_CHANNEL_MAX_LENGTH,
+  TEAM_ALIAS_NAME_MAX_LENGTH,
+  TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   isForbiddenViewershipSource,
+  isLiquipediaSourceHost,
   isIso4217Code,
 } from "@sarpbc/utils";
 import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
@@ -165,6 +168,46 @@ const contractDateSchema = z.iso.date("Use a real YYYY-MM-DD date");
 const effectiveDateSchema = contractDateSchema.describe(
   "Date the move takes effect according to the source (YYYY-MM-DD).",
 );
+
+const aliasSourceUrlSchema = sourceUrlSchema
+  .refine(
+    (url) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
+    "Liquipedia and its mirrors are not accepted sources",
+  )
+  .describe(
+    "Required official source for the name and its dates: the team, one of its players, the organiser, BLAST, RLEsports or PandaScore. Never Liquipedia or a mirror of it, not even as a lead.",
+  );
+
+const teamAliasInput = {
+  teamId: z.string().uuid().describe("UUID of the team that used the name."),
+  name: z.string().trim().min(1).max(TEAM_ALIAS_NAME_MAX_LENGTH).describe("The former name."),
+  from: contractDateSchema.describe("First day the team used the name (YYYY-MM-DD)."),
+  to: contractDateSchema
+    .optional()
+    .describe(
+      "Day the team stopped using the name, such as the rebrand date (YYYY-MM-DD). Omit while the name is still in use.",
+    ),
+  logoUrl: z
+    .string()
+    .url()
+    .max(TEAM_ALIAS_URL_MAX_LENGTH)
+    .regex(/^https:\/\//, "Use an https URL")
+    .refine(...withoutLiquipedia("use the team's official asset"))
+    .optional()
+    .describe("Optional https URL of the official logo used with this name. Never Liquipedia."),
+  pandascoreId: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe(
+      "Optional id of a separate PandaScore team record that carried this name, so PandaScore imports of it land on this team.",
+    ),
+  sourceUrl: aliasSourceUrlSchema,
+};
+
+const ALIAS_NOTE =
+  "Use this for a rebrand or a sponsor name, never merge_teams or create_team. Past tournaments and matches then show the name in force on their date, and search finds the team by it. Only record names and dates the source states.";
 
 const contractRoleSchema = z
   .enum(CONTRACT_ROLES)
@@ -379,6 +422,56 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
             user.id,
           ),
           sourceUrl,
+        ),
+    }),
+
+    defineTool({
+      name: "add_team_alias",
+      description: `Propose a dated former name of a team. Nothing changes until a staff member approves it in the admin app; periods of one team must not overlap. Read list_team_aliases and list_roster_proposals first. ${ALIAS_NOTE}`,
+      write: true,
+      permission: "teams.manage",
+      input: teamAliasInput,
+      handler: ({ teamId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
+        propose(
+          {
+            kind: "add_team_alias",
+            teamId,
+            alias: {
+              ...alias,
+              to: to ?? null,
+              logoUrl: logoUrl ?? null,
+              pandascoreId: pandascoreId ?? null,
+            },
+          },
+          sourceUrl,
+          user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "update_team_alias",
+      description: `Propose correcting a team's former name. Take aliasId from list_team_aliases. Once approved, it replaces every field of the alias, so pass the ones to keep too; the sourceUrl becomes its source. ${ALIAS_NOTE}`,
+      write: true,
+      permission: "teams.manage",
+      input: {
+        aliasId: z.string().uuid().describe("Alias UUID from list_team_aliases."),
+        ...teamAliasInput,
+      },
+      handler: ({ teamId, aliasId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
+        propose(
+          {
+            kind: "update_team_alias",
+            teamId,
+            aliasId,
+            alias: {
+              ...alias,
+              to: to ?? null,
+              logoUrl: logoUrl ?? null,
+              pandascoreId: pandascoreId ?? null,
+            },
+          },
+          sourceUrl,
+          user.id,
         ),
     }),
 

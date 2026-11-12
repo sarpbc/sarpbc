@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { Player, Team } from "./player.entities";
+import { Player, Team, TeamAlias } from "./player.entities";
 
 /**
  * The slug lookup only adopts rows stored before the PandaScore id was recorded, never start.gg
@@ -35,6 +35,15 @@ export async function findPandascoreTeam(
 ): Promise<Team | null> {
   const byId = pandascoreId !== undefined ? await em.findOne(Team, { pandascoreId }) : null;
   return byId ?? em.findOne(Team, adoptable(slug));
+}
+
+export async function findAliasedPandascoreTeam(
+  em: Pick<EntityManager, "findOne">,
+  pandascoreId: number | undefined,
+): Promise<string | null> {
+  if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) return null;
+  const alias = await em.findOne(TeamAlias, { pandascoreId });
+  return alias ? alias.team.id : null;
 }
 
 export async function availablePlayerSlug(

@@ -20,6 +20,7 @@ import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mjs";
 import { verifyViewership, verifyViewershipProposals } from "./scenarios/viewership.mjs";
+import { verifyTeamAliasProposals, verifyTeamAliases } from "./scenarios/team-aliases.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
@@ -592,6 +593,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await check("staff enter credited viewership on matches and events", async () => {
       await verifyViewership({ request, staffCookie, memberCookie, tournament, match });
     });
+
+    let aliasFixtures;
+    await check(
+      "dated team aliases name past stages and matches, feed search and refuse Liquipedia",
+      async () => {
+        aliasFixtures = await verifyTeamAliases({ request, staffCookie, memberCookie });
+      },
+    );
 
     await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
       assert.equal(tournament.slug, "integration-cup");
@@ -1450,6 +1459,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         startggCupId: startggCup,
         startggMatchId: startggMatch.id,
       });
+      await verifyTeamAliasProposals({ request, callTool, review, ...aliasFixtures });
       await verifyCircuits({
         app,
         orm,

@@ -2,6 +2,7 @@ import type { DataSource, Stream } from "@sarpbc/types";
 import { isoDay, participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
+import type { TeamAlias } from "../../roster/domain/team-alias";
 import type {
   League,
   Match,
@@ -75,6 +76,18 @@ export function mapCareer(player: Player, contracts: Contract[]) {
   };
 }
 
+export function mapTeamAlias(alias: TeamAlias) {
+  return {
+    id: alias.id,
+    name: alias.name,
+    from: alias.from,
+    to: alias.to,
+    sourceUrl: alias.sourceUrl,
+    logoUrl: alias.logoUrl,
+    pandascoreId: alias.pandascoreId,
+  };
+}
+
 export function mapTeamSummary(team: Team) {
   return {
     id: team.id,
@@ -85,6 +98,7 @@ export function mapTeamSummary(team: Team) {
     source: team.source,
     logoLightUrl: team.logoLightUrl,
     logoDarkUrl: team.logoDarkUrl,
+    formerNames: team.aliases.map(mapTeamAlias),
     players: team.players.map((player) => ({
       id: player.id,
       slug: player.slug,

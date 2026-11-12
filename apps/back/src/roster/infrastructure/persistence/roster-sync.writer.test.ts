@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Contract, Player, Team } from "./player.entities";
+import { Contract, Player, Team, TeamAlias } from "./player.entities";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import type { EntityManager } from "@mikro-orm/postgresql";
 describe("RosterSyncWriter", () => {
@@ -86,5 +86,24 @@ describe("RosterSyncWriter", () => {
     });
     expect(team.slug).toBe("local");
     expect(team.imageUrl).toBe("local.png");
+  });
+  it("maps a PandaScore team named in an alias to the aliased team without touching it", async () => {
+    const team = Object.assign(new Team(), {
+      id: "current",
+      name: "Fixture Now",
+      pandascoreId: 20,
+    });
+    const alias = Object.assign(new TeamAlias(), { pandascoreId: 21, team });
+    em.findOne.mockImplementation(async (entity, where) =>
+      entity === TeamAlias && where.pandascoreId === 21 ? alias : null,
+    );
+    const writer = new RosterSyncWriter(manager);
+    const input = { pandascoreId: 21, name: "Fixture Before", slug: "fixture-before" };
+    expect(await writer.upsertTeam(input)).toEqual({ id: "current" });
+    expect(await writer.upsertTeam(input)).toEqual({ id: "current" });
+    expect(team.name).toBe("Fixture Now");
+    expect(team.pandascoreId).toBe(20);
+    expect(em.persist).not.toHaveBeenCalled();
+    expect(em.findOne.mock.calls.filter(([entity]) => entity === TeamAlias)).toHaveLength(1);
   });
 });

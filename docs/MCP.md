@@ -34,7 +34,8 @@ Read tools (any valid PAT):
 | Tool                    | Description                                     |
 | ----------------------- | ----------------------------------------------- |
 | `search_players`        | Search players by name                          |
-| `search_teams`          | Search teams by name                            |
+| `search_teams`          | Search teams by current or former name          |
+| `list_team_aliases`     | A team's dated former names, oldest first       |
 | `get_player`            | Player profile by slug or id                    |
 | `list_contracts`        | A player's contracts, oldest first, with roles  |
 | `get_team`              | Team profile and roster by slug or id           |
@@ -103,6 +104,8 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `create_team`               | `teams.manage`                                           | Create a team (name, country, logo)                                                                            |
 | `update_team`               | `teams.manage`                                           | Update name, country or logo, or mark an empty team inactive                                                   |
 | `upload_team_logo`          | `teams.manage`                                           | Set the team's `light` or `dark` logo variant from an official asset stored on sarpbc.org                      |
+| `add_team_alias`            | `teams.manage`                                           | Record a dated former name (rebrand or sponsor name) of a team                                                 |
+| `update_team_alias`         | `teams.manage`                                           | Replace every field of a team's former name                                                                    |
 | `create_contract`           | `players.manage`                                         | Record a dated contract in a player's career, such as a past stint                                             |
 | `update_contract`           | `players.manage`                                         | Correct a contract's team, dates or role, or reopen it                                                         |
 | `merge_players`             | `players.manage`                                         | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                         |
@@ -120,6 +123,8 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 Contract roles are `active`, `benched` and `loaned` for players, and `coach`, `assistant_coach`, `analyst` and `manager` for staff. `add_player_to_team`, `create_contract` and `update_contract` take the role; `list_contracts` returns it. A player who changes role on the same team, for example from `active` to `benched` or from player to coach, gets a new contract with `add_player_to_team` on that team, so their past contracts keep their role. Proposing the team and role the player already holds is rejected. The role shown on player and team pages comes from the current contract.
 
 `upload_team_logo` takes `teamId`, `variant` (`light` or `dark`), the official asset's https `imageUrl` and `sourceUrl`; neither may be Liquipedia. The server downloads the asset from public addresses only (10 s, 2 MB, at most 3 redirects, none of them to Liquipedia), accepts PNG, WebP or SVG without scripts, event handlers or external references, requires 128x128 pixels for raster files, and stages a 512x512 transparent WebP in R2 under `pending/teams/{teamId}/logo-{variant}-{hash}.webp` when the proposal is created. Approval moves it to `teams/{teamId}/logo-{variant}-{hash}.webp`; rejection deletes it. The review shows the variant on light and dark backgrounds. `get_team` and `search_teams` return `logoLightUrl` and `logoDarkUrl`.
+
+A rebrand or a sponsor name is a dated alias of the same team, never a merge or a new team. `add_team_alias` and `update_team_alias` take `teamId`, the `name`, `from` (first day of use), an optional `to` (the day the name stopped being used, omitted while it is still in use), an optional https `logoUrl` of the official logo, an optional `pandascoreId` of a separate PandaScore team record that carried the name, and a required `sourceUrl` from the team, one of its players, the organiser, BLAST, RLEsports or PandaScore; Liquipedia and its mirrors are refused. Periods of one team must not overlap, and the PandaScore id must not belong to another team. On approval the proposal `sourceUrl` becomes the alias source. Past stages show the name in force when they began and matches the name in force on their date; search, `search_teams`, the replay import and PandaScore imports of the aliased PandaScore id use it. `get_team` and `search_teams` return `formerNames`.
 
 `list_roster_proposals` (`players.manage`, `teams.manage` or `tournaments.manage`) lists proposals by `status` (`pending` by default, `applied` or `rejected`) with the names they reference. Check it together with `search_players` / `search_teams` before proposing, so a pending creation is not proposed twice; an applied creation carries the new `entityId`.
 

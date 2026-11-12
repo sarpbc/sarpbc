@@ -1,6 +1,7 @@
 import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
+import type { TeamAlias } from "./team-alias";
 export interface ImportedTeamProfile {
   pandascoreId?: number;
   name: string;
@@ -61,6 +62,7 @@ export class Team {
   pandascoreId: number | null = null;
   source: DataSource = "manual";
   mergedIntoId: string | null = null;
+  aliases: TeamAlias[] = [];
   linkPandascore(pandascoreId: number): void {
     linkPandascore(this, pandascoreId);
   }

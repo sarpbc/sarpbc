@@ -4,16 +4,23 @@ import { v4 } from "uuid";
 import { Contract, Player, Team } from "./player.entities";
 import {
   availablePlayerSlug,
+  findAliasedPandascoreTeam,
   findPandascorePlayer,
   findPandascoreTeam,
 } from "./pandascore-adoption";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../application/imports";
 export class RosterSyncWriter {
   private readonly teams = new Map<string, Team>();
+  private readonly aliasedTeams = new Map<string, string | null>();
   private readonly players = new Map<number, Player>();
   constructor(private readonly em: Pick<EntityManager, "findOne" | "persist" | "getReference">) {}
   async upsertTeam(input: UpsertTeamCommand): Promise<{ id: string }> {
     const key = input.pandascoreId !== undefined ? String(input.pandascoreId) : input.slug;
+    if (!this.teams.has(key) && !this.aliasedTeams.has(key)) {
+      this.aliasedTeams.set(key, await findAliasedPandascoreTeam(this.em, input.pandascoreId));
+    }
+    const aliasedTeamId = this.aliasedTeams.get(key);
+    if (aliasedTeamId) return { id: aliasedTeamId };
     const existing =
       this.teams.get(key) ?? (await findPandascoreTeam(this.em, input.pandascoreId, input.slug));
     const row = existing ?? new Team();

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TeamAliasService } from "../../application/team-alias.service";
 import { Team } from "../../domain/roster";
 import { TeamController } from "./team.controller";
 
@@ -11,6 +12,7 @@ describe("TeamController", () => {
   const prizes = { teamEarnings } as never;
   const controller = new TeamController(
     teams as never,
+    new TeamAliasService({ run: async () => Promise.reject(new Error("unused")) }),
     contracts as never,
     tournaments as never,
     prizes,
