@@ -16,7 +16,6 @@ export interface BracketLink {
 
 export interface Tournament {
   id: string;
-  source: DataSource;
   pandascoreId?: number;
   source?: DataSource;
   name: string;

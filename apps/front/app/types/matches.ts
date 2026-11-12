@@ -120,7 +120,6 @@ export interface Match {
   results?: MatchResult[];
   createdAt: Date;
   updatedAt: Date;
-  source: DataSource;
   tournament: Tournament;
   viewership: Viewership | null;
   previousMatches?: BracketLink[];
