@@ -19,6 +19,7 @@ import type { MatchService } from "../../tournament/application/match/match.serv
 import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { StreamService } from "../../tournament/application/stream.service";
+import type { ViewershipService } from "../../tournament/application/viewership.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { StreamOwner } from "../../tournament/domain/stream";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
@@ -40,6 +41,7 @@ type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
 type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
 type Streams = Pick<StreamService, "requireProposable" | "set">;
 type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
+type Viewerships = Pick<ViewershipService, "requireProposable" | "set">;
 
 interface StreamChange {
   owner: StreamOwner;
@@ -69,6 +71,7 @@ export class RosterProposalService {
     private readonly matches: Matches,
     private readonly streams: Streams,
     private readonly lineups: Lineups,
+    private readonly viewerships: Viewerships,
   ) {}
 
   async propose(
@@ -99,6 +102,18 @@ export class RosterProposalService {
     const streamChange = streamChangeOf(change);
     if (streamChange) {
       await this.streams.requireProposable(streamChange.owner, streamChange.streams);
+    }
+    if (change.kind === "set_event_viewership") {
+      await this.viewerships.requireProposable(
+        { kind: "event", id: change.eventId },
+        change.viewership,
+      );
+    }
+    if (change.kind === "set_match_viewership") {
+      await this.viewerships.requireProposable(
+        { kind: "match", id: change.matchId },
+        change.viewership,
+      );
     }
     if (change.kind === "delete_team") {
       await this.requireTeamRemoval(change.teamId, change.mergeIntoTeamId);
@@ -145,7 +160,8 @@ export class RosterProposalService {
           proposals.flatMap(({ change }) =>
             change.kind === "delete_match" ||
             change.kind === "set_match_streams" ||
-            change.kind === "set_match_lineups"
+            change.kind === "set_match_lineups" ||
+            change.kind === "set_match_viewership"
               ? [change.matchId]
               : [],
           ),
@@ -165,7 +181,9 @@ export class RosterProposalService {
       events: [
         ...new Set(
           proposals.flatMap(({ change }) =>
-            change.kind === "set_event_streams" ? [change.eventId] : [],
+            change.kind === "set_event_streams" || change.kind === "set_event_viewership"
+              ? [change.eventId]
+              : [],
           ),
         ),
       ],
@@ -283,6 +301,12 @@ export class RosterProposalService {
       case "set_match_lineups":
         await this.lineups.set(change.matchId, change.lineups);
         return change.matchId;
+      case "set_event_viewership":
+        await this.viewerships.set({ kind: "event", id: change.eventId }, change.viewership);
+        return change.eventId;
+      case "set_match_viewership":
+        await this.viewerships.set({ kind: "match", id: change.matchId }, change.viewership);
+        return change.matchId;
       case "delete_match":
         await this.matches.deleteMatch(change.matchId);
         return change.matchId;
@@ -361,6 +385,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "set_event_streams":
     case "set_tournament_streams":
     case "set_match_streams":
+    case "set_event_viewership":
+    case "set_match_viewership":
     case "delete_match":
     case "delete_team":
       return [];
@@ -397,6 +423,8 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "set_tournament_streams":
     case "set_match_streams":
     case "set_match_lineups":
+    case "set_event_viewership":
+    case "set_match_viewership":
     case "delete_match":
       return [];
     default: {

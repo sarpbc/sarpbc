@@ -6,6 +6,7 @@ import {
   ROSTER_PROPOSAL_STATUSES,
   STREAM_KINDS,
   TEAM_LOGO_VARIANTS,
+  VIEWERSHIP_SCOPES,
   type PlayerStatus,
   type RosterChange,
   type RosterProposalStatus,
@@ -17,7 +18,10 @@ import {
   MAX_PRIZE_PLAYERS,
   MAX_STREAMS,
   ROSTER_PROPOSAL_PERMISSIONS,
+  MAX_VIEWERS,
   STREAM_CHANNEL_MAX_LENGTH,
+  VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
+  isForbiddenViewershipSource,
   isIso4217Code,
 } from "@sarpbc/utils";
 import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
@@ -85,6 +89,46 @@ const streamsSchema = z
 
 const STREAMS_NOTE =
   "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted. start.gg tournaments and matches are refused. A start.gg sourceUrl marks the streams as start.gg data: the site shows them with credit and they stay out of the MCP.";
+
+const viewershipSourceUrlSchema = sourceUrlSchema
+  .regex(/^https:\/\//, "Use an https URL")
+  .refine(
+    (url) => !URL.canParse(url) || !isForbiddenViewershipSource(new URL(url).hostname),
+    "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources",
+  )
+  .describe(
+    "Required public https page that states the numbers, such as an Esports Charts page or a public viewer counter. It is shown on the site as the credit. Never Liquipedia, BLAST.tv or start.gg.",
+  );
+
+const viewershipInput = {
+  peakViewers: z.number().int().min(0).max(MAX_VIEWERS).describe("Peak concurrent viewers."),
+  averageViewers: z
+    .number()
+    .int()
+    .min(0)
+    .max(MAX_VIEWERS)
+    .optional()
+    .describe("Average concurrent viewers, when the source states it. At most peakViewers."),
+  scope: z
+    .enum(VIEWERSHIP_SCOPES)
+    .describe(
+      "official when the numbers cover the official broadcasts only, with_costreams when they include co-streams.",
+    ),
+  measuredAt: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe("When the source measured the peak (ISO 8601 date-time), if it says so."),
+  sourceName: z
+    .string()
+    .trim()
+    .min(1)
+    .max(VIEWERSHIP_SOURCE_NAME_MAX_LENGTH)
+    .describe("Name of the source to credit next to the numbers (e.g. Esports Charts)."),
+  sourceUrl: viewershipSourceUrlSchema,
+};
+
+const VIEWERSHIP_NOTE =
+  "Once approved, it replaces the current numbers. Enter only numbers a public source states; no replay statistics. PandaScore entities are accepted. start.gg tournaments and matches are refused.";
 
 const reasonSchema = z
   .string()
@@ -619,6 +663,52 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
             user.id,
           ),
           undefined,
+        ),
+    }),
+
+    defineTool({
+      name: "set_event_viewership",
+      description: `Propose the viewership of a tournament event: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. Read get_event first. ${VIEWERSHIP_NOTE}`,
+      write: true,
+      permission: "tournaments.manage",
+      input: { eventId: z.string().uuid().describe("Event UUID."), ...viewershipInput },
+      handler: ({ eventId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
+        propose(
+          {
+            kind: "set_event_viewership",
+            eventId,
+            viewership: {
+              ...rest,
+              averageViewers: averageViewers ?? null,
+              measuredAt: measuredAt ?? null,
+              sourceUrl,
+            },
+          },
+          sourceUrl,
+          user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "set_match_viewership",
+      description: `Propose the viewership of one match: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. ${VIEWERSHIP_NOTE}`,
+      write: true,
+      permission: "tournaments.manage",
+      input: { matchId: z.string().uuid().describe("Match UUID."), ...viewershipInput },
+      handler: ({ matchId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
+        propose(
+          {
+            kind: "set_match_viewership",
+            matchId,
+            viewership: {
+              ...rest,
+              averageViewers: averageViewers ?? null,
+              measuredAt: measuredAt ?? null,
+              sourceUrl,
+            },
+          },
+          sourceUrl,
+          user.id,
         ),
     }),
 

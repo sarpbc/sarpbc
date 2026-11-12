@@ -34,6 +34,7 @@ export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
     name: row.name,
     league: row.league ? toLeague(row.league) : null,
     streams: row.streams ?? [],
+    viewership: row.viewership ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -105,6 +106,7 @@ export function toMatch(row: Row.Match): Match {
     numberOfGames: row.numberOfGames,
     officialStreams: row.officialStreams ?? [],
     streams: row.streams ?? [],
+    viewership: row.viewership ?? null,
     vods: row.vods ?? [],
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

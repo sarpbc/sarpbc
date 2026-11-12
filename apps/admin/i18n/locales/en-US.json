@@ -237,6 +237,8 @@
         "set_tournament_streams": "Tournament streams",
         "set_match_streams": "Match streams",
         "set_match_lineups": "Match lineups",
+        "set_event_viewership": "Event viewership",
+        "set_match_viewership": "Match viewership",
         "award_player": "Player award",
         "delete_match": "Delete match",
         "delete_team": "Delete team"
@@ -501,6 +503,46 @@
           "not-https": "Use an https link.",
           "channel-required": "Enter the channel name.",
           "invalid-language": "Enter a two-letter ISO 639-1 code, such as en or fr."
+        }
+      },
+      "viewership": {
+        "eventAction": "Event Viewership",
+        "matchAction": "Viewership",
+        "title": "Viewership · {name}",
+        "description": "Peak and average viewers from a public source. The site shows the numbers with the source credited next to them.",
+        "peakViewers": "Peak viewers",
+        "averageViewers": "Average viewers",
+        "optional": "Optional",
+        "scope": "Scope",
+        "scopes": {
+          "official": "Official broadcasts only",
+          "with_costreams": "Including co-streams"
+        },
+        "measuredAt": "Measured at",
+        "sourceName": "Source name",
+        "sourceNamePlaceholder": "Esports Charts",
+        "sourceUrl": "Source URL",
+        "sourceUrlPlaceholder": "https://escharts.com/…",
+        "sourceRules": "Credit a public source such as Esports Charts or a public viewer counter. Liquipedia, BLAST.tv and start.gg are not accepted, and replay statistics are not viewership.",
+        "save": "Save Viewership",
+        "saved": "Viewership saved",
+        "clear": "Remove Viewership",
+        "cleared": "Viewership removed",
+        "cancel": "Cancel",
+        "saveError": "Could not save viewership",
+        "loading": "Loading viewership…",
+        "loadError": "Could not load viewership.",
+        "retry": "Retry",
+        "errors": {
+          "invalid-peak": "Enter a whole number of viewers.",
+          "invalid-average": "Enter a whole number of viewers, or leave it empty.",
+          "average-above-peak": "The average cannot exceed the peak.",
+          "missing-source-name": "Enter the name of the source to credit.",
+          "source-name-too-long": "Shorten the source name.",
+          "invalid-source-url": "Enter the full URL of the source.",
+          "source-url-not-https": "Use an https link.",
+          "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted sources.",
+          "invalid-measured-at": "Enter a valid date and time."
         }
       },
       "statsImport": {

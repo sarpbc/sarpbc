@@ -238,6 +238,8 @@
         "set_tournament_streams": "Streams du tournoi",
         "set_match_streams": "Streams du match",
         "set_match_lineups": "Alignements du match",
+        "set_event_viewership": "Audience de l’événement",
+        "set_match_viewership": "Audience du match",
         "delete_match": "Suppression de match",
         "delete_team": "Suppression d'équipe"
       },
@@ -501,6 +503,46 @@
           "not-https": "Utilisez un lien https.",
           "channel-required": "Saisissez le nom de la chaîne.",
           "invalid-language": "Saisissez un code ISO 639-1 à deux lettres, comme en ou fr."
+        }
+      },
+      "viewership": {
+        "eventAction": "Audience de l’événement",
+        "matchAction": "Audience",
+        "title": "Audience · {name}",
+        "description": "Pic et moyenne de spectateurs relevés par une source publique. Le site affiche les chiffres avec la source créditée à côté.",
+        "peakViewers": "Pic de spectateurs",
+        "averageViewers": "Moyenne de spectateurs",
+        "optional": "Facultatif",
+        "scope": "Périmètre",
+        "scopes": {
+          "official": "Diffusions officielles uniquement",
+          "with_costreams": "Co-streams inclus"
+        },
+        "measuredAt": "Mesuré le",
+        "sourceName": "Nom de la source",
+        "sourceNamePlaceholder": "Esports Charts",
+        "sourceUrl": "URL de la source",
+        "sourceUrlPlaceholder": "https://escharts.com/…",
+        "sourceRules": "Créditez une source publique comme Esports Charts ou un compteur public. Liquipedia, BLAST.tv et start.gg ne sont pas acceptés, et les statistiques de replays ne sont pas des audiences.",
+        "save": "Enregistrer l’audience",
+        "saved": "Audience enregistrée",
+        "clear": "Retirer l’audience",
+        "cleared": "Audience retirée",
+        "cancel": "Annuler",
+        "saveError": "Impossible d’enregistrer l’audience",
+        "loading": "Chargement de l’audience…",
+        "loadError": "Impossible de charger l’audience.",
+        "retry": "Réessayer",
+        "errors": {
+          "invalid-peak": "Saisissez un nombre entier de spectateurs.",
+          "invalid-average": "Saisissez un nombre entier de spectateurs, ou laissez vide.",
+          "average-above-peak": "La moyenne ne peut pas dépasser le pic.",
+          "missing-source-name": "Saisissez le nom de la source à créditer.",
+          "source-name-too-long": "Raccourcissez le nom de la source.",
+          "invalid-source-url": "Saisissez l’URL complète de la source.",
+          "source-url-not-https": "Utilisez un lien https.",
+          "forbidden-source": "Liquipedia, BLAST.tv et start.gg ne sont pas des sources acceptées.",
+          "invalid-measured-at": "Saisissez une date et une heure valides."
         }
       },
       "statsImport": {

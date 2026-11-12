@@ -17,6 +17,7 @@ export type {
   EventInput,
   ManualEvent,
   TournamentEvent,
+  TournamentEventDetail,
   TournamentEventRef,
   TournamentPathResponse,
   TournamentTab,
@@ -103,6 +104,8 @@ export type {
 } from "./lineup";
 export { STREAM_KINDS, STREAM_PLATFORMS } from "./stream";
 export type { Stream, StreamInput, StreamKind, StreamPlatform, StreamsResponse } from "./stream";
+export { VIEWERSHIP_SCOPES } from "./viewership";
+export type { Viewership, ViewershipResponse, ViewershipScope } from "./viewership";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,

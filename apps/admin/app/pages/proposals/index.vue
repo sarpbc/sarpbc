@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { RosterProposal, StreamInput } from "@sarpbc/types";
+import type { RosterProposal, StreamInput, Viewership } from "@sarpbc/types";
 import { getApiErrorMessage, hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
@@ -88,6 +88,50 @@ function streamRows(
   ];
 }
 
+function viewershipRows(
+  targetKey: "eventId" | "matchId",
+  targetId: string,
+  viewership: Viewership,
+): { key: string; label: string; value: string }[] {
+  const count = new Intl.NumberFormat(parseLocale(locale.value));
+  return [
+    { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
+    {
+      key: "peakViewers",
+      label: t("page.tournaments.viewership.peakViewers"),
+      value: count.format(viewership.peakViewers),
+    },
+    ...(viewership.averageViewers === null
+      ? []
+      : [
+          {
+            key: "averageViewers",
+            label: t("page.tournaments.viewership.averageViewers"),
+            value: count.format(viewership.averageViewers),
+          },
+        ]),
+    {
+      key: "scope",
+      label: t("page.tournaments.viewership.scope"),
+      value: t(`page.tournaments.viewership.scopes.${viewership.scope}`),
+    },
+    ...(viewership.measuredAt === null
+      ? []
+      : [
+          {
+            key: "measuredAt",
+            label: t("page.tournaments.viewership.measuredAt"),
+            value: dateFormatter.value.format(new Date(viewership.measuredAt)),
+          },
+        ]),
+    {
+      key: "sourceName",
+      label: t("page.tournaments.viewership.sourceName"),
+      value: viewership.sourceName,
+    },
+  ];
+}
+
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
   const { change } = proposal;
   if (change.kind === "set_tournament_prizes") {
@@ -153,6 +197,12 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           ]
         : lineups),
     ];
+  }
+  if (change.kind === "set_event_viewership") {
+    return viewershipRows("eventId", change.eventId, change.viewership);
+  }
+  if (change.kind === "set_match_viewership") {
+    return viewershipRows("matchId", change.matchId, change.viewership);
   }
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;

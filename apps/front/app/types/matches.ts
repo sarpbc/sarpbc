@@ -6,6 +6,7 @@ import type {
   MatchVod,
   ParticipantRef,
   Stream,
+  Viewership,
 } from "@sarpbc/types";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { BracketLink, Tournament, TournamentParticipant } from "./tournament";
@@ -120,6 +121,7 @@ export interface Match {
   createdAt: Date;
   updatedAt: Date;
   tournament: Tournament;
+  viewership: Viewership | null;
   previousMatches?: BracketLink[];
   watchStreams?: Stream[];
   vods?: MatchVod[];

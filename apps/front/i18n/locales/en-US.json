@@ -280,6 +280,17 @@
       "resultHidden": "Result hidden",
       "revealScore": "Reveal Score",
       "revealResults": "Reveal Results"
+    },
+    "viewership": {
+      "title": "Viewership",
+      "peak": "Peak viewers",
+      "average": "Average viewers",
+      "measuredAt": "Measured on {date}",
+      "source": "Source:",
+      "scope": {
+        "official": "Official broadcasts only",
+        "withCostreams": "Including co-streams"
+      }
     }
   },
   "timeAgo": {

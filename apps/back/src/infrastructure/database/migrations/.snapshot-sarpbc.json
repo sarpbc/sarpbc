@@ -784,6 +784,23 @@
           "enumItems": [],
           "mappedType": "json"
         },
+        "viewership": {
+          "name": "viewership",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
         "pandascore_id": {
           "name": "pandascore_id",
           "type": "int",

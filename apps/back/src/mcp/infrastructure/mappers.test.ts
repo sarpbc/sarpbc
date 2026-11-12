@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { DataSource, Stream } from "@sarpbc/types";
+import type { DataSource, Stream, Viewership } from "@sarpbc/types";
 import { Player, Team } from "../../roster/domain/roster";
 import { Match, Tournament, TournamentParticipant } from "../../tournament/domain/competition";
 import { TournamentEvent } from "../../tournament/domain/tournament-event";
@@ -130,5 +130,58 @@ describe("MCP streams", () => {
     });
     expect(mapMatchListResponse(inherited).streams).toEqual([manual]);
     expect(redistributableStreams([startgg])).toEqual([]);
+  });
+});
+
+describe("MCP viewership", () => {
+  const viewership: Viewership = {
+    peakViewers: 12_000,
+    averageViewers: null,
+    scope: "official",
+    measuredAt: null,
+    sourceName: "Esports Charts",
+    sourceUrl: "https://escharts.com/tournaments/rl/fake-cup",
+  };
+  function stage(source: DataSource) {
+    return Object.assign(new Tournament(), {
+      id: `stage-${source}`,
+      slug: `stage-${source}`,
+      source,
+      event: { id: "event", slug: "coupe", name: "Coupe" },
+    });
+  }
+  function played(source: DataSource) {
+    return Object.assign(new Match(), {
+      publicId: 1,
+      name: "Final",
+      source,
+      viewership,
+      tournament: {
+        id: "cup",
+        name: "Coupe",
+        slug: "coupe",
+        event: { id: "event", slug: "coupe", name: "Coupe" },
+        beginAt: null,
+        league: null,
+        pickemsEnabled: false,
+        source: "manual",
+        pandascoreId: null,
+        streams: [],
+        eventStreams: [],
+      },
+    });
+  }
+
+  it("leaves the viewership of start.gg matches and start.gg-only events out", () => {
+    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+    expect(mapMatchListResponse(played("manual")).viewership).toEqual(viewership);
+    expect(mapMatchListResponse(played("startgg")).viewership).toBeNull();
+
+    const event = Object.assign(new TournamentEvent(), { slug: "coupe", viewership });
+    expect(mapEvent({ event, stages: [] }).viewership).toEqual(viewership);
+    expect(mapEvent({ event, stages: [stage("startgg")] }).viewership).toBeNull();
+    expect(mapEvent({ event, stages: [stage("startgg"), stage("manual")] }).viewership).toEqual(
+      viewership,
+    );
   });
 });

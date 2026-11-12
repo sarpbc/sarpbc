@@ -1,5 +1,6 @@
 import type { TournamentDetail, TournamentListItem } from "./competition";
 import type { League } from "./league";
+import type { Viewership } from "./viewership";
 
 export interface TournamentEventRef {
   id: string;
@@ -19,6 +20,10 @@ export interface TournamentEvent<Stage> extends TournamentEventRef {
   stages: Stage[];
 }
 
+export interface TournamentEventDetail extends TournamentEvent<TournamentDetail> {
+  viewership: Viewership | null;
+}
+
 export interface ManualEvent extends TournamentEvent<TournamentListItem> {
   editable: boolean;
 }
@@ -32,5 +37,5 @@ export interface EventInput {
 export type TournamentTab = "overview" | "matches";
 
 export type TournamentPathResponse =
-  | { kind: "event"; event: TournamentEvent<TournamentDetail> }
+  | { kind: "event"; event: TournamentEventDetail }
   | { kind: "stage"; tournament: TournamentDetail; tab: TournamentTab };

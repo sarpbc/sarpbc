@@ -274,6 +274,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       // jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
       officialStreams: unchangedJson(row.officialStreams, model.officialStreams),
       streams: unchangedJson(row.streams, model.streams),
+      viewership: unchangedJson(row.viewership, model.viewership),
       vods: model.vods,
     });
     row.tournament = this.em.getReference(Row.Tournament, model.tournament.id);
@@ -374,6 +375,7 @@ export class CompetitionEventWriter implements EventWriter {
       slug: model.slug,
       name: model.name,
       streams: unchangedJson(row.streams, model.streams),
+      viewership: unchangedJson(row.viewership, model.viewership),
     });
     row.league = model.league ? this.em.getReference(Row.League, model.league.id) : null;
     this.em.persist(row);

@@ -23,6 +23,8 @@ import type { EventQueries } from "../../application/ports";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { StreamService } from "../../application/stream.service";
 import { SetStreamsDto } from "./dto/set-streams.dto";
+import { ViewershipService } from "../../application/viewership.service";
+import { SetViewershipDto } from "./dto/set-viewership.dto";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EVENT_QUERIES } from "../competition-queries.tokens";
@@ -39,6 +41,7 @@ export class EventController {
     private readonly tournamentRead: CachedTournamentRead,
     private readonly catalogService: ManualCatalogService,
     private readonly streamService: StreamService,
+    private readonly viewershipService: ViewershipService,
   ) {}
 
   @Get()
@@ -102,6 +105,23 @@ export class EventController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
+  @Get(":id/viewership")
+  getViewership(@Param("id") id: string) {
+    return this.viewershipService.find({ kind: "event", id });
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put(":id/viewership")
+  setViewership(
+    @Param("id") id: string,
+    @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
+  ) {
+    return this.viewershipService.set({ kind: "event", id }, body.viewership);
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id") id: string) {
@@ -137,7 +157,10 @@ export class EventController {
         // An event left empty by moving its stages elsewhere stays stored but is not public.
         if (!found?.stages.length) throw new NotFoundError(MISSING);
         const stages = await Promise.all(found.stages.map(({ id }) => this.stage(id)));
-        return { kind: "event", event: mapEvent(found.event, stages) };
+        return {
+          kind: "event",
+          event: { ...mapEvent(found.event, stages), viewership: found.event.viewership },
+        };
       }
       default: {
         const unreachable: never = path;

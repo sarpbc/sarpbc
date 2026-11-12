@@ -280,6 +280,17 @@
       "resultHidden": "Résultat masqué",
       "revealScore": "Afficher le score",
       "revealResults": "Afficher les résultats"
+    },
+    "viewership": {
+      "title": "Audience",
+      "peak": "Pic de spectateurs",
+      "average": "Moyenne de spectateurs",
+      "measuredAt": "Mesuré le {date}",
+      "source": "Source :",
+      "scope": {
+        "official": "Diffusions officielles uniquement",
+        "withCostreams": "Co-streams inclus"
+      }
     }
   },
   "timeAgo": {

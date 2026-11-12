@@ -18,6 +18,7 @@ import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mjs";
+import { verifyViewership, verifyViewershipProposals } from "./scenarios/viewership.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
@@ -587,6 +588,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         });
       },
     );
+    await check("staff enter credited viewership on matches and events", async () => {
+      await verifyViewership({ request, staffCookie, memberCookie, tournament, match });
+    });
 
     await check("tournament events: list, event and stage paths, legacy ids and 404s", async () => {
       assert.equal(tournament.slug, "integration-cup");
@@ -1435,6 +1439,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         match,
         player,
         ...lineupFixtures,
+      });
+      await verifyViewershipProposals({
+        request,
+        staffCookie,
+        callTool,
+        review,
+        match,
+        startggCupId: startggCup,
+        startggMatchId: startggMatch.id,
       });
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });

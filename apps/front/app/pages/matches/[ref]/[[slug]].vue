@@ -363,6 +363,13 @@ const scoreboardLabel = computed(() => {
         </SRail>
       </div>
 
+      <SRail v-if="match.viewership" :title="t('components.viewership.title')">
+        <ViewershipStats
+          :viewership="match.viewership"
+          :startgg="match.source === 'startgg' || match.tournament.source === 'startgg'"
+        />
+      </SRail>
+
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
