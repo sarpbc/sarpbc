@@ -1,5 +1,10 @@
-import type { MatchLineupInput, RosterChange, StreamInput, Viewership } from "@sarpbc/types";
-import type { CircuitScaleTier, MatchLineupInput, RosterChange, StreamInput } from "@sarpbc/types";
+import type {
+  CircuitScaleTier,
+  MatchLineupInput,
+  RosterChange,
+  StreamInput,
+  Viewership,
+} from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
@@ -948,6 +953,9 @@ describe("RosterProposalService", () => {
       );
       await service.list("pending");
       expect(store.names).toHaveBeenCalledWith(expect.objectContaining({ events: ["event-1"] }));
+    });
+  });
+
   describe("circuit scale proposals", () => {
     const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
     const rules = "https://example.org/official-rules";

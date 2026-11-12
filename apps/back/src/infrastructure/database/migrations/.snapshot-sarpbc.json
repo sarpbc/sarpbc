@@ -1,8 +1,6 @@
 {
   "name": "public",
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "tables": [
     {
       "name": "air_riddle",
@@ -79,9 +77,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "air_riddle_pkey",
@@ -169,9 +165,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "bracket_link_pkey",
@@ -183,26 +177,18 @@
       "triggers": [],
       "foreignKeys": {
         "bracket_link_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "bracket_link_match_id_foreign",
           "localTableName": "public.bracket_link",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade"
         },
         "bracket_link_previous_match_id_foreign": {
-          "columnNames": [
-            "previous_match_id"
-          ],
+          "columnNames": ["previous_match_id"],
           "constraintName": "bracket_link_previous_match_id_foreign",
           "localTableName": "public.bracket_link",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade"
         }
@@ -335,9 +321,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "circuit_pkey",
@@ -345,9 +329,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "slug"
-          ],
+          "columnNames": ["slug"],
           "composite": false,
           "constraint": true,
           "keyName": "circuit_slug_unique",
@@ -486,10 +468,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "circuit_id",
-            "tournament_id"
-          ],
+          "columnNames": ["circuit_id", "tournament_id"],
           "composite": true,
           "constraint": true,
           "keyName": "circuit_stage_circuit_id_tournament_id_unique",
@@ -497,9 +476,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "circuit_stage_pkey",
@@ -507,9 +484,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "composite": false,
           "constraint": false,
           "keyName": "circuit_stage_tournament_id_index",
@@ -521,27 +496,19 @@
       "triggers": [],
       "foreignKeys": {
         "circuit_stage_circuit_id_foreign": {
-          "columnNames": [
-            "circuit_id"
-          ],
+          "columnNames": ["circuit_id"],
           "constraintName": "circuit_stage_circuit_id_foreign",
           "localTableName": "public.circuit_stage",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.circuit",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "circuit_stage_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "circuit_stage_tournament_id_foreign",
           "localTableName": "public.circuit_stage",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -717,10 +684,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "player_id",
-            "team_id"
-          ],
+          "columnNames": ["player_id", "team_id"],
           "composite": true,
           "constraint": false,
           "keyName": "contract_open_player_team_idx",
@@ -729,9 +693,7 @@
           "where": "\"end_date\" is null"
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "contract_pkey",
@@ -750,26 +712,18 @@
       "triggers": [],
       "foreignKeys": {
         "contract_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "contract_player_id_foreign",
           "localTableName": "public.contract",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade"
         },
         "contract_team_id_foreign": {
-          "columnNames": [
-            "team_id"
-          ],
+          "columnNames": ["team_id"],
           "constraintName": "contract_team_id_foreign",
           "localTableName": "public.contract",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.team",
           "updateRule": "cascade"
         }
@@ -851,9 +805,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "image_pkey",
@@ -1026,9 +978,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "pandascore_id"
-          ],
+          "columnNames": ["pandascore_id"],
           "composite": false,
           "constraint": true,
           "keyName": "league_pandascore_id_unique",
@@ -1036,9 +986,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "league_pkey",
@@ -1348,9 +1296,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "pandascore_id"
-          ],
+          "columnNames": ["pandascore_id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_pandascore_id_unique",
@@ -1358,9 +1304,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_pkey",
@@ -1368,9 +1312,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "public_id"
-          ],
+          "columnNames": ["public_id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_public_id_unique",
@@ -1382,26 +1324,18 @@
       "triggers": [],
       "foreignKeys": {
         "match_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "match_tournament_id_foreign",
           "localTableName": "public.match",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade"
         },
         "match_winner_id_foreign": {
-          "columnNames": [
-            "winner_id"
-          ],
+          "columnNames": ["winner_id"],
           "constraintName": "match_winner_id_foreign",
           "localTableName": "public.match",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -1603,9 +1537,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "ballchasing_id"
-          ],
+          "columnNames": ["ballchasing_id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_game_ballchasing_id_unique",
@@ -1613,9 +1545,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "composite": false,
           "constraint": false,
           "keyName": "match_game_match_id_index",
@@ -1623,10 +1553,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "match_id",
-            "number"
-          ],
+          "columnNames": ["match_id", "number"],
           "composite": true,
           "constraint": true,
           "keyName": "match_game_match_id_number_unique",
@@ -1634,9 +1561,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_game_pkey",
@@ -1648,39 +1573,27 @@
       "triggers": [],
       "foreignKeys": {
         "match_game_blue_participant_id_foreign": {
-          "columnNames": [
-            "blue_participant_id"
-          ],
+          "columnNames": ["blue_participant_id"],
           "constraintName": "match_game_blue_participant_id_foreign",
           "localTableName": "public.match_game",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade"
         },
         "match_game_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "match_game_match_id_foreign",
           "localTableName": "public.match_game",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "match_game_orange_participant_id_foreign": {
-          "columnNames": [
-            "orange_participant_id"
-          ],
+          "columnNames": ["orange_participant_id"],
           "constraintName": "match_game_orange_participant_id_foreign",
           "localTableName": "public.match_game",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade"
         }
@@ -1728,9 +1641,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "ballchasing_id"
-          ],
+          "columnNames": ["ballchasing_id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_game_exclusion_pkey",
@@ -1954,9 +1865,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "game_id"
-          ],
+          "columnNames": ["game_id"],
           "composite": false,
           "constraint": false,
           "keyName": "match_game_player_game_id_index",
@@ -1964,9 +1873,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_game_player_pkey",
@@ -1974,9 +1881,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "composite": false,
           "constraint": false,
           "keyName": "match_game_player_player_id_index",
@@ -1988,27 +1893,19 @@
       "triggers": [],
       "foreignKeys": {
         "match_game_player_game_id_foreign": {
-          "columnNames": [
-            "game_id"
-          ],
+          "columnNames": ["game_id"],
           "constraintName": "match_game_player_game_id_foreign",
           "localTableName": "public.match_game_player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match_game",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "match_game_player_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "match_game_player_player_id_foreign",
           "localTableName": "public.match_game_player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -2108,10 +2005,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "match_id",
-            "player_id"
-          ],
+          "columnNames": ["match_id", "player_id"],
           "composite": true,
           "constraint": true,
           "keyName": "match_lineup_player_match_id_player_id_unique",
@@ -2119,9 +2013,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_lineup_player_pkey",
@@ -2129,9 +2021,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "composite": false,
           "constraint": false,
           "keyName": "match_lineup_player_player_id_index",
@@ -2143,40 +2033,28 @@
       "triggers": [],
       "foreignKeys": {
         "match_lineup_player_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "match_lineup_player_match_id_foreign",
           "localTableName": "public.match_lineup_player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "match_lineup_player_participant_id_foreign": {
-          "columnNames": [
-            "participant_id"
-          ],
+          "columnNames": ["participant_id"],
           "constraintName": "match_lineup_player_participant_id_foreign",
           "localTableName": "public.match_lineup_player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "match_lineup_player_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "match_lineup_player_player_id_foreign",
           "localTableName": "public.match_lineup_player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -2225,10 +2103,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "match_id",
-            "tournament_participant_id"
-          ],
+          "columnNames": ["match_id", "tournament_participant_id"],
           "composite": true,
           "constraint": true,
           "keyName": "match_participants_pkey",
@@ -2240,27 +2115,19 @@
       "triggers": [],
       "foreignKeys": {
         "match_participants_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "match_participants_match_id_foreign",
           "localTableName": "public.match_participants",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "match_participants_tournament_participant_id_foreign": {
-          "columnNames": [
-            "tournament_participant_id"
-          ],
+          "columnNames": ["tournament_participant_id"],
           "constraintName": "match_participants_tournament_participant_id_foreign",
           "localTableName": "public.match_participants",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -2343,10 +2210,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "match_id",
-            "participant_id"
-          ],
+          "columnNames": ["match_id", "participant_id"],
           "composite": true,
           "constraint": true,
           "keyName": "match_result_match_id_participant_id_unique",
@@ -2354,9 +2218,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_result_pkey",
@@ -2368,26 +2230,18 @@
       "triggers": [],
       "foreignKeys": {
         "match_result_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "match_result_match_id_foreign",
           "localTableName": "public.match_result",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade"
         },
         "match_result_participant_id_foreign": {
-          "columnNames": [
-            "participant_id"
-          ],
+          "columnNames": ["participant_id"],
           "constraintName": "match_result_participant_id_foreign",
           "localTableName": "public.match_result",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade"
         }
@@ -2588,9 +2442,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "match_stats_import_pkey",
@@ -2598,10 +2450,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "tournament_id",
-            "created_at"
-          ],
+          "columnNames": ["tournament_id", "created_at"],
           "composite": true,
           "constraint": false,
           "keyName": "match_stats_import_tournament_id_created_at_index",
@@ -2613,14 +2462,10 @@
       "triggers": [],
       "foreignKeys": {
         "match_stats_import_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "match_stats_import_tournament_id_foreign",
           "localTableName": "public.match_stats_import",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -2816,10 +2661,7 @@
           "default": "'short'",
           "comment": null,
           "collation": null,
-          "enumItems": [
-            "short",
-            "article"
-          ],
+          "enumItems": ["short", "article"],
           "mappedType": "enum"
         },
         "updated_at": {
@@ -2842,9 +2684,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "author_id"
-          ],
+          "columnNames": ["author_id"],
           "composite": false,
           "constraint": false,
           "keyName": "news_article_author_id_index",
@@ -2852,9 +2692,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "news_article_pkey",
@@ -2862,9 +2700,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "slug"
-          ],
+          "columnNames": ["slug"],
           "composite": false,
           "constraint": true,
           "keyName": "news_article_slug_unique",
@@ -2872,9 +2708,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "title"
-          ],
+          "columnNames": ["title"],
           "composite": false,
           "constraint": false,
           "keyName": "news_article_title_index",
@@ -2882,9 +2716,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "type"
-          ],
+          "columnNames": ["type"],
           "composite": false,
           "constraint": false,
           "keyName": "news_article_type_index",
@@ -2903,14 +2735,10 @@
       "triggers": [],
       "foreignKeys": {
         "news_article_author_id_foreign": {
-          "columnNames": [
-            "author_id"
-          ],
+          "columnNames": ["author_id"],
           "constraintName": "news_article_author_id_foreign",
           "localTableName": "public.news_article",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -3043,9 +2871,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "owner_id"
-          ],
+          "columnNames": ["owner_id"],
           "composite": false,
           "constraint": false,
           "keyName": "personal_access_token_owner_id_index",
@@ -3053,9 +2879,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "personal_access_token_pkey",
@@ -3063,9 +2887,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "token_hash"
-          ],
+          "columnNames": ["token_hash"],
           "composite": false,
           "constraint": true,
           "keyName": "personal_access_token_token_hash_unique",
@@ -3077,14 +2899,10 @@
       "triggers": [],
       "foreignKeys": {
         "personal_access_token_owner_id_foreign": {
-          "columnNames": [
-            "owner_id"
-          ],
+          "columnNames": ["owner_id"],
           "constraintName": "personal_access_token_owner_id_foreign",
           "localTableName": "public.personal_access_token",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -3217,9 +3035,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "pickem_choice_pkey",
@@ -3227,10 +3043,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "user_id",
-            "match_id"
-          ],
+          "columnNames": ["user_id", "match_id"],
           "composite": true,
           "constraint": true,
           "keyName": "pickem_choice_user_match_unique",
@@ -3242,38 +3055,26 @@
       "triggers": [],
       "foreignKeys": {
         "pickem_choice_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "pickem_choice_match_id_foreign",
           "localTableName": "public.pickem_choice",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade"
         },
         "pickem_choice_picked_participant_id_foreign": {
-          "columnNames": [
-            "picked_participant_id"
-          ],
+          "columnNames": ["picked_participant_id"],
           "constraintName": "pickem_choice_picked_participant_id_foreign",
           "localTableName": "public.pickem_choice",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade"
         },
         "pickem_choice_user_id_foreign": {
-          "columnNames": [
-            "user_id"
-          ],
+          "columnNames": ["user_id"],
           "constraintName": "pickem_choice_user_id_foreign",
           "localTableName": "public.pickem_choice",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -3502,11 +3303,7 @@
           "default": "'active'",
           "comment": null,
           "collation": null,
-          "enumItems": [
-            "active",
-            "free_agent",
-            "retired"
-          ],
+          "enumItems": ["active", "free_agent", "retired"],
           "mappedType": "enum"
         },
         "team_id": {
@@ -3529,9 +3326,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "name"
-          ],
+          "columnNames": ["name"],
           "composite": false,
           "constraint": false,
           "keyName": "player_name_index",
@@ -3539,9 +3334,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "pandascore_id"
-          ],
+          "columnNames": ["pandascore_id"],
           "composite": false,
           "constraint": true,
           "keyName": "player_pandascore_id_unique",
@@ -3549,9 +3342,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "player_pkey",
@@ -3559,9 +3350,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "slug"
-          ],
+          "columnNames": ["slug"],
           "composite": false,
           "constraint": false,
           "keyName": "player_slug_index",
@@ -3580,27 +3369,19 @@
       "triggers": [],
       "foreignKeys": {
         "player_merged_into_id_foreign": {
-          "columnNames": [
-            "merged_into_id"
-          ],
+          "columnNames": ["merged_into_id"],
           "constraintName": "player_merged_into_id_foreign",
           "localTableName": "public.player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "restrict"
         },
         "player_team_id_foreign": {
-          "columnNames": [
-            "team_id"
-          ],
+          "columnNames": ["team_id"],
           "constraintName": "player_team_id_foreign",
           "localTableName": "public.player",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.team",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -3723,9 +3504,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "player_award_pkey",
@@ -3733,10 +3512,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "tournament_id",
-            "award_type"
-          ],
+          "columnNames": ["tournament_id", "award_type"],
           "composite": true,
           "constraint": true,
           "keyName": "player_award_tournament_id_award_type_unique",
@@ -3755,38 +3531,26 @@
       "triggers": [],
       "foreignKeys": {
         "player_award_participant_id_foreign": {
-          "columnNames": [
-            "participant_id"
-          ],
+          "columnNames": ["participant_id"],
           "constraintName": "player_award_participant_id_foreign",
           "localTableName": "public.player_award",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade"
         },
         "player_award_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "player_award_player_id_foreign",
           "localTableName": "public.player_award",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade"
         },
         "player_award_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "player_award_tournament_id_foreign",
           "localTableName": "public.player_award",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade"
         }
@@ -3868,9 +3632,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "player_photo_pkey",
@@ -3882,14 +3644,10 @@
       "triggers": [],
       "foreignKeys": {
         "player_photo_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "player_photo_player_id_foreign",
           "localTableName": "public.player_photo",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade"
         }
@@ -3971,9 +3729,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "player_platform_link_pkey",
@@ -3981,10 +3737,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "platform",
-            "platform_id"
-          ],
+          "columnNames": ["platform", "platform_id"],
           "composite": true,
           "constraint": true,
           "keyName": "player_platform_link_platform_platform_id_unique",
@@ -3992,9 +3745,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "composite": false,
           "constraint": false,
           "keyName": "player_platform_link_player_id_index",
@@ -4006,14 +3757,10 @@
       "triggers": [],
       "foreignKeys": {
         "player_platform_link_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "player_platform_link_player_id_foreign",
           "localTableName": "public.player_platform_link",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -4107,10 +3854,7 @@
           "default": "'DISCUSSION'",
           "comment": null,
           "collation": null,
-          "enumItems": [
-            "ARTICLE",
-            "DISCUSSION"
-          ],
+          "enumItems": ["ARTICLE", "DISCUSSION"],
           "mappedType": "enum"
         },
         "public_id": {
@@ -4185,9 +3929,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "post_pkey",
@@ -4195,9 +3937,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "public_id"
-          ],
+          "columnNames": ["public_id"],
           "composite": false,
           "constraint": true,
           "keyName": "post_public_id_unique",
@@ -4216,26 +3956,18 @@
       "triggers": [],
       "foreignKeys": {
         "post_author_id_foreign": {
-          "columnNames": [
-            "author_id"
-          ],
+          "columnNames": ["author_id"],
           "constraintName": "post_author_id_foreign",
           "localTableName": "public.post",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
         "post_topic_id_foreign": {
-          "columnNames": [
-            "topic_id"
-          ],
+          "columnNames": ["topic_id"],
           "constraintName": "post_topic_id_foreign",
           "localTableName": "public.post",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.topic",
           "updateRule": "cascade"
         }
@@ -4368,9 +4100,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "post_translation_pkey",
@@ -4382,14 +4112,10 @@
       "triggers": [],
       "foreignKeys": {
         "post_translation_post_id_foreign": {
-          "columnNames": [
-            "post_id"
-          ],
+          "columnNames": ["post_id"],
           "constraintName": "post_translation_post_id_foreign",
           "localTableName": "public.post_translation",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.post",
           "updateRule": "cascade"
         }
@@ -4556,9 +4282,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "reply_pkey",
@@ -4570,65 +4294,45 @@
       "triggers": [],
       "foreignKeys": {
         "reply_author_id_foreign": {
-          "columnNames": [
-            "author_id"
-          ],
+          "columnNames": ["author_id"],
           "constraintName": "reply_author_id_foreign",
           "localTableName": "public.reply",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
         "reply_match_id_foreign": {
-          "columnNames": [
-            "match_id"
-          ],
+          "columnNames": ["match_id"],
           "constraintName": "reply_match_id_foreign",
           "localTableName": "public.reply",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.match",
           "updateRule": "cascade",
           "deleteRule": "set null"
         },
         "reply_news_article_id_foreign": {
-          "columnNames": [
-            "news_article_id"
-          ],
+          "columnNames": ["news_article_id"],
           "constraintName": "reply_news_article_id_foreign",
           "localTableName": "public.reply",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.news_article",
           "updateRule": "cascade",
           "deleteRule": "set null"
         },
         "reply_post_id_foreign": {
-          "columnNames": [
-            "post_id"
-          ],
+          "columnNames": ["post_id"],
           "constraintName": "reply_post_id_foreign",
           "localTableName": "public.reply",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.post",
           "updateRule": "cascade",
           "deleteRule": "set null"
         },
         "reply_reply_to_id_foreign": {
-          "columnNames": [
-            "reply_to_id"
-          ],
+          "columnNames": ["reply_to_id"],
           "constraintName": "reply_reply_to_id_foreign",
           "localTableName": "public.reply",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.reply",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -4728,9 +4432,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "reply_notification_pkey",
@@ -4738,10 +4440,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "recipient_id",
-            "created_at"
-          ],
+          "columnNames": ["recipient_id", "created_at"],
           "composite": true,
           "constraint": false,
           "keyName": "reply_notification_recipient_id_created_at_index",
@@ -4749,10 +4448,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "recipient_id",
-            "read_at"
-          ],
+          "columnNames": ["recipient_id", "read_at"],
           "composite": true,
           "constraint": false,
           "keyName": "reply_notification_recipient_id_read_at_index",
@@ -4764,26 +4460,18 @@
       "triggers": [],
       "foreignKeys": {
         "reply_notification_recipient_id_foreign": {
-          "columnNames": [
-            "recipient_id"
-          ],
+          "columnNames": ["recipient_id"],
           "constraintName": "reply_notification_recipient_id_foreign",
           "localTableName": "public.reply_notification",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
         "reply_notification_reply_id_foreign": {
-          "columnNames": [
-            "reply_id"
-          ],
+          "columnNames": ["reply_id"],
           "constraintName": "reply_notification_reply_id_foreign",
           "localTableName": "public.reply_notification",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.reply",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -4883,9 +4571,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "created_at"
-          ],
+          "columnNames": ["created_at"],
           "composite": false,
           "constraint": false,
           "keyName": "reply_report_created_at_index",
@@ -4893,9 +4579,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "reply_report_pkey",
@@ -4903,9 +4587,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "reply_id"
-          ],
+          "columnNames": ["reply_id"],
           "composite": false,
           "constraint": false,
           "keyName": "reply_report_reply_id_index",
@@ -4913,10 +4595,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "reply_id",
-            "reporter_id"
-          ],
+          "columnNames": ["reply_id", "reporter_id"],
           "composite": true,
           "constraint": false,
           "keyName": "reply_report_reply_id_reporter_id_index",
@@ -4928,27 +4607,19 @@
       "triggers": [],
       "foreignKeys": {
         "reply_report_reply_id_foreign": {
-          "columnNames": [
-            "reply_id"
-          ],
+          "columnNames": ["reply_id"],
           "constraintName": "reply_report_reply_id_foreign",
           "localTableName": "public.reply_report",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.reply",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "reply_report_reporter_id_foreign": {
-          "columnNames": [
-            "reporter_id"
-          ],
+          "columnNames": ["reporter_id"],
           "constraintName": "reply_report_reporter_id_foreign",
           "localTableName": "public.reply_report",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -5115,9 +4786,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "roster_proposal_pkey",
@@ -5125,10 +4794,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "status",
-            "created_at"
-          ],
+          "columnNames": ["status", "created_at"],
           "composite": true,
           "constraint": false,
           "keyName": "roster_proposal_status_created_at_index",
@@ -5140,26 +4806,18 @@
       "triggers": [],
       "foreignKeys": {
         "roster_proposal_proposed_by_id_foreign": {
-          "columnNames": [
-            "proposed_by_id"
-          ],
+          "columnNames": ["proposed_by_id"],
           "constraintName": "roster_proposal_proposed_by_id_foreign",
           "localTableName": "public.roster_proposal",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
         "roster_proposal_reviewed_by_id_foreign": {
-          "columnNames": [
-            "reviewed_by_id"
-          ],
+          "columnNames": ["reviewed_by_id"],
           "constraintName": "roster_proposal_reviewed_by_id_foreign",
           "localTableName": "public.roster_proposal",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -5378,9 +5036,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "name"
-          ],
+          "columnNames": ["name"],
           "composite": false,
           "constraint": false,
           "keyName": "team_name_index",
@@ -5388,9 +5044,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "team_pkey",
@@ -5398,9 +5052,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "slug"
-          ],
+          "columnNames": ["slug"],
           "composite": false,
           "constraint": false,
           "keyName": "team_slug_index",
@@ -5412,14 +5064,10 @@
       "triggers": [],
       "foreignKeys": {
         "team_merged_into_id_foreign": {
-          "columnNames": [
-            "merged_into_id"
-          ],
+          "columnNames": ["merged_into_id"],
           "constraintName": "team_merged_into_id_foreign",
           "localTableName": "public.team",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.team",
           "updateRule": "cascade",
           "deleteRule": "restrict"
@@ -5519,9 +5167,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "topic_pkey",
@@ -5949,10 +5595,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "event_id",
-            "slug"
-          ],
+          "columnNames": ["event_id", "slug"],
           "composite": true,
           "constraint": true,
           "keyName": "tournament_event_id_slug_unique",
@@ -5960,9 +5603,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "pandascore_id"
-          ],
+          "columnNames": ["pandascore_id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_pandascore_id_unique",
@@ -5970,9 +5611,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_pkey",
@@ -5984,39 +5623,27 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_event_id_foreign": {
-          "columnNames": [
-            "event_id"
-          ],
+          "columnNames": ["event_id"],
           "constraintName": "tournament_event_id_foreign",
           "localTableName": "public.tournament",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_event",
           "updateRule": "cascade"
         },
         "tournament_league_id_foreign": {
-          "columnNames": [
-            "league_id"
-          ],
+          "columnNames": ["league_id"],
           "constraintName": "tournament_league_id_foreign",
           "localTableName": "public.tournament",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.league",
           "updateRule": "cascade",
           "deleteRule": "set null"
         },
         "tournament_winner_id_foreign": {
-          "columnNames": [
-            "winner_id"
-          ],
+          "columnNames": ["winner_id"],
           "constraintName": "tournament_winner_id_foreign",
           "localTableName": "public.tournament",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -6184,9 +5811,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "pandascore_serie_id"
-          ],
+          "columnNames": ["pandascore_serie_id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_event_pandascore_serie_id_unique",
@@ -6194,9 +5819,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_event_pkey",
@@ -6204,9 +5827,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "slug"
-          ],
+          "columnNames": ["slug"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_event_slug_unique",
@@ -6218,14 +5839,10 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_event_league_id_foreign": {
-          "columnNames": [
-            "league_id"
-          ],
+          "columnNames": ["league_id"],
           "constraintName": "tournament_event_league_id_foreign",
           "localTableName": "public.tournament_event",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.league",
           "updateRule": "cascade",
           "deleteRule": "set null"
@@ -6342,9 +5959,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_participant_pkey",
@@ -6352,9 +5967,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "team_id"
-          ],
+          "columnNames": ["team_id"],
           "composite": false,
           "constraint": false,
           "keyName": "tournament_participant_team_id_index",
@@ -6366,26 +5979,18 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_participant_team_id_foreign": {
-          "columnNames": [
-            "team_id"
-          ],
+          "columnNames": ["team_id"],
           "constraintName": "tournament_participant_team_id_foreign",
           "localTableName": "public.tournament_participant",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.team",
           "updateRule": "cascade"
         },
         "tournament_participant_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "tournament_participant_tournament_id_foreign",
           "localTableName": "public.tournament_participant",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade"
         }
@@ -6433,10 +6038,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "tournament_participant_id",
-            "player_id"
-          ],
+          "columnNames": ["tournament_participant_id", "player_id"],
           "composite": true,
           "constraint": true,
           "keyName": "tournament_participant_players_pkey",
@@ -6448,27 +6050,19 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_participant_players_foreign_tournament_part_5cea64eb": {
-          "columnNames": [
-            "tournament_participant_id"
-          ],
+          "columnNames": ["tournament_participant_id"],
           "constraintName": "tournament_participant_players_foreign_tournament_part_5cea64eb",
           "localTableName": "public.tournament_participant_players",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_participant",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "tournament_participant_players_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "tournament_participant_players_player_id_foreign",
           "localTableName": "public.tournament_participant_players",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -6602,9 +6196,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "tournament_prize_pkey",
@@ -6612,10 +6204,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "tournament_id",
-            "team_id"
-          ],
+          "columnNames": ["tournament_id", "team_id"],
           "composite": true,
           "constraint": true,
           "keyName": "tournament_prize_tournament_id_team_id_unique",
@@ -6627,26 +6216,18 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_prize_team_id_foreign": {
-          "columnNames": [
-            "team_id"
-          ],
+          "columnNames": ["team_id"],
           "constraintName": "tournament_prize_team_id_foreign",
           "localTableName": "public.tournament_prize",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.team",
           "updateRule": "cascade"
         },
         "tournament_prize_tournament_id_foreign": {
-          "columnNames": [
-            "tournament_id"
-          ],
+          "columnNames": ["tournament_id"],
           "constraintName": "tournament_prize_tournament_id_foreign",
           "localTableName": "public.tournament_prize",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
           "updateRule": "cascade"
         }
@@ -6694,10 +6275,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "tournament_prize_id",
-            "player_id"
-          ],
+          "columnNames": ["tournament_prize_id", "player_id"],
           "composite": true,
           "constraint": true,
           "keyName": "tournament_prize_players_pkey",
@@ -6709,27 +6287,19 @@
       "triggers": [],
       "foreignKeys": {
         "tournament_prize_players_player_id_foreign": {
-          "columnNames": [
-            "player_id"
-          ],
+          "columnNames": ["player_id"],
           "constraintName": "tournament_prize_players_player_id_foreign",
           "localTableName": "public.tournament_prize_players",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         },
         "tournament_prize_players_tournament_prize_id_foreign": {
-          "columnNames": [
-            "tournament_prize_id"
-          ],
+          "columnNames": ["tournament_prize_id"],
           "constraintName": "tournament_prize_players_tournament_prize_id_foreign",
           "localTableName": "public.tournament_prize_players",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament_prize",
           "updateRule": "cascade",
           "deleteRule": "cascade"
@@ -6812,9 +6382,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "login"
-          ],
+          "columnNames": ["login"],
           "composite": false,
           "constraint": true,
           "keyName": "twitch_streamer_login_unique",
@@ -6822,9 +6390,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "twitch_streamer_pkey",
@@ -6980,9 +6546,7 @@
       },
       "indexes": [
         {
-          "columnNames": [
-            "email"
-          ],
+          "columnNames": ["email"],
           "composite": false,
           "constraint": false,
           "keyName": "user_email_index",
@@ -6990,9 +6554,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "keyName": "user_pkey",

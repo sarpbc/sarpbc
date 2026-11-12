@@ -117,6 +117,7 @@ export class RosterProposalService {
         { kind: "match", id: change.matchId },
         change.viewership,
       );
+    }
     if (change.kind === "set_circuit_stage_scale") {
       await this.circuits.requireStageScale(change.circuitId, change.tournamentId, change.scale);
     }
