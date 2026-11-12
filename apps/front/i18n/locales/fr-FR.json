@@ -272,7 +272,6 @@
         "recentMatches": "Derniers matchs"
       }
     },
-<<<<<<< HEAD
     "spoiler": {
       "toggle": "Mode sans spoiler",
       "enable": "Masquer les scores et les résultats",
@@ -281,7 +280,7 @@
       "resultHidden": "Résultat masqué",
       "revealScore": "Afficher le score",
       "revealResults": "Afficher les résultats"
-=======
+    },
     "viewership": {
       "title": "Audience",
       "peak": "Pic de spectateurs",
@@ -292,7 +291,6 @@
         "official": "Diffusions officielles uniquement",
         "withCostreams": "Co-streams inclus"
       }
->>>>>>> 41b62b7b (feat(front): show credited viewership on match and event pages)
     }
   },
   "timeAgo": {
