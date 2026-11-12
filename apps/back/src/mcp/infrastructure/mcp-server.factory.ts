@@ -4,6 +4,7 @@ import type { PatUser } from "../../pat/application/pat.service";
 import { registerTools } from "./define-tool";
 import { MCP_SERVICES, type McpServices } from "./mcp-services";
 import { redistributableCompetition } from "./redistributable-competition";
+import { circuitTools } from "./tools/circuit-tools";
 import { eventTools } from "./tools/event-tools";
 import { gameStatsTools } from "./tools/game-stats-tools";
 import { readTools } from "./tools/read-tools";
@@ -30,6 +31,7 @@ export class McpServerFactory {
       ...writeTools(this.services),
       ...rosterTools(this.services),
       ...gameStatsTools(this.services),
+      ...circuitTools(this.services),
     ]);
 
     return server;

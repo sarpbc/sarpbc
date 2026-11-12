@@ -106,6 +106,21 @@ export { STREAM_KINDS, STREAM_PLATFORMS } from "./stream";
 export type { Stream, StreamInput, StreamKind, StreamPlatform, StreamsResponse } from "./stream";
 export { VIEWERSHIP_SCOPES } from "./viewership";
 export type { Viewership, ViewershipResponse, ViewershipScope } from "./viewership";
+export type {
+  CircuitDetail,
+  CircuitEventStatus,
+  CircuitInput,
+  CircuitScaleTier,
+  CircuitStage,
+  CircuitStageScaleInput,
+  CircuitStageTournament,
+  CircuitStandingCell,
+  CircuitStandingRow,
+  CircuitStandings,
+  CircuitStandingsEvent,
+  CircuitStandingTeam,
+  CircuitSummary,
+} from "./circuit";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,

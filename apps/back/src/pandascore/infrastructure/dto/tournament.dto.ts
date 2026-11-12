@@ -44,6 +44,10 @@ export const serieSchema = z.object({
   full_name: text,
   year: z.number().int().optional().catch(undefined),
 });
+export const standingSchema = z.object({
+  rank: z.number().int().positive(),
+  team: z.object({ id: z.number().int().positive() }).nullish(),
+});
 export const tournamentSchema = z.object({
   id: z.number().int().positive(),
   name: z.string(),

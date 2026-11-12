@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { CircuitModule } from "../../circuit/infrastructure/circuit.module";
 import { MatchStatsModule } from "../../match-stats/infrastructure/match-stats.module";
 import { PatModule } from "../../pat/infrastructure/pat.module";
 import { RosterModule } from "../../roster/infrastructure/roster.module";
@@ -17,6 +18,7 @@ import { mcpServicesProvider } from "./mcp-services";
     NewsModule,
     RosterProposalModule,
     MatchStatsModule,
+    CircuitModule,
   ],
   controllers: [McpController],
   providers: [mcpServicesProvider, McpServerFactory],

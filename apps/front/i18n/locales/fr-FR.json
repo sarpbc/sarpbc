@@ -111,7 +111,8 @@
     "players": "Joueurs",
     "matches": "Matchs",
     "results": "Résultats",
-    "transfers": "Transferts"
+    "transfers": "Transferts",
+    "circuits": "Circuits"
   },
   "components": {
     "cookiePopup": {
@@ -1804,6 +1805,41 @@
         "description": "Suivez les mouvements d'effectifs de l'esport Rocket League sur sarpbc.org : arrivées, départs, mises sur le banc et prêts, avec leurs sources."
       },
       "error": "Impossible de charger les transferts. Vérifiez votre connexion et réessayez."
+    },
+    "circuits": {
+      "index": {
+        "title": "Circuits",
+        "seoTitle": "Points des circuits Rocket League {'|'} sarpbc.org",
+        "description": "Suivez les points des circuits de l’esport Rocket League sur sarpbc.org : classement des équipes et points gagnés à chaque événement comptabilisé.",
+        "error": "Impossible de charger les circuits. Vérifiez votre connexion et réessayez.",
+        "empty": "Aucun circuit pour le moment.",
+        "emptyHint": "Les circuits apparaissent ici dès que l’équipe de sarpbc.org les ajoute."
+      },
+      "standings": {
+        "title": "Points du circuit",
+        "seoTitle": "Classement des points du circuit {name} {'|'} sarpbc.org",
+        "seoDescription": "Classement des points du circuit {name} sur sarpbc.org : totaux des équipes, rangs et points gagnés à chaque événement.",
+        "notFound": "Ce circuit n’existe pas.",
+        "error": "Impossible de charger le classement. Vérifiez votre connexion et réessayez.",
+        "empty": "Pas encore de classement.",
+        "emptyHint": "Le classement apparaît dès qu’un événement comptabilisé se termine.",
+        "caption": "Classement des points du circuit {name}",
+        "rank": "Rang",
+        "rankShort": "#",
+        "team": "Équipe",
+        "points": "Points",
+        "noPoints": "Aucun point",
+        "qualification": "Les équipes au-dessus de la ligne occupent les {count} places qualificatives.",
+        "aboutTitle": "Calcul des points",
+        "explainer": "Les points suivent le barème officiel saisi par l’équipe de sarpbc.org, appliqué aux classements finaux fournis par PandaScore. Seuls les résultats PandaScore sont comptabilisés.",
+        "scaleSource": "Source du barème",
+        "status": {
+          "scaleMissing": "Barème à venir",
+          "upcoming": "À venir",
+          "inProgress": "En cours",
+          "awaitingResults": "Résultats en attente"
+        }
+      }
     }
   }
 }

@@ -1,4 +1,10 @@
-import type { MatchLineupInput, RosterChange, StreamInput, Viewership } from "@sarpbc/types";
+import type {
+  CircuitScaleTier,
+  MatchLineupInput,
+  RosterChange,
+  StreamInput,
+  Viewership,
+} from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ConflictError,
@@ -94,6 +100,14 @@ function setup() {
     }),
     set: vi.fn(async () => ({ source: "manual" as const, lineups: [] })),
   };
+  const circuits = {
+    requireStageScale: vi.fn(async (_: string, tournamentId: string, scale: CircuitScaleTier[]) => {
+      if (tournamentId === "startgg-stage")
+        throw new InvalidInputError("Only PandaScore tournaments count toward circuit points");
+      return scale;
+    }),
+    setStageScale: vi.fn(async () => undefined),
+  };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
     upload: vi.fn(async (teamId: string, variant: string) =>
@@ -180,6 +194,7 @@ function setup() {
     streams,
     lineups,
     viewerships,
+    circuits,
   );
   return {
     saved,
@@ -196,6 +211,7 @@ function setup() {
     streams,
     lineups,
     viewerships,
+    circuits,
     service,
   };
 }
@@ -216,6 +232,7 @@ describe("RosterProposalService", () => {
   let streams: ReturnType<typeof setup>["streams"];
   let lineups: ReturnType<typeof setup>["lineups"];
   let viewerships: ReturnType<typeof setup>["viewerships"];
+  let circuits: ReturnType<typeof setup>["circuits"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -234,6 +251,7 @@ describe("RosterProposalService", () => {
       streams,
       lineups,
       viewerships,
+      circuits,
       service,
     } = setup());
   });
@@ -268,6 +286,7 @@ describe("RosterProposalService", () => {
       tournaments: [],
       matches: [],
       events: [],
+      circuits: [],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -934,6 +953,38 @@ describe("RosterProposalService", () => {
       );
       await service.list("pending");
       expect(store.names).toHaveBeenCalledWith(expect.objectContaining({ events: ["event-1"] }));
+    });
+  });
+
+  describe("circuit scale proposals", () => {
+    const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
+    const rules = "https://example.org/official-rules";
+    const setScale = (tournamentId = "ps-stage") =>
+      service.propose(
+        { kind: "set_circuit_stage_scale", circuitId: "circuit-1", tournamentId, scale },
+        rules,
+        "journalist",
+      );
+
+    it("checks the stage and keeps the scale pending until approval", async () => {
+      const proposal = await setScale();
+
+      expect(proposal).toMatchObject({ status: "pending", sourceUrl: rules });
+      expect(circuits.requireStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", scale);
+      expect(circuits.setStageScale).not.toHaveBeenCalled();
+    });
+
+    it("refuses a start.gg stage before recording anything", async () => {
+      await expect(setScale("startgg-stage")).rejects.toThrow("Only PandaScore");
+      expect(saved.size).toBe(0);
+    });
+
+    it("applies the scale with the proposal source on approval", async () => {
+      const { id } = await setScale();
+
+      expect(await service.approve(id, "admin")).toMatchObject({ entityId: "circuit-1" });
+      expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", scale, rules);
+      expect(staff.permissions).toContain("tournaments.manage");
     });
   });
 });

@@ -87,6 +87,7 @@ export interface TournamentWriter {
   saveLeague(league: League): Promise<void>;
   participants(id: string): Promise<TournamentParticipant[]>;
   saveParticipant(participant: ParticipantSnapshot): Promise<void>;
+  setPlacements(placements: ReadonlyMap<string, number | null>): Promise<void>;
   removeParticipant(id: string): Promise<void>;
   participantReferences(
     tournamentId: string,

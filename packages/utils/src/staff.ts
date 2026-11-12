@@ -42,6 +42,7 @@ export function requiredPermission(change: RosterChange): StaffPermission {
     case "set_match_lineups":
     case "set_event_viewership":
     case "set_match_viewership":
+    case "set_circuit_stage_scale":
     case "delete_match":
       return "tournaments.manage";
     default: {

@@ -82,6 +82,22 @@ export class PandascoreApiClient {
     return this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
+  async getTournamentStandings(tournamentId: number): Promise<unknown[] | null> {
+    try {
+      return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
+    } catch (error) {
+      if (!(error instanceof PandascoreApiError)) throw error;
+      if (error.status === 404) return [];
+      if (error.status !== 403) throw error;
+      log.warn({
+        component: PandascoreApiClient.name,
+        message: "PandaScore standings are not available with this API plan",
+        tournamentId,
+      });
+      return null;
+    }
+  }
+
   async getRocketLeaguePlayers(): Promise<unknown[]> {
     return this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },

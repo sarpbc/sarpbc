@@ -20,6 +20,7 @@ import type { MatchLineupService } from "../../tournament/application/match/matc
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { StreamService } from "../../tournament/application/stream.service";
 import type { ViewershipService } from "../../tournament/application/viewership.service";
+import type { CircuitService } from "../../circuit/application/circuit.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { StreamOwner } from "../../tournament/domain/stream";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
@@ -42,6 +43,7 @@ type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
 type Streams = Pick<StreamService, "requireProposable" | "set">;
 type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
 type Viewerships = Pick<ViewershipService, "requireProposable" | "set">;
+type Circuits = Pick<CircuitService, "requireStageScale" | "setStageScale">;
 
 interface StreamChange {
   owner: StreamOwner;
@@ -72,6 +74,7 @@ export class RosterProposalService {
     private readonly streams: Streams,
     private readonly lineups: Lineups,
     private readonly viewerships: Viewerships,
+    private readonly circuits: Circuits,
   ) {}
 
   async propose(
@@ -114,6 +117,9 @@ export class RosterProposalService {
         { kind: "match", id: change.matchId },
         change.viewership,
       );
+    }
+    if (change.kind === "set_circuit_stage_scale") {
+      await this.circuits.requireStageScale(change.circuitId, change.tournamentId, change.scale);
     }
     if (change.kind === "delete_team") {
       await this.requireTeamRemoval(change.teamId, change.mergeIntoTeamId);
@@ -172,7 +178,8 @@ export class RosterProposalService {
           proposals.flatMap(({ change }) =>
             change.kind === "set_tournament_prizes" ||
             change.kind === "award_player" ||
-            change.kind === "set_tournament_streams"
+            change.kind === "set_tournament_streams" ||
+            change.kind === "set_circuit_stage_scale"
               ? [change.tournamentId]
               : [],
           ),
@@ -184,6 +191,13 @@ export class RosterProposalService {
             change.kind === "set_event_streams" || change.kind === "set_event_viewership"
               ? [change.eventId]
               : [],
+          ),
+        ),
+      ],
+      circuits: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "set_circuit_stage_scale" ? [change.circuitId] : [],
           ),
         ),
       ],
@@ -307,6 +321,11 @@ export class RosterProposalService {
       case "set_match_viewership":
         await this.viewerships.set({ kind: "match", id: change.matchId }, change.viewership);
         return change.matchId;
+      case "set_circuit_stage_scale": {
+        const { circuitId, tournamentId, scale } = change;
+        await this.circuits.setStageScale(circuitId, tournamentId, scale, sourceUrl);
+        return circuitId;
+      }
       case "delete_match":
         await this.matches.deleteMatch(change.matchId);
         return change.matchId;
@@ -387,6 +406,7 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "set_match_streams":
     case "set_event_viewership":
     case "set_match_viewership":
+    case "set_circuit_stage_scale":
     case "delete_match":
     case "delete_team":
       return [];
@@ -425,6 +445,7 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "set_match_lineups":
     case "set_event_viewership":
     case "set_match_viewership":
+    case "set_circuit_stage_scale":
     case "delete_match":
       return [];
     default: {

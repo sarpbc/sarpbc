@@ -25,6 +25,11 @@ export interface UpsertTournamentParticipantCommand {
   players: UpsertPlayerCommand[];
 }
 
+export interface TournamentStandingCommand {
+  teamPandascoreId: number;
+  rank: number;
+}
+
 export interface UpsertTournamentCommand {
   pandascoreId: number;
   name: string;
@@ -40,6 +45,7 @@ export interface UpsertTournamentCommand {
   winnerPandascoreTeamId?: number | null;
   league?: UpsertLeagueCommand;
   expectedRoster?: UpsertTournamentParticipantCommand[];
+  standings?: TournamentStandingCommand[];
 }
 
 export interface UpsertMatchResultCommand {
@@ -93,4 +99,5 @@ export interface CompetitionFeed {
   getTournamentById(id: number): Promise<UpsertTournamentCommand | null>;
   getTournamentBrackets(id: number): Promise<UpsertMatchCommand[]>;
   getTournamentMatches(id: number): Promise<UpsertMatchCommand[]>;
+  getTournamentStandings(id: number): Promise<TournamentStandingCommand[] | null>;
 }

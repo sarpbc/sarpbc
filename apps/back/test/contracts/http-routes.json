@@ -72,6 +72,70 @@
     "permissions": []
   },
   {
+    "controller": "\"circuits\"",
+    "verb": "DELETE",
+    "path": "\":id/stages/:tournamentId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "GET",
+    "path": "\":ref/standings\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "GET",
+    "path": "\":ref\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "PUT",
+    "path": "\":id/stages/:tournamentId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
     "controller": "\"events\"",
     "verb": "DELETE",
     "path": "\":id\"",

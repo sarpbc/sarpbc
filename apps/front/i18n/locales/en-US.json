@@ -111,7 +111,8 @@
     "players": "Players",
     "matches": "Matches",
     "results": "Results",
-    "transfers": "Transfers"
+    "transfers": "Transfers",
+    "circuits": "Circuits"
   },
   "components": {
     "cookiePopup": {
@@ -1804,6 +1805,41 @@
         "description": "Follow Rocket League esports roster moves on sarpbc.org: player arrivals, departures, benchings and loans across teams, with sources."
       },
       "error": "Could not load transfers. Check your connection and try again."
+    },
+    "circuits": {
+      "index": {
+        "title": "Circuits",
+        "seoTitle": "Rocket League Circuit Points Standings {'|'} sarpbc.org",
+        "description": "Follow Rocket League esports circuit points on sarpbc.org: team standings and the points earned at each counted event.",
+        "error": "Couldn't load circuits. Check your connection and try again.",
+        "empty": "No circuits yet.",
+        "emptyHint": "Circuits appear here once sarpbc.org staff add them."
+      },
+      "standings": {
+        "title": "Circuit Points",
+        "seoTitle": "{name} Circuit Points Standings {'|'} sarpbc.org",
+        "seoDescription": "{name} circuit points standings on sarpbc.org: team totals, ranks and the points earned at each event.",
+        "notFound": "This circuit does not exist.",
+        "error": "Couldn't load the standings. Check your connection and try again.",
+        "empty": "No standings yet.",
+        "emptyHint": "Standings appear once a counted event ends.",
+        "caption": "{name} circuit points standings",
+        "rank": "Rank",
+        "rankShort": "#",
+        "team": "Team",
+        "points": "Points",
+        "noPoints": "No points",
+        "qualification": "Teams above the line hold the top {count} qualification spots.",
+        "aboutTitle": "How Points Work",
+        "explainer": "Points follow the official scale entered by sarpbc.org staff, applied to final placements from PandaScore. Only PandaScore results count.",
+        "scaleSource": "Points scale source",
+        "status": {
+          "scaleMissing": "Scale pending",
+          "upcoming": "Upcoming",
+          "inProgress": "In progress",
+          "awaitingResults": "Awaiting results"
+        }
+      }
     }
   }
 }
