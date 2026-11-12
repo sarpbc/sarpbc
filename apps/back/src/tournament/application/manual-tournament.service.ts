@@ -17,6 +17,7 @@ import type { CompetitionAfterCommit } from "./after-commit";
 import type {
   CompetitionTransaction,
   EventWriter,
+  MatchWriter,
   TournamentQueries,
   TournamentWriter,
 } from "./ports";
@@ -34,6 +35,7 @@ export class ManualTournamentService {
       tournament.pandascoreId = null;
       tournament.name = input.name;
       tournament.format = input.format ?? "3v3";
+      tournament.hasBracket = input.hasBracket ?? false;
       assertLineupFitsFormat(tournament.format, {
         teamIds: input.teamIds ?? [],
         playerGroups: input.playerParticipants ?? [],
@@ -61,7 +63,7 @@ export class ManualTournamentService {
     return this.detail(id);
   }
   async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
-    await this.transaction.run(async ({ tournaments, events }) => {
+    await this.transaction.run(async ({ tournaments, events, matches }) => {
       const tournament = await tournaments.load(id);
       if (!tournament) throw new NotFoundError('Tournament with id "' + id + '" was not found.');
       assertTournamentUpdateAllowed(tournament.source, input);
@@ -87,6 +89,8 @@ export class ManualTournamentService {
           await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
         if (input.rosters !== undefined)
           await this.setRosters(tournaments, tournament, input.rosters);
+        if (input.hasBracket !== undefined)
+          tournament.hasBracket = await bracketToggle(matches, tournament.id, input.hasBracket);
       }
       await tournaments.save(tournament);
     });
@@ -257,6 +261,20 @@ export class ManualTournamentService {
       });
     }
   }
+}
+
+async function bracketToggle(
+  matches: MatchWriter,
+  tournamentId: string,
+  hasBracket: boolean,
+): Promise<boolean> {
+  if (hasBracket) return true;
+  const stage = await matches.bracket(tournamentId);
+  if (stage.matches.some((match) => match.previousMatches.length > 0))
+    throw new InvalidInputError(
+      "This stage still has bracket links. Remove them from its matches before disabling the bracket.",
+    );
+  return false;
 }
 
 function sharedEventSlugError() {

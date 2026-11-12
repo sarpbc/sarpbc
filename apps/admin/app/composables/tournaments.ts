@@ -114,6 +114,7 @@ export interface ManualTournamentInput {
   format?: TournamentFormat;
   teamIds?: string[];
   playerParticipants?: string[][];
+  hasBracket?: boolean;
 }
 
 export async function getTournamentLeagues(): Promise<League[]> {

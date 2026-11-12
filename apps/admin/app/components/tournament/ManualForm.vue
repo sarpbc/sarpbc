@@ -229,6 +229,14 @@ function isTeamSelected(teamId: string): boolean {
       />
     </UFormField>
 
+    <UFormField name="hasBracket" :help="$t('page.tournaments.form.hasBracketHelp')">
+      <USwitch
+        :model-value="state.hasBracket"
+        :label="$t('page.tournaments.form.hasBracket')"
+        @update:model-value="updateField('hasBracket', $event)"
+      />
+    </UFormField>
+
     <UFormField
       v-if="state.format !== '3v3'"
       :label="$t('page.tournaments.form.players')"

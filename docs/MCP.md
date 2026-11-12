@@ -67,7 +67,8 @@ Write tools (staff permission required):
 | ---------------------------- | -------------------- | ---------------------------------------------------------------------------------------- |
 | `create_match`               | `tournaments.manage` | Create a match from participant ids and/or team ids or slugs                             |
 | `set_match_winner`           | `tournaments.manage` | Set match winner by participant id                                                       |
-| `update_match`               | `tournaments.manage` | Correct score, status or dates of a manual match                                         |
+| `update_match`               | `tournaments.manage` | Correct score, status, dates, sides or bracket links of a manual match                   |
+| `create_empty_bracket`       | `tournaments.manage` | Generate an empty 4, 8 or 16-team single-elimination bracket on a manual bracket stage   |
 | `set_match_game_vods`        | `tournaments.manage` | Replace the Twitch/YouTube VOD links of one game, with their ISO 639-1 language          |
 | `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
 | `create_tournament`          | `tournaments.manage` | Create a manual tournament, as a stage of an existing event or with an event of its own  |
@@ -143,6 +144,8 @@ A points circuit groups tournament stages under a name staff enter, such as a se
 `get_tournament` includes `participants` for manual and PandaScore tournaments. Each entry is the tournament participant `id` plus the team `id`, `slug` and `name`. A start.gg team registered in one of those tournaments is included. start.gg tournaments themselves stay hidden, and their participants are not returned by `create_tournament`, `update_tournament` or `create_match`.
 
 `create_match` still accepts `participantIds`. It also accepts `teams`, a list of team UUIDs or slugs, and resolves each one to the participant registered in that tournament. Calls that pass only `participantIds` are unchanged. A team that does not exist, or that is not registered in the tournament, is rejected with an error that names the team. At least two different sides are required, counting `participantIds` and `teams` together. `results`, `set_match_winner` and `update_match` still key scores and winners by tournament participant id. Those ids come from `get_tournament` or from the `participants` field on the `create_match` response.
+
+A manual stage shows as a bracket tree once `hasBracket` is set (`create_tournament` or `update_tournament`) and its matches carry `previousMatches`, each `{ previousMatchId, type: winner | loser }`, on `create_match` or `update_match`. A previous match must belong to the same stage, a match has at most two feeders, the winner (or loser) of a match feeds one match only, and links never form a cycle. `hasBracket` cannot be turned off while links remain. PandaScore stages and matches refuse these fields so the sync stays the only writer of their bracket. `create_empty_bracket` creates the matches of an empty tree, not started and without teams, on a bracket stage that has no match yet; `update_match` `participantIds` fills them later. `get_tournament` returns each match's `previousMatches`.
 
 VOD links are stored per game on the match. Only https `twitch.tv`, `youtube.com` and `youtu.be` URLs are accepted, optionally timestamped with `t=` (`123` or `1h2m3s`); the source is derived from the host and duplicate URLs within a game are dropped. MCP reads do not return VODs, and VODs of start.gg matches only appear where the match itself does.
 

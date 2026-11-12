@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TournamentMatchListItem } from "@sarpbc/types";
+import type { TournamentDetailMatch, TournamentMatchListItem } from "@sarpbc/types";
 import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
 const route = useRoute();
@@ -18,6 +18,9 @@ const streamsTarget = ref<{ path: string; title: string } | null>(null);
 const streamsOpen = ref(false);
 const viewershipTarget = ref<{ path: string; title: string } | null>(null);
 const viewershipOpen = ref(false);
+const bracketMatch = ref<{ match: TournamentDetailMatch; label: string } | null>(null);
+const bracketOpen = ref(false);
+const emptyBracketOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
@@ -58,13 +61,25 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-const displayMatches = computed(() =>
-  (matches.value ?? []).filter((match) => (match.participants?.length ?? 0) >= 2),
+const displayMatches = computed(() => matches.value ?? []);
+
+const editsBracket = computed(() => !!tournament.value && tournament.value.source !== "pandascore");
+const canGenerateBracket = computed(
+  () => editsBracket.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
 );
+
+function openBracket(match: TournamentMatchListItem) {
+  const detailed = tournament.value?.matches.find((candidate) => candidate.id === match.id);
+  if (!detailed) return;
+  bracketMatch.value = { match: detailed, label: matchLabel(match) };
+  bracketOpen.value = true;
+}
 
 function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
-  return `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
+  const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
+  const name = tournament.value?.matches.find((candidate) => candidate.id === match.id)?.name;
+  return name ? `${name} · ${sides}` : sides;
 }
 
 function matchScore(match: TournamentMatchListItem): string {
@@ -164,6 +179,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           @click="
             openViewership(`/events/${tournament.event.id}/viewership`, tournament.event.name)
           "
+        />
+        <UButton
+          v-if="canGenerateBracket"
+          variant="soft"
+          icon="i-fluent-organization-horizontal-24-regular"
+          :label="$t('page.tournaments.emptyBracket.action')"
+          @click="emptyBracketOpen = true"
         />
         <UButton
           v-if="tournament?.source === 'pandascore'"
@@ -268,6 +290,14 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 "
               />
               <UButton
+                v-if="editsBracket"
+                size="xs"
+                variant="soft"
+                icon="i-fluent-organization-horizontal-24-regular"
+                :label="$t('page.tournaments.bracket.action')"
+                @click="openBracket(match)"
+              />
+              <UButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 size="xs"
@@ -323,6 +353,24 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       :match="lineupsMatch"
       :label="matchLabel(lineupsMatch)"
       :participants="tournament.participants ?? []"
+    />
+
+    <TournamentMatchBracket
+      v-if="bracketMatch && tournament"
+      :key="bracketMatch.match.id"
+      v-model:open="bracketOpen"
+      :match="bracketMatch.match"
+      :label="bracketMatch.label"
+      :participants="tournament.participants ?? []"
+      :stage-matches="tournament.matches"
+      @saved="reload()"
+    />
+
+    <TournamentEmptyBracket
+      v-if="canGenerateBracket"
+      v-model:open="emptyBracketOpen"
+      :tournament-id="tournamentId"
+      @created="reload()"
     />
 
     <StreamEditor

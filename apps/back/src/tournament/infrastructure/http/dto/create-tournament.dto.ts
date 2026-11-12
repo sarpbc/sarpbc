@@ -38,6 +38,7 @@ const tournamentWriteFields = {
       "Each player can only be in one participant.",
     )
     .optional(),
+  hasBracket: z.boolean().optional(),
 };
 const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
 export const createTournamentFields = {

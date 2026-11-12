@@ -25,8 +25,11 @@ export type {
 export type { NewsArticleAdmin, NewsType, PaginatedNewsArticles } from "./news";
 export { SITEMAP_KINDS } from "./sitemap";
 export type { SitemapEntry, SitemapKind } from "./sitemap";
-export { DATA_SOURCES, TOURNAMENT_FORMATS } from "./competition";
+export { DATA_SOURCES, EMPTY_BRACKET_SIZES, TOURNAMENT_FORMATS } from "./competition";
 export type {
+  BracketLinkInput,
+  BracketLinkType,
+  EmptyBracketSize,
   CountedMatchListItem,
   MatchListItem,
   MatchResultsResponse,

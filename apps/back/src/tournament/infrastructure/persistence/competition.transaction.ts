@@ -7,6 +7,7 @@ import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persiste
 import * as Row from "./tournament.entities";
 import type * as Model from "../../domain/competition";
 import type { TournamentEvent } from "../../domain/tournament-event";
+import type { StageBracket } from "../../domain/bracket";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
@@ -201,6 +202,14 @@ const matchReferenceCounts = z.object({
   comments: z.coerce.number().int().nonnegative(),
   nextMatches: z.coerce.number().int().nonnegative(),
 });
+const stageBracketRows = z.array(z.object({ has_bracket: z.boolean() }));
+const stageMatchRows = z.array(
+  z.object({
+    id: z.string(),
+    previous_match_id: z.string().nullable(),
+    type: z.enum(["winner", "loser"]).nullable(),
+  }),
+);
 export class CompetitionMatchWriter implements MatchWriter {
   private readonly staged = new Map<string, Row.Match>();
   constructor(
@@ -260,6 +269,29 @@ export class CompetitionMatchWriter implements MatchWriter {
   }
   participants(id: string) {
     return this.tournaments.participants(id);
+  }
+  async bracket(tournamentId: string) {
+    const [stage] = stageBracketRows.parse(
+      await this.em.execute(`select "has_bracket" from "tournament" where "id" = ? for update`, [
+        tournamentId,
+      ]),
+    );
+    const matches = stageMatchRows.parse(
+      await this.em.execute(
+        `select "m"."id", "l"."previous_match_id", "l"."type"
+        from "match" "m" left join "bracket_link" "l" on "l"."match_id" = "m"."id"
+        where "m"."tournament_id" = ? order by "m"."id"`,
+        [tournamentId],
+      ),
+    );
+    const byId = new Map<string, StageBracket["matches"][number]>();
+    for (const row of matches) {
+      const match = byId.get(row.id) ?? { id: row.id, previousMatches: [] };
+      if (row.previous_match_id && row.type)
+        match.previousMatches.push({ previousMatchId: row.previous_match_id, type: row.type });
+      byId.set(row.id, match);
+    }
+    return { hasBracket: stage?.has_bracket ?? false, matches: [...byId.values()] };
   }
   async save(model: Model.Match) {
     let row =

@@ -15,6 +15,7 @@ import {
 } from "./scenarios/competition-sync-lookups.mjs";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
+import { verifyManualBrackets } from "./scenarios/manual-brackets.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
@@ -1780,6 +1781,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           memberCookie,
           RequestContext,
         });
+      },
+    );
+
+    await check(
+      "manual stages link their matches into a bracket and keep PandaScore brackets out of reach",
+      async () => {
+        await verifyManualBrackets({ request, staffCookie, memberCookie, competition });
       },
     );
 

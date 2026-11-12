@@ -22,6 +22,7 @@ import type { MatchTiming } from "../domain/tournament-end";
 import type { MatchDecided } from "../domain/match-decided";
 import type { MatchReferences } from "../domain/match-deletion";
 import type { LineupRow } from "../domain/match-lineup";
+import type { StageBracket } from "../domain/bracket";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/roster";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -132,6 +133,7 @@ export interface MatchWriter {
   timings(tournamentId: string): Promise<MatchTiming[]>;
   tournament(id: string): Promise<TournamentSummary | null>;
   participants(tournamentId: string): Promise<TournamentParticipant[]>;
+  bracket(tournamentId: string): Promise<StageBracket>;
 }
 export interface RosterIdentityWriter {
   upsertTeam(command: UpsertTeamCommand): Promise<{ id: string }>;

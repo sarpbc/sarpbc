@@ -19,7 +19,13 @@ import {
 import type { MatchLineupsResponse } from "@sarpbc/types";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
-import { CreateMatchDto, SetMatchVodsDto, SetMatchWinnerDto } from "./dto/create-match.dto";
+import {
+  CreateEmptyBracketDto,
+  CreateMatchDto,
+  SetMatchBracketDto,
+  SetMatchVodsDto,
+  SetMatchWinnerDto,
+} from "./dto/create-match.dto";
 import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
 import { CreateLeagueDto, UpdateLeagueDto } from "./dto/manual-catalog.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -262,6 +268,28 @@ export class TournamentController {
       beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
       endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,
     });
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Post(":id/bracket")
+  async createEmptyBracket(
+    @Param("id") tournamentId: string,
+    @Body({ schema: CreateEmptyBracketDto }) body: CreateEmptyBracketDto,
+  ) {
+    const matches = await this.matchService.createEmptyBracket(tournamentId, body);
+    return { matches: matches.map(mapTournamentMatchListItem) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/bracket")
+  async setMatchBracket(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchBracketDto }) body: SetMatchBracketDto,
+  ) {
+    const match = await this.matchService.updateMatch(matchId, body);
     return { match: withPublicSlug(match) };
   }
 
