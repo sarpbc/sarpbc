@@ -11,6 +11,7 @@ const search = ref("");
 const searching = ref(false);
 
 const teamList = ref<Team[]>([]);
+const teamQuery = ref("");
 const playerList = ref<Player[]>([]);
 
 const DEBOUNCE_MS = 150;
@@ -64,14 +65,14 @@ function handleLinkClick(event: MouseEvent): void {
 
 async function refreshSearch() {
   const request = ++latestRequest;
-  const { teams, players } = await searchTeamsAndPlayers({
-    query: search.value,
-  });
+  const query = search.value;
+  const { teams, players } = await searchTeamsAndPlayers({ query });
   // A newer keystroke or a cleared field owns the results now.
   if (request !== latestRequest) {
     return;
   }
   teamList.value = teams;
+  teamQuery.value = query;
   playerList.value = players;
   searching.value = false;
 }
@@ -97,7 +98,7 @@ async function refreshSearch() {
       >
         <PlayerList :players="playerList" :title="t('general.players')" />
 
-        <TeamList :teams="teamList" :title="t('general.teams')" />
+        <TeamList :teams="teamList" :title="t('general.teams')" :query="teamQuery" />
 
         <div
           v-if="search.length > 0 && teamList.length === 0 && playerList.length === 0"
