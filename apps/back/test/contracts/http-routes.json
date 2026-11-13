@@ -528,6 +528,46 @@
     "permissions": []
   },
   {
+    "controller": "\"on-this-day-facts\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"on-this-day-facts\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"on-this-day-facts\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"on-this-day-facts\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"on-this-day\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"pat\"",
     "verb": "DELETE",
     "path": "\"tokens/:id\"",

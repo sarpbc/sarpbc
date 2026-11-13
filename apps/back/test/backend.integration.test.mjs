@@ -17,6 +17,7 @@ import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
 import { verifyManualBrackets } from "./scenarios/manual-brackets.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
+import { verifyOnThisDay } from "./scenarios/on-this-day.mjs";
 import { verifySeasonArchives, verifySeasonAwards } from "./scenarios/seasons.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
@@ -1850,6 +1851,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       "manual stages link their matches into a bracket and keep PandaScore brackets out of reach",
       async () => {
         await verifyManualBrackets({ request, staffCookie, memberCookie, competition });
+      },
+    );
+
+    await check(
+      "on this day reads titles, bracket finals and transfers on the Paris day without start.gg",
+      async () => {
+        await verifyOnThisDay({ orm, request, staffCookie, memberCookie });
       },
     );
 

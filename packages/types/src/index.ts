@@ -206,3 +206,19 @@ export type {
   StreamScoreSeries,
   StreamScoreSide,
 } from "./stream-score";
+export { ON_THIS_DAY_LINK_KINDS } from "./on-this-day";
+export type {
+  OnThisDay,
+  OnThisDayEvent,
+  OnThisDayFact,
+  OnThisDayFactInput,
+  OnThisDayFactLinkInput,
+  OnThisDayLink,
+  OnThisDayLinkKind,
+  OnThisDayMatch,
+  OnThisDayPlayer,
+  OnThisDaySide,
+  OnThisDayTeam,
+  OnThisDayText,
+  OnThisDayTournament,
+} from "./on-this-day";

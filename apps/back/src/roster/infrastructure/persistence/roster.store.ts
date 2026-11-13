@@ -263,6 +263,23 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     );
   }
 
+  async findMovementsOnDay(month: number, day: number) {
+    const rows: { id: string }[] = await this.em
+      .getConnection()
+      .execute(
+        "SELECT id FROM contract WHERE (extract(month from start_date) = ? AND extract(day from start_date) = ?) OR (extract(month from end_date) = ? AND extract(day from end_date) = ?)",
+        [month, day, month, day],
+      );
+    if (rows.length === 0) return [];
+    return (
+      await this.em.find(
+        Row.Contract,
+        { id: { $in: rows.map(({ id }) => id) } },
+        { populate: ["player", "team"] },
+      )
+    ).map(toContract);
+  }
+
   async findById(id: string) {
     const row = await this.em.findOne(Row.Contract, { id }, contractOptions);
     return row ? toContract(row) : null;

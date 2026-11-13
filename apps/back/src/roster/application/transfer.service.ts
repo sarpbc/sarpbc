@@ -27,4 +27,11 @@ export class TransferService {
     );
     return [transfers.slice(offset, offset + limit), transfers.length];
   }
+
+  async onDay(month: number, day: number, now = new Date()): Promise<Transfer[]> {
+    const contracts = await this.contracts.findMovementsOnDay(month, day);
+    return deriveTransfers(contracts, now).filter(
+      ({ date }) => date.getUTCMonth() + 1 === month && date.getUTCDate() === day,
+    );
+  }
 }

@@ -295,6 +295,29 @@
         "official": "Official broadcasts only",
         "withCostreams": "Including co-streams"
       }
+    },
+    "onThisDay": {
+      "title": "On this day",
+      "viewAll": "See all ({count})",
+      "error": "Couldn't load what happened on this day. Check your connection and try again.",
+      "empty": {
+        "title": "Nothing recorded on this day",
+        "hint": "Titles, finals, transfers and staff-written facts from earlier years appear here on their anniversary."
+      },
+      "source": "Source",
+      "score": "{winner}–{loser}",
+      "line": {
+        "title": "{winner} won {tournament}",
+        "final": "{winner} beat {loser} {score} in the final of {tournament}",
+        "finalNoScore": "{winner} beat {loser} in the final of {tournament}",
+        "transfer": {
+          "arrival": "{player} joined {team}",
+          "departure": "{player} left {team}",
+          "benched": "{player} moved to the bench at {team}",
+          "loan": "{player} was loaned to {team}",
+          "staff": "{player} joined the staff of {team}"
+        }
+      }
     }
   },
   "timeAgo": {
@@ -2023,6 +2046,12 @@
           "rule": "Finished matches with at least one player from this country on a tournament roster, most recent first. start.gg matches are not listed."
         }
       }
+    },
+    "onThisDay": {
+      "title": "On this day",
+      "seoTitle": "On This Day in Rocket League Esports {'|'} sarpbc.org",
+      "description": "What happened on this day in earlier years of Rocket League esports: titles, finals, transfers and facts from sarpbc.org staff.",
+      "note": "Titles, finals and transfers come from sarpbc.org's records for this day in earlier years. The other entries are written by sarpbc.org staff, with their source when there is one."
     }
   }
 }

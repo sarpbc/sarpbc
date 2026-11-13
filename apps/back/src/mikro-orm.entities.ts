@@ -42,6 +42,7 @@ import {
   SeasonPathEntrySchema,
   SeasonSchema,
 } from "./season/infrastructure/persistence/season.entities";
+import { OnThisDayFactSchema } from "./on-this-day/infrastructure/persistence/on-this-day-fact.entities";
 import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/player-award.entities";
 import { TournamentPrizeSchema } from "./tournament/infrastructure/persistence/tournament-prize.entities";
 import { MatchLineupPlayerSchema } from "./tournament/infrastructure/persistence/match-lineup.entities";
@@ -89,6 +90,7 @@ export const mikroOrmEntities = [
   SeasonAwardSchema,
   SeasonParticipantSchema,
   SeasonPathEntrySchema,
+  OnThisDayFactSchema,
   TopicSchema,
   PostSchema,
   PostTranslationSchema,

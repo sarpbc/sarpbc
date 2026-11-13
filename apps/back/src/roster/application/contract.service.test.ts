@@ -163,6 +163,7 @@ describe("ContractService staff contracts", () => {
       findByTeam: async () => [],
       findFormerPlayersByTeam: async () => [],
       findMovements: async () => [],
+      findMovementsOnDay: async () => [],
     };
     const service = new ContractService(queries, {} as TeamQueries, {
       run: (work) => work({} as RosterWriteScope),

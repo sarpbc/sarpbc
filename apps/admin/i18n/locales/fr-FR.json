@@ -73,7 +73,8 @@
       "users": "Utilisateurs",
       "streamers": "Streamers en direct",
       "circuits": "Circuits",
-      "seasons": "Saisons"
+      "seasons": "Saisons",
+      "onThisDay": "Ce jour-là"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -1417,6 +1418,76 @@
           "title": "Retirer le résultat",
           "confirm": "Retirer {label} de ce parcours ?",
           "confirmButton": "Retirer le résultat"
+        }
+      }
+    },
+    "onThisDay": {
+      "title": "Ce jour-là",
+      "description": "Faits rédigés par le staff pour le bloc public « ce jour-là ». Les titres, finales et transferts viennent de la base de données ; n'ajoutez ici que ce que les données ne disent pas, avec la source officielle quand elle existe. Un fait s'affiche à son jour et son mois, à partir de son année si elle est renseignée.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les faits. Vérifiez votre connexion et réessayez.",
+      "empty": {
+        "title": "Aucun fait",
+        "description": "Ajoutez un fait pour un jour de l'année, rédigé en anglais et en français, avec sa source officielle."
+      },
+      "table": {
+        "date": "Jour",
+        "text": "Texte",
+        "link": "Lié à",
+        "noLink": "Aucun lien",
+        "hiddenStartgg": "start.gg : non affiché sur le site public"
+      },
+      "create": {
+        "button": "Ajouter un fait",
+        "title": "Ajouter un fait",
+        "submit": "Ajouter le fait",
+        "success": "Fait ajouté",
+        "failed": "Impossible d'ajouter le fait."
+      },
+      "edit": {
+        "title": "Modifier le fait",
+        "submit": "Enregistrer",
+        "saved": "Fait enregistré",
+        "failed": "Impossible d'enregistrer le fait."
+      },
+      "delete": {
+        "title": "Supprimer le fait",
+        "confirmButton": "Supprimer",
+        "confirm": "Supprimer le fait du {date} ? Il disparaît du bloc public."
+      },
+      "form": {
+        "description": "Rédigez la phrase que les lecteurs verront. Rien n'est réécrit ni généré.",
+        "month": "Mois",
+        "day": "Jour",
+        "year": "Année",
+        "yearHint": "Facultatif",
+        "yearInvalid": "Saisissez une année à partir de {min}, ou laissez vide.",
+        "textEn": "Texte anglais",
+        "textFr": "Texte français",
+        "textHint": "Une phrase courte, telle qu'elle s'affichera.",
+        "sourceUrl": "Source officielle",
+        "sourceUrlHint": "Facultatif. Liquipedia et BLAST.tv ne sont pas acceptés.",
+        "sourceInvalid": "Saisissez une URL http(s).",
+        "sourceForbidden": "Liquipedia et BLAST.tv ne sont pas des sources acceptées ; citez l'annonce officielle.",
+        "link": {
+          "label": "Lien",
+          "hint": "Facultatif. Un joueur, une équipe, une phase ou un match déjà sur le site.",
+          "none": "Aucun lien",
+          "clear": "Retirer {name}",
+          "noResults": "Aucun résultat.",
+          "noMatches": "Cette phase n'a aucun match.",
+          "loadingMatches": "Chargement des matchs…",
+          "kinds": {
+            "player": "Joueur",
+            "team": "Équipe",
+            "tournament": "Phase",
+            "match": "Match"
+          },
+          "search": {
+            "player": "Rechercher un joueur",
+            "team": "Rechercher une équipe",
+            "tournament": "Rechercher une phase"
+          }
         }
       }
     }
