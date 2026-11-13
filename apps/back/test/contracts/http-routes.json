@@ -144,6 +144,22 @@
     "permissions": ["\"tournaments.manage\""]
   },
   {
+    "controller": "\"countries\"",
+    "verb": "GET",
+    "path": "\":code\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"countries\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"events\"",
     "verb": "DELETE",
     "path": "\":id\"",

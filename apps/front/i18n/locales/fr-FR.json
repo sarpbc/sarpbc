@@ -114,6 +114,7 @@
     "transfers": "Transferts",
     "circuits": "Circuits",
     "seasons": "Saisons",
+    "countries": "Pays",
     "formerly": "Anciennement {name}"
   },
   "components": {
@@ -1988,6 +1989,38 @@
           "title": "Récompenses",
           "presentedBy": "Présenté par {name}",
           "officialSource": "Annonce officielle"
+        }
+      }
+    },
+    "countries": {
+      "index": {
+        "title": "Pays",
+        "seoTitle": "Joueurs de Rocket League par pays {'|'} sarpbc.org",
+        "description": "Parcourez l’esport Rocket League par pays sur sarpbc.org : les joueurs de chaque nationalité, leurs équipes actuelles et leurs matchs terminés.",
+        "total": "{count} pays | {count} pays",
+        "error": "Impossible de charger les pays. Vérifiez votre connexion et réessayez.",
+        "empty": "Aucun pays pour le moment.",
+        "emptyHint": "Les pays apparaissent ici dès que l’équipe de sarpbc.org renseigne la nationalité d’un joueur."
+      },
+      "detail": {
+        "notFound": "Aucun joueur de ce pays n’est référencé sur sarpbc.org.",
+        "error": "Impossible de charger ce pays. Vérifiez votre connexion et réessayez.",
+        "allCountries": "Tous les pays",
+        "seoTitle": "Joueurs de Rocket League – {name} {'|'} sarpbc.org",
+        "seoDescription": "{name} : les joueurs d’esport Rocket League référencés sur sarpbc.org, avec leurs équipes actuelles et leurs matchs terminés.",
+        "players": {
+          "title": "Joueurs",
+          "rule": "Joueurs dont le profil sarpbc.org indique cette nationalité, par ordre alphabétique."
+        },
+        "teams": {
+          "title": "Équipes",
+          "empty": "Aucun joueur de ce pays n’est actuellement dans une équipe.",
+          "rule": "Équipes dont l’effectif actuel compte au moins un joueur de ce pays, par ordre alphabétique."
+        },
+        "matches": {
+          "title": "Matchs",
+          "empty": "Aucun match terminé pour le moment.",
+          "rule": "Matchs terminés avec au moins un joueur de ce pays dans l’effectif d’un tournoi, du plus récent au plus ancien. Les matchs start.gg ne sont pas listés."
         }
       }
     }

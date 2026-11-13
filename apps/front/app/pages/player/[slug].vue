@@ -1,5 +1,12 @@
 <script lang="ts" setup>
-import { isStaffContractRole, playerPath, staffPath, teamPath } from "@sarpbc/utils";
+import {
+  countryCode,
+  countryPath,
+  isStaffContractRole,
+  playerPath,
+  staffPath,
+  teamPath,
+} from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -100,6 +107,9 @@ const realName = computed(() =>
     .join(" "),
 );
 
+const countryName = useCountryName();
+const nationalityCode = computed(() => countryCode(currentPlayer.value.nationality));
+
 const birthday = computed(() =>
   currentPlayer.value.birthday ? new Date(currentPlayer.value.birthday) : null,
 );
@@ -154,7 +164,15 @@ setPageSeo({
               v-if="currentPlayer.nationality || realName"
               class="flex min-w-0 flex-row items-center gap-2"
             >
-              <FlagIcon :nationality="currentPlayer.nationality" size="md" />
+              <SLink
+                v-if="nationalityCode"
+                :to="$localePath(countryPath(nationalityCode))"
+                :aria-label="countryName(nationalityCode)"
+                class="inline-flex"
+              >
+                <FlagIcon :nationality="nationalityCode" size="md" />
+              </SLink>
+              <FlagIcon v-else :nationality="currentPlayer.nationality" size="md" />
               <span v-if="realName" class="truncate text-sm text-muted">{{ realName }}</span>
             </div>
             <dl class="mt-auto flex w-full min-w-0 flex-col pt-6">

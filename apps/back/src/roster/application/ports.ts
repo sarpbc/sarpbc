@@ -10,6 +10,12 @@ export interface PlayerQueries {
   findById(id: string): Promise<Player | null>;
   findBySlug(slug: string): Promise<Player | null>;
   getRandomPlayer(): Promise<Player | null>;
+  nationalities(): Promise<NationalityCount[]>;
+  findByNationality(code: string): Promise<Player[]>;
+}
+export interface NationalityCount {
+  code: string;
+  players: number;
 }
 export interface TeamQueries {
   search(options: Partial<DirectorySearchProps>): Promise<Team[]>;

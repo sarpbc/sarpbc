@@ -114,6 +114,7 @@
     "transfers": "Transfers",
     "circuits": "Circuits",
     "seasons": "Seasons",
+    "countries": "Countries",
     "formerly": "Formerly {name}"
   },
   "components": {
@@ -1988,6 +1989,38 @@
           "title": "Awards",
           "presentedBy": "Presented by {name}",
           "officialSource": "Official announcement"
+        }
+      }
+    },
+    "countries": {
+      "index": {
+        "title": "Countries",
+        "seoTitle": "Rocket League Players by Country {'|'} sarpbc.org",
+        "description": "Browse Rocket League esports by country on sarpbc.org: the players of each nationality, their current teams and their finished matches.",
+        "total": "{count} country | {count} countries",
+        "error": "Couldn't load the countries. Check your connection and try again.",
+        "empty": "No countries yet.",
+        "emptyHint": "Countries appear here once sarpbc.org staff record a player's nationality."
+      },
+      "detail": {
+        "notFound": "No player from this country is listed on sarpbc.org.",
+        "error": "Couldn't load this country. Check your connection and try again.",
+        "allCountries": "All Countries",
+        "seoTitle": "{name} Rocket League Players {'|'} sarpbc.org",
+        "seoDescription": "Rocket League esports players from {name} on sarpbc.org, with their current teams and finished matches.",
+        "players": {
+          "title": "Players",
+          "rule": "Players whose sarpbc.org profile lists this nationality, in alphabetical order."
+        },
+        "teams": {
+          "title": "Teams",
+          "empty": "No player from this country is on a team right now.",
+          "rule": "Teams whose current roster includes at least one player from this country, in alphabetical order."
+        },
+        "matches": {
+          "title": "Matches",
+          "empty": "No finished matches yet.",
+          "rule": "Finished matches with at least one player from this country on a tournament roster, most recent first. start.gg matches are not listed."
         }
       }
     }
