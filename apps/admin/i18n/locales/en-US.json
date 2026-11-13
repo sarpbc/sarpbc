@@ -73,7 +73,8 @@
       "users": "Users",
       "streamers": "Live Streamers",
       "circuits": "Circuits",
-      "seasons": "Seasons"
+      "seasons": "Seasons",
+      "onThisDay": "On this day"
     },
     "search": {
       "placeholder": "Search…",
@@ -1417,6 +1418,76 @@
           "title": "Remove Result",
           "confirm": "Remove {label} from this path?",
           "confirmButton": "Remove Result"
+        }
+      }
+    },
+    "onThisDay": {
+      "title": "On this day",
+      "description": "Facts staff write themselves for the public on-this-day block. Titles, finals and transfers are added from the database; enter here only what the data cannot say, with the official source when there is one. Facts show on their month and day, from their year on when one is set.",
+      "loading": "Loading…",
+      "loadError": "Could not load the facts. Check your connection and try again.",
+      "empty": {
+        "title": "No Facts Yet",
+        "description": "Add a fact for a day of the year, written in English and in French, with its official source."
+      },
+      "table": {
+        "date": "Day",
+        "text": "Text",
+        "link": "Linked to",
+        "noLink": "No link",
+        "hiddenStartgg": "start.gg: not shown on the public site"
+      },
+      "create": {
+        "button": "Add fact",
+        "title": "Add a Fact",
+        "submit": "Add fact",
+        "success": "Fact added",
+        "failed": "Could not add the fact."
+      },
+      "edit": {
+        "title": "Edit Fact",
+        "submit": "Save",
+        "saved": "Fact saved",
+        "failed": "Could not save the fact."
+      },
+      "delete": {
+        "title": "Delete Fact",
+        "confirmButton": "Delete",
+        "confirm": "Delete the fact of {date}? It disappears from the public block."
+      },
+      "form": {
+        "description": "Write the sentence readers will see. Nothing is rewritten or generated.",
+        "month": "Month",
+        "day": "Day",
+        "year": "Year",
+        "yearHint": "Optional",
+        "yearInvalid": "Enter a year from {min}, or leave it empty.",
+        "textEn": "English text",
+        "textFr": "French text",
+        "textHint": "One short sentence, as it will appear.",
+        "sourceUrl": "Official source",
+        "sourceUrlHint": "Optional. Liquipedia and BLAST.tv are not accepted.",
+        "sourceInvalid": "Enter an http(s) URL.",
+        "sourceForbidden": "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
+        "link": {
+          "label": "Link",
+          "hint": "Optional. A player, team, stage or match already on the site.",
+          "none": "No link",
+          "clear": "Remove {name}",
+          "noResults": "Nothing found.",
+          "noMatches": "This stage has no matches.",
+          "loadingMatches": "Loading matches…",
+          "kinds": {
+            "player": "Player",
+            "team": "Team",
+            "tournament": "Stage",
+            "match": "Match"
+          },
+          "search": {
+            "player": "Search players",
+            "team": "Search teams",
+            "tournament": "Search stages"
+          }
         }
       }
     }
