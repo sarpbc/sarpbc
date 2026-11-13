@@ -1894,14 +1894,15 @@
         "noPoints": "Aucun point",
         "qualification": "Les équipes au-dessus de la ligne occupent les {count} places qualificatives.",
         "aboutTitle": "Calcul des points",
-        "explainer": "Les points suivent le barème officiel saisi par l’équipe de sarpbc.org, appliqué aux classements finaux fournis par PandaScore. Seuls les résultats PandaScore sont comptabilisés.",
+        "explainer": "Les points suivent le barème officiel saisi par l’équipe de sarpbc.org, appliqué à la place finale de chaque équipe : classement PandaScore ou place officielle saisie par l’équipe, comme les 9e à 16e places décidées en poules.",
         "scaleSource": "Source du barème",
         "status": {
           "scaleMissing": "Barème à venir",
           "upcoming": "À venir",
           "inProgress": "En cours",
           "awaitingResults": "Résultats en attente"
-        }
+        },
+        "regionalExplainer": "Ce circuit couvre la région {region}. Aux événements ouverts à toutes les régions, comme les Majors, seules les équipes de la région {region} marquent des points."
       }
     }
   }

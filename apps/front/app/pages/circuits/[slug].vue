@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { teamPath, tournamentEventPath } from "@sarpbc/utils";
+import { isWorldwideCircuitRegion, teamPath, tournamentEventPath } from "@sarpbc/utils";
 import type {
   CircuitEventStatus,
   CircuitStandingCell,
@@ -55,6 +55,11 @@ const tableRows = computed<StandingTableRow[]>(() => {
 });
 
 const hasCutoff = computed(() => tableRows.value.some((entry) => entry.cutoffBelow));
+
+const regionalRegion = computed(() => {
+  const region = standings.value?.region ?? null;
+  return region !== null && !isWorldwideCircuitRegion(region) ? region : null;
+});
 
 function statusLabel(status: CircuitEventStatus): string | null {
   switch (status) {
@@ -264,6 +269,9 @@ watch(
                 {{ standings.description }}
               </p>
               <p class="text-pretty">{{ t("page.circuits.standings.explainer") }}</p>
+              <p v-if="regionalRegion" class="text-pretty">
+                {{ t("page.circuits.standings.regionalExplainer", { region: regionalRegion }) }}
+              </p>
               <div v-if="standings.sourceUrls.length" class="flex flex-col gap-1 text-xs">
                 <span>{{ t("page.circuits.standings.scaleSource") }}</span>
                 <ul class="flex flex-col gap-1">
