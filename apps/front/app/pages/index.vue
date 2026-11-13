@@ -113,6 +113,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
           />
         </SCard>
       </SRail>
+      <OnThisDayBlock :limit="5" />
       <TransferLatest class="md:hidden" />
     </div>
   </div>

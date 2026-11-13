@@ -295,6 +295,29 @@
         "official": "Diffusions officielles uniquement",
         "withCostreams": "Co-streams inclus"
       }
+    },
+    "onThisDay": {
+      "title": "Ce jour-là",
+      "viewAll": "Tout voir ({count})",
+      "error": "Impossible de charger ce qui s'est passé ce jour-là. Vérifiez votre connexion et réessayez.",
+      "empty": {
+        "title": "Rien d'enregistré ce jour-là",
+        "hint": "Les titres, finales, transferts et faits rédigés par le staff des années précédentes apparaissent ici à leur date anniversaire."
+      },
+      "source": "Source",
+      "score": "{winner}–{loser}",
+      "line": {
+        "title": "{winner} remporte {tournament}",
+        "final": "{winner} bat {loser} {score} en finale de {tournament}",
+        "finalNoScore": "{winner} bat {loser} en finale de {tournament}",
+        "transfer": {
+          "arrival": "{player} rejoint {team}",
+          "departure": "{player} quitte {team}",
+          "benched": "{player} passe sur le banc de {team}",
+          "loan": "{player} est prêté à {team}",
+          "staff": "{player} rejoint le staff de {team}"
+        }
+      }
     }
   },
   "timeAgo": {
@@ -2023,6 +2046,12 @@
           "rule": "Matchs terminés avec au moins un joueur de ce pays dans l’effectif d’un tournoi, du plus récent au plus ancien. Les matchs start.gg ne sont pas listés."
         }
       }
+    },
+    "onThisDay": {
+      "title": "Ce jour-là",
+      "seoTitle": "Ce jour-là dans l'esport Rocket League {'|'} sarpbc.org",
+      "description": "Ce qui s'est passé ce jour-là les années précédentes dans l'esport Rocket League : titres, finales, transferts et faits rédigés par le staff de sarpbc.org.",
+      "note": "Les titres, finales et transferts viennent des données de sarpbc.org pour ce jour les années précédentes. Les autres entrées sont rédigées par le staff de sarpbc.org, avec leur source quand elle existe."
     }
   }
 }
