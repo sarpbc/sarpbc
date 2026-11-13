@@ -8,6 +8,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SCALE_TIERS,
   MAX_CIRCUIT_SEASON,
+  MAX_CIRCUIT_STAGE_TEAMS,
   MIN_CIRCUIT_SEASON,
 } from "@sarpbc/utils";
 
@@ -49,5 +50,11 @@ export const SetCircuitStageDto = z.strictObject({
     .trim()
     .url()
     .regex(/^https?:\/\//, "Use an http(s) URL"),
+  worldwide: z.boolean().optional(),
+  regionTeamIds: z.array(z.string().uuid()).max(MAX_CIRCUIT_STAGE_TEAMS).optional(),
+  finishes: z
+    .array(z.strictObject({ teamId: z.string().uuid(), placement }))
+    .max(MAX_CIRCUIT_STAGE_TEAMS)
+    .optional(),
 });
 export type SetCircuitStageDto = z.infer<typeof SetCircuitStageDto>;

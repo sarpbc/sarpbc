@@ -769,16 +769,18 @@ describe("RosterProposalService", () => {
         "journalist",
       );
 
+    const input = { scale, sourceUrl: rules };
+
     it("checks the stage and keeps the scale pending until approval", async () => {
       const proposal = await setScale();
 
       expect(proposal).toMatchObject({ status: "pending", sourceUrl: rules });
-      expect(circuits.requireStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", scale);
+      expect(circuits.requireStageSettings).toHaveBeenCalledWith("circuit-1", "ps-stage", input);
       expect(circuits.setStageScale).not.toHaveBeenCalled();
     });
 
-    it("refuses a start.gg stage before recording anything", async () => {
-      await expect(setScale("startgg-stage")).rejects.toThrow("Only PandaScore");
+    it("refuses a missing stage before recording anything", async () => {
+      await expect(setScale("missing-stage")).rejects.toThrow(NotFoundError);
       expect(saved.size).toBe(0);
     });
 
@@ -786,8 +788,33 @@ describe("RosterProposalService", () => {
       const { id } = await setScale();
 
       expect(await service.approve(id, "admin")).toMatchObject({ entityId: "circuit-1" });
-      expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", scale, rules);
+      expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", input);
       expect(staff.permissions).toContain("tournaments.manage");
+    });
+
+    it("carries the region teams and final placements, which must be known teams", async () => {
+      const change = {
+        kind: "set_circuit_stage_scale" as const,
+        circuitId: "circuit-1",
+        tournamentId: "major",
+        scale,
+        worldwide: true,
+        regionTeamIds: ["kc"],
+        finishes: [{ teamId: "kc", placement: 13 }],
+      };
+      const { id } = await service.propose(change, rules, "journalist");
+
+      await service.approve(id, "admin");
+      expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "major", {
+        scale,
+        sourceUrl: rules,
+        worldwide: true,
+        regionTeamIds: ["kc"],
+        finishes: [{ teamId: "kc", placement: 13 }],
+      });
+      await expect(
+        service.propose({ ...change, regionTeamIds: ["missing-team"] }, rules, "journalist"),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 

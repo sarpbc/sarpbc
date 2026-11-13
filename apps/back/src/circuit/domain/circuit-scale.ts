@@ -1,9 +1,14 @@
-import type { CircuitScaleTier } from "@sarpbc/types";
+import type {
+  CircuitScaleTier,
+  CircuitStageFinishInput,
+  CircuitStageScaleInput,
+} from "@sarpbc/types";
 import {
   MAX_CIRCUIT_PLACEMENT,
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
-  isLiquipediaSourceHost,
+  MAX_CIRCUIT_STAGE_TEAMS,
+  isForbiddenCircuitSourceHost,
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 
@@ -47,8 +52,53 @@ export function pointsForPlacement(
 export function assertCircuitSourceUrl(value: string): void {
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     throw new InvalidInputError("A circuit source must be an http(s) URL.");
-  if (isLiquipediaSourceHost(new URL(value).hostname))
+  if (isForbiddenCircuitSourceHost(new URL(value).hostname))
     throw new InvalidInputError(
-      "Liquipedia is not an accepted source; cite the official rules or announcement.",
+      "Liquipedia and BLAST.tv are not accepted sources; cite the official rules or announcement.",
     );
+}
+
+export interface CircuitStageSettings {
+  scale: CircuitScaleTier[];
+  sourceUrl: string;
+  worldwide: boolean;
+  regionTeamIds: string[];
+  finishes: CircuitStageFinishInput[];
+}
+
+function requireEventTeams(teamIds: readonly string[], eventTeamIds: ReadonlySet<string>): void {
+  if (teamIds.length > MAX_CIRCUIT_STAGE_TEAMS)
+    throw new InvalidInputError(`A circuit stage lists at most ${MAX_CIRCUIT_STAGE_TEAMS} teams.`);
+  if (new Set(teamIds).size !== teamIds.length)
+    throw new InvalidInputError("A team appears twice in the same list.");
+  const outsider = teamIds.find((id) => !eventTeamIds.has(id));
+  if (outsider !== undefined)
+    throw new InvalidInputError(
+      `Team "${outsider}" did not take part in any stage of this tournament event.`,
+    );
+}
+
+export function parseCircuitStageSettings(
+  input: CircuitStageScaleInput,
+  eventTeamIds: ReadonlySet<string>,
+): CircuitStageSettings {
+  assertCircuitSourceUrl(input.sourceUrl);
+  const regionTeamIds = [...(input.regionTeamIds ?? [])];
+  const finishes = (input.finishes ?? []).map(({ teamId, placement }) => ({ teamId, placement }));
+  requireEventTeams(regionTeamIds, eventTeamIds);
+  requireEventTeams(
+    finishes.map(({ teamId }) => teamId),
+    eventTeamIds,
+  );
+  if (finishes.some(({ placement }) => !isWhole(placement, 1, MAX_CIRCUIT_PLACEMENT)))
+    throw new InvalidInputError(
+      `A final placement is a whole number from 1 to ${MAX_CIRCUIT_PLACEMENT}.`,
+    );
+  return {
+    scale: parseCircuitScale(input.scale),
+    sourceUrl: input.sourceUrl,
+    worldwide: input.worldwide ?? false,
+    regionTeamIds,
+    finishes: finishes.sort((a, b) => a.placement - b.placement),
+  };
 }

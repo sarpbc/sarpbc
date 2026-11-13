@@ -12,6 +12,7 @@ import { rosterTools } from "./roster-tools";
 
 const CIRCUIT_ID = "5d1f2a3b-4c5d-4e6f-8a7b-9c0d1e2f3a4b";
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
+const TEAM_ID = "7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const SOURCE = "https://example.com/fake-circuit/rules";
 const SCALE = [
   { from: 1, to: 1, points: 10 },
@@ -68,14 +69,47 @@ describe("set_circuit_stage_scale", () => {
     expect(parsed(result)).toMatchObject({ kind: "set_circuit_stage_scale", status: "pending" });
   });
 
-  it("requires a non-Liquipedia sourceUrl and whole-number tiers", () => {
+  it("forwards the worldwide flag, the region teams and the final placements", async () => {
+    const { tool, rosterProposalService } = scaleTool();
+    const regional = {
+      worldwide: true,
+      regionTeamIds: [TEAM_ID],
+      finishes: [{ teamId: TEAM_ID, placement: 13 }],
+    };
+
+    await tool.run(user("admin"), { ...input, ...regional });
+
+    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
+      {
+        kind: "set_circuit_stage_scale",
+        circuitId: CIRCUIT_ID,
+        tournamentId: TOURNAMENT_ID,
+        scale: SCALE,
+        ...regional,
+      },
+      SOURCE,
+      "u1",
+    );
+  });
+
+  it("requires a sourceUrl outside Liquipedia and BLAST.tv, whole-number tiers and team UUIDs", () => {
     const schema = z.object(scaleTool().tool.inputSchema);
-    const accepts = (overrides: Partial<Record<keyof typeof input, string | typeof SCALE>>) =>
-      schema.safeParse({ ...input, ...overrides }).success;
+    const accepts = (
+      overrides: Partial<{
+        sourceUrl: string;
+        scale: typeof SCALE;
+        regionTeamIds: string[];
+        finishes: { teamId: string; placement: number }[];
+      }>,
+    ) => schema.safeParse({ ...input, ...overrides }).success;
 
     expect(accepts({})).toBe(true);
     expect(accepts({ sourceUrl: undefined })).toBe(false);
     expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/Fake" })).toBe(false);
+    expect(accepts({ sourceUrl: "https://blast.tv/rl/leaderboard/2026" })).toBe(false);
+    expect(accepts({ regionTeamIds: ["karmine-corp"] })).toBe(false);
+    expect(accepts({ finishes: [{ teamId: TEAM_ID, placement: 0 }] })).toBe(false);
+    expect(accepts({ finishes: [{ teamId: TEAM_ID, placement: 9 }] })).toBe(true);
     expect(accepts({ scale: [{ from: 0, to: 1, points: 3 }] })).toBe(false);
     expect(accepts({ scale: [{ from: 1, to: 1, points: 2.5 }] })).toBe(false);
   });
@@ -90,9 +124,16 @@ describe("set_circuit_stage_scale", () => {
 });
 
 describe("get_circuit", () => {
-  it("keeps start.gg stages out of the MCP response", async () => {
+  it("keeps start.gg stages, their region teams and their placements out of the MCP response", async () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-    const stage = (id: string, source: "pandascore" | "startgg") => ({
+    const team = {
+      id: TEAM_ID,
+      name: "Fake Team",
+      slug: "fake-team",
+      imageUrl: null,
+      darkModeImageUrl: null,
+    };
+    const stage = (id: string, source: "pandascore" | "manual" | "startgg") => ({
       tournament: {
         id,
         name: id,
@@ -104,6 +145,9 @@ describe("get_circuit", () => {
       },
       scale: SCALE,
       sourceUrl: SOURCE,
+      worldwide: true,
+      regionTeams: [team],
+      finishes: [{ team, placement: 13 }],
     });
     const summary = {
       id: CIRCUIT_ID,
@@ -117,7 +161,7 @@ describe("get_circuit", () => {
     };
     const detail: CircuitDetail = {
       ...summary,
-      stages: [stage("ps", "pandascore"), stage("sgg", "startgg")],
+      stages: [stage("ps", "pandascore"), stage("manual", "manual"), stage("sgg", "startgg")],
     };
     const standings: CircuitStandings = { ...summary, sourceUrls: [], events: [], rows: [] };
     const tool = circuitTools({
@@ -133,7 +177,11 @@ describe("get_circuit", () => {
 
     const body = parsed(await tool.run(user("journalist"), { idOrSlug: "season" }));
 
-    expect(body.stages.map((s: { tournament: { id: string } }) => s.tournament.id)).toEqual(["ps"]);
+    expect(body.stages.map((s: { tournament: { id: string } }) => s.tournament.id)).toEqual([
+      "ps",
+      "manual",
+    ]);
+    expect(JSON.stringify(body)).not.toContain("sgg");
   });
 });
 
@@ -188,7 +236,7 @@ describe("create_circuit and update_circuit", () => {
     });
   });
 
-  it("requires a slug, a season and a non-Liquipedia sourceUrl", () => {
+  it("requires a slug, a season and a sourceUrl outside Liquipedia and BLAST.tv", () => {
     const schema = z.object(tools().create.inputSchema);
     const accepts = (overrides: Record<string, string | number | undefined>) =>
       schema.safeParse({ ...input, ...overrides }).success;
@@ -201,6 +249,9 @@ describe("create_circuit and update_circuit", () => {
     expect(accepts({ sourceUrl: undefined })).toBe(false);
     expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/RLCS/2026" })).toBe(false);
     expect(accepts({ sourceUrl: "https://www.liquipedia.org/mirror" })).toBe(false);
+    expect(
+      accepts({ sourceUrl: "https://blast.tv/rl/leaderboard/2026/world-championship/eu" }),
+    ).toBe(false);
   });
 
   it("updates by id or slug and refuses an empty update", async () => {

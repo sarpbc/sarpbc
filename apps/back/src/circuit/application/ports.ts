@@ -1,5 +1,10 @@
-import type { CircuitScaleTier, CircuitStage, CircuitSummary, DataSource } from "@sarpbc/types";
+import type { CircuitStage, CircuitEventTeam, CircuitSummary, DataSource } from "@sarpbc/types";
+import type { CircuitStageSettings } from "../domain/circuit-scale";
 import type { CircuitStageResult } from "../domain/circuit-standings";
+
+export interface StoredStageResult extends CircuitStageResult {
+  source: DataSource;
+}
 
 export interface CircuitStore {
   list(): Promise<CircuitSummary[]>;
@@ -9,12 +14,8 @@ export interface CircuitStore {
   save(circuit: CircuitSummary): Promise<void>;
   remove(id: string): Promise<boolean>;
   stages(circuitId: string): Promise<CircuitStage[]>;
-  stageResults(circuitId: string): Promise<CircuitStageResult[]>;
-  tournamentSource(id: string): Promise<DataSource | null>;
-  saveStage(
-    circuitId: string,
-    tournamentId: string,
-    stage: { scale: CircuitScaleTier[]; sourceUrl: string },
-  ): Promise<void>;
+  stageResults(circuitId: string): Promise<StoredStageResult[]>;
+  eventTeams(tournamentId: string): Promise<CircuitEventTeam[] | null>;
+  saveStage(circuitId: string, tournamentId: string, settings: CircuitStageSettings): Promise<void>;
   removeStage(circuitId: string, tournamentId: string): Promise<boolean>;
 }

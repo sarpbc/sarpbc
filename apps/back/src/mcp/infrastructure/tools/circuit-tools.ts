@@ -6,7 +6,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isLiquipediaSourceHost,
+  isForbiddenCircuitSourceHost,
 } from "@sarpbc/utils";
 import { z } from "zod";
 import { isRedistributable } from "../../../common/domain/data-source";
@@ -57,7 +57,9 @@ const regionSchema = z
   .string()
   .trim()
   .max(CIRCUIT_REGION_MAX_LENGTH)
-  .describe("Region the circuit covers (e.g. Worldwide, EU, NA). Omit when the source names none.");
+  .describe(
+    "Region the circuit covers, as the rules name it (e.g. EU, NA, MENA, SAM, OCE, APAC, SSA). Omit it or use Worldwide for a worldwide circuit. In a regional circuit, a stage marked worldwide (such as a Major) credits only the region teams listed on that stage.",
+  );
 
 const descriptionSchema = z
   .string()
@@ -69,11 +71,11 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(
-    (url) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
-    "Liquipedia and its mirrors are not accepted sources",
+    (url) => !URL.canParse(url) || !isForbiddenCircuitSourceHost(new URL(url).hostname),
+    "Liquipedia, its mirrors and BLAST.tv are not accepted sources",
   )
   .describe(
-    "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia or a mirror of it.",
+    "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia, a mirror of it or BLAST.tv.",
   );
 
 const qualificationSpotsSchema = z
@@ -88,7 +90,7 @@ export function circuitTools({ circuitService }: CircuitToolServices): McpTool[]
     defineTool({
       name: "list_circuits",
       description:
-        "List the points circuits on sarpbc.org (a season or regional circuit whose official points scale staff entered). Use get_circuit for the stages, scales and standings.",
+        "List the points circuits on sarpbc.org (a season circuit, worldwide or limited to one region, whose official points scales staff entered). Use get_circuit for the stages, scales and standings.",
       input: {},
       handler: async () => (await circuitService.list()).map(withUrl),
     }),
@@ -96,7 +98,7 @@ export function circuitTools({ circuitService }: CircuitToolServices): McpTool[]
     defineTool({
       name: "get_circuit",
       description:
-        "Get one points circuit: each counted tournament stage with its official points scale (placement ranges and points) and source, then the standings computed from PandaScore final placements with an event-by-event breakdown. Only PandaScore stages count; start.gg and manual stages are never part of a circuit. Propose a stage scale with set_circuit_stage_scale.",
+        "Get one points circuit: each counted tournament stage with its official points scale (placement ranges and points), source, worldwide flag, region teams and staff-entered final placements, then the standings with an event-by-event breakdown. Placements come from PandaScore standings and from the final placements staff entered. In a regional circuit a worldwide stage credits only its region teams. PandaScore and manual stages are returned; start.gg stages and their placements and points are left out of this response, even when staff attached them. Propose a stage scale with set_circuit_stage_scale.",
       input: { idOrSlug: idOrSlugField("Circuit", "season-2026") },
       handler: async ({ idOrSlug }) => {
         const detail = await circuitService.detail(idOrSlug);

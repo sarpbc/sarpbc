@@ -1,7 +1,8 @@
 import type {
   CircuitDetail,
   CircuitInput,
-  CircuitScaleTier,
+  CircuitStageScaleInput,
+  CircuitEventTeam,
   CircuitStandings,
   CircuitSummary,
 } from "@sarpbc/types";
@@ -16,8 +17,13 @@ import {
 } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { isUuid } from "../../common/domain/entity-ref";
+import { isRedistributable } from "../../common/domain/data-source";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { assertCircuitSourceUrl, parseCircuitScale } from "../domain/circuit-scale";
+import {
+  assertCircuitSourceUrl,
+  parseCircuitStageSettings,
+  type CircuitStageSettings,
+} from "../domain/circuit-scale";
 import { computeCircuitStandings } from "../domain/circuit-standings";
 import type { CircuitStore } from "./ports";
 
@@ -88,8 +94,10 @@ export class CircuitService {
 
   async standings(idOrSlug: string): Promise<CircuitStandings> {
     const circuit = await this.require(idOrSlug);
-    const results = await this.store.stageResults(circuit.id);
-    return { ...circuit, ...computeCircuitStandings(results, this.clock()) };
+    const results = (await this.store.stageResults(circuit.id)).filter(({ source }) =>
+      isRedistributable(source),
+    );
+    return { ...circuit, ...computeCircuitStandings(results, circuit.region, this.clock()) };
   }
 
   async create(input: CircuitInput): Promise<CircuitSummary> {
@@ -135,36 +143,40 @@ export class CircuitService {
     if (!(await this.store.remove(id))) throw new NotFoundError("Circuit not found");
   }
 
-  async requireStageScale(
+  async stageTeams(circuitId: string, tournamentId: string): Promise<CircuitEventTeam[]> {
+    await this.require(circuitId);
+    return this.requireEventTeams(tournamentId);
+  }
+
+  async requireStageSettings(
     circuitId: string,
     tournamentId: string,
-    scale: readonly CircuitScaleTier[],
-  ): Promise<CircuitScaleTier[]> {
+    input: CircuitStageScaleInput,
+  ): Promise<CircuitStageSettings> {
     await this.require(circuitId);
-    const source = await this.store.tournamentSource(tournamentId);
-    if (source === null)
-      throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
-    if (source !== "pandascore")
-      throw new InvalidInputError(
-        "Only PandaScore tournaments count toward circuit points; start.gg and manual tournaments are refused.",
-      );
-    return parseCircuitScale(scale);
+    const teams = await this.requireEventTeams(tournamentId);
+    return parseCircuitStageSettings(input, new Set(teams.map(({ team }) => team.id)));
   }
 
   async setStageScale(
     circuitId: string,
     tournamentId: string,
-    scale: readonly CircuitScaleTier[],
-    sourceUrl: string,
+    input: CircuitStageScaleInput,
   ): Promise<void> {
-    assertCircuitSourceUrl(sourceUrl);
-    const parsed = await this.requireStageScale(circuitId, tournamentId, scale);
-    await this.store.saveStage(circuitId, tournamentId, { scale: parsed, sourceUrl });
+    const settings = await this.requireStageSettings(circuitId, tournamentId, input);
+    await this.store.saveStage(circuitId, tournamentId, settings);
   }
 
   async removeStage(circuitId: string, tournamentId: string): Promise<void> {
     if (!(await this.store.removeStage(circuitId, tournamentId)))
       throw new NotFoundError("This tournament is not part of the circuit.");
+  }
+
+  private async requireEventTeams(tournamentId: string): Promise<CircuitEventTeam[]> {
+    const teams = await this.store.eventTeams(tournamentId);
+    if (teams === null)
+      throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+    return teams;
   }
 
   private async require(idOrSlug: string): Promise<CircuitSummary> {

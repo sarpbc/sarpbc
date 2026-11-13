@@ -39,10 +39,28 @@ export interface CircuitStageTournament {
   event: TournamentEventRef;
 }
 
+export interface CircuitStageFinishInput {
+  teamId: string;
+  placement: number;
+}
+
+export interface CircuitStageFinish {
+  team: CircuitStandingTeam;
+  placement: number;
+}
+
 export interface CircuitStage {
   tournament: CircuitStageTournament;
   scale: CircuitScaleTier[];
   sourceUrl: string;
+  worldwide: boolean;
+  regionTeams: CircuitStandingTeam[];
+  finishes: CircuitStageFinish[];
+}
+
+export interface CircuitEventTeam {
+  team: CircuitStandingTeam;
+  placement: number | null;
 }
 
 export interface CircuitDetail extends CircuitSummary {
@@ -52,6 +70,9 @@ export interface CircuitDetail extends CircuitSummary {
 export interface CircuitStageScaleInput {
   scale: CircuitScaleTier[];
   sourceUrl: string;
+  worldwide?: boolean;
+  regionTeamIds?: string[];
+  finishes?: CircuitStageFinishInput[];
 }
 
 export type CircuitEventStatus =

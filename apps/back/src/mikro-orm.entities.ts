@@ -34,6 +34,7 @@ import {
 import {
   CircuitSchema,
   CircuitStageSchema,
+  CircuitStageTeamSchema,
 } from "./circuit/infrastructure/persistence/circuit.entities";
 import {
   SeasonAwardSchema,
@@ -81,6 +82,7 @@ export const mikroOrmEntities = [
   MatchLineupPlayerSchema,
   CircuitSchema,
   CircuitStageSchema,
+  CircuitStageTeamSchema,
   SeasonSchema,
   SeasonAwardSchema,
   TopicSchema,

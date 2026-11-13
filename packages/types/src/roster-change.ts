@@ -1,4 +1,4 @@
-import type { CircuitScaleTier } from "./circuit";
+import type { CircuitScaleTier, CircuitStageFinishInput } from "./circuit";
 import type { ContractRole } from "./contract";
 import type { MatchLineupInput } from "./lineup";
 import type { PlayerAwardType } from "./player-award";
@@ -107,6 +107,9 @@ export type RosterChange =
       circuitId: string;
       tournamentId: string;
       scale: CircuitScaleTier[];
+      worldwide?: boolean;
+      regionTeamIds?: string[];
+      finishes?: CircuitStageFinishInput[];
     }
   | { kind: "delete_match"; matchId: string; reason: string }
   | { kind: "delete_team"; teamId: string; reason: string; mergeIntoTeamId?: string };
