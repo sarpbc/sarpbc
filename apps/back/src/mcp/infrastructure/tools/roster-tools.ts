@@ -4,6 +4,7 @@ import {
   PLAYER_AWARD_TYPES,
   PLAYER_STATUSES,
   ROSTER_PROPOSAL_STATUSES,
+  SEASON_AWARD_TYPES,
   STREAM_KINDS,
   TEAM_LOGO_VARIANTS,
   VIEWERSHIP_SCOPES,
@@ -22,6 +23,9 @@ import {
   MAX_STREAMS,
   ROSTER_PROPOSAL_PERMISSIONS,
   MAX_VIEWERS,
+  SEASON_AWARD_PRESENTER_MAX_LENGTH,
+  SEASON_AWARD_REGION_MAX_LENGTH,
+  SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   STREAM_CHANNEL_MAX_LENGTH,
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
@@ -652,6 +656,48 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       handler: ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>
         propose(
           { kind: "award_player", tournamentId, teamId, playerId, awardType },
+          sourceUrl,
+          user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "propose_season_award",
+      description:
+        "Propose a player award of a season or league rather than of one tournament stage: season_mvp for the Season MVP, regular_season_mvp for the Regular Season MVP and regional_mvp for the MVP of one region. Only propose awards announced by an official account (RLEsports, BLAST, the organiser or the league). Staff create seasons in the admin app; read list_seasons and get_season first. A season holds one award of each type and one regional_mvp per region.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        seasonId: z.string().uuid().describe("Season UUID from list_seasons."),
+        playerId: z.string().uuid().describe("Player UUID."),
+        awardType: z
+          .enum(SEASON_AWARD_TYPES)
+          .describe("Award type: season_mvp, regular_season_mvp or regional_mvp."),
+        region: z
+          .string()
+          .trim()
+          .min(1)
+          .max(SEASON_AWARD_REGION_MAX_LENGTH)
+          .optional()
+          .describe(
+            "Region as the announcement names it (e.g. Europe). Required for regional_mvp, optional for regular_season_mvp and refused for season_mvp.",
+          ),
+        presentedBy: z
+          .string()
+          .trim()
+          .min(1)
+          .max(SEASON_AWARD_PRESENTER_MAX_LENGTH)
+          .optional()
+          .describe("Partner presenting the award when the announcement names one (e.g. Ally)."),
+        sourceUrl: sourceUrlSchema
+          .max(SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
+          .describe(
+            "Required official announcement of the award: an RLEsports, BLAST, organiser or league post or page. Never Liquipedia.",
+          ),
+      },
+      handler: ({ seasonId, playerId, awardType, region, presentedBy, sourceUrl }, user) =>
+        propose(
+          { kind: "award_season_player", seasonId, playerId, awardType, region, presentedBy },
           sourceUrl,
           user.id,
         ),

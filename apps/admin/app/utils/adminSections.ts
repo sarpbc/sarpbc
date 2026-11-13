@@ -41,6 +41,12 @@ export const ADMIN_SECTIONS = [
     label: "page.nav.circuits",
   },
   {
+    path: "/seasons",
+    permissions: ["tournaments.manage"],
+    icon: "i-fluent-ribbon-star-24-regular",
+    label: "page.nav.seasons",
+  },
+  {
     path: "/pickems",
     permissions: ["pickems.manage"],
     icon: "i-fluent-predictions-24-regular",

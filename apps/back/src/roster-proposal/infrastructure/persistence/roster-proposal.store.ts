@@ -12,6 +12,7 @@ import {
   TournamentEvent,
 } from "../../../tournament/infrastructure/competition-persistence";
 import { Circuit } from "../../../circuit/infrastructure/circuit-persistence";
+import { Season } from "../../../season/infrastructure/season-persistence";
 import * as Row from "./roster-proposal.entity";
 
 function toProposal(row: Row.RosterProposal): RosterProposal {
@@ -64,39 +65,44 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       if (!inTransaction) await em.flush();
     },
     names: async (ids) => {
-      const [players, teams, users, tournaments, matches, events, circuits] = await Promise.all([
-        ids.players.length
-          ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
-          : [],
-        ids.teams.length
-          ? em.find(Team, { id: { $in: ids.teams } }, { fields: ["id", "name"] })
-          : [],
-        ids.users.length
-          ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
-          : [],
-        ids.tournaments.length
-          ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
-          : [],
-        ids.matches.length
-          ? em.find(
-              Match,
-              { id: { $in: ids.matches } },
-              { populate: ["participants.team", "participants.players", "tournament.event"] },
-            )
-          : [],
-        ids.events.length
-          ? em.find(TournamentEvent, { id: { $in: ids.events } }, { fields: ["id", "name"] })
-          : [],
-        ids.circuits.length
-          ? em.find(Circuit, { id: { $in: ids.circuits } }, { fields: ["id", "name"] })
-          : [],
-      ]);
+      const [players, teams, users, tournaments, matches, events, circuits, seasons] =
+        await Promise.all([
+          ids.players.length
+            ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
+            : [],
+          ids.teams.length
+            ? em.find(Team, { id: { $in: ids.teams } }, { fields: ["id", "name"] })
+            : [],
+          ids.users.length
+            ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
+            : [],
+          ids.tournaments.length
+            ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
+            : [],
+          ids.matches.length
+            ? em.find(
+                Match,
+                { id: { $in: ids.matches } },
+                { populate: ["participants.team", "participants.players", "tournament.event"] },
+              )
+            : [],
+          ids.events.length
+            ? em.find(TournamentEvent, { id: { $in: ids.events } }, { fields: ["id", "name"] })
+            : [],
+          ids.circuits.length
+            ? em.find(Circuit, { id: { $in: ids.circuits } }, { fields: ["id", "name"] })
+            : [],
+          ids.seasons.length
+            ? em.find(Season, { id: { $in: ids.seasons } }, { fields: ["id", "name"] })
+            : [],
+        ]);
       return Object.fromEntries([
         ...players.map((player) => [player.id, player.name]),
         ...teams.map((team) => [team.id, team.name]),
         ...users.map((user) => [user.id, user.userName]),
         ...events.map((event) => [event.id, event.name]),
         ...circuits.map((circuit) => [circuit.id, circuit.name]),
+        ...seasons.map((season) => [season.id, season.name]),
         ...tournaments.map((tournament) => [
           tournament.id,
           `${tournament.event.name} · ${tournament.name}`,

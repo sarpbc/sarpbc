@@ -4,6 +4,7 @@ import type { MatchLineupInput } from "./lineup";
 import type { PlayerAwardType } from "./player-award";
 import type { PlayerStatus } from "./player";
 import type { PrizeEntry } from "./prize";
+import type { SeasonAwardType } from "./season";
 import type { StreamInput } from "./stream";
 import type { TeamAliasInput, TeamLogoVariant } from "./team";
 import type { Viewership } from "./viewership";
@@ -86,6 +87,14 @@ export type RosterChange =
       teamId: string;
       playerId: string;
       awardType: PlayerAwardType;
+    }
+  | {
+      kind: "award_season_player";
+      seasonId: string;
+      playerId: string;
+      awardType: SeasonAwardType;
+      region?: string;
+      presentedBy?: string;
     }
   | { kind: "set_event_streams"; eventId: string; streams: StreamInput[] }
   | { kind: "set_tournament_streams"; tournamentId: string; streams: StreamInput[] }

@@ -26,6 +26,8 @@ import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
 import { MatchStatsRosterReferences } from "../../match-stats/infrastructure/persistence/roster-references.mover";
 import { TournamentRosterReferences } from "../../tournament/infrastructure/persistence/roster-references.mover";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
+import { SeasonRosterReferences } from "../../season/infrastructure/persistence/roster-references.mover";
+import { SeasonModule } from "../../season/infrastructure/season.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
 import type { CurrentRosterSource } from "../application/ports";
@@ -41,6 +43,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
   imports: [
     MikroOrmModule.forFeature([Player, Team, Contract, PlayerPhoto]),
     TournamentModule,
+    SeasonModule,
     PandascoreModule,
     StorageModule,
     ConfigModule,
@@ -78,7 +81,11 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
         new MikroRosterMergeTransaction(em, (tx) => {
           const competition = new TournamentRosterReferences(tx);
           return {
-            movers: [new MatchStatsRosterReferences(tx), competition],
+            movers: [
+              new MatchStatsRosterReferences(tx),
+              new SeasonRosterReferences(tx),
+              competition,
+            ],
             sharedTournamentIds: (teamId, otherTeamId) =>
               competition.sharedTournamentIds(teamId, otherTeamId),
           };

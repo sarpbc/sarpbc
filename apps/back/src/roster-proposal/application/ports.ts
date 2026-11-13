@@ -17,6 +17,7 @@ export interface RosterNameIds {
   matches: string[];
   events: string[];
   circuits: string[];
+  seasons: string[];
 }
 
 export interface RosterProposalTransaction {

@@ -183,6 +183,37 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
       })),
     ];
   }
+  if (change.kind === "award_season_player") {
+    return [
+      {
+        key: "seasonId",
+        label: t("page.proposals.fields.seasonId"),
+        value: nameOf(change.seasonId),
+      },
+      {
+        key: "playerId",
+        label: t("page.proposals.fields.playerId"),
+        value: nameOf(change.playerId),
+      },
+      {
+        key: "awardType",
+        label: t("page.proposals.fields.awardType"),
+        value: t(`page.seasons.awards.types.${change.awardType}`),
+      },
+      ...(change.region
+        ? [{ key: "region", label: t("page.proposals.fields.region"), value: change.region }]
+        : []),
+      ...(change.presentedBy
+        ? [
+            {
+              key: "presentedBy",
+              label: t("page.proposals.fields.presentedBy"),
+              value: change.presentedBy,
+            },
+          ]
+        : []),
+    ];
+  }
   if (change.kind === "set_event_streams") {
     return streamRows("eventId", change.eventId, change.streams);
   }

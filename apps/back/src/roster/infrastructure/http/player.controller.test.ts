@@ -3,6 +3,8 @@ import { Player } from "../../domain/roster";
 import { Match, TournamentParticipant } from "../../../tournament/domain/competition";
 import { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
 import type { PlayerLineupRow } from "../../../tournament/application/ports";
+import type { SeasonStore } from "../../../season/application/ports";
+import { SeasonService } from "../../../season/application/season.service";
 import { PlayerController } from "./player.controller";
 
 describe("PlayerController", () => {
@@ -20,6 +22,19 @@ describe("PlayerController", () => {
     getTournamentsByTeamTenures: vi.fn(),
   };
   const awards = { findByPlayerId: vi.fn() };
+  const seasonStore: SeasonStore = {
+    list: vi.fn(),
+    find: vi.fn(),
+    nameTaken: vi.fn(),
+    save: vi.fn(),
+    remove: vi.fn(),
+    awards: vi.fn(),
+    awardsOfPlayer: vi.fn(),
+    player: vi.fn(),
+    awardTaken: vi.fn(),
+    saveAward: vi.fn(),
+    removeAward: vi.fn(),
+  };
   const playerEarnings = vi.fn();
   const prizes = { playerEarnings } as never;
   const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
@@ -66,6 +81,7 @@ describe("PlayerController", () => {
     matches as never,
     tournaments as never,
     awards as never,
+    new SeasonService(seasonStore),
     prizes,
     lineups,
   );
@@ -99,6 +115,7 @@ describe("PlayerController", () => {
     expect(contracts.getOldTeamsByPlayer).toHaveBeenCalledWith("kept");
     expect(tournaments.getTournamentsWonByPlayer).toHaveBeenCalledWith("kept");
     expect(awards.findByPlayerId).toHaveBeenCalledWith("kept");
+    expect(seasonStore.awardsOfPlayer).toHaveBeenCalledWith("kept");
     expect(playerEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
     expect(tournaments.getTournamentsByPlayer).toHaveBeenCalledWith("kept");
     expect(matches.getMatchesByPlayer).toHaveBeenCalledWith("kept");

@@ -1238,6 +1238,13 @@
             "offensive_mvp": "MVP Offensif",
             "defensive_mvp": "MVP Défensif",
             "breakthrough_player": "Révélation"
+          },
+          "presentedBy": "Présenté par {name}",
+          "officialSource": "Annonce officielle",
+          "seasonTypes": {
+            "season_mvp": "MVP de la saison",
+            "regular_season_mvp": "MVP de la saison régulière",
+            "regional_mvp": "MVP régional"
           }
         },
         "matches": {

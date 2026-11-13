@@ -50,6 +50,7 @@ const {
 
 const {
   awards,
+  seasonAwards,
   hasAwards,
   pending: awardsPending,
   error: awardsError,
@@ -289,6 +290,7 @@ setPageSeo({
         <PlayerAwardsSection
           v-if="showAwardsSection"
           :awards="awards"
+          :season-awards="seasonAwards"
           :pending="awardsPending"
           :has-error="Boolean(awardsError)"
           @retry="refreshAwards()"

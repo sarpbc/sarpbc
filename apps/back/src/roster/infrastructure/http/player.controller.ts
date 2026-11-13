@@ -36,6 +36,7 @@ import {
 } from "../../../tournament/application/match/match-lineup.service";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
+import { SeasonService } from "../../../season/application/season.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
@@ -48,6 +49,7 @@ export class PlayerController {
     private matchService: MatchService,
     @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
     private playerAwardService: PlayerAwardService,
+    private seasonService: SeasonService,
     private tournamentPrizeService: TournamentPrizeService,
     private lineupService: MatchLineupService,
   ) {}
@@ -170,8 +172,11 @@ export class PlayerController {
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
-    const awards = await this.playerAwardService.findByPlayerId(player.id);
-    return { awards };
+    const [awards, seasonAwards] = await Promise.all([
+      this.playerAwardService.findByPlayerId(player.id),
+      this.seasonService.awardsOfPlayer(player.id),
+    ]);
+    return { awards, seasonAwards };
   }
 
   @Get(":id/earnings")

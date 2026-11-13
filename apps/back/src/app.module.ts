@@ -21,6 +21,7 @@ import { GameModule } from "./game/infrastructure/game.module";
 import { ForumModule } from "./forum/infrastructure/forum.module";
 import { TournamentModule } from "./tournament/infrastructure/tournament.module";
 import { CircuitModule } from "./circuit/infrastructure/circuit.module";
+import { SeasonModule } from "./season/infrastructure/season.module";
 import { PandascoreModule } from "./pandascore/infrastructure/pandascore.module";
 import { NewsModule } from "./news/infrastructure/news.module";
 import { ReplyModule } from "./reply/infrastructure/reply.module";
@@ -64,6 +65,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     ForumModule,
     TournamentModule,
     CircuitModule,
+    SeasonModule,
     RedisModule,
     HealthModule,
     PandascoreModule,

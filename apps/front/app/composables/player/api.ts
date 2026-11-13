@@ -3,6 +3,7 @@ import type {
   Player,
   PlayerContract,
   PlayerProfileAward,
+  PlayerSeasonAward,
   PlayerStandIn,
   ProfileEarnings,
   ProfileMatchListItem,
@@ -89,12 +90,17 @@ export async function getPlayerTrophies(playerId: string): Promise<Tournament[]>
   return res.trophies ?? [];
 }
 
-export async function getPlayerAwards(playerId: string): Promise<PlayerProfileAward[]> {
-  const res = await apiFetch<{ awards?: PlayerProfileAward[] }>(`/player/${playerId}/awards`, {
+export interface PlayerAwards {
+  awards: PlayerProfileAward[];
+  seasonAwards: PlayerSeasonAward[];
+}
+
+export async function getPlayerAwards(playerId: string): Promise<PlayerAwards> {
+  const res = await apiFetch<Partial<PlayerAwards>>(`/player/${playerId}/awards`, {
     method: "GET",
   });
 
-  return res.awards ?? [];
+  return { awards: res.awards ?? [], seasonAwards: res.seasonAwards ?? [] };
 }
 
 export async function getPlayerStandIns(playerId: string): Promise<PlayerStandIn[]> {

@@ -52,6 +52,8 @@ Read tools (any valid PAT):
 | `get_event`             | Event by id or slug with its stages and league  |
 | `list_circuits`         | Points circuits with their public URL           |
 | `get_circuit`           | Circuit stages, scales and computed standings   |
+| `list_seasons`          | Seasons and leagues that hold season awards     |
+| `get_season`            | Season awards, regions, partners and sources    |
 
 News tools (`news.manage`):
 
@@ -112,6 +114,7 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `merge_players`             | `players.manage`                                         | Move a duplicate's contracts, photos, awards and tournament rosters to the kept player                         |
 | `merge_teams`               | `teams.manage`                                           | Move a duplicate's contracts, current players and tournament participations to the kept team                   |
 | `propose_tournament_prizes` | `tournaments.manage`                                     | Replace a tournament stage's prize distribution (placement, amount, ISO 4217 currency, team, optional players) |
+| `propose_season_award`      | `tournaments.manage`                                     | Record a Season MVP, Regular Season MVP or Regional MVP of a staff-created season                              |
 | `set_event_streams`         | `tournaments.manage`                                     | Replace the live streams of an event, inherited by its stages without their own list                           |
 | `set_tournament_streams`    | `tournaments.manage`                                     | Replace the live streams of a tournament stage, inherited by its matches without their own list                |
 | `set_match_streams`         | `tournaments.manage`                                     | Replace the live streams of one match, overriding the inherited list                                           |
@@ -143,6 +146,8 @@ Live streams are lists of `url`, `platform` (`twitch`, `youtube`, `kick` or `oth
 
 Viewership records, for an event or a match, `peakViewers`, an optional `averageViewers` no higher than the peak, a `scope` (`official` for the official broadcasts only, `with_costreams` when co-streams are counted), an optional `measuredAt` date-time, and the `sourceName` and https `sourceUrl` credited next to the numbers on the site. `set_event_viewership` and `set_match_viewership` replace the stored numbers once approved and use the proposal `sourceUrl` as the credited link; Liquipedia, BLAST.tv and start.gg pages are refused as sources, and replay statistics are not viewership. Both accept PandaScore entities and refuse start.gg matches and events whose stages all come from start.gg. Staff may enter numbers for start.gg matches and events in the admin app: the site shows them with the source and a start.gg credit, and `get_event`, `get_tournament`, `get_upcoming_matches` and `get_match_results` never return them. `list_events` returns the viewership of the events it lists; the site event listing carries none.
 A points circuit groups tournament stages under a name staff enter, such as a season or a region. Each stage carries the official points scale of its organiser: placement ranges (`from`, `to`) and the points every team in a range receives. Staff create circuits in the admin app. `set_circuit_stage_scale` proposes the whole scale of one stage with a required `sourceUrl`, the official rules or announcement and never Liquipedia, and adds the stage to the circuit once approved. Points are never estimated: a stage without a scale awards nothing. Standings add, for every stage that has ended, the points of each team's PandaScore final placement. Tied ranks share a tier and tied totals share a rank. Only PandaScore stages are accepted, so start.gg and manual tournaments are refused and never counted. `get_circuit` returns the stages with their scales, then the standings with an event-by-event breakdown and each event status (`scale_missing`, `upcoming`, `in_progress`, `awaiting_results` or `counted`). These official-scale standings are separate from any in-house ranking.
+
+A season is a staff-named record, such as `RLCS 2024`, that holds the awards no single tournament stage holds. Staff create seasons in the admin app; nothing is prefilled. `propose_season_award` records a `season_mvp`, a `regular_season_mvp` or a `regional_mvp` with the player, an optional `presentedBy` partner and a required `sourceUrl`: the official announcement from RLEsports, BLAST, the organiser or the league, never Liquipedia. A `regional_mvp` names its `region`, a `regular_season_mvp` may name one and a `season_mvp` has none. A season holds one award of each type and region. The award follows a player merge and appears on the player page with a link to its source. Stage awards stay on `propose_player_award`.
 
 `get_tournament`, `get_match_results` and `get_upcoming_matches` return each match's `winner`, `status` and `pandascoreId` (null for manual matches).
 
