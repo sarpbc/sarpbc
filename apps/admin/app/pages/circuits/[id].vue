@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { CircuitDetail, CircuitInput, CircuitStage } from "@sarpbc/types";
-import { getApiErrorMessage, tournamentStageLabel } from "@sarpbc/utils";
+import { getApiErrorMessage, isWorldwideCircuitRegion, tournamentStageLabel } from "@sarpbc/utils";
 import type { PickedStage } from "~/components/circuit/StagePicker.vue";
 import type { ScaleEditorTarget } from "~/components/circuit/ScaleEditor.vue";
 
@@ -52,7 +52,15 @@ async function save(input: CircuitInput) {
 }
 
 function startStage(stage: PickedStage) {
-  scaleTarget.value = { tournamentId: stage.id, label: stage.label, scale: [], sourceUrl: "" };
+  scaleTarget.value = {
+    tournamentId: stage.id,
+    label: stage.label,
+    scale: [],
+    sourceUrl: "",
+    worldwide: false,
+    regionTeamIds: [],
+    finishes: [],
+  };
 }
 
 function stageLabel(stage: CircuitStage): string {
@@ -65,7 +73,19 @@ function editStage(stage: CircuitStage) {
     label: stageLabel(stage),
     scale: stage.scale,
     sourceUrl: stage.sourceUrl,
+    worldwide: stage.worldwide,
+    regionTeamIds: stage.regionTeams.map(({ id }) => id),
+    finishes: stage.finishes.map(({ team, placement }) => ({ teamId: team.id, placement })),
   };
+}
+
+function regionSummary(stage: CircuitStage): string | null {
+  if (!stage.worldwide) return null;
+  if (isWorldwideCircuitRegion(circuit.value?.region)) {
+    return t("page.circuits.stages.worldwide");
+  }
+  const count = stage.regionTeams.length;
+  return t("page.circuits.stages.regionTeams", { count }, count);
 }
 
 function formatDates(stage: CircuitStage): string {
@@ -142,6 +162,20 @@ function formatDates(stage: CircuitStage): string {
                       stage.scale.length,
                     )
                   }}
+                  <template v-if="regionSummary(stage)"> · {{ regionSummary(stage) }}</template>
+                  <template v-if="stage.finishes.length">
+                    ·
+                    {{
+                      $t(
+                        "page.circuits.stages.finishes",
+                        { count: stage.finishes.length },
+                        stage.finishes.length,
+                      )
+                    }}
+                  </template>
+                </span>
+                <span v-if="stage.tournament.source === 'startgg'" class="text-muted">
+                  {{ $t("page.circuits.stages.startggNotice") }}
                 </span>
                 <ULink
                   :to="stage.sourceUrl"
@@ -178,7 +212,12 @@ function formatDates(stage: CircuitStage): string {
 
     <CircuitStagePicker v-model:open="isPickerOpen" @select="startStage" />
 
-    <CircuitScaleEditor v-model:target="scaleTarget" :circuit-id="circuitId" @saved="setCircuit" />
+    <CircuitScaleEditor
+      v-model:target="scaleTarget"
+      :circuit-id="circuitId"
+      :region="circuit?.region ?? null"
+      @saved="setCircuit"
+    />
 
     <ConfirmDeleteModal
       v-model:target="stageToRemove"

@@ -1,5 +1,6 @@
 import type {
   CircuitDetail,
+  CircuitEventTeam,
   CircuitInput,
   CircuitStageScaleInput,
   CircuitSummary,
@@ -42,4 +43,15 @@ export async function setCircuitStageScale(
 
 export async function removeCircuitStage(circuitId: string, tournamentId: string): Promise<void> {
   await apiFetch(`/circuits/${circuitId}/stages/${tournamentId}`, { method: "DELETE" });
+}
+
+export async function getCircuitStageTeams(
+  circuitId: string,
+  tournamentId: string,
+): Promise<CircuitEventTeam[]> {
+  const res = await apiFetch<{ teams: CircuitEventTeam[] }>(
+    `/circuits/${circuitId}/stages/${tournamentId}/teams`,
+    { method: "GET" },
+  );
+  return res.teams;
 }

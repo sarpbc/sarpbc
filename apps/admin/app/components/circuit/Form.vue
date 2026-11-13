@@ -7,7 +7,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isLiquipediaSourceHost,
+  isForbiddenCircuitSourceHost,
 } from "@sarpbc/utils";
 
 const props = defineProps<{
@@ -38,7 +38,7 @@ const sourceUrlError = computed<string | undefined>(() => {
   const url = URL.parse(value);
   if (url === null || (url.protocol !== "https:" && url.protocol !== "http:"))
     return t("page.circuits.scale.errors.sourceUrl");
-  return isLiquipediaSourceHost(url.hostname)
+  return isForbiddenCircuitSourceHost(url.hostname)
     ? t("page.circuits.scale.errors.sourceBlocked")
     : undefined;
 });

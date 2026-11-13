@@ -181,6 +181,25 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
         label: t("page.proposals.fields.tier", { number: tier.from }),
         value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
       })),
+      {
+        key: "worldwide",
+        label: t("page.proposals.fields.worldwide"),
+        value: change.worldwide ? t("page.proposals.values.yes") : t("page.proposals.values.no"),
+      },
+      ...(change.regionTeamIds?.length
+        ? [
+            {
+              key: "regionTeamIds",
+              label: t("page.proposals.fields.regionTeams"),
+              value: change.regionTeamIds.map(nameOf).join(", "),
+            },
+          ]
+        : []),
+      ...(change.finishes ?? []).map((finish) => ({
+        key: `finish-${finish.teamId}`,
+        label: t("page.proposals.fields.finish", { placement: finish.placement }),
+        value: nameOf(finish.teamId),
+      })),
     ];
   }
   if (change.kind === "award_season_player") {

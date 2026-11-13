@@ -287,7 +287,10 @@
         "aliasName": "Former name",
         "aliasFrom": "From",
         "aliasTo": "Until",
-        "aliasPandascoreId": "PandaScore team"
+        "aliasPandascoreId": "PandaScore team",
+        "worldwide": "Worldwide stage",
+        "regionTeams": "Region teams",
+        "finish": "Final place {placement}"
       },
       "playerStatus": {
         "active": "Active",
@@ -1196,7 +1199,7 @@
         "season": "Season",
         "seasonHint": "Year of the circuit season, as stated in the official rules.",
         "region": "Region",
-        "regionHint": "For example Worldwide, EU or NA. Leave empty if the rules name none.",
+        "regionHint": "For example EU, NA, MENA, SAM, OCE, APAC or SSA. Leave empty or enter Worldwide for a worldwide circuit.",
         "description": "Description",
         "sourceUrl": "Official rules",
         "sourceUrlHint": "Link to the official circuit rules or announcement. Never Liquipedia.",
@@ -1223,7 +1226,7 @@
       },
       "stages": {
         "title": "Stages",
-        "hint": "Only PandaScore tournament stages can be attached.",
+        "hint": "Attach PandaScore, manual or start.gg stages. start.gg stages count only here: the public site and the MCP leave them out.",
         "add": "Add Stage",
         "edit": "Edit Scale",
         "empty": "No stages yet. Add a stage, then enter its official points scale.",
@@ -1232,7 +1235,11 @@
           "title": "Remove Stage",
           "confirm": "Remove {name} from this circuit? Its points scale is deleted.",
           "confirmButton": "Remove Stage"
-        }
+        },
+        "worldwide": "Worldwide stage",
+        "regionTeams": "Worldwide stage, no region team | Worldwide stage, {count} region team | Worldwide stage, {count} region teams",
+        "finishes": "{count} final place | {count} final places",
+        "startggNotice": "Data from start.gg. Not shown on the public site or in the MCP."
       },
       "picker": {
         "title": "Add Stage",
@@ -1260,6 +1267,32 @@
           "overlap": "Place ranges cannot overlap.",
           "sourceUrl": "Enter a valid http or https URL.",
           "sourceBlocked": "This website is not accepted as a source. Use the official rules page or announcement."
+        },
+        "teamPlacement": "{name} (place {placement})",
+        "teamsLoading": "Loading the teams of this event…",
+        "teamsError": "Could not load the teams of this event.",
+        "noTeams": "No team has played this event yet.",
+        "region": {
+          "title": "Region",
+          "worldwide": "Worldwide stage",
+          "worldwideHint": "Teams from every region play it, as in a Major or a world championship.",
+          "worldwideCircuit": "This circuit is worldwide, so every team of this stage earns points.",
+          "teamsHint": "Only the teams you select earn points from this stage in the {region} circuit. Select the teams from {region}.",
+          "noneSelected": "No team selected: this stage awards no points in this circuit."
+        },
+        "finishes": {
+          "title": "Final places from earlier stages",
+          "hint": "Enter the official final place of teams eliminated before this stage, such as 9th to 16th decided in groups. Use the place the official rules give, for example 9 for a 9th–12th finish. It replaces the team's place in this stage and earns points from this scale.",
+          "team": "Team",
+          "selectTeam": "Select a team",
+          "placement": "Final place",
+          "add": "Add Final Place",
+          "remove": "Remove final place",
+          "errors": {
+            "incomplete": "Select a team and enter its place.",
+            "placement": "Use a whole number from 1 to {maxPlacement}.",
+            "repeated": "Each team can have only one final place."
+          }
         }
       }
     },
