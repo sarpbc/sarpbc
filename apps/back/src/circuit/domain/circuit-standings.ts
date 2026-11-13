@@ -7,6 +7,7 @@ import type {
   CircuitStandingTeam,
   TournamentEventRef,
 } from "@sarpbc/types";
+import { isWorldwideCircuitRegion } from "@sarpbc/utils";
 import { pointsForPlacement } from "./circuit-scale";
 
 export interface StagePlacement {
@@ -20,7 +21,10 @@ export interface CircuitStageResult {
   endAt: Date | null;
   scale: readonly CircuitScaleTier[];
   sourceUrl: string;
+  worldwide: boolean;
+  regionTeamIds: readonly string[];
   placements: readonly StagePlacement[];
+  finishes: readonly StagePlacement[];
 }
 
 export interface ComputedStandings {
@@ -48,8 +52,20 @@ function eventStatus(stages: readonly CircuitStageResult[], now: Date): CircuitE
   if (!scaled.length) return "scale_missing";
   if (scaled.every((stage) => !hasBegun(stage, now) && !hasEnded(stage, now))) return "upcoming";
   if (scaled.some((stage) => !hasEnded(stage, now))) return "in_progress";
-  if (scaled.every((stage) => stage.placements.length === 0)) return "awaiting_results";
+  if (scaled.every((stage) => stage.placements.length === 0 && stage.finishes.length === 0))
+    return "awaiting_results";
   return "counted";
+}
+
+function creditedPlacements(stage: CircuitStageResult, regional: boolean): StagePlacement[] {
+  const finished = new Set(stage.finishes.map(({ team }) => team.id));
+  const placements = [
+    ...stage.placements.filter(({ team }) => !finished.has(team.id)),
+    ...stage.finishes,
+  ];
+  if (!regional || !stage.worldwide) return placements;
+  const region = new Set(stage.regionTeamIds);
+  return placements.filter(({ team }) => region.has(team.id));
 }
 
 function bound(dates: readonly (Date | null)[], pick: "earliest" | "latest"): string | null {
@@ -69,8 +85,10 @@ function compareEvents(a: CircuitStandingsEvent, b: CircuitStandingsEvent): numb
 
 export function computeCircuitStandings(
   stages: readonly CircuitStageResult[],
+  region: string | null,
   now: Date,
 ): ComputedStandings {
+  const regional = !isWorldwideCircuitRegion(region);
   const groups = new Map<string, { event: TournamentEventRef; stages: CircuitStageResult[] }>();
   for (const stage of stages) {
     const group = groups.get(stage.event.id) ?? { event: stage.event, stages: [] };
@@ -95,7 +113,7 @@ export function computeCircuitStandings(
   const tallies = new Map<string, TeamTally>();
   for (const stage of stages) {
     if (!hasEnded(stage, now)) continue;
-    for (const { team, placement } of stage.placements) {
+    for (const { team, placement } of creditedPlacements(stage, regional)) {
       const points = pointsForPlacement(stage.scale, placement);
       if (points === null) continue;
       const tally = tallies.get(team.id) ?? { team, points: 0, cells: new Map() };

@@ -1,4 +1,5 @@
 import type {
+  CircuitStageScaleInput,
   RosterChange,
   RosterProposalStatus,
   StreamInput,
@@ -45,9 +46,17 @@ type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
 type Streams = Pick<StreamService, "requireProposable" | "set">;
 type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
 type Viewerships = Pick<ViewershipService, "requireProposable" | "set">;
-type Circuits = Pick<CircuitService, "requireStageScale" | "setStageScale">;
+type Circuits = Pick<CircuitService, "requireStageSettings" | "setStageScale">;
 type TeamAliases = Pick<TeamAliasService, "requireProposable" | "add" | "update">;
 type Seasons = Pick<SeasonService, "requireAward" | "addAward">;
+type CircuitStageChange = Extract<RosterChange, { kind: "set_circuit_stage_scale" }>;
+
+function circuitStageInput(
+  { scale, worldwide, regionTeamIds, finishes }: CircuitStageChange,
+  sourceUrl: string,
+): CircuitStageScaleInput {
+  return { scale, sourceUrl, worldwide, regionTeamIds, finishes };
+}
 
 interface StreamChange {
   owner: StreamOwner;
@@ -129,7 +138,11 @@ export class RosterProposalService {
       );
     }
     if (change.kind === "set_circuit_stage_scale") {
-      await this.circuits.requireStageScale(change.circuitId, change.tournamentId, change.scale);
+      await this.circuits.requireStageSettings(
+        change.circuitId,
+        change.tournamentId,
+        circuitStageInput(change, sourceUrl),
+      );
     }
     if (change.kind === "add_team_alias") {
       await this.teamAliases.requireProposable(change.teamId, { ...change.alias, sourceUrl });
@@ -358,8 +371,12 @@ export class RosterProposalService {
         await this.viewerships.set({ kind: "match", id: change.matchId }, change.viewership);
         return change.matchId;
       case "set_circuit_stage_scale": {
-        const { circuitId, tournamentId, scale } = change;
-        await this.circuits.setStageScale(circuitId, tournamentId, scale, sourceUrl);
+        const { circuitId, tournamentId } = change;
+        await this.circuits.setStageScale(
+          circuitId,
+          tournamentId,
+          circuitStageInput(change, sourceUrl),
+        );
         return circuitId;
       }
       case "delete_match":
@@ -474,6 +491,13 @@ function referencedTeamIds(change: RosterChange): string[] {
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
       return change.prizes.map(({ teamId }) => teamId);
+    case "set_circuit_stage_scale":
+      return [
+        ...new Set([
+          ...(change.regionTeamIds ?? []),
+          ...(change.finishes ?? []).map(({ teamId }) => teamId),
+        ]),
+      ];
     case "delete_team":
       return change.mergeIntoTeamId ? [change.teamId, change.mergeIntoTeamId] : [change.teamId];
     case "create_player":
@@ -487,7 +511,6 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "set_match_lineups":
     case "set_event_viewership":
     case "set_match_viewership":
-    case "set_circuit_stage_scale":
     case "delete_match":
       return [];
     default: {

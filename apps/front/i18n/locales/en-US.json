@@ -1894,14 +1894,15 @@
         "noPoints": "No points",
         "qualification": "Teams above the line hold the top {count} qualification spots.",
         "aboutTitle": "How Points Work",
-        "explainer": "Points follow the official scale entered by sarpbc.org staff, applied to final placements from PandaScore. Only PandaScore results count.",
+        "explainer": "Points follow the official scale entered by sarpbc.org staff, applied to each team's final placement: PandaScore standings, or the official placement staff entered, such as 9th to 16th places decided in groups.",
         "scaleSource": "Points scale source",
         "status": {
           "scaleMissing": "Scale pending",
           "upcoming": "Upcoming",
           "inProgress": "In progress",
           "awaitingResults": "Awaiting results"
-        }
+        },
+        "regionalExplainer": "This is the {region} circuit. At events open to every region, such as Majors, only teams from {region} earn points."
       }
     }
   }

@@ -20,6 +20,7 @@ import {
   MAX_CIRCUIT_PLACEMENT,
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
+  MAX_CIRCUIT_STAGE_TEAMS,
   MAX_STREAMS,
   ROSTER_PROPOSAL_PERMISSIONS,
   MAX_VIEWERS,
@@ -30,6 +31,7 @@ import {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
+  isForbiddenCircuitSourceHost,
   isForbiddenViewershipSource,
   isLiquipediaSourceHost,
   isIso4217Code,
@@ -115,6 +117,42 @@ const circuitScaleSchema = z
   .max(MAX_CIRCUIT_SCALE_TIERS)
   .describe(
     "The complete official scale of this stage, copied from the cited source; ranges must not overlap. Never estimate or invent points. An empty list keeps the stage in the circuit without awarding points.",
+  );
+
+const circuitSourceUrlSchema = sourceUrlSchema
+  .refine(
+    (url) => !URL.canParse(url) || !isForbiddenCircuitSourceHost(new URL(url).hostname),
+    "Liquipedia and BLAST.tv are not accepted circuit sources",
+  )
+  .describe(
+    "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia or BLAST.tv.",
+  );
+
+const circuitWorldwideSchema = z
+  .boolean()
+  .describe(
+    "True when the stage is open to teams of every region, such as a Major or a world championship. In a regional circuit such a stage credits only the teams listed in regionTeamIds; in a worldwide circuit it credits every team. Omit or false for a stage of the circuit's own region, such as a regional Open.",
+  );
+
+const circuitRegionTeamsSchema = z
+  .array(z.string().uuid())
+  .max(MAX_CIRCUIT_STAGE_TEAMS)
+  .describe(
+    "UUIDs of the teams of the circuit's region that took part in this worldwide stage. Only they earn points from it in a regional circuit. Each team must have played a stage of the same event. Omitted means none.",
+  );
+
+const circuitFinishesSchema = z
+  .array(
+    z.object({
+      teamId: z.string().uuid().describe("UUID of a team that played a stage of the same event."),
+      placement: circuitPlacement.describe(
+        "The team's official final placement in the whole event, e.g. 9 for a 9th-12th finish.",
+      ),
+    }),
+  )
+  .max(MAX_CIRCUIT_STAGE_TEAMS)
+  .describe(
+    "Official final placements in the event that this stage's own placements do not hold, such as the 9th-16th places decided in groups or pools before the playoffs. Each entry replaces the stage placement of its team and is scored with this stage's scale. Use the placement the official rules give (e.g. 9 for every team eliminated in the GSL lower semi-finals of a 16-team Open). Never estimate. Omitted means none.",
   );
 
 const STREAMS_NOTE =
@@ -779,18 +817,35 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     defineTool({
       name: "set_circuit_stage_scale",
       description:
-        "Propose the official points scale of one tournament stage in a points circuit, adding the stage to the circuit if needed. Nothing changes until a staff member approves it in the admin app. Points are then computed from the PandaScore final placements of that stage. Read get_circuit and get_tournament first. Only PandaScore stages are accepted; start.gg and manual tournaments are refused.",
+        "Propose the official points scale of one tournament stage in a points circuit, adding the stage to the circuit if needed; once approved it replaces the stage's whole settings. Nothing changes until a staff member approves it in the admin app. Points are then computed from the final placements of that stage (PandaScore standings) and from the final placements listed in finishes. PandaScore, manual and start.gg stages are accepted. A start.gg stage counts only on staff surfaces: the public site, get_circuit and list_circuits never show it or its points. Read get_circuit and get_tournament first.",
       write: true,
       permission: "tournaments.manage",
       input: {
         circuitId: z.string().uuid().describe("Circuit UUID from list_circuits or create_circuit."),
-        tournamentId: z.string().uuid().describe("PandaScore tournament stage UUID."),
+        tournamentId: z
+          .string()
+          .uuid()
+          .describe("Tournament stage UUID, usually the final stage (playoffs) of the event."),
         scale: circuitScaleSchema,
-        sourceUrl: sourceUrlSchema,
+        worldwide: circuitWorldwideSchema.optional(),
+        regionTeamIds: circuitRegionTeamsSchema.optional(),
+        finishes: circuitFinishesSchema.optional(),
+        sourceUrl: circuitSourceUrlSchema,
       },
-      handler: ({ circuitId, tournamentId, scale, sourceUrl }, user) =>
+      handler: (
+        { circuitId, tournamentId, scale, worldwide, regionTeamIds, finishes, sourceUrl },
+        user,
+      ) =>
         propose(
-          { kind: "set_circuit_stage_scale", circuitId, tournamentId, scale },
+          {
+            kind: "set_circuit_stage_scale",
+            circuitId,
+            tournamentId,
+            scale,
+            worldwide,
+            regionTeamIds,
+            finishes,
+          },
           sourceUrl,
           user.id,
         ),

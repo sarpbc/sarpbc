@@ -90,6 +90,14 @@
   {
     "controller": "\"circuits\"",
     "verb": "GET",
+    "path": "\":id/stages/:tournamentId/teams\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"circuits\"",
+    "verb": "GET",
     "path": "\":ref/standings\"",
     "status": null,
     "guards": [],

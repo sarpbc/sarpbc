@@ -524,6 +524,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "worldwide": {
+          "name": "worldwide",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
         }
       },
       "indexes": [
@@ -570,6 +587,146 @@
           "localTableName": "public.circuit_stage",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.tournament",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "circuit_stage_team",
+      "schema": "public",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "gen_random_uuid()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "placement": {
+          "name": "placement",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "region_member": {
+          "name": "region_member",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
+        "stage_id": {
+          "name": "stage_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "circuit_stage_team_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": ["stage_id", "team_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "circuit_stage_team_stage_id_team_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["team_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "circuit_stage_team_team_id_index",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "circuit_stage_team_stage_id_foreign": {
+          "columnNames": ["stage_id"],
+          "constraintName": "circuit_stage_team_stage_id_foreign",
+          "localTableName": "public.circuit_stage_team",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.circuit_stage",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        },
+        "circuit_stage_team_team_id_foreign": {
+          "columnNames": ["team_id"],
+          "constraintName": "circuit_stage_team_team_id_foreign",
+          "localTableName": "public.circuit_stage_team",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.team",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         }

@@ -287,7 +287,10 @@
         "aliasName": "Ancien nom",
         "aliasFrom": "Du",
         "aliasTo": "Jusqu'au",
-        "aliasPandascoreId": "Équipe PandaScore"
+        "aliasPandascoreId": "Équipe PandaScore",
+        "worldwide": "Étape mondiale",
+        "regionTeams": "Équipes de la région",
+        "finish": "Place finale {placement}"
       },
       "playerStatus": {
         "active": "Actif",
@@ -1196,7 +1199,7 @@
         "season": "Saison",
         "seasonHint": "Année de la saison du circuit, telle qu’indiquée dans le règlement officiel.",
         "region": "Région",
-        "regionHint": "Par exemple Monde, EU ou NA. Laissez vide si le règlement n’en précise aucune.",
+        "regionHint": "Par exemple EU, NA, MENA, SAM, OCE, APAC ou SSA. Laissez vide ou saisissez Worldwide pour un circuit mondial.",
         "description": "Description",
         "sourceUrl": "Règlement officiel",
         "sourceUrlHint": "Lien vers le règlement ou l’annonce officielle du circuit. Jamais Liquipedia.",
@@ -1223,7 +1226,7 @@
       },
       "stages": {
         "title": "Étapes",
-        "hint": "Seules les étapes de tournoi PandaScore peuvent être rattachées.",
+        "hint": "Ajoutez des étapes PandaScore, manuelles ou start.gg. Les étapes start.gg ne comptent qu’ici : le site public et le MCP les excluent.",
         "add": "Ajouter une étape",
         "edit": "Modifier le barème",
         "empty": "Aucune étape. Ajoutez une étape, puis saisissez son barème de points officiel.",
@@ -1232,7 +1235,11 @@
           "title": "Retirer l'étape",
           "confirm": "Retirer {name} de ce circuit ? Son barème de points sera supprimé.",
           "confirmButton": "Retirer l'étape"
-        }
+        },
+        "worldwide": "Étape mondiale",
+        "regionTeams": "Étape mondiale, aucune équipe de la région | Étape mondiale, {count} équipe de la région | Étape mondiale, {count} équipes de la région",
+        "finishes": "{count} place finale | {count} places finales",
+        "startggNotice": "Données start.gg. Non affichées sur le site public ni dans le MCP."
       },
       "picker": {
         "title": "Ajouter une étape",
@@ -1260,6 +1267,32 @@
           "overlap": "Les tranches de places ne doivent pas se chevaucher.",
           "sourceUrl": "Saisissez une URL http ou https valide.",
           "sourceBlocked": "Ce site n'est pas accepté comme source. Utilisez la page de règles officielle ou l'annonce."
+        },
+        "teamPlacement": "{name} ({placement}e place)",
+        "teamsLoading": "Chargement des équipes de cet événement…",
+        "teamsError": "Impossible de charger les équipes de cet événement.",
+        "noTeams": "Aucune équipe n’a encore joué cet événement.",
+        "region": {
+          "title": "Région",
+          "worldwide": "Étape mondiale",
+          "worldwideHint": "Des équipes de toutes les régions y jouent, comme dans un Major ou un championnat du monde.",
+          "worldwideCircuit": "Ce circuit est mondial : toutes les équipes de cette étape marquent des points.",
+          "teamsHint": "Seules les équipes sélectionnées marquent des points de cette étape dans le circuit {region}. Sélectionnez les équipes de la région {region}.",
+          "noneSelected": "Aucune équipe sélectionnée : cette étape ne rapporte aucun point dans ce circuit."
+        },
+        "finishes": {
+          "title": "Places finales des étapes précédentes",
+          "hint": "Saisissez la place finale officielle des équipes éliminées avant cette étape, par exemple les 9e à 16e places décidées en poules. Reprenez la place donnée par le règlement officiel, par exemple 9 pour une 9e–12e place. Elle remplace la place de l’équipe dans cette étape et rapporte les points de ce barème.",
+          "team": "Équipe",
+          "selectTeam": "Choisir une équipe",
+          "placement": "Place finale",
+          "add": "Ajouter une place finale",
+          "remove": "Retirer la place finale",
+          "errors": {
+            "incomplete": "Choisissez une équipe et saisissez sa place.",
+            "placement": "Saisissez un nombre entier de 1 à {maxPlacement}.",
+            "repeated": "Chaque équipe ne peut avoir qu’une place finale."
+          }
         }
       }
     },

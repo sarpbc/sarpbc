@@ -169,8 +169,13 @@ export async function verifyCircuits({
     staffCookie,
     400,
   );
-  for (const refused of [startgg, tournament])
-    await request("PUT", stagePath(refused.id), { scale, sourceUrl: RULES }, staffCookie, 400);
+  await request(
+    "PUT",
+    stagePath(counted.id),
+    { scale, sourceUrl: "https://blast.tv/rl/leaderboard/2026/world-championship/eu" },
+    staffCookie,
+    400,
+  );
   await request("PUT", stagePath(counted.id), { scale, sourceUrl: RULES }, memberCookie, 403);
 
   const standings = async () =>
@@ -189,12 +194,12 @@ export async function verifyCircuits({
   assert.deepEqual(
     await callTool("set_circuit_stage_scale", {
       circuitId: circuit.id,
-      tournamentId: startgg.id,
+      tournamentId: counted.id,
       scale,
-      sourceUrl: RULES,
+      sourceUrl: "https://www.blast.tv/rl/leaderboard/2026",
     }),
     { error: true },
-    "a start.gg stage is refused through the MCP",
+    "a BLAST.tv source is refused through the MCP",
   );
   const proposal = await callTool("set_circuit_stage_scale", {
     circuitId: circuit.id,
@@ -249,6 +254,79 @@ export async function verifyCircuits({
   );
   assert(mcp.stages.every((stage) => stage.tournament.source === "pandascore"));
   assert((await callTool("list_circuits", {})).some(({ id }) => id === circuit.id));
+
+  const eventTeams = (
+    await request("GET", `${stagePath(counted.id)}/teams`, undefined, staffCookie)
+  ).json().teams;
+  assert.deepEqual(
+    eventTeams.map(({ team, placement }) => [team.slug, placement]),
+    [
+      ["circuit-team-9801", 1],
+      ["circuit-team-9802", 2],
+      ["circuit-team-9803", 2],
+    ],
+  );
+  await request("GET", `${stagePath(counted.id)}/teams`, undefined, memberCookie, 403);
+  const teamId = (slug) => eventTeams.find(({ team }) => team.slug === slug).team.id;
+
+  for (const attached of [tournament, startgg])
+    await request("PUT", stagePath(attached.id), { scale, sourceUrl: RULES }, staffCookie);
+  const withAll = (await request("GET", `/circuits/${circuit.id}`, undefined, staffCookie)).json();
+  assert.deepEqual(
+    withAll.stages.map(({ tournament: { source } }) => source).sort(),
+    ["manual", "pandascore", "pandascore", "startgg"],
+    "staff see manual and start.gg stages",
+  );
+  const publicEvents = (await standings()).events.map(({ event }) => event.id);
+  assert(publicEvents.includes(tournament.event.id), "a manual stage is public");
+  assert(!publicEvents.includes(startgg.event.id), "a start.gg stage stays out of the standings");
+  const mcpAll = await callTool("get_circuit", { idOrSlug: circuit.slug });
+  assert(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
+  for (const attached of [tournament, startgg])
+    await request("DELETE", stagePath(attached.id), undefined, staffCookie, 204);
+
+  await request(
+    "PUT",
+    stagePath(counted.id),
+    { scale, sourceUrl: RULES, regionTeamIds: [randomUUID()] },
+    staffCookie,
+    400,
+  );
+  await request("PATCH", `/circuits/${circuit.id}`, { region: "EU" }, staffCookie);
+  const regional = (
+    await request(
+      "PUT",
+      stagePath(counted.id),
+      {
+        scale: [...scale, { from: 9, to: 12, points: 2 }],
+        sourceUrl: RULES,
+        worldwide: true,
+        regionTeamIds: [teamId("circuit-team-9801"), teamId("circuit-team-9803")],
+        finishes: [{ teamId: teamId("circuit-team-9803"), placement: 9 }],
+      },
+      staffCookie,
+    )
+  ).json();
+  assert.deepEqual(
+    regional.stages
+      .filter(({ tournament: { id } }) => id === counted.id)
+      .map(({ worldwide, regionTeams, finishes }) => [
+        worldwide,
+        regionTeams.map(({ slug }) => slug),
+        finishes.map(({ team, placement }) => [team.slug, placement]),
+      ]),
+    [[true, ["circuit-team-9801", "circuit-team-9803"], [["circuit-team-9803", 9]]]],
+  );
+  assert.deepEqual(
+    (await standings()).rows.map(({ points, team }) => [team.slug, points]),
+    [
+      ["circuit-team-9801", 10],
+      ["circuit-team-9803", 2],
+    ],
+    "a worldwide stage of a regional circuit credits only the region teams, with staff-entered places",
+  );
+  await request("PATCH", `/circuits/${circuit.id}`, { region: null }, staffCookie);
+  await request("PUT", stagePath(counted.id), { scale, sourceUrl: RULES }, staffCookie);
 
   const created = await callTool("create_circuit", {
     name: "Fake Series 2026",

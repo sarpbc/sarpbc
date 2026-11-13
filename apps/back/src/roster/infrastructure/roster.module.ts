@@ -26,6 +26,7 @@ import { MikroCurrentRosterWriter } from "./persistence/current-roster.writer";
 import { MatchStatsRosterReferences } from "../../match-stats/infrastructure/persistence/roster-references.mover";
 import { TournamentRosterReferences } from "../../tournament/infrastructure/persistence/roster-references.mover";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
+import { CircuitRosterReferences } from "../../circuit/infrastructure/persistence/roster-references.mover";
 import { SeasonRosterReferences } from "../../season/infrastructure/persistence/roster-references.mover";
 import { SeasonModule } from "../../season/infrastructure/season.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
@@ -84,6 +85,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
             movers: [
               new MatchStatsRosterReferences(tx),
               new SeasonRosterReferences(tx),
+              new CircuitRosterReferences(tx),
               competition,
             ],
             sharedTournamentIds: (teamId, otherTeamId) =>

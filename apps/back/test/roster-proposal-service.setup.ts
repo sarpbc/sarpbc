@@ -1,4 +1,9 @@
-import type { CircuitScaleTier, MatchLineupInput, StreamInput, Viewership } from "@sarpbc/types";
+import type {
+  CircuitStageScaleInput,
+  MatchLineupInput,
+  StreamInput,
+  Viewership,
+} from "@sarpbc/types";
 import { vi } from "vitest";
 import { ConflictError, InvalidInputError, NotFoundError } from "../src/common/domain/errors";
 import { Contract, Player, Team } from "../src/roster/domain/roster";
@@ -91,11 +96,13 @@ export function setupRosterProposalService() {
     set: vi.fn(async () => ({ source: "manual" as const, lineups: [] })),
   };
   const circuits = {
-    requireStageScale: vi.fn(async (_: string, tournamentId: string, scale: CircuitScaleTier[]) => {
-      if (tournamentId === "startgg-stage")
-        throw new InvalidInputError("Only PandaScore tournaments count toward circuit points");
-      return scale;
-    }),
+    requireStageSettings: vi.fn(
+      async (_: string, tournamentId: string, input: CircuitStageScaleInput) => {
+        if (tournamentId === "missing-stage")
+          throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+        return { worldwide: false, regionTeamIds: [], finishes: [], ...input };
+      },
+    ),
     setStageScale: vi.fn(async () => undefined),
   };
   const teamAliases = {

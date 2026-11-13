@@ -13,7 +13,12 @@ import {
   Put,
   UseGuards,
 } from "@nestjs/common";
-import type { CircuitDetail, CircuitStandings, CircuitSummary } from "@sarpbc/types";
+import type {
+  CircuitDetail,
+  CircuitEventTeam,
+  CircuitStandings,
+  CircuitSummary,
+} from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -77,8 +82,18 @@ export class CircuitController {
     @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
     @Body({ schema: SetCircuitStageDto }) dto: SetCircuitStageDto,
   ): Promise<CircuitDetail> {
-    await this.circuits.setStageScale(id, tournamentId, dto.scale, dto.sourceUrl);
+    await this.circuits.setStageScale(id, tournamentId, dto);
     return this.circuits.detail(id);
+  }
+
+  @UseGuards(AuthGuard, PermissionGuard)
+  @RequirePermissions("tournaments.manage")
+  @Get(":id/stages/:tournamentId/teams")
+  async stageTeams(
+    @Param("id", ParseUUIDPipe) id: string,
+    @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
+  ): Promise<{ teams: CircuitEventTeam[] }> {
+    return { teams: await this.circuits.stageTeams(id, tournamentId) };
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
