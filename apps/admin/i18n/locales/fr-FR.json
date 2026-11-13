@@ -72,7 +72,8 @@
       "backToSite": "Retour au site",
       "users": "Utilisateurs",
       "streamers": "Streamers en direct",
-      "circuits": "Circuits"
+      "circuits": "Circuits",
+      "seasons": "Saisons"
     },
     "search": {
       "placeholder": "Rechercher…",
@@ -237,6 +238,7 @@
         "update_contract": "Modification du contrat",
         "set_tournament_prizes": "Répartition des gains",
         "award_player": "Récompense joueur",
+        "award_season_player": "Récompense de saison",
         "set_event_streams": "Streams de l'événement",
         "set_tournament_streams": "Streams du tournoi",
         "set_match_streams": "Streams du match",
@@ -278,6 +280,9 @@
         "reason": "Motif",
         "mergeIntoTeamId": "Fusionner dans",
         "circuitId": "Circuit",
+        "seasonId": "Saison",
+        "region": "Région",
+        "presentedBy": "Présenté par",
         "tier": "Places à partir de {number}",
         "aliasName": "Ancien nom",
         "aliasFrom": "Du",
@@ -1204,6 +1209,70 @@
           "overlap": "Les tranches de places ne doivent pas se chevaucher.",
           "sourceUrl": "Saisissez une URL http ou https valide.",
           "sourceBlocked": "Ce site n'est pas accepté comme source. Utilisez la page de règles officielle ou l'annonce."
+        }
+      }
+    },
+    "seasons": {
+      "title": "Saisons",
+      "description": "Les saisons et les ligues portent les récompenses officielles qui ne relèvent d'aucune étape de tournoi, comme le MVP de la saison ou un MVP régional. Ne créez que des saisons dont les récompenses ont été annoncées officiellement.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les saisons. Vérifiez votre connexion et réessayez.",
+      "empty": {
+        "title": "Aucune saison",
+        "description": "Créez une saison ou une ligue, puis enregistrez les récompenses annoncées par l'organisateur."
+      },
+      "form": {
+        "name": "Nom",
+        "nameHint": "Tel que l'organisateur la nomme, par exemple RLCS 2024."
+      },
+      "create": {
+        "button": "Nouvelle saison",
+        "title": "Nouvelle saison",
+        "submit": "Créer la saison",
+        "success": "Saison créée",
+        "failed": "Impossible de créer la saison."
+      },
+      "edit": {
+        "title": "Détails de la saison",
+        "submit": "Enregistrer",
+        "saved": "Saison enregistrée",
+        "failed": "Impossible d'enregistrer la saison."
+      },
+      "delete": {
+        "title": "Supprimer la saison",
+        "confirm": "Supprimer {name} ? Ses récompenses seront supprimées avec elle.",
+        "confirmButton": "Supprimer la saison"
+      },
+      "awards": {
+        "title": "Récompenses",
+        "hint": "N'enregistrez que les récompenses annoncées par un compte officiel : RLEsports, BLAST, l'organisateur ou la ligue. Jamais Liquipedia. Une saison compte une récompense de chaque type et un MVP régional par région.",
+        "empty": "Aucune récompense enregistrée pour cette saison.",
+        "addTitle": "Ajouter une récompense",
+        "add": "Ajouter la récompense",
+        "added": "{name} reçoit la récompense {type}",
+        "addFailed": "Impossible d'ajouter la récompense.",
+        "awardType": "Type de récompense",
+        "region": "Région",
+        "regionRequired": "Obligatoire pour un MVP régional.",
+        "regionOptional": "Facultatif. À renseigner quand la récompense couvre une seule région.",
+        "player": "Joueur",
+        "searchPlayer": "Rechercher un joueur",
+        "noPlayers": "Aucun joueur trouvé.",
+        "clearPlayer": "Retirer {name}",
+        "presentedBy": "Présenté par",
+        "presentedByHint": "Partenaire facultatif cité dans l'annonce, par exemple Ally.",
+        "presentedByValue": "Présenté par {name}",
+        "sourceUrl": "URL de la source",
+        "sourceUrlHint": "Annonce officielle de la récompense",
+        "types": {
+          "season_mvp": "MVP de la saison",
+          "regular_season_mvp": "MVP de la saison régulière",
+          "regional_mvp": "MVP régional"
+        },
+        "remove": {
+          "title": "Retirer la récompense",
+          "confirm": "Retirer la récompense {type} de {name} ?",
+          "confirmButton": "Retirer la récompense"
         }
       }
     }

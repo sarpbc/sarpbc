@@ -72,7 +72,8 @@
       "backToSite": "Back to Site",
       "users": "Users",
       "streamers": "Live Streamers",
-      "circuits": "Circuits"
+      "circuits": "Circuits",
+      "seasons": "Seasons"
     },
     "search": {
       "placeholder": "Search…",
@@ -243,6 +244,7 @@
         "set_event_viewership": "Event viewership",
         "set_match_viewership": "Match viewership",
         "award_player": "Player award",
+        "award_season_player": "Season award",
         "delete_match": "Delete match",
         "delete_team": "Delete team",
         "set_circuit_stage_scale": "Points scale"
@@ -278,6 +280,9 @@
         "reason": "Reason",
         "mergeIntoTeamId": "Merge into",
         "circuitId": "Circuit",
+        "seasonId": "Season",
+        "region": "Region",
+        "presentedBy": "Presented by",
         "tier": "Places from {number}",
         "aliasName": "Former name",
         "aliasFrom": "From",
@@ -1204,6 +1209,70 @@
           "overlap": "Place ranges cannot overlap.",
           "sourceUrl": "Enter a valid http or https URL.",
           "sourceBlocked": "This website is not accepted as a source. Use the official rules page or announcement."
+        }
+      }
+    },
+    "seasons": {
+      "title": "Seasons",
+      "description": "Seasons and leagues hold the official awards that no single tournament stage holds, such as a Season MVP or a Regional MVP. Create only seasons whose awards were officially announced.",
+      "loading": "Loading…",
+      "loadError": "Could not load seasons. Check your connection and try again.",
+      "empty": {
+        "title": "No Seasons Yet",
+        "description": "Create a season or league, then record the awards its organiser announced."
+      },
+      "form": {
+        "name": "Name",
+        "nameHint": "As the organiser names it, e.g. RLCS 2024."
+      },
+      "create": {
+        "button": "New Season",
+        "title": "New Season",
+        "submit": "Create Season",
+        "success": "Season created",
+        "failed": "Could not create the season."
+      },
+      "edit": {
+        "title": "Season details",
+        "submit": "Save Changes",
+        "saved": "Season saved",
+        "failed": "Could not save the season."
+      },
+      "delete": {
+        "title": "Delete Season",
+        "confirm": "Delete {name}? Its awards are deleted with it.",
+        "confirmButton": "Delete Season"
+      },
+      "awards": {
+        "title": "Awards",
+        "hint": "Record only awards announced by an official account: RLEsports, BLAST, the organiser or the league. Never Liquipedia. A season holds one award of each type and one Regional MVP per region.",
+        "empty": "No awards recorded for this season yet.",
+        "addTitle": "Add Award",
+        "add": "Add Award",
+        "added": "{name} is now {type}",
+        "addFailed": "Could not add the award.",
+        "awardType": "Award type",
+        "region": "Region",
+        "regionRequired": "Required for a Regional MVP.",
+        "regionOptional": "Optional. Fill it in when the award covers one region.",
+        "player": "Player",
+        "searchPlayer": "Search players",
+        "noPlayers": "No matching players.",
+        "clearPlayer": "Clear {name}",
+        "presentedBy": "Presented by",
+        "presentedByHint": "Optional partner named in the announcement, e.g. Ally.",
+        "presentedByValue": "Presented by {name}",
+        "sourceUrl": "Source URL",
+        "sourceUrlHint": "Official announcement of the award",
+        "types": {
+          "season_mvp": "Season MVP",
+          "regular_season_mvp": "Regular Season MVP",
+          "regional_mvp": "Regional MVP"
+        },
+        "remove": {
+          "title": "Remove Award",
+          "confirm": "Remove the {type} award of {name}?",
+          "confirmButton": "Remove Award"
         }
       }
     }
