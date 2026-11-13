@@ -17,7 +17,7 @@ import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
 import { verifyManualBrackets } from "./scenarios/manual-brackets.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
-import { verifySeasonAwards } from "./scenarios/seasons.mjs";
+import { verifySeasonArchives, verifySeasonAwards } from "./scenarios/seasons.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mjs";
@@ -1474,6 +1474,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         tournament,
       });
       await verifySeasonAwards({ request, staffCookie, memberCookie, callTool, review, player });
+      await verifySeasonArchives({
+        request,
+        staffCookie,
+        memberCookie,
+        team,
+        otherTeam,
+        tournament,
+        startggCupId: startggCup,
+      });
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 

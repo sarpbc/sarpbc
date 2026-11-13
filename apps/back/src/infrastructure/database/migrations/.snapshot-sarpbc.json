@@ -5063,6 +5063,40 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "format_phases": {
+          "name": "format_phases",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'[]'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "format_summary": {
+          "name": "format_summary",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "id": {
           "name": "id",
           "type": "uuid",
@@ -5097,6 +5131,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamptz(6)",
@@ -5113,6 +5164,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "winner_team_id": {
+          "name": "winner_team_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
         }
       },
       "indexes": [
@@ -5131,11 +5199,29 @@
           "keyName": "season_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": ["slug"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "season_slug_unique",
+          "primary": false,
+          "unique": true
         }
       ],
       "checks": [],
       "triggers": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "season_winner_team_id_foreign": {
+          "columnNames": ["winner_team_id"],
+          "constraintName": "season_winner_team_id_foreign",
+          "localTableName": "public.season",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.team",
+          "updateRule": "cascade",
+          "deleteRule": "set null"
+        }
+      },
       "comment": null
     },
     {
@@ -5332,6 +5418,303 @@
           "referencedTableName": "public.season",
           "updateRule": "cascade",
           "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "season_participant",
+      "schema": "public",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": "now()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "gen_random_uuid()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "path_note": {
+          "name": "path_note",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "season_id": {
+          "name": "season_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "season_participant_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": ["season_id", "team_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "season_participant_season_id_team_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["team_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "season_participant_team_id_index",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "season_participant_season_id_foreign": {
+          "columnNames": ["season_id"],
+          "constraintName": "season_participant_season_id_foreign",
+          "localTableName": "public.season_participant",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.season",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        },
+        "season_participant_team_id_foreign": {
+          "columnNames": ["team_id"],
+          "constraintName": "season_participant_team_id_foreign",
+          "localTableName": "public.season_participant",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.team",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "season_path_entry",
+      "schema": "public",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": "now()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "gen_random_uuid()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "label": {
+          "name": "label",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "result": {
+          "name": "result",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "tournament_id": {
+          "name": "tournament_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["participant_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "season_path_entry_participant_id_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "season_path_entry_pkey",
+          "primary": true,
+          "unique": true
+        },
+        {
+          "columnNames": ["tournament_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "season_path_entry_tournament_id_index",
+          "primary": false,
+          "unique": false
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "season_path_entry_participant_id_foreign": {
+          "columnNames": ["participant_id"],
+          "constraintName": "season_path_entry_participant_id_foreign",
+          "localTableName": "public.season_path_entry",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.season_participant",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        },
+        "season_path_entry_tournament_id_foreign": {
+          "columnNames": ["tournament_id"],
+          "constraintName": "season_path_entry_tournament_id_foreign",
+          "localTableName": "public.season_path_entry",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tournament",
+          "updateRule": "cascade",
+          "deleteRule": "set null"
         }
       },
       "comment": null

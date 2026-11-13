@@ -904,9 +904,41 @@
     "permissions": []
   },
   {
+    "controller": "\"season-archives\"",
+    "verb": "GET",
+    "path": "\":slug\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"season-archives\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"seasons\"",
     "verb": "DELETE",
     "path": "\":id/awards/:awardId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"seasons\"",
+    "verb": "DELETE",
+    "path": "\":id/participants/:participantId/path/:entryId\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"seasons\"",
+    "verb": "DELETE",
+    "path": "\":id/participants/:participantId\"",
     "status": "HttpStatus.NO_CONTENT",
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]
@@ -938,6 +970,14 @@
   {
     "controller": "\"seasons\"",
     "verb": "PATCH",
+    "path": "\":id/participants/:participantId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"seasons\"",
+    "verb": "PATCH",
     "path": "\":id\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -947,6 +987,22 @@
     "controller": "\"seasons\"",
     "verb": "POST",
     "path": "\":id/awards\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"seasons\"",
+    "verb": "POST",
+    "path": "\":id/participants/:participantId/path\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"seasons\"",
+    "verb": "POST",
+    "path": "\":id/participants\"",
     "status": "HttpStatus.CREATED",
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

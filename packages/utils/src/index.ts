@@ -126,6 +126,7 @@ export {
 } from "./entity-slug";
 export {
   circuitPath,
+  seasonArchivePath,
   forumPostPath,
   localizedPath,
   matchPath,
@@ -186,10 +187,17 @@ export {
   isWorldwideCircuitRegion,
 } from "./circuit";
 export {
+  MAX_SEASON_FORMAT_PHASES,
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
   SEASON_AWARD_REGION_MAX_LENGTH,
   SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
+  SEASON_FORMAT_PHASE_DESCRIPTION_MAX_LENGTH,
+  SEASON_FORMAT_PHASE_NAME_MAX_LENGTH,
+  SEASON_FORMAT_SUMMARY_MAX_LENGTH,
   SEASON_NAME_MAX_LENGTH,
+  SEASON_PATH_LABEL_MAX_LENGTH,
+  SEASON_PATH_NOTE_MAX_LENGTH,
+  SEASON_PATH_RESULT_MAX_LENGTH,
 } from "./season";
 export {
   gameWinner,

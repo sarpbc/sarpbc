@@ -44,6 +44,10 @@ export function circuitPath(slug: string): string {
   return `/circuits/${slug}`;
 }
 
+export function seasonArchivePath(slug: string): string {
+  return `/seasons/${slug}`;
+}
+
 export function localizedPath(path: string, locale: UiLocale): string {
   return locale === "fr" ? `/fr${path}` : path;
 }

@@ -38,6 +38,8 @@ import {
 } from "./circuit/infrastructure/persistence/circuit.entities";
 import {
   SeasonAwardSchema,
+  SeasonParticipantSchema,
+  SeasonPathEntrySchema,
   SeasonSchema,
 } from "./season/infrastructure/persistence/season.entities";
 import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/player-award.entities";
@@ -85,6 +87,8 @@ export const mikroOrmEntities = [
   CircuitStageTeamSchema,
   SeasonSchema,
   SeasonAwardSchema,
+  SeasonParticipantSchema,
+  SeasonPathEntrySchema,
   TopicSchema,
   PostSchema,
   PostTranslationSchema,

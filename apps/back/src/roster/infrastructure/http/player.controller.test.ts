@@ -34,6 +34,19 @@ describe("PlayerController", () => {
     awardTaken: vi.fn(),
     saveAward: vi.fn(),
     removeAward: vi.fn(),
+    published: vi.fn(),
+    findBySlug: vi.fn(),
+    slugTaken: vi.fn(),
+    team: vi.fn(),
+    tournamentExists: vi.fn(),
+    participants: vi.fn(),
+    participant: vi.fn(),
+    participantTaken: vi.fn(),
+    saveParticipant: vi.fn(),
+    updatePathNote: vi.fn(),
+    removeParticipant: vi.fn(),
+    savePathEntry: vi.fn(),
+    removePathEntry: vi.fn(),
   };
   const playerEarnings = vi.fn();
   const prizes = { playerEarnings } as never;

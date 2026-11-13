@@ -99,7 +99,7 @@ export const zenSeasonAward: PlayerSeasonAward = {
   region: null,
   presentedBy: null,
   sourceUrl: "https://rocketleague.com/news/season-mvp",
-  season: { id: "season-1", name: "2026 Season" },
+  season: { id: "season-1", name: "2026 Season", slug: null },
 };
 
 export function careerEarnings(amount: number): ProfileEarnings {
