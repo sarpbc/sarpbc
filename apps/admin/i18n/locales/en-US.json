@@ -520,24 +520,25 @@
       "streamScore": {
         "action": "Stream Score",
         "title": "Stream Score · {match}",
-        "description": "Check a score read from the official stream by the OCR tool, then confirm the winner. Nothing is saved until you confirm.",
+        "description": "Check a score read from the official stream by the OCR tool, then confirm the series score. Nothing is saved until you confirm.",
         "paste": "OCR proposal",
         "pasteHelp": "Paste the JSON written by the stream-score-ocr tool for this match.",
         "needsTwoSides": "This match needs exactly two teams before a stream score can be confirmed.",
         "blueSide": "Blue side team",
         "chooseBlue": "Choose the team that played blue",
-        "bestOfMismatch": "The proposal was read as a best of {read}, but this match is a best of {match}.",
+        "bestOfMismatch": "The proposal was read as a best of {read}, but this match is a best of {match}. Tick to confirm you checked it.",
         "game": "Game {number}",
         "confidence": "{percent}% of readings agree",
         "unread": "Not Read",
-        "check": "Check",
+        "checked": "Checked",
         "noGames": "No finished game was read.",
         "series": "Proposed winner: {winner}, {blue}–{orange} (blue–orange)",
-        "noWinner": "No series winner was read. Enter the result by hand from the official post.",
+        "source": "Read from: {source}",
         "officialSource": "The organiser's official post remains the reference. Compare it with this proposal before you confirm.",
-        "confirm": "Confirm Winner: {winner}",
-        "confirmDisabled": "Confirm Winner",
-        "confirmed": "Winner confirmed",
+        "saved": "Confirming saves the series score and its winner only. Game scores, endings, times and the source stay in this preview and are not saved.",
+        "confirm": "Save Score: {blue} {blueScore}–{orangeScore} {orange}",
+        "confirmDisabled": "Save Score",
+        "confirmed": "Series score saved",
         "side": {
           "blue": "Blue",
           "orange": "Orange"
@@ -552,6 +553,13 @@
           "invalid-json": "This is not valid JSON.",
           "invalid-proposal": "This JSON is not a stream score proposal.",
           "inconsistent-series": "The series result does not match its games. Run the tool again rather than editing the file."
+        },
+        "blockers": {
+          "no-winner": "No series winner was read. Enter the result by hand from the official post.",
+          "unread-game": "A game was not read. Enter the result by hand from the official post.",
+          "unchecked-game": "Check each flagged game against the official post, then tick Checked.",
+          "best-of-mismatch": "Confirm the best-of difference before saving.",
+          "forbidden-source": "Liquipedia is not an accepted source. Read the score from the official stream."
         }
       },
       "streams": {

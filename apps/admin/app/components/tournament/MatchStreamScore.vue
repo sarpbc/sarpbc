@@ -1,8 +1,13 @@
 <script lang="ts" setup>
-import type { StreamScoreGame, StreamScoreSide, TournamentMatchListItem } from "@sarpbc/types";
-import { parseStreamScoreProposal, participantName } from "@sarpbc/utils";
-
-const LOW_CONFIDENCE = 0.9;
+import type { StreamScoreSide, TournamentMatchListItem } from "@sarpbc/types";
+import {
+  parseStreamScoreProposal,
+  participantName,
+  streamScoreBestOfMismatch,
+  streamScoreConfirmBlockers,
+  streamScoreGameNeedsCheck,
+  streamScoreSeriesResults,
+} from "@sarpbc/utils";
 
 const { match, label } = defineProps<{
   match: TournamentMatchListItem;
@@ -17,6 +22,8 @@ const reportError = useReportError();
 
 const text = ref("");
 const blueId = ref<string | undefined>(undefined);
+const checkedGames = ref<number[]>([]);
+const bestOfAcknowledged = ref(false);
 const confirming = ref(false);
 
 const parsed = computed(() =>
@@ -57,17 +64,28 @@ function sideName(side: StreamScoreSide): string {
   );
 }
 
-const winnerId = computed(() => {
-  const winner = proposal.value?.series.winner;
-  return winner ? sideId(winner) : undefined;
+const bestOfMismatch = computed(
+  () => proposal.value !== null && streamScoreBestOfMismatch(proposal.value, match.numberOfGames),
+);
+
+const blockers = computed(() =>
+  proposal.value
+    ? streamScoreConfirmBlockers(proposal.value, {
+        numberOfGames: match.numberOfGames,
+        checkedGames: new Set(checkedGames.value),
+        bestOfAcknowledged: bestOfAcknowledged.value,
+      })
+    : [],
+);
+
+const results = computed(() => {
+  const blue = sideId("blue");
+  const orange = sideId("orange");
+  if (!proposal.value || blue === undefined || orange === undefined) return null;
+  return streamScoreSeriesResults(proposal.value.series, { blue, orange });
 });
 
-const bestOfMismatch = computed(
-  () =>
-    proposal.value !== null &&
-    match.numberOfGames !== null &&
-    match.numberOfGames !== proposal.value.bestOf,
-);
+const canConfirm = computed(() => results.value !== null && blockers.value.length === 0);
 
 function formatOffset(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -76,11 +94,16 @@ function formatOffset(seconds: number): string {
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
 }
 
-function needsCheck(game: StreamScoreGame): boolean {
-  return (
-    game.confidence < LOW_CONFIDENCE || game.endedBy === "reset" || game.endedBy === "stream_end"
-  );
+function setGameChecked(number: number, checked: boolean) {
+  checkedGames.value = checked
+    ? [...checkedGames.value, number]
+    : checkedGames.value.filter((game) => game !== number);
 }
+
+watch(proposal, () => {
+  checkedGames.value = [];
+  bestOfAcknowledged.value = false;
+});
 
 watch(open, (isOpen) => {
   if (!isOpen) return;
@@ -89,11 +112,11 @@ watch(open, (isOpen) => {
 });
 
 async function confirm() {
-  const winner = winnerId.value;
-  if (!winner) return;
+  const series = results.value;
+  if (!series || !canConfirm.value) return;
   confirming.value = true;
   try {
-    await setMatchWinner(match.id, winner);
+    await setMatchResult(match.id, series);
     toast.add({ title: t("page.tournaments.streamScore.confirmed"), color: "success" });
     emit("confirmed");
     open.value = false;
@@ -142,14 +165,17 @@ async function confirm() {
             />
           </UFormField>
 
-          <p v-if="bestOfMismatch" class="text-sm text-warning">
-            {{
-              t("page.tournaments.streamScore.bestOfMismatch", {
-                read: proposal.bestOf,
-                match: match.numberOfGames,
-              })
-            }}
-          </p>
+          <label v-if="bestOfMismatch" class="flex items-start gap-2 text-sm text-warning">
+            <UCheckbox v-model="bestOfAcknowledged" />
+            <span>
+              {{
+                t("page.tournaments.streamScore.bestOfMismatch", {
+                  read: proposal.bestOf,
+                  match: match.numberOfGames,
+                })
+              }}
+            </span>
+          </label>
 
           <ol
             v-if="proposal.games.length > 0"
@@ -179,9 +205,16 @@ async function confirm() {
               <UBadge v-if="game.winner === null" color="error" variant="subtle" size="sm">
                 {{ t("page.tournaments.streamScore.unread") }}
               </UBadge>
-              <UBadge v-else-if="needsCheck(game)" color="warning" variant="subtle" size="sm">
-                {{ t("page.tournaments.streamScore.check") }}
-              </UBadge>
+              <label
+                v-else-if="streamScoreGameNeedsCheck(game)"
+                class="flex items-center gap-2 text-warning"
+              >
+                <UCheckbox
+                  :model-value="checkedGames.includes(game.number)"
+                  @update:model-value="setGameChecked(game.number, Boolean($event))"
+                />
+                <span>{{ t("page.tournaments.streamScore.checked") }}</span>
+              </label>
             </li>
           </ol>
           <p v-else class="text-sm text-muted">{{ t("page.tournaments.streamScore.noGames") }}</p>
@@ -198,10 +231,18 @@ async function confirm() {
               })
             }}
           </p>
-          <p v-else class="text-sm text-warning">
-            {{ t("page.tournaments.streamScore.noWinner") }}
+
+          <p class="text-sm break-all text-muted">
+            {{ t("page.tournaments.streamScore.source", { source: proposal.source }) }}
           </p>
 
+          <ul v-if="blockers.length > 0" class="flex flex-col gap-1 text-sm text-warning">
+            <li v-for="blocker in blockers" :key="blocker">
+              {{ t(`page.tournaments.streamScore.blockers.${blocker}`) }}
+            </li>
+          </ul>
+
+          <p class="text-sm text-muted">{{ t("page.tournaments.streamScore.saved") }}</p>
           <p class="text-sm text-muted">{{ t("page.tournaments.streamScore.officialSource") }}</p>
         </template>
       </div>
@@ -217,12 +258,15 @@ async function confirm() {
         />
         <UButton
           :loading="confirming"
-          :disabled="!winnerId"
+          :disabled="!canConfirm"
           icon="i-fluent-trophy-24-regular"
           :label="
-            proposal?.series.winner && winnerId
+            proposal && canConfirm
               ? t('page.tournaments.streamScore.confirm', {
-                  winner: sideName(proposal.series.winner),
+                  blue: sideName('blue'),
+                  orange: sideName('orange'),
+                  blueScore: proposal.series.blue,
+                  orangeScore: proposal.series.orange,
                 })
               : t('page.tournaments.streamScore.confirmDisabled')
           "
