@@ -35,6 +35,12 @@ export interface TeamTenure {
   from: Date;
   to: Date | null;
 }
+export interface AnniversaryDay {
+  month: number;
+  day: number;
+  timeZone: string;
+  beforeYear: number;
+}
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;
   searchByName(options: { name: string; limit?: number; offset?: number }): Promise<Tournament[]>;
@@ -50,6 +56,8 @@ export interface TournamentQueries {
   getTournamentsByTeamTenures(tenures: TeamTenure[]): Promise<Tournament[]>;
   getTournamentsWonByPlayer(id: string): Promise<Tournament[]>;
   getTournamentsWonByTeam(id: string): Promise<Tournament[]>;
+  wonOnDay(day: AnniversaryDay): Promise<Tournament[]>;
+  finalsOnDay(day: AnniversaryDay): Promise<Match[]>;
   knownPandascoreIds(): Promise<Set<number>>;
   findByPandascoreId(id: number): Promise<Tournament | null>;
   leagues(options: { limit: number; offset?: number }): Promise<League[]>;

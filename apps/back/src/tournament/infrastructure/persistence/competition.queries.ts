@@ -8,12 +8,23 @@ import { toLeague, toMatch, toTournament } from "./competition.mapper";
 import { TOURNAMENT_POPULATE } from "./tournament-populate";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { stageFilter } from "./stage-filter";
-import type { TournamentQueries, MatchQueries, TeamTenure } from "../../application/ports";
+import type {
+  AnniversaryDay,
+  TournamentQueries,
+  MatchQueries,
+  TeamTenure,
+} from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
 import type {
   MatchListKind,
   MatchListQueryOptions,
 } from "../../application/match/match-list-filters";
+function onDay(column: string): string {
+  return `extract(month from ${column} at time zone ?) = ? AND extract(day from ${column} at time zone ?) = ? AND extract(year from ${column} at time zone ?) < ?`;
+}
+function terminalBracketMatch(alias: string): string {
+  return `EXISTS (SELECT 1 FROM bracket_link fed WHERE fed.match_id = ${alias}.id) AND NOT EXISTS (SELECT 1 FROM bracket_link feeds WHERE feeds.previous_match_id = ${alias}.id)`;
+}
 const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
@@ -142,6 +153,58 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
         },
       )
     ).map(toTournament);
+  }
+  async wonOnDay(day: AnniversaryDay) {
+    const ids = await this.idsOnDay(
+      `SELECT t.id FROM tournament t
+       WHERE t.winner_id IS NOT NULL AND ${onDay("t.end_at")}`,
+      day,
+    );
+    if (ids.length === 0) return [];
+    return (
+      await this.em.find(
+        Tournament,
+        { id: { $in: ids } },
+        {
+          populate: ["league", "event", "winner.team", "winner.players"],
+          orderBy: { endAt: "DESC" },
+        },
+      )
+    ).map(toTournament);
+  }
+  async finalsOnDay(day: AnniversaryDay) {
+    const ids = await this.idsOnDay(
+      `SELECT m.id FROM match m JOIN tournament t ON t.id = m.tournament_id
+       WHERE t.has_bracket AND m.winner_id = t.winner_id AND ${onDay("m.end_at")}
+         AND ${terminalBracketMatch("m")}
+         AND (SELECT count(*) FROM match f
+              WHERE f.tournament_id = t.id AND f.winner_id = t.winner_id
+                AND ${terminalBracketMatch("f")}) = 1`,
+      day,
+    );
+    if (ids.length === 0) return [];
+    return (
+      await this.em.find(
+        Match,
+        { id: { $in: ids } },
+        {
+          populate: [
+            ...MATCH_TOURNAMENT_POPULATE,
+            "participants.team",
+            "participants.players",
+            "results",
+            "winner",
+          ],
+          orderBy: { endAt: "DESC" },
+        },
+      )
+    ).map(toMatch);
+  }
+  private async idsOnDay(query: string, { month, day, timeZone, beforeYear }: AnniversaryDay) {
+    const rows: { id: string }[] = await this.em
+      .getConnection()
+      .execute(query, [timeZone, month, timeZone, day, timeZone, beforeYear]);
+    return rows.map(({ id }) => id);
   }
   async list(kind: MatchListKind, options: MatchListQueryOptions) {
     const [rows, count] = await this.em

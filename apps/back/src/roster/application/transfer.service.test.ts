@@ -37,6 +37,7 @@ describe("TransferService", () => {
       findByTeam: async () => [],
       findFormerPlayersByTeam: async () => [],
       findMovements,
+      findMovementsOnDay: findMovements,
     };
     const service = new TransferService(contracts);
     return { service };
@@ -66,5 +67,17 @@ describe("TransferService", () => {
 
     expect(count).toBe(1);
     expect(transfers[0]).toMatchObject({ id: "kb:join", type: "benched" });
+  });
+
+  it("keeps the derived movements of a month and day, without same-team renewals", async () => {
+    const { service } = fixture();
+
+    const june = await service.onDay(6, 1, now);
+    expect(june.map(({ id }) => id).sort()).toEqual(["k:join", "v:leave"]);
+
+    const march = await service.onDay(3, 1, now);
+    expect(march.map(({ id, type }) => [id, type])).toEqual([["kb:join", "benched"]]);
+
+    expect(await service.onDay(1, 10, new Date("2021-12-31"))).toEqual([]);
   });
 });

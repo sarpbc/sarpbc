@@ -218,3 +218,15 @@ export {
   type StreamScoreSeriesResult,
 } from "./stream-score-review";
 export { countryCode } from "./country-code";
+export {
+  ON_THIS_DAY_MIN_YEAR,
+  ON_THIS_DAY_SOURCE_URL_MAX_LENGTH,
+  ON_THIS_DAY_TEXT_MAX_LENGTH,
+  SITE_TIME_ZONE,
+  calendarDayIn,
+  formatIsoDay,
+  isForbiddenFactSource,
+  isMonthDay,
+  parseIsoDay,
+  type CalendarDay,
+} from "./on-this-day";

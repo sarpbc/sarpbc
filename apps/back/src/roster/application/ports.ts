@@ -29,6 +29,7 @@ export interface ContractQueries {
   findByTeam(teamId: string): Promise<Contract[]>;
   findFormerPlayersByTeam(teamId: string): Promise<Contract[]>;
   findMovements(filter: ContractMovementFilter): Promise<Contract[]>;
+  findMovementsOnDay(month: number, day: number): Promise<Contract[]>;
 }
 export interface PhotoQueries {
   findByPlayer(playerId: string): Promise<PlayerPhoto[]>;

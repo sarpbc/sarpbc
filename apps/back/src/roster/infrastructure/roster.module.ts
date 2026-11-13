@@ -28,6 +28,7 @@ import { TournamentRosterReferences } from "../../tournament/infrastructure/pers
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { CircuitRosterReferences } from "../../circuit/infrastructure/persistence/roster-references.mover";
 import { SeasonRosterReferences } from "../../season/infrastructure/persistence/roster-references.mover";
+import { OnThisDayRosterReferences } from "../../on-this-day/infrastructure/persistence/roster-references.mover";
 import { SeasonModule } from "../../season/infrastructure/season.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCurrentRosterSource } from "../../pandascore/infrastructure/pandascore-current-roster-source";
@@ -86,6 +87,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
               new MatchStatsRosterReferences(tx),
               new SeasonRosterReferences(tx),
               new CircuitRosterReferences(tx),
+              new OnThisDayRosterReferences(tx),
               competition,
             ],
             sharedTournamentIds: (teamId, otherTeamId) =>
@@ -157,6 +159,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
   ],
   exports: [
     PlayerService,
+    TransferService,
     TeamService,
     TeamAliasService,
     ContractService,
