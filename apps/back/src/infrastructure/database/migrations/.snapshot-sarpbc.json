@@ -5034,7 +5034,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "unique": true,
+          "unique": false,
           "length": null,
           "precision": null,
           "scale": null,
@@ -5080,12 +5080,13 @@
           "unique": false
         },
         {
-          "columnNames": ["season_id", "award_type", "region"],
-          "composite": true,
+          "columnNames": [],
+          "composite": false,
           "constraint": true,
           "keyName": "season_award_season_id_award_type_region_unique",
           "primary": false,
-          "unique": true
+          "unique": true,
+          "expression": "alter table \"season_award\" add constraint \"season_award_season_id_award_type_region_unique\" unique nulls not distinct (\"season_id\", \"award_type\", \"region\");"
         }
       ],
       "checks": [

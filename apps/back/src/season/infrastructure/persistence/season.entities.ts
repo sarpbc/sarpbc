@@ -37,7 +37,13 @@ export const SeasonSchema = defineEntity({
 
 export const SeasonAwardSchema = defineEntity({
   class: SeasonAward,
-  uniques: [{ properties: ["season", "awardType", "region"] }],
+  uniques: [
+    {
+      name: "season_award_season_id_award_type_region_unique",
+      expression:
+        'alter table "season_award" add constraint "season_award_season_id_award_type_region_unique" unique nulls not distinct ("season_id", "award_type", "region");',
+    },
+  ],
   indexes: [{ properties: ["player"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),

@@ -1595,6 +1595,23 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         staffCookie,
         201,
       );
+      const { SeasonAward } =
+        await import("../src/season/infrastructure/persistence/season.entities.ts");
+      const { UniqueConstraintViolationException } = await import("@mikro-orm/core");
+      const regularSeasonMvp = (player) =>
+        insert(SeasonAward, {
+          season: referenceSeason.id,
+          player,
+          awardType: "regular_season_mvp",
+          region: null,
+          sourceUrl: "https://example.test/reference-season/regular",
+        });
+      await regularSeasonMvp(duplicate);
+      await assert.rejects(
+        regularSeasonMvp(kept),
+        UniqueConstraintViolationException,
+        "a season holds one award of a type without a region",
+      );
 
       await merge((service) => service.mergePlayers(kept, duplicate));
 
@@ -1630,7 +1647,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         (await request("GET", `/player/${kept}/awards`))
           .json()
           .seasonAwards.map(({ awardType, season }) => [awardType, season.id]),
-        [["season_mvp", referenceSeason.id]],
+        [
+          ["season_mvp", referenceSeason.id],
+          ["regular_season_mvp", referenceSeason.id],
+        ],
         "season awards follow the player merge",
       );
       assert.deepEqual(await members(soloEntry), [kept]);
