@@ -132,6 +132,7 @@ export {
   newsPath,
   playerPath,
   stageMatchesPath,
+  stageStatsPath,
   staffPath,
   teamPath,
   tournamentEventPath,
@@ -172,10 +173,13 @@ export {
 export {
   CIRCUIT_DESCRIPTION_MAX_LENGTH,
   CIRCUIT_NAME_MAX_LENGTH,
+  CIRCUIT_REGION_MAX_LENGTH,
   MAX_CIRCUIT_PLACEMENT,
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SCALE_TIERS,
+  MAX_CIRCUIT_SEASON,
+  MIN_CIRCUIT_SEASON,
 } from "./circuit";
 export {
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
@@ -183,3 +187,20 @@ export {
   SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   SEASON_NAME_MAX_LENGTH,
 } from "./season";
+export {
+  gameWinner,
+  parseStreamScoreProposal,
+  winsNeeded,
+  type ParsedStreamScoreProposal,
+  type StreamScoreProposalError,
+} from "./stream-score";
+export {
+  isForbiddenStreamScoreSource,
+  streamScoreBestOfMismatch,
+  streamScoreConfirmBlockers,
+  streamScoreGameNeedsCheck,
+  streamScoreSeriesResults,
+  type StreamScoreConfirmBlocker,
+  type StreamScoreReview,
+  type StreamScoreSeriesResult,
+} from "./stream-score-review";

@@ -36,6 +36,10 @@ export function stageMatchesPath(eventSlug: string, stageSlug: string): string {
   return `${tournamentStagePath(eventSlug, stageSlug)}/matches`;
 }
 
+export function stageStatsPath(eventSlug: string, stageSlug: string): string {
+  return `${tournamentStagePath(eventSlug, stageSlug)}/stats`;
+}
+
 export function circuitPath(slug: string): string {
   return `/circuits/${slug}`;
 }

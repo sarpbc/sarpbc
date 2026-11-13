@@ -16,13 +16,14 @@ import {
   NotFoundException,
   Inject,
 } from "@nestjs/common";
-import type { MatchLineupsResponse } from "@sarpbc/types";
+import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
   CreateEmptyBracketDto,
   CreateMatchDto,
   SetMatchBracketDto,
+  SetMatchResultDto,
   SetMatchVodsDto,
   SetMatchWinnerDto,
 } from "./dto/create-match.dto";
@@ -48,6 +49,8 @@ import { lineupsFromGames } from "../../domain/match-lineup";
 import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { ViewershipService } from "../../application/viewership.service";
 import { SetViewershipDto } from "./dto/set-viewership.dto";
 import { PlayerAwardService } from "../../application/player-award.service";
@@ -84,6 +87,7 @@ export class TournamentController {
     private lineupService: MatchLineupService,
     @Inject(GAME_STATS_STORE) private gameStats: Pick<GameStatsStore, "byMatch">,
     private viewershipService: ViewershipService,
+    private playerStatsService: TournamentPlayerStatsService,
   ) {}
 
   @Get()
@@ -211,6 +215,15 @@ export class TournamentController {
     return { matches: matches.map(mapTournamentMatchListItem) };
   }
 
+  @Get(":id/player-stats")
+  async getPlayerStats(@Param("id") id: string): Promise<TournamentPlayerStatsResponse> {
+    const tournament = await this.tournamentRead.findById(id);
+    if (!tournament || !isRedistributable(tournament.source)) {
+      throw new NotFoundException(`Tournament with id "${id}" not found`);
+    }
+    return this.playerStatsService.forStages([tournament]);
+  }
+
   @Get(":id/awards")
   async getAwardsByTournament(@Param("id") id: string) {
     const awards = await this.playerAwardService.findByTournamentId(id);
@@ -301,6 +314,20 @@ export class TournamentController {
     @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/result")
+  async setMatchResult(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchResultDto }) body: SetMatchResultDto,
+  ) {
+    const match = await this.matchService.updateMatch(matchId, {
+      status: "finished",
+      results: body.results,
+    });
     return { match: withPublicSlug(match) };
   }
 

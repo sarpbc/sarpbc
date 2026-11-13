@@ -63,6 +63,24 @@ if (canonicalPath.value && route.path !== canonicalPath.value) {
 
 const event = computed(() => (resolved.value?.kind === "event" ? resolved.value.event : null));
 
+const statsStages = computed(
+  () => event.value?.stages.filter((stage) => stage.source !== "startgg") ?? [],
+);
+
+const showStats = computed(() => statsStages.value.length > 0 && route.query.tab === "stats");
+
+const tabItems = computed(() => {
+  const path = event.value ? localePath(tournamentEventPath(event.value.slug)) : route.path;
+  return [
+    { to: path, label: t("common.overview"), active: !showStats.value },
+    {
+      to: { path, query: { tab: "stats" } },
+      label: t("page.tournaments.stats.tab"),
+      active: showStats.value,
+    },
+  ];
+});
+
 const champion = computed(() => {
   const finalStage = event.value?.stages[0];
   return finalStage ? getTournamentChampion(finalStage) : null;
@@ -139,62 +157,72 @@ watch(
         :count-label="t('page.tournaments.event.stagesCount', { count: stageCount })"
         :champion="champion"
         :spoiler-tournament-ids="event.stages.map((stage) => stage.id)"
-      />
-
-      <section v-if="event.viewership" aria-labelledby="tournament-event-viewership-title">
-        <SRail>
-          <template #caption>
-            <h2 id="tournament-event-viewership-title">
-              {{ t("components.viewership.title") }}
-            </h2>
-          </template>
-          <ViewershipStats
-            :viewership="event.viewership"
-            :startgg="event.stages.every((stage) => stage.source === 'startgg')"
-          />
-        </SRail>
-      </section>
-
-      <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">
-        <SRail>
-          <template #caption>
-            <h2 id="tournament-event-watch-title">
-              {{ t("page.match.detail.sections.watch") }}
-            </h2>
-          </template>
-          <StreamList :streams="watchStreams" />
-        </SRail>
-      </section>
-
-      <section
-        v-for="stage in event.stages"
-        :key="stage.id"
-        :aria-labelledby="`tournament-stage-title-${stage.id}`"
       >
-        <SRail caption="section">
-          <template #caption>
-            <div class="flex w-full min-w-0 items-center gap-2 pr-2">
-              <h2 :id="`tournament-stage-title-${stage.id}`" class="min-w-0 flex-1 truncate">
-                <SLink
-                  :to="localePath(tournamentStagePath(event.slug, stage.slug))"
-                  variant="inline"
-                >
-                  {{ stage.name }}
-                </SLink>
+        <STabNav
+          v-if="statsStages.length > 0"
+          :items="tabItems"
+          :ariaLabel="t('page.tournaments.id.sections')"
+        />
+      </TournamentHero>
+
+      <TournamentEventPlayerStats v-if="showStats" :event-slug="event.slug" :stages="statsStages" />
+
+      <template v-else>
+        <section v-if="event.viewership" aria-labelledby="tournament-event-viewership-title">
+          <SRail>
+            <template #caption>
+              <h2 id="tournament-event-viewership-title">
+                {{ t("components.viewership.title") }}
               </h2>
-              <span
-                v-if="stageMeta(stage)"
-                class="shrink-0 truncate text-xs font-normal text-muted tabular-nums"
-              >
-                {{ stageMeta(stage) }}
-              </span>
-            </div>
-          </template>
-          <SCard class="overflow-x-auto p-2">
-            <TournamentBracket :tournament="stage" />
-          </SCard>
-        </SRail>
-      </section>
+            </template>
+            <ViewershipStats
+              :viewership="event.viewership"
+              :startgg="event.stages.every((stage) => stage.source === 'startgg')"
+            />
+          </SRail>
+        </section>
+
+        <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">
+          <SRail>
+            <template #caption>
+              <h2 id="tournament-event-watch-title">
+                {{ t("page.match.detail.sections.watch") }}
+              </h2>
+            </template>
+            <StreamList :streams="watchStreams" />
+          </SRail>
+        </section>
+
+        <section
+          v-for="stage in event.stages"
+          :key="stage.id"
+          :aria-labelledby="`tournament-stage-title-${stage.id}`"
+        >
+          <SRail caption="section">
+            <template #caption>
+              <div class="flex w-full min-w-0 items-center gap-2 pr-2">
+                <h2 :id="`tournament-stage-title-${stage.id}`" class="min-w-0 flex-1 truncate">
+                  <SLink
+                    :to="localePath(tournamentStagePath(event.slug, stage.slug))"
+                    variant="inline"
+                  >
+                    {{ stage.name }}
+                  </SLink>
+                </h2>
+                <span
+                  v-if="stageMeta(stage)"
+                  class="shrink-0 truncate text-xs font-normal text-muted tabular-nums"
+                >
+                  {{ stageMeta(stage) }}
+                </span>
+              </div>
+            </template>
+            <SCard class="overflow-x-auto p-2">
+              <TournamentBracket :tournament="stage" />
+            </SCard>
+          </SRail>
+        </section>
+      </template>
     </template>
   </SHubPageBody>
 </template>

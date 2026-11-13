@@ -7,6 +7,7 @@ import { ManualGameService } from "../application/manual-game.service";
 import type { GameStatsStore, StatsCandidates } from "../application/ports";
 import { StatsImportService } from "../application/stats-import.service";
 import { StatsPlayerLinkService } from "../application/stats-player-link.service";
+import { TournamentPlayerStatsService } from "../application/tournament-player-stats.service";
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
 import { GAME_STATS_STORE } from "./game-stats.tokens";
 import { InterruptedImportsSweeper } from "./interrupted-imports.sweeper";
@@ -62,6 +63,11 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       inject: [EntityManager],
     },
     {
+      provide: TournamentPlayerStatsService,
+      useFactory: (games: GameStatsStore) => new TournamentPlayerStatsService(games),
+      inject: [GAME_STATS_STORE],
+    },
+    {
       provide: StatsPlayerLinkService,
       useFactory: (em: EntityManager, candidates: StatsCandidates) =>
         new StatsPlayerLinkService(candidates, new MikroOrmPlayerLinkStore(em)),
@@ -108,6 +114,12 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
     StatsImportRunner,
     InterruptedImportsSweeper,
   ],
-  exports: [GAME_STATS_STORE, StatsImportService, StatsPlayerLinkService, ManualGameService],
+  exports: [
+    GAME_STATS_STORE,
+    StatsImportService,
+    StatsPlayerLinkService,
+    ManualGameService,
+    TournamentPlayerStatsService,
+  ],
 })
 export class MatchStatsModule {}

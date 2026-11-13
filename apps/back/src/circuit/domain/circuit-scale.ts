@@ -1,7 +1,11 @@
 import type { CircuitScaleTier } from "@sarpbc/types";
-import { MAX_CIRCUIT_PLACEMENT, MAX_CIRCUIT_POINTS, MAX_CIRCUIT_SCALE_TIERS } from "@sarpbc/utils";
+import {
+  MAX_CIRCUIT_PLACEMENT,
+  MAX_CIRCUIT_POINTS,
+  MAX_CIRCUIT_SCALE_TIERS,
+  isLiquipediaSourceHost,
+} from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
-import { isLiquipediaHost } from "../../roster/domain/team-logo";
 
 function isWhole(value: number, min: number, max: number): boolean {
   return Number.isInteger(value) && value >= min && value <= max;
@@ -40,10 +44,10 @@ export function pointsForPlacement(
   return scale.find((tier) => tier.from <= placement && placement <= tier.to)?.points ?? null;
 }
 
-export function assertScaleSourceUrl(value: string): void {
+export function assertCircuitSourceUrl(value: string): void {
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
-    throw new InvalidInputError("The scale source must be an http(s) URL.");
-  if (isLiquipediaHost(new URL(value).hostname))
+    throw new InvalidInputError("A circuit source must be an http(s) URL.");
+  if (isLiquipediaSourceHost(new URL(value).hostname))
     throw new InvalidInputError(
       "Liquipedia is not an accepted source; cite the official rules or announcement.",
     );

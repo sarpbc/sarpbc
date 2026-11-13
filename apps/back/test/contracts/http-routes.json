@@ -146,6 +146,14 @@
   {
     "controller": "\"events\"",
     "verb": "GET",
+    "path": "\":event/player-stats\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"events\"",
+    "verb": "GET",
     "path": "\":id/streams\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -1234,6 +1242,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "GET",
+    "path": "\":id/player-stats\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "GET",
     "path": "\":id/prizes\"",
     "status": null,
     "guards": [],
@@ -1435,6 +1451,14 @@
     "controller": "\"tournaments\"",
     "verb": "PUT",
     "path": "\"matches/:matchId/lineups\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
+    "path": "\"matches/:matchId/result\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

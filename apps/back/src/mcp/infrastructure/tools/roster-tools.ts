@@ -783,7 +783,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        circuitId: z.string().uuid().describe("Circuit UUID from list_circuits."),
+        circuitId: z.string().uuid().describe("Circuit UUID from list_circuits or create_circuit."),
         tournamentId: z.string().uuid().describe("PandaScore tournament stage UUID."),
         scale: circuitScaleSchema,
         sourceUrl: sourceUrlSchema,

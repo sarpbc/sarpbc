@@ -82,6 +82,10 @@ export type {
   StatsPlayerLinkResult,
   StatsRoster,
   TournamentStatsGame,
+  PlayerStatCounts,
+  TournamentPlayerStats,
+  TournamentPlayerStatsResponse,
+  TournamentPlayerStatsTeam,
 } from "./match-stats";
 export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
 export { FORUM_ERROR_CODES } from "./forum";
@@ -177,3 +181,11 @@ export const TRANSFER_TYPES = [
   "loan",
   "staff",
 ] as const satisfies readonly TransferType[];
+export type {
+  StreamScoreFrameCounts,
+  StreamScoreGame,
+  StreamScoreGameEnding,
+  StreamScoreProposal,
+  StreamScoreSeries,
+  StreamScoreSide,
+} from "./stream-score";

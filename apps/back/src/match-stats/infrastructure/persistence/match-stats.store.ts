@@ -22,6 +22,7 @@ import type {
   StatsCandidates,
   StatsImportStore,
 } from "../../application/ports";
+import type { PlayerGameLine } from "../../domain/player-stats";
 import type { CandidateMatch, GameLocation, Side } from "../../domain/replay-matching";
 import { ACTIVE_IMPORT_STATUSES, type StatsImport } from "../../domain/stats-import";
 import {
@@ -189,6 +190,44 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       { orderBy: { number: "ASC" } },
     );
     return games.map(toTournamentGame);
+  }
+
+  async playerLines(tournamentIds: string[]): Promise<PlayerGameLine[]> {
+    const rows = await this.em.find(
+      MatchGamePlayer,
+      { game: { match: { tournament: { $in: tournamentIds } } } },
+      {
+        populate: [
+          "player",
+          "game.blueParticipant.team",
+          "game.blueParticipant.players",
+          "game.orangeParticipant.team",
+          "game.orangeParticipant.players",
+        ],
+      },
+    );
+    return rows.map((row) => {
+      const participant =
+        row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+      return {
+        gameId: row.game.id,
+        account: JSON.stringify([row.platform, row.platformId ?? row.name]),
+        player: row.player
+          ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
+          : null,
+        team: {
+          id: participant.team?.id ?? null,
+          name: nameOf(participant),
+          slug: participant.team?.slug ?? null,
+        },
+        teamGoals: row.side === "blue" ? row.game.blueGoals : row.game.orangeGoals,
+        goals: row.goals,
+        assists: row.assists,
+        saves: row.saves,
+        shots: row.shots,
+        demolitions: row.demolitions,
+      };
+    });
   }
 
   remove(tournamentId: string, location: GameLocation): Promise<TournamentStatsGame | null> {

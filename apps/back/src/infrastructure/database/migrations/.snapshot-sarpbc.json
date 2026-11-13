@@ -284,6 +284,40 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "region": {
+          "name": "region",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "season": {
+          "name": "season",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "slug": {
           "name": "slug",
           "type": "varchar(255)",
@@ -300,6 +334,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "source_url": {
+          "name": "source_url",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
         },
         "updated_at": {
           "name": "updated_at",
@@ -320,6 +371,15 @@
         }
       },
       "indexes": [
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "circuit_identity_unique",
+          "primary": false,
+          "unique": true,
+          "expression": "create unique index \"circuit_identity_unique\" on \"circuit\" (lower(\"name\"), \"season\", lower(\"region\")) nulls not distinct;"
+        },
         {
           "columnNames": ["id"],
           "composite": false,

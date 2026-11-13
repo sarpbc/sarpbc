@@ -1574,6 +1574,56 @@
           "title": "Répartition des gains",
           "error": "Impossible de charger la répartition des gains. Vérifiez votre connexion et réessayez."
         }
+      },
+      "stats": {
+        "tab": "Stats",
+        "caption": "Statistiques des joueurs sur les parties du tournoi",
+        "player": "Joueur",
+        "team": "Équipe",
+        "stage": "Phase",
+        "allTeams": "Toutes les équipes",
+        "allStages": "Toutes les phases",
+        "view": "Affichage des stats",
+        "totals": "Totaux",
+        "perGame": "Par partie",
+        "columns": {
+          "games": {
+            "short": "PJ",
+            "label": "Parties jouées"
+          },
+          "goals": {
+            "short": "B",
+            "label": "Buts"
+          },
+          "assists": {
+            "short": "PD",
+            "label": "Passes décisives"
+          },
+          "saves": {
+            "short": "Ar",
+            "label": "Arrêts"
+          },
+          "shots": {
+            "short": "Ti",
+            "label": "Tirs"
+          },
+          "shootingPercentage": {
+            "short": "Ti%",
+            "label": "Pourcentage de réussite aux tirs"
+          },
+          "demolitions": {
+            "short": "Dé",
+            "label": "Démolitions"
+          },
+          "goalParticipation": {
+            "short": "Part%",
+            "label": "Participation aux buts : buts et passes décisives par but de l’équipe"
+          }
+        },
+        "empty": "Aucune statistique de joueur pour ce tournoi pour le moment.",
+        "emptyHint": "Les statistiques apparaissent une fois les replays des parties importés depuis Ballchasing.",
+        "unlinked": "{count} compte de jeu non relié à un joueur n’est pas affiché. | {count} comptes de jeu non reliés à un joueur ne sont pas affichés.",
+        "error": "Impossible de charger les statistiques des joueurs. Vérifiez votre connexion et réessayez."
       }
     },
     "matches": {

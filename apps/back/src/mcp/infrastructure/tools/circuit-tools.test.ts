@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CircuitDetail, CircuitStandings, RosterChange, StaffRole } from "@sarpbc/types";
+import type {
+  CircuitDetail,
+  CircuitStandings,
+  CircuitSummary,
+  RosterChange,
+  StaffRole,
+} from "@sarpbc/types";
 import { z } from "zod";
 import { circuitTools } from "./circuit-tools";
 import { rosterTools } from "./roster-tools";
@@ -103,7 +109,10 @@ describe("get_circuit", () => {
       id: CIRCUIT_ID,
       slug: "season",
       name: "Season",
+      season: 2026,
+      region: null,
       description: null,
+      sourceUrl: SOURCE,
       qualificationSpots: null,
     };
     const detail: CircuitDetail = {
@@ -116,6 +125,8 @@ describe("get_circuit", () => {
         list: vi.fn(),
         detail: vi.fn(async () => detail),
         standings: vi.fn(async () => standings),
+        create: vi.fn(),
+        update: vi.fn(),
       },
     }).find((candidate) => candidate.name === "get_circuit");
     if (!tool) throw new Error("get_circuit is not defined");
@@ -123,5 +134,94 @@ describe("get_circuit", () => {
     const body = parsed(await tool.run(user("journalist"), { idOrSlug: "season" }));
 
     expect(body.stages.map((s: { tournament: { id: string } }) => s.tournament.id)).toEqual(["ps"]);
+  });
+});
+
+describe("create_circuit and update_circuit", () => {
+  const circuit: CircuitSummary = {
+    id: CIRCUIT_ID,
+    slug: "season-2026",
+    name: "RLCS 2026",
+    season: 2026,
+    region: "Worldwide",
+    description: null,
+    sourceUrl: SOURCE,
+    qualificationSpots: null,
+  };
+
+  function tools() {
+    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+    const circuitService = {
+      list: vi.fn(),
+      detail: vi.fn(),
+      standings: vi.fn(),
+      create: vi.fn(async () => circuit),
+      update: vi.fn(async () => circuit),
+    };
+    const all = circuitTools({ circuitService });
+    const named = (name: string) => {
+      const tool = all.find((candidate) => candidate.name === name);
+      if (!tool) throw new Error(`${name} is not defined`);
+      return tool;
+    };
+    return { circuitService, create: named("create_circuit"), update: named("update_circuit") };
+  }
+
+  const input = {
+    name: "RLCS 2026",
+    slug: "season-2026",
+    season: 2026,
+    region: "Worldwide",
+    sourceUrl: SOURCE,
+  };
+
+  it("creates the circuit directly and returns it with its public URL", async () => {
+    const { create, circuitService } = tools();
+
+    const body = parsed(await create.run(user("admin"), input));
+
+    expect(circuitService.create).toHaveBeenCalledExactlyOnceWith(input);
+    expect(body).toMatchObject({
+      id: CIRCUIT_ID,
+      slug: "season-2026",
+      url: "https://sarpbc.test/circuits/season-2026",
+    });
+  });
+
+  it("requires a slug, a season and a non-Liquipedia sourceUrl", () => {
+    const schema = z.object(tools().create.inputSchema);
+    const accepts = (overrides: Record<string, string | number | undefined>) =>
+      schema.safeParse({ ...input, ...overrides }).success;
+
+    expect(accepts({})).toBe(true);
+    expect(accepts({ region: undefined })).toBe(true);
+    expect(accepts({ slug: undefined })).toBe(false);
+    expect(accepts({ season: undefined })).toBe(false);
+    expect(accepts({ season: 2026.5 })).toBe(false);
+    expect(accepts({ sourceUrl: undefined })).toBe(false);
+    expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/RLCS/2026" })).toBe(false);
+    expect(accepts({ sourceUrl: "https://www.liquipedia.org/mirror" })).toBe(false);
+  });
+
+  it("updates by id or slug and refuses an empty update", async () => {
+    const { update, circuitService } = tools();
+
+    parsed(await update.run(user("admin"), { idOrSlug: "season-2026", region: null }));
+    expect(circuitService.update).toHaveBeenCalledExactlyOnceWith("season-2026", {
+      region: null,
+    });
+
+    const empty = await update.run(user("admin"), { idOrSlug: "season-2026" });
+    expect(empty.isError).toBe(true);
+    expect(circuitService.update).toHaveBeenCalledOnce();
+  });
+
+  it("requires tournaments.manage", async () => {
+    const { create, update, circuitService } = tools();
+
+    expect((await create.run(user("journalist"), input)).isError).toBe(true);
+    expect((await update.run(user("journalist"), { idOrSlug: "x", name: "y" })).isError).toBe(true);
+    expect(circuitService.create).not.toHaveBeenCalled();
+    expect(circuitService.update).not.toHaveBeenCalled();
   });
 });

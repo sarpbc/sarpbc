@@ -14,6 +14,7 @@ const TOOL_NAMES = [
   "get_tournament",
   "get_tournament_prizes",
   "get_tournament_awards",
+  "get_tournament_player_stats",
   "get_match_lineups",
   "get_team_earnings",
   "get_player_earnings",
@@ -77,6 +78,8 @@ const TOOL_NAMES = [
   "get_circuit",
   "list_seasons",
   "get_season",
+  "create_circuit",
+  "update_circuit",
 ];
 
 describe("McpServerFactory", () => {
