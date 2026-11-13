@@ -372,6 +372,15 @@
       },
       "indexes": [
         {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "circuit_identity_unique",
+          "primary": false,
+          "unique": true,
+          "expression": "create unique index \"circuit_identity_unique\" on \"circuit\" (lower(\"name\"), \"season\", lower(\"region\")) nulls not distinct;"
+        },
+        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,

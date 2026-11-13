@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 
 const DAY = 86_400_000;
 const RULES = "https://example.test/fake-circuit/rules";
@@ -84,6 +85,54 @@ export async function verifyCircuits({
   ).json();
   assert.equal(circuit.slug, "fake-circuit");
   await request("POST", "/circuits", { name: "Fake circuit" }, staffCookie, 409);
+
+  const { CircuitPersistence } =
+    await import("../../src/circuit/infrastructure/persistence/circuit.store.ts");
+  const { ConflictError } = await import("../../src/common/domain/errors.ts");
+  const saveDirectly = (fields) =>
+    new CircuitPersistence(orm.em.fork()).save({
+      id: randomUUID(),
+      season: null,
+      region: null,
+      description: null,
+      sourceUrl: null,
+      qualificationSpots: null,
+      ...fields,
+    });
+  for (const [first, twin, why] of [
+    [{ season: null, region: null }, { season: null, region: null }, "no season and no region"],
+    [{ season: 2026, region: null }, { season: 2026, region: null }, "no region"],
+    [{ season: null, region: "EU" }, { season: null, region: "eu" }, "no season"],
+    [{ season: 2026, region: "EU" }, { season: 2026, region: "eu" }, "a season and a region"],
+  ]) {
+    const slug = `fake-db-twin-${randomUUID()}`;
+    await saveDirectly({ ...first, name: "Fake DB Twin", slug });
+    await assert.rejects(
+      saveDirectly({ ...twin, name: "fake db twin", slug: `${slug}-copy` }),
+      ConflictError,
+      `the database refuses a twin circuit with ${why}`,
+    );
+    await orm.em.fork().nativeDelete("Circuit", { slug });
+  }
+
+  const raced = await Promise.all(
+    ["Fake Raced", "fake raced"].map((name, index) =>
+      app.inject({
+        method: "POST",
+        url: "/circuits",
+        payload: { name, slug: `fake-raced-${index}`, season: 2026, sourceUrl: RULES },
+        remoteAddress: "127.0.0.1",
+        headers: { cookie: staffCookie },
+      }),
+    ),
+  );
+  assert.deepEqual(
+    raced.map(({ statusCode }) => statusCode).sort(),
+    [201, 409],
+    "concurrent twin creates leave one circuit",
+  );
+  for (const response of raced.filter(({ statusCode }) => statusCode === 201))
+    await request("DELETE", `/circuits/${response.json().id}`, undefined, staffCookie, 204);
   assert(
     (await request("GET", "/circuits")).json().circuits.some(({ id }) => id === circuit.id),
     "the public list shows the circuit",

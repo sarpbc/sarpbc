@@ -101,6 +101,9 @@ describe("CircuitService", () => {
       region: "EU",
     });
     await service.create({ name: "RLCS 2026", slug: "season-2027", season: 2027 });
+    await expect(
+      service.create({ name: "rlcs 2026", slug: "season-2027-copy", season: 2027, region: " " }),
+    ).rejects.toThrow(ConflictError);
 
     await expect(service.update(europe.id, { region: "Worldwide" })).rejects.toThrow(ConflictError);
     expect(await service.update("season-2026-eu", { region: "NA", season: 2026 })).toMatchObject({

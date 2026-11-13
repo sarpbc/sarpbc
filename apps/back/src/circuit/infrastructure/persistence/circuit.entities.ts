@@ -29,6 +29,13 @@ export class CircuitStage {
 
 export const CircuitSchema = defineEntity({
   class: Circuit,
+  uniques: [
+    {
+      name: "circuit_identity_unique",
+      expression:
+        'create unique index "circuit_identity_unique" on "circuit" (lower("name"), "season", lower("region")) nulls not distinct;',
+    },
+  ],
   properties: {
     id: p.uuid().primary(),
     slug: p.string().unique(),
