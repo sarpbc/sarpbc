@@ -133,3 +133,33 @@ export interface StatsImport {
   startedAt: string | null;
   finishedAt: string | null;
 }
+
+export interface PlayerStatCounts {
+  goals: number;
+  assists: number;
+  saves: number;
+  shots: number;
+  demolitions: number;
+}
+
+export interface TournamentPlayerStatsTeam {
+  id: string | null;
+  name: string;
+  slug: string | null;
+}
+
+export interface TournamentPlayerStats {
+  player: { id: string; name: string; slug: string };
+  team: TournamentPlayerStatsTeam;
+  games: number;
+  totals: PlayerStatCounts;
+  perGame: PlayerStatCounts;
+  shootingPercentage: number | null;
+  goalParticipation: number | null;
+}
+
+export interface TournamentPlayerStatsResponse {
+  games: number;
+  players: TournamentPlayerStats[];
+  unlinkedAccounts: number;
+}

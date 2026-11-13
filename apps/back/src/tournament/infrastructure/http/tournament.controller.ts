@@ -16,7 +16,7 @@ import {
   NotFoundException,
   Inject,
 } from "@nestjs/common";
-import type { MatchLineupsResponse } from "@sarpbc/types";
+import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
@@ -48,6 +48,8 @@ import { lineupsFromGames } from "../../domain/match-lineup";
 import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { ViewershipService } from "../../application/viewership.service";
 import { SetViewershipDto } from "./dto/set-viewership.dto";
 import { PlayerAwardService } from "../../application/player-award.service";
@@ -84,6 +86,7 @@ export class TournamentController {
     private lineupService: MatchLineupService,
     @Inject(GAME_STATS_STORE) private gameStats: Pick<GameStatsStore, "byMatch">,
     private viewershipService: ViewershipService,
+    private playerStatsService: TournamentPlayerStatsService,
   ) {}
 
   @Get()
@@ -209,6 +212,15 @@ export class TournamentController {
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
     return { matches: matches.map(mapTournamentMatchListItem) };
+  }
+
+  @Get(":id/player-stats")
+  async getPlayerStats(@Param("id") id: string): Promise<TournamentPlayerStatsResponse> {
+    const tournament = await this.tournamentRead.findById(id);
+    if (!tournament || !isRedistributable(tournament.source)) {
+      throw new NotFoundException(`Tournament with id "${id}" not found`);
+    }
+    return this.playerStatsService.forStages([tournament]);
   }
 
   @Get(":id/awards")

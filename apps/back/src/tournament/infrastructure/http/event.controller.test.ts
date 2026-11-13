@@ -7,6 +7,7 @@ import { EventController } from "./event.controller";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { ViewershipService } from "../../application/viewership.service";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
   { run: () => Promise.reject(new Error("unused")) },
@@ -58,6 +59,7 @@ const stages = new Map(
 );
 
 describe("EventController", () => {
+  const playerLines = vi.fn(async (_ids: string[]) => []);
   const events = { list: vi.fn(), find: vi.fn(), stageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
@@ -73,6 +75,7 @@ describe("EventController", () => {
     catalog as never,
     unusedStreams,
     unusedViewerships,
+    new TournamentPlayerStatsService({ playerLines }),
   );
 
   beforeEach(() => {
@@ -107,6 +110,38 @@ describe("EventController", () => {
     if (resolved.kind !== "event") throw new Error("expected an event");
     expect(resolved.event.stages.map((s) => s.slug)).toEqual(["playoffs", "group-a"]);
     expect(resolved.event.stages[0]).toMatchObject({ matches: [], event: ref });
+  });
+
+  it("aggregates player stats over the redistributable stages of an event", async () => {
+    events.find.mockResolvedValueOnce({
+      event,
+      stages: [
+        stage({ id: "group-stage", source: "manual" }),
+        stage({ id: "qualifier", source: "startgg" }),
+        stage({ id: "finals", source: "manual" }),
+      ],
+    });
+
+    expect(await controller.playerStats(event.slug)).toEqual({
+      games: 0,
+      players: [],
+      unlinkedAccounts: 0,
+    });
+    expect(playerLines).toHaveBeenCalledWith(["group-stage", "finals"]);
+    await expect(controller.playerStats("unknown-event")).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("hides the player stats of an event whose stages all come from start.gg", async () => {
+    events.find.mockResolvedValueOnce({
+      event,
+      stages: [
+        stage({ id: "open-qualifier", source: "startgg" }),
+        stage({ id: "main-event", source: "startgg" }),
+      ],
+    });
+
+    await expect(controller.playerStats(event.slug)).rejects.toBeInstanceOf(NotFoundError);
+    expect(playerLines).not.toHaveBeenCalled();
   });
 
   it("resolves a stage by event and stage slugs", async () => {

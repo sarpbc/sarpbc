@@ -135,6 +135,31 @@ export async function verifyMatchStats({
   assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
   assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
 
+  const stageStats = (await request("GET", `/tournaments/${tournamentId}/player-stats`)).json();
+  assert.equal(stageStats.games, 2);
+  assert.equal(stageStats.unlinkedAccounts, 1, "an unlinked account is counted, not listed");
+  assert.equal(stageStats.players.length, 1);
+  const [veteran] = stageStats.players;
+  assert.equal(veteran.player.id, playerId);
+  assert.equal(veteran.games, 2);
+  const veteranRows = await orm.em
+    .fork()
+    .find(MatchGamePlayer, { player: playerId, game: { match: { tournament: tournamentId } } });
+  for (const key of ["goals", "assists", "saves", "shots", "demolitions"])
+    assert.equal(
+      veteran.totals[key],
+      veteranRows.reduce((sum, row) => sum + row[key], 0),
+      `${key} totals match the sum of the games`,
+    );
+  assert.equal(veteran.goalParticipation, 100);
+  const { event } = (await request("GET", `/tournaments/${tournamentId}`)).json().tournament;
+  assert.deepEqual(
+    (await request("GET", `/events/${event.slug}/player-stats`)).json(),
+    stageStats,
+    "an event of one stage aggregates like the stage",
+  );
+  await request("GET", `/events/${randomUUID()}/player-stats`, undefined, undefined, 404);
+
   const linksUrl = `/tournaments/${tournamentId}/stats-players`;
   await request("GET", linksUrl, undefined, undefined, 401);
   await request("GET", linksUrl, undefined, memberCookie, 403);

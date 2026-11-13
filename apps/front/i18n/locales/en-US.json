@@ -1528,6 +1528,56 @@
           "title": "Prize Distribution",
           "error": "Could not load the prize distribution. Check your connection and try again."
         }
+      },
+      "stats": {
+        "tab": "Stats",
+        "caption": "Player stats over the tournament games",
+        "player": "Player",
+        "team": "Team",
+        "stage": "Stage",
+        "allTeams": "All teams",
+        "allStages": "All stages",
+        "view": "Stats view",
+        "totals": "Totals",
+        "perGame": "Per game",
+        "columns": {
+          "games": {
+            "short": "GP",
+            "label": "Games played"
+          },
+          "goals": {
+            "short": "G",
+            "label": "Goals"
+          },
+          "assists": {
+            "short": "A",
+            "label": "Assists"
+          },
+          "saves": {
+            "short": "Sv",
+            "label": "Saves"
+          },
+          "shots": {
+            "short": "Sh",
+            "label": "Shots"
+          },
+          "shootingPercentage": {
+            "short": "Sh%",
+            "label": "Shooting percentage"
+          },
+          "demolitions": {
+            "short": "D",
+            "label": "Demolitions"
+          },
+          "goalParticipation": {
+            "short": "Part%",
+            "label": "Goal participation: goals and assists per team goal"
+          }
+        },
+        "empty": "No player stats for this tournament yet.",
+        "emptyHint": "Stats appear once the game replays are imported from Ballchasing.",
+        "unlinked": "{count} game account not linked to a player is not shown. | {count} game accounts not linked to a player are not shown.",
+        "error": "Could not load the player stats. Check your connection and try again."
       }
     },
     "matches": {

@@ -13,8 +13,10 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { TournamentPathResponse } from "@sarpbc/types";
+import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -42,6 +44,7 @@ export class EventController {
     private readonly catalogService: ManualCatalogService,
     private readonly streamService: StreamService,
     private readonly viewershipService: ViewershipService,
+    private readonly playerStatsService: TournamentPlayerStatsService,
   ) {}
 
   @Get()
@@ -126,6 +129,15 @@ export class EventController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param("id") id: string) {
     await this.catalogService.deleteEvent(id);
+  }
+
+  @Get(":event/player-stats")
+  async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
+    const found = await this.events.find(event);
+    if (!found?.stages.some((stage) => isRedistributable(stage.source))) {
+      throw new NotFoundError(MISSING);
+    }
+    return this.playerStatsService.forStages(found.stages);
   }
 
   @Get("resolve/:event")

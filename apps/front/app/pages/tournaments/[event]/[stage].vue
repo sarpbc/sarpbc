@@ -1,17 +1,12 @@
 <script lang="ts" setup>
 import type { TournamentTab } from "@sarpbc/types";
-import {
-  stageMatchesPath,
-  tournamentEventPath,
-  tournamentStageLabel,
-  tournamentStagePath,
-} from "@sarpbc/utils";
+import { tournamentEventPath, tournamentStageLabel } from "@sarpbc/utils";
 import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,
   getTournamentChampion,
 } from "~/utils/structuredData/tournamentSportsEvent";
-import { getTournamentTabFromRouteName } from "~/utils/tournamentTabRoute";
+import { getTournamentTabFromRouteName, tournamentTabPath } from "~/utils/tournamentTabRoute";
 
 definePageMeta({ viewTransition: false });
 
@@ -51,10 +46,13 @@ const activeTab = computed<TournamentTab>(() =>
 );
 
 const { tournament: resolvedStage, tab: resolvedTab } = resolved.value;
+const requestedTab = resolvedTab === "overview" ? activeTab.value : resolvedTab;
 const canonicalPath = localePath(
-  resolvedTab === "matches" || activeTab.value === "matches"
-    ? stageMatchesPath(resolvedStage.event.slug, resolvedStage.slug)
-    : tournamentStagePath(resolvedStage.event.slug, resolvedStage.slug),
+  tournamentTabPath(
+    requestedTab === "stats" && resolvedStage.source === "startgg" ? "overview" : requestedTab,
+    resolvedStage.event.slug,
+    resolvedStage.slug,
+  ),
 );
 if (route.path !== canonicalPath) {
   await redirectToCanonical(route, canonicalPath);
@@ -153,6 +151,7 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
           :event-slug="tournament.event.slug"
           :stage-slug="tournament.slug"
           :active-tab="activeTab"
+          :stats="tournament.source !== 'startgg'"
         />
       </TournamentHero>
       <NuxtPage :tournament="tournament" />

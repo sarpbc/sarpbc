@@ -132,6 +132,7 @@ export {
   newsPath,
   playerPath,
   stageMatchesPath,
+  stageStatsPath,
   staffPath,
   teamPath,
   tournamentEventPath,

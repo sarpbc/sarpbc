@@ -4,6 +4,7 @@ import type {
   TournamentListItem,
   TournamentMatchListItem,
   TournamentPathResponse,
+  TournamentPlayerStatsResponse,
 } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
 
@@ -98,4 +99,19 @@ export async function getTournamentMatches(
   );
 
   return res.matches ?? [];
+}
+
+export function getTournamentPlayerStats(
+  tournamentId: string,
+): Promise<TournamentPlayerStatsResponse> {
+  return apiFetch<TournamentPlayerStatsResponse>(`/tournaments/${tournamentId}/player-stats`, {
+    method: "GET",
+  });
+}
+
+export function getEventPlayerStats(eventSlug: string): Promise<TournamentPlayerStatsResponse> {
+  return apiFetch<TournamentPlayerStatsResponse>(
+    `/events/${encodeURIComponent(eventSlug)}/player-stats`,
+    { method: "GET" },
+  );
 }

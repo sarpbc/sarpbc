@@ -165,6 +165,9 @@ class MemoryGames implements GameStatsStore {
   async inTournament() {
     return [];
   }
+  async playerLines() {
+    return [];
+  }
   async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
     const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);
     if (!game) return null;
