@@ -113,6 +113,7 @@
     "results": "Résultats",
     "transfers": "Transferts",
     "circuits": "Circuits",
+    "seasons": "Saisons",
     "formerly": "Anciennement {name}"
   },
   "components": {
@@ -1949,6 +1950,45 @@
           "awaitingResults": "Résultats en attente"
         },
         "regionalExplainer": "Ce circuit couvre la région {region}. Aux événements ouverts à toutes les régions, comme les Majors, seules les équipes de la région {region} marquent des points."
+      }
+    },
+    "seasons": {
+      "index": {
+        "title": "Saisons RLCS",
+        "seoTitle": "Archives des saisons RLCS {'|'} sarpbc.org",
+        "description": "Parcourez les archives des saisons RLCS sur sarpbc.org : le format de chaque époque, le vainqueur, les équipes participantes et leur parcours au fil de la saison.",
+        "error": "Impossible de charger les saisons. Vérifiez votre connexion et réessayez.",
+        "empty": "Aucune saison pour le moment.",
+        "emptyHint": "Les saisons apparaissent ici dès que l’équipe de sarpbc.org les publie.",
+        "winner": "Vainqueur : {name}",
+        "noWinner": "Aucun vainqueur enregistré pour le moment"
+      },
+      "archive": {
+        "notFound": "Cette saison n’existe pas.",
+        "error": "Impossible de charger la saison. Vérifiez votre connexion et réessayez.",
+        "allSeasons": "Toutes les saisons",
+        "seoTitle": "Archive {name} {'|'} sarpbc.org",
+        "seoDescription": "{name} sur sarpbc.org : le format, le vainqueur, les équipes participantes et leur parcours au fil de la saison.",
+        "winner": {
+          "title": "Vainqueur",
+          "empty": "Aucun vainqueur enregistré pour le moment."
+        },
+        "format": {
+          "title": "Format",
+          "empty": "Le format de cette saison n’a pas encore été documenté."
+        },
+        "participants": {
+          "title": "Participants",
+          "empty": "Aucun participant enregistré pour le moment.",
+          "emptyHint": "Les équipes apparaissent ici dès que l’équipe de sarpbc.org les ajoute.",
+          "winner": "Vainqueur",
+          "pathEmpty": "Aucun résultat enregistré pour le moment."
+        },
+        "awards": {
+          "title": "Récompenses",
+          "presentedBy": "Présenté par {name}",
+          "officialSource": "Annonce officielle"
+        }
       }
     }
   }
