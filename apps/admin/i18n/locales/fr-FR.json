@@ -1298,7 +1298,7 @@
     },
     "seasons": {
       "title": "Saisons",
-      "description": "Les saisons et les ligues portent les récompenses officielles qui ne relèvent d'aucune étape de tournoi, comme le MVP de la saison ou un MVP régional. Ne créez que des saisons dont les récompenses ont été annoncées officiellement.",
+      "description": "Les saisons et les ligues portent les récompenses officielles qui ne relèvent d'aucune étape de tournoi, comme le MVP de la saison ou un MVP régional, ainsi que l'archive affichée sur la page publique des saisons : format, participants, leur parcours et le vainqueur.",
       "loading": "Chargement…",
       "loadError": "Impossible de charger les saisons. Vérifiez votre connexion et réessayez.",
       "empty": {
@@ -1307,7 +1307,20 @@
       },
       "form": {
         "name": "Nom",
-        "nameHint": "Tel que l'organisateur la nomme, par exemple RLCS 2024."
+        "nameHint": "Tel que l'organisateur la nomme, par exemple RLCS 2024.",
+        "slug": "Slug public",
+        "slugHint": "Publie l'archive à l'adresse /seasons/<slug>, par exemple rlcs-2024. Laissez vide pour garder la saison hors du site public.",
+        "formatSummary": "Format",
+        "formatSummaryHint": "Comment la saison était organisée, avec vos mots. Facultatif.",
+        "phases": "Phases",
+        "phasesHint": "Facultatif. Listez les phases de la saison dans l'ordre, par exemple Open Qualifiers, Majors, Championnat du monde.",
+        "phaseName": "Phase {number}",
+        "phaseDescription": "Description",
+        "removePhase": "Retirer la phase {number}",
+        "addPhase": "Ajouter une phase",
+        "winner": "Vainqueur",
+        "winnerHint": "Choisissez parmi les participants. Ajoutez d'abord l'équipe ci-dessous.",
+        "noWinner": "Pas encore de vainqueur"
       },
       "create": {
         "button": "Nouvelle saison",
@@ -1320,7 +1333,9 @@
         "title": "Détails de la saison",
         "submit": "Enregistrer",
         "saved": "Saison enregistrée",
-        "failed": "Impossible d'enregistrer la saison."
+        "failed": "Impossible d'enregistrer la saison.",
+        "publishedAt": "Publiée à l'adresse",
+        "unpublished": "Non publiée. Ajoutez un slug public pour afficher cette saison sur le site."
       },
       "delete": {
         "title": "Supprimer la saison",
@@ -1357,6 +1372,51 @@
           "title": "Retirer la récompense",
           "confirm": "Retirer la récompense {type} de {name} ?",
           "confirmButton": "Retirer la récompense"
+        }
+      },
+      "unpublished": "Non publiée",
+      "participants": {
+        "title": "Participants",
+        "hint": "Les équipes qui ont pris part à la saison, choisies parmi les équipes existantes. Renseignez le parcours de chaque équipe sous son nom.",
+        "searchTeam": "Rechercher une équipe à ajouter",
+        "noTeams": "Aucune équipe correspondante.",
+        "empty": "Aucun participant pour l'instant.",
+        "added": "{name} ajoutée",
+        "addFailed": "Impossible d'ajouter l'équipe.",
+        "winner": "Vainqueur",
+        "remove": {
+          "title": "Retirer le participant",
+          "label": "Retirer {name}",
+          "confirm": "Retirer {name} et son parcours de cette saison ?",
+          "confirmButton": "Retirer le participant"
+        }
+      },
+      "path": {
+        "title": "Parcours",
+        "empty": "Aucun résultat enregistré pour l'instant.",
+        "note": "Note de parcours",
+        "noteHint": "Court résumé facultatif de la saison de l'équipe.",
+        "saveNote": "Enregistrer la note",
+        "noteSaved": "Note de parcours enregistrée",
+        "noteFailed": "Impossible d'enregistrer la note de parcours.",
+        "label": "Événement",
+        "labelPlaceholder": "par exemple Spring Major",
+        "result": "Résultat",
+        "resultPlaceholder": "par exemple 1er, Top 8, Qualifiée",
+        "link": "Lier un tournoi",
+        "unlink": "Retirer le lien vers le tournoi",
+        "linked": "Lié à {name}",
+        "add": "Ajouter le résultat",
+        "addFailed": "Impossible d'ajouter le résultat.",
+        "startgg": "start.gg · non affiché sur le site public",
+        "picker": {
+          "title": "Lier un tournoi",
+          "hint": "Recherchez l'étape de tournoi existante dont provient ce résultat."
+        },
+        "remove": {
+          "title": "Retirer le résultat",
+          "confirm": "Retirer {label} de ce parcours ?",
+          "confirmButton": "Retirer le résultat"
         }
       }
     }
