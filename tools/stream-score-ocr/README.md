@@ -5,8 +5,9 @@ confirm manual tournament results almost live instead of the next day.
 
 The tool only proposes. It has no database or API access. Staff paste its JSON in the admin
 (tournament page, **Stream Score** on a manual match), check each game against the stream and the
-organiser's official post, choose which team played blue, and confirm the series winner in one
-click. The official post stays the confirmation.
+organiser's official post, choose which team played blue, and save the series score and winner. Game
+scores, endings and times stay in the proposal: the admin does not save them. The official post
+stays the confirmation.
 
 ## Requirements
 
@@ -105,9 +106,15 @@ Repeat with frames that show the missing characters, including an overtime clock
 
 ## Accuracy
 
+> **Not a production accuracy figure.** The numbers below come only from synthetic frames drawn by
+> `fixtures/render.ts` with a placeholder pixel font, read with the placeholder templates in
+> `overlays/coupe-de-france-slash-2026.json` that were learned from that same font. No real Slash
+> broadcast or VOD has been read yet, so the accuracy on real Coupe de France streams is unknown.
+
 `pnpm --filter @sarpbc/stream-score-ocr test` renders 12 generated series (56 games, Bo5 and Bo7,
 1080p, 720p and 540p, pixel noise, corrupted frames, replays, fades, ad breaks, pauses, overtimes)
-and compares the proposals with the scripted results:
+and compares the proposals with the scripted results. This only checks the pipeline end to end on
+its own synthetic input:
 
 | Sampling           | Correct game scores | Undecided games | Wrong scores | Series winners |
 | ------------------ | ------------------- | --------------- | ------------ | -------------- |
