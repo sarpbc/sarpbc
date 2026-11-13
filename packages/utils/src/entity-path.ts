@@ -48,6 +48,10 @@ export function seasonArchivePath(slug: string): string {
   return `/seasons/${slug}`;
 }
 
+export function countryPath(code: string): string {
+  return `/countries/${code.toLowerCase()}`;
+}
+
 export function localizedPath(path: string, locale: UiLocale): string {
   return locale === "fr" ? `/fr${path}` : path;
 }
