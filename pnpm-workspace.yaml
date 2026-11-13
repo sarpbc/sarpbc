@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - tools/stream-score-ocr
 
 overrides:
   h3: 1.15.11

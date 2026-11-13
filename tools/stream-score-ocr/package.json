@@ -1,0 +1,25 @@
+{
+  "name": "@sarpbc/stream-score-ocr",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "read": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/cli.ts read",
+    "calibrate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/cli.ts calibrate",
+    "lint": "oxlint --deny-warnings .",
+    "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt . --check",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@sarpbc/types": "workspace:*",
+    "@sarpbc/utils": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}
