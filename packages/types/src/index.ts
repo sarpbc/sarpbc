@@ -7,6 +7,14 @@ export type { StaffRole, StaffPermission, User, UserList, UserListItem } from ".
 export { PLAYER_STATUSES } from "./player";
 export type { Player, PlayerStatus } from "./player";
 export type { PlayerAwardType, PlayerProfileAward, TournamentAwardListItem } from "./player-award";
+export type {
+  CareerStint,
+  CareerTitle,
+  HeadToHead,
+  PlayerCareer,
+  PlayerComparison,
+  SeriesRecord,
+} from "./player-comparison";
 export { TEAM_LOGO_VARIANTS } from "./team";
 export type {
   Team,

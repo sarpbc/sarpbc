@@ -682,6 +682,14 @@
   {
     "controller": "\"player\"",
     "verb": "GET",
+    "path": "\"compare\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
+    "controller": "\"player\"",
+    "verb": "GET",
     "path": "\"slug/:slug\"",
     "status": null,
     "guards": [],

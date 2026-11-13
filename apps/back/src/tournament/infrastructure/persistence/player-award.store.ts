@@ -44,6 +44,7 @@ export class CompetitionAwardQueries implements AwardQueries {
         id: row.tournament.id,
         name: row.tournament.name,
         slug: row.tournament.slug,
+        source: row.tournament.source,
         endAt: row.tournament.endAt,
         event: toEventRef(row.tournament.event),
       },

@@ -32,6 +32,7 @@ import { StorageModule } from "./storage/infrastructure/storage.module";
 import { PatModule } from "./pat/infrastructure/pat.module";
 import { McpModule } from "./mcp/infrastructure/mcp.module";
 import { RosterProposalModule } from "./roster-proposal/infrastructure/roster-proposal.module";
+import { CareerModule } from "./career/infrastructure/career.module";
 import { StreamerModule } from "./streamer/infrastructure/streamer.module";
 import { MatchStatsModule } from "./match-stats/infrastructure/match-stats.module";
 import { SitemapModule } from "./sitemap/infrastructure/sitemap.module";
@@ -78,6 +79,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     PatModule,
     McpModule,
     RosterProposalModule,
+    CareerModule,
     StreamerModule,
     MatchStatsModule,
     SitemapModule,
