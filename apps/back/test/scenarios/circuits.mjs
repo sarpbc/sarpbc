@@ -189,6 +189,59 @@ export async function verifyCircuits({
   assert(mcp.stages.every((stage) => stage.tournament.source === "pandascore"));
   assert((await callTool("list_circuits", {})).some(({ id }) => id === circuit.id));
 
+  const created = await callTool("create_circuit", {
+    name: "Fake Series 2026",
+    slug: "fake-season-2026",
+    season: 2026,
+    region: "Worldwide",
+    description: "A fake circuit created through the MCP.",
+    sourceUrl: RULES,
+  });
+  assert.equal(created.slug, "fake-season-2026");
+  assert.equal(created.sourceUrl, RULES);
+  for (const [refused, why] of [
+    [{ slug: "fake-season-2026", name: "Another Fake", season: 2026 }, "a taken slug"],
+    [{ slug: "fake-twin", name: "fake series 2026", region: "worldwide" }, "a name twin"],
+    [{ slug: "fake-lp", sourceUrl: "https://liquipedia.net/rocketleague/Fake" }, "Liquipedia"],
+  ])
+    assert.deepEqual(
+      await callTool("create_circuit", {
+        name: "Fake Series 2026",
+        season: 2026,
+        region: "Worldwide",
+        sourceUrl: RULES,
+        ...refused,
+      }),
+      { error: true },
+      `create_circuit refuses ${why}`,
+    );
+  const updated = await callTool("update_circuit", {
+    idOrSlug: "fake-season-2026",
+    region: "EU",
+    qualificationSpots: 1,
+  });
+  assert.equal(updated.region, "EU");
+  assert.equal(updated.qualificationSpots, 1);
+  const mcpProposal = await callTool("set_circuit_stage_scale", {
+    circuitId: created.id,
+    tournamentId: counted.id,
+    scale,
+    sourceUrl: RULES,
+  });
+  assert.equal((await review(mcpProposal)).status, "applied");
+  const createdDetail = await callTool("get_circuit", { idOrSlug: "fake-season-2026" });
+  assert.equal(createdDetail.season, 2026);
+  assert.deepEqual(
+    createdDetail.stages.map((stage) => stage.tournament.id),
+    [counted.id],
+  );
+  assert.deepEqual(
+    createdDetail.standings.map(({ points }) => points),
+    [10, 6, 6],
+  );
+  assert((await callTool("list_circuits", {})).some(({ id }) => id === created.id));
+  await request("DELETE", `/circuits/${created.id}`, undefined, staffCookie, 204);
+
   await request("DELETE", stagePath(pending.id), undefined, staffCookie, 204);
   await request("DELETE", stagePath(pending.id), undefined, staffCookie, 404);
   await request("DELETE", `/circuits/${circuit.id}`, undefined, staffCookie, 204);

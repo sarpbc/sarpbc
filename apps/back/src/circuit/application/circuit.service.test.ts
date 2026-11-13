@@ -26,6 +26,9 @@ function setup() {
     slugTaken: vi.fn(async (slug: string, exceptId: string | null) =>
       [...circuits.values()].some((c) => c.slug === slug && c.id !== exceptId),
     ),
+    withSeason: vi.fn(async (season: number | null) =>
+      [...circuits.values()].filter((c) => c.season === season),
+    ),
     save: vi.fn(async (circuit: CircuitSummary) => {
       circuits.set(circuit.id, circuit);
     }),
@@ -66,6 +69,57 @@ describe("CircuitService", () => {
     await expect(service.create({ name: "x", qualificationSpots: 0 })).rejects.toThrow(
       InvalidInputError,
     );
+  });
+
+  it("stores season, region and rules source, and refuses the same name, season and region", async () => {
+    const rlcs = await service.create({
+      name: "RLCS 2026",
+      slug: "season-2026",
+      season: 2026,
+      region: " Worldwide ",
+      description: "",
+      sourceUrl: SOURCE,
+    });
+    expect(await service.detail("season-2026")).toMatchObject({
+      id: rlcs.id,
+      season: 2026,
+      region: "Worldwide",
+      description: null,
+      sourceUrl: SOURCE,
+    });
+
+    await expect(
+      service.create({ name: "rlcs 2026", slug: "other", season: 2026, region: "worldwide" }),
+    ).rejects.toThrow(ConflictError);
+    await expect(
+      service.create({ name: "Other", slug: "season-2026", season: 2027 }),
+    ).rejects.toThrow(ConflictError);
+    const europe = await service.create({
+      name: "RLCS 2026",
+      slug: "season-2026-eu",
+      season: 2026,
+      region: "EU",
+    });
+    await service.create({ name: "RLCS 2026", slug: "season-2027", season: 2027 });
+
+    await expect(service.update(europe.id, { region: "Worldwide" })).rejects.toThrow(ConflictError);
+    expect(await service.update("season-2026-eu", { region: "NA", season: 2026 })).toMatchObject({
+      id: europe.id,
+      region: "NA",
+    });
+    expect(await service.update(rlcs.id, { name: "RLCS 2026" })).toMatchObject({ id: rlcs.id });
+  });
+
+  it("validates the season and the rules source", async () => {
+    await expect(service.create({ name: "x", season: 1999 })).rejects.toThrow(InvalidInputError);
+    await expect(service.create({ name: "x", season: 2026.5 })).rejects.toThrow(InvalidInputError);
+    await expect(
+      service.create({ name: "x", sourceUrl: "https://liquipedia.net/rocketleague/RLCS" }),
+    ).rejects.toThrow(InvalidInputError);
+    await expect(service.create({ name: "x", sourceUrl: "ftp://example.org" })).rejects.toThrow(
+      InvalidInputError,
+    );
+    await expect(service.update(circuitId, { season: 3000 })).rejects.toThrow(InvalidInputError);
   });
 
   it("stores a PandaScore stage scale with its source, sorted", async () => {

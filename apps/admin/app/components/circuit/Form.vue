@@ -3,7 +3,10 @@ import type { CircuitInput, CircuitSummary } from "@sarpbc/types";
 import {
   CIRCUIT_DESCRIPTION_MAX_LENGTH,
   CIRCUIT_NAME_MAX_LENGTH,
+  CIRCUIT_REGION_MAX_LENGTH,
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
+  MAX_CIRCUIT_SEASON,
+  MIN_CIRCUIT_SEASON,
 } from "@sarpbc/utils";
 
 const props = defineProps<{
@@ -16,23 +19,32 @@ const emit = defineEmits<{ submit: [input: CircuitInput] }>();
 
 const name = ref(props.circuit?.name ?? "");
 const slug = ref(props.circuit?.slug ?? "");
+const season = ref<number | null>(props.circuit?.season ?? null);
+const region = ref(props.circuit?.region ?? "");
 const description = ref(props.circuit?.description ?? "");
+const sourceUrl = ref(props.circuit?.sourceUrl ?? "");
 const qualificationSpots = ref<number | null>(props.circuit?.qualificationSpots ?? null);
 
-const isValid = computed(() => {
-  const spots = qualificationSpots.value;
-  return (
+function inRange(value: number | null, min: number, max: number): boolean {
+  return value === null || (Number.isInteger(value) && value >= min && value <= max);
+}
+
+const isValid = computed(
+  () =>
     name.value.trim().length > 0 &&
-    (spots === null ||
-      (Number.isInteger(spots) && spots >= 1 && spots <= MAX_CIRCUIT_QUALIFICATION_SPOTS))
-  );
-});
+    inRange(season.value, MIN_CIRCUIT_SEASON, MAX_CIRCUIT_SEASON) &&
+    inRange(qualificationSpots.value, 1, MAX_CIRCUIT_QUALIFICATION_SPOTS) &&
+    (!sourceUrl.value.trim() || /^https?:\/\//.test(sourceUrl.value.trim())),
+);
 
 function submit() {
   if (!isValid.value) return;
   const input: CircuitInput = {
     name: name.value.trim(),
+    season: season.value,
+    region: region.value.trim() || null,
     description: description.value.trim() || null,
+    sourceUrl: sourceUrl.value.trim() || null,
     qualificationSpots: qualificationSpots.value,
   };
   const trimmedSlug = slug.value.trim();
@@ -53,6 +65,27 @@ function submit() {
     >
       <UInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
     </UFormField>
+    <UFormField
+      :label="$t('page.circuits.form.season')"
+      :hint="$t('page.circuits.form.seasonHint')"
+      name="season"
+    >
+      <UInputNumber
+        v-model="season"
+        :min="MIN_CIRCUIT_SEASON"
+        :max="MAX_CIRCUIT_SEASON"
+        :step="1"
+        :format-options="{ useGrouping: false }"
+        class="w-full"
+      />
+    </UFormField>
+    <UFormField
+      :label="$t('page.circuits.form.region')"
+      :hint="$t('page.circuits.form.regionHint')"
+      name="region"
+    >
+      <UInput v-model="region" :maxlength="CIRCUIT_REGION_MAX_LENGTH" class="w-full" />
+    </UFormField>
     <UFormField :label="$t('page.circuits.form.description')" name="description">
       <UTextarea
         v-model="description"
@@ -60,6 +93,13 @@ function submit() {
         :rows="3"
         class="w-full"
       />
+    </UFormField>
+    <UFormField
+      :label="$t('page.circuits.form.sourceUrl')"
+      :hint="$t('page.circuits.form.sourceUrlHint')"
+      name="sourceUrl"
+    >
+      <UInput v-model="sourceUrl" type="url" autocomplete="off" class="w-full" />
     </UFormField>
     <UFormField
       :label="$t('page.circuits.form.qualificationSpots')"

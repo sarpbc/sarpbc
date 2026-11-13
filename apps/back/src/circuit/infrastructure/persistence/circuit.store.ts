@@ -19,7 +19,10 @@ function toSummary(row: Circuit): CircuitSummary {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    season: row.season,
+    region: row.region,
     description: row.description,
+    sourceUrl: row.sourceUrl,
     qualificationSpots: row.qualificationSpots,
   };
 }
@@ -84,6 +87,10 @@ export class CircuitPersistence implements CircuitStore {
   async slugTaken(slug: string, exceptId: string | null) {
     const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
     return (await this.em.count(Circuit, filter)) > 0;
+  }
+
+  async withSeason(season: number | null) {
+    return (await this.em.find(Circuit, { season })).map(toSummary);
   }
 
   async save(circuit: CircuitSummary) {

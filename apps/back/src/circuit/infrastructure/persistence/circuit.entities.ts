@@ -7,7 +7,10 @@ export class Circuit {
   id: string = v4();
   declare slug: string;
   declare name: string;
+  season: number | null = null;
+  region: string | null = null;
   description: string | null = null;
+  sourceUrl: string | null = null;
   qualificationSpots: number | null = null;
   createdAt = new Date();
   updatedAt = new Date();
@@ -30,7 +33,10 @@ export const CircuitSchema = defineEntity({
     id: p.uuid().primary(),
     slug: p.string().unique(),
     name: p.string(),
+    season: p.integer().nullable(),
+    region: p.string().nullable(),
     description: p.text().nullable(),
+    sourceUrl: p.text().nullable(),
     qualificationSpots: p.integer().nullable(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     updatedAt: p

@@ -77,6 +77,8 @@ const TOOL_NAMES = [
   "get_circuit",
   "list_seasons",
   "get_season",
+  "create_circuit",
+  "update_circuit",
 ];
 
 describe("McpServerFactory", () => {

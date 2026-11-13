@@ -40,9 +40,9 @@ export function pointsForPlacement(
   return scale.find((tier) => tier.from <= placement && placement <= tier.to)?.points ?? null;
 }
 
-export function assertScaleSourceUrl(value: string): void {
+export function assertCircuitSourceUrl(value: string): void {
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
-    throw new InvalidInputError("The scale source must be an http(s) URL.");
+    throw new InvalidInputError("A circuit source must be an http(s) URL.");
   if (isLiquipediaHost(new URL(value).hostname))
     throw new InvalidInputError(
       "Liquipedia is not an accepted source; cite the official rules or announcement.",
