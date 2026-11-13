@@ -22,6 +22,7 @@ import type { PlayerAwardService } from "../../tournament/application/player-awa
 import type { StreamService } from "../../tournament/application/stream.service";
 import type { ViewershipService } from "../../tournament/application/viewership.service";
 import type { CircuitService } from "../../circuit/application/circuit.service";
+import type { SeasonService } from "../../season/application/season.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import type { StreamOwner } from "../../tournament/domain/stream";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
@@ -46,6 +47,7 @@ type Lineups = Pick<MatchLineupService, "requireProposable" | "set">;
 type Viewerships = Pick<ViewershipService, "requireProposable" | "set">;
 type Circuits = Pick<CircuitService, "requireStageScale" | "setStageScale">;
 type TeamAliases = Pick<TeamAliasService, "requireProposable" | "add" | "update">;
+type Seasons = Pick<SeasonService, "requireAward" | "addAward">;
 
 interface StreamChange {
   owner: StreamOwner;
@@ -78,6 +80,7 @@ export class RosterProposalService {
     private readonly viewerships: Viewerships,
     private readonly circuits: Circuits,
     private readonly teamAliases: TeamAliases,
+    private readonly seasons: Seasons,
   ) {}
 
   async propose(
@@ -96,6 +99,10 @@ export class RosterProposalService {
     if (change.kind === "award_player") {
       const { tournamentId, teamId, playerId, awardType } = change;
       await this.awards.requireProposable(tournamentId, teamId, playerId, awardType);
+    }
+    if (change.kind === "award_season_player") {
+      const { kind: _, seasonId, ...award } = change;
+      await this.seasons.requireAward(seasonId, { ...award, sourceUrl });
     }
     if (change.kind === "delete_match") {
       await this.matches.requireProposableDeletion(change.matchId);
@@ -211,6 +218,13 @@ export class RosterProposalService {
           ),
         ),
       ],
+      seasons: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "award_season_player" ? [change.seasonId] : [],
+          ),
+        ),
+      ],
     });
     return { proposals, names };
   }
@@ -323,6 +337,10 @@ export class RosterProposalService {
         const { tournamentId, teamId, playerId, awardType } = change;
         return (await this.awards.createForTeam(tournamentId, teamId, playerId, awardType)).id;
       }
+      case "award_season_player": {
+        const { kind: _, seasonId, ...award } = change;
+        return (await this.seasons.addAward(seasonId, { ...award, sourceUrl })).id;
+      }
       case "set_event_streams":
       case "set_tournament_streams":
       case "set_match_streams": {
@@ -407,6 +425,7 @@ function referencedPlayerIds(change: RosterChange): string[] {
     case "create_contract":
     case "update_contract":
     case "award_player":
+    case "award_season_player":
       return [change.playerId];
     case "merge_players":
       return [change.keptId, change.duplicateId];
@@ -461,6 +480,7 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "update_player":
     case "create_team":
     case "merge_players":
+    case "award_season_player":
     case "set_event_streams":
     case "set_tournament_streams":
     case "set_match_streams":

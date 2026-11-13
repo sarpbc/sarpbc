@@ -117,6 +117,25 @@ function setup() {
     add: vi.fn(async () => new TeamAlias()),
     update: vi.fn(async () => new TeamAlias()),
   };
+  const seasons = {
+    requireAward: vi.fn(async (seasonId: string, input: { region?: string | null }) => {
+      if (seasonId !== "season-1") throw new NotFoundError("Season not found");
+      return {
+        awardType: "regional_mvp" as const,
+        region: input.region ?? null,
+        presentedBy: null,
+        sourceUrl: "https://x.com/RLEsports/status/1",
+      };
+    }),
+    addAward: vi.fn(async () => ({
+      id: "season-award-1",
+      awardType: "regional_mvp" as const,
+      region: "Europe",
+      presentedBy: null,
+      sourceUrl: "https://x.com/RLEsports/status/1",
+      player: { id: "zen", name: "zen", slug: "zen" },
+    })),
+  };
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
   const logos = {
     upload: vi.fn(async (teamId: string, variant: string) =>
@@ -205,6 +224,7 @@ function setup() {
     viewerships,
     circuits,
     teamAliases,
+    seasons,
   );
   return {
     saved,
@@ -223,6 +243,7 @@ function setup() {
     viewerships,
     circuits,
     teamAliases,
+    seasons,
     service,
   };
 }
@@ -245,6 +266,7 @@ describe("RosterProposalService", () => {
   let viewerships: ReturnType<typeof setup>["viewerships"];
   let circuits: ReturnType<typeof setup>["circuits"];
   let teamAliases: ReturnType<typeof setup>["teamAliases"];
+  let seasons: ReturnType<typeof setup>["seasons"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -265,6 +287,7 @@ describe("RosterProposalService", () => {
       viewerships,
       circuits,
       teamAliases,
+      seasons,
       service,
     } = setup());
   });
@@ -300,6 +323,7 @@ describe("RosterProposalService", () => {
       matches: [],
       events: [],
       circuits: [],
+      seasons: [],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -1061,6 +1085,63 @@ describe("RosterProposalService", () => {
       expect(teams.update).not.toHaveBeenCalled();
       expect(merges.mergeTeams).not.toHaveBeenCalled();
       expect(staff.permissions).toEqual(["teams.manage", "teams.manage"]);
+    });
+  });
+
+  describe("season award proposals", () => {
+    const announcement = "https://x.com/RLEsports/status/1";
+    const proposeRegional = (seasonId = "season-1") =>
+      service.propose(
+        {
+          kind: "award_season_player",
+          seasonId,
+          playerId: "zen",
+          awardType: "regional_mvp",
+          region: "Europe",
+        },
+        announcement,
+        "journalist",
+      );
+
+    it("checks the award against the season and keeps it pending", async () => {
+      const proposal = await proposeRegional();
+
+      expect(proposal).toMatchObject({ status: "pending", sourceUrl: announcement });
+      expect(seasons.requireAward).toHaveBeenCalledWith("season-1", {
+        playerId: "zen",
+        awardType: "regional_mvp",
+        region: "Europe",
+        sourceUrl: announcement,
+      });
+      expect(seasons.addAward).not.toHaveBeenCalled();
+    });
+
+    it("refuses an unknown season before recording anything", async () => {
+      await expect(proposeRegional("missing")).rejects.toThrow("Season not found");
+      expect(saved.size).toBe(0);
+    });
+
+    it("records the award with the announcement as its source on approval", async () => {
+      const { id } = await proposeRegional();
+
+      expect(await service.approve(id, "admin")).toMatchObject({ entityId: "season-award-1" });
+      expect(seasons.addAward).toHaveBeenCalledWith("season-1", {
+        playerId: "zen",
+        awardType: "regional_mvp",
+        region: "Europe",
+        sourceUrl: announcement,
+      });
+      expect(staff.permissions).toContain("tournaments.manage");
+    });
+
+    it("names the season in the pending list", async () => {
+      await proposeRegional();
+
+      await service.list("pending");
+
+      expect(store.names).toHaveBeenCalledWith(
+        expect.objectContaining({ players: ["zen"], seasons: ["season-1"] }),
+      );
     });
   });
 });

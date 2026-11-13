@@ -131,6 +131,16 @@ export type {
   CircuitStandingTeam,
   CircuitSummary,
 } from "./circuit";
+export { SEASON_AWARD_TYPES } from "./season";
+export type {
+  PlayerSeasonAward,
+  SeasonAward,
+  SeasonAwardInput,
+  SeasonAwardType,
+  SeasonDetail,
+  SeasonInput,
+  SeasonSummary,
+} from "./season";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {
   RosterChange,

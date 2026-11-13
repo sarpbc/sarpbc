@@ -56,6 +56,7 @@ const TOOL_NAMES = [
   "update_contract",
   "propose_tournament_prizes",
   "propose_player_award",
+  "propose_season_award",
   "set_event_streams",
   "set_tournament_streams",
   "set_match_streams",
@@ -74,6 +75,8 @@ const TOOL_NAMES = [
   "remove_match_game",
   "list_circuits",
   "get_circuit",
+  "list_seasons",
+  "get_season",
 ];
 
 describe("McpServerFactory", () => {

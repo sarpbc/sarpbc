@@ -17,6 +17,7 @@ import { verifyPlayerAwards } from "./scenarios/player-awards.mjs";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mjs";
 import { verifyManualBrackets } from "./scenarios/manual-brackets.mjs";
 import { verifyMatchStats } from "./scenarios/match-stats.mjs";
+import { verifySeasonAwards } from "./scenarios/seasons.mjs";
 import { verifySitemap } from "./scenarios/sitemap.mjs";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mjs";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mjs";
@@ -1472,6 +1473,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         review,
         tournament,
       });
+      await verifySeasonAwards({ request, staffCookie, memberCookie, callTool, review, player });
       await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
     });
 
@@ -1579,6 +1581,20 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       await addMembers(sharedEntry, kept, duplicate);
       await award(soloCup, soloEntry, duplicate, "mvp");
       await award(sharedCup, sharedEntry, duplicate, "defensive_mvp");
+      const referenceSeason = (
+        await request("POST", "/seasons", { name: "Reference Season" }, staffCookie, 201)
+      ).json();
+      await request(
+        "POST",
+        `/seasons/${referenceSeason.id}/awards`,
+        {
+          playerId: duplicate,
+          awardType: "season_mvp",
+          sourceUrl: "https://example.test/reference-season/mvp",
+        },
+        staffCookie,
+        201,
+      );
 
       await merge((service) => service.mergePlayers(kept, duplicate));
 
@@ -1610,6 +1626,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       ]);
       assert.deepEqual(await awardsOf(duplicate), []);
       assert.deepEqual(await awardsOf(kept), ["defensive_mvp", "mvp"]);
+      assert.deepEqual(
+        (await request("GET", `/player/${kept}/awards`))
+          .json()
+          .seasonAwards.map(({ awardType, season }) => [awardType, season.id]),
+        [["season_mvp", referenceSeason.id]],
+        "season awards follow the player merge",
+      );
       assert.deepEqual(await members(soloEntry), [kept]);
       assert.deepEqual(await members(sharedEntry), [kept], "no duplicate membership");
 

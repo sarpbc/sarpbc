@@ -8,6 +8,7 @@ import { ContractService } from "../../roster/application/contract.service";
 import { PlayerService } from "../../roster/application/player.service";
 import { TeamService } from "../../roster/application/team.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
+import { SeasonService } from "../../season/application/season.service";
 import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../tournament/application/match/match.service";
@@ -51,6 +52,7 @@ const SERVICES = {
   statsPlayerLinkService: StatsPlayerLinkService,
   manualGameService: ManualGameService,
   circuitService: CircuitService,
+  seasonService: SeasonService,
 };
 
 type Provided<Entry> =

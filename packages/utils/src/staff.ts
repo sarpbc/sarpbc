@@ -38,6 +38,7 @@ export function requiredPermission(change: RosterChange): StaffPermission {
       return "teams.manage";
     case "set_tournament_prizes":
     case "award_player":
+    case "award_season_player":
     case "set_event_streams":
     case "set_tournament_streams":
     case "set_match_streams":
