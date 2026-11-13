@@ -1202,6 +1202,50 @@
       }
     },
     "player": {
+      "compare": {
+        "title": "Compare Players",
+        "intro": "Career titles, series records, prize money, awards and teams side by side.",
+        "seoTitle": "Compare Players - sarpbc.org",
+        "seoTitleWithNames": "{a} vs {b} - Career Comparison - sarpbc.org",
+        "seoDescription": "Compare two Rocket League players' careers: titles, series records, prize money, awards and teams.",
+        "firstPlayer": "First player",
+        "secondPlayer": "Second player",
+        "searchPlaceholder": "Search a player…",
+        "searchHint": "Type a player name",
+        "choose": "Choose two players to compare their careers.",
+        "chooseHint": "Search for a player in each field above.",
+        "samePlayer": "A player cannot be compared with themselves.",
+        "samePlayerHint": "Choose a different player in one of the fields above.",
+        "notFound": "No player found for \"{slug}\".",
+        "notFoundHint": "Search for the player in the fields above.",
+        "loadFailed": "Could not load these players. Check your connection and try again.",
+        "error": "Could not load this comparison. Check your connection and try again.",
+        "tableCaption": "Career comparison between {a} and {b}",
+        "statistic": "Statistic",
+        "higher": "(higher)",
+        "present": "present",
+        "rows": {
+          "titles": "Titles",
+          "seriesWon": "Series won",
+          "seriesLost": "Series lost",
+          "headToHead": "Head-to-head series won",
+          "earnings": "Prize money",
+          "earningsIn": "Prize money ({currency})",
+          "awards": "Awards",
+          "teams": "Teams"
+        },
+        "sections": {
+          "summary": "Career",
+          "titles": "Titles",
+          "awards": "Awards",
+          "teams": "Teams"
+        },
+        "empty": {
+          "titles": "No titles",
+          "awards": "No awards",
+          "teams": "No recorded teams"
+        }
+      },
       "slug": {
         "failedToLoadPlayerData": "Failed to load player data",
         "playerNotFound": "Player Not Found",
@@ -1310,7 +1354,9 @@
         },
         "kicker": "Player",
         "staffCareer": "Staff career",
-        "viewStaffProfile": "View staff profile"
+        "viewStaffProfile": "View staff profile",
+        "compare": "Compare",
+        "compareCareers": "Compare careers"
       }
     },
     "staff": {

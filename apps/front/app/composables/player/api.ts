@@ -1,6 +1,7 @@
 import type { Tournament } from "~/types/tournament";
 import type {
   Player,
+  PlayerComparison,
   PlayerContract,
   PlayerProfileAward,
   PlayerSeasonAward,
@@ -125,4 +126,13 @@ export async function getPlayerTournaments(playerId: string): Promise<Tournament
   });
 
   return res.tournaments ?? [];
+}
+
+export async function getPlayerComparison(a: string, b: string): Promise<PlayerComparison> {
+  const res = await apiFetch<{ comparison: PlayerComparison }>("/player/compare", {
+    method: "GET",
+    params: { a, b },
+  });
+
+  return res.comparison;
 }

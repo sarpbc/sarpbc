@@ -1202,6 +1202,50 @@
       }
     },
     "player": {
+      "compare": {
+        "title": "Comparer des joueurs",
+        "intro": "Titres, bilan en séries, gains, distinctions et équipes, côte à côte.",
+        "seoTitle": "Comparer des joueurs - sarpbc.org",
+        "seoTitleWithNames": "{a} vs {b} - Comparaison de carrières - sarpbc.org",
+        "seoDescription": "Comparez la carrière de deux joueurs de Rocket League : titres, bilan en séries, gains, distinctions et équipes.",
+        "firstPlayer": "Premier joueur",
+        "secondPlayer": "Second joueur",
+        "searchPlaceholder": "Rechercher un joueur…",
+        "searchHint": "Saisissez le nom d'un joueur",
+        "choose": "Choisissez deux joueurs pour comparer leurs carrières.",
+        "chooseHint": "Recherchez un joueur dans chaque champ ci-dessus.",
+        "samePlayer": "Un joueur ne peut pas être comparé à lui-même.",
+        "samePlayerHint": "Choisissez un autre joueur dans l'un des champs ci-dessus.",
+        "notFound": "Aucun joueur trouvé pour « {slug} ».",
+        "notFoundHint": "Recherchez le joueur dans les champs ci-dessus.",
+        "loadFailed": "Impossible de charger ces joueurs. Vérifiez votre connexion et réessayez.",
+        "error": "Impossible de charger cette comparaison. Vérifiez votre connexion et réessayez.",
+        "tableCaption": "Comparaison des carrières de {a} et {b}",
+        "statistic": "Statistique",
+        "higher": "(plus élevé)",
+        "present": "aujourd'hui",
+        "rows": {
+          "titles": "Titres",
+          "seriesWon": "Séries gagnées",
+          "seriesLost": "Séries perdues",
+          "headToHead": "Séries gagnées en face-à-face",
+          "earnings": "Gains",
+          "earningsIn": "Gains ({currency})",
+          "awards": "Distinctions",
+          "teams": "Équipes"
+        },
+        "sections": {
+          "summary": "Carrière",
+          "titles": "Titres",
+          "awards": "Distinctions",
+          "teams": "Équipes"
+        },
+        "empty": {
+          "titles": "Aucun titre",
+          "awards": "Aucune distinction",
+          "teams": "Aucune équipe enregistrée"
+        }
+      },
       "slug": {
         "failedToLoadPlayerData": "Échec du chargement des données du joueur",
         "playerNotFound": "Joueur introuvable",
@@ -1310,7 +1354,9 @@
         },
         "kicker": "Joueur",
         "staffCareer": "Carrière staff",
-        "viewStaffProfile": "Voir la fiche staff"
+        "viewStaffProfile": "Voir la fiche staff",
+        "compare": "Comparer",
+        "compareCareers": "Comparer les carrières"
       }
     },
     "staff": {
