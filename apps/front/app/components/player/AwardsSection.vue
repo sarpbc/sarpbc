@@ -1,13 +1,20 @@
 <script lang="ts" setup>
-import type { PlayerAwardType, PlayerProfileAward } from "@sarpbc/types";
+import type {
+  PlayerAwardType,
+  PlayerProfileAward,
+  PlayerSeasonAward,
+  SeasonAwardType,
+} from "@sarpbc/types";
 import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
 
 const {
   awards,
+  seasonAwards,
   pending = false,
   hasError = false,
 } = defineProps<{
   awards: PlayerProfileAward[];
+  seasonAwards: PlayerSeasonAward[];
   pending?: boolean;
   hasError?: boolean;
 }>();
@@ -44,6 +51,33 @@ function awardTypeLabel(awardType: PlayerAwardType): string {
       return _exhaustive;
     }
   }
+}
+
+function seasonAwardTypeLabel(awardType: SeasonAwardType): string {
+  switch (awardType) {
+    case "season_mvp":
+      return t("page.player.slug.awards.seasonTypes.season_mvp");
+    case "regular_season_mvp":
+      return t("page.player.slug.awards.seasonTypes.regular_season_mvp");
+    case "regional_mvp":
+      return t("page.player.slug.awards.seasonTypes.regional_mvp");
+    default: {
+      const _exhaustive: never = awardType;
+      return _exhaustive;
+    }
+  }
+}
+
+function seasonMetaParts(award: PlayerSeasonAward): string[] {
+  const parts: string[] = [];
+  if (award.region) {
+    parts.push(award.region);
+  }
+  if (award.presentedBy) {
+    parts.push(t("page.player.slug.awards.presentedBy", { name: award.presentedBy }));
+  }
+  parts.push(t("page.player.slug.awards.officialSource"));
+  return parts;
 }
 
 function metaParts(award: PlayerProfileAward): string[] {
@@ -88,7 +122,32 @@ function metaParts(award: PlayerProfileAward): string[] {
         <SErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
       </SCard>
 
-      <SCard v-else-if="awards.length > 0">
+      <SCard v-else-if="awards.length > 0 || seasonAwards.length > 0">
+        <SListItem
+          v-for="award in seasonAwards"
+          :key="award.id"
+          :to="award.sourceUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="min-w-0"
+        >
+          <div class="flex w-full min-w-0 items-center gap-2">
+            <UIcon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-highlighted">
+                {{ seasonAwardTypeLabel(award.awardType) }} · {{ award.season.name }}
+              </p>
+              <p class="truncate text-xs text-muted">
+                {{ seasonMetaParts(award).join(" · ") }}
+              </p>
+            </div>
+            <UIcon
+              name="i-fluent-open-24-regular"
+              class="size-4 shrink-0 text-muted"
+              aria-hidden="true"
+            />
+          </div>
+        </SListItem>
         <SListItem
           v-for="award in awards"
           :key="award.id"
