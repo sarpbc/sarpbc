@@ -121,6 +121,11 @@ jobs:
       - name: Typecheck packages
         run: pnpm exec turbo run typecheck --filter="./packages/*"
 
+      - name: Stream score OCR tool
+        run: |
+          pnpm --filter @sarpbc/stream-score-ocr typecheck
+          pnpm --filter @sarpbc/stream-score-ocr test
+
       - name: Locale parity and package boundaries
         run: |
           pnpm check:i18n

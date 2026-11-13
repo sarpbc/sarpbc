@@ -19,6 +19,7 @@ import type {
   TournamentFormat,
   TournamentStatsGame,
 } from "@sarpbc/types";
+import type { StreamScoreSeriesResult } from "@sarpbc/utils";
 
 export async function getAllTournaments(query: {
   limit: number;
@@ -75,6 +76,16 @@ export async function setMatchWinner(matchId: string, winnerId: string): Promise
   await apiFetch(`/tournaments/matches/${matchId}/winner`, {
     method: "PUT",
     body: { winnerId },
+  });
+}
+
+export async function setMatchResult(
+  matchId: string,
+  results: StreamScoreSeriesResult[],
+): Promise<void> {
+  await apiFetch(`/tournaments/matches/${matchId}/result`, {
+    method: "PUT",
+    body: { results },
   });
 }
 

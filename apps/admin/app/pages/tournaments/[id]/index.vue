@@ -14,6 +14,8 @@ const vodsMatch = ref<TournamentMatchListItem | null>(null);
 const vodsOpen = ref(false);
 const lineupsMatch = ref<TournamentMatchListItem | null>(null);
 const lineupsOpen = ref(false);
+const streamScoreMatch = ref<TournamentMatchListItem | null>(null);
+const streamScoreOpen = ref(false);
 const streamsTarget = ref<{ path: string; title: string } | null>(null);
 const streamsOpen = ref(false);
 const viewershipTarget = ref<{ path: string; title: string } | null>(null);
@@ -112,6 +114,11 @@ async function handleRefresh() {
 function openVods(match: TournamentMatchListItem) {
   vodsMatch.value = match;
   vodsOpen.value = true;
+}
+
+function openStreamScore(match: TournamentMatchListItem) {
+  streamScoreMatch.value = match;
+  streamScoreOpen.value = true;
 }
 
 function openLineups(match: TournamentMatchListItem) {
@@ -290,6 +297,14 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 "
               />
               <UButton
+                v-if="tournament?.source === 'manual'"
+                size="xs"
+                variant="soft"
+                icon="i-fluent-scan-text-24-regular"
+                :label="$t('page.tournaments.streamScore.action')"
+                @click="openStreamScore(match)"
+              />
+              <UButton
                 v-if="editsBracket"
                 size="xs"
                 variant="soft"
@@ -353,6 +368,15 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       :match="lineupsMatch"
       :label="matchLabel(lineupsMatch)"
       :participants="tournament.participants ?? []"
+    />
+
+    <TournamentMatchStreamScore
+      v-if="streamScoreMatch"
+      :key="streamScoreMatch.id"
+      v-model:open="streamScoreOpen"
+      :match="streamScoreMatch"
+      :label="matchLabel(streamScoreMatch)"
+      @confirmed="refreshMatches()"
     />
 
     <TournamentMatchBracket

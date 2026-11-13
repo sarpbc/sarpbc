@@ -52,6 +52,12 @@ the project's architecture, design or delivery conventions.
 | `@sarpbc/composables` | Shared Nuxt composables               |
 | `@sarpbc/ui`          | Shared Vue components                 |
 
+## Tools
+
+| Path                     | Purpose                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `tools/stream-score-ocr` | Standalone OCR prototype that proposes series scores from organiser streams for staff to confirm |
+
 ### Package Rules
 
 - `types` and `utils` must remain framework-independent.

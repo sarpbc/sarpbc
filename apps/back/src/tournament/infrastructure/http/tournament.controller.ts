@@ -23,6 +23,7 @@ import {
   CreateEmptyBracketDto,
   CreateMatchDto,
   SetMatchBracketDto,
+  SetMatchResultDto,
   SetMatchVodsDto,
   SetMatchWinnerDto,
 } from "./dto/create-match.dto";
@@ -313,6 +314,20 @@ export class TournamentController {
     @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/result")
+  async setMatchResult(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchResultDto }) body: SetMatchResultDto,
+  ) {
+    const match = await this.matchService.updateMatch(matchId, {
+      status: "finished",
+      results: body.results,
+    });
     return { match: withPublicSlug(match) };
   }
 

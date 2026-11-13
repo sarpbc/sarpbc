@@ -517,6 +517,51 @@
         "saved": "Alignements enregistrés",
         "saveError": "Impossible d'enregistrer les alignements"
       },
+      "streamScore": {
+        "action": "Score du stream",
+        "title": "Score du stream · {match}",
+        "description": "Vérifiez un score lu sur le stream officiel par l'outil OCR, puis confirmez le score de la série. Rien n'est enregistré avant votre confirmation.",
+        "paste": "Proposition OCR",
+        "pasteHelp": "Collez le JSON produit par l'outil stream-score-ocr pour ce match.",
+        "needsTwoSides": "Ce match doit avoir exactement deux équipes avant de confirmer un score du stream.",
+        "blueSide": "Équipe côté bleu",
+        "chooseBlue": "Choisissez l'équipe qui jouait en bleu",
+        "bestOfMismatch": "La proposition a été lue en BO{read}, mais ce match est un BO{match}. Cochez pour confirmer que vous l'avez vérifié.",
+        "game": "Manche {number}",
+        "confidence": "{percent} % des lectures concordantes",
+        "unread": "Non lue",
+        "checked": "Vérifiée",
+        "noGames": "Aucune manche terminée n'a été lue.",
+        "series": "Vainqueur proposé : {winner}, {blue}–{orange} (bleu–orange)",
+        "source": "Lu depuis : {source}",
+        "officialSource": "La publication officielle de l'organisateur reste la référence. Comparez-la à cette proposition avant de confirmer.",
+        "saved": "La confirmation enregistre uniquement le score de la série et son vainqueur. Les scores des manches, leurs fins, les horaires et la source restent dans cet aperçu et ne sont pas enregistrés.",
+        "confirm": "Enregistrer le score : {blue} {blueScore}–{orangeScore} {orange}",
+        "confirmDisabled": "Enregistrer le score",
+        "confirmed": "Score de la série enregistré",
+        "side": {
+          "blue": "Bleu",
+          "orange": "Orange"
+        },
+        "endedBy": {
+          "regulation": "Terminée à 0:00",
+          "overtime": "Terminée en prolongation",
+          "reset": "Lue au coup d'envoi suivant",
+          "stream_end": "Lue à la fin du stream"
+        },
+        "errors": {
+          "invalid-json": "Ce texte n'est pas un JSON valide.",
+          "invalid-proposal": "Ce JSON n'est pas une proposition de score du stream.",
+          "inconsistent-series": "Le résultat de la série ne correspond pas à ses manches. Relancez l'outil plutôt que de modifier le fichier."
+        },
+        "blockers": {
+          "no-winner": "Aucun vainqueur de série n'a été lu. Saisissez le résultat à la main depuis la publication officielle.",
+          "unread-game": "Une manche n'a pas été lue. Saisissez le résultat à la main depuis la publication officielle.",
+          "unchecked-game": "Comparez chaque manche signalée à la publication officielle, puis cochez Vérifiée.",
+          "best-of-mismatch": "Confirmez l'écart de format avant d'enregistrer.",
+          "forbidden-source": "Liquipedia n'est pas une source acceptée. Lisez le score sur le stream officiel."
+        }
+      },
       "streams": {
         "tournamentAction": "Streams du Tournoi",
         "eventAction": "Streams de l’Événement",

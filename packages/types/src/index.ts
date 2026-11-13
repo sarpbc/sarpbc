@@ -173,3 +173,11 @@ export const TRANSFER_TYPES = [
   "loan",
   "staff",
 ] as const satisfies readonly TransferType[];
+export type {
+  StreamScoreFrameCounts,
+  StreamScoreGame,
+  StreamScoreGameEnding,
+  StreamScoreProposal,
+  StreamScoreSeries,
+  StreamScoreSide,
+} from "./stream-score";
