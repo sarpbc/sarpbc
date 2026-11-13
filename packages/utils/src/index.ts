@@ -187,3 +187,10 @@ export {
   SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   SEASON_NAME_MAX_LENGTH,
 } from "./season";
+export {
+  gameWinner,
+  parseStreamScoreProposal,
+  winsNeeded,
+  type ParsedStreamScoreProposal,
+  type StreamScoreProposalError,
+} from "./stream-score";
