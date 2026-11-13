@@ -2,7 +2,13 @@ import { toSlug } from "@sarpbc/utils";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
 import { Contract, Player, PlayerPhoto } from "../domain/roster";
-import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
+import type {
+  ContractWriter,
+  NationalityCount,
+  PhotoQueries,
+  PlayerQueries,
+  RosterTransaction,
+} from "./ports";
 import { requireTeam } from "./require-team";
 import type { DirectorySearchProps } from "./search-props";
 
@@ -166,6 +172,14 @@ export class PlayerService {
       }
       await players.delete(player);
     });
+  }
+
+  async nationalities(): Promise<NationalityCount[]> {
+    return this.players.nationalities();
+  }
+
+  async findByNationality(code: string): Promise<Player[]> {
+    return this.players.findByNationality(code);
   }
 
   async getRandomPlayer(): Promise<Player | null> {

@@ -5,6 +5,7 @@ export interface MatchListScopeFilters {
   /** User-facing tournament (League entity). */
   leagueId?: string;
   teamId?: string;
+  playerIds?: string[];
   /** Excludes start.gg matches and tournaments, whose data may not be redistributed. */
   redistributableOnly?: boolean;
 }

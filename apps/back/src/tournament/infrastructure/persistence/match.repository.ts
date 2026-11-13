@@ -19,7 +19,7 @@ interface MatchListFilter {
   beginAt?: { $gte?: Date; $lte?: Date };
   endAt?: null | { $ne: null };
   tournament?: MatchTournamentScopeFilter;
-  participants?: { team: { id: string } };
+  participants?: { team?: { id: string }; players?: { id: { $in: string[] } } };
   source?: { $ne: DataSource };
 }
 
@@ -205,7 +205,12 @@ export class MatchRepository extends EntityRepository<Match> {
     const query: MatchListFilter = { ...base };
     const tournamentFilter = this.buildTournamentFilter(scope);
     if (tournamentFilter) query.tournament = tournamentFilter;
-    if (scope.teamId) query.participants = { team: { id: scope.teamId } };
+    if (scope.teamId || scope.playerIds) {
+      query.participants = {
+        ...(scope.teamId && { team: { id: scope.teamId } }),
+        ...(scope.playerIds && { players: { id: { $in: scope.playerIds } } }),
+      };
+    }
     if (scope.redistributableOnly) {
       query.source = { $ne: "startgg" };
     }

@@ -8,6 +8,7 @@ import type { TeamAlias } from "../../domain/team-alias";
 import type {
   ContractQueries,
   ContractWriter,
+  NationalityCount,
   PhotoQueries,
   PhotoWriter,
   PlayerQueries,
@@ -29,6 +30,7 @@ import type { ContractMovementFilter, DirectorySearchProps } from "../../applica
 const playerOptions = { populate: ["team", "photos"] as const };
 const teamOptions = { populate: ["players", "players.team"] as const };
 const contractOptions = { populate: ["player", "player.team", "team"] as const };
+const NATIONALITY_CODE = "upper(trim(nationality))";
 
 /** A name search wins over a first-letter filter; both leave out merged duplicates. */
 function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
@@ -84,6 +86,31 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       ? await this.em.findOne(Row.Player, { id: rows[0].id }, playerOptions)
       : null;
     return row ? toPlayer(row) : null;
+  }
+
+  async nationalities(): Promise<NationalityCount[]> {
+    const rows: { code: string; players: string }[] = await this.em
+      .getConnection()
+      .execute(
+        `SELECT ${NATIONALITY_CODE} AS code, count(*) AS players FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} ~ '^[A-Z]{2}$' GROUP BY 1 ORDER BY 1`,
+      );
+    return rows.map(({ code, players }) => ({ code, players: Number(players) }));
+  }
+
+  async findByNationality(code: string) {
+    const rows: { id: string }[] = await this.em
+      .getConnection()
+      .execute(`SELECT id FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} = ?`, [
+        code,
+      ]);
+    if (rows.length === 0) return [];
+    return (
+      await this.em.find(
+        Row.Player,
+        { id: { $in: rows.map(({ id }) => id) } },
+        { populate: ["team"], orderBy: { name: "asc" } },
+      )
+    ).map(toPlayer);
   }
 
   async save(model: Player) {

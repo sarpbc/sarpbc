@@ -27,6 +27,7 @@ export type {
 export { CONTRACT_ROLES, STAFF_CONTRACT_ROLES } from "./contract";
 export type { ContractRole, PlayerContract, StaffContractRole, TeamContract } from "./contract";
 export type { Transfer, TransferType } from "./transfer";
+export type { CountryDetail, CountrySummary } from "./country";
 export type { League, LeagueInput } from "./league";
 export type {
   EventInput,

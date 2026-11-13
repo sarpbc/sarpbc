@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { verifyCountries } from "./countries.mjs";
 
 export async function verifyCompetitionSyncLookups({
   app,
@@ -245,4 +246,6 @@ export async function verifyRedistributableScope({
     [{ currency: "USD", amount: 1000 }],
     "redistributable earnings leave out start.gg tournaments",
   );
+
+  await verifyCountries({ request, staffCookie });
 }
