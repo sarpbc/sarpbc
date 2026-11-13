@@ -159,8 +159,9 @@ describe("SeasonService", () => {
     ).resolves.toMatchObject({ region: null });
   });
 
-  it("refuses Liquipedia and non-http sources", async () => {
+  it("refuses Liquipedia, non-http and overlong sources", async () => {
     for (const sourceUrl of [
+      `${ANNOUNCEMENT}?${"a".repeat(2048)}`,
       "https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2024",
       "ftp://rlesports.com/award",
     ])

@@ -1,5 +1,9 @@
 import type { SeasonAwardType } from "@sarpbc/types";
-import { SEASON_AWARD_PRESENTER_MAX_LENGTH, SEASON_AWARD_REGION_MAX_LENGTH } from "@sarpbc/utils";
+import {
+  SEASON_AWARD_PRESENTER_MAX_LENGTH,
+  SEASON_AWARD_REGION_MAX_LENGTH,
+  SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
+} from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 import { isLiquipediaHost } from "../../roster/domain/team-logo";
 
@@ -52,6 +56,10 @@ function parseRegion(awardType: SeasonAwardType, value: string | null | undefine
 }
 
 export function assertAwardSourceUrl(value: string): void {
+  if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
+    throw new InvalidInputError(
+      `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,
+    );
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     throw new InvalidInputError("The award source must be an http(s) URL.");
   if (isLiquipediaHost(new URL(value).hostname))

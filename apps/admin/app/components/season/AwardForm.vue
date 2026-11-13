@@ -6,7 +6,11 @@ import {
   type SeasonAwardInput,
   type SeasonAwardType,
 } from "@sarpbc/types";
-import { SEASON_AWARD_PRESENTER_MAX_LENGTH, SEASON_AWARD_REGION_MAX_LENGTH } from "@sarpbc/utils";
+import {
+  SEASON_AWARD_PRESENTER_MAX_LENGTH,
+  SEASON_AWARD_REGION_MAX_LENGTH,
+  SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
+} from "@sarpbc/utils";
 
 defineProps<{ loading: boolean }>();
 
@@ -187,6 +191,7 @@ defineExpose({ reset });
       <UInput
         v-model="sourceUrl"
         type="url"
+        :maxlength="SEASON_AWARD_SOURCE_URL_MAX_LENGTH"
         autocomplete="off"
         spellcheck="false"
         placeholder="https://"

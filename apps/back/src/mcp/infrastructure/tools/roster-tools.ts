@@ -25,6 +25,7 @@ import {
   MAX_VIEWERS,
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
   SEASON_AWARD_REGION_MAX_LENGTH,
+  SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   STREAM_CHANNEL_MAX_LENGTH,
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
@@ -688,9 +689,11 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           .max(SEASON_AWARD_PRESENTER_MAX_LENGTH)
           .optional()
           .describe("Partner presenting the award when the announcement names one (e.g. Ally)."),
-        sourceUrl: sourceUrlSchema.describe(
-          "Required official announcement of the award: an RLEsports, BLAST, organiser or league post or page. Never Liquipedia.",
-        ),
+        sourceUrl: sourceUrlSchema
+          .max(SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
+          .describe(
+            "Required official announcement of the award: an RLEsports, BLAST, organiser or league post or page. Never Liquipedia.",
+          ),
       },
       handler: ({ seasonId, playerId, awardType, region, presentedBy, sourceUrl }, user) =>
         propose(

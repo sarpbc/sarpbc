@@ -3,6 +3,7 @@ import { SEASON_AWARD_TYPES } from "@sarpbc/types";
 import {
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
   SEASON_AWARD_REGION_MAX_LENGTH,
+  SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   SEASON_NAME_MAX_LENGTH,
 } from "@sarpbc/utils";
 
@@ -19,6 +20,7 @@ export const CreateSeasonAwardDto = z.strictObject({
   sourceUrl: z
     .string()
     .trim()
+    .max(SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
     .url()
     .regex(/^https?:\/\//, "Use an http(s) URL"),
 });

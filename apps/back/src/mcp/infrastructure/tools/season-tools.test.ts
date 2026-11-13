@@ -69,6 +69,7 @@ describe("propose_season_award", () => {
     expect(accepts({})).toBe(true);
     expect(accepts({ sourceUrl: undefined })).toBe(false);
     expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/RLCS/2024" })).toBe(false);
+    expect(accepts({ sourceUrl: `${ANNOUNCEMENT}?${"a".repeat(2048)}` })).toBe(false);
     expect(accepts({ awardType: "mvp" })).toBe(false);
   });
 
