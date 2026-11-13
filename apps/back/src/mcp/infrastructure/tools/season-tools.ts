@@ -25,7 +25,8 @@ export function seasonTools({ seasonService }: SeasonToolServices): McpTool[] {
       handler: async ({ id }) => {
         const season = await seasonService.detail(id);
         return {
-          ...season,
+          id: season.id,
+          name: season.name,
           awards: season.awards.map((award) => ({
             ...award,
             player: { ...award.player, url: playerUrl(award.player.slug) },

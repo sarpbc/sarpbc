@@ -9,8 +9,9 @@ import type {
 import { SEASON_NAME_MAX_LENGTH } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { EMPTY_SEASON_FORMAT, parseSeasonFormat, parseSeasonSlug } from "../domain/season-archive";
 import { SEASON_AWARD_LABELS, parseSeasonAward } from "../domain/season-award";
-import type { SeasonStore } from "./ports";
+import type { SeasonRecord, SeasonStore } from "./ports";
 
 function cleanName(name: string): string {
   const trimmed = name.trim();
@@ -30,20 +31,38 @@ export class SeasonService {
 
   async detail(id: string): Promise<SeasonDetail> {
     const season = await this.require(id);
-    return { ...season, awards: await this.store.awards(season.id) };
+    const participants = await this.store.participants(season.id);
+    return { ...season, participants, awards: await this.store.awards(season.id) };
   }
 
-  async create(input: SeasonInput): Promise<SeasonSummary> {
-    const season: SeasonSummary = { id: v4(), name: await this.freeName(input.name, null) };
+  async create(input: SeasonInput): Promise<SeasonDetail> {
+    if (input.winnerTeamId)
+      throw new InvalidInputError("Add the winning team as a participant before naming it.");
+    const season: SeasonRecord = {
+      id: v4(),
+      name: await this.freeName(input.name, null),
+      slug: await this.freeSlug(input.slug ?? null, null),
+      format: input.format ? parseSeasonFormat(input.format) : EMPTY_SEASON_FORMAT,
+      winnerTeamId: null,
+    };
     await this.store.save(season);
-    return season;
+    return this.detail(season.id);
   }
 
-  async update(id: string, input: SeasonInput): Promise<SeasonSummary> {
+  async update(id: string, input: SeasonInput): Promise<SeasonDetail> {
     const current = await this.require(id);
-    const season: SeasonSummary = { ...current, name: await this.freeName(input.name, id) };
+    const season: SeasonRecord = {
+      ...current,
+      name: await this.freeName(input.name, id),
+      slug: input.slug === undefined ? current.slug : await this.freeSlug(input.slug, id),
+      format: input.format ? parseSeasonFormat(input.format) : current.format,
+      winnerTeamId:
+        input.winnerTeamId === undefined
+          ? current.winnerTeamId
+          : await this.participantTeam(id, input.winnerTeamId),
+    };
     await this.store.save(season);
-    return season;
+    return this.detail(id);
   }
 
   async remove(id: string): Promise<void> {
@@ -82,7 +101,7 @@ export class SeasonService {
       throw new NotFoundError(`Award with id "${awardId}" was not found for season "${seasonId}"`);
   }
 
-  private async require(id: string): Promise<SeasonSummary> {
+  private async require(id: string): Promise<SeasonRecord> {
     const season = await this.store.find(id);
     if (!season) throw new NotFoundError("Season not found");
     return season;
@@ -93,5 +112,19 @@ export class SeasonService {
     if (await this.store.nameTaken(name, exceptId))
       throw new ConflictError(`A season named "${name}" already exists.`);
     return name;
+  }
+
+  private async freeSlug(raw: string | null, exceptId: string | null): Promise<string | null> {
+    const slug = parseSeasonSlug(raw);
+    if (slug !== null && (await this.store.slugTaken(slug, exceptId)))
+      throw new ConflictError(`A season with the slug "${slug}" already exists.`);
+    return slug;
+  }
+
+  private async participantTeam(seasonId: string, teamId: string | null): Promise<string | null> {
+    if (teamId === null) return null;
+    if (!(await this.store.participantTaken(seasonId, teamId)))
+      throw new InvalidInputError("The winner must be one of the season's participants.");
+    return teamId;
   }
 }

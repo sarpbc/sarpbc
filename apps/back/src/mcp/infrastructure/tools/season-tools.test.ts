@@ -83,11 +83,35 @@ describe("propose_season_award", () => {
 });
 
 describe("get_season", () => {
-  it("returns the awards with a link to each player", async () => {
+  it("returns the awards with a link to each player and leaves the archive out", async () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
     const detail: SeasonDetail = {
       id: SEASON_ID,
       name: "RLCS 2024",
+      slug: "rlcs-2024",
+      format: { summary: "Splits and a World Championship.", phases: [] },
+      winnerTeamId: null,
+      participants: [
+        {
+          id: "participant-1",
+          team: { id: "t1", name: "Team", slug: "team", imageUrl: null, darkModeImageUrl: null },
+          pathNote: null,
+          path: [
+            {
+              id: "entry-1",
+              label: "Open qualifier",
+              result: "1st",
+              tournament: {
+                id: "s1",
+                name: "Open",
+                slug: "open",
+                source: "startgg",
+                event: { id: "e1", slug: "open", name: "Open" },
+              },
+            },
+          ],
+        },
+      ],
       awards: [
         {
           id: "award-1",
@@ -106,6 +130,7 @@ describe("get_season", () => {
 
     const body = parsed(await tool.run(user("journalist"), { id: SEASON_ID }));
 
+    expect(Object.keys(body).sort()).toEqual(["awards", "id", "name"]);
     expect(body.awards[0]).toMatchObject({
       presentedBy: "Ally",
       player: { slug: "exotiik", url: "https://sarpbc.test/player/exotiik" },

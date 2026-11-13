@@ -12,6 +12,7 @@ const breadcrumbItems = [{ label: t("page.seasons.title") }];
 
 const columns: TableColumn<SeasonSummary>[] = [
   { accessorKey: "name", header: t("page.seasons.form.name") },
+  { accessorKey: "slug", header: t("page.seasons.form.slug") },
   { id: "actions", header: "" },
 ];
 
@@ -92,6 +93,12 @@ async function create(input: SeasonInput) {
               <ULink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
               </ULink>
+            </template>
+            <template #slug-cell="{ row }">
+              <span v-if="row.original.slug" class="font-mono text-sm" translate="no">
+                {{ row.original.slug }}
+              </span>
+              <span v-else class="text-sm text-muted">{{ $t("page.seasons.unpublished") }}</span>
             </template>
             <template #actions-cell="{ row }">
               <UButton

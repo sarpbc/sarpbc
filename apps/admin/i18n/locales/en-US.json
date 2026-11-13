@@ -1298,7 +1298,7 @@
     },
     "seasons": {
       "title": "Seasons",
-      "description": "Seasons and leagues hold the official awards that no single tournament stage holds, such as a Season MVP or a Regional MVP. Create only seasons whose awards were officially announced.",
+      "description": "Seasons and leagues hold the official awards that no single tournament stage holds, such as a Season MVP or a Regional MVP, and the archive shown on the public seasons page: format, participants, their path and the winner.",
       "loading": "Loading…",
       "loadError": "Could not load seasons. Check your connection and try again.",
       "empty": {
@@ -1307,7 +1307,20 @@
       },
       "form": {
         "name": "Name",
-        "nameHint": "As the organiser names it, e.g. RLCS 2024."
+        "nameHint": "As the organiser names it, e.g. RLCS 2024.",
+        "slug": "Public slug",
+        "slugHint": "Publishes the archive at /seasons/<slug>, e.g. rlcs-2024. Leave empty to keep the season off the public site.",
+        "formatSummary": "Format",
+        "formatSummaryHint": "How the season was organised, in your own words. Optional.",
+        "phases": "Phases",
+        "phasesHint": "Optional. List the phases of the season in order, e.g. Open Qualifiers, Majors, World Championship.",
+        "phaseName": "Phase {number}",
+        "phaseDescription": "Description",
+        "removePhase": "Remove phase {number}",
+        "addPhase": "Add Phase",
+        "winner": "Winner",
+        "winnerHint": "Pick among the participants. Add the team below first.",
+        "noWinner": "No winner yet"
       },
       "create": {
         "button": "New Season",
@@ -1320,7 +1333,9 @@
         "title": "Season details",
         "submit": "Save Changes",
         "saved": "Season saved",
-        "failed": "Could not save the season."
+        "failed": "Could not save the season.",
+        "publishedAt": "Published at",
+        "unpublished": "Not published. Add a public slug to show this season on the site."
       },
       "delete": {
         "title": "Delete Season",
@@ -1357,6 +1372,51 @@
           "title": "Remove Award",
           "confirm": "Remove the {type} award of {name}?",
           "confirmButton": "Remove Award"
+        }
+      },
+      "unpublished": "Not published",
+      "participants": {
+        "title": "Participants",
+        "hint": "Teams that took part in the season, picked from existing teams. Attach each team's path through the season below it.",
+        "searchTeam": "Search teams to add",
+        "noTeams": "No matching teams.",
+        "empty": "No participants yet.",
+        "added": "{name} added",
+        "addFailed": "Could not add the team.",
+        "winner": "Winner",
+        "remove": {
+          "title": "Remove Participant",
+          "label": "Remove {name}",
+          "confirm": "Remove {name} and its path from this season?",
+          "confirmButton": "Remove Participant"
+        }
+      },
+      "path": {
+        "title": "Path",
+        "empty": "No results recorded yet.",
+        "note": "Path note",
+        "noteHint": "Optional short summary of the team's season.",
+        "saveNote": "Save Note",
+        "noteSaved": "Path note saved",
+        "noteFailed": "Could not save the path note.",
+        "label": "Event",
+        "labelPlaceholder": "e.g. Spring Major",
+        "result": "Result",
+        "resultPlaceholder": "e.g. 1st, Top 8, Qualified",
+        "link": "Link Tournament",
+        "unlink": "Remove tournament link",
+        "linked": "Linked to {name}",
+        "add": "Add Result",
+        "addFailed": "Could not add the result.",
+        "startgg": "start.gg · not shown on the public site",
+        "picker": {
+          "title": "Link Tournament",
+          "hint": "Search for an existing tournament stage this result comes from."
+        },
+        "remove": {
+          "title": "Remove Result",
+          "confirm": "Remove {label} from this path?",
+          "confirmButton": "Remove Result"
         }
       }
     }

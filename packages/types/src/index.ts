@@ -149,12 +149,25 @@ export type {
 export { SEASON_AWARD_TYPES } from "./season";
 export type {
   PlayerSeasonAward,
+  SeasonArchive,
+  SeasonArchiveAward,
+  SeasonArchiveParticipant,
+  SeasonArchivePathEntry,
+  SeasonArchiveSummary,
   SeasonAward,
   SeasonAwardInput,
   SeasonAwardType,
   SeasonDetail,
+  SeasonFormat,
+  SeasonFormatPhase,
   SeasonInput,
+  SeasonParticipant,
+  SeasonParticipantInput,
+  SeasonPathEntry,
+  SeasonPathEntryInput,
+  SeasonPathTournament,
   SeasonSummary,
+  SeasonTeam,
 } from "./season";
 export { ROSTER_PROPOSAL_STATUSES } from "./roster-change";
 export type {

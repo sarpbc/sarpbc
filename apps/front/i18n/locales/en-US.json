@@ -113,6 +113,7 @@
     "results": "Results",
     "transfers": "Transfers",
     "circuits": "Circuits",
+    "seasons": "Seasons",
     "formerly": "Formerly {name}"
   },
   "components": {
@@ -1949,6 +1950,45 @@
           "awaitingResults": "Awaiting results"
         },
         "regionalExplainer": "This is the {region} circuit. At events open to every region, such as Majors, only teams from {region} earn points."
+      }
+    },
+    "seasons": {
+      "index": {
+        "title": "RLCS Seasons",
+        "seoTitle": "RLCS Season Archives {'|'} sarpbc.org",
+        "description": "Browse RLCS season archives on sarpbc.org: the format of each era, the winner, the participating teams and their path through the season.",
+        "error": "Couldn't load the seasons. Check your connection and try again.",
+        "empty": "No seasons yet.",
+        "emptyHint": "Seasons appear here once sarpbc.org staff publish them.",
+        "winner": "Winner: {name}",
+        "noWinner": "No winner recorded yet"
+      },
+      "archive": {
+        "notFound": "This season does not exist.",
+        "error": "Couldn't load the season. Check your connection and try again.",
+        "allSeasons": "All Seasons",
+        "seoTitle": "{name} Archive {'|'} sarpbc.org",
+        "seoDescription": "{name} on sarpbc.org: the format, the winner, the participating teams and their path through the season.",
+        "winner": {
+          "title": "Winner",
+          "empty": "No winner recorded yet."
+        },
+        "format": {
+          "title": "Format",
+          "empty": "The format of this season has not been documented yet."
+        },
+        "participants": {
+          "title": "Participants",
+          "empty": "No participants recorded yet.",
+          "emptyHint": "Teams appear here once sarpbc.org staff add them.",
+          "winner": "Winner",
+          "pathEmpty": "No results recorded yet."
+        },
+        "awards": {
+          "title": "Awards",
+          "presentedBy": "Presented by {name}",
+          "officialSource": "Official announcement"
+        }
       }
     }
   }

@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import type { SeasonAward, SeasonAwardInput, SeasonInput } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, seasonArchivePath } from "@sarpbc/utils";
 
 const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
+const config = useRuntimeConfig();
 
 const seasonId = computed(() => String(route.params.id));
 
@@ -26,6 +27,12 @@ const breadcrumbItems = computed(() => [
   { label: season.value?.name ?? seasonId.value },
 ]);
 
+const publicUrl = computed(() =>
+  season.value?.slug
+    ? `${config.public.publicSiteUrl}${seasonArchivePath(season.value.slug)}`
+    : null,
+);
+
 const isSaving = ref(false);
 const isAdding = ref(false);
 const awardToRemove = ref<SeasonAward | null>(null);
@@ -39,8 +46,7 @@ function awardLabel(award: SeasonAward): string {
 async function save(input: SeasonInput) {
   isSaving.value = true;
   try {
-    const summary = await updateSeason(seasonId.value, input);
-    if (season.value) season.value = { ...season.value, ...summary };
+    season.value = await updateSeason(seasonId.value, input);
     toast.add({ title: t("page.seasons.edit.saved"), color: "success" });
   } catch (saveError) {
     reportError(saveError, t("page.seasons.edit.failed"));
@@ -87,6 +93,15 @@ async function addAward(input: SeasonAwardInput) {
       <div v-else class="flex flex-col gap-6">
         <section class="flex max-w-xl flex-col gap-3">
           <h2 class="text-lg font-semibold">{{ $t("page.seasons.edit.title") }}</h2>
+          <p class="text-sm text-muted">
+            <template v-if="publicUrl">
+              {{ $t("page.seasons.edit.publishedAt") }}
+              <ULink :to="publicUrl" external target="_blank" class="text-primary hover:underline">
+                {{ publicUrl }}
+              </ULink>
+            </template>
+            <template v-else>{{ $t("page.seasons.edit.unpublished") }}</template>
+          </p>
           <SeasonForm
             :key="season.id"
             :season="season"
@@ -95,6 +110,13 @@ async function addAward(input: SeasonAwardInput) {
             @submit="save"
           />
         </section>
+
+        <SeasonParticipants
+          :season-id="season.id"
+          :participants="season.participants"
+          :winner-team-id="season.winnerTeamId"
+          @changed="refresh()"
+        />
 
         <section class="flex flex-col gap-3 border border-default p-4">
           <div class="flex flex-col gap-1">

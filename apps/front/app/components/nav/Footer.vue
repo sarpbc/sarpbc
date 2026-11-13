@@ -31,6 +31,7 @@ const columns = computed<FooterColumn[]>(() => [
       { label: t("general.results"), to: localePath("/results") },
       { label: t("general.tournaments"), to: localePath("/tournaments") },
       { label: t("general.circuits"), to: localePath("/circuits") },
+      { label: t("general.seasons"), to: localePath("/seasons") },
       { label: t("general.teams"), to: localePath("/team") },
       { label: t("general.players"), to: localePath("/player") },
       { label: t("general.transfers"), to: localePath("/transfers") },

@@ -1,7 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { describe, expect, it, vi } from "vitest";
 import { SeasonRosterReferences } from "./roster-references.mover";
-import { SeasonAward } from "./season.entities";
+import { Season, SeasonAward, SeasonParticipant, SeasonPathEntry } from "./season.entities";
 
 describe("SeasonRosterReferences.movePlayer", () => {
   function award(id: string, playerId: string, seasonId: string, region: string | null) {
@@ -58,6 +58,55 @@ describe("SeasonRosterReferences.movePlayer", () => {
       SeasonAward,
       { player: "zen-dup" },
       { player: "zen" },
+    );
+  });
+});
+
+describe("SeasonRosterReferences.moveTeam", () => {
+  function participant(id: string, teamId: string, seasonId: string, pathNote: string | null) {
+    return { id, team: { id: teamId }, season: { id: seasonId }, pathNote };
+  }
+
+  function mover(participants: ReturnType<typeof participant>[]) {
+    const find = vi.fn().mockResolvedValue(participants);
+    const nativeDelete = vi.fn();
+    const nativeUpdate = vi.fn();
+    const references = new SeasonRosterReferences(
+      Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
+    );
+    return { references, nativeDelete, nativeUpdate };
+  }
+
+  it("moves the winner, folds a shared season into the kept team and reassigns the rest", async () => {
+    const { references, nativeDelete, nativeUpdate } = mover([
+      participant("kept-2024", "vitality", "2024", null),
+      participant("dup-2024", "vitality-dup", "2024", "Won the Major."),
+      participant("dup-2023", "vitality-dup", "2023", null),
+    ]);
+
+    await references.moveTeam("vitality-dup", "vitality");
+
+    expect(nativeUpdate).toHaveBeenCalledWith(
+      Season,
+      { winnerTeam: "vitality-dup" },
+      { winnerTeam: "vitality" },
+    );
+    expect(nativeUpdate).toHaveBeenCalledWith(
+      SeasonPathEntry,
+      { participant: "dup-2024" },
+      { participant: "kept-2024" },
+    );
+    expect(nativeUpdate).toHaveBeenCalledWith(
+      SeasonParticipant,
+      { id: "kept-2024" },
+      { pathNote: "Won the Major." },
+    );
+    expect(nativeDelete).toHaveBeenCalledTimes(1);
+    expect(nativeDelete).toHaveBeenCalledWith(SeasonParticipant, { id: "dup-2024" });
+    expect(nativeUpdate).toHaveBeenLastCalledWith(
+      SeasonParticipant,
+      { team: "vitality-dup" },
+      { team: "vitality" },
     );
   });
 });

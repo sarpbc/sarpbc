@@ -115,3 +115,90 @@ export async function verifySeasonAwards({
   await request("DELETE", `/seasons/${season.id}`, undefined, staffCookie, 204);
   assert.deepEqual((await request("GET", `/player/${player.id}/awards`)).json().seasonAwards, []);
 }
+
+export async function verifySeasonArchives({
+  request,
+  staffCookie,
+  memberCookie,
+  team,
+  otherTeam,
+  tournament,
+  startggCupId,
+}) {
+  const slug = "fake-archive-2026";
+  await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
+  const season = (
+    await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, staffCookie, 201)
+  ).json();
+  assert.equal(season.slug, slug);
+  await request("POST", "/seasons", { name: "Fake Archive copy", slug }, staffCookie, 409);
+  await request("GET", "/season-archives/fake-archive-unknown", undefined, undefined, 404);
+  assert.deepEqual((await request("GET", `/season-archives/${slug}`)).json(), {
+    slug,
+    name: "Fake Archive 2026",
+    format: { summary: null, phases: [] },
+    winner: null,
+    participants: [],
+    awards: [],
+  });
+
+  const participantsUrl = `/seasons/${season.id}/participants`;
+  await request("POST", participantsUrl, { teamId: team.id }, memberCookie, 403);
+  const winner = (
+    await request(
+      "POST",
+      participantsUrl,
+      { teamId: team.id, pathNote: "Fake path." },
+      staffCookie,
+      201,
+    )
+  ).json().participant;
+  await request("POST", participantsUrl, { teamId: team.id }, staffCookie, 409);
+  await request("POST", participantsUrl, { teamId: otherTeam.id }, staffCookie, 201);
+
+  const pathUrl = `${participantsUrl}/${winner.id}/path`;
+  for (const entry of [
+    { label: "Fake Open", result: "Qualified", tournamentId: startggCupId },
+    { label: "Fake Major", result: "1st", tournamentId: tournament.id },
+    { label: "Fake Regional", result: "Top 4" },
+  ])
+    await request("POST", pathUrl, entry, staffCookie, 201);
+
+  await request(
+    "PATCH",
+    `/seasons/${season.id}`,
+    {
+      name: "Fake Archive 2026",
+      winnerTeamId: team.id,
+      format: { summary: "Fake format.", phases: [{ name: "Fake splits", description: null }] },
+    },
+    staffCookie,
+    200,
+  );
+  await request("DELETE", `${participantsUrl}/${winner.id}`, undefined, staffCookie, 409);
+
+  const detail = (await request("GET", `/seasons/${season.id}`, undefined, staffCookie)).json();
+  const staffPath = detail.participants.find(({ id }) => id === winner.id).path;
+  assert.deepEqual(
+    staffPath.map(({ tournament: linked }) => linked?.source ?? null),
+    ["startgg", tournament.source, null],
+  );
+
+  const archive = (await request("GET", `/season-archives/${slug}`)).json();
+  assert.equal(archive.winner.id, team.id);
+  assert.deepEqual(archive.format.phases, [{ name: "Fake splits", description: null }]);
+  const publicPath = archive.participants.find(({ team: { id } }) => id === team.id).path;
+  assert.deepEqual(
+    publicPath.map(({ label }) => label),
+    ["Fake Major", "Fake Regional"],
+  );
+  assert(!JSON.stringify(archive).includes(startggCupId));
+  assert(
+    (await request("GET", "/season-archives"))
+      .json()
+      .seasons.some((summary) => summary.slug === slug && summary.winner?.id === team.id),
+  );
+
+  await request("DELETE", `/seasons/${season.id}`, undefined, staffCookie, 204);
+  await request("GET", `/season-archives/${slug}`, undefined, undefined, 404);
+}

@@ -1,92 +1,120 @@
-import type { SeasonAward, SeasonSummary } from "@sarpbc/types";
+import type { SeasonDetail } from "@sarpbc/types";
 import { beforeEach, describe, expect, it } from "vitest";
+import { memorySeasonStore } from "../../../test/season-store.memory";
 import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import type { SeasonAwardFields } from "../domain/season-award";
-import type { SeasonAwardPlayer, SeasonStore } from "./ports";
+import { SeasonArchiveService } from "./season-archive.service";
 import { SeasonService } from "./season.service";
 
 const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 
-interface StoredAward extends SeasonAward {
-  seasonId: string;
-}
-
-function memoryStore() {
-  const seasons = new Map<string, SeasonSummary>();
-  const awards: StoredAward[] = [];
-  const players = new Map<string, SeasonAwardPlayer>([
-    ["zen", { id: "zen", name: "zen", mergedIntoId: null }],
-    ["vatira", { id: "vatira", name: "Vatira", mergedIntoId: null }],
-    ["old-zen", { id: "old-zen", name: "zen", mergedIntoId: "zen" }],
-  ]);
-  const strip = (award: StoredAward): SeasonAward => ({
-    id: award.id,
-    awardType: award.awardType,
-    region: award.region,
-    presentedBy: award.presentedBy,
-    sourceUrl: award.sourceUrl,
-    player: award.player,
-  });
-  const store: SeasonStore = {
-    list: async () => [...seasons.values()],
-    find: async (id) => seasons.get(id) ?? null,
-    nameTaken: async (name, exceptId) =>
-      [...seasons.values()].some((season) => season.name === name && season.id !== exceptId),
-    save: async (season) => {
-      seasons.set(season.id, season);
-    },
-    remove: async (id) => seasons.delete(id),
-    awards: async (seasonId) => awards.filter((award) => award.seasonId === seasonId).map(strip),
-    awardsOfPlayer: async (playerId) =>
-      awards
-        .filter((award) => award.player.id === playerId)
-        .flatMap((award) => {
-          const season = seasons.get(award.seasonId);
-          const { id, awardType, region, presentedBy, sourceUrl } = award;
-          return season ? [{ id, awardType, region, presentedBy, sourceUrl, season }] : [];
-        }),
-    player: async (id) => players.get(id) ?? null,
-    awardTaken: async (seasonId, { awardType, region }) =>
-      awards.some(
-        (award) =>
-          award.seasonId === seasonId && award.awardType === awardType && award.region === region,
-      ),
-    saveAward: async (seasonId, playerId, fields: SeasonAwardFields) => {
-      const award: StoredAward = {
-        ...fields,
-        id: `award-${awards.length + 1}`,
-        seasonId,
-        player: { id: playerId, name: playerId, slug: playerId },
-      };
-      awards.push(award);
-      return strip(award);
-    },
-    removeAward: async (seasonId, awardId) => {
-      const index = awards.findIndex(
-        (award) => award.seasonId === seasonId && award.id === awardId,
-      );
-      if (index < 0) return false;
-      awards.splice(index, 1);
-      return true;
-    },
-  };
-  return { store, awards };
-}
-
 describe("SeasonService", () => {
   let service: SeasonService;
-  let season: SeasonSummary;
+  let archives: SeasonArchiveService;
+  let season: SeasonDetail;
 
   beforeEach(async () => {
-    service = new SeasonService(memoryStore().store);
+    const { store } = memorySeasonStore();
+    service = new SeasonService(store);
+    archives = new SeasonArchiveService(store);
     season = await service.create({ name: "  RLCS 2024 " });
   });
 
-  it("creates a season with a trimmed, unique name", async () => {
-    expect(season.name).toBe("RLCS 2024");
+  it("creates a season with a trimmed, unique name and an empty archive", async () => {
+    expect(season).toMatchObject({
+      name: "RLCS 2024",
+      slug: null,
+      format: { summary: null, phases: [] },
+      winnerTeamId: null,
+      participants: [],
+      awards: [],
+    });
     await expect(service.create({ name: "RLCS 2024" })).rejects.toBeInstanceOf(ConflictError);
     await expect(service.create({ name: "   " })).rejects.toBeInstanceOf(InvalidInputError);
     expect(await service.update(season.id, { name: "RLCS 2024" })).toEqual(season);
+  });
+
+  it("normalises the public slug and keeps it unique across seasons", async () => {
+    const published = await service.update(season.id, { name: "RLCS 2024", slug: " RLCS 2024 " });
+    expect(published.slug).toBe("rlcs-2024");
+    expect(await service.update(season.id, { name: "RLCS 2024 World" })).toMatchObject({
+      slug: "rlcs-2024",
+    });
+
+    await expect(
+      service.create({ name: "RLCS 2024 copy", slug: "rlcs-2024" }),
+    ).rejects.toBeInstanceOf(ConflictError);
+    const other = await service.create({ name: "RLCS 2025", slug: "rlcs-2025" });
+    await expect(
+      service.update(other.id, { name: "RLCS 2025", slug: "RLCS-2024" }),
+    ).rejects.toThrow('A season with the slug "rlcs-2024" already exists.');
+
+    for (const slug of ["!!!", "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b"])
+      await expect(service.update(other.id, { name: "RLCS 2025", slug })).rejects.toBeInstanceOf(
+        InvalidInputError,
+      );
+    expect(await service.update(other.id, { name: "RLCS 2025", slug: " " })).toMatchObject({
+      slug: null,
+    });
+  });
+
+  it("stores a trimmed format with ordered phases", async () => {
+    const updated = await service.update(season.id, {
+      name: "RLCS 2024",
+      format: {
+        summary: "  Open qualifiers feed two Majors and a World Championship. ",
+        phases: [
+          { name: " Open Qualifiers ", description: " " },
+          { name: "World Championship", description: "Top teams from every region." },
+        ],
+      },
+    });
+    expect(updated.format).toEqual({
+      summary: "Open qualifiers feed two Majors and a World Championship.",
+      phases: [
+        { name: "Open Qualifiers", description: null },
+        { name: "World Championship", description: "Top teams from every region." },
+      ],
+    });
+    await expect(
+      service.update(season.id, {
+        name: "RLCS 2024",
+        format: { summary: null, phases: [{ name: "  ", description: null }] },
+      }),
+    ).rejects.toThrow("The phase name is required.");
+    await expect(
+      service.update(season.id, {
+        name: "RLCS 2024",
+        format: {
+          summary: null,
+          phases: Array.from({ length: 13 }, (_, index) => ({
+            name: `Phase ${index}`,
+            description: null,
+          })),
+        },
+      }),
+    ).rejects.toThrow("at most 12 phases");
+  });
+
+  it("names a winner only among the participants", async () => {
+    await expect(
+      service.create({ name: "RLCS 2025", winnerTeamId: "vitality" }),
+    ).rejects.toBeInstanceOf(InvalidInputError);
+    await expect(
+      service.update(season.id, { name: "RLCS 2024", winnerTeamId: "vitality" }),
+    ).rejects.toThrow("The winner must be one of the season's participants.");
+
+    await archives.addParticipant(season.id, { teamId: "vitality" });
+    const crowned = await service.update(season.id, {
+      name: "RLCS 2024",
+      winnerTeamId: "vitality",
+    });
+    expect(crowned.winnerTeamId).toBe("vitality");
+    expect(await service.update(season.id, { name: "RLCS 2024" })).toMatchObject({
+      winnerTeamId: "vitality",
+    });
+    expect(
+      await service.update(season.id, { name: "RLCS 2024", winnerTeamId: null }),
+    ).toMatchObject({ winnerTeamId: null });
   });
 
   it("records a Season MVP presented by a partner", async () => {
@@ -104,7 +132,10 @@ describe("SeasonService", () => {
       sourceUrl: ANNOUNCEMENT,
     });
     expect(await service.awardsOfPlayer("zen")).toEqual([
-      expect.objectContaining({ id: award.id, season }),
+      expect.objectContaining({
+        id: award.id,
+        season: { id: season.id, name: season.name, slug: null },
+      }),
     ]);
   });
 
