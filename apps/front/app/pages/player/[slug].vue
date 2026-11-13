@@ -225,6 +225,20 @@ setPageSeo({
                   </SLink>
                 </dd>
               </div>
+              <div
+                class="flex h-row min-w-0 flex-row items-center justify-between gap-3 border-t border-separator"
+              >
+                <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.compare") }}</dt>
+                <dd class="min-w-0">
+                  <SLink
+                    :to="$localePath({ path: '/player/compare', query: { a: currentPlayer.slug } })"
+                    variant="inline"
+                    class="text-sm font-medium"
+                  >
+                    {{ t("page.player.slug.compareCareers") }}
+                  </SLink>
+                </dd>
+              </div>
             </dl>
           </div>
         </div>
