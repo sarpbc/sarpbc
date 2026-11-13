@@ -5,6 +5,7 @@ import {
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
   getApiErrorMessage,
+  isLiquipediaSourceHost,
 } from "@sarpbc/utils";
 
 export interface ScaleEditorTarget {
@@ -26,8 +27,6 @@ interface ValidTier {
   to: number;
   points: number;
 }
-
-const BLOCKED_SOURCE_HOST = "liquipedia.net";
 
 const props = defineProps<{ circuitId: string }>();
 const target = defineModel<ScaleEditorTarget | null>("target", { required: true });
@@ -110,8 +109,7 @@ const sourceUrlError = computed<string | undefined>(() => {
   if (url === null || (url.protocol !== "https:" && url.protocol !== "http:")) {
     return t("page.circuits.scale.errors.sourceUrl");
   }
-  const host = url.hostname.toLowerCase();
-  return host === BLOCKED_SOURCE_HOST || host.endsWith(`.${BLOCKED_SOURCE_HOST}`)
+  return isLiquipediaSourceHost(url.hostname)
     ? t("page.circuits.scale.errors.sourceBlocked")
     : undefined;
 });

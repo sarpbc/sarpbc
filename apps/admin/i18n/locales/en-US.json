@@ -1148,7 +1148,13 @@
         "name": "Name",
         "slug": "Slug",
         "slugHint": "Leave empty to generate it from the name.",
+        "season": "Season",
+        "seasonHint": "Year of the circuit season, as stated in the official rules.",
+        "region": "Region",
+        "regionHint": "For example Worldwide, EU or NA. Leave empty if the rules name none.",
         "description": "Description",
+        "sourceUrl": "Official rules",
+        "sourceUrlHint": "Link to the official circuit rules or announcement. Never Liquipedia.",
         "qualificationSpots": "Qualification spots",
         "qualificationSpotsHint": "Top places highlighted in the standings."
       },

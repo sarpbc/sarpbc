@@ -1148,7 +1148,13 @@
         "name": "Nom",
         "slug": "Slug",
         "slugHint": "Laissez vide pour le générer à partir du nom.",
+        "season": "Saison",
+        "seasonHint": "Année de la saison du circuit, telle qu’indiquée dans le règlement officiel.",
+        "region": "Région",
+        "regionHint": "Par exemple Monde, EU ou NA. Laissez vide si le règlement n’en précise aucune.",
         "description": "Description",
+        "sourceUrl": "Règlement officiel",
+        "sourceUrlHint": "Lien vers le règlement ou l’annonce officielle du circuit. Jamais Liquipedia.",
         "qualificationSpots": "Places de qualification",
         "qualificationSpotsHint": "Nombre de premières places mises en avant dans le classement."
       },

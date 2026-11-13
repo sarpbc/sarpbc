@@ -6,6 +6,8 @@ import type {
   TournamentEventRef,
 } from "@sarpbc/types";
 import { isUuid } from "../../../common/domain/entity-ref";
+import { ConflictError } from "../../../common/domain/errors";
+import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import {
   Tournament,
   TournamentParticipant,
@@ -19,7 +21,10 @@ function toSummary(row: Circuit): CircuitSummary {
     id: row.id,
     slug: row.slug,
     name: row.name,
+    season: row.season,
+    region: row.region,
     description: row.description,
+    sourceUrl: row.sourceUrl,
     qualificationSpots: row.qualificationSpots,
   };
 }
@@ -86,10 +91,22 @@ export class CircuitPersistence implements CircuitStore {
     return (await this.em.count(Circuit, filter)) > 0;
   }
 
+  async withSeason(season: number | null) {
+    return (await this.em.find(Circuit, { season })).map(toSummary);
+  }
+
   async save(circuit: CircuitSummary) {
     const row = (await this.em.findOne(Circuit, { id: circuit.id })) ?? new Circuit();
     Object.assign(row, circuit);
-    await this.em.persist(row).flush();
+    try {
+      await this.em.persist(row).flush();
+    } catch (error) {
+      if (isUniqueViolation(error))
+        throw new ConflictError(
+          `A circuit with the slug "${circuit.slug}", or named "${circuit.name}" for this season and region, already exists.`,
+        );
+      throw error;
+    }
   }
 
   async remove(id: string) {

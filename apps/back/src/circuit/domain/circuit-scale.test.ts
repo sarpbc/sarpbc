@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
-import { assertScaleSourceUrl, parseCircuitScale, pointsForPlacement } from "./circuit-scale";
+import { assertCircuitSourceUrl, parseCircuitScale, pointsForPlacement } from "./circuit-scale";
 
 describe("parseCircuitScale", () => {
   it("orders tiers by placement", () => {
@@ -43,12 +43,12 @@ describe("pointsForPlacement", () => {
   });
 });
 
-describe("assertScaleSourceUrl", () => {
+describe("assertCircuitSourceUrl", () => {
   it("accepts an http(s) source and refuses other values and Liquipedia", () => {
-    expect(() => assertScaleSourceUrl("https://example.org/rules")).not.toThrow();
-    expect(() => assertScaleSourceUrl("")).toThrow(InvalidInputError);
-    expect(() => assertScaleSourceUrl("ftp://example.org/rules")).toThrow(InvalidInputError);
-    expect(() => assertScaleSourceUrl("https://liquipedia.net/rocketleague/x")).toThrow(
+    expect(() => assertCircuitSourceUrl("https://example.org/rules")).not.toThrow();
+    expect(() => assertCircuitSourceUrl("")).toThrow(InvalidInputError);
+    expect(() => assertCircuitSourceUrl("ftp://example.org/rules")).toThrow(InvalidInputError);
+    expect(() => assertCircuitSourceUrl("https://liquipedia.net/rocketleague/x")).toThrow(
       "Liquipedia",
     );
   });
