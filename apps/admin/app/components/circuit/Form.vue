@@ -7,6 +7,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
+  isLiquipediaSourceHost,
 } from "@sarpbc/utils";
 
 const props = defineProps<{
@@ -16,6 +17,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ submit: [input: CircuitInput] }>();
+
+const { t } = useI18n();
 
 const name = ref(props.circuit?.name ?? "");
 const slug = ref(props.circuit?.slug ?? "");
@@ -29,22 +32,36 @@ function inRange(value: number | null, min: number, max: number): boolean {
   return value === null || (Number.isInteger(value) && value >= min && value <= max);
 }
 
+const sourceUrlError = computed<string | undefined>(() => {
+  const value = sourceUrl.value.trim();
+  if (value === "") return undefined;
+  const url = URL.parse(value);
+  if (url === null || (url.protocol !== "https:" && url.protocol !== "http:"))
+    return t("page.circuits.scale.errors.sourceUrl");
+  return isLiquipediaSourceHost(url.hostname)
+    ? t("page.circuits.scale.errors.sourceBlocked")
+    : undefined;
+});
+
 const isValid = computed(
   () =>
     name.value.trim().length > 0 &&
+    season.value !== null &&
     inRange(season.value, MIN_CIRCUIT_SEASON, MAX_CIRCUIT_SEASON) &&
     inRange(qualificationSpots.value, 1, MAX_CIRCUIT_QUALIFICATION_SPOTS) &&
-    (!sourceUrl.value.trim() || /^https?:\/\//.test(sourceUrl.value.trim())),
+    sourceUrl.value.trim() !== "" &&
+    sourceUrlError.value === undefined,
 );
 
 function submit() {
-  if (!isValid.value) return;
+  const seasonValue = season.value;
+  if (!isValid.value || seasonValue === null) return;
   const input: CircuitInput = {
     name: name.value.trim(),
-    season: season.value,
+    season: seasonValue,
     region: region.value.trim() || null,
     description: description.value.trim() || null,
-    sourceUrl: sourceUrl.value.trim() || null,
+    sourceUrl: sourceUrl.value.trim(),
     qualificationSpots: qualificationSpots.value,
   };
   const trimmedSlug = slug.value.trim();
@@ -69,6 +86,7 @@ function submit() {
       :label="$t('page.circuits.form.season')"
       :hint="$t('page.circuits.form.seasonHint')"
       name="season"
+      required
     >
       <UInputNumber
         v-model="season"
@@ -97,9 +115,18 @@ function submit() {
     <UFormField
       :label="$t('page.circuits.form.sourceUrl')"
       :hint="$t('page.circuits.form.sourceUrlHint')"
+      :error="sourceUrlError"
       name="sourceUrl"
+      required
     >
-      <UInput v-model="sourceUrl" type="url" autocomplete="off" class="w-full" />
+      <UInput
+        v-model="sourceUrl"
+        type="url"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="https://"
+        class="w-full"
+      />
     </UFormField>
     <UFormField
       :label="$t('page.circuits.form.qualificationSpots')"

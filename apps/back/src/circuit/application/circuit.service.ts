@@ -48,8 +48,7 @@ function cleanSpots(spots: number | null | undefined): number | null {
   return spots;
 }
 
-function cleanSeason(season: number | null | undefined): number | null {
-  if (season === null || season === undefined) return null;
+function cleanSeason(season: number): number {
   if (!Number.isInteger(season) || season < MIN_CIRCUIT_SEASON || season > MAX_CIRCUIT_SEASON)
     throw new InvalidInputError(
       `A circuit season is a year from ${MIN_CIRCUIT_SEASON} to ${MAX_CIRCUIT_SEASON}.`,
@@ -66,9 +65,8 @@ function cleanRegion(region: string | null | undefined): string | null {
   return trimmed || null;
 }
 
-function cleanSourceUrl(sourceUrl: string | null | undefined): string | null {
-  const trimmed = sourceUrl?.trim() ?? "";
-  if (!trimmed) return null;
+function cleanSourceUrl(sourceUrl: string): string {
+  const trimmed = sourceUrl.trim();
   assertCircuitSourceUrl(trimmed);
   return trimmed;
 }

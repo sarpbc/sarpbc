@@ -14,15 +14,15 @@ import {
 const circuitFields = {
   name: z.string().trim().min(1).max(CIRCUIT_NAME_MAX_LENGTH),
   slug: z.string().trim().min(1).max(120).optional(),
-  season: z.number().int().min(MIN_CIRCUIT_SEASON).max(MAX_CIRCUIT_SEASON).nullish(),
+  season: z.number().int().min(MIN_CIRCUIT_SEASON).max(MAX_CIRCUIT_SEASON),
   region: z.string().trim().max(CIRCUIT_REGION_MAX_LENGTH).nullish(),
   description: z.string().max(CIRCUIT_DESCRIPTION_MAX_LENGTH).nullish(),
   sourceUrl: z
     .string()
     .trim()
     .max(2048)
-    .refine((url) => !url || /^https?:\/\//.test(url), "Use an http(s) URL")
-    .nullish(),
+    .url()
+    .regex(/^https?:\/\//, "Use an http(s) URL"),
   qualificationSpots: z.number().int().min(1).max(MAX_CIRCUIT_QUALIFICATION_SPOTS).nullish(),
 };
 

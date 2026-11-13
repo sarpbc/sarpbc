@@ -73,18 +73,30 @@ export async function verifyCircuits({
     )
   ).json().tournament;
 
-  await request("POST", "/circuits", { name: "Fake Circuit" }, memberCookie, 403);
+  const identity = { season: 2026, sourceUrl: RULES };
+  await request("POST", "/circuits", { name: "Fake Circuit", ...identity }, memberCookie, 403);
+  for (const missing of [{ season: 2026 }, { sourceUrl: RULES }])
+    await request("POST", "/circuits", { name: "Fake Circuit", ...missing }, staffCookie, 400);
+  await request(
+    "POST",
+    "/circuits",
+    { name: "Fake Circuit", season: 2026, sourceUrl: "https://liquipedia.net/rocketleague/Fake" },
+    staffCookie,
+    400,
+  );
   const circuit = (
     await request(
       "POST",
       "/circuits",
-      { name: "Fake Circuit", qualificationSpots: 2 },
+      { name: "Fake Circuit", qualificationSpots: 2, ...identity },
       staffCookie,
       201,
     )
   ).json();
   assert.equal(circuit.slug, "fake-circuit");
-  await request("POST", "/circuits", { name: "Fake circuit" }, staffCookie, 409);
+  await request("POST", "/circuits", { name: "Fake circuit", ...identity }, staffCookie, 409);
+  for (const cleared of [{ season: null }, { sourceUrl: null }])
+    await request("PATCH", `/circuits/${circuit.id}`, cleared, staffCookie, 400);
 
   const { CircuitPersistence } =
     await import("../../src/circuit/infrastructure/persistence/circuit.store.ts");

@@ -11,10 +11,10 @@ export interface CircuitScaleTier {
 export interface CircuitInput {
   name: string;
   slug?: string;
-  season?: number | null;
+  season: number;
   region?: string | null;
   description?: string | null;
-  sourceUrl?: string | null;
+  sourceUrl: string;
   qualificationSpots?: number | null;
 }
 
