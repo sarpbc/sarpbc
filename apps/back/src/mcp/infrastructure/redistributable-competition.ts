@@ -1,5 +1,6 @@
 import { isRedistributable } from "../../common/domain/data-source";
 import { NotFoundError } from "../../common/domain/errors";
+import type { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
 import type { Tournament } from "../../tournament/domain/competition";
 import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
@@ -24,6 +25,7 @@ export interface RedistributableCompetitionServices {
   >;
   playerAwardService: Pick<PlayerAwardService, "findByTournamentId">;
   matchLineupService: Pick<MatchLineupService, "find">;
+  tournamentPlayerStatsService: Pick<TournamentPlayerStatsService, "forStages">;
 }
 
 /**
@@ -50,12 +52,19 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     tournamentPrizeService,
     playerAwardService,
     matchLineupService,
+    tournamentPlayerStatsService,
   } = services;
 
   async function tournament(id: string): Promise<Tournament> {
     const found = await tournamentQueries.findById(id);
     if (!found || !isRedistributable(found.source)) throw tournamentNotFound(id);
     return found;
+  }
+
+  async function event(idOrSlug: string): Promise<EventListing> {
+    const listing = await catalogService.findEvent(idOrSlug);
+    if (isHiddenEvent(listing)) throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
+    return listing;
   }
 
   return {
@@ -103,10 +112,14 @@ export function redistributableCompetition(services: RedistributableCompetitionS
       return eventQueries.list({ ...options, redistributableOnly: true });
     },
 
-    async event(idOrSlug: string): Promise<EventListing> {
-      const listing = await catalogService.findEvent(idOrSlug);
-      if (isHiddenEvent(listing)) throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
-      return listing;
+    event,
+
+    async tournamentPlayerStats(tournamentId: string) {
+      return tournamentPlayerStatsService.forStages([await tournament(tournamentId)]);
+    },
+
+    async eventPlayerStats(idOrSlug: string) {
+      return tournamentPlayerStatsService.forStages((await event(idOrSlug)).stages);
     },
   };
 }

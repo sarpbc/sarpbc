@@ -107,6 +107,7 @@ function setup(
     })),
     byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => []),
     inTournament: vi.fn<GameStatsStore["inTournament"]>(async () => []),
+    playerLines: vi.fn<GameStatsStore["playerLines"]>(async () => []),
     remove: vi.fn<GameStatsStore["remove"]>(async () => null),
   } satisfies GameStatsStore;
   const service = new ManualGameService(

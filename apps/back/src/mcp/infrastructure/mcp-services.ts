@@ -3,6 +3,7 @@ import { CircuitService } from "../../circuit/application/circuit.service";
 import { ManualGameService } from "../../match-stats/application/manual-game.service";
 import { StatsImportService } from "../../match-stats/application/stats-import.service";
 import { StatsPlayerLinkService } from "../../match-stats/application/stats-player-link.service";
+import { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
 import { NewsService } from "../../news/application/news.service";
 import { ContractService } from "../../roster/application/contract.service";
 import { PlayerService } from "../../roster/application/player.service";
@@ -51,6 +52,7 @@ const SERVICES = {
   statsImportService: StatsImportService,
   statsPlayerLinkService: StatsPlayerLinkService,
   manualGameService: ManualGameService,
+  tournamentPlayerStatsService: TournamentPlayerStatsService,
   circuitService: CircuitService,
   seasonService: SeasonService,
 };

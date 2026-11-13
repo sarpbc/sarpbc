@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { Player, Team } from "../../../roster/domain/roster";
 import { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
+import { TournamentEvent } from "../../../tournament/domain/tournament-event";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { redistributableCompetition } from "../redistributable-competition";
 import { readTools } from "./read-tools";
 
@@ -103,6 +105,26 @@ function setup() {
     findBySlug: vi.fn().mockResolvedValue(team),
     findById: vi.fn().mockResolvedValue(team),
   };
+  const playerLines = vi.fn(async (ids: string[]) =>
+    ids.map((id) => ({
+      gameId: `game-${id}`,
+      account: "steam:1",
+      player: { id: "p1", name: "Scout", slug: "scout" },
+      team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
+      teamGoals: 4,
+      goals: 2,
+      assists: 1,
+      saves: 0,
+      shots: 4,
+      demolitions: 1,
+    })),
+  );
+  const catalogService = {
+    findEvent: vi.fn(async (idOrSlug: string) => ({
+      event: Object.assign(new TournamentEvent(), { id: "event", slug: idOrSlug, name: "Coupe" }),
+      stages: [manualCup, Object.assign(new Tournament(), { id: "c1", source: "startgg" })],
+    })),
+  };
   const tools = readTools({
     playerService,
     teamService,
@@ -115,7 +137,8 @@ function setup() {
       tournamentPrizeService,
       playerAwardService,
       events: { list: vi.fn() },
-      catalogService: { findEvent: vi.fn() },
+      catalogService,
+      tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerLines }),
     }),
   });
   const call = (name: string, args = {}) => {
@@ -135,6 +158,7 @@ function setup() {
     playerAwardService,
     playerService,
     teamService,
+    playerLines,
     call,
     json,
   };
@@ -179,6 +203,24 @@ describe("MCP read tools", () => {
       ],
     });
     expect((await call("get_tournament", { id: "c1" })).isError).toBe(true);
+  });
+
+  it("aggregates player stats per stage or event and leaves start.gg stages out", async () => {
+    const { call, json, playerLines } = setup();
+    expect(await json("get_tournament_player_stats", { tournamentId: "manual-cup" })).toMatchObject(
+      {
+        games: 1,
+        unlinkedAccounts: 0,
+        players: [{ player: { id: "p1" }, games: 1, totals: { goals: 2 }, goalParticipation: 75 }],
+      },
+    );
+    expect(await json("get_tournament_player_stats", { event: "coupe" })).toMatchObject({
+      games: 1,
+    });
+    expect(playerLines).toHaveBeenLastCalledWith(["manual-cup"]);
+    expect((await call("get_tournament_player_stats", { tournamentId: "c1" })).isError).toBe(true);
+    expect((await call("get_tournament_player_stats", {})).isError).toBe(true);
+    expect(playerLines).toHaveBeenCalledTimes(2);
   });
 
   it("returns match lineups with stand-in flags and hides start.gg matches", async () => {

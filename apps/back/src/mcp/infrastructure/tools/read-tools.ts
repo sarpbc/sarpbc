@@ -1,5 +1,6 @@
 import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
+import { InvalidInputError } from "../../../common/domain/errors";
 import type { NewsService } from "../../../news/application/news.service";
 import type { ContractService } from "../../../roster/application/contract.service";
 import type { PlayerService } from "../../../roster/application/player.service";
@@ -137,6 +138,21 @@ export function readTools({
       handler: async ({ id }) => {
         const distribution = await competition.prizeDistribution(id);
         return { tournamentId: id, prizepool: distribution.prizepool, prizes: distribution.prizes };
+      },
+    }),
+
+    defineTool({
+      name: "get_tournament_player_stats",
+      description:
+        "Get per-player stats aggregated over a tournament stage (tournamentId) or a whole event (event), from the Ballchasing games imported for it. Each row is a sarpbc.org player with the team they played for (a stand-in counts for the side they played on): games, totals and per-game averages of goals, assists, saves, shots and demolitions, shootingPercentage (goals per shot) and goalParticipation (goals and assists per goal of their side), both percentages or null. Game accounts not linked to a player are only counted in unlinkedAccounts; link them with link_game_player. games is 0 when no stats were imported. start.gg tournaments are not returned, and an event only counts its other stages.",
+      input: {
+        tournamentId: z.string().min(1).optional().describe("Tournament stage UUID."),
+        event: z.string().min(1).optional().describe("Event UUID or slug."),
+      },
+      handler: async ({ tournamentId, event }) => {
+        if (tournamentId && !event) return competition.tournamentPlayerStats(tournamentId);
+        if (event && !tournamentId) return competition.eventPlayerStats(event);
+        throw new InvalidInputError("Pass either tournamentId or event.");
       },
     }),
 

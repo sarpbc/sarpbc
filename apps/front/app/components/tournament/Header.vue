@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TournamentTab } from "@sarpbc/types";
-import { stageMatchesPath, tournamentStagePath } from "@sarpbc/utils";
+import { tournamentTabPath } from "~/utils/tournamentTabRoute";
 
 const { eventSlug, stageSlug, activeTab } = defineProps<{
   eventSlug: string;
@@ -11,18 +11,19 @@ const { eventSlug, stageSlug, activeTab } = defineProps<{
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const tabItems = computed(() => [
-  {
-    to: localePath(tournamentStagePath(eventSlug, stageSlug)),
-    label: t("common.overview"),
-    active: activeTab === "overview",
-  },
-  {
-    to: localePath(stageMatchesPath(eventSlug, stageSlug)),
-    label: t("general.matches"),
-    active: activeTab === "matches",
-  },
-]);
+const TABS = [
+  { tab: "overview", label: "common.overview" },
+  { tab: "matches", label: "general.matches" },
+  { tab: "stats", label: "page.tournaments.stats.tab" },
+] as const;
+
+const tabItems = computed(() =>
+  TABS.map(({ tab, label }) => ({
+    to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
+    label: t(label),
+    active: activeTab === tab,
+  })),
+);
 </script>
 
 <template>

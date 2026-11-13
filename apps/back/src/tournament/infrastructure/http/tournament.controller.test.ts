@@ -9,6 +9,7 @@ import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { MatchLineupService } from "../../application/match/match-lineup.service";
 import { ViewershipService } from "../../application/viewership.service";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
   { run: () => Promise.reject(new Error("unused")) },
@@ -26,8 +27,23 @@ const unusedLineups = new MatchLineupService(
 );
 const unusedGameStats = { byMatch: async () => [] };
 const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
+const playerLines = vi.fn(async (ids: string[]) =>
+  ids.map((id) => ({
+    gameId: `game-${id}`,
+    account: "steam:1",
+    player: { id: "zen", name: "zen", slug: "zen" },
+    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+    teamGoals: 2,
+    goals: 1,
+    assists: 0,
+    saves: 2,
+    shots: 3,
+    demolitions: 1,
+  })),
+);
+const playerStats = new TournamentPlayerStatsService({ playerLines });
 
-describe("TournamentController.findOne", () => {
+describe("TournamentController stage reads", () => {
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
   let controller: TournamentController;
@@ -53,6 +69,7 @@ describe("TournamentController.findOne", () => {
       unusedLineups,
       unusedGameStats,
       unusedViewerships,
+      playerStats,
     );
     redis.get.mockResolvedValue(null);
   });
@@ -73,6 +90,32 @@ describe("TournamentController.findOne", () => {
     );
     const result = await controller.findOne("t1");
     expect(result.tournament).toMatchObject({ id: "t1", matches: [], participants: [] });
+  });
+
+  it("aggregates the player stats of a stage, none for start.gg, 404 when unknown", async () => {
+    tournaments.findById.mockImplementation(async (id: string) =>
+      id === "missing"
+        ? null
+        : Object.assign(new Tournament(), {
+            id,
+            slug: id,
+            source: id === "open-qualifier" ? "startgg" : "manual",
+            event: { id: "e1", slug: "coupe-de-france-slash-2026", name: "Coupe de France" },
+          }),
+    );
+
+    expect(await controller.getPlayerStats("group-stage")).toMatchObject({
+      games: 1,
+      players: [{ player: { id: "zen" }, totals: { goals: 1, saves: 2 }, goalParticipation: 50 }],
+    });
+    expect(await controller.getPlayerStats("open-qualifier")).toEqual({
+      games: 0,
+      players: [],
+      unlinkedAccounts: 0,
+    });
+    await expect(controller.getPlayerStats("missing")).rejects.toBeInstanceOf(NotFoundException);
+    expect(playerLines).toHaveBeenCalledTimes(1);
+    expect(playerLines).toHaveBeenCalledWith(["group-stage"]);
   });
 });
 
@@ -97,6 +140,7 @@ describe("TournamentController leagues", () => {
     unusedLineups,
     unusedGameStats,
     unusedViewerships,
+    playerStats,
   );
   const manual = Object.assign(new League(), {
     id: "l1",

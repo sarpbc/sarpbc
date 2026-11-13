@@ -34,7 +34,7 @@ export interface EventInput {
   leagueId?: string | null;
 }
 
-export type TournamentTab = "overview" | "matches";
+export type TournamentTab = "overview" | "matches" | "stats";
 
 export type TournamentPathResponse =
   | { kind: "event"; event: TournamentEventDetail }
