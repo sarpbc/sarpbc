@@ -63,7 +63,11 @@ if (canonicalPath.value && route.path !== canonicalPath.value) {
 
 const event = computed(() => (resolved.value?.kind === "event" ? resolved.value.event : null));
 
-const showStats = computed(() => route.query.tab === "stats");
+const statsStages = computed(
+  () => event.value?.stages.filter((stage) => stage.source !== "startgg") ?? [],
+);
+
+const showStats = computed(() => statsStages.value.length > 0 && route.query.tab === "stats");
 
 const tabItems = computed(() => {
   const path = event.value ? localePath(tournamentEventPath(event.value.slug)) : route.path;
@@ -154,14 +158,14 @@ watch(
         :champion="champion"
         :spoiler-tournament-ids="event.stages.map((stage) => stage.id)"
       >
-        <STabNav :items="tabItems" :ariaLabel="t('page.tournaments.id.sections')" />
+        <STabNav
+          v-if="statsStages.length > 0"
+          :items="tabItems"
+          :ariaLabel="t('page.tournaments.id.sections')"
+        />
       </TournamentHero>
 
-      <TournamentEventPlayerStats
-        v-if="showStats"
-        :event-slug="event.slug"
-        :stages="event.stages"
-      />
+      <TournamentEventPlayerStats v-if="showStats" :event-slug="event.slug" :stages="statsStages" />
 
       <template v-else>
         <section v-if="event.viewership" aria-labelledby="tournament-event-viewership-title">
