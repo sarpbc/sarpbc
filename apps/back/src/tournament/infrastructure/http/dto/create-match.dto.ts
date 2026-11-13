@@ -22,6 +22,17 @@ export const CreateMatchDto = z.strictObject({
 export type CreateMatchDto = z.infer<typeof CreateMatchDto>;
 export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });
 export type SetMatchWinnerDto = z.infer<typeof SetMatchWinnerDto>;
+export const SetMatchResultDto = z.strictObject({
+  results: z
+    .array(z.strictObject({ participantId: z.string().min(1), score: z.number().int().min(0) }))
+    .length(2)
+    .refine(
+      ([first, second]) => first?.participantId !== second?.participantId,
+      "Each side needs its own participant",
+    )
+    .refine(([first, second]) => first?.score !== second?.score, "A finished match needs a winner"),
+});
+export type SetMatchResultDto = z.infer<typeof SetMatchResultDto>;
 export const MatchVodLinkDto = z.strictObject({
   url: z.string().min(1).max(2048),
   language: z.string().min(1).max(8),
