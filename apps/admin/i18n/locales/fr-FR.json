@@ -517,6 +517,43 @@
         "saved": "Alignements enregistrés",
         "saveError": "Impossible d'enregistrer les alignements"
       },
+      "streamScore": {
+        "action": "Score du stream",
+        "title": "Score du stream · {match}",
+        "description": "Vérifiez un score lu sur le stream officiel par l'outil OCR, puis confirmez le vainqueur. Rien n'est enregistré avant votre confirmation.",
+        "paste": "Proposition OCR",
+        "pasteHelp": "Collez le JSON produit par l'outil stream-score-ocr pour ce match.",
+        "needsTwoSides": "Ce match doit avoir exactement deux équipes avant de confirmer un score du stream.",
+        "blueSide": "Équipe côté bleu",
+        "chooseBlue": "Choisissez l'équipe qui jouait en bleu",
+        "bestOfMismatch": "La proposition a été lue en BO{read}, mais ce match est un BO{match}.",
+        "game": "Manche {number}",
+        "confidence": "{percent} % des lectures concordantes",
+        "unread": "Non lue",
+        "check": "À vérifier",
+        "noGames": "Aucune manche terminée n'a été lue.",
+        "series": "Vainqueur proposé : {winner}, {blue}–{orange} (bleu–orange)",
+        "noWinner": "Aucun vainqueur de série n'a été lu. Saisissez le résultat à la main depuis la publication officielle.",
+        "officialSource": "La publication officielle de l'organisateur reste la référence. Comparez-la à cette proposition avant de confirmer.",
+        "confirm": "Confirmer le vainqueur : {winner}",
+        "confirmDisabled": "Confirmer le vainqueur",
+        "confirmed": "Vainqueur confirmé",
+        "side": {
+          "blue": "Bleu",
+          "orange": "Orange"
+        },
+        "endedBy": {
+          "regulation": "Terminée à 0:00",
+          "overtime": "Terminée en prolongation",
+          "reset": "Lue au coup d'envoi suivant",
+          "stream_end": "Lue à la fin du stream"
+        },
+        "errors": {
+          "invalid-json": "Ce texte n'est pas un JSON valide.",
+          "invalid-proposal": "Ce JSON n'est pas une proposition de score du stream.",
+          "inconsistent-series": "Le résultat de la série ne correspond pas à ses manches. Relancez l'outil plutôt que de modifier le fichier."
+        }
+      },
       "streams": {
         "tournamentAction": "Streams du Tournoi",
         "eventAction": "Streams de l’Événement",

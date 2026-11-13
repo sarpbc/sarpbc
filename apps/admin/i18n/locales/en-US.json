@@ -517,6 +517,43 @@
         "saved": "Lineups saved",
         "saveError": "Could not save lineups"
       },
+      "streamScore": {
+        "action": "Stream Score",
+        "title": "Stream Score · {match}",
+        "description": "Check a score read from the official stream by the OCR tool, then confirm the winner. Nothing is saved until you confirm.",
+        "paste": "OCR proposal",
+        "pasteHelp": "Paste the JSON written by the stream-score-ocr tool for this match.",
+        "needsTwoSides": "This match needs exactly two teams before a stream score can be confirmed.",
+        "blueSide": "Blue side team",
+        "chooseBlue": "Choose the team that played blue",
+        "bestOfMismatch": "The proposal was read as a best of {read}, but this match is a best of {match}.",
+        "game": "Game {number}",
+        "confidence": "{percent}% of readings agree",
+        "unread": "Not Read",
+        "check": "Check",
+        "noGames": "No finished game was read.",
+        "series": "Proposed winner: {winner}, {blue}–{orange} (blue–orange)",
+        "noWinner": "No series winner was read. Enter the result by hand from the official post.",
+        "officialSource": "The organiser's official post remains the reference. Compare it with this proposal before you confirm.",
+        "confirm": "Confirm Winner: {winner}",
+        "confirmDisabled": "Confirm Winner",
+        "confirmed": "Winner confirmed",
+        "side": {
+          "blue": "Blue",
+          "orange": "Orange"
+        },
+        "endedBy": {
+          "regulation": "Ended at 0:00",
+          "overtime": "Ended in overtime",
+          "reset": "Read at the next kickoff",
+          "stream_end": "Read at the end of the stream"
+        },
+        "errors": {
+          "invalid-json": "This is not valid JSON.",
+          "invalid-proposal": "This JSON is not a stream score proposal.",
+          "inconsistent-series": "The series result does not match its games. Run the tool again rather than editing the file."
+        }
+      },
       "streams": {
         "tournamentAction": "Tournament Streams",
         "eventAction": "Event Streams",
