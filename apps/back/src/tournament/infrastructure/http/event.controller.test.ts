@@ -131,6 +131,19 @@ describe("EventController", () => {
     await expect(controller.playerStats("unknown-event")).rejects.toBeInstanceOf(NotFoundError);
   });
 
+  it("hides the player stats of an event whose stages all come from start.gg", async () => {
+    events.find.mockResolvedValueOnce({
+      event,
+      stages: [
+        stage({ id: "open-qualifier", source: "startgg" }),
+        stage({ id: "main-event", source: "startgg" }),
+      ],
+    });
+
+    await expect(controller.playerStats(event.slug)).rejects.toBeInstanceOf(NotFoundError);
+    expect(playerLines).not.toHaveBeenCalled();
+  });
+
   it("resolves a stage by event and stage slugs", async () => {
     expect(await controller.resolveStage(event.slug, "Playoffs")).toMatchObject({
       kind: "stage",

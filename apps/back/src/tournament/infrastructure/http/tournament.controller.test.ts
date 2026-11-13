@@ -92,7 +92,7 @@ describe("TournamentController stage reads", () => {
     expect(result.tournament).toMatchObject({ id: "t1", matches: [], participants: [] });
   });
 
-  it("aggregates the player stats of a stage, none for start.gg, 404 when unknown", async () => {
+  it("aggregates the player stats of a stage, 404 for start.gg or unknown stages", async () => {
     tournaments.findById.mockImplementation(async (id: string) =>
       id === "missing"
         ? null
@@ -108,11 +108,9 @@ describe("TournamentController stage reads", () => {
       games: 1,
       players: [{ player: { id: "zen" }, totals: { goals: 1, saves: 2 }, goalParticipation: 50 }],
     });
-    expect(await controller.getPlayerStats("open-qualifier")).toEqual({
-      games: 0,
-      players: [],
-      unlinkedAccounts: 0,
-    });
+    await expect(controller.getPlayerStats("open-qualifier")).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
     await expect(controller.getPlayerStats("missing")).rejects.toBeInstanceOf(NotFoundException);
     expect(playerLines).toHaveBeenCalledTimes(1);
     expect(playerLines).toHaveBeenCalledWith(["group-stage"]);

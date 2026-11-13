@@ -16,6 +16,7 @@ import {
 import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors";
+import { isRedistributable } from "../../../common/domain/data-source";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
@@ -133,7 +134,9 @@ export class EventController {
   @Get(":event/player-stats")
   async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
     const found = await this.events.find(event);
-    if (!found?.stages.length) throw new NotFoundError(MISSING);
+    if (!found?.stages.some((stage) => isRedistributable(stage.source))) {
+      throw new NotFoundError(MISSING);
+    }
     return this.playerStatsService.forStages(found.stages);
   }
 
