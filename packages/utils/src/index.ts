@@ -194,3 +194,13 @@ export {
   type ParsedStreamScoreProposal,
   type StreamScoreProposalError,
 } from "./stream-score";
+export {
+  isForbiddenStreamScoreSource,
+  streamScoreBestOfMismatch,
+  streamScoreConfirmBlockers,
+  streamScoreGameNeedsCheck,
+  streamScoreSeriesResults,
+  type StreamScoreConfirmBlocker,
+  type StreamScoreReview,
+  type StreamScoreSeriesResult,
+} from "./stream-score-review";
