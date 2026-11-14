@@ -1,11 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
-import {
-  newsEntityTagStart,
-  parseNewsEntityTag,
-  serializeNewsEntityTag,
-  type NewsEntityTagKind,
-} from "@sarpbc/utils";
+import { newsEntityTagStart, parseNewsEntityTag, serializeNewsEntityTag } from "@sarpbc/utils";
+import type { NewsEntityTagKind } from "@sarpbc/utils";
 import EntityTagNodeView from "~/components/news/EntityTagNodeView.vue";
 
 function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {

@@ -298,12 +298,14 @@ export async function verifyMatchStats({
     .getRepository(MatchGamePlayer)
     .find({ player: playerId, game: { match: { tournament: tournamentId } } });
 
-  for (const key of statKeys)
+  for (const key of statKeys) {
     assert.equal(
       veteran.totals[key],
       veteranRows.reduce((sum, row) => sum + row[key], 0),
       `${key} totals match the sum of the games`,
     );
+  }
+
   assert.equal(veteran.goalParticipation, 100);
 
   const response6 = await request("GET", `/tournaments/${tournamentId}`);

@@ -24,18 +24,23 @@ export function normalizeLineups(
   const players = new Set<string>();
 
   for (const { participantId, playerIds } of inputs) {
-    if (!participantIds.includes(participantId))
+    if (!participantIds.includes(participantId)) {
       throw new InvalidInputError(`Participant "${participantId}" does not play this match`);
+    }
 
-    if (byParticipant.has(participantId))
+    if (byParticipant.has(participantId)) {
       throw new InvalidInputError(`Participant "${participantId}" has two lineups`);
+    }
 
-    if (playerIds.length > MAX_LINEUP_PLAYERS)
+    if (playerIds.length > MAX_LINEUP_PLAYERS) {
       throw new InvalidInputError(`A lineup has at most ${MAX_LINEUP_PLAYERS} players`);
+    }
 
     for (const playerId of playerIds) {
-      if (players.has(playerId))
+      if (players.has(playerId)) {
         throw new InvalidInputError(`Player "${playerId}" appears twice in the match lineups`);
+      }
+
       players.add(playerId);
     }
 
@@ -80,7 +85,10 @@ export function lineupsFromGames(games: readonly GameLineupSource[]): MatchLineu
       const playerIds = byParticipant.get(participantId) ?? [];
 
       for (const { player } of players) {
-        if (!player || seen.has(player.id)) continue;
+        if (!player || seen.has(player.id)) {
+          continue;
+        }
+
         seen.add(player.id);
         playerIds.push(player.id);
       }

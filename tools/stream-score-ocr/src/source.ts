@@ -1,6 +1,8 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
 import { isLiquipediaSourceHost } from "@sarpbc/utils/source-host";
-import { readPpmFrames, type Frame } from "./frame.ts";
+import { readPpmFrames } from "./frame.ts";
+import type { Frame } from "./frame.ts";
 
 const URL_INPUT = /^[a-z][a-z0-9+.-]*:\/\//i;
 
@@ -18,23 +20,30 @@ export interface TimedFrame {
 
 export function checkInput(input: string, live: boolean): void {
   if (!URL_INPUT.test(input)) {
-    if (live) throw new Error("A live source must be a stream URL.");
+    if (live) {
+      throw new Error("A live source must be a stream URL.");
+    }
 
     return;
   }
 
   const url = new URL(input);
 
-  if (url.protocol !== "https:") throw new Error("Stream URLs must use https.");
+  if (url.protocol !== "https:") {
+    throw new Error("Stream URLs must use https.");
+  }
 
-  if (isLiquipediaSourceHost(url.hostname))
+  if (isLiquipediaSourceHost(url.hostname)) {
     throw new Error("Liquipedia is not an accepted source.");
+  }
 }
 
 function stopOnExit(processes: readonly ChildProcess[]): () => void {
   return () => {
     for (const child of processes) {
-      if (child.exitCode === null) child.kill();
+      if (child.exitCode === null) {
+        child.kill();
+      }
     }
   };
 }
@@ -71,7 +80,9 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
 
     processes.push(capture);
 
-    if (capture.stdout !== null && decoder.stdin !== null) capture.stdout.pipe(decoder.stdin);
+    if (capture.stdout !== null && decoder.stdin !== null) {
+      capture.stdout.pipe(decoder.stdin);
+    }
   }
 
   const stop = stopOnExit(processes);
@@ -83,7 +94,10 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
   exited.promise.catch(() => null);
 
   try {
-    if (decoder.stdout === null) throw new Error("ffmpeg has no output stream.");
+    if (decoder.stdout === null) {
+      throw new Error("ffmpeg has no output stream.");
+    }
+
     let index = 0;
 
     for await (const frame of readPpmFrames(decoder.stdout)) {
@@ -93,7 +107,9 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
 
     const code = await exited.promise;
 
-    if (code !== 0) throw new Error(`ffmpeg exited with code ${code}.`);
+    if (code !== 0) {
+      throw new Error(`ffmpeg exited with code ${code}.`);
+    }
   } finally {
     stop();
   }

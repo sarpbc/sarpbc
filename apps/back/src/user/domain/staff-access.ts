@@ -4,12 +4,8 @@
  * - Roles are pre-configured permission bundles assigned on the user.
  */
 
-import {
-  STAFF_PERMISSIONS,
-  STAFF_ROLES,
-  type StaffPermission,
-  type StaffRole,
-} from "@sarpbc/types";
+import { STAFF_PERMISSIONS, STAFF_ROLES } from "@sarpbc/types";
+import type { StaffPermission, StaffRole } from "@sarpbc/types";
 
 export const ROLE_PERMISSIONS = {
   admin: STAFF_PERMISSIONS,

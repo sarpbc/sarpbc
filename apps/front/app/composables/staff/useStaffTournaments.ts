@@ -5,7 +5,10 @@ import type { Tournament } from "~/types/tournament";
 import { splitTournaments } from "~/composables/entity/useEntityTournaments";
 
 function coversTournament(contract: PlayerContract, tournament: Tournament): boolean {
-  if (!tournament.beginAt) return false;
+  if (!tournament.beginAt) {
+    return false;
+  }
+
   const beginAt = new Date(tournament.beginAt).getTime();
 
   return (

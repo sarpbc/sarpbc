@@ -28,10 +28,11 @@ export function assertEventEditable(
   event: TournamentEvent,
   stages: readonly { source: DataSource }[],
 ): void {
-  if (isEventSynced(event, stages))
+  if (isEventSynced(event, stages)) {
     throw new InvalidInputError(
       "This event is managed by the PandaScore sync. Only manual events can be edited.",
     );
+  }
 }
 
 /**
@@ -78,7 +79,9 @@ export function eventDisplayName(input: {
 
   if (serie !== undefined) {
     if (/^\d{4}$/.test(serie)) {
-      if (league !== undefined) return `${league} ${serie}`;
+      if (league !== undefined) {
+        return `${league} ${serie}`;
+      }
 
       return stage && !isGenericStageName(stage) ? stage : serie;
     }
@@ -88,7 +91,9 @@ export function eventDisplayName(input: {
       : serie;
   }
 
-  if (league !== undefined && stage) return `${league} ${stage}`;
+  if (league !== undefined && stage) {
+    return `${league} ${stage}`;
+  }
 
   return stage || (league ?? "");
 }

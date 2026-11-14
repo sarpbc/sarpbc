@@ -15,7 +15,9 @@ const costream: StreamInput = { url: "https://kick.com/kameto", language: "fr", 
 function stream(url: string, source: Stream["source"] = "manual"): Stream {
   const streamUrl = replaceStreams([], [{ url, language: "en", kind: "official" }], "manual").at(0);
 
-  if (streamUrl === undefined) throw new Error("fixture");
+  if (streamUrl === undefined) {
+    throw new Error("fixture");
+  }
 
   return { ...streamUrl, source };
 }

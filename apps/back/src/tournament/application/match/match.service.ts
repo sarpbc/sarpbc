@@ -4,11 +4,13 @@ import { InvalidInputError } from "../../../common/domain/errors/invalid-input-e
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { Match, matchPublicSlug } from "../../domain/match";
+import type { Match } from "../../domain/match";
+import { matchPublicSlug } from "../../domain/match";
 import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
-import { buildHeadToHead, type HeadToHead } from "./match-head-to-head";
+import { buildHeadToHead } from "./match-head-to-head";
+import type { HeadToHead } from "./match-head-to-head";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type { CompetitionTransaction, MatchQueries, MatchWriter } from "../ports";
 import type { EmptyBracketInput, ManualMatchInput, UpdateMatchInput } from "../inputs";
@@ -204,7 +206,10 @@ export class MatchService {
 
     await Promise.all(
       participants.map(async ({ team }) => {
-        if (!team) return;
+        if (!team) {
+          return;
+        }
+
         const teamId = team.id;
 
         const recent = await this.reads.recentByTeam({
@@ -287,10 +292,14 @@ export class MatchService {
     await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
 
-      if (!match) throw new NotFoundError("Match not found");
+      if (!match) {
+        throw new NotFoundError("Match not found");
+      }
 
-      if (!isRedistributable(match.source) || !isRedistributable(match.tournament.source))
+      if (!isRedistributable(match.source) || !isRedistributable(match.tournament.source)) {
         throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
+      }
+
       await assertDeletable(matches, match);
     });
   }
@@ -298,7 +307,10 @@ export class MatchService {
     const tournamentId = await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
 
-      if (!match) throw new NotFoundError("Match not found");
+      if (!match) {
+        throw new NotFoundError("Match not found");
+      }
+
       await assertDeletable(matches, match);
       await matches.remove(id);
 
@@ -313,7 +325,9 @@ export class MatchService {
   private async committed(id: string): Promise<Match> {
     const match = await this.find(id);
 
-    if (!match) throw new NotFoundError("Match not found");
+    if (!match) {
+      throw new NotFoundError("Match not found");
+    }
 
     return match;
   }

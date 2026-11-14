@@ -137,7 +137,9 @@ function currentTeamName(state: CareerState): string {
 }
 
 function fieldPlayer(state: CareerState, skip: { skipRegionals: number; skipMajor: boolean }) {
-  if (!state.role) throw new Error("Career role required for simulation");
+  if (!state.role) {
+    throw new Error("Career role required for simulation");
+  }
 
   return {
     teamId: state.currentTeamId,
@@ -247,8 +249,9 @@ function runStageSimulation(
       break;
     }
 
-    default:
+    default: {
       assertNever(stage);
+    }
   }
 
   return {
@@ -259,7 +262,9 @@ function runStageSimulation(
 }
 
 function pendingOfferTeamIds(transferTeamIds: string[], lastChanceTeamId: string | null): string[] {
-  if (transferTeamIds.length > 0) return transferTeamIds;
+  if (transferTeamIds.length > 0) {
+    return transferTeamIds;
+  }
 
   return isNonEmptyString(lastChanceTeamId) ? [lastChanceTeamId] : [];
 }
@@ -450,9 +455,11 @@ function reduceOnboarding(state: CareerState, action: OnboardingAction): CareerR
       };
     }
 
-    case "CONTINUE_FROM_MENU":
+    case "CONTINUE_FROM_MENU": {
       return continueFromMenu(state);
-    case "RETURN_TO_MENU":
+    }
+
+    case "RETURN_TO_MENU": {
       return {
         state: {
           ...createInitialCareerState(),
@@ -461,17 +468,23 @@ function reduceOnboarding(state: CareerState, action: OnboardingAction): CareerR
         },
         finishedResult: null,
       };
-    case "SET_ONBOARDING_STEP":
+    }
+
+    case "SET_ONBOARDING_STEP": {
       return {
         state: { ...state, onboardingStep: action.step },
         finishedResult: null,
       };
-    case "SET_PLAYER_NAME":
+    }
+
+    case "SET_PLAYER_NAME": {
       return {
         state: { ...state, playerName: action.name.trim() },
         finishedResult: null,
       };
-    case "SET_REGION":
+    }
+
+    case "SET_REGION": {
       return {
         state: {
           ...state,
@@ -480,28 +493,43 @@ function reduceOnboarding(state: CareerState, action: OnboardingAction): CareerR
         },
         finishedResult: null,
       };
-    case "SET_COUNTRY":
+    }
+
+    case "SET_COUNTRY": {
       return { state: { ...state, country: action.country }, finishedResult: null };
-    case "SET_ROLE":
+    }
+
+    case "SET_ROLE": {
       return { state: { ...state, role: action.role }, finishedResult: null };
-    case "SET_BACKGROUND":
+    }
+
+    case "SET_BACKGROUND": {
       return { state: { ...state, background: action.background }, finishedResult: null };
-    case "COMPLETE_ONBOARDING":
+    }
+
+    case "COMPLETE_ONBOARDING": {
       return completeOnboarding(state);
-    default:
+    }
+
+    default: {
       return assertNever(action);
+    }
   }
 }
 
 function resolveEventChoice(state: CareerState, choiceId: string): CareerReduceResult {
   const eventId = state.currentEventId;
 
-  if (!isNonEmptyString(eventId)) return unchanged(state);
+  if (!isNonEmptyString(eventId)) {
+    return unchanged(state);
+  }
 
   const event = getEventById(eventId);
   const choice = event?.choices.find((entry) => entry.id === choiceId);
 
-  if (!choice) return unchanged(state);
+  if (!choice) {
+    return unchanged(state);
+  }
 
   const before = state.stats;
   const context = buildEventOutcomeContext(state, choice);
@@ -525,7 +553,9 @@ function resolveEventChoice(state: CareerState, choiceId: string): CareerReduceR
     destiny,
   };
 
-  if (resolved.failed) lastEventOutcome.failed = true;
+  if (resolved.failed) {
+    lastEventOutcome.failed = true;
+  }
 
   return {
     state: {
@@ -570,17 +600,24 @@ function continueAfterStageResult(state: CareerState): CareerReduceResult {
   const stage = state.currentStage;
 
   switch (stage) {
-    case "split1":
+    case "split1": {
       return {
         state: startStageEvents({ ...state, currentStage: "split2" }),
         finishedResult: null,
       };
-    case "split2":
+    }
+
+    case "split2": {
       return { state: goToWorldsOrEndSeason(state), finishedResult: null };
-    case "worlds":
+    }
+
+    case "worlds": {
       return { state: endSeason(state), finishedResult: null };
-    default:
+    }
+
+    default: {
       return assertNever(stage);
+    }
   }
 }
 
@@ -597,12 +634,17 @@ function resolveOffseasonDestiny(state: CareerState, id: string): CareerReduceRe
 
   switch (id) {
     case "quit":
-    case "streamer":
+    case "streamer": {
       return finishCareer(next, getRecommendedDestiny(next.destinyLeanings));
-    case "coach":
+    }
+
+    case "coach": {
       return { state: next, finishedResult: null };
-    default:
+    }
+
+    default: {
       return assertNever(id);
+    }
   }
 }
 
@@ -627,7 +669,7 @@ function acceptOffer(state: CareerState, teamId: string): CareerReduceResult {
 
 function reduceSeason(state: CareerState, action: SeasonAction): CareerReduceResult {
   switch (action.type) {
-    case "START_SEASON":
+    case "START_SEASON": {
       return {
         state: startStageEvents({
           ...state,
@@ -637,24 +679,41 @@ function reduceSeason(state: CareerState, action: SeasonAction): CareerReduceRes
         }),
         finishedResult: null,
       };
-    case "RESOLVE_EVENT_CHOICE":
+    }
+
+    case "RESOLVE_EVENT_CHOICE": {
       return resolveEventChoice(state, action.choiceId);
-    case "CONTINUE_AFTER_EVENT_OUTCOME":
+    }
+
+    case "CONTINUE_AFTER_EVENT_OUTCOME": {
       return continueAfterEventOutcome(state);
-    case "CONTINUE_AFTER_STAGE_RESULT":
+    }
+
+    case "CONTINUE_AFTER_STAGE_RESULT": {
       return continueAfterStageResult(state);
-    case "RESOLVE_OFFSEASON_DESTINY":
+    }
+
+    case "RESOLVE_OFFSEASON_DESTINY": {
       return resolveOffseasonDestiny(state, action.choiceId);
-    case "ACCEPT_OFFER":
+    }
+
+    case "ACCEPT_OFFER": {
       return acceptOffer(state, action.teamId);
-    case "STAY_WITH_TEAM":
+    }
+
+    case "STAY_WITH_TEAM": {
       return state.renewalOffered
         ? { state: advanceToNextSeason(state), finishedResult: null }
         : unchanged(state);
-    case "RETIRE_CAREER":
+    }
+
+    case "RETIRE_CAREER": {
       return finishCareer(state, getRecommendedDestiny(state.destinyLeanings));
-    default:
+    }
+
+    default: {
       return assertNever(action);
+    }
   }
 }
 
@@ -669,8 +728,10 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
     case "SET_COUNTRY":
     case "SET_ROLE":
     case "SET_BACKGROUND":
-    case "COMPLETE_ONBOARDING":
+    case "COMPLETE_ONBOARDING": {
       return reduceOnboarding(state, action);
+    }
+
     case "START_SEASON":
     case "RESOLVE_EVENT_CHOICE":
     case "CONTINUE_AFTER_EVENT_OUTCOME":
@@ -678,10 +739,13 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
     case "RESOLVE_OFFSEASON_DESTINY":
     case "ACCEPT_OFFER":
     case "STAY_WITH_TEAM":
-    case "RETIRE_CAREER":
+    case "RETIRE_CAREER": {
       return reduceSeason(state, action);
-    default:
+    }
+
+    default: {
       return assertNever(action);
+    }
   }
 }
 
@@ -690,7 +754,9 @@ export function canContinueCareer(state: CareerState): boolean {
     return true;
   }
 
-  if (state.phase !== "onboarding" && state.phase !== "menu") return true;
+  if (state.phase !== "onboarding" && state.phase !== "menu") {
+    return true;
+  }
 
   return state.onboardingStep !== "intro" || state.playerName.length > 0 || state.region !== null;
 }

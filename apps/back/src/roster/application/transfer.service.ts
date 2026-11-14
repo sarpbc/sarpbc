@@ -1,5 +1,6 @@
 import type { TransferType } from "@sarpbc/types";
-import { deriveTransfers, type Transfer } from "../domain/transfer";
+import { deriveTransfers } from "../domain/transfer";
+import type { Transfer } from "../domain/transfer";
 import type { ContractQueries } from "./ports";
 import type { ContractMovementFilter } from "./search-props";
 

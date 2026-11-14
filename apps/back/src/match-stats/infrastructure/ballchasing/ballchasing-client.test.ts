@@ -84,26 +84,31 @@ describe("BallchasingClient.groupReplays", () => {
       const parsed = new URL(url);
       const group = parsed.searchParams.get("group");
 
-      if (parsed.pathname === "/api/groups/pilot") return json({ id: "pilot", name: "Pilot" });
+      if (parsed.pathname === "/api/groups/pilot") {
+        return json({ id: "pilot", name: "Pilot" });
+      }
 
       if (
         parsed.pathname === "/api/replays" &&
         group === "pilot" &&
         !parsed.searchParams.has("after")
-      )
+      ) {
         return json({
           count: 2,
           list: [listedReplay("r1")],
           next: `${BALLCHASING_API_URL}/replays?after=r1&count=200&group=pilot`,
         });
+      }
 
-      if (parsed.pathname === "/api/replays" && group === "pilot")
+      if (parsed.pathname === "/api/replays" && group === "pilot") {
         return json({ count: 2, list: [listedReplay("r2")] });
+      }
 
-      if (parsed.pathname === "/api/groups" && group === "pilot")
+      if (parsed.pathname === "/api/groups" && group === "pilot") {
         return json({ list: [{ id: "pilot-day-2" }] });
+      }
 
-      if (parsed.pathname === "/api/replays" && group === "pilot-day-2")
+      if (parsed.pathname === "/api/replays" && group === "pilot-day-2") {
         return json({
           count: 1,
           list: [
@@ -111,9 +116,11 @@ describe("BallchasingClient.groupReplays", () => {
             listedReplay("r1"),
           ],
         });
+      }
 
-      if (parsed.pathname === "/api/groups" && group === "pilot-day-2")
+      if (parsed.pathname === "/api/groups" && group === "pilot-day-2") {
         return json({ list: [{ id: "pilot" }] });
+      }
 
       return json({ error: "not found" }, 404);
     });
@@ -135,8 +142,10 @@ describe("BallchasingClient.groupReplays", () => {
       playedAtHasTimezone: false,
     });
 
-    for (const [, init] of fetch.mock.calls)
+    for (const [, init] of fetch.mock.calls) {
       expect(init?.headers).toStrictEqual({ Authorization: "secret-key" });
+    }
+
     expect(new URL(requestUrl(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
   });
 
@@ -376,9 +385,13 @@ describe("BallchasingClient rate limiting", () => {
     const { instance, sleep } = client(() => {
       calls += 1;
 
-      if (calls === 1) return json({ error: "rate limited" }, 429, { "retry-after": "0" });
+      if (calls === 1) {
+        return json({ error: "rate limited" }, 429, { "retry-after": "0" });
+      }
 
-      if (calls <= 3) return json({ error: "rate limited" }, 429);
+      if (calls <= 3) {
+        return json({ error: "rate limited" }, 429);
+      }
 
       return json(replayDetail());
     });

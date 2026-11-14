@@ -21,11 +21,16 @@ export class AirRiddleService {
   ): Promise<{ results: AirRiddleResultEnum[]; error?: string; answer?: string }> {
     const players = await this.players.find({ name: guess });
 
-    if (!players.some((p) => p.name.toUpperCase() === guess.toUpperCase()))
+    if (!players.some((p) => p.name.toUpperCase() === guess.toUpperCase())) {
       return { results: [], error: "playerNotFound" };
+    }
+
     const riddle = await this.getTodaysRiddle();
 
-    if (!riddle) throw new Error("Failed to create AirRiddle");
+    if (!riddle) {
+      throw new Error("Failed to create AirRiddle");
+    }
+
     const results = evaluateGuess(guess.toUpperCase(), riddle.playerName.toUpperCase());
 
     return {
@@ -38,7 +43,10 @@ export class AirRiddleService {
   }
   async createAirRiddle(): Promise<DailyRiddle | null> {
     try {
-      if (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) return null;
+      if (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) {
+        return null;
+      }
+
       const player = await this.players.getRandomPlayer();
 
       if (!player) {

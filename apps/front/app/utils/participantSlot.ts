@@ -1,4 +1,5 @@
-import { participantName, type NamedParticipant } from "@sarpbc/utils";
+import { participantName } from "@sarpbc/utils";
+import type { NamedParticipant } from "@sarpbc/utils";
 
 export function slotName(
   participants: readonly NamedParticipant[] | undefined,

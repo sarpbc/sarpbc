@@ -40,7 +40,9 @@ function setup(role: "admin" | "journalist") {
   const tool = (name: string) => {
     const found = tools.find((candidate) => candidate.name === name);
 
-    if (!found) throw new Error(`${name} is not defined`);
+    if (!found) {
+      throw new Error(`${name} is not defined`);
+    }
 
     return found;
   };

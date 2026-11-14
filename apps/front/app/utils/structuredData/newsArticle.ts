@@ -3,11 +3,12 @@ import {
   localizedPath,
   newsPath,
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
-  type UiLocale,
   isNonEmptyString,
 } from "@sarpbc/utils";
+import type { UiLocale } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
-import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
+import { compactJsonLd, SCHEMA_ORG } from "./jsonLd";
+import type { JsonLdNode } from "./jsonLd";
 import { ORGANIZATION_ID } from "./organization";
 
 export interface NewsArticleLd extends JsonLdNode {

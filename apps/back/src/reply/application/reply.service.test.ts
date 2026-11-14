@@ -78,7 +78,9 @@ describe(ReplyService, () => {
         async find(target: ReplyTarget) {
           const row = await em.findOne(target);
 
-          if (row === null) return null;
+          if (row === null) {
+            return null;
+          }
 
           return { post: null, newsArticle: null, match: row };
         },

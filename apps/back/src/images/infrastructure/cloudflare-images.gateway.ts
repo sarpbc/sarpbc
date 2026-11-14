@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import type { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
 import { createLogger } from "evlog";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";

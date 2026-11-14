@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { colorDistance, meanColor, readPpmFrames, scaleRegion, type Frame } from "./frame.ts";
+import { colorDistance, meanColor, readPpmFrames, scaleRegion } from "./frame.ts";
+import type { Frame } from "./frame.ts";
 
 function ppm(width: number, height: number, fill: number): Uint8Array {
   const header = Buffer.from(`P6\n${width} ${height}\n255\n`, "latin1");
@@ -17,7 +18,9 @@ async function* chunked(bytes: Uint8Array, size: number): AsyncGenerator<Uint8Ar
 async function collect(chunks: AsyncIterable<Uint8Array>): Promise<Frame[]> {
   const frames: Frame[] = [];
 
-  for await (const frame of readPpmFrames(chunks)) frames.push(frame);
+  for await (const frame of readPpmFrames(chunks)) {
+    frames.push(frame);
+  }
 
   return frames;
 }

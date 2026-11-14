@@ -8,11 +8,11 @@ import {
   saveCareerResult,
 } from "~/composables/useCareerStorage";
 import {
-  type CareerAction,
   canContinueCareer,
   createInitialCareerState,
   reduceCareerState,
 } from "~/utils/career/careerReducer";
+import type { CareerAction } from "~/utils/career/careerReducer";
 import {
   computeSeasonPoints,
   computeStateRankings,
@@ -71,16 +71,23 @@ export function useCareerSimulator() {
   const seasonPoints = computed(() => computeSeasonPoints(state.value.currentSplits));
 
   const qualifiedForWorlds = computed(() => {
-    if (state.value.currentSplits.length < SPLITS_PER_SEASON) return false;
+    if (state.value.currentSplits.length < SPLITS_PER_SEASON) {
+      return false;
+    }
+
     const rank = getTeamRank(worldRankings.value, state.value.currentTeamId);
 
-    if (rank === null || rank === undefined) return false;
+    if (rank === null || rank === undefined) {
+      return false;
+    }
 
     return qualifiesForWorlds(rank, worldRankings.value.teams.length);
   });
 
   const currentEvent = computed(() => {
-    if (!isNonEmptyString(state.value.currentEventId)) return null;
+    if (!isNonEmptyString(state.value.currentEventId)) {
+      return null;
+    }
 
     return getEventById(state.value.currentEventId) ?? null;
   });
@@ -106,7 +113,9 @@ export function useCareerSimulator() {
   const canContinue = computed(() => canContinueCareer(state.value));
 
   const continueName = computed(() => {
-    if (!canContinue.value) return "";
+    if (!canContinue.value) {
+      return "";
+    }
 
     if (state.value.playerName && currentTeamName.value) {
       return `${state.value.playerName} · ${currentTeamName.value}`;
@@ -215,7 +224,9 @@ export function useCareerSimulator() {
 export function useCareerSimulatorContext() {
   const context = inject<ReturnType<typeof useCareerSimulator>>(careerSimulatorKey);
 
-  if (!context) throw new Error("useCareerSimulatorContext requires useCareerSimulator parent");
+  if (!context) {
+    throw new Error("useCareerSimulatorContext requires useCareerSimulator parent");
+  }
 
   return context;
 }

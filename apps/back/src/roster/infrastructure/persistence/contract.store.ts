@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Player as PlayerRow } from "./player.entity";
 import { Team as TeamRow } from "./team.entity";
@@ -58,7 +58,9 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
         [month, day, month, day],
       );
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       ContractRow,
@@ -80,7 +82,10 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
       ? await this.em.findOneOrFail(ContractRow, { id: model.id })
       : new ContractRow();
 
-    if (!model.id) model.id = v4();
+    if (!model.id) {
+      model.id = v4();
+    }
+
     Object.assign(row, {
       id: model.id,
       player: this.em.getReference(PlayerRow, model.player.id),

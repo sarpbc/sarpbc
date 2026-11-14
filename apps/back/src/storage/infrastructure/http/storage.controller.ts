@@ -19,13 +19,9 @@ import { MultipartInterceptor } from "../../../common/infrastructure/http/interc
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { Storage } from "../../../common/infrastructure/http/fastify";
-import {
-  R2UploadDto,
-  type R2UploadInput,
-  R2UploadUrlDto,
-  type R2UploadUrlInput,
-} from "./dto/r2-upload-url.dto";
-import { StorageService } from "../../application/storage.service";
+import { R2UploadDto, R2UploadUrlDto } from "./dto/r2-upload-url.dto";
+import type { R2UploadInput, R2UploadUrlInput } from "./dto/r2-upload-url.dto";
+import type { StorageService } from "../../application/storage.service";
 
 const IMAGE_FILE_TYPE = new RegExp(`^(${IMAGE_CONTENT_TYPES.join("|")})$`);
 

@@ -7,7 +7,9 @@ const sourceRoot = path.join(project, "src");
 const configPath = path.join(project, "tsconfig.json");
 const config = ts.readConfigFile(configPath, (file) => ts.sys.readFile(file));
 
-if (config.error) throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, "\n"));
+if (config.error) {
+  throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, "\n"));
+}
 
 const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, project);
 
@@ -69,7 +71,9 @@ const isInner = (file: string, root: string): boolean =>
 const featureOf = (file: string, root: string): string => normalized(file, root).split("/")[0];
 
 function defined<T>(value: T | undefined): T {
-  if (value === undefined) throw new Error("Expected a value in the feature graph.");
+  if (value === undefined) {
+    throw new Error("Expected a value in the feature graph.");
+  }
 
   return value;
 }
@@ -116,7 +120,11 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
     }
   }
 
-  for (const node of [...graph.keys()].toSorted()) if (!index.has(node)) visit(node);
+  for (const node of [...graph.keys()].toSorted()) {
+    if (!index.has(node)) {
+      visit(node);
+    }
+  }
 
   return components;
 }
@@ -129,16 +137,26 @@ function cyclePath(component: string[], graph: FeatureGraph): string[] | undefin
 
   function walk(node: string): string[] | undefined {
     for (const next of [...defined(graph.get(node)).keys()].toSorted()) {
-      if (!members.has(next)) continue;
+      if (!members.has(next)) {
+        continue;
+      }
 
-      if (next === start) return [...trail, start];
+      if (next === start) {
+        return [...trail, start];
+      }
 
-      if (seen.has(next)) continue;
+      if (seen.has(next)) {
+        continue;
+      }
+
       seen.add(next);
       trail.push(next);
       const found = walk(next);
 
-      if (found) return found;
+      if (found) {
+        return found;
+      }
+
       trail.pop();
     }
 
@@ -152,9 +170,14 @@ function featureCycles(edges: FeatureEdge[]): string[] {
   const graph: FeatureGraph = new Map();
 
   for (const [from, target, via] of edges) {
-    if (!graph.has(from)) graph.set(from, new Map());
+    if (!graph.has(from)) {
+      graph.set(from, new Map());
+    }
 
-    if (!graph.has(target)) graph.set(target, new Map());
+    if (!graph.has(target)) {
+      graph.set(target, new Map());
+    }
+
     const importers = defined(graph.get(from)).get(target) ?? [];
     defined(graph.get(from)).set(target, [...importers, via].toSorted());
   }
@@ -197,7 +220,9 @@ function innerLayerViolations(
     return [`${origin}: ${originLayer} imports non-allowlisted package ${specifier}`];
   }
 
-  if (resolved === undefined || !resolved.startsWith(root)) return [];
+  if (resolved === undefined || !resolved.startsWith(root)) {
+    return [];
+  }
 
   const violations: string[] = [];
   const allowed = originLayer === "domain" ? ["domain"] : ["domain", "application"];
@@ -220,7 +245,9 @@ function innerLayerViolations(
 function crossFeatureViolations(site: ImportSite, root: string): string[] {
   const { origin, resolved } = site;
 
-  if (resolved === undefined || !resolved.startsWith(root)) return [];
+  if (resolved === undefined || !resolved.startsWith(root)) {
+    return [];
+  }
 
   const violations: string[] = [];
   const target = normalized(resolved, root);

@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { MatchLineupInput } from "@sarpbc/types";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import type { LineupWriter } from "../../application/ports";
@@ -14,7 +14,9 @@ export class CompetitionLineupWriter implements LineupWriter {
   async activePlayersExist(ids: string[]) {
     const unique = [...new Set(ids)];
 
-    if (unique.length === 0) return true;
+    if (unique.length === 0) {
+      return true;
+    }
 
     return (
       (await this.em.count(Player, { id: { $in: unique }, mergedInto: null })) === unique.length

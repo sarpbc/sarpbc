@@ -19,16 +19,19 @@ function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipan
   for (const { teamId, playerIds } of entries) {
     const roster = rosters.get(teamId);
 
-    if (!roster)
+    if (!roster) {
       throw new InvalidInputError(
         `Team "${teamId}" is not a participant of this tournament. Add it as a participant first.`,
       );
+    }
+
     const outsiders = playerIds.filter((playerId) => !roster.includes(playerId));
 
-    if (outsiders.length > 0)
+    if (outsiders.length > 0) {
       throw new InvalidInputError(
         `Players ${outsiders.join(", ")} are not on the tournament roster of team "${teamId}".`,
       );
+    }
   }
 }
 
@@ -42,7 +45,9 @@ export class TournamentPrizeService {
   async findByTournamentId(id: string): Promise<TournamentPrizes> {
     const prizes = await this.reads.byTournament(id);
 
-    if (!prizes) throw new NotFoundError(`Tournament with id "${id}" not found`);
+    if (!prizes) {
+      throw new NotFoundError(`Tournament with id "${id}" not found`);
+    }
 
     return prizes;
   }
@@ -50,10 +55,13 @@ export class TournamentPrizeService {
   async requireProposableTournament(id: string): Promise<void> {
     const source = await this.reads.tournamentSource(id);
 
-    if (!source) throw new NotFoundError(`Tournament with id "${id}" not found`);
+    if (!source) {
+      throw new NotFoundError(`Tournament with id "${id}" not found`);
+    }
 
-    if (source === "startgg")
+    if (source === "startgg") {
       throw new InvalidInputError("Prize distributions of start.gg tournaments cannot be proposed");
+    }
   }
 
   async requireProposablePrize(
@@ -106,8 +114,10 @@ export class TournamentPrizeService {
     buildEntries: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
   ): Promise<TournamentPrizes> {
     await this.transaction.run(async ({ prizes }) => {
-      if (!(await prizes.tournamentExists(tournamentId)))
+      if (!(await prizes.tournamentExists(tournamentId))) {
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+      }
+
       const entries = await buildEntries(prizes);
       assertPrizeDistribution(entries);
       assertParticipants(entries, await prizes.participants(tournamentId));

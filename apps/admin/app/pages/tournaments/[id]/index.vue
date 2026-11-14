@@ -88,7 +88,10 @@ function matchLabel(match: TournamentMatchListItem): string {
 function openBracket(match: TournamentMatchListItem) {
   const detailed = detailMatches.value.get(match.id);
 
-  if (!detailed) return;
+  if (!detailed) {
+    return;
+  }
+
   bracketMatch.value = { match: detailed, label: matchLabel(match) };
   bracketOpen.value = true;
 }

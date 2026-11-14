@@ -36,7 +36,9 @@ const nickname = computed(() => t(`page.game.career.end.nicknames.${result.nickn
 function majorSummary(season: CareerSeasonRecord, split: number): string {
   const record = season.splits.find((entry) => entry.split === split);
 
-  if (!record) return t("page.game.career.results.majorNotQualified");
+  if (!record) {
+    return t("page.game.career.results.majorNotQualified");
+  }
 
   return record.major
     ? t(`page.game.career.placements.${record.major}`)

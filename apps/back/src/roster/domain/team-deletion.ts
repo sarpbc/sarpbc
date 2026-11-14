@@ -1,6 +1,7 @@
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import { describeReferences, type ReferenceNouns } from "../../common/domain/references";
+import { describeReferences } from "../../common/domain/references";
+import type { ReferenceNouns } from "../../common/domain/references";
 import type { Team } from "./team";
 
 export interface TeamCompetitionReferences {

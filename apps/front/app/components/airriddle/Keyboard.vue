@@ -41,15 +41,23 @@ function keyLabel(letter: string): string {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {
-    case "correct":
+    case "correct": {
       return `${letter}, ${t("page.game.airriddle.result.correct")}`;
-    case "misplaced":
+    }
+
+    case "misplaced": {
       return `${letter}, ${t("page.game.airriddle.result.misplaced")}`;
-    case "incorrect":
+    }
+
+    case "incorrect": {
       return `${letter}, ${t("page.game.airriddle.result.incorrect")}`;
+    }
+
     case "unused":
-    case undefined:
+    case undefined: {
       return letter;
+    }
+
     default: {
       const exhaustive: never = status;
 
@@ -62,15 +70,23 @@ function keyClass(letter: string): string {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {
-    case "correct":
+    case "correct": {
       return "bg-success text-ink-950";
-    case "misplaced":
+    }
+
+    case "misplaced": {
       return "bg-warning text-ink-950";
-    case "incorrect":
+    }
+
+    case "incorrect": {
       return "bg-elevated text-highlighted";
+    }
+
     case "unused":
-    case undefined:
+    case undefined: {
       return "";
+    }
+
     default: {
       const exhaustive: never = status;
 

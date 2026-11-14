@@ -20,7 +20,9 @@ function streamsResponse(data: unknown[], status = 200) {
 function requestedUrl(call: Parameters<typeof fetch>): URL {
   const [input] = call;
 
-  if (!(input instanceof URL)) throw new Error("Expected a URL request");
+  if (!(input instanceof URL)) {
+    throw new TypeError("Expected a URL request");
+  }
 
   return input;
 }

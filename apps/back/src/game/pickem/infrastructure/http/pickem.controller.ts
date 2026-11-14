@@ -1,12 +1,13 @@
 import { Controller, Get, Param, Post, Body, UseGuards, Request } from "@nestjs/common";
-import { PickemService } from "../../application/pickem.service";
+import type { PickemService } from "../../application/pickem.service";
 import { AuthGuard } from "../../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../../user/infrastructure/http/user.guard";
-import { AuthenticatedUserRequest } from "../../../../common/infrastructure/http/types/authenticated.interface";
-import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
+import type { AuthenticatedUserRequest } from "../../../../common/infrastructure/http/types/authenticated.interface";
+import type { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
 import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
-import { MakePickDto, type MakePickInput } from "./dto/make-pick.dto";
+import { MakePickDto } from "./dto/make-pick.dto";
+import type { MakePickInput } from "./dto/make-pick.dto";
 
 @Controller("pickem")
 export class PickemController {

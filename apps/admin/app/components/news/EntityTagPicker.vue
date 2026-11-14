@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { watchDebounced } from "@vueuse/core";
 import type { Player, Team } from "@sarpbc/types";
-import { resolveThemedLogoUrl, type NewsEntityTagKind } from "@sarpbc/utils";
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
+import type { NewsEntityTagKind } from "@sarpbc/utils";
 
 const { kind, open } = defineProps<{
   kind: NewsEntityTagKind;

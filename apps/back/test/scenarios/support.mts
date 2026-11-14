@@ -55,7 +55,9 @@ export type RequestContextType = typeof RequestContext;
 
 /** UTF-16 code unit order, the order `Array.prototype.sort` uses by default. */
 export const byText = (a: string, b: string): number => {
-  if (a < b) return -1;
+  if (a < b) {
+    return -1;
+  }
 
   return a > b ? 1 : 0;
 };

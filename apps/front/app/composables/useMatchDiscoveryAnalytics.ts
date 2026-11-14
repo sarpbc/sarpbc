@@ -1,9 +1,6 @@
 import type { MatchLinkTarget } from "~/types/matches";
-import {
-  buildMatchDetailTo,
-  type MatchDiscoverySource,
-  type MatchDiscoveryStatus,
-} from "~/utils/matchDiscoveryAnalytics";
+import { buildMatchDetailTo } from "~/utils/matchDiscoveryAnalytics";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 
 interface MatchDetailViewedProperties {
   match_id: string;

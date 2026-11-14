@@ -44,7 +44,9 @@ const { data: nextEvent } = useLazyAsyncData(
       .filter((event) => getTournamentStatus(event) === "upcoming")
       .toSorted((a, b) => new Date(a.beginAt ?? 0).getTime() - new Date(b.beginAt ?? 0).getTime());
 
-    if (!next) return null;
+    if (!next) {
+      return null;
+    }
 
     return { slug: next.slug, name: next.name };
   },

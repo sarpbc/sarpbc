@@ -1,5 +1,6 @@
 import { v4 } from "uuid";
-import { isMatchFinished, matchSlug, participantName, type NamedParticipant } from "@sarpbc/utils";
+import { isMatchFinished, matchSlug, participantName } from "@sarpbc/utils";
+import type { NamedParticipant } from "@sarpbc/utils";
 import type { MatchVod, Stream, TournamentEventRef, Viewership, DataSource } from "@sarpbc/types";
 import type { League } from "./league";
 import type { OfficialMatchStream } from "./official-match-stream";
@@ -61,7 +62,9 @@ export class Match {
   }
   /** Match lists read `endAt` as the end marker, so a finished match must carry one. */
   stampEnd(at: Date): void {
-    if (this.status === "finished") this.endAt ??= at;
+    if (this.status === "finished") {
+      this.endAt ??= at;
+    }
   }
   isDecided(): boolean {
     return this.winner !== null && this.hasEnded();

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { TournamentSyncRunner } from "./tournament-sync.runner";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";

@@ -4,8 +4,8 @@ import {
   assertBracketLinks,
   assertManualBracketMatch,
   emptySingleEliminationBracket,
-  type StageBracket,
 } from "./bracket";
+import type { StageBracket } from "./bracket";
 
 const stage = (): StageBracket => ({
   hasBracket: true,

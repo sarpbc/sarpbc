@@ -19,11 +19,17 @@ export function playerNameMatches(inGameName: string, playerName: string): boole
   const inGame = normalizeName(inGameName);
   const player = normalizeName(playerName);
 
-  if (!inGame || !player) return false;
+  if (!inGame || !player) {
+    return false;
+  }
 
-  if (inGame === player) return true;
+  if (inGame === player) {
+    return true;
+  }
 
-  if (player.length >= 2 && tokens(inGameName).includes(player)) return true;
+  if (player.length >= 2 && tokens(inGameName).includes(player)) {
+    return true;
+  }
 
   return (
     player.length >= MIN_AFFIX_LENGTH && (inGame.startsWith(player) || inGame.endsWith(player))
@@ -42,13 +48,22 @@ export function teamNameMatches(replayTeamName: string, teamName: string): boole
   const replay = replayParts.join("") || replayAll.join("");
   const team = teamParts.join("") || teamAll.join("");
 
-  if (!replay || !team) return false;
+  if (!replay || !team) {
+    return false;
+  }
 
-  if (replay === team) return true;
+  if (replay === team) {
+    return true;
+  }
 
-  if (teamParts.length >= 2 && replay === initials(teamParts)) return true;
+  if (teamParts.length >= 2 && replay === initials(teamParts)) {
+    return true;
+  }
 
-  if (replayParts.length >= 2 && team === initials(replayParts)) return true;
+  if (replayParts.length >= 2 && team === initials(replayParts)) {
+    return true;
+  }
+
   const [shorter, longer] = replay.length <= team.length ? [replay, team] : [team, replay];
 
   return shorter.length >= MIN_AFFIX_LENGTH && longer.includes(shorter);

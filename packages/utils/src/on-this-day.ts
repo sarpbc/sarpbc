@@ -13,7 +13,9 @@ export interface CalendarDay {
 }
 
 export function isMonthDay(month: number, day: number): boolean {
-  if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) return false;
+  if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) {
+    return false;
+  }
 
   return day >= 1 && day <= (DAYS_IN_MONTH[month - 1] ?? 0);
 }
@@ -35,7 +37,10 @@ export function calendarDayIn(date: Date, timeZone: string): CalendarDay {
 export function parseIsoDay(value: string): CalendarDay | null {
   const match = ISO_DAY.exec(value);
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
+
   const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
   const date = new Date(Date.UTC(year, month - 1, day));
 

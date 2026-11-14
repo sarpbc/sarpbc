@@ -55,7 +55,10 @@ function expectStatus(result: SpawnSyncReturns<string>, status: number): void {
 }
 
 void test("branches accept every allowed type and main", () => {
-  for (const type of types) expectStatus(run(["branch", `${type}/159-player-search`]), 0);
+  for (const type of types) {
+    expectStatus(run(["branch", `${type}/159-player-search`]), 0);
+  }
+
   expectStatus(run(["branch", "main"]), 0);
 });
 

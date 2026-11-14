@@ -60,13 +60,17 @@ export function winsNeeded(bestOf: number): number {
 }
 
 export function gameWinner(game: Pick<StreamScoreGame, "blue" | "orange">): StreamScoreSide | null {
-  if (game.blue === game.orange) return null;
+  if (game.blue === game.orange) {
+    return null;
+  }
 
   return game.blue > game.orange ? "blue" : "orange";
 }
 
 function leadingSide(blue: number, orange: number, needed: number): StreamScoreSide | null {
-  if (blue >= needed) return "blue";
+  if (blue >= needed) {
+    return "blue";
+  }
 
   return orange >= needed ? "orange" : null;
 }
@@ -103,9 +107,13 @@ export function parseStreamScoreProposal(text: string): ParsedStreamScoreProposa
 
   const parsed = proposalSchema.safeParse(json);
 
-  if (!parsed.success) return { ok: false, error: "invalid-proposal" };
+  if (!parsed.success) {
+    return { ok: false, error: "invalid-proposal" };
+  }
 
-  if (!isConsistent(parsed.data)) return { ok: false, error: "inconsistent-series" };
+  if (!isConsistent(parsed.data)) {
+    return { ok: false, error: "inconsistent-series" };
+  }
 
   return { ok: true, proposal: parsed.data };
 }

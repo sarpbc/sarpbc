@@ -1,9 +1,13 @@
 import type { DirectorySearchProps } from "../../application/search-props";
 
 function namePattern(name: string | undefined, start: string | undefined): string | null {
-  if (name !== undefined && name !== "") return `%${name}%`;
+  if (name !== undefined && name !== "") {
+    return `%${name}%`;
+  }
 
-  if (start !== undefined && start !== "") return `${start}%`;
+  if (start !== undefined && start !== "") {
+    return `${start}%`;
+  }
 
   return null;
 }

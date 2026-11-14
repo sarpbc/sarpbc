@@ -21,23 +21,29 @@ export interface OnThisDayFactFields {
 function requiredText(value: string, language: string): string {
   const text = value.trim();
 
-  if (!text || text.length > ON_THIS_DAY_TEXT_MAX_LENGTH)
+  if (!text || text.length > ON_THIS_DAY_TEXT_MAX_LENGTH) {
     throw new InvalidInputError(
       `The ${language} text has between 1 and ${ON_THIS_DAY_TEXT_MAX_LENGTH} characters.`,
     );
+  }
 
   return text;
 }
 
 function parseYear(year: number | null, month: number, day: number): number | null {
-  if (year === null) return null;
+  if (year === null) {
+    return null;
+  }
 
-  if (!Number.isInteger(year) || year < ON_THIS_DAY_MIN_YEAR || year > 9999)
+  if (!Number.isInteger(year) || year < ON_THIS_DAY_MIN_YEAR || year > 9999) {
     throw new InvalidInputError(`The year is a whole number from ${ON_THIS_DAY_MIN_YEAR}.`);
+  }
+
   const date = new Date(Date.UTC(year, month - 1, day));
 
-  if (date.getUTCMonth() !== month - 1)
+  if (date.getUTCMonth() !== month - 1) {
     throw new InvalidInputError(`February 29 does not exist in ${year}.`);
+  }
 
   return year;
 }
@@ -45,30 +51,39 @@ function parseYear(year: number | null, month: number, day: number): number | nu
 export function parseFactSourceUrl(value: string | null): string | null {
   const raw = value?.trim() ?? "";
 
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
 
-  if (raw.length > ON_THIS_DAY_SOURCE_URL_MAX_LENGTH)
+  if (raw.length > ON_THIS_DAY_SOURCE_URL_MAX_LENGTH) {
     throw new InvalidInputError(
       `The source has at most ${ON_THIS_DAY_SOURCE_URL_MAX_LENGTH} characters.`,
     );
+  }
 
-  if (!URL.canParse(raw)) throw new InvalidInputError("The source must be an http(s) URL.");
+  if (!URL.canParse(raw)) {
+    throw new InvalidInputError("The source must be an http(s) URL.");
+  }
+
   const url = new URL(raw);
 
-  if (!/^https?:$/.test(url.protocol) || url.username || url.password)
+  if (!/^https?:$/.test(url.protocol) || url.username || url.password) {
     throw new InvalidInputError("The source must be an http(s) URL.");
+  }
 
-  if (isForbiddenSourceHost(url.hostname))
+  if (isForbiddenSourceHost(url.hostname)) {
     throw new InvalidInputError(
       "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
     );
+  }
 
   return url.href;
 }
 
 export function parseOnThisDayFact(input: OnThisDayFactFields): OnThisDayFactFields {
-  if (!isMonthDay(input.month, input.day))
+  if (!isMonthDay(input.month, input.day)) {
     throw new InvalidInputError("The month and day do not form a calendar date.");
+  }
 
   return {
     month: input.month,

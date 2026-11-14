@@ -37,9 +37,13 @@ describe(findMatchBlocks, () => {
 
   it("puts live, then upcoming, then recent results of a scope up to its limit", async () => {
     reads.page.mockImplementation(async (kind) => {
-      if (kind === "live") return [stored("live")];
+      if (kind === "live") {
+        return [stored("live")];
+      }
 
-      if (kind === "upcoming") return [stored("next"), stored("later")];
+      if (kind === "upcoming") {
+        return [stored("next"), stored("later")];
+      }
 
       return [stored("result")];
     });

@@ -85,7 +85,9 @@ function textInk(text: string) {
   const glyphs = Array.from(text, (char) => {
     const rows = FONT.get(char);
 
-    if (rows === undefined) throw new Error(`No fixture glyph for ${char}`);
+    if (rows === undefined) {
+      throw new Error(`No fixture glyph for ${char}`);
+    }
 
     return rows;
   });
@@ -94,7 +96,9 @@ function textInk(text: string) {
 
   for (const [index, rows] of glyphs.entries()) {
     if (index > 0) {
-      for (const row of ink) row.push(false);
+      for (const row of ink) {
+        row.push(false);
+      }
     }
 
     for (const [y, row] of rows.entries()) {
@@ -208,7 +212,9 @@ export class FixtureRenderer {
   #panel(replay: boolean): Float32Array {
     const cached = this.#panels.get(replay);
 
-    if (cached !== undefined) return cached;
+    if (cached !== undefined) {
+      return cached;
+    }
 
     const layers: { region: Region; color: Rgb }[] = [
       { region: PANEL, color: PANEL_COLOR },
@@ -216,7 +222,9 @@ export class FixtureRenderer {
       { region: ORANGE_STRIP, color: ORANGE_COLOR },
     ];
 
-    if (replay) layers.push({ region: REPLAY_BANNER, color: REPLAY_COLOR });
+    if (replay) {
+      layers.push({ region: REPLAY_BANNER, color: REPLAY_COLOR });
+    }
 
     const layer = this.#bandLayer((x0, x1, y0, y1, base) => {
       let color = base;
@@ -242,7 +250,10 @@ export class FixtureRenderer {
     const key = `${region.x}:${text}`;
     const cached = this.#texts.get(key);
 
-    if (cached !== undefined) return cached;
+    if (cached !== undefined) {
+      return cached;
+    }
+
     const { columns, ink } = textInk(text);
     const originX = region.x + (region.width - columns * FONT_PIXEL) / 2;
     const originY = region.y + (region.height - FONT_ROWS * FONT_PIXEL) / 2;
@@ -263,7 +274,10 @@ export class FixtureRenderer {
 
         for (let row = firstRow; row <= lastRow; row += 1) {
           for (let column = firstColumn; column <= lastColumn; column += 1) {
-            if (!ink[row]?.[column]) continue;
+            if (!ink[row]?.[column]) {
+              continue;
+            }
+
             const cellX = originX + column * FONT_PIXEL;
             const cellY = originY + row * FONT_PIXEL;
             area +=
@@ -304,7 +318,10 @@ export class FixtureRenderer {
   #hiddenLayer(variant: number): Float32Array {
     const cached = this.#hidden.get(variant);
 
-    if (cached !== undefined) return cached;
+    if (cached !== undefined) {
+      return cached;
+    }
+
     const random = seededRandom(variant * 7919 + 17);
 
     const blocks = Array.from({ length: 6 }, () => ({

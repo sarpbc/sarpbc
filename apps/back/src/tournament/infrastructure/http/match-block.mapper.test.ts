@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Team } from "../../../roster/domain/team";
-import { Match, type TournamentSummary } from "../../domain/match";
+import { Match } from "../../domain/match";
+import type { TournamentSummary } from "../../domain/match";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchBlockItem } from "./match-list.mapper";
 

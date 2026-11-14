@@ -1,7 +1,9 @@
 import type { PostHogProperties, PostHogService } from "./posthog.service";
 
 function singleHeader(value: string | string[] | undefined): string | undefined {
-  if (!Array.isArray(value)) return value;
+  if (!Array.isArray(value)) {
+    return value;
+  }
 
   const [first]: (string | undefined)[] = value;
 

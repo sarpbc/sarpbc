@@ -25,7 +25,10 @@ export class SeasonRosterReferences implements RosterReferenceMover {
       .filter((award) => award.player.id === from && held.has(awardKey(award)))
       .map(({ id }) => id);
 
-    if (duplicates.length) await this.em.nativeDelete(SeasonAward, { id: { $in: duplicates } });
+    if (duplicates.length) {
+      await this.em.nativeDelete(SeasonAward, { id: { $in: duplicates } });
+    }
+
     await this.em.nativeUpdate(SeasonAward, { player: from }, { player: to });
   }
 
@@ -49,19 +52,24 @@ export class SeasonRosterReferences implements RosterReferenceMover {
       async (duplicate) => {
         const keeper = kept.get(duplicate.season.id);
 
-        if (!keeper) return;
+        if (!keeper) {
+          return;
+        }
+
         await this.em.nativeUpdate(
           SeasonPathEntry,
           { participant: duplicate.id },
           { participant: keeper.id },
         );
 
-        if (keeper.pathNote === null && duplicate.pathNote !== null)
+        if (keeper.pathNote === null && duplicate.pathNote !== null) {
           await this.em.nativeUpdate(
             SeasonParticipant,
             { id: keeper.id },
             { pathNote: duplicate.pathNote },
           );
+        }
+
         await this.em.nativeDelete(SeasonParticipant, { id: duplicate.id });
       },
     );

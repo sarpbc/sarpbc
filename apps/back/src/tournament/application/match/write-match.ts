@@ -13,12 +13,8 @@ import type {
   UpdateMatchInput,
 } from "../inputs";
 import { winnerFromResults } from "@sarpbc/utils";
-import {
-  normalizeMatchVods,
-  replaceGameVods,
-  type MatchVodInput,
-  type MatchVodLink,
-} from "../../domain/match-vod";
+import { normalizeMatchVods, replaceGameVods } from "../../domain/match-vod";
+import type { MatchVodInput, MatchVodLink } from "../../domain/match-vod";
 import {
   assertBracketLinks,
   assertManualBracketMatch,
@@ -36,8 +32,9 @@ async function requireParticipants(
   const ids = new Set(participantIds);
   const participants = available.filter((p) => ids.has(p.id));
 
-  if (participants.length !== participantIds.length)
+  if (participants.length !== participantIds.length) {
     throw new InvalidInputError("Some participants not found in this tournament");
+  }
 
   return participants;
 }
@@ -81,13 +78,14 @@ async function saveMatch(
     for (const r of input.results) {
       const participant = participants.find((p) => p.id === r.participantId);
 
-      if (participant)
+      if (participant) {
         match.results.push({
           id: v4(),
           match: { id: match.id },
           participant: { id: participant.id },
           score: r.score,
         });
+      }
     }
   }
 
@@ -101,7 +99,9 @@ async function saveMatch(
     if (winnerId !== null && winnerId !== "") {
       match.winner = participants.find((p) => p.id === winnerId) ?? null;
 
-      if (match.winner) match.status = "finished";
+      if (match.winner) {
+        match.status = "finished";
+      }
     }
   }
 
@@ -118,15 +118,19 @@ export async function createMatchInTransaction(
 ): Promise<Match> {
   const tournament = await writer.tournament(tournamentId);
 
-  if (!tournament) throw new NotFoundError("Tournament not found");
+  if (!tournament) {
+    throw new NotFoundError("Tournament not found");
+  }
+
   const participants = await requireParticipants(writer, tournamentId, input.participantIds);
   const match = new Match();
   match.tournament = tournament;
   match.source = tournament.source === "startgg" ? "startgg" : "manual";
   match.sourceUrl = parseDataSourceUrl(input.sourceUrl ?? null);
 
-  if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0)
+  if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0) {
     await setBracketLinks(writer, match, input.previousMatches);
+  }
 
   return await saveMatch(writer, match, participants, input);
 }
@@ -138,19 +142,25 @@ export async function createEmptyBracketInTransaction(
 ): Promise<Match[]> {
   const tournament = await writer.tournament(tournamentId);
 
-  if (!tournament) throw new NotFoundError("Tournament not found");
+  if (!tournament) {
+    throw new NotFoundError("Tournament not found");
+  }
 
-  if (tournament.source === "pandascore")
+  if (tournament.source === "pandascore") {
     throw new InvalidInputError("PandaScore manages the matches of this stage.");
+  }
+
   const stage = await writer.bracket(tournamentId);
 
-  if (!stage.hasBracket)
+  if (!stage.hasBracket) {
     throw new InvalidInputError("Enable the bracket on this stage before generating it.");
+  }
 
-  if (stage.matches.length > 0)
+  if (stage.matches.length > 0) {
     throw new InvalidInputError(
       "This stage already has matches. Generate an empty bracket on a stage without matches.",
     );
+  }
 
   const planned = emptySingleEliminationBracket(input.teams).map((slot) => {
     const match = new Match();
@@ -187,7 +197,10 @@ export async function upsertSyncedMatchInTransaction(
 ): Promise<Match> {
   const tournament = await writer.tournament(tournamentId);
 
-  if (!tournament) throw new NotFoundError("Tournament not found");
+  if (!tournament) {
+    throw new NotFoundError("Tournament not found");
+  }
+
   const participants = await requireParticipants(writer, tournamentId, input.participantIds);
   let match = await writer.byPandascoreId(input.pandascoreId);
 
@@ -198,7 +211,9 @@ export async function upsertSyncedMatchInTransaction(
     match.source = "pandascore";
   }
 
-  if (input.officialStreams !== undefined) match.officialStreams = input.officialStreams;
+  if (input.officialStreams !== undefined) {
+    match.officialStreams = input.officialStreams;
+  }
 
   if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0) {
     const previousMatches = await mapSequentially(input.previousMatches, async (link) => ({
@@ -230,10 +245,16 @@ export async function setWinnerInTransaction(
 ): Promise<Match> {
   const match = await writer.load(id);
 
-  if (!match) throw new NotFoundError("Match not found");
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
+
   const winner = match.participants.find((p) => p.id === winnerId);
 
-  if (!winner) throw new InvalidInputError("Winner must be a participant in this match");
+  if (!winner) {
+    throw new InvalidInputError("Winner must be a participant in this match");
+  }
+
   match.winner = winner;
   match.status = "finished";
   match.stampEnd(new Date());
@@ -250,21 +271,27 @@ async function replaceParticipants(
 ): Promise<void> {
   assertManualBracketMatch(match);
 
-  if (new Set(participantIds).size !== participantIds.length)
+  if (new Set(participantIds).size !== participantIds.length) {
     throw new InvalidInputError("Each participant can only play a match once.");
+  }
+
   const participants = await requireParticipants(writer, match.tournament.id, [...participantIds]);
   const current = new Set(match.participants.map((p) => p.id));
 
   const changed =
     current.size !== participantIds.length || participantIds.some((id) => !current.has(id));
 
-  if (changed && !rescored && (match.results.length > 0 || match.winner))
+  if (changed && !rescored && (match.results.length > 0 || match.winner)) {
     throw new InvalidInputError(
       "This match already has scores or a winner. Send its new scores with the participants.",
     );
+  }
+
   match.participants = participantIds.flatMap((id) => participants.find((p) => p.id === id) ?? []);
 
-  if (match.winner && !participantIds.includes(match.winner.id)) match.winner = null;
+  if (match.winner && !participantIds.includes(match.winner.id)) {
+    match.winner = null;
+  }
 }
 
 export async function updateMatchInTransaction(
@@ -274,31 +301,45 @@ export async function updateMatchInTransaction(
 ): Promise<Match> {
   const match = await writer.load(id);
 
-  if (!match) throw new NotFoundError("Match not found");
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
 
-  if (match.pandascoreId !== null)
+  if (match.pandascoreId !== null) {
     throw new InvalidInputError("PandaScore manages the score, status and dates of this match");
+  }
 
-  if (input.participantIds !== undefined)
+  if (input.participantIds !== undefined) {
     await replaceParticipants(writer, match, input.participantIds, input.results !== undefined);
+  }
 
-  if (input.previousMatches !== undefined)
+  if (input.previousMatches !== undefined) {
     await setBracketLinks(writer, match, input.previousMatches);
+  }
 
-  if (input.beginAt !== undefined) match.beginAt = input.beginAt;
+  if (input.beginAt !== undefined) {
+    match.beginAt = input.beginAt;
+  }
 
-  if (input.endAt !== undefined) match.endAt = input.endAt;
+  if (input.endAt !== undefined) {
+    match.endAt = input.endAt;
+  }
 
-  if (input.status !== undefined) match.status = input.status;
+  if (input.status !== undefined) {
+    match.status = input.status;
+  }
 
-  if (input.status !== undefined && input.status !== "finished" && input.endAt === undefined)
+  if (input.status !== undefined && input.status !== "finished" && input.endAt === undefined) {
     match.endAt = null;
+  }
 
   if (input.results) {
     const ids = new Set(match.participants.map((p) => p.id));
 
-    if (input.results.some((r) => !ids.has(r.participantId)))
+    if (input.results.some((r) => !ids.has(r.participantId))) {
       throw new InvalidInputError("Scores must belong to participants in this match");
+    }
+
     match.results = input.results.map((r) => ({
       id: v4(),
       match: { id: match.id },
@@ -320,9 +361,13 @@ export async function updateMatchInTransaction(
     const winner = match.participants.find((p) => p.id === winnerId) ?? null;
 
     // A staff-picked winner survives a status-only update on a drawn or unscored match.
-    if (winner || input.results) match.winner = winner;
+    if (winner || input.results) {
+      match.winner = winner;
+    }
 
-    if (match.winner) match.status = "finished";
+    if (match.winner) {
+      match.status = "finished";
+    }
   } else {
     match.winner = null;
   }
@@ -340,7 +385,10 @@ export async function setVodsInTransaction(
 ): Promise<Match> {
   const match = await writer.load(id);
 
-  if (!match) throw new NotFoundError("Match not found");
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
+
   match.vods = normalizeMatchVods(vods, match.numberOfGames);
   await writer.save(match);
 
@@ -354,7 +402,10 @@ export async function setSourceInTransaction(
 ): Promise<Match> {
   const match = await writer.load(id);
 
-  if (!match) throw new NotFoundError("Match not found");
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
+
   match.sourceUrl = parseDataSourceUrl(sourceUrl);
   await writer.save(match);
 
@@ -369,7 +420,10 @@ export async function setGameVodsInTransaction(
 ): Promise<Match> {
   const match = await writer.load(id);
 
-  if (!match) throw new NotFoundError("Match not found");
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
+
   match.vods = replaceGameVods(match.vods, game, links, match.numberOfGames);
   await writer.save(match);
 

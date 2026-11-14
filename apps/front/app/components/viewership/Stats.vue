@@ -17,10 +17,14 @@ const dateTimeFormatter = computed(
 
 function scopeLabel(scope: ViewershipScope): string {
   switch (scope) {
-    case "official":
+    case "official": {
       return t("components.viewership.scope.official");
-    case "with_costreams":
+    }
+
+    case "with_costreams": {
       return t("components.viewership.scope.withCostreams");
+    }
+
     default: {
       const _exhaustive: never = scope;
 

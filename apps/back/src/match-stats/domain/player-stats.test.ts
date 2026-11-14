@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { aggregatePlayerStats, type PlayerGameLine } from "./player-stats";
+import { aggregatePlayerStats } from "./player-stats";
+import type { PlayerGameLine } from "./player-stats";
 
 const vitality = { id: "team-vit", name: "Vitality", slug: "vitality" };
 const solary = { id: "team-sly", name: "Solary", slug: "solary" };

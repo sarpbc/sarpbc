@@ -5,10 +5,10 @@ import {
   NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
   NEWS_MATCH_BLOCK_MAX_MATCHES,
   newsMatchBlockKey,
-  type NewsMatchBlockKind,
   tournamentStageLabel,
   participantName,
 } from "@sarpbc/utils";
+import type { NewsMatchBlockKind } from "@sarpbc/utils";
 
 interface Selection {
   id: string;
@@ -56,14 +56,22 @@ const block = computed((): MatchBlockSelector | null => {
   }
 
   switch (kind.value) {
-    case "match":
+    case "match": {
       return matchIds.value[0] ? { kind: "match", id: matchIds.value[0] } : null;
-    case "matches":
+    }
+
+    case "matches": {
       return matchIds.value.length > 0 ? { kind: "matches", ids: matchIds.value } : null;
-    case "tournament":
+    }
+
+    case "tournament": {
       return { kind: "tournament", id: source.value.id, limit: limit.value };
-    case "team":
+    }
+
+    case "team": {
       return { kind: "team", id: source.value.id, limit: limit.value };
+    }
+
     default: {
       const exhaustive: never = kind.value;
 

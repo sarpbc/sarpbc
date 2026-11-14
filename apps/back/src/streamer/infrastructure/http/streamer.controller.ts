@@ -16,8 +16,9 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { TrackedStreamer as TrackedStreamerRecord } from "../../domain/tracked-streamer";
-import { StreamerService } from "../../application/streamer.service";
-import { CreateStreamerDto, type CreateStreamerInput } from "./dto/create-streamer.dto";
+import type { StreamerService } from "../../application/streamer.service";
+import { CreateStreamerDto } from "./dto/create-streamer.dto";
+import type { CreateStreamerInput } from "./dto/create-streamer.dto";
 
 function mapTrackedStreamer(streamer: TrackedStreamerRecord): TrackedStreamer {
   return {

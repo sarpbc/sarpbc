@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import type { ConfigService } from "@nestjs/config";
 import {
   CopyObjectCommand,
   DeleteObjectCommand,
@@ -9,11 +9,8 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
-import {
-  IMAGE_FILE_EXTENSIONS,
-  type ImageContentType,
-  type ImageUploadTarget,
-} from "@sarpbc/utils";
+import { IMAGE_FILE_EXTENSIONS } from "@sarpbc/utils";
+import type { ImageContentType, ImageUploadTarget } from "@sarpbc/utils";
 import type {
   ObjectStorage,
   ObjectUploadUrl,

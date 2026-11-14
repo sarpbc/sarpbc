@@ -137,8 +137,10 @@ export class RosterProposalService {
     sourceUrl: string,
     proposedById: string,
   ): Promise<RosterProposal> {
-    if (sourceUrl !== "" && !isAcceptedDataSourceUrl(sourceUrl))
+    if (sourceUrl !== "" && !isAcceptedDataSourceUrl(sourceUrl)) {
       throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
+    }
+
     await this.requireReferences(change);
 
     if (change.kind === "update_contract") {
@@ -170,8 +172,10 @@ export class RosterProposalService {
     }
 
     if (change.kind === "set_match_lineups") {
-      if (!isRedistributable(sourceFromUrl(sourceUrl)))
+      if (!isRedistributable(sourceFromUrl(sourceUrl))) {
         throw new InvalidInputError("Lineups sourced from start.gg cannot be proposed");
+      }
+
       await this.lineups.requireProposable(change.matchId, change.lineups);
     }
 
@@ -350,7 +354,10 @@ export class RosterProposalService {
   ): Promise<RosterProposal> {
     const proposal = await proposals.findById(id);
 
-    if (!proposal) throw new NotFoundError(`Roster proposal "${id}" not found`);
+    if (!proposal) {
+      throw new NotFoundError(`Roster proposal "${id}" not found`);
+    }
+
     const permission = requiredPermission(proposal.change);
 
     if (!(await this.staff.hasAnyPermission(reviewerId, [permission]))) {
@@ -494,8 +501,9 @@ export class RosterProposalService {
         return change.matchId;
       },
       delete_team: async (change) => {
-        if (change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== "")
+        if (change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== "") {
           return await keptIdOf(this.merges.mergeTeams(change.mergeIntoTeamId, change.teamId));
+        }
 
         await this.teams.delete(change.teamId);
 
@@ -529,7 +537,9 @@ export class RosterProposalService {
   private async requirePlayer(id: string): Promise<void> {
     const player = await this.players.findById(id);
 
-    if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
+    if (!player) {
+      throw new NotFoundError(`Player with id "${id}" not found`);
+    }
 
     if (player.id !== id) {
       throw new InvalidInputError(`Player "${id}" was merged into "${player.id}"; use that id`);
@@ -556,7 +566,9 @@ export class RosterProposalService {
   private async requireTeam(id: string): Promise<void> {
     const team = await this.teams.findById(id);
 
-    if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+    if (!team) {
+      throw new NotFoundError(`Team with id "${id}" not found`);
+    }
 
     if (team.id !== id) {
       throw new InvalidInputError(`Team "${id}" was merged into "${team.id}"; use that id`);

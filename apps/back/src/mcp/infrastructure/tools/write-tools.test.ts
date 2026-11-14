@@ -6,7 +6,8 @@ import { TournamentParticipant } from "../../../tournament/domain/tournament-par
 import { Team } from "../../../roster/domain/team";
 import type { McpTool, ToolArguments } from "../define-tool";
 import { jsonOf } from "../../../../test/mcp-result";
-import { writeTools, type WriteToolServices } from "./write-tools";
+import { writeTools } from "./write-tools";
+import type { WriteToolServices } from "./write-tools";
 
 function services(): WriteToolServices {
   return {
@@ -52,7 +53,9 @@ function services(): WriteToolServices {
 function defined(tools: McpTool[], name: string): McpTool {
   const tool = tools.find((candidate) => candidate.name === name);
 
-  if (!tool) throw new Error(`${name} is not defined`);
+  if (!tool) {
+    throw new Error(`${name} is not defined`);
+  }
 
   return tool;
 }
@@ -445,8 +448,9 @@ describe("bracket tools", () => {
     const input = z.object(defined(tools, "set_match_source").inputSchema);
     expect(input.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
 
-    for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"])
+    for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"]) {
       expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
+    }
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {

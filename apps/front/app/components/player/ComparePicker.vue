@@ -56,7 +56,9 @@ const items = computed(() =>
 );
 
 function select(option: PlayerOption | undefined) {
-  if (option) emit("select", option.value);
+  if (option) {
+    emit("select", option.value);
+  }
 }
 </script>
 

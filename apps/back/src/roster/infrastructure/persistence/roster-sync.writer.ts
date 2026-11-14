@@ -1,5 +1,5 @@
 import { playerColumns, teamColumns, toPlayer, toTeam } from "./roster.mapper";
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Contract } from "./contract.entity";
 import { Player } from "./player.entity";
@@ -26,8 +26,9 @@ export class RosterSyncWriter {
 
     const aliasedTeamId = this.aliasedTeams.get(key);
 
-    if (aliasedTeamId !== null && aliasedTeamId !== undefined && aliasedTeamId !== "")
+    if (aliasedTeamId !== null && aliasedTeamId !== undefined && aliasedTeamId !== "") {
       return { id: aliasedTeamId };
+    }
 
     const existing =
       this.teams.get(key) ?? (await findPandascoreTeam(this.em, input.pandascoreId, input.slug));
@@ -67,8 +68,10 @@ export class RosterSyncWriter {
     model.synchronizeProfile(input);
     Object.assign(row, playerColumns(model));
 
-    if (currentTeamId !== undefined && !(existing && (await this.hasOpenContract(row.id))))
+    if (currentTeamId !== undefined && !(existing && (await this.hasOpenContract(row.id)))) {
       row.team = currentTeamId === null ? null : this.em.getReference(Team, currentTeamId);
+    }
+
     this.em.persist(row);
 
     return { id: row.id };

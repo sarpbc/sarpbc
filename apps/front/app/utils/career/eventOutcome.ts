@@ -1,11 +1,6 @@
 import { isNonEmptyString } from "@sarpbc/utils";
-import {
-  getSeasonsPastPeak,
-  USER_ROSTER_ID,
-  type CareerEventChoiceDefinition,
-  type CareerState,
-  type CareerStats,
-} from "~/types/career";
+import { getSeasonsPastPeak, USER_ROSTER_ID } from "~/types/career";
+import type { CareerEventChoiceDefinition, CareerState, CareerStats } from "~/types/career";
 import { getRosterPlayerRating, getRosterStrength } from "~/utils/career/roster";
 import { createRng, hashString } from "~/utils/career/rng";
 
@@ -34,7 +29,9 @@ export interface ResolvedEventOutcome {
 }
 
 function mean(values: readonly number[]): number {
-  if (values.length === 0) return WORLD_STRENGTH_BASELINE;
+  if (values.length === 0) {
+    return WORLD_STRENGTH_BASELINE;
+  }
 
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
@@ -110,7 +107,9 @@ export function buildEventOutcomeContext(
 ): EventOutcomeContext {
   const eventId = state.currentEventId;
 
-  if (!isNonEmptyString(eventId)) throw new Error("No active event");
+  if (!isNonEmptyString(eventId)) {
+    throw new Error("No active event");
+  }
 
   const roster = state.world.rosters[state.currentTeamId];
   const lastSeason = state.seasonRecords.at(-1);

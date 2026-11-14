@@ -2,16 +2,26 @@ import type { TransferType } from "@sarpbc/types";
 
 export function transferTypeIcon(type: TransferType): string {
   switch (type) {
-    case "arrival":
+    case "arrival": {
       return "i-fluent-arrow-down-24-regular";
-    case "departure":
+    }
+
+    case "departure": {
       return "i-fluent-arrow-up-24-regular";
-    case "benched":
+    }
+
+    case "benched": {
       return "i-fluent-pause-24-regular";
-    case "loan":
+    }
+
+    case "loan": {
       return "i-fluent-arrow-swap-24-regular";
-    case "staff":
+    }
+
+    case "staff": {
       return "i-fluent-briefcase-24-regular";
+    }
+
     default: {
       const exhaustive: never = type;
 

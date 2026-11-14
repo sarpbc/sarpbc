@@ -18,8 +18,9 @@ function minorUnitScale(currency: string): number {
 function totals(lines: ShareLine[]): PrizeAmount[] {
   const byCurrency = new Map<string, number>();
 
-  for (const { entry, minorUnits } of lines)
+  for (const { entry, minorUnits } of lines) {
     byCurrency.set(entry.currency, (byCurrency.get(entry.currency) ?? 0) + minorUnits);
+  }
 
   return [...byCurrency]
     .toSorted(([a], [b]) => a.localeCompare(b))
@@ -42,7 +43,9 @@ export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {
 
   const years = new Map<number | null, ShareLine[]>();
 
-  for (const line of shares) years.set(line.year, [...(years.get(line.year) ?? []), line]);
+  for (const line of shares) {
+    years.set(line.year, [...(years.get(line.year) ?? []), line]);
+  }
 
   const grouped: EarningsYear[] = [...years]
     .toSorted(([a], [b]) => (b ?? -Infinity) - (a ?? -Infinity))

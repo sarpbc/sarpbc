@@ -37,7 +37,10 @@ function playerLabel(row: MatchGamePlayerStats): string {
 const teams = computed(() => {
   const current = game.value;
 
-  if (!current) return [];
+  if (!current) {
+    return [];
+  }
+
   const order = participants.map((participant) => participant.id);
 
   return [...current.teams]

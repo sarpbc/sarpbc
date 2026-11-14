@@ -17,7 +17,9 @@ const value = ref(sourceUrl ?? "");
 const saving = ref(false);
 
 watch(open, (isOpen) => {
-  if (isOpen) value.value = sourceUrl ?? "";
+  if (isOpen) {
+    value.value = sourceUrl ?? "";
+  }
 });
 
 async function save() {

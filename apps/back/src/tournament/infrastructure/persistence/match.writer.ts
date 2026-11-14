@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode } from "@mikro-orm/core";
 import { z } from "zod";
 import { Tournament as TournamentRow } from "./tournament.entity";
@@ -11,7 +11,7 @@ import type { StageBracket } from "../../domain/bracket";
 import type { MatchWriter } from "../../application/ports";
 import { MATCH_WRITE_POPULATE, toMatch } from "./competition.mapper";
 import { unchangedJson } from "./unchanged-json";
-import { CompetitionTournamentWriter } from "./tournament.writer";
+import type { CompetitionTournamentWriter } from "./tournament.writer";
 
 const matchReferenceCounts = z.object({
   picks: z.coerce.number().int().nonnegative(),
@@ -45,17 +45,23 @@ export class CompetitionMatchWriter implements MatchWriter {
         { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
       );
 
-      if (row) await this.em.populate(row, [...MATCH_WRITE_POPULATE], { refresh: true });
+      if (row) {
+        await this.em.populate(row, [...MATCH_WRITE_POPULATE], { refresh: true });
+      }
     }
 
-    if (row) this.staged.set(row.id, row);
+    if (row) {
+      this.staged.set(row.id, row);
+    }
 
     return row ? toMatch(row) : null;
   }
   async byPandascoreId(id: number) {
     const staged = [...this.staged.values()].find((m) => m.pandascoreId === id);
 
-    if (staged) return toMatch(staged);
+    if (staged) {
+      return toMatch(staged);
+    }
 
     const row = await this.em.findOne(
       MatchRow,
@@ -63,7 +69,9 @@ export class CompetitionMatchWriter implements MatchWriter {
       { populate: [...MATCH_WRITE_POPULATE] },
     );
 
-    if (row) this.staged.set(row.id, row);
+    if (row) {
+      this.staged.set(row.id, row);
+    }
 
     return row ? toMatch(row) : null;
   }
@@ -71,8 +79,11 @@ export class CompetitionMatchWriter implements MatchWriter {
     const rows = await this.em.findAll(MatchRow, { where: { tournament: tournamentId } });
     const byId = new Map(rows.map((row) => [row.id, row]));
 
-    for (const row of this.staged.values())
-      if (row.tournament.id === tournamentId) byId.set(row.id, row);
+    for (const row of this.staged.values()) {
+      if (row.tournament.id === tournamentId) {
+        byId.set(row.id, row);
+      }
+    }
 
     return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
   }
@@ -122,8 +133,10 @@ export class CompetitionMatchWriter implements MatchWriter {
     for (const row of matches) {
       const match = byId.get(row.id) ?? { id: row.id, previousMatches: [] };
 
-      if (row.previous_match_id !== null && row.previous_match_id !== "" && row.type)
+      if (row.previous_match_id !== null && row.previous_match_id !== "" && row.type) {
         match.previousMatches.push({ previousMatchId: row.previous_match_id, type: row.type });
+      }
+
       byId.set(row.id, match);
     }
 
@@ -171,13 +184,22 @@ export class CompetitionMatchWriter implements MatchWriter {
     const resultIds = new Set(model.results.map((r) => r.id));
     const linkIds = new Set(model.previousMatches.map((l) => l.id));
 
-    if (row.results.isInitialized())
-      for (const result of row.results.getItems())
-        if (!resultIds.has(result.id)) this.em.remove(result);
+    if (row.results.isInitialized()) {
+      for (const result of row.results.getItems()) {
+        if (!resultIds.has(result.id)) {
+          this.em.remove(result);
+        }
+      }
+    }
 
-    if (row.previousMatches.isInitialized())
-      for (const link of row.previousMatches.getItems())
-        if (!linkIds.has(link.id)) this.em.remove(link);
+    if (row.previousMatches.isInitialized()) {
+      for (const link of row.previousMatches.getItems()) {
+        if (!linkIds.has(link.id)) {
+          this.em.remove(link);
+        }
+      }
+    }
+
     row.results.set(
       model.results.map((r) => {
         const result = existingResults.get(r.id) ?? new MatchResultRow();

@@ -10,7 +10,10 @@ const root = useTemplateRef("root");
 const { stop } = useIntersectionObserver(
   root,
   ([entry]) => {
-    if (!entry?.isIntersecting) return;
+    if (!entry?.isIntersecting) {
+      return;
+    }
+
     stop();
     void load();
   },

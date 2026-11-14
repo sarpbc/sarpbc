@@ -2,10 +2,8 @@ import { setImmediate as nextTick } from "node:timers/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthenticationError } from "../../common/domain/errors/authentication-error";
 import { AuthService, parseOAuthReturnTo } from "./auth.service";
-import {
-  GoogleIdentityGateway,
-  type GoogleOAuthSession,
-} from "../infrastructure/google-identity.gateway";
+import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway";
+import type { GoogleOAuthSession } from "../infrastructure/google-identity.gateway";
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
 import type { GoogleIdentity, SessionTokens } from "./ports/authentication";
@@ -13,7 +11,9 @@ import { UserService } from "../../user/application/user.service";
 import { unconstructed } from "../../../test/doubles";
 
 async function waitUntil(predicate: () => boolean, startedAt = Date.now()): Promise<void> {
-  if (predicate()) return;
+  if (predicate()) {
+    return;
+  }
 
   if (Date.now() - startedAt > 1000) {
     throw new Error("Timed out waiting for overlapping OAuth callbacks");

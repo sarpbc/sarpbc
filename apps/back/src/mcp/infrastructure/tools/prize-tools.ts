@@ -6,7 +6,8 @@ import {
   isIso4217Code,
 } from "@sarpbc/utils";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { proposalSourceUrlSchema, proposer } from "./proposals";
 
 export interface PrizeToolServices {

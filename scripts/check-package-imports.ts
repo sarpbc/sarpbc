@@ -22,7 +22,9 @@ function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
 
-    if (entry.isDirectory()) return entry.name === "node_modules" ? [] : sourceFiles(file);
+    if (entry.isDirectory()) {
+      return entry.name === "node_modules" ? [] : sourceFiles(file);
+    }
 
     return /\.(?:ts|mts|mjs|js|vue)$/.test(entry.name) ? [file] : [];
   });

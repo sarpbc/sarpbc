@@ -75,15 +75,23 @@ function openCreateModal() {
 }
 
 async function confirmCreate() {
-  if (!newTeam.value.name) return;
+  if (!newTeam.value.name) {
+    return;
+  }
+
   isCreating.value = true;
 
   try {
     const body: CreateTeamDto = { name: newTeam.value.name };
 
-    if (newTeam.value.location) body.location = newTeam.value.location;
+    if (newTeam.value.location) {
+      body.location = newTeam.value.location;
+    }
 
-    if (newTeam.value.imageUrl) body.imageUrl = newTeam.value.imageUrl;
+    if (newTeam.value.imageUrl) {
+      body.imageUrl = newTeam.value.imageUrl;
+    }
+
     const created = await createTeam(body);
     isCreateModalOpen.value = false;
     await navigateTo(localePath(`/teams/${created.id}`));

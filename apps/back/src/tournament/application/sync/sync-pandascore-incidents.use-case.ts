@@ -1,7 +1,7 @@
 import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionFeed } from "../feed";
 import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../ports";
-import { CompetitionSyncService } from "./competition-sync.service";
+import type { CompetitionSyncService } from "./competition-sync.service";
 
 const FALLBACK_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -50,12 +50,15 @@ export class SyncPandascoreIncidentsUseCase {
     let earliestFailure: Date | null = null;
 
     for (const incident of incidents) {
-      if (incident.modifiedAt > latest) latest = incident.modifiedAt;
+      if (incident.modifiedAt > latest) {
+        latest = incident.modifiedAt;
+      }
     }
 
     for (const failedAt of failures) {
-      if (failedAt !== null && (!earliestFailure || failedAt < earliestFailure))
+      if (failedAt !== null && (!earliestFailure || failedAt < earliestFailure)) {
         earliestFailure = failedAt;
+      }
     }
 
     await this.cursor.setLastSyncAt(

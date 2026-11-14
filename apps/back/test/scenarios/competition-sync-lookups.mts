@@ -196,7 +196,9 @@ export async function verifyCompetitionSyncLookups({
 
   const views = await Promise.all(twins.map(async (twin) => await view(twin.id)));
 
-  for (const { source } of views) assert.equal(source, "manual");
+  for (const { source } of views) {
+    assert.equal(source, "manual");
+  }
 }
 
 export async function verifyPandascoreAdoption({

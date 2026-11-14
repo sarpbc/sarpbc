@@ -1,7 +1,8 @@
 import type { LookupAddress, LookupOptions } from "node:dns";
 import type { RequestOptions } from "node:https";
 import type { IncomingMessage } from "node:http";
-import { BlockList, isIP, type LookupFunction } from "node:net";
+import { BlockList, isIP } from "node:net";
+import type { LookupFunction } from "node:net";
 import { finished } from "node:stream/promises";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
@@ -57,12 +58,16 @@ const BLOCKED_SUBNETS: [string, number, "ipv4" | "ipv6"][] = [
 
 const blocked = new BlockList();
 
-for (const [network, prefix, family] of BLOCKED_SUBNETS) blocked.addSubnet(network, prefix, family);
+for (const [network, prefix, family] of BLOCKED_SUBNETS) {
+  blocked.addSubnet(network, prefix, family);
+}
 
 export function isPublicAddress(address: string): boolean {
   const family = isIP(address);
 
-  if (family === 0) return false;
+  if (family === 0) {
+    return false;
+  }
 
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
 }
@@ -78,9 +83,13 @@ function tooLargeError(maxBytes: number): InvalidInputError {
 }
 
 function downloadError(error: Error, signal: AbortSignal): Error {
-  if (error instanceof InvalidInputError) return error;
+  if (error instanceof InvalidInputError) {
+    return error;
+  }
 
-  if (signal.aborted) return new InvalidInputError("The image download timed out.");
+  if (signal.aborted) {
+    return new InvalidInputError("The image download timed out.");
+  }
 
   return new InvalidInputError(`The image could not be downloaded: ${error.message}`);
 }
@@ -93,7 +102,9 @@ async function resolvePublicAddresses(
   try {
     const resolved = await lookup(hostname, { all: true, family });
 
-    if (resolved.some(({ address }) => !isPublicAddress(address))) return privateAddressError();
+    if (resolved.some(({ address }) => !isPublicAddress(address))) {
+      return privateAddressError();
+    }
 
     return resolved;
   } catch (error) {
@@ -148,9 +159,13 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
 
   const host = url.hostname.replaceAll(/^\[|\]$/g, "");
 
-  if (isIP(host) && !isPublicAddress(host)) throw privateAddressError();
+  if (isIP(host) && !isPublicAddress(host)) {
+    throw privateAddressError();
+  }
 
-  if (/(?:^|\.)localhost\.?$/i.test(host)) throw privateAddressError();
+  if (/(?:^|\.)localhost\.?$/i.test(host)) {
+    throw privateAddressError();
+  }
 
   if (!isAllowedHost(host)) {
     throw new InvalidInputError(`The image URL host "${host}" is not an accepted source.`);

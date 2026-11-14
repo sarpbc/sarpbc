@@ -1,5 +1,6 @@
-import { EntityManager } from "@mikro-orm/postgresql";
-import { QueryOrder, type FilterQuery } from "@mikro-orm/core";
+import type { EntityManager } from "@mikro-orm/postgresql";
+import { QueryOrder } from "@mikro-orm/core";
+import type { FilterQuery } from "@mikro-orm/core";
 import type { TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
 import type { EarningsLine } from "../../application/earnings";
 import type { EarningsScope, PrizeQueries } from "../../application/ports";
@@ -62,7 +63,9 @@ export class CompetitionPrizeQueries implements PrizeQueries {
   async byTournament(id: string) {
     const tournament = await this.em.findOne(Tournament, { id });
 
-    if (!tournament) return null;
+    if (!tournament) {
+      return null;
+    }
 
     const rows = await this.em.find(
       TournamentPrize,

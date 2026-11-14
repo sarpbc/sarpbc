@@ -1,5 +1,6 @@
 import { winnerFromResults } from "@sarpbc/utils";
-import { matchPublicSlug, type Match } from "../../domain/match";
+import { matchPublicSlug } from "../../domain/match";
+import type { Match } from "../../domain/match";
 
 export interface HeadToHeadMeeting {
   id: string;

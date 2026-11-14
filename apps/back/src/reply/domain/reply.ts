@@ -1,5 +1,6 @@
 import { forumPostPath, forumPostSlug, matchPath, newsPath } from "@sarpbc/utils";
-import { REPLY_TARGET_TYPES, type ReplyTargetType } from "@sarpbc/types";
+import { REPLY_TARGET_TYPES } from "@sarpbc/types";
+import type { ReplyTargetType } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface ReplyTarget {
@@ -90,8 +91,9 @@ export function replyTarget(input: {
     return id !== undefined && id !== "" ? [{ kind, id }] : [];
   });
 
-  if (targets.length !== 1)
+  if (targets.length !== 1) {
     throw new InvalidInputError("Provide exactly one of postId, newsArticleId, or matchId.");
+  }
 
   return targets[0];
 }

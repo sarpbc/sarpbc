@@ -15,8 +15,9 @@ import type { OnThisDayFact } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { OnThisDayFactService } from "../../application/on-this-day-fact.service";
-import { OnThisDayFactDto, type OnThisDayFactInput } from "./dto/on-this-day.dto";
+import type { OnThisDayFactService } from "../../application/on-this-day-fact.service";
+import { OnThisDayFactDto } from "./dto/on-this-day.dto";
+import type { OnThisDayFactInput } from "./dto/on-this-day.dto";
 
 @Controller("on-this-day-facts")
 @UseGuards(AuthGuard, PermissionGuard)

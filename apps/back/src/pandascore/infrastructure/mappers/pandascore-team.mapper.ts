@@ -1,5 +1,5 @@
-import { UpsertTeamCommand } from "../../../roster/application/imports";
-import { TeamDto } from "../dto/tournament.dto";
+import type { UpsertTeamCommand } from "../../../roster/application/imports";
+import type { TeamDto } from "../dto/tournament.dto";
 
 export function toUpsertTeamCommand(dto: TeamDto): UpsertTeamCommand {
   return {

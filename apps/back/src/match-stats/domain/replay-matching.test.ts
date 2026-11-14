@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-import {
-  assignReplays,
-  resolvePlayerId,
-  type CandidateMatch,
-  type CandidateParticipant,
-  type ReplayAssignment,
-  type ReplaySummary,
+import { assignReplays, resolvePlayerId } from "./replay-matching";
+import type {
+  CandidateMatch,
+  CandidateParticipant,
+  ReplayAssignment,
+  ReplaySummary,
 } from "./replay-matching";
 
 const kc: CandidateParticipant = {
@@ -99,7 +98,9 @@ function describeAssignment(assignment: ReplayAssignment): string {
     return `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`;
   }
 
-  if (assignment.kind === "stored") return `stored:${assignment.matchId}#${assignment.gameNumber}`;
+  if (assignment.kind === "stored") {
+    return `stored:${assignment.matchId}#${assignment.gameNumber}`;
+  }
 
   return `unmatched:${assignment.reason}${assignment.matchId === null ? "" : `@${assignment.matchId}`}`;
 }

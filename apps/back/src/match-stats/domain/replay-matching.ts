@@ -94,7 +94,10 @@ function rosterIdentifies(team: ReplayTeam, participant: CandidateParticipant): 
 }
 
 function identifies(team: ReplayTeam, participant: CandidateParticipant): boolean {
-  if (rosterIdentifies(team, participant)) return true;
+  if (rosterIdentifies(team, participant)) {
+    return true;
+  }
+
   const replayName = team.name;
 
   const named =
@@ -105,7 +108,10 @@ function identifies(team: ReplayTeam, participant: CandidateParticipant): boolea
 }
 
 function orient(replay: ReplaySummary, match: CandidateMatch): SideAssignment | "ambiguous" | null {
-  if (match.participants.length !== 2) return null;
+  if (match.participants.length !== 2) {
+    return null;
+  }
+
   const [first, second] = match.participants;
 
   const fits = (blue: CandidateParticipant, orange: CandidateParticipant) =>
@@ -117,11 +123,17 @@ function orient(replay: ReplaySummary, match: CandidateMatch): SideAssignment | 
   const straight = fits(first, second);
   const swapped = fits(second, first);
 
-  if (straight && swapped) return "ambiguous";
+  if (straight && swapped) {
+    return "ambiguous";
+  }
 
-  if (straight) return { blue: first.id, orange: second.id };
+  if (straight) {
+    return { blue: first.id, orange: second.id };
+  }
 
-  if (swapped) return { blue: second.id, orange: first.id };
+  if (swapped) {
+    return { blue: second.id, orange: first.id };
+  }
 
   return null;
 }
@@ -150,14 +162,23 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
   for (const match of matches) {
     const sides = orient(replay, match);
 
-    if (sides === "ambiguous") return { kind: "unmatched", reason: "ambiguous_match" };
+    if (sides === "ambiguous") {
+      return { kind: "unmatched", reason: "ambiguous_match" };
+    }
 
-    if (sides) compatible.push({ match, sides });
+    if (sides) {
+      compatible.push({ match, sides });
+    }
   }
 
-  if (compatible.length === 0) return { kind: "unmatched", reason: "unknown_teams" };
+  if (compatible.length === 0) {
+    return { kind: "unmatched", reason: "unknown_teams" };
+  }
 
-  if (!replay.playedAt) return { kind: "unmatched", reason: "missing_date" };
+  if (!replay.playedAt) {
+    return { kind: "unmatched", reason: "missing_date" };
+  }
+
   const played = replay.playedAt.getTime();
 
   const windowed = compatible.flatMap(({ match, sides }) =>
@@ -167,12 +188,17 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
       : [],
   );
 
-  if (windowed.length === 0) return { kind: "unmatched", reason: "outside_match_window" };
+  if (windowed.length === 0) {
+    return { kind: "unmatched", reason: "outside_match_window" };
+  }
 
-  if (windowed.length === 1)
+  if (windowed.length === 1) {
     return { kind: "placed", matchId: windowed[0].matchId, sides: windowed[0].sides };
+  }
 
-  if (!replay.playedAtHasTimezone) return { kind: "unmatched", reason: "ambiguous_match" };
+  if (!replay.playedAtHasTimezone) {
+    return { kind: "unmatched", reason: "ambiguous_match" };
+  }
 
   // Overlapping windows (a same-day rematch): the replay belongs to the latest match already begun.
   // Every windowed match qualifies for the early-start slack, so when none has begun it cannot decide.
@@ -180,8 +206,9 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
     .filter(({ begin }) => begin <= played)
     .toSorted((a, b) => b.begin - a.begin);
 
-  if (started.length === 0 || (started.length > 1 && started[0].begin === started[1].begin))
+  if (started.length === 0 || (started.length > 1 && started[0].begin === started[1].begin)) {
     return { kind: "unmatched", reason: "ambiguous_match" };
+  }
 
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
 }
@@ -196,31 +223,45 @@ function seriesProblem(
   match: CandidateMatch,
   games: readonly SeriesGame[],
 ): UnmatchedReason | null {
-  if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id)))
+  if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id))) {
     return "match_has_other_stats";
+  }
 
-  if (match.numberOfGames !== null && games.length > match.numberOfGames)
+  if (match.numberOfGames !== null && games.length > match.numberOfGames) {
     return "inconsistent_series";
+  }
+
   const wins = new Map<string, number>();
 
   for (const { replay, sides } of games) {
-    if (replay.blue.goals === replay.orange.goals) return "inconsistent_series";
+    if (replay.blue.goals === replay.orange.goals) {
+      return "inconsistent_series";
+    }
+
     const winner = replay.blue.goals > replay.orange.goals ? sides.blue : sides.orange;
     wins.set(winner, (wins.get(winner) ?? 0) + 1);
   }
 
   const played = [...match.scores.values()].reduce((sum, score) => sum + score, 0);
 
-  if (!match.finished || played === 0) return "match_not_finished";
+  if (!match.finished || played === 0) {
+    return "match_not_finished";
+  }
 
-  for (const [participantId, won] of wins)
-    if (won > (match.scores.get(participantId) ?? 0)) return "inconsistent_series";
+  for (const [participantId, won] of wins) {
+    if (won > (match.scores.get(participantId) ?? 0)) {
+      return "inconsistent_series";
+    }
+  }
 
-  if (games.length < played) return "incomplete_series";
+  if (games.length < played) {
+    return "incomplete_series";
+  }
 
   // Staff may have attached a game under another number, and the import never renumbers one.
-  if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1))
+  if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1)) {
     return "match_has_other_stats";
+  }
 
   return null;
 }
@@ -238,11 +279,17 @@ function seriesAssignments(
   for (const match of matches) {
     const games = series.get(match.id);
 
-    if (!games) continue;
+    if (!games) {
+      continue;
+    }
+
     const problem = seriesProblem(match, games);
 
     for (const [index, { replay, sides, storedNumber }] of games.entries()) {
-      if (storedNumber !== null) continue;
+      if (storedNumber !== null) {
+        continue;
+      }
+
       assignments.push(
         problem
           ? { kind: "unmatched", replay, reason: problem, matchId: match.id, sides }
@@ -319,7 +366,7 @@ export function assignReplays(
     const placement = place(replay, matches);
 
     if (placement.kind === "unmatched") {
-      if (!location)
+      if (!location) {
         assignments.push({
           kind: "unmatched",
           replay,
@@ -327,11 +374,16 @@ export function assignReplays(
           matchId: null,
           sides: null,
         });
+      }
+
       continue;
     }
 
     // A game staff attached to another match is absent from the series it would fit.
-    if (location && location.matchId !== placement.matchId) continue;
+    if (location && location.matchId !== placement.matchId) {
+      continue;
+    }
+
     const games = series.get(placement.matchId) ?? [];
     games.push({ replay, sides: placement.sides, storedNumber: location?.number ?? null });
     series.set(placement.matchId, games);

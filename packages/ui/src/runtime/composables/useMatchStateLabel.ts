@@ -7,14 +7,20 @@ export function useMatchStateLabel(
 ) {
   return (item: MatchBlockItem): string => {
     switch (item.state) {
-      case "live":
+      case "live": {
         return t("newsTag.matchLive");
-      case "finished":
+      }
+
+      case "finished": {
         return t("newsTag.matchFinal");
-      case "upcoming":
+      }
+
+      case "upcoming": {
         return isNonEmptyString(item.beginAt)
           ? formatBeginAt(new Date(item.beginAt))
           : t("newsTag.matchTbd");
+      }
+
       default: {
         const exhaustive: never = item.state;
 

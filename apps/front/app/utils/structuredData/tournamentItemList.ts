@@ -1,7 +1,8 @@
 import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
-import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
+import { compactJsonLd, SCHEMA_ORG } from "./jsonLd";
+import type { JsonLdNode } from "./jsonLd";
 
 export interface ListItemLd extends JsonLdNode {
   "@type": "ListItem";

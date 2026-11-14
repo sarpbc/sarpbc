@@ -64,10 +64,16 @@ try {
 
     case "pre-push": {
       for (const line of readFileSync(0, "utf-8").trim().split(/\r?\n/)) {
-        if (!line) continue;
+        if (!line) {
+          continue;
+        }
+
         const [, localSha, remoteRef] = line.split(/\s+/);
 
-        if (/^0+$/.test(localSha) || !remoteRef.startsWith("refs/heads/")) continue;
+        if (/^0+$/.test(localSha) || !remoteRef.startsWith("refs/heads/")) {
+          continue;
+        }
+
         checkBranch(remoteRef.slice("refs/heads/".length));
       }
 
@@ -77,7 +83,9 @@ try {
     case "pr": {
       const eventPath = process.env.GITHUB_EVENT_PATH;
 
-      if (eventPath === undefined) throw new Error("GITHUB_EVENT_PATH is not set.");
+      if (eventPath === undefined) {
+        throw new Error("GITHUB_EVENT_PATH is not set.");
+      }
 
       const { pull_request: pr } = pullRequestEvent.parse(
         JSON.parse(readFileSync(eventPath, "utf-8")),
@@ -90,7 +98,10 @@ try {
       const commits = git("log", "-z", "--format=%H%n%B", `${pr.base.sha}..${pr.head.sha}`, "--");
 
       for (const commit of commits.split("\0")) {
-        if (!commit) continue;
+        if (!commit) {
+          continue;
+        }
+
         const [sha, subject] = commit.split("\n");
         checkSubject(subject, `commit ${sha}`);
         checkTrailers(commit, `commit ${sha}`);
@@ -99,10 +110,11 @@ try {
       break;
     }
 
-    default:
+    default: {
       throw new Error(
         "Usage: node scripts/check-git-names.ts <branch [name]|commit-msg <file>|pre-push|pr>",
       );
+    }
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

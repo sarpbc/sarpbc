@@ -15,12 +15,10 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { RosterProposalService } from "../../application/roster-proposal.service";
+import type { RosterProposalService } from "../../application/roster-proposal.service";
 import type { RosterProposal } from "../../domain/roster-proposal";
-import {
-  ListRosterProposalsQueryDto,
-  type ListRosterProposalsQueryInput,
-} from "./dto/list-roster-proposals-query.dto";
+import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.dto";
+import type { ListRosterProposalsQueryInput } from "./dto/list-roster-proposals-query.dto";
 
 function mapProposal(proposal: RosterProposal): RosterProposalResponse {
   return {

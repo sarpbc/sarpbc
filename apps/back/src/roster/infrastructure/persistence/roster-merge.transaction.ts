@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { mapSequentially } from "../../../common/application/sequentially";
 import { Player as PlayerRow } from "./player.entity";
 import { Team as TeamRow } from "./team.entity";

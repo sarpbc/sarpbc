@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { VNode } from "vue";
-import { participantName, playerPath, teamPath, type SpoilerRevealTarget } from "@sarpbc/utils";
+import { participantName, playerPath, teamPath } from "@sarpbc/utils";
+import type { SpoilerRevealTarget } from "@sarpbc/utils";
 import type { ParticipantRef, TeamSummary, TournamentFormat } from "@sarpbc/types";
 import {
   formatTournamentDateRange,
@@ -53,7 +54,10 @@ const statusLabel = computed(() =>
 );
 
 const typeLabel = computed(() => {
-  if (!type) return null;
+  if (!type) {
+    return null;
+  }
+
   const key = `components.tournaments.${type}`;
 
   return te(key) ? t(key) : null;
@@ -63,14 +67,23 @@ const metaItems = computed(() => {
   const items: { label: string; tabular: boolean }[] = [];
   const prizepoolLabel = formatTournamentPrizepool(prizepool);
 
-  if (prizepoolLabel) items.push({ label: prizepoolLabel, tabular: true });
+  if (prizepoolLabel) {
+    items.push({ label: prizepoolLabel, tabular: true });
+  }
 
-  if (countLabel) items.push({ label: countLabel, tabular: true });
+  if (countLabel) {
+    items.push({ label: countLabel, tabular: true });
+  }
+
   const formatLabel = nonDefaultFormatLabel(format);
 
-  if (formatLabel) items.push({ label: formatLabel, tabular: true });
+  if (formatLabel) {
+    items.push({ label: formatLabel, tabular: true });
+  }
 
-  if (typeLabel.value) items.push({ label: typeLabel.value, tabular: false });
+  if (typeLabel.value) {
+    items.push({ label: typeLabel.value, tabular: false });
+  }
 
   return items;
 });

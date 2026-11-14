@@ -32,7 +32,7 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
   const matches = tournament.matches ?? [];
 
   switch (format) {
-    case "flat-stage":
+    case "flat-stage": {
       return {
         format,
         upperLayout: null,
@@ -41,7 +41,9 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
         flatMatches: sortMatchesByBeginAt(matches),
         groupedMatches: [],
       };
-    case "bracket-missing-links":
+    }
+
+    case "bracket-missing-links": {
       return {
         format,
         upperLayout: null,
@@ -50,7 +52,9 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
         flatMatches: [],
         groupedMatches: groupMatchesByRound(matches),
       };
-    case "linked-single-elimination":
+    }
+
+    case "linked-single-elimination": {
       return {
         format,
         upperLayout: buildBracketSectionLayout(matches),
@@ -59,6 +63,8 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
         flatMatches: [],
         groupedMatches: [],
       };
+    }
+
     case "linked-double-elimination": {
       const { upper, lower } = splitDoubleEliminationMatches(matches);
       const doubleEliminationLayout = buildUnifiedDoubleEliminationLayout(upper, lower, matches);

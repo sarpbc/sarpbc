@@ -17,71 +17,65 @@ import {
   Inject,
 } from "@nestjs/common";
 import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
-import { CachedTournamentRead } from "../cache/cached-tournament.read";
-import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
+import type { CachedTournamentRead } from "../cache/cached-tournament.read";
+import type { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
   CreateEmptyBracketDto,
-  type CreateEmptyBracketInput,
   CreateMatchDto,
-  type CreateMatchInput,
   SetMatchBracketDto,
-  type SetMatchBracketInput,
   SetMatchResultDto,
-  type SetMatchResultInput,
   SetMatchSourceDto,
-  type SetMatchSourceInput,
   SetMatchVodsDto,
-  type SetMatchVodsInput,
   SetMatchWinnerDto,
-  type SetMatchWinnerInput,
 } from "./dto/create-match.dto";
-import {
-  CreateTournamentDto,
-  type CreateTournamentInput,
-  UpdateTournamentDto,
-  type UpdateTournamentInput,
-} from "./dto/create-tournament.dto";
-import {
-  CreateLeagueDto,
-  type CreateLeagueInput,
-  UpdateLeagueDto,
-  type UpdateLeagueInput,
-} from "./dto/manual-catalog.dto";
+import type {
+  CreateEmptyBracketInput,
+  CreateMatchInput,
+  SetMatchBracketInput,
+  SetMatchResultInput,
+  SetMatchSourceInput,
+  SetMatchVodsInput,
+  SetMatchWinnerInput,
+} from "./dto/create-match.dto";
+import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
+import type { CreateTournamentInput, UpdateTournamentInput } from "./dto/create-tournament.dto";
+import { CreateLeagueDto, UpdateLeagueDto } from "./dto/manual-catalog.dto";
+import type { CreateLeagueInput, UpdateLeagueInput } from "./dto/manual-catalog.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { TournamentQueries } from "../../application/ports";
-import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
-import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
+import type { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
+import type { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
-import { ManualTournamentService } from "../../application/manual-tournament.service";
-import { ManualCatalogService } from "../../application/manual-catalog.service";
-import { MatchService } from "../../application/match/match.service";
-import { StreamService } from "../../application/stream.service";
-import { SetStreamsDto, type SetStreamsInput } from "./dto/set-streams.dto";
-import {
+import type { ManualTournamentService } from "../../application/manual-tournament.service";
+import type { ManualCatalogService } from "../../application/manual-catalog.service";
+import type { MatchService } from "../../application/match/match.service";
+import type { StreamService } from "../../application/stream.service";
+import { SetStreamsDto } from "./dto/set-streams.dto";
+import type { SetStreamsInput } from "./dto/set-streams.dto";
+import type {
   MatchLineupService,
-  type MatchLineups,
+  MatchLineups,
 } from "../../application/match/match-lineup.service";
 import { lineupsFromGames } from "../../domain/match-lineup";
-import { SetMatchLineupsDto, type SetMatchLineupsInput } from "./dto/set-match-lineups.dto";
+import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
+import type { SetMatchLineupsInput } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
-import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import type { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { isRedistributable } from "../../../common/domain/data-source";
-import { ViewershipService } from "../../application/viewership.service";
-import { SetViewershipDto, type SetViewershipInput } from "./dto/set-viewership.dto";
-import { PlayerAwardService } from "../../application/player-award.service";
-import { CreatePlayerAwardDto, type CreatePlayerAwardInput } from "./dto/create-player-award.dto";
-import { TournamentPrizeService } from "../../application/tournament-prize.service";
-import {
-  SetTournamentPrizesDto,
-  type SetTournamentPrizesInput,
-} from "./dto/set-tournament-prizes.dto";
-import {
-  ListTournamentsQueryDto,
-  type ListTournamentsQueryInput,
-} from "./dto/list-tournaments-query.dto";
+import type { ViewershipService } from "../../application/viewership.service";
+import { SetViewershipDto } from "./dto/set-viewership.dto";
+import type { SetViewershipInput } from "./dto/set-viewership.dto";
+import type { PlayerAwardService } from "../../application/player-award.service";
+import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
+import type { CreatePlayerAwardInput } from "./dto/create-player-award.dto";
+import type { TournamentPrizeService } from "../../application/tournament-prize.service";
+import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
+import type { SetTournamentPrizesInput } from "./dto/set-tournament-prizes.dto";
+import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
+import type { ListTournamentsQueryInput } from "./dto/list-tournaments-query.dto";
 import {
   mapProfileMatchListItem,
   mapTournamentMatchListItem,

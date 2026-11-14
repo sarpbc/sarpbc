@@ -51,7 +51,9 @@ export function describeFields<Fields extends Record<string, z.ZodType>>(
     }),
   );
 
-  if (!keepsFields(described, fields)) throw new Error("describeFields dropped an input field");
+  if (!keepsFields(described, fields)) {
+    throw new Error("describeFields dropped an input field");
+  }
 
   return described;
 }

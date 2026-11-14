@@ -29,12 +29,18 @@ export function getTournamentStatus(
 
 export function tournamentStatusLabelKey(status: TournamentStatus): string {
   switch (status) {
-    case "live":
+    case "live": {
       return "page.tournaments.id.status.live";
-    case "upcoming":
+    }
+
+    case "upcoming": {
       return "page.tournaments.id.status.upcoming";
-    case "finished":
+    }
+
+    case "finished": {
       return "page.tournaments.id.status.finished";
+    }
+
     default: {
       const _exhaustive: never = status;
 

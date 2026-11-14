@@ -1,5 +1,5 @@
 import type { TransferType, ContractRole } from "@sarpbc/types";
-import { Contract } from "./contract";
+import type { Contract } from "./contract";
 
 export interface Transfer {
   id: string;
@@ -11,17 +11,25 @@ export interface Transfer {
 
 function joinType(role: ContractRole): TransferType {
   switch (role) {
-    case "active":
+    case "active": {
       return "arrival";
-    case "benched":
+    }
+
+    case "benched": {
       return "benched";
-    case "loaned":
+    }
+
+    case "loaned": {
       return "loan";
+    }
+
     case "coach":
     case "assistant_coach":
     case "analyst":
-    case "manager":
+    case "manager": {
       return "staff";
+    }
+
     default: {
       const unreachable: never = role;
 

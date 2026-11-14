@@ -2,9 +2,11 @@ import { createReadStream } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import type { StreamScoreProposal } from "@sarpbc/types";
-import { readPpmFrames, scaleRegion, type Frame } from "./frame.ts";
+import { readPpmFrames, scaleRegion } from "./frame.ts";
+import type { Frame } from "./frame.ts";
 import { glyphGrids, templateFromGrid } from "./glyph.ts";
-import { loadOverlay, type GlyphTemplate, type Overlay, type Region } from "./overlay.ts";
+import { loadOverlay } from "./overlay.ts";
+import type { GlyphTemplate, Overlay, Region } from "./overlay.ts";
 import { readScoreboard } from "./scoreboard.ts";
 import { SeriesTracker } from "./series.ts";
 import { streamFrames } from "./source.ts";
@@ -16,17 +18,23 @@ const USAGE = `Usage:
                        --blue <score> --orange <score> --clock <m:ss|+m:ss>`;
 
 function positiveInteger(value: string | undefined, fallback: number, name: string): number {
-  if (value === undefined) return fallback;
+  if (value === undefined) {
+    return fallback;
+  }
+
   const parsed = Number(value);
 
-  if (!Number.isInteger(parsed) || parsed < 1)
+  if (!Number.isInteger(parsed) || parsed < 1) {
     throw new Error(`--${name} must be a positive integer.`);
+  }
 
   return parsed;
 }
 
 function required(value: string | undefined, name: string): string {
-  if (value === undefined || value === "") throw new Error(`--${name} is required.\n${USAGE}`);
+  if (value === undefined || value === "") {
+    throw new Error(`--${name} is required.\n${USAGE}`);
+  }
 
   return value;
 }
@@ -37,8 +45,11 @@ async function writeProposal(
 ): Promise<void> {
   const json = `${JSON.stringify(proposal, null, 2)}\n`;
 
-  if (out === undefined) process.stdout.write(json);
-  else await writeFile(out, json);
+  if (out === undefined) {
+    process.stdout.write(json);
+  } else {
+    await writeFile(out, json);
+  }
 }
 
 async function read(args: readonly string[]): Promise<void> {
@@ -100,7 +111,9 @@ async function read(args: readonly string[]): Promise<void> {
       }
     }
 
-    if (tracker.decided) break;
+    if (tracker.decided) {
+      break;
+    }
   }
 
   await writes;
@@ -119,7 +132,9 @@ async function readSingleFrame(path: string): Promise<Frame> {
   const first = await frames.next();
   await frames.return(undefined);
 
-  if (first.done === true) throw new Error(`${path} holds no PPM frame.`);
+  if (first.done === true) {
+    throw new Error(`${path} holds no PPM frame.`);
+  }
 
   return first.value;
 }
@@ -177,16 +192,21 @@ async function main(argv: readonly string[]): Promise<void> {
   const [command, ...args] = argv;
 
   switch (command) {
-    case "read":
+    case "read": {
       await read(args);
 
       return;
-    case "calibrate":
+    }
+
+    case "calibrate": {
       await calibrate(args);
 
       return;
-    default:
+    }
+
+    default: {
       throw new Error(USAGE);
+    }
   }
 }
 

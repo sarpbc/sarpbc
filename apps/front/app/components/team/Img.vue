@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
+import { resolveThemedLogoUrl } from "@sarpbc/utils";
+import type { ThemedLogo } from "@sarpbc/utils";
 
 interface Props {
   /** Left out while the match slot has no team yet: shows a generic icon instead of an initial. */

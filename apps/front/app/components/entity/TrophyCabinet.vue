@@ -24,7 +24,9 @@ const headingId = computed(() => `${kind}-trophies-title`);
 const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatEndDate = (value: Date | string | null) => {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
 
   return mediumDate.value.format(new Date(value));
 };

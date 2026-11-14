@@ -75,11 +75,17 @@ const body = computed(() => {
 });
 
 const title = computed(() => {
-  if (destinyPromptPending) return t("page.game.career.offseason.prompt.title");
+  if (destinyPromptPending) {
+    return t("page.game.career.offseason.prompt.title");
+  }
 
-  if (hasOffers.value) return null;
+  if (hasOffers.value) {
+    return null;
+  }
 
-  if (renewalOffered) return t("page.game.career.offseason.renewalTitle");
+  if (renewalOffered) {
+    return t("page.game.career.offseason.renewalTitle");
+  }
 
   return t("page.game.career.offseason.unsignedTitle");
 });

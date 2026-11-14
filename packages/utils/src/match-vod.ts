@@ -39,14 +39,19 @@ export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
     return { ok: false, error: "invalid-url" };
   }
 
-  if (url.protocol !== "https:") return { ok: false, error: "not-https" };
+  if (url.protocol !== "https:") {
+    return { ok: false, error: "not-https" };
+  }
+
   const source = VOD_HOSTS.get(url.hostname);
 
-  if (!source || url.port || url.username || url.password)
+  if (!source || url.port || url.username || url.password) {
     return { ok: false, error: "unsupported-host" };
+  }
 
-  if (url.searchParams.getAll("t").some((timestamp) => !TIMESTAMP_PATTERN.test(timestamp)))
+  if (url.searchParams.getAll("t").some((timestamp) => !TIMESTAMP_PATTERN.test(timestamp))) {
     return { ok: false, error: "invalid-timestamp" };
+  }
 
   return { ok: true, url: url.href, source };
 }

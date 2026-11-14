@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";

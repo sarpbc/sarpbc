@@ -17,12 +17,18 @@ interface AirRiddleAttemptLike {
 
 function resultToStatus(result: AirRiddleResultEnum): AirRiddleLetterStatus {
   switch (result) {
-    case AirRiddleResultEnum.CORRECT:
+    case AirRiddleResultEnum.CORRECT: {
       return "correct";
-    case AirRiddleResultEnum.MISPLACED:
+    }
+
+    case AirRiddleResultEnum.MISPLACED: {
       return "misplaced";
-    case AirRiddleResultEnum.INCORRECT:
+    }
+
+    case AirRiddleResultEnum.INCORRECT: {
       return "incorrect";
+    }
+
     default: {
       const exhaustive: never = result;
 

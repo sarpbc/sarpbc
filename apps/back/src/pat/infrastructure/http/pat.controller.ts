@@ -12,8 +12,9 @@ import {
 import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { CreateTokenDto, type CreateTokenInput } from "./dto/create-token.dto";
-import { PatService } from "../../application/pat.service";
+import { CreateTokenDto } from "./dto/create-token.dto";
+import type { CreateTokenInput } from "./dto/create-token.dto";
+import type { PatService } from "../../application/pat.service";
 
 @Controller("pat")
 export class PatController {

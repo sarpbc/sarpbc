@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { StreamerService, type StreamerFailureReporter } from "../../application/streamer.service";
+import { StreamerService } from "../../application/streamer.service";
+import type { StreamerFailureReporter } from "../../application/streamer.service";
 import { TOKEN_REQUEST_TIMEOUT_MS } from "../twitch/twitch-app-token";
 import { STREAMS_REQUEST_TIMEOUT_MS } from "../twitch/twitch-helix-source";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
@@ -27,13 +28,19 @@ describe(RedisLiveStreamCache, () => {
   const createRedis = () => ({
     get: vi.fn<RedisService["get"]>(async (key) => store.get(key) ?? null),
     setIfAbsent: vi.fn<RedisService["setIfAbsent"]>(async (key, value) => {
-      if (store.has(key)) return false;
+      if (store.has(key)) {
+        return false;
+      }
+
       store.set(key, value);
 
       return true;
     }),
     setWhileHeld: vi.fn<RedisService["setWhileHeld"]>(async (lockKey, lockValue, key, value) => {
-      if (store.get(lockKey) !== lockValue) return false;
+      if (store.get(lockKey) !== lockValue) {
+        return false;
+      }
+
       store.set(key, value);
 
       return true;
@@ -54,7 +61,9 @@ describe(RedisLiveStreamCache, () => {
     const fetchedAt = new Date("2026-10-31T20:00:00Z");
     const claim = await cache.claimRefresh();
 
-    if (claim === null) throw new Error("expected a refresh claim");
+    if (claim === null) {
+      throw new Error("expected a refresh claim");
+    }
 
     await expect(cache.write({ streams: [stream], fetchedAt }, claim)).resolves.toBe(true);
 
@@ -132,7 +141,9 @@ describe(RedisLiveStreamCache, () => {
   it("drops a refresh that lost its claim to an invalidation", async () => {
     const staleClaim = await cache.claimRefresh();
 
-    if (staleClaim === null) throw new Error("expected a refresh claim");
+    if (staleClaim === null) {
+      throw new Error("expected a refresh claim");
+    }
 
     await cache.clear();
     const freshClaim = await cache.claimRefresh();
@@ -147,7 +158,10 @@ describe(RedisLiveStreamCache, () => {
   it("clears the snapshot and the refresh claim", async () => {
     const claim = await cache.claimRefresh();
 
-    if (claim === null) throw new Error("expected a refresh claim");
+    if (claim === null) {
+      throw new Error("expected a refresh claim");
+    }
+
     await cache.write({ streams: [stream], fetchedAt: new Date() }, claim);
 
     await cache.clear();

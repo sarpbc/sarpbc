@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { parseTweetUrl, tweetImageProxyPath, type TweetEmbed } from "@sarpbc/utils";
+import { parseTweetUrl, tweetImageProxyPath } from "@sarpbc/utils";
+import type { TweetEmbed } from "@sarpbc/utils";
 
 const { url } = defineProps<{
   url: string;

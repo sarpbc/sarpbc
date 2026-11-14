@@ -14,22 +14,30 @@ const CURRENCY_CODES = {
 
 function currencyCodeFor(name: string): string {
   for (const [label, code] of Object.entries(CURRENCY_CODES)) {
-    if (label === name) return code;
+    if (label === name) {
+      return code;
+    }
   }
 
   return "USD";
 }
 
 export function formatPrizepool(prizepool: string | undefined | null, locale = "en-US"): string {
-  if (!isNonEmptyString(prizepool)) return "";
+  if (!isNonEmptyString(prizepool)) {
+    return "";
+  }
 
   const parts = prizepool.trim().split(" ");
 
-  if (parts.length < 2) return prizepool;
+  if (parts.length < 2) {
+    return prizepool;
+  }
 
   const amount = Number((parts[0] ?? "").replaceAll(",", ""));
 
-  if (Number.isNaN(amount)) return prizepool;
+  if (Number.isNaN(amount)) {
+    return prizepool;
+  }
 
   const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
 

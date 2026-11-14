@@ -1,5 +1,5 @@
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import type { ConfigService } from "@nestjs/config";
 import type { Redis, RedisOptions } from "ioredis";
 import { log } from "evlog";
 

@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import { AuthenticationError } from "../../../domain/errors/authentication-error";
 import { ConflictError } from "../../../domain/errors/conflict-error";

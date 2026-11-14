@@ -98,7 +98,9 @@ const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 const yearFormat = computed(() => new Intl.DateTimeFormat(locale.value, { year: "numeric" }));
 
 function leaderOf(a: number, b: number): Side | "tie" {
-  if (a === b) return "tie";
+  if (a === b) {
+    return "tie";
+  }
 
   return a > b ? "a" : "b";
 }
@@ -126,7 +128,7 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
     ...new Set([...a.earnings.totals, ...b.earnings.totals].map(({ currency }) => currency)),
   ].toSorted();
 
-  if (currencies.length === 0)
+  if (currencies.length === 0) {
     return [
       {
         key: "earnings",
@@ -136,6 +138,7 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
         leader: null,
       },
     ];
+  }
 
   return currencies.map((currency) => {
     const amountA = a.earnings.totals.find((total) => total.currency === currency)?.amount ?? 0;
@@ -157,7 +160,10 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
 const summaryRows = computed<SummaryRow[]>(() => {
   const current = comparison.value;
 
-  if (!current) return [];
+  if (!current) {
+    return [];
+  }
+
   const { a, b, headToHead } = current;
 
   return [
@@ -196,9 +202,13 @@ const summaryRows = computed<SummaryRow[]>(() => {
 });
 
 function valueClass(row: SummaryRow, side: Side): string {
-  if (row.leader === null) return "text-default";
+  if (row.leader === null) {
+    return "text-default";
+  }
 
-  if (row.leader === "tie") return "text-toned";
+  if (row.leader === "tie") {
+    return "text-toned";
+  }
 
   return row.leader === side ? "font-medium text-highlighted" : "text-muted";
 }
@@ -254,7 +264,9 @@ function teamItems(career: PlayerCareer): CareerItem[] {
 const detailSections = computed(() => {
   const current = comparison.value;
 
-  if (!current) return [];
+  if (!current) {
+    return [];
+  }
 
   return [
     {

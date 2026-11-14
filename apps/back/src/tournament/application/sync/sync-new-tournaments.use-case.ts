@@ -1,8 +1,8 @@
 import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionDiagnostics } from "../ports";
-import { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
-import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
-import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
+import type { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
+import type { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
+import type { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 
 export interface SyncNewTournamentsResult {
   discovered: number;

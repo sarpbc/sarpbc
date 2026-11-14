@@ -50,15 +50,17 @@ describe(normalizeMatchVods, () => {
       normalizeMatchVods([vod("https://youtu.be/a", { language: " FR " })], 5)[0]?.language,
     ).toBe("fr");
 
-    for (const language of ["aa", "ja", "zu"])
+    for (const language of ["aa", "ja", "zu"]) {
       expect(normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)[0]?.language).toBe(
         language,
       );
+    }
 
-    for (const language of ["fra", "xx", "zz", "e1", "", "en-US"])
+    for (const language of ["fra", "xx", "zz", "e1", "", "en-US"]) {
       expect(() => normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)).toThrow(
         InvalidInputError,
       );
+    }
   });
 
   it("checks a declared source against the host", () => {
@@ -135,7 +137,8 @@ describe(replaceGameVods, () => {
   });
 
   it("rejects a game outside the match format even when clearing it", () => {
-    for (const game of [0, 6, 1.5])
+    for (const game of [0, 6, 1.5]) {
       expect(() => replaceGameVods(current, game, [], 5)).toThrow("Game must be between 1 and 5.");
+    }
   });
 });

@@ -5,8 +5,8 @@ import {
   parseTeamAlias,
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
-  type TeamAliasError,
 } from "@sarpbc/utils";
+import type { TeamAliasError } from "@sarpbc/utils";
 
 type AliasField = "name" | "from" | "to" | "sourceUrl" | "logoUrl" | "pandascoreId";
 
@@ -86,21 +86,33 @@ function toInput(values: AliasForm): TeamAliasInput {
 function fieldOf(error: TeamAliasError): AliasField {
   switch (error) {
     case "missing-name":
-    case "name-too-long":
+    case "name-too-long": {
       return "name";
-    case "invalid-from":
+    }
+
+    case "invalid-from": {
       return "from";
+    }
+
     case "invalid-to":
-    case "to-not-after-from":
+    case "to-not-after-from": {
       return "to";
+    }
+
     case "invalid-source-url":
-    case "forbidden-source":
+    case "forbidden-source": {
       return "sourceUrl";
+    }
+
     case "invalid-logo-url":
-    case "forbidden-logo-source":
+    case "forbidden-logo-source": {
       return "logoUrl";
-    case "invalid-pandascore-id":
+    }
+
+    case "invalid-pandascore-id": {
       return "pandascoreId";
+    }
+
     default: {
       const exhaustive: never = error;
 
@@ -114,7 +126,9 @@ const parsed = computed(() => parseTeamAlias(toInput(form.value)));
 function feedback(field: AliasField): FieldFeedback {
   const result = parsed.value;
 
-  if (result.ok || fieldOf(result.error) !== field) return {};
+  if (result.ok || fieldOf(result.error) !== field) {
+    return {};
+  }
 
   return { error: t(`page.teams.aliases.errors.${result.error}`) };
 }
@@ -141,7 +155,10 @@ function openEdit(alias: TeamAlias) {
 async function submit() {
   const result = parsed.value;
 
-  if (!result.ok || saving.value) return;
+  if (!result.ok || saving.value) {
+    return;
+  }
+
   saving.value = true;
 
   try {

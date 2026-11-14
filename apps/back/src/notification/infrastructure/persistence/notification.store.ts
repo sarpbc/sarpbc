@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { ReplyNotificationRepository } from "./reply-notification.repository";
+import type { ReplyNotificationRepository } from "./reply-notification.repository";
 import { ReplyNotification } from "./reply-notification.entity";
 import { replySnapshot } from "../../../reply/infrastructure/reply-persistence";
 import type { NotificationStore } from "../../application/ports";

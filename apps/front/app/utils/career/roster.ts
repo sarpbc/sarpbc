@@ -111,7 +111,9 @@ export function getRosterPlayerRating(
   world: CareerWorldState,
   userRating: number,
 ): number {
-  if (playerId === USER_ROSTER_ID) return userRating;
+  if (playerId === USER_ROSTER_ID) {
+    return userRating;
+  }
 
   return world.players[playerId]?.rating ?? 50;
 }
@@ -121,7 +123,9 @@ export function getRosterStrength(
   world: CareerWorldState,
   userRating: number,
 ): number {
-  if (roster.length === 0) return 0;
+  if (roster.length === 0) {
+    return 0;
+  }
 
   const sum = roster.reduce(
     (total, playerId) => total + getRosterPlayerRating(playerId, world, userRating),
@@ -147,14 +151,18 @@ export function getPlayerMatchStrength(
   user: MatchStrengthUser,
 ): number {
   if (playerId === USER_ROSTER_ID) {
-    if (user.stats) return computePerformance(user.stats, user.role);
+    if (user.stats) {
+      return computePerformance(user.stats, user.role);
+    }
 
     return user.rating;
   }
 
   const npc = world.players[playerId];
 
-  if (!npc) return 50;
+  if (!npc) {
+    return 50;
+  }
 
   return computePerformance(npcStats(npc));
 }
@@ -164,7 +172,9 @@ export function getRosterMatchStrength(
   world: CareerWorldState,
   user: MatchStrengthUser,
 ): number {
-  if (roster.length === 0) return 0;
+  if (roster.length === 0) {
+    return 0;
+  }
 
   const sum = roster.reduce(
     (total, playerId) => total + getPlayerMatchStrength(playerId, world, user),
@@ -185,10 +195,14 @@ function npcWalkSpan(tick: NpcRatingTick): number {
   switch (tick) {
     case "split1":
     case "split2":
-    case "worlds":
+    case "worlds": {
       return 1;
-    case "season":
+    }
+
+    case "season": {
       return 2;
+    }
+
     default: {
       const _exhaustive: never = tick;
 
@@ -201,10 +215,14 @@ function npcFormWalkSpan(tick: NpcRatingTick): number {
   switch (tick) {
     case "split1":
     case "split2":
-    case "worlds":
+    case "worlds": {
       return 2;
-    case "season":
+    }
+
+    case "season": {
       return 3;
+    }
+
     default: {
       const _exhaustive: never = tick;
 
@@ -215,12 +233,19 @@ function npcFormWalkSpan(tick: NpcRatingTick): number {
 
 /** Rising / stable / declining lane, hashed from id so stars fade and prospects climb. */
 function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): number {
-  if (tick !== "season") return 0;
+  if (tick !== "season") {
+    return 0;
+  }
+
   const lane = hashString(`${playerId}:career-lane`) % 3;
 
-  if (lane === 0) return season <= 5 ? 1 : 0;
+  if (lane === 0) {
+    return season <= 5 ? 1 : 0;
+  }
 
-  if (lane === 1) return 0;
+  if (lane === 1) {
+    return 0;
+  }
 
   return season >= 4 ? -1 : 0;
 }
@@ -276,7 +301,9 @@ export function createCareerWorld(careerId: string): CareerWorldState {
   const takenNames = new Set(Object.keys(world.players));
 
   for (const [i, name] of SPARE_GAMERTAGS.slice(0, 8).entries()) {
-    if (takenNames.has(name)) continue;
+    if (takenNames.has(name)) {
+      continue;
+    }
 
     const rng = createRng(hashString(`${careerId}:fa:${i}`));
     const regions: CareerRegion[] = ["na", "eu", "sam", "oce", "mena", "apac", "ssa"];
@@ -298,9 +325,13 @@ export function createCareerWorld(careerId: string): CareerWorldState {
 function pickDisplacementFate(rng: () => number, canSwap: boolean): DisplacementFate {
   const roll = rng();
 
-  if (canSwap && roll < 0.5) return "swap";
+  if (canSwap && roll < 0.5) {
+    return "swap";
+  }
 
-  if (roll < (canSwap ? 0.8 : 0.7)) return "free_agent";
+  if (roll < (canSwap ? 0.8 : 0.7)) {
+    return "free_agent";
+  }
 
   return "leave";
 }
@@ -334,10 +365,14 @@ function pickPlayerToDisplace(
 }
 
 function isSigned(playerId: string, world: CareerWorldState): boolean {
-  if (playerId === USER_ROSTER_ID) return true;
+  if (playerId === USER_ROSTER_ID) {
+    return true;
+  }
 
   for (const roster of Object.values(world.rosters)) {
-    if (roster.includes(playerId)) return true;
+    if (roster.includes(playerId)) {
+      return true;
+    }
   }
 
   return false;
@@ -416,18 +451,24 @@ function takeReplacement(
 
 function releasePlayer(world: CareerWorldState, playerId: string, fate: DisplacementFate): void {
   switch (fate) {
-    case "swap":
+    case "swap": {
       break;
-    case "free_agent":
+    }
+
+    case "free_agent": {
       if (!world.freeAgentIds.includes(playerId)) {
         world.freeAgentIds.push(playerId);
       }
 
       break;
-    case "leave":
+    }
+
+    case "leave": {
       Reflect.deleteProperty(world.players, playerId);
       world.freeAgentIds = world.freeAgentIds.filter((id) => id !== playerId);
       break;
+    }
+
     default: {
       const _exhaustive: never = fate;
       throw new Error(`Unhandled displacement fate: ${String(_exhaustive)}`);
@@ -445,19 +486,25 @@ function fillVacancy(
 ): void {
   const team = getWorldTeamById(teamId);
 
-  if (!team) return;
+  if (!team) {
+    return;
+  }
 
   const remaining = (world.rosters[teamId] ?? []).filter((id) => id !== USER_ROSTER_ID);
   let incoming: string;
 
   switch (fate) {
-    case "swap":
+    case "swap": {
       incoming = displacedId;
       break;
+    }
+
     case "free_agent":
-    case "leave":
+    case "leave": {
       incoming = takeReplacement(world, team, userRating, rng);
       break;
+    }
+
     default: {
       const _exhaustive: never = fate;
       throw new Error(`Unhandled displacement fate: ${String(_exhaustive)}`);

@@ -8,7 +8,9 @@ const { t, locale } = useI18n();
 const games = computed(() => {
   const byGame = new Map<number, MatchVod[]>();
 
-  for (const vod of vods) byGame.set(vod.game, [...(byGame.get(vod.game) ?? []), vod]);
+  for (const vod of vods) {
+    byGame.set(vod.game, [...(byGame.get(vod.game) ?? []), vod]);
+  }
 
   return [...byGame.entries()]
     .toSorted(([a], [b]) => a - b)
@@ -19,10 +21,14 @@ const languageNames = computed(() => new Intl.DisplayNames([locale.value], { typ
 
 function sourceLabel(source: MatchVodSource): string {
   switch (source) {
-    case "twitch":
+    case "twitch": {
       return t("page.match.detail.vods.sources.twitch");
-    case "youtube":
+    }
+
+    case "youtube": {
       return t("page.match.detail.vods.sources.youtube");
+    }
+
     default: {
       const exhaustive: never = source;
 

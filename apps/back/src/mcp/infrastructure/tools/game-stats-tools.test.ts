@@ -123,7 +123,10 @@ function setup(role: "admin" | "journalist") {
   const call = async (name: string, input: Record<string, string | number | boolean>) => {
     const tool = tools.find((defined) => defined.name === name);
 
-    if (!tool) throw new Error(`${name} is not defined`);
+    if (!tool) {
+      throw new Error(`${name} is not defined`);
+    }
+
     const result = await tool.run({ id: "u1", email: "staff@test.com", role }, input);
     const text = textOf(result);
 
@@ -285,7 +288,10 @@ describe("game stats tools", () => {
     expect(result.isError).toBe(true);
     expect(text).toContain("tournaments.manage");
 
-    for (const service of [statsImportService, statsPlayerLinkService, manualGameService])
-      for (const method of Object.values(service)) expect(method).not.toHaveBeenCalled();
+    for (const service of [statsImportService, statsPlayerLinkService, manualGameService]) {
+      for (const method of Object.values(service)) {
+        expect(method).not.toHaveBeenCalled();
+      }
+    }
   });
 });

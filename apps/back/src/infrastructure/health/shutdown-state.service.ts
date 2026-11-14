@@ -1,4 +1,5 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 
 const SHUTDOWN_SIGNALS = ["SIGTERM", "SIGINT"] as const;
 

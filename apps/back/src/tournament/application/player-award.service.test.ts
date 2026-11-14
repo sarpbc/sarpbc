@@ -1,4 +1,5 @@
-import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
+import { PLAYER_AWARD_TYPES } from "@sarpbc/types";
+import type { PlayerAwardType } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";

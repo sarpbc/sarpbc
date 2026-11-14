@@ -5,8 +5,8 @@ import {
   parseTeamAlias,
   teamAliasInForce,
   teamAliasesOverlap,
-  type TeamAliasError,
 } from "@sarpbc/utils";
+import type { TeamAliasError } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
 import { Team } from "./team";
@@ -38,7 +38,9 @@ const ERRORS = {
 export function requireTeamAliasInput(input: TeamAliasInput): TeamAliasInput {
   const parsed = parseTeamAlias(input);
 
-  if (!parsed.ok) throw new InvalidInputError(ERRORS[parsed.error]);
+  if (!parsed.ok) {
+    throw new InvalidInputError(ERRORS[parsed.error]);
+  }
 
   return parsed.alias;
 }
@@ -62,10 +64,15 @@ export function assertTeamAliasFits(alias: TeamAlias, team: Team): void {
 }
 
 export function teamAt(team: Team, at: Date | null): Team {
-  if (!at || team.aliases.length === 0) return team;
+  if (!at || team.aliases.length === 0) {
+    return team;
+  }
+
   const alias = teamAliasInForce(team.aliases, isoDay(at));
 
-  if (!alias) return team;
+  if (!alias) {
+    return team;
+  }
 
   const logo =
     alias.logoUrl !== null && alias.logoUrl !== ""

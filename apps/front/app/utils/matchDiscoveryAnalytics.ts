@@ -47,12 +47,18 @@ export function listVariantToDiscoveryStatus(
   variant: "live" | "upcoming" | "result",
 ): MatchDiscoveryStatus {
   switch (variant) {
-    case "live":
+    case "live": {
       return "live";
-    case "upcoming":
+    }
+
+    case "upcoming": {
       return "upcoming";
-    case "result":
+    }
+
+    case "result": {
       return "finished";
+    }
+
     default: {
       const _exhaustive: never = variant;
 

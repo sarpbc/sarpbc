@@ -1,10 +1,11 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
+import type { CanActivate, ExecutionContext } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import type { Reflector } from "@nestjs/core";
 import type { FastifyRequest } from "fastify";
 import { ForbiddenError } from "../../../common/domain/errors/forbidden-error";
 import { STAFF_PERMISSIONS_KEY } from "./decorator/require-permissions.decorator";
 import type { StaffPermission } from "@sarpbc/types";
-import { UserService } from "../../application/user.service";
+import type { UserService } from "../../application/user.service";
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

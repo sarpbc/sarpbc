@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { PrizeEntry } from "@sarpbc/types";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import type { PrizeWriter } from "../../application/ports";

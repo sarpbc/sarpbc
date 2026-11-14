@@ -12,7 +12,9 @@ export type LocaleValue = z.infer<typeof localeValue>;
 function leafKeys(value: LocaleValue, prefix = ""): string[] {
   const object = localeObject.safeParse(value);
 
-  if (!object.success) return [prefix];
+  if (!object.success) {
+    return [prefix];
+  }
 
   return Object.entries(object.data).flatMap(([key, child]) =>
     leafKeys(child, prefix ? `${prefix}.${key}` : key),
@@ -61,6 +63,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
     }
   }
 
-  if (failed) process.exitCode = 1;
-  else process.stdout.write(`i18n parity checked in ${directories.length} locale folders.\n`);
+  if (failed) {
+    process.exitCode = 1;
+  } else {
+    process.stdout.write(`i18n parity checked in ${directories.length} locale folders.\n`);
+  }
 }

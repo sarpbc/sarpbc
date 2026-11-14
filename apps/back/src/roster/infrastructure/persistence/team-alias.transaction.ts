@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { TeamAliasTransaction, TeamAliasWriteScope } from "../../application/ports";
 import { MikroTeamStore } from "./team.store";
 import { MikroTeamAliasStore } from "./team-alias.store";

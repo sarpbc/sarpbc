@@ -1,4 +1,5 @@
-import { auth, oauth2, type oauth2_v2 } from "@googleapis/oauth2";
+import { auth, oauth2 } from "@googleapis/oauth2";
+import type { oauth2_v2 } from "@googleapis/oauth2";
 import { z } from "zod";
 import { AuthenticationError } from "../../common/domain/errors/authentication-error";
 import type {

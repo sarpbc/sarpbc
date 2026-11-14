@@ -47,13 +47,17 @@ async function bracketToggle(
   tournamentId: string,
   hasBracket: boolean,
 ): Promise<boolean> {
-  if (hasBracket) return true;
+  if (hasBracket) {
+    return true;
+  }
+
   const stage = await matches.bracket(tournamentId);
 
-  if (stage.matches.some((match) => match.previousMatches.length > 0))
+  if (stage.matches.some((match) => match.previousMatches.length > 0)) {
     throw new InvalidInputError(
       "This stage still has bracket links. Remove them from its matches before disabling the bracket.",
     );
+  }
 
   return false;
 }
@@ -70,7 +74,10 @@ export class ManualTournamentService {
       tournament.league = await requireLeague(tournaments, input.leagueId);
 
       if (input.eventId !== undefined && input.eventId !== "") {
-        if (input.slug !== undefined) throw sharedEventSlugError();
+        if (input.slug !== undefined) {
+          throw sharedEventSlugError();
+        }
+
         await placeStage(events, tournament, await requireEvent(events, input.eventId));
       } else {
         tournament.slug = stageSlug(input.name);
@@ -79,11 +86,13 @@ export class ManualTournamentService {
 
       await tournaments.save(tournament);
 
-      if (input.teamIds?.length !== undefined && input.teamIds.length !== 0)
+      if (input.teamIds?.length !== undefined && input.teamIds.length !== 0) {
         await syncParticipants(tournaments, tournament, input.teamIds);
+      }
 
-      if (input.playerParticipants?.length !== undefined && input.playerParticipants.length !== 0)
+      if (input.playerParticipants?.length !== undefined && input.playerParticipants.length !== 0) {
         await syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+      }
 
       return tournament.id;
     });
@@ -94,41 +103,62 @@ export class ManualTournamentService {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
       const tournament = await tournaments.load(id);
 
-      if (!tournament) throw new NotFoundError(`Tournament with id "${id}" was not found.`);
+      if (!tournament) {
+        throw new NotFoundError(`Tournament with id "${id}" was not found.`);
+      }
+
       assertTournamentUpdateAllowed(tournament.source, input);
       const previousName = tournament.name;
 
-      if (input.name !== undefined) tournament.name = input.name;
+      if (input.name !== undefined) {
+        tournament.name = input.name;
+      }
 
-      if (input.tier !== undefined) tournament.tier = nonBlank(input.tier) ?? null;
+      if (input.tier !== undefined) {
+        tournament.tier = nonBlank(input.tier) ?? null;
+      }
 
-      if (input.beginAt !== undefined)
+      if (input.beginAt !== undefined) {
         tournament.beginAt = input.beginAt === null ? null : new Date(input.beginAt);
+      }
 
-      if (input.endAt !== undefined)
+      if (input.endAt !== undefined) {
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
+      }
 
-      if (input.imageUrl !== undefined) tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
+      if (input.imageUrl !== undefined) {
+        tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
+      }
+
       tournament.assertDateOrder();
 
       if (tournament.source === "pandascore") {
-        if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
+        if (input.endAt !== undefined) {
+          tournament.endAtCorrected = input.endAt !== null;
+        }
       } else {
-        if (input.leagueId !== undefined)
+        if (input.leagueId !== undefined) {
           tournament.league = await requireLeague(tournaments, input.leagueId);
+        }
+
         await updateEvent(events, tournament, previousName, input);
         await assertUpdatedLineup(tournaments, tournament, input);
 
-        if (input.teamIds !== undefined)
+        if (input.teamIds !== undefined) {
           await syncParticipants(tournaments, tournament, input.teamIds);
+        }
 
-        if (input.playerParticipants !== undefined)
+        if (input.playerParticipants !== undefined) {
           await syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+        }
 
-        if (input.rosters !== undefined) await setRosters(tournaments, tournament, input.rosters);
+        if (input.rosters !== undefined) {
+          await setRosters(tournaments, tournament, input.rosters);
+        }
 
-        if (input.hasBracket !== undefined)
+        if (input.hasBracket !== undefined) {
           tournament.hasBracket = await bracketToggle(matches, tournament.id, input.hasBracket);
+        }
       }
 
       await tournaments.save(tournament);
@@ -141,7 +171,10 @@ export class ManualTournamentService {
     await this.transaction.run(async ({ tournaments }) => {
       const tournament = await tournaments.load(id);
 
-      if (!tournament) throw new NotFoundError("Tournament not found");
+      if (!tournament) {
+        throw new NotFoundError("Tournament not found");
+      }
+
       tournament.pickemsEnabled = enabled;
       await tournaments.save(tournament);
     });
@@ -150,8 +183,9 @@ export class ManualTournamentService {
   private async detail(id: string) {
     const tournament = await this.reads.findById(id);
 
-    if (!tournament)
+    if (!tournament) {
       throw new NotFoundError(`Tournament with id "${id}" was not found after save.`);
+    }
 
     return tournament;
   }

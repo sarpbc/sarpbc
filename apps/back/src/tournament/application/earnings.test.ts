@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { summarizeEarnings, type EarningsLine } from "./earnings";
+import { summarizeEarnings } from "./earnings";
+import type { EarningsLine } from "./earnings";
 
 function line(
   id: string,

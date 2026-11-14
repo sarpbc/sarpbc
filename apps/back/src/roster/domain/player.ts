@@ -14,18 +14,27 @@ function roleFromPandascore(role: string | null): ContractRole {
     ""
   ) {
     case "coach":
-    case "head_coach":
+    case "head_coach": {
       return "coach";
+    }
+
     case "assistant_coach":
-    case "co_coach":
+    case "co_coach": {
       return "assistant_coach";
-    case "analyst":
+    }
+
+    case "analyst": {
       return "analyst";
+    }
+
     case "manager":
-    case "staff":
+    case "staff": {
       return "manager";
-    default:
+    }
+
+    default: {
       return "active";
+    }
   }
 }
 
@@ -62,13 +71,18 @@ export class Player {
       (this.imageUrl === null || this.imageUrl === "") &&
       input.imageUrl !== undefined &&
       input.imageUrl !== ""
-    )
+    ) {
       this.imageUrl = input.imageUrl;
+    }
 
-    if (input.role !== undefined) this.role = input.role;
+    if (input.role !== undefined) {
+      this.role = input.role;
+    }
   }
   currentRole(): ContractRole | null {
-    if (!this.team) return null;
+    if (!this.team) {
+      return null;
+    }
 
     return this.contractRole ?? roleFromPandascore(this.role);
   }

@@ -47,7 +47,10 @@ async function refreshOptions() {
 }
 
 async function handleSubmit() {
-  if (isSaving.value || isUploading.value) return;
+  if (isSaving.value || isUploading.value) {
+    return;
+  }
+
   const validationError = validateManualTournamentForm(formState.value);
 
   if (validationError) {

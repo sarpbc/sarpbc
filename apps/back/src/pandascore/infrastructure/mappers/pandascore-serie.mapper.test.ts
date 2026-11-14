@@ -17,7 +17,9 @@ function deletionReason(object: DeletionObject | null): string | null {
     object,
   });
 
-  if (incident.change_type !== "deletion") throw new Error("expected a deletion");
+  if (incident.change_type !== "deletion") {
+    throw new Error("expected a deletion");
+  }
 
   return incident.object;
 }
@@ -67,8 +69,10 @@ describe("serie incidents", () => {
       object: { id: 9417, full_name: "Paris 2026", year: "2026", league: { id: 4 } },
     });
 
-    if (incident.change_type === "deletion" || incident.type !== "serie")
+    if (incident.change_type === "deletion" || incident.type !== "serie") {
       throw new Error("expected a serie update");
+    }
+
     expect(toUpsertSerieCommand(incident.object)).toStrictEqual({
       pandascoreId: 9417,
       fullName: "Paris 2026",

@@ -4,15 +4,20 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { isUuid } from "../../common/domain/entity-ref";
 import type { Tournament } from "../domain/tournament";
-import { toEventRef, type TournamentEvent } from "../domain/tournament-event";
+import { toEventRef } from "../domain/tournament-event";
+import type { TournamentEvent } from "../domain/tournament-event";
 import type { EventWriter, TournamentWriter } from "./ports";
 
 export async function requireLeague(writer: TournamentWriter, id: string | null | undefined) {
-  if (id === null || id === undefined || id === "") return null;
+  if (id === null || id === undefined || id === "") {
+    return null;
+  }
+
   const league = await writer.league(id);
 
-  if (!league)
+  if (!league) {
     throw new NotFoundError(`League with id "${id}" was not found. Choose a league from the list.`);
+  }
 
   return league;
 }
@@ -20,8 +25,9 @@ export async function requireLeague(writer: TournamentWriter, id: string | null 
 export async function requireEvent(events: EventWriter, id: string): Promise<TournamentEvent> {
   const event = await events.load(id);
 
-  if (!event)
+  if (!event) {
     throw new NotFoundError(`Event with id "${id}" was not found. Choose an existing event.`);
+  }
 
   return event;
 }
@@ -29,15 +35,17 @@ export async function requireEvent(events: EventWriter, id: string): Promise<Tou
 export async function explicitEventSlug(events: EventWriter, raw: string, eventId: string) {
   const slug = toSlug(raw);
 
-  if (!slug || isUuid(slug))
+  if (!slug || isUuid(slug)) {
     throw new InvalidInputError(
       "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs-2026).",
     );
+  }
 
-  if (await events.slugTaken(slug, eventId))
+  if (await events.slugTaken(slug, eventId)) {
     throw new ConflictError(
       `An event with the slug "${slug}" already exists. Choose a different slug.`,
     );
+  }
 
   return slug;
 }

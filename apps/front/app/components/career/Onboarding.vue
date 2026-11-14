@@ -1,14 +1,11 @@
 <script lang="ts" setup>
-import {
-  CAREER_BACKGROUNDS,
-  CAREER_COUNTRIES,
-  CAREER_REGIONS,
-  CAREER_ROLES,
-  type CareerBackground,
-  type CareerCountry,
-  type CareerRegion,
-  type CareerRole,
-  type OnboardingStep,
+import { CAREER_BACKGROUNDS, CAREER_COUNTRIES, CAREER_REGIONS, CAREER_ROLES } from "~/types/career";
+import type {
+  CareerBackground,
+  CareerCountry,
+  CareerRegion,
+  CareerRole,
+  OnboardingStep,
 } from "~/types/career";
 
 const { step, playerName, region, country, role, background } = defineProps<{
@@ -46,24 +43,35 @@ function goTo(nextStep: OnboardingStep) {
 }
 
 function onIntroNext() {
-  if (!playerName.trim()) return;
+  if (!playerName.trim()) {
+    return;
+  }
+
   goTo("region");
 }
 
 function onRegionNext() {
-  if (region) goTo("country");
+  if (region) {
+    goTo("country");
+  }
 }
 
 function onCountryNext() {
-  if (country) goTo("role");
+  if (country) {
+    goTo("role");
+  }
 }
 
 function onRoleNext() {
-  if (role) goTo("background");
+  if (role) {
+    goTo("background");
+  }
 }
 
 function onStart() {
-  if (background) emit("complete");
+  if (background) {
+    emit("complete");
+  }
 }
 </script>
 

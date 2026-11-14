@@ -14,29 +14,42 @@ export function parseCareerState(raw: string | null): CareerState | null {
 }
 
 export function loadActiveCareer(): CareerState | null {
-  if (!import.meta.client) return null;
+  if (!import.meta.client) {
+    return null;
+  }
 
   return parseCareerState(localStorage.getItem(CAREER_ACTIVE_STORAGE_KEY));
 }
 
 export function saveActiveCareer(state: CareerState): void {
-  if (!import.meta.client) return;
+  if (!import.meta.client) {
+    return;
+  }
+
   localStorage.setItem(CAREER_ACTIVE_STORAGE_KEY, JSON.stringify(state));
 }
 
 export function clearActiveCareer(): void {
-  if (!import.meta.client) return;
+  if (!import.meta.client) {
+    return;
+  }
+
   localStorage.removeItem(CAREER_ACTIVE_STORAGE_KEY);
 }
 
 export function loadCareerResults(): Map<string, CareerResult> {
-  if (!import.meta.client) return new Map();
+  if (!import.meta.client) {
+    return new Map();
+  }
 
   return parseCareerResultsJson(localStorage.getItem(CAREER_RESULTS_STORAGE_KEY));
 }
 
 export function saveCareerResult(result: CareerResult): void {
-  if (!import.meta.client) return;
+  if (!import.meta.client) {
+    return;
+  }
+
   const existing = loadCareerResults();
   existing.set(result.id, result);
   localStorage.setItem(CAREER_RESULTS_STORAGE_KEY, JSON.stringify(Object.fromEntries(existing)));

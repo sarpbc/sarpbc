@@ -47,7 +47,9 @@ function weakestRosterRating(team: RankedTeam): number {
   let min = Infinity;
 
   for (const member of team.roster) {
-    if (member.rating < min) min = member.rating;
+    if (member.rating < min) {
+      min = member.rating;
+    }
   }
 
   return min;
@@ -93,7 +95,9 @@ export function getTransferBand(
     };
   }
 
-  if (seasonPoints < 15) return null;
+  if (seasonPoints < 15) {
+    return null;
+  }
 
   if (seasonPoints < 28) {
     return { minRank: Math.max(currentRank, 8), maxRank: 99, maxOffers: 1 };
@@ -115,7 +119,9 @@ export function getTransferBand(
 }
 
 function rollOfferCount(rng: () => number, threeChance: number, twoChance: number): number {
-  if (rng() < threeChance) return 3;
+  if (rng() < threeChance) {
+    return 3;
+  }
 
   return rng() < twoChance ? 2 : 1;
 }
@@ -131,7 +137,9 @@ export function pickOffseasonOffers(
   const playerWorldRank = marketPlayerRank(rankings, playerRating, listedRank);
   const band = getTransferBand(seasonPoints, currentRank, playerWorldRank);
 
-  if (!band) return [];
+  if (!band) {
+    return [];
+  }
 
   const inBand = (entry: RankedTeam): boolean =>
     entry.team.id !== currentTeamId && entry.rank >= band.minRank && entry.rank <= band.maxRank;
@@ -144,7 +152,9 @@ export function pickOffseasonOffers(
     pool = rankings.teams.filter(inBand);
   }
 
-  if (pool.length === 0) return [];
+  if (pool.length === 0) {
+    return [];
+  }
 
   const rng = createRng(seed);
   let count: number;
@@ -165,7 +175,9 @@ export function pickOffseasonOffers(
 
   count = Math.min(count, band.maxOffers, pool.length);
 
-  if (count <= 0) return [];
+  if (count <= 0) {
+    return [];
+  }
 
   const shortlist = pool.toSorted((a, b) => a.rank - b.rank).slice(0, OFFER_SHORTLIST);
 
@@ -175,9 +187,13 @@ export function pickOffseasonOffers(
 }
 
 function renewalPerformanceModifier(seasonPoints: number): number {
-  if (seasonPoints >= 42) return 0.15;
+  if (seasonPoints >= 42) {
+    return 0.15;
+  }
 
-  if (seasonPoints >= 20) return 0.05;
+  if (seasonPoints >= 20) {
+    return 0.05;
+  }
 
   return seasonPoints < 10 ? -0.15 : 0;
 }

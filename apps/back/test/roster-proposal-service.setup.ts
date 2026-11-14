@@ -26,37 +26,44 @@ import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
 import { TeamAlias } from "../src/roster/domain/team-alias";
-import {
-  replaceStreams,
-  type StreamEditSource,
-  type StreamOwner,
-} from "../src/tournament/domain/stream";
-import { requireViewership, type ViewershipOwner } from "../src/tournament/domain/viewership";
+import { replaceStreams } from "../src/tournament/domain/stream";
+import type { StreamEditSource, StreamOwner } from "../src/tournament/domain/stream";
+import { requireViewership } from "../src/tournament/domain/viewership";
+import type { ViewershipOwner } from "../src/tournament/domain/viewership";
 import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
 import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 
 const teamGuard = async (id: string) => {
-  if (id === "kc") throw new ConflictError("Karmine Corp still has 3 contracts");
+  if (id === "kc") {
+    throw new ConflictError("Karmine Corp still has 3 contracts");
+  }
 };
 
 const matchGuard = async (id: string) => {
-  if (id === "missing-match") throw new NotFoundError("Match not found");
+  if (id === "missing-match") {
+    throw new NotFoundError("Match not found");
+  }
 
-  if (id === "pandascore-match")
+  if (id === "pandascore-match") {
     throw new InvalidInputError("Final is synced from PandaScore and cannot be deleted");
+  }
 };
 
 const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
 
 const awardError = (tournamentId: string, playerId: string) => {
-  if (tournamentId === "startgg-cup")
+  if (tournamentId === "startgg-cup") {
     return new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
+  }
 
-  if (tournamentId !== "cup")
+  if (tournamentId !== "cup") {
     return new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+  }
 
-  if (playerId !== "zen") return new InvalidInputError(`${playerId} is not on the roster`);
+  if (playerId !== "zen") {
+    return new InvalidInputError(`${playerId} is not on the roster`);
+  }
 
   return null;
 };
@@ -109,8 +116,9 @@ export function setupRosterProposalService() {
       async (id: string) => {
         await matchGuard(id);
 
-        if (id === "startgg-match")
+        if (id === "startgg-match") {
           throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
+        }
       },
     ),
     deleteMatch: vi.fn<MatchService["deleteMatch"]>(matchGuard),
@@ -121,8 +129,9 @@ export function setupRosterProposalService() {
       async (owner: ViewershipOwner, input: Viewership) => {
         requireViewership(input);
 
-        if (owner.id === "startgg-match")
+        if (owner.id === "startgg-match") {
           throw new InvalidInputError("The viewership of a start.gg match cannot be proposed");
+        }
       },
     ),
     set: vi.fn<ViewershipService["set"]>(async (_: ViewershipOwner, input: Viewership | null) => ({
@@ -133,8 +142,10 @@ export function setupRosterProposalService() {
   const streams = {
     requireProposable: vi.fn<StreamService["requireProposable"]>(
       async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
-        if (owner.id === "startgg-match")
+        if (owner.id === "startgg-match") {
           throw new InvalidInputError("Streams of a start.gg match cannot be proposed");
+        }
+
         replaceStreams([], inputs, "manual");
       },
     ),
@@ -149,12 +160,15 @@ export function setupRosterProposalService() {
   const lineups = {
     requireProposable: vi.fn<MatchLineupService["requireProposable"]>(
       async (matchId: string, inputs: readonly MatchLineupInput[]) => {
-        if (matchId === "startgg-match")
+        if (matchId === "startgg-match") {
           throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
+        }
+
         const playerIds = inputs.flatMap(({ playerIds: ids }) => ids);
 
-        if (new Set(playerIds).size !== playerIds.length)
+        if (new Set(playerIds).size !== playerIds.length) {
           throw new InvalidInputError("A player appears twice in the match lineups");
+        }
       },
     ),
     set: vi.fn<MatchLineupService["set"]>(async () => ({ source: "manual" as const, lineups: [] })),
@@ -163,8 +177,9 @@ export function setupRosterProposalService() {
   const circuits = {
     requireStageSettings: vi.fn<CircuitService["requireStageSettings"]>(
       async (_: string, tournamentId: string, input: CircuitStageScaleInput) => {
-        if (tournamentId === "missing-stage")
+        if (tournamentId === "missing-stage") {
           throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+        }
 
         return { worldwide: false, regionTeamIds: [], finishes: [], ...input };
       },
@@ -175,8 +190,9 @@ export function setupRosterProposalService() {
   const teamAliases = {
     requireProposable: vi.fn<TeamAliasService["requireProposable"]>(
       async (_teamId: string, input: { sourceUrl: string }) => {
-        if (input.sourceUrl.includes("liquipedia"))
+        if (input.sourceUrl.includes("liquipedia")) {
           throw new InvalidInputError("Liquipedia is not an accepted source");
+        }
       },
     ),
     add: vi.fn<TeamAliasService["add"]>(async () => new TeamAlias()),
@@ -186,7 +202,9 @@ export function setupRosterProposalService() {
   const seasons = {
     requireAward: vi.fn<SeasonService["requireAward"]>(
       async (seasonId: string, input: { region?: string | null }) => {
-        if (seasonId !== "season-1") throw new NotFoundError("Season not found");
+        if (seasonId !== "season-1") {
+          throw new NotFoundError("Season not found");
+        }
 
         return {
           awardType: "regional_mvp" as const,
@@ -239,20 +257,26 @@ export function setupRosterProposalService() {
   const prizes = {
     requireProposableTournament: vi.fn<TournamentPrizeService["requireProposableTournament"]>(
       async (id: string) => {
-        if (id === "startgg-cup")
+        if (id === "startgg-cup") {
           throw new InvalidInputError(
             "Prize distributions of start.gg tournaments cannot be proposed",
           );
+        }
 
-        if (id !== "cup") throw new NotFoundError(`Tournament with id "${id}" not found`);
+        if (id !== "cup") {
+          throw new NotFoundError(`Tournament with id "${id}" not found`);
+        }
       },
     ),
     requireProposablePrize: vi.fn<TournamentPrizeService["requireProposablePrize"]>(
       async (tournamentId: string, teamId: string) => {
-        if (tournamentId !== "cup")
+        if (tournamentId !== "cup") {
           throw new NotFoundError(`Tournament "${tournamentId}" not found`);
+        }
 
-        if (teamId !== "kc") throw new NotFoundError(`Team "${teamId}" has no prize`);
+        if (teamId !== "kc") {
+          throw new NotFoundError(`Team "${teamId}" has no prize`);
+        }
       },
     ),
     setDistribution: vi.fn<TournamentPrizeService["setDistribution"]>(),
@@ -264,7 +288,9 @@ export function setupRosterProposalService() {
       async (tournamentId: string, _team: string, playerId: string) => {
         const error = awardError(tournamentId, playerId);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
       },
     ),
     createForTeam: vi.fn<PlayerAwardService["createForTeam"]>(async () => ({
@@ -289,7 +315,10 @@ export function setupRosterProposalService() {
       } catch (error) {
         saved.clear();
 
-        for (const [id, proposal] of before) saved.set(id, proposal);
+        for (const [id, proposal] of before) {
+          saved.set(id, proposal);
+        }
+
         throw error;
       }
     },

@@ -1,5 +1,6 @@
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { newsMatchBlockToAttrs, type NewsMatchBlockAttrs } from "@sarpbc/utils";
+import { newsMatchBlockToAttrs } from "@sarpbc/utils";
+import type { NewsMatchBlockAttrs } from "@sarpbc/utils";
 
 export const EMPTY_MATCH_BLOCK_ATTRS: Required<NewsMatchBlockAttrs> = {
   match: null,
