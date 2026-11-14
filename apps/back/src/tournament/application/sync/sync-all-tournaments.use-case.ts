@@ -9,9 +9,9 @@ export class SyncAllTournamentsUseCase {
     private readonly synchronization: CompetitionSyncService,
   ) {}
   async execute(): Promise<string[]> {
-    const commands = await this.feed.getTournaments(),
-      known = await this.reads.knownPandascoreIds(),
-      ids: string[] = [];
+    const commands = await this.feed.getTournaments();
+    const known = await this.reads.knownPandascoreIds();
+    const ids: string[] = [];
 
     for (const command of commands) {
       if (known.has(command.pandascoreId)) continue;

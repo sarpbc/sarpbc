@@ -52,8 +52,8 @@ async function onFileChange(event: Event) {
       articleSlug: props.articleSlug,
       articleTitle: props.articleTitle,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "";
+  } catch (error_) {
+    const message = error_ instanceof Error ? error_.message : "";
     toast.add({
       title: t("imageUpload.uploadFailed"),
       description: message || t("imageUpload.uploadServerError"),

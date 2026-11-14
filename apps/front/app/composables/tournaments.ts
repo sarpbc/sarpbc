@@ -74,12 +74,12 @@ export async function resolveTournamentPath(
     return await apiFetch<TournamentPathResponse>(`/events/resolve/${path}`, {
       method: "GET",
     });
-  } catch (cause) {
-    if (getApiErrorStatus(cause) === 404) {
+  } catch (error) {
+    if (getApiErrorStatus(error) === 404) {
       return null;
     }
 
-    throw cause;
+    throw error;
   }
 }
 
@@ -90,12 +90,12 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
     });
 
     return res.tournament ?? null;
-  } catch (cause) {
-    if (getApiErrorStatus(cause) === 404) {
+  } catch (error) {
+    if (getApiErrorStatus(error) === 404) {
       return null;
     }
 
-    throw cause;
+    throw error;
   }
 }
 

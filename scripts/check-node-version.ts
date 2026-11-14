@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 
-const expected = readFileSync(".nvmrc", "utf8").trim().replace(/^v/, "");
+const expected = readFileSync(".nvmrc", "utf-8").trim().replace(/^v/, "");
 const apps = ["back", "front", "admin"];
 
 const mismatches = apps.flatMap((app) => {
   const file = `apps/${app}/Dockerfile`;
-  const actual = /^ARG NODE_VERSION=(\S*)$/m.exec(readFileSync(file, "utf8"))?.[1];
+  const actual = /^ARG NODE_VERSION=(\S*)$/m.exec(readFileSync(file, "utf-8"))?.[1];
 
   return actual === expected
     ? []

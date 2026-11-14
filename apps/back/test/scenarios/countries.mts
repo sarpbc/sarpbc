@@ -87,7 +87,7 @@ export async function verifyCountries({ request, staffCookie }: CountriesContext
     { code: "TV", playerCount: 2 },
     "stored nationalities are trimmed and upper-cased into one code",
   );
-  assert(
+  assert.ok(
     countries.every(({ code }) => /^[A-Z]{2}$/.test(code)),
     "values that are not a two-letter code stay off the index",
   );

@@ -165,7 +165,7 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
     throw new InvalidInputError("The image URL must use the default https port.");
   }
 
-  const host = url.hostname.replace(/^\[|\]$/g, "");
+  const host = url.hostname.replaceAll(/^\[|\]$/g, "");
 
   if (isIP(host) && !isPublicAddress(host)) throw privateAddressError();
 

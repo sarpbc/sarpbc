@@ -2,9 +2,7 @@ import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
-export interface PostHogProperties {
-  [key: string]: string | number | boolean | null;
-}
+export type PostHogProperties = Record<string, string | number | boolean | null>;
 
 @Injectable()
 export class PostHogService implements OnModuleDestroy {

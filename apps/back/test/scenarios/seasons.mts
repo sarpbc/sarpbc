@@ -88,7 +88,7 @@ export async function verifySeasonAwards({
 
   await request("POST", "/seasons", { name: "Fake League 2026" }, staffCookie, 409);
   await request("GET", "/seasons", undefined, undefined, 401);
-  assert(
+  assert.ok(
     (await request("GET", "/seasons", undefined, staffCookie))
       .json(seasonList)
       .seasons.some(({ id }) => id === season.id),
@@ -186,7 +186,9 @@ export async function verifySeasonAwards({
       ["regional_mvp", "North America", otherPlayer.id],
     ],
   );
-  assert((await callTool("list_seasons", {}, z.array(idRef))).some(({ id }) => id === season.id));
+  assert.ok(
+    (await callTool("list_seasons", {}, z.array(idRef))).some(({ id }) => id === season.id),
+  );
 
   const profile = (await request("GET", `/player/${player.id}/awards`)).json(playerSeasonAwards);
 
@@ -282,7 +284,7 @@ export async function verifySeasonArchives({
   );
 
   const staffEntry = detail.participants.find(({ id }) => id === winner.id);
-  assert(staffEntry, "the season lists the winner");
+  assert.ok(staffEntry, "the season lists the winner");
   const staffPath = staffEntry.path;
   assert.deepEqual(
     staffPath.map(({ tournament: linked }) => linked?.source ?? null),
@@ -291,18 +293,18 @@ export async function verifySeasonArchives({
 
   const archiveBody = (await request("GET", `/season-archives/${slug}`)).json(z.json());
   const archive = seasonArchive.parse(archiveBody);
-  assert(archive.winner, "the archive names the winner");
+  assert.ok(archive.winner, "the archive names the winner");
   assert.equal(archive.winner.id, team.id);
   assert.deepEqual(archive.format.phases, [{ name: "Fake splits", description: null }]);
   const publicEntry = archive.participants.find(({ team: { id } }) => id === team.id);
-  assert(publicEntry, "the archive lists the winner");
+  assert.ok(publicEntry, "the archive lists the winner");
   const publicPath = publicEntry.path;
   assert.deepEqual(
     publicPath.map(({ label }) => label),
     ["Fake Major", "Fake Regional"],
   );
-  assert(!JSON.stringify(archiveBody).includes(startggCupId));
-  assert(
+  assert.ok(!JSON.stringify(archiveBody).includes(startggCupId));
+  assert.ok(
     (await request("GET", "/season-archives"))
       .json(seasonArchiveList)
       .seasons.some((summary) => summary.slug === slug && summary.winner?.id === team.id),

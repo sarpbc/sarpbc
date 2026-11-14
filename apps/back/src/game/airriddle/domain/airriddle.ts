@@ -22,7 +22,7 @@ export function evaluateGuess(guess: string, answer: string): AirRiddleResultEnu
     if (results[i] === undefined) {
       const found = letters.indexOf(guess[i]);
 
-      if (found < 0) results[i] = AirRiddleResultEnum.INCORRECT;
+      if (found === -1) results[i] = AirRiddleResultEnum.INCORRECT;
       else {
         results[i] = AirRiddleResultEnum.MISPLACED;
         letters[found] = null;

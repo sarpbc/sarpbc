@@ -1,9 +1,8 @@
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, winnerFromResults } from "@sarpbc/utils";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { winnerFromResults } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/competition";
 import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
@@ -128,7 +127,7 @@ export class MatchService {
   }
 
   private async buildTeamForms(match: Match): Promise<TeamFormsMap> {
-    const participants = match.participants;
+    const { participants } = match;
     const teamForms: TeamFormsMap = {};
 
     await Promise.all(
@@ -167,7 +166,7 @@ export class MatchService {
   }
 
   private mapTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
-    const participants = match.participants;
+    const { participants } = match;
     const teamParticipant = participants.find((p) => p.team?.id === teamId);
     const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
     const opponent = opponentParticipant?.team;
@@ -176,7 +175,7 @@ export class MatchService {
       return null;
     }
 
-    const results = match.results;
+    const { results } = match;
     const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score ?? null;
 
     const opponentScore =
@@ -204,7 +203,7 @@ export class MatchService {
       return match.winner.team.id === teamId ? "win" : "loss";
     }
 
-    const participants = match.participants;
+    const { participants } = match;
 
     if (participants.length !== 2) {
       return null;

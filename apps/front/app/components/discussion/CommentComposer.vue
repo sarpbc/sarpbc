@@ -6,7 +6,7 @@ import type { ReplyTargetType } from "@sarpbc/types";
 const {
   targetType,
   targetId,
-  replyToId = undefined,
+  replyToId,
   autofocus = false,
 } = defineProps<{
   targetType: ReplyTargetType;

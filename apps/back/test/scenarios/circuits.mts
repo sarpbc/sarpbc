@@ -282,7 +282,7 @@ export async function verifyCircuits({
       staffCookie,
       204,
     );
-  assert(
+  assert.ok(
     (await request("GET", "/circuits"))
       .json(z.object({ circuits: z.array(idRef) }))
       .circuits.some(({ id }) => id === circuit.id),
@@ -404,8 +404,10 @@ export async function verifyCircuits({
     mcp.standings.map(({ points }) => points),
     [10, 6, 6],
   );
-  assert(mcp.stages.every((stage) => stage.tournament.source === "pandascore"));
-  assert((await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === circuit.id));
+  assert.ok(mcp.stages.every((stage) => stage.tournament.source === "pandascore"));
+  assert.ok(
+    (await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === circuit.id),
+  );
 
   const teamsOfEvent = (
     await request("GET", `${stagePath(counted.id)}/teams`, undefined, staffCookie)
@@ -423,7 +425,7 @@ export async function verifyCircuits({
 
   const teamId = (slug: string): string => {
     const found = teamsOfEvent.find(({ team }) => team.slug === slug);
-    assert(found, `${slug} is listed among the event teams`);
+    assert.ok(found, `${slug} is listed among the event teams`);
 
     return found.team.id;
   };
@@ -440,11 +442,11 @@ export async function verifyCircuits({
     ["manual", "pandascore", "pandascore", "startgg"],
     "staff see manual and start.gg stages",
   );
-  const publicEvents = (await standings()).events.map(({ event }) => event.id);
-  assert(publicEvents.includes(tournament.event.id), "a manual stage is public");
-  assert(!publicEvents.includes(startgg.event.id), "a start.gg stage stays out of the standings");
+  const publicEvents = new Set((await standings()).events.map(({ event }) => event.id));
+  assert(publicEvents.has(tournament.event.id), "a manual stage is public");
+  assert(!publicEvents.has(startgg.event.id), "a start.gg stage stays out of the standings");
   const mcpAll = await callTool("get_circuit", { idOrSlug: circuit.slug }, mcpCircuit);
-  assert(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
+  assert.ok(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
 
   for (const attached of [tournament, startgg])
     await request("DELETE", stagePath(attached.id), undefined, staffCookie, 204);
@@ -564,7 +566,9 @@ export async function verifyCircuits({
     createdDetail.standings.map(({ points }) => points),
     [10, 6, 6],
   );
-  assert((await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === created.id));
+  assert.ok(
+    (await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === created.id),
+  );
   await request("DELETE", `/circuits/${created.id}`, undefined, staffCookie, 204);
 
   await request("DELETE", stagePath(pending.id), undefined, staffCookie, 204);

@@ -109,7 +109,7 @@ export function gameStatsTools({
 
         return {
           import:
-            latest !== undefined ? summarizeStatsImport(latest, includeOtherStages ?? false) : null,
+            latest === undefined ? null : summarizeStatsImport(latest, includeOtherStages ?? false),
         };
       },
     }),

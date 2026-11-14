@@ -34,8 +34,8 @@ export function parseIcsSlug(pathname: string): string | null {
 export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
     return (await getMatchById(id)).match;
-  } catch (cause) {
-    return rethrowApiError(cause, {
+  } catch (error) {
+    return rethrowApiError(error, {
       notFound: "Match not found",
       badGateway: "Could not load match for calendar",
     });
@@ -53,8 +53,8 @@ export async function fetchTournamentForCalendar(
       apiFetch<TournamentResponse>(`/tournaments/${id}`),
       apiFetch<TournamentMatchesResponse>(`/tournaments/${id}/matches`),
     ]);
-  } catch (cause) {
-    rethrowApiError(cause, {
+  } catch (error) {
+    rethrowApiError(error, {
       notFound: "Tournament not found",
       badGateway: "Could not load tournament for calendar",
     });
@@ -103,7 +103,7 @@ export function buildTournamentIcs(
 }
 
 export function icsFilename(prefix: string, id: string): string {
-  const safe = id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || "event";
+  const safe = id.replaceAll(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || "event";
 
   return `sarpbc-${prefix}-${safe}.ics`;
 }

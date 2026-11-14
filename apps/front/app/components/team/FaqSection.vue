@@ -48,7 +48,7 @@ function formatMatchLine(match: MatchListItem, live: boolean): string {
 }
 
 const faqItems = computed(() => {
-  const name = team.name;
+  const { name } = team;
 
   const rosterAnswer =
     players.length > 0

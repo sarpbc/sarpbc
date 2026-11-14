@@ -81,7 +81,7 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
     decoder.once("close", resolve);
   });
 
-  exited.catch(() => undefined);
+  exited.catch(() => {});
 
   try {
     if (decoder.stdout === null) throw new Error("ffmpeg has no output stream.");

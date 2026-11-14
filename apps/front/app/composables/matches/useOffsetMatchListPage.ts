@@ -1,8 +1,8 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 
-export type OffsetPageQuery = {
+export interface OffsetPageQuery {
   offset?: string;
-};
+}
 
 export const MATCH_LIST_PAGE_SIZE = 20;
 

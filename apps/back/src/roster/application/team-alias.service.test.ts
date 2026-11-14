@@ -37,7 +37,7 @@ function setup(owner: string | null = null) {
     save: vi.fn(async (_teamId: string, alias: TeamAlias) => {
       alias.id ||= "new-alias";
     }),
-    delete: vi.fn(async () => undefined),
+    delete: vi.fn(async () => {}),
   };
 
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));

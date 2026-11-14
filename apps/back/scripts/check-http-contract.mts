@@ -54,7 +54,7 @@ function stringConstants(): Map<string, string[]> {
     for (const file of filesIn(dir)) {
       const source = ts.createSourceFile(
         file,
-        fs.readFileSync(file, "utf8"),
+        fs.readFileSync(file, "utf-8"),
         ts.ScriptTarget.Latest,
         true,
       );
@@ -94,7 +94,7 @@ function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile
   return expression.arguments.flatMap((argument) => {
     if (!ts.isSpreadElement(argument)) return [argument.getText(source)];
     const values = constants.get(argument.expression.getText(source));
-    assert(
+    assert.ok(
       values,
       `${source.fileName}: cannot resolve ${argument.getText(source)} to a workspace string array constant`,
     );
@@ -105,7 +105,7 @@ function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile
 
 function decorators(node: ts.Node, source: ts.SourceFile): Decorator[] {
   return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
-    const expression = decorator.expression;
+    const { expression } = decorator;
 
     return ts.isCallExpression(expression) && ts.isIdentifier(expression.expression)
       ? [
@@ -143,7 +143,7 @@ function collectRoutes(sources: SourceText[]): Route[] {
           );
 
           if (input === undefined || dto?.endsWith("Dto") !== true) continue;
-          assert(
+          assert.ok(
             input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
             `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,
           );
@@ -179,7 +179,7 @@ function collectRoutes(sources: SourceText[]): Route[] {
   return routes.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
-const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
+const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf-8") }));
 const actual = collectRoutes(sources);
 
 if (process.argv.includes("--write")) {
@@ -189,7 +189,7 @@ if (process.argv.includes("--write")) {
 } else {
   assert.deepEqual(
     actual,
-    z.array(routeSchema).parse(JSON.parse(fs.readFileSync(snapshot, "utf8"))),
+    z.array(routeSchema).parse(JSON.parse(fs.readFileSync(snapshot, "utf-8"))),
     "HTTP routes, status overrides, guards and permissions changed. If intended, run `pnpm --filter back test:contracts --write` then `pnpm --filter back fmt`, and commit test/contracts/http-routes.json.",
   );
   process.stdout.write(`Verified ${actual.length} HTTP route contracts.\n`);

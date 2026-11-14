@@ -7,7 +7,7 @@ import {
 import { ApplicationError, IntegrationError, NotFoundError } from "../../common/domain/errors";
 import type { TweetImage, TweetImageGateway } from "../application/tweet-image.service";
 
-const FETCH_TIMEOUT_MS = 5_000;
+const FETCH_TIMEOUT_MS = 5000;
 const MAX_REDIRECTS = 2;
 const TWIMG_ORIGIN = "https://pbs.twimg.com";
 

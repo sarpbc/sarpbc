@@ -164,9 +164,7 @@ function setup() {
     return await tool.run(user, args);
   };
 
-  const json = async (name: string, args = {}) => {
-    return jsonOf(await call(name, args));
-  };
+  const json = async (name: string, args = {}) => jsonOf(await call(name, args));
 
   return {
     matchService,

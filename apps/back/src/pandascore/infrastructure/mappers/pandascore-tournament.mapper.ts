@@ -18,7 +18,7 @@ export class PandascoreTournamentMapper {
       beginAt:
         dto.begin_at !== undefined && dto.begin_at !== "" ? new Date(dto.begin_at) : undefined,
       endAt: dto.end_at !== undefined && dto.end_at !== "" ? new Date(dto.end_at) : undefined,
-      prizepool: dto.prizepool != null ? String(dto.prizepool) : undefined,
+      prizepool: dto.prizepool == null ? undefined : String(dto.prizepool),
       type: dto.type,
       country: dto.country ?? undefined,
       hasBracket: dto.has_bracket,

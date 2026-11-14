@@ -1,4 +1,4 @@
-import type { DataSource, Stream } from "@sarpbc/types";
+import type { DataSource, Stream, NewsArticleAdmin } from "@sarpbc/types";
 import { isoDay, participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract, Player, Team } from "../../roster/domain/roster";
@@ -11,7 +11,6 @@ import type {
 } from "../../tournament/domain/competition";
 import { isEventSynced } from "../../tournament/domain/tournament-event";
 import type { EventListing } from "../../tournament/application/ports";
-import type { NewsArticleAdmin } from "@sarpbc/types";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
 import {
   adminNewsEditUrl,
@@ -144,11 +143,11 @@ export function mapEvent({ event, stages }: EventListing) {
     .filter((stage) => isRedistributable(stage.source))
     .sort((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
 
-  const days = (dates: Array<Date | null>) =>
+  const days = (dates: (Date | null)[]) =>
     dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
 
-  const starts = days(phases.map((phase) => phase.beginAt)),
-    ends = days(phases.map((phase) => phase.endAt));
+  const starts = days(phases.map((phase) => phase.beginAt));
+  const ends = days(phases.map((phase) => phase.endAt));
 
   return {
     id: event.id,

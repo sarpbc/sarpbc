@@ -7,7 +7,7 @@ function createTeam(id: string, name: string): Team {
   const team = new Team();
   team.id = id;
   team.name = name;
-  team.slug = name.toLowerCase().replace(/\s+/g, "-");
+  team.slug = name.toLowerCase().replaceAll(/\s+/g, "-");
 
   return team;
 }

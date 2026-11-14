@@ -5,13 +5,13 @@ import { z } from "zod";
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
-export type PandascoreQueryParams = {
+export interface PandascoreQueryParams {
   page?: string;
   per_page?: string;
   sort?: string;
   since?: string;
   videogame?: string[];
-};
+}
 
 export interface PandascoreRequestOptions {
   params?: PandascoreQueryParams;
@@ -74,7 +74,7 @@ export class PandascoreApiClient {
       }
     }
 
-    return Array.from(byId.values());
+    return [...byId.values()];
   }
 
   async getTournamentById(tournamentId: number): Promise<PandascoreJson | null> {

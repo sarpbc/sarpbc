@@ -39,7 +39,7 @@ const languageCode = computed(() => language.value.trim().toLowerCase());
 const languageValid = computed(() => isIso6391Code(languageCode.value));
 
 const urlError = computed(() => {
-  if (!url.value.trim() || parsedUrl.value.ok) return undefined;
+  if (!url.value.trim() || parsedUrl.value.ok) return;
 
   return t(`page.match.detail.vodAdd.errors.${parsedUrl.value.error}`);
 });

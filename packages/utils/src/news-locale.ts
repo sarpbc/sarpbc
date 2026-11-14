@@ -1,20 +1,20 @@
 import type { SupportedLocale } from "@sarpbc/types";
 import { isNonEmptyString } from "./text";
 
-export type NewsTranslationFields = {
+export interface NewsTranslationFields {
   titleFr: string | null;
   contentFr: string | null;
-};
+}
 
 export type NewsLocalizableFields = {
   title: string;
   content: string;
 } & NewsTranslationFields;
 
-export type LocalizedNewsFields = {
+export interface LocalizedNewsFields {
   title: string;
   content: string;
-};
+}
 
 export function hasFrenchTranslation(
   article: NewsTranslationFields,

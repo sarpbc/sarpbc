@@ -24,7 +24,7 @@ export function useMatchesListPage() {
       byId.set(match.id, match);
     }
 
-    return Array.from(byId.values()).sort((a, b) => matchBeginTime(a) - matchBeginTime(b));
+    return [...byId.values()].sort((a, b) => matchBeginTime(a) - matchBeginTime(b));
   });
 
   const hasMatches = computed(() => scheduleMatches.value.length > 0);

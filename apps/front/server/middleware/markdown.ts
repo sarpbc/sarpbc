@@ -39,7 +39,7 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
       response.status,
     );
 
-    return undefined;
+    return;
   }
 
   setHeader(event, "content-type", "text/markdown; charset=utf-8");
@@ -77,32 +77,32 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
 
 export default defineEventHandler(async (event) => {
   if (event.method !== "GET" && event.method !== "HEAD") {
-    return undefined;
+    return;
   }
 
   if (isNonEmptyString(getHeader(event, INTERNAL_HEADER))) {
-    return undefined;
+    return;
   }
 
   const url = getRequestURL(event);
-  const pathname = url.pathname;
+  const { pathname } = url;
 
   if (pathname.startsWith("/.well-known/")) {
-    return undefined;
+    return;
   }
 
   if (isMarkdownPagePath(pathname)) {
     const htmlPath = htmlPathFromMarkdownPath(pathname);
 
     if (!isMarkdownEligibleHtmlPath(htmlPath)) {
-      return undefined;
+      return;
     }
 
     return await sendMarkdown(event, htmlPath, url.search);
   }
 
   if (!isMarkdownEligibleHtmlPath(pathname)) {
-    return undefined;
+    return;
   }
 
   if (shouldServeMarkdown(getHeader(event, "accept"), getHeader(event, "sec-fetch-dest"))) {
@@ -114,5 +114,5 @@ export default defineEventHandler(async (event) => {
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");
   setHeader(event, "link", LLMS_TXT_LINK);
 
-  return undefined;
+  return;
 });

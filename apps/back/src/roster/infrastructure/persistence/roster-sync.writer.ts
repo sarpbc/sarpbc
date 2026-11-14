@@ -16,7 +16,7 @@ export class RosterSyncWriter {
   private readonly players = new Map<number, Player>();
   constructor(private readonly em: Pick<EntityManager, "findOne" | "persist" | "getReference">) {}
   async upsertTeam(input: UpsertTeamCommand): Promise<{ id: string }> {
-    const key = input.pandascoreId !== undefined ? String(input.pandascoreId) : input.slug;
+    const key = input.pandascoreId === undefined ? input.slug : String(input.pandascoreId);
 
     if (!this.teams.has(key) && !this.aliasedTeams.has(key)) {
       this.aliasedTeams.set(key, await findAliasedPandascoreTeam(this.em, input.pandascoreId));

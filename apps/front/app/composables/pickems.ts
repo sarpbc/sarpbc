@@ -3,24 +3,24 @@ import { isPickemTournamentActive } from "~/utils/pickems";
 import type { TournamentListItem } from "@sarpbc/types";
 import { getApiErrorMessage, isNonEmptyString } from "@sarpbc/utils";
 
-export type UserPickemPick = {
+export interface UserPickemPick {
   match: string;
   pickedParticipant: string;
   points: number | null;
   scored: boolean;
-};
+}
 
-export type PickemLeaderboardEntry = {
+export interface PickemLeaderboardEntry {
   userId: string;
   userName: string;
   points: number;
-};
+}
 
-export type PickemPersonalRanking = {
+export interface PickemPersonalRanking {
   rank: number | null;
   total: number;
   points: number;
-};
+}
 
 export async function getActivePickemTournaments(limit = 1): Promise<TournamentListItem[]> {
   const { tournaments } = await getAllTournaments({

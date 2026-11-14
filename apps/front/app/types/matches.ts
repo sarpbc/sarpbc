@@ -16,12 +16,12 @@ export interface MatchResult {
   score: number;
 }
 
-export type MatchEventGroup = {
+export interface MatchEventGroup {
   key: string;
   displayName: string;
   matchesPath: string;
   matches: MatchListItem[];
-};
+}
 
 export interface MatchRowItem {
   id: string;

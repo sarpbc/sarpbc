@@ -4,7 +4,7 @@ import { NotFoundError, IntegrationError } from "../../common/domain/errors";
 import type { TweetEmbedGateway } from "../application/tweet-embed.service";
 
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
-const FETCH_TIMEOUT_MS = 4_000;
+const FETCH_TIMEOUT_MS = 4000;
 const imageUrl = z.url().startsWith("https://pbs.twimg.com/");
 
 const unavailableTweetSchema = z.union([
@@ -64,7 +64,7 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     // X's syndication endpoint requires this token, also used by vercel/react-tweet.
     url.searchParams.set(
       "token",
-      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replace(/(0+|\.)/g, ""),
+      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(0+|\.)/g, ""),
     );
 
     let response: Response;
@@ -105,7 +105,7 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
       text = text.replace(media.url, "");
     }
 
-    text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim();
+    text = text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&").trim();
 
     return {
       id: parsed.id,

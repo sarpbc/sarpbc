@@ -97,7 +97,7 @@ export function serializeNewsTweetTag(url: string): string {
 export function newsTweetTagStart(content: string): number {
   const block = content.indexOf(TWEET_BLOCK_OPENER);
 
-  return block !== -1 ? block : content.indexOf(TWEET_INLINE_OPENER);
+  return block === -1 ? content.indexOf(TWEET_INLINE_OPENER) : block;
 }
 
 function blockTagEnd(content: string, afterBrace: number): number {

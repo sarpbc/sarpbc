@@ -1,10 +1,16 @@
 import { v4 } from "uuid";
 import { isMatchFinished, matchSlug, participantName, type NamedParticipant } from "@sarpbc/utils";
-import type { MatchVod, Stream, TournamentEventRef, Viewership } from "@sarpbc/types";
+import type {
+  MatchVod,
+  Stream,
+  TournamentEventRef,
+  Viewership,
+  DataSource,
+  TournamentFormat,
+} from "@sarpbc/types";
 import type { Player, Team } from "../../roster/domain/roster";
 import type { OfficialMatchStream } from "./official-match-stream";
 import { effectiveStreams, pandascoreStreams } from "./stream";
-import type { DataSource, TournamentFormat } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 
 export class League {
@@ -103,7 +109,7 @@ export class Match {
 
 export interface MatchSlugSource {
   name: string;
-  participants: ReadonlyArray<NamedParticipant>;
+  participants: readonly NamedParticipant[];
   tournament: { slug: string; event: { slug: string } };
 }
 

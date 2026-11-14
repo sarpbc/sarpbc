@@ -192,7 +192,7 @@ export default defineNuxtConfig({
     apiBaseServer: "",
     apiInternalToken: "",
     public: {
-      apiBase: apiBase,
+      apiBase,
       adminUrl,
       posthog: {
         publicKey: posthogPublicKey,

@@ -6,11 +6,11 @@ import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-
 import type { CompetitionIncident } from "../feed";
 
 describe("PandaScore incidents", () => {
-  const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
-    cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },
-    reads = { findByPandascoreId: vi.fn() },
-    sync = { applyIncident: vi.fn() },
-    diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() };
+  const cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() };
+  const reads = { findByPandascoreId: vi.fn() };
+  const sync = { applyIncident: vi.fn() };
+  const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const now = new Date("2026-10-15T12:00:00Z");
 
@@ -71,7 +71,7 @@ describe("PandaScore incidents", () => {
     id,
     modifiedAt: new Date(modifiedAt),
     kind: "team",
-    command: { name: "T" + id, slug: "t" + id },
+    command: { name: `T${id}`, slug: `t${id}` },
   });
 
   it("keeps processing after a failure but does not move the cursor past it", async () => {

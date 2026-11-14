@@ -10,7 +10,7 @@ import { McpServerFactory } from "./mcp-server.factory";
 const METHOD_NOT_ALLOWED_BODY = {
   jsonrpc: "2.0",
   error: {
-    code: -32000,
+    code: -32_000,
     message: "Method not allowed.",
   },
   id: null,
@@ -56,7 +56,7 @@ export class McpController {
           JSON.stringify({
             jsonrpc: "2.0",
             error: {
-              code: -32603,
+              code: -32_603,
               message: "Internal server error",
             },
             id: null,

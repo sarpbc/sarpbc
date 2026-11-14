@@ -19,7 +19,7 @@ const reportError = useReportError();
 
 const query = ref("");
 const pending = ref(false);
-const results = ref<Array<Player | Team>>([]);
+const results = ref<(Player | Team)[]>([]);
 
 const title = computed(() =>
   props.kind === "player"

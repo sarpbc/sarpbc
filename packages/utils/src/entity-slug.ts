@@ -20,15 +20,15 @@ function truncateAtHyphen(slug: string): string {
   return cut > 0 ? window.slice(0, cut) : slug.slice(0, MAX_SLUG_LENGTH);
 }
 
-export function toSlug(...parts: Array<string | null | undefined>): string {
+export function toSlug(...parts: (string | null | undefined)[]): string {
   const text = parts
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(" ");
 
   const slug = slugify(text, { lower: true, strict: true })
-    .replace(/-{2,}/g, "-")
-    .replace(/^-|-$/g, "");
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/^-|-$/g, "");
 
   return truncateAtHyphen(slug);
 }
@@ -61,7 +61,7 @@ function roundLabel(matchName: string | null | undefined): string | null {
   if (!isNonEmptyString(name)) return null;
   const colon = name.indexOf(":");
 
-  if (colon >= 0) return name.slice(0, colon);
+  if (colon !== -1) return name.slice(0, colon);
 
   return /tbd/i.test(name) ? null : name;
 }

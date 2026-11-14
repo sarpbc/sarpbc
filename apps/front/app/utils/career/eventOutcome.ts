@@ -109,10 +109,9 @@ export function buildEventOutcomeContext(
   if (!isNonEmptyString(eventId)) throw new Error("No active event");
 
   const roster = state.world.rosters[state.currentTeamId];
-  const lastSeason = state.seasonRecords[state.seasonRecords.length - 1];
+  const lastSeason = state.seasonRecords.at(-1);
 
-  const lastSplit =
-    state.currentSplits[state.currentSplits.length - 1] ?? lastSeason?.splits.at(-1);
+  const lastSplit = state.currentSplits.at(-1) ?? lastSeason?.splits.at(-1);
 
   return {
     careerId: state.id,

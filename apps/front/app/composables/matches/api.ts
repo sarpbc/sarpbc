@@ -4,12 +4,12 @@ import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
 // Nitro routes import this file and have no Nuxt auto-imports.
 import { apiFetch } from "@sarpbc/composables/apiFetch";
 
-export type MatchesListQuery = {
+export interface MatchesListQuery {
   limit?: number;
   offset?: number;
   leagueId?: string;
   tournamentId?: string;
-};
+}
 
 function matchesPath(path: string, query?: MatchesListQuery): string {
   const params = new URLSearchParams();
@@ -37,15 +37,15 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
 
 const SIDEBAR_MAX_AGE_MS = 30_000;
 
-type Slot<T> = {
+interface Slot<T> {
   expiresAt: number;
   value: T;
-};
+}
 
-type SidebarCache<T> = {
+interface SidebarCache<T> {
   slot?: Slot<T>;
   pending?: Promise<T>;
-};
+}
 
 const upcomingSidebar: SidebarCache<UpcomingMatchesResponse> = {};
 const resultsSidebar: SidebarCache<MatchResultsResponse> = {};
@@ -120,7 +120,7 @@ export async function getMatchById(id: string): Promise<MatchDetailResponse> {
 
 export async function setMatchVods(
   matchId: string,
-  vods: Array<Omit<MatchVod, "source">>,
+  vods: Omit<MatchVod, "source">[],
 ): Promise<MatchVod[]> {
   const response = await apiFetch<{ match: { vods: MatchVod[] } }>(
     `/tournaments/matches/${matchId}/vods`,

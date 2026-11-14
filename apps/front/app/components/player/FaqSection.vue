@@ -14,7 +14,7 @@ const { t, te } = useI18n();
 const { setJsonLd } = useStructuredData();
 
 const faqItems = computed(() => {
-  const name = player.name;
+  const { name } = player;
   const teamName = player.team?.name;
   const demonym = resolvePlayerNationalityDemonym(player.nationality, te, t);
 

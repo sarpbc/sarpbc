@@ -46,7 +46,7 @@ function href(match: MatchRowItem): string {
 }
 
 const onClick = useLinkDelegation((link) => {
-  const matchId = link.dataset.matchId;
+  const { matchId } = link.dataset;
 
   if (!source || !matchId) {
     return;

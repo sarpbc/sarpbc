@@ -1,6 +1,5 @@
 import { Controller, Get, Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
-import { NestFactory } from "@nestjs/core";
+import { APP_GUARD, NestFactory } from "@nestjs/core";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";

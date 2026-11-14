@@ -19,8 +19,8 @@ export class SyncNewTournamentsUseCase {
   async execute(): Promise<SyncNewTournamentsResult> {
     const ids = await this.additions.execute();
 
-    let detailsSynced = 0,
-      detailsFailed = 0;
+    let detailsFailed = 0,
+      detailsSynced = 0;
 
     for (const id of ids) {
       try {
@@ -28,7 +28,7 @@ export class SyncNewTournamentsUseCase {
         detailsSynced++;
       } catch (error) {
         detailsFailed++;
-        this.diagnostics.error("Tournament detail sync failed: " + id, error);
+        this.diagnostics.error(`Tournament detail sync failed: ${id}`, error);
       }
     }
 

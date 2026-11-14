@@ -9,7 +9,7 @@ import { OVERLAY_PATH } from "../fixtures/accuracy.ts";
 import { FixtureRenderer } from "../fixtures/render.ts";
 import { parseOverlay } from "./overlay.ts";
 
-const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url));
+const CLI = fileURLToPath(new URL("cli.ts", import.meta.url));
 
 async function cli(args: readonly string[]): Promise<{ stdout: string; stderr: string }> {
   return await new Promise((resolve, reject) => {
@@ -34,7 +34,7 @@ void describe("stream-score-ocr cli", () => {
   });
 
   void it("learns glyph templates from a labelled frame", async () => {
-    const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf8"));
+    const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf-8"));
     const partial = join(directory, "overlay.json");
     await writeFile(
       partial,

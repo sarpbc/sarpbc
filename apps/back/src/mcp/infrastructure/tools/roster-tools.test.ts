@@ -50,7 +50,7 @@ function setup(role: "admin" | "journalist") {
   return { rosterProposalService, tool, call };
 }
 
-function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+function textOf(result: { content: { type: string; text?: string }[] }): string {
   return result.content[0]?.text ?? "";
 }
 

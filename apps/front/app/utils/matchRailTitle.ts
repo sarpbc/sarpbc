@@ -2,9 +2,9 @@ import { daysFromToday, parseMatchDate } from "./calendarDay";
 
 export type MatchRailTitleKind = "today" | "tomorrow" | "upcoming";
 
-type MatchWithBeginAt = {
+interface MatchWithBeginAt {
   beginAt?: Date | string | null;
-};
+}
 
 export function resolveMatchRailTitleKind(
   live: MatchWithBeginAt[],

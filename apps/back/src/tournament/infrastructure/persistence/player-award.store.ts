@@ -125,10 +125,9 @@ export class CompetitionAwardWriter implements AwardWriter {
     } catch (error) {
       if (isUniqueViolation(error))
         throw new ConflictError(
-          row.tournament.name +
-            " already has a " +
-            AWARD_LABELS[input.awardType] +
-            " award. Remove the current award before assigning another player.",
+          `${row.tournament.name} already has a ${
+            AWARD_LABELS[input.awardType]
+          } award. Remove the current award before assigning another player.`,
         );
       throw error;
     }

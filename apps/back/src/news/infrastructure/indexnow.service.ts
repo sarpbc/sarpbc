@@ -23,7 +23,7 @@ export class IndexNowService implements NewsIndexing {
     const log = createLogger({ component: IndexNowService.name });
 
     try {
-      const origin = new URL(this.configService.getOrThrow<string>("front_url")).origin;
+      const { origin } = new URL(this.configService.getOrThrow<string>("front_url"));
 
       const urlList = [...new Set(slugs)].flatMap((slug) => {
         const path = newsPath(encodeURIComponent(slug));

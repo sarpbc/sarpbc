@@ -1,6 +1,9 @@
 import { isNonEmptyString } from "./text";
 
-type EventStage = { name: string; event: { name: string } };
+interface EventStage {
+  name: string;
+  event: { name: string };
+}
 
 export function distinctStageName(stage: EventStage): string | null {
   const stageName = stage.name.trim();

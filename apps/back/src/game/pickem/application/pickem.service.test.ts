@@ -4,7 +4,9 @@ import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 
 describe("PickemService", () => {
-  let match: PickMatch, picks: Pick[], service: PickemService;
+  let match: PickMatch;
+  let picks: Pick[];
+  let service: PickemService;
   const warn = vi.fn<(message: string) => void>();
   beforeEach(() => {
     vi.clearAllMocks();

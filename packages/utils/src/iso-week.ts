@@ -1,9 +1,9 @@
 export const ISO_WEEK_ID_PATTERN = /^(\d{4})-W(0[1-9]|[1-4]\d|5[0-3])$/;
 
-export type IsoWeekId = {
+export interface IsoWeekId {
   year: number;
   week: number;
-};
+}
 
 const MS_PER_DAY = 86_400_000;
 

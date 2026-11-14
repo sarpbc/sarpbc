@@ -22,7 +22,7 @@ export function buildTournamentParticipantEntries(
   const result: TournamentParticipantEntry[] = [];
 
   for (const participant of tournament.participants) {
-    const team = participant.team;
+    const { team } = participant;
     const key = team?.id ?? participant.id;
     const listed = team ? Boolean(team.slug) : participant.players.length > 0;
 

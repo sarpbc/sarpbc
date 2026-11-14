@@ -39,7 +39,7 @@ export class SyncPandascoreIncidentsUseCase {
 
         await this.synchronization.applyIncident(incident, backfill);
       } catch (error) {
-        this.diagnostics.error("PandaScore incident failed: " + incident.id, error);
+        this.diagnostics.error(`PandaScore incident failed: ${incident.id}`, error);
 
         if (!earliestFailure || incident.modifiedAt < earliestFailure)
           earliestFailure = incident.modifiedAt;

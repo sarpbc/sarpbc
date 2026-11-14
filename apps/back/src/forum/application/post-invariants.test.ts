@@ -120,7 +120,7 @@ describe("post transaction and policies", () => {
       author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
       postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3599999),
+      createdAt: new Date(now.getTime() - 3_599_999),
       updatedAt: null,
       translations: [],
     });
@@ -141,7 +141,7 @@ describe("post transaction and policies", () => {
       author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
       postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3600000),
+      createdAt: new Date(now.getTime() - 3_600_000),
       updatedAt: null,
       translations: [],
     });

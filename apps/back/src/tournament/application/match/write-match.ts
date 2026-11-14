@@ -29,9 +29,9 @@ async function requireParticipants(
   tournamentId: string,
   participantIds: string[],
 ) {
-  const available = await writer.participants(tournamentId),
-    ids = new Set(participantIds),
-    participants = available.filter((p) => ids.has(p.id));
+  const available = await writer.participants(tournamentId);
+  const ids = new Set(participantIds);
+  const participants = available.filter((p) => ids.has(p.id));
 
   if (participants.length !== participantIds.length)
     throw new InvalidInputError("Some participants not found in this tournament");
@@ -163,7 +163,7 @@ export async function createEmptyBracketInTransaction(
       slot.previousMatches.flatMap(({ index, type }) => {
         const previous: (typeof planned)[number] | undefined = planned[index];
 
-        return previous !== undefined ? [{ previousMatchId: previous.match.id, type }] : [];
+        return previous === undefined ? [] : [{ previousMatchId: previous.match.id, type }];
       }),
     );
     await saveMatch(writer, match, [], {
@@ -280,9 +280,7 @@ export async function updateMatchInTransaction(
       ? input.status === "finished"
       : match.hasEnded();
 
-  if (!finished) {
-    match.winner = null;
-  } else {
+  if (finished) {
     const winnerId = winnerFromResults(
       match.results.map((r) => ({ participantId: r.participant.id, score: r.score })),
     );
@@ -293,6 +291,8 @@ export async function updateMatchInTransaction(
     if (winner || input.results) match.winner = winner;
 
     if (match.winner) match.status = "finished";
+  } else {
+    match.winner = null;
   }
 
   match.stampEnd(new Date());

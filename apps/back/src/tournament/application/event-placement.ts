@@ -10,9 +10,7 @@ export async function requireLeague(writer: TournamentWriter, id: string | null 
   const league = await writer.league(id);
 
   if (!league)
-    throw new NotFoundError(
-      'League with id "' + id + '" was not found. Choose a league from the list.',
-    );
+    throw new NotFoundError(`League with id "${id}" was not found. Choose a league from the list.`);
 
   return league;
 }
@@ -21,7 +19,7 @@ export async function requireEvent(events: EventWriter, id: string): Promise<Tou
   const event = await events.load(id);
 
   if (!event)
-    throw new NotFoundError('Event with id "' + id + '" was not found. Choose an existing event.');
+    throw new NotFoundError(`Event with id "${id}" was not found. Choose an existing event.`);
 
   return event;
 }

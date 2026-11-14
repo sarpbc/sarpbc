@@ -1,7 +1,7 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 
 export function formatTrophyHighlightNames(
-  trophies: ReadonlyArray<{ displayName: string; endAt: Date | string | null }>,
+  trophies: readonly { displayName: string; endAt: Date | string | null }[],
   limit = 3,
 ): string {
   const sorted = [...trophies].sort((a, b) => {

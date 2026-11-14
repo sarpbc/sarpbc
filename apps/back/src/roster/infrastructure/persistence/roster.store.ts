@@ -101,9 +101,9 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     const first: { id: string } | undefined = rows[0];
 
     const row =
-      first !== undefined
-        ? await this.em.findOne(Row.Player, { id: first.id }, playerOptions)
-        : null;
+      first === undefined
+        ? null
+        : await this.em.findOne(Row.Player, { id: first.id }, playerOptions);
 
     return row ? toPlayer(row) : null;
   }

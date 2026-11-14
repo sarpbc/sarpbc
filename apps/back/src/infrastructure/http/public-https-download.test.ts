@@ -27,7 +27,7 @@ type Reply = { status: number; headers?: Record<string, string>; body?: string[]
 
 const limits = {
   maxBytes: 16,
-  timeoutMs: 1_000,
+  timeoutMs: 1000,
   maxRedirects: 2,
   isAllowedHost: (hostname: string) => !/(^|\.)liquipedia\.net$/i.test(hostname),
 };

@@ -86,8 +86,9 @@ export function memorySeasonStore() {
     list: async () => [...seasons.values()].map(({ id, name, slug }) => ({ id, name, slug })),
     published: async () =>
       [...seasons.values()].flatMap(({ id, name, slug, winnerTeamId }) =>
-        slug !== null
-          ? [
+        slug === null
+          ? []
+          : [
               {
                 slug,
                 name,
@@ -97,8 +98,7 @@ export function memorySeasonStore() {
                       participant.seasonId === id && participant.team.id === winnerTeamId,
                   )?.team ?? null,
               },
-            ]
-          : [],
+            ],
       ),
     find: async (id) => seasons.get(id) ?? null,
     findBySlug: async (slug) =>
@@ -156,7 +156,7 @@ export function memorySeasonStore() {
         (award) => award.seasonId === seasonId && award.id === awardId,
       );
 
-      if (index < 0) return false;
+      if (index === -1) return false;
       awards.splice(index, 1);
 
       return true;
@@ -202,7 +202,7 @@ export function memorySeasonStore() {
         (participant) => participant.seasonId === seasonId && participant.id === participantId,
       );
 
-      if (index < 0) return false;
+      if (index === -1) return false;
       participants.splice(index, 1);
 
       return true;

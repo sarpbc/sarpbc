@@ -34,7 +34,7 @@ function defined(tools: McpTool[], name: string): McpTool {
   return tool;
 }
 
-function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+function textOf(result: { content: { type: string; text?: string }[] }): string {
   return result.content[0]?.text ?? "";
 }
 

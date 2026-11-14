@@ -4,7 +4,7 @@ const MIN_AFFIX_LENGTH = 4;
 function tokens(value: string): string[] {
   return value
     .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
+    .replaceAll(/\p{M}/gu, "")
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .filter(Boolean);

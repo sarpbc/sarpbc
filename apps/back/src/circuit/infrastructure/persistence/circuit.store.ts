@@ -171,7 +171,7 @@ export class CircuitPersistence implements CircuitStore {
     const placements = new Map<string, StagePlacement[]>();
 
     for (const participant of participants) {
-      const id = participant.tournament.id;
+      const { id } = participant.tournament;
       placements.set(id, [...(placements.get(id) ?? []), ...toPlacement(participant)]);
     }
 

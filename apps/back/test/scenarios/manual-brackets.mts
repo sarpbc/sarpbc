@@ -72,7 +72,7 @@ export async function verifyManualBrackets({
         (participant) => participant.players[0].id === player.id,
       );
 
-      assert(entry, "the seeded player entered the stage");
+      assert.ok(entry, "the seeded player entered the stage");
 
       return entry.id;
     });
@@ -117,7 +117,7 @@ export async function verifyManualBrackets({
 
   const detailFinal = detail.matches.find((match) => match.id === final.id);
   assert.equal(detail.hasBracket, true);
-  assert(detailFinal, "the final is part of the stage");
+  assert.ok(detailFinal, "the final is part of the stage");
   assert.deepEqual(
     detailFinal.previousMatches
       .map(({ previousMatch, type }) => [previousMatch, type])
@@ -181,13 +181,15 @@ export async function verifyManualBrackets({
   ).json(generatedMatches).matches;
 
   assert.equal(generated.length, 3);
-  assert(generated.every((match) => match.participants.length === 0 && match.numberOfGames === 7));
+  assert.ok(
+    generated.every((match) => match.participants.length === 0 && match.numberOfGames === 7),
+  );
 
   const tree = (await request("GET", `/tournaments/${empty.id}`)).json(tournamentBody).tournament
     .matches;
 
   const grandFinal = tree.find((match) => match.name === "Grand Final");
-  assert(grandFinal, "the generated bracket has a grand final");
+  assert.ok(grandFinal, "the generated bracket has a grand final");
   assert.deepEqual(
     grandFinal.previousMatches.map(({ previousMatch }) => previousMatch).sort(),
     tree
@@ -196,7 +198,7 @@ export async function verifyManualBrackets({
       .sort(),
   );
   const firstSemi = tree.find((match) => match.name === "Semifinal 1");
-  assert(firstSemi, "the generated bracket has a first semifinal");
+  assert.ok(firstSemi, "the generated bracket has a first semifinal");
   const [e1, e2] = participantsOf(empty);
 
   const filled = (

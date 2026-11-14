@@ -13,11 +13,11 @@ const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
 
 function escapeXml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 function truncate(value: string, maxLength: number): string {
@@ -36,7 +36,7 @@ function getParticipantScore(
 }
 
 export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
-  const match = matchDetail.match;
+  const { match } = matchDetail;
   const participants = match.participants ?? [];
   const teamA = participants[0];
   const teamB = participants[1];
@@ -114,8 +114,8 @@ export function getMatchOgResvgFontOptions() {
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
     return await getMatchById(id);
-  } catch (cause) {
-    return rethrowApiError(cause, {
+  } catch (error) {
+    return rethrowApiError(error, {
       notFound: "Match not found",
       badGateway: "Could not load match for OG image",
     });

@@ -267,7 +267,7 @@ export async function verifyStreamProposals({
     (candidate) => candidate.id === match.id,
   );
 
-  assert(mcpMatch, "the upcoming match is listed through the MCP");
+  assert.ok(mcpMatch, "the upcoming match is listed through the MCP");
   assert.deepEqual(mcpMatch.streams, [], "MCP match reads drop inherited start.gg streams");
 
   const manual = await callTool("set_match_streams", {

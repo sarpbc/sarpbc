@@ -1,10 +1,10 @@
 import type { AutocaptureConfig, PostHog } from "posthog-js";
 import { sanitizePostHogEvent, sanitizePostHogUrl } from "~/utils/posthog-privacy";
 
-type PostHogPublicConfig = {
+interface PostHogPublicConfig {
   publicKey: string;
   host: string;
-};
+}
 
 let client: PostHog | null = null;
 let loading: Promise<PostHog | null> | null = null;

@@ -12,9 +12,9 @@ import { isMatchBlockLive } from "../../application/match/match-blocks";
 import { mapParticipantRef } from "./participant-ref.mapper";
 
 export function mapMatchListItem(match: Match): MatchListItem {
-  const participants = match.participants;
-  const results = match.results;
-  const tournament = match.tournament;
+  const { participants } = match;
+  const { results } = match;
+  const { tournament } = match;
 
   return {
     id: match.id,
@@ -102,5 +102,5 @@ export function withPublicSlug(match: Match): Omit<
 > & {
   slug: string;
 } {
-  return Object.assign({}, match, { slug: matchPublicSlug(match) });
+  return { ...match, slug: matchPublicSlug(match) };
 }

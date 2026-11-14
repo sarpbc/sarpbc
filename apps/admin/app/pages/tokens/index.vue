@@ -112,9 +112,9 @@ async function confirmCreate() {
     copied.value = null;
     isRevealModalOpen.value = true;
     await refresh();
-  } catch (err) {
+  } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(err) ?? t("page.tokens.create.failed"),
+      title: getApiErrorMessage(error_) ?? t("page.tokens.create.failed"),
       color: "error",
     });
   } finally {
@@ -143,9 +143,9 @@ async function confirmRevoke() {
       color: "success",
     });
     await refresh();
-  } catch (err) {
+  } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(err) ?? t("page.tokens.revoke.failed"),
+      title: getApiErrorMessage(error_) ?? t("page.tokens.revoke.failed"),
       color: "error",
     });
   } finally {

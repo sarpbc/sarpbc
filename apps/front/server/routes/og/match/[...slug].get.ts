@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   if (isNonEmptyString(svgMatch?.[1])) {
     await sendRedirect(event, `/og/match/${svgMatch[1]}.png`, 301);
 
-    return undefined;
+    return;
   }
 
   const id = pngMatch?.[1];

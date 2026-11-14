@@ -190,7 +190,7 @@ export async function verifyTeamAliases({
   const detail = (await request("GET", `/tournaments/${stage.id}`)).json(stageDetail).tournament;
 
   const renamed = detail.participants.find(({ team: entry }) => entry?.id === team.id)?.team;
-  assert(renamed, "the stage lists the renamed team");
+  assert.ok(renamed, "the stage lists the renamed team");
   assert.deepEqual(
     { name: renamed.name, slug: renamed.slug, logo: renamed.logoLightUrl },
     { name: "Integration Origins", slug: team.slug, logo: ORIGINS.logoUrl },

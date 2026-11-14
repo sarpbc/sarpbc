@@ -86,12 +86,12 @@ nonPublic.addSubnet("fe80::", 10, "ipv6");
 
 export type HeaderValue = string | string[] | undefined;
 
-export type ClientRequest = {
+export interface ClientRequest {
   ip?: string;
   headers?: Record<string, HeaderValue>;
   socket?: { remoteAddress?: string | null };
   raw?: { socket?: { remoteAddress?: string | null } };
-};
+}
 
 export function canonicalIp(value: string | undefined | null): string | undefined {
   if (!isNonEmptyString(value)) {

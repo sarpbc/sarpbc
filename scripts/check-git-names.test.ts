@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-const script = fileURLToPath(new URL("./check-git-names.ts", import.meta.url));
+const script = fileURLToPath(new URL("check-git-names.ts", import.meta.url));
 
 const types = [
   "feat",
@@ -47,7 +47,7 @@ interface RunOptions {
 }
 
 function run(args: string[], options: RunOptions = {}): SpawnSyncReturns<string> {
-  return spawnSync(process.execPath, [script, ...args], { encoding: "utf8", ...options });
+  return spawnSync(process.execPath, [script, ...args], { encoding: "utf-8", ...options });
 }
 
 function expectStatus(result: SpawnSyncReturns<string>, status: number): void {
@@ -169,7 +169,7 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
         `core.hooksPath=${join(directory, "no-hooks")}`,
         ...args,
       ],
-      { cwd: directory, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      { cwd: directory, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
     ).trim();
 
   git("init", "-b", "main");

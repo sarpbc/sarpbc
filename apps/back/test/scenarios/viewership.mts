@@ -196,7 +196,7 @@ export async function verifyViewershipProposals({
 
   assert.deepEqual(mcpMatch?.viewership, expected, "MCP reads return sarpbc numbers");
 
-  const startggEntry = { ...expected, peakViewers: 9_000, averageViewers: 6_000 };
+  const startggEntry = { ...expected, peakViewers: 9000, averageViewers: 6000 };
   await request(
     "PUT",
     `/tournaments/matches/${startggMatchId}/viewership`,

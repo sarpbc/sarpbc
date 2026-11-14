@@ -212,7 +212,7 @@ export function computeStateRankings(state: CareerState): WorldRankings {
       season: state.currentSeason,
       splits: state.currentSplits,
       worlds: state.currentWorlds,
-      previousPoints: state.seasonRecords[state.seasonRecords.length - 1]?.points ?? null,
+      previousPoints: state.seasonRecords.at(-1)?.points ?? null,
     },
     state.world,
   );

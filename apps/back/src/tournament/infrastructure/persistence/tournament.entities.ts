@@ -1,12 +1,10 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { v4 } from "uuid";
-import { Player } from "../../../roster/infrastructure/roster-persistence";
-import { Team } from "../../../roster/infrastructure/roster-persistence";
+import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { MatchRepository } from "./match.repository";
 import { TournamentRepository } from "./tournament.repository";
 import type { OfficialMatchStream } from "../../domain/official-match-stream";
-import type { DataSource, TournamentFormat } from "@sarpbc/types";
-import type { MatchVod, Stream, Viewership } from "@sarpbc/types";
+import type { DataSource, TournamentFormat, MatchVod, Stream, Viewership } from "@sarpbc/types";
 
 export class League {
   id: string = v4();

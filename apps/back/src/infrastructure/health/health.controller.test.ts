@@ -48,7 +48,7 @@ describe("HealthController", () => {
 
   it("ready pings postgres and redis", async () => {
     health.check.mockImplementation(
-      async (indicators: Array<() => Promise<HealthIndicatorResult>>) => {
+      async (indicators: (() => Promise<HealthIndicatorResult>)[]) => {
         await Promise.all(indicators.map(async (indicator) => await indicator()));
 
         return { status: "ok" };

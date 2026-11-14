@@ -5,5 +5,5 @@ export function formatDateForInput(date: Date | string | null | undefined): stri
     return "";
   }
 
-  return new Date(date).toISOString().substring(0, 10);
+  return new Date(date).toISOString().slice(0, 10);
 }

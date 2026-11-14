@@ -19,9 +19,9 @@ describe("R2Service", () => {
   const logError = vi.fn<ObjectOperationLogger["error"]>();
 
   const operationLogger: ObjectOperationLogger = {
-    set: () => undefined,
+    set: () => {},
     error: logError,
-    emit: () => undefined,
+    emit: () => {},
   };
 
   let sendSpy: MockInstance;

@@ -1,6 +1,6 @@
 import type { ReplyTargetType } from "@sarpbc/types";
 
-export type NotificationDto = {
+export interface NotificationDto {
   id: string;
   createdAt: Date;
   readAt: Date | null;
@@ -15,4 +15,4 @@ export type NotificationDto = {
   targetId: string;
   targetLabel: string;
   targetPath: string;
-};
+}

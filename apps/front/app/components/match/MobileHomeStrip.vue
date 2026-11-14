@@ -11,9 +11,9 @@ const { data, pending } = await useUpcomingMatches();
 const liveMatches = computed(() => data.value?.live ?? []);
 const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
 
-const matches = computed(() => {
-  return [...liveMatches.value, ...upcomingMatches.value].slice(0, MAX_MATCHES);
-});
+const matches = computed(() =>
+  [...liveMatches.value, ...upcomingMatches.value].slice(0, MAX_MATCHES),
+);
 
 const showRail = computed(() => pending.value || matches.value.length > 0);
 

@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const FRONT_ROOT = path.resolve(__dirname, "..");
 
 const IMPORTS_TYPES = [".nuxt/types/imports.d.ts", ".nuxt/types/nitro-imports.d.ts"].map((file) =>
@@ -29,7 +29,7 @@ function readAutoImportNames(): string[] {
     let source: string;
 
     try {
-      source = readFileSync(file, "utf8");
+      source = readFileSync(file, "utf-8");
     } catch {
       console.error(`Missing ${file}. Run "pnpm exec nuxt prepare" in apps/front first.`);
       process.exit(1);

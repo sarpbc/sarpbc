@@ -32,12 +32,12 @@ const {
   async () => {
     try {
       return await getMatchById(matchRef.value);
-    } catch (err: unknown) {
-      if (getApiErrorStatus(err) === 404) {
+    } catch (error_: unknown) {
+      if (getApiErrorStatus(error_) === 404) {
         return null;
       }
 
-      throw err;
+      throw error_;
     }
   },
   {
@@ -240,7 +240,7 @@ const seoDescription = computed(() => {
 });
 
 function getMatchOgImageUrl(id: string): string {
-  const origin = new URL(getCanonicalUrl()).origin;
+  const { origin } = new URL(getCanonicalUrl());
 
   return `${origin}/og/match/${id}.png?v=2`;
 }

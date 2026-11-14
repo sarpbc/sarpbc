@@ -131,11 +131,11 @@ function replayUrl(item: StatsImportItem): string {
 function itemMeta(item: StatsImportItem): string {
   const label = matchLabel(item.matchId);
 
-  const target = !label
-    ? "—"
-    : item.status === "unmatched"
+  const target = label
+    ? item.status === "unmatched"
       ? label
-      : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
+      : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber })
+    : "—";
 
   return `${formatDate(item.playedAt)} · ${target}`;
 }

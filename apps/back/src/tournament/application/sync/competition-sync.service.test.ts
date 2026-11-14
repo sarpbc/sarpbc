@@ -130,9 +130,9 @@ function memoryStore() {
 describe("Competition synchronization", () => {
   const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
 
-  const cache = { invalidateTournament: vi.fn() },
-    published = { publish: vi.fn() },
-    diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() };
+  const published = { publish: vi.fn() };
+  const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
@@ -189,7 +189,7 @@ describe("Competition synchronization", () => {
       id: String(p.pandascoreId),
     }));
     cache.invalidateTournament.mockImplementation(async (id: string) => {
-      log.push("invalidate " + id);
+      log.push(`invalidate ${id}`);
     });
   });
 
@@ -214,7 +214,7 @@ describe("Competition synchronization", () => {
       name: "RLCS Major Paris 2026",
       league: { name: "RLCS Major" },
     });
-    expect(log).toEqual(["commit", "invalidate " + created.id]);
+    expect(log).toEqual(["commit", `invalidate ${created.id}`]);
   });
 
   it("files every stage of a serie under one event with distinct stage slugs", async () => {
@@ -246,7 +246,7 @@ describe("Competition synchronization", () => {
       slug: "rlcs-major-paris-2026",
       name: "RLCS Major Paris Major 2026",
     });
-    expect(log).toEqual(["commit", "invalidate " + created.id, "invalidate " + sibling.id]);
+    expect(log).toEqual(["commit", `invalidate ${created.id}`, `invalidate ${sibling.id}`]);
   });
 
   it("keeps local artwork while updating feed-owned fields", async () => {
@@ -305,7 +305,7 @@ describe("Competition synchronization", () => {
       slug: "rlcs-major-paris-2026",
       name: "RLCS Major Major Paris 2026",
     });
-    expect(log).toEqual(["commit", "invalidate " + stage.id]);
+    expect(log).toEqual(["commit", `invalidate ${stage.id}`]);
   });
 
   it("ignores a serie update that has no event yet", async () => {
@@ -343,7 +343,7 @@ describe("Competition synchronization", () => {
       event: { id: target.event.id },
     });
     expect(store.events.has(oldEventId)).toBe(false);
-    expect(log).toEqual(["commit", "invalidate " + merged.id]);
+    expect(log).toEqual(["commit", `invalidate ${merged.id}`]);
     await service.applyIncident(
       serieIncident({ changeType: "deletion", deletion: { kind: "merged", intoId: 300 } }),
     );
@@ -527,12 +527,12 @@ describe("Competition synchronization", () => {
     const beginAt = new Date("2026-03-01T12:00Z");
 
     const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
-      store.seedStage(store.seedEvent({ id: "event-" + id, slug: id, name }), {
+      store.seedStage(store.seedEvent({ id: `event-${id}`, slug: id, name }), {
         id,
         source: "manual",
         pandascoreId: null,
         name,
-        slug: "manual-" + id,
+        slug: `manual-${id}`,
         beginAt: new Date("2026-03-01T00:00Z"),
         endAt: new Date("2026-03-02T00:00Z"),
       });
@@ -563,7 +563,7 @@ describe("Competition synchronization", () => {
     const matchCommand = (pandascoreId: number, status: string) => ({
       pandascoreId,
       tournamentPandascoreId: 1,
-      name: "Match " + pandascoreId,
+      name: `Match ${pandascoreId}`,
       beginAt: new Date("2030-01-01"),
       status,
       opponentSlugs: [],
@@ -581,7 +581,7 @@ describe("Competition synchronization", () => {
       saved.length = 0;
       store.tournamentWriter.participants.mockResolvedValue(teams);
       store.matchWriter.participants = async () => teams;
-      const save = store.matchWriter.save;
+      const { save } = store.matchWriter;
       store.matchWriter.save = async (match: Match) => {
         saved.push(match);
         await save(match);
