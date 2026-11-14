@@ -35,7 +35,7 @@ export function replaceStreams(
   if (inputs.length > MAX_STREAMS)
     throw new InvalidInputError(`A stream list holds at most ${MAX_STREAMS} streams.`);
   const startgg = new Set(
-    current.filter((stream) => stream.source === "startgg").map((s) => s.url),
+    current.flatMap((stream) => (stream.source === "startgg" ? [stream.url] : [])),
   );
   const seen = new Set<string>();
   const streams: Stream[] = [];

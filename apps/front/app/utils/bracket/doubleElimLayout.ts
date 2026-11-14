@@ -127,12 +127,11 @@ export function buildDoubleEliminationCombinedLayout(
   }
 
   const crossBracketFinalIds = new Set(
-    lowerMatches
-      .filter(
-        (match) =>
-          getBracketSectionFromName(match.name) === "finals" || hasUpperWinnerFeed(match, upperIds),
-      )
-      .map((match) => match.id),
+    lowerMatches.flatMap((match) =>
+      getBracketSectionFromName(match.name) === "finals" || hasUpperWinnerFeed(match, upperIds)
+        ? [match.id]
+        : [],
+    ),
   );
 
   const columns = new Map<string, number>(namedColumns);

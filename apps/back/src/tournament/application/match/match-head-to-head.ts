@@ -102,9 +102,7 @@ export function buildHeadToHead(
   teamBId: string,
   recentLimit = 5,
 ): HeadToHead {
-  const meetings = matches
-    .map((match) => mapHeadToHeadMeeting(match, teamAId, teamBId))
-    .filter((meeting): meeting is HeadToHeadMeeting => meeting !== null);
+  const meetings = matches.flatMap((match) => mapHeadToHeadMeeting(match, teamAId, teamBId) ?? []);
 
   let teamAWins = 0;
   let teamBWins = 0;

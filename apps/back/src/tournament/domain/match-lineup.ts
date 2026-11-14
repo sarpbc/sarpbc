@@ -47,9 +47,11 @@ export function buildLineups(
   rows: readonly LineupRow[],
 ): MatchLineup[] {
   return sides.flatMap(({ participantId, rosterIds }) => {
-    const players = rows
-      .filter((row) => row.participantId === participantId)
-      .map(({ player }) => ({ ...player, standIn: isStandIn(rosterIds, player.id) }));
+    const players = rows.flatMap((row) =>
+      row.participantId === participantId
+        ? [{ ...row.player, standIn: isStandIn(rosterIds, row.player.id) }]
+        : [],
+    );
     return players.length > 0 ? [{ participantId, players }] : [];
   });
 }
@@ -75,10 +77,9 @@ export function lineupsFromGames(games: readonly GameLineupSource[]): MatchLineu
       byParticipant.set(participantId, playerIds);
     }
   }
-  return [...byParticipant]
-    .filter(([, playerIds]) => playerIds.length > 0)
-    .map(([participantId, playerIds]) => ({
-      participantId,
-      playerIds: playerIds.slice(0, MAX_LINEUP_PLAYERS),
-    }));
+  return [...byParticipant].flatMap(([participantId, playerIds]) =>
+    playerIds.length > 0
+      ? [{ participantId, playerIds: playerIds.slice(0, MAX_LINEUP_PLAYERS) }]
+      : [],
+  );
 }

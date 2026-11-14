@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { VNode } from "vue";
 import { participantName, playerPath, teamPath, type SpoilerRevealTarget } from "@sarpbc/utils";
 import type { ParticipantRef, TeamSummary, TournamentFormat } from "@sarpbc/types";
 import {
@@ -36,8 +37,8 @@ const {
 }>();
 
 defineSlots<{
-  kicker?(): unknown;
-  default?(): unknown;
+  kicker?(): VNode[];
+  default?(): VNode[];
 }>();
 
 const { t, locale, te } = useI18n();

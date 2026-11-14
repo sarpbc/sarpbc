@@ -8,6 +8,7 @@ import {
 import { matchDecided } from "../../../tournament/domain/match-decided";
 import { CompetitionAfterCommit } from "../../../tournament/application/after-commit";
 import { MatchService } from "../../../tournament/application/match/match.service";
+import type { CompetitionTransaction } from "../../../tournament/application/ports";
 import { PickemService } from "../application/pickem.service";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
 
@@ -29,7 +30,7 @@ describe("deciding a match from pick'ems", () => {
     const events = { publish: vi.fn(async () => {}) };
     const competition = new MatchService(
       { detail: async () => stored } as never,
-      { run: (work: (scope: never) => unknown) => work({ matches: writer } as never) } as never,
+      { run: (work) => work({ matches: writer } as never) } satisfies CompetitionTransaction,
       new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, {
         error: vi.fn(),
       }),

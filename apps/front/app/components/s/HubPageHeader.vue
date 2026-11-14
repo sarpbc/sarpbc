@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { VNode } from "vue";
+
 defineSlots<{
-  title(): unknown;
-  meta?(): unknown;
+  title(): VNode[];
+  meta?(): VNode[];
 }>();
 </script>
 

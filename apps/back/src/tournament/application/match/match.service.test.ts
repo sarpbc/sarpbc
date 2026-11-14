@@ -3,6 +3,7 @@ import { Match, TournamentParticipant } from "../../domain/competition";
 import { matchDecided } from "../../domain/match-decided";
 import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";
+import type { CompetitionTransaction } from "../ports";
 
 describe("MatchService decided events", () => {
   const participants = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
@@ -20,7 +21,7 @@ describe("MatchService decided events", () => {
   const cache = { invalidateTournament: vi.fn() };
   const service = new MatchService(
     reads as never,
-    { run: (work: (scope: never) => unknown) => work({ matches } as never) } as never,
+    { run: (work) => work({ matches } as never) } satisfies CompetitionTransaction,
     new CompetitionAfterCommit(cache, events, diagnostics),
   );
 

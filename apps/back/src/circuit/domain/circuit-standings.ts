@@ -141,7 +141,7 @@ export function computeCircuitStandings(
     ),
   }));
   const sourceUrls = [
-    ...new Set(stages.filter((stage) => stage.scale.length).map((stage) => stage.sourceUrl)),
+    ...new Set(stages.flatMap((stage) => (stage.scale.length > 0 ? [stage.sourceUrl] : []))),
   ];
   return { sourceUrls, events, rows };
 }

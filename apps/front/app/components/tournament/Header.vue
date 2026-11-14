@@ -19,11 +19,17 @@ const TABS = [
 ] as const;
 
 const tabItems = computed(() =>
-  TABS.filter(({ tab }) => stats || tab !== "stats").map(({ tab, label }) => ({
-    to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
-    label: t(label),
-    active: activeTab === tab,
-  })),
+  TABS.flatMap(({ tab, label }) =>
+    stats || tab !== "stats"
+      ? [
+          {
+            to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
+            label: t(label),
+            active: activeTab === tab,
+          },
+        ]
+      : [],
+  ),
 );
 </script>
 

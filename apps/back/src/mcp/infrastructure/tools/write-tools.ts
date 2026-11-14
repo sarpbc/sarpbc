@@ -8,14 +8,17 @@ import type { TeamService } from "../../../roster/application/team.service";
 import type { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import type { MatchService } from "../../../tournament/application/match/match.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
-import type { SyncNewTournamentsUseCase } from "../../../tournament/application/sync/sync-new-tournaments.use-case";
+import type {
+  SyncNewTournamentsResult,
+  SyncNewTournamentsUseCase,
+} from "../../../tournament/application/sync/sync-new-tournaments.use-case";
 import type { SyncPandascoreTournamentUseCase } from "../../../tournament/application/sync/sync-pandascore-tournament.use-case";
 import { matchPublicSlug } from "../../../tournament/domain/competition";
 import {
   createTournamentFields,
   updateTournamentFields,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
 import { mapListedParticipants, mapMatchListResponse } from "../mappers";
 import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
@@ -41,6 +44,10 @@ const matchResultSchema = z.object({
 const previousMatchesInput = bracketLinksSchema.describe(
   "Bracket feeders of this manual match: up to two { previousMatchId, type } entries, where previousMatchId is a match UUID of the same stage and type says whether its winner or loser plays here. The stage must have hasBracket enabled. Links must not form a cycle, and the winner (or loser) of a match feeds a single match.",
 );
+
+type TriggeredSync =
+  | { success: true; scope: "single"; tournamentId: string }
+  | { success: true; scope: "new_tournaments"; sync: SyncNewTournamentsResult };
 
 const NEWS_TYPE_MEANING =
   "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).";
@@ -556,7 +563,7 @@ export function writeTools({
           .optional()
           .describe("Local tournament UUID to sync. Omit to run the global new-tournament sync."),
       },
-      handler: async ({ tournamentId }) => {
+      handler: async ({ tournamentId }): Promise<ToolWrite<TriggeredSync>> => {
         if (tournamentId) {
           await pandascoreTournamentSync.execute(tournamentId);
           return {

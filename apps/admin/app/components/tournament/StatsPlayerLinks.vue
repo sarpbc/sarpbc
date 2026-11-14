@@ -45,9 +45,9 @@ function rosterOptions(player: StatsPlayerAccount): SelectItem[][] {
   const rosters = accounts.value?.rosters ?? [];
   const own = rosters.filter((roster) => roster.participantId === player.team.participantId);
   const others = rosters.filter((roster) => roster.participantId !== player.team.participantId);
-  return [...own, ...others]
-    .filter((roster) => roster.players.length > 0)
-    .map((roster) => rosterGroup(roster));
+  return [...own, ...others].flatMap((roster) =>
+    roster.players.length > 0 ? [rosterGroup(roster)] : [],
+  );
 }
 
 function meta(player: StatsPlayerAccount): string {

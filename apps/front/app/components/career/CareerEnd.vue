@@ -26,10 +26,7 @@ const trophyLines = computed(() => {
   for (const trophy of props.result.trophies) {
     counts[trophy.type] += 1;
   }
-  return TROPHY_TYPES.filter((type) => counts[type] > 0).map((type) => ({
-    type,
-    count: counts[type],
-  }));
+  return TROPHY_TYPES.flatMap((type) => (counts[type] > 0 ? [{ type, count: counts[type] }] : []));
 });
 
 const nickname = computed(() => t(`page.game.career.end.nicknames.${props.result.nicknameKey}`));

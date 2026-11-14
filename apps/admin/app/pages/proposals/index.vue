@@ -353,16 +353,11 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
   const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);
-  return fields
-    .filter(
-      (field): field is [string, string | boolean | null] =>
-        !["kind", "logoKey", "logoUrl"].includes(field[0]) && field[1] !== undefined,
-    )
-    .map(([key, value]) => ({
-      key,
-      label: t(`page.proposals.fields.${key}`),
-      value: formatValue(key, value),
-    }));
+  return fields.flatMap(([key, value]) =>
+    ["kind", "logoKey", "logoUrl"].includes(key) || value === undefined
+      ? []
+      : [{ key, label: t(`page.proposals.fields.${key}`), value: formatValue(key, value) }],
+  );
 }
 
 const logoBackgrounds = [

@@ -20,12 +20,10 @@ const outcomeCopy = computed(() => {
 
 const statRows = computed(() => {
   const keys: (keyof CareerStats)[] = ["rating", "form", "morale"];
-  return keys
-    .map((stat) => ({
-      stat,
-      value: props.outcome.delta[stat] ?? 0,
-    }))
-    .filter((row) => row.value !== 0);
+  return keys.flatMap((stat) => {
+    const value = props.outcome.delta[stat] ?? 0;
+    return value === 0 ? [] : [{ stat, value }];
+  });
 });
 
 const deltaGridClass = computed(() => {

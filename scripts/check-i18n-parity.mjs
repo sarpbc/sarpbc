@@ -17,8 +17,8 @@ export function parityViolations(directory) {
   const english = keys("en-US");
   const french = keys("fr-FR");
   return [
-    ...[...english].filter((key) => !french.has(key)).map((key) => `${key}: missing in fr-FR`),
-    ...[...french].filter((key) => !english.has(key)).map((key) => `${key}: missing in en-US`),
+    ...[...english.difference(french)].map((key) => `${key}: missing in fr-FR`),
+    ...[...french.difference(english)].map((key) => `${key}: missing in en-US`),
   ];
 }
 

@@ -12,7 +12,7 @@ export class TournamentPlayerStatsService {
   constructor(private readonly games: Pick<GameStatsStore, "playerLines">) {}
 
   async forStages(stages: readonly StatsStage[]): Promise<TournamentPlayerStatsResponse> {
-    const ids = stages.filter((stage) => isRedistributable(stage.source)).map(({ id }) => id);
+    const ids = stages.flatMap(({ id, source }) => (isRedistributable(source) ? [id] : []));
     return aggregatePlayerStats(ids.length === 0 ? [] : await this.games.playerLines(ids));
   }
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceUnavailableException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { HealthCheckService } from "@nestjs/terminus";
+import { HealthCheckService, type HealthIndicatorResult } from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { PostgresHealthIndicator } from "./postgres.health";
 import { RedisHealthIndicator } from "./redis.health";
@@ -43,10 +43,12 @@ describe("HealthController", () => {
   });
 
   it("ready pings postgres and redis", async () => {
-    health.check.mockImplementation(async (indicators: Array<() => Promise<unknown>>) => {
-      await Promise.all(indicators.map((indicator) => indicator()));
-      return { status: "ok" };
-    });
+    health.check.mockImplementation(
+      async (indicators: Array<() => Promise<HealthIndicatorResult>>) => {
+        await Promise.all(indicators.map((indicator) => indicator()));
+        return { status: "ok" };
+      },
+    );
 
     await expect(controller.ready()).resolves.toEqual({ status: "ok" });
     expect(postgres.pingCheck).toHaveBeenCalledWith("postgres");

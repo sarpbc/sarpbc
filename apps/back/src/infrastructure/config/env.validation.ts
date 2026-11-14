@@ -90,7 +90,7 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
 
 type SecretName = keyof typeof SECRET_FILES;
 
-function withSecrets(env: RawEnv, names: SecretName[]): RawEnv {
+function withSecrets(env: RawEnv, names: SecretName[]) {
   const secrets = Object.fromEntries(
     names.map((name) => [name, readSecret(env, name, SECRET_FILES[name])]),
   );

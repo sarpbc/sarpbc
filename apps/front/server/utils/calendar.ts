@@ -87,10 +87,9 @@ export function buildTournamentIcs(
   matches: TournamentMatchListItem[],
   now: Date,
 ): string {
-  const events = matches
-    .filter((match) => isMatchOnCalendar(match))
-    .map((match) => matchToCalendarEvent(match, tournament, now))
-    .filter((event) => event != null);
+  const events = matches.flatMap((match) =>
+    isMatchOnCalendar(match) ? (matchToCalendarEvent(match, tournament, now) ?? []) : [],
+  );
 
   return buildIcs({
     name: tournamentStageLabel(tournament),
