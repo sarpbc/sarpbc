@@ -1,6 +1,5 @@
 import type { LookupAddress, LookupOptions } from "node:dns";
-import { lookup as dnsLookup } from "node:dns/promises";
-import { request } from "node:https";
+import type { RequestOptions } from "node:https";
 import type { IncomingMessage } from "node:http";
 import { BlockList, isIP, type LookupFunction } from "node:net";
 import { InvalidInputError } from "../../common/domain/errors";
@@ -10,6 +9,21 @@ export interface PublicDownloadOptions {
   timeoutMs: number;
   maxRedirects: number;
   isAllowedHost: (hostname: string) => boolean;
+}
+
+interface HttpsRequest {
+  once(event: "response", listener: (response: IncomingMessage) => void): this;
+  once(event: "error", listener: (error: Error) => void): this;
+  end(): void;
+}
+
+/** The Node primitives a download needs, so a caller supplies them (`https.request`, `dns.promises.lookup`). */
+export interface PublicHttpsTransport {
+  request: (url: URL, options: RequestOptions) => HttpsRequest;
+  lookup: (
+    hostname: string,
+    options: { all: true; family: LookupOptions["family"] },
+  ) => Promise<LookupAddress[]>;
 }
 
 const BLOCKED_SUBNETS: [string, number, "ipv4" | "ipv6"][] = [
@@ -52,38 +66,41 @@ export function isPublicAddress(address: string): boolean {
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
 }
 
-export const publicOnlyLookup: LookupFunction = (hostname, options, callback) => {
-  void resolvePublicAddresses(hostname, options.family).then((resolved) => {
-    if (resolved instanceof Error) {
-      callback(resolved, "", 0);
+function createPublicOnlyLookup(lookup: PublicHttpsTransport["lookup"]): LookupFunction {
+  return (hostname, options, callback) => {
+    void resolvePublicAddresses(lookup, hostname, options.family).then((resolved) => {
+      if (resolved instanceof Error) {
+        callback(resolved, "", 0);
 
-      return;
-    }
+        return;
+      }
 
-    const first: (typeof resolved)[number] | undefined = resolved[0];
+      const first: (typeof resolved)[number] | undefined = resolved[0];
 
-    if (first === undefined) {
-      callback(privateAddressError(), "", 0);
+      if (first === undefined) {
+        callback(privateAddressError(), "", 0);
 
-      return;
-    }
+        return;
+      }
 
-    if (options.all === true) {
-      callback(null, resolved);
+      if (options.all === true) {
+        callback(null, resolved);
 
-      return;
-    }
+        return;
+      }
 
-    callback(null, first.address, first.family);
-  });
-};
+      callback(null, first.address, first.family);
+    });
+  };
+}
 
 async function resolvePublicAddresses(
+  lookup: PublicHttpsTransport["lookup"],
   hostname: string,
   family: LookupOptions["family"],
 ): Promise<LookupAddress[] | Error> {
   try {
-    const resolved = await dnsLookup(hostname, { all: true, family });
+    const resolved = await lookup(hostname, { all: true, family });
 
     if (resolved.some(({ address }) => !isPublicAddress(address))) return privateAddressError();
 
@@ -96,13 +113,14 @@ async function resolvePublicAddresses(
 export async function downloadPublicHttps(
   url: URL,
   options: PublicDownloadOptions,
+  transport: PublicHttpsTransport,
 ): Promise<Uint8Array> {
   const signal = AbortSignal.timeout(options.timeoutMs);
   let current = url;
 
   for (let redirects = 0; ; redirects += 1) {
     requirePublicHttpsUrl(current, options.isAllowedHost);
-    const response = await get(current, signal);
+    const response = await get(current, signal, transport);
     const status = response.statusCode ?? 0;
 
     if (
@@ -158,11 +176,15 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
   }
 }
 
-async function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
+async function get(
+  url: URL,
+  signal: AbortSignal,
+  transport: PublicHttpsTransport,
+): Promise<IncomingMessage> {
   return await new Promise((resolve, reject) => {
-    const req = request(url, {
+    const req = transport.request(url, {
       method: "GET",
-      lookup: publicOnlyLookup,
+      lookup: createPublicOnlyLookup(transport.lookup),
       signal,
       agent: false,
       headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },

@@ -2,20 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
-import { createLogger } from "evlog";
-import { R2Service } from "./r2.service";
+import { R2Service, type ObjectOperationLogger } from "./r2.service";
 import { StorageService } from "../application/storage.service";
 import { InvalidInputError } from "../../common/domain/errors";
 
 describe("R2Service", () => {
-  const createdLogger = () => {
-    const created = vi.mocked(createLogger).mock.results[0];
-
-    if (created?.type !== "return") throw new Error("No logger was created");
-
-    return created.value;
-  };
-
   const configuredValues = {
     r2_account_id: "acct",
     r2_endpoint: "https://acct.r2.cloudflarestorage.com",
@@ -25,13 +16,21 @@ describe("R2Service", () => {
     r2_public_base_url: "https://cdn.example",
   } as const;
 
+  const logError = vi.fn<ObjectOperationLogger["error"]>();
+
+  const operationLogger: ObjectOperationLogger = {
+    set: () => undefined,
+    error: logError,
+    emit: () => undefined,
+  };
+
   let sendSpy: MockInstance;
   let r2: R2Service;
   let service: StorageService;
 
   beforeEach(() => {
     sendSpy = vi.spyOn(S3Client.prototype, "send").mockImplementation(() => {});
-    r2 = new R2Service(new ConfigService(configuredValues));
+    r2 = new R2Service(new ConfigService(configuredValues), () => operationLogger);
     service = new StorageService(r2);
     vi.clearAllMocks();
   });
@@ -64,7 +63,7 @@ describe("R2Service", () => {
       service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
-    expect(createdLogger().error).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalled();
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -110,7 +109,7 @@ describe("R2Service", () => {
     await expect(
       r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(createdLogger().error).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalled();
   });
 
   it("publishes a pending object by copying it under its final key", async () => {
@@ -156,7 +155,10 @@ describe("R2Service", () => {
   });
 
   it("fails with a clear error when R2 is not configured", async () => {
-    const unconfigured = new R2Service(new ConfigService({ r2_bucket: "sarpbc-org" }));
+    const unconfigured = new R2Service(
+      new ConfigService({ r2_bucket: "sarpbc-org" }),
+      () => operationLogger,
+    );
 
     await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
       /R2 storage is not configured/,

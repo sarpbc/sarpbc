@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { createLogger } from "evlog";
 import { R2Service } from "./r2.service";
 import { StorageController } from "./http/storage.controller";
 import { StorageService } from "../application/storage.service";
@@ -8,7 +9,11 @@ import { StorageService } from "../application/storage.service";
   imports: [ConfigModule],
   controllers: [StorageController],
   providers: [
-    R2Service,
+    {
+      provide: R2Service,
+      useFactory: (config: ConfigService) => new R2Service(config, createLogger),
+      inject: [ConfigService],
+    },
     {
       provide: StorageService,
       useFactory: (storage: R2Service) => new StorageService(storage),
