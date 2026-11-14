@@ -45,7 +45,7 @@ export function useEntityTabs(kind: EntityKind) {
     if (next === "matches" || next === "events") {
       const current = route.query[next];
 
-      if (current) {
+      if (current !== undefined && current !== null && current !== "") {
         query[next] = String(current);
       }
     }

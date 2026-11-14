@@ -132,11 +132,17 @@ export class UserService {
   async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null): Promise<User> {
     user.googleId = googleId;
 
-    if (avatarUrl && !user.avatarUrl) {
+    if (
+      avatarUrl !== null &&
+      avatarUrl !== "" &&
+      (user.avatarUrl === null || user.avatarUrl === "")
+    ) {
       user.avatarUrl = avatarUrl;
     }
 
-    await this.transaction.run(async ({ users }) => await users.save(user));
+    await this.transaction.run(async ({ users }) => {
+      await users.save(user);
+    });
 
     return user;
   }

@@ -50,7 +50,7 @@ export class TeamAliasService {
     if (alias.pandascoreId !== null) {
       const owner = await scope.aliases.pandascoreOwner(alias.pandascoreId, id);
 
-      if (owner) {
+      if (owner !== null && owner !== "") {
         throw new ConflictError(
           `PandaScore team ${alias.pandascoreId} already belongs to ${owner}; an alias cannot claim it.`,
         );
@@ -65,7 +65,7 @@ export class TeamAliasService {
 
     if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
 
-    if (team.mergedIntoId) {
+    if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
       throw new InvalidInputError(
         `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
       );

@@ -1,6 +1,7 @@
 import { BlockList, isIP } from "node:net";
 import { timingSafeEqual } from "node:crypto";
 import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
+import { isNonEmptyString } from "./text";
 
 const CLOUDFLARE_IPV4 = [
   "173.245.48.0/20",
@@ -93,7 +94,7 @@ export type ClientRequest = {
 };
 
 export function canonicalIp(value: string | undefined | null): string | undefined {
-  if (!value) {
+  if (!isNonEmptyString(value)) {
     return undefined;
   }
 
@@ -116,7 +117,7 @@ function ipFamily(ip: string): "ipv4" | "ipv6" {
 export function isCloudflareIp(value: string | undefined): boolean {
   const ip = canonicalIp(value);
 
-  if (!ip) {
+  if (!isNonEmptyString(ip)) {
     return false;
   }
 
@@ -126,7 +127,7 @@ export function isCloudflareIp(value: string | undefined): boolean {
 export function isTrustedProxy(value: string | undefined): boolean {
   const ip = canonicalIp(value);
 
-  if (!ip) {
+  if (!isNonEmptyString(ip)) {
     return false;
   }
 
@@ -136,7 +137,7 @@ export function isTrustedProxy(value: string | undefined): boolean {
 export function isPublicIp(value: string | undefined): boolean {
   const ip = canonicalIp(value);
 
-  if (!ip) {
+  if (!isNonEmptyString(ip)) {
     return false;
   }
 
@@ -149,25 +150,25 @@ function header(headers: ClientRequest["headers"], name: string): string | undef
   if (Array.isArray(value)) {
     const trimmed = value.length === 1 ? value[0]?.trim() : undefined;
 
-    return trimmed ? trimmed : undefined;
+    return isNonEmptyString(trimmed) ? trimmed : undefined;
   }
 
   const trimmed = value?.trim();
 
-  return trimmed ? trimmed : undefined;
+  return isNonEmptyString(trimmed) ? trimmed : undefined;
 }
 
 export function resolveClientAddress(request: ClientRequest): string {
   const seen = canonicalIp(request.ip);
 
-  if (!seen) {
+  if (!isNonEmptyString(seen)) {
     return "unknown";
   }
 
   if (isCloudflareIp(seen)) {
     const client = canonicalIp(header(request.headers, "cf-connecting-ip"));
 
-    if (client && isPublicIp(client)) {
+    if (isNonEmptyString(client) && isPublicIp(client)) {
       return client;
     }
   }
@@ -178,7 +179,7 @@ export function resolveClientAddress(request: ClientRequest): string {
 export function peerAddress(request: ClientRequest): string | undefined {
   const address = request.socket?.remoteAddress ?? request.raw?.socket?.remoteAddress;
 
-  return address ? canonicalIp(address) : undefined;
+  return isNonEmptyString(address) ? canonicalIp(address) : undefined;
 }
 
 export function isDirectLoopback(request: ClientRequest): boolean {
@@ -193,7 +194,7 @@ export function addressSeenByTrustedProxy(
 ): string | undefined {
   const socket = canonicalIp(socketAddress);
 
-  if (!socket) {
+  if (!isNonEmptyString(socket)) {
     return undefined;
   }
 
@@ -235,7 +236,7 @@ export function visitorAddressFromProxy(input: {
 }): string | undefined {
   const seen = addressSeenByTrustedProxy(input.socketAddress, joinedHeader(input.forwardedFor));
 
-  if (!seen) {
+  if (!isNonEmptyString(seen)) {
     return undefined;
   }
 
@@ -250,7 +251,7 @@ export function visitorAddressFromProxy(input: {
 export function forwardedPublicClient(request: ClientRequest): string | undefined {
   const client = canonicalIp(header(request.headers, INTERNAL_CLIENT_HEADER));
 
-  if (!client || !isPublicIp(client)) {
+  if (!isNonEmptyString(client) || !isPublicIp(client)) {
     return undefined;
   }
 
@@ -263,13 +264,13 @@ export function internalApiTokenMatches(
 ): boolean {
   const token = expected?.trim();
 
-  if (!token) {
+  if (!isNonEmptyString(token)) {
     return false;
   }
 
   const provided = header(request.headers, INTERNAL_API_HEADER);
 
-  if (!provided) {
+  if (!isNonEmptyString(provided)) {
     return false;
   }
 

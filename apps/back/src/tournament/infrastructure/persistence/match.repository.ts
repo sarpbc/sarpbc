@@ -216,14 +216,14 @@ export class MatchRepository extends EntityRepository<Match> {
 
     if (tournamentFilter) query.tournament = tournamentFilter;
 
-    if (scope.teamId || scope.playerIds) {
+    if ((scope.teamId !== undefined && scope.teamId !== "") || scope.playerIds) {
       query.participants = {
-        ...(scope.teamId && { team: { id: scope.teamId } }),
+        ...(scope.teamId !== undefined && scope.teamId !== "" && { team: { id: scope.teamId } }),
         ...(scope.playerIds && { players: { id: { $in: scope.playerIds } } }),
       };
     }
 
-    if (scope.redistributableOnly) {
+    if (scope.redistributableOnly === true) {
       query.source = { $ne: "startgg" };
     }
 
@@ -235,21 +235,25 @@ export class MatchRepository extends EntityRepository<Match> {
   ): MatchTournamentScopeFilter | undefined {
     const { tournamentId, leagueId, redistributableOnly } = scope;
 
-    if (!tournamentId && !leagueId && !redistributableOnly) {
+    if (
+      (tournamentId === undefined || tournamentId === "") &&
+      (leagueId === undefined || leagueId === "") &&
+      redistributableOnly !== true
+    ) {
       return undefined;
     }
 
     const filter: MatchTournamentScopeFilter = {};
 
-    if (tournamentId) {
+    if (tournamentId !== undefined && tournamentId !== "") {
       filter.id = tournamentId;
     }
 
-    if (leagueId) {
+    if (leagueId !== undefined && leagueId !== "") {
       filter.league = { id: leagueId };
     }
 
-    if (redistributableOnly) {
+    if (redistributableOnly === true) {
       filter.source = { $ne: "startgg" };
     }
 

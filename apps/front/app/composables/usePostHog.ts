@@ -13,7 +13,7 @@ export function usePostHog(): PostHogClient {
     }
 
     void loadPostHogClient(config.public.posthog).then((client) => {
-      if (choice.value === "accepted" && client?.has_opted_in_capturing()) {
+      if (choice.value === "accepted" && client?.has_opted_in_capturing() === true) {
         fn(client);
       }
     });

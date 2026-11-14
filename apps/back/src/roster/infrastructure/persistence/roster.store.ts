@@ -34,10 +34,18 @@ const NATIONALITY_CODE = "upper(trim(nationality))";
 
 /** A name search wins over a first-letter filter; both leave out merged duplicates. */
 function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
-  const pattern = name ? `%${name}%` : start ? `${start}%` : null;
+  const pattern =
+    name !== undefined && name !== ""
+      ? `%${name}%`
+      : start !== undefined && start !== ""
+        ? `${start}%`
+        : null;
 
   return {
-    where: { ...(pattern && { name: { $ilike: pattern } }), mergedInto: null },
+    where: {
+      ...(pattern !== null && pattern !== "" && { name: { $ilike: pattern } }),
+      mergedInto: null,
+    },
     page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
   };
 }
@@ -90,9 +98,12 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       .getConnection()
       .execute("SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1");
 
-    const row = rows[0]
-      ? await this.em.findOne(Row.Player, { id: rows[0].id }, playerOptions)
-      : null;
+    const first: { id: string } | undefined = rows[0];
+
+    const row =
+      first !== undefined
+        ? await this.em.findOne(Row.Player, { id: first.id }, playerOptions)
+        : null;
 
     return row ? toPlayer(row) : null;
   }
@@ -132,7 +143,10 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
 
     if (!model.id) model.id = v4();
     Object.assign(row, playerColumns(model), {
-      mergedInto: model.mergedIntoId ? this.em.getReference(Row.Player, model.mergedIntoId) : null,
+      mergedInto:
+        model.mergedIntoId !== null && model.mergedIntoId !== ""
+          ? this.em.getReference(Row.Player, model.mergedIntoId)
+          : null,
       team: model.team ? this.em.getReference(Row.Team, model.team.id) : null,
     });
     this.em.persist(row);
@@ -149,7 +163,7 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
   private async teamDirectoryQuery(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
 
-    if (!options.name) return { where, page };
+    if (options.name === undefined || options.name === "") return { where, page };
 
     const aliases = await this.em.find(
       Row.TeamAlias,
@@ -200,7 +214,10 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
 
     if (!model.id) model.id = v4();
     Object.assign(row, teamColumns(model), {
-      mergedInto: model.mergedIntoId ? this.em.getReference(Row.Team, model.mergedIntoId) : null,
+      mergedInto:
+        model.mergedIntoId !== null && model.mergedIntoId !== ""
+          ? this.em.getReference(Row.Team, model.mergedIntoId)
+          : null,
     });
     this.em.persist(row);
   }
@@ -281,8 +298,8 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
 
   async findMovements({ teamId, playerId }: ContractMovementFilter) {
     const where: FilterQuery<Row.Contract> = {
-      ...(teamId && { team: teamId }),
-      ...(playerId && { player: playerId }),
+      ...(teamId !== undefined && teamId !== "" && { team: teamId }),
+      ...(playerId !== undefined && playerId !== "" && { player: playerId }),
     };
 
     return (await this.em.find(Row.Contract, where, { populate: ["player", "team"] })).map(

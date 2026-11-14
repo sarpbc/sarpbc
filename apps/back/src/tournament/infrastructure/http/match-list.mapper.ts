@@ -102,5 +102,5 @@ export function withPublicSlug(match: Match): Omit<
 > & {
   slug: string;
 } {
-  return { ...match, slug: matchPublicSlug(match) };
+  return Object.assign({}, match, { slug: matchPublicSlug(match) });
 }

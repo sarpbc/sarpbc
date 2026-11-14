@@ -184,7 +184,7 @@ export class CompetitionSyncService {
     const event = await events.bySerieId(command.pandascoreId);
     const serieName = command.fullName?.trim();
 
-    if (!event || !serieName) return null;
+    if (!event || serieName === undefined || serieName === "") return null;
     const stages = await events.stages(event.id);
     event.name = eventDisplayName({
       leagueName: event.league?.name ?? null,
@@ -269,7 +269,7 @@ export class CompetitionSyncService {
     else await placeStage(scope.events, tournament, event);
     await scope.tournaments.save(tournament);
 
-    if (previousEventId && previousEventId !== event.id) {
+    if (previousEventId !== null && previousEventId !== "" && previousEventId !== event.id) {
       const remaining = await scope.events.stages(previousEventId);
 
       if (!remaining.length) {
@@ -288,7 +288,11 @@ export class CompetitionSyncService {
 
     const pandascoreTeams = new Map(
       participants.flatMap((participant) =>
-        participant.team?.pandascoreId ? [[participant.id, participant.team.pandascoreId]] : [],
+        participant.team?.pandascoreId !== null &&
+        participant.team?.pandascoreId !== undefined &&
+        participant.team.pandascoreId !== 0
+          ? [[participant.id, participant.team.pandascoreId]]
+          : [],
       ),
     );
 
@@ -301,7 +305,8 @@ export class CompetitionSyncService {
         playerIds.push((await scope.rosters.upsertPlayer(player)).id);
       const participantId = existingParticipant?.id ?? v4();
 
-      if (roster.team.pandascoreId) pandascoreTeams.set(participantId, roster.team.pandascoreId);
+      if (roster.team.pandascoreId !== undefined && roster.team.pandascoreId !== 0)
+        pandascoreTeams.set(participantId, roster.team.pandascoreId);
       await scope.tournaments.saveParticipant({
         id: participantId,
         tournamentId: tournament.id,
@@ -346,7 +351,11 @@ export class CompetitionSyncService {
     const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
 
     if (synced) {
-      if (linkTournamentId && synced.id !== linkTournamentId)
+      if (
+        linkTournamentId !== undefined &&
+        linkTournamentId !== "" &&
+        synced.id !== linkTournamentId
+      )
         throw new ConflictError(
           `PandaScore tournament ${command.pandascoreId} is already imported as tournament ${synced.id}.`,
         );
@@ -356,7 +365,7 @@ export class CompetitionSyncService {
 
     const manualId = linkTournamentId ?? (await this.manualCounterpart(scope, command, league));
 
-    if (!manualId) return null;
+    if (manualId === null || manualId === "") return null;
     const manual = await scope.tournaments.load(manualId);
 
     if (!manual) throw new NotFoundError(`Tournament with id "${manualId}" was not found.`);
@@ -430,7 +439,9 @@ export class CompetitionSyncService {
       stageName: command.name,
     });
 
-    const current = currentEventId ? await events.load(currentEventId) : null;
+    const current =
+      currentEventId !== null && currentEventId !== "" ? await events.load(currentEventId) : null;
+
     const unclaimedCurrent = current?.pandascoreSerieId === null ? current : null;
 
     const lookups: Array<() => Promise<TournamentEvent | null>> = serie
@@ -499,7 +510,8 @@ export class CompetitionSyncService {
       if (!command.beginAt) continue;
 
       const participantIds = (
-        command.opponentPandascoreIds?.length
+        command.opponentPandascoreIds?.length !== undefined &&
+        command.opponentPandascoreIds.length !== 0
           ? command.opponentPandascoreIds.map(
               (id) => participants.find((p) => p.team?.pandascoreId === id)?.id,
             )

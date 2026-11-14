@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { getEventById } from "~/data/career/events";
 import { getWorldTeamById } from "~/data/career/world";
 import {
@@ -79,7 +80,7 @@ export function useCareerSimulator() {
   });
 
   const currentEvent = computed(() => {
-    if (!state.value.currentEventId) return null;
+    if (!isNonEmptyString(state.value.currentEventId)) return null;
 
     return getEventById(state.value.currentEventId) ?? null;
   });

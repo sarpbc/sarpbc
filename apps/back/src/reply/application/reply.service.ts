@@ -100,7 +100,7 @@ export class ReplyService {
 
       let replyTo: ReplyRecord | null = null;
 
-      if (createReplyDto.replyToId) {
+      if (createReplyDto.replyToId !== undefined && createReplyDto.replyToId !== "") {
         replyTo = await scope.replies.findById(createReplyDto.replyToId);
 
         if (!replyTo || replyTo.hiddenAt) {
@@ -135,7 +135,7 @@ export class ReplyService {
   }
 
   async hide(id: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
       if (!reply) {
@@ -152,7 +152,7 @@ export class ReplyService {
   }
 
   async delete(id: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
       if (!reply) {
@@ -210,7 +210,7 @@ export class ReplyService {
   }
 
   async deleteAllForTarget(targetType: ReplyTargetType, targetId: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const replies = await scope.replies.findByTarget(targetType, targetId, {
         includeHidden: true,
       });
@@ -249,9 +249,9 @@ export class ReplyService {
       const dto = byId.get(reply.id)!;
       const parentId = reply.replyTo?.id;
 
-      if (parentId && byId.has(parentId)) {
+      if (parentId !== undefined && parentId !== "" && byId.has(parentId)) {
         byId.get(parentId)!.replies.push(dto);
-      } else if (!parentId) {
+      } else if (parentId === undefined || parentId === "") {
         roots.push(dto);
       }
     }

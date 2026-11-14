@@ -71,6 +71,7 @@ function setup(role: string | null = "admin") {
       () => "translation",
     ),
     scope,
+    posts,
     saved,
     translations,
     commits: () => commits,
@@ -157,8 +158,8 @@ describe("post transaction and policies", () => {
     };
 
     await expect(f.service.delete(post.id)).rejects.toThrow("reply deletion failed");
-    expect(f.scope.posts.deleteTranslations).not.toHaveBeenCalled();
-    expect(f.scope.posts.delete).not.toHaveBeenCalled();
+    expect(f.posts.deleteTranslations).not.toHaveBeenCalled();
+    expect(f.posts.delete).not.toHaveBeenCalled();
     expect(f.commits()).toBe(1);
   });
 });
@@ -215,6 +216,6 @@ describe("post lookup", () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     await f.service.delete(stored.id);
-    expect(f.scope.posts.delete).toHaveBeenCalled();
+    expect(f.posts.delete).toHaveBeenCalled();
   });
 });

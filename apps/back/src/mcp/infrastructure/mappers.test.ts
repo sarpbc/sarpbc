@@ -13,11 +13,11 @@ import {
 } from "./mappers";
 
 function match(source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match {
-  return {
+  return Object.assign(new Match(), {
     source,
     tournament: { source: tournamentSource },
     participants: [{ team: { source: teamSource } }],
-  } as never;
+  });
 }
 
 describe("isRedistributableMatch", () => {

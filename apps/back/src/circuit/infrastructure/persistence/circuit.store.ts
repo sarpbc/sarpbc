@@ -107,7 +107,8 @@ export class CircuitPersistence implements CircuitStore {
   }
 
   async slugTaken(slug: string, exceptId: string | null) {
-    const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
+    const filter =
+      exceptId !== null && exceptId !== "" ? { slug, id: { $ne: exceptId } } : { slug };
 
     return (await this.em.count(Circuit, filter)) > 0;
   }

@@ -49,7 +49,7 @@ export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
 export function getApiErrorMessage(cause: unknown): string | undefined {
   const body = getApiErrorBody(cause);
 
-  if (!body?.message) return undefined;
+  if (body?.message === undefined || body.message === "") return undefined;
 
   if (Array.isArray(body.message)) {
     return body.message[0];

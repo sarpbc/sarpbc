@@ -1,16 +1,18 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthenticationError } from "../../common/domain/errors";
-import * as googleOAuth2 from "@googleapis/oauth2";
 import { AuthService } from "./auth.service";
 import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway";
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
+import type { GoogleIdentity } from "./ports/authentication";
+import { UserService } from "../../user/application/user.service";
+import { unconstructed } from "../../../test/doubles";
+
+const googleOAuth2 = vi.hoisted(() => ({ OAuth2: vi.fn(), oauth2: vi.fn() }));
 
 vi.mock("@googleapis/oauth2", () => ({
-  auth: {
-    OAuth2: vi.fn(),
-  },
-  oauth2: vi.fn(),
+  auth: { OAuth2: googleOAuth2.OAuth2 },
+  oauth2: googleOAuth2.oauth2,
 }));
 
 async function waitUntil(predicate: () => boolean): Promise<void> {
@@ -21,14 +23,16 @@ async function waitUntil(predicate: () => boolean): Promise<void> {
       throw new Error("Timed out waiting for overlapping OAuth callbacks");
     }
 
-    await new Promise<void>((resolve) => setImmediate(resolve));
+    await new Promise<void>((resolve) => {
+      setImmediate(resolve);
+    });
   }
 }
 
 describe("AuthService", () => {
   let service: AuthService;
 
-  const userService = {
+  const userServiceMocks = {
     signIn: vi.fn(),
     findOneByGoogleId: vi.fn(),
     findOneByEmail: vi.fn(),
@@ -36,6 +40,8 @@ describe("AuthService", () => {
     linkGoogleAccount: vi.fn(),
     create: vi.fn(),
   };
+
+  const userService = Object.assign(unconstructed(UserService), userServiceMocks);
 
   const jwtService = {
     signAsync: vi.fn().mockResolvedValue("jwt-token"),
@@ -45,7 +51,7 @@ describe("AuthService", () => {
     service = new AuthService(
       new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn() }, "secret"),
       new GoogleIdentityGateway("client-id", "secret", "http://localhost/callback"),
-      userService as never,
+      userService,
       { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
     );
     vi.clearAllMocks();
@@ -83,16 +89,24 @@ describe("AuthService", () => {
       verify: vi.fn(),
     };
 
-    const sessionUsers = { findById: vi.fn() };
+    const findById = vi.fn();
+    const sessionUsers = Object.assign(unconstructed(UserService), { findById });
 
-    const sessions = new AuthService(tokens, {} as never, sessionUsers as never, {
+    const unusedGoogle: GoogleIdentity = {
+      profile: async () => await Promise.reject(new Error("unused")),
+      authorizationUrl: () => {
+        throw new Error("unused");
+      },
+    };
+
+    const sessions = new AuthService(tokens, unusedGoogle, sessionUsers, {
       frontUrl: "",
       adminUrl: "",
     });
 
     it("authenticates with the current database email, not the token's", async () => {
       tokens.verify.mockResolvedValue({ id: "user-1", email: "old@b.com" });
-      sessionUsers.findById.mockResolvedValue({ id: "user-1", email: "new@b.com", userName: "x" });
+      findById.mockResolvedValue({ id: "user-1", email: "new@b.com", userName: "x" });
 
       await expect(sessions.authenticate("jwt")).resolves.toEqual({
         id: "user-1",
@@ -103,7 +117,7 @@ describe("AuthService", () => {
 
     it("rejects a valid token whose user no longer exists", async () => {
       tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-      sessionUsers.findById.mockResolvedValue(null);
+      findById.mockResolvedValue(null);
 
       await expect(sessions.authenticate("jwt")).resolves.toBeNull();
       await expect(sessions.refreshSession("jwt")).resolves.toBeNull();
@@ -111,7 +125,7 @@ describe("AuthService", () => {
 
     it("refreshes into the user and a new token pair", async () => {
       tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-      sessionUsers.findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
 
       await expect(sessions.refreshSession("jwt")).resolves.toEqual({
         user: { id: "user-1", email: "a@b.com" },
@@ -155,7 +169,7 @@ describe("AuthService", () => {
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
       } as const;
 
-      const oauth2Mock: Mock = googleOAuth2.auth.OAuth2 as never;
+      const oauth2Mock = googleOAuth2.OAuth2;
       oauth2Mock.mockImplementation(function () {
         const client = {
           credentials: {} as OAuthClientCredentials,
@@ -174,7 +188,7 @@ describe("AuthService", () => {
         return client;
       });
 
-      const oauth2ApiMock: Mock = googleOAuth2.oauth2 as never;
+      const oauth2ApiMock = googleOAuth2.oauth2;
       oauth2ApiMock.mockReturnValue({
         userinfo: {
           get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {

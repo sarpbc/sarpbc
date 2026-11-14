@@ -77,8 +77,9 @@ void describe("parseStreamScoreProposal", () => {
   });
 
   void it("accepts a game whose winner was not read", () => {
-    const [first, second] = PROPOSAL.games;
-    assert.ok(first && second);
+    const first = PROPOSAL.games.at(0);
+    const second = PROPOSAL.games.at(1);
+    assert.ok(first !== undefined && second !== undefined);
     assert.equal(
       error({
         ...PROPOSAL,
@@ -103,8 +104,9 @@ void describe("parseStreamScoreProposal", () => {
       error({ ...PROPOSAL, series: { blue: 2, orange: 2, winner: "blue" } }),
       "inconsistent-series",
     );
-    const [first, ...rest] = PROPOSAL.games;
-    assert.ok(first);
+    const first = PROPOSAL.games.at(0);
+    const rest = PROPOSAL.games.slice(1);
+    assert.ok(first !== undefined);
     assert.equal(
       error({ ...PROPOSAL, games: [{ ...first, winner: "orange" }, ...rest] }),
       "inconsistent-series",

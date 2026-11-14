@@ -662,11 +662,9 @@ describe("RosterProposalService", () => {
         list,
         "startgg",
       );
-      const applied = await streams.set.mock.results[1]?.value;
-      expect(applied.streams.map((stream: { source: string }) => stream.source)).toEqual([
-        "startgg",
-        "startgg",
-      ]);
+      const result = streams.set.mock.results[1];
+      const applied = result?.type === "return" ? await result.value : undefined;
+      expect(applied?.streams.map((stream) => stream.source)).toEqual(["startgg", "startgg"]);
     });
 
     it("asks the reviewer for the tournament permission", async () => {

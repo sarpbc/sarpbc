@@ -156,9 +156,19 @@ export function readTools({
         event: z.string().min(1).optional().describe("Event UUID or slug."),
       },
       handler: async ({ tournamentId, event }) => {
-        if (tournamentId && !event) return await competition.tournamentPlayerStats(tournamentId);
+        if (
+          tournamentId !== undefined &&
+          tournamentId !== "" &&
+          (event === undefined || event === "")
+        )
+          return await competition.tournamentPlayerStats(tournamentId);
 
-        if (event && !tournamentId) return await competition.eventPlayerStats(event);
+        if (
+          event !== undefined &&
+          event !== "" &&
+          (tournamentId === undefined || tournamentId === "")
+        )
+          return await competition.eventPlayerStats(event);
         throw new InvalidInputError("Pass either tournamentId or event.");
       },
     }),

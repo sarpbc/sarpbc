@@ -28,7 +28,7 @@ export function formatTournamentLabel(match: Match): string {
   const league = match.tournament?.league?.name;
   const name = match.tournament?.name;
 
-  if (league && name) {
+  if (league !== undefined && league !== "" && name) {
     return `${league} ${name}`;
   }
 
@@ -36,7 +36,7 @@ export function formatTournamentLabel(match: Match): string {
 }
 
 export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string): string | null {
-  if (match.winner?.team?.id) {
+  if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
     const winnerId = match.winner.team.id;
 
     if (winnerId === teamAId || winnerId === teamBId) {

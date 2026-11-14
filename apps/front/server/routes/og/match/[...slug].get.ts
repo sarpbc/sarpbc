@@ -1,4 +1,5 @@
 import { Resvg } from "@resvg/resvg-js";
+import { isNonEmptyString } from "@sarpbc/utils";
 import {
   buildMatchOgSvg,
   fetchMatchDetailForOg,
@@ -14,13 +15,15 @@ export default defineEventHandler(async (event) => {
   const pngMatch = /^(.+)\.png$/i.exec(segment);
   const svgMatch = /^(.+)\.svg$/i.exec(segment);
 
-  if (svgMatch?.[1]) {
-    return await sendRedirect(event, `/og/match/${svgMatch[1]}.png`, 301);
+  if (isNonEmptyString(svgMatch?.[1])) {
+    await sendRedirect(event, `/og/match/${svgMatch[1]}.png`, 301);
+
+    return undefined;
   }
 
   const id = pngMatch?.[1];
 
-  if (!id) {
+  if (!isNonEmptyString(id)) {
     throw createError({ statusCode: 404, statusMessage: "Match not found" });
   }
 

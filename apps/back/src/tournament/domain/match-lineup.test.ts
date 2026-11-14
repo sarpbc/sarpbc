@@ -98,11 +98,11 @@ describe("lineupsFromGames", () => {
       teams: [
         {
           participantId: "side-a",
-          players: aPlayers.map((id) => ({ player: id ? { id } : null })),
+          players: aPlayers.map((id) => ({ player: id === null ? null : { id } })),
         },
         {
           participantId: "side-b",
-          players: bPlayers.map((id) => ({ player: id ? { id } : null })),
+          players: bPlayers.map((id) => ({ player: id === null ? null : { id } })),
         },
       ],
     });

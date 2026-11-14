@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Player } from "@sarpbc/types";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
-import { fetchWithEntityTagCache } from "../composables/entityTagCache";
+import { fetchPlayerTagWithCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
 const props = defineProps<{
@@ -41,7 +41,7 @@ async function loadPlayer() {
   error.value = false;
 
   try {
-    const response = await fetchWithEntityTagCache(`player:${props.slug}`, () =>
+    const response = await fetchPlayerTagWithCache(props.slug, () =>
       apiFetch<{ player: Player | null }>(`/player/slug/${encodeURIComponent(props.slug)}`),
     );
 

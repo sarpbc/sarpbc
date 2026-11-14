@@ -1,26 +1,21 @@
+import { EntityManager } from "@mikro-orm/postgresql";
+import { HealthIndicatorService } from "@nestjs/terminus";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { unconstructed } from "../../../test/doubles";
 import { PostgresHealthIndicator } from "./postgres.health";
 
 describe("PostgresHealthIndicator", () => {
-  const up = vi.fn().mockReturnValue({ postgres: { status: "up" } });
-  const down = vi.fn().mockReturnValue({ postgres: { status: "down" } });
-
-  const healthIndicatorService = {
-    check: vi.fn().mockReturnValue({ up, down }),
-  };
-
   const execute = vi.fn();
 
-  const em = {
+  const em = Object.assign(unconstructed(EntityManager), {
     getConnection: () => ({ execute }),
-  };
+  });
 
   let indicator: PostgresHealthIndicator;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    healthIndicatorService.check.mockReturnValue({ up, down });
-    indicator = new PostgresHealthIndicator(em as never, healthIndicatorService as never);
+    indicator = new PostgresHealthIndicator(em, new HealthIndicatorService());
   });
 
   it("is up when SELECT 1 succeeds", async () => {
@@ -30,15 +25,13 @@ describe("PostgresHealthIndicator", () => {
       postgres: { status: "up" },
     });
     expect(execute).toHaveBeenCalledWith("SELECT 1");
-    expect(up).toHaveBeenCalled();
   });
 
   it("is down when the query fails", async () => {
     execute.mockRejectedValue(new Error("connection refused"));
 
     await expect(indicator.pingCheck("postgres")).resolves.toEqual({
-      postgres: { status: "down" },
+      postgres: { status: "down", message: "connection refused" },
     });
-    expect(down).toHaveBeenCalledWith({ message: "connection refused" });
   });
 });

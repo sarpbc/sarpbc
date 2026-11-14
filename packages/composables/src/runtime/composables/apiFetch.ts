@@ -1,12 +1,29 @@
-import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "@sarpbc/utils";
+import {
+  INTERNAL_API_HEADER,
+  INTERNAL_CLIENT_HEADER,
+  isNonEmptyString,
+  resolveApiBase,
+} from "@sarpbc/utils";
+import type {
+  NuxtRequestEvent,
+  useRequestEvent as NuxtUseRequestEvent,
+  useRuntimeConfig as NuxtUseRuntimeConfig,
+} from "nuxt/app";
 
-type PrivateApiConfig = {
-  apiBaseServer?: string;
-  apiInternalToken?: string;
-  public: {
+declare module "nuxt/schema" {
+  interface RuntimeConfig {
+    apiBaseServer: string;
+    apiInternalToken: string;
+  }
+
+  interface PublicRuntimeConfig {
     apiBase: string;
-  };
-};
+  }
+}
+
+// Nuxt and Nitro both auto-import useRuntimeConfig, so it stays a global here.
+declare const useRuntimeConfig: typeof NuxtUseRuntimeConfig;
+declare const useRequestEvent: typeof NuxtUseRequestEvent;
 
 type ServerRequest = {
   node: {
@@ -17,14 +34,14 @@ type ServerRequest = {
   };
 };
 
-function privateApiConfig(): PrivateApiConfig {
-  return useRuntimeConfig() as PrivateApiConfig;
+function hasNodeRequest(event: NuxtRequestEvent): event is NuxtRequestEvent & ServerRequest {
+  return "node" in event;
 }
 
 function apiBase(): string {
-  const config = privateApiConfig();
+  const config = useRuntimeConfig();
 
-  return resolveApiBase(config.public.apiBase, config.apiBaseServer, import.meta.server === true);
+  return resolveApiBase(config.public.apiBase, config.apiBaseServer, import.meta.server);
 }
 
 export function createApiClient() {
@@ -40,28 +57,29 @@ export function createApiClient() {
       let event: ServerRequest | undefined;
 
       try {
-        // Nitro routes call apiFetch with no Nuxt context: their type program has no
-        // useRequestEvent, and at runtime the call throws.
-        // @ts-ignore
-        event = useRequestEvent();
+        // Nitro routes call apiFetch with no Nuxt context: Nitro has no useRequestEvent,
+        // so the call throws a ReferenceError.
+        const requestEvent = useRequestEvent();
+        event =
+          requestEvent !== undefined && hasNodeRequest(requestEvent) ? requestEvent : undefined;
       } catch {
         event = undefined;
       }
 
       const cookie = event?.node.req.headers.cookie;
 
-      if (cookie && !Array.isArray(cookie)) {
+      if (!Array.isArray(cookie) && isNonEmptyString(cookie)) {
         headers.set("cookie", cookie);
       }
 
-      const config = privateApiConfig();
-      const token = config.apiInternalToken?.trim();
-      const serverBase = config.apiBaseServer?.trim();
+      const config = useRuntimeConfig();
+      const token = config.apiInternalToken.trim();
+      const serverBase = config.apiBaseServer.trim();
 
-      if (token && serverBase) {
+      if (isNonEmptyString(token) && isNonEmptyString(serverBase)) {
         headers.set(INTERNAL_API_HEADER, token);
 
-        if (event) {
+        if (event !== undefined) {
           const { visitorAddressFromProxy } = await import("@sarpbc/utils/client-address");
 
           const visitor = visitorAddressFromProxy({
@@ -70,7 +88,7 @@ export function createApiClient() {
             connectingIp: event.node.req.headers["cf-connecting-ip"],
           });
 
-          if (visitor) {
+          if (isNonEmptyString(visitor)) {
             headers.set(INTERNAL_CLIENT_HEADER, visitor);
           }
         }
@@ -85,5 +103,5 @@ export async function apiFetch<T>(
   url: string,
   opts: Parameters<typeof $fetch>[1] = {},
 ): Promise<T> {
-  return createApiClient()<T, string>(url, opts);
+  return await createApiClient()<T, string>(url, opts);
 }

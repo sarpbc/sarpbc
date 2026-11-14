@@ -6,7 +6,13 @@ export function createTwitchSource(
   clientId: string | undefined,
   clientSecret: string | undefined,
 ): LiveStreamSource | null {
-  if (!clientId || !clientSecret) return null;
+  if (
+    clientId === undefined ||
+    clientId === "" ||
+    clientSecret === undefined ||
+    clientSecret === ""
+  )
+    return null;
 
   return new TwitchHelixSource(clientId, new TwitchAppToken({ clientId, clientSecret }));
 }

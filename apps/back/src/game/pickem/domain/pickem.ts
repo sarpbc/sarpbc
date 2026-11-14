@@ -55,10 +55,10 @@ export function assertPickAllowed(
 }
 
 export function derivePickWinner(match: PickMatch): string | null {
-  if (match.winnerId) return match.winnerId;
+  if (match.winnerId !== null && match.winnerId !== "") return match.winnerId;
   const leader = winnerFromResults(match.results);
 
-  return leader && match.participantIds.includes(leader) ? leader : null;
+  return leader !== null && leader !== "" && match.participantIds.includes(leader) ? leader : null;
 }
 
 export function scorePick(pick: Pick, winnerId: string): void {

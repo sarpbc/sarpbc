@@ -23,7 +23,7 @@ export function assertMatchDeletable(match: Match, references: MatchReferences):
 
   const blocking = describeReferences(references, MATCH_REFERENCE_NOUNS);
 
-  if (blocking) {
+  if (blocking !== null && blocking !== "") {
     throw new ConflictError(`${match.name} still has ${blocking}; remove them before deleting it`);
   }
 }

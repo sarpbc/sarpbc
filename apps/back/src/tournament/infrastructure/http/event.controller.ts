@@ -137,7 +137,7 @@ export class EventController {
   async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
     const found = await this.events.find(event);
 
-    if (!found?.stages.some((stage) => isRedistributable(stage.source))) {
+    if (found?.stages.some((stage) => isRedistributable(stage.source)) !== true) {
       throw new NotFoundError(MISSING);
     }
 
@@ -168,7 +168,7 @@ export class EventController {
       case "stage": {
         const id = await this.events.stageId(path.eventSlug, path.stageSlug);
 
-        if (!id) throw new NotFoundError(MISSING);
+        if (id === null || id === "") throw new NotFoundError(MISSING);
 
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
@@ -177,7 +177,8 @@ export class EventController {
         const found = await this.events.find(path.eventSlug);
 
         // An event left empty by moving its stages elsewhere stays stored but is not public.
-        if (!found?.stages.length) throw new NotFoundError(MISSING);
+        if (found?.stages.length === undefined || found?.stages.length === 0)
+          throw new NotFoundError(MISSING);
         const stages = await Promise.all(found.stages.map(async ({ id }) => await this.stage(id)));
 
         return {

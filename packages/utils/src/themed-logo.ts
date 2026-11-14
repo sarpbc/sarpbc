@@ -1,4 +1,5 @@
 import type { TeamLogos } from "@sarpbc/types";
+import { isNonEmptyString } from "./text";
 
 export type ThemedLogo = Partial<TeamLogos>;
 
@@ -18,5 +19,7 @@ export function resolveThemedLogoUrl(
 }
 
 function present(url: string | null | undefined): string | undefined {
-  return url?.trim() || undefined;
+  const trimmed = url?.trim();
+
+  return isNonEmptyString(trimmed) ? trimmed : undefined;
 }

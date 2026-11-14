@@ -152,7 +152,7 @@ export class NewsService {
 
       let slug: string;
 
-      if (dto.slug) {
+      if (dto.slug !== undefined && dto.slug !== "") {
         slug = toSlug(dto.slug);
 
         if (!slug) {

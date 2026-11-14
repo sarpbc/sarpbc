@@ -12,6 +12,8 @@ import { OnThisDayService } from "./on-this-day.service";
 const NOW = new Date("2026-12-06T09:00:00Z");
 const ON = { year: 2026, month: 12, day: 6 };
 
+const anySlug: unknown = expect.any(String);
+
 describe("OnThisDayService", () => {
   it("queries the requested month and day in the site time zone, before its year", async () => {
     const { sources, tournaments, transfers, facts } = onThisDaySources();
@@ -78,7 +80,7 @@ describe("OnThisDayService", () => {
         year: 2023,
         date: "2023-12-06",
         tournament,
-        match: { publicId: 42, slug: expect.any(String) },
+        match: { publicId: 42, slug: anySlug },
         winner: { team: kc, players: [vatira], score: 4 },
         loser: {
           team: { ...kc, name: "Team BDS", slug: "team-bds", imageUrl: null },

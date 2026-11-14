@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { ConflictError, InvalidInputError } from "../../common/domain/errors";
 import { Player, Team } from "../domain/roster";
 import type { RosterMergeWriteScope } from "./ports";
+import { unusedContractWriter, unusedPhotoWriter } from "../../../test/roster-doubles";
 import { RosterMergeService } from "./roster-merge.service";
 
 describe("RosterMergeService", () => {
@@ -10,6 +11,12 @@ describe("RosterMergeService", () => {
   let stores: RosterMergeWriteScope;
   let service: RosterMergeService;
   let shared: string[];
+  let savePlayer: Mock<RosterMergeWriteScope["players"]["save"]>;
+  let deletePlayer: Mock<RosterMergeWriteScope["players"]["delete"]>;
+  let saveTeam: Mock<RosterMergeWriteScope["teams"]["save"]>;
+  let deleteTeam: Mock<RosterMergeWriteScope["teams"]["delete"]>;
+  let movePlayer: Mock<RosterMergeWriteScope["references"]["movePlayer"]>;
+  let moveTeam: Mock<RosterMergeWriteScope["references"]["moveTeam"]>;
 
   beforeEach(() => {
     const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
@@ -39,25 +46,31 @@ describe("RosterMergeService", () => {
       ].map((team) => [team.id, team]),
     );
     shared = [];
+    savePlayer = vi.fn(async () => {});
+    deletePlayer = vi.fn<RosterMergeWriteScope["players"]["delete"]>();
+    saveTeam = vi.fn(async () => {});
+    deleteTeam = vi.fn<RosterMergeWriteScope["teams"]["delete"]>();
+    movePlayer = vi.fn(async () => {});
+    moveTeam = vi.fn(async () => {});
     stores = {
       players: {
         findById: async (id) => players.get(id) ?? null,
-        findBySlug: vi.fn(),
-        save: vi.fn(async () => {}),
-        delete: vi.fn(),
+        findBySlug: async () => null,
+        save: savePlayer,
+        delete: deletePlayer,
       },
       teams: {
         findById: async (id) => teams.get(id) ?? null,
-        findBySlug: vi.fn(),
-        redirectCount: vi.fn(),
-        save: vi.fn(async () => {}),
-        delete: vi.fn(),
+        findBySlug: async () => null,
+        redirectCount: async () => 0,
+        save: saveTeam,
+        delete: deleteTeam,
       },
-      contracts: {} as RosterMergeWriteScope["contracts"],
-      photos: {} as RosterMergeWriteScope["photos"],
+      contracts: unusedContractWriter,
+      photos: unusedPhotoWriter,
       references: {
-        movePlayer: vi.fn(async () => {}),
-        moveTeam: vi.fn(async () => {}),
+        movePlayer,
+        moveTeam,
         sharedTournamentIds: async () => shared,
       },
     };
@@ -67,7 +80,7 @@ describe("RosterMergeService", () => {
   it("moves references, fills missing profile fields and keeps the duplicate as a redirect", async () => {
     const { kept, merged } = await service.mergePlayers("zen", "zen-dup");
 
-    expect(stores.references.movePlayer).toHaveBeenCalledWith("zen-dup", "zen");
+    expect(movePlayer).toHaveBeenCalledWith("zen-dup", "zen");
     expect(kept).toMatchObject({
       nationality: "FR",
       pandascoreId: 42,
@@ -76,15 +89,15 @@ describe("RosterMergeService", () => {
       team: { id: "vitality" },
     });
     expect(merged).toMatchObject({ mergedIntoId: "zen", pandascoreId: null, team: null });
-    expect(stores.players.delete).not.toHaveBeenCalled();
-    expect(stores.players.save).toHaveBeenCalledWith(merged);
-    expect(stores.players.save).toHaveBeenCalledWith(kept);
+    expect(deletePlayer).not.toHaveBeenCalled();
+    expect(savePlayer).toHaveBeenCalledWith(merged);
+    expect(savePlayer).toHaveBeenCalledWith(kept);
   });
 
   it("refuses to merge two distinct PandaScore players", async () => {
     players.get("zen")!.pandascoreId = 1;
     await expect(service.mergePlayers("zen", "zen-dup")).rejects.toThrow(ConflictError);
-    expect(stores.references.movePlayer).not.toHaveBeenCalled();
+    expect(movePlayer).not.toHaveBeenCalled();
   });
 
   it("refuses players on different current teams", async () => {
@@ -102,15 +115,15 @@ describe("RosterMergeService", () => {
   it("merges teams into an inactive redirect", async () => {
     const { kept, merged } = await service.mergeTeams("kc", "kc-dup");
 
-    expect(stores.references.moveTeam).toHaveBeenCalledWith("kc-dup", "kc");
+    expect(moveTeam).toHaveBeenCalledWith("kc-dup", "kc");
     expect(kept).toMatchObject({ location: "FR", imageUrl: "kc.png", pandascoreId: 7 });
     expect(merged).toMatchObject({ mergedIntoId: "kc", active: false, pandascoreId: null });
-    expect(stores.teams.delete).not.toHaveBeenCalled();
+    expect(deleteTeam).not.toHaveBeenCalled();
   });
 
   it("refuses teams that took part in the same tournament", async () => {
     shared = ["rlcs-major"];
     await expect(service.mergeTeams("kc", "kc-dup")).rejects.toThrow("rlcs-major");
-    expect(stores.references.moveTeam).not.toHaveBeenCalled();
+    expect(moveTeam).not.toHaveBeenCalled();
   });
 });

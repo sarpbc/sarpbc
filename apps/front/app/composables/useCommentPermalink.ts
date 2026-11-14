@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/commentPermalink";
 
 export function useCommentPermalink() {
@@ -65,7 +66,7 @@ export function useCommentPermalink() {
   function tryScrollFromHash() {
     const commentId = parseCommentHash(route.hash);
 
-    if (commentId && scrollToComment(commentId)) {
+    if (isNonEmptyString(commentId) && scrollToComment(commentId)) {
       highlightComment(commentId);
     }
   }

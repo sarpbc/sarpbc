@@ -27,7 +27,8 @@ function roleFromPandascore(role: string | null): ContractRole {
     role
       ?.trim()
       .toLowerCase()
-      .replace(/[\s-]+/g, "_")
+      .replace(/[\s-]+/g, "_") ??
+    ""
   ) {
     case "coach":
     case "head_coach":
@@ -78,9 +79,18 @@ export class Team {
 
     if (input.location !== undefined) this.location = input.location;
 
-    if (!this.imageUrl && input.imageUrl) this.imageUrl = input.imageUrl;
+    if (
+      (this.imageUrl === null || this.imageUrl === "") &&
+      input.imageUrl !== undefined &&
+      input.imageUrl !== ""
+    )
+      this.imageUrl = input.imageUrl;
 
-    if (!this.darkModeImageUrl && input.darkModeImageUrl)
+    if (
+      (this.darkModeImageUrl === null || this.darkModeImageUrl === "") &&
+      input.darkModeImageUrl !== undefined &&
+      input.darkModeImageUrl !== ""
+    )
       this.darkModeImageUrl = input.darkModeImageUrl;
   }
 }
@@ -114,7 +124,12 @@ export class Player {
     this.birthday = input.birthday ? new Date(input.birthday) : null;
     this.nationality = input.nationality ?? null;
 
-    if (!this.imageUrl && input.imageUrl) this.imageUrl = input.imageUrl;
+    if (
+      (this.imageUrl === null || this.imageUrl === "") &&
+      input.imageUrl !== undefined &&
+      input.imageUrl !== ""
+    )
+      this.imageUrl = input.imageUrl;
 
     if (input.role !== undefined) this.role = input.role;
   }
@@ -124,7 +139,11 @@ export class Player {
     return this.contractRole ?? roleFromPandascore(this.role);
   }
   replaceProfilePhoto(url: string | null): string | null {
-    const archived = this.imageUrl && this.imageUrl !== url ? this.imageUrl : null;
+    const archived =
+      this.imageUrl !== null && this.imageUrl !== "" && this.imageUrl !== url
+        ? this.imageUrl
+        : null;
+
     this.imageUrl = url;
 
     return archived;

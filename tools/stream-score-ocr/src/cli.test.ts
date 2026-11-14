@@ -5,20 +5,23 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
 import { OVERLAY_PATH } from "../fixtures/accuracy.ts";
 import { FixtureRenderer } from "../fixtures/render.ts";
 import { parseOverlay } from "./overlay.ts";
 
-const run = promisify(execFile);
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url));
 
 async function cli(args: readonly string[]): Promise<{ stdout: string; stderr: string }> {
-  return await run(process.execPath, [
-    "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
-    CLI,
-    ...args,
-  ]);
+  return await new Promise((resolve, reject) => {
+    execFile(
+      process.execPath,
+      ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args],
+      (error, stdout, stderr) => {
+        if (error === null) resolve({ stdout, stderr });
+        else reject(new Error(error.message, { cause: error }));
+      },
+    );
+  });
 }
 
 void describe("stream-score-ocr cli", () => {

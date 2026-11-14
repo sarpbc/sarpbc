@@ -44,7 +44,7 @@ export function hasBothTeams(stats: ReplayStats): boolean {
 
 export function platformAccounts(stats: ReplayStats): PlatformAccount[] {
   return stats.players.flatMap(({ platform, platformId }) =>
-    platformId ? [{ platform, platformId }] : [],
+    platformId !== null && platformId !== "" ? [{ platform, platformId }] : [],
   );
 }
 
@@ -66,7 +66,8 @@ export function buildGameRecord(
     if (linked) return { ...player, playerId: linked.playerId };
     const playerId = resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []);
 
-    if (playerId && platformId) learnedLinks.push({ platform, platformId, playerId });
+    if (playerId !== null && playerId !== "" && platformId !== null && platformId !== "")
+      learnedLinks.push({ platform, platformId, playerId });
 
     return { ...player, playerId };
   });

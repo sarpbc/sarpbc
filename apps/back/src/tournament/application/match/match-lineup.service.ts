@@ -111,7 +111,7 @@ export class MatchLineupService {
     return rows.flatMap(({ matchId, participantId }) => {
       const match = matches.get(matchId);
 
-      if (!match?.participants.some(({ id }) => id === participantId)) return [];
+      if (match?.participants.some(({ id }) => id === participantId) !== true) return [];
 
       return [{ participantId, match }];
     });

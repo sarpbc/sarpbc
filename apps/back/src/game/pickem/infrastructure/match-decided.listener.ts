@@ -9,6 +9,6 @@ export class MatchDecidedListener {
 
   @OnEvent(MATCH_DECIDED)
   async handle(event: MatchDecided) {
-    return await this.pickem.autoScoreMatch(event.matchId);
+    await this.pickem.autoScoreMatch(event.matchId);
   }
 }

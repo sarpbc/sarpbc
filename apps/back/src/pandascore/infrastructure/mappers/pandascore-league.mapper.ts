@@ -9,7 +9,10 @@ export class PandascoreLeagueMapper {
       slug: dto.slug,
       url: dto.url,
       imageUrl: dto.image_url,
-      modifiedAt: dto.modified_at ? new Date(dto.modified_at) : undefined,
+      modifiedAt:
+        dto.modified_at !== undefined && dto.modified_at !== ""
+          ? new Date(dto.modified_at)
+          : undefined,
     };
   }
 }

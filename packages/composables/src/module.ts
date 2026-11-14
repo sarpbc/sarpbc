@@ -6,7 +6,7 @@ export default defineNuxtModule({
     configKey: "sarpbcComposables",
   },
   setup() {
-    const { resolve } = createResolver(import.meta.url);
-    addImportsDir(resolve("./runtime/composables"));
+    const resolver = createResolver(import.meta.url);
+    addImportsDir(resolver.resolve("./runtime/composables"));
   },
 });

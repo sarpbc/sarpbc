@@ -31,7 +31,7 @@ function listPath(path: string, query: TournamentListQuery): string {
     params.set("pickems", pickems ? "true" : "false");
   }
 
-  if (activeOnly) {
+  if (activeOnly === true) {
     params.set("activeOnly", "true");
   }
 

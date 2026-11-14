@@ -268,13 +268,14 @@ export class TournamentModule implements OnModuleInit {
     private readonly orm: MikroORM,
   ) {}
   onModuleInit() {
-    if (this.configService.get<boolean>("pandascore_sync_on_boot"))
-      this.startSync().catch((error) => {
-        competitionDiagnostics.error("Failed to sync tournaments on module init", error);
-      });
+    if (this.configService.get<boolean>("pandascore_sync_on_boot") === true) void this.startSync();
   }
   @CreateRequestContext()
   private async startSync() {
-    await this.syncAll.execute();
+    try {
+      await this.syncAll.execute();
+    } catch (error) {
+      competitionDiagnostics.error("Failed to sync tournaments on module init", error);
+    }
   }
 }

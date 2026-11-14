@@ -49,7 +49,7 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       useFactory: (config: ConfigService) => {
         const apiKey = config.get<string>("ballchasing.apiKey");
 
-        return apiKey ? new BallchasingClient(apiKey) : null;
+        return apiKey !== undefined && apiKey !== "" ? new BallchasingClient(apiKey) : null;
       },
       inject: [ConfigService],
     },

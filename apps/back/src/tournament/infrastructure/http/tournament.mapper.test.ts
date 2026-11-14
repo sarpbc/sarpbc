@@ -34,7 +34,7 @@ function knockout() {
     publicId: 9,
     name: "Final",
     status: "finished",
-    tournament: { ...tournament, league: null },
+    tournament: Object.assign(new Tournament(), tournament, { league: null }),
     participants: [zen, vatira],
     winner: zen,
     results: [
@@ -104,9 +104,9 @@ describe("player participants in public responses", () => {
       winner: kc,
     });
 
+    const kcTeam: unknown = expect.objectContaining({ name: "Karmine Corp" });
+
     expect(mapTournamentListItem(cup).format).toBe("3v3");
-    expect(mapTournamentListItem(cup).participants).toEqual([
-      { id: "kc", team: expect.objectContaining({ name: "Karmine Corp" }) },
-    ]);
+    expect(mapTournamentListItem(cup).participants).toEqual([{ id: "kc", team: kcTeam }]);
   });
 });

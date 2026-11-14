@@ -3,7 +3,11 @@ import { ConflictError, NotFoundError } from "../../common/domain/errors";
 import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamSnapshot } from "./ports/live-stream-cache";
 import type { SourceStream } from "./ports/live-stream-source";
-import { LIVE_STREAMS_FRESH_MS, StreamerService } from "./streamer.service";
+import {
+  LIVE_STREAMS_FRESH_MS,
+  StreamerService,
+  type StreamerFailureReporter,
+} from "./streamer.service";
 
 const now = new Date("2026-10-31T20:00:00Z");
 
@@ -47,7 +51,7 @@ describe("StreamerService", () => {
   let streamers = createStreamers();
   let source = createSource();
   let cache = createCache();
-  let reportFailure = vi.fn();
+  let reportFailure = vi.fn<StreamerFailureReporter>();
   let service = new StreamerService(streamers, source, cache, reportFailure, () => now);
 
   beforeEach(() => {
@@ -55,7 +59,7 @@ describe("StreamerService", () => {
     source = createSource();
     snapshot = null;
     cache = createCache();
-    reportFailure = vi.fn();
+    reportFailure = vi.fn<StreamerFailureReporter>();
     service = new StreamerService(streamers, source, cache, reportFailure, () => now);
   });
 

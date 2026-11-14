@@ -4,7 +4,14 @@ import { League } from "../domain/competition";
 import { TournamentEvent } from "../domain/tournament-event";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualCatalogService } from "./manual-catalog.service";
-import type { EventStage } from "./ports";
+import type { CompetitionTransaction, EventStage } from "./ports";
+import {
+  competitionScope,
+  eventQueries,
+  eventWriter as eventWriterDouble,
+  tournamentQueries,
+  tournamentWriter as tournamentWriterDouble,
+} from "../../../test/competition-doubles";
 
 describe("ManualCatalogService", () => {
   const events = new Map<string, TournamentEvent>();
@@ -37,9 +44,14 @@ describe("ManualCatalogService", () => {
     }),
   };
 
-  const tx = {
-    run: async <T>(work: (scope: never) => Promise<T>) =>
-      await work({ tournaments: tournamentWriter, events: eventWriter } as never),
+  const tx: CompetitionTransaction = {
+    run: async (work) =>
+      await work(
+        competitionScope({
+          tournaments: tournamentWriterDouble(tournamentWriter),
+          events: eventWriterDouble(eventWriter),
+        }),
+      ),
   };
 
   const queries = {
@@ -57,8 +69,8 @@ describe("ManualCatalogService", () => {
     diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const service = new ManualCatalogService(
-    { leagues: vi.fn() } as never,
-    queries,
+    tournamentQueries(),
+    eventQueries(queries),
     tx,
     new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
   );

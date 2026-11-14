@@ -50,12 +50,11 @@ export const TweetTagNode = Node.create({
     },
   },
 
-  parseMarkdown: (token) => ({
-    type: "tweetTag",
-    attrs: {
-      url: token.url,
-    },
-  }),
+  parseMarkdown: (token) => {
+    const parsed = parseNewsTweetTag((token.raw ?? "").trimStart());
+
+    return parsed ? { type: "tweetTag", attrs: { url: parsed.url } } : [];
+  },
 
   renderMarkdown: (node) => serializeNewsTweetTag(String(node.attrs?.url ?? "")),
 });

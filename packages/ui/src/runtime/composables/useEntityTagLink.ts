@@ -1,11 +1,19 @@
 import { playerPath, teamPath } from "@sarpbc/utils";
+import { useRuntimeConfig } from "nuxt/app";
+import { useLocalePath } from "#i18n";
+
+declare module "nuxt/schema" {
+  interface PublicRuntimeConfig {
+    publicSiteUrl: string;
+  }
+}
 
 export function useEntityTagLink() {
   const localePath = useLocalePath();
-  const publicSiteUrl = useRuntimeConfig().public.publicSiteUrl as string;
+  const { publicSiteUrl } = useRuntimeConfig().public;
 
   function href(path: string): string {
-    return publicSiteUrl ? `${publicSiteUrl}${path}` : localePath(path);
+    return publicSiteUrl === "" ? localePath(path) : `${publicSiteUrl}${path}`;
   }
 
   function playerHref(slug: string): string {

@@ -1,6 +1,22 @@
 import assert from "node:assert/strict";
-import type { CountryDetail, CountrySummary, Team, TournamentDetail } from "@sarpbc/types";
+import { z } from "zod";
 import type { Payload, Request } from "./support.mts";
+
+const team = z.looseObject({ id: z.string(), name: z.string() });
+
+const countriesBody = z.object({
+  countries: z.array(z.looseObject({ code: z.string(), playerCount: z.number() })),
+});
+
+const countryBody = z.object({
+  country: z.looseObject({
+    code: z.string(),
+    players: z.array(z.looseObject({ name: z.string() })),
+    teams: z.array(z.looseObject({ id: z.string() })),
+    matches: z.array(z.looseObject({ id: z.string() })),
+    matchTotal: z.number(),
+  }),
+});
 
 export interface CountriesContext {
   request: Request;
@@ -8,40 +24,63 @@ export interface CountriesContext {
 }
 
 export async function verifyCountries({ request, staffCookie }: CountriesContext): Promise<void> {
-  async function created<T>(path: string, body: Payload): Promise<T> {
-    return (await request("POST", path, body, staffCookie, 201)).json<T>();
+  async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
+    return (await request("POST", path, body, staffCookie, 201)).json(schema);
   }
 
-  const home = (await created<{ team: Team }>("/team", { name: "Country Home Five" })).team;
-  const away = (await created<{ team: Team }>("/team", { name: "Country Away Five" })).team;
-  await created("/player", { name: "Country Local", nationality: " tv ", teamId: home.id });
-  await created("/player", { name: "Country Free Agent", nationality: "TV" });
-  await created("/player", { name: "Country Visitor", nationality: "Tuvalu", teamId: away.id });
+  const teamBody = z.object({ team });
+  const playerBody = z.looseObject({});
+  const home = (await created("/team", { name: "Country Home Five" }, teamBody)).team;
+  const away = (await created("/team", { name: "Country Away Five" }, teamBody)).team;
+
+  await created(
+    "/player",
+    { name: "Country Local", nationality: " tv ", teamId: home.id },
+    playerBody,
+  );
+  await created("/player", { name: "Country Free Agent", nationality: "TV" }, playerBody);
+
+  await created(
+    "/player",
+    { name: "Country Visitor", nationality: "Tuvalu", teamId: away.id },
+    playerBody,
+  );
 
   const finishedMatchOf = async (source: string): Promise<string> => {
-    const { tournament } = await created<{ tournament: TournamentDetail }>("/tournaments", {
-      name: `Country ${source} Cup`,
-      source,
-      teamIds: [home.id, away.id],
-    });
+    const { tournament } = await created(
+      "/tournaments",
+      {
+        name: `Country ${source} Cup`,
+        source,
+        teamIds: [home.id, away.id],
+      },
+      z.object({
+        tournament: z.looseObject({
+          id: z.string(),
+          participants: z.array(z.looseObject({ id: z.string() })),
+        }),
+      }),
+    );
 
     return (
-      await created<{ match: { id: string } }>(`/tournaments/${tournament.id}/matches`, {
-        name: `Country ${source} Final`,
-        beginAt: "2026-06-01T10:00:00Z",
-        endAt: "2026-06-01T12:00:00Z",
-        status: "finished",
-        participantIds: tournament.participants.map(({ id }) => id),
-      })
+      await created(
+        `/tournaments/${tournament.id}/matches`,
+        {
+          name: `Country ${source} Final`,
+          beginAt: "2026-06-01T10:00:00Z",
+          endAt: "2026-06-01T12:00:00Z",
+          status: "finished",
+          participantIds: tournament.participants.map(({ id }) => id),
+        },
+        z.object({ match: z.looseObject({ id: z.string() }) }),
+      )
     ).match.id;
   };
 
   const manualFinal = await finishedMatchOf("manual");
   await finishedMatchOf("startgg");
 
-  const { countries } = (await request("GET", "/countries")).json<{
-    countries: CountrySummary[];
-  }>();
+  const { countries } = (await request("GET", "/countries")).json(countriesBody);
 
   assert.deepEqual(
     countries.find(({ code }) => code === "TV"),
@@ -53,7 +92,7 @@ export async function verifyCountries({ request, staffCookie }: CountriesContext
     "values that are not a two-letter code stay off the index",
   );
 
-  const { country } = (await request("GET", "/countries/tv")).json<{ country: CountryDetail }>();
+  const { country } = (await request("GET", "/countries/tv")).json(countryBody);
   assert.equal(country.code, "TV");
   assert.deepEqual(
     country.players.map(({ name }) => name),

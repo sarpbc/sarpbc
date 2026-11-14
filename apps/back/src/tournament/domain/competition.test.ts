@@ -40,8 +40,8 @@ describe("Match outcome", () => {
 describe("Tournament date order", () => {
   const build = (beginAt: string | null, endAt: string | null) =>
     Object.assign(new Tournament(), {
-      beginAt: beginAt ? new Date(beginAt) : null,
-      endAt: endAt ? new Date(endAt) : null,
+      beginAt: beginAt === null ? null : new Date(beginAt),
+      endAt: endAt === null ? null : new Date(endAt),
     });
 
   it.each([

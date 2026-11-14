@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import request from "supertest";
 import type { StaffPermission } from "@sarpbc/types";
+import { z } from "zod";
 import { AuthService } from "../src/auth/application/auth.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
 import { configureApp } from "../src/configure-app";
@@ -87,7 +88,7 @@ describe("on this day (e2e)", () => {
   it("lets staff create, edit and delete a fact, shown publicly on its day only", async () => {
     const created = await http().post("/on-this-day-facts").set("Cookie", STAFF).send(fact);
     expect(created.status).toBe(201);
-    const { id } = created.body.fact;
+    const { id } = z.object({ fact: z.object({ id: z.string() }) }).parse(created.body).fact;
 
     const day = await http().get("/on-this-day").query({ date: "2026-06-05" }).expect(200);
     expect(day.headers["cache-control"]).toBe("public, max-age=300");
@@ -123,7 +124,7 @@ describe("on this day (e2e)", () => {
       .send({ ...fact, link: { kind: "tournament", id: STARTGG_STAGE_ID } })
       .expect(200);
     const hidden = await http().get("/on-this-day").query({ date: "2026-06-05" }).expect(200);
-    expect(hidden.body.events).toEqual([]);
+    expect(hidden.body).toHaveProperty("events", []);
 
     await http().delete(`/on-this-day-facts/${id}`).set("Cookie", STAFF).expect(204);
     await http().delete(`/on-this-day-facts/${id}`).set("Cookie", STAFF).expect(404);
@@ -147,6 +148,6 @@ describe("on this day (e2e)", () => {
 
   it("answers today without a date", async () => {
     const today = await http().get("/on-this-day").expect(200);
-    expect(today.body.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(z.object({ date: z.string() }).parse(today.body).date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

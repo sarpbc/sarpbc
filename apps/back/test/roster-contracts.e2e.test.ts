@@ -9,11 +9,7 @@ import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/a
 import { configureApp } from "../src/configure-app";
 import { ContractService } from "../src/roster/application/contract.service";
 import { PlayerService } from "../src/roster/application/player.service";
-import type {
-  ContractQueries,
-  RosterTransaction,
-  TeamQueries,
-} from "../src/roster/application/ports";
+import type { RosterTransaction, RosterWriteScope } from "../src/roster/application/ports";
 import { Contract, Player, Team } from "../src/roster/domain/roster";
 import { PlayerController } from "../src/roster/infrastructure/http/player.controller";
 import { MatchService } from "../src/tournament/application/match/match.service";
@@ -22,6 +18,14 @@ import { PlayerAwardService } from "../src/tournament/application/player-award.s
 import { SeasonService } from "../src/season/application/season.service";
 import { TournamentPrizeService } from "../src/tournament/application/tournament-prize.service";
 import { TOURNAMENT_QUERIES } from "../src/tournament/infrastructure/competition-queries.tokens";
+import {
+  unusedContractQueries,
+  unusedContractWriter,
+  unusedPhotoWriter,
+  unusedPlayerWriter,
+  unusedTeamQueries,
+  unusedTeamWriter,
+} from "./roster-doubles";
 
 describe("Staff contract writes keep the career consistent (e2e)", () => {
   let app: NestFastifyApplication;
@@ -30,10 +34,15 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   const zen = Object.assign(new Player(), { id: "zen", name: "zen", team: kc });
   let career: Contract[];
 
-  const scope = {
-    players: { findById: async (id: string) => (id === zen.id ? zen : null) },
-    teams: { findById: async (id: string) => (id === kcId ? kc : null) },
+  const scope: RosterWriteScope = {
+    players: {
+      ...unusedPlayerWriter,
+      findById: async (id: string) => (id === zen.id ? zen : null),
+    },
+    teams: { ...unusedTeamWriter, findById: async (id: string) => (id === kcId ? kc : null) },
+    photos: unusedPhotoWriter,
     contracts: {
+      ...unusedContractWriter,
       findByPlayer: async () => career,
       findById: async (id: string) => {
         const stored = career.find((contract) => contract.id === id);
@@ -45,7 +54,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
         career = [...career.filter((stored) => stored.id !== contract.id), contract];
       },
     },
-  } as never;
+  };
 
   const transaction: RosterTransaction = { run: async (work) => await work(scope) };
 
@@ -65,7 +74,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       providers: [
         {
           provide: ContractService,
-          useValue: new ContractService({} as ContractQueries, {} as TeamQueries, transaction),
+          useValue: new ContractService(unusedContractQueries, unusedTeamQueries, transaction),
         },
         { provide: PlayerService, useValue: {} },
         { provide: MatchService, useValue: {} },
@@ -99,7 +108,10 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       .send({ teamId: kcId, startDate: "2024-01-01", endDate: "2025-07-01" })
       .expect(422);
 
-    expect(response.body.message).toContain('overlaps contract "open"');
+    expect(response.body).toHaveProperty(
+      "message",
+      expect.stringContaining('overlaps contract "open"'),
+    );
     expect(career).toHaveLength(1);
   });
 
@@ -119,7 +131,10 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       .send({ endDate: "2025-07-01" })
       .expect(422);
 
-    expect(response.body.message).toContain('overlaps contract "open"');
+    expect(response.body).toHaveProperty(
+      "message",
+      expect.stringContaining('overlaps contract "open"'),
+    );
     expect(career.find(({ id }) => id === "past")?.endDate).toEqual(new Date("2025-05-31"));
   });
 

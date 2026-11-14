@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import {
   getSeasonsPastPeak,
   USER_ROSTER_ID,
@@ -105,7 +106,7 @@ export function buildEventOutcomeContext(
 ): EventOutcomeContext {
   const eventId = state.currentEventId;
 
-  if (!eventId) throw new Error("No active event");
+  if (!isNonEmptyString(eventId)) throw new Error("No active event");
 
   const roster = state.world.rosters[state.currentTeamId];
   const lastSeason = state.seasonRecords[state.seasonRecords.length - 1];

@@ -33,15 +33,15 @@ function baseMigrationNames(directory: string, baseRef: string): string[] | unde
   return output
     .split(/\r?\n/)
     .map((file) => path.posix.basename(file))
-    .filter((name) => timestampOf(name));
+    .filter((name) => timestampOf(name) !== undefined);
 }
 
 export function migrationViolations(directory = defaultDirectory, baseRef = ""): string[] {
   const files = readdirSync(directory).sort();
-  const names = files.filter((name) => timestampOf(name));
+  const names = files.filter((name) => timestampOf(name) !== undefined);
 
   const violations = files
-    .filter((name) => !timestampOf(name) && !snapshotPattern.test(name))
+    .filter((name) => timestampOf(name) === undefined && !snapshotPattern.test(name))
     .map(
       (name) =>
         `Unexpected file ${name} in the migrations directory. Migrations must be named Migration<14-digit timestamp>.ts or Migration<14-digit timestamp>_<name>.ts.`,
@@ -80,9 +80,13 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
   }
 
   const missingTimestamps = new Set(missing.map(timestampOf));
-  const newestBase = baseList.map(timestampOf).sort().at(-1);
 
-  if (newestBase) {
+  const newestBase = baseList
+    .flatMap((name) => timestampOf(name) ?? [])
+    .sort((a, b) => a.localeCompare(b))
+    .at(-1);
+
+  if (newestBase !== undefined) {
     for (const name of names.filter((name) => !baseNames.has(name))) {
       const timestamp = timestampOf(name);
 

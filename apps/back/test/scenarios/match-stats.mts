@@ -1,15 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import type {
-  MatchGameStats,
-  StatsImport,
-  StatsPlayerAccounts,
-  StatsPlayerLinkInput,
-  StatsPlayerLinkResult,
-  TournamentDetail,
-  TournamentPlayerStatsResponse,
-  TournamentStatsGame,
-} from "@sarpbc/types";
+import type { StatsPlayerLinkInput, TournamentStatsGame } from "@sarpbc/types";
+import { z } from "zod";
 import type {
   GamePlayerRecord,
   GameRecord,
@@ -33,14 +25,89 @@ interface MatchStatsContext {
   };
 }
 
-interface ErrorBody {
-  code: string;
-}
+const identified = z.looseObject({ id: z.string() });
 
-interface DeletedGame {
-  number: number;
-  ballchasingId: string;
-}
+const errorBody = z.looseObject({ code: z.string() });
+
+const deletedGame = z.looseObject({ number: z.number(), ballchasingId: z.string() });
+
+const statsImports = z.object({
+  imports: z.array(
+    z.looseObject({ status: z.string(), error: z.string().nullable(), processed: z.number() }),
+  ),
+});
+
+const matchGames = z.object({
+  games: z.array(
+    z.looseObject({
+      number: z.number(),
+      ballchasingId: z.string(),
+      teams: z.array(
+        z.looseObject({
+          participantId: z.string(),
+          goals: z.number(),
+          players: z.array(z.looseObject({ name: z.string(), player: identified.nullable() })),
+        }),
+      ),
+    }),
+  ),
+});
+
+const stat = z.number();
+
+const playerStats = z.looseObject({
+  games: z.number(),
+  unlinkedAccounts: z.number(),
+  players: z.array(
+    z.looseObject({
+      player: identified,
+      games: z.number(),
+      goalParticipation: z.number(),
+      totals: z.looseObject({
+        goals: stat,
+        assists: stat,
+        saves: stat,
+        shots: stat,
+        demolitions: stat,
+      }),
+    }),
+  ),
+});
+
+const tournamentBody = z.object({
+  tournament: z.looseObject({
+    name: z.string(),
+    event: z.looseObject({ slug: z.string() }),
+    participants: z.array(
+      z.looseObject({ id: z.string(), team: z.looseObject({ name: z.string() }).nullish() }),
+    ),
+  }),
+});
+
+const statsPlayerAccounts = z.looseObject({
+  players: z.array(
+    z.looseObject({
+      platform: z.string(),
+      platformId: z.string(),
+      name: z.string(),
+      team: z.looseObject({ participantId: z.string(), name: z.string() }),
+      games: z.number(),
+      player: identified.nullable(),
+    }),
+  ),
+  rosters: z.array(z.looseObject({ participantId: z.string(), players: z.array(identified) })),
+});
+
+const linkResult = z.looseObject({
+  link: z.looseObject({ platform: z.string(), platformId: z.string(), playerId: z.string() }),
+  linkedRows: z.number(),
+});
+
+const storedGames = z.object({
+  games: z.array(
+    z.looseObject({ matchId: z.string(), number: z.number(), ballchasingId: z.string() }),
+  ),
+});
 
 const statKeys = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
@@ -74,12 +141,11 @@ export async function verifyMatchStats({
 
   const unconfigured = (
     await request("POST", importsUrl, { group: "pilot-group" }, staffCookie, 500)
-  ).json<ErrorBody>();
+  ).json(errorBody);
 
   assert.equal(unconfigured.code, "ballchasing_not_configured");
   assert.deepEqual(
-    (await request("GET", importsUrl, undefined, staffCookie)).json<{ imports: StatsImport[] }>()
-      .imports,
+    (await request("GET", importsUrl, undefined, staffCookie)).json(statsImports).imports,
     [],
   );
 
@@ -130,9 +196,7 @@ export async function verifyMatchStats({
     [["integration-replay-1", { matchId, number: 1 }]],
   );
 
-  const [shown] = (await request("GET", `/matches/${matchId}`)).json<{
-    games: MatchGameStats[];
-  }>().games;
+  const [shown] = (await request("GET", `/matches/${matchId}`)).json(matchGames).games;
 
   assert.equal(shown.number, 1);
   assert.equal(shown.ballchasingId, "integration-replay-1");
@@ -173,9 +237,9 @@ export async function verifyMatchStats({
   });
   assert.equal(await new MikroOrmStatsImportStore(orm.em.fork()).failUnfinished("restarted"), 1);
 
-  const [listed] = (await request("GET", importsUrl, undefined, staffCookie)).json<{
-    imports: StatsImport[];
-  }>().imports;
+  const [listed] = (await request("GET", importsUrl, undefined, staffCookie)).json(
+    statsImports,
+  ).imports;
 
   assert.equal(listed.status, "failed");
   assert.equal(listed.error, "restarted");
@@ -214,9 +278,9 @@ export async function verifyMatchStats({
   assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
   assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
 
-  const stageStats = (
-    await request("GET", `/tournaments/${tournamentId}/player-stats`)
-  ).json<TournamentPlayerStatsResponse>();
+  const stageStats = (await request("GET", `/tournaments/${tournamentId}/player-stats`)).json(
+    playerStats,
+  );
 
   assert.equal(stageStats.games, 2);
   assert.equal(stageStats.unlinkedAccounts, 1, "an unlinked account is counted, not listed");
@@ -237,14 +301,12 @@ export async function verifyMatchStats({
     );
   assert.equal(veteran.goalParticipation, 100);
 
-  const { event } = (await request("GET", `/tournaments/${tournamentId}`)).json<{
-    tournament: TournamentDetail;
-  }>().tournament;
+  const { event } = (await request("GET", `/tournaments/${tournamentId}`)).json(
+    tournamentBody,
+  ).tournament;
 
   assert.deepEqual(
-    (
-      await request("GET", `/events/${event.slug}/player-stats`)
-    ).json<TournamentPlayerStatsResponse>(),
+    (await request("GET", `/events/${event.slug}/player-stats`)).json(playerStats),
     stageStats,
     "an event of one stage aggregates like the stage",
   );
@@ -341,8 +403,8 @@ export async function verifyMatchStats({
     "learning links earlier unlinked rows of the account",
   );
 
-  const accounts = async (): Promise<StatsPlayerAccounts> =>
-    (await request("GET", linksUrl, undefined, staffCookie)).json<StatsPlayerAccounts>();
+  const accounts = async (): Promise<z.infer<typeof statsPlayerAccounts>> =>
+    (await request("GET", linksUrl, undefined, staffCookie)).json(statsPlayerAccounts);
 
   const known = await accounts();
   const unlinked = known.players.filter((account) => account.player === null);
@@ -384,7 +446,7 @@ export async function verifyMatchStats({
 
   const outsider = (
     await link({ platform: "steam", platformId: "s-renamed", playerId: randomUUID() }, 400)
-  ).json<ErrorBody>();
+  ).json(errorBody);
 
   assert.equal(outsider.code, "player_not_on_tournament_roster");
   await request(
@@ -397,15 +459,14 @@ export async function verifyMatchStats({
   assert.equal(await linkOf("s-renamed"), null, "a rejected link writes nothing");
 
   assert.deepEqual(
-    (
-      await link({ platform: "steam", platformId: "s-renamed", playerId: otherId })
-    ).json<StatsPlayerLinkResult>(),
+    (await link({ platform: "steam", platformId: "s-renamed", playerId: otherId })).json(
+      linkResult,
+    ),
     { link: { platform: "steam", platformId: "s-renamed", playerId: otherId }, linkedRows: 1 },
   );
   assert.deepEqual(
-    (
-      await link({ platform: "steam", platformId: "s-learn", playerId: otherId })
-    ).json<StatsPlayerLinkResult>().linkedRows,
+    (await link({ platform: "steam", platformId: "s-learn", playerId: otherId })).json(linkResult)
+      .linkedRows,
     2,
     "a staff link repoints rows already linked to another player",
   );
@@ -423,9 +484,7 @@ export async function verifyMatchStats({
   );
   assert.equal(await linkOf("s-learn"), otherId, "learning never overwrites an existing link");
 
-  const games = (await request("GET", `/matches/${matchId}`)).json<{
-    games: MatchGameStats[];
-  }>().games;
+  const games = (await request("GET", `/matches/${matchId}`)).json(matchGames).games;
 
   const thirdGame = games.find((shownGame) => shownGame.number === 3);
   assert(thirdGame, "game 3 is shown");
@@ -467,21 +526,21 @@ export async function verifyMatchStats({
   await request("POST", gamesUrl, attach, memberCookie, 403);
   await request("DELETE", `${gamesUrl}/${matchId}/3`, undefined, memberCookie, 403);
   assert.equal(
-    (await request("POST", gamesUrl, attach, staffCookie, 500)).json<ErrorBody>().code,
+    (await request("POST", gamesUrl, attach, staffCookie, 500)).json(errorBody).code,
     "ballchasing_not_configured",
   );
   assert.deepEqual(
     (await request("GET", gamesUrl, undefined, staffCookie))
-      .json<{ games: TournamentStatsGame[] }>()
+      .json(storedGames)
       .games.map((stored) => [stored.matchId, stored.number, stored.ballchasingId]),
     [1, 2, 3, 4, 5].map((number) => [matchId, number, `integration-replay-${number}`]),
   );
 
   const store = () => new MikroOrmGameStatsStore(orm.em.fork());
 
-  const { tournament } = (await request("GET", `/tournaments/${tournamentId}`)).json<{
-    tournament: TournamentDetail;
-  }>();
+  const { tournament } = (await request("GET", `/tournaments/${tournamentId}`)).json(
+    tournamentBody,
+  );
 
   const teamName = (id: string): string | undefined =>
     tournament.participants.find((entry) => entry.id === id)?.team?.name;
@@ -496,7 +555,7 @@ export async function verifyMatchStats({
 
   const removed = (
     await request("DELETE", `${gamesUrl}/${matchId}/3`, undefined, staffCookie)
-  ).json<DeletedGame>();
+  ).json(deletedGame);
 
   assert.deepEqual([removed.number, removed.ballchasingId], [3, "integration-replay-3"]);
   assert.equal(await rowPlayers("s-renamed").then((rows) => rows.length), 0, "player rows go too");

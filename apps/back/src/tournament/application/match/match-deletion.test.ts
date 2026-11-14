@@ -81,8 +81,8 @@ describe("MatchService deletion", () => {
           invalidated.push(id);
         },
       },
-      { publish: vi.fn() },
-      { error: vi.fn() },
+      { publish: async () => {} },
+      { error: () => {} },
     ),
   );
 

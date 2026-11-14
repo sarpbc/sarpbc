@@ -81,8 +81,9 @@ void describe("stream score confirmation", () => {
   });
 
   void it("blocks an unread game even when staff checked it", () => {
-    const [first, second] = PROPOSAL.games;
-    assert.ok(first && second);
+    const first = PROPOSAL.games.at(0);
+    const second = PROPOSAL.games.at(1);
+    assert.ok(first !== undefined && second !== undefined);
 
     const proposal: StreamScoreProposal = {
       ...PROPOSAL,

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { requestUrl } from "../../../../test/fetch-mock";
 import { IntegrationError } from "../../../common/domain/errors";
 import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
@@ -64,7 +65,7 @@ function json(
 }
 
 function client(routes: (url: string) => Response) {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(String(input)));
+  const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(requestUrl(input)));
   let clock = 0;
 
   const sleep = vi.fn(async (ms: number) => {
@@ -139,7 +140,7 @@ describe("BallchasingClient.groupReplays", () => {
 
     for (const [, init] of fetch.mock.calls)
       expect(init?.headers).toEqual({ Authorization: "secret-key" });
-    expect(new URL(String(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
+    expect(new URL(requestUrl(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
   });
 
   it("explains a missing group, a rejected key and an unexpected body", async () => {
@@ -164,7 +165,7 @@ describe("BallchasingClient.groupReplays", () => {
     );
 
     await expect(instance.groupReplays("pilot")).rejects.toThrow(IntegrationError);
-    expect(fetch.mock.calls.map(([url]) => String(url))).not.toContain(
+    expect(fetch.mock.calls.map(([url]) => requestUrl(url))).not.toContain(
       "https://evil.example/api/replays?after=x",
     );
   });
@@ -276,7 +277,7 @@ describe("BallchasingClient.replayStats", () => {
         },
       ],
     });
-    expect(String(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1`);
+    expect(requestUrl(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1`);
   });
 
   it("counts a number omitted inside a stats object as zero", async () => {

@@ -5,9 +5,11 @@ import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
 import type { ReplyWriteScope } from "./ports";
 
+import { ReplyService } from "./reply.service";
+
 type Match = NonNullable<ReplyRecord["match"]>;
 
-import { ReplyService } from "./reply.service";
+const matchFor = (id: string): Match => ({ id, publicId: 1, name: "Match", slug: "match" });
 
 describe("ReplyService", () => {
   let service: ReplyService;
@@ -38,7 +40,7 @@ describe("ReplyService", () => {
   };
 
   const em = {
-    findOne: vi.fn(),
+    findOne: vi.fn<(target: ReplyTarget) => Promise<Match | null>>(),
   };
 
   beforeEach(async () => {
@@ -51,13 +53,9 @@ describe("ReplyService", () => {
         async find(target: ReplyTarget) {
           const row = await em.findOne(target);
 
-          if (!row) return null;
+          if (row === null) return null;
 
-          return {
-            post: target.kind === "forumPost" ? row : null,
-            newsArticle: target.kind === "newsArticle" ? row : null,
-            match: target.kind === "match" ? row : null,
-          };
+          return { post: null, newsArticle: null, match: row };
         },
       },
     };
@@ -88,7 +86,7 @@ describe("ReplyService", () => {
     it("creates a match-targeted reply", async () => {
       replyRepository.findLatestByUser.mockResolvedValue(null);
       userService.findById.mockResolvedValue(makeUser());
-      const match = { id: "22222222-2222-4222-8222-222222222222" } as Match;
+      const match = matchFor("22222222-2222-4222-8222-222222222222");
       em.findOne.mockResolvedValue(match);
       replyRepository.save.mockResolvedValue(undefined);
 
@@ -106,7 +104,7 @@ describe("ReplyService", () => {
     it("rejects empty trimmed content", async () => {
       replyRepository.findLatestByUser.mockResolvedValue(null);
       userService.findById.mockResolvedValue(makeUser());
-      em.findOne.mockResolvedValue({ id: "22222222-2222-4222-8222-222222222222" });
+      em.findOne.mockResolvedValue(matchFor("22222222-2222-4222-8222-222222222222"));
 
       await expect(
         service.create("user-1", {
@@ -134,12 +132,12 @@ describe("ReplyService", () => {
     it("paginates root replies and threads descendants for a match", async () => {
       const root = makeReply({
         id: "root",
-        match: { id: "m1" } as Match,
+        match: matchFor("m1"),
       });
 
       const child = makeReply({
         id: "child",
-        match: { id: "m1" } as Match,
+        match: matchFor("m1"),
         replyTo: root,
       });
 

@@ -60,11 +60,11 @@ describe("HealthController", () => {
     expect(redis.pingCheck).toHaveBeenCalledWith("redis");
   });
 
-  it("ready returns 503 while shutting down", () => {
+  it("ready returns 503 while shutting down", async () => {
     shutdownState.isShuttingDown.mockReturnValue(true);
 
-    expect(async () => await controller.ready()).toThrow(ServiceUnavailableException);
-    expect(async () => await controller.ready()).toThrow(/Shutting down/);
+    await expect(controller.ready()).rejects.toThrow(ServiceUnavailableException);
+    await expect(controller.ready()).rejects.toThrow(/Shutting down/);
     expect(health.check).not.toHaveBeenCalled();
   });
 });

@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { UserList, UserListItem } from "@sarpbc/types";
 import type { AssignableRole } from "~/types/user";
 
@@ -8,7 +9,7 @@ export async function getUsers(query: {
 }): Promise<UserList> {
   return await apiFetch<UserList>("/users", {
     method: "GET",
-    query: { ...query, search: query.search || undefined },
+    query: { ...query, search: isNonEmptyString(query.search) ? query.search : undefined },
   });
 }
 

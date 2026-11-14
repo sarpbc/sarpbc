@@ -3,7 +3,7 @@ import { Test } from "@nestjs/testing";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import request from "supertest";
-import type { PlayerComparison } from "@sarpbc/types";
+import { z } from "zod";
 import { AuthGuard } from "../src/auth/infrastructure/http/auth.guard";
 import { PermissionGuard } from "../src/user/infrastructure/http/user.guard";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
@@ -20,6 +20,22 @@ import { PlayerAwardService } from "../src/tournament/application/player-award.s
 import { TournamentPrizeService } from "../src/tournament/application/tournament-prize.service";
 import { TOURNAMENT_QUERIES } from "../src/tournament/infrastructure/competition-queries.tokens";
 import { careerSources, zenSeasonAward } from "./career-fixtures";
+
+const comparisonBody = z.object({
+  comparison: z.object({
+    a: z.looseObject({
+      player: z.unknown(),
+      titles: z.unknown(),
+      teams: z.unknown(),
+      series: z.unknown(),
+      earnings: z.looseObject({ totals: z.unknown() }),
+      awards: z.array(z.looseObject({ id: z.string() })),
+      seasonAwards: z.unknown(),
+    }),
+    b: z.looseObject({ player: z.unknown() }),
+    headToHead: z.unknown(),
+  }),
+});
 
 describe("GET /player/compare (e2e)", () => {
   let app: NestFastifyApplication;
@@ -65,7 +81,7 @@ describe("GET /player/compare (e2e)", () => {
       .query({ a: "zen", b: "vatira" })
       .expect(200);
 
-    const { comparison }: { comparison: PlayerComparison } = response.body;
+    const { comparison } = comparisonBody.parse(response.body);
 
     expect(comparison.a.player).toMatchObject({ id: "zen", slug: "zen" });
     expect(comparison.b.player).toMatchObject({ id: "vatira", slug: "vatira" });
@@ -78,12 +94,14 @@ describe("GET /player/compare (e2e)", () => {
         event: { id: "cup", slug: "cup", name: "Cup" },
       },
     ]);
+    const kc: unknown = expect.objectContaining({ id: "kc", slug: "karmine-corp" });
+
     expect(comparison.a.teams).toEqual([
       {
         role: "active",
         startDate: "2023-01-01T00:00:00.000Z",
         endDate: null,
-        team: expect.objectContaining({ id: "kc", slug: "karmine-corp" }),
+        team: kc,
       },
     ]);
     expect(comparison.a.series).toEqual({ wins: 2, losses: 2 });

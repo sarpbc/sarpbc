@@ -174,6 +174,7 @@ export {
   MAX_IMAGE_BYTES,
   MAX_IMAGE_MEGABYTES,
   canonicalImageContentType,
+  parseR2UploadResponse,
   type ImageContentType,
   type ImageUploadTarget,
 } from "./image-upload";
@@ -267,3 +268,5 @@ export {
 export { DATA_SOURCE_URL_MAX_LENGTH, isAcceptedDataSourceUrl } from "./data-source-url";
 
 export { isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";
+
+export { isNonEmptyDateInput, isNonEmptyString } from "./text";

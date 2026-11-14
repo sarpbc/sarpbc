@@ -5,13 +5,13 @@ import { z } from "zod";
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
-export interface PandascoreQueryParams {
+export type PandascoreQueryParams = {
   page?: string;
   per_page?: string;
   sort?: string;
   since?: string;
   videogame?: string[];
-}
+};
 
 export interface PandascoreRequestOptions {
   params?: PandascoreQueryParams;
@@ -38,7 +38,7 @@ export class PandascoreApiClient {
   constructor(private readonly configService: ConfigService) {
     const apiToken = this.configService.get<string>("pandascore_api_token");
 
-    if (!apiToken) {
+    if (apiToken === undefined || apiToken === "") {
       log.error({
         component: PandascoreApiClient.name,
         message: "PANDASCORE_API_TOKEN not configured",
@@ -204,6 +204,8 @@ export class PandascoreApiClient {
   }
 
   private async sleep(ms: number): Promise<void> {
-    return await new Promise((resolve) => setTimeout(resolve, ms));
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 }

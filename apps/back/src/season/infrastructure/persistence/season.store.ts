@@ -118,7 +118,9 @@ export class SeasonPersistence implements SeasonStore {
     );
 
     return rows.flatMap(({ slug, name, winnerTeam }) =>
-      slug ? [{ slug, name, winner: winnerTeam ? toTeam(winnerTeam) : null }] : [],
+      slug !== null && slug !== ""
+        ? [{ slug, name, winner: winnerTeam ? toTeam(winnerTeam) : null }]
+        : [],
     );
   }
 
@@ -135,13 +137,15 @@ export class SeasonPersistence implements SeasonStore {
   }
 
   async nameTaken(name: string, exceptId: string | null) {
-    const filter = exceptId ? { name, id: { $ne: exceptId } } : { name };
+    const filter =
+      exceptId !== null && exceptId !== "" ? { name, id: { $ne: exceptId } } : { name };
 
     return (await this.em.count(Season, filter)) > 0;
   }
 
   async slugTaken(slug: string, exceptId: string | null) {
-    const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
+    const filter =
+      exceptId !== null && exceptId !== "" ? { slug, id: { $ne: exceptId } } : { slug };
 
     return (await this.em.count(Season, filter)) > 0;
   }
@@ -154,7 +158,10 @@ export class SeasonPersistence implements SeasonStore {
       slug: season.slug,
       formatSummary: season.format.summary,
       formatPhases: season.format.phases,
-      winnerTeam: season.winnerTeamId ? this.em.getReference(Team, season.winnerTeamId) : null,
+      winnerTeam:
+        season.winnerTeamId !== null && season.winnerTeamId !== ""
+          ? this.em.getReference(Team, season.winnerTeamId)
+          : null,
     });
 
     try {
@@ -163,7 +170,7 @@ export class SeasonPersistence implements SeasonStore {
       if (isUniqueViolation(error))
         throw new ConflictError(
           `Another season already uses the name "${season.name}"` +
-            (season.slug ? ` or the slug "${season.slug}".` : "."),
+            (season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."),
         );
       throw error;
     }
@@ -320,13 +327,14 @@ export class SeasonPersistence implements SeasonStore {
       participant: this.em.getReference(SeasonParticipant, participantId),
       label: entry.label,
       result: entry.result,
-      tournament: entry.tournamentId
-        ? await this.em.findOneOrFail(
-            Tournament,
-            { id: entry.tournamentId },
-            { populate: ["event"] },
-          )
-        : null,
+      tournament:
+        entry.tournamentId !== null && entry.tournamentId !== ""
+          ? await this.em.findOneOrFail(
+              Tournament,
+              { id: entry.tournamentId },
+              { populate: ["event"] },
+            )
+          : null,
     });
 
     await this.em.persist(row).flush();

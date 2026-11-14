@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import {
   buildTournamentIcs,
   fetchTournamentForCalendar,
@@ -9,7 +10,7 @@ import {
 export default defineEventHandler(async (event) => {
   const id = parseIcsSlug(getRequestURL(event).pathname);
 
-  if (!id) {
+  if (!isNonEmptyString(id)) {
     throw createError({ statusCode: 404, statusMessage: "Tournament not found" });
   }
 

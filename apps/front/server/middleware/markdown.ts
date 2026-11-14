@@ -9,6 +9,7 @@ import {
   markdownPathFromHtmlPath,
 } from "~/utils/markdownPath";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
+import { isNonEmptyString } from "@sarpbc/utils";
 
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
 const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
@@ -29,14 +30,16 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
 
   const location = response.headers.get("location");
 
-  if (response.status >= 300 && response.status < 400 && location) {
+  if (response.status >= 300 && response.status < 400 && isNonEmptyString(location)) {
     const target = new URL(location, getRequestURL(event).origin);
 
-    return await sendRedirect(
+    await sendRedirect(
       event,
       `${markdownPathFromHtmlPath(target.pathname)}${target.search}`,
       response.status,
     );
+
+    return undefined;
   }
 
   setHeader(event, "content-type", "text/markdown; charset=utf-8");
@@ -74,32 +77,32 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
 
 export default defineEventHandler(async (event) => {
   if (event.method !== "GET" && event.method !== "HEAD") {
-    return;
+    return undefined;
   }
 
-  if (getHeader(event, INTERNAL_HEADER)) {
-    return;
+  if (isNonEmptyString(getHeader(event, INTERNAL_HEADER))) {
+    return undefined;
   }
 
   const url = getRequestURL(event);
   const pathname = url.pathname;
 
   if (pathname.startsWith("/.well-known/")) {
-    return;
+    return undefined;
   }
 
   if (isMarkdownPagePath(pathname)) {
     const htmlPath = htmlPathFromMarkdownPath(pathname);
 
     if (!isMarkdownEligibleHtmlPath(htmlPath)) {
-      return;
+      return undefined;
     }
 
     return await sendMarkdown(event, htmlPath, url.search);
   }
 
   if (!isMarkdownEligibleHtmlPath(pathname)) {
-    return;
+    return undefined;
   }
 
   if (shouldServeMarkdown(getHeader(event, "accept"), getHeader(event, "sec-fetch-dest"))) {
@@ -110,4 +113,6 @@ export default defineEventHandler(async (event) => {
 
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");
   setHeader(event, "link", LLMS_TXT_LINK);
+
+  return undefined;
 });

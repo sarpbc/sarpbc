@@ -1,5 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, type FilterQuery } from "@mikro-orm/core";
+import { z } from "zod";
 import type { ReplyTargetType } from "@sarpbc/types";
 import type { ReplyFindOptions } from "../../application/ports";
 import { REPLY_TARGETS, replySortOrder, type ReplyTargetFields } from "../../domain/reply";
@@ -13,6 +14,8 @@ type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatc
 function onTarget(targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter {
   return { [REPLY_TARGETS[targetType].field]: target };
 }
+
+const moderationRows = z.array(z.object({ id: z.string(), report_count: z.coerce.number() }));
 
 export class ReplyRepository {
   private readonly rows;
@@ -108,7 +111,12 @@ export class ReplyRepository {
       for (const reply of nonRoots) {
         const parentId = reply.replyTo?.id;
 
-        if (parentId && frontier.has(parentId) && !collected.has(reply.id)) {
+        if (
+          parentId !== undefined &&
+          parentId !== "" &&
+          frontier.has(parentId) &&
+          !collected.has(reply.id)
+        ) {
           collected.set(reply.id, reply);
           nextFrontier.add(reply.id);
         }
@@ -127,10 +135,9 @@ export class ReplyRepository {
   async findRecentForModeration(
     limit: number,
   ): Promise<Array<{ reply: Reply; reportCount: number }>> {
-    type ModerationRow = { id: string; report_count: string };
-
-    const rows = (await this.em.getConnection().execute(
-      `
+    const rows = moderationRows.parse(
+      await this.em.getConnection().execute(
+        `
         SELECT
           r.id,
           COUNT(rr.id) AS report_count
@@ -140,10 +147,11 @@ export class ReplyRepository {
         ORDER BY COUNT(rr.id) DESC, r.created_at DESC
         LIMIT ?
       `,
-      [limit],
-    )) as ModerationRow[];
+        [limit],
+      ),
+    );
 
-    const ids = rows.map((row: ModerationRow) => row.id);
+    const ids = rows.map((row) => row.id);
 
     if (ids.length === 0) {
       return [];
@@ -155,7 +163,7 @@ export class ReplyRepository {
     );
 
     const replyById = new Map(replies.map((reply) => [reply.id, reply]));
-    const countById = new Map(rows.map((row: ModerationRow) => [row.id, Number(row.report_count)]));
+    const countById = new Map(rows.map((row) => [row.id, row.report_count]));
 
     return ids
       .map((id: string) => {

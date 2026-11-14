@@ -53,7 +53,7 @@ export interface TournamentResponse {
 }
 
 export function mapLeague(league: League | null | undefined): LeagueResponse | null {
-  if (!league?.id) {
+  if (league?.id === undefined || league?.id === "") {
     return null;
   }
 

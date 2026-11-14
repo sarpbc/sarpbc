@@ -64,7 +64,8 @@ export class SeasonArchiveService {
   async archive(slug: string): Promise<SeasonArchive> {
     const season = await this.store.findBySlug(slug);
 
-    if (!season?.slug) throw new NotFoundError("Season not found");
+    if (season?.slug === null || season?.slug === undefined || season?.slug === "")
+      throw new NotFoundError("Season not found");
     const participants = await this.store.participants(season.id);
     const awards = await this.store.awards(season.id);
 
@@ -80,7 +81,7 @@ export class SeasonArchiveService {
 
     if (!team) throw new NotFoundError(`Team with id "${input.teamId}" not found`);
 
-    if (team.mergedIntoId)
+    if (team.mergedIntoId !== null && team.mergedIntoId !== "")
       throw new InvalidInputError(
         `Team "${team.id}" was merged into "${team.mergedIntoId}"; use that id`,
       );
@@ -121,7 +122,11 @@ export class SeasonArchiveService {
     const { participant } = await this.requireParticipant(seasonId, participantId);
     const entry = parsePathEntry(input);
 
-    if (entry.tournamentId && !(await this.store.tournamentExists(entry.tournamentId)))
+    if (
+      entry.tournamentId !== null &&
+      entry.tournamentId !== "" &&
+      !(await this.store.tournamentExists(entry.tournamentId))
+    )
       throw new NotFoundError(`Tournament with id "${entry.tournamentId}" was not found.`);
 
     return await this.store.savePathEntry(participant.id, entry);

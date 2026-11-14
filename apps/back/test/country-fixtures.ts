@@ -49,7 +49,8 @@ export function countrySources() {
       options: MatchListQueryOptions = {},
     ): Promise<[Match[], number]> => {
       const rows = countryMatches.filter(
-        (match) => kind === "results" && (!options.redistributableOnly || redistributable(match)),
+        (match) =>
+          kind === "results" && (options.redistributableOnly !== true || redistributable(match)),
       );
 
       return [rows, rows.length];

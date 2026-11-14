@@ -62,7 +62,7 @@ export class AuthController {
   async refresh(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
-    if (!refreshToken) {
+    if (refreshToken === undefined || refreshToken === "") {
       clearAuthCookies(res, this.authCookie());
 
       return await res.code(401).send({

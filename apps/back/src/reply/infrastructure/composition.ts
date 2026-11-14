@@ -41,8 +41,11 @@ export function replyDeletion(em: EntityManager) {
   const service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
 
   return {
-    deleteAllForPost: async (id: string) => await service.deleteAllForTarget("forumPost", id),
-    deleteAllForTarget: async (type: ReplyTarget["kind"], id: string) =>
-      await service.deleteAllForTarget(type, id),
+    deleteAllForPost: async (id: string) => {
+      await service.deleteAllForTarget("forumPost", id);
+    },
+    deleteAllForTarget: async (type: ReplyTarget["kind"], id: string) => {
+      await service.deleteAllForTarget(type, id);
+    },
   };
 }

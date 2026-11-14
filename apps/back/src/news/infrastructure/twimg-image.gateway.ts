@@ -40,7 +40,7 @@ export class TwimgImageGateway implements TweetImageGateway {
       let target = twimgUrl(url);
 
       for (let redirects = 0; ; redirects++) {
-        if (!target) throw unavailable();
+        if (target === null || target === "") throw unavailable();
 
         const response = await fetch(target, {
           redirect: "manual",
@@ -55,7 +55,7 @@ export class TwimgImageGateway implements TweetImageGateway {
         await response.body?.cancel();
         const location = response.headers.get("location");
 
-        if (!location || redirects >= MAX_REDIRECTS) throw unavailable();
+        if (location === null || location === "" || redirects >= MAX_REDIRECTS) throw unavailable();
         target = twimgUrl(location, target);
       }
     } catch (error) {
@@ -88,14 +88,18 @@ async function readImage(response: Response): Promise<TweetImage> {
   let size = 0;
 
   for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
-    size += chunk.value.byteLength;
+    const value: unknown = chunk.value;
+
+    if (!(value instanceof Uint8Array)) throw unavailable();
+
+    size += value.byteLength;
 
     if (size > MAX_IMAGE_BYTES) {
       await reader.cancel();
       throw unavailable();
     }
 
-    chunks.push(chunk.value);
+    chunks.push(value);
   }
 
   return { contentType, body: Buffer.concat(chunks) };

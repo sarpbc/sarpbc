@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { z } from "zod";
 import {
   CAREER_BACKGROUNDS,
@@ -152,7 +153,7 @@ export const careerStateSchema = z.object({
 });
 
 export function parseCareerStateJson(raw: string | null): CareerState | null {
-  if (!raw) return null;
+  if (!isNonEmptyString(raw)) return null;
 
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -181,7 +182,7 @@ const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().c
 export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
   const results = new Map<string, CareerResult>();
 
-  if (!raw) return results;
+  if (!isNonEmptyString(raw)) return results;
 
   try {
     const parsed = careerResultsSchema.safeParse(JSON.parse(raw));

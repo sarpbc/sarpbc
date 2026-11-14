@@ -80,7 +80,7 @@ describe("native Nest Zod validation over Fastify", () => {
   ])("rejects invalid query %s", async (url) => {
     const response = await app.inject({ method: "GET", url });
     expect(response.statusCode).toBe(400);
-    expect(response.json().message).toBeInstanceOf(Array);
+    expect(response.json()).toHaveProperty("message", expect.any(Array));
   });
 
   const post = {
@@ -100,7 +100,7 @@ describe("native Nest Zod validation over Fastify", () => {
     });
 
     expect(accepted.statusCode).toBe(201);
-    expect(accepted.json().translations).toEqual([translation]);
+    expect(accepted.json()).toHaveProperty("translations", [translation]);
 
     for (const translations of [
       [{ ...translation, author: "staff" }],

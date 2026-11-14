@@ -26,17 +26,20 @@ export const getFileFromPart = async (part: MultipartFile): Promise<Storage.Mult
 export const validateFile = async (
   file: Storage.MultipartFile,
   options: MultipartOptions,
-): Promise<string | void> => {
+): Promise<string | undefined> => {
   const validators: FileValidator[] = [];
 
-  if (options.maxFileSize)
+  if (options.maxFileSize !== undefined && options.maxFileSize !== 0)
     validators.push(new MaxFileSizeValidator({ maxSize: options.maxFileSize }));
 
-  if (options.fileType) validators.push(new FileTypeValidator({ fileType: options.fileType }));
+  if (options.fileType !== undefined && options.fileType !== "")
+    validators.push(new FileTypeValidator({ fileType: options.fileType }));
 
   for (const validator of validators) {
     if (await validator.isValid(file)) continue;
 
     return validator.buildErrorMessage(file);
   }
+
+  return undefined;
 };

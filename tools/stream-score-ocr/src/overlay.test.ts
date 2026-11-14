@@ -10,7 +10,7 @@ void describe("overlay config", () => {
     assert.equal(overlay.id, "coupe-de-france-slash-2026");
     assert.deepEqual(
       [...new Set(overlay.templates.map((template) => template.char))].sort(),
-      [..."+0123456789:"].sort(),
+      "+0123456789:".split("").sort(),
     );
   });
 

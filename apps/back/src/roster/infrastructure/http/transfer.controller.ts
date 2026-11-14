@@ -16,11 +16,18 @@ export class TransferController {
   @Get()
   async find(@Query({ schema: ListTransfersQueryDto }) query: ListTransfersQueryDto) {
     const [team, player] = await Promise.all([
-      query.team ? this.teamService.findBySlug(query.team) : null,
-      query.player ? this.playerService.findBySlug(query.player) : null,
+      query.team !== undefined && query.team !== ""
+        ? this.teamService.findBySlug(query.team)
+        : null,
+      query.player !== undefined && query.player !== ""
+        ? this.playerService.findBySlug(query.player)
+        : null,
     ]);
 
-    if ((query.team && !team) || (query.player && !player)) {
+    if (
+      (query.team !== undefined && query.team !== "" && !team) ||
+      (query.player !== undefined && query.player !== "" && !player)
+    ) {
       return { transfers: [], count: 0 };
     }
 
@@ -28,8 +35,8 @@ export class TransferController {
       teamId: team?.id,
       playerId: player?.id,
       type: query.type,
-      from: query.from ? new Date(query.from) : undefined,
-      to: query.to ? new Date(query.to) : undefined,
+      from: query.from !== undefined && query.from !== "" ? new Date(query.from) : undefined,
+      to: query.to !== undefined && query.to !== "" ? new Date(query.to) : undefined,
       limit: query.limit,
       offset: query.offset,
     });

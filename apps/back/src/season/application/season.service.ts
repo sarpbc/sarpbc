@@ -39,7 +39,11 @@ export class SeasonService {
   }
 
   async create(input: SeasonInput): Promise<SeasonDetail> {
-    if (input.winnerTeamId)
+    if (
+      input.winnerTeamId !== null &&
+      input.winnerTeamId !== undefined &&
+      input.winnerTeamId !== ""
+    )
       throw new InvalidInputError("Add the winning team as a participant before naming it.");
 
     const season: SeasonRecord = {
@@ -89,7 +93,7 @@ export class SeasonService {
 
     if (!player) throw new NotFoundError(`Player with id "${input.playerId}" not found`);
 
-    if (player.mergedIntoId)
+    if (player.mergedIntoId !== null && player.mergedIntoId !== "")
       throw new InvalidInputError(
         `Player "${player.id}" was merged into "${player.mergedIntoId}"; use that id`,
       );
@@ -97,7 +101,7 @@ export class SeasonService {
     if (await this.store.awardTaken(season.id, award))
       throw new ConflictError(
         `${season.name} already has a ${SEASON_AWARD_LABELS[award.awardType]}` +
-          (award.region ? ` for ${award.region}` : "") +
+          (award.region !== null && award.region !== "" ? ` for ${award.region}` : "") +
           ". Remove the current award before assigning another player.",
       );
 

@@ -15,6 +15,10 @@ import { Circuit } from "../../../circuit/infrastructure/circuit-persistence";
 import { Season } from "../../../season/infrastructure/season-persistence";
 import * as Row from "./roster-proposal.entity";
 
+function entry(id: string, label: string): [string, string] {
+  return [id, label];
+}
+
 function toProposal(row: Row.RosterProposal): RosterProposal {
   return Object.assign(new RosterProposal(), {
     id: row.id,
@@ -60,7 +64,10 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         sourceUrl: model.sourceUrl,
         status: model.status,
         proposedBy: em.getReference(User, model.proposedById),
-        reviewedBy: model.reviewedById ? em.getReference(User, model.reviewedById) : null,
+        reviewedBy:
+          model.reviewedById !== null && model.reviewedById !== ""
+            ? em.getReference(User, model.reviewedById)
+            : null,
         reviewedAt: model.reviewedAt,
         entityId: model.entityId,
       });
@@ -102,27 +109,28 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         ]);
 
       return Object.fromEntries([
-        ...players.map((player) => [player.id, player.name]),
-        ...teams.map((team) => [team.id, team.name]),
-        ...users.map((user) => [user.id, user.userName]),
-        ...events.map((event) => [event.id, event.name]),
-        ...circuits.map((circuit) => [circuit.id, circuit.name]),
-        ...seasons.map((season) => [season.id, season.name]),
-        ...tournaments.map((tournament) => [
-          tournament.id,
-          `${tournament.event.name} · ${tournament.name}`,
-        ]),
-        ...matches.map((match) => [
-          match.id,
-          [
-            match.participants
-              .map(({ team, players }) => participantName({ team, players: players.getItems() }))
-              .join(" vs "),
-            match.tournament.event.name,
-            match.tournament.name,
-            match.name,
-          ].join(" · "),
-        ]),
+        ...players.map((player) => entry(player.id, player.name)),
+        ...teams.map((team) => entry(team.id, team.name)),
+        ...users.map((user) => entry(user.id, user.userName)),
+        ...events.map((event) => entry(event.id, event.name)),
+        ...circuits.map((circuit) => entry(circuit.id, circuit.name)),
+        ...seasons.map((season) => entry(season.id, season.name)),
+        ...tournaments.map((tournament) =>
+          entry(tournament.id, `${tournament.event.name} · ${tournament.name}`),
+        ),
+        ...matches.map((match) =>
+          entry(
+            match.id,
+            [
+              match.participants
+                .map(({ team, players }) => participantName({ team, players: players.getItems() }))
+                .join(" vs "),
+              match.tournament.event.name,
+              match.tournament.name,
+              match.name,
+            ].join(" · "),
+          ),
+        ),
       ]);
     },
   };

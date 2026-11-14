@@ -175,14 +175,20 @@ export class RosterModule implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    if (this.configService.get<boolean>("pandascore_sync_on_boot")) {
-      this.syncPandascoreTeams.seed().catch((error) => {
-        log.error({
-          component: RosterModule.name,
-          job: "module_init",
-          message: "Failed to initialize teams on module init",
-          error: error instanceof Error ? error : new Error(String(error)),
-        });
+    if (this.configService.get<boolean>("pandascore_sync_on_boot") === true) {
+      void this.seedTeams();
+    }
+  }
+
+  private async seedTeams(): Promise<void> {
+    try {
+      await this.syncPandascoreTeams.seed();
+    } catch (error) {
+      log.error({
+        component: RosterModule.name,
+        job: "module_init",
+        message: "Failed to initialize teams on module init",
+        error: error instanceof Error ? error : new Error(String(error)),
       });
     }
   }

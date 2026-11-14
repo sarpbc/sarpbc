@@ -1,4 +1,4 @@
-import { currencyFractionDigits } from "@sarpbc/utils";
+import { currencyFractionDigits, isNonEmptyString } from "@sarpbc/utils";
 
 const CURRENCY_CODES = {
   "United State Dollar": "USD",
@@ -24,7 +24,7 @@ export function formatPrizepool(
   prizepool: string | undefined | null,
   locale: string = "en-US",
 ): string {
-  if (!prizepool) return "";
+  if (!isNonEmptyString(prizepool)) return "";
 
   const parts = prizepool.trim().split(" ");
 

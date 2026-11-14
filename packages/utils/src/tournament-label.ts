@@ -1,3 +1,5 @@
+import { isNonEmptyString } from "./text";
+
 type EventStage = { name: string; event: { name: string } };
 
 export function distinctStageName(stage: EventStage): string | null {
@@ -16,5 +18,5 @@ export function tournamentStageLabel(stage: EventStage): string {
   const eventName = stage.event.name.trim();
   const stageName = distinctStageName(stage);
 
-  return stageName ? `${eventName} ${stageName}` : eventName;
+  return isNonEmptyString(stageName) ? `${eventName} ${stageName}` : eventName;
 }

@@ -1,4 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
 import { describe, expect, it, vi } from "vitest";
 import { CircuitStageTeam } from "./circuit.entities";
 import { CircuitRosterReferences } from "./roster-references.mover";
@@ -14,7 +15,7 @@ describe("CircuitRosterReferences.moveTeam", () => {
     const nativeUpdate = vi.fn();
 
     const references = new CircuitRosterReferences(
-      Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
+      Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
     );
 
     return { references, nativeDelete, nativeUpdate };
