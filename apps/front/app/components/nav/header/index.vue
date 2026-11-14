@@ -36,9 +36,7 @@ function closeMenu() {
 }
 
 function handleMobileMenuClick(event: MouseEvent) {
-  const target = event.target as HTMLElement | null;
-
-  if (target?.closest("a")) {
+  if (event.target instanceof Element && event.target.closest("a")) {
     closeMenu();
   }
 }

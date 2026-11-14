@@ -39,8 +39,8 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
   {
     accessorKey: "type",
     header: t("page.news.columns.format"),
-    cell: ({ getValue }) => {
-      const value = getValue() as NewsType | undefined;
+    cell: ({ row }) => {
+      const value = row.original.type;
 
       return value === "article" ? t("page.news.type.article") : t("page.news.type.short");
     },
@@ -48,7 +48,7 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
   {
     accessorKey: "createdAt",
     header: t("page.news.columns.createdAt"),
-    cell: ({ getValue }) => dateFormatter.value.format(new Date(getValue() as string)),
+    cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
   },
   {
     id: "actions",

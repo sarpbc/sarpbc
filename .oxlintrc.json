@@ -33,6 +33,7 @@
     "anti-slop/no-unsafe-dictionary-type": "error",
     "anti-slop/no-widen-then-assert": "error",
     "anti-slop/require-readable-spacing": "error",
+    "anti-slop/require-safety-comment-for-type-assertion": "error",
     "oxc/no-accumulating-spread": "error",
     "typescript/await-thenable": "error",
     "typescript/consistent-return": "error",

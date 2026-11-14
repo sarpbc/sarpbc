@@ -6,7 +6,7 @@ const localePath = useLocalePath();
 const { t, locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
-const postRef = computed(() => route.params.ref as string);
+const postRef = computed(() => String(route.params.ref));
 
 const {
   data: post,

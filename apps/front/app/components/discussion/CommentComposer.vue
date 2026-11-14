@@ -46,15 +46,7 @@ const contentInputRef = useTemplateRef("contentInput");
 
 function focusContentInput() {
   nextTick(() => {
-    const component = contentInputRef.value;
-
-    if (!component) return;
-
-    const root =
-      component instanceof HTMLElement ? component : (component as { $el?: HTMLElement }).$el;
-
-    const textarea = root?.querySelector?.("textarea") ?? root;
-    textarea?.focus();
+    contentInputRef.value?.textareaRef?.focus();
   });
 }
 

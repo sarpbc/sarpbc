@@ -14,7 +14,7 @@ const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const { setJsonLd } = useStructuredData();
 const route = useRoute();
-const slug = computed(() => route.params.slug as string);
+const slug = computed(() => String(route.params.slug));
 
 const { data: article, error: articleError } = await useAsyncData(
   () => `news-${slug.value}-${locale.value}`,

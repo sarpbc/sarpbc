@@ -44,7 +44,11 @@ const TOURNAMENT_DETAIL_POPULATE = [
 
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
-  async find({ limit, offset = 0, ...filters }: TournamentListOptions) {
+  async find({
+    limit,
+    offset = 0,
+    ...filters
+  }: TournamentListOptions): Promise<[ReturnType<typeof toTournament>[], number]> {
     const [rows, count] = await this.em.findAndCount(Tournament, stageFilter(filters), {
       limit,
       offset,
@@ -59,7 +63,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       ],
     });
 
-    return [rows.map(toTournament), count] as [ReturnType<typeof toTournament>[], number];
+    return [rows.map(toTournament), count];
   }
   async searchByName(options: { name: string; limit?: number; offset?: number }) {
     return (
@@ -221,12 +225,15 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
 
     return rows.map(({ id }) => id);
   }
-  async list(kind: MatchListKind, options: MatchListQueryOptions) {
+  async list(
+    kind: MatchListKind,
+    options: MatchListQueryOptions,
+  ): Promise<[ReturnType<typeof toMatch>[], number]> {
     const [rows, count] = await this.em
       .getRepository<Match, MatchRepository>(Match)
       .listAndCount(kind, options);
 
-    return [rows.map(toMatch), count] as [ReturnType<typeof toMatch>[], number];
+    return [rows.map(toMatch), count];
   }
   async page(kind: MatchListKind, options: MatchListQueryOptions) {
     return (await this.em.getRepository<Match, MatchRepository>(Match).list(kind, options)).map(

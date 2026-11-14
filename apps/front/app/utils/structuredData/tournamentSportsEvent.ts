@@ -103,7 +103,7 @@ export interface BuildTournamentSportsEventOptions {
 }
 
 function isTournamentFormat(value: string): value is TournamentFormat {
-  return (TOURNAMENT_FORMATS as readonly string[]).includes(value);
+  return TOURNAMENT_FORMATS.some((format) => format === value);
 }
 
 export function toIsoDate(value: Date | string | undefined | null): string | undefined {

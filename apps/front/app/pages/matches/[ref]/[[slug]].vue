@@ -15,7 +15,7 @@ const route = useRoute();
 const localePath = useLocalePath();
 const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
-const matchRef = computed(() => route.params.ref as string);
+const matchRef = computed(() => String(route.params.ref));
 const { trackMatchDetailViewed } = useMatchDiscoveryAnalytics();
 
 const discoverySource = computed(() =>

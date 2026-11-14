@@ -13,7 +13,7 @@ const { setPageSeo } = useSarpbcSeo();
 const route = useRoute();
 const localePath = useLocalePath();
 
-const slug = computed(() => route.params.slug as string);
+const slug = computed(() => String(route.params.slug));
 
 const { data: player, error: playerError } = await useAsyncData(
   () => `player-slug-${slug.value}`,

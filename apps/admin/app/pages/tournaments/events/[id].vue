@@ -8,7 +8,7 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const eventId = computed(() => route.params.id as string);
+const eventId = computed(() => String(route.params.id));
 const formState = ref(eventToFormState(null));
 const isSaving = ref(false);
 const eventToDelete = ref<ManualEvent | null>(null);

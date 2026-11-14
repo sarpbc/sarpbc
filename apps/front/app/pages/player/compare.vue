@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { CareerStint, Player, PlayerCareer } from "@sarpbc/types";
 import { playerPath, teamPath, tournamentStagePath } from "@sarpbc/utils";
-import type { LocationQueryValue } from "vue-router";
 
 definePageMeta({ key: (route) => route.fullPath });
 
@@ -30,12 +29,8 @@ const { setPageSeo } = useSarpbcSeo();
 const { formatAmount } = usePrizeFormat();
 const { awardTypeLabel, seasonAwardTypeLabel } = usePlayerAwardLabels();
 
-function slugParam(value: LocationQueryValue | LocationQueryValue[] | undefined): string {
-  return Array.isArray(value) ? "" : (value ?? "").trim();
-}
-
-const slugA = slugParam(route.query.a);
-const slugB = slugParam(route.query.b);
+const slugA = routeQueryString(route.query.a);
+const slugB = routeQueryString(route.query.b);
 
 async function loadPlayer(slug: string): Promise<Player | null> {
   return slug ? getPlayerFromSlug(slug) : null;
