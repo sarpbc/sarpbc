@@ -7,11 +7,13 @@ export interface ParticipantLineup {
   playerGroups: readonly (readonly string[])[];
 }
 
-export function playerGroupKey(playerIds: readonly string[]): string {
-  return playerIds.toSorted().join(",");
-}
+export const playerGroupKey = (playerIds: readonly string[]): string =>
+  playerIds.toSorted().join(",");
 
-export function assertLineupFitsFormat(format: TournamentFormat, lineup: ParticipantLineup): void {
+export const assertLineupFitsFormat = (
+  format: TournamentFormat,
+  lineup: ParticipantLineup,
+): void => {
   switch (format) {
     case "1v1": {
       if (lineup.teamIds.length) {
@@ -57,4 +59,4 @@ export function assertLineupFitsFormat(format: TournamentFormat, lineup: Partici
   if (new Set(players).size !== players.length) {
     throw new InvalidInputError("A player can only be in one participant of a tournament.");
   }
-}
+};

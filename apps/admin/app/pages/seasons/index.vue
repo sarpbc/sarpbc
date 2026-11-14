@@ -30,7 +30,7 @@ const isCreateOpen = ref(false);
 const isCreating = ref(false);
 const seasonToDelete = ref<SeasonSummary | null>(null);
 
-async function create(input: SeasonInput) {
+const create = async (input: SeasonInput) => {
   isCreating.value = true;
 
   try {
@@ -43,7 +43,7 @@ async function create(input: SeasonInput) {
   } finally {
     isCreating.value = false;
   }
-}
+};
 </script>
 
 <template>

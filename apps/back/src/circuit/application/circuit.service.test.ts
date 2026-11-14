@@ -19,7 +19,7 @@ const team = (id: string) => ({
   darkModeImageUrl: null,
 });
 
-function setup() {
+const setup = () => {
   const circuits = new Map<string, CircuitSummary>();
 
   const eventTeams = new Map<string, CircuitEventTeam[]>(
@@ -65,7 +65,7 @@ function setup() {
   const service = new CircuitService(store, () => new Date("2026-06-01T00:00:00Z"));
 
   return { service, saved, results };
-}
+};
 
 const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
   source: "pandascore",

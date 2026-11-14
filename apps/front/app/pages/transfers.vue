@@ -28,9 +28,7 @@ const totalPages = computed(() => Math.ceil(totalTransfers.value / TRANSFERS_PER
 const hasPrevious = computed(() => currentPage.value > 1);
 const hasNext = computed(() => currentPage.value < totalPages.value);
 
-function pageQuery(page: number): LocationQueryRaw {
-  return page > 1 ? { page: String(page) } : {};
-}
+const pageQuery = (page: number): LocationQueryRaw => (page > 1 ? { page: String(page) } : {});
 
 setPageSeo({
   title: t("page.transfers.seo.title"),

@@ -32,7 +32,7 @@ export interface BuildNewsArticleJsonLdInput {
   locale?: UiLocale;
 }
 
-export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): NewsArticleLd {
+export const buildNewsArticleJsonLd = (article: BuildNewsArticleJsonLdInput): NewsArticleLd => {
   const url = `${SITE_ORIGIN}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
 
   const description =
@@ -60,4 +60,4 @@ export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): Ne
       "@id": ORGANIZATION_ID,
     },
   });
-}
+};

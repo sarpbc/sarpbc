@@ -74,7 +74,7 @@ const displayScoreB = computed(() => displayMatchScore(scoreB.value, matchStatus
 
 const showScores = computed(() => displayScoreA.value !== null || displayScoreB.value !== null);
 
-function onMatchClick() {
+const onMatchClick = () => {
   if (!discoverySource || !discoveryStatus) {
     return;
   }
@@ -84,7 +84,7 @@ function onMatchClick() {
     source: discoverySource,
     status: discoveryStatus,
   });
-}
+};
 
 const displayTeamA = computed(() => {
   if (!teamAName) {
@@ -102,13 +102,13 @@ const displayTeamB = computed(() => {
   return bracket ? shortTeamName(teamBName) : teamBName;
 });
 
-function participantRowClass(participantId: string | null): string {
+const participantRowClass = (participantId: string | null): string => {
   if (concealed.value || !winnerParticipantId || !participantId) {
     return "";
   }
 
   return participantId === winnerParticipantId ? "font-medium text-highlighted" : "text-muted";
-}
+};
 </script>
 
 <template>

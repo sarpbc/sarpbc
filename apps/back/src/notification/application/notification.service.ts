@@ -3,18 +3,16 @@ import type { NotificationDto } from "./notification.view";
 import { resolveReplyTargetLink } from "../../reply/domain/reply";
 import type { ReplyTargetLink } from "../../reply/domain/reply";
 
-function targetFields(
+const targetFields = (
   target: ReplyTargetLink,
-): Pick<NotificationDto, "targetType" | "targetId" | "targetLabel" | "targetPath"> {
-  return {
-    targetType: target.targetType,
-    targetId: target.targetId,
-    targetLabel: target.targetLabel,
-    targetPath: target.targetPath,
-  };
-}
+): Pick<NotificationDto, "targetType" | "targetId" | "targetLabel" | "targetPath"> => ({
+  targetType: target.targetType,
+  targetId: target.targetId,
+  targetLabel: target.targetLabel,
+  targetPath: target.targetPath,
+});
 
-function toNotificationDto(notification: NotificationRecord): NotificationDto | null {
+const toNotificationDto = (notification: NotificationRecord): NotificationDto | null => {
   const target = resolveReplyTargetLink(notification.reply);
 
   if (!target) {
@@ -34,7 +32,7 @@ function toNotificationDto(notification: NotificationRecord): NotificationDto | 
     },
     ...targetFields(target),
   };
-}
+};
 
 export class NotificationService {
   constructor(private readonly notificationRepository: NotificationStore) {}

@@ -7,7 +7,7 @@ import { PostType } from "../domain/post-type.enum";
 
 const now = new Date("2026-10-15T12:00:00Z");
 
-function setup(role: Author["role"] = "admin") {
+const setup = (role: Author["role"] = "admin") => {
   const topic: TopicRecord = {
     id: "topic",
     title: "Topic",
@@ -81,7 +81,7 @@ function setup(role: Author["role"] = "admin") {
     translations,
     commits: () => commits,
   };
-}
+};
 
 const input = {
   id: "post",

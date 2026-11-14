@@ -2,31 +2,29 @@ import { describe, expect, it } from "vitest";
 import { summarizeEarnings } from "./earnings";
 import type { EarningsLine } from "./earnings";
 
-function line(
+const line = (
   id: string,
   amount: number,
   currency: string,
   endAt: string | null,
   shares = 1,
-): EarningsLine {
-  return {
-    id,
-    placement: 1,
-    amount,
-    currency,
-    shares,
-    team: { id: "team-a", name: "Team A", slug: "team-a" },
-    tournament: {
-      id: `t-${id}`,
-      name: "Main Event",
-      slug: "main-event",
-      source: "manual",
-      beginAt: null,
-      endAt,
-      event: { id: "e1", slug: "fake-cup", name: "Fake Cup" },
-    },
-  };
-}
+): EarningsLine => ({
+  id,
+  placement: 1,
+  amount,
+  currency,
+  shares,
+  team: { id: "team-a", name: "Team A", slug: "team-a" },
+  tournament: {
+    id: `t-${id}`,
+    name: "Main Event",
+    slug: "main-event",
+    source: "manual",
+    beginAt: null,
+    endAt,
+    event: { id: "e1", slug: "fake-cup", name: "Fake Cup" },
+  },
+});
 
 describe(summarizeEarnings, () => {
   it("totals each currency separately without converting", () => {

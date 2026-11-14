@@ -38,13 +38,13 @@ const isAdding = ref(false);
 const awardToRemove = ref<SeasonAward | null>(null);
 const awardForm = useTemplateRef("awardForm");
 
-function awardLabel(award: SeasonAward): string {
+const awardLabel = (award: SeasonAward): string => {
   const type = t(`page.seasons.awards.types.${award.awardType}`);
 
   return award.region ? `${type} · ${award.region}` : type;
-}
+};
 
-async function save(input: SeasonInput) {
+const save = async (input: SeasonInput) => {
   isSaving.value = true;
 
   try {
@@ -55,9 +55,9 @@ async function save(input: SeasonInput) {
   } finally {
     isSaving.value = false;
   }
-}
+};
 
-async function addAward(input: SeasonAwardInput) {
+const addAward = async (input: SeasonAwardInput) => {
   isAdding.value = true;
 
   try {
@@ -73,7 +73,7 @@ async function addAward(input: SeasonAwardInput) {
   } finally {
     isAdding.value = false;
   }
-}
+};
 </script>
 
 <template>

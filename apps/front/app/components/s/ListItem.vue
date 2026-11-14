@@ -10,7 +10,7 @@ const { size = "default", to = null } = defineProps<{
 
 const attrs = useAttrs();
 
-function listItemSizeClasses(value: ListItemSize): string {
+const listItemSizeClasses = (value: ListItemSize): string => {
   switch (value) {
     case "compact": {
       return "h-row-compact min-h-row-compact";
@@ -38,7 +38,7 @@ function listItemSizeClasses(value: ListItemSize): string {
       return _exhaustive;
     }
   }
-}
+};
 
 const itemClass = computed(() => [
   "flex w-full row-separator",

@@ -6,11 +6,11 @@ interface MatchWithBeginAt {
   beginAt?: Date | string | null;
 }
 
-export function resolveMatchRailTitleKind(
+export const resolveMatchRailTitleKind = (
   live: MatchWithBeginAt[],
   upcoming: MatchWithBeginAt[],
   now: Date = new Date(),
-): MatchRailTitleKind {
+): MatchRailTitleKind => {
   if (live.length > 0) {
     return "today";
   }
@@ -44,4 +44,4 @@ export function resolveMatchRailTitleKind(
   }
 
   return "upcoming";
-}
+};

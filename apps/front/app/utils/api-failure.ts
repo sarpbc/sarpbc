@@ -11,11 +11,11 @@ interface ApiFailure<Reason extends string> {
   message?: string;
 }
 
-export function apiFailure<Reason extends string>(
+export const apiFailure = <Reason extends string>(
   cause: unknown,
   action: string,
   reasons: { codes?: Record<string, Reason>; statuses?: Record<number, Reason> } = {},
-): ApiFailure<Reason> {
+): ApiFailure<Reason> => {
   const status = getApiErrorStatus(cause);
   const code = getApiErrorCode(cause);
   const message = getApiErrorMessage(cause);
@@ -35,4 +35,4 @@ export function apiFailure<Reason extends string>(
   console.error(`Error ${action}:`, cause);
 
   return { ok: false, reason: "unknown", message };
-}
+};

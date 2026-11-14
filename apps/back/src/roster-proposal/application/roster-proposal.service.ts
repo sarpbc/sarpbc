@@ -44,26 +44,24 @@ type ApplyHandlers = {
   [K in Kind]: (change: ChangeMap[K], sourceUrl: string) => Promise<string>;
 };
 
-async function applyChange<K extends Kind>(
+const applyChange = async <K extends Kind>(
   handlers: ApplyHandlers,
   kind: K,
   change: ChangeMap[K],
   sourceUrl: string,
-): Promise<string> {
-  return await handlers[kind](change, sourceUrl);
-}
+): Promise<string> => await handlers[kind](change, sourceUrl);
 
-async function idOf(created: Promise<{ id: string }>): Promise<string> {
+const idOf = async (created: Promise<{ id: string }>): Promise<string> => {
   const { id } = await created;
 
   return id;
-}
+};
 
-async function keptIdOf(merged: Promise<{ kept: { id: string } }>): Promise<string> {
+const keptIdOf = async (merged: Promise<{ kept: { id: string } }>): Promise<string> => {
   const { kept } = await merged;
 
   return kept.id;
-}
+};
 
 export interface RosterProposalList {
   proposals: RosterProposal[];

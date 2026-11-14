@@ -42,19 +42,18 @@ const airRiddleStoredStateSchema = z.object({
 export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
 
 /** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
-export function getAirRiddleDateKey(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", {
+export const getAirRiddleDateKey = (now = new Date()): string =>
+  new Intl.DateTimeFormat("en-CA", {
     timeZone: AIR_RIDDLE_TIMEZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(now);
-}
 
-export function parseAirRiddleStoredState(
+export const parseAirRiddleStoredState = (
   raw: string | null,
   today: string,
-): AirRiddleStoredState | null {
+): AirRiddleStoredState | null => {
   if (!isNonEmptyString(raw)) {
     return null;
   }
@@ -92,9 +91,9 @@ export function parseAirRiddleStoredState(
   } catch {
     return null;
   }
-}
+};
 
-export function loadAirRiddleStoredState(
+export const loadAirRiddleStoredState = function loadAirRiddleStoredState(
   today = getAirRiddleDateKey(),
 ): AirRiddleStoredState | null {
   if (!import.meta.client) {
@@ -108,9 +107,11 @@ export function loadAirRiddleStoredState(
   }
 
   return stored;
-}
+};
 
-export function saveAirRiddleStoredState(state: Omit<AirRiddleStoredState, "date">): void {
+export const saveAirRiddleStoredState = function saveAirRiddleStoredState(
+  state: Omit<AirRiddleStoredState, "date">,
+): void {
   if (!import.meta.client) {
     return;
   }
@@ -121,4 +122,4 @@ export function saveAirRiddleStoredState(state: Omit<AirRiddleStoredState, "date
   };
 
   localStorage.setItem(AIR_RIDDLE_STORAGE_KEY, JSON.stringify(payload));
-}
+};

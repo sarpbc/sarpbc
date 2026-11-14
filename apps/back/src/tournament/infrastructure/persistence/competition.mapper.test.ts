@@ -16,22 +16,22 @@ const orm = new MikroORM({
 
 const em = orm.em.fork();
 
-function stage() {
+const stage = () => {
   const event = Object.assign(new TournamentEvent(), {
     slug: "coupe-de-france-slash-2025",
     name: "Slash",
   });
 
   return Object.assign(new Tournament(), { name: "Playoffs", slug: "playoffs", event });
-}
+};
 
-function entry(tournament: Tournament, teamId: string) {
+const entry = (tournament: Tournament, teamId: string) => {
   const team = Object.assign(new Team(), { id: teamId, name: teamId });
   const participant = Object.assign(new TournamentParticipant(), { tournament, team });
   tournament.participants.add(participant);
 
   return participant;
-}
+};
 
 describe(toTournament, () => {
   it("maps a won stage with its winner and participants", () => {
@@ -92,7 +92,7 @@ describe(toParticipant, () => {
   });
 });
 
-function renamedStage(beginAt: string) {
+const renamedStage = (beginAt: string) => {
   const tournament = Object.assign(stage(), { beginAt: new Date(beginAt) });
   const participant = entry(tournament, "fixture");
   Object.assign(participant.team ?? {}, {
@@ -111,7 +111,7 @@ function renamedStage(beginAt: string) {
   });
 
   return { tournament, participant };
-}
+};
 
 describe("names in force on the date", () => {
   it("shows the stage participants under the name they used when the stage began", () => {

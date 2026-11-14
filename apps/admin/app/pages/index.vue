@@ -30,9 +30,8 @@ const hasAnyTool = computed(() => shortcuts.value.length > 0);
 
 const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
-function formatDate(value: string | null): string {
-  return value ? dateFormatter.value.format(new Date(value)) : t("page.home.dateUnknown");
-}
+const formatDate = (value: string | null): string =>
+  value ? dateFormatter.value.format(new Date(value)) : t("page.home.dateUnknown");
 
 const proposals = useLazyAsyncData("admin-home-proposals", () => getPendingRosterProposals(), {
   server: false,
@@ -68,9 +67,8 @@ const replyCountLabel = computed(() =>
     : String(replyCount.value),
 );
 
-function matchTitle(participants: NamedParticipant[]): string {
-  return participants.map(participantName).join(" vs ") || t("page.home.tbd");
-}
+const matchTitle = (participants: NamedParticipant[]): string =>
+  participants.map(participantName).join(" vs ") || t("page.home.tbd");
 
 onMounted(() => {
   if (route.query.forbidden === "1") {

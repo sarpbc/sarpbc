@@ -1,3 +1,1 @@
-export function isoDay(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+export const isoDay = (date: Date): string => date.toISOString().slice(0, 10);

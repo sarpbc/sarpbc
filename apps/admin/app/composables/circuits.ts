@@ -6,54 +6,53 @@ import type {
   CircuitSummary,
 } from "@sarpbc/types";
 
-export async function getCircuits(): Promise<CircuitSummary[]> {
+export const getCircuits = async (): Promise<CircuitSummary[]> => {
   const res = await apiFetch<{ circuits: CircuitSummary[] }>("/circuits", { method: "GET" });
 
   return res.circuits;
-}
+};
 
-export async function getCircuit(idOrSlug: string): Promise<CircuitDetail> {
-  return await apiFetch<CircuitDetail>(`/circuits/${idOrSlug}`, { method: "GET" });
-}
+export const getCircuit = async (idOrSlug: string): Promise<CircuitDetail> =>
+  await apiFetch<CircuitDetail>(`/circuits/${idOrSlug}`, { method: "GET" });
 
-export async function createCircuit(input: CircuitInput): Promise<CircuitSummary> {
-  return await apiFetch<CircuitSummary>("/circuits", { method: "POST", body: input });
-}
+export const createCircuit = async (input: CircuitInput): Promise<CircuitSummary> =>
+  await apiFetch<CircuitSummary>("/circuits", { method: "POST", body: input });
 
-export async function updateCircuit(
+export const updateCircuit = async (
   id: string,
   input: Partial<CircuitInput>,
-): Promise<CircuitSummary> {
-  return await apiFetch<CircuitSummary>(`/circuits/${id}`, { method: "PATCH", body: input });
-}
+): Promise<CircuitSummary> =>
+  await apiFetch<CircuitSummary>(`/circuits/${id}`, { method: "PATCH", body: input });
 
-export async function deleteCircuit(id: string): Promise<void> {
+export const deleteCircuit = async (id: string): Promise<void> => {
   await apiFetch(`/circuits/${id}`, { method: "DELETE" });
-}
+};
 
-export async function setCircuitStageScale(
+export const setCircuitStageScale = async (
   circuitId: string,
   tournamentId: string,
   input: CircuitStageScaleInput,
-): Promise<CircuitDetail> {
-  return await apiFetch<CircuitDetail>(`/circuits/${circuitId}/stages/${tournamentId}`, {
+): Promise<CircuitDetail> =>
+  await apiFetch<CircuitDetail>(`/circuits/${circuitId}/stages/${tournamentId}`, {
     method: "PUT",
     body: input,
   });
-}
 
-export async function removeCircuitStage(circuitId: string, tournamentId: string): Promise<void> {
-  await apiFetch(`/circuits/${circuitId}/stages/${tournamentId}`, { method: "DELETE" });
-}
-
-export async function getCircuitStageTeams(
+export const removeCircuitStage = async (
   circuitId: string,
   tournamentId: string,
-): Promise<CircuitEventTeam[]> {
+): Promise<void> => {
+  await apiFetch(`/circuits/${circuitId}/stages/${tournamentId}`, { method: "DELETE" });
+};
+
+export const getCircuitStageTeams = async (
+  circuitId: string,
+  tournamentId: string,
+): Promise<CircuitEventTeam[]> => {
   const res = await apiFetch<{ teams: CircuitEventTeam[] }>(
     `/circuits/${circuitId}/stages/${tournamentId}/teams`,
     { method: "GET" },
   );
 
   return res.teams;
-}
+};

@@ -13,7 +13,7 @@ import type {
   PrizeWriter,
 } from "./ports";
 
-function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipant[]): void {
+const assertParticipants = (entries: PrizeEntry[], participants: PrizeParticipant[]): void => {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
 
   for (const { teamId, playerIds } of entries) {
@@ -33,7 +33,7 @@ function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipan
       );
     }
   }
-}
+};
 
 export class TournamentPrizeService {
   constructor(

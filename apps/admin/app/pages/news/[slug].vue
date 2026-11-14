@@ -56,11 +56,11 @@ const isSaving = ref(false);
 const isPublishing = ref(false);
 const isModalOpen = ref(false);
 
-function openSaveModal() {
+const openSaveModal = () => {
   isModalOpen.value = true;
-}
+};
 
-async function saveArticle() {
+const saveArticle = async () => {
   if (!title.value || !content.value || !articleSlug.value.trim()) {
     return;
   }
@@ -92,9 +92,9 @@ async function saveArticle() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 
-async function togglePublish() {
+const togglePublish = async () => {
   if (isPublishing.value) {
     return;
   }
@@ -114,7 +114,7 @@ async function togglePublish() {
   } finally {
     isPublishing.value = false;
   }
-}
+};
 </script>
 
 <template>

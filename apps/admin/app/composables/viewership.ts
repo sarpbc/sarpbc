@@ -1,12 +1,10 @@
 import type { Viewership, ViewershipResponse } from "@sarpbc/types";
 
-export async function getViewership(path: string): Promise<ViewershipResponse> {
-  return await apiFetch<ViewershipResponse>(path, { method: "GET" });
-}
+export const getViewership = async (path: string): Promise<ViewershipResponse> =>
+  await apiFetch<ViewershipResponse>(path, { method: "GET" });
 
-export async function setViewership(
+export const setViewership = async (
   path: string,
   viewership: Viewership | null,
-): Promise<ViewershipResponse> {
-  return await apiFetch<ViewershipResponse>(path, { method: "PUT", body: { viewership } });
-}
+): Promise<ViewershipResponse> =>
+  await apiFetch<ViewershipResponse>(path, { method: "PUT", body: { viewership } });

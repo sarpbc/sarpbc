@@ -11,10 +11,10 @@ export interface AuthCookieConfig {
   domain: string | undefined;
 }
 
-function cookieOptions(
+const cookieOptions = (
   config: AuthCookieConfig | undefined,
   maxAge?: number,
-): CookieSerializeOptions {
+): CookieSerializeOptions => {
   const options: CookieSerializeOptions = {
     httpOnly: true,
     secure: Boolean(config?.secure),
@@ -31,13 +31,13 @@ function cookieOptions(
   }
 
   return options;
-}
+};
 
-export function setAuthCookies(
+export const setAuthCookies = (
   reply: FastifyReply,
   tokens: AuthTokenPair,
   config: AuthCookieConfig | undefined,
-): void {
+): void => {
   reply.setCookie(
     ACCESS_TOKEN_COOKIE,
     tokens.accessToken,
@@ -48,10 +48,13 @@ export function setAuthCookies(
     tokens.refreshToken,
     cookieOptions(config, REFRESH_TOKEN_TTL_SECONDS),
   );
-}
+};
 
-export function clearAuthCookies(reply: FastifyReply, config: AuthCookieConfig | undefined): void {
+export const clearAuthCookies = (
+  reply: FastifyReply,
+  config: AuthCookieConfig | undefined,
+): void => {
   const options = cookieOptions(config);
   reply.clearCookie(ACCESS_TOKEN_COOKIE, options);
   reply.clearCookie(REFRESH_TOKEN_COOKIE, options);
-}
+};

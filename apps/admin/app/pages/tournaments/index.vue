@@ -53,16 +53,15 @@ const columns: TableColumn<TournamentListItem>[] = [
   },
 ];
 
-function isManualTournament(tournament: TournamentListItem): boolean {
-  return tournament.source !== "pandascore";
-}
+const isManualTournament = (tournament: TournamentListItem): boolean =>
+  tournament.source !== "pandascore";
 
-function selectRow(e: Event, row: TableRow<TournamentListItem>) {
+const selectRow = (e: Event, row: TableRow<TournamentListItem>) => {
   e.preventDefault();
   navigateTo(localePath(`/tournaments/${row.original.id}`));
-}
+};
 
-async function handleSyncAdditions() {
+const handleSyncAdditions = async () => {
   isSyncingAdditions.value = true;
 
   try {
@@ -74,9 +73,9 @@ async function handleSyncAdditions() {
   } finally {
     isSyncingAdditions.value = false;
   }
-}
+};
 
-async function handleSyncTournament(e: Event, tournamentId: string) {
+const handleSyncTournament = async (e: Event, tournamentId: string) => {
   e.stopPropagation();
 
   try {
@@ -84,7 +83,7 @@ async function handleSyncTournament(e: Event, tournamentId: string) {
   } catch (syncError) {
     reportError(syncError);
   }
-}
+};
 </script>
 
 <template>

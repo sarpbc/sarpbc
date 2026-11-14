@@ -14,7 +14,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
 const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
 
-async function sendMarkdown(event: H3Event, htmlPath: string, search: string): Promise<void> {
+const sendMarkdown = async (event: H3Event, htmlPath: string, search: string): Promise<void> => {
   const response = await useNitroApp().localFetch(`${htmlPath}${search}`, {
     method: "GET",
     headers: {
@@ -78,7 +78,7 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string): P
       ],
     }),
   );
-}
+};
 
 export default defineEventHandler(async (event) => {
   if (event.method !== "GET" && event.method !== "HEAD") {

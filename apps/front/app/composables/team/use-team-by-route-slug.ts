@@ -1,4 +1,4 @@
-export async function useTeamByRouteSlug() {
+export const useTeamByRouteSlug = async () => {
   const route = useRoute();
 
   const slug = computed(() => {
@@ -21,4 +21,4 @@ export async function useTeamByRouteSlug() {
     error,
     refresh,
   };
-}
+};

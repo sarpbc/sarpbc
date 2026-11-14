@@ -17,7 +17,7 @@ const USAGE = `Usage:
   node src/cli.ts calibrate --overlay <file> --frame <frame.ppm>
                        --blue <score> --orange <score> --clock <m:ss|+m:ss>`;
 
-function positiveInteger(value: string | undefined, fallback: number, name: string): number {
+const positiveInteger = (value: string | undefined, fallback: number, name: string): number => {
   if (value === undefined) {
     return fallback;
   }
@@ -29,20 +29,20 @@ function positiveInteger(value: string | undefined, fallback: number, name: stri
   }
 
   return parsed;
-}
+};
 
-function required(value: string | undefined, name: string): string {
+const required = (value: string | undefined, name: string): string => {
   if (value === undefined || value === "") {
     throw new Error(`--${name} is required.\n${USAGE}`);
   }
 
   return value;
-}
+};
 
-async function writeProposal(
+const writeProposal = async (
   proposal: StreamScoreProposal,
   out: string | undefined,
-): Promise<void> {
+): Promise<void> => {
   const json = `${JSON.stringify(proposal, null, 2)}\n`;
 
   if (out === undefined) {
@@ -50,9 +50,9 @@ async function writeProposal(
   } else {
     await writeFile(out, json);
   }
-}
+};
 
-async function read(args: readonly string[]): Promise<void> {
+const read = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
     args: [...args],
     options: {
@@ -125,9 +125,9 @@ async function read(args: readonly string[]): Promise<void> {
       : `Proposed series: blue ${proposal.series.blue} - ${proposal.series.orange} orange. Confirm it in the admin against the official post.\n`,
   );
   await writeProposal(proposal, values.out);
-}
+};
 
-async function readSingleFrame(path: string): Promise<Frame> {
+const readSingleFrame = async (path: string): Promise<Frame> => {
   const frames = readPpmFrames(createReadStream(path));
   const first = await frames.next();
   await frames.return(undefined);
@@ -137,14 +137,14 @@ async function readSingleFrame(path: string): Promise<Frame> {
   }
 
   return first.value;
-}
+};
 
-function labelledTemplates(
+const labelledTemplates = (
   frame: Frame,
   overlay: Overlay,
   region: Region,
   text: string,
-): GlyphTemplate[] {
+): GlyphTemplate[] => {
   const grids = glyphGrids(frame, scaleRegion(region, overlay.reference, frame), {
     threshold: overlay.text.threshold,
     size: overlay.glyph,
@@ -155,9 +155,9 @@ function labelledTemplates(
   }
 
   return grids.map((grid, index) => templateFromGrid(text.charAt(index), grid, overlay.glyph));
-}
+};
 
-async function calibrate(args: readonly string[]): Promise<void> {
+const calibrate = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
     args: [...args],
     options: {
@@ -186,9 +186,9 @@ async function calibrate(args: readonly string[]): Promise<void> {
   ];
 
   process.stdout.write(`${JSON.stringify({ ...overlay, templates }, null, 2)}\n`);
-}
+};
 
-async function main(argv: readonly string[]): Promise<void> {
+const main = async (argv: readonly string[]): Promise<void> => {
   const [command, ...args] = argv;
 
   switch (command) {
@@ -208,7 +208,7 @@ async function main(argv: readonly string[]): Promise<void> {
       throw new Error(USAGE);
     }
   }
-}
+};
 
 try {
   await main(process.argv.slice(2));

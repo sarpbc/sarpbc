@@ -4,7 +4,7 @@ import { User as Account } from "../../domain/user";
 import type { UserListQuery, UserQueries, UserWriter } from "../../application/ports/user-store";
 import { User } from "./user.entity";
 
-export function toAccount(record: User): Account {
+export const toAccount = (record: User): Account => {
   const account = new Account(
     record.email,
     record.userName,
@@ -18,7 +18,7 @@ export function toAccount(record: User): Account {
   account.createdAt = record.createdAt;
 
   return account;
-}
+};
 
 export class MikroUserStore implements UserQueries, UserWriter {
   constructor(private readonly em: EntityManager) {}

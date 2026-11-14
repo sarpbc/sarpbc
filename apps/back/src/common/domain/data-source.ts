@@ -5,7 +5,7 @@ import { InvalidInputError } from "./errors/invalid-input-error";
 export const REFUSED_DATA_SOURCE_MESSAGE =
   "A source must be an http(s) URL of the official rules or announcement; Liquipedia and BLAST.tv are refused";
 
-export function parseDataSourceUrl(value: string | null): string | null {
+export const parseDataSourceUrl = (value: string | null): string | null => {
   const url = value?.trim() ?? "";
 
   if (!url) {
@@ -17,13 +17,13 @@ export function parseDataSourceUrl(value: string | null): string | null {
   }
 
   return url;
-}
+};
 
 /**
  * start.gg terms allow display with credit. Its players and teams are public; its tournaments
  * and matches stay out of the MCP, open-data exports and other redistribution paths.
  */
-export function isRedistributable(source: DataSource): boolean {
+export const isRedistributable = (source: DataSource): boolean => {
   switch (source) {
     case "pandascore":
     case "manual": {
@@ -40,10 +40,10 @@ export function isRedistributable(source: DataSource): boolean {
       return exhaustive;
     }
   }
-}
+};
 
-export function sourceFromUrl(url: string): Exclude<DataSource, "pandascore"> {
+export const sourceFromUrl = (url: string): Exclude<DataSource, "pandascore"> => {
   const host = new URL(url).hostname.toLowerCase();
 
   return host === "start.gg" || host.endsWith(".start.gg") ? "startgg" : "manual";
-}
+};

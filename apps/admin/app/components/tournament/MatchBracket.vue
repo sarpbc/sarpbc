@@ -34,14 +34,14 @@ const links = ref<LinkRow[]>([]);
 const saving = ref(false);
 let nextKey = 0;
 
-function reset() {
+const reset = () => {
   sides.value = [0, 1].map((index) => match.participants[index]?.id ?? TBD);
   links.value = match.previousMatches.map(({ previousMatch, type }) => ({
     key: (nextKey += 1),
     previousMatchId: previousMatch,
     type,
   }));
-}
+};
 
 watch(
   open,
@@ -61,12 +61,12 @@ const participantItems = computed(() => [
   })),
 ]);
 
-function stageMatchLabel(candidate: TournamentDetailMatch): string {
+const stageMatchLabel = (candidate: TournamentDetailMatch): string => {
   const [first, second] = candidate.participants;
   const tbd = t("page.tournaments.bracket.tbd");
 
   return `${candidate.name} · ${first ? participantName(first) : tbd} vs ${second ? participantName(second) : tbd}`;
-}
+};
 
 const matchItems = computed(() =>
   stageMatches
@@ -88,15 +88,15 @@ const canSave = computed(
     new Set(links.value.map((link) => link.previousMatchId)).size === links.value.length,
 );
 
-function addLink() {
+const addLink = () => {
   links.value.push({ key: (nextKey += 1), previousMatchId: "", type: "winner" });
-}
+};
 
-function removeLink(key: number) {
+const removeLink = (key: number) => {
   links.value = links.value.filter((link) => link.key !== key);
-}
+};
 
-async function save() {
+const save = async () => {
   saving.value = true;
 
   try {
@@ -112,7 +112,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

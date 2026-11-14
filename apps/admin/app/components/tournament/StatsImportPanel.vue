@@ -23,9 +23,8 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-function formatDate(value: Date | string | null): string {
-  return value ? dateFormatter.value.format(new Date(value)) : "—";
-}
+const formatDate = (value: Date | string | null): string =>
+  value ? dateFormatter.value.format(new Date(value)) : "—";
 
 const group = ref("");
 const submitting = ref(false);
@@ -61,14 +60,13 @@ const {
 const attachTarget = ref<StatsImportItem | null>(null);
 const linksVersion = ref(0);
 
-function attachedGame(item: StatsImportItem): TournamentStatsGame | undefined {
-  return games.value?.find((game) => game.ballchasingId === item.replayId);
-}
+const attachedGame = (item: StatsImportItem): TournamentStatsGame | undefined =>
+  games.value?.find((game) => game.ballchasingId === item.replayId);
 
-async function onGamesChanged() {
+const onGamesChanged = async () => {
   linksVersion.value += 1;
   await refreshGames();
-}
+};
 
 const poll = useIntervalFn(() => refresh(), POLL_MS, { immediate: false });
 
@@ -91,7 +89,7 @@ const attention = computed(() =>
   ),
 );
 
-function statusColor(status: StatsImportStatus) {
+const statusColor = (status: StatsImportStatus) => {
   switch (status) {
     case "pending":
     case "running": {
@@ -112,43 +110,41 @@ function statusColor(status: StatsImportStatus) {
       return exhaustive;
     }
   }
-}
+};
 
-function labelOf(match: TournamentMatchListItem): string {
+const labelOf = (match: TournamentMatchListItem): string => {
   const [a, b] = match.participants ?? [];
   const teams = `${a ? participantName(a) : "TBD"} vs ${b ? participantName(b) : "TBD"}`;
 
   return match.beginAt ? `${teams} · ${formatDate(match.beginAt)}` : teams;
-}
+};
 
-function matchLabel(matchId: string | null): string | null {
+const matchLabel = (matchId: string | null): string | null => {
   const match = matches.find((candidate) => candidate.id === matchId);
 
   return match ? labelOf(match) : null;
-}
+};
 
 const ROW_CLASS =
   "flex flex-col gap-0.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4";
 
-function replayUrl(item: StatsImportItem): string {
-  return `https://ballchasing.com/replay/${item.replayId}`;
-}
+const replayUrl = (item: StatsImportItem): string =>
+  `https://ballchasing.com/replay/${item.replayId}`;
 
-function itemTarget(item: StatsImportItem, label: string): string {
-  return item.status === "unmatched"
+const itemTarget = (item: StatsImportItem, label: string): string =>
+  item.status === "unmatched"
     ? label
     : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
-}
 
-function itemMeta(item: StatsImportItem): string {
+const itemMeta = (item: StatsImportItem): string => {
   const label = matchLabel(item.matchId);
 
   const target = label ? itemTarget(item, label) : "—";
 
   return `${formatDate(item.playedAt)} · ${target}`;
-}
+};
 
-function itemReason(item: StatsImportItem): string {
+const itemReason = (item: StatsImportItem): string => {
   switch (item.status) {
     case "unmatched": {
       return t(`page.tournaments.statsImport.unmatched.${item.reason}`);
@@ -169,9 +165,9 @@ function itemReason(item: StatsImportItem): string {
       return exhaustive;
     }
   }
-}
+};
 
-async function submit() {
+const submit = async () => {
   if (!group.value.trim()) {
     return;
   }
@@ -192,7 +188,7 @@ async function submit() {
   } finally {
     submitting.value = false;
   }
-}
+};
 </script>
 
 <template>

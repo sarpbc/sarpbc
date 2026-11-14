@@ -28,7 +28,7 @@ const errorMessage = ref<string | null>(null);
 
 onMounted(leaveIfSignedIn);
 
-async function onSubmit(event: Event) {
+const onSubmit = async (event: Event) => {
   event.preventDefault();
   errorMessage.value = null;
 
@@ -45,7 +45,7 @@ async function onSubmit(event: Event) {
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error) ?? t("page.authentication.errors.signUpFailed");
   }
-}
+};
 </script>
 
 <template>

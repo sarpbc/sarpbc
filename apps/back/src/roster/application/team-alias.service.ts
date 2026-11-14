@@ -6,7 +6,7 @@ import type { Team } from "../domain/team";
 import { TeamAlias, assertTeamAliasFits, requireTeamAliasInput } from "../domain/team-alias";
 import type { TeamAliasTransaction, TeamAliasWriteScope } from "./ports";
 
-async function requireTeamForAlias({ teams }: TeamAliasWriteScope, id: string): Promise<Team> {
+const requireTeamForAlias = async ({ teams }: TeamAliasWriteScope, id: string): Promise<Team> => {
   const team = await teams.findById(id);
 
   if (!team) {
@@ -20,9 +20,9 @@ async function requireTeamForAlias({ teams }: TeamAliasWriteScope, id: string): 
   }
 
   return team;
-}
+};
 
-function requireTeamAlias(team: Team, aliasId: string): TeamAlias {
+const requireTeamAlias = (team: Team, aliasId: string): TeamAlias => {
   const alias = team.aliases.find(({ id }) => id === aliasId);
 
   if (!alias) {
@@ -30,14 +30,14 @@ function requireTeamAlias(team: Team, aliasId: string): TeamAlias {
   }
 
   return alias;
-}
+};
 
-async function prepareAlias(
+const prepareAlias = async (
   scope: TeamAliasWriteScope,
   teamId: string,
   input: TeamAliasInput,
   aliasId?: string,
-): Promise<TeamAlias> {
+): Promise<TeamAlias> => {
   const team = await requireTeamForAlias(scope, teamId);
   const id = aliasId === undefined ? "" : requireTeamAlias(team, aliasId).id;
   const alias = Object.assign(new TeamAlias(), requireTeamAliasInput(input), { id });
@@ -54,7 +54,7 @@ async function prepareAlias(
   }
 
   return alias;
-}
+};
 
 export class TeamAliasService {
   constructor(private readonly transaction: TeamAliasTransaction) {}

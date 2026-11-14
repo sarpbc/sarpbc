@@ -15,23 +15,19 @@ const GENERATED_ID = "generated-id";
 
 const matchFor = (id: string): Match => ({ id, publicId: 1, name: "Match", slug: "match" });
 
-function makeUser(id = "user-1"): Author {
-  return { id, userName: "fan" };
-}
+const makeUser = (id = "user-1"): Author => ({ id, userName: "fan" });
 
-function makeReply(partial: Partial<ReplyRecord> & { id: string }): ReplyRecord {
-  return {
-    content: "hello",
-    createdAt: new Date("2026-01-01"),
-    author: makeUser(),
-    post: null,
-    newsArticle: null,
-    match: null,
-    replyTo: null,
-    hiddenAt: null,
-    ...partial,
-  };
-}
+const makeReply = (partial: Partial<ReplyRecord> & { id: string }): ReplyRecord => ({
+  content: "hello",
+  createdAt: new Date("2026-01-01"),
+  author: makeUser(),
+  post: null,
+  newsArticle: null,
+  match: null,
+  replyTo: null,
+  hiddenAt: null,
+  ...partial,
+});
 
 describe(ReplyService, () => {
   let service: ReplyService;

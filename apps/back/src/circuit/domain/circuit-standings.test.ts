@@ -23,19 +23,17 @@ const team = (id: string) => ({
   darkModeImageUrl: null,
 });
 
-function stage(overrides: Partial<CircuitStageResult> & { event: TournamentEventRef }) {
-  return {
-    beginAt: past(1),
-    endAt: past(2),
-    scale,
-    sourceUrl: "https://example.org/rules",
-    worldwide: false,
-    regionTeamIds: [],
-    placements: [],
-    finishes: [],
-    ...overrides,
-  };
-}
+const stage = (overrides: Partial<CircuitStageResult> & { event: TournamentEventRef }) => ({
+  beginAt: past(1),
+  endAt: past(2),
+  scale,
+  sourceUrl: "https://example.org/rules",
+  worldwide: false,
+  regionTeamIds: [],
+  placements: [],
+  finishes: [],
+  ...overrides,
+});
 
 describe(computeCircuitStandings, () => {
   it("adds the points of each placement and breaks the total down by event", () => {

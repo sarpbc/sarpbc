@@ -39,15 +39,13 @@ interface TeamTally {
   cells: Map<string, CircuitStandingCell>;
 }
 
-function hasEnded(stage: CircuitStageResult, now: Date): boolean {
-  return stage.endAt !== null && stage.endAt <= now;
-}
+const hasEnded = (stage: CircuitStageResult, now: Date): boolean =>
+  stage.endAt !== null && stage.endAt <= now;
 
-function hasBegun(stage: CircuitStageResult, now: Date): boolean {
-  return stage.beginAt !== null && stage.beginAt <= now;
-}
+const hasBegun = (stage: CircuitStageResult, now: Date): boolean =>
+  stage.beginAt !== null && stage.beginAt <= now;
 
-function eventStatus(stages: readonly CircuitStageResult[], now: Date): CircuitEventStatus {
+const eventStatus = (stages: readonly CircuitStageResult[], now: Date): CircuitEventStatus => {
   const scaled = stages.filter((stage) => stage.scale.length > 0);
 
   if (!scaled.length) {
@@ -67,9 +65,9 @@ function eventStatus(stages: readonly CircuitStageResult[], now: Date): CircuitE
   }
 
   return "counted";
-}
+};
 
-function creditedPlacements(stage: CircuitStageResult, regional: boolean): StagePlacement[] {
+const creditedPlacements = (stage: CircuitStageResult, regional: boolean): StagePlacement[] => {
   const finished = new Set(stage.finishes.map(({ team }) => team.id));
 
   const placements = [
@@ -84,9 +82,9 @@ function creditedPlacements(stage: CircuitStageResult, regional: boolean): Stage
   const region = new Set(stage.regionTeamIds);
 
   return placements.filter(({ team }) => region.has(team.id));
-}
+};
 
-function bound(dates: readonly (Date | null)[], pick: "earliest" | "latest"): string | null {
+const bound = (dates: readonly (Date | null)[], pick: "earliest" | "latest"): string | null => {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   if (!times.length) {
@@ -94,9 +92,9 @@ function bound(dates: readonly (Date | null)[], pick: "earliest" | "latest"): st
   }
 
   return new Date(pick === "earliest" ? Math.min(...times) : Math.max(...times)).toISOString();
-}
+};
 
-function compareEvents(a: CircuitStandingsEvent, b: CircuitStandingsEvent): number {
+const compareEvents = (a: CircuitStandingsEvent, b: CircuitStandingsEvent): number => {
   if (a.beginAt !== b.beginAt) {
     if (a.beginAt === null) {
       return 1;
@@ -110,13 +108,13 @@ function compareEvents(a: CircuitStandingsEvent, b: CircuitStandingsEvent): numb
   }
 
   return a.event.name.localeCompare(b.event.name);
-}
+};
 
-export function computeCircuitStandings(
+export const computeCircuitStandings = (
   stages: readonly CircuitStageResult[],
   region: string | null,
   now: Date,
-): ComputedStandings {
+): ComputedStandings => {
   const regional = !isWorldwideCircuitRegion(region);
   const groups = new Map<string, { event: TournamentEventRef; stages: CircuitStageResult[] }>();
 
@@ -192,4 +190,4 @@ export function computeCircuitStandings(
   ];
 
   return { sourceUrls, events, rows };
-}
+};

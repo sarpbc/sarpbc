@@ -25,7 +25,7 @@ const article: NewsArticleRecord = {
   type: "short",
 };
 
-function storeFailingWith(error: Error) {
+const storeFailingWith = (error: Error) => {
   const em = {
     findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
     getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
@@ -36,7 +36,7 @@ function storeFailingWith(error: Error) {
   };
 
   return new MikroNewsStore(Object.assign(unconstructed(EntityManager), em));
-}
+};
 
 describe("MikroNewsStore.save", () => {
   it("reports a unique violation as a slug conflict", async () => {

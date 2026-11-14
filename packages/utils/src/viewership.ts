@@ -20,17 +20,16 @@ export type ParsedViewership =
   | { ok: true; viewership: Viewership }
   | { ok: false; error: ViewershipError };
 
-export function isForbiddenViewershipSource(hostname: string): boolean {
+export const isForbiddenViewershipSource = (hostname: string): boolean => {
   const host = hostname.toLowerCase().replace(/\.$/u, "");
 
   return isForbiddenSourceHost(host) || host === "start.gg" || host.endsWith(".start.gg");
-}
+};
 
-function isViewerCount(value: number): boolean {
-  return Number.isInteger(value) && value >= 0 && value <= MAX_VIEWERS;
-}
+const isViewerCount = (value: number): boolean =>
+  Number.isInteger(value) && value >= 0 && value <= MAX_VIEWERS;
 
-export function parseViewership(input: Viewership): ParsedViewership {
+export const parseViewership = (input: Viewership): ParsedViewership => {
   if (!isViewerCount(input.peakViewers)) {
     return { ok: false, error: "invalid-peak" };
   }
@@ -98,4 +97,4 @@ export function parseViewership(input: Viewership): ParsedViewership {
       sourceUrl: url.href,
     },
   };
-}
+};

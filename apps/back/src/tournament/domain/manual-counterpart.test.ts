@@ -10,16 +10,14 @@ const stage = {
   endAt: null,
 };
 
-function candidate(overrides: Partial<ManualCandidate>): ManualCandidate {
-  return {
-    id: "manual-1",
-    name: "RLCS MENA Open Qualifier 4 2025 – Group B",
-    leagueId: null,
-    beginAt: new Date("2025-03-01T00:00Z"),
-    endAt: new Date("2025-03-02T00:00Z"),
-    ...overrides,
-  };
-}
+const candidate = (overrides: Partial<ManualCandidate>): ManualCandidate => ({
+  id: "manual-1",
+  name: "RLCS MENA Open Qualifier 4 2025 – Group B",
+  leagueId: null,
+  beginAt: new Date("2025-03-01T00:00Z"),
+  endAt: new Date("2025-03-02T00:00Z"),
+  ...overrides,
+});
 
 describe(findManualCounterpart, () => {
   it("matches the same words in any order with overlapping dates", () => {

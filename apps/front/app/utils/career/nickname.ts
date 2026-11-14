@@ -16,18 +16,15 @@ export interface CareerNicknameInput {
 
 type NicknameTier = "goat" | "champion" | "majors" | "nearly" | "journeyman" | "bust";
 
-function countTrophies(
+const countTrophies = (
   trophies: CareerNicknameInput["trophies"],
   type: CareerTrophy["type"],
-): number {
-  return trophies.filter((trophy) => trophy.type === type).length;
-}
+): number => trophies.filter((trophy) => trophy.type === type).length;
 
-function isWorldsPodium(placement: CareerPlacement | null): boolean {
-  return placement === "finalist" || placement === "top4";
-}
+const isWorldsPodium = (placement: CareerPlacement | null): boolean =>
+  placement === "finalist" || placement === "top4";
 
-function classifyNickname(input: CareerNicknameInput): NicknameTier {
+const classifyNickname = (input: CareerNicknameInput): NicknameTier => {
   const worldsWins = countTrophies(input.trophies, "worlds");
   const majorWins = countTrophies(input.trophies, "major");
   const worldsPodiums = input.seasons.filter((season) => isWorldsPodium(season.worlds)).length;
@@ -53,9 +50,9 @@ function classifyNickname(input: CareerNicknameInput): NicknameTier {
   }
 
   return "journeyman";
-}
+};
 
-function nicknameForChampion(role: CareerRole): CareerNicknameKey {
+const nicknameForChampion = (role: CareerRole): CareerNicknameKey => {
   switch (role) {
     case "offense": {
       return "closer";
@@ -75,9 +72,9 @@ function nicknameForChampion(role: CareerRole): CareerNicknameKey {
       return _exhaustive;
     }
   }
-}
+};
 
-function nicknameForNearly(role: CareerRole): CareerNicknameKey {
+const nicknameForNearly = (role: CareerRole): CareerNicknameKey => {
   switch (role) {
     case "offense": {
       return "surfaceFox";
@@ -97,9 +94,9 @@ function nicknameForNearly(role: CareerRole): CareerNicknameKey {
       return _exhaustive;
     }
   }
-}
+};
 
-function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
+const nicknameForJourneyman = (destiny: CareerDestiny): CareerNicknameKey => {
   switch (destiny) {
     case "streamer": {
       return "theMic";
@@ -119,9 +116,9 @@ function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
       return _exhaustive;
     }
   }
-}
+};
 
-export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKey {
+export const pickCareerNickname = (input: CareerNicknameInput): CareerNicknameKey => {
   const tier = classifyNickname(input);
 
   switch (tier) {
@@ -155,4 +152,4 @@ export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKe
       return _exhaustive;
     }
   }
-}
+};

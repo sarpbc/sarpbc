@@ -21,51 +21,47 @@ import { Circuit } from "./circuit.entity";
 import { CircuitStage } from "./circuit-stage.entity";
 import { CircuitStageTeam } from "./circuit-stage-team.entity";
 
-function toSummary(row: Circuit): CircuitSummary {
-  return {
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    season: row.season,
-    region: row.region,
-    description: row.description,
-    sourceUrl: row.sourceUrl,
-    qualificationSpots: row.qualificationSpots,
-  };
-}
+const toSummary = (row: Circuit): CircuitSummary => ({
+  id: row.id,
+  slug: row.slug,
+  name: row.name,
+  season: row.season,
+  region: row.region,
+  description: row.description,
+  sourceUrl: row.sourceUrl,
+  qualificationSpots: row.qualificationSpots,
+});
 
-function eventRef({ event }: Tournament): TournamentEventRef {
-  return { id: event.id, slug: event.slug, name: event.name };
-}
+const eventRef = ({ event }: Tournament): TournamentEventRef => ({
+  id: event.id,
+  slug: event.slug,
+  name: event.name,
+});
 
-function toTeam(team: Team): CircuitStandingTeam {
-  return {
-    id: team.id,
-    name: team.name,
-    slug: team.slug,
-    imageUrl: team.imageUrl,
-    darkModeImageUrl: team.darkModeImageUrl,
-  };
-}
+const toTeam = (team: Team): CircuitStandingTeam => ({
+  id: team.id,
+  name: team.name,
+  slug: team.slug,
+  imageUrl: team.imageUrl,
+  darkModeImageUrl: team.darkModeImageUrl,
+});
 
-function regionTeams(stage: CircuitStage): Team[] {
-  return stage.teams
+const regionTeams = (stage: CircuitStage): Team[] =>
+  stage.teams
     .getItems()
     .filter(({ regionMember }) => regionMember)
     .map(({ team }) => team)
     .toSorted((a, b) => a.name.localeCompare(b.name));
-}
 
-function finishes(stage: CircuitStage): StagePlacement[] {
-  return stage.teams
+const finishes = (stage: CircuitStage): StagePlacement[] =>
+  stage.teams
     .getItems()
     .flatMap(({ team, placement }) =>
       placement === null ? [] : [{ team: toTeam(team), placement }],
     )
     .toSorted((a, b) => a.placement - b.placement || a.team.name.localeCompare(b.team.name));
-}
 
-function toStageItem(stage: CircuitStage): CircuitDetail["stages"][number] {
+const toStageItem = (stage: CircuitStage): CircuitDetail["stages"][number] => {
   const { tournament, scale, sourceUrl, worldwide } = stage;
 
   return {
@@ -84,11 +80,10 @@ function toStageItem(stage: CircuitStage): CircuitDetail["stages"][number] {
     regionTeams: regionTeams(stage).map(toTeam),
     finishes: finishes(stage),
   };
-}
+};
 
-function toPlacement({ team, placement }: TournamentParticipant): StagePlacement[] {
-  return team && placement !== null ? [{ placement, team: toTeam(team) }] : [];
-}
+const toPlacement = ({ team, placement }: TournamentParticipant): StagePlacement[] =>
+  team && placement !== null ? [{ placement, team: toTeam(team) }] : [];
 
 export class CircuitPersistence implements CircuitStore {
   constructor(private readonly em: EntityManager) {}

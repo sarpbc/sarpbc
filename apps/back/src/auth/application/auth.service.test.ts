@@ -10,7 +10,7 @@ import type { GoogleIdentity, SessionTokens } from "./ports/authentication";
 import { UserService } from "../../user/application/user.service";
 import { unconstructed } from "../../../test/doubles";
 
-async function waitUntil(predicate: () => boolean, startedAt = Date.now()): Promise<void> {
+const waitUntil = async (predicate: () => boolean, startedAt = Date.now()): Promise<void> => {
   if (predicate()) {
     return;
   }
@@ -21,7 +21,7 @@ async function waitUntil(predicate: () => boolean, startedAt = Date.now()): Prom
 
   await nextTick();
   await waitUntil(predicate, startedAt);
-}
+};
 
 let newGoogleSession: () => GoogleOAuthSession = () => {
   throw new Error("unused");

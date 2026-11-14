@@ -1,6 +1,6 @@
 import type { AppNotification } from "@sarpbc/types";
 
-export async function getNotifications(limit = 30): Promise<AppNotification[]> {
+export const getNotifications = async (limit = 30): Promise<AppNotification[]> => {
   try {
     const res = await apiFetch<{ notifications: AppNotification[] }>("/notifications", {
       method: "GET",
@@ -13,9 +13,9 @@ export async function getNotifications(limit = 30): Promise<AppNotification[]> {
 
     return [];
   }
-}
+};
 
-export async function getUnreadNotificationCount(): Promise<number> {
+export const getUnreadNotificationCount = async (): Promise<number> => {
   try {
     const res = await apiFetch<{ count: number }>("/notifications/unread-count", {
       method: "GET",
@@ -27,9 +27,9 @@ export async function getUnreadNotificationCount(): Promise<number> {
 
     return 0;
   }
-}
+};
 
-export async function markNotificationsRead(ids?: string[]): Promise<number> {
+export const markNotificationsRead = async (ids?: string[]): Promise<number> => {
   try {
     const res = await apiFetch<{ marked: number }>("/notifications/read", {
       method: "PATCH",
@@ -42,13 +42,13 @@ export async function markNotificationsRead(ids?: string[]): Promise<number> {
 
     return 0;
   }
-}
+};
 
-export function useUnreadNotificationCount() {
+export const useUnreadNotificationCount = function useUnreadNotificationCount() {
   const user = useUser();
   const count = useState<number>("unread-notification-count", () => 0);
 
-  async function refresh() {
+  const refresh = async () => {
     if (!user.value) {
       count.value = 0;
 
@@ -56,7 +56,7 @@ export function useUnreadNotificationCount() {
     }
 
     count.value = await getUnreadNotificationCount();
-  }
+  };
 
   if (import.meta.client) {
     watch(
@@ -72,4 +72,4 @@ export function useUnreadNotificationCount() {
     count,
     refresh,
   };
-}
+};

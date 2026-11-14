@@ -26,12 +26,12 @@ export interface NamedPick extends Pick {
   user: { id: string; userName: string };
 }
 
-export function assertPickAllowed(
+export const assertPickAllowed = (
   match: PickMatch,
   participantId: string,
   now: Date,
   scored: boolean,
-): void {
+): void => {
   if (!match.pickemsEnabled) {
     throw new InvalidInputError(
       "Pick'ems are not enabled for this tournament. Choose another tournament.",
@@ -57,9 +57,9 @@ export function assertPickAllowed(
   if (scored) {
     throw new InvalidInputError("This pick has already been scored and cannot be changed.");
   }
-}
+};
 
-export function derivePickWinner(match: PickMatch): string | null {
+export const derivePickWinner = (match: PickMatch): string | null => {
   if (match.winnerId !== null && match.winnerId !== "") {
     return match.winnerId;
   }
@@ -67,13 +67,13 @@ export function derivePickWinner(match: PickMatch): string | null {
   const leader = winnerFromResults(match.results);
 
   return leader !== null && leader !== "" && match.participantIds.includes(leader) ? leader : null;
-}
+};
 
-export function scorePick(pick: Pick, winnerId: string): void {
+export const scorePick = (pick: Pick, winnerId: string): void => {
   if (pick.scored) {
     return;
   }
 
   pick.points = pick.pickedParticipant.id === winnerId ? 5 : 0;
   pick.scored = true;
-}
+};

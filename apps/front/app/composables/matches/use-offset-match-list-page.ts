@@ -7,7 +7,7 @@ export interface OffsetPageQuery {
 
 export const MATCH_LIST_PAGE_SIZE = 20;
 
-export function parseRouteOffset(value: string | null | (string | null)[] | undefined): number {
+export const parseRouteOffset = (value: string | null | (string | null)[] | undefined): number => {
   const raw = Array.isArray(value) ? value[0] : value;
 
   if (!isNonEmptyString(raw)) {
@@ -21,24 +21,23 @@ export function parseRouteOffset(value: string | null | (string | null)[] | unde
   }
 
   return parsed;
-}
+};
 
-export function offsetPageQuery(offset: number): OffsetPageQuery {
+export const offsetPageQuery = (offset: number): OffsetPageQuery => {
   if (offset <= 0) {
     return {};
   }
 
   return { offset: String(offset) };
-}
+};
 
-function getPageQuery(nextOffset: number): OffsetPageQuery {
-  return offsetPageQuery(Math.max(0, nextOffset));
-}
+const getPageQuery = (nextOffset: number): OffsetPageQuery =>
+  offsetPageQuery(Math.max(0, nextOffset));
 
-export function useOffsetMatchListPage<TData extends { total: number }>(config: {
+export const useOffsetMatchListPage = <TData extends { total: number }>(config: {
   keyPrefix: string;
   fetch: (query: { limit: number; offset: number }) => Promise<TData>;
-}) {
+}) => {
   const route = useRoute();
   const offset = computed(() => parseRouteOffset(route.query.offset));
 
@@ -85,4 +84,4 @@ export function useOffsetMatchListPage<TData extends { total: number }>(config: 
     hasNext,
     getPageQuery,
   };
-}
+};

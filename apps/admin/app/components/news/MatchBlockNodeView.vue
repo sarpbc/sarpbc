@@ -11,9 +11,9 @@ const editMatchBlock = useEditMatchBlock();
 
 const block = computed(() => newsMatchBlockFromAttrs(node.attrs));
 
-function edit() {
+const edit = () => {
   editMatchBlock(block.value, (next) => updateAttributes(matchBlockNodeAttrs(next)));
-}
+};
 </script>
 
 <template>

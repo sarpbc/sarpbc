@@ -3,16 +3,14 @@ import { describe, expect, it } from "vitest";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 import type { MatchStreamDto } from "../dto/match.dto";
 
-function stream(overrides: Partial<MatchStreamDto> = {}): MatchStreamDto {
-  return {
-    main: false,
-    language: "en",
-    embed_url: "https://player.twitch.tv/?channel=rlcs",
-    official: true,
-    raw_url: "https://www.twitch.tv/rocketleague",
-    ...overrides,
-  };
-}
+const stream = (overrides: Partial<MatchStreamDto> = {}): MatchStreamDto => ({
+  main: false,
+  language: "en",
+  embed_url: "https://player.twitch.tv/?channel=rlcs",
+  official: true,
+  raw_url: "https://www.twitch.tv/rocketleague",
+  ...overrides,
+});
 
 describe(mapOfficialMatchStreams, () => {
   it("returns an empty list when streams are missing", () => {

@@ -12,7 +12,7 @@ const CURRENCY_CODES = {
   Yen: "JPY",
 } as const;
 
-function currencyCodeFor(name: string): string {
+const currencyCodeFor = (name: string): string => {
   for (const [label, code] of Object.entries(CURRENCY_CODES)) {
     if (label === name) {
       return code;
@@ -20,9 +20,9 @@ function currencyCodeFor(name: string): string {
   }
 
   return "USD";
-}
+};
 
-export function formatPrizepool(prizepool: string | undefined | null, locale = "en-US"): string {
+export const formatPrizepool = (prizepool: string | undefined | null, locale = "en-US"): string => {
   if (!isNonEmptyString(prizepool)) {
     return "";
   }
@@ -51,9 +51,9 @@ export function formatPrizepool(prizepool: string | undefined | null, locale = "
   } catch {
     return `$${amount.toLocaleString()}`;
   }
-}
+};
 
-export function formatPrizeAmount(amount: number, currency: string, locale: string): string {
+export const formatPrizeAmount = (amount: number, currency: string, locale: string): string => {
   const fractionDigits = Number.isInteger(amount) ? 0 : currencyFractionDigits(currency);
 
   return new Intl.NumberFormat(locale, {
@@ -62,4 +62,4 @@ export function formatPrizeAmount(amount: number, currency: string, locale: stri
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(amount);
-}
+};

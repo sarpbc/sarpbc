@@ -33,13 +33,13 @@ if (production) {
   });
 }
 
-async function bootstrap() {
+const bootstrap = async () => {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, createHttpAdapter());
 
   const configService = app.get(ConfigService);
   await configureApp(app, configService.getOrThrow<string[]>("corsOrigins"));
 
   await app.listen(configService.getOrThrow<number>("port"), "0.0.0.0");
-}
+};
 
 void bootstrap();

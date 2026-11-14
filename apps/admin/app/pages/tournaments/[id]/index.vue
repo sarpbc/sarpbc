@@ -51,9 +51,9 @@ const {
 
 const loadError = computed(() => tournamentError.value ?? matchesError.value);
 
-async function reload() {
+const reload = async () => {
   await Promise.all([refreshTournament(), refreshMatches()]);
-}
+};
 
 const breadcrumbItems = computed(() => [
   {
@@ -77,15 +77,15 @@ const canGenerateBracket = computed(
   () => editsBracket.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
 );
 
-function matchLabel(match: TournamentMatchListItem): string {
+const matchLabel = (match: TournamentMatchListItem): string => {
   const [teamA, teamB] = match.participants;
   const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
   const name = detailMatches.value.get(match.id)?.name;
 
   return name ? `${name} · ${sides}` : sides;
-}
+};
 
-function openBracket(match: TournamentMatchListItem) {
+const openBracket = (match: TournamentMatchListItem) => {
   const detailed = detailMatches.value.get(match.id);
 
   if (!detailed) {
@@ -94,18 +94,17 @@ function openBracket(match: TournamentMatchListItem) {
 
   bracketMatch.value = { match: detailed, label: matchLabel(match) };
   bracketOpen.value = true;
-}
+};
 
-function matchSourceUrl(match: TournamentMatchListItem): string | null {
-  return detailMatches.value.get(match.id)?.sourceUrl ?? null;
-}
+const matchSourceUrl = (match: TournamentMatchListItem): string | null =>
+  detailMatches.value.get(match.id)?.sourceUrl ?? null;
 
-function openSource(match: TournamentMatchListItem) {
+const openSource = (match: TournamentMatchListItem) => {
   sourceMatch.value = match;
   sourceOpen.value = true;
-}
+};
 
-function matchScore(match: TournamentMatchListItem): string {
+const matchScore = (match: TournamentMatchListItem): string => {
   if (!match.participants?.length) {
     return "-";
   }
@@ -117,9 +116,9 @@ function matchScore(match: TournamentMatchListItem): string {
       return `${participantName(participant)}: ${result?.score ?? "-"}`;
     })
     .join(" · ");
-}
+};
 
-async function handleRefresh() {
+const handleRefresh = async () => {
   try {
     await runTournamentSync(tournamentId.value, async () => {
       await Promise.all([
@@ -131,34 +130,34 @@ async function handleRefresh() {
   } catch (syncError) {
     reportError(syncError);
   }
-}
+};
 
-function openVods(match: TournamentMatchListItem) {
+const openVods = (match: TournamentMatchListItem) => {
   vodsMatch.value = match;
   vodsOpen.value = true;
-}
+};
 
-function openStreamScore(match: TournamentMatchListItem) {
+const openStreamScore = (match: TournamentMatchListItem) => {
   streamScoreMatch.value = match;
   streamScoreOpen.value = true;
-}
+};
 
-function openLineups(match: TournamentMatchListItem) {
+const openLineups = (match: TournamentMatchListItem) => {
   lineupsMatch.value = match;
   lineupsOpen.value = true;
-}
+};
 
-function openStreams(path: string, name: string) {
+const openStreams = (path: string, name: string) => {
   streamsTarget.value = { path, title: t("page.tournaments.streams.title", { name }) };
   streamsOpen.value = true;
-}
+};
 
-function openViewership(path: string, name: string) {
+const openViewership = (path: string, name: string) => {
   viewershipTarget.value = { path, title: t("page.tournaments.viewership.title", { name }) };
   viewershipOpen.value = true;
-}
+};
 
-async function handleSetWinner(match: TournamentMatchListItem, participantId: string) {
+const handleSetWinner = async (match: TournamentMatchListItem, participantId: string) => {
   settingWinnerMatchId.value = match.id;
 
   try {
@@ -170,7 +169,7 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
   } finally {
     settingWinnerMatchId.value = null;
   }
-}
+};
 </script>
 
 <template>

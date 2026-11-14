@@ -12,7 +12,7 @@ const { to, variant = "muted" } = defineProps<{
 
 const attrs = useAttrs();
 
-function variantClasses(value: LinkVariant): string {
+const variantClasses = (value: LinkVariant): string => {
   switch (value) {
     case "muted": {
       return "text-muted hover:text-highlighted transition-none";
@@ -32,7 +32,7 @@ function variantClasses(value: LinkVariant): string {
       return exhaustive;
     }
   }
-}
+};
 
 const linkClass = computed(() => [variantClasses(variant), attrs.class]);
 

@@ -59,10 +59,7 @@ export type GlyphTemplate = z.infer<typeof templateSchema>;
 
 export type Overlay = z.infer<typeof overlaySchema>;
 
-export function parseOverlay(text: string): Overlay {
-  return overlaySchema.parse(JSON.parse(text));
-}
+export const parseOverlay = (text: string): Overlay => overlaySchema.parse(JSON.parse(text));
 
-export async function loadOverlay(path: string): Promise<Overlay> {
-  return parseOverlay(await readFile(path, "utf-8"));
-}
+export const loadOverlay = async (path: string): Promise<Overlay> =>
+  parseOverlay(await readFile(path, "utf-8"));

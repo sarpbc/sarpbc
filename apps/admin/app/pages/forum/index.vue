@@ -50,15 +50,15 @@ const {
 
 const postToDelete = ref<ForumPostListItem | null>(null);
 
-function selectRow(e: Event, row: TableRow<ForumPostListItem>) {
+const selectRow = (e: Event, row: TableRow<ForumPostListItem>) => {
   e.preventDefault();
   navigateTo(localePath(`/forum/${row.original.id}`));
-}
+};
 
-function openDeleteModal(e: Event, post: ForumPostListItem) {
+const openDeleteModal = (e: Event, post: ForumPostListItem) => {
   e.stopPropagation();
   postToDelete.value = post;
-}
+};
 </script>
 
 <template>

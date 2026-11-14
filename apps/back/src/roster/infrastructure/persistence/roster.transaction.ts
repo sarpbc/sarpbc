@@ -5,14 +5,12 @@ import { MikroTeamStore } from "./team.store";
 import { MikroContractStore } from "./contract.store";
 import { MikroPhotoStore } from "./photo.store";
 
-export function writeScope(tx: EntityManager): RosterWriteScope {
-  return {
-    players: new MikroPlayerStore(tx, true),
-    teams: new MikroTeamStore(tx),
-    contracts: new MikroContractStore(tx),
-    photos: new MikroPhotoStore(tx),
-  };
-}
+export const writeScope = (tx: EntityManager): RosterWriteScope => ({
+  players: new MikroPlayerStore(tx, true),
+  teams: new MikroTeamStore(tx),
+  contracts: new MikroContractStore(tx),
+  photos: new MikroPhotoStore(tx),
+});
 
 export class MikroRosterTransaction implements RosterTransaction {
   constructor(private readonly em: EntityManager) {}

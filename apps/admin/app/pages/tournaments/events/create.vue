@@ -21,7 +21,7 @@ const breadcrumbItems = computed(() => [
   { label: t("page.tournaments.events.create.title") },
 ]);
 
-async function handleSubmit() {
+const handleSubmit = async () => {
   if (isSaving.value) {
     return;
   }
@@ -47,7 +47,7 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

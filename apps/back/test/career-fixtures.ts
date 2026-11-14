@@ -33,9 +33,8 @@ export const vatira = Object.assign(new Player(), {
 
 export const mawkzy = Object.assign(new Player(), { id: "mawkzy", name: "M0nkey", slug: "m0nkey" });
 
-function side(id: string, team: Team, players: Player[]): TournamentParticipant {
-  return Object.assign(new TournamentParticipant(), { id, team, players });
-}
+const side = (id: string, team: Team, players: Player[]): TournamentParticipant =>
+  Object.assign(new TournamentParticipant(), { id, team, players });
 
 interface MatchSpec {
   id: string;
@@ -46,7 +45,7 @@ interface MatchSpec {
   finished?: boolean;
 }
 
-export function careerMatch(spec: MatchSpec): Match {
+export const careerMatch = (spec: MatchSpec): Match => {
   const participants = [
     side(`${spec.id}-kc`, kc, spec.sides[0]),
     side(`${spec.id}-bds`, bds, spec.sides[1]),
@@ -72,10 +71,10 @@ export function careerMatch(spec: MatchSpec): Match {
       eventStreams: [],
     },
   });
-}
+};
 
-export function careerTitle(id: string, source: DataSource): Tournament {
-  return Object.assign(new Tournament(), {
+export const careerTitle = (id: string, source: DataSource): Tournament =>
+  Object.assign(new Tournament(), {
     id,
     name: `Title ${id}`,
     slug: id,
@@ -83,22 +82,19 @@ export function careerTitle(id: string, source: DataSource): Tournament {
     event: cup,
     endAt: new Date("2026-05-01T00:00:00.000Z"),
   });
-}
 
-export function careerAward(id: string, source: DataSource): PlayerProfileAward {
-  return {
-    id,
-    awardType: "mvp",
-    tournament: {
-      id: `${id}-stage`,
-      name: "Main Stage",
-      slug: "main-stage",
-      source,
-      endAt: null,
-      event: cup,
-    },
-  };
-}
+export const careerAward = (id: string, source: DataSource): PlayerProfileAward => ({
+  id,
+  awardType: "mvp",
+  tournament: {
+    id: `${id}-stage`,
+    name: "Main Stage",
+    slug: "main-stage",
+    source,
+    endAt: null,
+    event: cup,
+  },
+});
 
 export const zenSeasonAward: PlayerSeasonAward = {
   id: "season-mvp",
@@ -109,9 +105,10 @@ export const zenSeasonAward: PlayerSeasonAward = {
   season: { id: "season-1", name: "2026 Season", slug: null },
 };
 
-export function careerEarnings(amount: number): ProfileEarnings {
-  return { totals: [{ currency: "USD", amount }], years: [] };
-}
+export const careerEarnings = (amount: number): ProfileEarnings => ({
+  totals: [{ currency: "USD", amount }],
+  years: [],
+});
 
 export const careerMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
@@ -128,7 +125,7 @@ export const careerMatches: Match[] = [
   careerMatch({ id: "scrim-cup", sides: [[zen, vatira], [mawkzy]], winner: 1 }),
 ];
 
-export function careerSources() {
+export const careerSources = () => {
   const players = [zen, vatira, mawkzy];
 
   const contract = Object.assign(new Contract(), {
@@ -176,4 +173,4 @@ export function careerSources() {
   } satisfies PlayerComparisonSources;
 
   return { sources, playerEarnings };
-}
+};

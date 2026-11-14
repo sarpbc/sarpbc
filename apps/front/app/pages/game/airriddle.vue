@@ -85,7 +85,7 @@ const tileGridStyle = computed(() => ({
 
 const letterStatuses = computed(() => deriveAirRiddleLetterStatuses(gameState.attempts));
 
-function focusHiddenInput() {
+const focusHiddenInput = () => {
   if (isMobile.value || !canType.value) {
     return;
   }
@@ -93,19 +93,19 @@ function focusHiddenInput() {
   nextTick(() => {
     hiddenInputRef.value?.focus();
   });
-}
+};
 
-function onKeyboardLetter(letter: string) {
+const onKeyboardLetter = (letter: string) => {
   appendToGuess(letter);
   error.value = undefined;
-}
+};
 
-function onKeyboardBackspace() {
+const onKeyboardBackspace = () => {
   removeFromGuess();
   error.value = undefined;
-}
+};
 
-function onPaste(event: ClipboardEvent) {
+const onPaste = (event: ClipboardEvent) => {
   if (isMobile.value || !canType.value) {
     return;
   }
@@ -120,9 +120,9 @@ function onPaste(event: ClipboardEvent) {
   event.preventDefault();
   appendToGuess(event.clipboardData?.getData("text") ?? "");
   error.value = undefined;
-}
+};
 
-function persistGameState() {
+const persistGameState = () => {
   if (gameState.targetLength <= 0) {
     return;
   }
@@ -134,9 +134,9 @@ function persistGameState() {
     isGameOver: gameState.isGameOver,
     answer: answer.value,
   });
-}
+};
 
-function restoreGameState(length: number) {
+const restoreGameState = (length: number) => {
   const stored = loadAirRiddleStoredState();
 
   if (!stored || stored.targetLength !== length) {
@@ -147,9 +147,9 @@ function restoreGameState(length: number) {
   gameState.isWon = stored.isWon;
   gameState.isGameOver = stored.isGameOver;
   answer.value = stored.answer;
-}
+};
 
-async function loadTodayRiddle() {
+const loadTodayRiddle = async () => {
   loading.value = true;
 
   try {
@@ -165,7 +165,7 @@ async function loadTodayRiddle() {
     loading.value = false;
     focusHiddenInput();
   }
-}
+};
 
 watch(isMobile, () => {
   focusHiddenInput();
@@ -177,7 +177,7 @@ watch(canType, (value) => {
   }
 });
 
-async function submitGuess() {
+const submitGuess = async () => {
   if (!canSubmit.value || submitting.value) {
     return;
   }
@@ -233,9 +233,9 @@ async function submitGuess() {
     submitting.value = false;
     focusHiddenInput();
   }
-}
+};
 
-function onPhysicalKeydown(event: KeyboardEvent) {
+const onPhysicalKeydown = (event: KeyboardEvent) => {
   if (isMobile.value || !canType.value) {
     return;
   }
@@ -264,7 +264,7 @@ function onPhysicalKeydown(event: KeyboardEvent) {
     appendToGuess(event.key);
     error.value = undefined;
   }
-}
+};
 
 setPageSeo({
   title: t("page.game.airriddle.seo.title"),

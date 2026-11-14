@@ -9,11 +9,11 @@ interface CreateReplyDtoPlain {
   replyToId?: string;
 }
 
-async function validateDto(plain: CreateReplyDtoPlain) {
+const validateDto = async (plain: CreateReplyDtoPlain) => {
   const result = CreateReplyDto.safeParse(plain);
 
   return result.success ? [] : result.error.issues;
-}
+};
 
 describe("create-reply body", () => {
   it("accepts a single match target", async () => {

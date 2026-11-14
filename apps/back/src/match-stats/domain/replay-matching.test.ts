@@ -41,44 +41,39 @@ const KC_NAMES = ["Vatira", "Atow", "Rise"];
 const BDS_NAMES = ["M0nkey M00n", "Seikoo", "ExoTiiK"];
 const VIT_NAMES = ["zen", "Alpha54", "Radosin"];
 
-function at(iso: string): Date {
-  return new Date(iso);
-}
+const at = (iso: string): Date => new Date(iso);
 
-function won(winner: CandidateParticipant, loser: CandidateParticipant, games = 1) {
-  return new Map([
+const won = (winner: CandidateParticipant, loser: CandidateParticipant, games = 1) =>
+  new Map([
     [winner.id, games],
     [loser.id, 0],
   ]);
-}
 
-function match(
+const match = (
   id: string,
   participants: CandidateParticipant[],
   beginAt: string | null,
   overrides: Partial<CandidateMatch> = {},
-): CandidateMatch {
-  return {
-    id,
-    beginAt: beginAt === null ? null : at(beginAt),
-    endAt: null,
-    finished: true,
-    numberOfGames: 5,
-    participants,
-    scores: new Map(),
-    storedReplayIds: [],
-    ...overrides,
-  };
-}
+): CandidateMatch => ({
+  id,
+  beginAt: beginAt === null ? null : at(beginAt),
+  endAt: null,
+  finished: true,
+  numberOfGames: 5,
+  participants,
+  scores: new Map(),
+  storedReplayIds: [],
+  ...overrides,
+});
 
 let sequence = 0;
 
-function replay(
+const replay = (
   playedAt: string | null,
   blue: { names: string[]; goals: number; name?: string },
   orange: { names: string[]; goals: number; name?: string },
   overrides: Partial<ReplaySummary> = {},
-): ReplaySummary {
+): ReplaySummary => {
   sequence += 1;
 
   return {
@@ -91,9 +86,9 @@ function replay(
     orange: { name: orange.name ?? null, goals: orange.goals, playerNames: orange.names },
     ...overrides,
   };
-}
+};
 
-function describeAssignment(assignment: ReplayAssignment): string {
+const describeAssignment = (assignment: ReplayAssignment): string => {
   if (assignment.kind === "matched") {
     return `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`;
   }
@@ -103,13 +98,12 @@ function describeAssignment(assignment: ReplayAssignment): string {
   }
 
   return `unmatched:${assignment.reason}${assignment.matchId === null ? "" : `@${assignment.matchId}`}`;
-}
+};
 
-function byReplay(assignments: ReplayAssignment[]) {
-  return Object.fromEntries(
+const byReplay = (assignments: ReplayAssignment[]) =>
+  Object.fromEntries(
     assignments.map((assignment) => [assignment.replay.id, describeAssignment(assignment)]),
   );
-}
 
 describe("assignReplays with player participants", () => {
   const zen: CandidateParticipant = {

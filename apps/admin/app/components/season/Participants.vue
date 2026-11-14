@@ -23,7 +23,7 @@ const participantToRemove = ref<SeasonParticipant | null>(null);
 const takenTeamIds = computed(() => new Set(participants.map(({ team }) => team.id)));
 const candidates = computed(() => results.value.filter((team) => !takenTeamIds.value.has(team.id)));
 
-async function runSearch(value: string) {
+const runSearch = async (value: string) => {
   const trimmed = value.trim();
 
   if (!trimmed) {
@@ -42,11 +42,11 @@ async function runSearch(value: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-async function add(team: Team) {
+const add = async (team: Team) => {
   adding.value = true;
 
   try {
@@ -63,7 +63,7 @@ async function add(team: Team) {
   } finally {
     adding.value = false;
   }
-}
+};
 </script>
 
 <template>

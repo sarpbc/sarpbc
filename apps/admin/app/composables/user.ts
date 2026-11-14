@@ -1,6 +1,6 @@
 import type { User } from "@sarpbc/types";
 
-export async function getProfile(): Promise<User | null> {
+export const getProfile = async (): Promise<User | null> => {
   try {
     const res = await apiFetch<{ user?: User }>("/user/profile", {
       method: "GET",
@@ -10,16 +10,16 @@ export async function getProfile(): Promise<User | null> {
   } catch {
     return null;
   }
-}
+};
 
-export function useLogout() {
+export const useLogout = () => {
   const user = useUser();
   const localePath = useLocalePath();
   const toast = useToast();
   const { $i18n } = useNuxtApp();
   const loggingOut = ref(false);
 
-  async function logout(): Promise<void> {
+  const logout = async (): Promise<void> => {
     if (loggingOut.value) {
       return;
     }
@@ -50,7 +50,7 @@ export function useLogout() {
     } finally {
       loggingOut.value = false;
     }
-  }
+  };
 
   return { loggingOut, logout };
-}
+};

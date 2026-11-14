@@ -11,11 +11,9 @@ interface ShareLine {
   year: number | null;
 }
 
-function minorUnitScale(currency: string): number {
-  return 10 ** currencyFractionDigits(currency);
-}
+const minorUnitScale = (currency: string): number => 10 ** currencyFractionDigits(currency);
 
-function totals(lines: ShareLine[]): PrizeAmount[] {
+const totals = (lines: ShareLine[]): PrizeAmount[] => {
   const byCurrency = new Map<string, number>();
 
   for (const { entry, minorUnits } of lines) {
@@ -25,15 +23,15 @@ function totals(lines: ShareLine[]): PrizeAmount[] {
   return [...byCurrency]
     .toSorted(([a], [b]) => a.localeCompare(b))
     .map(([currency, amount]) => ({ currency, amount: amount / minorUnitScale(currency) }));
-}
+};
 
-function yearOf(entry: EarningsEntry): number | null {
+const yearOf = (entry: EarningsEntry): number | null => {
   const date = entry.tournament.endAt ?? entry.tournament.beginAt;
 
   return date !== null && date !== "" ? new Date(date).getUTCFullYear() : null;
-}
+};
 
-export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {
+export const summarizeEarnings = (lines: EarningsLine[]): ProfileEarnings => {
   const shares: ShareLine[] = lines.map(({ shares: count, ...entry }) => {
     const scale = minorUnitScale(entry.currency);
     const minorUnits = Math.round((entry.amount * scale) / Math.max(count, 1));
@@ -56,4 +54,4 @@ export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {
     }));
 
   return { totals: totals(shares), years: grouped };
-}
+};

@@ -62,7 +62,7 @@ for (const [network, prefix, family] of BLOCKED_SUBNETS) {
   blocked.addSubnet(network, prefix, family);
 }
 
-export function isPublicAddress(address: string): boolean {
+export const isPublicAddress = (address: string): boolean => {
   const family = isIP(address);
 
   if (family === 0) {
@@ -70,19 +70,15 @@ export function isPublicAddress(address: string): boolean {
   }
 
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
-}
+};
 
-function privateAddressError(): InvalidInputError {
-  return new InvalidInputError(
-    "The image URL resolves to a private, loopback or link-local address.",
-  );
-}
+const privateAddressError = (): InvalidInputError =>
+  new InvalidInputError("The image URL resolves to a private, loopback or link-local address.");
 
-function tooLargeError(maxBytes: number): InvalidInputError {
-  return new InvalidInputError(`The image is larger than ${maxBytes / (1024 * 1024)} MB.`);
-}
+const tooLargeError = (maxBytes: number): InvalidInputError =>
+  new InvalidInputError(`The image is larger than ${maxBytes / (1024 * 1024)} MB.`);
 
-function downloadError(error: Error, signal: AbortSignal): Error {
+const downloadError = (error: Error, signal: AbortSignal): Error => {
   if (error instanceof InvalidInputError) {
     return error;
   }
@@ -92,13 +88,13 @@ function downloadError(error: Error, signal: AbortSignal): Error {
   }
 
   return new InvalidInputError(`The image could not be downloaded: ${error.message}`);
-}
+};
 
-async function resolvePublicAddresses(
+const resolvePublicAddresses = async (
   lookup: PublicHttpsTransport["lookup"],
   hostname: string,
   family: LookupOptions["family"],
-): Promise<LookupAddress[] | Error> {
+): Promise<LookupAddress[] | Error> => {
   try {
     const resolved = await lookup(hostname, { all: true, family });
 
@@ -110,10 +106,11 @@ async function resolvePublicAddresses(
   } catch (error) {
     return error instanceof Error ? error : new Error(String(error));
   }
-}
+};
 
-function createPublicOnlyLookup(lookup: PublicHttpsTransport["lookup"]): LookupFunction {
-  return (hostname, options, respond) => {
+const createPublicOnlyLookup =
+  (lookup: PublicHttpsTransport["lookup"]): LookupFunction =>
+  (hostname, options, respond) => {
     const answer = async (): Promise<void> => {
       const resolved = await resolvePublicAddresses(lookup, hostname, options.family);
 
@@ -142,9 +139,8 @@ function createPublicOnlyLookup(lookup: PublicHttpsTransport["lookup"]): LookupF
 
     void answer();
   };
-}
 
-function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => boolean): void {
+const requirePublicHttpsUrl = (url: URL, isAllowedHost: (hostname: string) => boolean): void => {
   if (url.protocol !== "https:") {
     throw new InvalidInputError("The image URL and its redirects must use https.");
   }
@@ -170,13 +166,13 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
   if (!isAllowedHost(host)) {
     throw new InvalidInputError(`The image URL host "${host}" is not an accepted source.`);
   }
-}
+};
 
-async function get(
+const get = async (
   url: URL,
   signal: AbortSignal,
   transport: PublicHttpsTransport,
-): Promise<IncomingMessage> {
+): Promise<IncomingMessage> => {
   const req = transport.request(url, {
     method: "GET",
     lookup: createPublicOnlyLookup(transport.lookup),
@@ -193,13 +189,13 @@ async function get(
   req.end();
 
   return await promise;
-}
+};
 
-async function readBody(
+const readBody = async (
   response: IncomingMessage,
   maxBytes: number,
   signal: AbortSignal,
-): Promise<Uint8Array> {
+): Promise<Uint8Array> => {
   const declared = Number(response.headers["content-length"]);
 
   if (Number.isFinite(declared) && declared > maxBytes) {
@@ -229,15 +225,15 @@ async function readBody(
   }
 
   return new Uint8Array(Buffer.concat(chunks));
-}
+};
 
-async function followRedirects(
+const followRedirects = async (
   current: URL,
   redirects: number,
   options: PublicDownloadOptions,
   transport: PublicHttpsTransport,
   signal: AbortSignal,
-): Promise<Uint8Array> {
+): Promise<Uint8Array> => {
   requirePublicHttpsUrl(current, options.isAllowedHost);
   const response = await get(current, signal, transport);
   const status = response.statusCode ?? 0;
@@ -273,12 +269,11 @@ async function followRedirects(
   }
 
   return await readBody(response, options.maxBytes, signal);
-}
+};
 
-export async function downloadPublicHttps(
+export const downloadPublicHttps = async (
   url: URL,
   options: PublicDownloadOptions,
   transport: PublicHttpsTransport,
-): Promise<Uint8Array> {
-  return await followRedirects(url, 0, options, transport, AbortSignal.timeout(options.timeoutMs));
-}
+): Promise<Uint8Array> =>
+  await followRedirects(url, 0, options, transport, AbortSignal.timeout(options.timeoutMs));

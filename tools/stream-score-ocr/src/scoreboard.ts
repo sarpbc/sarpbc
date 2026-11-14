@@ -21,24 +21,24 @@ const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/u;
 const DIGITS = new Set("0123456789");
 const CLOCK_CHARS = new Set("0123456789:+");
 
-function matches(frame: Frame, overlay: Overlay, anchor: Anchor): boolean {
+const matches = (frame: Frame, overlay: Overlay, anchor: Anchor): boolean => {
   const region = scaleRegion(anchor.region, overlay.reference, frame);
 
   return colorDistance(meanColor(frame, region), anchor.color) <= anchor.tolerance;
-}
+};
 
-function readRegion(
+const readRegion = (
   frame: Frame,
   overlay: Overlay,
   region: Region,
   templates: readonly GlyphTemplate[],
-): { text: string; confidence: number } | null {
+): { text: string; confidence: number } | null => {
   const settings: GlyphSettings = { threshold: overlay.text.threshold, size: overlay.glyph };
 
   return readText(frame, scaleRegion(region, overlay.reference, frame), settings, templates);
-}
+};
 
-export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReading {
+export const readScoreboard = (frame: Frame, overlay: Overlay): ScoreboardReading => {
   const visible =
     overlay.visibleWhen.every((anchor) => matches(frame, overlay, anchor)) &&
     !overlay.ignoreWhen.some((anchor) => matches(frame, overlay, anchor));
@@ -78,4 +78,4 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
     overtime: clockParts.groups?.overtime === "+",
     confidence,
   };
-}
+};

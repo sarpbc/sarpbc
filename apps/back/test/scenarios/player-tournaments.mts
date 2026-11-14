@@ -69,14 +69,14 @@ const gameBody = z.object({
   ),
 });
 
-export async function verifyPlayerTournaments({
+export const verifyPlayerTournaments = async ({
   app,
   orm,
   request,
   staffCookie,
   memberCookie,
   RequestContext,
-}: PlayerTournamentsContext): Promise<void> {
+}: PlayerTournamentsContext): Promise<void> => {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { RosterMergeService } =
@@ -288,4 +288,4 @@ export async function verifyPlayerTournaments({
     ConflictError,
     "two players of one 1v1 tournament cannot be merged into one participant",
   );
-}
+};

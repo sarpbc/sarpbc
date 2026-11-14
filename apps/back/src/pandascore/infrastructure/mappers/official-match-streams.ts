@@ -3,7 +3,7 @@ import type { MatchStreamDto } from "../dto/match.dto";
 
 const MAX_OFFICIAL_STREAMS = 12;
 
-function isHttpUrl(value: string): boolean {
+const isHttpUrl = (value: string): boolean => {
   try {
     const parsed = new URL(value);
 
@@ -11,11 +11,11 @@ function isHttpUrl(value: string): boolean {
   } catch {
     return false;
   }
-}
+};
 
-export function mapOfficialMatchStreams(
+export const mapOfficialMatchStreams = (
   streams: MatchStreamDto[] | undefined,
-): OfficialMatchStream[] {
+): OfficialMatchStream[] => {
   if (!streams || streams.length === 0) {
     return [];
   }
@@ -47,4 +47,4 @@ export function mapOfficialMatchStreams(
   }
 
   return official;
-}
+};

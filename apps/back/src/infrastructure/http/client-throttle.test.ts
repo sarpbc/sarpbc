@@ -45,13 +45,13 @@ describe("client throttle behind a trusted proxy", () => {
     await app.close();
   });
 
-  async function hit(options: {
+  const hit = async (options: {
     remoteAddress: string;
     forwardedFor?: string;
     connectingIp?: string;
     token?: string;
     client?: string;
-  }) {
+  }) => {
     const headers: Record<string, string> = {};
 
     if (options.forwardedFor !== undefined) {
@@ -76,7 +76,7 @@ describe("client throttle behind a trusted proxy", () => {
       remoteAddress: options.remoteAddress,
       headers,
     });
-  }
+  };
 
   it("keeps a separate bucket per Cloudflare visitor", async () => {
     const visitor = {

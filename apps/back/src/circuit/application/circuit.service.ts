@@ -26,7 +26,7 @@ import type { CircuitStageSettings } from "../domain/circuit-scale";
 import { computeCircuitStandings } from "../domain/circuit-standings";
 import type { CircuitStore } from "./ports";
 
-function cleanName(name: string): string {
+const cleanName = (name: string): string => {
   const trimmed = name.trim();
 
   if (!trimmed || trimmed.length > CIRCUIT_NAME_MAX_LENGTH) {
@@ -36,9 +36,9 @@ function cleanName(name: string): string {
   }
 
   return trimmed;
-}
+};
 
-function cleanDescription(description: string | null | undefined): string | null {
+const cleanDescription = (description: string | null | undefined): string | null => {
   const trimmed = description?.trim() ?? "";
 
   if (trimmed.length > CIRCUIT_DESCRIPTION_MAX_LENGTH) {
@@ -48,9 +48,9 @@ function cleanDescription(description: string | null | undefined): string | null
   }
 
   return trimmed || null;
-}
+};
 
-function cleanSpots(spots: number | null | undefined): number | null {
+const cleanSpots = (spots: number | null | undefined): number | null => {
   if (spots === null || spots === undefined) {
     return null;
   }
@@ -62,9 +62,9 @@ function cleanSpots(spots: number | null | undefined): number | null {
   }
 
   return spots;
-}
+};
 
-function cleanSeason(season: number): number {
+const cleanSeason = (season: number): number => {
   if (!Number.isInteger(season) || season < MIN_CIRCUIT_SEASON || season > MAX_CIRCUIT_SEASON) {
     throw new InvalidInputError(
       `A circuit season is a year from ${MIN_CIRCUIT_SEASON} to ${MAX_CIRCUIT_SEASON}.`,
@@ -72,9 +72,9 @@ function cleanSeason(season: number): number {
   }
 
   return season;
-}
+};
 
-function cleanRegion(region: string | null | undefined): string | null {
+const cleanRegion = (region: string | null | undefined): string | null => {
   const trimmed = region?.trim() ?? "";
 
   if (trimmed.length > CIRCUIT_REGION_MAX_LENGTH) {
@@ -84,18 +84,16 @@ function cleanRegion(region: string | null | undefined): string | null {
   }
 
   return trimmed || null;
-}
+};
 
-function cleanSourceUrl(sourceUrl: string): string {
+const cleanSourceUrl = (sourceUrl: string): string => {
   const trimmed = sourceUrl.trim();
   assertCircuitSourceUrl(trimmed);
 
   return trimmed;
-}
+};
 
-function key(value: string | null): string | null {
-  return value?.toLocaleLowerCase("en-US") ?? null;
-}
+const key = (value: string | null): string | null => value?.toLocaleLowerCase("en-US") ?? null;
 
 export class CircuitService {
   constructor(

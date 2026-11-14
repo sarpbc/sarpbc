@@ -124,7 +124,7 @@ describe(RosterSyncWriter, () => {
     expect(team.imageUrl).toBe("local.png");
   });
 
-  async function upsertAliasedTeamTwice() {
+  const upsertAliasedTeamTwice = async () => {
     const team = Object.assign(new Team(), {
       id: "current",
       name: "Fixture Now",
@@ -141,7 +141,7 @@ describe(RosterSyncWriter, () => {
     const input = { pandascoreId: 21, name: "Fixture Before", slug: "fixture-before" };
 
     return { team, results: [await writer.upsertTeam(input), await writer.upsertTeam(input)] };
-  }
+  };
 
   it("maps a PandaScore team named in an alias to the aliased team", async () => {
     const { results } = await upsertAliasedTeamTwice();

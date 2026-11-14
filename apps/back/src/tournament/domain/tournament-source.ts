@@ -1,7 +1,7 @@
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import type { DataSource } from "@sarpbc/types";
 
-export function assertTournamentUpdateAllowed(
+export const assertTournamentUpdateAllowed = (
   source: DataSource,
   patch: {
     imageUrl?: string | null;
@@ -18,7 +18,7 @@ export function assertTournamentUpdateAllowed(
     rosters?: unknown[];
     hasBracket?: boolean;
   },
-): void {
+): void => {
   switch (source) {
     case "manual":
     case "startgg": {
@@ -46,26 +46,26 @@ export function assertTournamentUpdateAllowed(
       return exhaustive;
     }
   }
-}
+};
 
-export function assertPandascoreSyncAllowed(source: DataSource): void {
+export const assertPandascoreSyncAllowed = (source: DataSource): void => {
   if (source !== "pandascore") {
     throw new Error(`Cannot sync a ${source} tournament from PandaScore`);
   }
-}
+};
 
-export function assertPandascoreUpsertAllowed(
+export const assertPandascoreUpsertAllowed = (
   tournament: { id: string; source: DataSource },
   pandascoreId: number,
-): void {
+): void => {
   if (tournament.source !== "pandascore") {
     throw new Error(
       `Refusing PandaScore upsert for id ${pandascoreId}: tournament ${tournament.id} is source=${tournament.source}`,
     );
   }
-}
+};
 
-export function claimForPandascore(
+export const claimForPandascore = (
   tournament: {
     id: string;
     source: DataSource;
@@ -75,7 +75,7 @@ export function claimForPandascore(
   },
   pandascoreId: number,
   providerEndAt: Date | null,
-): void {
+): void => {
   if (tournament.source !== "manual") {
     throw new InvalidInputError(
       `Only manual tournaments can be linked to PandaScore; this one is source=${tournament.source}.`,
@@ -85,12 +85,12 @@ export function claimForPandascore(
   tournament.source = "pandascore";
   tournament.pandascoreId = pandascoreId;
   tournament.endAtCorrected = tournament.endAt !== null && providerEndAt === null;
-}
+};
 
-export function assertLeagueUpdateAllowed(
+export const assertLeagueUpdateAllowed = (
   league: { pandascoreId: number | null },
   patch: { name?: string; slug?: string | null; url?: string | null; imageUrl?: string | null },
-): void {
+): void => {
   if (league.pandascoreId === null) {
     return;
   }
@@ -104,4 +104,4 @@ export function assertLeagueUpdateAllowed(
   throw new InvalidInputError(
     "Only the image can be edited on a PandaScore league. Send imageUrl alone.",
   );
-}
+};

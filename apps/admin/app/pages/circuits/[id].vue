@@ -34,11 +34,11 @@ const isPickerOpen = ref(false);
 const scaleTarget = ref<ScaleEditorTarget | null>(null);
 const stageToRemove = ref<CircuitStage | null>(null);
 
-function setCircuit(value: CircuitDetail) {
+const setCircuit = (value: CircuitDetail) => {
   circuit.value = value;
-}
+};
 
-async function save(input: CircuitInput) {
+const save = async (input: CircuitInput) => {
   isSaving.value = true;
 
   try {
@@ -54,9 +54,9 @@ async function save(input: CircuitInput) {
   } finally {
     isSaving.value = false;
   }
-}
+};
 
-function startStage(stage: PickedStage) {
+const startStage = (stage: PickedStage) => {
   scaleTarget.value = {
     tournamentId: stage.id,
     label: stage.label,
@@ -66,13 +66,11 @@ function startStage(stage: PickedStage) {
     regionTeamIds: [],
     finishes: [],
   };
-}
+};
 
-function stageLabel(stage: CircuitStage): string {
-  return tournamentStageLabel(stage.tournament);
-}
+const stageLabel = (stage: CircuitStage): string => tournamentStageLabel(stage.tournament);
 
-function editStage(stage: CircuitStage) {
+const editStage = (stage: CircuitStage) => {
   scaleTarget.value = {
     tournamentId: stage.tournament.id,
     label: stageLabel(stage),
@@ -82,9 +80,9 @@ function editStage(stage: CircuitStage) {
     regionTeamIds: stage.regionTeams.map(({ id }) => id),
     finishes: stage.finishes.map(({ team, placement }) => ({ teamId: team.id, placement })),
   };
-}
+};
 
-function regionSummary(stage: CircuitStage): string | null {
+const regionSummary = (stage: CircuitStage): string | null => {
   if (!stage.worldwide) {
     return null;
   }
@@ -96,15 +94,15 @@ function regionSummary(stage: CircuitStage): string | null {
   const count = stage.regionTeams.length;
 
   return t("page.circuits.stages.regionTeams", { count }, count);
-}
+};
 
-function formatDates(stage: CircuitStage): string {
+const formatDates = (stage: CircuitStage): string => {
   const { beginAt, endAt } = stage.tournament;
   const begin = beginAt ? dateFormatter.value.format(new Date(beginAt)) : null;
   const end = endAt ? dateFormatter.value.format(new Date(endAt)) : null;
 
   return [begin, end].filter((date) => date !== null).join(" – ") || "—";
-}
+};
 </script>
 
 <template>

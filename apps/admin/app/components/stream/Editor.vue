@@ -48,19 +48,17 @@ const kindOptions = computed(() =>
   STREAM_KINDS.map((kind) => ({ value: kind, label: t(`page.tournaments.streams.kinds.${kind}`) })),
 );
 
-function normalizeLanguage(language: string): string {
-  return language.trim().toLowerCase();
-}
+const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
 
-function languageFeedback(language: string): FieldFeedback {
+const languageFeedback = (language: string): FieldFeedback => {
   const code = normalizeLanguage(language);
 
   return isIso6391Code(code)
     ? { help: languageNames.value.of(code) }
     : { error: t("page.tournaments.streams.errors.invalid-language") };
-}
+};
 
-function platformLabel(platform: StreamPlatform): string {
+const platformLabel = (platform: StreamPlatform): string => {
   switch (platform) {
     case "twitch": {
       return t("page.tournaments.streams.platforms.twitch");
@@ -84,9 +82,9 @@ function platformLabel(platform: StreamPlatform): string {
       return exhaustive;
     }
   }
-}
+};
 
-function urlFeedback(url: string): FieldFeedback {
+const urlFeedback = (url: string): FieldFeedback => {
   if (!url.trim()) {
     return {};
   }
@@ -100,33 +98,30 @@ function urlFeedback(url: string): FieldFeedback {
         }),
       }
     : { error: t(`page.tournaments.streams.errors.${parsed.error}`) };
-}
+};
 
-function derivedChannel(url: string): string | null {
+const derivedChannel = (url: string): string | null => {
   const parsed = parseStreamUrl(url);
 
   return parsed.ok ? parsed.channel : null;
-}
+};
 
-function channelFeedback(row: StreamRow): FieldFeedback {
+const channelFeedback = (row: StreamRow): FieldFeedback => {
   if (row.channel.trim() || derivedChannel(row.url) || !row.url.trim()) {
     return {};
   }
 
   return { error: t("page.tournaments.streams.errors.channel-required") };
-}
+};
 
-function isRowValid(row: StreamRow): boolean {
-  return (
-    parseStreamUrl(row.url).ok &&
-    isIso6391Code(normalizeLanguage(row.language)) &&
-    Boolean(row.channel.trim() || derivedChannel(row.url))
-  );
-}
+const isRowValid = (row: StreamRow): boolean =>
+  parseStreamUrl(row.url).ok &&
+  isIso6391Code(normalizeLanguage(row.language)) &&
+  Boolean(row.channel.trim() || derivedChannel(row.url));
 
 const canSave = computed(() => rows.value.every(isRowValid));
 
-function apply(response: StreamsResponse) {
+const apply = (response: StreamsResponse) => {
   rows.value = response.streams.map(({ url, channel, language, kind }) => ({
     key: (nextKey += 1),
     url,
@@ -135,9 +130,9 @@ function apply(response: StreamsResponse) {
     kind,
   }));
   inheritedCount.value = response.inherited.length;
-}
+};
 
-async function load() {
+const load = async () => {
   loading.value = true;
   loadFailed.value = false;
 
@@ -148,7 +143,7 @@ async function load() {
   } finally {
     loading.value = false;
   }
-}
+};
 
 watch(
   open,
@@ -160,7 +155,7 @@ watch(
   { immediate: true },
 );
 
-function addRow() {
+const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
     key: (nextKey += 1),
@@ -169,13 +164,13 @@ function addRow() {
     language: last?.language ?? "en",
     kind: last?.kind ?? "official",
   });
-}
+};
 
-function removeRow(key: number) {
+const removeRow = (key: number) => {
   rows.value = rows.value.filter((row) => row.key !== key);
-}
+};
 
-async function save() {
+const save = async () => {
   saving.value = true;
 
   try {
@@ -197,7 +192,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

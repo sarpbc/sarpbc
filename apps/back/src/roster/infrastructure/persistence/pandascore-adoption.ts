@@ -18,11 +18,11 @@ const adoptable = (slug: string) => ({
  * PandaScore renames player slugs and has given one player's slug a different person's
  * name (`zen-aidan-hui` is Alexis "zen" Bernier), so the PandaScore id is the identity.
  */
-export async function findPandascorePlayer(
+export const findPandascorePlayer = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number,
   slug: string,
-): Promise<Player | null> {
+): Promise<Player | null> => {
   const byId = await em.findOne(Player, { pandascoreId });
 
   if (byId) {
@@ -30,22 +30,22 @@ export async function findPandascorePlayer(
   }
 
   return await em.findOne(Player, adoptable(slug));
-}
+};
 
-export async function findPandascoreTeam(
+export const findPandascoreTeam = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number | undefined,
   slug: string,
-): Promise<Team | null> {
+): Promise<Team | null> => {
   const byId = pandascoreId === undefined ? null : await em.findOne(Team, { pandascoreId });
 
   return await (byId ?? em.findOne(Team, adoptable(slug)));
-}
+};
 
-export async function findAliasedPandascoreTeam(
+export const findAliasedPandascoreTeam = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number | undefined,
-): Promise<string | null> {
+): Promise<string | null> => {
   if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) {
     return null;
   }
@@ -53,14 +53,14 @@ export async function findAliasedPandascoreTeam(
   const alias = await em.findOne(TeamAlias, { pandascoreId });
 
   return alias ? alias.team.id : null;
-}
+};
 
-export async function availablePlayerSlug(
+export const availablePlayerSlug = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number,
   slug: string,
-): Promise<string> {
+): Promise<string> => {
   const taken = await em.findOne(Player, { slug });
 
   return taken ? `${slug}-${pandascoreId}` : slug;
-}
+};

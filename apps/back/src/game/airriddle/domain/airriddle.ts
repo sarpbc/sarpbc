@@ -7,7 +7,7 @@ export interface DailyRiddle {
   createdAt: Date;
 }
 
-export function evaluateGuess(guess: string, answer: string): AirRiddleResultEnum[] {
+export const evaluateGuess = (guess: string, answer: string): AirRiddleResultEnum[] => {
   const results: AirRiddleResultEnum[] = Array.from({ length: guess.length });
   const letters: (string | null)[] = answer.split("");
 
@@ -32,4 +32,4 @@ export function evaluateGuess(guess: string, answer: string): AirRiddleResultEnu
   }
 
   return results;
-}
+};

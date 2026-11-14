@@ -209,12 +209,12 @@ void describe("article content", () => {
   });
 });
 
-function assertFast(content: string) {
+const assertFast = (content: string) => {
   assert.deepEqual(extractNewsMatchBlocks(content), []);
   assert.equal(parseNewsMatchTag(content), null);
   findInvalidNewsMatchTags(content);
   stripNewsMatchTags(content);
-}
+};
 
 void describe("hostile content", () => {
   void it("scans a block tag followed by whitespace in linear time", () => {

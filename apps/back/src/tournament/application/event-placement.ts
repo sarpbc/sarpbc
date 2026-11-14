@@ -8,7 +8,7 @@ import { toEventRef } from "../domain/tournament-event";
 import type { TournamentEvent } from "../domain/tournament-event";
 import type { EventWriter, TournamentWriter } from "./ports";
 
-export async function requireLeague(writer: TournamentWriter, id: string | null | undefined) {
+export const requireLeague = async (writer: TournamentWriter, id: string | null | undefined) => {
   if (id === null || id === undefined || id === "") {
     return null;
   }
@@ -20,9 +20,9 @@ export async function requireLeague(writer: TournamentWriter, id: string | null 
   }
 
   return league;
-}
+};
 
-export async function requireEvent(events: EventWriter, id: string): Promise<TournamentEvent> {
+export const requireEvent = async (events: EventWriter, id: string): Promise<TournamentEvent> => {
   const event = await events.load(id);
 
   if (!event) {
@@ -30,9 +30,9 @@ export async function requireEvent(events: EventWriter, id: string): Promise<Tou
   }
 
   return event;
-}
+};
 
-export async function explicitEventSlug(events: EventWriter, raw: string, eventId: string) {
+export const explicitEventSlug = async (events: EventWriter, raw: string, eventId: string) => {
   const slug = toSlug(raw);
 
   if (!slug || isUuid(slug)) {
@@ -48,16 +48,16 @@ export async function explicitEventSlug(events: EventWriter, raw: string, eventI
   }
 
   return slug;
-}
+};
 
-export async function placeStage(
+export const placeStage = async (
   events: EventWriter,
   tournament: Tournament,
   event: TournamentEvent,
-) {
+) => {
   tournament.slug = await allocateSlug(
     stageSlug(tournament.name),
     async (slug) => await events.stageSlugTaken(event.id, slug, tournament.id),
   );
   tournament.event = toEventRef(event);
-}
+};

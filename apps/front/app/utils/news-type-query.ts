@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import { NEWS_TYPES } from "@sarpbc/types";
 import type { NewsType } from "@sarpbc/types";
 
-export function isNewsType(value: string): value is NewsType {
+export const isNewsType = (value: string): value is NewsType => {
   for (const type of NEWS_TYPES) {
     if (type === value) {
       return true;
@@ -10,8 +10,7 @@ export function isNewsType(value: string): value is NewsType {
   }
 
   return false;
-}
+};
 
-export function resolveNewsType(value: string | null | undefined): NewsType {
-  return isNonEmptyString(value) && isNewsType(value) ? value : "short";
-}
+export const resolveNewsType = (value: string | null | undefined): NewsType =>
+  isNonEmptyString(value) && isNewsType(value) ? value : "short";

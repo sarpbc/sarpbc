@@ -17,7 +17,7 @@ import { CompetitionPickemMatches } from "./competition-pickem-matches";
 
 const now = new Date("2026-01-01T12:00:00Z");
 
-function arrange() {
+const arrange = () => {
   const [a, b] = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
 
   const stored = Object.assign(new Match(), {
@@ -77,7 +77,7 @@ function arrange() {
   );
 
   return { stored, save, publish, pickems };
-}
+};
 
 describe("deciding a match from pick'ems", () => {
   it("is live while it runs", () => {

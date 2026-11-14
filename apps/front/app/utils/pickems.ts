@@ -9,14 +9,13 @@ interface PickemTournamentState {
   winner?: { id: string } | null;
 }
 
-function hasTournamentWinner(tournament: PickemTournamentState): boolean {
-  return isNonEmptyString(tournament.winnerId) || isNonEmptyString(tournament.winner?.id);
-}
+const hasTournamentWinner = (tournament: PickemTournamentState): boolean =>
+  isNonEmptyString(tournament.winnerId) || isNonEmptyString(tournament.winner?.id);
 
-export function isPickemTournamentActive(
+export const isPickemTournamentActive = (
   tournament: PickemTournamentState,
   now = Date.now(),
-): boolean {
+): boolean => {
   if (tournament.pickemsEnabled !== true) {
     return false;
   }
@@ -30,15 +29,13 @@ export function isPickemTournamentActive(
   }
 
   return true;
-}
+};
 
-export function isMatchLockedForPickem(match: MatchLifecycle, now = Date.now()): boolean {
-  return isMatchFinished(match) || isMatchLive(match, now);
-}
+export const isMatchLockedForPickem = (match: MatchLifecycle, now = Date.now()): boolean =>
+  isMatchFinished(match) || isMatchLive(match, now);
 
-export function isPickemOpenForMatch(match: Match, now = Date.now()): boolean {
-  return Boolean(match.tournament?.pickemsEnabled) && !isMatchLockedForPickem(match, now);
-}
+export const isPickemOpenForMatch = (match: Match, now = Date.now()): boolean =>
+  Boolean(match.tournament?.pickemsEnabled) && !isMatchLockedForPickem(match, now);
 
 export interface PickemPickState {
   pickedParticipant: string;
@@ -46,10 +43,10 @@ export interface PickemPickState {
   scored: boolean;
 }
 
-export function getPickOutcome(
+export const getPickOutcome = (
   match: { winnerId: string | null },
   pick: PickemPickState | undefined,
-): "correct" | "incorrect" | "pending" | "none" {
+): "correct" | "incorrect" | "pending" | "none" => {
   if (!pick) {
     return "none";
   }
@@ -67,4 +64,4 @@ export function getPickOutcome(
   }
 
   return pick.points === 0 ? "incorrect" : "pending";
-}
+};

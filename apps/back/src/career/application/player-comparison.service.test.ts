@@ -10,12 +10,12 @@ import {
 } from "../../../test/career-fixtures";
 import { PlayerComparisonService } from "./player-comparison.service";
 
-async function compareZenWithVatira() {
+const compareZenWithVatira = async () => {
   const { sources, playerEarnings } = careerSources();
   const comparison = await new PlayerComparisonService(sources).compare("zen", "vatira");
 
   return { comparison, playerEarnings };
-}
+};
 
 describe(PlayerComparisonService, () => {
   it("compares the two players", async () => {

@@ -6,7 +6,7 @@ import { StatsPlayerLinkService } from "./stats-player-link.service";
 
 const link = { platform: "steam", platformId: "76561198224723032", playerId: "kofyr" };
 
-function setup() {
+const setup = () => {
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
     matches: vi.fn<StatsCandidates["matches"]>(),
@@ -24,7 +24,7 @@ function setup() {
   } satisfies PlayerLinkStore;
 
   return { service: new StatsPlayerLinkService(candidates, links), links };
-}
+};
 
 describe(StatsPlayerLinkService, () => {
   it("links a tournament roster player and reports the rows repointed", async () => {

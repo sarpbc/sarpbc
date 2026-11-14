@@ -3,26 +3,22 @@ import { formatPrizeAmount } from "~/utils/currency-formatter";
 
 export const STARTGG_URL = "https://www.start.gg";
 
-export async function getTournamentPrizes(tournamentId: string): Promise<TournamentPrizes> {
-  return await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
-}
+export const getTournamentPrizes = async (tournamentId: string): Promise<TournamentPrizes> =>
+  await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
 
-export function usePrizeFormat() {
+export const usePrizeFormat = () => {
   const { t, locale } = useI18n();
 
   const ordinalRules = computed(() => new Intl.PluralRules(locale.value, { type: "ordinal" }));
 
-  function formatAmount(amount: number, currency: string): string {
-    return formatPrizeAmount(amount, currency, locale.value);
-  }
+  const formatAmount = (amount: number, currency: string): string =>
+    formatPrizeAmount(amount, currency, locale.value);
 
-  function formatTotals(totals: PrizeAmount[]): string {
-    return totals.map(({ amount, currency }) => formatAmount(amount, currency)).join(" · ");
-  }
+  const formatTotals = (totals: PrizeAmount[]): string =>
+    totals.map(({ amount, currency }) => formatAmount(amount, currency)).join(" · ");
 
-  function formatPlacement(placement: number): string {
-    return t(`common.placement.${ordinalRules.value.select(placement)}`, { n: placement });
-  }
+  const formatPlacement = (placement: number): string =>
+    t(`common.placement.${ordinalRules.value.select(placement)}`, { n: placement });
 
   return { formatAmount, formatTotals, formatPlacement };
-}
+};

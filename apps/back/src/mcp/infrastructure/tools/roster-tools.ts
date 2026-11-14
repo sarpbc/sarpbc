@@ -239,7 +239,7 @@ export interface RosterToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose" | "proposeTeamLogo" | "list">;
 }
 
-function redistributableChange(change: RosterChange, sourceUrl: string): RosterChange {
+const redistributableChange = (change: RosterChange, sourceUrl: string): RosterChange => {
   if (
     change.kind === "set_event_streams" ||
     change.kind === "set_tournament_streams" ||
@@ -249,9 +249,9 @@ function redistributableChange(change: RosterChange, sourceUrl: string): RosterC
   }
 
   return change;
-}
+};
 
-export function rosterTools({ rosterProposalService }: RosterToolServices): McpTool[] {
+export const rosterTools = ({ rosterProposalService }: RosterToolServices): McpTool[] => {
   const propose = proposer(rosterProposalService);
 
   return [
@@ -890,4 +890,4 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       },
     }),
   ];
-}
+};

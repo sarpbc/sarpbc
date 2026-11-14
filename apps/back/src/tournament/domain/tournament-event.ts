@@ -17,39 +17,39 @@ export class TournamentEvent {
   updatedAt = new Date();
 }
 
-export function isEventSynced(
+export const isEventSynced = (
   event: TournamentEvent,
   stages: readonly { source: DataSource }[],
-): boolean {
-  return event.pandascoreSerieId !== null || stages.some((stage) => stage.source === "pandascore");
-}
+): boolean =>
+  event.pandascoreSerieId !== null || stages.some((stage) => stage.source === "pandascore");
 
-export function assertEventEditable(
+export const assertEventEditable = (
   event: TournamentEvent,
   stages: readonly { source: DataSource }[],
-): void {
+): void => {
   if (isEventSynced(event, stages)) {
     throw new InvalidInputError(
       "This event is managed by the PandaScore sync. Only manual events can be edited.",
     );
   }
-}
+};
 
 /**
  * A manual tournament created without an event gets an event of its own, named after it. Only that
  * event follows the tournament's name, slug and league; a shared or separately named event does not.
  */
-export function ownsEvent(
+export const ownsEvent = (
   event: TournamentEvent,
   stageIds: readonly string[],
   tournament: { id: string; name: string },
-): boolean {
-  return stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
-}
+): boolean =>
+  stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
 
-export function toEventRef(event: TournamentEventRef): TournamentEventRef {
-  return { id: event.id, slug: event.slug, name: event.name };
-}
+export const toEventRef = (event: TournamentEventRef): TournamentEventRef => ({
+  id: event.id,
+  slug: event.slug,
+  name: event.name,
+});
 
 const GENERIC_STAGE_NAMES = new Set([
   "playoffs",
@@ -64,15 +64,13 @@ const GENERIC_STAGE_NAMES = new Set([
   "finals",
 ]);
 
-function isGenericStageName(name: string): boolean {
-  return GENERIC_STAGE_NAMES.has(name.toLowerCase());
-}
+const isGenericStageName = (name: string): boolean => GENERIC_STAGE_NAMES.has(name.toLowerCase());
 
-export function eventDisplayName(input: {
+export const eventDisplayName = (input: {
   leagueName: string | null;
   serieName: string | null;
   stageName: string;
-}): string {
+}): string => {
   const league = nonBlank(input.leagueName);
   const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
@@ -96,16 +94,12 @@ export function eventDisplayName(input: {
   }
 
   return stage || (league ?? "");
-}
+};
 
-function utcDay(date: Date | null): string {
-  return date ? isoDay(date) : "";
-}
+const utcDay = (date: Date | null): string => (date ? isoDay(date) : "");
 
 /** Same-day stages start at staggered times (Group B before Group A), so order by day, then name. */
-export function compareStages(
+export const compareStages = (
   a: { beginAt: Date | null; name: string },
   b: { beginAt: Date | null; name: string },
-): number {
-  return utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
-}
+): number => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);

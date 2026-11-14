@@ -20,7 +20,7 @@ import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../../common/domain/text";
 
-function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSelector> {
+const parseMatchBlockKeys = (raw?: string | string[]): Map<string, MatchBlockSelector> => {
   const keys = [...new Set([raw ?? []].flat())];
 
   if (keys.length === 0 || keys.length > NEWS_MATCH_BLOCKS_PER_REQUEST) {
@@ -40,16 +40,17 @@ function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSel
       return [key, block];
     }),
   );
-}
+};
 
-function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
-  return {
-    tournamentId: nonBlank(tournamentId),
-    leagueId: nonBlank(leagueId),
-  };
-}
+const parseListScopeFilters = (
+  tournamentId?: string,
+  leagueId?: string,
+): MatchListScopeFilters => ({
+  tournamentId: nonBlank(tournamentId),
+  leagueId: nonBlank(leagueId),
+});
 
-function parsePagingValue(name: string, value?: string): number | undefined {
+const parsePagingValue = (name: string, value?: string): number | undefined => {
   if (value === undefined || value === "") {
     return undefined;
   }
@@ -61,24 +62,21 @@ function parsePagingValue(name: string, value?: string): number | undefined {
   }
 
   return parsed;
-}
+};
 
-function parsePaging(limit?: string, offset?: string) {
-  return {
-    limit: parsePagingValue("limit", limit),
-    offset: parsePagingValue("offset", offset) ?? 0,
-  };
-}
+const parsePaging = (limit?: string, offset?: string) => ({
+  limit: parsePagingValue("limit", limit),
+  offset: parsePagingValue("offset", offset) ?? 0,
+});
 
-function attachCommentCounts(
+const attachCommentCounts = (
   items: MatchListItem[],
   counts: Map<string, number>,
-): CountedMatchListItem[] {
-  return items.map((item) => ({
+): CountedMatchListItem[] =>
+  items.map((item) => ({
     ...item,
     commentCount: counts.get(item.id) ?? 0,
   }));
-}
 
 @Controller("matches")
 export class MatchController {

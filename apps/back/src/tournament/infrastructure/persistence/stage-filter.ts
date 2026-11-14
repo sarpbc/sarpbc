@@ -7,11 +7,11 @@ interface StageFilter {
   $or?: [{ endAt: null }, { endAt: { $gt: Date } }];
 }
 
-export function stageFilter({
+export const stageFilter = ({
   pickems,
   activeOnly = false,
   redistributableOnly = false,
-}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">): StageFilter {
+}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">): StageFilter => {
   const where: StageFilter = {};
 
   if (pickems !== undefined) {
@@ -28,4 +28,4 @@ export function stageFilter({
   }
 
   return where;
-}
+};

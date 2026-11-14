@@ -32,9 +32,8 @@ const { awardTypeLabel, seasonAwardTypeLabel } = usePlayerAwardLabels();
 const slugA = routeQueryString(route.query.a);
 const slugB = routeQueryString(route.query.b);
 
-async function loadPlayer(slug: string): Promise<Player | null> {
-  return slug ? getPlayerFromSlug(slug) : null;
-}
+const loadPlayer = async (slug: string): Promise<Player | null> =>
+  slug ? getPlayerFromSlug(slug) : null;
 
 const [
   { data: playerA, error: playerAError, refresh: refreshPlayerA },
@@ -85,45 +84,47 @@ const {
   { default: () => null },
 );
 
-function selectPlayer(side: Side, slug: string) {
+const selectPlayer = (side: Side, slug: string) => {
   router.replace({ query: { ...route.query, [side]: slug } });
-}
+};
 
-function retryPlayers() {
+const retryPlayers = () => {
   refreshPlayerA();
   refreshPlayerB();
-}
+};
 
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 const yearFormat = computed(() => new Intl.DateTimeFormat(locale.value, { year: "numeric" }));
 
-function leaderOf(a: number, b: number): Side | "tie" {
+const leaderOf = (a: number, b: number): Side | "tie" => {
   if (a === b) {
     return "tie";
   }
 
   return a > b ? "a" : "b";
-}
+};
 
-function countRow(key: string, label: string, a: number, b: number, compared: boolean): SummaryRow {
-  return {
-    key,
-    label,
-    a: numberFormat.value.format(a),
-    b: numberFormat.value.format(b),
-    leader: compared ? leaderOf(a, b) : null,
-  };
-}
+const countRow = (
+  key: string,
+  label: string,
+  a: number,
+  b: number,
+  compared: boolean,
+): SummaryRow => ({
+  key,
+  label,
+  a: numberFormat.value.format(a),
+  b: numberFormat.value.format(b),
+  leader: compared ? leaderOf(a, b) : null,
+});
 
-function awardCount(career: PlayerCareer): number {
-  return career.awards.length + career.seasonAwards.length;
-}
+const awardCount = (career: PlayerCareer): number =>
+  career.awards.length + career.seasonAwards.length;
 
-function teamCount(career: PlayerCareer): number {
-  return new Set(career.teams.map(({ team }) => team.id)).size;
-}
+const teamCount = (career: PlayerCareer): number =>
+  new Set(career.teams.map(({ team }) => team.id)).size;
 
-function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
+const earningsRows = (a: PlayerCareer, b: PlayerCareer): SummaryRow[] => {
   const currencies = [
     ...new Set([...a.earnings.totals, ...b.earnings.totals].map(({ currency }) => currency)),
   ].toSorted();
@@ -155,7 +156,7 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
       leader: leaderOf(amountA, amountB),
     };
   });
-}
+};
 
 const summaryRows = computed<SummaryRow[]>(() => {
   const current = comparison.value;
@@ -201,7 +202,7 @@ const summaryRows = computed<SummaryRow[]>(() => {
   ];
 });
 
-function valueClass(row: SummaryRow, side: Side): string {
+const valueClass = (row: SummaryRow, side: Side): string => {
   if (row.leader === null) {
     return "text-default";
   }
@@ -211,46 +212,42 @@ function valueClass(row: SummaryRow, side: Side): string {
   }
 
   return row.leader === side ? "font-medium text-highlighted" : "text-muted";
-}
+};
 
-function yearOf(value: string | null): string | null {
-  return value ? yearFormat.value.format(new Date(value)) : null;
-}
+const yearOf = (value: string | null): string | null =>
+  value ? yearFormat.value.format(new Date(value)) : null;
 
-function stintRange(stint: CareerStint): string {
+const stintRange = (stint: CareerStint): string => {
   const start = yearOf(stint.startDate) ?? "";
   const end = yearOf(stint.endDate) ?? t("page.player.compare.present");
 
   return start === end ? start : `${start} – ${end}`;
-}
+};
 
-function titleItems(career: PlayerCareer): CareerItem[] {
-  return career.titles.map((title) => ({
+const titleItems = (career: PlayerCareer): CareerItem[] =>
+  career.titles.map((title) => ({
     key: title.id,
     label: title.event.name,
     meta: yearOf(title.endAt) ?? "",
     to: localePath(tournamentStagePath(title.event.slug, title.slug)),
   }));
-}
 
-function awardItems(career: PlayerCareer): CareerItem[] {
-  return [
-    ...career.seasonAwards.map((award) => ({
-      key: award.id,
-      label: seasonAwardTypeLabel(award.awardType),
-      meta: [award.season.name, award.region].filter(Boolean).join(" · "),
-    })),
-    ...career.awards.map((award) => ({
-      key: award.id,
-      label: awardTypeLabel(award.awardType),
-      meta: award.tournament.event.name,
-      to: localePath(tournamentStagePath(award.tournament.event.slug, award.tournament.slug)),
-    })),
-  ];
-}
+const awardItems = (career: PlayerCareer): CareerItem[] => [
+  ...career.seasonAwards.map((award) => ({
+    key: award.id,
+    label: seasonAwardTypeLabel(award.awardType),
+    meta: [award.season.name, award.region].filter(Boolean).join(" · "),
+  })),
+  ...career.awards.map((award) => ({
+    key: award.id,
+    label: awardTypeLabel(award.awardType),
+    meta: award.tournament.event.name,
+    to: localePath(tournamentStagePath(award.tournament.event.slug, award.tournament.slug)),
+  })),
+];
 
-function teamItems(career: PlayerCareer): CareerItem[] {
-  return career.teams.map((stint) => ({
+const teamItems = (career: PlayerCareer): CareerItem[] =>
+  career.teams.map((stint) => ({
     key: `${stint.team.id}-${stint.startDate}`,
     label: stint.team.name,
     meta:
@@ -259,7 +256,6 @@ function teamItems(career: PlayerCareer): CareerItem[] {
         : `${t(`common.contractRole.${stint.role}`)} · ${stintRange(stint)}`,
     to: localePath(teamPath(stint.team.slug)),
   }));
-}
 
 const detailSections = computed(() => {
   const current = comparison.value;

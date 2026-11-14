@@ -61,14 +61,14 @@ const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
 
 const playerStats = new TournamentPlayerStatsService({ playerLines });
 
-function controllerWith(
+const controllerWith = (
   tournaments: TournamentQueries,
   tournamentRead: CachedTournamentRead,
   prizeService: TournamentPrizeService,
   prizesRead: CachedTournamentPrizesRead,
   catalog: ManualCatalogService,
-): TournamentController {
-  return new TournamentController(
+): TournamentController =>
+  new TournamentController(
     tournaments,
     unconstructed(SyncNewTournamentsUseCase),
     unconstructed(SyncPandascoreTournamentUseCase),
@@ -85,7 +85,6 @@ function controllerWith(
     unusedViewerships,
     playerStats,
   );
-}
 
 describe("TournamentController stage reads", () => {
   const redis = {

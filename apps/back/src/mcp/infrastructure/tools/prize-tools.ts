@@ -14,7 +14,7 @@ export interface PrizeToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose">;
 }
 
-export function prizeTools({ rosterProposalService }: PrizeToolServices): McpTool[] {
+export const prizeTools = ({ rosterProposalService }: PrizeToolServices): McpTool[] => {
   const propose = proposer(rosterProposalService);
 
   return [
@@ -120,4 +120,4 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
         ),
     }),
   ];
-}
+};

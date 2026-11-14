@@ -16,11 +16,10 @@ const TWIMG_ORIGIN = "https://pbs.twimg.com";
 // X also serves AVIF, which the cover upload does not accept.
 const TWIMG_CONTENT_TYPES = new Set<string>([...IMAGE_CONTENT_TYPES, "image/avif"]);
 
-function unavailable(): IntegrationError {
-  return new IntegrationError("Could not load this image from X. Try again in a moment.");
-}
+const unavailable = (): IntegrationError =>
+  new IntegrationError("Could not load this image from X. Try again in a moment.");
 
-function twimgUrl(input: string, base?: string): string | null {
+const twimgUrl = (input: string, base?: string): string | null => {
   let url: URL;
 
   try {
@@ -34,9 +33,9 @@ function twimgUrl(input: string, base?: string): string | null {
   }
 
   return `${TWIMG_ORIGIN}${url.pathname}${url.search}`;
-}
+};
 
-async function readImage(response: Response): Promise<TweetImage> {
+const readImage = async (response: Response): Promise<TweetImage> => {
   if (response.status === 404 || response.status === 410) {
     await response.body?.cancel();
     throw new NotFoundError("This image is no longer available on X.");
@@ -75,13 +74,13 @@ async function readImage(response: Response): Promise<TweetImage> {
   }
 
   return { contentType, body: Buffer.concat(chunks) };
-}
+};
 
-async function fetchImage(
+const fetchImage = async (
   target: string | null,
   redirects: number,
   signal: AbortSignal,
-): Promise<TweetImage> {
+): Promise<TweetImage> => {
   if (target === null || target === "") {
     throw unavailable();
   }
@@ -104,7 +103,7 @@ async function fetchImage(
   }
 
   return await fetchImage(twimgUrl(location, target), redirects + 1, signal);
-}
+};
 
 export class TwimgImageGateway implements TweetImageGateway {
   async load(url: string): Promise<TweetImage> {

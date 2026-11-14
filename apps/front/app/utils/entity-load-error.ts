@@ -6,10 +6,16 @@ import { getApiErrorStatus } from "@sarpbc/utils";
  * exist; anything else is a failed load. `fatal` shows the error page on client navigation too,
  * instead of silently keeping the previous route.
  */
-export function throwEntityLoadError(
-  cause: unknown,
-  messages: { notFound: string; failed: string },
-): never {
+interface EntityLoadErrorMessages {
+  notFound: string;
+  failed: string;
+}
+
+// Control flow treats a call as terminating only through an explicitly annotated binding.
+export const throwEntityLoadError: (cause: unknown, messages: EntityLoadErrorMessages) => never = (
+  cause,
+  messages,
+) => {
   const status = cause === undefined || cause === null ? 404 : getApiErrorStatus(cause);
   const notFound = status === 404;
   throw createError({
@@ -17,4 +23,4 @@ export function throwEntityLoadError(
     message: notFound ? messages.notFound : messages.failed,
     fatal: true,
   });
-}
+};

@@ -12,7 +12,7 @@ export interface MatchSlugInput {
   stageSlug: string;
 }
 
-function truncateAtHyphen(slug: string): string {
+const truncateAtHyphen = (slug: string): string => {
   if (slug.length <= MAX_SLUG_LENGTH) {
     return slug;
   }
@@ -21,9 +21,9 @@ function truncateAtHyphen(slug: string): string {
   const cut = window.lastIndexOf("-");
 
   return cut > 0 ? window.slice(0, cut) : slug.slice(0, MAX_SLUG_LENGTH);
-}
+};
 
-export function toSlug(...parts: (string | null | undefined)[]): string {
+export const toSlug = (...parts: (string | null | undefined)[]): string => {
   const text = parts
     .map((part) => part?.trim())
     .filter(Boolean)
@@ -34,23 +34,21 @@ export function toSlug(...parts: (string | null | undefined)[]): string {
     .replaceAll(/^-|-$/gu, "");
 
   return truncateAtHyphen(slug);
-}
+};
 
-export function eventSlug(name: string, year: number | null): string {
+export const eventSlug = (name: string, year: number | null): string => {
   const suffix = year !== null && !YEAR_PATTERN.test(name) ? String(year) : null;
 
   return toSlug(name, suffix) || "event";
-}
+};
 
-export function stageSlug(name: string): string {
-  return toSlug(name) || "stage";
-}
+export const stageSlug = (name: string): string => toSlug(name) || "stage";
 
 /** Tournament paths read a UUID segment as a legacy stage id, so a slug must never look like one. */
-export async function allocateSlug(
+export const allocateSlug = async (
   base: string,
   isTaken: (slug: string) => boolean | Promise<boolean>,
-): Promise<string> {
+): Promise<string> => {
   const allocate = async (attempt: number): Promise<string> => {
     const slug = attempt === 1 ? base : `${base}-${attempt}`;
 
@@ -62,9 +60,9 @@ export async function allocateSlug(
   };
 
   return await allocate(1);
-}
+};
 
-function roundLabel(matchName: string | null | undefined): string | null {
+const roundLabel = (matchName: string | null | undefined): string | null => {
   const name = matchName?.trim();
 
   if (!isNonEmptyString(name)) {
@@ -78,24 +76,23 @@ function roundLabel(matchName: string | null | undefined): string | null {
   }
 
   return /tbd/iu.test(name) ? null : name;
-}
+};
 
-function knownTeamName(name: string | null | undefined): string | null {
+const knownTeamName = (name: string | null | undefined): string | null => {
   const trimmed = name?.trim();
 
   return isNonEmptyString(trimmed) && !/^tbd$/iu.test(trimmed) ? trimmed : null;
-}
+};
 
-export function isKnownTeamName(name: string | null | undefined): boolean {
-  return knownTeamName(name) !== null;
-}
+export const isKnownTeamName = (name: string | null | undefined): boolean =>
+  knownTeamName(name) !== null;
 
-export function matchSlug({
+export const matchSlug = ({
   teamNames,
   matchName,
   eventSlug: event,
   stageSlug: stage,
-}: MatchSlugInput): string {
+}: MatchSlugInput): string => {
   const [teamA = null, teamB = null] = teamNames.map(knownTeamName);
 
   const [first, second] =
@@ -107,8 +104,6 @@ export function matchSlug({
 
   // A manual tournament is the only stage of an event slugged after the same name.
   return toSlug(...lead, event, stage === event ? null : stage) || "match";
-}
+};
 
-export function forumPostSlug(title: string): string {
-  return toSlug(title) || "post";
-}
+export const forumPostSlug = (title: string): string => toSlug(title) || "post";

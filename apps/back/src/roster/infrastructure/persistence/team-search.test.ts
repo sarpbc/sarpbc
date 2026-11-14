@@ -11,7 +11,7 @@ const orm = new MikroORM({
   allowGlobalContext: true,
 });
 
-function fixture(aliasTeamIds: string[]) {
+const fixture = (aliasTeamIds: string[]) => {
   const em = orm.em.fork();
 
   const aliases = aliasTeamIds.map((id) =>
@@ -22,7 +22,7 @@ function fixture(aliasTeamIds: string[]) {
   find.mockResolvedValueOnce(aliases).mockResolvedValueOnce([]);
 
   return { find, teams: new MikroTeamStore(em) };
-}
+};
 
 describe("MikroTeamStore.search", () => {
   it("also finds a team by a name it used before", async () => {

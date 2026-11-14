@@ -40,13 +40,13 @@ const feed = computed(() => buildNewsFeed(newsItems.value));
 const hasMoreNews = computed(() => (newsPage.value?.total ?? 0) > newsItems.value.length);
 const hasNews = computed(() => feed.value.length > 0);
 
-function loadMoreNews() {
+const loadMoreNews = () => {
   if (!hasMoreNews.value || newsPending.value) {
     return;
   }
 
   newsLimit.value += HOMEPAGE_NEWS_LIMIT;
-}
+};
 
 const { data: activePickemTournament } = await useLazyAsyncData(
   "active-pickem-tournament",

@@ -38,12 +38,12 @@ interface ManualBracketsContext {
   competition: { tournamentId: string; matchId: string };
 }
 
-export async function verifyManualBrackets({
+export const verifyManualBrackets = async ({
   request,
   staffCookie,
   memberCookie,
   competition,
-}: ManualBracketsContext): Promise<void> {
+}: ManualBracketsContext): Promise<void> => {
   const players: Identified[] = await mapSequentially(
     ["Fake Seed One", "Fake Seed Two", "Fake Seed Three", "Fake Seed Four"],
     async (name) => {
@@ -231,4 +231,4 @@ export async function verifyManualBrackets({
     [e2, e1],
   );
   await request("POST", `/tournaments/${empty.id}/bracket`, { teams: 4 }, staffCookie, 400);
-}
+};

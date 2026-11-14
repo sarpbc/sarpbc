@@ -5,13 +5,11 @@ import type { SearchQueryInput } from "./dto/search-query.dto";
 import { mapPlayer, mapTeam } from "../../../roster/infrastructure/http/player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 
-function searchCriteria(query: SearchQueryInput) {
-  return {
-    query: query.q ?? "",
-    limit: query.limit,
-    offset: query.offset,
-  };
-}
+const searchCriteria = (query: SearchQueryInput) => ({
+  query: query.q ?? "",
+  limit: query.limit,
+  offset: query.offset,
+});
 
 @Controller("search")
 export class SearchController {

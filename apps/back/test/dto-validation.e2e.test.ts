@@ -16,9 +16,7 @@ import type { UpdateTournamentInput } from "../src/tournament/infrastructure/htt
 import { CreateNewsArticleDto } from "../src/news/infrastructure/http/dto/create-news-article.dto";
 import type { CreateNewsArticleInput } from "../src/news/infrastructure/http/dto/create-news-article.dto";
 
-function echo<T>(value: T): T {
-  return value;
-}
+const echo = <T>(value: T): T => value;
 
 @Controller()
 class ValidationController {

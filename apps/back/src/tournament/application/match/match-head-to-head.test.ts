@@ -6,25 +6,25 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { Team } from "../../../roster/domain/team";
 import { buildHeadToHead, getWinnerTeamId, mapHeadToHeadMeeting } from "./match-head-to-head";
 
-function createTeam(id: string, name: string): Team {
+const createTeam = (id: string, name: string): Team => {
   const team = new Team();
   team.id = id;
   team.name = name;
   team.slug = name.toLowerCase().replaceAll(/\s+/gu, "-");
 
   return team;
-}
+};
 
-function createParticipant(id: string, team: Team): TournamentParticipant {
+const createParticipant = (id: string, team: Team): TournamentParticipant => {
   const participant = new TournamentParticipant();
   participant.id = id;
   participant.team = team;
   participant.players = [];
 
   return participant;
-}
+};
 
-function createFinishedMatch({
+const createFinishedMatch = ({
   id,
   teamA,
   teamB,
@@ -42,7 +42,7 @@ function createFinishedMatch({
   tournamentName?: string;
   eventSlug?: string;
   endAt?: Date;
-}): Match {
+}): Match => {
   const tournament = new Tournament();
   tournament.id = `tournament-${id}`;
   tournament.name = tournamentName;
@@ -71,7 +71,7 @@ function createFinishedMatch({
   }
 
   return match;
-}
+};
 
 describe("match-head-to-head", () => {
   const teamVitality = createTeam("team-vitality", "Team Vitality");

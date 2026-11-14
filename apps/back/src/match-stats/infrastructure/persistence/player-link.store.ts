@@ -6,9 +6,11 @@ import { MatchGamePlayer } from "./match-game-player.entity";
 import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { nameOf } from "./participant-name";
 
-export function toLink(row: PlayerPlatformLink): PlayerLink {
-  return { platform: row.platform, platformId: row.platformId, playerId: row.player.id };
-}
+export const toLink = (row: PlayerPlatformLink): PlayerLink => ({
+  platform: row.platform,
+  platformId: row.platformId,
+  playerId: row.player.id,
+});
 
 export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   constructor(private readonly em: EntityManager) {}

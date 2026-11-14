@@ -33,17 +33,16 @@ const worlds = {
   name: "RLCS 2024 World Championship",
 };
 
-function side(id: string, team: Team): TournamentParticipant {
-  return Object.assign(new TournamentParticipant(), { id, team, players: [vatira] });
-}
+const side = (id: string, team: Team): TournamentParticipant =>
+  Object.assign(new TournamentParticipant(), { id, team, players: [vatira] });
 
-export function stage(
+export const stage = (
   id: string,
   source: DataSource,
   endAt: string,
   winner = side(`${id}-kc`, kc),
-) {
-  return Object.assign(new Tournament(), {
+) =>
+  Object.assign(new Tournament(), {
     id,
     name: "Playoffs",
     slug: "playoffs",
@@ -52,13 +51,12 @@ export function stage(
     endAt: new Date(endAt),
     winner,
   });
-}
 
-export function grandFinal(
+export const grandFinal = (
   tournament: Tournament,
   endAt: string,
   options: { source?: DataSource; publicId?: number } = {},
-) {
+) => {
   const winner = side(`${tournament.id}-kc`, kc);
   const loser = side(`${tournament.id}-bds`, bds);
 
@@ -89,9 +87,9 @@ export function grandFinal(
       eventStreams: [],
     },
   });
-}
+};
 
-export function transfer(id: string, type: Transfer["type"], date: string): Transfer {
+export const transfer = (id: string, type: Transfer["type"], date: string): Transfer => {
   const contract = Object.assign(new Contract(), {
     id,
     player: vatira,
@@ -100,30 +98,28 @@ export function transfer(id: string, type: Transfer["type"], date: string): Tran
   });
 
   return { id: `${id}:join`, type, date: new Date(date), contract, sourceUrl: null };
-}
+};
 
-export function fact(overrides: Partial<OnThisDayFact> = {}): OnThisDayFact {
-  return {
-    id: "fact-id",
-    month: 12,
-    day: 6,
-    year: 2015,
-    textEn: "Rocket League's first official league kicked off.",
-    textFr: "La première ligue officielle de Rocket League débutait.",
-    link: null,
-    sourceUrl: "https://www.rocketleague.com/news",
-    ...overrides,
-  };
-}
+export const fact = (overrides: Partial<OnThisDayFact> = {}): OnThisDayFact => ({
+  id: "fact-id",
+  month: 12,
+  day: 6,
+  year: 2015,
+  textEn: "Rocket League's first official league kicked off.",
+  textFr: "La première ligue officielle de Rocket League débutait.",
+  link: null,
+  sourceUrl: "https://www.rocketleague.com/news",
+  ...overrides,
+});
 
-export function onThisDaySources(
+export const onThisDaySources = (
   data: {
     titles?: Tournament[];
     finals?: Match[];
     transfers?: Transfer[];
     facts?: OnThisDayFact[];
   } = {},
-) {
+) => {
   const tournaments = {
     wonOnDay: vi.fn<OnThisDaySources["tournaments"]["wonOnDay"]>(async () => data.titles ?? []),
     finalsOnDay: vi.fn<OnThisDaySources["tournaments"]["finalsOnDay"]>(
@@ -139,7 +135,7 @@ export function onThisDaySources(
   const sources: OnThisDaySources = { tournaments, transfers, facts };
 
   return { sources, tournaments, transfers, facts };
-}
+};
 
 type FactLink = NonNullable<OnThisDayFact["link"]>;
 
@@ -168,7 +164,7 @@ const LINKABLE = [
 const target = ({ kind, id }: OnThisDayFactLinkInput) =>
   LINKABLE.find((link) => link.kind === kind && link.id === id) ?? null;
 
-export function memoryFactStore(): OnThisDayFactStore {
+export const memoryFactStore = (): OnThisDayFactStore => {
   const rows = new Map<string, OnThisDayFact>();
 
   return {
@@ -182,4 +178,4 @@ export function memoryFactStore(): OnThisDayFactStore {
     },
     remove: async (id) => rows.delete(id),
   };
-}
+};

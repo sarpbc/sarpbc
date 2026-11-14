@@ -8,28 +8,26 @@ import type { TournamentParticipant } from "../domain/tournament-participant";
 import type { ParticipantRosterInput, UpdateTournamentInput } from "./inputs";
 import type { TournamentWriter } from "./ports";
 
-function playersNotFound(): InvalidInputError {
-  return new InvalidInputError(
+const playersNotFound = (): InvalidInputError =>
+  new InvalidInputError(
     "One or more players were not found. Refresh the player list and try again.",
   );
-}
 
-function participantPlayerKey(participant: TournamentParticipant): string {
-  return playerGroupKey(participant.players.map((player) => player.id));
-}
+const participantPlayerKey = (participant: TournamentParticipant): string =>
+  playerGroupKey(participant.players.map((player) => player.id));
 
 /** Copied once when the team joins, so later transfers do not rewrite the history of the tournament. */
-async function activeRoster(writer: TournamentWriter, teamId: string): Promise<string[]> {
+const activeRoster = async (writer: TournamentWriter, teamId: string): Promise<string[]> => {
   const players = await writer.teamPlayers(teamId);
 
   return players.filter((player) => player.currentRole() === "active").map((player) => player.id);
-}
+};
 
-async function removeParticipants(
+const removeParticipants = async (
   writer: TournamentWriter,
   tournamentId: string,
   participants: TournamentParticipant[],
-): Promise<void> {
+): Promise<void> => {
   const references = await mapSequentially(
     participants,
     async (p) => await writer.participantReferences(tournamentId, p.id),
@@ -42,13 +40,13 @@ async function removeParticipants(
   await mapSequentially(participants, async (p) => {
     await writer.removeParticipant(p.id);
   });
-}
+};
 
-export async function syncParticipants(
+export const syncParticipants = async (
   writer: TournamentWriter,
   tournament: Tournament,
   teamIds: string[],
-): Promise<void> {
+): Promise<void> => {
   if (new Set(teamIds).size !== teamIds.length || !(await writer.teamsExist(teamIds))) {
     throw new InvalidInputError(
       "One or more teams were not found. Refresh the team list and try again.",
@@ -77,13 +75,13 @@ export async function syncParticipants(
       rosterSourceUrl: null,
     });
   });
-}
+};
 
-export async function syncPlayerParticipants(
+export const syncPlayerParticipants = async (
   writer: TournamentWriter,
   tournament: Tournament,
   groups: string[][],
-): Promise<void> {
+): Promise<void> => {
   const playerIds = [...new Set(groups.flat())];
 
   if (playerIds.length && !(await writer.playersExist(playerIds))) {
@@ -113,13 +111,13 @@ export async function syncPlayerParticipants(
       rosterSourceUrl: null,
     });
   });
-}
+};
 
-export async function assertUpdatedLineup(
+export const assertUpdatedLineup = async (
   writer: TournamentWriter,
   tournament: Tournament,
   input: UpdateTournamentInput,
-): Promise<void> {
+): Promise<void> => {
   if (input.format !== undefined) {
     tournament.format = input.format;
   }
@@ -139,13 +137,13 @@ export async function assertUpdatedLineup(
       input.playerParticipants ??
       current.flatMap((p) => (p.team ? [] : [p.players.map((player) => player.id)])),
   });
-}
+};
 
-export async function setRosters(
+export const setRosters = async (
   writer: TournamentWriter,
   tournament: Tournament,
   rosters: ParticipantRosterInput[],
-): Promise<void> {
+): Promise<void> => {
   const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
 
   if (playerIds.length && !(await writer.playersExist(playerIds))) {
@@ -184,4 +182,4 @@ export async function setRosters(
           : parseDataSourceUrl(roster.sourceUrl),
     });
   });
-}
+};

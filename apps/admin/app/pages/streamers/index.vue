@@ -62,18 +62,18 @@ const {
   server: false,
 });
 
-function openAddModal() {
+const openAddModal = () => {
   newLogin.value = "";
   newDisplayName.value = "";
   isAddModalOpen.value = true;
-}
+};
 
-function openRemoveModal(streamer: TrackedStreamer) {
+const openRemoveModal = (streamer: TrackedStreamer) => {
   streamerToRemove.value = streamer;
   isRemoveModalOpen.value = true;
-}
+};
 
-async function confirmAdd() {
+const confirmAdd = async () => {
   if (!isLoginValid.value) {
     return;
   }
@@ -96,9 +96,9 @@ async function confirmAdd() {
   } finally {
     isAdding.value = false;
   }
-}
+};
 
-async function confirmRemove() {
+const confirmRemove = async () => {
   if (!streamerToRemove.value) {
     return;
   }
@@ -122,7 +122,7 @@ async function confirmRemove() {
   } finally {
     isRemoving.value = false;
   }
-}
+};
 </script>
 
 <template>

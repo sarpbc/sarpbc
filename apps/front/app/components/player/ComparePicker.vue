@@ -29,9 +29,11 @@ const query = refDebounced(
   200,
 );
 
-function toOption(candidate: Player): PlayerOption {
-  return { label: candidate.name, description: candidate.team?.name, value: candidate.slug };
-}
+const toOption = (candidate: Player): PlayerOption => ({
+  label: candidate.name,
+  description: candidate.team?.name,
+  value: candidate.slug,
+});
 
 const selected = computed(() => (player ? toOption(player) : undefined));
 
@@ -55,11 +57,11 @@ const items = computed(() =>
     .map((candidate) => toOption(candidate)),
 );
 
-function select(option: PlayerOption | undefined) {
+const select = (option: PlayerOption | undefined) => {
   if (option) {
     emit("select", option.value);
   }
-}
+};
 </script>
 
 <template>

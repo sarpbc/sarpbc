@@ -103,24 +103,22 @@ export interface CircuitsContext {
 const DAY = 86_400_000;
 const RULES = "https://example.test/fake-circuit/rules";
 
-function pandascoreStage({
+const pandascoreStage = ({
   pandascoreId,
   serieId,
   name,
   teams,
   endAt,
-}: StageInput): UpsertTournamentCommand {
-  return {
-    pandascoreId,
-    name,
-    serie: { pandascoreId: serieId, fullName: `Fake Circuit ${name}`, year: 2026 },
-    beginAt: new Date(endAt.getTime() - 3 * DAY),
-    endAt,
-    expectedRoster: teams.map((team) => ({ team, players: [] })),
-  };
-}
+}: StageInput): UpsertTournamentCommand => ({
+  pandascoreId,
+  name,
+  serie: { pandascoreId: serieId, fullName: `Fake Circuit ${name}`, year: 2026 },
+  beginAt: new Date(endAt.getTime() - 3 * DAY),
+  endAt,
+  expectedRoster: teams.map((team) => ({ team, players: [] })),
+});
 
-export async function verifyCircuits({
+export const verifyCircuits = async ({
   app,
   orm,
   RequestContext,
@@ -130,15 +128,13 @@ export async function verifyCircuits({
   callTool,
   review,
   tournament,
-}: CircuitsContext): Promise<void> {
+}: CircuitsContext): Promise<void> => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const sync = app.get(CompetitionSyncService);
 
-  function run<T>(work: () => T): T {
-    return RequestContext.create(orm.em.fork(), work);
-  }
+  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const teams = [9801, 9802, 9803].map((pandascoreId) => ({
     pandascoreId,
@@ -609,4 +605,4 @@ export async function verifyCircuits({
   await request("DELETE", stagePath(pending.id), undefined, staffCookie, 404);
   await request("DELETE", `/circuits/${circuit.id}`, undefined, staffCookie, 204);
   await request("GET", `/circuits/${circuit.slug}/standings`, undefined, undefined, 404);
-}
+};

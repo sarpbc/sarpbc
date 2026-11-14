@@ -28,11 +28,11 @@ const limits = {
   isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/iu.test(hostname),
 };
 
-function resolveDns(addresses: Record<string, string[]>) {
+const resolveDns = (addresses: Record<string, string[]>) => {
   fakes.addresses = new Map(Object.entries(addresses));
-}
+};
 
-function serve(routes: Record<string, Reply>) {
+const serve = (routes: Record<string, Reply>) => {
   fakes.request.mockImplementation((url, options) => {
     const { lookup, signal } = options;
 
@@ -81,7 +81,7 @@ function serve(routes: Record<string, Reply>) {
 
     return req;
   });
-}
+};
 
 const download = async (url: string, overrides: Partial<typeof limits> = {}) =>
   await downloadPublicHttps(new URL(url), { ...limits, ...overrides }, transport);

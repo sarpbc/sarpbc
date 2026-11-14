@@ -15,7 +15,7 @@ const INPUT = {
   sourceUrl: SOURCE,
 };
 
-function setup(toolName: string, role: StaffRole = "admin") {
+const setup = (toolName: string, role: StaffRole = "admin") => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -30,7 +30,7 @@ function setup(toolName: string, role: StaffRole = "admin") {
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
 describe("viewership tools", () => {
   it.each([

@@ -13,10 +13,10 @@ import type { Applied } from "./sync-applied";
 
 type IncidentDeletion = Extract<CompetitionIncident, { changeType: "deletion" }>;
 
-export async function applyLeague(
+export const applyLeague = async (
   scope: CompetitionWriteScope,
   command: UpsertLeagueCommand,
-): Promise<League> {
+): Promise<League> => {
   const league =
     (await scope.tournaments.leagueByPandascoreId(command.pandascoreId)) ??
     Object.assign(new League(), { pandascoreId: command.pandascoreId });
@@ -29,12 +29,12 @@ export async function applyLeague(
   await scope.tournaments.saveLeague(league);
 
   return league;
-}
+};
 
-export async function applySerie(
+export const applySerie = async (
   events: EventWriter,
   command: UpsertSerieCommand,
-): Promise<Applied | null> {
+): Promise<Applied | null> => {
   const event = await events.bySerieId(command.pandascoreId);
   const serieName = command.fullName?.trim();
 
@@ -51,13 +51,13 @@ export async function applySerie(
   await events.save(event);
 
   return { stageIds: stages.map((stage) => stage.id), matches: [] };
-}
+};
 
-async function mergeSerie(
+const mergeSerie = async (
   scope: CompetitionWriteScope,
   serieId: number,
   intoId: number,
-): Promise<Applied | null> {
+): Promise<Applied | null> => {
   const from = await scope.events.bySerieId(serieId);
 
   if (!from) {
@@ -95,13 +95,13 @@ async function mergeSerie(
   await scope.events.remove(from.id);
 
   return { stageIds, matches: [] };
-}
+};
 
-async function applySerieDeletion(
+const applySerieDeletion = async (
   scope: CompetitionWriteScope,
   serieId: number,
   deletion: ProviderDeletion,
-): Promise<Applied | null> {
+): Promise<Applied | null> => {
   switch (deletion.kind) {
     case "merged": {
       return await mergeSerie(scope, serieId, deletion.intoId);
@@ -118,12 +118,12 @@ async function applySerieDeletion(
       return neverDeletion;
     }
   }
-}
+};
 
-export async function applyDeletion(
+export const applyDeletion = async (
   scope: CompetitionWriteScope,
   incident: IncidentDeletion,
-): Promise<Applied | null> {
+): Promise<Applied | null> => {
   switch (incident.kind) {
     case "serie": {
       return await applySerieDeletion(scope, incident.id, incident.deletion);
@@ -143,4 +143,4 @@ export async function applyDeletion(
       return neverKind;
     }
   }
-}
+};

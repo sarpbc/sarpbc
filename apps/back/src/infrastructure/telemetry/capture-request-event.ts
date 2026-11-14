@@ -1,6 +1,6 @@
 import type { PostHogProperties, PostHogService } from "./posthog.service";
 
-function singleHeader(value: string | string[] | undefined): string | undefined {
+const singleHeader = (value: string | string[] | undefined): string | undefined => {
   if (!Array.isArray(value)) {
     return value;
   }
@@ -8,14 +8,14 @@ function singleHeader(value: string | string[] | undefined): string | undefined 
   const [first]: (string | undefined)[] = value;
 
   return first;
-}
+};
 
-export async function captureRequestEvent(
+export const captureRequestEvent = async (
   posthog: PostHogService,
   headers: Record<string, string | string[] | undefined>,
   event: string,
   properties?: PostHogProperties,
-): Promise<void> {
+): Promise<void> => {
   posthog.capture({
     distinctId: singleHeader(headers["x-posthog-distinct-id"]),
     event,
@@ -23,4 +23,4 @@ export async function captureRequestEvent(
     properties,
   });
   await posthog.flush();
-}
+};

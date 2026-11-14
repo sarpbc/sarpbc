@@ -6,12 +6,12 @@ import type { Orm, Payload, Request } from "./support.mts";
 
 const DAY = "2026-02-17";
 
-function participantOf(stage: StageRef, teamId: string): string {
+const participantOf = (stage: StageRef, teamId: string): string => {
   const participant = stage.participants.find(({ team }) => team.id === teamId);
   assert.ok(participant, "the stage has the team");
 
   return participant.id;
-}
+};
 
 export interface OnThisDayContext {
   orm: Orm;
@@ -74,17 +74,17 @@ const onThisDay = z.object({
   ),
 });
 
-export async function verifyOnThisDay({
+export const verifyOnThisDay = async ({
   orm,
   request,
   staffCookie,
   memberCookie,
-}: OnThisDayContext): Promise<void> {
-  async function created<T>(schema: z.ZodType<T>, path: string, body: Payload): Promise<T> {
+}: OnThisDayContext): Promise<void> => {
+  const created = async <T,>(schema: z.ZodType<T>, path: string, body: Payload): Promise<T> => {
     const response = await request("POST", path, body, staffCookie, 201);
 
     return response.json(schema);
-  }
+  };
 
   const sql = async (query: string, params: (string | number)[]) =>
     await orm.em.fork().getConnection().execute(query, params);
@@ -265,4 +265,4 @@ export async function verifyOnThisDay({
 
   await request("DELETE", `/on-this-day-facts/${saved.id}`, undefined, staffCookie, 204);
   await request("DELETE", `/on-this-day-facts/${future.id}`, undefined, staffCookie, 204);
-}
+};

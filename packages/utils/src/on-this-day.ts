@@ -12,15 +12,15 @@ export interface CalendarDay {
   day: number;
 }
 
-export function isMonthDay(month: number, day: number): boolean {
+export const isMonthDay = (month: number, day: number): boolean => {
   if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) {
     return false;
   }
 
   return day >= 1 && day <= (DAYS_IN_MONTH[month - 1] ?? 0);
-}
+};
 
-export function calendarDayIn(date: Date, timeZone: string): CalendarDay {
+export const calendarDayIn = (date: Date, timeZone: string): CalendarDay => {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
@@ -32,9 +32,9 @@ export function calendarDayIn(date: Date, timeZone: string): CalendarDay {
     Number(parts.find((entry) => entry.type === type)?.value);
 
   return { year: part("year"), month: part("month"), day: part("day") };
-}
+};
 
-export function parseIsoDay(value: string): CalendarDay | null {
+export const parseIsoDay = (value: string): CalendarDay | null => {
   const match = ISO_DAY.exec(value);
 
   if (!match) {
@@ -47,8 +47,7 @@ export function parseIsoDay(value: string): CalendarDay | null {
   return date.getUTCMonth() === month - 1 && date.getUTCDate() === day
     ? { year, month, day }
     : null;
-}
+};
 
-export function formatIsoDay({ year, month, day }: CalendarDay): string {
-  return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
+export const formatIsoDay = ({ year, month, day }: CalendarDay): string =>
+  `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

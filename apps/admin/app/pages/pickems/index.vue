@@ -36,19 +36,18 @@ const breadcrumbItems = computed(() => [
   },
 ]);
 
-function teamLogoSrc(team: ThemedLogo | null | undefined) {
-  return resolveThemedLogoUrl(team, colorMode.value);
-}
+const teamLogoSrc = (team: ThemedLogo | null | undefined) =>
+  resolveThemedLogoUrl(team, colorMode.value);
 
-async function handleSyncTournament(tournamentId: string) {
+const handleSyncTournament = async (tournamentId: string) => {
   try {
     await runTournamentSync(tournamentId, refresh);
   } catch (syncError) {
     reportError(syncError);
   }
-}
+};
 
-async function handleEnablePickems(tournamentId: string) {
+const handleEnablePickems = async (tournamentId: string) => {
   enablingTournamentId.value = tournamentId;
 
   try {
@@ -60,7 +59,7 @@ async function handleEnablePickems(tournamentId: string) {
   } finally {
     enablingTournamentId.value = null;
   }
-}
+};
 </script>
 
 <template>

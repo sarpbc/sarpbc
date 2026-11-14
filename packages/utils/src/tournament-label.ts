@@ -5,7 +5,7 @@ interface EventStage {
   event: { name: string };
 }
 
-export function distinctStageName(stage: EventStage): string | null {
+export const distinctStageName = (stage: EventStage): string | null => {
   const stageName = stage.name.trim();
 
   // An event without a PandaScore serie is named after its only stage, sometimes behind the
@@ -15,11 +15,11 @@ export function distinctStageName(stage: EventStage): string | null {
   }
 
   return stageName;
-}
+};
 
-export function tournamentStageLabel(stage: EventStage): string {
+export const tournamentStageLabel = (stage: EventStage): string => {
   const eventName = stage.event.name.trim();
   const stageName = distinctStageName(stage);
 
   return isNonEmptyString(stageName) ? `${eventName} ${stageName}` : eventName;
-}
+};

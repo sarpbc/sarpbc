@@ -20,12 +20,12 @@ interface CreateReplyBody {
   replyToId?: string;
 }
 
-export async function getCommentsByTarget(
+export const getCommentsByTarget = async (
   targetType: ReplyTargetType,
   targetId: string,
   page = 0,
   limit?: number,
-): Promise<PaginatedReplies> {
+): Promise<PaginatedReplies> => {
   try {
     const query: GetCommentsQuery = {
       targetType,
@@ -45,18 +45,17 @@ export async function getCommentsByTarget(
     console.error("Error fetching comments:", error);
     throw error;
   }
-}
+};
 
-export function refetchLimitForLoadedPages(loadedPages: number, pageSize: number): number {
-  return Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
-}
+export const refetchLimitForLoadedPages = (loadedPages: number, pageSize: number): number =>
+  Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
 
-export async function createComment(data: {
+export const createComment = async (data: {
   content: string;
   targetType: ReplyTargetType;
   targetId: string;
   replyToId?: string;
-}): Promise<CreateCommentResult> {
+}): Promise<CreateCommentResult> => {
   const body: CreateReplyBody = {
     content: data.content,
   };
@@ -100,9 +99,9 @@ export async function createComment(data: {
       codes: { [FORUM_ERROR_CODES.REPLY_RATE_LIMITED]: "rate_limited" },
     });
   }
-}
+};
 
-export async function hideComment(commentId: string): Promise<boolean> {
+export const hideComment = async (commentId: string): Promise<boolean> => {
   try {
     await apiFetch(`/replies/${commentId}/hide`, { method: "PATCH", body: {} });
 
@@ -112,9 +111,9 @@ export async function hideComment(commentId: string): Promise<boolean> {
 
     return false;
   }
-}
+};
 
-export async function deleteComment(commentId: string): Promise<boolean> {
+export const deleteComment = async (commentId: string): Promise<boolean> => {
   try {
     await apiFetch(`/replies/${commentId}`, { method: "DELETE" });
 
@@ -124,12 +123,12 @@ export async function deleteComment(commentId: string): Promise<boolean> {
 
     return false;
   }
-}
+};
 
-export async function reportComment(
+export const reportComment = async (
   commentId: string,
   reason: ReplyReportReason,
-): Promise<ReportCommentResult> {
+): Promise<ReportCommentResult> => {
   try {
     await apiFetch(`/replies/${commentId}/report`, {
       method: "POST",
@@ -142,4 +141,4 @@ export async function reportComment(
       codes: { [FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED]: "already_reported" },
     });
   }
-}
+};

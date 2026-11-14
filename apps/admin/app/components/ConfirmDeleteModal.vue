@@ -29,7 +29,7 @@ const open = computed({
   },
 });
 
-async function confirm() {
+const confirm = async () => {
   const item = target.value;
 
   if (item === null) {
@@ -47,7 +47,7 @@ async function confirm() {
   } finally {
     isDeleting.value = false;
   }
-}
+};
 </script>
 
 <template>

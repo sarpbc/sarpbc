@@ -8,7 +8,7 @@ interface DeletionObject {
   videogame_id?: number;
 }
 
-function deletionReason(object: DeletionObject | null): string | null {
+const deletionReason = (object: DeletionObject | null): string | null => {
   const incident = incidentSchema.parse({
     id: 1,
     modified_at: "2026-10-01T00:00:00Z",
@@ -22,7 +22,7 @@ function deletionReason(object: DeletionObject | null): string | null {
   }
 
   return incident.object;
-}
+};
 
 const deletion = (reason: string | null) => ({
   deleted_at: "2026-10-01T00:00:00Z",

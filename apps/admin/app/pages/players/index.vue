@@ -67,17 +67,17 @@ const newPlayer = ref({
   imageUrl: "",
 });
 
-function selectRow(e: Event, row: TableRow<Player>) {
+const selectRow = (e: Event, row: TableRow<Player>) => {
   e.preventDefault();
   navigateTo(localePath(`/players/${row.original.id}`));
-}
+};
 
-function openDeleteModal(e: Event, player: Player) {
+const openDeleteModal = (e: Event, player: Player) => {
   e.stopPropagation();
   playerToDelete.value = player;
-}
+};
 
-function openCreateModal() {
+const openCreateModal = () => {
   newPlayer.value = {
     name: "",
     firstName: "",
@@ -87,9 +87,9 @@ function openCreateModal() {
     imageUrl: "",
   };
   isCreateModalOpen.value = true;
-}
+};
 
-async function confirmCreate() {
+const confirmCreate = async () => {
   if (!newPlayer.value.name) {
     return;
   }
@@ -127,7 +127,7 @@ async function confirmCreate() {
   } finally {
     isCreating.value = false;
   }
-}
+};
 </script>
 
 <template>

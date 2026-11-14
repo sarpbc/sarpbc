@@ -53,7 +53,7 @@ const SPARE_GAMERTAGS = [
 
 type DisplacementFate = "swap" | "free_agent" | "leave";
 
-function asRoster(ids: string[]): CareerRoster {
+const asRoster = (ids: string[]): CareerRoster => {
   const [first, second, third] = ids;
 
   if (
@@ -66,9 +66,9 @@ function asRoster(ids: string[]): CareerRoster {
   }
 
   return [first, second, third];
-}
+};
 
-function cloneWorld(world: CareerWorldState): CareerWorldState {
+const cloneWorld = (world: CareerWorldState): CareerWorldState => {
   const rosters: Record<string, CareerRoster> = {};
 
   for (const [teamId, roster] of Object.entries(world.rosters)) {
@@ -93,36 +93,34 @@ function cloneWorld(world: CareerWorldState): CareerWorldState {
       points: { ...field.points },
     })),
   };
-}
+};
 
-function emptyCareerWorld(): CareerWorldState {
-  return {
-    rosters: {},
-    players: {},
-    freeAgentIds: [],
-    nextGeneratedId: 1,
-    rankSnapshot: null,
-    splitFields: [],
-  };
-}
+const emptyCareerWorld = (): CareerWorldState => ({
+  rosters: {},
+  players: {},
+  freeAgentIds: [],
+  nextGeneratedId: 1,
+  rankSnapshot: null,
+  splitFields: [],
+});
 
-export function getRosterPlayerRating(
+export const getRosterPlayerRating = (
   playerId: string,
   world: CareerWorldState,
   userRating: number,
-): number {
+): number => {
   if (playerId === USER_ROSTER_ID) {
     return userRating;
   }
 
   return world.players[playerId]?.rating ?? 50;
-}
+};
 
-export function getRosterStrength(
+export const getRosterStrength = (
   roster: readonly string[],
   world: CareerWorldState,
   userRating: number,
-): number {
+): number => {
   if (roster.length === 0) {
     return 0;
   }
@@ -133,7 +131,7 @@ export function getRosterStrength(
   );
 
   return sum / roster.length;
-}
+};
 
 export interface MatchStrengthUser {
   rating: number;
@@ -141,15 +139,17 @@ export interface MatchStrengthUser {
   role?: CareerRole | null;
 }
 
-function npcStats(player: CareerNpcPlayer): CareerStats {
-  return { rating: player.rating, form: player.form, morale: player.morale };
-}
+const npcStats = (player: CareerNpcPlayer): CareerStats => ({
+  rating: player.rating,
+  form: player.form,
+  morale: player.morale,
+});
 
-export function getPlayerMatchStrength(
+export const getPlayerMatchStrength = (
   playerId: string,
   world: CareerWorldState,
   user: MatchStrengthUser,
-): number {
+): number => {
   if (playerId === USER_ROSTER_ID) {
     if (user.stats) {
       return computePerformance(user.stats, user.role);
@@ -165,13 +165,13 @@ export function getPlayerMatchStrength(
   }
 
   return computePerformance(npcStats(npc));
-}
+};
 
-export function getRosterMatchStrength(
+export const getRosterMatchStrength = (
   roster: readonly string[],
   world: CareerWorldState,
   user: MatchStrengthUser,
-): number {
+): number => {
   if (roster.length === 0) {
     return 0;
   }
@@ -182,16 +182,14 @@ export function getRosterMatchStrength(
   );
 
   return sum / roster.length;
-}
+};
 
-function rollNpcFormMorale(rng: () => number): Pick<CareerNpcPlayer, "form" | "morale"> {
-  return {
-    form: clampStat(56 + rng() * 18),
-    morale: clampStat(56 + rng() * 18),
-  };
-}
+const rollNpcFormMorale = (rng: () => number): Pick<CareerNpcPlayer, "form" | "morale"> => ({
+  form: clampStat(56 + rng() * 18),
+  morale: clampStat(56 + rng() * 18),
+});
 
-function npcWalkSpan(tick: NpcRatingTick): number {
+const npcWalkSpan = (tick: NpcRatingTick): number => {
   switch (tick) {
     case "split1":
     case "split2":
@@ -209,9 +207,9 @@ function npcWalkSpan(tick: NpcRatingTick): number {
       return _exhaustive;
     }
   }
-}
+};
 
-function npcFormWalkSpan(tick: NpcRatingTick): number {
+const npcFormWalkSpan = (tick: NpcRatingTick): number => {
   switch (tick) {
     case "split1":
     case "split2":
@@ -229,10 +227,10 @@ function npcFormWalkSpan(tick: NpcRatingTick): number {
       return _exhaustive;
     }
   }
-}
+};
 
 /** Rising / stable / declining lane, hashed from id so stars fade and prospects climb. */
-function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): number {
+const npcCareerBias = (playerId: string, season: number, tick: NpcRatingTick): number => {
   if (tick !== "season") {
     return 0;
   }
@@ -248,14 +246,14 @@ function npcCareerBias(playerId: string, season: number, tick: NpcRatingTick): n
   }
 
   return season >= 4 ? -1 : 0;
-}
+};
 
-export function tickNpcRatings(
+export const tickNpcRatings = (
   world: CareerWorldState,
   careerId: string,
   season: number,
   tick: NpcRatingTick,
-): CareerWorldState {
+): CareerWorldState => {
   const next = cloneWorld(world);
   const ratingSpan = npcWalkSpan(tick);
   const formSpan = npcFormWalkSpan(tick);
@@ -275,9 +273,9 @@ export function tickNpcRatings(
   }
 
   return next;
-}
+};
 
-export function createCareerWorld(careerId: string): CareerWorldState {
+export const createCareerWorld = (careerId: string): CareerWorldState => {
   const world = emptyCareerWorld();
 
   for (const team of WORLD_TEAMS) {
@@ -320,9 +318,9 @@ export function createCareerWorld(careerId: string): CareerWorldState {
   }
 
   return world;
-}
+};
 
-function pickDisplacementFate(rng: () => number, canSwap: boolean): DisplacementFate {
+const pickDisplacementFate = (rng: () => number, canSwap: boolean): DisplacementFate => {
   const roll = rng();
 
   if (canSwap && roll < 0.5) {
@@ -334,14 +332,14 @@ function pickDisplacementFate(rng: () => number, canSwap: boolean): Displacement
   }
 
   return "leave";
-}
+};
 
-function pickPlayerToDisplace(
+const pickPlayerToDisplace = (
   roster: readonly string[],
   world: CareerWorldState,
   userRating: number,
   rng: () => number,
-): string {
+): string => {
   const npcs = roster.filter((id) => id !== USER_ROSTER_ID);
 
   const sorted = npcs.toSorted(
@@ -362,9 +360,9 @@ function pickPlayerToDisplace(
   );
 
   return bottom[Math.floor(rng() * bottom.length)] ?? worst;
-}
+};
 
-function isSigned(playerId: string, world: CareerWorldState): boolean {
+const isSigned = (playerId: string, world: CareerWorldState): boolean => {
   if (playerId === USER_ROSTER_ID) {
     return true;
   }
@@ -376,9 +374,9 @@ function isSigned(playerId: string, world: CareerWorldState): boolean {
   }
 
   return false;
-}
+};
 
-function usedNames(world: CareerWorldState): Set<string> {
+const usedNames = (world: CareerWorldState): Set<string> => {
   const names = new Set<string>();
 
   for (const player of Object.values(world.players)) {
@@ -386,13 +384,13 @@ function usedNames(world: CareerWorldState): Set<string> {
   }
 
   return names;
-}
+};
 
-function generateReplacement(
+const generateReplacement = (
   world: CareerWorldState,
   region: CareerRegion,
   rating: number,
-): string {
+): string => {
   const names = usedNames(world);
 
   const name =
@@ -410,14 +408,14 @@ function generateReplacement(
   };
 
   return id;
-}
+};
 
-function takeReplacement(
+const takeReplacement = (
   world: CareerWorldState,
   team: CareerWorldTeam,
   userRating: number,
   rng: () => number,
-): string {
+): string => {
   const regional = world.freeAgentIds.filter(
     (id) => world.players[id]?.region === team.region && !isSigned(id, world),
   );
@@ -447,9 +445,9 @@ function takeReplacement(
     remaining.length > 0 ? getRosterStrength(remaining, world, userRating) : team.baseStrength;
 
   return generateReplacement(world, team.region, baseline + (rng() * 8 - 6));
-}
+};
 
-function releasePlayer(world: CareerWorldState, playerId: string, fate: DisplacementFate): void {
+const releasePlayer = (world: CareerWorldState, playerId: string, fate: DisplacementFate): void => {
   switch (fate) {
     case "swap": {
       break;
@@ -474,16 +472,16 @@ function releasePlayer(world: CareerWorldState, playerId: string, fate: Displace
       throw new Error(`Unhandled displacement fate: ${String(_exhaustive)}`);
     }
   }
-}
+};
 
-function fillVacancy(
+const fillVacancy = (
   world: CareerWorldState,
   teamId: string,
   displacedId: string,
   fate: DisplacementFate,
   userRating: number,
   rng: () => number,
-): void {
+): void => {
   const team = getWorldTeamById(teamId);
 
   if (!team) {
@@ -512,15 +510,15 @@ function fillVacancy(
   }
 
   world.rosters[teamId] = asRoster([...remaining, incoming]);
-}
+};
 
-export function moveUserToTeam(
+export const moveUserToTeam = (
   world: CareerWorldState,
   toTeamId: string,
   fromTeamId: string | null,
   userRating: number,
   seed: number,
-): CareerWorldState {
+): CareerWorldState => {
   const next = cloneWorld(world);
   const destination = next.rosters[toTeamId];
 
@@ -550,4 +548,4 @@ export function moveUserToTeam(
   }
 
   return next;
-}
+};

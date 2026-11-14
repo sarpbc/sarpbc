@@ -1,10 +1,9 @@
 import type { OnThisDay } from "@sarpbc/types";
 
-export async function getOnThisDay(): Promise<OnThisDay> {
-  return await apiFetch<OnThisDay>("/on-this-day", { method: "GET" });
-}
+export const getOnThisDay = async (): Promise<OnThisDay> =>
+  await apiFetch<OnThisDay>("/on-this-day", { method: "GET" });
 
-export function useOnThisDay() {
+export const useOnThisDay = () => {
   const { data, pending, error, refresh } = useLazyAsyncData(
     "on-this-day",
     async () => await getOnThisDay(),
@@ -14,4 +13,4 @@ export function useOnThisDay() {
   const date = computed(() => data.value?.date ?? null);
 
   return { events, date, pending, error, refresh };
-}
+};

@@ -47,9 +47,7 @@ const viewOptions = computed(() => [
   { value: "perGame" as const, label: t("page.tournaments.stats.perGame") },
 ]);
 
-function teamKey(row: TournamentPlayerStats): string {
-  return row.team.id ?? row.team.name;
-}
+const teamKey = (row: TournamentPlayerStats): string => row.team.id ?? row.team.name;
 
 const teamOptions = computed(() => {
   const teams = new Map<string, string>();
@@ -75,7 +73,7 @@ watch(
   },
 );
 
-function value(row: TournamentPlayerStats, column: Column): number | null {
+const value = (row: TournamentPlayerStats, column: Column): number | null => {
   switch (column) {
     case "games": {
       return row.games;
@@ -100,9 +98,9 @@ function value(row: TournamentPlayerStats, column: Column): number | null {
       return unreachable;
     }
   }
-}
+};
 
-function compare(a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey): number {
+const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey): number => {
   if (key === "player") {
     return a.player.name.localeCompare(b.player.name);
   }
@@ -112,7 +110,7 @@ function compare(a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKe
   }
 
   return (value(a, key) ?? -1) - (value(b, key) ?? -1);
-}
+};
 
 const rows = computed(() => {
   const { key, descending } = sort.value;
@@ -125,20 +123,20 @@ const rows = computed(() => {
     );
 });
 
-function sortBy(key: SortKey): void {
+const sortBy = (key: SortKey): void => {
   sort.value =
     sort.value.key === key
       ? { key, descending: !sort.value.descending }
       : { key, descending: key !== "player" && key !== "team" };
-}
+};
 
-function ariaSort(key: SortKey): "ascending" | "descending" | undefined {
+const ariaSort = (key: SortKey): "ascending" | "descending" | undefined => {
   if (sort.value.key !== key) {
     return undefined;
   }
 
   return sort.value.descending ? "descending" : "ascending";
-}
+};
 
 const numberFormat = computed(
   () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }),
@@ -148,7 +146,7 @@ const percentFormat = computed(
   () => new Intl.NumberFormat(locale.value, { style: "percent", maximumFractionDigits: 1 }),
 );
 
-function display(row: TournamentPlayerStats, column: Column): string {
+const display = (row: TournamentPlayerStats, column: Column): string => {
   const current = value(row, column);
 
   if (current === null) {
@@ -158,7 +156,7 @@ function display(row: TournamentPlayerStats, column: Column): string {
   return PERCENTAGES.has(column)
     ? percentFormat.value.format(current / 100)
     : numberFormat.value.format(current);
-}
+};
 
 const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
 </script>

@@ -173,7 +173,7 @@ const hasScoredPicks = computed(() =>
   [...(picks.value?.values() ?? [])].some((pick) => pick.scored),
 );
 
-function tabTo(tab: PickemDetailTab) {
+const tabTo = (tab: PickemDetailTab) => {
   const path = localePath(`/game/pickems/${tournamentId.value}`);
 
   switch (tab) {
@@ -191,18 +191,16 @@ function tabTo(tab: PickemDetailTab) {
       return _exhaustive;
     }
   }
-}
+};
 
 const submittingMatchId = ref<string | null>(null);
 
-function loginRedirectPath() {
-  return {
-    path: localePath("/login"),
-    query: { redirect: localePath(`/game/pickems/${tournamentId.value}`) },
-  };
-}
+const loginRedirectPath = () => ({
+  path: localePath("/login"),
+  query: { redirect: localePath(`/game/pickems/${tournamentId.value}`) },
+});
 
-function matchScoreLabel(match: TournamentDetailMatch): string | null {
+const matchScoreLabel = (match: TournamentDetailMatch): string | null => {
   const status = resolveMatchDiscoveryStatus(match);
 
   if (!shouldShowMatchScores(status)) {
@@ -224,9 +222,9 @@ function matchScoreLabel(match: TournamentDetailMatch): string | null {
   }
 
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
-}
+};
 
-function matchCenterPrimary(match: TournamentDetailMatch): string | null {
+const matchCenterPrimary = (match: TournamentDetailMatch): string | null => {
   const score = matchScoreLabel(match);
 
   if (score) {
@@ -238,19 +236,18 @@ function matchCenterPrimary(match: TournamentDetailMatch): string | null {
   }
 
   return pickemTimeDf.value.format(new Date(match.beginAt));
-}
+};
 
-function openMatchLabel(match: TournamentDetailMatch): string {
-  return t("page.game.pickems.detail.openMatch", {
+const openMatchLabel = (match: TournamentDetailMatch): string =>
+  t("page.game.pickems.detail.openMatch", {
     teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
     teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
   });
-}
 
-function teamButtonColor(
+const teamButtonColor = (
   match: TournamentDetailMatch,
   participantId: string | undefined,
-): "neutral" | "success" | "error" | "primary" {
+): "neutral" | "success" | "error" | "primary" => {
   if (!participantId || !picks.value) {
     return "neutral";
   }
@@ -272,9 +269,9 @@ function teamButtonColor(
   }
 
   return "primary";
-}
+};
 
-async function pickTeam(matchId: string, participantId: string) {
+const pickTeam = async (matchId: string, participantId: string) => {
   if (!participantId || submittingMatchId.value) {
     return;
   }
@@ -306,7 +303,7 @@ async function pickTeam(matchId: string, participantId: string) {
   } finally {
     submittingMatchId.value = null;
   }
-}
+};
 
 onMounted(() => {
   posthog?.capture("pickem_tournament_opened", { tournament_id: tournamentId.value });

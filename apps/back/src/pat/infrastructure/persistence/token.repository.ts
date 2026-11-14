@@ -5,14 +5,12 @@ import type { StoredToken, TokenSummary } from "../../domain/token";
 import { User } from "../../../user/infrastructure/user-persistence";
 import { PersonalAccessToken } from "./personal-access-token.entity";
 
-function summary(token: PersonalAccessToken): TokenSummary {
-  return {
-    id: token.id,
-    name: token.name,
-    createdAt: token.createdAt,
-    lastUsedAt: token.lastUsedAt,
-  };
-}
+const summary = (token: PersonalAccessToken): TokenSummary => ({
+  id: token.id,
+  name: token.name,
+  createdAt: token.createdAt,
+  lastUsedAt: token.lastUsedAt,
+});
 
 @Injectable()
 export class TokenRepository implements TokenStore {

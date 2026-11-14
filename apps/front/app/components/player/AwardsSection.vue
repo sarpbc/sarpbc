@@ -33,7 +33,7 @@ const formatEndDate = (value: Date | string | null) => {
   return mediumDate.value.format(new Date(value));
 };
 
-function seasonMetaParts(award: PlayerSeasonAward): string[] {
+const seasonMetaParts = (award: PlayerSeasonAward): string[] => {
   const parts: string[] = [];
 
   if (award.region) {
@@ -47,9 +47,9 @@ function seasonMetaParts(award: PlayerSeasonAward): string[] {
   parts.push(t("page.player.slug.awards.officialSource"));
 
   return parts;
-}
+};
 
-function metaParts(award: PlayerProfileAward): string[] {
+const metaParts = (award: PlayerProfileAward): string[] => {
   const parts: string[] = [];
   const stageName = distinctStageName(award.tournament);
 
@@ -66,7 +66,7 @@ function metaParts(award: PlayerProfileAward): string[] {
   }
 
   return parts;
-}
+};
 </script>
 
 <template>

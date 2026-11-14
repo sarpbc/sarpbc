@@ -15,7 +15,7 @@ const sizeClasses = {
 
 type StringLookup = Readonly<Record<string, string>>;
 
-function lookupStringMap(map: StringLookup, key: string): string | undefined {
+const lookupStringMap = (map: StringLookup, key: string): string | undefined => {
   for (const [entryKey, value] of Object.entries(map)) {
     if (entryKey === key) {
       return value;
@@ -23,7 +23,7 @@ function lookupStringMap(map: StringLookup, key: string): string | undefined {
   }
 
   return undefined;
-}
+};
 
 const getContinent = (countryCode: string): string => {
   const continentMap = {

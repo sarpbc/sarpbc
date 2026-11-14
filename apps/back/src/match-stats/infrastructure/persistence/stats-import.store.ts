@@ -4,21 +4,19 @@ import { ACTIVE_IMPORT_STATUSES } from "../../domain/stats-import";
 import type { StatsImport } from "../../domain/stats-import";
 import { MatchStatsImport } from "./match-stats-import.entity";
 
-function toImport(row: MatchStatsImport): StatsImport {
-  return {
-    id: row.id,
-    tournamentId: row.tournament.id,
-    groupId: row.groupId,
-    status: row.status,
-    total: row.total,
-    processed: row.processed,
-    items: [...row.items],
-    error: row.error,
-    createdAt: row.createdAt,
-    startedAt: row.startedAt,
-    finishedAt: row.finishedAt,
-  };
-}
+const toImport = (row: MatchStatsImport): StatsImport => ({
+  id: row.id,
+  tournamentId: row.tournament.id,
+  groupId: row.groupId,
+  status: row.status,
+  total: row.total,
+  processed: row.processed,
+  items: [...row.items],
+  error: row.error,
+  createdAt: row.createdAt,
+  startedAt: row.startedAt,
+  finishedAt: row.finishedAt,
+});
 
 export class MikroOrmStatsImportStore implements StatsImportStore {
   constructor(private readonly em: EntityManager) {}

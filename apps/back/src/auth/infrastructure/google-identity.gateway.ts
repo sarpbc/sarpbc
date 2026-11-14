@@ -27,11 +27,11 @@ export interface GoogleOAuthSession {
   userinfo: () => Promise<oauth2_v2.Schema$Userinfo>;
 }
 
-export function createGoogleOAuthSession(
+export const createGoogleOAuthSession = (
   clientId: string,
   clientSecret: string,
   redirectUri: string,
-): GoogleOAuthSession {
+): GoogleOAuthSession => {
   const client = new auth.OAuth2(clientId, clientSecret, redirectUri);
 
   return {
@@ -46,7 +46,7 @@ export function createGoogleOAuthSession(
       return data;
     },
   };
-}
+};
 
 export class GoogleIdentityGateway implements GoogleIdentity {
   constructor(private readonly newSession: () => GoogleOAuthSession) {}

@@ -26,29 +26,23 @@ import { SeasonAward } from "./season-award.entity";
 import { SeasonParticipant } from "./season-participant.entity";
 import { SeasonPathEntry } from "./season-path-entry.entity";
 
-function toSummary(row: Season): SeasonSummary {
-  return { id: row.id, name: row.name, slug: row.slug };
-}
+const toSummary = (row: Season): SeasonSummary => ({ id: row.id, name: row.name, slug: row.slug });
 
-function toRecord(row: Season): SeasonRecord {
-  return {
-    ...toSummary(row),
-    format: { summary: row.formatSummary, phases: row.formatPhases },
-    winnerTeamId: row.winnerTeam?.id ?? null,
-  };
-}
+const toRecord = (row: Season): SeasonRecord => ({
+  ...toSummary(row),
+  format: { summary: row.formatSummary, phases: row.formatPhases },
+  winnerTeamId: row.winnerTeam?.id ?? null,
+});
 
-function toTeam(row: Team): SeasonTeam {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    imageUrl: row.imageUrl,
-    darkModeImageUrl: row.darkModeImageUrl,
-  };
-}
+const toTeam = (row: Team): SeasonTeam => ({
+  id: row.id,
+  name: row.name,
+  slug: row.slug,
+  imageUrl: row.imageUrl,
+  darkModeImageUrl: row.darkModeImageUrl,
+});
 
-function toPathEntry(row: SeasonPathEntry): SeasonPathEntryItem {
+const toPathEntry = (row: SeasonPathEntry): SeasonPathEntryItem => {
   const { tournament } = row;
 
   return {
@@ -69,38 +63,30 @@ function toPathEntry(row: SeasonPathEntry): SeasonPathEntryItem {
         }
       : null,
   };
-}
+};
 
-function byCreation(a: { createdAt: Date; id: string }, b: { createdAt: Date; id: string }) {
-  return a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id);
-}
+const byCreation = (a: { createdAt: Date; id: string }, b: { createdAt: Date; id: string }) =>
+  a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id);
 
-function toParticipant(row: SeasonParticipant): SeasonParticipantItem {
-  return {
-    id: row.id,
-    team: toTeam(row.team),
-    pathNote: row.pathNote,
-    path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
-  };
-}
+const toParticipant = (row: SeasonParticipant): SeasonParticipantItem => ({
+  id: row.id,
+  team: toTeam(row.team),
+  pathNote: row.pathNote,
+  path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
+});
 
-function toAward(row: SeasonAward): SeasonAwardItem {
-  return {
-    id: row.id,
-    awardType: row.awardType,
-    region: row.region,
-    presentedBy: row.presentedBy,
-    sourceUrl: row.sourceUrl,
-    player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
-  };
-}
+const toAward = (row: SeasonAward): SeasonAwardItem => ({
+  id: row.id,
+  awardType: row.awardType,
+  region: row.region,
+  presentedBy: row.presentedBy,
+  sourceUrl: row.sourceUrl,
+  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+});
 
-function byAwardOrder(a: SeasonAward, b: SeasonAward): number {
-  return (
-    SEASON_AWARD_TYPES.indexOf(a.awardType) - SEASON_AWARD_TYPES.indexOf(b.awardType) ||
-    (a.region ?? "").localeCompare(b.region ?? "")
-  );
-}
+const byAwardOrder = (a: SeasonAward, b: SeasonAward): number =>
+  SEASON_AWARD_TYPES.indexOf(a.awardType) - SEASON_AWARD_TYPES.indexOf(b.awardType) ||
+  (a.region ?? "").localeCompare(b.region ?? "");
 
 const PARTICIPANT_POPULATE = ["team", "path.tournament.event"] as const;
 

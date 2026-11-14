@@ -2,10 +2,10 @@ import { InvalidInputError } from "../../../common/domain/errors/invalid-input-e
 
 type UpdateFieldValue = string | number | boolean | null | undefined | readonly (object | string)[];
 
-export function requireUpdateFields(fields: Readonly<Record<string, UpdateFieldValue>>): void {
+export const requireUpdateFields = (fields: Readonly<Record<string, UpdateFieldValue>>): void => {
   if (Object.values(fields).every((value) => value === undefined)) {
     throw new InvalidInputError(
       `Provide at least one field to update (${Object.keys(fields).join(", ")}).`,
     );
   }
-}
+};

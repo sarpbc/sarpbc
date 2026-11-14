@@ -10,7 +10,7 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapTournamentDetail } from "../http/tournament.mapper";
 import { CachedTournamentRead } from "./cached-tournament.read";
 
-function fixture(): Tournament {
+const fixture = (): Tournament => {
   const team = Object.assign(new Team(), { id: "team", name: "Team", slug: "team" });
 
   const player = Object.assign(new Player(), {
@@ -39,7 +39,7 @@ function fixture(): Tournament {
     matches: [match],
     winner: participant,
   });
-}
+};
 
 describe(CachedTournamentRead, () => {
   const warn = vi.spyOn(log, "warn");

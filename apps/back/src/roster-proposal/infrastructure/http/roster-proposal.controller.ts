@@ -20,19 +20,17 @@ import type { RosterProposal } from "../../domain/roster-proposal";
 import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.dto";
 import type { ListRosterProposalsQueryInput } from "./dto/list-roster-proposals-query.dto";
 
-function mapProposal(proposal: RosterProposal): RosterProposalResponse {
-  return {
-    id: proposal.id,
-    change: proposal.change,
-    sourceUrl: proposal.sourceUrl,
-    status: proposal.status,
-    proposedById: proposal.proposedById,
-    reviewedById: proposal.reviewedById,
-    reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
-    entityId: proposal.entityId,
-    createdAt: proposal.createdAt.toISOString(),
-  };
-}
+const mapProposal = (proposal: RosterProposal): RosterProposalResponse => ({
+  id: proposal.id,
+  change: proposal.change,
+  sourceUrl: proposal.sourceUrl,
+  status: proposal.status,
+  proposedById: proposal.proposedById,
+  reviewedById: proposal.reviewedById,
+  reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
+  entityId: proposal.entityId,
+  createdAt: proposal.createdAt.toISOString(),
+});
 
 @Controller("roster-proposals")
 export class RosterProposalController {

@@ -34,18 +34,17 @@ interface ServerRequest {
   };
 }
 
-function hasNodeRequest(event: NuxtRequestEvent): event is NuxtRequestEvent & ServerRequest {
-  return "node" in event;
-}
+const hasNodeRequest = (event: NuxtRequestEvent): event is NuxtRequestEvent & ServerRequest =>
+  "node" in event;
 
-function apiBase(): string {
+const apiBase = function apiBase(): string {
   const config = useRuntimeConfig();
 
   return resolveApiBase(config.public.apiBase, config.apiBaseServer, import.meta.server);
-}
+};
 
-export function createApiClient() {
-  return $fetch.create({
+export const createApiClient = () =>
+  $fetch.create({
     baseURL: apiBase(),
     credentials: "include",
     async onRequest({ options }) {
@@ -97,11 +96,8 @@ export function createApiClient() {
       options.headers = headers;
     },
   });
-}
 
-export async function apiFetch<T>(
+export const apiFetch = async <T>(
   url: string,
   opts: Parameters<typeof $fetch>[1] = {},
-): Promise<T> {
-  return await createApiClient()<T, string>(url, opts);
-}
+): Promise<T> => await createApiClient()<T, string>(url, opts);

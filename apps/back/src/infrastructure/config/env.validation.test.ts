@@ -15,7 +15,7 @@ const requiredEnv = {
 const validateEnv = (overrides: Record<string, string | undefined> = {}) =>
   validate({ ...requiredEnv, ...overrides });
 
-function failureOf(overrides: Record<string, string | undefined>): string {
+const failureOf = (overrides: Record<string, string | undefined>): string => {
   try {
     validateEnv(overrides);
   } catch (error) {
@@ -23,7 +23,7 @@ function failureOf(overrides: Record<string, string | undefined>): string {
   }
 
   throw new Error("Expected the environment to be rejected");
-}
+};
 
 describe("validateEnv", () => {
   it("applies defaults for optional services", () => {
