@@ -77,7 +77,6 @@ export interface UpdateMatchInput {
   results?: { participantId: string; score: number }[];
   participantIds?: string[];
   previousMatches?: BracketLinkInput[];
-  sourceUrl?: string | null;
 }
 export interface TournamentListOptions {
   limit: number;

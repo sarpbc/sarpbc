@@ -17,10 +17,11 @@ describe("MatchService decided events", () => {
   const reads = { detail: vi.fn() };
   const events = { publish: vi.fn() };
   const diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() };
   const service = new MatchService(
     reads as never,
     { run: (work: (scope: never) => unknown) => work({ matches } as never) } as never,
-    new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, diagnostics),
+    new CompetitionAfterCommit(cache, events, diagnostics),
   );
 
   const storedMatch = (fields: Partial<Match> = {}) =>
@@ -62,6 +63,15 @@ describe("MatchService decided events", () => {
     await service.setVods("match", [{ game: 1, url: "https://youtu.be/a", language: "en" }]);
     await service.setGameVods("match", 2, []);
 
+    expect(events.publish).not.toHaveBeenCalled();
+  });
+
+  it("refreshes the cached tournament without re-scoring when only the source changes", async () => {
+    persisted = storedMatch({ status: "finished", winner: participants[0] });
+
+    await service.setSource("match", "https://www.rocketleague.com/en/news/rlcs-official-rules");
+
+    expect(cache.invalidateTournament).toHaveBeenCalledWith("cup");
     expect(events.publish).not.toHaveBeenCalled();
   });
 

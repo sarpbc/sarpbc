@@ -10,7 +10,6 @@ import {
   ON_THIS_DAY_MIN_YEAR,
   ON_THIS_DAY_SOURCE_URL_MAX_LENGTH,
   ON_THIS_DAY_TEXT_MAX_LENGTH,
-  isForbiddenSourceHost,
   isMonthDay,
   participantName,
   tournamentStageLabel,
@@ -32,6 +31,7 @@ const props = defineProps<{
 const emit = defineEmits<{ submit: [input: OnThisDayFactInput] }>();
 
 const { t, locale } = useI18n();
+const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 const reportError = useReportError();
 
 function linkLabel(link: NonNullable<OnThisDayFact["link"]>): string {
@@ -90,15 +90,7 @@ const yearError = computed(() =>
     ? t("page.onThisDay.form.yearInvalid", { min: ON_THIS_DAY_MIN_YEAR })
     : undefined,
 );
-const sourceError = computed(() => {
-  const value = sourceUrl.value.trim();
-  if (!value) return undefined;
-  if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
-    return t("page.onThisDay.form.sourceInvalid");
-  return isForbiddenSourceHost(new URL(value).hostname)
-    ? t("page.onThisDay.form.sourceForbidden")
-    : undefined;
-});
+const sourceError = computed(() => checkSourceUrl(sourceUrl.value));
 const isValid = computed(
   () =>
     textEn.value.trim().length > 0 &&

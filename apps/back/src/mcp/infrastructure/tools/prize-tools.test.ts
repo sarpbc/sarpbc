@@ -2,6 +2,7 @@ import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
 import type { RosterChange, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
+import { prizeTools } from "./prize-tools";
 import { rosterTools } from "./roster-tools";
 
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -19,9 +20,10 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
-  const tool = rosterTools({ rosterProposalService }).find(
-    (candidate) => candidate.name === toolName,
-  );
+  const tool = [
+    ...rosterTools({ rosterProposalService }),
+    ...prizeTools({ rosterProposalService }),
+  ].find((candidate) => candidate.name === toolName);
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
   return { rosterProposalService, tool, call };
@@ -93,16 +95,6 @@ describe("propose_tournament_prize_update", () => {
       RULES,
       "u1",
     );
-  });
-
-  it("refuses BLAST.tv as a source", () => {
-    const { tool } = setup("admin", "propose_tournament_prize_update");
-    const schema = z.object(tool.inputSchema);
-    const base = { tournamentId: TOURNAMENT_ID, teamId: TEAM_ID };
-    expect(schema.safeParse({ ...base, sourceUrl: "https://blast.tv/rl/open" }).success).toBe(
-      false,
-    );
-    expect(schema.safeParse({ ...base, sourceUrl: RULES }).success).toBe(true);
   });
 });
 

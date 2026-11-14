@@ -262,7 +262,9 @@ export class MatchService {
     const written = await this.transaction.run(({ matches }) =>
       setSourceInTransaction(matches, matchId, sourceUrl),
     );
-    return this.committed(written.id);
+    const match = await this.committed(written.id);
+    await this.afterCommit.settle({ tournamentIds: [match.tournament.id] });
+    return match;
   }
   async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>

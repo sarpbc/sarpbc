@@ -7,7 +7,6 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 
 const props = defineProps<{
@@ -18,7 +17,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ submit: [input: CircuitInput] }>();
 
-const { t } = useI18n();
+const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 
 const name = ref(props.circuit?.name ?? "");
 const slug = ref(props.circuit?.slug ?? "");
@@ -32,16 +31,7 @@ function inRange(value: number | null, min: number, max: number): boolean {
   return value === null || (Number.isInteger(value) && value >= min && value <= max);
 }
 
-const sourceUrlError = computed<string | undefined>(() => {
-  const value = sourceUrl.value.trim();
-  if (value === "") return undefined;
-  const url = URL.parse(value);
-  if (url === null || (url.protocol !== "https:" && url.protocol !== "http:"))
-    return t("page.circuits.scale.errors.sourceUrl");
-  return isForbiddenSourceHost(url.hostname)
-    ? t("page.circuits.scale.errors.sourceBlocked")
-    : undefined;
-});
+const sourceUrlError = computed(() => checkSourceUrl(sourceUrl.value));
 
 const isValid = computed(
   () =>

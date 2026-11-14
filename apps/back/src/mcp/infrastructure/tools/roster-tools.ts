@@ -14,9 +14,6 @@ import {
 } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
-  MAX_PRIZE_AMOUNT,
-  MAX_PRIZE_ENTRIES,
-  MAX_PRIZE_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
@@ -31,23 +28,15 @@ import {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
-  isBlastSourceHost,
-  isForbiddenSourceHost,
   isForbiddenViewershipSource,
   isLiquipediaSourceHost,
-  isIso4217Code,
 } from "@sarpbc/utils";
 import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
 import { InvalidInputError } from "../../../common/domain/errors";
-import {
-  MAX_TEAM_LOGO_BYTES,
-  MIN_TEAM_LOGO_PIXELS,
-  isLiquipediaHost,
-} from "../../../roster/domain/team-logo";
+import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
-import type { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
-import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
-import { adminRosterProposalsUrl } from "../urls";
+import { defineTool, type McpTool } from "../define-tool";
+import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 
 const DEFAULT_PLAYER_STATUS = "free_agent" satisfies PlayerStatus;
@@ -55,24 +44,9 @@ const DEFAULT_PROPOSAL_STATUS = "pending" satisfies RosterProposalStatus;
 
 const withoutLiquipedia = (use: string) =>
   [
-    (url: string) => !URL.canParse(url) || !isLiquipediaHost(new URL(url).hostname),
+    (url: string) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
     `Liquipedia is not an accepted source; ${use}`,
   ] as const;
-
-const withoutBlast = [
-  (url: string) => !URL.canParse(url) || !isBlastSourceHost(new URL(url).hostname),
-  "BLAST.tv is not an accepted source; its terms forbid reusing its data. Cite the official Rocket League rules or the organiser's announcement",
-] as const;
-
-const sourceUrlSchema = z
-  .string()
-  .url()
-  .regex(/^https?:\/\//, "Use an http(s) URL")
-  .refine(...withoutLiquipedia("cite the official announcement it relies on"))
-  .refine(...withoutBlast)
-  .describe(
-    "Required public source: the official team or player announcement, the official Rocket League rules, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia or BLAST.tv. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
-  );
 
 const streamsSchema = z
   .array(
@@ -126,14 +100,9 @@ const circuitScaleSchema = z
     "The complete official scale of this stage, copied from the cited source; ranges must not overlap. Never estimate or invent points. An empty list keeps the stage in the circuit without awarding points.",
   );
 
-const circuitSourceUrlSchema = sourceUrlSchema
-  .refine(
-    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
-    "Liquipedia and BLAST.tv are not accepted circuit sources",
-  )
-  .describe(
-    "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia or BLAST.tv.",
-  );
+const circuitSourceUrlSchema = sourceUrlSchema.describe(
+  "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia, a mirror of it or BLAST.tv.",
+);
 
 const circuitWorldwideSchema = z
   .boolean()
@@ -218,14 +187,9 @@ const effectiveDateSchema = contractDateSchema.describe(
   "Date the move takes effect according to the source (YYYY-MM-DD).",
 );
 
-const aliasSourceUrlSchema = sourceUrlSchema
-  .refine(
-    (url) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
-    "Liquipedia and its mirrors are not accepted sources",
-  )
-  .describe(
-    "Required official source for the name and its dates: the team, one of its players, the organiser, BLAST, RLEsports or PandaScore. Never Liquipedia or a mirror of it, not even as a lead.",
-  );
+const aliasSourceUrlSchema = sourceUrlSchema.describe(
+  "Required official source for the name and its dates: the team, one of its players, the organiser, RLEsports or PandaScore. Never Liquipedia, a mirror of it or BLAST.tv, not even as a lead.",
+);
 
 const teamAliasInput = {
   teamId: z.string().uuid().describe("UUID of the team that used the name."),
@@ -271,9 +235,6 @@ const countrySchema = z
 
 const playerStatusSchema = z.enum(PLAYER_STATUSES).describe("Career status.");
 
-const REVIEW_NOTE =
-  "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
-
 const LOGO_LIMITS = `at most ${MAX_TEAM_LOGO_BYTES / (1024 * 1024)} MB, at least ${MIN_TEAM_LOGO_PIXELS}x${MIN_TEAM_LOGO_PIXELS} pixels`;
 
 export interface RosterToolServices {
@@ -291,24 +252,8 @@ function redistributableChange(change: RosterChange, sourceUrl: string): RosterC
   }
 }
 
-function proposed(proposal: RosterProposal, sourceUrl: string | undefined): ToolWrite {
-  return {
-    entityId: proposal.id,
-    sourceUrl,
-    result: {
-      proposalId: proposal.id,
-      kind: proposal.change.kind,
-      change: proposal.change,
-      status: proposal.status,
-      reviewUrl: adminRosterProposalsUrl(),
-      note: REVIEW_NOTE,
-    },
-  };
-}
-
 export function rosterTools({ rosterProposalService }: RosterToolServices): McpTool[] {
-  const propose = async (change: RosterChange, sourceUrl: string, userId: string) =>
-    proposed(await rosterProposalService.propose(change, sourceUrl, userId), sourceUrl);
+  const propose = proposer(rosterProposalService);
 
   return [
     defineTool({
@@ -624,112 +569,6 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           user.id,
         );
       },
-    }),
-
-    defineTool({
-      name: "propose_tournament_prizes",
-      description:
-        "Propose the prize distribution of one tournament stage. Once approved, it replaces the whole distribution of that stage, so list every paid placement, and every row takes sourceUrl as its source. To correct one row or only its source, use propose_tournament_prize_update. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
-      write: true,
-      permission: "tournaments.manage",
-      input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
-        prizes: z
-          .array(
-            z.object({
-              placement: z
-                .number()
-                .int()
-                .min(1)
-                .describe("Final placement; tied teams share the same placement."),
-              amount: z
-                .number()
-                .int()
-                .min(1)
-                .max(MAX_PRIZE_AMOUNT)
-                .describe("Whole amount in the stated currency."),
-              currency: z
-                .string()
-                .refine(isIso4217Code, "Use an ISO 4217 currency code")
-                .describe("ISO 4217 currency code as stated by the source (e.g. USD, EUR)."),
-              teamId: z.string().uuid().describe("Team UUID."),
-              playerIds: z
-                .array(z.string().uuid())
-                .max(MAX_PRIZE_PLAYERS)
-                .optional()
-                .describe(
-                  "Optional player UUIDs from the team's stage roster who share this prize.",
-                ),
-            }),
-          )
-          .max(MAX_PRIZE_ENTRIES)
-          .describe("Every paid placement of the stage."),
-        sourceUrl: sourceUrlSchema,
-      },
-      handler: ({ tournamentId, prizes, sourceUrl }, user) =>
-        propose(
-          {
-            kind: "set_tournament_prizes",
-            tournamentId,
-            prizes: prizes.map(({ playerIds, ...prize }) => ({
-              ...prize,
-              playerIds: playerIds ?? [],
-            })),
-          },
-          sourceUrl,
-          user.id,
-        ),
-    }),
-
-    defineTool({
-      name: "propose_tournament_prize_update",
-      description:
-        "Propose a correction of one prize row of a tournament stage, keyed by its team, without replacing the rest of the distribution. Send only the fields that change; send none of them to re-source the row without changing its value. Once approved, the row's source becomes sourceUrl. Read get_tournament_prizes first: the team must already have a prize in that stage. start.gg tournaments are refused. Enter the amount in the currency the source states; never convert it.",
-      write: true,
-      permission: "tournaments.manage",
-      input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
-        teamId: z.string().uuid().describe("UUID of the team whose prize row changes."),
-        placement: z.number().int().min(1).optional().describe("Corrected final placement."),
-        amount: z
-          .number()
-          .int()
-          .min(1)
-          .max(MAX_PRIZE_AMOUNT)
-          .optional()
-          .describe("Corrected whole amount in the stated currency."),
-        currency: z
-          .string()
-          .refine(isIso4217Code, "Use an ISO 4217 currency code")
-          .optional()
-          .describe("Corrected ISO 4217 currency code."),
-        playerIds: z
-          .array(z.string().uuid())
-          .max(MAX_PRIZE_PLAYERS)
-          .optional()
-          .describe("Replacement list of player UUIDs from the team's stage roster."),
-        sourceUrl: sourceUrlSchema.describe(
-          "Required public source of the corrected row, usually the official Rocket League rules (prize attachments) or the organiser's announcement. Never Liquipedia or BLAST.tv.",
-        ),
-      },
-      handler: (
-        { tournamentId, teamId, placement, amount, currency, playerIds, sourceUrl },
-        user,
-      ) =>
-        propose(
-          {
-            kind: "update_tournament_prize",
-            tournamentId,
-            teamId,
-            patch: Object.fromEntries(
-              Object.entries({ placement, amount, currency, playerIds }).filter(
-                ([, value]) => value !== undefined,
-              ),
-            ),
-          },
-          sourceUrl,
-          user.id,
-        ),
     }),
 
     defineTool({

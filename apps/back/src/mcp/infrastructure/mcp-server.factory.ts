@@ -8,6 +8,7 @@ import { circuitTools } from "./tools/circuit-tools";
 import { eventTools } from "./tools/event-tools";
 import { gameStatsTools } from "./tools/game-stats-tools";
 import { readTools } from "./tools/read-tools";
+import { prizeTools } from "./tools/prize-tools";
 import { rosterTools } from "./tools/roster-tools";
 import { seasonTools } from "./tools/season-tools";
 import { writeTools } from "./tools/write-tools";
@@ -31,6 +32,7 @@ export class McpServerFactory {
       ...eventTools({ ...this.services, competition }),
       ...writeTools(this.services),
       ...rosterTools(this.services),
+      ...prizeTools(this.services),
       ...gameStatsTools(this.services),
       ...circuitTools(this.services),
       ...seasonTools(this.services),

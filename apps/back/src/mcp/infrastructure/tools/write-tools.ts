@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  DATA_SOURCE_URL_MAX_LENGTH,
-  MAX_VODS_PER_GAME,
-  isForbiddenSourceHost,
-} from "@sarpbc/utils";
+import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import type { NewsService } from "../../../news/application/news.service";
 import { createNewsArticleFields } from "../../../news/infrastructure/http/dto/create-news-article.dto";
 import { updateNewsArticleFields } from "../../../news/infrastructure/http/dto/update-news-article.dto";
@@ -25,7 +21,7 @@ import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
-import { describeFields, toPatchedDate } from "./tool-input";
+import { dataSourceUrlField, describeFields, toPatchedDate } from "./tool-input";
 import {
   bracketLinksSchema,
   emptyBracketTeamsSchema,
@@ -33,18 +29,9 @@ import {
 import { isRedistributable } from "../../../common/domain/data-source";
 import { requireUpdateFields } from "./update-fields";
 
-const matchSourceUrlInput = z
-  .string()
-  .url()
-  .max(DATA_SOURCE_URL_MAX_LENGTH)
-  .regex(/^https?:\/\//, "Use an http(s) URL")
-  .refine(
-    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
-    "Liquipedia and BLAST.tv are not accepted sources",
-  )
-  .describe(
-    "Public page the match, its schedule or its score was taken from: the organiser's announcement, the official Rocket League rules or the start.gg or PandaScore page. Never Liquipedia or BLAST.tv.",
-  );
+const matchSourceUrlInput = dataSourceUrlField(
+  "Public page the match, its schedule or its score was taken from: the organiser's announcement, the official Rocket League rules or the start.gg or PandaScore page. Never Liquipedia, a mirror of it or BLAST.tv.",
+);
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -321,7 +308,7 @@ export function writeTools({
     defineTool({
       name: "update_match",
       description:
-        "Correct the score, status, dates, participants, bracket links or source of a manual match (pandascoreId is null). sourceUrl alone also works on a PandaScore match, to record where its schedule or score was checked. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
+        "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_match_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -354,10 +341,6 @@ export function writeTools({
             "Every side of the match, as tournament participant UUIDs from get_tournament, in display order. Replaces the current sides; an empty list empties the match.",
           ),
         previousMatches: previousMatchesInput.optional(),
-        sourceUrl: matchSourceUrlInput
-          .nullable()
-          .optional()
-          .describe("Public source of the match data, or null to clear it."),
       },
       handler: async ({
         matchId,
@@ -367,19 +350,9 @@ export function writeTools({
         results,
         participantIds,
         previousMatches,
-        sourceUrl,
       }) => {
-        const fields = { beginAt, endAt, status, results, participantIds, previousMatches };
-        requireUpdateFields({ ...fields, sourceUrl });
-        if (
-          Object.values(fields).every((value) => value === undefined) &&
-          sourceUrl !== undefined
-        ) {
-          const match = await matchService.setSource(matchId, sourceUrl);
-          return { entityId: match.id, result: mapMatchListResponse(match) };
-        }
+        requireUpdateFields({ beginAt, endAt, status, results, participantIds, previousMatches });
         const match = await matchService.updateMatch(matchId, {
-          sourceUrl,
           beginAt: toPatchedDate(beginAt),
           endAt: toPatchedDate(endAt),
           status,
@@ -387,6 +360,22 @@ export function writeTools({
           participantIds,
           previousMatches,
         });
+        return { entityId: match.id, result: mapMatchListResponse(match) };
+      },
+    }),
+
+    defineTool({
+      name: "set_match_source",
+      description:
+        "Record or clear the public source of a match: where its schedule, sides or score were taken from. Works on any match, PandaScore included, and changes nothing else.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        matchId: z.string().min(1).describe("Match UUID."),
+        sourceUrl: matchSourceUrlInput.nullable().describe("Public source, or null to clear it."),
+      },
+      handler: async ({ matchId, sourceUrl }) => {
+        const match = await matchService.setSource(matchId, sourceUrl);
         return { entityId: match.id, result: mapMatchListResponse(match) };
       },
     }),

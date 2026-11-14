@@ -1,5 +1,11 @@
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "@sarpbc/utils";
+import {
+  DATA_SOURCE_URL_MAX_LENGTH,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  isAcceptedDataSourceUrl,
+} from "@sarpbc/utils";
 import { z } from "zod";
+import { REFUSED_DATA_SOURCE_MESSAGE } from "../../../common/domain/data-source";
 
 export const SEARCH_LIMIT = 20;
 
@@ -36,4 +42,13 @@ export function describeFields<Fields extends Record<string, z.ZodType>>(
 /** PATCH semantics: undefined leaves the date untouched, null clears it. */
 export function toPatchedDate(value: string | null | undefined): Date | null | undefined {
   return value === undefined || value === null ? value : new Date(value);
+}
+
+/** The one source URL rule of every MCP write: http(s), no credentials, never Liquipedia or BLAST.tv. */
+export function dataSourceUrlField(description: string) {
+  return z
+    .string()
+    .max(DATA_SOURCE_URL_MAX_LENGTH)
+    .refine(isAcceptedDataSourceUrl, REFUSED_DATA_SOURCE_MESSAGE)
+    .describe(description);
 }

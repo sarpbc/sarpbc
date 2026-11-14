@@ -6,14 +6,13 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 import { z } from "zod";
 import { isRedistributable } from "../../../common/domain/data-source";
 import type { CircuitService } from "../../../circuit/application/circuit.service";
 import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
 import { circuitUrl, tournamentUrl } from "../urls";
-import { idOrSlugField } from "./tool-input";
+import { dataSourceUrlField, idOrSlugField } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
 
 export interface CircuitToolServices {
@@ -66,17 +65,9 @@ const descriptionSchema = z
   .max(CIRCUIT_DESCRIPTION_MAX_LENGTH)
   .describe("Short neutral description shown on the circuit page.");
 
-const sourceUrlSchema = z
-  .string()
-  .url()
-  .regex(/^https?:\/\//, "Use an http(s) URL")
-  .refine(
-    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
-    "Liquipedia, its mirrors and BLAST.tv are not accepted sources",
-  )
-  .describe(
-    "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia, a mirror of it or BLAST.tv.",
-  );
+const sourceUrlSchema = dataSourceUrlField(
+  "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia, a mirror of it or BLAST.tv.",
+);
 
 const qualificationSpotsSchema = z
   .number()

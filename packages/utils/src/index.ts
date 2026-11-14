@@ -228,4 +228,4 @@ export {
   type CalendarDay,
 } from "./on-this-day";
 export { DATA_SOURCE_URL_MAX_LENGTH, isAcceptedDataSourceUrl } from "./data-source-url";
-export { isBlastSourceHost, isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";
+export { isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";

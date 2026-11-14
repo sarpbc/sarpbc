@@ -15,7 +15,7 @@ export const TournamentPrizeEntryDto = z.strictObject({
   currency: z.string().length(CURRENCY_CODE_LENGTH),
   teamId: z.uuid(),
   playerIds: z.array(z.uuid()).max(MAX_PRIZE_PLAYERS).default([]),
-  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().default(null),
+  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable(),
 });
 
 export const SetTournamentPrizesDto = z.strictObject({

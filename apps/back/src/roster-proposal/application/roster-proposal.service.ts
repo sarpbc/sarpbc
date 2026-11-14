@@ -7,8 +7,12 @@ import type {
   StreamInput,
   TeamLogoVariant,
 } from "@sarpbc/types";
-import { requiredPermission } from "@sarpbc/utils";
-import { isRedistributable, sourceFromUrl } from "../../common/domain/data-source";
+import { isAcceptedDataSourceUrl, requiredPermission } from "@sarpbc/utils";
+import {
+  REFUSED_DATA_SOURCE_MESSAGE,
+  isRedistributable,
+  sourceFromUrl,
+} from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
@@ -102,6 +106,8 @@ export class RosterProposalService {
     sourceUrl: string,
     proposedById: string,
   ): Promise<RosterProposal> {
+    if (sourceUrl !== "" && !isAcceptedDataSourceUrl(sourceUrl))
+      throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
     await this.requireReferences(change);
     if (change.kind === "update_contract") {
       await this.requireContract(change.playerId, change.contractId);
@@ -111,7 +117,8 @@ export class RosterProposalService {
       await this.prizes.requireProposableTournament(change.tournamentId);
     }
     if (change.kind === "update_tournament_prize") {
-      await this.prizes.requireProposablePrize(change.tournamentId, change.teamId);
+      const { tournamentId, teamId, patch } = change;
+      await this.prizes.requireProposablePrize(tournamentId, teamId, patch);
     }
     if (change.kind === "award_player") {
       const { tournamentId, teamId, playerId, awardType } = change;

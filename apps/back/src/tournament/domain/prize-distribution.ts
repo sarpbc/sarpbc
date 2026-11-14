@@ -1,12 +1,6 @@
-import type { PrizeEntry } from "@sarpbc/types";
-import {
-  MAX_PRIZE_AMOUNT,
-  MAX_PRIZE_ENTRIES,
-  isAcceptedDataSourceUrl,
-  isIso4217Code,
-} from "@sarpbc/utils";
-import { REFUSED_DATA_SOURCE_MESSAGE } from "../../common/domain/data-source";
-import { InvalidInputError } from "../../common/domain/errors";
+import type { PrizeEntry, PrizeEntryPatch } from "@sarpbc/types";
+import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
+import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 
 export function assertPrizeDistribution(entries: PrizeEntry[]): void {
   if (entries.length > MAX_PRIZE_ENTRIES)
@@ -22,8 +16,6 @@ export function assertPrizeDistribution(entries: PrizeEntry[]): void {
       );
     if (!isIso4217Code(entry.currency))
       throw new InvalidInputError(`"${entry.currency}" is not an ISO 4217 currency code`);
-    if (entry.sourceUrl !== null && !isAcceptedDataSourceUrl(entry.sourceUrl))
-      throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
     if (teams.has(entry.teamId))
       throw new InvalidInputError(`Team "${entry.teamId}" appears twice in the distribution`);
     teams.add(entry.teamId);
@@ -33,4 +25,26 @@ export function assertPrizeDistribution(entries: PrizeEntry[]): void {
       players.add(playerId);
     }
   }
+}
+
+export function patchPrizeEntry(
+  entries: PrizeEntry[],
+  teamId: string,
+  patch: PrizeEntryPatch,
+  sourceUrl: string | null,
+): PrizeEntry[] {
+  if (!entries.some((entry) => entry.teamId === teamId))
+    throw new NotFoundError(`Team "${teamId}" has no prize in this tournament`);
+  return entries.map((entry) =>
+    entry.teamId === teamId
+      ? {
+          ...entry,
+          placement: patch.placement ?? entry.placement,
+          amount: patch.amount ?? entry.amount,
+          currency: patch.currency ?? entry.currency,
+          playerIds: patch.playerIds ?? entry.playerIds,
+          sourceUrl,
+        }
+      : entry,
+  );
 }

@@ -13,7 +13,9 @@
       "analyst": "Analyste",
       "manager": "Manager"
     },
-    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia et BLAST.tv ne sont pas des sources acceptées."
+    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
+    "sourceUrl": "URL de la source",
+    "openSource": "Ouvrir la source"
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP ou GIF, jusqu’à {max} Mo",
@@ -758,11 +760,9 @@
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
         },
-        "sourceUrl": "URL de la source",
         "bulkSource": "Source de tous les gains",
         "bulkSourceHint": "Renseigne la source de chaque gain ci-dessous, par exemple avec le règlement officiel. Enregistrez pour appliquer.",
-        "applySource": "Appliquer à tous",
-        "openSource": "Ouvrir la source"
+        "applySource": "Appliquer à tous"
       },
       "events": {
         "title": "Événements",
@@ -1290,9 +1290,7 @@
           "incomplete": "Renseignez les trois valeurs.",
           "range": "La dernière place ne peut pas précéder la première.",
           "numbers": "Utilisez des nombres entiers : places de 1 à {maxPlacement}, points de 0 à {maxPoints}.",
-          "overlap": "Les tranches de places ne doivent pas se chevaucher.",
-          "sourceUrl": "Saisissez une URL http ou https valide.",
-          "sourceBlocked": "Ce site n'est pas accepté comme source. Utilisez la page de règles officielle ou l'annonce."
+          "overlap": "Les tranches de places ne doivent pas se chevaucher."
         },
         "teamPlacement": "{name} ({placement}e place)",
         "teamsLoading": "Chargement des équipes de cet événement…",
@@ -1492,8 +1490,6 @@
         "textHint": "Une phrase courte, telle qu'elle s'affichera.",
         "sourceUrl": "Source officielle",
         "sourceUrlHint": "Facultatif. Liquipedia et BLAST.tv ne sont pas acceptés.",
-        "sourceInvalid": "Saisissez une URL http(s).",
-        "sourceForbidden": "Liquipedia et BLAST.tv ne sont pas des sources acceptées ; citez l'annonce officielle.",
         "link": {
           "label": "Lien",
           "hint": "Facultatif. Un joueur, une équipe, une phase ou un match déjà sur le site.",

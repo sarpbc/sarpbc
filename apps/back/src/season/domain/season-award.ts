@@ -3,9 +3,9 @@ import {
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
   SEASON_AWARD_REGION_MAX_LENGTH,
   SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
+  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
-import { isLiquipediaHost } from "../../roster/domain/team-logo";
 
 export interface SeasonAwardFields {
   awardType: SeasonAwardType;
@@ -62,9 +62,9 @@ export function assertAwardSourceUrl(value: string): void {
     );
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     throw new InvalidInputError("The award source must be an http(s) URL.");
-  if (isLiquipediaHost(new URL(value).hostname))
+  if (isForbiddenSourceHost(new URL(value).hostname))
     throw new InvalidInputError(
-      "Liquipedia is not an accepted source; cite the official announcement.",
+      "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
     );
 }
 

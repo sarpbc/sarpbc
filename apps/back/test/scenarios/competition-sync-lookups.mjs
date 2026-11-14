@@ -212,11 +212,17 @@ export async function verifyRedistributableScope({
       status: "finished",
       participantIds: tournament.participants.map(({ id }) => id),
     });
-    await request(
+    const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+    const response = await request(
       "PUT",
       `/tournaments/${tournament.id}/prizes`,
-      { prizes: [{ placement: 1, amount: 1000, currency: "USD", teamId: alpha }] },
+      { prizes: [{ placement: 1, amount: 1000, currency: "USD", teamId: alpha, sourceUrl }] },
       staffCookie,
+    );
+    assert.equal(
+      response.json().prizes[0].sourceUrl,
+      sourceUrl,
+      "a prize keeps the source staff entered",
     );
     return tournament.id;
   };

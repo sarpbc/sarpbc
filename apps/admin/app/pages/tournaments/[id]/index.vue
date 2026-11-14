@@ -66,6 +66,9 @@ const breadcrumbItems = computed(() => [
 ]);
 
 const displayMatches = computed(() => matches.value ?? []);
+const detailMatches = computed(
+  () => new Map((tournament.value?.matches ?? []).map((match) => [match.id, match])),
+);
 
 const editsBracket = computed(() => !!tournament.value && tournament.value.source !== "pandascore");
 const canGenerateBracket = computed(
@@ -73,7 +76,7 @@ const canGenerateBracket = computed(
 );
 
 function openBracket(match: TournamentMatchListItem) {
-  const detailed = tournament.value?.matches.find((candidate) => candidate.id === match.id);
+  const detailed = detailMatches.value.get(match.id);
   if (!detailed) return;
   bracketMatch.value = { match: detailed, label: matchLabel(match) };
   bracketOpen.value = true;
@@ -82,14 +85,12 @@ function openBracket(match: TournamentMatchListItem) {
 function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
   const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
-  const name = tournament.value?.matches.find((candidate) => candidate.id === match.id)?.name;
+  const name = detailMatches.value.get(match.id)?.name;
   return name ? `${name} · ${sides}` : sides;
 }
 
 function matchSourceUrl(match: TournamentMatchListItem): string | null {
-  return (
-    tournament.value?.matches.find((candidate) => candidate.id === match.id)?.sourceUrl ?? null
-  );
+  return detailMatches.value.get(match.id)?.sourceUrl ?? null;
 }
 
 function openSource(match: TournamentMatchListItem) {
@@ -285,7 +286,7 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
               </p>
               <ULink
                 v-if="matchSourceUrl(match)"
-                :to="matchSourceUrl(match)!"
+                :to="matchSourceUrl(match) ?? undefined"
                 external
                 target="_blank"
                 class="truncate text-sm text-primary hover:underline"

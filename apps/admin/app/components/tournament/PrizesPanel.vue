@@ -363,7 +363,7 @@ async function save() {
         />
 
         <UFormField
-          :label="t('page.tournaments.prizes.sourceUrl')"
+          :label="t('common.sourceUrl')"
           :error="sourceUrlError(row.sourceUrl)"
           class="sm:col-span-full"
         >
@@ -375,7 +375,7 @@ async function save() {
               target="_blank"
               class="break-all text-primary hover:underline"
             >
-              {{ t("page.tournaments.prizes.openSource") }}
+              {{ t("common.openSource") }}
             </ULink>
           </template>
         </UFormField>

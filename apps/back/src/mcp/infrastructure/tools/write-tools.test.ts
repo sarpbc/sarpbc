@@ -348,27 +348,16 @@ describe("bracket tools", () => {
     expect(JSON.parse(textOf(result)).previousMatches).toEqual(previousMatches);
   });
 
-  it("sets only the source of a match, PandaScore included, without a manual update", async () => {
-    const { matchService, run } = setup("manual");
+  it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
+    const { tools, matchService, run } = setup("manual");
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
-    await run("update_match", { matchId: "final", sourceUrl });
+    await run("set_match_source", { matchId: "final", sourceUrl });
     expect(matchService.setSource).toHaveBeenCalledWith("final", sourceUrl);
-    expect(matchService.updateMatch).not.toHaveBeenCalled();
 
-    await run("update_match", { matchId: "final", status: "finished", sourceUrl });
-    expect(matchService.updateMatch).toHaveBeenCalledWith(
-      "final",
-      expect.objectContaining({ status: "finished", sourceUrl }),
-    );
-  });
-
-  it("refuses a BLAST.tv match source", () => {
-    const { tools } = setup("manual");
-    const update = z.object(defined(tools, "update_match").inputSchema);
-    expect(update.safeParse({ matchId: "final", sourceUrl: "https://blast.tv/rl" }).success).toBe(
-      false,
-    );
-    expect(update.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
+    const input = z.object(defined(tools, "set_match_source").inputSchema);
+    expect(input.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
+    for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"])
+      expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {

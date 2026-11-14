@@ -73,7 +73,7 @@ async function save(participant: (typeof teamParticipants.value)[number]) {
           v-model="values[participant.id]"
           type="url"
           autocomplete="off"
-          :aria-label="`${participant.team.name} · ${t('page.tournaments.prizes.sourceUrl')}`"
+          :aria-label="`${participant.team.name} · ${t('common.sourceUrl')}`"
           class="w-full"
         />
         <template v-if="participant.rosterSourceUrl" #help>
@@ -83,7 +83,7 @@ async function save(participant: (typeof teamParticipants.value)[number]) {
             target="_blank"
             class="break-all text-primary hover:underline"
           >
-            {{ t("page.tournaments.prizes.openSource") }}
+            {{ t("common.openSource") }}
           </ULink>
         </template>
       </UFormField>

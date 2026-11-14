@@ -1,9 +1,16 @@
 import type { PrizeEntry, PrizeEntryPatch, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
+import { parseDataSourceUrl } from "../../common/domain/data-source";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { assertPrizeDistribution } from "../domain/prize-distribution";
+import { assertPrizeDistribution, patchPrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
 import type { CompetitionAfterCommit } from "./after-commit";
-import type { EarningsScope, PrizeParticipant, PrizeQueries, PrizeTransaction } from "./ports";
+import type {
+  EarningsScope,
+  PrizeParticipant,
+  PrizeQueries,
+  PrizeTransaction,
+  PrizeWriter,
+} from "./ports";
 
 function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipant[]): void {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
@@ -41,11 +48,17 @@ export class TournamentPrizeService {
       throw new InvalidInputError("Prize distributions of start.gg tournaments cannot be proposed");
   }
 
-  async requireProposablePrize(tournamentId: string, teamId: string): Promise<void> {
+  async requireProposablePrize(
+    tournamentId: string,
+    teamId: string,
+    patch: PrizeEntryPatch,
+  ): Promise<void> {
     await this.requireProposableTournament(tournamentId);
-    const { prizes } = await this.findByTournamentId(tournamentId);
-    if (!prizes.some((prize) => prize.team.id === teamId))
-      throw new NotFoundError(`Team "${teamId}" has no prize in tournament "${tournamentId}"`);
+    await this.transaction.run(async ({ prizes }) => {
+      const entries = patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, null);
+      assertPrizeDistribution(entries);
+      assertParticipants(entries, await prizes.participants(tournamentId));
+    });
   }
 
   async teamEarnings(teamId: string, scope: EarningsScope): Promise<ProfileEarnings> {
@@ -57,15 +70,12 @@ export class TournamentPrizeService {
   }
 
   async setDistribution(tournamentId: string, entries: PrizeEntry[]): Promise<TournamentPrizes> {
-    assertPrizeDistribution(entries);
-    await this.transaction.run(async ({ prizes }) => {
-      if (!(await prizes.tournamentExists(tournamentId)))
-        throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
-      assertParticipants(entries, await prizes.participants(tournamentId));
-      await prizes.replace(tournamentId, entries);
-    });
-    await this.afterCommit.settle({ tournamentIds: [tournamentId] });
-    return this.findByTournamentId(tournamentId);
+    const sourced = entries.map((entry) => ({
+      ...entry,
+      sourceUrl: parseDataSourceUrl(entry.sourceUrl),
+    }));
+    assertPrizeDistribution(sourced);
+    return this.write(tournamentId, async () => sourced);
   }
 
   async updateEntry(
@@ -74,24 +84,20 @@ export class TournamentPrizeService {
     patch: PrizeEntryPatch,
     sourceUrl: string,
   ): Promise<TournamentPrizes> {
+    const source = parseDataSourceUrl(sourceUrl);
+    return this.write(tournamentId, async (prizes) =>
+      patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, source),
+    );
+  }
+
+  private async write(
+    tournamentId: string,
+    next: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
+  ): Promise<TournamentPrizes> {
     await this.transaction.run(async ({ prizes }) => {
       if (!(await prizes.tournamentExists(tournamentId)))
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
-      const current = await prizes.entries(tournamentId);
-      if (!current.some((entry) => entry.teamId === teamId))
-        throw new NotFoundError(`Team "${teamId}" has no prize in tournament "${tournamentId}"`);
-      const entries = current.map((entry) =>
-        entry.teamId === teamId
-          ? {
-              ...entry,
-              placement: patch.placement ?? entry.placement,
-              amount: patch.amount ?? entry.amount,
-              currency: patch.currency ?? entry.currency,
-              playerIds: patch.playerIds ?? entry.playerIds,
-              sourceUrl,
-            }
-          : entry,
-      );
+      const entries = await next(prizes);
       assertPrizeDistribution(entries);
       assertParticipants(entries, await prizes.participants(tournamentId));
       await prizes.replace(tournamentId, entries);

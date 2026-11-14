@@ -60,6 +60,14 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
+function optionalRow(
+  key: string,
+  label: string,
+  value: string | undefined,
+): { key: string; label: string; value: string }[] {
+  return value === undefined ? [] : [{ key, label, value }];
+}
+
 function streamRows(
   targetKey: "eventId" | "tournamentId" | "matchId",
   targetId: string,
@@ -101,29 +109,23 @@ function viewershipRows(
       label: t("page.tournaments.viewership.peakViewers"),
       value: count.format(viewership.peakViewers),
     },
-    ...(viewership.averageViewers === null
-      ? []
-      : [
-          {
-            key: "averageViewers",
-            label: t("page.tournaments.viewership.averageViewers"),
-            value: count.format(viewership.averageViewers),
-          },
-        ]),
+    ...optionalRow(
+      "averageViewers",
+      t("page.tournaments.viewership.averageViewers"),
+      viewership.averageViewers === null ? undefined : count.format(viewership.averageViewers),
+    ),
     {
       key: "scope",
       label: t("page.tournaments.viewership.scope"),
       value: t(`page.tournaments.viewership.scopes.${viewership.scope}`),
     },
-    ...(viewership.measuredAt === null
-      ? []
-      : [
-          {
-            key: "measuredAt",
-            label: t("page.tournaments.viewership.measuredAt"),
-            value: dateFormatter.value.format(new Date(viewership.measuredAt)),
-          },
-        ]),
+    ...optionalRow(
+      "measuredAt",
+      t("page.tournaments.viewership.measuredAt"),
+      viewership.measuredAt === null
+        ? undefined
+        : dateFormatter.value.format(new Date(viewership.measuredAt)),
+    ),
     {
       key: "sourceName",
       label: t("page.tournaments.viewership.sourceName"),
@@ -167,42 +169,28 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   if (change.kind === "update_tournament_prize") {
     const { patch } = change;
     const patched = [
-      ...(patch.placement === undefined
-        ? []
-        : [
-            {
-              key: "placement",
-              label: t("page.tournaments.prizes.placement"),
-              value: String(patch.placement),
-            },
-          ]),
-      ...(patch.amount === undefined
-        ? []
-        : [
-            {
-              key: "amount",
-              label: t("page.tournaments.prizes.amount"),
-              value: String(patch.amount),
-            },
-          ]),
-      ...(patch.currency === undefined
-        ? []
-        : [
-            {
-              key: "currency",
-              label: t("page.tournaments.prizes.currency"),
-              value: patch.currency,
-            },
-          ]),
-      ...(patch.playerIds === undefined
-        ? []
-        : [
-            {
-              key: "playerIds",
-              label: t("page.tournaments.prizes.players"),
-              value: patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
-            },
-          ]),
+      ...optionalRow(
+        "placement",
+        t("page.tournaments.prizes.placement"),
+        patch.placement === undefined ? undefined : String(patch.placement),
+      ),
+      ...optionalRow(
+        "amount",
+        t("page.tournaments.prizes.amount"),
+        patch.amount === undefined
+          ? undefined
+          : patch.currency === undefined
+            ? String(patch.amount)
+            : formatAmount(patch.amount, patch.currency),
+      ),
+      ...optionalRow("currency", t("page.tournaments.prizes.currency"), patch.currency),
+      ...optionalRow(
+        "playerIds",
+        t("page.tournaments.prizes.players"),
+        patch.playerIds === undefined
+          ? undefined
+          : patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
+      ),
     ];
     return [
       {

@@ -166,6 +166,24 @@ describe("TournamentPrizeService", () => {
     expect(writer.replace).not.toHaveBeenCalled();
   });
 
+  it("corrects a row while another row of the stage still cites a refused source", async () => {
+    const { service, writer } = setup({
+      participants: [rosterA, { teamId: "team-b", playerIds: [] }],
+    });
+    const legacy: PrizeEntry = {
+      ...entry,
+      placement: 2,
+      teamId: "team-b",
+      playerIds: [],
+      sourceUrl: "https://blast.tv/rl/open",
+    };
+    writer.entries.mockResolvedValue([entry, legacy]);
+
+    await service.updateEntry("cup", "team-a", {}, RULES);
+
+    expect(writer.replace).toHaveBeenCalledWith("cup", [{ ...entry, sourceUrl: RULES }, legacy]);
+  });
+
   it("refuses a BLAST.tv source", async () => {
     const { service, writer } = setup();
     await expect(

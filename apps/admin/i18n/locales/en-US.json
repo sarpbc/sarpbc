@@ -13,7 +13,9 @@
       "analyst": "Analyst",
       "manager": "Manager"
     },
-    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia and BLAST.tv are not accepted sources."
+    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia and BLAST.tv are not accepted sources.",
+    "sourceUrl": "Source URL",
+    "openSource": "Open source"
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP or GIF, up to {max} MB",
@@ -758,11 +760,9 @@
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
         },
-        "sourceUrl": "Source URL",
         "bulkSource": "Source for every prize",
         "bulkSourceHint": "Fills the source of every prize below, for example with the official rulebook. Save to apply.",
-        "applySource": "Apply to All",
-        "openSource": "Open source"
+        "applySource": "Apply to All"
       },
       "events": {
         "title": "Events",
@@ -1290,9 +1290,7 @@
           "incomplete": "Fill in all three values.",
           "range": "The last place cannot be before the first place.",
           "numbers": "Use whole numbers: places from 1 to {maxPlacement}, points from 0 to {maxPoints}.",
-          "overlap": "Place ranges cannot overlap.",
-          "sourceUrl": "Enter a valid http or https URL.",
-          "sourceBlocked": "This website is not accepted as a source. Use the official rules page or announcement."
+          "overlap": "Place ranges cannot overlap."
         },
         "teamPlacement": "{name} (place {placement})",
         "teamsLoading": "Loading the teams of this event…",
@@ -1492,8 +1490,6 @@
         "textHint": "One short sentence, as it will appear.",
         "sourceUrl": "Official source",
         "sourceUrlHint": "Optional. Liquipedia and BLAST.tv are not accepted.",
-        "sourceInvalid": "Enter an http(s) URL.",
-        "sourceForbidden": "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
         "link": {
           "label": "Link",
           "hint": "Optional. A player, team, stage or match already on the site.",

@@ -35,6 +35,7 @@ const TOOL_NAMES = [
   "set_match_winner",
   "set_match_game_vods",
   "update_match",
+  "set_match_source",
   "create_tournament",
   "update_tournament",
   "link_pandascore_tournament",

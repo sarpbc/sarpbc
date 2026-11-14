@@ -206,7 +206,6 @@ export async function updateMatchInTransaction(
     await replaceParticipants(writer, match, input.participantIds, input.results !== undefined);
   if (input.previousMatches !== undefined)
     await setBracketLinks(writer, match, input.previousMatches);
-  if (input.sourceUrl !== undefined) match.sourceUrl = parseDataSourceUrl(input.sourceUrl);
   if (input.beginAt !== undefined) match.beginAt = input.beginAt;
   if (input.endAt !== undefined) match.endAt = input.endAt;
   if (input.status !== undefined) match.status = input.status;

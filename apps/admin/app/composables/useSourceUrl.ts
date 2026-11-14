@@ -1,6 +1,5 @@
 import { isAcceptedDataSourceUrl } from "@sarpbc/utils";
 
-/** A blank field means no source. */
 export function useSourceUrl() {
   const { t } = useI18n();
 
