@@ -1,5 +1,5 @@
-import type { UpsertMatchCommand } from "../../../tournament/application/feed";
-import type { MatchDto } from "../dto/match.dto";
+import { UpsertMatchCommand } from "../../../tournament/application/feed";
+import { MatchDto } from "../dto/match.dto";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 
 export function toUpsertMatchCommand(dto: MatchDto): UpsertMatchCommand {

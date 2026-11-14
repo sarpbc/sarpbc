@@ -7,7 +7,7 @@ import {
   formatTournamentDateRange,
   getTournamentStatus,
   tournamentStatusLabelKey,
-} from "~/utils/tournamentStatus";
+} from "~/utils/tournament-status";
 
 const {
   title,

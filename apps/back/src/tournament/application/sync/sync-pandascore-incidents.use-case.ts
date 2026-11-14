@@ -1,7 +1,7 @@
 import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionFeed } from "../feed";
 import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../ports";
-import type { CompetitionSyncService } from "./competition-sync.service";
+import { CompetitionSyncService } from "./competition-sync.service";
 
 const FALLBACK_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 

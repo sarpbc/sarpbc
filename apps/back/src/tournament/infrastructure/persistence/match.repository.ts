@@ -1,7 +1,7 @@
 import { EntityRepository } from "@mikro-orm/core";
 import type { DataSource } from "@sarpbc/types";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import type { Match } from "./match.entity";
+import { Match } from "./match.entity";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type {
   MatchListKind,

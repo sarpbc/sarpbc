@@ -15,14 +15,14 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { TeamService } from "../../application/team.service";
-import type { TeamAliasService } from "../../application/team-alias.service";
+import { TeamService } from "../../application/team.service";
+import { TeamAliasService } from "../../application/team-alias.service";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
-import type { ContractService } from "../../application/contract.service";
-import type { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
-import type { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import { ContractService } from "../../application/contract.service";
+import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
+import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
 import { CreateTeamDto } from "./dto/create-team.dto";

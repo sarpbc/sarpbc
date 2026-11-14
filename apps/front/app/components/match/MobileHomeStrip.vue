@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { filterMatchesTodayOrTomorrow } from "~/utils/calendarDay";
-import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
+import { filterMatchesTodayOrTomorrow } from "~/utils/calendar-day";
+import { resolveMatchRailTitleKind } from "~/utils/match-rail-title";
 
 const MAX_MATCHES = 5;
 const SOURCE = "home_strip" as const;

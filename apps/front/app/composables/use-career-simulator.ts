@@ -6,13 +6,13 @@ import {
   loadActiveCareer,
   saveActiveCareer,
   saveCareerResult,
-} from "~/composables/useCareerStorage";
+} from "~/composables/use-career-storage";
 import {
   canContinueCareer,
   createInitialCareerState,
   reduceCareerState,
-} from "~/utils/career/careerReducer";
-import type { CareerAction } from "~/utils/career/careerReducer";
+} from "~/utils/career/career-reducer";
+import type { CareerAction } from "~/utils/career/career-reducer";
 import {
   computeSeasonPoints,
   computeStateRankings,

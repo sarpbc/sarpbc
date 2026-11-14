@@ -21,8 +21,8 @@ import type {
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import type { SeasonArchiveService } from "../../application/season-archive.service";
-import type { SeasonService } from "../../application/season.service";
+import { SeasonArchiveService } from "../../application/season-archive.service";
+import { SeasonService } from "../../application/season.service";
 import {
   CreateSeasonAwardDto,
   CreateSeasonParticipantDto,

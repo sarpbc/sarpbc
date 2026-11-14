@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { Injectable } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { z } from "zod";
 
 import { PandascoreApiError } from "./pandascore-api.errors";

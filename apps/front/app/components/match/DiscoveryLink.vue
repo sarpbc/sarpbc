@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { matchPath } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
-import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 
 defineOptions({ inheritAttrs: false });
 

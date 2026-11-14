@@ -1,5 +1,5 @@
 import { isNonEmptyString } from "@sarpbc/utils";
-import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/commentPermalink";
+import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/comment-permalink";
 
 function focusCommentElement(commentId: string): HTMLElement | null {
   const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);

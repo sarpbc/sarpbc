@@ -1,6 +1,5 @@
-import type { OnModuleDestroy } from "@nestjs/common";
-import { Injectable } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
 export type PostHogProperties = Record<string, string | number | boolean | null>;

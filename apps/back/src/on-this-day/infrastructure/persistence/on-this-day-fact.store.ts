@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { DataSource, OnThisDayFactLinkInput } from "@sarpbc/types";
 import { participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../../common/domain/data-source";

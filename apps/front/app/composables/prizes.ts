@@ -1,5 +1,5 @@
 import type { PrizeAmount, TournamentPrizes } from "@sarpbc/types";
-import { formatPrizeAmount } from "~/utils/currencyFormatter";
+import { formatPrizeAmount } from "~/utils/currency-formatter";
 
 export const STARTGG_URL = "https://www.start.gg";
 

@@ -2,7 +2,7 @@ import type { MaybeRef } from "vue";
 import type { PlayerContract } from "@sarpbc/types";
 import { getPlayerStaffTournaments } from "~/composables/player/api";
 import type { Tournament } from "~/types/tournament";
-import { splitTournaments } from "~/composables/entity/useEntityTournaments";
+import { splitTournaments } from "~/composables/entity/use-entity-tournaments";
 
 function coversTournament(contract: PlayerContract, tournament: Tournament): boolean {
   if (!tournament.beginAt) {

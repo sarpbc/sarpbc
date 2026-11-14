@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import { localizedPath } from "@sarpbc/utils/entity-path";
 import { isNonEmptyString } from "@sarpbc/utils/text";
 import { DEFAULT_API_BASE, SITE_ORIGIN, apiPreconnectLinks, i18nOptions } from "@sarpbc/ui/config";
-import { newsMdcComponents } from "./app/utils/newsMdcComponents";
+import { newsMdcComponents } from "./app/utils/news-mdc-components";
 
 const require = createRequire(import.meta.url);
 const tiptapPmPath = path.dirname(path.dirname(require.resolve("@tiptap/pm/view")));

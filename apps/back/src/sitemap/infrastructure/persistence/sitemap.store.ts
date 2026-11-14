@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { STAFF_CONTRACT_ROLES } from "@sarpbc/types";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import {

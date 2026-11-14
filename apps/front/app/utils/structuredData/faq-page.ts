@@ -1,5 +1,5 @@
-import { SCHEMA_ORG, compactJsonLd } from "./jsonLd";
-import type { JsonLdNode } from "./jsonLd";
+import { SCHEMA_ORG, compactJsonLd } from "./json-ld";
+import type { JsonLdNode } from "./json-ld";
 
 export interface FaqPageItem {
   question: string;

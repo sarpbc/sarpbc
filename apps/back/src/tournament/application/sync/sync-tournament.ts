@@ -4,7 +4,7 @@ import { allocateSlug, eventSlug } from "@sarpbc/utils";
 import { Team } from "../../../roster/domain/team";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
-import type { League } from "../../domain/league";
+import { League } from "../../domain/league";
 import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
 import { Tournament } from "../../domain/tournament";
 import { inferEndAt } from "../../domain/tournament-end";

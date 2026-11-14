@@ -8,7 +8,7 @@ import {
   serializeNewsMatchTag,
 } from "@sarpbc/utils";
 import MatchBlockNodeView from "~/components/news/MatchBlockNodeView.vue";
-import { EMPTY_MATCH_BLOCK_ATTRS, matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
+import { EMPTY_MATCH_BLOCK_ATTRS, matchBlockNodeAttrs } from "~/utils/editor/match-block-attrs";
 
 const matchBlockTokenizer: MarkdownTokenizer = {
   name: "matchBlock",

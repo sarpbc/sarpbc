@@ -1,6 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { Topic } from "./topic.entity";
-import type { TopicRepository } from "./topic.repository";
+import { TopicRepository } from "./topic.repository";
 import { topicSnapshot } from "./forum.mapper";
 import type { TopicRecord } from "../../application/models";
 import type { TopicStore } from "../../application/ports";

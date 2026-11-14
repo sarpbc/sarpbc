@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { MatchListItem, Player, Team } from "@sarpbc/types";
 import { participantName } from "@sarpbc/utils";
-import { buildFaqPage } from "~/utils/structuredData/faqPage";
+import { buildFaqPage } from "~/utils/structuredData/faq-page";
 
 const {
   team,

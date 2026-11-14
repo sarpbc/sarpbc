@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
-import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
-import { getTournamentStatus } from "~/utils/tournamentStatus";
+import { buildTournamentItemList } from "~/utils/structuredData/tournament-item-list";
+import { getTournamentStatus } from "~/utils/tournament-status";
 
 const { t } = useI18n();
 const route = useRoute();

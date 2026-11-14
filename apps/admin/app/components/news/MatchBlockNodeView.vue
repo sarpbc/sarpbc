@@ -2,7 +2,7 @@
 import { NodeViewWrapper } from "@tiptap/vue-3";
 import type { NodeViewProps } from "@tiptap/vue-3";
 import { newsMatchBlockFromAttrs } from "@sarpbc/utils";
-import { matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
+import { matchBlockNodeAttrs } from "~/utils/editor/match-block-attrs";
 
 const { node, updateAttributes, selected, deleteNode } = defineProps<NodeViewProps>();
 

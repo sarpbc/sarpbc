@@ -3,7 +3,7 @@ import { mapSequentially } from "../../common/application/sequentially";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
+import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
 import { Contract } from "../domain/contract";
 import { Player } from "../domain/player";
 import { PlayerPhoto } from "../domain/player-photo";

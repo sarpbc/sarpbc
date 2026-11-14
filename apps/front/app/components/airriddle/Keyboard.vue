@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AirRiddleLetterStatus } from "~/utils/airRiddleLetterStatus";
+import type { AirRiddleLetterStatus } from "~/utils/air-riddle-letter-status";
 
 const { t } = useI18n();
 

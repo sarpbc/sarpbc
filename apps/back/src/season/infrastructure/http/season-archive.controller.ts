@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Param } from "@nestjs/common";
 import type { SeasonArchive, SeasonArchiveSummary } from "@sarpbc/types";
-import type { SeasonArchiveService } from "../../application/season-archive.service";
+import { SeasonArchiveService } from "../../application/season-archive.service";
 
 @Controller("season-archives")
 export class SeasonArchiveController {

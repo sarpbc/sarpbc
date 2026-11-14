@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode } from "@mikro-orm/core";
 import { z } from "zod";
 import { Tournament as TournamentRow } from "./tournament.entity";
@@ -11,7 +11,7 @@ import type { StageBracket } from "../../domain/bracket";
 import type { MatchWriter } from "../../application/ports";
 import { MATCH_WRITE_POPULATE, toMatch } from "./competition.mapper";
 import { unchangedJson } from "./unchanged-json";
-import type { CompetitionTournamentWriter } from "./tournament.writer";
+import { CompetitionTournamentWriter } from "./tournament.writer";
 
 const matchReferenceCounts = z.object({
   picks: z.coerce.number().int().nonnegative(),

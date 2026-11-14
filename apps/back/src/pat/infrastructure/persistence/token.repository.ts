@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { TokenStore } from "../../application/ports/token-store";
 import type { StoredToken, TokenSummary } from "../../domain/token";
 import { User } from "../../../user/infrastructure/user-persistence";

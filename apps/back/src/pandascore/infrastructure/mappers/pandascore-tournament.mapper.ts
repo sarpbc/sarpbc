@@ -1,8 +1,8 @@
-import type {
+import {
   UpsertTournamentParticipantCommand,
   UpsertTournamentCommand,
 } from "../../../tournament/application/feed";
-import type { ExpectedRosterDto, TournamentDto } from "../dto/tournament.dto";
+import { ExpectedRosterDto, TournamentDto } from "../dto/tournament.dto";
 import { toUpsertLeagueCommand } from "./pandascore-league.mapper";
 import { toUpsertPlayerCommand } from "./pandascore-player.mapper";
 import { toUpsertSerieCommand } from "./pandascore-serie.mapper";

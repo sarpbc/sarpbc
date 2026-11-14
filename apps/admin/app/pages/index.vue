@@ -6,7 +6,7 @@ import {
   participantName,
 } from "@sarpbc/utils";
 import type { NamedParticipant } from "@sarpbc/utils";
-import { canAccessSection } from "~/utils/adminSections";
+import { canAccessSection } from "~/utils/admin-sections";
 
 const ARTICLE_LIMIT = 5;
 const MATCH_LIMIT = 5;

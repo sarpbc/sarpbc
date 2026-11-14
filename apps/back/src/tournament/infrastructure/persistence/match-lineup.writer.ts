@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { MatchLineupInput } from "@sarpbc/types";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import type { LineupWriter } from "../../application/ports";

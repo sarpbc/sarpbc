@@ -7,8 +7,8 @@ import {
 } from "@sarpbc/utils";
 import type { UiLocale } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
-import { compactJsonLd, SCHEMA_ORG } from "./jsonLd";
-import type { JsonLdNode } from "./jsonLd";
+import { compactJsonLd, SCHEMA_ORG } from "./json-ld";
+import type { JsonLdNode } from "./json-ld";
 import { ORGANIZATION_ID } from "./organization";
 
 export interface NewsArticleLd extends JsonLdNode {

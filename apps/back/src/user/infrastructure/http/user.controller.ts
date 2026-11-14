@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Patch, Request, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
-import type { UserService } from "../../application/user.service";
+import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
-import type { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { CurrentUserId } from "./decorator/current-user.decorator";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import type { UpdateProfileInput } from "./dto/update-profile.dto";

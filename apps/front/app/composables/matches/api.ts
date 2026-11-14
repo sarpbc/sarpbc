@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
 import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
 // Nitro routes import this file and have no Nuxt auto-imports.
-import { apiFetch } from "@sarpbc/composables/apiFetch";
+import { apiFetch } from "@sarpbc/composables/api-fetch";
 
 export interface MatchesListQuery {
   limit?: number;

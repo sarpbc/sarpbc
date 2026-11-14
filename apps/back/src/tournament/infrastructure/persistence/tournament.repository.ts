@@ -1,6 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 import type { FilterQuery } from "@mikro-orm/core";
-import type { Tournament } from "./tournament.entity";
+import { Tournament } from "./tournament.entity";
 import { TOURNAMENT_POPULATE } from "./tournament-populate";
 
 export class TournamentRepository extends EntityRepository<Tournament> {

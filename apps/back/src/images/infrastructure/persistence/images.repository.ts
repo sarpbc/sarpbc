@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { log } from "evlog";
 import { IntegrationError } from "../../../common/domain/errors/integration-error";
 import type { ImageRepository as ImageStore } from "../../application/ports/image.repository";

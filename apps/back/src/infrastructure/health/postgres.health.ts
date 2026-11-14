@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import type { EntityManager } from "@mikro-orm/postgresql";
-import type { HealthIndicatorService } from "@nestjs/terminus";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { HealthIndicatorService } from "@nestjs/terminus";
 import { HEALTH_PING_TIMEOUT_MS, withTimeout } from "./with-timeout";
 
 @Injectable()

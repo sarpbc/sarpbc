@@ -2,7 +2,7 @@ import { Controller, Get, Header, Param, Query } from "@nestjs/common";
 import type { CountryDetail, CountrySummary } from "@sarpbc/types";
 import { OffsetPaginationQueryDto } from "../../../common/infrastructure/http/dto/offset-pagination-query.dto";
 import type { OffsetPaginationQueryInput } from "../../../common/infrastructure/http/dto/offset-pagination-query.dto";
-import type { CountryService } from "../../application/country.service";
+import { CountryService } from "../../application/country.service";
 import { mapCountry, mapCountrySummary } from "./country.mapper";
 
 @Controller("countries")

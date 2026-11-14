@@ -4,7 +4,7 @@ import { isMatchFinished, isMatchLive, isNonEmptyString } from "@sarpbc/utils";
 import { getPlayerMatches } from "~/composables/player/api";
 import { getTeamMatches } from "~/composables/team/api";
 import type { EntityKind, EntityMatchSections } from "~/types/entity";
-import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entitySort";
+import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entity-sort";
 
 const LIVE_STATUSES = new Set(["running", "live", "in_progress"]);
 

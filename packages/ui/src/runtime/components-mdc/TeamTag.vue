@@ -5,8 +5,8 @@ import {
   selectActiveRosterPlayers,
   resolveThemedLogoUrl,
 } from "@sarpbc/utils";
-import { fetchTeamTagWithCache } from "../composables/entityTagCache";
-import { useEntityTagLink } from "../composables/useEntityTagLink";
+import { fetchTeamTagWithCache } from "../composables/entity-tag-cache";
+import { useEntityTagLink } from "../composables/use-entity-tag-link";
 
 const { slug } = defineProps<{
   slug: string;

@@ -1,4 +1,4 @@
-import { localDayKey, parseMatchDate } from "~/utils/calendarDay";
+import { localDayKey, parseMatchDate } from "~/utils/calendar-day";
 
 export const UNKNOWN_DAY_KEY = "__unknown__";
 

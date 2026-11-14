@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { Reply, ReplyTargetType } from "@sarpbc/types";
 import { canModerateComments } from "@sarpbc/utils";
-import { commentAnchorId } from "~/utils/commentPermalink";
+import { commentAnchorId } from "~/utils/comment-permalink";
 
 const { comment, targetType, targetId } = defineProps<{
   comment: Reply;

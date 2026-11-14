@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { RedisService } from "../../infrastructure/redis/redis.service";
+import { RedisService } from "../../infrastructure/redis/redis.service";
 import type { CompetitionCache } from "../application/ports";
 import { tournamentCacheKey } from "./cache/cached-tournament.read";
 import { tournamentPrizesCacheKey } from "./cache/cached-tournament-prizes.read";

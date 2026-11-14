@@ -2,7 +2,7 @@
 import { watchDebounced } from "@vueuse/core";
 import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
 import { resolveThemedLogoUrl, tournamentStageLabel } from "@sarpbc/utils";
-import { canAccessSection } from "~/utils/adminSections";
+import { canAccessSection } from "~/utils/admin-sections";
 import type { Player, Team } from "@sarpbc/types";
 
 const { t } = useI18n();

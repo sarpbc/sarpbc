@@ -5,7 +5,7 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { ListModerationRepliesQueryDto } from "./dto/list-moderation-replies-query.dto";
 import type { ListModerationRepliesQueryInput } from "./dto/list-moderation-replies-query.dto";
-import type { ModerationService } from "../../application/moderation.service";
+import { ModerationService } from "../../application/moderation.service";
 
 @Controller("moderation")
 @UseGuards(AuthGuard, PermissionGuard)

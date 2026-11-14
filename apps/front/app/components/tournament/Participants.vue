@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentDetail } from "@sarpbc/types";
-import { buildTournamentParticipantEntries } from "~/utils/tournamentParticipants";
+import { buildTournamentParticipantEntries } from "~/utils/tournament-participants";
 
 const { tournament } = defineProps<{
   tournament: TournamentDetail;

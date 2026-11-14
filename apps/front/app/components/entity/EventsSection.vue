@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
 import type { EntityEventListItem, EntityEventsKind } from "~/types/entity";
-import { formatTournamentDateRange, tournamentStatusLabelKey } from "~/utils/tournamentStatus";
+import { formatTournamentDateRange, tournamentStatusLabelKey } from "~/utils/tournament-status";
 
 const {
   kind,

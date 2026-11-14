@@ -6,8 +6,7 @@ import type {
   TournamentMatchListItem,
 } from "@sarpbc/types";
 import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
-import type { Match } from "../../domain/match";
-import { matchPublicSlug } from "../../domain/match";
+import { Match, matchPublicSlug } from "../../domain/match";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
 import { mapParticipantRef } from "./participant-ref.mapper";

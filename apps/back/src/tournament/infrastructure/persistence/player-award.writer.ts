@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
 import { participantName } from "@sarpbc/utils";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";

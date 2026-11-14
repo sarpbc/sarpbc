@@ -4,7 +4,7 @@ import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.v
 import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
 import AirRiddleTile from "~/components/airriddle/Tile.vue";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
-import { deriveAirRiddleLetterStatuses } from "~/utils/airRiddleLetterStatus";
+import { deriveAirRiddleLetterStatuses } from "~/utils/air-riddle-letter-status";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();

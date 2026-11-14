@@ -14,18 +14,18 @@ import type { ForumPostCreationStatus, ForumPostListItem } from "@sarpbc/types";
 import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import type { PostService } from "../../application/post.service";
+import { PostService } from "../../application/post.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import type { CreatePostInput } from "./post/dto/create-post.dto";
-import type { PostResponse } from "./post/dto/post-response.dto";
+import { PostResponse } from "./post/dto/post-response.dto";
 import { postWithSlugResponse } from "./forum-response";
 import type { CreatedPost } from "../../application/models";
-import type { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
-import type { ReplyService } from "../../../reply/application/reply.service";
+import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import { ReplyService } from "../../../reply/application/reply.service";
 
 @Controller("posts")
 export class PostController {

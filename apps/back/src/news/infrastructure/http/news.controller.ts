@@ -20,18 +20,18 @@ import type { PaginationQueryInput } from "../../../common/infrastructure/http/d
 import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dto";
 import type { NewsListQueryInput, NewsLocaleQueryInput } from "./dto/news-locale-query.dto";
 import { parseLocale } from "@sarpbc/utils";
-import type { NewsService } from "../../application/news.service";
+import { NewsService } from "../../application/news.service";
 import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
 import type { CreateNewsArticleInput } from "./dto/create-news-article.dto";
 import { TweetEmbedQueryDto } from "./dto/tweet-embed-query.dto";
 import type { TweetEmbedQueryInput } from "./dto/tweet-embed-query.dto";
-import type { TweetEmbedService } from "../../application/tweet-embed.service";
-import type { TweetImageService } from "../../application/tweet-image.service";
+import { TweetEmbedService } from "../../application/tweet-embed.service";
+import { TweetImageService } from "../../application/tweet-image.service";
 
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
-import type { ReplyService } from "../../../reply/application/reply.service";
+import { ReplyService } from "../../../reply/application/reply.service";
 import { ReplyContentDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";
 import type { ReplyContentInput } from "../../../reply/infrastructure/http/dto/create-reply.dto";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";

@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { UserList } from "@sarpbc/types";
-import type { UserService } from "../../application/user.service";
+import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "./decorator/current-user.decorator";
 import { RequirePermissions } from "./decorator/require-permissions.decorator";

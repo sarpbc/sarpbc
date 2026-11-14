@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Request } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
-import type { AirRiddleService } from "../../application/airriddle.service";
-import type { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
+import { AirRiddleService } from "../../application/airriddle.service";
+import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
 import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
 import { GuessDto } from "./dto/guess.dto";
 import type { GuessInput } from "./dto/guess.dto";

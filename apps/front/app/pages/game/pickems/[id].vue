@@ -6,8 +6,8 @@ import {
   displayMatchScore,
   getMatchParticipantScore,
   shouldShowMatchScores,
-} from "~/utils/matchScore";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+} from "~/utils/match-score";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import { getPickOutcome, isMatchLockedForPickem } from "~/utils/pickems";
 import type { PickemPickState } from "~/utils/pickems";
 

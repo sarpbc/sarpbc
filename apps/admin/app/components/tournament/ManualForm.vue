@@ -2,7 +2,7 @@
 import { TOURNAMENT_FORMATS } from "@sarpbc/types";
 import type { League, ManualEvent, Team, TournamentDetail } from "@sarpbc/types";
 import { toSlug } from "@sarpbc/utils";
-import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
+import type { ManualTournamentFormState } from "~/composables/use-manual-tournament-form";
 
 const NEW_EVENT = "new";
 

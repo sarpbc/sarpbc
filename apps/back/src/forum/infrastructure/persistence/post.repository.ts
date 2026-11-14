@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EntityRepository } from "@mikro-orm/core";
 
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import type { Post } from "./post.entity";
+import { Post } from "./post.entity";
 
 export class PostRepository extends EntityRepository<Post> {
   async findPaginated({

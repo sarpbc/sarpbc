@@ -2,7 +2,7 @@ import { Controller, Get, Header, Query } from "@nestjs/common";
 import type { OnThisDay } from "@sarpbc/types";
 import { parseIsoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
-import type { OnThisDayService } from "../../application/on-this-day.service";
+import { OnThisDayService } from "../../application/on-this-day.service";
 import { OnThisDayQueryDto } from "./dto/on-this-day.dto";
 import type { OnThisDayQueryInput } from "./dto/on-this-day.dto";
 

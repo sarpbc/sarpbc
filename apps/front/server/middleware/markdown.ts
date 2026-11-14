@@ -7,7 +7,7 @@ import {
   isMarkdownEligibleHtmlPath,
   isMarkdownPagePath,
   markdownPathFromHtmlPath,
-} from "~/utils/markdownPath";
+} from "~/utils/markdown-path";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { isNonEmptyString } from "@sarpbc/utils";
 

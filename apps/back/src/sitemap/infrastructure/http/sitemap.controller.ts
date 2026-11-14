@@ -2,7 +2,7 @@ import { Controller, Get, Param } from "@nestjs/common";
 import { SITEMAP_KINDS } from "@sarpbc/types";
 import type { SitemapKind } from "@sarpbc/types";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
-import type { SitemapService } from "../../application/sitemap.service";
+import { SitemapService } from "../../application/sitemap.service";
 
 function isSitemapKind(value: string): value is SitemapKind {
   return SITEMAP_KINDS.some((kind) => kind === value);

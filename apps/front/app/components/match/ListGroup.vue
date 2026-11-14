@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import type { MatchListItem } from "@sarpbc/types";
 import type { MatchEventGroup } from "~/types/matches";
-import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
-import { formatDayHeaderDate } from "~/utils/dateFormatter";
+import type { MatchDiscoverySource } from "~/utils/match-discovery-analytics";
+import { formatDayHeaderDate } from "~/utils/date-formatter";
 
 const {
   matches,

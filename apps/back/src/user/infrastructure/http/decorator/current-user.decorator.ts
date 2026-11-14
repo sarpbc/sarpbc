@@ -1,6 +1,5 @@
-import type { ExecutionContext } from "@nestjs/common";
-import { createParamDecorator } from "@nestjs/common";
-import type { FastifyRequest } from "fastify";
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { FastifyRequest } from "fastify";
 
 export const CurrentUserId = createParamDecorator(
   (_data: undefined, context: ExecutionContext) =>

@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import type { PlayerComparison } from "@sarpbc/types";
-import type { PlayerComparisonService } from "../../application/player-comparison.service";
+import { PlayerComparisonService } from "../../application/player-comparison.service";
 import { ComparePlayersQueryDto } from "./dto/compare-players-query.dto";
 import type { ComparePlayersQueryInput } from "./dto/compare-players-query.dto";
 import { mapComparison } from "./player-comparison.mapper";

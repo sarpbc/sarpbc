@@ -15,8 +15,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { PlayerStandIn } from "@sarpbc/types";
-import type { PlayerService } from "../../application/player.service";
-import type { ContractService } from "../../application/contract.service";
+import { PlayerService } from "../../application/player.service";
+import { ContractService } from "../../application/contract.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -35,13 +35,15 @@ import type { ListDirectoryQueryInput } from "../../../common/infrastructure/htt
 import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
-import type { MatchService } from "../../../tournament/application/match/match.service";
-import type { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
-import { lineupSource } from "../../../tournament/application/match/match-lineup.service";
+import { MatchService } from "../../../tournament/application/match/match.service";
+import {
+  MatchLineupService,
+  lineupSource,
+} from "../../../tournament/application/match/match-lineup.service";
 import { isRedistributable } from "../../../common/domain/data-source";
-import type { PlayerAwardService } from "../../../tournament/application/player-award.service";
-import type { SeasonService } from "../../../season/application/season.service";
-import type { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import { PlayerAwardService } from "../../../tournament/application/player-award.service";
+import { SeasonService } from "../../../season/application/season.service";
+import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
 

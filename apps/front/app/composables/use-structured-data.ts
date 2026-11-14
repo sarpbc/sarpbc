@@ -1,6 +1,6 @@
 import type { MaybeRefOrGetter } from "vue";
-import { compactJsonLd, serializeJsonLd } from "~/utils/structuredData/jsonLd";
-import type { JsonLdNode } from "~/utils/structuredData/jsonLd";
+import { compactJsonLd, serializeJsonLd } from "~/utils/structuredData/json-ld";
+import type { JsonLdNode } from "~/utils/structuredData/json-ld";
 
 function setJsonLd(key: string, data: MaybeRefOrGetter<JsonLdNode | null | undefined>): void {
   useHead({
