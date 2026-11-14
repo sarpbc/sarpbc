@@ -134,7 +134,13 @@ export function computeCircuitStandings(
       const points = pointsForPlacement(stage.scale, placement);
 
       if (points === null) continue;
-      const tally = tallies.get(team.id) ?? { team, points: 0, cells: new Map() };
+
+      const tally = tallies.get(team.id) ?? {
+        team,
+        points: 0,
+        cells: new Map<string, CircuitStandingCell>(),
+      };
+
       const cell = tally.cells.get(stage.event.id);
       tally.cells.set(stage.event.id, {
         eventId: stage.event.id,

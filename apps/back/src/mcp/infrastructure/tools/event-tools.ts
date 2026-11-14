@@ -57,7 +57,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       write: true,
       permission: "tournaments.manage",
       input: {
-        leagueId: z.string().uuid().describe("League UUID from list_leagues."),
+        leagueId: z.uuid().describe("League UUID from list_leagues."),
         ...describeFields(updateLeagueFields, {
           name: "League name.",
           slug: "Slug, or null to clear.",
@@ -131,7 +131,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       write: true,
       permission: "tournaments.manage",
       input: {
-        eventId: z.string().uuid().describe("Event UUID from get_event or list_events."),
+        eventId: z.uuid().describe("Event UUID from get_event or list_events."),
         ...describeFields(updateEventFields, {
           name: "Event name.",
           slug: "Event URL slug.",

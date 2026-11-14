@@ -1,7 +1,7 @@
 import type { RosterProposal, RosterProposalList } from "@sarpbc/types";
 
 export async function getPendingRosterProposals(): Promise<RosterProposalList> {
-  return apiFetch<RosterProposalList>("/roster-proposals", {
+  return await apiFetch<RosterProposalList>("/roster-proposals", {
     method: "GET",
     query: { status: "pending" },
   });

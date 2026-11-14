@@ -1,3 +1,5 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
+
 export const PAST_ENTRIES_LIMIT = 10;
 
 interface Timed {
@@ -6,7 +8,7 @@ interface Timed {
 }
 
 function timeOf(value: Date | string | null | undefined): number {
-  return value ? new Date(value).getTime() : 0;
+  return isNonEmptyDateInput(value) ? new Date(value).getTime() : 0;
 }
 
 export function byBeginAtAsc(a: Timed, b: Timed): number {

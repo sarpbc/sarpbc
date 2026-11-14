@@ -57,14 +57,15 @@ function toSeasonArchive(
 export class SeasonArchiveService {
   constructor(private readonly store: SeasonStore) {}
 
-  published(): Promise<SeasonArchiveSummary[]> {
-    return this.store.published();
+  async published(): Promise<SeasonArchiveSummary[]> {
+    return await this.store.published();
   }
 
   async archive(slug: string): Promise<SeasonArchive> {
     const season = await this.store.findBySlug(slug);
 
-    if (!season?.slug) throw new NotFoundError("Season not found");
+    if (season?.slug === null || season?.slug === undefined || season?.slug === "")
+      throw new NotFoundError("Season not found");
     const participants = await this.store.participants(season.id);
     const awards = await this.store.awards(season.id);
 
@@ -80,7 +81,7 @@ export class SeasonArchiveService {
 
     if (!team) throw new NotFoundError(`Team with id "${input.teamId}" not found`);
 
-    if (team.mergedIntoId)
+    if (team.mergedIntoId !== null && team.mergedIntoId !== "")
       throw new InvalidInputError(
         `Team "${team.id}" was merged into "${team.mergedIntoId}"; use that id`,
       );
@@ -88,7 +89,7 @@ export class SeasonArchiveService {
     if (await this.store.participantTaken(season.id, team.id))
       throw new ConflictError(`${team.name} already takes part in ${season.name}.`);
 
-    return this.store.saveParticipant(season.id, team.id, parsePathNote(input.pathNote));
+    return await this.store.saveParticipant(season.id, team.id, parsePathNote(input.pathNote));
   }
 
   async updatePathNote(
@@ -121,10 +122,14 @@ export class SeasonArchiveService {
     const { participant } = await this.requireParticipant(seasonId, participantId);
     const entry = parsePathEntry(input);
 
-    if (entry.tournamentId && !(await this.store.tournamentExists(entry.tournamentId)))
+    if (
+      entry.tournamentId !== null &&
+      entry.tournamentId !== "" &&
+      !(await this.store.tournamentExists(entry.tournamentId))
+    )
       throw new NotFoundError(`Tournament with id "${entry.tournamentId}" was not found.`);
 
-    return this.store.savePathEntry(participant.id, entry);
+    return await this.store.savePathEntry(participant.id, entry);
   }
 
   async removePathEntry(seasonId: string, participantId: string, entryId: string): Promise<void> {

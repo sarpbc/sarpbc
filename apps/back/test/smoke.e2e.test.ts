@@ -7,6 +7,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import request from "supertest";
+import { z } from "zod";
 import type { MatchGameStats } from "@sarpbc/types";
 import { AuthController } from "../src/auth/infrastructure/http/auth.controller";
 import { authServiceProvider } from "../src/auth/infrastructure/auth.module";
@@ -209,7 +210,7 @@ describe("API smoke (e2e)", () => {
       .expect(200);
 
     const cookies = response.headers["set-cookie"];
-    const cookieHeader = Array.isArray(cookies) ? cookies.join(";") : String(cookies ?? "");
+    const cookieHeader = Array.isArray(cookies) ? cookies.join(";") : (cookies ?? "");
     expect(cookieHeader).toContain("access_token=");
     expect(cookieHeader).toContain("refresh_token=");
     expect(cookieHeader).toContain("HttpOnly");
@@ -217,7 +218,7 @@ describe("API smoke (e2e)", () => {
 
   it("lists published news", async () => {
     const response = await request(app.getHttpServer()).get("/news").expect(200);
-    expect(response.body.data[0].title).toBe("Hello");
+    expect(response.body).toHaveProperty("data[0].title", "Hello");
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
@@ -276,12 +277,14 @@ describe("API smoke (e2e)", () => {
   it("serves a match by public id with its computed slug", async () => {
     const response = await request(app.getHttpServer()).get("/matches/7250").expect(200);
     expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "publicId", value: 7250 });
-    expect(response.body.match).toMatchObject({
-      publicId: 7250,
-      slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
+    expect(response.body).toMatchObject({
+      match: {
+        publicId: 7250,
+        slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
+      },
     });
     expect(matchGames.byMatch).toHaveBeenLastCalledWith(grandFinal.id);
-    expect(response.body.games).toEqual(games);
+    expect(response.body).toHaveProperty("games", games);
   });
 
   it("serves a match by its legacy id", async () => {
@@ -311,8 +314,13 @@ describe("API smoke (e2e)", () => {
       expect.any(Date),
     );
     expect(response.headers["cache-control"]).toBe("public, max-age=10");
-    expect(Object.keys(response.body.blocks)).toEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
-    expect(response.body.blocks[`team:${team}:5`][0]).toMatchObject({
+
+    const { blocks } = z
+      .object({ blocks: z.record(z.string(), z.array(z.unknown())) })
+      .parse(response.body);
+
+    expect(Object.keys(blocks)).toEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
+    expect(blocks[`team:${team}:5`]?.[0]).toMatchObject({
       publicId: 7250,
       state: "upcoming",
       commentCount: 2,

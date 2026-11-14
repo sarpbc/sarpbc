@@ -24,7 +24,7 @@ import { IMAGE_PREFIXES } from "../domain/image-target";
 
 interface R2Connection {
   client: S3Client;
-  publicUrl(key: string): string;
+  publicUrl: (key: string) => string;
 }
 
 @Injectable()
@@ -42,13 +42,24 @@ export class R2Service implements ObjectStorage {
 
     const endpoint =
       this.configService.get<string>("r2_endpoint")?.replace(/\/$/, "") ??
-      (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+      (accountId !== undefined && accountId !== ""
+        ? `https://${accountId}.r2.cloudflarestorage.com`
+        : undefined);
 
     const accessKeyId = this.configService.get<string>("r2_access_key_id");
     const secretAccessKey = this.configService.get<string>("r2_secret_access_key");
     const publicBaseUrl = this.configService.get<string>("r2_public_base_url");
 
-    if (!endpoint || !accessKeyId || !secretAccessKey || !publicBaseUrl) {
+    if (
+      endpoint === undefined ||
+      endpoint === "" ||
+      accessKeyId === undefined ||
+      accessKeyId === "" ||
+      secretAccessKey === undefined ||
+      secretAccessKey === "" ||
+      publicBaseUrl === undefined ||
+      publicBaseUrl === ""
+    ) {
       throw new InternalServerErrorException(
         "R2 storage is not configured. Set R2 credentials, R2_ENDPOINT (or R2_ACCOUNT_ID), and R2_PUBLIC_BASE_URL.",
       );
@@ -88,14 +99,14 @@ export class R2Service implements ObjectStorage {
     return { uploadUrl, publicUrl: publicUrl(key), key };
   }
 
-  uploadImage(
+  async uploadImage(
     buffer: Uint8Array,
     contentType: ImageContentType,
     target: ImageUploadTarget,
   ): Promise<StoredObject> {
     const key = imageKey(target, contentType);
 
-    return this.objectOperation(
+    return await this.objectOperation(
       "uploadImage",
       { key, target, imageContentType: contentType, imageSize: buffer.byteLength },
       async ({ client, publicUrl }) => {
@@ -114,8 +125,8 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
-    return this.objectOperation(
+  async putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
+    return await this.objectOperation(
       "putObject",
       { key, imageContentType: contentType, imageSize: bytes.byteLength },
       async ({ client, publicUrl }) => {
@@ -134,22 +145,26 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  copyObject(sourceKey: string, key: string): Promise<StoredObject> {
-    return this.objectOperation("copyObject", { sourceKey, key }, async ({ client, publicUrl }) => {
-      await client.send(
-        new CopyObjectCommand({
-          Bucket: this.bucket,
-          CopySource: encodeURI(`${this.bucket}/${sourceKey}`),
-          Key: key,
-        }),
-      );
+  async copyObject(sourceKey: string, key: string): Promise<StoredObject> {
+    return await this.objectOperation(
+      "copyObject",
+      { sourceKey, key },
+      async ({ client, publicUrl }) => {
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: this.bucket,
+            CopySource: encodeURI(`${this.bucket}/${sourceKey}`),
+            Key: key,
+          }),
+        );
 
-      return { publicUrl: publicUrl(key), key };
-    });
+        return { publicUrl: publicUrl(key), key };
+      },
+    );
   }
 
-  deleteObject(key: string): Promise<void> {
-    return this.objectOperation("deleteObject", { key }, async ({ client }) => {
+  async deleteObject(key: string): Promise<void> {
+    await this.objectOperation("deleteObject", { key }, async ({ client }) => {
       await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
     });
   }

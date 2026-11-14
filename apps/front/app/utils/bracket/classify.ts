@@ -1,3 +1,4 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
 import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./types";
 import { TBD_LABEL } from "~/utils/tbdLabel";
@@ -51,8 +52,13 @@ export function groupMatchesByRound(
       matches: sortMatchesByBeginAt(roundMatches),
     }))
     .sort((a, b) => {
-      const dateA = a.matches[0]?.beginAt ? new Date(a.matches[0].beginAt).getTime() : 0;
-      const dateB = b.matches[0]?.beginAt ? new Date(b.matches[0].beginAt).getTime() : 0;
+      const dateA = isNonEmptyDateInput(a.matches[0]?.beginAt)
+        ? new Date(a.matches[0].beginAt).getTime()
+        : 0;
+
+      const dateB = isNonEmptyDateInput(b.matches[0]?.beginAt)
+        ? new Date(b.matches[0].beginAt).getTime()
+        : 0;
 
       return dateA - dateB;
     });

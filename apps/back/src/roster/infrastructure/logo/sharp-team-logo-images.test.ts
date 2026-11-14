@@ -5,8 +5,8 @@ import { SharpTeamLogoImages } from "./sharp-team-logo-images";
 
 const images = new SharpTeamLogoImages();
 
-function png(width: number, height: number) {
-  return sharp({
+async function png(width: number, height: number) {
+  return await sharp({
     create: { width, height, channels: 3, background: { r: 200, g: 20, b: 20 } },
   })
     .png()

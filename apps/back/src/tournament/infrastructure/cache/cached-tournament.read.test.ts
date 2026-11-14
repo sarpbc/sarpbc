@@ -37,6 +37,7 @@ function fixture(): Tournament {
 }
 
 describe("CachedTournamentRead", () => {
+  const warn = vi.spyOn(log, "warn");
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
   const read = new CachedTournamentRead(tournaments, redis);
@@ -72,7 +73,7 @@ describe("CachedTournamentRead", () => {
     async (cached) => {
       redis.get.mockResolvedValue(cached);
       expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
-      expect(log.warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
+      expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
     },
   );
 
@@ -83,7 +84,7 @@ describe("CachedTournamentRead", () => {
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, id: "other" }));
     await read.findById("t1");
     expect(tournaments.findById).toHaveBeenCalledTimes(2);
-    expect(log.warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledTimes(2);
   });
 
   it("never serves a cached value with fields outside the public response", async () => {
@@ -91,7 +92,7 @@ describe("CachedTournamentRead", () => {
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, internalSecret: "hidden" }));
     expect(await read.findById("t1")).toEqual(dto);
     expect(tournaments.findById).toHaveBeenCalledTimes(1);
-    expect(log.warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
+    expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
   });
 
   it.each(["get", "set"] as const)(
@@ -99,7 +100,7 @@ describe("CachedTournamentRead", () => {
     async (operation) => {
       redis[operation].mockRejectedValue(new Error("Redis unavailable"));
       expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
-      expect(log.warn).toHaveBeenCalled();
+      expect(warn).toHaveBeenCalled();
     },
   );
 

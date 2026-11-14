@@ -191,9 +191,13 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(
       async () => options.replays ?? [game2, stranger, game1],
     ),
-    replayStats: vi.fn<BallchasingSource["replayStats"]>(async (id) =>
-      statsFor([game1, game2].find((replay) => replay.id === id) as ReplaySummary),
-    ),
+    replayStats: vi.fn<BallchasingSource["replayStats"]>(async (id) => {
+      const replay = [game1, game2].find((candidate) => candidate.id === id);
+
+      if (replay === undefined) throw new Error(`Unknown replay ${id}`);
+
+      return statsFor(replay);
+    }),
   } satisfies BallchasingSource;
 
   const candidates: StatsCandidates = {
@@ -208,7 +212,7 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
 
   const games = new MemoryGames();
   const imports = new MemoryImports();
-  const reportFailure = vi.fn();
+  const reportFailure = vi.fn<(cause: unknown) => void>();
   const scheduler = { schedule: vi.fn<StatsImportScheduler["schedule"]>() };
 
   const service = new StatsImportService(
@@ -260,8 +264,8 @@ describe("StatsImportService.request", () => {
       { tournamentExists: vi.fn(), matches: vi.fn() },
       new MemoryGames(),
       imports,
-      { schedule: vi.fn() },
-      vi.fn(),
+      { schedule: vi.fn<StatsImportScheduler["schedule"]>() },
+      vi.fn<(cause: unknown) => void>(),
     );
 
     await expect(service.request("t1", "pilot-abc123")).rejects.toBeInstanceOf(IntegrationError);
@@ -275,7 +279,10 @@ describe("StatsImportService.run", () => {
 
     await service.run(id);
 
-    const done = imports.rows.get(id) as StatsImport;
+    const done = imports.rows.get(id);
+
+    if (done === undefined) throw new Error("Import was not stored");
+
     expect(done.status).toBe("completed");
     expect(done.total).toBe(3);
     expect(done.processed).toBe(3);

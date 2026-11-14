@@ -4,7 +4,9 @@ import { ShutdownStateService } from "./shutdown-state.service";
 describe("ShutdownStateService", () => {
   const service = new ShutdownStateService();
 
-  afterEach(() => service.onModuleDestroy());
+  afterEach(() => {
+    service.onModuleDestroy();
+  });
 
   it("is not shutting down until the module is destroyed", () => {
     const fresh = new ShutdownStateService();

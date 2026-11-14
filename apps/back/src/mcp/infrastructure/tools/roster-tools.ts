@@ -111,7 +111,7 @@ const circuitWorldwideSchema = z
   );
 
 const circuitRegionTeamsSchema = z
-  .array(z.string().uuid())
+  .array(z.uuid())
   .max(MAX_CIRCUIT_STAGE_TEAMS)
   .describe(
     "UUIDs of the teams of the circuit's region that took part in this worldwide stage. Only they earn points from it in a regional circuit. Each team must have played a stage of the same event. Omitted means none.",
@@ -120,7 +120,7 @@ const circuitRegionTeamsSchema = z
 const circuitFinishesSchema = z
   .array(
     z.object({
-      teamId: z.string().uuid().describe("UUID of a team that played a stage of the same event."),
+      teamId: z.uuid().describe("UUID of a team that played a stage of the same event."),
       placement: circuitPlacement.describe(
         "The team's official final placement in the whole event, e.g. 9 for a 9th-12th finish.",
       ),
@@ -192,7 +192,7 @@ const aliasSourceUrlSchema = sourceUrlSchema.describe(
 );
 
 const teamAliasInput = {
-  teamId: z.string().uuid().describe("UUID of the team that used the name."),
+  teamId: z.uuid().describe("UUID of the team that used the name."),
   name: z.string().trim().min(1).max(TEAM_ALIAS_NAME_MAX_LENGTH).describe("The former name."),
   from: contractDateSchema.describe("First day the team used the name (YYYY-MM-DD)."),
   to: contractDateSchema
@@ -201,7 +201,6 @@ const teamAliasInput = {
       "Day the team stopped using the name, such as the rebrand date (YYYY-MM-DD). Omit while the name is still in use.",
     ),
   logoUrl: z
-    .string()
     .url()
     .max(TEAM_ALIAS_URL_MAX_LENGTH)
     .regex(/^https:\/\//, "Use an https URL")
@@ -242,14 +241,15 @@ export interface RosterToolServices {
 }
 
 function redistributableChange(change: RosterChange, sourceUrl: string): RosterChange {
-  switch (change.kind) {
-    case "set_event_streams":
-    case "set_tournament_streams":
-    case "set_match_streams":
-      return isRedistributable(sourceFromUrl(sourceUrl)) ? change : { ...change, streams: [] };
-    default:
-      return change;
+  if (
+    change.kind === "set_event_streams" ||
+    change.kind === "set_tournament_streams" ||
+    change.kind === "set_match_streams"
+  ) {
+    return isRedistributable(sourceFromUrl(sourceUrl)) ? change : { ...change, streams: [] };
   }
+
+  return change;
 }
 
 export function rosterTools({ rosterProposalService }: RosterToolServices): McpTool[] {
@@ -263,14 +263,18 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        playerId: z.string().uuid().describe("Player UUID."),
-        teamId: z.string().uuid().describe("Team UUID."),
+        playerId: z.uuid().describe("Player UUID."),
+        teamId: z.uuid().describe("Team UUID."),
         effectiveDate: effectiveDateSchema,
         role: contractRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ sourceUrl, role, ...input }, user) =>
-        propose({ kind: "add_player_to_team", ...input, contractRole: role }, sourceUrl, user.id),
+      handler: async ({ sourceUrl, role, ...input }, user) =>
+        await propose(
+          { kind: "add_player_to_team", ...input, contractRole: role },
+          sourceUrl,
+          user.id,
+        ),
     }),
 
     defineTool({
@@ -280,8 +284,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        playerId: z.string().uuid().describe("Player UUID."),
-        teamId: z.string().uuid().describe("Team UUID the player leaves."),
+        playerId: z.uuid().describe("Player UUID."),
+        teamId: z.uuid().describe("Team UUID the player leaves."),
         effectiveDate: effectiveDateSchema,
         sourceUrl: sourceUrlSchema,
         status: z
@@ -289,8 +293,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           .optional()
           .describe(`Status after leaving. Defaults to ${DEFAULT_PLAYER_STATUS}.`),
       },
-      handler: ({ sourceUrl, status, ...input }, user) =>
-        propose(
+      handler: async ({ sourceUrl, status, ...input }, user) =>
+        await propose(
           {
             kind: "remove_player_from_team",
             ...input,
@@ -312,8 +316,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         status: playerStatusSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ name, country, status, sourceUrl }, user) =>
-        propose(
+      handler: async ({ name, country, status, sourceUrl }, user) =>
+        await propose(
           {
             kind: "create_player",
             name,
@@ -332,16 +336,16 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        playerId: z.string().uuid().describe("Player UUID."),
+        playerId: z.uuid().describe("Player UUID."),
         name: z.string().min(1).max(255).optional().describe("In-game name."),
         country: countrySchema.optional(),
         status: playerStatusSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ playerId, name, country, status, sourceUrl }, user) => {
+      handler: async ({ playerId, name, country, status, sourceUrl }, user) => {
         requireUpdateFields({ name, country, status });
 
-        return propose(
+        return await propose(
           { kind: "update_player", playerId, name, nationality: country, status },
           sourceUrl,
           user.id,
@@ -358,11 +362,15 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       input: {
         name: z.string().min(1).max(255).describe("Team name."),
         country: countrySchema.optional(),
-        imageUrl: z.string().url().max(255).optional().describe("Logo URL."),
+        imageUrl: z.url().max(255).optional().describe("Logo URL."),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ name, country, imageUrl, sourceUrl }, user) =>
-        propose({ kind: "create_team", name, location: country, imageUrl }, sourceUrl, user.id),
+      handler: async ({ name, country, imageUrl, sourceUrl }, user) =>
+        await propose(
+          { kind: "create_team", name, location: country, imageUrl },
+          sourceUrl,
+          user.id,
+        ),
     }),
 
     defineTool({
@@ -372,17 +380,17 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: {
-        teamId: z.string().uuid().describe("Team UUID."),
+        teamId: z.uuid().describe("Team UUID."),
         name: z.string().min(1).max(255).optional().describe("Team name."),
         country: countrySchema.optional(),
-        imageUrl: z.string().url().max(255).optional().describe("Logo URL."),
+        imageUrl: z.url().max(255).optional().describe("Logo URL."),
         active: z.boolean().optional().describe("False marks a disbanded team inactive."),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ teamId, name, country, imageUrl, active, sourceUrl }, user) => {
+      handler: async ({ teamId, name, country, imageUrl, active, sourceUrl }, user) => {
         requireUpdateFields({ name, country, imageUrl, active });
 
-        return propose(
+        return await propose(
           { kind: "update_team", teamId, name, location: country, imageUrl, active },
           sourceUrl,
           user.id,
@@ -396,12 +404,11 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: {
-        teamId: z.string().uuid().describe("Team UUID."),
+        teamId: z.uuid().describe("Team UUID."),
         variant: z
           .enum(TEAM_LOGO_VARIANTS)
           .describe("light for display on light backgrounds, dark for dark backgrounds."),
         imageUrl: z
-          .string()
           .url()
           .regex(/^https:\/\//, "Use an https URL")
           .refine(...withoutLiquipedia("use the team's official asset"))
@@ -427,8 +434,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: teamAliasInput,
-      handler: ({ teamId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
-        propose(
+      handler: async ({ teamId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
+        await propose(
           {
             kind: "add_team_alias",
             teamId,
@@ -450,11 +457,11 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: {
-        aliasId: z.string().uuid().describe("Alias UUID from list_team_aliases."),
+        aliasId: z.uuid().describe("Alias UUID from list_team_aliases."),
         ...teamAliasInput,
       },
-      handler: ({ teamId, aliasId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
-        propose(
+      handler: async ({ teamId, aliasId, to, logoUrl, pandascoreId, sourceUrl, ...alias }, user) =>
+        await propose(
           {
             kind: "update_team_alias",
             teamId,
@@ -478,12 +485,12 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        keptPlayerId: z.string().uuid().describe("UUID of the player to keep."),
-        duplicatePlayerId: z.string().uuid().describe("UUID of the duplicate to merge into it."),
+        keptPlayerId: z.uuid().describe("UUID of the player to keep."),
+        duplicatePlayerId: z.uuid().describe("UUID of the duplicate to merge into it."),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ keptPlayerId, duplicatePlayerId, sourceUrl }, user) =>
-        propose(
+      handler: async ({ keptPlayerId, duplicatePlayerId, sourceUrl }, user) =>
+        await propose(
           { kind: "merge_players", keptId: keptPlayerId, duplicateId: duplicatePlayerId },
           sourceUrl,
           user.id,
@@ -497,12 +504,12 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: {
-        keptTeamId: z.string().uuid().describe("UUID of the team to keep."),
-        duplicateTeamId: z.string().uuid().describe("UUID of the duplicate to merge into it."),
+        keptTeamId: z.uuid().describe("UUID of the team to keep."),
+        duplicateTeamId: z.uuid().describe("UUID of the duplicate to merge into it."),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ keptTeamId, duplicateTeamId, sourceUrl }, user) =>
-        propose(
+      handler: async ({ keptTeamId, duplicateTeamId, sourceUrl }, user) =>
+        await propose(
           { kind: "merge_teams", keptId: keptTeamId, duplicateId: duplicateTeamId },
           sourceUrl,
           user.id,
@@ -516,8 +523,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        playerId: z.string().uuid().describe("Player UUID."),
-        teamId: z.string().uuid().describe("Team UUID."),
+        playerId: z.uuid().describe("Player UUID."),
+        teamId: z.uuid().describe("Team UUID."),
         startDate: contractDateSchema.describe("Date the player joined (YYYY-MM-DD)."),
         endDate: contractDateSchema
           .optional()
@@ -525,12 +532,12 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         role: contractRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ playerId, teamId, startDate, endDate, role, sourceUrl }, user) => {
-        if (endDate && endDate < startDate) {
+      handler: async ({ playerId, teamId, startDate, endDate, role, sourceUrl }, user) => {
+        if (endDate !== undefined && endDate !== "" && endDate < startDate) {
           throw new InvalidInputError("endDate must not precede startDate.");
         }
 
-        return propose(
+        return await propose(
           { kind: "create_contract", playerId, teamId, startDate, endDate, contractRole: role },
           sourceUrl,
           user.id,
@@ -545,9 +552,9 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "players.manage",
       input: {
-        playerId: z.string().uuid().describe("UUID of the player the contract belongs to."),
-        contractId: z.string().uuid().describe("Contract UUID from list_contracts."),
-        teamId: z.string().uuid().optional().describe("Corrected team UUID."),
+        playerId: z.uuid().describe("UUID of the player the contract belongs to."),
+        contractId: z.uuid().describe("Contract UUID from list_contracts."),
+        teamId: z.uuid().optional().describe("Corrected team UUID."),
         startDate: contractDateSchema.optional().describe("Corrected start date (YYYY-MM-DD)."),
         endDate: contractDateSchema
           .nullable()
@@ -556,10 +563,13 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         role: contractRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ playerId, contractId, teamId, startDate, endDate, role, sourceUrl }, user) => {
+      handler: async (
+        { playerId, contractId, teamId, startDate, endDate, role, sourceUrl },
+        user,
+      ) => {
         requireUpdateFields({ teamId, startDate, endDate, role });
 
-        return propose(
+        return await propose(
           {
             kind: "update_contract",
             contractId,
@@ -582,9 +592,9 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
-        teamId: z.string().uuid().describe("UUID of the team the player represented."),
-        playerId: z.string().uuid().describe("Player UUID."),
+        tournamentId: z.uuid().describe("Tournament stage UUID."),
+        teamId: z.uuid().describe("UUID of the team the player represented."),
+        playerId: z.uuid().describe("Player UUID."),
         awardType: z
           .enum(PLAYER_AWARD_TYPES)
           .describe(
@@ -592,8 +602,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           ),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>
-        propose(
+      handler: async ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>
+        await propose(
           { kind: "award_player", tournamentId, teamId, playerId, awardType },
           sourceUrl,
           user.id,
@@ -607,8 +617,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        seasonId: z.string().uuid().describe("Season UUID from list_seasons."),
-        playerId: z.string().uuid().describe("Player UUID."),
+        seasonId: z.uuid().describe("Season UUID from list_seasons."),
+        playerId: z.uuid().describe("Player UUID."),
         awardType: z
           .enum(SEASON_AWARD_TYPES)
           .describe("Award type: season_mvp, regular_season_mvp or regional_mvp."),
@@ -634,8 +644,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
             "Required official announcement of the award: an RLEsports, BLAST, organiser or league post or page. Never Liquipedia.",
           ),
       },
-      handler: ({ seasonId, playerId, awardType, region, presentedBy, sourceUrl }, user) =>
-        propose(
+      handler: async ({ seasonId, playerId, awardType, region, presentedBy, sourceUrl }, user) =>
+        await propose(
           { kind: "award_season_player", seasonId, playerId, awardType, region, presentedBy },
           sourceUrl,
           user.id,
@@ -648,12 +658,12 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        eventId: z.string().uuid().describe("Event UUID."),
+        eventId: z.uuid().describe("Event UUID."),
         streams: streamsSchema,
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ eventId, streams, sourceUrl }, user) =>
-        propose({ kind: "set_event_streams", eventId, streams }, sourceUrl, user.id),
+      handler: async ({ eventId, streams, sourceUrl }, user) =>
+        await propose({ kind: "set_event_streams", eventId, streams }, sourceUrl, user.id),
     }),
 
     defineTool({
@@ -662,12 +672,16 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        tournamentId: z.uuid().describe("Tournament stage UUID."),
         streams: streamsSchema,
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ tournamentId, streams, sourceUrl }, user) =>
-        propose({ kind: "set_tournament_streams", tournamentId, streams }, sourceUrl, user.id),
+      handler: async ({ tournamentId, streams, sourceUrl }, user) =>
+        await propose(
+          { kind: "set_tournament_streams", tournamentId, streams },
+          sourceUrl,
+          user.id,
+        ),
     }),
 
     defineTool({
@@ -676,12 +690,12 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        matchId: z.string().uuid().describe("Match UUID."),
+        matchId: z.uuid().describe("Match UUID."),
         streams: streamsSchema,
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ matchId, streams, sourceUrl }, user) =>
-        propose({ kind: "set_match_streams", matchId, streams }, sourceUrl, user.id),
+      handler: async ({ matchId, streams, sourceUrl }, user) =>
+        await propose({ kind: "set_match_streams", matchId, streams }, sourceUrl, user.id),
     }),
 
     defineTool({
@@ -691,7 +705,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        matchId: z.string().uuid().describe("Match UUID."),
+        matchId: z.uuid().describe("Match UUID."),
         lineups: z
           .array(
             z.object({
@@ -702,7 +716,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
                   "Tournament participant id of one side of the match, from get_tournament.",
                 ),
               playerIds: z
-                .array(z.string().uuid())
+                .array(z.uuid())
                 .max(MAX_LINEUP_PLAYERS)
                 .describe("Player UUIDs who played for this participant, in lineup order."),
             }),
@@ -711,8 +725,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           .describe("One entry per side of the match."),
         sourceUrl: sourceUrlSchema,
       },
-      handler: ({ matchId, lineups, sourceUrl }, user) =>
-        propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),
+      handler: async ({ matchId, lineups, sourceUrl }, user) =>
+        await propose({ kind: "set_match_lineups", matchId, lineups }, sourceUrl, user.id),
     }),
 
     defineTool({
@@ -722,9 +736,8 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        circuitId: z.string().uuid().describe("Circuit UUID from list_circuits or create_circuit."),
+        circuitId: z.uuid().describe("Circuit UUID from list_circuits or create_circuit."),
         tournamentId: z
-          .string()
           .uuid()
           .describe("Tournament stage UUID, usually the final stage (playoffs) of the event."),
         scale: circuitScaleSchema,
@@ -733,11 +746,11 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         finishes: circuitFinishesSchema.optional(),
         sourceUrl: circuitSourceUrlSchema,
       },
-      handler: (
+      handler: async (
         { circuitId, tournamentId, scale, worldwide, regionTeamIds, finishes, sourceUrl },
         user,
       ) =>
-        propose(
+        await propose(
           {
             kind: "set_circuit_stage_scale",
             circuitId,
@@ -759,7 +772,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "tournaments.manage",
       input: {
-        matchId: z.string().uuid().describe("Match UUID."),
+        matchId: z.uuid().describe("Match UUID."),
         reason: reasonSchema,
         sourceUrl: sourceUrlSchema
           .optional()
@@ -785,10 +798,9 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       write: true,
       permission: "teams.manage",
       input: {
-        teamId: z.string().uuid().describe("UUID of the team to remove."),
+        teamId: z.uuid().describe("UUID of the team to remove."),
         reason: reasonSchema,
         mergeIntoTeamId: z
-          .string()
           .uuid()
           .optional()
           .describe("UUID of the team this one duplicates. Its references move there on approval."),
@@ -809,9 +821,9 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       description: `Propose the viewership of a tournament event: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. Read get_event first. ${VIEWERSHIP_NOTE}`,
       write: true,
       permission: "tournaments.manage",
-      input: { eventId: z.string().uuid().describe("Event UUID."), ...viewershipInput },
-      handler: ({ eventId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
-        propose(
+      input: { eventId: z.uuid().describe("Event UUID."), ...viewershipInput },
+      handler: async ({ eventId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
+        await propose(
           {
             kind: "set_event_viewership",
             eventId,
@@ -832,9 +844,9 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       description: `Propose the viewership of one match: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. ${VIEWERSHIP_NOTE}`,
       write: true,
       permission: "tournaments.manage",
-      input: { matchId: z.string().uuid().describe("Match UUID."), ...viewershipInput },
-      handler: ({ matchId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
-        propose(
+      input: { matchId: z.uuid().describe("Match UUID."), ...viewershipInput },
+      handler: async ({ matchId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
+        await propose(
           {
             kind: "set_match_viewership",
             matchId,

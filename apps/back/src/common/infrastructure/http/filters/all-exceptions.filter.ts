@@ -37,9 +37,10 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
         });
       }
 
-      const body = exception.detail.code
-        ? exception.detail
-        : { statusCode: status, error, ...exception.detail };
+      const body =
+        exception.detail.code !== undefined && exception.detail.code !== ""
+          ? exception.detail
+          : { statusCode: status, error, ...exception.detail };
 
       void response.status(status).send(body);
 

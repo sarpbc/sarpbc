@@ -20,9 +20,9 @@ import {
 @Controller("auth")
 export class AuthController {
   constructor(
-    private authService: AuthService,
-    private configService: ConfigService,
-    private posthog: PostHogService,
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly posthog: PostHogService,
   ) {}
 
   private authCookie(): AuthCookieConfig | undefined {
@@ -47,7 +47,7 @@ export class AuthController {
     setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_logged_in");
 
-    return res.code(200).send({ success: true });
+    return await res.code(200).send({ success: true });
   }
 
   @Get("logout")
@@ -62,10 +62,10 @@ export class AuthController {
   async refresh(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
-    if (!refreshToken) {
+    if (refreshToken === undefined || refreshToken === "") {
       clearAuthCookies(res, this.authCookie());
 
-      return res.code(401).send({
+      return await res.code(401).send({
         statusCode: 401,
         message: "Missing auth token in cookie",
       });
@@ -76,7 +76,7 @@ export class AuthController {
     if (!session) {
       clearAuthCookies(res, this.authCookie());
 
-      return res.code(401).send({
+      return await res.code(401).send({
         statusCode: 401,
         message: "Invalid or expired token",
       });
@@ -84,7 +84,7 @@ export class AuthController {
 
     setAuthCookies(res, session.tokens, this.authCookie());
 
-    return res.code(200).send({ success: true });
+    return await res.code(200).send({ success: true });
   }
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -98,7 +98,7 @@ export class AuthController {
     setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_signed_up");
 
-    return res.code(200).send({ success: true });
+    return await res.code(200).send({ success: true });
   }
 
   @UseGuards(AuthGuard)
@@ -133,12 +133,12 @@ export class AuthController {
       const tokens = await this.authService.handleGoogleCallback(code);
       setAuthCookies(res, tokens, this.authCookie());
 
-      return res.code(302).redirect(returnUrl);
+      return await res.code(302).redirect(returnUrl);
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
       const separator = returnUrl.includes("?") ? "&" : "?";
 
-      return res.code(302).redirect(`${returnUrl}${separator}authError=google`);
+      return await res.code(302).redirect(`${returnUrl}${separator}authError=google`);
     }
   }
 }

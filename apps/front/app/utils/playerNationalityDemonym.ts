@@ -1,3 +1,5 @@
+import { isNonEmptyString } from "@sarpbc/utils";
+
 const DEMONYM_KEY_PREFIX = "nationalities.demonym.";
 
 export function playerNationalityDemonymKey(code: string): string {
@@ -11,7 +13,7 @@ export function resolvePlayerNationalityDemonym(
 ): string | null {
   const code = nationality?.trim().toUpperCase();
 
-  if (!code) {
+  if (!isNonEmptyString(code)) {
     return null;
   }
 

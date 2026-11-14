@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  ApplicationError,
   ConflictError,
   IntegrationError,
   InvalidInputError,
@@ -11,7 +12,6 @@ import { ManualGameService } from "./manual-game.service";
 import type {
   BallchasingSource,
   GameAttachment,
-  GameRecord,
   GameStatsStore,
   ReplayStats,
   StatsCandidates,
@@ -56,6 +56,18 @@ function line(name: string, platformId: string) {
     shots: 3,
     demolitions: 0,
   };
+}
+
+async function rejection(work: Promise<unknown>): Promise<ApplicationError> {
+  const error: unknown = await work.then(
+    () => undefined,
+    (cause: unknown) => cause,
+  );
+
+  if (!(error instanceof ApplicationError))
+    throw new Error("Expected an ApplicationError rejection", { cause: error });
+
+  return error;
 }
 
 const input = {
@@ -137,7 +149,7 @@ describe("ManualGameService.attach", () => {
       orangeGoals: 3,
     });
     expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
-    const record = games.save.mock.calls[0][0] as GameRecord;
+    const record = games.save.mock.calls[0][0];
     expect(record).toMatchObject({ rocketLeagueId: "RL-1", playedAt: PLAYED_AT, number: 2 });
     expect(record.players.map((player) => [player.name, player.playerId])).toEqual([
       ["Seikoo", "seikoo"],
@@ -218,11 +230,11 @@ describe("ManualGameService.attach", () => {
   ])("rejects %s before calling Ballchasing", async (_label, tournamentId, change, kind, code) => {
     const { service, source, games } = setup();
 
-    const error = await service.attach(tournamentId, { ...input, ...change }).catch((e) => e);
+    const error = await rejection(service.attach(tournamentId, { ...input, ...change }));
 
     expect(error).toBeInstanceOf(kind);
 
-    if (code) expect(error.detail.code).toBe(code);
+    if (code !== undefined) expect(error.detail.code).toBe(code);
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.save).not.toHaveBeenCalled();
   });
@@ -239,7 +251,7 @@ describe("ManualGameService.attach", () => {
 
     games.attachment.mockResolvedValueOnce(attached);
 
-    const error = await service.attach("t1", input).catch((e) => e);
+    const error = await rejection(service.attach("t1", input));
 
     expect(error).toBeInstanceOf(ConflictError);
     expect(error.detail.code).toBe("replay_already_attached");
@@ -254,8 +266,8 @@ describe("ManualGameService.attach", () => {
       players: stats.players.filter((player) => player.side === "blue"),
     });
 
-    const notReady = await service.attach("t1", input).catch((e) => e);
-    const oneSided = await service.attach("t1", input).catch((e) => e);
+    const notReady = await rejection(service.attach("t1", input));
+    const oneSided = await rejection(service.attach("t1", input));
 
     expect(notReady).toBeInstanceOf(UnprocessableError);
     expect(notReady.detail.code).toBe("replay_not_ready");

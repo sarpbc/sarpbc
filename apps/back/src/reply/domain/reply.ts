@@ -84,13 +84,13 @@ export function replyTarget(input: {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
 
-    return id ? [{ kind, id }] : [];
+    return id !== undefined && id !== "" ? [{ kind, id }] : [];
   });
 
   if (targets.length !== 1)
     throw new InvalidInputError("Provide exactly one of postId, newsArticleId, or matchId.");
 
-  return targets[0]!;
+  return targets[0];
 }
 
 export function sameReplyTarget(

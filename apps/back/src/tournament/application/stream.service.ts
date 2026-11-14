@@ -85,8 +85,8 @@ export class StreamService {
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
 
-  find(owner: StreamOwner): Promise<OwnedStreams> {
-    return this.transaction.run(async (scope) => {
+  async find(owner: StreamOwner): Promise<OwnedStreams> {
+    return await this.transaction.run(async (scope) => {
       const { streams, inherited } = await loadOwner(scope, owner);
 
       return { streams, inherited };

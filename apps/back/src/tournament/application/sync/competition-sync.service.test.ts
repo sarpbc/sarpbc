@@ -5,12 +5,22 @@ import { League, Match, Tournament, TournamentParticipant } from "../../domain/c
 import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { Team } from "../../../roster/domain/roster";
-import type { CompetitionWriteScope, EventWriter } from "../ports";
-import type { CompetitionIncident, UpsertTournamentCommand } from "../feed";
+import type { CompetitionTransaction, EventWriter, TournamentWriter } from "../ports";
+import type {
+  CompetitionIncident,
+  ProviderDeletion,
+  UpsertSerieCommand,
+  UpsertTournamentCommand,
+} from "../feed";
+import {
+  competitionScope,
+  matchWriter as matchWriterDouble,
+  rosterIdentityWriter,
+  tournamentWriter as tournamentWriterDouble,
+} from "../../../../test/competition-doubles";
 import type { MatchTiming } from "../../domain/tournament-end";
 
-const copy = <T extends object>(value: T): T =>
-  Object.assign(Object.create(Object.getPrototypeOf(value) as object) as T, value);
+const copy = <T extends object>(type: new () => T, value: T): T => Object.assign(new type(), value);
 
 function memoryStore() {
   const tournaments = new Map<string, Tournament>();
@@ -23,23 +33,23 @@ function memoryStore() {
     byPandascoreId: vi.fn(async (id: number) => {
       const found = all().find((t) => t.pandascoreId === id);
 
-      return found ? copy(found) : null;
+      return found ? copy(Tournament, found) : null;
     }),
     load: vi.fn(async (id: string) => {
       const found = tournaments.get(id);
 
-      return found ? copy(found) : null;
+      return found ? copy(Tournament, found) : null;
     }),
     manualCandidates: vi.fn(async () => []),
     save: vi.fn(async (tournament: Tournament) => {
-      tournaments.set(tournament.id, copy(tournament));
+      tournaments.set(tournament.id, copy(Tournament, tournament));
     }),
     participants: vi.fn(async (): Promise<TournamentParticipant[]> => []),
-    saveParticipant: vi.fn(),
-    setPlacements: vi.fn(),
+    saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
+    setPlacements: vi.fn<TournamentWriter["setPlacements"]>(),
     leagueByPandascoreId: vi.fn(async (id: number) => leagues.get(id) ?? null),
     saveLeague: vi.fn(async (league: League) => {
-      if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(league));
+      if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(League, league));
     }),
   };
 
@@ -47,12 +57,12 @@ function memoryStore() {
     load: async (id) => {
       const found = events.get(id);
 
-      return found ? copy(found) : null;
+      return found ? copy(TournamentEvent, found) : null;
     },
     bySerieId: async (id) => {
       const found = [...events.values()].find((e) => e.pandascoreSerieId === id);
 
-      return found ? copy(found) : null;
+      return found ? copy(TournamentEvent, found) : null;
     },
     unclaimedByName: async () => null,
     slugTaken: async (slug, except) =>
@@ -64,7 +74,7 @@ function memoryStore() {
         .filter((t) => t.event.id === eventId)
         .map(({ id, name, source }) => ({ id, name, source })),
     save: async (event) => {
-      events.set(event.id, copy(event));
+      events.set(event.id, copy(TournamentEvent, event));
     },
     remove: async (id) => {
       events.delete(id);
@@ -127,16 +137,17 @@ describe("Competition synchronization", () => {
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
 
-  const tx = {
-    run: async <T>(work: (scope: CompetitionWriteScope) => Promise<T>) => {
-      const scope = {
-        tournaments: store.tournamentWriter,
-        events: store.eventWriter,
-        matches: store.matchWriter,
-        rosters,
-      };
+  const tx: CompetitionTransaction = {
+    run: async (work) => {
+      const result = await work(
+        competitionScope({
+          tournaments: tournamentWriterDouble(store.tournamentWriter),
+          events: store.eventWriter,
+          matches: matchWriterDouble(store.matchWriter),
+          rosters: rosterIdentityWriter(rosters),
+        }),
+      );
 
-      const result = await work(scope as never);
       log.push("commit");
 
       return result;
@@ -161,8 +172,13 @@ describe("Competition synchronization", () => {
   });
 
   const serieIncident = (
-    change: Partial<CompetitionIncident> & Pick<CompetitionIncident, "changeType">,
-  ) => ({ id: 100, modifiedAt: new Date(), kind: "serie", ...change }) as CompetitionIncident;
+    change:
+      | { changeType: "creation" | "update"; command: UpsertSerieCommand }
+      | { changeType: "deletion"; deletion: ProviderDeletion },
+  ): CompetitionIncident =>
+    change.changeType === "deletion"
+      ? { id: 100, modifiedAt: new Date(), kind: "serie", ...change }
+      : { id: 100, modifiedAt: new Date(), kind: "serie", ...change };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -408,7 +424,9 @@ describe("Competition synchronization", () => {
     const [placements] = store.tournamentWriter.setPlacements.mock.calls[0] ?? [];
     expect(placements?.get("dropped")).toBeNull();
     expect(placements?.has("unknown-team")).toBe(false);
-    expect([...(placements?.values() ?? [])].sort()).toEqual([1, null]);
+    expect(
+      [...(placements?.values() ?? [])].sort((a, b) => (a ?? Infinity) - (b ?? Infinity)),
+    ).toEqual([1, null]);
   });
 
   it("leaves placements untouched when the feed carries no standings", async () => {
@@ -482,7 +500,7 @@ describe("Competition synchronization", () => {
         kind: "tournament",
         changeType: "update",
         command: stageCommand({}),
-      } as CompetitionIncident);
+      });
       expect(store.tournaments.get("stage")?.endAt).toEqual(new Date("2025-03-02T18:00Z"));
     });
 

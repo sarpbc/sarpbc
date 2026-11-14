@@ -28,16 +28,17 @@ function tournament() {
     participants: [participant("p-kc", kc), participant("p-m8", m8)],
   });
 
-  const lookup: IdOrSlugLookup<Team> = {
-    findById: vi.fn(
-      async (id: string) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
-    ),
-    findBySlug: vi.fn(
-      async (slug: string) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
-    ),
-  };
+  const findById = vi.fn(
+    async (id: string) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
+  );
 
-  return { cup, kc, m8, lookup };
+  const findBySlug = vi.fn(
+    async (slug: string) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
+  );
+
+  const lookup: IdOrSlugLookup<Team> = { findById, findBySlug };
+
+  return { cup, kc, m8, lookup, findById };
 }
 
 const noPlayers: IdOrSlugLookup<Player> = {
@@ -47,7 +48,7 @@ const noPlayers: IdOrSlugLookup<Player> = {
 
 describe("resolveMatchParticipantIds", () => {
   it("keeps tournament participant ids", async () => {
-    const { cup, lookup } = tournament();
+    const { cup, lookup, findById } = tournament();
 
     const resolved = await resolveMatchParticipantIds(
       cup,
@@ -56,11 +57,11 @@ describe("resolveMatchParticipantIds", () => {
     );
 
     expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
-    expect(lookup.findById).not.toHaveBeenCalled();
+    expect(findById).not.toHaveBeenCalled();
   });
 
   it("resolves team slugs and ids and ignores duplicates", async () => {
-    const { cup, kc, lookup } = tournament();
+    const { cup, kc, lookup, findById } = tournament();
 
     const resolved = await resolveMatchParticipantIds(
       cup,
@@ -69,7 +70,7 @@ describe("resolveMatchParticipantIds", () => {
     );
 
     expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
-    expect(lookup.findById).toHaveBeenCalledWith(KC_ID);
+    expect(findById).toHaveBeenCalledWith(KC_ID);
   });
 
   it("rejects an unknown participant, a missing team, and a team that is not registered", async () => {

@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { Tournament } from "~/types/tournament";
 import type {
   Player,
@@ -31,19 +32,19 @@ export async function getAllPlayers(query?: {
 }): Promise<{ players: Player[]; total: number }> {
   const params: PlayerListParams = { limit: query?.limit ?? 50 };
 
-  if (query?.offset && query.offset > 0) {
+  if (query?.offset !== undefined && query.offset > 0) {
     params.offset = query.offset;
   }
 
-  if (query?.start) {
+  if (isNonEmptyString(query?.start)) {
     params.start = query.start;
-  } else if (query?.search) {
+  } else if (isNonEmptyString(query?.search)) {
     params.name = query.search;
   }
 
   const res = await apiFetch<{ players?: Player[]; count?: number }>("/player", {
     method: "GET",
-    params,
+    query: params,
   });
 
   const players = res.players ?? [];
@@ -132,7 +133,7 @@ export async function getPlayerTournaments(playerId: string): Promise<Tournament
 export async function getPlayerComparison(a: string, b: string): Promise<PlayerComparison> {
   const res = await apiFetch<{ comparison: PlayerComparison }>("/player/compare", {
     method: "GET",
-    params: { a, b },
+    query: { a, b },
   });
 
   return res.comparison;

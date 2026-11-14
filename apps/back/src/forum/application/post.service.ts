@@ -33,15 +33,15 @@ export class PostService {
   ) {}
 
   async find(options: { limit?: number; offset?: number }): Promise<PostRecord[]> {
-    return this.postRepository.findPaginated(options);
+    return await this.postRepository.findPaginated(options);
   }
 
   async findByTopicId(topicId: string): Promise<PostRecord[]> {
-    return this.postRepository.findByTopicId(topicId);
+    return await this.postRepository.findByTopicId(topicId);
   }
 
   async findById(ref: EntityRef): Promise<PostRecord | null> {
-    return this.postRepository.findWithDetails(ref);
+    return await this.postRepository.findWithDetails(ref);
   }
 
   async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
@@ -118,7 +118,11 @@ export class PostService {
 
       await scope.posts.save(newPost);
 
-      if (user.role === "admin" && createPostInput.translations?.length) {
+      if (
+        user.role === "admin" &&
+        createPostInput.translations?.length !== undefined &&
+        createPostInput.translations.length !== 0
+      ) {
         for (const tr of createPostInput.translations) {
           const t: TranslationRecord = {
             id: this.id(),
@@ -142,11 +146,11 @@ export class PostService {
   }
 
   async findRecentActivity(limit: number = 20) {
-    return this.postRepository.findRecentActivity(limit);
+    return await this.postRepository.findRecentActivity(limit);
   }
 
   async delete(id: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const post = await scope.posts.findWithDetails({ kind: "id", value: id });
 
       if (!post) {

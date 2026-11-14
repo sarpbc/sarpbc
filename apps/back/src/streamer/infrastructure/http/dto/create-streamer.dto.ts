@@ -8,7 +8,7 @@ export const CreateStreamerDto = z.strictObject({
     .trim()
     .max(TRACKED_STREAMER_NAME_MAX_LENGTH)
     .nullish()
-    .transform((value) => (value ? value : null)),
+    .transform((value) => (value !== null && value !== undefined && value !== "" ? value : null)),
 });
 
 export type CreateStreamerDto = z.infer<typeof CreateStreamerDto>;

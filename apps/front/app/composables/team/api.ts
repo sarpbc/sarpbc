@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { ProfileEarnings, ProfileMatchListItem, Team, TeamContract } from "@sarpbc/types";
 import type { Tournament } from "~/types/tournament";
 
@@ -23,22 +24,22 @@ export async function getAllTeams(query?: {
   start?: string;
 }): Promise<{ teams: Team[]; total: number }> {
   const params: TeamListParams = {
-    limit: query?.limit || 50,
+    limit: query?.limit ?? 50,
   };
 
-  if (query?.offset && query.offset > 0) {
+  if (query?.offset !== undefined && query.offset > 0) {
     params.offset = query.offset;
   }
 
-  if (query?.start) {
+  if (isNonEmptyString(query?.start)) {
     params.start = query.start;
-  } else if (query?.search) {
+  } else if (isNonEmptyString(query?.search)) {
     params.name = query.search;
   }
 
   const res = await apiFetch<{ teams: Team[]; count: number }>(`/team`, {
     method: "GET",
-    params,
+    query: params,
   });
 
   return { teams: res.teams, total: res.count };

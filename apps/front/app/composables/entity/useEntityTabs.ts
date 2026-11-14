@@ -35,7 +35,7 @@ export function useEntityTabs(kind: EntityKind) {
     const next = parseProfileTab(value);
 
     if (next === "info") {
-      router.replace({ query: {} });
+      void router.replace({ query: {} });
 
       return;
     }
@@ -45,12 +45,12 @@ export function useEntityTabs(kind: EntityKind) {
     if (next === "matches" || next === "events") {
       const current = route.query[next];
 
-      if (current) {
+      if (current !== undefined && current !== null && current !== "") {
         query[next] = String(current);
       }
     }
 
-    router.replace({ query });
+    void router.replace({ query });
   }
 
   return { tab, tabItems, setTab };
@@ -77,7 +77,7 @@ export function useEntityListTab(key: EntityListTabKey) {
       delete query[key];
     }
 
-    router.replace({ query });
+    void router.replace({ query });
   }
 
   return { tab, emptyIcon, setTab };

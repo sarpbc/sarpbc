@@ -1,4 +1,5 @@
 import { icons } from "@iconify-json/flag";
+import { isNonEmptyString } from "@sarpbc/utils";
 
 /**
  * GET /flags/:code.svg — nationality flags as long-cached images, so pages stop
@@ -12,7 +13,7 @@ export default defineEventHandler((event) => {
   const name = `${code}-4x3`;
   const icon = icons.icons[name] ?? icons.icons[icons.aliases?.[name]?.parent ?? ""];
 
-  if (!code || !icon) {
+  if (!isNonEmptyString(code) || !icon) {
     throw createError({ statusCode: 404, statusMessage: "Flag not found" });
   }
 

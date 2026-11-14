@@ -55,18 +55,18 @@ export class ReplyService {
   }
 
   async recentForModeration(limit: number) {
-    return this.replyRepository.findRecentForModeration(limit);
+    return await this.replyRepository.findRecentForModeration(limit);
   }
 
   async countByTargetIds(
     targetType: ReplyTargetType,
     targetIds: string[],
   ): Promise<Map<string, number>> {
-    return this.replyRepository.countByTargetIds(targetType, targetIds);
+    return await this.replyRepository.countByTargetIds(targetType, targetIds);
   }
 
   async create(userId: string, createReplyDto: CreateReplyInput): Promise<Reply> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const target = replyTarget(createReplyDto);
       const cooldownStart = new Date(this.now().getTime() - REPLY_CREATION_COOLDOWN_MS);
       const latestReply = await scope.replies.findLatestByUser(userId);
@@ -100,7 +100,7 @@ export class ReplyService {
 
       let replyTo: ReplyRecord | null = null;
 
-      if (createReplyDto.replyToId) {
+      if (createReplyDto.replyToId !== undefined && createReplyDto.replyToId !== "") {
         replyTo = await scope.replies.findById(createReplyDto.replyToId);
 
         if (!replyTo || replyTo.hiddenAt) {
@@ -135,7 +135,7 @@ export class ReplyService {
   }
 
   async hide(id: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
       if (!reply) {
@@ -152,7 +152,7 @@ export class ReplyService {
   }
 
   async delete(id: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
       if (!reply) {
@@ -168,7 +168,7 @@ export class ReplyService {
     replyId: string,
     reason: ReplyReportReason,
   ): Promise<{ id: string; reason: ReplyReportReason; createdAt: Date }> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(replyId);
 
       if (!reply || reply.hiddenAt) {
@@ -210,7 +210,7 @@ export class ReplyService {
   }
 
   async deleteAllForTarget(targetType: ReplyTargetType, targetId: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const replies = await scope.replies.findByTarget(targetType, targetId, {
         includeHidden: true,
       });
@@ -249,9 +249,9 @@ export class ReplyService {
       const dto = byId.get(reply.id)!;
       const parentId = reply.replyTo?.id;
 
-      if (parentId && byId.has(parentId)) {
+      if (parentId !== undefined && parentId !== "" && byId.has(parentId)) {
         byId.get(parentId)!.replies.push(dto);
-      } else if (!parentId) {
+      } else if (parentId === undefined || parentId === "") {
         roots.push(dto);
       }
     }

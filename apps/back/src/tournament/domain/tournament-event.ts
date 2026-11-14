@@ -3,6 +3,7 @@ import type { TournamentEventRef } from "@sarpbc/types";
 import type { DataSource, Stream, Viewership } from "@sarpbc/types";
 import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
+import { nonBlank } from "../../common/domain/text";
 import type { League } from "./competition";
 
 export class TournamentEvent {
@@ -72,25 +73,25 @@ export function eventDisplayName(input: {
   serieName: string | null;
   stageName: string;
 }): string {
-  const league = input.leagueName?.trim();
-  const serie = input.serieName?.trim();
+  const league = nonBlank(input.leagueName);
+  const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
 
-  if (serie) {
+  if (serie !== undefined) {
     if (/^\d{4}$/.test(serie)) {
-      if (league) return `${league} ${serie}`;
+      if (league !== undefined) return `${league} ${serie}`;
 
       return stage && !isGenericStageName(stage) ? stage : serie;
     }
 
-    return league && !serie.toLowerCase().startsWith(league.toLowerCase())
+    return league !== undefined && !serie.toLowerCase().startsWith(league.toLowerCase())
       ? `${league} ${serie}`
       : serie;
   }
 
-  if (league && stage) return `${league} ${stage}`;
+  if (league !== undefined && stage) return `${league} ${stage}`;
 
-  return stage || league || "";
+  return stage || (league ?? "");
 }
 
 function utcDay(date: Date | null): string {

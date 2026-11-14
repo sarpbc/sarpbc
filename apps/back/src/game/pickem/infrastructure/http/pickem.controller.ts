@@ -45,7 +45,7 @@ export class PickemController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Post("matches/:matchId/validate")
   async validateMatch(@Param("matchId") matchId: string) {
-    return this.pickemService.validateMatchResult(matchId);
+    return await this.pickemService.validateMatchResult(matchId);
   }
 
   @Get("tournament/:tournamentId/leaderboard")
@@ -61,6 +61,6 @@ export class PickemController {
     @Param("tournamentId") tournamentId: string,
     @Request() req: AuthenticatedUserRequest,
   ) {
-    return this.pickemService.personalRanking(tournamentId, req.user.id);
+    return await this.pickemService.personalRanking(tournamentId, req.user.id);
   }
 }

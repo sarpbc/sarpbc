@@ -14,7 +14,7 @@ export class PatAuthGuard implements CanActivate {
 
     const authHeader = request.headers.authorization;
 
-    if (!authHeader || !BEARER_PREFIX.test(authHeader)) {
+    if (authHeader === undefined || authHeader === "" || !BEARER_PREFIX.test(authHeader)) {
       throw new AuthenticationError(
         "Missing API token. Send it as an Authorization: Bearer header.",
       );

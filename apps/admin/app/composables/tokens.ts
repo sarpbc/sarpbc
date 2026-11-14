@@ -9,7 +9,7 @@ export async function getPatTokens(): Promise<PatToken[]> {
 }
 
 export async function createPatToken(name: string): Promise<CreatedPatToken> {
-  return apiFetch<CreatedPatToken>("/pat/tokens", {
+  return await apiFetch<CreatedPatToken>("/pat/tokens", {
     method: "POST",
     body: { name },
   });

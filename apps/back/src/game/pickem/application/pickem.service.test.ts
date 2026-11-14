@@ -5,7 +5,7 @@ import type { PickemWrites } from "./ports";
 
 describe("PickemService", () => {
   let match: PickMatch, picks: Pick[], service: PickemService;
-  const warn = vi.fn();
+  const warn = vi.fn<(message: string) => void>();
   beforeEach(() => {
     vi.clearAllMocks();
     match = {
@@ -32,14 +32,20 @@ describe("PickemService", () => {
     };
 
     service = new PickemService(
-      { list: async () => picks as NamedPick[] },
+      {
+        list: async () =>
+          picks.map((pick): NamedPick => ({
+            ...pick,
+            user: { ...pick.user, userName: pick.user.id },
+          })),
+      },
       {
         find: async () => structuredClone(match),
         decide: async (_, id) => {
           match.winnerId = id;
         },
       },
-      { run: async (work) => work(scope) },
+      { run: async (work) => await work(scope) },
       { now: () => new Date("2026-01-01"), id: () => "pick-1", warn },
     );
   });

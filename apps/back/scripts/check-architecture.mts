@@ -6,7 +6,7 @@ import ts from "typescript";
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoot = path.join(project, "src");
 const configPath = path.join(project, "tsconfig.json");
-const config = ts.readConfigFile(configPath, ts.sys.readFile);
+const config = ts.readConfigFile(configPath, (file) => ts.sys.readFile(file));
 
 if (config.error) throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, "\n"));
 

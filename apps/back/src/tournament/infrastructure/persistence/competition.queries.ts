@@ -86,13 +86,13 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
 
     return row ? toTournament(row) : null;
   }
-  findPandascoreWithoutMatches() {
-    return this.em
+  async findPandascoreWithoutMatches() {
+    return await this.em
       .getRepository<Tournament, TournamentRepository>(Tournament)
       .findPandascoreWithoutMatches();
   }
-  findPandascoreActive(options: { beginsBefore: Date; beganAfter: Date; endsAfter: Date }) {
-    return this.em
+  async findPandascoreActive(options: { beginsBefore: Date; beganAfter: Date; endsAfter: Date }) {
+    return await this.em
       .getRepository<Tournament, TournamentRepository>(Tournament)
       .findPandascoreActive(options);
   }
@@ -124,16 +124,16 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       ...new Map(participants.map((p) => [p.tournament.id, toTournament(p.tournament)])).values(),
     ];
   }
-  getTournamentsByPlayer(id: string) {
-    return this.tournamentsByParticipants({ players: { id } });
+  async getTournamentsByPlayer(id: string) {
+    return await this.tournamentsByParticipants({ players: { id } });
   }
-  getTournamentsByTeam(id: string) {
-    return this.tournamentsByParticipants({ team: { id } });
+  async getTournamentsByTeam(id: string) {
+    return await this.tournamentsByParticipants({ team: { id } });
   }
   async getTournamentsByTeamTenures(tenures: TeamTenure[]) {
     if (tenures.length === 0) return [];
 
-    return this.tournamentsByParticipants({
+    return await this.tournamentsByParticipants({
       $or: tenures.map(({ teamId, from, to }) => ({
         team: { id: teamId },
         tournament: { beginAt: to ? { $gte: from, $lte: to } : { $gte: from } },
@@ -275,11 +275,11 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       })
     ).map(toMatch);
   }
-  byPlayer(id: string) {
-    return this.matchesBy({ participants: { players: { id } } });
+  async byPlayer(id: string) {
+    return await this.matchesBy({ participants: { players: { id } } });
   }
-  byTeam(id: string) {
-    return this.matchesBy({ participants: { team: { id } } });
+  async byTeam(id: string) {
+    return await this.matchesBy({ participants: { team: { id } } });
   }
   async byTournament(id: string) {
     return (

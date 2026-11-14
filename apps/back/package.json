@@ -18,7 +18,7 @@
     "test:cov": "pnpm run build && vitest run --coverage",
     "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc -p tsconfig.build.json --noEmit --incremental false",
-    "typecheck:tests": "tsc -p tsconfig.test.json --incremental false",
+    "typecheck:tests": "tsc -p tsconfig.json --incremental false",
     "test:architecture": "node --test scripts/check-architecture.test.mts && node scripts/check-architecture.mts",
     "test:migrations": "node --test scripts/check-migrations.test.mts && node scripts/check-migrations.mts",
     "test:contracts": "node scripts/check-http-contract.mts",

@@ -15,13 +15,13 @@ function scorebug(blue: number, orange: number, clock: number, overtime: boolean
   return { kind: "scorebug", blue, orange, clock, overtime, replay: false, fade: 1, glitch: false };
 }
 
-describe("readScoreboard", () => {
+void describe("readScoreboard", () => {
   let overlay: Overlay;
   before(async () => {
     overlay = await loadOverlay(OVERLAY_PATH);
   });
 
-  it("reads scores, the regulation clock and overtime at every broadcast size", () => {
+  void it("reads scores, the regulation clock and overtime at every broadcast size", () => {
     for (const [index, size] of SIZES.entries()) {
       const renderer = new FixtureRenderer(size, index + 1);
 
@@ -50,7 +50,7 @@ describe("readScoreboard", () => {
     }
   });
 
-  it("ignores replays, faded transitions and screens without the scorebug", () => {
+  void it("ignores replays, faded transitions and screens without the scorebug", () => {
     const renderer = new FixtureRenderer({ width: 1920, height: 1080 }, 9);
 
     const scenes: Scene[] = [
@@ -65,7 +65,7 @@ describe("readScoreboard", () => {
     }
   });
 
-  it("never reads a wrong score from corrupted frames", () => {
+  void it("never reads a wrong score from corrupted frames", () => {
     for (const [index, size] of SIZES.entries()) {
       const renderer = new FixtureRenderer(size, index + 20);
 

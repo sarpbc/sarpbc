@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { orderStreams, parseStreamUrl } from "./stream";
 
-describe("parseStreamUrl", () => {
-  it("derives the platform and channel of known hosts", () => {
+void describe("parseStreamUrl", () => {
+  void it("derives the platform and channel of known hosts", () => {
     assert.deepEqual(parseStreamUrl(" https://www.twitch.tv/rocketleague "), {
       ok: true,
       url: "https://www.twitch.tv/rocketleague",
@@ -24,12 +24,12 @@ describe("parseStreamUrl", () => {
     });
   });
 
-  it("leaves the channel unknown when the URL does not name it", () => {
+  void it("leaves the channel unknown when the URL does not name it", () => {
     const parsed = parseStreamUrl("https://www.youtube.com/watch?v=abc");
     assert.equal(parsed.ok && parsed.channel, null);
   });
 
-  it("accepts other https hosts under the other platform", () => {
+  void it("accepts other https hosts under the other platform", () => {
     assert.deepEqual(parseStreamUrl("https://www.example.tv/live"), {
       ok: true,
       url: "https://www.example.tv/live",
@@ -38,7 +38,7 @@ describe("parseStreamUrl", () => {
     });
   });
 
-  it("rejects non-https and malformed URLs", () => {
+  void it("rejects non-https and malformed URLs", () => {
     assert.deepEqual(parseStreamUrl("http://twitch.tv/rl"), { ok: false, error: "not-https" });
     assert.deepEqual(parseStreamUrl("twitch.tv/rl"), { ok: false, error: "invalid-url" });
     assert.deepEqual(parseStreamUrl("https://user@twitch.tv/rl"), {
@@ -48,7 +48,7 @@ describe("parseStreamUrl", () => {
   });
 });
 
-describe("orderStreams", () => {
+void describe("orderStreams", () => {
   const streams = [
     { url: "a", language: "en", kind: "costream" as const },
     { url: "b", language: "fr", kind: "costream" as const },
@@ -56,7 +56,7 @@ describe("orderStreams", () => {
     { url: "d", language: "fr", kind: "official" as const },
   ];
 
-  it("puts the reader's language first, then official streams", () => {
+  void it("puts the reader's language first, then official streams", () => {
     assert.deepEqual(
       orderStreams(streams, "fr").map(({ url }) => url),
       ["d", "b", "c", "a"],

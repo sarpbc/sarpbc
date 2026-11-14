@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
 import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
 // Nitro routes import this file and have no Nuxt auto-imports.
@@ -21,11 +22,11 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
     params.set("offset", String(query.offset));
   }
 
-  if (query?.leagueId) {
+  if (isNonEmptyString(query?.leagueId)) {
     params.set("leagueId", query.leagueId);
   }
 
-  if (query?.tournamentId) {
+  if (isNonEmptyString(query?.tournamentId)) {
     params.set("tournamentId", query.tournamentId);
   }
 
@@ -49,13 +50,13 @@ type SidebarCache<T> = {
 const upcomingSidebar: SidebarCache<UpcomingMatchesResponse> = {};
 const resultsSidebar: SidebarCache<MatchResultsResponse> = {};
 
-function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> {
+async function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> {
   if (cache.slot && cache.slot.expiresAt > Date.now()) {
-    return Promise.resolve(cache.slot.value);
+    return await Promise.resolve(cache.slot.value);
   }
 
   if (cache.pending) {
-    return cache.pending;
+    return await cache.pending;
   }
 
   const request = load()
@@ -70,30 +71,34 @@ function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise
 
   cache.pending = request;
 
-  return request;
+  return await request;
 }
 
-export function getUpcomingMatches(query?: MatchesListQuery): Promise<UpcomingMatchesResponse> {
-  return apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
+export async function getUpcomingMatches(
+  query?: MatchesListQuery,
+): Promise<UpcomingMatchesResponse> {
+  return await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
 }
 
-export function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  return apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
+export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
+  return await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });
 }
 
 /** Rendered on every SSR page: share one response across requests instead of calling the API each time. */
-export function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
+export async function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
   return import.meta.server
-    ? loadSidebar(upcomingSidebar, getUpcomingMatches)
-    : getUpcomingMatches();
+    ? await loadSidebar(upcomingSidebar, getUpcomingMatches)
+    : await getUpcomingMatches();
 }
 
-export function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
-  return import.meta.server ? loadSidebar(resultsSidebar, getMatchesResults) : getMatchesResults();
+export async function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
+  return import.meta.server
+    ? await loadSidebar(resultsSidebar, getMatchesResults)
+    : await getMatchesResults();
 }
 
 export async function getMatchById(id: string): Promise<MatchDetailResponse> {

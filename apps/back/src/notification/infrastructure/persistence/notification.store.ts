@@ -17,11 +17,11 @@ export class MikroNotificationStore implements NotificationStore {
       reply: replySnapshot(row.reply),
     }));
   }
-  countUnread(id: string) {
-    return this.rows.countUnread(id);
+  async countUnread(id: string) {
+    return await this.rows.countUnread(id);
   }
-  markRead(id: string, ids?: string[]) {
-    return this.em.transactional(async (em) => {
+  async markRead(id: string, ids?: string[]) {
+    return await this.em.transactional(async (em) => {
       const rows = em.getRepository<ReplyNotification, ReplyNotificationRepository>(
         ReplyNotification,
       );

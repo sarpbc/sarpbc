@@ -4,6 +4,7 @@ import {
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
 import type { CircuitSummary } from "@sarpbc/types";
+import { unconstructed } from "../../../../test/doubles";
 import { describe, expect, it, vi } from "vitest";
 import { ConflictError } from "../../../common/domain/errors";
 import { CircuitPersistence } from "./circuit.store";
@@ -26,7 +27,7 @@ function storeFailingWith(error: Error) {
     flush: vi.fn().mockRejectedValue(error),
   };
 
-  return new CircuitPersistence(Object.assign(Object.create(EntityManager.prototype), em));
+  return new CircuitPersistence(Object.assign(unconstructed(EntityManager), em));
 }
 
 describe("CircuitPersistence.save", () => {

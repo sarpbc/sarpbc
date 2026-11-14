@@ -51,9 +51,11 @@ function setup() {
     stages: vi.fn(async () => []),
     stageResults: vi.fn(async () => results),
     eventTeams: vi.fn(async (id: string) => eventTeams.get(id) ?? null),
-    saveStage: vi.fn(async (circuitId: string, tournamentId: string, stage) => {
-      saved.set(`${circuitId}:${tournamentId}`, stage);
-    }),
+    saveStage: vi.fn(
+      async (circuitId: string, tournamentId: string, stage: CircuitStageSettings) => {
+        saved.set(`${circuitId}:${tournamentId}`, stage);
+      },
+    ),
     removeStage: vi.fn(async (circuitId: string, tournamentId: string) =>
       saved.delete(`${circuitId}:${tournamentId}`),
     ),

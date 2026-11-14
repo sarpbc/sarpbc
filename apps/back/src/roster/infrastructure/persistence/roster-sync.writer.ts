@@ -24,7 +24,8 @@ export class RosterSyncWriter {
 
     const aliasedTeamId = this.aliasedTeams.get(key);
 
-    if (aliasedTeamId) return { id: aliasedTeamId };
+    if (aliasedTeamId !== null && aliasedTeamId !== undefined && aliasedTeamId !== "")
+      return { id: aliasedTeamId };
 
     const existing =
       this.teams.get(key) ?? (await findPandascoreTeam(this.em, input.pandascoreId, input.slug));

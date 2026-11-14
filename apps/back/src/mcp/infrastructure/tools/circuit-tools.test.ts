@@ -1,14 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import type {
-  CircuitDetail,
-  CircuitStandings,
-  CircuitSummary,
-  RosterChange,
-  StaffRole,
-} from "@sarpbc/types";
+import type { CircuitDetail, CircuitStandings, CircuitSummary, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import { circuitTools } from "./circuit-tools";
 import { rosterTools } from "./roster-tools";
+import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
 
 const CIRCUIT_ID = "5d1f2a3b-4c5d-4e6f-8a7b-9c0d1e2f3a4b";
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -23,15 +18,7 @@ const SCALE = [
 const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
 
 function scaleTool() {
-  const rosterProposalService = {
-    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
-      id: "proposal-1",
-      status: "pending",
-      change,
-    })),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
-  };
+  const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "set_circuit_stage_scale",
@@ -40,12 +27,6 @@ function scaleTool() {
   if (!tool) throw new Error("set_circuit_stage_scale is not defined");
 
   return { rosterProposalService, tool };
-}
-
-function parsed(result: { content: { type: string; text?: string }[] }) {
-  const block = result.content[0];
-
-  return JSON.parse(block?.type === "text" && block.text ? block.text : "null");
 }
 
 describe("set_circuit_stage_scale", () => {
@@ -72,7 +53,7 @@ describe("set_circuit_stage_scale", () => {
       SOURCE,
       "u1",
     );
-    expect(parsed(result)).toMatchObject({ kind: "set_circuit_stage_scale", status: "pending" });
+    expect(jsonOf(result)).toMatchObject({ kind: "set_circuit_stage_scale", status: "pending" });
   });
 
   it("forwards the worldwide flag, the region teams and the final placements", async () => {
@@ -190,12 +171,11 @@ describe("get_circuit", () => {
 
     if (!tool) throw new Error("get_circuit is not defined");
 
-    const body = parsed(await tool.run(user("journalist"), { idOrSlug: "season" }));
+    const body = jsonOf(await tool.run(user("journalist"), { idOrSlug: "season" }));
 
-    expect(body.stages.map((s: { tournament: { id: string } }) => s.tournament.id)).toEqual([
-      "ps",
-      "manual",
-    ]);
+    expect(body).toMatchObject({
+      stages: [{ tournament: { id: "ps" } }, { tournament: { id: "manual" } }],
+    });
     expect(JSON.stringify(body)).not.toContain("sgg");
   });
 });
@@ -247,7 +227,7 @@ describe("create_circuit and update_circuit", () => {
   it("creates the circuit directly and returns it with its public URL", async () => {
     const { create, circuitService } = tools();
 
-    const body = parsed(await create.run(user("admin"), input));
+    const body = jsonOf(await create.run(user("admin"), input));
 
     expect(circuitService.create).toHaveBeenCalledExactlyOnceWith(input);
     expect(body).toMatchObject({
@@ -279,7 +259,7 @@ describe("create_circuit and update_circuit", () => {
   it("updates by id or slug and refuses an empty update", async () => {
     const { update, circuitService } = tools();
 
-    parsed(await update.run(user("admin"), { idOrSlug: "season-2026", region: null }));
+    await update.run(user("admin"), { idOrSlug: "season-2026", region: null });
     expect(circuitService.update).toHaveBeenCalledExactlyOnceWith("season-2026", {
       region: null,
     });

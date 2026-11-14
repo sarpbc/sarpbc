@@ -4,6 +4,7 @@ import { Tournament, TournamentParticipant } from "../../../tournament/domain/co
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { redistributableCompetition } from "../redistributable-competition";
+import { jsonOf } from "../../../../test/mcp-result";
 import { readTools } from "./read-tools";
 
 const user = { id: "u1", email: "staff@test.com", role: "journalist" } as const;
@@ -155,18 +156,16 @@ function setup() {
     }),
   });
 
-  const call = (name: string, args = {}) => {
+  const call = async (name: string, args = {}) => {
     const tool = tools.find((candidate) => candidate.name === name);
 
     if (!tool) throw new Error(`${name} is not defined`);
 
-    return tool.run(user, args);
+    return await tool.run(user, args);
   };
 
   const json = async (name: string, args = {}) => {
-    const block = (await call(name, args)).content[0];
-
-    return JSON.parse(block?.type === "text" ? block.text : "null");
+    return jsonOf(await call(name, args));
   };
 
   return {
@@ -190,7 +189,7 @@ describe("MCP read tools", () => {
     await call("get_match_results");
     await call("get_tournaments");
 
-    const redistributableOnly = expect.objectContaining({ redistributableOnly: true });
+    const redistributableOnly: unknown = expect.objectContaining({ redistributableOnly: true });
     expect(matchService.list).toHaveBeenCalledWith("upcoming", redistributableOnly);
     expect(matchService.list).toHaveBeenCalledWith("live", redistributableOnly);
     expect(matchService.list).toHaveBeenCalledWith("results", redistributableOnly);
@@ -199,7 +198,13 @@ describe("MCP read tools", () => {
 
   it("returns start.gg players and teams with their source", async () => {
     const { json } = setup();
-    const startgg = expect.objectContaining({ id: expect.any(String), source: "startgg" });
+    const anyString: unknown = expect.any(String);
+
+    const startgg: unknown = expect.objectContaining({
+      id: anyString,
+      source: "startgg",
+    });
+
     expect(await json("search_players", { query: "Scout" })).toEqual([startgg]);
     expect(await json("search_teams", { query: "Scouted" })).toEqual([startgg]);
     expect(await json("get_player", { idOrSlug: "scout" })).toMatchObject({
@@ -212,6 +217,7 @@ describe("MCP read tools", () => {
 
   it("returns registered participants and hides start.gg tournaments", async () => {
     const { call, json } = setup();
+
     expect(await json("get_tournament", { id: "manual-cup" })).toMatchObject({
       id: "manual-cup",
       participants: [

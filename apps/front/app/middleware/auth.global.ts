@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { getCookie } from "h3";
 import {
   ACCESS_TOKEN_COOKIE,
@@ -44,7 +45,7 @@ export default defineNuxtRouteMiddleware(async () => {
     const accessToken = event ? getCookie(event, ACCESS_TOKEN_COOKIE) : undefined;
     const refreshToken = event ? getCookie(event, REFRESH_TOKEN_COOKIE) : undefined;
 
-    if (!accessToken && !refreshToken) {
+    if (!isNonEmptyString(accessToken) && !isNonEmptyString(refreshToken)) {
       user.value = null;
 
       return;

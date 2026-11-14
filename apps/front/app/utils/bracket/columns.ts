@@ -1,8 +1,9 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
 function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
-  if (!match.beginAt) {
+  if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
 
@@ -12,7 +13,7 @@ function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
 }
 
 function getMatchDayKey(match: TournamentDetailMatch): string | null {
-  if (!match.beginAt) {
+  if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
 

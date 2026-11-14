@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RosterChange, SeasonDetail, StaffRole } from "@sarpbc/types";
+import type { SeasonDetail, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
+import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
 import { seasonTools } from "./season-tools";
 
@@ -10,15 +11,7 @@ const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
 
 function awardTool() {
-  const rosterProposalService = {
-    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
-      id: "proposal-1",
-      status: "pending",
-      change,
-    })),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
-  };
+  const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "propose_season_award",
@@ -27,12 +20,6 @@ function awardTool() {
   if (!tool) throw new Error("propose_season_award is not defined");
 
   return { rosterProposalService, tool };
-}
-
-function parsed(result: { content: { type: string; text?: string }[] }) {
-  const block = result.content[0];
-
-  return JSON.parse(block?.type === "text" && block.text ? block.text : "null");
 }
 
 describe("propose_season_award", () => {
@@ -62,7 +49,7 @@ describe("propose_season_award", () => {
       ANNOUNCEMENT,
       "u1",
     );
-    expect(parsed(result)).toMatchObject({ kind: "award_season_player", status: "pending" });
+    expect(jsonOf(result)).toMatchObject({ kind: "award_season_player", status: "pending" });
   });
 
   it("requires a non-Liquipedia sourceUrl and a season award type", () => {
@@ -136,12 +123,18 @@ describe("get_season", () => {
 
     if (!tool) throw new Error("get_season is not defined");
 
-    const body = parsed(await tool.run(user("journalist"), { id: SEASON_ID }));
+    const body = jsonOf(await tool.run(user("journalist"), { id: SEASON_ID }));
 
-    expect(Object.keys(body).sort()).toEqual(["awards", "id", "name"]);
-    expect(body.awards[0]).toMatchObject({
-      presentedBy: "Ally",
-      player: { slug: "exotiik", url: "https://sarpbc.test/player/exotiik" },
+    expect(body).toMatchObject({
+      awards: [
+        {
+          presentedBy: "Ally",
+          player: { slug: "exotiik", url: "https://sarpbc.test/player/exotiik" },
+        },
+      ],
     });
+    expect(new Set(Object.keys(z.record(z.string(), z.unknown()).parse(body)))).toEqual(
+      new Set(["awards", "id", "name"]),
+    );
   });
 });

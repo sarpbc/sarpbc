@@ -1,11 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team, TeamAlias } from "./player.entities";
 import { RosterSyncWriter } from "./roster-sync.writer";
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
+
+type EntityClass = new () => object;
+
+type Row = Player | Team | TeamAlias | Contract;
+
+type Where = { pandascoreId?: number; player?: string; endDate?: Date | null };
 
 describe("RosterSyncWriter", () => {
-  const em = { findOne: vi.fn(), persist: vi.fn(), getReference: vi.fn() };
-  const manager: Pick<EntityManager, "findOne" | "persist" | "getReference"> = em;
+  const em = {
+    findOne: vi.fn<(entity: EntityClass, where: Where) => Promise<Row | null>>(),
+    persist: vi.fn<(row: Team | Player) => void>(),
+    getReference: vi.fn<(entity: EntityClass, id: string) => object>(),
+  };
+
+  const manager = Object.assign(unconstructed(EntityManager), em);
+
   beforeEach(() => {
     vi.clearAllMocks();
     em.findOne.mockResolvedValue(null);

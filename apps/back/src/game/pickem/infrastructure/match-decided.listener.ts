@@ -8,7 +8,7 @@ export class MatchDecidedListener {
   constructor(private readonly pickem: PickemService) {}
 
   @OnEvent(MATCH_DECIDED)
-  handle(event: MatchDecided) {
-    return this.pickem.autoScoreMatch(event.matchId);
+  async handle(event: MatchDecided) {
+    await this.pickem.autoScoreMatch(event.matchId);
   }
 }

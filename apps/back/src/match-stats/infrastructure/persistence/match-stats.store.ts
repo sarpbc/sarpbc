@@ -128,8 +128,8 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     return rows.map(toLink);
   }
 
-  save(game: GameRecord): Promise<TournamentStatsGame> {
-    return this.em.transactional(async (em) => {
+  async save(game: GameRecord): Promise<TournamentStatsGame> {
+    return await this.em.transactional(async (em) => {
       await em.nativeDelete(MatchGameExclusion, { ballchasingId: game.ballchasingId });
 
       for (const { playerId, ...account } of game.learnedLinks) {
@@ -243,8 +243,8 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     });
   }
 
-  remove(tournamentId: string, location: GameLocation): Promise<TournamentStatsGame | null> {
-    return this.em.transactional(async (em) => {
+  async remove(tournamentId: string, location: GameLocation): Promise<TournamentStatsGame | null> {
+    return await this.em.transactional(async (em) => {
       const game = await em.findOne(MatchGame, {
         match: { id: location.matchId, tournament: tournamentId },
         number: location.number,
@@ -344,8 +344,8 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
     );
   }
 
-  link({ playerId, ...account }: PlayerLink): Promise<number> {
-    return this.em.transactional(async (em) => {
+  async link({ playerId, ...account }: PlayerLink): Promise<number> {
+    return await this.em.transactional(async (em) => {
       await em.upsert(
         PlayerPlatformLink,
         { ...account, player: playerId },
@@ -356,7 +356,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         },
       );
 
-      return em.nativeUpdate(MatchGamePlayer, account, { player: playerId });
+      return await em.nativeUpdate(MatchGamePlayer, account, { player: playerId });
     });
   }
 }
@@ -459,8 +459,8 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
     return rows.map(toImport);
   }
 
-  failUnfinished(error: string): Promise<number> {
-    return this.em.nativeUpdate(
+  async failUnfinished(error: string): Promise<number> {
+    return await this.em.nativeUpdate(
       MatchStatsImport,
       { status: { $in: [...ACTIVE_IMPORT_STATUSES] } },
       { status: "failed", error, finishedAt: new Date() },

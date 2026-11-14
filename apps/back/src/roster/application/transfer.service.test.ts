@@ -21,7 +21,7 @@ describe("TransferService", () => {
       player: zen,
       team,
       startDate: new Date(startDate),
-      endDate: endDate ? new Date(endDate) : null,
+      endDate: endDate === null ? null : new Date(endDate),
       role,
     });
 

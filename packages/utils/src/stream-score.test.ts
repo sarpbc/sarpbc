@@ -60,8 +60,8 @@ function error(proposal: StreamScoreProposal): string | null {
   return parsed.ok ? null : parsed.error;
 }
 
-describe("parseStreamScoreProposal", () => {
-  it("accepts a decided series and an unfinished one", () => {
+void describe("parseStreamScoreProposal", () => {
+  void it("accepts a decided series and an unfinished one", () => {
     assert.deepEqual(parseStreamScoreProposal(JSON.stringify(PROPOSAL)), {
       ok: true,
       proposal: PROPOSAL,
@@ -76,9 +76,10 @@ describe("parseStreamScoreProposal", () => {
     );
   });
 
-  it("accepts a game whose winner was not read", () => {
-    const [first, second] = PROPOSAL.games;
-    assert.ok(first && second);
+  void it("accepts a game whose winner was not read", () => {
+    const first = PROPOSAL.games.at(0);
+    const second = PROPOSAL.games.at(1);
+    assert.ok(first !== undefined && second !== undefined);
     assert.equal(
       error({
         ...PROPOSAL,
@@ -89,12 +90,12 @@ describe("parseStreamScoreProposal", () => {
     );
   });
 
-  it("rejects text that is not a proposal", () => {
+  void it("rejects text that is not a proposal", () => {
     assert.deepEqual(parseStreamScoreProposal("{"), { ok: false, error: "invalid-json" });
     assert.equal(error({ ...PROPOSAL, bestOf: 0 }), "invalid-proposal");
   });
 
-  it("rejects a series that does not follow from its games", () => {
+  void it("rejects a series that does not follow from its games", () => {
     assert.equal(
       error({ ...PROPOSAL, series: { blue: 3, orange: 1, winner: null } }),
       "inconsistent-series",
@@ -103,8 +104,9 @@ describe("parseStreamScoreProposal", () => {
       error({ ...PROPOSAL, series: { blue: 2, orange: 2, winner: "blue" } }),
       "inconsistent-series",
     );
-    const [first, ...rest] = PROPOSAL.games;
-    assert.ok(first);
+    const first = PROPOSAL.games.at(0);
+    const rest = PROPOSAL.games.slice(1);
+    assert.ok(first !== undefined);
     assert.equal(
       error({ ...PROPOSAL, games: [{ ...first, winner: "orange" }, ...rest] }),
       "inconsistent-series",
@@ -124,8 +126,8 @@ describe("parseStreamScoreProposal", () => {
   });
 });
 
-describe("stream score helpers", () => {
-  it("counts the wins a best-of needs and the winner of a game", () => {
+void describe("stream score helpers", () => {
+  void it("counts the wins a best-of needs and the winner of a game", () => {
     assert.equal(winsNeeded(5), 3);
     assert.equal(winsNeeded(7), 4);
     assert.equal(gameWinner({ blue: 2, orange: 2 }), null);

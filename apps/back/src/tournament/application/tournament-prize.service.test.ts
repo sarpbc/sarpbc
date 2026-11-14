@@ -46,7 +46,7 @@ function setup({
     byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
   };
 
-  const transaction: PrizeTransaction = { run: (work) => work({ prizes: writer }) };
+  const transaction: PrizeTransaction = { run: async (work) => await work({ prizes: writer }) };
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
   const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
 

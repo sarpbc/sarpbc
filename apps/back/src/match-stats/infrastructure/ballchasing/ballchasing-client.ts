@@ -2,6 +2,7 @@ import { z } from "zod";
 import { IntegrationError } from "../../../common/domain/errors";
 import type { BallchasingSource, ReplayPlayerStats, ReplayStats } from "../../application/ports";
 import { BALLCHASING_HOST } from "../../domain/ballchasing-ref";
+import { nonBlank } from "../../../common/domain/text";
 import type { ReplaySummary, ReplayTeam, Side } from "../../domain/replay-matching";
 
 export const BALLCHASING_API_URL = `https://${BALLCHASING_HOST}/api`;
@@ -79,16 +80,16 @@ type ListedReplay = z.infer<typeof replayList>["list"][number];
 
 function toTeam(side: z.infer<typeof team> | undefined): ReplayTeam {
   return {
-    name: side?.name?.trim() || null,
+    name: nonBlank(side?.name) ?? null,
     goals: side?.goals ?? 0,
     playerNames: (side?.players ?? []).map((player) => player.name),
   };
 }
 
 function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Date | null {
-  if (!raw) return null;
+  if (raw === undefined || raw === "") return null;
   // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
-  const value = hasTimezone ? raw : `${raw.replace(/(Z|[+-]\d\d:\d\d)$/, "")}Z`;
+  const value = hasTimezone === true ? raw : `${raw.replace(/(Z|[+-]\d\d:\d\d)$/, "")}Z`;
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
@@ -110,7 +111,7 @@ function toPlayers(side: Side, detail: z.infer<typeof detailSide>): ReplayPlayer
   return detail.players.map(({ name, id, stats }) => ({
     name,
     platform: id?.platform ?? "unknown",
-    platformId: id?.id || null,
+    platformId: id?.id === undefined || id.id === "" ? null : id.id,
     side,
     goals: stats.core.goals,
     assists: stats.core.assists,
@@ -139,7 +140,13 @@ export class BallchasingClient implements BallchasingSource {
     options: BallchasingClientOptions = {},
   ) {
     this.fetch = options.fetch ?? fetch;
-    this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    this.sleep =
+      options.sleep ??
+      (async (ms) => {
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      });
     this.now = options.now ?? Date.now;
     this.intervalsMs = options.intervalsMs ?? DEFAULT_INTERVALS_MS;
   }
@@ -150,9 +157,7 @@ export class BallchasingClient implements BallchasingSource {
     const visited = new Set<string>();
     const queue = [groupId];
 
-    while (queue.length > 0) {
-      const group = queue.shift() as string;
-
+    for (let group = queue.shift(); group !== undefined; group = queue.shift()) {
       if (visited.has(group)) continue;
       visited.add(group);
 
@@ -200,7 +205,7 @@ export class BallchasingClient implements BallchasingSource {
     first.searchParams.set("count", String(PAGE_SIZE));
     let url: string | undefined = first.toString();
 
-    while (url) {
+    while (url !== undefined && url !== "") {
       const response = await this.request("list", url);
       const page = schema.safeParse(await response.json());
 
@@ -210,7 +215,7 @@ export class BallchasingClient implements BallchasingSource {
       url = page.data.next;
 
       // The key travels with every request, so never follow a link off the API host.
-      if (url && !url.startsWith(`${BALLCHASING_API_URL}/`))
+      if (url !== undefined && url !== "" && !url.startsWith(`${BALLCHASING_API_URL}/`))
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
     }
 

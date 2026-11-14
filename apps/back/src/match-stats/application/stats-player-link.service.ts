@@ -29,6 +29,6 @@ export class StatsPlayerLinkService {
         code: "player_not_on_tournament_roster",
       });
 
-    return this.links.link(link);
+    return await this.links.link(link);
   }
 }

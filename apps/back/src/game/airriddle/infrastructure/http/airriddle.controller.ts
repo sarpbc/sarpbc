@@ -8,7 +8,7 @@ import { GuessDto } from "./dto/guess.dto";
 @Controller("air-riddle")
 export class AirRiddleController {
   constructor(
-    private airRiddleService: AirRiddleService,
+    private readonly airRiddleService: AirRiddleService,
     private readonly posthog: PostHogService,
   ) {}
 

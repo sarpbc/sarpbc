@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { competitionFeed } from "../../../../test/competition-doubles";
+import { unconstructed } from "../../../../test/doubles";
+import { CompetitionSyncService } from "./competition-sync.service";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import type { CompetitionIncident } from "../feed";
 
@@ -12,10 +15,10 @@ describe("PandaScore incidents", () => {
   const now = new Date("2026-10-15T12:00:00Z");
 
   const service = new SyncPandascoreIncidentsUseCase(
-    feed as never,
+    competitionFeed(feed),
     cursor,
     reads,
-    sync as never,
+    Object.assign(unconstructed(CompetitionSyncService), sync),
     diagnostics,
     () => now,
   );

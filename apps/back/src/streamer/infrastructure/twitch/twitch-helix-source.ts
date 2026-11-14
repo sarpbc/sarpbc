@@ -36,7 +36,7 @@ export class TwitchHelixSource implements LiveStreamSource {
       batches.push(logins.slice(start, start + HELIX_LOGINS_PER_REQUEST));
     }
 
-    const results = await Promise.all(batches.map((batch) => this.fetchStreams(batch)));
+    const results = await Promise.all(batches.map(async (batch) => await this.fetchStreams(batch)));
 
     return results
       .flat()
@@ -71,8 +71,8 @@ export class TwitchHelixSource implements LiveStreamSource {
     return streamsResponse.parse(await response.json()).data;
   }
 
-  private request(url: URL, token: string): Promise<Response> {
-    return fetch(url, {
+  private async request(url: URL, token: string): Promise<Response> {
+    return await fetch(url, {
       headers: { "Client-Id": this.clientId, Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(STREAMS_REQUEST_TIMEOUT_MS),
     });

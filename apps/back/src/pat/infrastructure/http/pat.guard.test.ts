@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExecutionContext } from "@nestjs/common";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthenticationError } from "../../../common/domain/errors";
 import { PatAuthGuard } from "./pat.guard";
@@ -33,9 +34,7 @@ describe("PatAuthGuard", () => {
   const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
     const request: PatGuardTestRequest = { headers };
 
-    return {
-      switchToHttp: () => ({ getRequest: () => request }),
-    } as ExecutionContext;
+    return new ExecutionContextHost([request]);
   };
 
   it("throws when the authorization header is missing", async () => {
@@ -49,9 +48,7 @@ describe("PatAuthGuard", () => {
       headers: { authorization: "Bearer sarpbc_pat_valid" },
     };
 
-    const context = {
-      switchToHttp: () => ({ getRequest: () => request }),
-    } as ExecutionContext;
+    const context = new ExecutionContextHost([request]);
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });

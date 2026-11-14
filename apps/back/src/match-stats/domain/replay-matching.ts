@@ -243,7 +243,9 @@ export function assignReplays(
   // Another upload of a stored or removed game must not come back under a new replay id.
   const taken = new Set(
     replays.flatMap((replay) =>
-      replay.rocketLeagueId && (stored.has(replay.id) || excluded.has(replay.id))
+      replay.rocketLeagueId !== null &&
+      replay.rocketLeagueId !== "" &&
+      (stored.has(replay.id) || excluded.has(replay.id))
         ? [replay.rocketLeagueId]
         : [],
     ),
@@ -272,7 +274,7 @@ export function assignReplays(
         matchId: location.matchId,
         gameNumber: location.number,
       });
-    } else if (replay.rocketLeagueId) {
+    } else if (replay.rocketLeagueId !== null && replay.rocketLeagueId !== "") {
       if (seen.has(replay.rocketLeagueId) || taken.has(replay.rocketLeagueId)) {
         assignments.push({
           kind: "unmatched",

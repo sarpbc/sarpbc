@@ -32,5 +32,7 @@ export function winnerFromResults(results: readonly MatchResultScore[]): string 
   const top = Math.max(...scored.map((result) => result.score));
   const leaders = scored.filter((result) => result.score === top);
 
-  return leaders.length === 1 ? leaders[0]!.participantId : null;
+  const leader: (typeof leaders)[number] | undefined = leaders[0];
+
+  return leaders.length === 1 && leader !== undefined ? leader.participantId : null;
 }

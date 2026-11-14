@@ -32,7 +32,7 @@ export class TwitchAppToken {
       this.pending = null;
     });
 
-    return this.pending;
+    return await this.pending;
   }
 
   invalidate(rejected: string): void {

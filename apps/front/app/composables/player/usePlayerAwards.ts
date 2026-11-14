@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import type { PlayerAwards } from "./api";
 
@@ -7,7 +8,7 @@ export function usePlayerAwards(playerId: MaybeRef<string | undefined>) {
   const { data, pending, error, refresh } = useAsyncData<PlayerAwards>(
     () => `player-awards-${playerIdRef.value ?? "unknown"}`,
     async () =>
-      playerIdRef.value
+      isNonEmptyString(playerIdRef.value)
         ? await getPlayerAwards(playerIdRef.value)
         : { awards: [], seasonAwards: [] },
     {

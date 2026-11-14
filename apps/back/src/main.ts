@@ -42,4 +42,4 @@ async function bootstrap() {
   await app.listen(configService.getOrThrow<number>("port"), "0.0.0.0");
 }
 
-bootstrap();
+void bootstrap();

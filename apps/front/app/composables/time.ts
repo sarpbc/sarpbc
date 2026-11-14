@@ -1,14 +1,9 @@
-import {
-  formatTimeAgo,
-  type UseTimeAgoMessages,
-  type UseTimeAgoUnit,
-  type UseTimeAgoUnitNamesDefault,
-} from "@vueuse/core";
+import { formatTimeAgo, type UseTimeAgoMessages, type UseTimeAgoUnit } from "@vueuse/core";
 
 const RELATIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 // VueUse switches to "last week" from 6 days; days must last the whole relative window.
-const TIME_AGO_UNITS: UseTimeAgoUnit<UseTimeAgoUnitNamesDefault>[] = [
+const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
   { max: 60_000, value: 1_000, name: "second" },
   { max: 2_760_000, value: 60_000, name: "minute" },
   { max: 72_000_000, value: 3_600_000, name: "hour" },
@@ -33,10 +28,10 @@ export function formatLocaleTimeAgo(date: Date) {
 
   const pf = (past: boolean) => (past ? ".past" : ".future");
 
-  const messages: UseTimeAgoMessages<UseTimeAgoUnitNamesDefault> = {
+  const messages: UseTimeAgoMessages = {
     justNow: t("timeAgo.just-now"),
-    past: (n) => (n.match(/\d/) ? t("timeAgo.ago", [n]) : n),
-    future: (n) => (n.match(/\d/) ? t("timeAgo.in", [n]) : n),
+    past: (n) => (/\d/.exec(n) ? t("timeAgo.ago", [n]) : n),
+    future: (n) => (/\d/.exec(n) ? t("timeAgo.in", [n]) : n),
     month: (n, past) =>
       n === 1
         ? past

@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type {
   CareerNpcPlayer,
   CareerRegion,
@@ -311,7 +312,7 @@ function pickPlayerToDisplace(
 
   const worst = sorted[0];
 
-  if (!worst) {
+  if (!isNonEmptyString(worst)) {
     throw new Error("Cannot displace from an empty NPC roster");
   }
 

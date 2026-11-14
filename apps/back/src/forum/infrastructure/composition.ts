@@ -6,8 +6,8 @@ import type { ForumTransaction } from "../application/ports";
 
 export function transactionalForum(em: EntityManager): ForumTransaction {
   return {
-    run: (work) =>
-      em.transactional(async (tx) => {
+    run: async (work) =>
+      await em.transactional(async (tx) => {
         const result = await work({
           posts: new MikroPostStore(tx),
           topics: new MikroTopicStore(tx),

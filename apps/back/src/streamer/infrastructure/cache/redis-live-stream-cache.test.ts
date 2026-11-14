@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { StreamerService } from "../../application/streamer.service";
+import { StreamerService, type StreamerFailureReporter } from "../../application/streamer.service";
 import { TOKEN_REQUEST_TIMEOUT_MS } from "../twitch/twitch-app-token";
 import { STREAMS_REQUEST_TIMEOUT_MS } from "../twitch/twitch-helix-source";
 import {
@@ -104,7 +104,7 @@ describe("RedisLiveStreamCache", () => {
       },
       { findLiveRocketLeague },
       cache,
-      vi.fn(),
+      vi.fn<StreamerFailureReporter>(),
       () => now,
     );
 

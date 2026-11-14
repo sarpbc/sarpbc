@@ -18,6 +18,7 @@ import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors";
+import { nonBlank } from "../../../common/domain/text";
 
 function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSelector> {
   const keys = [...new Set(raw === undefined ? [] : Array.isArray(raw) ? raw : [raw])];
@@ -43,13 +44,13 @@ function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSel
 
 function parseListScopeFilters(tournamentId?: string, leagueId?: string): MatchListScopeFilters {
   return {
-    tournamentId: tournamentId?.trim() || undefined,
-    leagueId: leagueId?.trim() || undefined,
+    tournamentId: nonBlank(tournamentId),
+    leagueId: nonBlank(leagueId),
   };
 }
 
 function parsePagingValue(name: string, value?: string): number | undefined {
-  if (!value) {
+  if (value === undefined || value === "") {
     return undefined;
   }
 
@@ -82,10 +83,10 @@ function attachCommentCounts(
 @Controller("matches")
 export class MatchController {
   constructor(
-    private matchService: MatchService,
-    private replyService: ReplyService,
-    private lineupService: MatchLineupService,
-    @Inject(GAME_STATS_STORE) private gameStats: GameStatsStore,
+    private readonly matchService: MatchService,
+    private readonly replyService: ReplyService,
+    private readonly lineupService: MatchLineupService,
+    @Inject(GAME_STATS_STORE) private readonly gameStats: GameStatsStore,
   ) {}
 
   @Get("upcoming")

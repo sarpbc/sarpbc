@@ -49,7 +49,7 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       useFactory: (config: ConfigService) => {
         const apiKey = config.get<string>("ballchasing.apiKey");
 
-        return apiKey ? new BallchasingClient(apiKey) : null;
+        return apiKey !== undefined && apiKey !== "" ? new BallchasingClient(apiKey) : null;
       },
       inject: [ConfigService],
     },
@@ -98,11 +98,12 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
           games,
           new MikroOrmStatsImportStore(em),
           runner,
-          (error) =>
+          (error) => {
             log.error({
               component: StatsImportService.name,
               error: error instanceof Error ? error : new Error(String(error)),
-            }),
+            });
+          },
         ),
       inject: [
         EntityManager,

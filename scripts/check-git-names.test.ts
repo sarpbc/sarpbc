@@ -33,7 +33,9 @@ interface PullRequestFixture {
 
 function fixture(t: TestContext): string {
   const directory = mkdtempSync(join(tmpdir(), "sarpbc-git-names-"));
-  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  t.after(() => {
+    rmSync(directory, { recursive: true, force: true });
+  });
 
   return directory;
 }
@@ -52,12 +54,12 @@ function expectStatus(result: SpawnSyncReturns<string>, status: number): void {
   assert.equal(result.status, status, result.stderr);
 }
 
-test("branches accept every allowed type and main", () => {
+void test("branches accept every allowed type and main", () => {
   for (const type of types) expectStatus(run(["branch", `${type}/159-player-search`]), 0);
   expectStatus(run(["branch", "main"]), 0);
 });
 
-test("branches reject agent prefixes and malformed names", () => {
+void test("branches reject agent prefixes and malformed names", () => {
   for (const name of [
     "codex/player-search",
     "cursor/player-search",
@@ -76,7 +78,7 @@ test("branches reject agent prefixes and malformed names", () => {
   }
 });
 
-test("commit messages accept scopes, breaking changes and multiline bodies", (t) => {
+void test("commit messages accept scopes, breaking changes and multiline bodies", (t) => {
   const message = join(fixture(t), "commit message.txt");
 
   for (const subject of [
@@ -90,7 +92,7 @@ test("commit messages accept scopes, breaking changes and multiline bodies", (t)
   }
 });
 
-test("commit messages reject agent prefixes and malformed subjects", (t) => {
+void test("commit messages reject agent prefixes and malformed subjects", (t) => {
   const message = join(fixture(t), "COMMIT_EDITMSG");
 
   for (const subject of [
@@ -112,7 +114,7 @@ test("commit messages reject agent prefixes and malformed subjects", (t) => {
   }
 });
 
-test("commit messages reject agent co-authors and keep human ones", (t) => {
+void test("commit messages reject agent co-authors and keep human ones", (t) => {
   const message = join(fixture(t), "COMMIT_EDITMSG");
 
   for (const trailer of [
@@ -132,7 +134,7 @@ test("commit messages reject agent co-authors and keep human ones", (t) => {
   expectStatus(run(["commit-msg", message]), 0);
 });
 
-test("pushes check destination branches, including refspecs and multiple refs", () => {
+void test("pushes check destination branches, including refspecs and multiple refs", () => {
   const sha = "a".repeat(40);
   const zero = "0".repeat(40);
   const valid = `refs/heads/feat/search ${sha} refs/heads/feat/search ${zero}\n`;
@@ -152,7 +154,7 @@ test("pushes check destination branches, including refspecs and multiple refs", 
   expectStatus(run(["pre-push"], { input: "" }), 0);
 });
 
-test("PR checks inspect real commits and exclude existing history", (t) => {
+void test("PR checks inspect real commits and exclude existing history", (t) => {
   const directory = fixture(t);
 
   const git = (...args: string[]) =>

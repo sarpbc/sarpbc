@@ -11,6 +11,7 @@ import type {
   UpdateLeagueInput,
 } from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
+import { nonBlank } from "../../common/domain/text";
 import type {
   CompetitionTransaction,
   EventListing,
@@ -25,23 +26,25 @@ export class ManualCatalogService {
     private readonly transaction: CompetitionTransaction,
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
-  leagues(): Promise<League[]> {
-    return this.reads.leagues({ limit: 200 });
+  async leagues(): Promise<League[]> {
+    return await this.reads.leagues({ limit: 200 });
   }
   async createLeague(input: CreateLeagueInput): Promise<League> {
     const league = Object.assign(new League(), {
       name: input.name,
       slug: leagueSlug(input.slug ?? input.name),
-      url: input.url?.trim() || null,
-      imageUrl: input.imageUrl?.trim() || null,
+      url: nonBlank(input.url) ?? null,
+      imageUrl: nonBlank(input.imageUrl) ?? null,
     });
 
-    await this.transaction.run(({ tournaments }) => tournaments.saveLeague(league));
+    await this.transaction.run(async ({ tournaments }) => {
+      await tournaments.saveLeague(league);
+    });
 
     return league;
   }
   async updateLeague(id: string, input: UpdateLeagueInput): Promise<League> {
-    return this.transaction.run(async ({ tournaments }) => {
+    return await this.transaction.run(async ({ tournaments }) => {
       const league = await requireLeague(tournaments, id);
 
       if (!league) throw new NotFoundError('League with id "' + id + '" was not found.');
@@ -52,9 +55,9 @@ export class ManualCatalogService {
       if (input.slug !== undefined)
         league.slug = input.slug === null ? null : leagueSlug(input.slug);
 
-      if (input.url !== undefined) league.url = input.url?.trim() || null;
+      if (input.url !== undefined) league.url = nonBlank(input.url) ?? null;
 
-      if (input.imageUrl !== undefined) league.imageUrl = input.imageUrl?.trim() || null;
+      if (input.imageUrl !== undefined) league.imageUrl = nonBlank(input.imageUrl) ?? null;
       await tournaments.saveLeague(league);
 
       return league;
@@ -79,15 +82,19 @@ export class ManualCatalogService {
         league: await requireLeague(tournaments, input.leagueId),
       });
 
-      event.slug = input.slug
-        ? await explicitEventSlug(events, input.slug, event.id)
-        : await allocateSlug(eventSlug(input.name, null), (slug) => events.slugTaken(slug, null));
+      event.slug =
+        input.slug !== undefined && input.slug !== ""
+          ? await explicitEventSlug(events, input.slug, event.id)
+          : await allocateSlug(
+              eventSlug(input.name, null),
+              async (slug) => await events.slugTaken(slug, null),
+            );
       await events.save(event);
 
       return event.id;
     });
 
-    return this.findEvent(id);
+    return await this.findEvent(id);
   }
   async updateEvent(id: string, input: UpdateEventInput): Promise<EventListing> {
     const stageIds = await this.transaction.run(async ({ tournaments, events }) => {
@@ -108,7 +115,7 @@ export class ManualCatalogService {
 
     await this.afterCommit.settle({ tournamentIds: stageIds });
 
-    return this.findEvent(id);
+    return await this.findEvent(id);
   }
   async deleteEvent(id: string): Promise<void> {
     await this.transaction.run(async ({ events }) => {

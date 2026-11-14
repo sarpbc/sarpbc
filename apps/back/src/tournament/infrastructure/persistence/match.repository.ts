@@ -53,26 +53,29 @@ const FINISHED_POPULATE = [
 ] as const;
 
 export class MatchRepository extends EntityRepository<Match> {
-  list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
+  async list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
     const { where, orderBy, limit, offset } = this.listQuery(kind, options);
 
-    return this.find(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
+    return await this.find(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
-  listAndCount(kind: MatchListKind, options: MatchListQueryOptions): Promise<[Match[], number]> {
+  async listAndCount(
+    kind: MatchListKind,
+    options: MatchListQueryOptions,
+  ): Promise<[Match[], number]> {
     const { where, orderBy, limit, offset } = this.listQuery(kind, options);
 
-    return this.findAndCount(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
+    return await this.findAndCount(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
   async findByIds(ids: string[]): Promise<Match[]> {
-    return this.find({ id: { $in: ids } }, { populate: [...LIST_POPULATE] });
+    return await this.find({ id: { $in: ids } }, { populate: [...LIST_POPULATE] });
   }
 
   async findDetail(ref: EntityRef): Promise<Match | null> {
     const where = ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value };
 
-    return this.findOne(where, { populate: [...DETAIL_POPULATE] });
+    return await this.findOne(where, { populate: [...DETAIL_POPULATE] });
   }
 
   async findRecentFinishedByTeamId({
@@ -84,7 +87,7 @@ export class MatchRepository extends EntityRepository<Match> {
     excludeMatchId: string;
     limit?: number;
   }): Promise<Match[]> {
-    return this.find(
+    return await this.find(
       {
         id: { $ne: excludeMatchId },
         endAt: { $ne: null },
@@ -111,7 +114,7 @@ export class MatchRepository extends EntityRepository<Match> {
     excludeMatchId: string;
     limit?: number;
   }): Promise<Match[]> {
-    return this.find(
+    return await this.find(
       {
         id: { $ne: excludeMatchId },
         endAt: { $ne: null },
@@ -138,7 +141,7 @@ export class MatchRepository extends EntityRepository<Match> {
     const now = new Date();
     const cutoffTime = new Date(now.getTime() - minutesAgo * 60 * 1000);
 
-    return this.find(
+    return await this.find(
       { endAt: { $ne: null, $gte: cutoffTime } },
       {
         limit,
@@ -213,14 +216,14 @@ export class MatchRepository extends EntityRepository<Match> {
 
     if (tournamentFilter) query.tournament = tournamentFilter;
 
-    if (scope.teamId || scope.playerIds) {
+    if ((scope.teamId !== undefined && scope.teamId !== "") || scope.playerIds) {
       query.participants = {
-        ...(scope.teamId && { team: { id: scope.teamId } }),
+        ...(scope.teamId !== undefined && scope.teamId !== "" && { team: { id: scope.teamId } }),
         ...(scope.playerIds && { players: { id: { $in: scope.playerIds } } }),
       };
     }
 
-    if (scope.redistributableOnly) {
+    if (scope.redistributableOnly === true) {
       query.source = { $ne: "startgg" };
     }
 
@@ -232,21 +235,25 @@ export class MatchRepository extends EntityRepository<Match> {
   ): MatchTournamentScopeFilter | undefined {
     const { tournamentId, leagueId, redistributableOnly } = scope;
 
-    if (!tournamentId && !leagueId && !redistributableOnly) {
+    if (
+      (tournamentId === undefined || tournamentId === "") &&
+      (leagueId === undefined || leagueId === "") &&
+      redistributableOnly !== true
+    ) {
       return undefined;
     }
 
     const filter: MatchTournamentScopeFilter = {};
 
-    if (tournamentId) {
+    if (tournamentId !== undefined && tournamentId !== "") {
       filter.id = tournamentId;
     }
 
-    if (leagueId) {
+    if (leagueId !== undefined && leagueId !== "") {
       filter.league = { id: leagueId };
     }
 
-    if (redistributableOnly) {
+    if (redistributableOnly === true) {
       filter.source = { $ne: "startgg" };
     }
 

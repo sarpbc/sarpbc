@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { jsonOf as json } from "../../../../test/mcp-result";
 import { League, Tournament } from "../../../tournament/domain/competition";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import type { DataSource } from "@sarpbc/types";
 import { redistributableCompetition } from "../redistributable-competition";
 import { eventTools } from "./event-tools";
+
+const EVENT_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 
 function stage(id: string, source: DataSource, beginAt: string | null) {
   return Object.assign(new Tournament(), {
@@ -13,8 +15,8 @@ function stage(id: string, source: DataSource, beginAt: string | null) {
     slug: id,
     source,
     tier: "B",
-    beginAt: beginAt ? new Date(beginAt) : null,
-    endAt: beginAt ? new Date(beginAt) : null,
+    beginAt: beginAt === null ? null : new Date(beginAt),
+    endAt: beginAt === null ? null : new Date(beginAt),
     event: { id: "cdf", slug: "cdf-2026", name: "CDF 2026" },
   });
 }
@@ -78,17 +80,12 @@ function setup(role: "admin" | "journalist" = "admin") {
 
     if (!found) throw new Error(`${name} is not defined`);
 
-    return (input: ToolInput) => found.run({ id: "u1", email: "staff@test.com", role }, input);
+    return async (input: ToolInput) =>
+      await found.run({ id: "u1", email: "staff@test.com", role }, input);
   };
 
   return { catalogService, eventQueries, tool, listing };
 }
-
-const json = (result: CallToolResult) => {
-  const block = result.content[0];
-
-  return JSON.parse(block?.type === "text" ? block.text : "null");
-};
 
 describe("event tools", () => {
   it("returns an event's redistributable stages earliest first with its overall dates", async () => {
@@ -141,11 +138,11 @@ describe("event tools", () => {
     const { tool, catalogService } = setup();
     await tool("create_event")({ name: "CDF 2026" });
     expect(catalogService.createEvent).toHaveBeenCalledWith({ name: "CDF 2026" });
-    await tool("update_event")({ eventId: "cdf", name: "Coupe de France Slash 2026" });
-    expect(catalogService.updateEvent).toHaveBeenCalledWith("cdf", {
+    await tool("update_event")({ eventId: EVENT_ID, name: "Coupe de France Slash 2026" });
+    expect(catalogService.updateEvent).toHaveBeenCalledWith(EVENT_ID, {
       name: "Coupe de France Slash 2026",
     });
-    expect((await tool("update_event")({ eventId: "cdf" })).isError).toBe(true);
+    expect((await tool("update_event")({ eventId: EVENT_ID })).isError).toBe(true);
   });
 
   it("maps leagues with their source", async () => {

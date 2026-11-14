@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ConfigService } from "@nestjs/config";
+import { requestUrl } from "../../../test/fetch-mock";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { PandascoreCompetitionFeed } from "./pandascore-competition-feed";
 
@@ -39,7 +40,7 @@ describe("PandascoreCompetitionFeed standings", () => {
       { teamPandascoreId: 9, rank: 3 },
       { teamPandascoreId: 10, rank: 3 },
     ]);
-    expect(String(fetch.mock.calls[0]?.[0])).toContain("/tournaments/42/standings");
+    expect(requestUrl(fetch.mock.calls[0]?.[0])).toContain("/tournaments/42/standings");
   });
 
   it("returns no standings for a tournament PandaScore has none for", async () => {

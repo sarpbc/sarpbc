@@ -7,21 +7,21 @@ export async function getNewsArticles(
   locale?: string,
   type?: NewsType,
 ): Promise<PaginatedNewsArticles> {
-  return apiFetch<PaginatedNewsArticles>(`/news`, {
+  return await apiFetch<PaginatedNewsArticles>(`/news`, {
     method: "GET",
     query: { page, limit, locale, type },
   });
 }
 
 export async function getNewsWeek(week: string, locale?: string): Promise<NewsWeek> {
-  return apiFetch<NewsWeek>(`/news/weeks/${week}`, {
+  return await apiFetch<NewsWeek>(`/news/weeks/${week}`, {
     method: "GET",
     query: { locale },
   });
 }
 
 export async function getNewsArticle(slug: string, locale?: string): Promise<NewsArticle | null> {
-  return apiFetch<NewsArticle>(`/news/${slug}`, {
+  return await apiFetch<NewsArticle>(`/news/${slug}`, {
     method: "GET",
     query: { locale },
   });

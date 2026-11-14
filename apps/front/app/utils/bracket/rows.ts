@@ -1,3 +1,4 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
@@ -5,8 +6,8 @@ export const MIN_ROW_GAP = 2;
 
 export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
   return [...matches].sort((a, b) => {
-    const dateA = a.beginAt ? new Date(a.beginAt).getTime() : Number.NaN;
-    const dateB = b.beginAt ? new Date(b.beginAt).getTime() : Number.NaN;
+    const dateA = isNonEmptyDateInput(a.beginAt) ? new Date(a.beginAt).getTime() : Number.NaN;
+    const dateB = isNonEmptyDateInput(b.beginAt) ? new Date(b.beginAt).getTime() : Number.NaN;
     const hasDateA = !Number.isNaN(dateA);
     const hasDateB = !Number.isNaN(dateB);
 

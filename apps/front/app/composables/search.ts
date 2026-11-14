@@ -10,7 +10,7 @@ export async function searchTeamsAndPlayers({ query }: { query?: string }): Prom
   try {
     return await apiFetch<SearchResult>(`/search`, {
       method: "GET",
-      params: {
+      query: {
         q: query,
         type: "all",
       },

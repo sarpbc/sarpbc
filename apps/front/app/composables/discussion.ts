@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import {
   FORUM_ERROR_CODES,
   type PaginatedReplies,
@@ -82,7 +83,7 @@ export async function createComment(data: {
     }
   }
 
-  if (data.replyToId) {
+  if (isNonEmptyString(data.replyToId)) {
     body.replyToId = data.replyToId;
   }
 

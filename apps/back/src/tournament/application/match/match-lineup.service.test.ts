@@ -19,6 +19,14 @@ function unused(): never {
 
 const player = (id: string) => Object.assign(new Player(), { id, name: id, slug: id });
 
+const lineupPlayer = (id: string) => ({
+  id,
+  name: id,
+  slug: id,
+  imageUrl: null,
+  nationality: null,
+});
+
 function participant(id: string, rosterIds: string[]) {
   return Object.assign(new TournamentParticipant(), { id, players: rosterIds.map(player) });
 }
@@ -94,7 +102,7 @@ describe("MatchLineupService", () => {
     },
   };
 
-  const transaction: CompetitionTransaction = { run: (work) => work(scope) };
+  const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
   const byIds = vi.fn(async (ids: string[]) =>
     ids.flatMap((id) => {
@@ -131,11 +139,11 @@ describe("MatchLineupService", () => {
     stored = [
       {
         participantId: "side-a",
-        player: { ...player("alpha"), imageUrl: null, nationality: null },
+        player: lineupPlayer("alpha"),
       },
       {
         participantId: "side-a",
-        player: { ...player("delta"), imageUrl: null, nationality: null },
+        player: lineupPlayer("delta"),
       },
     ];
 

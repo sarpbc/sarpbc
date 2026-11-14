@@ -9,11 +9,7 @@ describe("SearchService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new SearchService(
-      playerService as never,
-      teamService as never,
-      tournamentService as never,
-    );
+    service = new SearchService(playerService, teamService, tournamentService);
   });
 
   it("includes tournaments when type is all", async () => {

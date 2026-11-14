@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { StatsImportItem, StatsPlayerAccounts, TournamentStatsGame } from "@sarpbc/types";
+import { jsonOf, textOf } from "../../../../test/mcp-result";
 import { ConflictError } from "../../../common/domain/errors";
 import type { StatsImport } from "../../../match-stats/domain/stats-import";
 import { gameStatsTools, summarizeStatsImport } from "./game-stats-tools";
@@ -13,17 +14,25 @@ const TOOLS = [
   "remove_match_game",
 ];
 
-function item(replayId: string, overrides: Partial<StatsImportItem> = {}): StatsImportItem {
-  return {
-    replayId,
-    title: replayId,
-    playedAt: null,
-    status: "unmatched",
-    matchId: null,
-    reason: "unknown_teams",
-    ...overrides,
-  } as StatsImportItem;
-}
+const base = (replayId: string) => ({ replayId, title: replayId, playedAt: null });
+
+const stored = (
+  replayId: string,
+  status: "imported" | "already_imported",
+  gameNumber: number,
+): StatsImportItem => ({ ...base(replayId), status, matchId: "m1", gameNumber });
+
+const unmatched = (
+  replayId: string,
+  reason: Extract<StatsImportItem, { status: "unmatched" }>["reason"] = "unknown_teams",
+  matchId: string | null = null,
+): StatsImportItem => ({
+  ...base(replayId),
+  status: "unmatched",
+  matchId,
+  blueParticipantId: null,
+  reason,
+});
 
 const statsImport: StatsImport = {
   id: "import-1",
@@ -33,12 +42,19 @@ const statsImport: StatsImport = {
   total: 6,
   processed: 6,
   items: [
-    item("imported", { status: "imported", matchId: "m1", gameNumber: 1 }),
-    item("stored", { status: "already_imported", matchId: "m1", gameNumber: 2 }),
-    item("other-1"),
-    item("other-2", { reason: "outside_match_window" }),
-    item("incomplete", { matchId: "m2", reason: "incomplete_series" }),
-    item("failed", { status: "failed", matchId: "m1", gameNumber: 3, reason: "fetch_failed" }),
+    stored("imported", "imported", 1),
+    stored("stored", "already_imported", 2),
+    unmatched("other-1"),
+    unmatched("other-2", "outside_match_window"),
+    unmatched("incomplete", "incomplete_series", "m2"),
+    {
+      ...base("failed"),
+      status: "failed",
+      matchId: "m1",
+      gameNumber: 3,
+      blueParticipantId: "p1",
+      reason: "fetch_failed",
+    },
   ],
   error: null,
   createdAt: new Date("2026-06-02T10:00:00Z"),
@@ -102,10 +118,9 @@ function setup(role: "admin" | "journalist") {
 
     if (!tool) throw new Error(`${name} is not defined`);
     const result = await tool.run({ id: "u1", email: "staff@test.com", role }, input);
-    const block = result.content[0];
-    const text = block?.type === "text" ? block.text : "";
+    const text = textOf(result);
 
-    return { result, text, body: result.isError ? null : JSON.parse(text) };
+    return { result, text, body: result.isError === true ? null : jsonOf(result) };
   };
 
   return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
@@ -144,8 +159,9 @@ describe("game stats tools", () => {
     ).toEqual({ id: "import-1", groupId: "rlcs-x1", status: "pending" });
     expect(statsImportService.request).toHaveBeenCalledWith("t1", "rlcs-x1");
     const { body } = await call("get_game_stats_import", { tournamentId: "t1" });
-    expect(body.import).toMatchObject({ id: "import-1", status: "completed" });
-    expect(body.import.toReview).toHaveLength(2);
+    expect(body).toMatchObject({
+      import: { id: "import-1", status: "completed", toReview: [{}, {}] },
+    });
   });
 
   it("answers null when the tournament has no import", async () => {
@@ -161,14 +177,16 @@ describe("game stats tools", () => {
     const { call, statsPlayerLinkService } = setup("admin");
 
     const unlinked = (await call("list_unlinked_game_players", { tournamentId: "t1" })).body;
-    expect(unlinked.players.map((account: { name: string }) => account.name)).toEqual(["Racer"]);
-    expect(unlinked.rosters).toEqual(accounts.rosters);
+    expect(unlinked).toMatchObject({
+      players: [expect.objectContaining({ name: "Racer" })],
+      rosters: accounts.rosters,
+    });
 
     const all = (
       await call("list_unlinked_game_players", { tournamentId: "t1", includeLinked: true })
     ).body;
 
-    expect(all.players).toHaveLength(2);
+    expect(all).toMatchObject({ players: [{}, {}] });
 
     const link = {
       platform: "steam",

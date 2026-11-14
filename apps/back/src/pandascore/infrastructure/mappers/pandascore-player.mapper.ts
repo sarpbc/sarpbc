@@ -18,7 +18,8 @@ export class PandascorePlayerMapper {
       slug: dto.slug,
       firstName: dto.first_name,
       lastName: dto.last_name ?? undefined,
-      birthday: dto.birthday ? new Date(dto.birthday) : undefined,
+      birthday:
+        dto.birthday !== undefined && dto.birthday !== "" ? new Date(dto.birthday) : undefined,
       nationality: dto.nationality,
       imageUrl: dto.image_url ?? undefined,
       role: dto.role,

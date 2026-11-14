@@ -4,7 +4,7 @@ import { formatPrizeAmount } from "~/utils/currencyFormatter";
 export const STARTGG_URL = "https://www.start.gg";
 
 export async function getTournamentPrizes(tournamentId: string): Promise<TournamentPrizes> {
-  return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
+  return await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
 }
 
 export function usePrizeFormat() {

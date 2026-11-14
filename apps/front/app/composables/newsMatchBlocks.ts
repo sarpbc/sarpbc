@@ -31,8 +31,12 @@ export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: 
     () => toValue(key),
     async (): Promise<Record<string, MatchBlockItem[]>> => {
       const responses = await Promise.all(
-        chunk(blockKeys.value, NEWS_MATCH_BLOCKS_PER_REQUEST).map((block) =>
-          apiFetch<MatchBlocksResponse>("/matches/blocks", { method: "GET", query: { block } }),
+        chunk(blockKeys.value, NEWS_MATCH_BLOCKS_PER_REQUEST).map(
+          async (block) =>
+            await apiFetch<MatchBlocksResponse>("/matches/blocks", {
+              method: "GET",
+              query: { block },
+            }),
         ),
       );
 

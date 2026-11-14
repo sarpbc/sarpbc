@@ -67,15 +67,15 @@ export class MatchService {
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
 
-  list(
+  async list(
     kind: MatchListKind,
     { limit = DEFAULT_PAGE_SIZE, ...options }: MatchListQueryOptions = {},
   ): Promise<[Match[], number]> {
-    return this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_PAGE_SIZE) });
+    return await this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_PAGE_SIZE) });
   }
 
   async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {
-    return findMatchBlocks(this.reads, blocks, now);
+    return await findMatchBlocks(this.reads, blocks, now);
   }
 
   async findRecentlyEnded({
@@ -85,7 +85,7 @@ export class MatchService {
     limit?: number;
     minutesAgo?: number;
   } = {}): Promise<Match[]> {
-    return this.reads.recentlyEnded({ limit, minutesAgo });
+    return await this.reads.recentlyEnded({ limit, minutesAgo });
   }
 
   async findDetail(
@@ -200,7 +200,7 @@ export class MatchService {
   }
 
   private getTeamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
-    if (match.winner?.team?.id) {
+    if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
       return match.winner.team.id === teamId ? "win" : "loss";
     }
 
@@ -234,45 +234,45 @@ export class MatchService {
   }
 
   async createMatch(tournamentId: string, input: ManualMatchInput): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      createMatchInTransaction(matches, tournamentId, input),
+    const written = await this.transaction.run(
+      async ({ matches }) => await createMatchInTransaction(matches, tournamentId, input),
     );
 
-    return this.settled(written.id);
+    return await this.settled(written.id);
   }
   async createEmptyBracket(tournamentId: string, input: EmptyBracketInput): Promise<Match[]> {
-    const written = await this.transaction.run(({ matches }) =>
-      createEmptyBracketInTransaction(matches, tournamentId, input),
+    const written = await this.transaction.run(
+      async ({ matches }) => await createEmptyBracketInTransaction(matches, tournamentId, input),
     );
 
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
 
-    return this.reads.byIds(written.map((match) => match.id));
+    return await this.reads.byIds(written.map((match) => match.id));
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      setWinnerInTransaction(matches, matchId, winnerId),
+    const written = await this.transaction.run(
+      async ({ matches }) => await setWinnerInTransaction(matches, matchId, winnerId),
     );
 
-    return this.settled(written.id);
+    return await this.settled(written.id);
   }
   async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      updateMatchInTransaction(matches, matchId, input),
+    const written = await this.transaction.run(
+      async ({ matches }) => await updateMatchInTransaction(matches, matchId, input),
     );
 
-    return this.settled(written.id);
+    return await this.settled(written.id);
   }
   async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      setVodsInTransaction(matches, matchId, vods),
+    const written = await this.transaction.run(
+      async ({ matches }) => await setVodsInTransaction(matches, matchId, vods),
     );
 
-    return this.committed(written.id);
+    return await this.committed(written.id);
   }
   async setSource(matchId: string, sourceUrl: string | null): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      setSourceInTransaction(matches, matchId, sourceUrl),
+    const written = await this.transaction.run(
+      async ({ matches }) => await setSourceInTransaction(matches, matchId, sourceUrl),
     );
 
     const match = await this.committed(written.id);
@@ -281,11 +281,11 @@ export class MatchService {
     return match;
   }
   async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
-    const written = await this.transaction.run(({ matches }) =>
-      setGameVodsInTransaction(matches, matchId, game, links),
+    const written = await this.transaction.run(
+      async ({ matches }) => await setGameVodsInTransaction(matches, matchId, game, links),
     );
 
-    return this.committed(written.id);
+    return await this.committed(written.id);
   }
   async requireProposableDeletion(id: string): Promise<void> {
     await this.transaction.run(async ({ matches }) => {
@@ -311,8 +311,8 @@ export class MatchService {
 
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
   }
-  find(id: string): Promise<Match | null> {
-    return this.reads.detail({ kind: "id", value: id });
+  async find(id: string): Promise<Match | null> {
+    return await this.reads.detail({ kind: "id", value: id });
   }
   private async committed(id: string): Promise<Match> {
     const match = await this.find(id);
@@ -331,13 +331,13 @@ export class MatchService {
     return match;
   }
   async getMatchesByPlayer(id: string) {
-    return this.reads.byPlayer(id);
+    return await this.reads.byPlayer(id);
   }
   async getMatchesByTeam(id: string) {
-    return this.reads.byTeam(id);
+    return await this.reads.byTeam(id);
   }
   async getMatchesByTournament(id: string) {
-    return this.reads.byTournament(id);
+    return await this.reads.byTournament(id);
   }
 }
 

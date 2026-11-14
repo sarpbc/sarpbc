@@ -164,7 +164,10 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     }
 
     row.tournament = this.em.getReference(Row.Tournament, model.tournamentId);
-    row.team = model.teamId ? this.em.getReference(Team, model.teamId) : null;
+    row.team =
+      model.teamId !== null && model.teamId !== ""
+        ? this.em.getReference(Team, model.teamId)
+        : null;
     row.players.set(model.playerIds.map((id) => this.em.getReference(Player, id)));
     row.rosterSourceUrl = model.rosterSourceUrl;
     this.em.persist(row);
@@ -284,8 +287,8 @@ export class CompetitionMatchWriter implements MatchWriter {
 
     return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
   }
-  tournament(id: string) {
-    return this.tournaments.load(id);
+  async tournament(id: string) {
+    return await this.tournaments.load(id);
   }
   async references(id: string) {
     const counts: unknown = await this.em.execute(
@@ -306,8 +309,8 @@ export class CompetitionMatchWriter implements MatchWriter {
     await this.em.nativeDelete(Row.Match, { id });
     this.staged.delete(id);
   }
-  participants(id: string) {
-    return this.tournaments.participants(id);
+  async participants(id: string) {
+    return await this.tournaments.participants(id);
   }
   async bracket(tournamentId: string) {
     const [stage] = stageBracketRows.parse(
@@ -330,7 +333,7 @@ export class CompetitionMatchWriter implements MatchWriter {
     for (const row of matches) {
       const match = byId.get(row.id) ?? { id: row.id, previousMatches: [] };
 
-      if (row.previous_match_id && row.type)
+      if (row.previous_match_id !== null && row.previous_match_id !== "" && row.type)
         match.previousMatches.push({ previousMatchId: row.previous_match_id, type: row.type });
       byId.set(row.id, match);
     }
@@ -425,14 +428,14 @@ export class CompetitionEventWriter implements EventWriter {
 
     return row ? toTournamentEvent(row) : null;
   }
-  load(id: string) {
-    return this.find({ id });
+  async load(id: string) {
+    return await this.find({ id });
   }
-  bySerieId(id: number) {
-    return this.find({ pandascoreSerieId: id });
+  async bySerieId(id: number) {
+    return await this.find({ pandascoreSerieId: id });
   }
-  unclaimedByName(leagueId: string | null, name: string) {
-    return this.find({
+  async unclaimedByName(leagueId: string | null, name: string) {
+    return await this.find({
       pandascoreSerieId: null,
       league: leagueId,
       name,
@@ -440,9 +443,10 @@ export class CompetitionEventWriter implements EventWriter {
     });
   }
   async slugTaken(slug: string, exceptEventId: string | null) {
-    const where: FilterQuery<Row.TournamentEvent> = exceptEventId
-      ? { slug, id: { $ne: exceptEventId } }
-      : { slug };
+    const where: FilterQuery<Row.TournamentEvent> =
+      exceptEventId !== null && exceptEventId !== ""
+        ? { slug, id: { $ne: exceptEventId } }
+        : { slug };
 
     return (await this.em.count(Row.TournamentEvent, where)) > 0;
   }
@@ -527,8 +531,8 @@ function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
 
 export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (em) => {
+  async run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (em) => {
       const result = await work(lazyWriteScope(em));
       await em.flush();
 

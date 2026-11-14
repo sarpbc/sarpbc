@@ -1,4 +1,5 @@
 import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs";
+import { isNonEmptyString } from "./text";
 
 export interface ParsedTweetUrl {
   id: string;
@@ -41,7 +42,7 @@ const TWEET_INLINE_OPENER = ":tweet{";
 
 export function parseTweetUrl(input: string): ParsedTweetUrl | null {
   const trimmed = input.trim();
-  const match = trimmed.match(TWEET_STATUS_PATTERN);
+  const match = TWEET_STATUS_PATTERN.exec(trimmed);
 
   if (!match || match[2] == null) {
     return null;
@@ -59,7 +60,7 @@ export function parseTweetUrl(input: string): ParsedTweetUrl | null {
 }
 
 export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
-  const match = raw.match(TWEET_TAG_PATTERN);
+  const match = TWEET_TAG_PATTERN.exec(raw);
 
   if (!match) {
     return null;
@@ -69,7 +70,7 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
     .find((attr) => attr.name === "url")
     ?.value.trim();
 
-  if (!url) {
+  if (!isNonEmptyString(url)) {
     return null;
   }
 

@@ -5,15 +5,15 @@ import { resolveApiBase } from "./internal-api";
 const PUBLIC = "https://api.sarpbc.org";
 const SERVER = "http://sarpbcorg-back-lc37mk:4001";
 
-describe("resolveApiBase", () => {
-  it("keeps the public origin on the client and when no server base is set", () => {
+void describe("resolveApiBase", () => {
+  void it("keeps the public origin on the client and when no server base is set", () => {
     assert.equal(resolveApiBase(PUBLIC, undefined, false), PUBLIC);
     assert.equal(resolveApiBase(PUBLIC, SERVER, false), PUBLIC);
     assert.equal(resolveApiBase(`${PUBLIC}/`, "  ", true), PUBLIC);
     assert.equal(resolveApiBase(PUBLIC, undefined, true), PUBLIC);
   });
 
-  it("uses the private origin for server calls and drops a trailing slash", () => {
+  void it("uses the private origin for server calls and drops a trailing slash", () => {
     assert.equal(resolveApiBase(PUBLIC, `${SERVER}/`, true), SERVER);
   });
 });

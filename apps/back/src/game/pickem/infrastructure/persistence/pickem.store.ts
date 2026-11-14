@@ -47,16 +47,16 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
   async list(tournamentId: string, { userId, scoredOnly }: PickFilter = {}): Promise<NamedPick[]> {
     const where: TournamentPickFilter = { match: { tournament: { id: tournamentId } } };
 
-    if (userId) where.user = { id: userId };
+    if (userId !== undefined && userId !== "") where.user = { id: userId };
 
-    if (scoredOnly) where.scored = true;
+    if (scoredOnly === true) where.scored = true;
 
     return (
       await this.em.find(PickemChoice, where, { populate: ["user", "match", "pickedParticipant"] })
     ).map(toNamedPick);
   }
-  run<T>(work: (scope: PickemWrites) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: PickemWrites) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const scope: PickemWrites = {
         userExists: async (id) => !!(await tx.findOne(User, { id })),
         participantExists: async (id) => !!(await tx.findOne(TournamentParticipant, { id })),

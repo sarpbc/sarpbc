@@ -65,11 +65,12 @@ export function toParticipant(
   row: Row.TournamentParticipant,
   at?: Date | null,
 ): TournamentParticipant | null {
-  const { tournament, team } = row;
+  const { team } = row;
+  const tournament: Row.Tournament | undefined = row.tournament;
 
   const loaded =
     wrap(row).isInitialized() &&
-    tournament &&
+    tournament !== undefined &&
     (team ? wrap(team).isInitialized() : row.players.isInitialized());
 
   if (!loaded) {
@@ -199,8 +200,12 @@ export function toTournament(row: Row.Tournament): Tournament {
 export function toMatchSlug(row: Row.Match): string {
   const loaded = wrap(row).isInitialized();
 
+  const rowTournament: Row.Tournament | undefined = row.tournament;
+
   const tournament =
-    loaded && row.tournament && wrap(row.tournament).isInitialized() ? row.tournament : null;
+    loaded && rowTournament !== undefined && wrap(rowTournament).isInitialized()
+      ? rowTournament
+      : null;
 
   const event = tournament && wrap(tournament.event).isInitialized() ? tournament.event : null;
 

@@ -1,4 +1,9 @@
-import { getApiErrorCode, getApiErrorMessage, getApiErrorStatus } from "@sarpbc/utils";
+import {
+  getApiErrorCode,
+  getApiErrorMessage,
+  getApiErrorStatus,
+  isNonEmptyString,
+} from "@sarpbc/utils";
 
 interface ApiFailure<Reason extends string> {
   ok: false;
@@ -20,10 +25,10 @@ export function apiFailure<Reason extends string>(
   }
 
   const reason =
-    (code ? reasons.codes?.[code] : undefined) ??
+    (isNonEmptyString(code) ? reasons.codes?.[code] : undefined) ??
     (status === undefined ? undefined : reasons.statuses?.[status]);
 
-  if (reason) {
+  if (reason !== undefined) {
     return { ok: false, reason, message };
   }
 
