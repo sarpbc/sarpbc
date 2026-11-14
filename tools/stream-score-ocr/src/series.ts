@@ -241,7 +241,7 @@ export class SeriesTracker {
   }
 
   #adoptUnconfirmed(current: CurrentGame): void {
-    const unconfirmed = current.unconfirmed;
+    const { unconfirmed } = current;
 
     if (current.blue !== current.orange || unconfirmed === null) return;
     current.blue = unconfirmed.blue;

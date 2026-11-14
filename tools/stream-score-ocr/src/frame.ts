@@ -35,8 +35,8 @@ export function meanColor(frame: Frame, region: Region): Rgb {
   let green = 0;
   let blue = 0;
 
-  for (let y = region.y; y < region.y + region.height; y++) {
-    for (let x = region.x; x < region.x + region.width; x++) {
+  for (let { y } = region; y < region.y + region.height; y++) {
+    for (let { x } = region; x < region.x + region.width; x++) {
       const offset = (y * frame.width + x) * 3;
       red += frame.data[offset] ?? 0;
       green += frame.data[offset + 1] ?? 0;

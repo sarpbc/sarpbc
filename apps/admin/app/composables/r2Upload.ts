@@ -5,11 +5,11 @@ import {
   type ImageUploadTarget,
 } from "@sarpbc/utils";
 
-type ImageUploadContext = {
+interface ImageUploadContext {
   target: ImageUploadTarget;
   articleSlug?: string;
   articleTitle?: string;
-};
+}
 
 function messageFromNestBody(responseText: string): string | undefined {
   try {
@@ -98,10 +98,10 @@ export function useR2Upload() {
       progress.value = 100;
 
       return publicUrl;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Image upload failed";
+    } catch (error_) {
+      const message = error_ instanceof Error ? error_.message : "Image upload failed";
       error.value = message;
-      console.error("Error uploading to R2:", err);
+      console.error("Error uploading to R2:", error_);
       throw new Error(message);
     } finally {
       isUploading.value = false;

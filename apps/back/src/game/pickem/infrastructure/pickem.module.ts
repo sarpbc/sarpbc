@@ -1,8 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import { Logger } from "@nestjs/common";
+import { Logger, Module } from "@nestjs/common";
 import { v4 } from "uuid";
 import { MikroPickemStore } from "./persistence/pickem.store";
-import { Module } from "@nestjs/common";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { PickemChoice } from "./persistence/pickem.entity";
 import { PickemController } from "./http/pickem.controller";

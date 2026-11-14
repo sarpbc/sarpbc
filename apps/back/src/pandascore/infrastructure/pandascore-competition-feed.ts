@@ -49,8 +49,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
   }
   async listIncidents(params: { since: Date }): Promise<CompetitionIncident[]> {
     return (await this.apiClient.listIncidents(params)).map((v) => {
-      const i = incidentSchema.parse(v),
-        base = { id: i.id, modifiedAt: new Date(i.modified_at) };
+      const i = incidentSchema.parse(v);
+      const base = { id: i.id, modifiedAt: new Date(i.modified_at) };
 
       if (i.change_type === "deletion")
         return {

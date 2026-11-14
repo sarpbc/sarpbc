@@ -54,7 +54,7 @@ function listedReplay(id: string, overrides: { date?: string; date_has_tz?: bool
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
 function json(
-  body: { [key: string]: Json },
+  body: Record<string, Json>,
   status = 200,
   headers: Record<string, string> = {},
 ): Response {
@@ -177,7 +177,7 @@ describe("BallchasingClient.groupReplays", () => {
 
     const instance = new BallchasingClient("k", {
       fetch,
-      sleep: async () => undefined,
+      sleep: async () => {},
     });
 
     await expect(instance.groupReplays("pilot")).rejects.toThrow(/could not be reached/);
@@ -311,7 +311,7 @@ describe("BallchasingClient.replayStats", () => {
     const detail = replayDetail();
     const [firstkiller, racer] = detail.blue.players;
 
-    const withBluePlayer = (player: { [key: string]: Json }) => ({
+    const withBluePlayer = (player: Record<string, Json>) => ({
       ...detail,
       blue: { ...detail.blue, players: [firstkiller, player] },
     });

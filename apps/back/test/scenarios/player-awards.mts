@@ -37,7 +37,7 @@ export async function verifyPlayerAwards({
   await request("POST", url, input, memberCookie, 403);
   await request("POST", url, { ...input, playerId: outsiderPlayerId }, staffCookie, 400);
 
-  const award = (await request("POST", url, input, staffCookie, 201)).json(awardBody).award;
+  const { award } = (await request("POST", url, input, staffCookie, 201)).json(awardBody);
 
   assert.equal(award.player.id, playerId);
   assert.equal(award.participant.id, participantId);
@@ -63,7 +63,7 @@ export async function verifyPlayerAwards({
     profileBody,
   ).awards;
 
-  assert(profileAwards.some((a) => a.id === award.id && a.tournament.id === tournamentId));
+  assert.ok(profileAwards.some((a) => a.id === award.id && a.tournament.id === tournamentId));
   await request("DELETE", `${url}/${award.id}`, undefined, memberCookie, 403);
   await request("DELETE", `${url}/${award.id}`, undefined, staffCookie, 204);
   assert.deepEqual((await request("GET", url)).json(awardsBody).awards, []);

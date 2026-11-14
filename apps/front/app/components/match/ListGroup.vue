@@ -15,11 +15,11 @@ const { matches, variant, discoverySource, liveMatchIds } = defineProps<{
 
 const { t, locale } = useI18n();
 
-type ListBlock = {
+interface ListBlock {
   key: string;
   dateLabel: string | null;
   events: MatchEventGroup[];
-};
+}
 
 const useDateGrouping = computed(() => variant === "upcoming");
 

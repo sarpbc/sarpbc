@@ -102,7 +102,7 @@ function byReplay(assignments: ReplayAssignment[]) {
         ? `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`
         : assignment.kind === "stored"
           ? `stored:${assignment.matchId}#${assignment.gameNumber}`
-          : `unmatched:${assignment.reason}${assignment.matchId !== null ? `@${assignment.matchId}` : ""}`,
+          : `unmatched:${assignment.reason}${assignment.matchId === null ? "" : `@${assignment.matchId}`}`,
     ]),
   );
 }

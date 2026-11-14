@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
-const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repository = path.resolve(import.meta.dirname, "..");
 
 const localeValue = z.json();
 const localeObject = z.record(z.string(), localeValue);
@@ -24,7 +24,9 @@ export function parityViolations(directory: string): string[] {
   const keys = (locale: string): Set<string> =>
     new Set(
       leafKeys(
-        localeValue.parse(JSON.parse(readFileSync(path.join(directory, `${locale}.json`), "utf8"))),
+        localeValue.parse(
+          JSON.parse(readFileSync(path.join(directory, `${locale}.json`), "utf-8")),
+        ),
       ),
     );
 
@@ -37,7 +39,7 @@ export function parityViolations(directory: string): string[] {
   ];
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const candidates = [
     ...readdirSync(path.join(repository, "apps")).map((app) =>
       path.join(repository, "apps", app, "i18n", "locales"),

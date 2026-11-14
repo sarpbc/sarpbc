@@ -77,7 +77,7 @@ export function newsEntityTagStart(content: string, kind: NewsEntityTagKind): nu
 }
 
 export function replaceNewsEntityTagsWithLabels(content: string): string {
-  return content.replace(
+  return content.replaceAll(
     NEWS_ENTITY_TAG_GLOBAL_PATTERN,
     (raw) => parseNewsEntityTag(raw)?.label ?? "",
   );

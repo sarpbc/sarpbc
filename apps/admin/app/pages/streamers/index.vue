@@ -88,9 +88,9 @@ async function confirmAdd() {
       color: "success",
     });
     await refresh();
-  } catch (err) {
+  } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(err) ?? t("page.streamers.add.failed"),
+      title: getApiErrorMessage(error_) ?? t("page.streamers.add.failed"),
       color: "error",
     });
   } finally {
@@ -114,9 +114,9 @@ async function confirmRemove() {
       color: "success",
     });
     await refresh();
-  } catch (err) {
+  } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(err) ?? t("page.streamers.remove.failed"),
+      title: getApiErrorMessage(error_) ?? t("page.streamers.remove.failed"),
       color: "error",
     });
   } finally {

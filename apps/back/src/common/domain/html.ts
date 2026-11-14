@@ -51,7 +51,7 @@ function isSafeUrl(value: string): boolean {
 }
 
 function asciiLowerCase(value: string): string {
-  return value.replace(/[A-Z]/g, (char) => char.toLowerCase());
+  return value.replaceAll(/[A-Z]/g, (char) => char.toLowerCase());
 }
 
 function isWordChar(char: string): boolean {
@@ -159,7 +159,7 @@ export function sanitizePlainText(value: string): string {
 }
 
 export function sanitizeNewsHtml(value: string): string {
-  return stripDangerousBlocks(value).replace(
+  return stripDangerousBlocks(value).replaceAll(
     /<\/?([a-zA-Z][\w:-]*)\b([^>]*)>/g,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();

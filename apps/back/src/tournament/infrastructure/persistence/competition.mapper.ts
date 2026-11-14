@@ -55,8 +55,7 @@ export const MATCH_WRITE_POPULATE = [
 
 export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
-  if (!wrap(row).isInitialized())
-    throw new Error("Tournament event " + row.id + " is not populated");
+  if (!wrap(row).isInitialized()) throw new Error(`Tournament event ${row.id} is not populated`);
 
   return toEventRef(row);
 }

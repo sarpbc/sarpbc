@@ -37,7 +37,7 @@ export const TweetTagNode = Node.create({
       const parsed = parseNewsTweetTag(src.trimStart());
 
       if (!parsed) {
-        return undefined;
+        return;
       }
 
       const leading = src.length - src.trimStart().length;

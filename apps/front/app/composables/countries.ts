@@ -18,12 +18,12 @@ export async function getCountry(
     );
 
     return res.country;
-  } catch (cause) {
-    if (getApiErrorStatus(cause) === 404) {
+  } catch (error) {
+    if (getApiErrorStatus(error) === 404) {
       return null;
     }
 
-    throw cause;
+    throw error;
   }
 }
 

@@ -40,11 +40,11 @@ export function isMatchLockedForPickem(match: MatchLifecycle, now = Date.now()):
   return isMatchFinished(match) || isMatchLive(match, now);
 }
 
-export type PickemPickState = {
+export interface PickemPickState {
   pickedParticipant: string;
   points: number | null;
   scored: boolean;
-};
+}
 
 export function getPickOutcome(
   match: { winnerId: string | null },

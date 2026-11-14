@@ -35,7 +35,7 @@ const COLUMNS: readonly Column[] = [
   "goalParticipation",
 ];
 
-const PERCENTAGES: readonly Column[] = ["shootingPercentage", "goalParticipation"];
+const PERCENTAGES: readonly Column[] = new Set(["shootingPercentage", "goalParticipation"]);
 const ALL_TEAMS = "all";
 
 const view = ref<View>("totals");
@@ -137,7 +137,7 @@ function display(row: TournamentPlayerStats, column: Column): string {
 
   if (current === null) return "–";
 
-  return PERCENTAGES.includes(column)
+  return PERCENTAGES.has(column)
     ? percentFormat.value.format(current / 100)
     : numberFormat.value.format(current);
 }

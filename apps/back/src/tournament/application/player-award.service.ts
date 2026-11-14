@@ -16,14 +16,14 @@ export class PlayerAwardService {
   async findByPlayerId(id: string) {
     const awards = await this.reads.byPlayer(id);
 
-    if (!awards) throw new NotFoundError('Player with id "' + id + '" not found');
+    if (!awards) throw new NotFoundError(`Player with id "${id}" not found`);
 
     return awards;
   }
   async findByTournamentId(id: string) {
     const awards = await this.reads.byTournament(id);
 
-    if (!awards) throw new NotFoundError('Tournament with id "' + id + '" not found');
+    if (!awards) throw new NotFoundError(`Tournament with id "${id}" not found`);
 
     return awards;
   }
@@ -72,7 +72,7 @@ export class PlayerAwardService {
     await this.transaction.run(async ({ awards }) => {
       if (!(await awards.remove(tournamentId, awardId)))
         throw new NotFoundError(
-          'Award with id "' + awardId + '" was not found for tournament "' + tournamentId + '"',
+          `Award with id "${awardId}" was not found for tournament "${tournamentId}"`,
         );
     });
   }
@@ -95,10 +95,10 @@ export class PlayerAwardService {
 
     if (await awards.awardTaken(tournamentId, awardType))
       throw new InvalidInputError(
-        tournament.name +
-          " already has a " +
-          awardType.replaceAll("_", " ") +
-          " award. A tournament has one award of each type.",
+        `${tournament.name} already has a ${awardType.replaceAll(
+          "_",
+          " ",
+        )} award. A tournament has one award of each type.`,
       );
 
     return participant.id;
@@ -118,25 +118,24 @@ export class PlayerAwardService {
       playerId,
     );
 
-    if (!tournament) throw new NotFoundError('Tournament with id "' + tournamentId + '" not found');
+    if (!tournament) throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
 
     if (!participant)
       throw new NotFoundError(
-        "Tournament participant " +
-          ("participantId" in participantRef
+        `Tournament participant ${
+          "participantId" in participantRef
             ? 'with id "' + participantRef.participantId + '"'
-            : 'for team "' + participantRef.teamId + '"') +
-          " was not found for this tournament",
+            : 'for team "' + participantRef.teamId + '"'
+        } was not found for this tournament`,
       );
 
-    if (!player) throw new NotFoundError('Player with id "' + playerId + '" not found');
+    if (!player) throw new NotFoundError(`Player with id "${playerId}" not found`);
 
     if (!participant.playerIds.includes(playerId))
       throw new InvalidInputError(
-        player.name +
-          " is not on the roster for " +
-          participant.name +
-          ". Add the player to this participant in the tournament roster first.",
+        `${player.name} is not on the roster for ${
+          participant.name
+        }. Add the player to this participant in the tournament roster first.`,
       );
 
     return { tournament, participant };

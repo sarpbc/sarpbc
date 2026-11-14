@@ -43,7 +43,9 @@ type SideRow = [participantId: string, players: [id: string, standIn: boolean][]
 
 type Identified = z.infer<typeof identified>;
 
-type Tournament = { participants: z.infer<typeof participant>[] };
+interface Tournament {
+  participants: z.infer<typeof participant>[];
+}
 
 interface LineupsContext {
   request: Request;

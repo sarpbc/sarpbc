@@ -125,12 +125,12 @@ function diffMembers(
 }
 
 function mergeAdjacentEras(
-  eras: Array<{
+  eras: {
     startMs: number;
     endMs: number | null;
     isCurrent: boolean;
     members: TeamRosterEraMember[];
-  }>,
+  }[],
 ): typeof eras {
   if (eras.length <= 1) return eras;
 
@@ -174,12 +174,12 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
 
   const boundaries = [...boundarySet].sort((left, right) => left - right);
 
-  const rawEras: Array<{
+  const rawEras: {
     startMs: number;
     endMs: number | null;
     isCurrent: boolean;
     members: TeamRosterEraMember[];
-  }> = [];
+  }[] = [];
 
   for (let index = 0; index < boundaries.length; index++) {
     const startMs = boundaries[index]!;

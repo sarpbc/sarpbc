@@ -20,8 +20,7 @@ function seedSlots(size: number): number[] {
   const slots: number[] = [];
 
   for (const seed of half) {
-    slots.push(seed);
-    slots.push(size - 1 - seed);
+    slots.push(seed, size - 1 - seed);
   }
 
   return slots;

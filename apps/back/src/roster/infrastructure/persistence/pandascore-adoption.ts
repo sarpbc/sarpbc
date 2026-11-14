@@ -35,7 +35,7 @@ export async function findPandascoreTeam(
   pandascoreId: number | undefined,
   slug: string,
 ): Promise<Team | null> {
-  const byId = pandascoreId !== undefined ? await em.findOne(Team, { pandascoreId }) : null;
+  const byId = pandascoreId === undefined ? null : await em.findOne(Team, { pandascoreId });
 
   return await (byId ?? em.findOne(Team, adoptable(slug)));
 }

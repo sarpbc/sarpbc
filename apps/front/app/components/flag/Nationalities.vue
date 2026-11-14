@@ -17,9 +17,7 @@ const sizeClasses = {
   lg: "w-6 h-4",
 };
 
-interface StringLookup {
-  readonly [key: string]: string;
-}
+type StringLookup = Readonly<Record<string, string>>;
 
 function lookupStringMap(map: StringLookup, key: string): string | undefined {
   for (const [entryKey, value] of Object.entries(map)) {

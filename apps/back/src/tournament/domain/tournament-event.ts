@@ -1,6 +1,5 @@
 import { v4 } from "uuid";
-import type { TournamentEventRef } from "@sarpbc/types";
-import type { DataSource, Stream, Viewership } from "@sarpbc/types";
+import type { TournamentEventRef, DataSource, Stream, Viewership } from "@sarpbc/types";
 import { isoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 import { nonBlank } from "../../common/domain/text";
@@ -20,14 +19,14 @@ export class TournamentEvent {
 
 export function isEventSynced(
   event: TournamentEvent,
-  stages: ReadonlyArray<{ source: DataSource }>,
+  stages: readonly { source: DataSource }[],
 ): boolean {
   return event.pandascoreSerieId !== null || stages.some((stage) => stage.source === "pandascore");
 }
 
 export function assertEventEditable(
   event: TournamentEvent,
-  stages: ReadonlyArray<{ source: DataSource }>,
+  stages: readonly { source: DataSource }[],
 ): void {
   if (isEventSynced(event, stages))
     throw new InvalidInputError(

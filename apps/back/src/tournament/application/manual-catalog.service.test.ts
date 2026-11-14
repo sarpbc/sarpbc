@@ -65,8 +65,8 @@ describe("ManualCatalogService", () => {
     unsynced: vi.fn(),
   };
 
-  const cache = { invalidateTournament: vi.fn() },
-    diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() };
+  const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const service = new ManualCatalogService(
     tournamentQueries(),

@@ -10,11 +10,11 @@ export type EntityListTab = "upcoming" | "past";
 
 type EntityListTabKey = "matches" | "events";
 
-type ProfileTabQuery = {
+interface ProfileTabQuery {
   tab: EntityProfileTab;
   matches?: string;
   events?: string;
-};
+}
 
 function parseProfileTab(value: LocationQuery[string] | number | undefined): EntityProfileTab {
   return PROFILE_TABS.find((tab) => tab === value) ?? "info";

@@ -25,14 +25,14 @@ declare module "nuxt/schema" {
 declare const useRuntimeConfig: typeof NuxtUseRuntimeConfig;
 declare const useRequestEvent: typeof NuxtUseRequestEvent;
 
-type ServerRequest = {
+interface ServerRequest {
   node: {
     req: {
       headers: Record<string, string | string[] | undefined>;
       socket?: { remoteAddress?: string | null };
     };
   };
-};
+}
 
 function hasNodeRequest(event: NuxtRequestEvent): event is NuxtRequestEvent & ServerRequest {
   return "node" in event;

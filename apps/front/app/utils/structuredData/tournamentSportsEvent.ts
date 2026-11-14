@@ -68,10 +68,7 @@ export interface PropertyValueLd extends JsonLdNode {
   value: string;
 }
 
-export type SportsEventLocationLd =
-  | VirtualLocationLd
-  | PlaceLd
-  | Array<VirtualLocationLd | PlaceLd>;
+export type SportsEventLocationLd = VirtualLocationLd | PlaceLd | (VirtualLocationLd | PlaceLd)[];
 
 export interface SportsEventVenueLd {
   eventAttendanceMode: string;
@@ -222,7 +219,7 @@ export function eventVenue(
 export function getTournamentChampion(
   tournament: Pick<TournamentDetail, "winner">,
 ): ParticipantRef<TeamSummary> | null {
-  const winner = tournament.winner;
+  const { winner } = tournament;
 
   if (!winner) {
     return null;
@@ -239,7 +236,7 @@ function competitorFromTournament(
   const competitors = new Map<string, CompetitorLd>();
 
   for (const participant of tournament.participants) {
-    const team = participant.team;
+    const { team } = participant;
 
     if (!team) {
       for (const player of participant.players) {

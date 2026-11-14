@@ -2,8 +2,12 @@ import { isDeepStrictEqual } from "node:util";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { LockMode, type FilterQuery } from "@mikro-orm/core";
 import { z } from "zod";
-import { Player, Team, toPlayer } from "../../../roster/infrastructure/roster-persistence";
-import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
+import {
+  Player,
+  Team,
+  toPlayer,
+  RosterSyncWriter,
+} from "../../../roster/infrastructure/roster-persistence";
 import * as Row from "./tournament.entities";
 import type * as Model from "../../domain/competition";
 import type { TournamentEvent } from "../../domain/tournament-event";
@@ -379,8 +383,8 @@ export class CompetitionMatchWriter implements MatchWriter {
     const existingResults = new Map(row.results.getItems().map((result) => [result.id, result]));
     const existingLinks = new Map(row.previousMatches.getItems().map((link) => [link.id, link]));
 
-    const resultIds = new Set(model.results.map((r) => r.id)),
-      linkIds = new Set(model.previousMatches.map((l) => l.id));
+    const resultIds = new Set(model.results.map((r) => r.id));
+    const linkIds = new Set(model.previousMatches.map((l) => l.id));
 
     if (row.results.isInitialized())
       for (const result of row.results.getItems())

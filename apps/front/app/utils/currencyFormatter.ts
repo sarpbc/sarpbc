@@ -30,7 +30,7 @@ export function formatPrizepool(
 
   if (parts.length < 2) return prizepool;
 
-  const amount = parseFloat((parts[0] ?? "").replaceAll(",", ""));
+  const amount = Number.parseFloat((parts[0] ?? "").replaceAll(",", ""));
 
   if (isNaN(amount)) return prizepool;
 

@@ -54,9 +54,9 @@ describe("ManualTournamentService", () => {
 
   const matchWriter = { bracket: vi.fn() };
 
-  const cache = { invalidateTournament: vi.fn() },
-    diagnostics = { error: vi.fn(), warn: vi.fn() },
-    reads = { findById: vi.fn(), leagues: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() };
+  const diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const reads = { findById: vi.fn(), leagues: vi.fn() };
 
   let tournament: Tournament;
   const events: string[] = [];

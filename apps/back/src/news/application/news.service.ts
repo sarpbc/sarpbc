@@ -171,8 +171,8 @@ export class NewsService {
         updatedAt: null,
         title: sanitizePlainText(dto.title),
         content: newsContent(dto.content),
-        titleFr: dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null,
-        contentFr: dto.contentFr != null ? newsContent(dto.contentFr) : null,
+        titleFr: dto.titleFr == null ? null : sanitizePlainText(dto.titleFr),
+        contentFr: dto.contentFr == null ? null : newsContent(dto.contentFr),
         author,
         slug,
         isDraft: true,
@@ -320,11 +320,11 @@ export class NewsService {
       }
 
       if (dto.titleFr !== undefined) {
-        article.titleFr = dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null;
+        article.titleFr = dto.titleFr == null ? null : sanitizePlainText(dto.titleFr);
       }
 
       if (dto.contentFr !== undefined) {
-        article.contentFr = dto.contentFr != null ? newsContent(dto.contentFr) : null;
+        article.contentFr = dto.contentFr == null ? null : newsContent(dto.contentFr);
       }
 
       if (dto.imageUrl !== undefined) {

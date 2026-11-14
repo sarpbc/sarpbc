@@ -86,7 +86,7 @@ export function useCareerSimulator() {
   });
 
   const lastSplit = computed<CareerSplitRecord | null>(
-    () => state.value.currentSplits[state.value.currentSplits.length - 1] ?? null,
+    () => state.value.currentSplits.at(-1) ?? null,
   );
 
   const playerAge = computed(() => getPlayerAge(state.value.currentSeason));

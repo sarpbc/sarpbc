@@ -44,9 +44,7 @@ export interface McpTool {
 }
 
 function listOr(items: readonly string[]): string {
-  return items.length > 1
-    ? `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`
-    : items.join("");
+  return items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join("");
 }
 
 function asError(cause: unknown): Error {

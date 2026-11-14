@@ -132,9 +132,7 @@ export class ReplyRepository {
     return await this.rows.find({ replyTo: { id: replyId } }, { populate: [...REPLY_POPULATE] });
   }
 
-  async findRecentForModeration(
-    limit: number,
-  ): Promise<Array<{ reply: Reply; reportCount: number }>> {
+  async findRecentForModeration(limit: number): Promise<{ reply: Reply; reportCount: number }[]> {
     const rows = moderationRows.parse(
       await this.em.getConnection().execute(
         `

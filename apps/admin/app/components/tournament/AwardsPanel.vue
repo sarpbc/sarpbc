@@ -8,11 +8,11 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 
 const props = defineProps<{
   tournamentId: string;
-  participants: Array<{
+  participants: {
     id: string;
     team: { name: string } | null;
     players?: Array<{ id: string; name: string }>;
-  }>;
+  }[];
 }>();
 
 const { t } = useI18n();
@@ -44,13 +44,13 @@ const availableAwardTypeOptions = computed(() =>
 );
 
 const rosterOptions = computed(() => {
-  const options: Array<{
+  const options: {
     value: string;
     label: string;
     participantId: string;
     playerId: string;
     playerName: string;
-  }> = [];
+  }[] = [];
 
   for (const participant of props.participants) {
     for (const player of participant.players ?? []) {

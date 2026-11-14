@@ -9,7 +9,7 @@ type EventStage = Pick<
   "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
 >;
 
-function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): string | null {
+function bound(dates: (Date | null)[], pick: (...times: number[]) => number): string | null {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   return times.length ? new Date(pick(...times)).toISOString() : null;

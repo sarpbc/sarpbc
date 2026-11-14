@@ -100,11 +100,11 @@ export class PickemService {
     return [...entries.values()].sort((a, b) => b.points - a.points);
   }
   async personalRanking(tournamentId: string, userId: string): Promise<PersonalRankingDto> {
-    const entries = await this.leaderboard(tournamentId),
-      index = entries.findIndex((e) => e.userId === userId);
+    const entries = await this.leaderboard(tournamentId);
+    const index = entries.findIndex((e) => e.userId === userId);
 
     return {
-      rank: index < 0 ? null : index + 1,
+      rank: index === -1 ? null : index + 1,
       total: entries.length,
       points: entries[index]?.points ?? 0,
     };

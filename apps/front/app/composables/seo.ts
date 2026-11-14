@@ -137,9 +137,7 @@ export const useSarpbcSeo = () => {
     useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl });
   };
 
-  const getCanonicalUrl = () => {
-    return `${SITE_ORIGIN}${route.path === "/fr" ? "/fr/" : route.path}`;
-  };
+  const getCanonicalUrl = () => `${SITE_ORIGIN}${route.path === "/fr" ? "/fr/" : route.path}`;
 
   return {
     setPageSeo,

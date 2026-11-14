@@ -60,7 +60,7 @@ const eventId = computed({
 
 /** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
 const sharesEvent = computed(() => {
-  const original = props.original;
+  const { original } = props;
 
   if (!original) return false;
   const event = props.events.find((candidate) => candidate.id === original.event.id);
@@ -132,7 +132,7 @@ function toggleTeam(teamId: string, checked: boolean) {
     next.delete(teamId);
   }
 
-  updateField("teamIds", Array.from(next));
+  updateField("teamIds", [...next]);
 }
 
 function isTeamSelected(teamId: string): boolean {

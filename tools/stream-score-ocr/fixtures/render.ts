@@ -55,12 +55,12 @@ export function seededRandom(seed: number): () => number {
   let state = seed >>> 0;
 
   return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
+    state = (state + 0x6d_2b_79_f5) >>> 0;
     let value = state;
     value = Math.imul(value ^ (value >>> 15), value | 1);
     value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
 
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
   };
 }
 
@@ -83,7 +83,7 @@ function rectCoverage(region: Region, x0: number, x1: number, y0: number, y1: nu
 }
 
 function textInk(text: string) {
-  const glyphs = Array.from(text).map((char) => {
+  const glyphs = [...text].map((char) => {
     const rows = FONT.get(char);
 
     if (rows === undefined) throw new Error(`No fixture glyph for ${char}`);
@@ -99,7 +99,7 @@ function textInk(text: string) {
     }
 
     for (const [y, row] of rows.entries()) {
-      ink[y]?.push(...Array.from(row).map((cell) => cell === "#"));
+      ink[y]?.push(...[...row].map((cell) => cell === "#"));
     }
   }
 
@@ -211,7 +211,7 @@ export class FixtureRenderer {
 
     if (cached !== undefined) return cached;
 
-    const layers: Array<{ region: Region; color: Rgb }> = [
+    const layers: { region: Region; color: Rgb }[] = [
       { region: PANEL, color: PANEL_COLOR },
       { region: BLUE_STRIP, color: BLUE_COLOR },
       { region: ORANGE_STRIP, color: ORANGE_COLOR },

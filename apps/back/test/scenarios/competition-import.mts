@@ -124,7 +124,7 @@ export async function verifyCompetitionImport({
     .fork()
     .findOneOrFail(Player, { pandascoreId: veteran.pandascoreId }, { populate: ["team"] });
 
-  assert(player.team, "the imported player has a current team");
+  assert.ok(player.team, "the imported player has a current team");
   const currentTeamId = player.team.id;
   await request(
     "PATCH",
@@ -139,8 +139,8 @@ export async function verifyCompetitionImport({
     serie: { pandascoreId: 9601, fullName: "Spring Split", year: 2026 },
     country: "FR",
     hasBracket: true,
-    beginAt: new Date(Date.now() - 172800000),
-    endAt: new Date(Date.now() + 172800000),
+    beginAt: new Date(Date.now() - 172_800_000),
+    endAt: new Date(Date.now() + 172_800_000),
     winnerPandascoreTeamId: oldTeam.pandascoreId,
     league: {
       pandascoreId: 9401,
@@ -159,8 +159,8 @@ export async function verifyCompetitionImport({
     tournamentPandascoreId: tournamentCommand.pandascoreId,
     name: "Imported Semifinal",
     slug: "imported-semifinal",
-    beginAt: new Date(Date.now() - 7200000),
-    endAt: new Date(Date.now() - 3600000),
+    beginAt: new Date(Date.now() - 7_200_000),
+    endAt: new Date(Date.now() - 3_600_000),
     status: "finished",
     numberOfGames: 5,
     opponentSlugs: [oldTeam.slug, rival.slug],
@@ -178,7 +178,7 @@ export async function verifyCompetitionImport({
     pandascoreId: 9502,
     name: "Imported Final",
     slug: "imported-final",
-    beginAt: new Date(Date.now() + 86400000),
+    beginAt: new Date(Date.now() + 86_400_000),
     endAt: undefined,
     status: "not_started",
     results: [],
@@ -212,12 +212,12 @@ export async function verifyCompetitionImport({
   assert.equal(view.participants.length, 2);
   assert.equal(view.matches.length, 2);
   const participant = view.participants.find((p) => p.team.slug === oldTeam.slug);
-  assert(participant, "the historical team remains a tournament participant");
+  assert.ok(participant, "the historical team remains a tournament participant");
   assert.equal(participant.players[0].id, player.id);
   assert.equal(view.winner?.id, participant.id);
   const semiView = view.matches.find((m) => m.name === semifinal.name);
   const finalView = view.matches.find((m) => m.name === final.name);
-  assert(semiView && finalView, "both imported matches are listed");
+  assert.ok(semiView && finalView, "both imported matches are listed");
   assert.equal(semiView.winnerId, participant.id);
   assert.equal(finalView.previousMatches[0].previousMatch, semiView.id);
   assert.equal((await playerView()).team?.id, currentTeamId);
@@ -305,12 +305,12 @@ export async function verifyCompetitionImport({
       .total,
     1,
   );
-  assert(
+  assert.ok(
     (
       await read(`/player/${player.id}/trophies`, z.object({ trophies: z.array(idRow) }))
     ).trophies.some((t) => t.id === imported.id),
   );
-  assert(
+  assert.ok(
     (
       await read(
         `/team/${participant.team.id}/tournaments`,
@@ -318,12 +318,12 @@ export async function verifyCompetitionImport({
       )
     ).tournaments.some((t) => t.id === imported.id),
   );
-  assert(
+  assert.ok(
     (
       await read(`/team/${participant.team.id}/trophies`, z.object({ trophies: z.array(idRow) }))
     ).trophies.some((t) => t.id === imported.id),
   );
-  assert(
+  assert.ok(
     (await read(`/player/${player.id}/matches`, z.object({ matches: z.array(idRow) }))).matches
       .length >= 2,
   );
@@ -332,7 +332,7 @@ export async function verifyCompetitionImport({
       ?.id,
     imported.id,
   );
-  assert(
+  assert.ok(
     (await run(async () => await tournaments.knownPandascoreIds())).has(
       tournamentCommand.pandascoreId,
     ),
@@ -411,7 +411,7 @@ export async function verifyCompetitionImport({
   );
 
   const rivalParticipant = view.participants.find((p) => p.id !== participant.id);
-  assert(rivalParticipant, "the rival remains a tournament participant");
+  assert.ok(rivalParticipant, "the rival remains a tournament participant");
 
   return {
     tournamentId: imported.id,

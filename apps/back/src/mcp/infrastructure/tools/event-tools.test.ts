@@ -21,12 +21,12 @@ function stage(id: string, source: DataSource, beginAt: string | null) {
   });
 }
 
-type ToolInput = {
+interface ToolInput {
   idOrSlug?: string;
   eventId?: string;
   leagueId?: string;
   name?: string;
-};
+}
 
 function setup(role: "admin" | "journalist" = "admin") {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");

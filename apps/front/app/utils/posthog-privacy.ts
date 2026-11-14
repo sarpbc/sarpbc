@@ -19,7 +19,7 @@ export function sanitizePostHogUrl(value: string): string {
 }
 
 export function sanitizePostHogEvent(event: CaptureResult): CaptureResult {
-  const properties = event.properties;
+  const { properties } = event;
 
   for (const key of [
     "$current_url",

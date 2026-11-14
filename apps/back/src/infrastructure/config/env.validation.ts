@@ -38,7 +38,7 @@ const envSchema = databaseSchema.extend({
   TWITCH_CLIENT_SECRET: optionalText,
   BALLCHASING_API_KEY: optionalText,
   INTERNAL_API_TOKEN: optionalText.refine(
-    (value) => value === undefined || /^[\x21-\x7E]{16,}$/.test(value),
+    (value) => value === undefined || /^[\u0021-\u007E]{16,}$/.test(value),
     { message: "must be at least 16 visible ASCII characters" },
   ),
   PANDASCORE_SYNC_ON_BOOT: z.string().optional(),
@@ -81,7 +81,7 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
   }
 
   try {
-    return readFileSync(`/run/secrets/${file}`, "utf8").trim();
+    return readFileSync(`/run/secrets/${file}`, "utf-8").trim();
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return undefined;

@@ -179,7 +179,7 @@ export async function verifyCompetitionSyncLookups({
     serie: { pandascoreId: 9805, fullName: "Twin", year: 2026 },
   });
 
-  assert(
+  assert.ok(
     !twins.some((twin) => twin.id === separate.id),
     "several matching manual tournaments are never linked automatically",
   );

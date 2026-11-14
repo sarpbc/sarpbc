@@ -40,8 +40,8 @@ import type * as RosterRows from "../src/roster/infrastructure/persistence/playe
 
 type Application = NestFastifyApplication;
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf8");
+const root = resolve(import.meta.dirname, "..");
+const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf-8");
 
 const identified = z.object({ id: z.string() });
 
@@ -205,7 +205,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
   function docker(...args: string[]): string {
     return execFileSync("docker", args, {
-      encoding: "utf8",
+      encoding: "utf-8",
       timeout: 30_000,
     }).trim();
   }
@@ -260,8 +260,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
   function cookies(response: JsonResponse): string {
     const values = response.headers["set-cookie"];
-    assert(Array.isArray(values) && values.length >= 2, "access and refresh cookies are returned");
-    assert(
+    assert.ok(
+      Array.isArray(values) && values.length >= 2,
+      "access and refresh cookies are returned",
+    );
+    assert.ok(
       values.every((value) => /HttpOnly/i.test(value)),
       "authentication cookies are HttpOnly",
     );
@@ -383,9 +386,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           emit: "js",
           snapshot: false,
         });
-        const migrator = orm.migrator;
+        const { migrator } = orm;
         const pending = await migrator.getPending();
-        assert(pending.length > 0, "the fresh database has migrations to apply");
+        assert.ok(pending.length > 0, "the fresh database has migrations to apply");
         const applied = await migrator.up();
         assert.equal(applied.length, pending.length);
         assert.deepEqual(await migrator.getPending(), []);
@@ -423,7 +426,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         member = (await request("GET", "/user/profile", undefined, memberCookie)).json(
           z.object({ user: userBody }),
         ).user;
-        assert(!("password" in staff) && !("googleId" in staff));
+        assert.ok(!("password" in staff) && !("googleId" in staff));
         await request("GET", "/user/profile", undefined, undefined, 401);
         await request("POST", "/team", { name: "Forbidden" }, memberCookie, 403);
         await orm.em.fork().nativeUpdate(User, { id: staff.id }, { role: "admin" });
@@ -558,7 +561,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         team.id,
       );
 
-      const photo = (
+      const { photo } = (
         await request(
           "POST",
           `/player/${player.id}/photo`,
@@ -566,7 +569,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           staffCookie,
           201,
         )
-      ).json(z.object({ photo: photoBody })).photo;
+      ).json(z.object({ photo: photoBody }));
 
       assert.equal(
         (
@@ -586,7 +589,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         true,
       );
 
-      const contract = (
+      const { contract } = (
         await request(
           "POST",
           `/player/${player.id}/contract`,
@@ -594,7 +597,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           staffCookie,
           201,
         )
-      ).json(z.object({ contract: contractBody })).contract;
+      ).json(z.object({ contract: contractBody }));
 
       assert.equal(contract.team.id, team.id);
       assert.equal(
@@ -671,8 +674,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             201,
           )
         ).json(z.object({ match: matchBody })).match;
-        assert(match.id);
-        assert(
+        assert.ok(match.id);
+        assert.ok(
           Number.isInteger(match.publicId) && match.publicId > 0,
           "created match has a public id",
         );
@@ -723,7 +726,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.match(first.tournament.matches[0].beginAt, /^\d{4}-\d{2}-\d{2}T/);
         assert.equal(first.tournament.participants[0].team.id, tournament.participants[0].team.id);
         const ttl = await redis.ttl(`tournament:${tournament.id}`);
-        assert(ttl > 0 && ttl <= 60, `cache TTL is seconds, observed ${ttl}`);
+        assert.ok(ttl > 0 && ttl <= 60, `cache TTL is seconds, observed ${ttl}`);
         await request(
           "PATCH",
           `/tournaments/${tournament.id}`,
@@ -919,17 +922,17 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
       const listed = (await request("GET", "/events?limit=100")).json(eventList);
       const listedEvent = listed.events.find((event) => event.id === tournament.event.id);
-      assert(listedEvent, "the manual tournament is listed as an event");
-      assert(listed.count >= 1);
+      assert.ok(listedEvent, "the manual tournament is listed as an event");
+      assert.ok(listed.count >= 1);
       assert.equal(listedEvent.name, "Integration Cup Updated");
       assert.deepEqual(
         listedEvent.stages.map((stage) => [stage.id, stage.matches]),
         [[tournament.id, undefined]],
       );
       const pickems = (await request("GET", "/events?pickems=false&limit=100")).json(eventList);
-      assert(!pickems.events.some((event) => event.id === tournament.event.id));
+      assert.ok(!pickems.events.some((event) => event.id === tournament.event.id));
       const active = (await request("GET", "/events?activeOnly=true&limit=100")).json(eventList);
-      assert(active.events.some((event) => event.id === tournament.event.id));
+      assert.ok(active.events.some((event) => event.id === tournament.event.id));
 
       const event = (await request("GET", "/events/resolve/Integration-Cup")).json(
         z.object({
@@ -1054,7 +1057,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           0,
         );
 
-        const picks = (
+        const { picks } = (
           await request(
             "GET",
             `/pickem/tournament/${tournament.id}/user/picks`,
@@ -1065,7 +1068,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           z.object({
             picks: z.array(z.object({ points: z.number(), scored: z.boolean() })),
           }),
-        ).picks;
+        );
 
         assert.equal(picks.length, 1);
         assert.equal(picks[0].points, 5);
@@ -1135,9 +1138,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           1,
         );
 
-        const notifications = (await request("GET", "/notifications", undefined, staffCookie)).json(
-          z.object({ notifications: z.array(notificationBody) }),
-        ).notifications;
+        const { notifications } = (
+          await request("GET", "/notifications", undefined, staffCookie)
+        ).json(z.object({ notifications: z.array(notificationBody) }));
 
         assert.equal(notifications.length, 1);
         await request("PATCH", "/notifications/read", { ids: [notifications[0].id] }, staffCookie);
@@ -1178,9 +1181,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       async () => {
         const postId = randomUUID();
 
-        const topics = (await request("GET", "/forum")).json(
+        const { topics } = (await request("GET", "/forum")).json(
           z.object({ topics: z.array(identified) }),
-        ).topics;
+        );
 
         const post = (
           await request(
@@ -1225,9 +1228,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             201,
           );
 
-          const notifications = (
+          const { notifications } = (
             await request("GET", "/notifications", undefined, staffCookie)
-          ).json(z.object({ notifications: z.array(notificationBody) })).notifications;
+          ).json(z.object({ notifications: z.array(notificationBody) }));
 
           assert.equal(notifications[0].targetPath, path);
           await request("PATCH", "/notifications/read", {}, staffCookie);
@@ -1247,7 +1250,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             (reply) => reply.id === root.id,
           );
 
-          assert(reported, "the reported reply is moderated");
+          assert.ok(reported, "the reported reply is moderated");
           assert.equal(reported.targetPath, path);
           await request("DELETE", `/replies/${root.id}`, undefined, staffCookie, 204);
         }
@@ -1286,7 +1289,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
                   });
                   await scope.notifications.createForDirectReply(staff.id, id);
                   const tx = TransactionContext.getEntityManager();
-                  assert(tx, "the adapter provides a real transaction context");
+                  assert.ok(tx, "the adapter provides a real transaction context");
                   await tx.flush();
                   assert.equal(await tx.count(Reply, { id }), 1);
                   assert.equal(await tx.count(ReplyNotification, { reply: { id } }), 1);
@@ -1314,7 +1317,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
               async () =>
                 await transactionalReplies(em).run(async (scope) => {
                   const tx = TransactionContext.getEntityManager();
-                  assert(tx, "the adapter provides a real transaction context");
+                  assert.ok(tx, "the adapter provides a real transaction context");
                   await scope.replies.save({
                     id,
                     content: "Rolled back after SQL constraint",
@@ -1375,14 +1378,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             async () =>
               await new MikroRosterTransaction(em).run(async (scope) => {
                 const model = await scope.players.findById(player.id);
-                assert(model, "the player exists");
+                assert.ok(model, "the player exists");
                 model.imageUrl = "https://example.test/rolled-back.jpg";
                 await scope.players.save(model);
                 photo.player = model;
                 photo.url = "https://example.test/rollback-archive.jpg";
                 await scope.photos.save(photo);
                 const tx = TransactionContext.getEntityManager();
-                assert(tx, "the adapter provides a real transaction context");
+                assert.ok(tx, "the adapter provides a real transaction context");
                 await tx.flush();
                 assert.equal(await tx.count(rosterRows.PlayerPhoto, { id: photo.id }), 1);
                 assert.equal(
@@ -1416,7 +1419,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           z.object({ tokens: z.array(z.looseObject({ id: z.string() })) }),
         ).tokens;
 
-        assert(!("tokenHash" in listed[0]) && !("token" in listed[0]));
+        assert.ok(!("tokenHash" in listed[0]) && !("token" in listed[0]));
         const patHeaders = { authorization: `Bearer ${token.token}` };
         await request("GET", "/mcp", undefined, undefined, 405, patHeaders);
         await orm.em.fork().nativeUpdate(User, { id: staff.id }, { role: "journalist" });
@@ -1469,11 +1472,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         );
 
         if (message.error !== undefined) return { error: true };
-        assert(message.result, "the MCP response carries a result");
+        assert.ok(message.result, "the MCP response carries a result");
 
         if (message.result.isError === true) return { error: true };
         const text = message.result.content?.[0]?.text;
-        assert(text !== undefined, "the MCP result carries content");
+        assert.ok(text !== undefined, "the MCP result carries content");
 
         return jsonValue.parse(JSON.parse(text));
       }
@@ -1522,7 +1525,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(proposal.status, "pending", `${tool} is queued`);
         const result = await review(proposal);
         assert.equal(result.status, "applied");
-        assert(result.entityId !== null, `${tool} created an entity`);
+        assert.ok(result.entityId !== null, `${tool} created an entity`);
 
         return result.entityId;
       };
@@ -2033,12 +2036,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         error: true,
       });
 
-      const listed = (await callTool("get_tournaments", { limit: 100 }, z.array(identified))).map(
-        ({ id }) => id,
+      const listed = new Set(
+        (await callTool("get_tournaments", { limit: 100 }, z.array(identified))).map(
+          ({ id }) => id,
+        ),
       );
 
-      assert.ok(listed.includes(manualCup));
-      assert.ok(!listed.includes(startggCup));
+      assert.ok(listed.has(manualCup));
+      assert.ok(!listed.has(startggCup));
 
       const results = await callTool(
         "get_match_results",
@@ -2184,7 +2189,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           id,
           participantOf: (teamId: string): string => {
             const entry = participants.find((candidate) => candidate.team.id === teamId);
-            assert(entry, "the team has a participant entry");
+            assert.ok(entry, "the team has a participant entry");
 
             return entry.id;
           },
@@ -2254,7 +2259,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           .fork()
           .findOneOrFail(rosterRows.Player, { id }, { populate: ["team"] });
 
-        assert(row.team, "the player has a team");
+        assert.ok(row.team, "the player has a team");
 
         return row.team.id;
       };
@@ -2264,7 +2269,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           .fork()
           .findOneOrFail(TournamentParticipant, { id }, { populate: ["team"] });
 
-        assert(row.team, "the participant has a team");
+        assert.ok(row.team, "the participant has a team");
 
         return row.team.id;
       };
@@ -2275,7 +2280,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       const duplicate = await newPlayer("Reference Duplicate", {
         team: alpha,
-        pandascoreId: 77001,
+        pandascoreId: 77_001,
       });
 
       const redirected = await newPlayer("Reference Redirected", { mergedInto: duplicate });
@@ -2341,7 +2346,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       await merge(async (service) => await service.mergePlayers(kept, duplicate));
 
       const keptRow = await playerRow(kept);
-      assert.equal(keptRow.pandascoreId, 77001, "the kept player takes the freed PandaScore id");
+      assert.equal(keptRow.pandascoreId, 77_001, "the kept player takes the freed PandaScore id");
       assert.equal(keptRow.source, "pandascore");
       const duplicateRow = await playerRow(duplicate);
       assert.equal(duplicateRow.pandascoreId, null);
@@ -2466,7 +2471,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         ).post;
 
         assert.equal(created.title, "Integration Discussion");
-        assert(Number.isInteger(created.publicId) && created.publicId > 0, "post has a public id");
+        assert.ok(
+          Number.isInteger(created.publicId) && created.publicId > 0,
+          "post has a public id",
+        );
         assert.equal(created.slug, "integration-discussion");
         assert.deepEqual(createdLocation, {
           publicId: created.publicId,
@@ -2512,7 +2520,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           .json(z.object({ posts: z.array(postBody) }))
           .posts.find((post) => post.id === id);
 
-        assert(listedPost, "the post is listed");
+        assert.ok(listedPost, "the post is listed");
         assert.equal(listedPost.publicId, created.publicId);
         assert.equal(listedPost.slug, "integration-discussion");
         await request("DELETE", `/posts/${id}`, undefined, memberCookie, 403);
@@ -2649,7 +2657,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const { PlayerService } = await import("../src/roster/application/player.service.ts");
       const players = app.get(PlayerService);
       const merged = await orm.em.fork().find(rosterRows.Player, { mergedInto: { $ne: null } });
-      assert(merged.length > 0, "the merge scenarios left redirect rows behind");
+      assert.ok(merged.length > 0, "the merge scenarios left redirect rows behind");
       const mergedIds = new Set(merged.map(({ id }) => id));
 
       for (let draw = 0; draw < 40; draw++) {
@@ -2658,7 +2666,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           async () => await players.getRandomPlayer(),
         );
 
-        assert(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
+        assert.ok(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
       }
     });
 
@@ -2692,9 +2700,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         }),
       );
 
-      assert(found.players.some((p) => p.id === player.id));
-      assert(found.teams.some((t) => t.id === team.id));
-      assert(found.tournaments.some((t) => t.id === tournament.id));
+      assert.ok(found.players.some((p) => p.id === player.id));
+      assert.ok(found.teams.some((t) => t.id === team.id));
+      assert.ok(found.tournaments.some((t) => t.id === tournament.id));
       assert.equal(
         (await request("GET", "/health/live")).json(z.object({ status: z.string() })).status,
         "ok",

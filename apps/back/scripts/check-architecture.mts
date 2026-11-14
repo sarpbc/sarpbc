@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const project = path.resolve(import.meta.dirname, "..");
 const sourceRoot = path.join(project, "src");
 const configPath = path.join(project, "tsconfig.json");
 const config = ts.readConfigFile(configPath, (file) => ts.sys.readFile(file));
@@ -188,7 +188,7 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot): 
 
     const source = ts.createSourceFile(
       file,
-      fs.readFileSync(file, "utf8"),
+      fs.readFileSync(file, "utf-8"),
       ts.ScriptTarget.Latest,
       true,
     );
@@ -267,7 +267,7 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot): 
   return [...violations, ...featureCycles(featureEdges)];
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const violations = architectureViolations();
 
   if (violations.length) {

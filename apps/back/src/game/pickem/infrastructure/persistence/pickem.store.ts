@@ -32,7 +32,7 @@ function toNamedPick(row: PickemChoice): NamedPick {
 /** Serializes picks and scoring of one match, so a pick is never read as unscored while it is being scored. */
 async function lockMatchPicks(tx: EntityManager, matchId: string): Promise<void> {
   await tx.execute("select pg_advisory_xact_lock(hashtextextended(?, 0))", [
-    "pickem:match:" + matchId,
+    `pickem:match:${matchId}`,
   ]);
 }
 

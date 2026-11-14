@@ -19,7 +19,7 @@ const pullRequestEvent = z.object({
 });
 
 function git(...args: string[]): string {
-  return execFileSync("git", args, { encoding: "utf8" }).trim();
+  return execFileSync("git", args, { encoding: "utf-8" }).trim();
 }
 
 function checkBranch(branch: string): void {
@@ -56,14 +56,14 @@ try {
     }
 
     case "commit-msg": {
-      const message = readFileSync(process.argv[3], "utf8");
+      const message = readFileSync(process.argv[3], "utf-8");
       checkSubject(message.split(/\r?\n/, 1)[0], "commit subject");
       checkTrailers(message, "commit message");
       break;
     }
 
     case "pre-push": {
-      for (const line of readFileSync(0, "utf8").trim().split(/\r?\n/)) {
+      for (const line of readFileSync(0, "utf-8").trim().split(/\r?\n/)) {
         if (!line) continue;
         const [, localSha, remoteRef] = line.split(/\s+/);
 
@@ -80,7 +80,7 @@ try {
       if (eventPath === undefined) throw new Error("GITHUB_EVENT_PATH is not set.");
 
       const { pull_request: pr } = pullRequestEvent.parse(
-        JSON.parse(readFileSync(eventPath, "utf8")),
+        JSON.parse(readFileSync(eventPath, "utf-8")),
       );
 
       checkBranch(pr.head.ref);

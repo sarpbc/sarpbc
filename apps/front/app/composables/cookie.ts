@@ -34,7 +34,7 @@ export const useCookieConsent = () => {
 
   return {
     choice: readonly(choice),
-    visible: visible,
+    visible,
     open,
     close,
     setChoice,

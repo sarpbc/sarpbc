@@ -8,7 +8,11 @@ type EntityClass = new () => object;
 
 type Row = Player | Team | TeamAlias | Contract;
 
-type Where = { pandascoreId?: number; player?: string; endDate?: Date | null };
+interface Where {
+  pandascoreId?: number;
+  player?: string;
+  endDate?: Date | null;
+}
 
 describe("RosterSyncWriter", () => {
   const em = {

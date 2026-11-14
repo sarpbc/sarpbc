@@ -119,7 +119,7 @@ export function setupRosterProposalService() {
         return { worldwide: false, regionTeamIds: [], finishes: [], ...input };
       },
     ),
-    setStageScale: vi.fn(async () => undefined),
+    setStageScale: vi.fn(async () => {}),
   };
 
   const teamAliases = {

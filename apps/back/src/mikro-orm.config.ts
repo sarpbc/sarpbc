@@ -22,7 +22,7 @@ export default defineConfig({
   pool: {
     min: 0,
     max: 10,
-    idleTimeoutMillis: 30000,
+    idleTimeoutMillis: 30_000,
   },
   highlighter: new SqlHighlighter(),
   debug: !env.production,

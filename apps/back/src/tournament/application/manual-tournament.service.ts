@@ -81,7 +81,7 @@ export class ManualTournamentService {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
       const tournament = await tournaments.load(id);
 
-      if (!tournament) throw new NotFoundError('Tournament with id "' + id + '" was not found.');
+      if (!tournament) throw new NotFoundError(`Tournament with id "${id}" was not found.`);
       assertTournamentUpdateAllowed(tournament.source, input);
       const previousName = tournament.name;
 
@@ -139,7 +139,7 @@ export class ManualTournamentService {
     const tournament = await this.reads.findById(id);
 
     if (!tournament)
-      throw new NotFoundError('Tournament with id "' + id + '" was not found after save.');
+      throw new NotFoundError(`Tournament with id "${id}" was not found after save.`);
 
     return tournament;
   }
@@ -205,8 +205,8 @@ export class ManualTournamentService {
         "One or more teams were not found. Refresh the team list and try again.",
       );
 
-    const existing = await writer.participants(tournament.id),
-      desired = new Set(teamIds);
+    const existing = await writer.participants(tournament.id);
+    const desired = new Set(teamIds);
 
     for (const p of existing) {
       if (!p.team || desired.has(p.team.id)) continue;
@@ -239,9 +239,10 @@ export class ManualTournamentService {
         "One or more players were not found. Refresh the player list and try again.",
       );
 
-    const existing = (await writer.participants(tournament.id)).filter((p) => !p.team),
-      keyOf = (p: TournamentParticipant) => playerGroupKey(p.players.map((player) => player.id)),
-      desired = new Set(groups.map(playerGroupKey));
+    const existing = (await writer.participants(tournament.id)).filter((p) => !p.team);
+    const keyOf = (p: TournamentParticipant) =>
+      playerGroupKey(p.players.map((player) => player.id));
+    const desired = new Set(groups.map(playerGroupKey));
 
     for (const p of existing) {
       if (desired.has(keyOf(p))) continue;

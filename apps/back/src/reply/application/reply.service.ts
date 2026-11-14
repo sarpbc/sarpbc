@@ -94,7 +94,7 @@ export class ReplyService {
 
       if (!targetFields) {
         throw new NotFoundError(
-          REPLY_TARGETS[target.kind].label + " not found. Refresh the page and try again.",
+          `${REPLY_TARGETS[target.kind].label} not found. Refresh the page and try again.`,
         );
       }
 

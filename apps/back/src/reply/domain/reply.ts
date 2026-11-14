@@ -2,7 +2,10 @@ import { forumPostPath, forumPostSlug, matchPath, newsPath } from "@sarpbc/utils
 import { REPLY_TARGET_TYPES, type ReplyTargetType } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
 
-export type ReplyTarget = { kind: ReplyTargetType; id: string };
+export interface ReplyTarget {
+  kind: ReplyTargetType;
+  id: string;
+}
 
 export interface ReplyTargetFields {
   post: { id: string; publicId: number; title: string } | null;
@@ -10,12 +13,12 @@ export interface ReplyTargetFields {
   match: { id: string; publicId: number; name: string; slug: string } | null;
 }
 
-export type ReplyTargetLink = {
+export interface ReplyTargetLink {
   targetType: ReplyTargetType;
   targetId: string;
   targetLabel: string;
   targetPath: string;
-};
+}
 
 interface ReplyTargetSpec {
   field: keyof ReplyTargetFields;

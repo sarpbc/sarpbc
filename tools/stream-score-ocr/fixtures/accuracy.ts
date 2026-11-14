@@ -58,7 +58,7 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
   }).length;
 
   const blueWins = expected.filter((score) => score.blue > score.orange).length;
-  const winner = parsed.proposal.series.winner;
+  const { winner } = parsed.proposal.series;
   const expectedWinner = blueWins > expected.length - blueWins ? "blue" : "orange";
 
   return {
@@ -73,7 +73,7 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
 export async function measureFixtures(intervalSeconds: number): Promise<Measure> {
   const results: SeriesResult[] = [];
 
-  for (const script of generateSeries(12, 20261102))
+  for (const script of generateSeries(12, 20_261_102))
     results.push(await replay(script, intervalSeconds));
   const games = results.reduce((total, result) => total + result.games, 0);
   const correctGames = results.reduce((total, result) => total + result.correctGames, 0);

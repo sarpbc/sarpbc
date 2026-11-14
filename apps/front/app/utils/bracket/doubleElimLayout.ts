@@ -222,7 +222,7 @@ export function buildUnifiedDoubleEliminationLayout(
     (lowerSectionLayout?.matches ?? []).map((match) => [match.matchId, match]),
   );
 
-  const upperPlacements: Array<{ match: TournamentDetailMatch; column: number; row: number }> = [];
+  const upperPlacements: { match: TournamentDetailMatch; column: number; row: number }[] = [];
 
   for (const upperMatch of sortMatchesByBeginAt(upperMatches)) {
     let anchorColumn: number | null = getUpperColumnFromName(upperMatch.name);

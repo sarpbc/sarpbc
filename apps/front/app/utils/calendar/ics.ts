@@ -39,16 +39,16 @@ export function matchEventUid(id: string): string {
 function formatIcsUtc(date: Date): string {
   return date
     .toISOString()
-    .replace(/[-:]/g, "")
+    .replaceAll(/[-:]/g, "")
     .replace(/\.\d{3}/, "");
 }
 
 function escapeIcsText(value: string): string {
   return value
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
+    .replaceAll("\\", "\\\\")
+    .replaceAll("\n", "\\n")
+    .replaceAll(";", "\\;")
+    .replaceAll(",", "\\,");
 }
 
 function foldIcsLine(line: string): string {
@@ -58,7 +58,7 @@ function foldIcsLine(line: string): string {
     return line;
   }
 
-  const chars = Array.from(line);
+  const chars = [...line];
   const folded: string[] = [];
   let current = "";
 

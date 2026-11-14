@@ -15,7 +15,7 @@ void describe("overlay config", () => {
   });
 
   void it("rejects templates that do not match the glyph size", async () => {
-    const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf8"));
+    const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf-8"));
     assert.throws(() =>
       parseOverlay(JSON.stringify({ ...overlay, templates: [{ char: "1", rows: ["#", "#"] }] })),
     );

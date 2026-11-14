@@ -60,8 +60,8 @@ function line(name: string, platformId: string) {
 
 async function rejection(work: Promise<unknown>): Promise<ApplicationError> {
   const error: unknown = await work.then(
-    () => undefined,
-    (cause: unknown) => cause,
+    () => {},
+    (error_: unknown) => error_,
   );
 
   if (!(error instanceof ApplicationError))

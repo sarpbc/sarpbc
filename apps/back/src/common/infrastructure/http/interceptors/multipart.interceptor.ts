@@ -18,13 +18,9 @@ import { getFileFromPart, MultipartOptions, validateFile } from "../multipart-fi
 
 const fieldValue = z.string().catch("");
 
-interface StoredFilesByField {
-  [fieldname: string]: Storage.MultipartFile[];
-}
+type StoredFilesByField = Record<string, Storage.MultipartFile[]>;
 
-interface MultipartFormFields {
-  [fieldname: string]: string;
-}
+type MultipartFormFields = Record<string, string>;
 
 function isMultipartFileTooLarge(cause: unknown): boolean {
   if (!(cause instanceof Error)) {

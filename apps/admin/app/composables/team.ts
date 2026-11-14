@@ -1,24 +1,24 @@
 import type { ContractRole, Team, TeamAlias, TeamAliasInput, TeamContract } from "@sarpbc/types";
 import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 
-export type CreateTeamDto = {
+export interface CreateTeamDto {
   name: string;
   location?: string;
   imageUrl?: string;
-};
+}
 
-export type UpdateTeamDto = {
+export interface UpdateTeamDto {
   name?: string;
   location?: string;
   imageUrl?: string;
-};
+}
 
-type TeamContractDto = {
+interface TeamContractDto {
   playerId: string;
   role: ContractRole;
   startDate: string;
   endDate?: string | null;
-};
+}
 
 export async function getAllTeams(query: {
   limit: number;

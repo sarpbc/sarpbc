@@ -36,13 +36,13 @@ export class PostRepository extends EntityRepository<Post> {
   }
 
   async findRecentActivity(limit: number): Promise<
-    Array<{
+    {
       id: string;
       publicId: number;
       title: string;
       messageCount: number;
       lastActivity: Date;
-    }>
+    }[]
   > {
     const query = `
       SELECT

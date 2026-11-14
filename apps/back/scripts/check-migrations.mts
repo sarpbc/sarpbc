@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const defaultDirectory = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
+  import.meta.dirname,
   "../src/infrastructure/database/migrations",
 );
 
@@ -27,7 +27,7 @@ function baseMigrationNames(directory: string, baseRef: string): string[] | unde
 
   const output = execFileSync("git", ["ls-tree", "--name-only", baseRef, "--", "."], {
     cwd: directory,
-    encoding: "utf8",
+    encoding: "utf-8",
   });
 
   return output
@@ -101,7 +101,7 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
   return violations;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const baseRef = process.env.BASE_REF ?? "";
   const violations = migrationViolations(defaultDirectory, baseRef);
 

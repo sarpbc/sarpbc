@@ -6,7 +6,7 @@ export const ROCKET_LEAGUE_GAME_ID = "30921";
 export const HELIX_LOGINS_PER_REQUEST = 100;
 
 const STREAMS_URL = "https://api.twitch.tv/helix/streams";
-export const STREAMS_REQUEST_TIMEOUT_MS = 5_000;
+export const STREAMS_REQUEST_TIMEOUT_MS = 5000;
 
 const streamsResponse = z.object({
   data: z.array(

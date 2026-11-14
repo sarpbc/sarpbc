@@ -47,7 +47,7 @@ export class ManualCatalogService {
     return await this.transaction.run(async ({ tournaments }) => {
       const league = await requireLeague(tournaments, id);
 
-      if (!league) throw new NotFoundError('League with id "' + id + '" was not found.');
+      if (!league) throw new NotFoundError(`League with id "${id}" was not found.`);
       assertLeagueUpdateAllowed(league, input);
 
       if (input.name !== undefined) league.name = input.name;
@@ -71,7 +71,7 @@ export class ManualCatalogService {
   async findEvent(idOrSlug: string): Promise<EventListing> {
     const found = await this.events.find(idOrSlug);
 
-    if (!found) throw new NotFoundError('Event "' + idOrSlug + '" was not found.');
+    if (!found) throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
 
     return found;
   }

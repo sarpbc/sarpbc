@@ -10,7 +10,10 @@ import {
   participantName,
 } from "@sarpbc/utils";
 
-type Selection = { id: string; label: string };
+interface Selection {
+  id: string;
+  label: string;
+}
 
 const props = defineProps<{
   open: boolean;

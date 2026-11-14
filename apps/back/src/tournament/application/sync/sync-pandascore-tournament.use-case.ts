@@ -26,7 +26,7 @@ export class SyncPandascoreTournamentUseCase {
   async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
 
-    if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
+    if (!command) throw new NotFoundError(`PandaScore tournament ${id} not found`);
 
     return await this.import(command, linkTournamentId);
   }

@@ -82,10 +82,10 @@ export type CareerAction =
   | { type: "RETIRE_CAREER" }
   | { type: "RETURN_TO_MENU" };
 
-export type CareerReduceResult = {
+export interface CareerReduceResult {
   state: CareerState;
   finishedResult: CareerResult | null;
-};
+}
 
 function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${String(value)}`);
@@ -429,7 +429,7 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         state: {
           ...state,
           region: action.region,
-          country: state.region !== action.region ? null : state.country,
+          country: state.region === action.region ? state.country : null,
         },
         finishedResult: null,
       };

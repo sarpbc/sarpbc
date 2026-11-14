@@ -112,7 +112,7 @@ export async function verifyPlayerTournaments({
     400,
   );
 
-  const tournament = (
+  const { tournament } = (
     await request(
       "POST",
       "/tournaments",
@@ -120,10 +120,10 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json(soloTournamentBody).tournament;
+  ).json(soloTournamentBody);
 
   assert.equal(tournament.format, "1v1");
-  assert(tournament.participants.every((participant) => participant.team === null));
+  assert.ok(tournament.participants.every((participant) => participant.team === null));
   assert.deepEqual(
     tournament.participants
       .map((participant) => participant.players.map(({ id }) => id))
@@ -134,7 +134,7 @@ export async function verifyPlayerTournaments({
 
   const participantOf = (playerId: string): string => {
     const participant = tournament.participants.find((entry) => entry.players[0].id === playerId);
-    assert(participant, "the tournament has the player");
+    assert.ok(participant, "the tournament has the player");
 
     return participant.id;
   };
@@ -146,7 +146,7 @@ export async function verifyPlayerTournaments({
 
   const playedAt = new Date(Date.now() - 3_600_000);
 
-  const match = (
+  const { match } = (
     await request(
       "POST",
       `/tournaments/${tournament.id}/matches`,
@@ -160,7 +160,7 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json(soloMatchBody).match;
+  ).json(soloMatchBody);
 
   assert.equal(match.slug, "fake-solo-one-vs-fake-solo-two-fake-knockout");
 
@@ -176,7 +176,7 @@ export async function verifyPlayerTournaments({
       }),
   );
 
-  assert(scored.winner, "the scored match has a winner");
+  assert.ok(scored.winner, "the scored match has a winner");
   assert.equal(scored.winner.id, soloParticipant);
 
   const detail = (await request("GET", `/tournaments/${tournament.id}`)).json(
@@ -274,7 +274,7 @@ export async function verifyPlayerTournaments({
     ],
   );
   const attachment = await new MikroOrmGameStatsStore(orm.em.fork()).attachment("fake-1v1-replay");
-  assert(attachment, "the replay is attached");
+  assert.ok(attachment, "the replay is attached");
   assert.deepEqual(attachment.teams, ["Fake Solo Two", "Fake Solo One"]);
   await assert.rejects(
     RequestContext.create(

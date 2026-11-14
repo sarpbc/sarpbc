@@ -100,9 +100,9 @@ export class SeasonService {
 
     if (await this.store.awardTaken(season.id, award))
       throw new ConflictError(
-        `${season.name} already has a ${SEASON_AWARD_LABELS[award.awardType]}` +
-          (award.region !== null && award.region !== "" ? ` for ${award.region}` : "") +
-          ". Remove the current award before assigning another player.",
+        `${season.name} already has a ${SEASON_AWARD_LABELS[award.awardType]}${
+          award.region !== null && award.region !== "" ? ` for ${award.region}` : ""
+        }. Remove the current award before assigning another player.`,
       );
 
     return award;

@@ -60,4 +60,4 @@ export const byText = (a: string, b: string): number => {
   return a > b ? 1 : 0;
 };
 
-export const byJoined = (a: unknown[], b: unknown[]): number => byText(a.join(), b.join());
+export const byJoined = (a: unknown[], b: unknown[]): number => byText(a.join(","), b.join(","));

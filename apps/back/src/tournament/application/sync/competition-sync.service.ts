@@ -297,9 +297,9 @@ export class CompetitionSyncService {
     );
 
     for (const roster of command.expectedRoster ?? []) {
-      const team = await scope.rosters.upsertTeam(roster.team),
-        existingParticipant = participants.find((p) => p.team?.id === team.id),
-        playerIds: string[] = [];
+      const team = await scope.rosters.upsertTeam(roster.team);
+      const existingParticipant = participants.find((p) => p.team?.id === team.id);
+      const playerIds: string[] = [];
 
       for (const player of roster.players)
         playerIds.push((await scope.rosters.upsertPlayer(player)).id);
@@ -431,7 +431,7 @@ export class CompetitionSyncService {
     command: UpsertTournamentCommand,
     league: League | null,
   ): Promise<{ event: TournamentEvent; renamed: boolean }> {
-    const serie = command.serie;
+    const { serie } = command;
 
     const name = eventDisplayName({
       leagueName: league?.name ?? null,
@@ -444,7 +444,7 @@ export class CompetitionSyncService {
 
     const unclaimedCurrent = current?.pandascoreSerieId === null ? current : null;
 
-    const lookups: Array<() => Promise<TournamentEvent | null>> = serie
+    const lookups: (() => Promise<TournamentEvent | null>)[] = serie
       ? [
           async () => await events.bySerieId(serie.pandascoreId),
           async () => unclaimedCurrent,
@@ -500,8 +500,8 @@ export class CompetitionSyncService {
     tournament: Tournament,
     commands: UpsertMatchCommand[],
   ): Promise<string[]> {
-    const participants = await scope.tournaments.participants(tournament.id),
-      ids: string[] = [];
+    const participants = await scope.tournaments.participants(tournament.id);
+    const ids: string[] = [];
 
     // Bracket links only resolve to matches already written, so earlier matches go first.
     for (const command of [...commands].sort(

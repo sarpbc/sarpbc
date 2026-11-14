@@ -169,8 +169,9 @@ export class SeasonPersistence implements SeasonStore {
     } catch (error) {
       if (isUniqueViolation(error))
         throw new ConflictError(
-          `Another season already uses the name "${season.name}"` +
-            (season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."),
+          `Another season already uses the name "${season.name}"${
+            season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."
+          }`,
         );
       throw error;
     }

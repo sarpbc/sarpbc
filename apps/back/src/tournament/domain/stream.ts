@@ -72,7 +72,7 @@ export function replaceStreams(
   return streams;
 }
 
-export function effectiveStreams(...lists: ReadonlyArray<readonly Stream[]>): Stream[] {
+export function effectiveStreams(...lists: readonly (readonly Stream[])[]): Stream[] {
   return [...(lists.find((list) => list.length > 0) ?? [])];
 }
 

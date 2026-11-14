@@ -19,6 +19,6 @@ describe("parseEntityRef", () => {
   );
 
   it("accepts the largest integer a Postgres int column holds", () => {
-    expect(parseEntityRef("2147483647")).toEqual({ kind: "publicId", value: 2147483647 });
+    expect(parseEntityRef("2147483647")).toEqual({ kind: "publicId", value: 2_147_483_647 });
   });
 });

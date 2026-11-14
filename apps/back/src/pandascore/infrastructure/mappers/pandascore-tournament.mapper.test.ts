@@ -14,7 +14,7 @@ describe("PandascoreTournamentMapper", () => {
       end_at: "2025-06-10T18:00:00Z",
       winner_id: 7,
       winner_type: "Team",
-      prizepool: 100000,
+      prizepool: 100_000,
       tier: "s",
       league: {
         id: 1,

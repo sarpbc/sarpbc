@@ -7,7 +7,7 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const FRONT_ROOT = path.resolve(__dirname, "..");
 
 const SCAN_ROOTS = [path.join(FRONT_ROOT, "app")];
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
   const violations: Violation[] = [];
 
   for (const file of files) {
-    const content = await readFile(file, "utf8");
+    const content = await readFile(file, "utf-8");
     violations.push(...scanFile(file, content));
   }
 

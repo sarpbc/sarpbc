@@ -352,9 +352,9 @@ export function findInvalidNewsMatchTags(content: string): string[] {
 export function newsMatchTagStart(content: string): number {
   const block = content.indexOf(MATCH_BLOCK_OPENER);
 
-  return block !== -1 ? block : content.indexOf(MATCH_INLINE_OPENER);
+  return block === -1 ? content.indexOf(MATCH_INLINE_OPENER) : block;
 }
 
 export function stripNewsMatchTags(content: string): string {
-  return content.replace(MATCH_TAG_GLOBAL_PATTERN, " ");
+  return content.replaceAll(MATCH_TAG_GLOBAL_PATTERN, " ");
 }

@@ -7,7 +7,7 @@ const DAY = "2026-02-17";
 
 function participantOf(stage: StageRef, teamId: string): string {
   const participant = stage.participants.find(({ team }) => team.id === teamId);
-  assert(participant, "the stage has the team");
+  assert.ok(participant, "the stage has the team");
 
   return participant.id;
 }
@@ -152,7 +152,7 @@ export async function verifyOnThisDay({
   await crown(await stage("Anniversary This Year Cup"), "2026-02-17T12:00:00Z");
   await crown(await stage("Anniversary Community Cup", "startgg"), "2023-02-17T20:00:00Z");
 
-  const player = (await created(playerBody, "/player", { name: "Anniversary Rookie" })).player;
+  const { player } = await created(playerBody, "/player", { name: "Anniversary Rookie" });
 
   await created(z.unknown(), `/player/${player.id}/contract`, {
     teamId: away.id,
@@ -207,7 +207,7 @@ export async function verifyOnThisDay({
   const summary = events.map((event) => {
     switch (event.kind) {
       case "fact":
-        assert(event.link, "the staff fact links a team");
+        assert.ok(event.link, "the staff fact links a team");
 
         return [event.kind, event.year, event.text.en, event.link.slug];
       case "title":
@@ -242,7 +242,7 @@ export async function verifyOnThisDay({
     ],
     "transfers are derived from the contracts that start or end on this day",
   );
-  assert(!JSON.stringify(body).includes(home.id), "the public payload carries no internal id");
+  assert.ok(!JSON.stringify(body).includes(home.id), "the public payload carries no internal id");
 
   await request("DELETE", `/on-this-day-facts/${saved.id}`, undefined, staffCookie, 204);
   await request("DELETE", `/on-this-day-facts/${future.id}`, undefined, staffCookie, 204);

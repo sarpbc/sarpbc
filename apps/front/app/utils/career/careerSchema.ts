@@ -224,14 +224,14 @@ function normalizeLoadedCareerState(state: CareerState): CareerState {
 
 export function encodeCareerResultForShare(result: CareerResult): string {
   return btoa(encodeURIComponent(JSON.stringify(result)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replace(/[=]+$/, "");
 }
 
 export function decodeCareerResultFromShare(encoded: string): CareerResult | null {
   try {
-    const padded = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = encoded.replaceAll("-", "+").replaceAll("_", "/");
     const json = decodeURIComponent(atob(padded));
 
     return parseCareerResultJson(json);

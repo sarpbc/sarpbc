@@ -17,7 +17,7 @@ const matchBlockTokenizer: MarkdownTokenizer = {
     const parsed = parseNewsMatchTag(src.trimStart());
 
     if (!parsed) {
-      return undefined;
+      return;
     }
 
     const leading = src.length - src.trimStart().length;

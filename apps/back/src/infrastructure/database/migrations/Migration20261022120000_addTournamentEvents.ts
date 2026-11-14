@@ -97,7 +97,7 @@ function chronology(
 function groupKey(stage: StageRow): string {
   const serie = nonBlank(stage.serie);
 
-  return serie !== undefined ? `${stage.leagueId ?? ""}::${serie}` : `stage::${stage.id}`;
+  return serie === undefined ? `stage::${stage.id}` : `${stage.leagueId ?? ""}::${serie}`;
 }
 
 export class Migration20261022120000_addTournamentEvents extends Migration {
