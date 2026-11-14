@@ -36,7 +36,7 @@ describe("MikroTeamStore.search", () => {
       { name: { $ilike: "%origins%" } },
       { fields: ["team"] },
     );
-    expect(find.mock.calls[1]?.[1]).toEqual({
+    expect(find.mock.calls[1]?.[1]).toStrictEqual({
       mergedInto: null,
       $or: [{ name: { $ilike: "%origins%" } }, { id: { $in: ["renamed", "other"] } }],
     });
@@ -46,7 +46,7 @@ describe("MikroTeamStore.search", () => {
     const { find, teams } = fixture([]);
 
     await teams.search({ name: "now" });
-    expect(find.mock.calls[1]?.[1]).toEqual({ name: { $ilike: "%now%" }, mergedInto: null });
+    expect(find.mock.calls[1]?.[1]).toStrictEqual({ name: { $ilike: "%now%" }, mergedInto: null });
 
     find.mockClear();
     find.mockResolvedValueOnce([]);

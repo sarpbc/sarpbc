@@ -77,12 +77,12 @@ describe(ViewershipService, () => {
   it("stores a staff entry with its normalized credit and clears it with null", async () => {
     const saved = await service.set({ kind: "match", id: "manual" }, VIEWERSHIP);
 
-    expect(saved.viewership).toEqual({
+    expect(saved.viewership).toStrictEqual({
       ...VIEWERSHIP,
       measuredAt: "2026-05-24T18:00:00.000Z",
       sourceName: "Esports Charts",
     });
-    await expect(service.find({ kind: "match", id: "manual" })).resolves.toEqual(saved);
+    await expect(service.find({ kind: "match", id: "manual" })).resolves.toStrictEqual(saved);
 
     await service.set({ kind: "match", id: "manual" }, null);
     expect(matches.get("manual")?.viewership).toBeNull();

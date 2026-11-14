@@ -64,10 +64,10 @@ describe(PickemService, () => {
       { participantId: "a", score: 4 },
       { participantId: "b", score: 2 },
     ];
-    await expect(service.validateMatchResult("m")).resolves.toEqual({ updated: 2 });
-    expect(picks.map((p) => p.points)).toEqual([5, 0]);
-    await expect(service.validateMatchResult("m")).resolves.toEqual({ updated: 0 });
-    expect(picks.map((p) => p.points)).toEqual([5, 0]);
+    await expect(service.validateMatchResult("m")).resolves.toStrictEqual({ updated: 2 });
+    expect(picks.map((p) => p.points)).toStrictEqual([5, 0]);
+    await expect(service.validateMatchResult("m")).resolves.toStrictEqual({ updated: 0 });
+    expect(picks.map((p) => p.points)).toStrictEqual([5, 0]);
   });
 
   it("rechecks current match eligibility for every edit", async () => {
@@ -84,7 +84,9 @@ describe(PickemService, () => {
 
   it("keeps automatic scoring best effort when no winner can be derived", async () => {
     await expect(service.autoScoreMatch("m")).resolves.toBeUndefined();
-    expect(warn).toHaveBeenCalledWith();
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      "Auto-score skipped for match m: Match has no winner set yet. Wait for the series result and try again.",
+    );
   });
 
   it("does not choose a winner for a tied result", async () => {

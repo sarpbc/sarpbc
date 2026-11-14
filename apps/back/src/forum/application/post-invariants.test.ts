@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { PostService } from "./post.service";
-import type { ForumWriteScope, ForumTransaction } from "./ports";
-import type { PostRecord, TopicRecord, TranslationRecord } from "./models";
+import type { ForumWriteScope, ForumTransaction, PostStore, TopicStore } from "./ports";
+import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "./models";
+import type { Author } from "../../common/domain/author";
 import { PostType } from "../domain/post-type.enum";
 
 const now = new Date("2026-10-15T12:00:00Z");
 
-function setup(role: string | null = "admin") {
+function setup(role: Author["role"] = "admin") {
   const topic: TopicRecord = {
     id: "topic",
     title: "Topic",
@@ -16,40 +17,44 @@ function setup(role: string | null = "admin") {
     posts: [],
   };
 
-  const saved: PostRecord[] = [];
+  const saved: NewPostRecord[] = [];
   const translations: TranslationRecord[] = [];
 
   const posts = {
-    findPaginated: vi.fn().mockResolvedValue([]),
-    findByTopicId: vi.fn().mockResolvedValue([]),
-    findById: vi.fn(async (id: string) => {
+    findPaginated: vi.fn<PostStore["findPaginated"]>().mockResolvedValue([]),
+    findByTopicId: vi.fn<PostStore["findByTopicId"]>().mockResolvedValue([]),
+    findById: vi.fn<PostStore["findById"]>(async (id) => {
       const post = saved.find((candidate) => candidate.id === id);
 
       return post ? { ...post, publicId: 41 } : null;
     }),
-    findWithDetails: vi.fn().mockResolvedValue(null),
-    findLatestByUser: vi.fn().mockResolvedValue(null),
-    findRecentActivity: vi.fn().mockResolvedValue([]),
-    save: vi.fn(async (model: PostRecord) => {
+    findWithDetails: vi.fn<PostStore["findWithDetails"]>().mockResolvedValue(null),
+    findLatestByUser: vi.fn<PostStore["findLatestByUser"]>().mockResolvedValue(null),
+    findRecentActivity: vi.fn<PostStore["findRecentActivity"]>().mockResolvedValue([]),
+    save: vi.fn<PostStore["save"]>(async (model) => {
       saved.push(model);
     }),
-    saveTranslation: vi.fn(async (model: TranslationRecord) => {
+    saveTranslation: vi.fn<PostStore["saveTranslation"]>(async (model) => {
       translations.push(model);
     }),
-    deleteTranslations: vi.fn(),
-    delete: vi.fn(),
+    deleteTranslations: vi.fn<PostStore["deleteTranslations"]>(),
+    delete: vi.fn<PostStore["delete"]>(),
   };
 
   const scope: ForumWriteScope = {
     posts,
     topics: {
-      findAllTopics: vi.fn().mockResolvedValue([]),
-      findById: vi.fn().mockResolvedValue(topic),
-      findByTitle: vi.fn().mockResolvedValue(topic),
-      save: vi.fn(),
+      findAllTopics: vi.fn<TopicStore["findAllTopics"]>().mockResolvedValue([]),
+      findById: vi.fn<TopicStore["findById"]>().mockResolvedValue(topic),
+      findByTitle: vi.fn<TopicStore["findByTitle"]>().mockResolvedValue(topic),
+      save: vi.fn<TopicStore["save"]>(),
     },
-    users: { findById: vi.fn().mockResolvedValue({ id: "user", userName: "Fan", role }) },
-    replies: { deleteAllForPost: vi.fn() },
+    users: {
+      findById: vi
+        .fn<ForumWriteScope["users"]["findById"]>()
+        .mockResolvedValue({ id: "user", userName: "Fan", role }),
+    },
+    replies: { deleteAllForPost: vi.fn<ForumWriteScope["replies"]["deleteAllForPost"]>() },
   };
 
   let commits = 0;
@@ -89,7 +94,10 @@ const input = {
 describe("post transaction and policies", () => {
   it("creates the post and sanitized admin translations before a single commit", async () => {
     const f = setup();
-    await expect(f.service.create("user", input)).resolves.toEqual({ publicId: 41, slug: "title" });
+    await expect(f.service.create("user", input)).resolves.toStrictEqual({
+      publicId: 41,
+      slug: "title",
+    });
     expect(f.saved[0]?.title).toBe("Title");
     expect(f.translations[0]?.title).toBe("Titre");
     expect(f.translations[0]?.post.id).toBe("post");
@@ -100,7 +108,7 @@ describe("post transaction and policies", () => {
     const f = setup(null);
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
-    expect(f.translations).toEqual([]);
+    expect(f.translations).toStrictEqual([]);
   });
 
   it("does not commit a post if a translation fails", async () => {
@@ -127,7 +135,7 @@ describe("post transaction and policies", () => {
       updatedAt: null,
       translations: [],
     });
-    await expect(f.service.getCreationStatus("user")).resolves.toEqual({
+    await expect(f.service.getCreationStatus("user")).resolves.toStrictEqual({
       canCreate: false,
       nextAvailableAt: new Date(now.getTime() + 1).toISOString(),
       cooldownHours: 1,
@@ -157,7 +165,7 @@ describe("post transaction and policies", () => {
     const f = setup();
     await f.service.create("user", input);
     const [post] = f.saved;
-    f.scope.posts.findWithDetails = async () => post;
+    f.scope.posts.findWithDetails = async () => ({ ...post, publicId: 41 });
     f.scope.replies.deleteAllForPost = async () => {
       throw new Error("reply deletion failed");
     };
@@ -195,7 +203,7 @@ describe("post lookup", () => {
 
   it("exposes the public id and a slug derived from the base title", async () => {
     const f = setup();
-    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
     const ref = { kind: "publicId", value: 88 } as const;
     await expect(f.service.findByIdDto(ref, "fr-FR")).resolves.toMatchObject({
       id: stored.id,
@@ -207,7 +215,7 @@ describe("post lookup", () => {
 
   it("applies the requested translation from the single lookup and keeps the base slug", async () => {
     const f = setup();
-    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
     await expect(
       f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US"),
     ).resolves.toMatchObject({
@@ -226,8 +234,8 @@ describe("post lookup", () => {
 
   it("deletes by legacy id", async () => {
     const f = setup();
-    f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
+    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
     await f.service.delete(stored.id);
-    expect(f.posts.delete).toHaveBeenCalledWith();
+    expect(f.posts.delete).toHaveBeenCalledExactlyOnceWith(stored);
   });
 });

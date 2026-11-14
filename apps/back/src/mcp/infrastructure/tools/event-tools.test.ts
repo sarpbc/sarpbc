@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { jsonOf as json } from "../../../../test/mcp-result";
+import type { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
+import type { MatchService } from "../../../tournament/application/match/match.service";
+import type { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
+import type { PlayerAwardService } from "../../../tournament/application/player-award.service";
+import type { EventQueries, TournamentQueries } from "../../../tournament/application/ports";
+import type { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import { League } from "../../../tournament/domain/league";
 import { Tournament } from "../../../tournament/domain/tournament";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
@@ -48,31 +55,42 @@ function setup(role: "admin" | "journalist" = "admin") {
   };
 
   const catalogService = {
-    leagues: vi.fn(),
-    findEvent: vi.fn().mockResolvedValue(listing),
-    createEvent: vi.fn().mockResolvedValue({ event, stages: [] }),
-    updateEvent: vi.fn().mockResolvedValue(listing),
-    createLeague: vi.fn(),
-    updateLeague: vi.fn(),
+    leagues: vi.fn<ManualCatalogService["leagues"]>(),
+    findEvent: vi.fn<ManualCatalogService["findEvent"]>().mockResolvedValue(listing),
+    createEvent: vi
+      .fn<ManualCatalogService["createEvent"]>()
+      .mockResolvedValue({ event, stages: [] }),
+    updateEvent: vi.fn<ManualCatalogService["updateEvent"]>().mockResolvedValue(listing),
+    createLeague: vi.fn<ManualCatalogService["createLeague"]>(),
+    updateLeague: vi.fn<ManualCatalogService["updateLeague"]>(),
   };
 
-  const eventQueries = { list: vi.fn().mockResolvedValue([[listing], 1]) };
+  const eventQueries = {
+    list: vi.fn<EventQueries["list"]>().mockResolvedValue([[listing], 1]),
+  };
 
   const tools = eventTools({
     catalogService,
     competition: redistributableCompetition({
       catalogService,
       events: eventQueries,
-      tournaments: { find: vi.fn(), findById: vi.fn() },
-      matchService: { list: vi.fn() },
-      matchLineupService: { find: vi.fn() },
-      tournamentPlayerStatsService: { forStages: vi.fn() },
-      tournamentPrizeService: {
-        findByTournamentId: vi.fn(),
-        teamEarnings: vi.fn(),
-        playerEarnings: vi.fn(),
+      tournaments: {
+        find: vi.fn<TournamentQueries["find"]>(),
+        findById: vi.fn<TournamentQueries["findById"]>(),
       },
-      playerAwardService: { findByTournamentId: vi.fn() },
+      matchService: { list: vi.fn<MatchService["list"]>() },
+      matchLineupService: { find: vi.fn<MatchLineupService["find"]>() },
+      tournamentPlayerStatsService: {
+        forStages: vi.fn<TournamentPlayerStatsService["forStages"]>(),
+      },
+      tournamentPrizeService: {
+        findByTournamentId: vi.fn<TournamentPrizeService["findByTournamentId"]>(),
+        teamEarnings: vi.fn<TournamentPrizeService["teamEarnings"]>(),
+        playerEarnings: vi.fn<TournamentPrizeService["playerEarnings"]>(),
+      },
+      playerAwardService: {
+        findByTournamentId: vi.fn<PlayerAwardService["findByTournamentId"]>(),
+      },
     }),
   });
 
@@ -119,7 +137,7 @@ describe("event tools", () => {
   it("excludes start.gg events in the list query", async () => {
     const { tool, eventQueries } = setup();
     await tool("list_events")({});
-    expect(eventQueries.list).toHaveBeenCalledWith({
+    expect(eventQueries.list).toHaveBeenCalledExactlyOnceWith({
       activeOnly: false,
       redistributableOnly: true,
       limit: 20,
@@ -139,9 +157,9 @@ describe("event tools", () => {
   it("creates and updates events through the catalog service", async () => {
     const { tool, catalogService } = setup();
     await tool("create_event")({ name: "CDF 2026" });
-    expect(catalogService.createEvent).toHaveBeenCalledWith({ name: "CDF 2026" });
+    expect(catalogService.createEvent).toHaveBeenCalledExactlyOnceWith({ name: "CDF 2026" });
     await tool("update_event")({ eventId: EVENT_ID, name: "Coupe de France Slash 2026" });
-    expect(catalogService.updateEvent).toHaveBeenCalledWith(EVENT_ID, {
+    expect(catalogService.updateEvent).toHaveBeenCalledExactlyOnceWith(EVENT_ID, {
       name: "Coupe de France Slash 2026",
     });
     const awaited2 = await tool("update_event")({ eventId: EVENT_ID });

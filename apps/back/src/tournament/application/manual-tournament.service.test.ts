@@ -12,7 +12,16 @@ import { Team } from "../../roster/domain/team";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
-import type { CompetitionTransaction, TournamentWriter } from "./ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  CompetitionEvents,
+  CompetitionTransaction,
+  EventWriter,
+  MatchWriter,
+  TournamentQueries,
+  TournamentWriter,
+} from "./ports";
 import {
   competitionScope,
   eventWriter as eventWriterDouble,
@@ -38,16 +47,16 @@ const solo = (id: string, playerId: string) =>
 
 describe(ManualTournamentService, () => {
   const writer = {
-    load: vi.fn(),
-    save: vi.fn(),
-    participants: vi.fn(),
-    teamsExist: vi.fn(),
-    participantReferences: vi.fn(),
-    removeParticipant: vi.fn(),
+    load: vi.fn<TournamentWriter["load"]>(),
+    save: vi.fn<TournamentWriter["save"]>(),
+    participants: vi.fn<TournamentWriter["participants"]>(),
+    teamsExist: vi.fn<TournamentWriter["teamsExist"]>(),
+    participantReferences: vi.fn<TournamentWriter["participantReferences"]>(),
+    removeParticipant: vi.fn<TournamentWriter["removeParticipant"]>(),
     saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
-    league: vi.fn(),
-    playersExist: vi.fn(),
-    teamPlayers: vi.fn(),
+    league: vi.fn<TournamentWriter["league"]>(),
+    playersExist: vi.fn<TournamentWriter["playersExist"]>(),
+    teamPlayers: vi.fn<TournamentWriter["teamPlayers"]>(),
   };
 
   let tournament: Tournament;
@@ -55,30 +64,38 @@ describe(ManualTournamentService, () => {
   const stored = new Map<string, TournamentEvent>();
 
   const eventWriter = {
-    load: vi.fn(async (id: string) => {
+    load: vi.fn<EventWriter["load"]>(async (id) => {
       const event = stored.get(id);
 
       return event ? Object.assign(new TournamentEvent(), event) : null;
     }),
-    slugTaken: vi.fn(async (slug: string, except: string | null) =>
+    slugTaken: vi.fn<EventWriter["slugTaken"]>(async (slug, except) =>
       [...stored.values()].some((event) => event.slug === slug && event.id !== except),
     ),
-    save: vi.fn(async (event: TournamentEvent) => {
+    save: vi.fn<EventWriter["save"]>(async (event) => {
       stored.set(event.id, Object.assign(new TournamentEvent(), event));
     }),
-    stages: vi.fn(async (eventId: string) =>
+    stages: vi.fn<EventWriter["stages"]>(async (eventId) =>
       tournament.event.id === eventId
         ? [{ id: tournament.id, name: tournament.name, source: tournament.source }]
         : [],
     ),
-    stageSlugTaken: vi.fn(async (_event: string, _slug: string) => false),
+    stageSlugTaken: vi.fn<EventWriter["stageSlugTaken"]>(async () => false),
   };
 
-  const matchWriter = { bracket: vi.fn() };
+  const matchWriter = { bracket: vi.fn<MatchWriter["bracket"]>() };
 
-  const cache = { invalidateTournament: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
-  const reads = { findById: vi.fn(), leagues: vi.fn() };
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
+
+  const reads = {
+    findById: vi.fn<TournamentQueries["findById"]>(),
+    leagues: vi.fn<TournamentQueries["leagues"]>(),
+  };
 
   const events: string[] = [];
 
@@ -101,7 +118,11 @@ describe(ManualTournamentService, () => {
   const service = new ManualTournamentService(
     tournamentQueries(reads),
     tx,
-    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+    new CompetitionAfterCommit(
+      cache,
+      { publish: vi.fn<CompetitionEvents["publish"]>() },
+      diagnostics,
+    ),
   );
 
   beforeEach(() => {
@@ -233,7 +254,7 @@ describe(ManualTournamentService, () => {
       pandascoreId: 123,
       imageUrl: "https://cdn.example/ewc.png",
     });
-    expect(events).toEqual(["commit", "invalidate"]);
+    expect(events).toStrictEqual(["commit", "invalidate"]);
     expect(writer.league).not.toHaveBeenCalled();
   });
 
@@ -412,7 +433,7 @@ describe(ManualTournamentService, () => {
       slug: "finals",
       event: { id: "event", slug: "ewc-2026", name: "EWC" },
     });
-    expect([...stored.keys()]).toEqual(["event"]);
+    expect([...stored.keys()]).toStrictEqual(["event"]);
     await expect(
       service.create({ name: "Finals", eventId: "event", slug: "finals" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
@@ -422,7 +443,10 @@ describe(ManualTournamentService, () => {
     cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
     const updateResult2 = await service.update("ewc", { imageUrl: null });
     expect(updateResult2.imageUrl).toBeNull();
-    expect(diagnostics.error).toHaveBeenCalledWith();
+    expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
+      "Tournament cache invalidation failed",
+      new Error("Redis down"),
+    );
   });
 
   it.each(["tournamentWinner", "matchParticipant", "matchWinner", "results"])(
@@ -433,7 +457,13 @@ describe(ManualTournamentService, () => {
       writer.participants.mockResolvedValue([
         Object.assign(new TournamentParticipant(), { id: "p", team }),
       ]);
-      writer.participantReferences.mockResolvedValue({ [reference]: true });
+      writer.participantReferences.mockResolvedValue({
+        tournamentWinner: false,
+        matchParticipant: false,
+        matchWinner: false,
+        results: false,
+        [reference]: true,
+      });
       await expect(service.update("ewc", { teamIds: [] })).rejects.toBeInstanceOf(
         InvalidInputError,
       );
@@ -465,7 +495,7 @@ describe(ManualTournamentService, () => {
       expect(writer.playersExist).toHaveBeenCalledWith(["zen", "vatira"]);
       expect(writer.teamsExist).not.toHaveBeenCalled();
       expect(writer.teamPlayers).not.toHaveBeenCalled();
-      expect(writer.saveParticipant.mock.calls.map(([participant]) => participant)).toEqual([
+      expect(writer.saveParticipant.mock.calls.map(([participant]) => participant)).toStrictEqual([
         expect.objectContaining({ teamId: null, playerIds: ["zen"] }),
         expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
       ]);
@@ -517,8 +547,7 @@ describe(ManualTournamentService, () => {
       });
       await service.update("ewc", { playerParticipants: [["zen"], ["vatira"]] });
       expect(writer.removeParticipant).toHaveBeenCalledWith("p-atow");
-      expect(writer.saveParticipant).toHaveBeenCalledOnce();
-      expect(writer.saveParticipant).toHaveBeenCalledWith(
+      expect(writer.saveParticipant).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
       );
     });

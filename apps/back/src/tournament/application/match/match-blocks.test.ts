@@ -29,11 +29,10 @@ describe(findMatchBlocks, () => {
       NOW,
     );
 
-    expect(reads.byIds).toHaveBeenCalledOnce();
-    expect(reads.byIds).toHaveBeenCalledWith(["a", "b", "missing"]);
+    expect(reads.byIds).toHaveBeenCalledExactlyOnceWith(["a", "b", "missing"]);
     expect(reads.page).not.toHaveBeenCalled();
-    expect(single?.map((match) => match.id)).toEqual(["a"]);
-    expect(manual?.map((match) => match.id)).toEqual(["b", "a"]);
+    expect(single?.map((match) => match.id)).toStrictEqual(["a"]);
+    expect(manual?.map((match) => match.id)).toStrictEqual(["b", "a"]);
   });
 
   it("puts live, then upcoming, then recent results of a scope up to its limit", async () => {
@@ -61,8 +60,8 @@ describe(findMatchBlocks, () => {
       liveSince: new Date(NOW.getTime() - MATCH_BLOCK_LIVE_WINDOW_MS),
     });
     expect(reads.page).toHaveBeenCalledWith("results", { limit: 10, teamId: "falcons" });
-    expect(tournament?.map((match) => match.id)).toEqual(["live", "next", "later"]);
-    expect(team?.map((match) => match.id)).toEqual(["live", "next", "later", "result"]);
+    expect(tournament?.map((match) => match.id)).toStrictEqual(["live", "next", "later"]);
+    expect(team?.map((match) => match.id)).toStrictEqual(["live", "next", "later", "result"]);
   });
 
   it("queries a tournament or team once for blocks with different limits", async () => {
@@ -79,11 +78,11 @@ describe(findMatchBlocks, () => {
       NOW,
     );
 
-    expect(reads.page.mock.calls.filter(([kind]) => kind === "upcoming")).toEqual([
+    expect(reads.page.mock.calls.filter(([kind]) => kind === "upcoming")).toStrictEqual([
       ["upcoming", { limit: 4, teamId: "falcons" }],
     ]);
-    expect(short?.map((match) => match.id)).toEqual(["a", "b"]);
-    expect(long?.map((match) => match.id)).toEqual(["a", "b", "c", "d"]);
+    expect(short?.map((match) => match.id)).toStrictEqual(["a", "b"]);
+    expect(long?.map((match) => match.id)).toStrictEqual(["a", "b", "c", "d"]);
   });
 });
 

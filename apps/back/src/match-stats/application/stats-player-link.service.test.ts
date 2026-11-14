@@ -8,8 +8,8 @@ const link = { platform: "steam", platformId: "76561198224723032", playerId: "ko
 
 function setup() {
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn(async (id: string) => id === "t1"),
-    matches: vi.fn(),
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
+    matches: vi.fn<StatsCandidates["matches"]>(),
   };
 
   const links = {
@@ -54,7 +54,7 @@ describe(StatsPlayerLinkService, () => {
   it("lists the tournament's accounts with every roster of the tournament", async () => {
     const { service } = setup();
 
-    await expect(service.accounts("t1")).resolves.toEqual({
+    await expect(service.accounts("t1")).resolves.toStrictEqual({
       players: [],
       rosters: [{ participantId: "p1", teamName: "KC", players: [{ id: "kofyr", name: "kofyr" }] }],
     });

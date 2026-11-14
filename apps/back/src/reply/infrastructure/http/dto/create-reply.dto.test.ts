@@ -15,7 +15,7 @@ async function validateDto(plain: CreateReplyDtoPlain) {
   return result.success ? [] : result.error.issues;
 }
 
-describe(CreateReplyDto, () => {
+describe("create-reply body", () => {
   it("accepts a single match target", async () => {
     const errors = await validateDto({
       content: "Nice clutch",
@@ -66,7 +66,7 @@ describe(CreateReplyDto, () => {
   });
 
   it("validates article reply content without accepting a caller-supplied target", () => {
-    expect(ReplyContentDto.parse({ content: " hi " })).toEqual({ content: "hi" });
+    expect(ReplyContentDto.parse({ content: " hi " })).toStrictEqual({ content: "hi" });
     expect(
       ReplyContentDto.safeParse({ content: "hi", matchId: "22222222-2222-4222-8222-222222222222" })
         .success,

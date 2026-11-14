@@ -4,6 +4,7 @@ import { z } from "zod";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import { jsonOf } from "../../../../test/mcp-result";
+import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import { rosterTools } from "./roster-tools";
 
 const TEAM_ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
@@ -21,17 +22,17 @@ function setup(role: "admin" | "journalist") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
   const rosterProposalService = {
-    propose: vi.fn(async (change: ToolArguments, sourceUrl: string) =>
+    propose: vi.fn<RosterProposalService["propose"]>(async (change, sourceUrl) =>
       Object.assign(new RosterProposal(), { id: "proposal-1", sourceUrl, change }),
     ),
-    proposeTeamLogo: vi.fn(async (logo: { teamId: string; variant: string }, sourceUrl: string) =>
+    proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(async (logo, sourceUrl) =>
       Object.assign(new RosterProposal(), {
         id: "proposal-1",
         sourceUrl,
         change: { kind: "upload_team_logo", ...logo, logoUrl: LOGO_URL },
       }),
     ),
-    list: vi.fn(),
+    list: vi.fn<RosterProposalService["list"]>(),
   };
 
   const tools = rosterTools({ rosterProposalService });

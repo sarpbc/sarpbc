@@ -43,7 +43,7 @@ describe(toTournament, () => {
     const mapped = toTournament(tournament);
 
     expect(mapped.winner?.team?.id).toBe("gentle-mates");
-    expect(mapped.participants.map((p) => p.team?.id)).toEqual(["gentle-mates", "next2nu"]);
+    expect(mapped.participants.map((p) => p.team?.id)).toStrictEqual(["gentle-mates", "next2nu"]);
   });
 
   it("maps a stage whose winner was loaded without its relations", () => {
@@ -67,7 +67,9 @@ describe(toTournament, () => {
 
     tournament.participants.add(orphan);
 
-    expect(toTournament(tournament).participants.map((p) => p.team?.id)).toEqual(["gentle-mates"]);
+    expect(toTournament(tournament).participants.map((p) => p.team?.id)).toStrictEqual([
+      "gentle-mates",
+    ]);
   });
 });
 
@@ -86,7 +88,7 @@ describe(toParticipant, () => {
     );
     participant.players.add(em.getReference(Player, "unloaded-player"));
 
-    expect(toParticipant(participant)?.players.map((p) => p.id)).toEqual(["m0nkey-m00n"]);
+    expect(toParticipant(participant)?.players.map((p) => p.id)).toStrictEqual(["m0nkey-m00n"]);
   });
 });
 

@@ -11,6 +11,9 @@ import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { ViewershipService } from "../../application/viewership.service";
+import type { GameStatsStore } from "../../../match-stats/application/ports";
+import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { TournamentQueries } from "../../application/ports";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
@@ -70,13 +73,13 @@ const stages = new Map(
 );
 
 describe(EventController, () => {
-  const playerLines = vi.fn(async (_ids: string[]) => []);
+  const playerLines = vi.fn<GameStatsStore["playerLines"]>(async () => []);
   const events = eventQueries();
   const listEvents = vi.spyOn(events, "list");
   const findEvent = vi.spyOn(events, "find");
   const stageId = vi.spyOn(events, "stageId");
-  const redis = { get: vi.fn(), set: vi.fn() };
-  const tournaments = { findById: vi.fn() };
+  const redis = { get: vi.fn<RedisService["get"]>(), set: vi.fn<RedisService["set"]>() };
+  const tournaments = { findById: vi.fn<TournamentQueries["findById"]>() };
 
   const catalog = unconstructed(ManualCatalogService);
   const manualEvents = vi.spyOn(catalog, "manualEvents");
@@ -124,7 +127,7 @@ describe(EventController, () => {
     });
 
     if (resolved.kind !== "event") throw new Error("expected an event");
-    expect(resolved.event.stages.map((s) => s.slug)).toEqual(["playoffs", "group-a"]);
+    expect(resolved.event.stages.map((s) => s.slug)).toStrictEqual(["playoffs", "group-a"]);
     expect(resolved.event.stages[0]).toMatchObject({ matches: [], event: ref });
   });
 
@@ -138,7 +141,7 @@ describe(EventController, () => {
       ],
     });
 
-    await expect(controller.playerStats(event.slug)).resolves.toEqual({
+    await expect(controller.playerStats(event.slug)).resolves.toStrictEqual({
       games: 0,
       players: [],
       unlinkedAccounts: 0,
@@ -209,7 +212,7 @@ describe(EventController, () => {
       activeOnly: true,
     });
     expect(listed.count).toBe(1);
-    expect(listed.events[0].stages.map((s) => s.name)).toEqual(["Playoffs", "Group A"]);
+    expect(listed.events[0].stages.map((s) => s.name)).toStrictEqual(["Playoffs", "Group A"]);
     expect(listed.events[0].stages[0]).not.toHaveProperty("matches");
   });
 
@@ -229,7 +232,7 @@ describe(EventController, () => {
       { event: empty, stages: [] },
     ]);
     const listed = await controller.listManual();
-    expect(listed.events.map((e) => [e.id, e.editable, e.stages.length])).toEqual([
+    expect(listed.events.map((e) => [e.id, e.editable, e.stages.length])).toStrictEqual([
       ["event", true, 2],
       ["empty", true, 0],
     ]);

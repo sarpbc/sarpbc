@@ -32,7 +32,7 @@ describe("PandascoreCompetitionFeed standings", () => {
       ]),
     );
 
-    await expect(feed.getTournamentStandings(42)).resolves.toEqual([
+    await expect(feed.getTournamentStandings(42)).resolves.toStrictEqual([
       { teamPandascoreId: 8, rank: 1 },
       { teamPandascoreId: 9, rank: 3 },
       { teamPandascoreId: 10, rank: 3 },
@@ -43,7 +43,7 @@ describe("PandascoreCompetitionFeed standings", () => {
   it("returns no standings for a tournament PandaScore has none for", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(respond(404, { error: "Not found" }));
 
-    await expect(feed.getTournamentStandings(42)).resolves.toEqual([]);
+    await expect(feed.getTournamentStandings(42)).resolves.toStrictEqual([]);
   });
 
   it("reports standings as unavailable instead of failing the sync on a plan refusal", async () => {

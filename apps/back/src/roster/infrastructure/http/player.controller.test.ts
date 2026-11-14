@@ -1,9 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Contract } from "../../domain/contract";
 import { Player } from "../../domain/player";
+import { Team } from "../../domain/team";
 import { Match } from "../../../tournament/domain/match";
 import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
-import type { PlayerLineupRow, TournamentQueries } from "../../../tournament/application/ports";
+import type {
+  LineupQueries,
+  PlayerLineupRow,
+  TournamentQueries,
+} from "../../../tournament/application/ports";
 import type { SeasonStore } from "../../../season/application/ports";
 import { SeasonService } from "../../../season/application/season.service";
 import { PlayerController } from "./player.controller";
@@ -40,18 +46,25 @@ const standInMatch = (id: string, source: "manual" | "startgg", publicId: number
     },
   });
 
+const staffContract = (teamId: string, startDate: Date, endDate: Date | null) =>
+  Object.assign(new Contract(), {
+    team: Object.assign(new Team(), { id: teamId }),
+    startDate,
+    endDate,
+  });
+
 describe(PlayerController, () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
-  const findPlayerById = vi.fn();
-  const getContractsByPlayer = vi.fn();
-  const getOldTeamsByPlayer = vi.fn();
-  const getStaffContractsByPlayer = vi.fn();
-  const getMatchesByPlayer = vi.fn();
-  const getTournamentsWonByPlayer = vi.fn();
-  const getTournamentsByPlayer = vi.fn();
-  const getTournamentsByTeamTenures = vi.fn();
-  const findByPlayerId = vi.fn();
-  const awardsOfPlayer = vi.fn();
+  const findPlayerById = vi.fn<PlayerService["findById"]>();
+  const getContractsByPlayer = vi.fn<ContractService["getContractsByPlayer"]>();
+  const getOldTeamsByPlayer = vi.fn<ContractService["getOldTeamsByPlayer"]>();
+  const getStaffContractsByPlayer = vi.fn<ContractService["getStaffContractsByPlayer"]>();
+  const getMatchesByPlayer = vi.fn<MatchService["getMatchesByPlayer"]>();
+  const getTournamentsWonByPlayer = vi.fn<TournamentQueries["getTournamentsWonByPlayer"]>();
+  const getTournamentsByPlayer = vi.fn<TournamentQueries["getTournamentsByPlayer"]>();
+  const getTournamentsByTeamTenures = vi.fn<TournamentQueries["getTournamentsByTeamTenures"]>();
+  const findByPlayerId = vi.fn<PlayerAwardService["findByPlayerId"]>();
+  const awardsOfPlayer = vi.fn<SeasonStore["awardsOfPlayer"]>();
 
   const tournaments: TournamentQueries = {
     ...unusedTournamentQueries,
@@ -61,33 +74,33 @@ describe(PlayerController, () => {
   };
 
   const seasonStore: SeasonStore = {
-    list: vi.fn(),
-    find: vi.fn(),
-    nameTaken: vi.fn(),
-    save: vi.fn(),
-    remove: vi.fn(),
-    awards: vi.fn(),
+    list: vi.fn<SeasonStore["list"]>(),
+    find: vi.fn<SeasonStore["find"]>(),
+    nameTaken: vi.fn<SeasonStore["nameTaken"]>(),
+    save: vi.fn<SeasonStore["save"]>(),
+    remove: vi.fn<SeasonStore["remove"]>(),
+    awards: vi.fn<SeasonStore["awards"]>(),
     awardsOfPlayer,
-    player: vi.fn(),
-    awardTaken: vi.fn(),
-    saveAward: vi.fn(),
-    removeAward: vi.fn(),
-    published: vi.fn(),
-    findBySlug: vi.fn(),
-    slugTaken: vi.fn(),
-    team: vi.fn(),
-    tournamentExists: vi.fn(),
-    participants: vi.fn(),
-    participant: vi.fn(),
-    participantTaken: vi.fn(),
-    saveParticipant: vi.fn(),
-    updatePathNote: vi.fn(),
-    removeParticipant: vi.fn(),
-    savePathEntry: vi.fn(),
-    removePathEntry: vi.fn(),
+    player: vi.fn<SeasonStore["player"]>(),
+    awardTaken: vi.fn<SeasonStore["awardTaken"]>(),
+    saveAward: vi.fn<SeasonStore["saveAward"]>(),
+    removeAward: vi.fn<SeasonStore["removeAward"]>(),
+    published: vi.fn<SeasonStore["published"]>(),
+    findBySlug: vi.fn<SeasonStore["findBySlug"]>(),
+    slugTaken: vi.fn<SeasonStore["slugTaken"]>(),
+    team: vi.fn<SeasonStore["team"]>(),
+    tournamentExists: vi.fn<SeasonStore["tournamentExists"]>(),
+    participants: vi.fn<SeasonStore["participants"]>(),
+    participant: vi.fn<SeasonStore["participant"]>(),
+    participantTaken: vi.fn<SeasonStore["participantTaken"]>(),
+    saveParticipant: vi.fn<SeasonStore["saveParticipant"]>(),
+    updatePathNote: vi.fn<SeasonStore["updatePathNote"]>(),
+    removeParticipant: vi.fn<SeasonStore["removeParticipant"]>(),
+    savePathEntry: vi.fn<SeasonStore["savePathEntry"]>(),
+    removePathEntry: vi.fn<SeasonStore["removePathEntry"]>(),
   };
 
-  const playerEarnings = vi.fn();
+  const playerEarnings = vi.fn<TournamentPrizeService["playerEarnings"]>();
   const prizes = Object.assign(unconstructed(TournamentPrizeService), { playerEarnings });
 
   const standInMatches = [
@@ -100,7 +113,7 @@ describe(PlayerController, () => {
     { matchId: "cup-final", participantId: "cup-final-b", rosterIds: ["kept"] },
   ];
 
-  const byPlayer = vi.fn(async () => lineupRows);
+  const byPlayer = vi.fn<LineupQueries["byPlayer"]>(async () => lineupRows);
 
   const lineups = new MatchLineupService(
     { byMatch: async () => [], byPlayer },
@@ -137,27 +150,57 @@ describe(PlayerController, () => {
     playerEarnings.mockResolvedValue({ totals: [], years: [] });
   });
 
-  it("reads the sub-resources of the player a merged id resolves to", async () => {
-    await controller.getContracts("merged");
-    await controller.getOldTeams("merged");
-    await controller.getTrophies("merged");
-    await controller.getAwards("merged");
-    await controller.getEarnings("merged");
-    await controller.getTournaments("merged");
-    await controller.getMatches("merged");
-    await controller.getStaffTournaments("merged");
-    await controller.getStandIns("merged");
+  describe("with a merged player id", () => {
+    beforeEach(async () => {
+      await controller.getContracts("merged");
+      await controller.getOldTeams("merged");
+      await controller.getTrophies("merged");
+      await controller.getAwards("merged");
+      await controller.getEarnings("merged");
+      await controller.getTournaments("merged");
+      await controller.getMatches("merged");
+      await controller.getStaffTournaments("merged");
+      await controller.getStandIns("merged");
+    });
 
-    expect(getContractsByPlayer).toHaveBeenCalledWith("kept");
-    expect(getOldTeamsByPlayer).toHaveBeenCalledWith("kept");
-    expect(getTournamentsWonByPlayer).toHaveBeenCalledWith("kept");
-    expect(findByPlayerId).toHaveBeenCalledWith("kept");
-    expect(awardsOfPlayer).toHaveBeenCalledWith("kept");
-    expect(playerEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
-    expect(getTournamentsByPlayer).toHaveBeenCalledWith("kept");
-    expect(getMatchesByPlayer).toHaveBeenCalledWith("kept");
-    expect(getStaffContractsByPlayer).toHaveBeenCalledWith("kept");
-    expect(byPlayer).toHaveBeenCalledWith("kept");
+    it("reads the contracts of the resolved player", () => {
+      expect(getContractsByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the former teams of the resolved player", () => {
+      expect(getOldTeamsByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the trophies of the resolved player", () => {
+      expect(getTournamentsWonByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the awards of the resolved player", () => {
+      expect(findByPlayerId).toHaveBeenCalledExactlyOnceWith("kept");
+      expect(awardsOfPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the earnings of the resolved player", () => {
+      expect(playerEarnings).toHaveBeenCalledExactlyOnceWith("kept", {
+        redistributableOnly: false,
+      });
+    });
+
+    it("reads the tournaments of the resolved player", () => {
+      expect(getTournamentsByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the matches of the resolved player", () => {
+      expect(getMatchesByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the staff contracts of the resolved player", () => {
+      expect(getStaffContractsByPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
+
+    it("reads the stand-in lineups of the resolved player", () => {
+      expect(byPlayer).toHaveBeenCalledExactlyOnceWith("kept");
+    });
   });
 
   it("lists stand-in series for the site, keeping start.gg ones with their credit flag", async () => {
@@ -170,7 +213,7 @@ describe(PlayerController, () => {
         id: match.id,
         publicId: match.publicId,
       })),
-    ).toEqual([
+    ).toStrictEqual([
       { participantId: "startgg-final-a", startgg: true, id: "startgg-final", publicId: 7 },
     ]);
   });
@@ -179,13 +222,13 @@ describe(PlayerController, () => {
     const from = new Date("2024-01-01");
     const to = new Date("2024-12-31");
     getStaffContractsByPlayer.mockResolvedValue([
-      { team: { id: "kc" }, startDate: from, endDate: to },
-      { team: { id: "vit" }, startDate: to, endDate: null },
+      staffContract("kc", from, to),
+      staffContract("vit", to, null),
     ]);
 
     await controller.getStaffTournaments("kept");
 
-    expect(getTournamentsByTeamTenures).toHaveBeenCalledWith([
+    expect(getTournamentsByTeamTenures).toHaveBeenCalledExactlyOnceWith([
       { teamId: "kc", from, to },
       { teamId: "vit", from: to, to: null },
     ]);

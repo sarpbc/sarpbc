@@ -31,12 +31,12 @@ function tournament() {
     participants: [participant("p-kc", kc), participant("p-m8", m8)],
   });
 
-  const findById = vi.fn(
-    async (id: string) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
+  const findById = vi.fn<IdOrSlugLookup<Team>["findById"]>(
+    async (id) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
   );
 
-  const findBySlug = vi.fn(
-    async (slug: string) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
+  const findBySlug = vi.fn<IdOrSlugLookup<Team>["findBySlug"]>(
+    async (slug) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
   );
 
   const lookup: IdOrSlugLookup<Team> = { findById, findBySlug };
@@ -59,7 +59,7 @@ describe(resolveMatchParticipantIds, () => {
       { teams: lookup, players: noPlayers },
     );
 
-    expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
+    expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
     expect(findById).not.toHaveBeenCalled();
   });
 
@@ -72,7 +72,7 @@ describe(resolveMatchParticipantIds, () => {
       { teams: lookup, players: noPlayers },
     );
 
-    expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
+    expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
     expect(findById).toHaveBeenCalledWith(KC_ID);
   });
 
@@ -155,7 +155,7 @@ describe(resolveMatchParticipantIds, () => {
       { teams: tournament().lookup, players },
     );
 
-    expect(resolved.map((entry) => entry.id)).toEqual(["p-zen", "p-vatira"]);
+    expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-zen", "p-vatira"]);
     await expect(
       resolveMatchParticipantIds(
         knockout,

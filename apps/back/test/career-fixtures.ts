@@ -6,7 +6,6 @@ import type {
 } from "@sarpbc/types";
 import { vi } from "vitest";
 import type { PlayerComparisonSources } from "../src/career/application/player-comparison.service";
-import type { EarningsScope } from "../src/tournament/application/ports";
 import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
@@ -140,8 +139,8 @@ export function careerSources() {
     endDate: null,
   });
 
-  const playerEarnings = vi.fn(
-    async (playerId: string, scope: EarningsScope): Promise<ProfileEarnings> =>
+  const playerEarnings = vi.fn<PlayerComparisonSources["prizes"]["playerEarnings"]>(
+    async (playerId, scope) =>
       careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0),
   );
 

@@ -27,10 +27,12 @@ const article: NewsArticleRecord = {
 
 function storeFailingWith(error: Error) {
   const em = {
-    findOne: vi.fn().mockResolvedValue(null),
-    getReference: vi.fn((_entity: EntityName<object>, id: string) => ({ id })),
-    persist: vi.fn(),
-    flush: vi.fn().mockRejectedValue(error),
+    findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
+    getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
+      (_entity, id) => ({ id }),
+    ),
+    persist: vi.fn<() => void>(),
+    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
   };
 
   return new MikroNewsStore(Object.assign(unconstructed(EntityManager), em));

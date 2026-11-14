@@ -31,28 +31,28 @@ describe("Roster workflows", () => {
     stores = {
       teams: {
         findById: async () => team,
-        findBySlug: vi.fn(),
+        findBySlug: vi.fn<RosterWriteScope["teams"]["findBySlug"]>(),
         redirectCount: async () => 0,
         save: saveTeam,
         delete: deleteTeam,
       },
       players: {
         findById: async () => player,
-        findBySlug: vi.fn(),
-        save: vi.fn(),
-        delete: vi.fn(),
+        findBySlug: vi.fn<RosterWriteScope["players"]["findBySlug"]>(),
+        save: vi.fn<RosterWriteScope["players"]["save"]>(),
+        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
       },
       photos: {
-        findByPlayer: vi.fn(),
-        findById: vi.fn(),
-        save: vi.fn(),
-        delete: vi.fn(),
+        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
+        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
+        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
+        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
       },
       contracts: {
-        findByPlayer: vi.fn(),
+        findByPlayer: vi.fn<RosterWriteScope["contracts"]["findByPlayer"]>(),
         findByTeam: async () => [contract],
         findById: async () => contract,
-        save: vi.fn(),
+        save: vi.fn<RosterWriteScope["contracts"]["save"]>(),
         delete: deleteContract,
       },
     };
@@ -69,10 +69,10 @@ describe("Roster workflows", () => {
     competition = { participations: 0, matches: 0, prizes: 0 };
 
     const queries: TeamQueries = {
-      search: vi.fn(),
-      searchAndCount: vi.fn(),
-      findById: vi.fn(),
-      findBySlug: vi.fn(),
+      search: vi.fn<TeamQueries["search"]>(),
+      searchAndCount: vi.fn<TeamQueries["searchAndCount"]>(),
+      findById: vi.fn<TeamQueries["findById"]>(),
+      findBySlug: vi.fn<TeamQueries["findBySlug"]>(),
     };
 
     service = new TeamService(queries, transaction, {

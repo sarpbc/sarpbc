@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TrackedStreamer } from "../domain/tracked-streamer";
-import type { LiveStreamSnapshot } from "./ports/live-stream-cache";
-import type { SourceStream } from "./ports/live-stream-source";
+import type { LiveStreamCache, LiveStreamSnapshot } from "./ports/live-stream-cache";
+import type { LiveStreamSource, SourceStream } from "./ports/live-stream-source";
+import type { TrackedStreamerStore } from "./ports/tracked-streamer-store";
 import {
   LIVE_STREAMS_FRESH_MS,
   StreamerService,
@@ -26,27 +27,31 @@ function live(login: string, viewerCount: number): SourceStream {
 }
 
 const createStreamers = () => ({
-  list: vi.fn().mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
-  add: vi.fn(),
-  remove: vi.fn(),
+  list: vi
+    .fn<TrackedStreamerStore["list"]>()
+    .mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
+  add: vi.fn<TrackedStreamerStore["add"]>(),
+  remove: vi.fn<TrackedStreamerStore["remove"]>(),
 });
 
 const createSource = () => ({
-  findLiveRocketLeague: vi.fn().mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
+  findLiveRocketLeague: vi
+    .fn<LiveStreamSource["findLiveRocketLeague"]>()
+    .mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
 });
 
 describe(StreamerService, () => {
   let snapshot: LiveStreamSnapshot | null = null;
 
   const createCache = () => ({
-    read: vi.fn(async () => snapshot),
-    write: vi.fn(async (value: LiveStreamSnapshot, _claim: string) => {
+    read: vi.fn<LiveStreamCache["read"]>(async () => snapshot),
+    write: vi.fn<LiveStreamCache["write"]>(async (value) => {
       snapshot = value;
 
       return true;
     }),
-    claimRefresh: vi.fn<() => Promise<string | null>>().mockResolvedValue("claim-1"),
-    clear: vi.fn().mockResolvedValue(undefined),
+    claimRefresh: vi.fn<LiveStreamCache["claimRefresh"]>().mockResolvedValue("claim-1"),
+    clear: vi.fn<LiveStreamCache["clear"]>().mockResolvedValue(undefined),
   });
 
   let streamers = createStreamers();
@@ -67,7 +72,7 @@ describe(StreamerService, () => {
   it("returns an empty list without touching the cache or Twitch when the feature is off", async () => {
     service = new StreamerService(streamers, null, cache, reportFailure, () => now);
 
-    await expect(service.listLive()).resolves.toEqual([]);
+    await expect(service.listLive()).resolves.toStrictEqual([]);
     expect(cache.read).not.toHaveBeenCalled();
     expect(streamers.list).not.toHaveBeenCalled();
   });
@@ -76,7 +81,7 @@ describe(StreamerService, () => {
     const result = await service.listLive();
 
     expect(source.findLiveRocketLeague).toHaveBeenCalledWith(["zenrll", "kaydop"]);
-    expect(result).toEqual([
+    expect(result).toStrictEqual([
       {
         login: "zenrll",
         displayName: "Zen",
@@ -98,7 +103,7 @@ describe(StreamerService, () => {
   it("serves a fresh cached result without calling Twitch", async () => {
     snapshot = { streams: [], fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS + 1) };
 
-    await expect(service.listLive()).resolves.toEqual([]);
+    await expect(service.listLive()).resolves.toStrictEqual([]);
     expect(source.findLiveRocketLeague).not.toHaveBeenCalled();
     expect(cache.claimRefresh).not.toHaveBeenCalled();
   });
@@ -117,7 +122,7 @@ describe(StreamerService, () => {
     cache.claimRefresh.mockResolvedValue(null);
     source.findLiveRocketLeague.mockClear();
 
-    await expect(service.listLive()).resolves.toEqual(stale);
+    await expect(service.listLive()).resolves.toStrictEqual(stale);
     expect(source.findLiveRocketLeague).not.toHaveBeenCalled();
   });
 
@@ -126,20 +131,20 @@ describe(StreamerService, () => {
     snapshot = { streams: stale, fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS) };
     source.findLiveRocketLeague.mockRejectedValue(new Error("Twitch down"));
 
-    await expect(service.listLive()).resolves.toEqual(stale);
+    await expect(service.listLive()).resolves.toStrictEqual(stale);
     expect(reportFailure).toHaveBeenCalledWith("fetch", expect.any(Error));
   });
 
   it("returns an empty list when Twitch fails without a previous result", async () => {
     source.findLiveRocketLeague.mockRejectedValue(new Error("Twitch down"));
 
-    await expect(service.listLive()).resolves.toEqual([]);
+    await expect(service.listLive()).resolves.toStrictEqual([]);
   });
 
   it("returns an empty list without calling Twitch when Redis is unavailable", async () => {
     cache.read.mockRejectedValue(new Error("Redis down"));
 
-    await expect(service.listLive()).resolves.toEqual([]);
+    await expect(service.listLive()).resolves.toStrictEqual([]);
     expect(source.findLiveRocketLeague).not.toHaveBeenCalled();
     expect(reportFailure).toHaveBeenCalledWith("cache", expect.any(Error));
   });
@@ -154,7 +159,7 @@ describe(StreamerService, () => {
   it("skips Twitch when no channel is tracked", async () => {
     streamers.list.mockResolvedValue([]);
 
-    await expect(service.listLive()).resolves.toEqual([]);
+    await expect(service.listLive()).resolves.toStrictEqual([]);
     expect(source.findLiveRocketLeague).not.toHaveBeenCalled();
   });
 
@@ -163,7 +168,7 @@ describe(StreamerService, () => {
 
     await expect(service.add("zenrll", "Zen")).resolves.toMatchObject({ login: "zenrll" });
     expect(streamers.add).toHaveBeenCalledWith("zenrll", "Zen");
-    expect(cache.clear).toHaveBeenCalledWith();
+    expect(cache.clear).toHaveBeenCalledExactlyOnceWith();
   });
 
   it("rejects a channel that is already tracked", async () => {
@@ -177,7 +182,7 @@ describe(StreamerService, () => {
     streamers.remove.mockResolvedValue(true);
 
     await service.remove("zenrll-id");
-    expect(cache.clear).toHaveBeenCalledWith();
+    expect(cache.clear).toHaveBeenCalledExactlyOnceWith();
   });
 
   it("reports a missing channel on removal", async () => {

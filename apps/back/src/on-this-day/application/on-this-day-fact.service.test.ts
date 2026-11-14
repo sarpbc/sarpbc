@@ -30,7 +30,7 @@ describe(OnThisDayFactService, () => {
     await expect(service.list()).resolves.toHaveLength(1);
 
     await service.remove(created.id);
-    await expect(service.list()).resolves.toEqual([]);
+    await expect(service.list()).resolves.toStrictEqual([]);
     await expect(service.remove(created.id)).rejects.toThrow(NotFoundError);
   });
 
@@ -40,7 +40,7 @@ describe(OnThisDayFactService, () => {
     await expect(
       service.create({ ...input, link: { kind: "player", id: MANUAL_STAGE_ID } }),
     ).rejects.toThrow(InvalidInputError);
-    await expect(service.list()).resolves.toEqual([]);
+    await expect(service.list()).resolves.toStrictEqual([]);
   });
 
   it("refuses to edit an unknown fact", async () => {

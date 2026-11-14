@@ -15,6 +15,16 @@ const requiredEnv = {
 const validateEnv = (overrides: Record<string, string | undefined> = {}) =>
   validate({ ...requiredEnv, ...overrides });
 
+function failureOf(overrides: Record<string, string | undefined>): string {
+  try {
+    validateEnv(overrides);
+  } catch (error) {
+    return String(error);
+  }
+
+  throw new Error("Expected the environment to be rejected");
+}
+
 describe("validateEnv", () => {
   it("applies defaults for optional services", () => {
     const env = validateEnv();
@@ -72,23 +82,17 @@ describe("validateEnv", () => {
 
   it("rejects a short internal API token without including its value in the error", () => {
     const invalid = "short-token";
-    expect(() => validateEnv({ INTERNAL_API_TOKEN: invalid })).toThrow(/INTERNAL_API_TOKEN/);
+    const failure = failureOf({ INTERNAL_API_TOKEN: invalid });
 
-    try {
-      validateEnv({ INTERNAL_API_TOKEN: invalid });
-    } catch (error) {
-      expect(String(error)).not.toContain(invalid);
-    }
+    expect(failure).toMatch(/INTERNAL_API_TOKEN/);
+    expect(failure).not.toContain(invalid);
   });
 
   it("rejects malformed IndexNow credentials without including their value in the error", () => {
     const invalid = "invalid/indexnow/credential";
-    expect(() => validateEnv({ INDEXNOW_KEY: invalid })).toThrow(/INDEXNOW_KEY/);
+    const failure = failureOf({ INDEXNOW_KEY: invalid });
 
-    try {
-      validateEnv({ INDEXNOW_KEY: invalid });
-    } catch (error) {
-      expect(String(error)).not.toContain(invalid);
-    }
+    expect(failure).toMatch(/INDEXNOW_KEY/);
+    expect(failure).not.toContain(invalid);
   });
 });

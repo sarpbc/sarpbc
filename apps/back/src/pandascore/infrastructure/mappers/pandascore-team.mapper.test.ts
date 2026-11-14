@@ -15,7 +15,7 @@ describe("PandascoreTeamMapper", () => {
       dark_mode_image_url: "https://example.com/vitality-dark.png",
     });
 
-    expect(toUpsertTeamCommand(dto)).toEqual({
+    expect(toUpsertTeamCommand(dto)).toStrictEqual({
       pandascoreId: 7,
       name: "Team Vitality",
       slug: "team-vitality",

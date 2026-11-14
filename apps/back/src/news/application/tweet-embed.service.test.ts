@@ -48,18 +48,25 @@ describe(TweetEmbedService, () => {
     ],
   };
 
-  it("returns the tweet's photos, author and date, removes attachment URLs and caches the result", async () => {
+  const url = "https://x.com/RL_Comm/status/2095971934320071030";
+
+  it("returns the tweet's author, text and date", async () => {
     fetchMock.mockImplementation(async () => Response.json(tweet));
 
-    const url = "https://x.com/RL_Comm/status/2095971934320071030";
-    const first = await service.embed(url);
-    const second = await service.embed(url);
+    const embedded = await service.embed(url);
 
-    expect(first.authorHandle).toBe("RL_Comm");
-    expect(first.text).toBe("This marks the end of my playing career.");
-    expect(first.authorImageUrl).toBe(tweet.user.profile_image_url_https);
-    expect(first.postedAt).toBe(tweet.created_at);
-    expect(first.media).toEqual([
+    expect(embedded.authorHandle).toBe("RL_Comm");
+    expect(embedded.text).toBe("This marks the end of my playing career.");
+    expect(embedded.authorImageUrl).toBe(tweet.user.profile_image_url_https);
+    expect(embedded.postedAt).toBe(tweet.created_at);
+  });
+
+  it("returns the tweet's photos", async () => {
+    fetchMock.mockImplementation(async () => Response.json(tweet));
+
+    const embedded = await service.embed(url);
+
+    expect(embedded.media).toStrictEqual([
       {
         type: "photo",
         url: tweet.mediaDetails[0]?.media_url_https,
@@ -68,7 +75,15 @@ describe(TweetEmbedService, () => {
         alt: "Retirement announcement",
       },
     ]);
-    expect(second).toEqual(first);
+  });
+
+  it("caches the result", async () => {
+    fetchMock.mockImplementation(async () => Response.json(tweet));
+
+    const first = await service.embed(url);
+    const second = await service.embed(url);
+
+    expect(second).toStrictEqual(first);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 
@@ -83,7 +98,7 @@ describe(TweetEmbedService, () => {
     );
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.text).toBe("A & B 😀");
-    expect(embed.media).toEqual([]);
+    expect(embed.media).toStrictEqual([]);
   });
 
   it("keeps every photo and video preview with its dimensions", async () => {
@@ -104,7 +119,7 @@ describe(TweetEmbedService, () => {
     const embed = await service.embed("https://x.com/i/web/status/2095971934320071030");
     expect(embed.url).toBe("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.media).toHaveLength(2);
-    expect(embed.media[1]).toEqual({
+    expect(embed.media[1]).toStrictEqual({
       type: "video",
       url: "https://pbs.twimg.com/media/video.jpg",
       width: 1200,

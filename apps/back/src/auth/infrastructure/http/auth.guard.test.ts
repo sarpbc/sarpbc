@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CookieSerializeOptions } from "@fastify/cookie";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { ExecutionContext } from "@nestjs/common";
@@ -22,18 +23,18 @@ describe(AuthGuard, () => {
   let guard: AuthGuard;
 
   const authService = {
-    authenticate: vi.fn(),
-    refreshSession: vi.fn(),
+    authenticate: vi.fn<AuthService["authenticate"]>(),
+    refreshSession: vi.fn<AuthService["refreshSession"]>(),
   };
 
-  const setCookie = vi.fn();
+  const setCookie = vi.fn<(name: string, value: string, options: CookieSerializeOptions) => void>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthGuard,
         { provide: AuthService, useValue: authService },
-        { provide: ConfigService, useValue: { get: vi.fn() } },
+        { provide: ConfigService, useValue: { get: vi.fn<ConfigService["get"]>() } },
       ],
     }).compile();
 
@@ -53,7 +54,7 @@ describe(AuthGuard, () => {
     const request: AuthGuardTestRequest = { cookies: { access_token: "valid-token" } };
 
     await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
-    expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });
+    expect(request.user).toStrictEqual({ id: "user-1", email: "a@b.com" });
     expect(authService.authenticate).toHaveBeenCalledWith("valid-token");
   });
 
@@ -73,7 +74,7 @@ describe(AuthGuard, () => {
     const request: AuthGuardTestRequest = { cookies: { refresh_token: "refresh-token" } };
 
     await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
-    expect(request.user).toEqual({ id: "user-1", email: "a@b.com" });
+    expect(request.user).toStrictEqual({ id: "user-1", email: "a@b.com" });
     expect(setCookie).toHaveBeenCalledWith(
       "access_token",
       "new-access",

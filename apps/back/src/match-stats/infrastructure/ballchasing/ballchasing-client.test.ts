@@ -65,7 +65,7 @@ function client(routes: (url: string) => Response) {
   const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(requestUrl(input)));
   let clock = 0;
 
-  const sleep = vi.fn(async (ms: number) => {
+  const sleep = vi.fn<(ms: number) => Promise<void>>(async (ms) => {
     clock += ms;
   });
 
@@ -120,8 +120,8 @@ describe("BallchasingClient.groupReplays", () => {
 
     const replays = await instance.groupReplays("pilot");
 
-    expect(replays.map((replay) => replay.id)).toEqual(["r1", "r2", "r3"]);
-    expect(replays[0]).toEqual({
+    expect(replays.map((replay) => replay.id)).toStrictEqual(["r1", "r2", "r3"]);
+    expect(replays[0]).toStrictEqual({
       id: "r1",
       rocketLeagueId: "RL-r1",
       title: "Game r1",
@@ -136,7 +136,7 @@ describe("BallchasingClient.groupReplays", () => {
     });
 
     for (const [, init] of fetch.mock.calls)
-      expect(init?.headers).toEqual({ Authorization: "secret-key" });
+      expect(init?.headers).toStrictEqual({ Authorization: "secret-key" });
     expect(new URL(requestUrl(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
   });
 
@@ -233,7 +233,7 @@ describe("BallchasingClient.replayStats", () => {
   it("maps the date, team goals and each player's five stats", async () => {
     const { instance, fetch } = client(() => json(replayDetail()));
 
-    await expect(instance.replayStats("r1")).resolves.toEqual({
+    await expect(instance.replayStats("r1")).resolves.toStrictEqual({
       rocketLeagueId: "RL-r1",
       playedAt: new Date("2026-06-01T18:05:00Z"),
       blueGoals: 2,
@@ -349,7 +349,7 @@ describe("BallchasingClient.replayStats", () => {
     advance(300);
     await instance.replayStats("c");
 
-    expect(sleep.mock.calls).toEqual([[500], [200]]);
+    expect(sleep.mock.calls).toStrictEqual([[500], [200]]);
   });
 });
 
@@ -367,7 +367,7 @@ describe("BallchasingClient rate limiting", () => {
 
     await instance.replayStats("r1");
 
-    expect(sleep.mock.calls).toEqual([[7000]]);
+    expect(sleep.mock.calls).toStrictEqual([[7000]]);
   });
 
   it("backs off from one second, doubling, when Retry-After is missing or 0", async () => {
@@ -385,7 +385,7 @@ describe("BallchasingClient rate limiting", () => {
 
     await instance.replayStats("r1");
 
-    expect(sleep.mock.calls).toEqual([[1000], [2000], [4000]]);
+    expect(sleep.mock.calls).toStrictEqual([[1000], [2000], [4000]]);
   });
 
   it("fails clearly once the retries are exhausted", async () => {
@@ -393,6 +393,6 @@ describe("BallchasingClient rate limiting", () => {
 
     await expect(instance.replayStats("r1")).rejects.toThrow(/rate limit reached/);
     expect(fetch).toHaveBeenCalledTimes(6);
-    expect(sleep.mock.calls).toEqual([[1000], [2000], [4000], [8000], [16_000]]);
+    expect(sleep.mock.calls).toStrictEqual([[1000], [2000], [4000], [8000], [16_000]]);
   });
 });

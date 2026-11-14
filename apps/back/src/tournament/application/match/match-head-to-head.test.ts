@@ -77,7 +77,7 @@ describe("match-head-to-head", () => {
   const teamVitality = createTeam("team-vitality", "Team Vitality");
   const teamKarmine = createTeam("team-karmine", "Karmine Corp");
 
-  it("builds aggregate record and recent meetings", () => {
+  const twoMeetings = () => {
     const matches = [
       createFinishedMatch({
         id: "match-1",
@@ -97,16 +97,25 @@ describe("match-head-to-head", () => {
       }),
     ];
 
-    const headToHead = buildHeadToHead(matches, teamVitality.id, teamKarmine.id);
+    return buildHeadToHead(matches, teamVitality.id, teamKarmine.id);
+  };
+
+  it("counts the meetings and each team's wins", () => {
+    const headToHead = twoMeetings();
 
     expect(headToHead.totalMeetings).toBe(2);
     expect(headToHead.teamAWins).toBe(1);
     expect(headToHead.teamBWins).toBe(1);
     expect(headToHead.recentMeetings).toHaveLength(2);
-    expect(headToHead.recentMeetings[0]?.id).toBe("match-1");
-    expect(headToHead.recentMeetings[0]?.scoreA).toBe(4);
-    expect(headToHead.recentMeetings[0]?.scoreB).toBe(2);
-    expect(headToHead.recentMeetings[0]?.winnerTeamId).toBe(teamVitality.id);
+  });
+
+  it("lists the latest meeting first with its score and winner", () => {
+    const [latest] = twoMeetings().recentMeetings;
+
+    expect(latest?.id).toBe("match-1");
+    expect(latest?.scoreA).toBe(4);
+    expect(latest?.scoreB).toBe(2);
+    expect(latest?.winnerTeamId).toBe(teamVitality.id);
   });
 
   it("links each meeting to its canonical match page", () => {
@@ -134,7 +143,7 @@ describe("match-head-to-head", () => {
     expect(headToHead.totalMeetings).toBe(0);
     expect(headToHead.teamAWins).toBe(0);
     expect(headToHead.teamBWins).toBe(0);
-    expect(headToHead.recentMeetings).toEqual([]);
+    expect(headToHead.recentMeetings).toStrictEqual([]);
   });
 
   it("does not count ties as wins", () => {
@@ -181,7 +190,7 @@ describe("match-head-to-head", () => {
 
     const meeting = mapHeadToHeadMeeting(match, teamVitality.id, teamKarmine.id);
 
-    expect(meeting).toEqual(
+    expect(meeting).toStrictEqual(
       expect.objectContaining({
         teamAId: teamVitality.id,
         teamBId: teamKarmine.id,

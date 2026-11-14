@@ -1,6 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SeasonRosterReferences } from "./roster-references.mover";
 import { Season } from "./season.entity";
 import { SeasonAward } from "./season-award.entity";
@@ -18,9 +18,9 @@ function award(id: string, playerId: string, seasonId: string, region: string | 
 }
 
 function awardMover(awards: ReturnType<typeof award>[]) {
-  const find = vi.fn().mockResolvedValue(awards);
-  const nativeDelete = vi.fn();
-  const nativeUpdate = vi.fn();
+  const find = vi.fn<EntityManager["find"]>().mockResolvedValue(awards);
+  const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
+  const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
 
   const references = new SeasonRosterReferences(
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
@@ -73,9 +73,9 @@ function participant(id: string, teamId: string, seasonId: string, pathNote: str
 }
 
 function participantMover(participants: ReturnType<typeof participant>[]) {
-  const find = vi.fn().mockResolvedValue(participants);
-  const nativeDelete = vi.fn();
-  const nativeUpdate = vi.fn();
+  const find = vi.fn<EntityManager["find"]>().mockResolvedValue(participants);
+  const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
+  const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
 
   const references = new SeasonRosterReferences(
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
@@ -85,20 +85,30 @@ function participantMover(participants: ReturnType<typeof participant>[]) {
 }
 
 describe("SeasonRosterReferences.moveTeam", () => {
-  it("moves the winner, folds a shared season into the kept team and reassigns the rest", async () => {
-    const { references, nativeDelete, nativeUpdate } = participantMover([
+  let nativeDelete: ReturnType<typeof participantMover>["nativeDelete"];
+  let nativeUpdate: ReturnType<typeof participantMover>["nativeUpdate"];
+
+  beforeEach(async () => {
+    const mover = participantMover([
       participant("kept-2024", "vitality", "2024", null),
       participant("dup-2024", "vitality-dup", "2024", "Won the Major."),
       participant("dup-2023", "vitality-dup", "2023", null),
     ]);
 
-    await references.moveTeam("vitality-dup", "vitality");
+    ({ nativeDelete, nativeUpdate } = mover);
 
+    await mover.references.moveTeam("vitality-dup", "vitality");
+  });
+
+  it("moves the season winner to the kept team", () => {
     expect(nativeUpdate).toHaveBeenCalledWith(
       Season,
       { winnerTeam: "vitality-dup" },
       { winnerTeam: "vitality" },
     );
+  });
+
+  it("folds the path entries and the note of a shared season into the kept team", () => {
     expect(nativeUpdate).toHaveBeenCalledWith(
       SeasonPathEntry,
       { participant: "dup-2024" },
@@ -109,8 +119,13 @@ describe("SeasonRosterReferences.moveTeam", () => {
       { id: "kept-2024" },
       { pathNote: "Won the Major." },
     );
-    expect(nativeDelete).toHaveBeenCalledOnce();
-    expect(nativeDelete).toHaveBeenCalledWith(SeasonParticipant, { id: "dup-2024" });
+  });
+
+  it("deletes only the duplicate's participant of the shared season", () => {
+    expect(nativeDelete).toHaveBeenCalledExactlyOnceWith(SeasonParticipant, { id: "dup-2024" });
+  });
+
+  it("reassigns the remaining participants last", () => {
     expect(nativeUpdate).toHaveBeenLastCalledWith(
       SeasonParticipant,
       { team: "vitality-dup" },

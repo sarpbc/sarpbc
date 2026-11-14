@@ -61,11 +61,11 @@ describe(computeCircuitStandings, () => {
       now,
     );
 
-    expect(events.map(({ event: { id }, status }) => [id, status])).toEqual([
+    expect(events.map(({ event: { id }, status }) => [id, status])).toStrictEqual([
       ["a", "counted"],
       ["b", "counted"],
     ]);
-    expect(rows).toEqual([
+    expect(rows).toStrictEqual([
       {
         rank: 1,
         points: 16,
@@ -104,7 +104,7 @@ describe(computeCircuitStandings, () => {
       now,
     );
 
-    expect(rows.map(({ rank, team: { id }, points }) => [rank, id, points])).toEqual([
+    expect(rows.map(({ rank, team: { id }, points }) => [rank, id, points])).toStrictEqual([
       [1, "vit", 10],
       [2, "bds", 3],
       [2, "kc", 3],
@@ -118,15 +118,15 @@ describe(computeCircuitStandings, () => {
       now,
     );
 
-    expect(rows).toEqual([]);
+    expect(rows).toStrictEqual([]);
     expect(events[0]?.status).toBe("scale_missing");
   });
 
   it("keeps an ended event without results in the list without awarding points", () => {
     const { rows, events } = computeCircuitStandings([stage({ event: event("a") })], null, now);
 
-    expect(rows).toEqual([]);
-    expect(events).toEqual([
+    expect(rows).toStrictEqual([]);
+    expect(events).toStrictEqual([
       {
         event: event("a"),
         beginAt: past(1).toISOString(),
@@ -148,8 +148,8 @@ describe(computeCircuitStandings, () => {
       now,
     );
 
-    expect(rows).toEqual([]);
-    expect(events.map(({ event: { id }, status }) => [id, status])).toEqual([
+    expect(rows).toStrictEqual([]);
+    expect(events.map(({ event: { id }, status }) => [id, status])).toStrictEqual([
       ["live", "in_progress"],
       ["next", "upcoming"],
     ]);
@@ -169,8 +169,8 @@ describe(computeCircuitStandings, () => {
       now,
     );
 
-    expect(rows[0]?.events).toEqual([{ eventId: "a", points: 7, placement: 2 }]);
-    expect(sourceUrls).toEqual(["https://example.org/rules"]);
+    expect(rows[0]?.events).toStrictEqual([{ eventId: "a", points: 7, placement: 2 }]);
+    expect(sourceUrls).toStrictEqual(["https://example.org/rules"]);
   });
 });
 
@@ -201,7 +201,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
     });
 
   it("credits only the region teams listed on a worldwide stage", () => {
-    expect(totals([major()], "EU")).toEqual([
+    expect(totals([major()], "EU")).toStrictEqual([
       ["kc", 20],
       ["vit", 14],
     ]);
@@ -209,7 +209,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
 
   it("credits every team of a worldwide stage in a worldwide circuit", () => {
     for (const region of [null, "Worldwide"])
-      expect(totals([major()], region)).toEqual([
+      expect(totals([major()], region)).toStrictEqual([
         ["nrg", 30],
         ["kc", 20],
         ["flcn", 14],
@@ -218,7 +218,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
   });
 
   it("credits nobody from a worldwide stage whose region teams are not entered yet", () => {
-    expect(totals([major({ regionTeamIds: [] })], "NA")).toEqual([]);
+    expect(totals([major({ regionTeamIds: [] })], "NA")).toStrictEqual([]);
   });
 
   it("credits every placed team of a stage of the circuit's own region", () => {
@@ -235,7 +235,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
         ],
         "EU",
       ),
-    ).toEqual([
+    ).toStrictEqual([
       ["kc", 10],
       ["vit", 6],
     ]);
@@ -255,7 +255,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
         ],
         "EU",
       ),
-    ).toEqual([["kc", 3]]);
+    ).toStrictEqual([["kc", 3]]);
   });
 });
 
@@ -287,16 +287,27 @@ describe("computeCircuitStandings with places decided in groups", () => {
     finishes: groupFinishes,
   });
 
-  it("awards the 9th-12th and 13th-16th bands from staff-entered event placements", () => {
+  const playoffStandings = () => {
     const { rows } = computeCircuitStandings([playoffs], null, now);
     const points = Object.fromEntries(rows.map(({ team: { id }, points: total }) => [id, total]));
 
+    return { rows, points };
+  };
+
+  it("awards the 9th-12th and 13th-16th bands from staff-entered event placements", () => {
+    const { rows, points } = playoffStandings();
+
     expect(rows).toHaveLength(16);
-    expect(["g9", "g10", "g11", "g12"].map((id) => points[id])).toEqual([2, 2, 2, 2]);
-    expect(["g13", "g14", "g15", "g16"].map((id) => points[id])).toEqual([1, 1, 1, 1]);
+    expect(["g9", "g10", "g11", "g12"].map((id) => points[id])).toStrictEqual([2, 2, 2, 2]);
+    expect(["g13", "g14", "g15", "g16"].map((id) => points[id])).toStrictEqual([1, 1, 1, 1]);
+  });
+
+  it("keeps the top placements and records each staff-entered event placement", () => {
+    const { rows, points } = playoffStandings();
+
     expect(points.p1).toBe(15);
     expect(points.p8).toBe(3);
-    expect(rows.find(({ team: { id } }) => id === "g9")?.events).toEqual([
+    expect(rows.find(({ team: { id } }) => id === "g9")?.events).toStrictEqual([
       { eventId: "open", points: 2, placement: 9 },
     ]);
   });
@@ -315,7 +326,7 @@ describe("computeCircuitStandings with places decided in groups", () => {
       now,
     );
 
-    expect(rows.map(({ points }) => points)).toEqual([2]);
+    expect(rows.map(({ points }) => points)).toStrictEqual([2]);
   });
 
   it("does not score group-stage placements unless that stage is attached", () => {
@@ -332,7 +343,7 @@ describe("computeCircuitStandings with places decided in groups", () => {
       now,
     );
 
-    expect(rows.map(({ team: { id }, points }) => [id, points])).toEqual([["kc", 10]]);
+    expect(rows.map(({ team: { id }, points }) => [id, points])).toStrictEqual([["kc", 10]]);
     expect(events[0]?.status).toBe("counted");
   });
 });

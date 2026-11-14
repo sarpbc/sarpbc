@@ -7,10 +7,10 @@ describe("AirRiddle guess input", () => {
   const metadata = { type: "body", schema: GuessDto } as const;
 
   it("accepts a player name and an optional final-guess boolean", async () => {
-    await expect(pipe.transform({ guess: "Kaydop" }, metadata)).resolves.toEqual({
+    await expect(pipe.transform({ guess: "Kaydop" }, metadata)).resolves.toStrictEqual({
       guess: "Kaydop",
     });
-    await expect(pipe.transform({ guess: "Kaydop", last: true }, metadata)).resolves.toEqual({
+    await expect(pipe.transform({ guess: "Kaydop", last: true }, metadata)).resolves.toStrictEqual({
       guess: "Kaydop",
       last: true,
     });
@@ -23,6 +23,6 @@ describe("AirRiddle guess input", () => {
     { guess: "Kaydop", last: "true" },
     { guess: "Kaydop", answer: "Zen" },
   ])("rejects malformed input %j", async (input) => {
-    await expect(pipe.transform(input, metadata)).rejects.toThrow();
+    await expect(pipe.transform(input, metadata)).rejects.toThrow("Bad Request Exception");
   });
 });

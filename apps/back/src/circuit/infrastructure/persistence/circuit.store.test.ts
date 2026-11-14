@@ -22,9 +22,9 @@ const circuit: CircuitSummary = {
 
 function storeFailingWith(error: Error) {
   const em = {
-    findOne: vi.fn().mockResolvedValue(null),
-    persist: vi.fn().mockReturnThis(),
-    flush: vi.fn().mockRejectedValue(error),
+    findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
+    persist: vi.fn<EntityManager["persist"]>().mockReturnThis(),
+    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
   };
 
   return new CircuitPersistence(Object.assign(unconstructed(EntityManager), em));

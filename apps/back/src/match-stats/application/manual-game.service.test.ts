@@ -86,8 +86,8 @@ function setup(
   } satisfies BallchasingSource;
 
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn(async (id: string) => id === "t1"),
-    matches: vi.fn(async () => [
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
+    matches: vi.fn<StatsCandidates["matches"]>(async () => [
       {
         ...match,
         numberOfGames: options.numberOfGames === undefined ? 5 : options.numberOfGames,
@@ -134,7 +134,7 @@ describe("ManualGameService.attach", () => {
   it("stores the replay as the chosen game with the chosen sides and resolves players", async () => {
     const { service, games, source } = setup();
 
-    await expect(service.attach("t1", input)).resolves.toEqual({
+    await expect(service.attach("t1", input)).resolves.toStrictEqual({
       matchId: "m1",
       number: 2,
       ballchasingId: REPLAY,
@@ -147,11 +147,11 @@ describe("ManualGameService.attach", () => {
     expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
     const [[record]] = games.save.mock.calls;
     expect(record).toMatchObject({ rocketLeagueId: "RL-1", playedAt: PLAYED_AT, number: 2 });
-    expect(record.players.map((player) => [player.name, player.playerId])).toEqual([
+    expect(record.players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Seikoo", "seikoo"],
       ["Stand-in", "vatira"],
     ]);
-    expect(record.learnedLinks).toEqual([
+    expect(record.learnedLinks).toStrictEqual([
       { platform: "steam", platformId: "seikoo-id", playerId: "seikoo" },
     ]);
   });
@@ -177,7 +177,7 @@ describe("ManualGameService.attach", () => {
       blueParticipantId: "p-seikoo",
       orangeParticipantId: "p-stand-in",
     });
-    expect(record.players.map((player) => [player.side, player.playerId])).toEqual([
+    expect(record.players.map((player) => [player.side, player.playerId])).toStrictEqual([
       ["blue", "seikoo"],
       ["orange", "stand-in"],
     ]);
@@ -191,8 +191,17 @@ describe("ManualGameService.attach", () => {
     expect(games.save).toHaveBeenCalledOnce();
   });
 
+  it("rejects an unknown tournament before calling Ballchasing", async () => {
+    const { service, source, games } = setup();
+
+    await expect(rejection(service.attach("missing", input))).resolves.toBeInstanceOf(
+      NotFoundError,
+    );
+    expect(source.replayStats).not.toHaveBeenCalled();
+    expect(games.save).not.toHaveBeenCalled();
+  });
+
   it.each([
-    ["an unknown tournament", "missing", {}, NotFoundError, undefined],
     [
       "an invalid replay",
       "t1",
@@ -230,7 +239,7 @@ describe("ManualGameService.attach", () => {
 
     expect(error).toBeInstanceOf(kind);
 
-    if (code !== undefined) expect(error.detail.code).toBe(code);
+    expect(error.detail.code).toBe(code);
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.save).not.toHaveBeenCalled();
   });
@@ -295,7 +304,7 @@ describe("ManualGameService.remove", () => {
 
     games.remove.mockResolvedValueOnce(removed);
 
-    await expect(service.remove("t1", "m1", 1)).resolves.toEqual(removed);
+    await expect(service.remove("t1", "m1", 1)).resolves.toStrictEqual(removed);
     expect(games.remove).toHaveBeenCalledWith("t1", { matchId: "m1", number: 1 });
   });
 
@@ -312,7 +321,7 @@ describe("ManualGameService.list", () => {
   it("lists the tournament's stored games", async () => {
     const { service, games } = setup();
 
-    await expect(service.list("t1")).resolves.toEqual([]);
+    await expect(service.list("t1")).resolves.toStrictEqual([]);
     expect(games.inTournament).toHaveBeenCalledWith("t1");
     await expect(service.list("missing")).rejects.toBeInstanceOf(NotFoundError);
   });

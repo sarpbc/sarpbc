@@ -72,30 +72,47 @@ describe("season archives (e2e)", () => {
     await app.close();
   });
 
-  it("keeps the staff season routes behind tournaments.manage", async () => {
-    await request(app.getHttpServer()).get("/seasons").expect(401);
-    await request(app.getHttpServer()).get("/seasons").set("Cookie", MEMBER).expect(403);
-    await request(app.getHttpServer())
+  it.each([
+    ["anonymous", undefined, 401],
+    ["a member", MEMBER, 403],
+  ])("keeps the season list from %s", async (_, cookie, status) => {
+    const response = await http()
+      .get("/seasons")
+      .set("Cookie", cookie ?? "");
+
+    expect(response.status).toBe(status);
+  });
+
+  it("refuses a member adding a participant", async () => {
+    const response = await http()
       .post(`/seasons/${pilot.id}/participants`)
       .set("Cookie", MEMBER)
-      .send({ teamId: "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b" })
-      .expect(403);
-    const list = await http().get("/seasons").set("Cookie", STAFF).expect(200);
+      .send({ teamId: "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b" });
+
+    expect(response.status).toBe(403);
+  });
+
+  it("lists every season to staff", async () => {
+    const list = await http().get("/seasons").set("Cookie", STAFF);
+
+    expect(list.status).toBe(200);
     expect(z.object({ seasons: z.array(z.unknown()) }).parse(list.body).seasons).toHaveLength(2);
   });
 
-  it("publishes slugged seasons to anyone and renders an empty pilot", async () => {
-    const index = await request(app.getHttpServer()).get("/season-archives").expect(200);
+  it("lists slugged seasons to anyone", async () => {
+    const index = await http().get("/season-archives");
+
     expect(index.headers["cache-control"]).toBe("public, max-age=60");
-    expect(index.body).toEqual({
+    expect(index.body).toStrictEqual({
       seasons: [{ slug: "pilot-season", name: "Pilot season", winner: null }],
     });
+  });
 
-    const archive = await request(app.getHttpServer())
-      .get("/season-archives/pilot-season")
-      .expect(200);
+  it("renders an empty pilot archive", async () => {
+    const archive = await http().get("/season-archives/pilot-season");
 
-    expect(archive.body).toEqual({
+    expect(archive.status).toBe(200);
+    expect(archive.body).toStrictEqual({
       slug: "pilot-season",
       name: "Pilot season",
       format: { summary: null, phases: [] },
@@ -106,41 +123,59 @@ describe("season archives (e2e)", () => {
     expect(JSON.stringify(archive.body)).not.toContain(pilot.id);
   });
 
-  it("answers 404 for an unknown or unpublished slug", async () => {
-    await request(app.getHttpServer()).get("/season-archives/rlcs-1999").expect(404);
-    await request(app.getHttpServer()).get("/season-archives/draft").expect(404);
-  });
+  it.each(["rlcs-1999", "draft"])(
+    "answers 404 for the unknown or unpublished slug %s",
+    async (slug) => {
+      const response = await http().get(`/season-archives/${slug}`);
+
+      expect(response.status).toBe(404);
+    },
+  );
 
   it("refuses a slug another season already uses", async () => {
     const response = await http()
       .post("/seasons")
       .set("Cookie", STAFF)
-      .send({ name: "Another pilot", slug: "pilot-season" })
-      .expect(409);
+      .send({ name: "Another pilot", slug: "pilot-season" });
 
+    expect(response.status).toBe(409);
     expect(JSON.stringify(response.body)).toContain("pilot-season");
   });
 
-  it("validates archive bodies at the HTTP boundary", async () => {
-    await http()
-      .patch(`/seasons/${pilot.id}`)
-      .set("Cookie", STAFF)
-      .send({ name: "Pilot season", winnerTeamId: "vitality" })
-      .expect(400);
-    await http()
-      .post(`/seasons/${pilot.id}/participants`)
-      .set("Cookie", STAFF)
-      .send({ teamId: "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b", extra: true })
-      .expect(400);
-    await http()
-      .post(`/seasons/${pilot.id}/participants/6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b/path`)
-      .set("Cookie", STAFF)
-      .send({ label: "", result: "1st" })
-      .expect(400);
-    await http()
-      .post(`/seasons/${pilot.id}/participants`)
-      .set("Cookie", STAFF)
-      .send({ teamId: "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b" })
-      .expect(404);
+  const TEAM_ID = "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b";
+
+  it.each([
+    [
+      "an unknown winner team",
+      "patch",
+      (id: string) => `/seasons/${id}`,
+      { name: "Pilot season", winnerTeamId: "vitality" },
+      400,
+    ],
+    [
+      "an unexpected participant field",
+      "post",
+      (id: string) => `/seasons/${id}/participants`,
+      { teamId: TEAM_ID, extra: true },
+      400,
+    ],
+    [
+      "an empty path label",
+      "post",
+      (id: string) => `/seasons/${id}/participants/${TEAM_ID}/path`,
+      { label: "", result: "1st" },
+      400,
+    ],
+    [
+      "a participant team that does not exist",
+      "post",
+      (id: string) => `/seasons/${id}/participants`,
+      { teamId: TEAM_ID },
+      404,
+    ],
+  ] as const)("answers %s with the status %i", async (_, method, path, body, status) => {
+    const response = await http()[method](path(pilot.id)).set("Cookie", STAFF).send(body);
+
+    expect(response.status).toBe(status);
   });
 });

@@ -70,7 +70,7 @@ describe("PandascoreTournamentMapper", () => {
 
     const command = toUpsertTournamentCommand(dto);
 
-    expect(command).toEqual({
+    expect(command).toStrictEqual({
       pandascoreId: 42,
       name: "RLCS 2025",
       serie: { pandascoreId: 2, fullName: "RLCS 2025 Season", year: 2025 },

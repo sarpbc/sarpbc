@@ -120,7 +120,7 @@ describe(RosterSyncWriter, () => {
     expect(team.imageUrl).toBe("local.png");
   });
 
-  it("maps a PandaScore team named in an alias to the aliased team without touching it", async () => {
+  async function upsertAliasedTeamTwice() {
     const team = Object.assign(new Team(), {
       id: "current",
       name: "Fixture Now",
@@ -128,16 +128,34 @@ describe(RosterSyncWriter, () => {
     });
 
     const alias = Object.assign(new TeamAlias(), { pandascoreId: 21, team });
+
     em.findOne.mockImplementation(async (entity, where) =>
       entity === TeamAlias && where.pandascoreId === 21 ? alias : null,
     );
+
     const writer = new RosterSyncWriter(manager);
     const input = { pandascoreId: 21, name: "Fixture Before", slug: "fixture-before" };
-    await expect(writer.upsertTeam(input)).resolves.toEqual({ id: "current" });
-    await expect(writer.upsertTeam(input)).resolves.toEqual({ id: "current" });
+
+    return { team, results: [await writer.upsertTeam(input), await writer.upsertTeam(input)] };
+  }
+
+  it("maps a PandaScore team named in an alias to the aliased team", async () => {
+    const { results } = await upsertAliasedTeamTwice();
+
+    expect(results).toStrictEqual([{ id: "current" }, { id: "current" }]);
+  });
+
+  it("does not touch the aliased team", async () => {
+    const { team } = await upsertAliasedTeamTwice();
+
     expect(team.name).toBe("Fixture Now");
     expect(team.pandascoreId).toBe(20);
     expect(em.persist).not.toHaveBeenCalled();
+  });
+
+  it("looks the alias up once for repeated upserts", async () => {
+    await upsertAliasedTeamTwice();
+
     expect(em.findOne.mock.calls.filter(([entity]) => entity === TeamAlias)).toHaveLength(1);
   });
 });

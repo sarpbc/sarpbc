@@ -32,7 +32,7 @@ describe(TwitchAppToken, () => {
 
     expect(url).toBe("https://id.twitch.tv/oauth2/token");
     expect(init?.method).toBe("POST");
-    expect(Object.fromEntries(body)).toEqual({
+    expect(Object.fromEntries(body)).toStrictEqual({
       client_id: "client",
       client_secret: "secret",
       grant_type: "client_credentials",
@@ -68,7 +68,10 @@ describe(TwitchAppToken, () => {
   it("shares one request between concurrent callers", async () => {
     fetchMock.mockResolvedValueOnce(tokenResponse("first"));
 
-    await expect(Promise.all([token.get(), token.get()])).resolves.toEqual(["first", "first"]);
+    await expect(Promise.all([token.get(), token.get()])).resolves.toStrictEqual([
+      "first",
+      "first",
+    ]);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
 

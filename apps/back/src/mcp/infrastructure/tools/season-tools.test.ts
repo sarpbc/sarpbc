@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { SeasonDetail, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import type { SeasonService } from "../../../season/application/season.service";
 import { rosterTools } from "./roster-tools";
 import { seasonTools } from "./season-tools";
 
@@ -118,7 +119,10 @@ describe("get_season", () => {
     };
 
     const tool = seasonTools({
-      seasonService: { list: vi.fn(), detail: vi.fn(async () => detail) },
+      seasonService: {
+        list: vi.fn<SeasonService["list"]>(),
+        detail: vi.fn<SeasonService["detail"]>(async () => detail),
+      },
     }).find((candidate) => candidate.name === "get_season");
 
     if (!tool) throw new Error("get_season is not defined");
@@ -133,7 +137,7 @@ describe("get_season", () => {
         },
       ],
     });
-    expect(new Set(Object.keys(z.record(z.string(), z.unknown()).parse(body)))).toEqual(
+    expect(new Set(Object.keys(z.record(z.string(), z.unknown()).parse(body)))).toStrictEqual(
       new Set(["awards", "id", "name"]),
     );
   });

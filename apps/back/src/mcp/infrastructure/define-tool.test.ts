@@ -28,6 +28,8 @@ const write = (handler: () => Promise<{ result: object; entityId?: string }>) =>
     handler,
   });
 
+type WriteHandler = Parameters<typeof write>[0];
+
 const read = (permission?: "news.manage" | readonly ["players.manage", "teams.manage"]) =>
   defineTool({
     name: "get_thing",
@@ -50,7 +52,7 @@ const failing = (cause: Error) =>
 describe(defineTool, () => {
   describe("write tools", () => {
     it("denies a role without the permission and never runs the handler", async () => {
-      const handler = vi.fn(async () => ({ result: { ok: true } }));
+      const handler = vi.fn<WriteHandler>(async () => ({ result: { ok: true } }));
       const result = await write(handler).run(journalist, { matchId: "m1" });
 
       expect(result.isError).toBe(true);
@@ -120,7 +122,13 @@ describe(defineTool, () => {
       expect(result.isError).toBe(true);
       expect(textContent(result)).not.toContain("ECONNREFUSED");
       expect(textContent(result)).toContain("was logged");
-      expect(logError).toHaveBeenCalledWith();
+      expect(logError).toHaveBeenCalledExactlyOnceWith({
+        component: "McpTool",
+        error: new Error("connect ECONNREFUSED 10.0.0.5:5432"),
+        message: "get_thing failed",
+        tool: "get_thing",
+        userId: "user-1",
+      });
     });
   });
 
