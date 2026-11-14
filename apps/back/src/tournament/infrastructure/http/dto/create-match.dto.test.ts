@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CreateMatchDto, SetMatchResultDto } from "./create-match.dto";
 
-describe("CreateMatchDto", () => {
+describe("create-match body", () => {
   const valid = { name: "Final", participantIds: ["a", "b"] };
 
   it("accepts a manual match", () => {
@@ -20,7 +20,7 @@ const result = (a: number, b: number, second = "b") => ({
   ],
 });
 
-describe("SetMatchResultDto", () => {
+describe("set-match-result body", () => {
   it("accepts the series score of both sides", () => {
     expect(SetMatchResultDto.safeParse(result(3, 1)).success).toBe(true);
   });

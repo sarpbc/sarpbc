@@ -3,7 +3,7 @@ import { inferEndAt } from "./tournament-end";
 
 const at = (iso: string) => new Date(iso);
 
-describe("inferEndAt", () => {
+describe(inferEndAt, () => {
   it("returns the latest played match end once every match is settled", () => {
     expect(
       inferEndAt([
@@ -11,7 +11,7 @@ describe("inferEndAt", () => {
         { status: "finished", beginAt: at("2025-03-02T10:00Z"), endAt: null },
         { status: "canceled", beginAt: at("2025-03-03T10:00Z"), endAt: null },
       ]),
-    ).toEqual(at("2025-03-02T10:00Z"));
+    ).toStrictEqual(at("2025-03-02T10:00Z"));
   });
 
   it("returns null while a match is still to play", () => {

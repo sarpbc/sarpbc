@@ -19,15 +19,15 @@ import {
 
 const matchWriterMock = () =>
   ({
-    load: vi.fn(),
-    byPandascoreId: vi.fn(),
-    save: vi.fn(),
-    tournament: vi.fn(),
-    participants: vi.fn(),
-    timings: vi.fn(),
-    references: vi.fn(),
-    remove: vi.fn(),
-    bracket: vi.fn(),
+    load: vi.fn<MatchWriter["load"]>(),
+    byPandascoreId: vi.fn<MatchWriter["byPandascoreId"]>(),
+    save: vi.fn<MatchWriter["save"]>(),
+    tournament: vi.fn<MatchWriter["tournament"]>(),
+    participants: vi.fn<MatchWriter["participants"]>(),
+    timings: vi.fn<MatchWriter["timings"]>(),
+    references: vi.fn<MatchWriter["references"]>(),
+    remove: vi.fn<MatchWriter["remove"]>(),
+    bracket: vi.fn<MatchWriter["bracket"]>(),
   }) satisfies MatchWriter;
 
 describe("Match writes", () => {
@@ -62,7 +62,7 @@ describe("Match writes", () => {
     });
 
     expect(match.winner?.id).toBe("a");
-    expect(match.results.map((result) => result.score)).toEqual([4, 2]);
+    expect(match.results.map((result) => result.score)).toStrictEqual([4, 2]);
     expect(writer.save).toHaveBeenCalledWith(match);
   });
 
@@ -79,7 +79,7 @@ describe("Match writes", () => {
       status: "finished",
     });
 
-    expect(match.endAt).toEqual(endAt);
+    expect(match.endAt).toStrictEqual(endAt);
   });
 
   it("rejects participants belonging to another tournament", async () => {
@@ -107,7 +107,7 @@ describe("Match writes", () => {
       participantIds: ["a", "b"],
     });
 
-    expect(updated.officialStreams).toEqual([
+    expect(updated.officialStreams).toStrictEqual([
       { language: "en", url: "https://twitch.tv/rocketleague", main: true },
     ]);
   });
@@ -160,7 +160,7 @@ describe("Manual match corrections", () => {
     });
 
     expect(match.winner?.id).toBe("b");
-    expect(match.results.map((result) => [result.participant.id, result.score])).toEqual([
+    expect(match.results.map((result) => [result.participant.id, result.score])).toStrictEqual([
       ["a", 1],
       ["b", 3],
     ]);
@@ -217,7 +217,7 @@ describe("Manual match corrections", () => {
     );
     const endAt = new Date("2026-11-02T19:12:00Z");
     const match = await updateMatchInTransaction(writer, "match", { status: "finished", endAt });
-    expect(match.endAt).toEqual(endAt);
+    expect(match.endAt).toStrictEqual(endAt);
   });
 
   it("clears the end date when the match is reopened", async () => {
@@ -272,7 +272,7 @@ describe("Match VOD writes", () => {
       { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "FR" },
     ]);
 
-    expect(match.vods).toEqual([
+    expect(match.vods).toStrictEqual([
       { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "fr", source: "twitch" },
     ]);
     expect(writer.save).toHaveBeenCalledWith(match);
@@ -286,7 +286,7 @@ describe("Match VOD writes", () => {
       { url: "https://twitch.tv/videos/5", language: "en", source: "twitch" },
     ]);
 
-    expect(match.vods.map((vod) => [vod.game, vod.source, vod.language])).toEqual([
+    expect(match.vods.map((vod) => [vod.game, vod.source, vod.language])).toStrictEqual([
       [1, "youtube", "en"],
       [5, "youtube", "de"],
       [5, "twitch", "en"],
@@ -390,7 +390,7 @@ describe("Match writes between player participants", () => {
     });
 
     expect(match.winner?.id).toBe("vatira");
-    expect(match.results.map((result) => result.score)).toEqual([2, 3]);
+    expect(match.results.map((result) => result.score)).toStrictEqual([2, 3]);
   });
 });
 
@@ -438,7 +438,7 @@ describe("Manual bracket writes", () => {
 
     expect(
       match.previousMatches.map(({ previousMatch, type }) => [previousMatch.id, type]),
-    ).toEqual([
+    ).toStrictEqual([
       ["semi-1", "winner"],
       ["semi-2", "winner"],
     ]);
@@ -484,7 +484,7 @@ describe("Manual bracket writes", () => {
     expect(linked.previousMatches).toHaveLength(2);
     writer.load.mockResolvedValue(linked);
     const cleared = await updateMatchInTransaction(writer, "final", { previousMatches: [] });
-    expect(cleared.previousMatches).toEqual([]);
+    expect(cleared.previousMatches).toStrictEqual([]);
   });
 
   it("refuses bracket links and participants on a PandaScore match", async () => {
@@ -516,7 +516,7 @@ describe("Manual bracket writes", () => {
   it("fills an empty bracket match with its participants in order", async () => {
     writer.load.mockResolvedValue(emptyMatch());
     const match = await updateMatchInTransaction(writer, "final", { participantIds: ["b", "a"] });
-    expect(match.participants.map((participant) => participant.id)).toEqual(["b", "a"]);
+    expect(match.participants.map((participant) => participant.id)).toStrictEqual(["b", "a"]);
   });
 
   it("refuses to swap the participants of a scored match without new scores", async () => {
@@ -540,12 +540,12 @@ describe("Manual bracket writes", () => {
     });
 
     const [semi1, semi2, final] = matches;
-    expect(matches.map((match) => [match.name, match.participants.length])).toEqual([
+    expect(matches.map((match) => [match.name, match.participants.length])).toStrictEqual([
       ["Semifinal 1", 0],
       ["Semifinal 2", 0],
       ["Grand Final", 0],
     ]);
-    expect(final?.previousMatches.map(({ previousMatch }) => previousMatch.id)).toEqual([
+    expect(final?.previousMatches.map(({ previousMatch }) => previousMatch.id)).toStrictEqual([
       semi1?.id,
       semi2?.id,
     ]);

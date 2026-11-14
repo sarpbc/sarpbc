@@ -21,7 +21,7 @@ function setup() {
   return { playerLines, service: new TournamentPlayerStatsService({ playerLines }) };
 }
 
-describe("TournamentPlayerStatsService", () => {
+describe(TournamentPlayerStatsService, () => {
   it("aggregates every redistributable stage of an event together", async () => {
     const { service, playerLines } = setup();
 
@@ -38,7 +38,9 @@ describe("TournamentPlayerStatsService", () => {
   it("returns empty stats for a start.gg stage without reading its games", async () => {
     const { service, playerLines } = setup();
 
-    expect(await service.forStages([{ id: "qualifier", source: "startgg" }])).toEqual({
+    await expect(
+      service.forStages([{ id: "qualifier", source: "startgg" }]),
+    ).resolves.toStrictEqual({
       games: 0,
       players: [],
       unlinkedAccounts: 0,

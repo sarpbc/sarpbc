@@ -24,12 +24,14 @@ const reply: ReplyRecord = {
 
 function entityManager(flushFailure: Error | null) {
   return {
-    getRepository: vi.fn().mockReturnValue({}),
-    findOne: vi.fn().mockResolvedValue({ id: reply.id }),
-    getReference: vi.fn((_entity: EntityName<object>, id: string) => ({ id })),
-    persist: vi.fn(),
-    remove: vi.fn(),
-    flush: vi.fn(async () => {
+    getRepository: vi.fn<() => object>().mockReturnValue({}),
+    findOne: vi.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: reply.id }),
+    getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
+      (_entity, id) => ({ id }),
+    ),
+    persist: vi.fn<EntityManager["persist"]>(),
+    remove: vi.fn<EntityManager["remove"]>(),
+    flush: vi.fn<() => Promise<void>>(async () => {
       if (flushFailure) throw flushFailure;
     }),
   };
@@ -57,7 +59,7 @@ describe("MikroReplyStore.delete", () => {
           "This comment could not be deleted because it is still referenced. Hide it instead.",
       },
     });
-    expect(em.remove).toHaveBeenCalled();
+    expect(em.remove).toHaveBeenCalledExactlyOnceWith({ id: reply.id });
   });
 
   it("rethrows other database failures", async () => {

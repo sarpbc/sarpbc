@@ -12,7 +12,7 @@ const entry: PrizeEntry = {
   sourceUrl: null,
 };
 
-describe("assertPrizeDistribution", () => {
+describe(assertPrizeDistribution, () => {
   it("accepts tied placements in several currencies", () => {
     expect(() => {
       assertPrizeDistribution([

@@ -17,13 +17,13 @@ function makeReply(partial: Partial<ReplyTargetFields>): ReplyTargetFields {
   };
 }
 
-describe("resolveReplyTargetLink", () => {
+describe(resolveReplyTargetLink, () => {
   it("resolves forum post targets", () => {
     const reply = makeReply({
       post: { id: "post-1", publicId: 88, title: "Thread title: Who wins?" },
     });
 
-    expect(resolveReplyTargetLink(reply)).toEqual({
+    expect(resolveReplyTargetLink(reply)).toStrictEqual({
       targetType: "forumPost",
       targetId: "post-1",
       targetLabel: "Thread title: Who wins?",
@@ -36,7 +36,7 @@ describe("resolveReplyTargetLink", () => {
       newsArticle: { id: "news-1", slug: "rlcs-finals", title: "RLCS Finals" },
     });
 
-    expect(resolveReplyTargetLink(reply)).toEqual({
+    expect(resolveReplyTargetLink(reply)).toStrictEqual({
       targetType: "newsArticle",
       targetId: "news-1",
       targetLabel: "RLCS Finals",
@@ -54,7 +54,7 @@ describe("resolveReplyTargetLink", () => {
       },
     });
 
-    expect(resolveReplyTargetLink(reply)).toEqual({
+    expect(resolveReplyTargetLink(reply)).toStrictEqual({
       targetType: "match",
       targetId: "match-1",
       targetLabel: "Team A vs Team B",
@@ -67,13 +67,13 @@ describe("resolveReplyTargetLink", () => {
   });
 });
 
-describe("replyTarget", () => {
+describe(replyTarget, () => {
   it.each([
     [{ postId: "p" }, { kind: "forumPost", id: "p" }],
     [{ newsArticleId: "n" }, { kind: "newsArticle", id: "n" }],
     [{ matchId: "m" }, { kind: "match", id: "m" }],
   ])("reads the single target of %j", (input, expected) => {
-    expect(replyTarget(input)).toEqual(expected);
+    expect(replyTarget(input)).toStrictEqual(expected);
   });
 
   it.each([{}, { postId: "p", matchId: "m" }])("rejects %j", (input) => {
@@ -83,7 +83,7 @@ describe("replyTarget", () => {
 
 const post = (id: string) => makeReply({ post: { id, publicId: 1, title: "T" } });
 
-describe("sameReplyTarget", () => {
+describe(sameReplyTarget, () => {
   it("matches replies on the same target", () => {
     expect(sameReplyTarget(post("p1"), post("p1"))).toBe(true);
   });
@@ -96,7 +96,7 @@ describe("sameReplyTarget", () => {
   });
 });
 
-describe("replySortOrder", () => {
+describe(replySortOrder, () => {
   it("lists forum discussions oldest first and the other targets newest first", () => {
     expect(replySortOrder("forumPost")).toBe("asc");
     expect(replySortOrder("newsArticle")).toBe("desc");

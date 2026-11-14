@@ -3,6 +3,9 @@ import type { StatsImportItem, StatsPlayerAccounts, TournamentStatsGame } from "
 import { jsonOf, textOf } from "../../../../test/mcp-result";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import type { StatsImport } from "../../../match-stats/domain/stats-import";
+import type { ManualGameService } from "../../../match-stats/application/manual-game.service";
+import type { StatsImportService } from "../../../match-stats/application/stats-import.service";
+import type { StatsPlayerLinkService } from "../../../match-stats/application/stats-player-link.service";
 import { gameStatsTools, summarizeStatsImport } from "./game-stats-tools";
 
 const TOOLS = [
@@ -97,18 +100,22 @@ const game: TournamentStatsGame = {
 
 function setup(role: "admin" | "journalist") {
   const statsImportService = {
-    request: vi.fn(async () => ({ ...statsImport, status: "pending" as const, items: [] })),
-    recent: vi.fn(async () => [statsImport]),
+    request: vi.fn<StatsImportService["request"]>(async () => ({
+      ...statsImport,
+      status: "pending" as const,
+      items: [],
+    })),
+    recent: vi.fn<StatsImportService["recent"]>(async () => [statsImport]),
   };
 
   const statsPlayerLinkService = {
-    accounts: vi.fn(async () => accounts),
-    link: vi.fn(async () => 7),
+    accounts: vi.fn<StatsPlayerLinkService["accounts"]>(async () => accounts),
+    link: vi.fn<StatsPlayerLinkService["link"]>(async () => 7),
   };
 
   const manualGameService = {
-    attach: vi.fn(async () => game),
-    remove: vi.fn(async () => game),
+    attach: vi.fn<ManualGameService["attach"]>(async () => game),
+    remove: vi.fn<ManualGameService["remove"]>(async () => game),
   };
 
   const tools = gameStatsTools({ statsImportService, statsPlayerLinkService, manualGameService });
@@ -126,21 +133,26 @@ function setup(role: "admin" | "journalist") {
   return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
 }
 
-describe("summarizeStatsImport", () => {
+describe(summarizeStatsImport, () => {
   it("counts other-stage replays and lists only the ones staff should review", () => {
     const summary = summarizeStatsImport(statsImport, false);
 
-    expect(summary.counts).toEqual({ imported: 1, already_imported: 1, unmatched: 3, failed: 1 });
-    expect(summary.otherStages).toEqual({ unknown_teams: 1, outside_match_window: 1 });
-    expect(summary.toReview.map((entry) => entry.replayId)).toEqual(["incomplete", "failed"]);
+    expect(summary.counts).toStrictEqual({
+      imported: 1,
+      already_imported: 1,
+      unmatched: 3,
+      failed: 1,
+    });
+    expect(summary.otherStages).toStrictEqual({ unknown_teams: 1, outside_match_window: 1 });
+    expect(summary.toReview.map((entry) => entry.replayId)).toStrictEqual(["incomplete", "failed"]);
     expect(summary.otherStageReplays).toBeNull();
-    expect(summary.progress).toEqual({ processed: 6, total: 6 });
+    expect(summary.progress).toStrictEqual({ processed: 6, total: 6 });
   });
 
   it("lists other-stage replays on request", () => {
     expect(
       summarizeStatsImport(statsImport, true).otherStageReplays?.map((entry) => entry.replayId),
-    ).toEqual(["other-1", "other-2"]);
+    ).toStrictEqual(["other-1", "other-2"]);
   });
 });
 
@@ -148,14 +160,18 @@ describe("game stats tools", () => {
   it("defines every tool", () => {
     const { tools } = setup("admin");
 
-    expect(tools.map((tool) => tool.name)).toEqual(TOOLS);
+    expect(tools.map((tool) => tool.name)).toStrictEqual(TOOLS);
   });
 
   it("starts an import and reports the latest one", async () => {
     const { call, statsImportService } = setup("admin");
 
     const callResult = await call("import_game_stats", { tournamentId: "t1", group: "rlcs-x1" });
-    expect(callResult.body).toEqual({ id: "import-1", groupId: "rlcs-x1", status: "pending" });
+    expect(callResult.body).toStrictEqual({
+      id: "import-1",
+      groupId: "rlcs-x1",
+      status: "pending",
+    });
     expect(statsImportService.request).toHaveBeenCalledWith("t1", "rlcs-x1");
     const { body } = await call("get_game_stats_import", { tournamentId: "t1" });
     expect(body).toMatchObject({
@@ -168,7 +184,7 @@ describe("game stats tools", () => {
     statsImportService.recent.mockResolvedValueOnce([]);
 
     const callResult2 = await call("get_game_stats_import", { tournamentId: "t1" });
-    expect(callResult2.body).toEqual({
+    expect(callResult2.body).toStrictEqual({
       import: null,
     });
   });
@@ -199,7 +215,7 @@ describe("game stats tools", () => {
     };
 
     const callResult5 = await call("link_game_player", { tournamentId: "t1", ...link });
-    expect(callResult5.body).toEqual({
+    expect(callResult5.body).toStrictEqual({
       link,
       linkedRows: 7,
     });
@@ -217,7 +233,7 @@ describe("game stats tools", () => {
     };
 
     const callResult6 = await call("attach_replay_to_game", { tournamentId: "t1", ...input });
-    expect(callResult6.body).toEqual(game);
+    expect(callResult6.body).toStrictEqual(game);
     expect(manualGameService.attach).toHaveBeenCalledWith("t1", input);
 
     const callResult7 = await call("remove_match_game", {
@@ -226,7 +242,7 @@ describe("game stats tools", () => {
       gameNumber: 2,
     });
 
-    expect(callResult7.body).toEqual(game);
+    expect(callResult7.body).toStrictEqual(game);
     expect(manualGameService.remove).toHaveBeenCalledWith("t1", "m1", 2);
   });
 
@@ -250,31 +266,24 @@ describe("game stats tools", () => {
     });
   });
 
-  it("requires tournaments.manage for every tool", async () => {
+  it.each(TOOLS)("requires tournaments.manage for %s", async (name) => {
     const { call, statsImportService, statsPlayerLinkService, manualGameService } =
       setup("journalist");
 
-    const outcomes = await Promise.all(
-      TOOLS.map(async (name) => ({
-        name,
-        ...(await call(name, {
-          tournamentId: "t1",
-          group: "rlcs-x1",
-          platform: "steam",
-          platformId: "1",
-          playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
-          matchId: "m1",
-          replay: game.ballchasingId,
-          gameNumber: 1,
-          blueParticipantId: "p1",
-        })),
-      })),
-    );
+    const { result, text } = await call(name, {
+      tournamentId: "t1",
+      group: "rlcs-x1",
+      platform: "steam",
+      platformId: "1",
+      playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
+      matchId: "m1",
+      replay: game.ballchasingId,
+      gameNumber: 1,
+      blueParticipantId: "p1",
+    });
 
-    for (const { name, result, text } of outcomes) {
-      expect(result.isError, name).toBe(true);
-      expect(text).toContain("tournaments.manage");
-    }
+    expect(result.isError).toBe(true);
+    expect(text).toContain("tournaments.manage");
 
     for (const service of [statsImportService, statsPlayerLinkService, manualGameService])
       for (const method of Object.values(service)) expect(method).not.toHaveBeenCalled();

@@ -8,6 +8,17 @@ import { TournamentPlayerStatsService } from "../../../match-stats/application/t
 import { redistributableCompetition } from "../redistributable-competition";
 import { jsonOf } from "../../../../test/mcp-result";
 import { readTools } from "./read-tools";
+import type { GameStatsStore } from "../../../match-stats/application/ports";
+import type { NewsService } from "../../../news/application/news.service";
+import type { ContractService } from "../../../roster/application/contract.service";
+import type { PlayerService } from "../../../roster/application/player.service";
+import type { TeamService } from "../../../roster/application/team.service";
+import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
+import type { MatchService } from "../../../tournament/application/match/match.service";
+import type { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
+import type { PlayerAwardService } from "../../../tournament/application/player-award.service";
+import type { EventQueries, TournamentQueries } from "../../../tournament/application/ports";
+import type { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 
 const user = { id: "u1", email: "staff@test.com", role: "journalist" } as const;
 
@@ -29,10 +40,10 @@ function setup() {
     team,
   });
 
-  const matchService = { list: vi.fn().mockResolvedValue([[], 0]) };
+  const matchService = { list: vi.fn<MatchService["list"]>().mockResolvedValue([[], 0]) };
 
   const matchLineupService = {
-    find: vi.fn(async (matchId: string) => ({
+    find: vi.fn<MatchLineupService["find"]>(async (matchId) => ({
       source: matchId === "startgg-match" ? ("startgg" as const) : ("manual" as const),
       lineups: [
         {
@@ -82,22 +93,26 @@ function setup() {
   });
 
   const tournaments = {
-    find: vi.fn().mockResolvedValue([[], 0]),
-    findById: vi.fn(async (id: string) =>
+    find: vi.fn<TournamentQueries["find"]>().mockResolvedValue([[], 0]),
+    findById: vi.fn<TournamentQueries["findById"]>(async (id) =>
       id === manualCup.id ? manualCup : Object.assign(new Tournament(), { id, source: "startgg" }),
     ),
   };
 
   const tournamentPrizeService = {
     findByTournamentId: vi
-      .fn()
+      .fn<TournamentPrizeService["findByTournamentId"]>()
       .mockResolvedValue({ source: "manual", prizepool: null, prizes: [] }),
-    teamEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
-    playerEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
+    teamEarnings: vi
+      .fn<TournamentPrizeService["teamEarnings"]>()
+      .mockResolvedValue({ totals: [], years: [] }),
+    playerEarnings: vi
+      .fn<TournamentPrizeService["playerEarnings"]>()
+      .mockResolvedValue({ totals: [], years: [] }),
   };
 
   const playerAwardService = {
-    findByTournamentId: vi.fn().mockResolvedValue([
+    findByTournamentId: vi.fn<PlayerAwardService["findByTournamentId"]>().mockResolvedValue([
       {
         id: "award-1",
         awardType: "mvp",
@@ -108,18 +123,18 @@ function setup() {
   };
 
   const playerService = {
-    find: vi.fn().mockResolvedValue([player]),
-    findBySlug: vi.fn().mockResolvedValue(player),
-    findById: vi.fn().mockResolvedValue(null),
+    find: vi.fn<PlayerService["find"]>().mockResolvedValue([player]),
+    findBySlug: vi.fn<PlayerService["findBySlug"]>().mockResolvedValue(player),
+    findById: vi.fn<PlayerService["findById"]>().mockResolvedValue(null),
   };
 
   const teamService = {
-    find: vi.fn().mockResolvedValue([team]),
-    findBySlug: vi.fn().mockResolvedValue(team),
-    findById: vi.fn().mockResolvedValue(team),
+    find: vi.fn<TeamService["find"]>().mockResolvedValue([team]),
+    findBySlug: vi.fn<TeamService["findBySlug"]>().mockResolvedValue(team),
+    findById: vi.fn<TeamService["findById"]>().mockResolvedValue(team),
   };
 
-  const playerLines = vi.fn(async (ids: string[]) =>
+  const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
     ids.map((id) => ({
       gameId: `game-${id}`,
       account: "steam:1",
@@ -135,7 +150,7 @@ function setup() {
   );
 
   const catalogService = {
-    findEvent: vi.fn(async (idOrSlug: string) => ({
+    findEvent: vi.fn<ManualCatalogService["findEvent"]>(async (idOrSlug) => ({
       event: Object.assign(new TournamentEvent(), { id: "event", slug: idOrSlug, name: "Coupe" }),
       stages: [manualCup, Object.assign(new Tournament(), { id: "c1", source: "startgg" })],
     })),
@@ -144,15 +159,18 @@ function setup() {
   const tools = readTools({
     playerService,
     teamService,
-    contractService: { getContractsByPlayer: vi.fn() },
-    newsService: { findAll: vi.fn(), findOneAdminByIdOrSlug: vi.fn() },
+    contractService: { getContractsByPlayer: vi.fn<ContractService["getContractsByPlayer"]>() },
+    newsService: {
+      findAll: vi.fn<NewsService["findAll"]>(),
+      findOneAdminByIdOrSlug: vi.fn<NewsService["findOneAdminByIdOrSlug"]>(),
+    },
     competition: redistributableCompetition({
       matchService,
       matchLineupService,
       tournaments,
       tournamentPrizeService,
       playerAwardService,
-      events: { list: vi.fn() },
+      events: { list: vi.fn<EventQueries["list"]>() },
       catalogService,
       tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerLines }),
     }),
@@ -205,20 +223,22 @@ describe("MCP read tools", () => {
       source: "startgg",
     });
 
-    expect(await json("search_players", { query: "Scout" })).toEqual([startgg]);
-    expect(await json("search_teams", { query: "Scouted" })).toEqual([startgg]);
-    expect(await json("get_player", { idOrSlug: "scout" })).toMatchObject({
+    await expect(json("search_players", { query: "Scout" })).resolves.toStrictEqual([startgg]);
+    await expect(json("search_teams", { query: "Scouted" })).resolves.toStrictEqual([startgg]);
+    await expect(json("get_player", { idOrSlug: "scout" })).resolves.toMatchObject({
       source: "startgg",
       role: "active",
       team: { id: "t1", source: "startgg" },
     });
-    expect(await json("get_team", { idOrSlug: "scouted" })).toMatchObject({ source: "startgg" });
+    await expect(json("get_team", { idOrSlug: "scouted" })).resolves.toMatchObject({
+      source: "startgg",
+    });
   });
 
   it("returns registered participants and hides start.gg tournaments", async () => {
     const { call, json } = setup();
 
-    expect(await json("get_tournament", { id: "manual-cup" })).toMatchObject({
+    await expect(json("get_tournament", { id: "manual-cup" })).resolves.toMatchObject({
       id: "manual-cup",
       participants: [
         {
@@ -231,29 +251,41 @@ describe("MCP read tools", () => {
     expect(callResult.isError).toBe(true);
   });
 
-  it("aggregates player stats per stage or event and leaves start.gg stages out", async () => {
-    const { call, json, playerLines } = setup();
-    expect(await json("get_tournament_player_stats", { tournamentId: "manual-cup" })).toMatchObject(
-      {
-        games: 1,
-        unlinkedAccounts: 0,
-        players: [{ player: { id: "p1" }, games: 1, totals: { goals: 2 }, goalParticipation: 75 }],
-      },
-    );
-    expect(await json("get_tournament_player_stats", { event: "coupe" })).toMatchObject({
+  it("aggregates player stats for a tournament", async () => {
+    const { json } = setup();
+
+    await expect(
+      json("get_tournament_player_stats", { tournamentId: "manual-cup" }),
+    ).resolves.toMatchObject({
+      games: 1,
+      unlinkedAccounts: 0,
+      players: [{ player: { id: "p1" }, games: 1, totals: { goals: 2 }, goalParticipation: 75 }],
+    });
+  });
+
+  it("aggregates player stats for the stages of an event", async () => {
+    const { json, playerLines } = setup();
+
+    await expect(json("get_tournament_player_stats", { event: "coupe" })).resolves.toMatchObject({
       games: 1,
     });
-    expect(playerLines).toHaveBeenLastCalledWith(["manual-cup"]);
-    const callResult2 = await call("get_tournament_player_stats", { tournamentId: "c1" });
-    expect(callResult2.isError).toBe(true);
-    const callResult3 = await call("get_tournament_player_stats", {});
-    expect(callResult3.isError).toBe(true);
-    expect(playerLines).toHaveBeenCalledTimes(2);
+    expect(playerLines).toHaveBeenCalledExactlyOnceWith(["manual-cup"]);
+  });
+
+  it("leaves start.gg stages out and requires a selector without reading stats", async () => {
+    const { call, playerLines } = setup();
+
+    const startgg = await call("get_tournament_player_stats", { tournamentId: "c1" });
+    const missing = await call("get_tournament_player_stats", {});
+
+    expect(startgg.isError).toBe(true);
+    expect(missing.isError).toBe(true);
+    expect(playerLines).not.toHaveBeenCalled();
   });
 
   it("returns match lineups with stand-in flags and hides start.gg matches", async () => {
     const { call, json } = setup();
-    expect(await json("get_match_lineups", { matchId: "manual-match" })).toEqual({
+    await expect(json("get_match_lineups", { matchId: "manual-match" })).resolves.toStrictEqual({
       matchId: "manual-match",
       lineups: [
         {
@@ -281,7 +313,7 @@ describe("MCP read tools", () => {
 
   it("returns redistributable distributions with the PandaScore prize pool", async () => {
     const { json } = setup();
-    expect(await json("get_tournament_prizes", { id: "c1" })).toEqual({
+    await expect(json("get_tournament_prizes", { id: "c1" })).resolves.toStrictEqual({
       tournamentId: "c1",
       prizepool: null,
       prizes: [],
@@ -297,7 +329,7 @@ describe("MCP read tools", () => {
 
   it("returns the awards of a redistributable tournament with their player and team", async () => {
     const { json } = setup();
-    expect(await json("get_tournament_awards", { id: "manual-cup" })).toEqual({
+    await expect(json("get_tournament_awards", { id: "manual-cup" })).resolves.toStrictEqual({
       tournamentId: "manual-cup",
       awards: [
         {

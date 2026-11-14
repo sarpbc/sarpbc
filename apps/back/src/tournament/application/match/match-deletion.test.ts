@@ -81,16 +81,16 @@ describe("MatchService deletion", () => {
   const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
   const reads: MatchQueries = {
-    list: vi.fn(),
-    page: vi.fn(),
-    byIds: vi.fn(),
-    recentlyEnded: vi.fn(),
-    detail: vi.fn(),
-    recentByTeam: vi.fn(),
-    betweenTeams: vi.fn(),
-    byPlayer: vi.fn(),
-    byTeam: vi.fn(),
-    byTournament: vi.fn(),
+    list: vi.fn<MatchQueries["list"]>(),
+    page: vi.fn<MatchQueries["page"]>(),
+    byIds: vi.fn<MatchQueries["byIds"]>(),
+    recentlyEnded: vi.fn<MatchQueries["recentlyEnded"]>(),
+    detail: vi.fn<MatchQueries["detail"]>(),
+    recentByTeam: vi.fn<MatchQueries["recentByTeam"]>(),
+    betweenTeams: vi.fn<MatchQueries["betweenTeams"]>(),
+    byPlayer: vi.fn<MatchQueries["byPlayer"]>(),
+    byTeam: vi.fn<MatchQueries["byTeam"]>(),
+    byTournament: vi.fn<MatchQueries["byTournament"]>(),
   };
 
   const service = new MatchService(
@@ -117,8 +117,8 @@ describe("MatchService deletion", () => {
   it("deletes the match and refreshes the standings of its tournament", async () => {
     await service.deleteMatch("dup");
 
-    expect(removed).toEqual(["dup"]);
-    expect(invalidated).toEqual(["oce-open"]);
+    expect(removed).toStrictEqual(["dup"]);
+    expect(invalidated).toStrictEqual(["oce-open"]);
   });
 
   it("refuses to delete a PandaScore match", async () => {
@@ -128,8 +128,8 @@ describe("MatchService deletion", () => {
     await expect(service.requireProposableDeletion("dup")).rejects.toThrow(
       "synced from PandaScore",
     );
-    expect(removed).toEqual([]);
-    expect(invalidated).toEqual([]);
+    expect(removed).toStrictEqual([]);
+    expect(invalidated).toStrictEqual([]);
   });
 
   it("refuses to delete a match that picks, comments or the bracket still reference", async () => {
@@ -139,7 +139,7 @@ describe("MatchService deletion", () => {
       "3 pick'em picks, 1 comment, 1 bracket match fed by it",
     );
     await expect(service.requireProposableDeletion("dup")).rejects.toBeInstanceOf(ConflictError);
-    expect(removed).toEqual([]);
+    expect(removed).toStrictEqual([]);
   });
 
   it("reports a missing match", async () => {
@@ -154,13 +154,13 @@ describe("MatchService deletion", () => {
 
     await expect(service.requireProposableDeletion("dup")).rejects.toThrow("start.gg");
     await service.deleteMatch("dup");
-    expect(removed).toEqual(["dup"]);
+    expect(removed).toStrictEqual(["dup"]);
   });
 
   it("checks a proposable deletion without deleting", async () => {
     await service.requireProposableDeletion("dup");
 
-    expect(removed).toEqual([]);
-    expect(invalidated).toEqual([]);
+    expect(removed).toStrictEqual([]);
+    expect(invalidated).toStrictEqual([]);
   });
 });

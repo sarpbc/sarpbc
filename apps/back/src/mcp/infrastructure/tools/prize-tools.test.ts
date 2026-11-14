@@ -142,7 +142,7 @@ describe("propose_player_award", () => {
     await call(input);
     await call({ ...input, awardType: "grand_finals_mvp" });
 
-    expect(rosterProposalService.propose.mock.calls.map(([change]) => change)).toEqual([
+    expect(rosterProposalService.propose.mock.calls.map(([change]) => change)).toStrictEqual([
       expect.objectContaining({ kind: "award_player", awardType: "mvp" }),
       expect.objectContaining({ kind: "award_player", awardType: "grand_finals_mvp" }),
     ]);

@@ -5,7 +5,7 @@ import { Team } from "../domain/team";
 import type { ContractQueries } from "./ports";
 import { TransferService } from "./transfer.service";
 
-describe("TransferService", () => {
+describe(TransferService, () => {
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
@@ -55,14 +55,14 @@ describe("TransferService", () => {
 
     const [page, count] = await service.findAndCount({ limit: 2, offset: 1 }, now);
     expect(count).toBe(4);
-    expect(page.map(({ id }) => id)).toEqual(["k:join", "v:leave"]);
+    expect(page.map(({ id }) => id)).toStrictEqual(["k:join", "v:leave"]);
 
     const [departures] = await service.findAndCount(
       { type: "departure", limit: 25, offset: 0 },
       now,
     );
 
-    expect(departures.map(({ id }) => id)).toEqual(["v:leave"]);
+    expect(departures.map(({ id }) => id)).toStrictEqual(["v:leave"]);
   });
 
   it("drops edge movements of loaded contracts that fall outside the period", async () => {
@@ -81,11 +81,11 @@ describe("TransferService", () => {
     const { service } = fixture();
 
     const june = await service.onDay(6, 1, now);
-    expect(june.map(({ id }) => id).toSorted()).toEqual(["k:join", "v:leave"]);
+    expect(june.map(({ id }) => id).toSorted()).toStrictEqual(["k:join", "v:leave"]);
 
     const march = await service.onDay(3, 1, now);
-    expect(march.map(({ id, type }) => [id, type])).toEqual([["kb:join", "benched"]]);
+    expect(march.map(({ id, type }) => [id, type])).toStrictEqual([["kb:join", "benched"]]);
 
-    expect(await service.onDay(1, 10, new Date("2021-12-31"))).toEqual([]);
+    await expect(service.onDay(1, 10, new Date("2021-12-31"))).resolves.toStrictEqual([]);
   });
 });

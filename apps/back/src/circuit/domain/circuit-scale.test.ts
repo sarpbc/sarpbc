@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { assertCircuitSourceUrl, parseCircuitScale, pointsForPlacement } from "./circuit-scale";
 
-describe("parseCircuitScale", () => {
+describe(parseCircuitScale, () => {
   it("orders tiers by placement", () => {
     expect(
       parseCircuitScale([
         { from: 3, to: 4, points: 2 },
         { from: 1, to: 2, points: 5 },
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       { from: 1, to: 2, points: 5 },
       { from: 3, to: 4, points: 2 },
     ]);
@@ -32,7 +32,7 @@ describe("parseCircuitScale", () => {
   });
 });
 
-describe("pointsForPlacement", () => {
+describe(pointsForPlacement, () => {
   const scale = [{ from: 5, to: 8, points: 4 }];
 
   it("returns the points of the range holding the placement, or null outside it", () => {
@@ -43,7 +43,7 @@ describe("pointsForPlacement", () => {
   });
 });
 
-describe("assertCircuitSourceUrl", () => {
+describe(assertCircuitSourceUrl, () => {
   it("accepts an http(s) source and refuses other values and Liquipedia", () => {
     expect(() => {
       assertCircuitSourceUrl("https://example.org/rules");

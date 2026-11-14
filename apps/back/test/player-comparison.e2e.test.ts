@@ -75,17 +75,29 @@ describe("GET /player/compare (e2e)", () => {
     await app.close();
   });
 
-  it("returns both careers without start.gg competition data", async () => {
-    const response = await request(app.getHttpServer())
-      .get("/player/compare")
-      .query({ a: "zen", b: "vatira" })
-      .expect(200);
+  const compare = async (query: { a?: string; b?: string }) =>
+    await request(app.getHttpServer()).get("/player/compare").query(query);
 
-    const { comparison } = comparisonBody.parse(response.body);
+  const zenVersusVatira = async () => {
+    const response = await compare({ a: "zen", b: "vatira" });
+
+    expect(response.status).toBe(200);
+
+    return { response, comparison: comparisonBody.parse(response.body).comparison };
+  };
+
+  it("identifies both compared players", async () => {
+    const { comparison } = await zenVersusVatira();
 
     expect(comparison.a.player).toMatchObject({ id: "zen", slug: "zen" });
     expect(comparison.b.player).toMatchObject({ id: "vatira", slug: "vatira" });
-    expect(comparison.a.titles).toEqual([
+  });
+
+  it("returns the titles, teams and series of a career", async () => {
+    const { comparison } = await zenVersusVatira();
+    const kc: unknown = expect.objectContaining({ id: "kc", slug: "karmine-corp" });
+
+    expect(comparison.a.titles).toStrictEqual([
       {
         id: "rlcs",
         name: "Title rlcs",
@@ -94,9 +106,7 @@ describe("GET /player/compare (e2e)", () => {
         event: { id: "cup", slug: "cup", name: "Cup" },
       },
     ]);
-    const kc: unknown = expect.objectContaining({ id: "kc", slug: "karmine-corp" });
-
-    expect(comparison.a.teams).toEqual([
+    expect(comparison.a.teams).toStrictEqual([
       {
         role: "active",
         startDate: "2023-01-01T00:00:00.000Z",
@@ -104,29 +114,31 @@ describe("GET /player/compare (e2e)", () => {
         team: kc,
       },
     ]);
-    expect(comparison.a.series).toEqual({ wins: 2, losses: 2 });
-    expect(comparison.headToHead).toEqual({ a: 1, b: 1 });
-    expect(comparison.a.earnings.totals).toEqual([{ currency: "USD", amount: 1500 }]);
-    expect(comparison.a.awards.map(({ id }) => id)).toEqual(["major-mvp"]);
-    expect(comparison.a.seasonAwards).toEqual([zenSeasonAward]);
+    expect(comparison.a.series).toStrictEqual({ wins: 2, losses: 2 });
+    expect(comparison.headToHead).toStrictEqual({ a: 1, b: 1 });
+  });
+
+  it("returns the earnings and awards of a career", async () => {
+    const { comparison } = await zenVersusVatira();
+
+    expect(comparison.a.earnings.totals).toStrictEqual([{ currency: "USD", amount: 1500 }]);
+    expect(comparison.a.awards.map(({ id }) => id)).toStrictEqual(["major-mvp"]);
+    expect(comparison.a.seasonAwards).toStrictEqual([zenSeasonAward]);
+  });
+
+  it("leaves start.gg competition data out of the comparison", async () => {
+    const { response } = await zenVersusVatira();
+
     expect(JSON.stringify(response.body)).not.toContain("startgg");
   });
 
-  it("answers 404 for an unknown player", async () => {
-    await request(app.getHttpServer())
-      .get("/player/compare")
-      .query({ a: "zen", b: "ghost" })
-      .expect(404);
-  });
+  it.each([
+    ["an unknown player", { a: "zen", b: "ghost" }, 404],
+    ["a player compared with themselves", { a: "zen", b: "zen" }, 400],
+    ["a missing slug", { a: "zen" }, 400],
+  ])("answers %s with %i", async (_, query, status) => {
+    const response = await compare(query);
 
-  it("answers 400 when a player is compared with themselves", async () => {
-    await request(app.getHttpServer())
-      .get("/player/compare")
-      .query({ a: "zen", b: "zen" })
-      .expect(400);
-  });
-
-  it("answers 400 when a slug is missing", async () => {
-    await request(app.getHttpServer()).get("/player/compare").query({ a: "zen" }).expect(400);
+    expect(response.status).toBe(status);
   });
 });

@@ -4,10 +4,20 @@ import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { League } from "../domain/league";
+import { Tournament } from "../domain/tournament";
 import { TournamentEvent } from "../domain/tournament-event";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualCatalogService } from "./manual-catalog.service";
-import type { CompetitionTransaction, EventStage } from "./ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  CompetitionEvents,
+  CompetitionTransaction,
+  EventQueries,
+  EventStage,
+  EventWriter,
+  TournamentWriter,
+} from "./ports";
 import {
   competitionScope,
   eventQueries,
@@ -19,33 +29,33 @@ import {
 const event = (id: string, pandascoreSerieId: number | null = null) =>
   Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
 
-describe("ManualCatalogService", () => {
+describe(ManualCatalogService, () => {
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<string, League>();
   let stages: EventStage[] = [];
 
   const eventWriter = {
-    load: vi.fn(async (id: string) => {
+    load: vi.fn<EventWriter["load"]>(async (id) => {
       const known = events.get(id);
 
       return known ? Object.assign(new TournamentEvent(), known) : null;
     }),
-    slugTaken: vi.fn(async (slug: string, except: string | null) =>
+    slugTaken: vi.fn<EventWriter["slugTaken"]>(async (slug, except) =>
       [...events.values()].some((candidate) => candidate.slug === slug && candidate.id !== except),
     ),
-    stages: vi.fn(async () => stages),
-    save: vi.fn(async (saved: TournamentEvent) => {
+    stages: vi.fn<EventWriter["stages"]>(async () => stages),
+    save: vi.fn<EventWriter["save"]>(async (saved) => {
       events.set(saved.id, Object.assign(new TournamentEvent(), saved));
     }),
   };
 
   const tournamentWriter = {
-    league: vi.fn(async (id: string) => {
+    league: vi.fn<TournamentWriter["league"]>(async (id) => {
       const league = leagues.get(id);
 
       return league ? Object.assign(new League(), league) : null;
     }),
-    saveLeague: vi.fn(async (league: League) => {
+    saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
       leagues.set(league.id, Object.assign(new League(), league));
     }),
   };
@@ -61,24 +71,32 @@ describe("ManualCatalogService", () => {
   };
 
   const queries = {
-    list: vi.fn(),
-    find: vi.fn(async (idOrSlug: string) => {
+    list: vi.fn<EventQueries["list"]>(),
+    find: vi.fn<EventQueries["find"]>(async (idOrSlug) => {
       const found = events.get(idOrSlug);
 
       return found ? { event: found, stages: [] } : null;
     }),
-    stageId: vi.fn(),
-    unsynced: vi.fn(),
+    stageId: vi.fn<EventQueries["stageId"]>(),
+    unsynced: vi.fn<EventQueries["unsynced"]>(),
   };
 
-  const cache = { invalidateTournament: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
 
   const service = new ManualCatalogService(
     tournamentQueries(),
     eventQueries(queries),
     tx,
-    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+    new CompetitionAfterCommit(
+      cache,
+      { publish: vi.fn<CompetitionEvents["publish"]>() },
+      diagnostics,
+    ),
   );
 
   beforeEach(() => {
@@ -108,7 +126,7 @@ describe("ManualCatalogService", () => {
       league: { id: "rlcs" },
       pandascoreSerieId: null,
     });
-    expect(created.stages).toEqual([]);
+    expect(created.stages).toStrictEqual([]);
   });
 
   it("rejects a taken explicit slug and an unknown league", async () => {
@@ -137,7 +155,7 @@ describe("ManualCatalogService", () => {
       slug: "coupe-de-france-slash-2026",
       league: null,
     });
-    expect(cache.invalidateTournament.mock.calls).toEqual([["pool"], ["finals"]]);
+    expect(cache.invalidateTournament.mock.calls).toStrictEqual([["pool"], ["finals"]]);
   });
 
   it.each([
@@ -155,12 +173,18 @@ describe("ManualCatalogService", () => {
   it("lists only events the staff can edit, empty ones included", async () => {
     queries.unsynced.mockResolvedValue([
       { event: event("empty"), stages: [] },
-      { event: event("manual"), stages: [{ id: "pool", source: "manual" }] },
-      { event: event("mixed"), stages: [{ id: "swiss", source: "pandascore" }] },
+      {
+        event: event("manual"),
+        stages: [Object.assign(new Tournament(), { id: "pool", source: "manual" })],
+      },
+      {
+        event: event("mixed"),
+        stages: [Object.assign(new Tournament(), { id: "swiss", source: "pandascore" })],
+      },
       { event: event("serie", 3), stages: [] },
     ]);
     const manualEventsResult = await service.manualEvents();
-    expect(manualEventsResult.map((listed) => listed.event.id)).toEqual(["empty", "manual"]);
+    expect(manualEventsResult.map((listed) => listed.event.id)).toStrictEqual(["empty", "manual"]);
   });
 
   it("creates a manual league with a slug from its name", async () => {
@@ -175,9 +199,9 @@ describe("ManualCatalogService", () => {
   });
 
   it("edits only the image of a PandaScore league", async () => {
-    expect(
-      await service.updateLeague("rlcs", { imageUrl: "https://cdn.example/rlcs.png" }),
-    ).toMatchObject({ name: "RLCS", imageUrl: "https://cdn.example/rlcs.png" });
+    await expect(
+      service.updateLeague("rlcs", { imageUrl: "https://cdn.example/rlcs.png" }),
+    ).resolves.toMatchObject({ name: "RLCS", imageUrl: "https://cdn.example/rlcs.png" });
     await expect(service.updateLeague("rlcs", { name: "RLCS 2026" })).rejects.toBeInstanceOf(
       InvalidInputError,
     );

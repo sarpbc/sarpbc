@@ -132,8 +132,8 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
   const games = new MemoryGames();
 
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn(async (id: string) => id === "t1"),
-    matches: vi.fn(async () => [
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
+    matches: vi.fn<StatsCandidates["matches"]>(async () => [
       {
         ...candidate,
         storedReplayIds: games.saved.map((game) => game.ballchasingId),
@@ -191,7 +191,10 @@ describe("StatsImportService.request", () => {
 
     const service = new StatsImportService(
       null,
-      { tournamentExists: vi.fn(), matches: vi.fn() },
+      {
+        tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(),
+        matches: vi.fn<StatsCandidates["matches"]>(),
+      },
       new MemoryGames(),
       imports,
       { schedule: vi.fn<StatsImportScheduler["schedule"]>() },
@@ -202,27 +205,39 @@ describe("StatsImportService.request", () => {
   });
 });
 
+async function runImport() {
+  const context = setup();
+  const { id } = await context.service.request("t1", "pilot-abc123");
+
+  await context.service.run(id);
+
+  const done = context.imports.rows.get(id);
+
+  if (done === undefined) throw new Error("Import was not stored");
+
+  return { ...context, done };
+}
+
 describe("StatsImportService.run", () => {
-  it("imports matched games, reports the rest and tracks progress", async () => {
-    const { service, games, imports, source } = setup();
-    const { id } = await service.request("t1", "pilot-abc123");
-
-    await service.run(id);
-
-    const done = imports.rows.get(id);
-
-    if (done === undefined) throw new Error("Import was not stored");
+  it("reports the rest and tracks progress", async () => {
+    const { done, imports } = await runImport();
 
     expect(done.status).toBe("completed");
     expect(done.total).toBe(3);
     expect(done.processed).toBe(3);
-    expect(done.items.map((item) => [item.replayId, item.status])).toEqual([
+    expect(done.items.map((item) => [item.replayId, item.status])).toStrictEqual([
       ["r1", "imported"],
       ["r2", "imported"],
       ["r3", "unmatched"],
     ]);
+    expect(imports.saves.map((save) => save.processed)).toContain(1);
+  });
+
+  it("imports the matched games", async () => {
+    const { games, source } = await runImport();
+
     expect(source.replayStats).toHaveBeenCalledTimes(2);
-    expect(games.saved.map((game) => [game.ballchasingId, game.number])).toEqual([
+    expect(games.saved.map((game) => [game.ballchasingId, game.number])).toStrictEqual([
       ["r1", 1],
       ["r2", 2],
     ]);
@@ -233,7 +248,7 @@ describe("StatsImportService.run", () => {
       blueGoals: 2,
       orangeGoals: 0,
     });
-    expect(games.saved[0].players.map((player) => [player.name, player.playerId])).toEqual([
+    expect(games.saved[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Vatira", "Vatira"],
       ["Atow", "Atow"],
       ["Stand-in", null],
@@ -241,7 +256,6 @@ describe("StatsImportService.run", () => {
       ["Seikoo", "Seikoo"],
       ["Stand-in", null],
     ]);
-    expect(imports.saves.map((save) => save.processed)).toContain(1);
   });
 
   it("learns platform links from unique roster-name matches once", async () => {
@@ -250,14 +264,14 @@ describe("StatsImportService.run", () => {
     const response = await service.request("t1", "pilot-abc123");
     await service.run(response.id);
 
-    expect(games.saved[0].learnedLinks).toEqual([
+    expect(games.saved[0].learnedLinks).toStrictEqual([
       { platform: "epic", platformId: "Vatira-id", playerId: "Vatira" },
       { platform: "epic", platformId: "Atow-id", playerId: "Atow" },
       { platform: "epic", platformId: "M0nkey M00n-id", playerId: "M0nkey M00n" },
       { platform: "epic", platformId: "Seikoo-id", playerId: "Seikoo" },
     ]);
-    expect(games.saved[1].learnedLinks).toEqual([]);
-    expect(games.saved[1].players.map((player) => player.playerId)).toEqual([
+    expect(games.saved[1].learnedLinks).toStrictEqual([]);
+    expect(games.saved[1].players.map((player) => player.playerId)).toStrictEqual([
       "Vatira",
       "Atow",
       null,
@@ -279,7 +293,7 @@ describe("StatsImportService.run", () => {
     await service.run(response2.id);
 
     const [saved] = games.saved;
-    expect(saved.players.map((player) => [player.name, player.playerId])).toEqual([
+    expect(saved.players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Vatira", "Atow"],
       ["Atow", "Atow"],
       ["Stand-in", "outsider"],
@@ -287,7 +301,7 @@ describe("StatsImportService.run", () => {
       ["Seikoo", "Seikoo"],
       ["Stand-in", null],
     ]);
-    expect(saved.learnedLinks.map((link) => link.platformId)).toEqual([
+    expect(saved.learnedLinks.map((link) => link.platformId)).toStrictEqual([
       "Atow-id",
       "M0nkey M00n-id",
       "Seikoo-id",
@@ -305,7 +319,7 @@ describe("StatsImportService.run", () => {
 
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.saved).toHaveLength(2);
-    expect(imports.rows.get(id)?.items.map((item) => item.status)).toEqual([
+    expect(imports.rows.get(id)?.items.map((item) => item.status)).toStrictEqual([
       "already_imported",
       "already_imported",
       "unmatched",
@@ -323,8 +337,8 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(source.replayStats).not.toHaveBeenCalled();
-    expect(games.saved.map((game) => game.ballchasingId)).toEqual(["r1"]);
-    expect(imports.rows.get(id)?.items).toEqual([
+    expect(games.saved.map((game) => game.ballchasingId)).toStrictEqual(["r1"]);
+    expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 1 }),
       expect.objectContaining({ replayId: "r2", status: "unmatched", reason: "excluded_by_staff" }),
       expect.objectContaining({
@@ -357,7 +371,7 @@ describe("StatsImportService.run", () => {
 
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.saved).toHaveLength(1);
-    expect(imports.rows.get(id)?.items).toEqual([
+    expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 2 }),
       expect.objectContaining({
         replayId: "r2",
@@ -379,7 +393,7 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(games.saved).toHaveLength(0);
-    expect(imports.rows.get(id)?.items.slice(0, 2)).toEqual([
+    expect(imports.rows.get(id)?.items.slice(0, 2)).toStrictEqual([
       expect.objectContaining({ replayId: "r1", status: "failed", reason: "score_mismatch" }),
       expect.objectContaining({ replayId: "r2", status: "failed", reason: "replay_not_ready" }),
     ]);
@@ -407,7 +421,7 @@ describe("StatsImportService.run", () => {
 
     await service.run(id);
 
-    expect(imports.rows.get(id)?.items).toEqual([
+    expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({
         replayId: "r1",
         status: "failed",
@@ -466,7 +480,7 @@ describe("StatsImportService maintenance", () => {
     const { service } = setup();
     await service.request("t1", "pilot-abc123");
 
-    expect(await service.failInterrupted()).toBe(1);
+    await expect(service.failInterrupted()).resolves.toBe(1);
     const [latest] = await service.recent("t1");
     expect(latest).toMatchObject({ status: "failed", error: INTERRUPTED_IMPORT_ERROR });
   });

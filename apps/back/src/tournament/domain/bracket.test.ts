@@ -142,7 +142,7 @@ describe("PandaScore bracket data", () => {
 
 describe("empty single-elimination bracket", () => {
   it("builds two semifinals feeding a grand final for four teams", () => {
-    expect(emptySingleEliminationBracket(4)).toEqual([
+    expect(emptySingleEliminationBracket(4)).toStrictEqual([
       { name: "Semifinal 1", previousMatches: [] },
       { name: "Semifinal 2", previousMatches: [] },
       {
@@ -157,7 +157,7 @@ describe("empty single-elimination bracket", () => {
 
   it("builds seven matches for eight teams, each round fed by the previous one", () => {
     const matches = emptySingleEliminationBracket(8);
-    expect(matches.map((match) => match.name)).toEqual([
+    expect(matches.map((match) => match.name)).toStrictEqual([
       "Quarterfinal 1",
       "Quarterfinal 2",
       "Quarterfinal 3",
@@ -166,7 +166,7 @@ describe("empty single-elimination bracket", () => {
       "Semifinal 2",
       "Grand Final",
     ]);
-    expect(matches[5]?.previousMatches).toEqual([
+    expect(matches[5]?.previousMatches).toStrictEqual([
       { index: 2, type: "winner" },
       { index: 3, type: "winner" },
     ]);

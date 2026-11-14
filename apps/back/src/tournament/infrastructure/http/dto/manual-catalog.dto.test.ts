@@ -9,10 +9,10 @@ describe("manual catalog DTOs", () => {
   });
 
   it("accepts null to clear an event league or league fields", () => {
-    expect(UpdateEventDto.parse({ leagueId: null })).toEqual({
+    expect(UpdateEventDto.parse({ leagueId: null })).toStrictEqual({
       leagueId: null,
     });
-    expect(UpdateLeagueDto.parse({ slug: null, url: null, imageUrl: null })).toEqual({
+    expect(UpdateLeagueDto.parse({ slug: null, url: null, imageUrl: null })).toStrictEqual({
       slug: null,
       url: null,
       imageUrl: null,
@@ -22,7 +22,7 @@ describe("manual catalog DTOs", () => {
   it("rejects unknown fields and non-http URLs", () => {
     expect(CreateLeagueDto.safeParse({ name: "CDF", source: "manual" }).success).toBe(false);
     expect(CreateLeagueDto.safeParse({ name: "CDF", url: SCRIPT_URL }).success).toBe(false);
-    expect(CreateLeagueDto.parse({ name: " CDF ", url: "https://cdf.gg" })).toEqual({
+    expect(CreateLeagueDto.parse({ name: " CDF ", url: "https://cdf.gg" })).toStrictEqual({
       name: "CDF",
       url: "https://cdf.gg",
     });

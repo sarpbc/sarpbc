@@ -32,7 +32,7 @@ describe("PandascoreMatchMapper", () => {
 
     const command = toUpsertMatchCommand(dto);
 
-    expect(command).toEqual({
+    expect(command).toStrictEqual({
       pandascoreId: 99,
       tournamentPandascoreId: 42,
       name: "Grand Final",
@@ -67,7 +67,7 @@ describe("PandascoreMatchMapper", () => {
       ],
     });
 
-    expect(toUpsertMatchCommand(dto).officialStreams).toEqual([
+    expect(toUpsertMatchCommand(dto).officialStreams).toStrictEqual([
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },
     ]);
   });

@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Match } from "../../domain/match";
+import { Match, type TournamentSummary } from "../../domain/match";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";
-import type { CompetitionTransaction } from "../ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  CompetitionEvents,
+  CompetitionTransaction,
+  MatchQueries,
+  MatchWriter,
+} from "../ports";
 import { competitionScope, matchQueries, matchWriter } from "../../../../test/competition-doubles";
 
 describe("MatchService decided events", () => {
@@ -12,17 +19,22 @@ describe("MatchService decided events", () => {
   let persisted: Match;
 
   const matches = {
-    load: vi.fn(),
-    byPandascoreId: vi.fn(),
-    save: vi.fn(),
-    tournament: vi.fn(),
-    participants: vi.fn(),
+    load: vi.fn<MatchWriter["load"]>(),
+    byPandascoreId: vi.fn<MatchWriter["byPandascoreId"]>(),
+    save: vi.fn<MatchWriter["save"]>(),
+    tournament: vi.fn<MatchWriter["tournament"]>(),
+    participants: vi.fn<MatchWriter["participants"]>(),
   };
 
-  const reads = { detail: vi.fn() };
-  const events = { publish: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
-  const cache = { invalidateTournament: vi.fn() };
+  const reads = { detail: vi.fn<MatchQueries["detail"]>() };
+  const events = { publish: vi.fn<CompetitionEvents["publish"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
+
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
 
   const service = new MatchService(
     matchQueries(reads),
@@ -31,6 +43,20 @@ describe("MatchService decided events", () => {
     } satisfies CompetitionTransaction,
     new CompetitionAfterCommit(cache, events, diagnostics),
   );
+
+  const cup: TournamentSummary = {
+    id: "cup",
+    name: "Cup",
+    slug: "cup",
+    event: { id: "event", slug: "event", name: "Event" },
+    beginAt: null,
+    league: null,
+    pickemsEnabled: false,
+    source: "manual",
+    pandascoreId: null,
+    streams: [],
+    eventStreams: [],
+  };
 
   const storedMatch = (fields: Partial<Match> = {}) =>
     Object.assign(new Match(), {
@@ -48,7 +74,7 @@ describe("MatchService decided events", () => {
       persisted = match;
     });
     reads.detail.mockImplementation(async () => persisted);
-    matches.tournament.mockResolvedValue({ id: "cup" });
+    matches.tournament.mockResolvedValue(cup);
     matches.participants.mockResolvedValue(participants);
     matches.byPandascoreId.mockResolvedValue(null);
   });

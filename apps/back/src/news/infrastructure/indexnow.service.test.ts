@@ -5,7 +5,7 @@ import { IndexNowService } from "./indexnow.service";
 
 const TEST_KEY = "indexnow-nonproduction-test-fixture";
 
-describe("IndexNowService", () => {
+describe(IndexNowService, () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("submits deduplicated English and French URLs with a verifiable key location", async () => {
@@ -22,11 +22,11 @@ describe("IndexNowService", () => {
     );
 
     await service.submitNewsSlugs(["rlcs-final", "rlcs-final"]);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledOnce();
     const [endpoint, request] = fetch.mock.calls[0] ?? [];
     expect(endpoint).toBe("https://api.indexnow.org/indexnow");
     expect(request?.method).toBe("POST");
-    expect(JSON.parse(z.string().parse(request?.body))).toEqual({
+    expect(JSON.parse(z.string().parse(request?.body))).toStrictEqual({
       host: "sarpbc.org",
       key: TEST_KEY,
       keyLocation: `https://sarpbc.org/${TEST_KEY}.txt`,

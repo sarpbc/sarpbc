@@ -125,12 +125,17 @@ export function onThisDaySources(
   } = {},
 ) {
   const tournaments = {
-    wonOnDay: vi.fn(async () => data.titles ?? []),
-    finalsOnDay: vi.fn(async () => data.finals ?? []),
+    wonOnDay: vi.fn<OnThisDaySources["tournaments"]["wonOnDay"]>(async () => data.titles ?? []),
+    finalsOnDay: vi.fn<OnThisDaySources["tournaments"]["finalsOnDay"]>(
+      async () => data.finals ?? [],
+    ),
   };
 
-  const transfers = { onDay: vi.fn(async () => data.transfers ?? []) };
-  const facts = { onDay: vi.fn(async () => data.facts ?? []) };
+  const transfers = {
+    onDay: vi.fn<OnThisDaySources["transfers"]["onDay"]>(async () => data.transfers ?? []),
+  };
+
+  const facts = { onDay: vi.fn<OnThisDaySources["facts"]["onDay"]>(async () => data.facts ?? []) };
   const sources: OnThisDaySources = { tournaments, transfers, facts };
 
   return { sources, tournaments, transfers, facts };

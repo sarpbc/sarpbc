@@ -23,7 +23,7 @@ function match(source: DataSource, tournamentSource: DataSource, teamSource: Dat
   });
 }
 
-describe("isRedistributableMatch", () => {
+describe(isRedistributableMatch, () => {
   it("keeps a redistributable match with a start.gg participant team", () => {
     expect(isRedistributableMatch(match("manual", "pandascore", "startgg"))).toBe(true);
   });
@@ -72,7 +72,7 @@ describe("mapTournamentDetail participants", () => {
   it("lists participant ids, team identity and roster, including a start.gg team", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
     const detail = mapTournamentDetail(cup("manual"));
-    expect(detail.participants).toEqual([
+    expect(detail.participants).toStrictEqual([
       {
         id: "part-kc",
         name: "Karmine Corp",
@@ -81,14 +81,14 @@ describe("mapTournamentDetail participants", () => {
         rosterSourceUrl: null,
       },
     ]);
-    expect(detail.matches).toEqual([]);
+    expect(detail.matches).toStrictEqual([]);
   });
 
   it("omits participants of a start.gg tournament", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
     const tournament = cup("startgg");
     expect(mapTournamentDetail(tournament)).not.toHaveProperty("participants");
-    expect(mapListedParticipants(tournament.source, tournament.participants)).toEqual({});
+    expect(mapListedParticipants(tournament.source, tournament.participants)).toStrictEqual({});
   });
 });
 
@@ -111,10 +111,10 @@ describe("MCP streams", () => {
       streams: [startgg, manual],
     });
 
-    expect(mapTournamentDetail(tournament).streams).toEqual([manual]);
+    expect(mapTournamentDetail(tournament).streams).toStrictEqual([manual]);
 
     const event = Object.assign(new TournamentEvent(), { slug: "coupe", streams: [startgg] });
-    expect(mapEvent({ event, stages: [] }).streams).toEqual([]);
+    expect(mapEvent({ event, stages: [] }).streams).toStrictEqual([]);
   });
 
   it("drops start.gg streams a match inherits from its tournament", () => {
@@ -138,8 +138,8 @@ describe("MCP streams", () => {
       },
     });
 
-    expect(mapMatchListResponse(inherited).streams).toEqual([manual]);
-    expect(redistributableStreams([startgg])).toEqual([]);
+    expect(mapMatchListResponse(inherited).streams).toStrictEqual([manual]);
+    expect(redistributableStreams([startgg])).toStrictEqual([]);
   });
 });
 
@@ -186,14 +186,14 @@ describe("MCP viewership", () => {
 
   it("leaves the viewership of start.gg matches and start.gg-only events out", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-    expect(mapMatchListResponse(played("manual")).viewership).toEqual(viewership);
+    expect(mapMatchListResponse(played("manual")).viewership).toStrictEqual(viewership);
     expect(mapMatchListResponse(played("startgg")).viewership).toBeNull();
 
     const event = Object.assign(new TournamentEvent(), { slug: "coupe", viewership });
-    expect(mapEvent({ event, stages: [] }).viewership).toEqual(viewership);
+    expect(mapEvent({ event, stages: [] }).viewership).toStrictEqual(viewership);
     expect(mapEvent({ event, stages: [stage("startgg")] }).viewership).toBeNull();
-    expect(mapEvent({ event, stages: [stage("startgg"), stage("manual")] }).viewership).toEqual(
-      viewership,
-    );
+    expect(
+      mapEvent({ event, stages: [stage("startgg"), stage("manual")] }).viewership,
+    ).toStrictEqual(viewership);
   });
 });

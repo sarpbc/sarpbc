@@ -8,7 +8,7 @@ import {
 } from "../infrastructure/google-identity.gateway";
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
-import type { GoogleIdentity } from "./ports/authentication";
+import type { GoogleIdentity, SessionTokens } from "./ports/authentication";
 import { UserService } from "../../user/application/user.service";
 import { unconstructed } from "../../../test/doubles";
 
@@ -27,27 +27,29 @@ let newGoogleSession: () => GoogleOAuthSession = () => {
   throw new Error("unused");
 };
 
-describe("AuthService", () => {
+describe(AuthService, () => {
   let service: AuthService;
 
   const userServiceMocks = {
-    signIn: vi.fn(),
-    findOneByGoogleId: vi.fn(),
-    findOneByEmail: vi.fn(),
-    createGoogleUser: vi.fn(),
-    linkGoogleAccount: vi.fn(),
-    create: vi.fn(),
+    signIn: vi.fn<UserService["signIn"]>(),
+    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
+    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
+    createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
+    linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
+    create: vi.fn<UserService["create"]>(),
   };
 
   const userService = Object.assign(unconstructed(UserService), userServiceMocks);
 
   const jwtService = {
-    signAsync: vi.fn().mockResolvedValue("jwt-token"),
+    signAsync: vi
+      .fn<(payload: string | Buffer | { id?: string }) => Promise<string>>()
+      .mockResolvedValue("jwt-token"),
   };
 
   beforeEach(async () => {
     service = new AuthService(
-      new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn() }, "secret"),
+      new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn<() => Promise<never>>() }, "secret"),
       new GoogleIdentityGateway(() => newGoogleSession()),
       userService,
       { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
@@ -73,7 +75,7 @@ describe("AuthService", () => {
         Object.assign(new User("a@b.com", "alice", "hash"), { id: "user-1" }),
       );
 
-      await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toEqual({
+      await expect(service.signIn({ email: "a@b.com", password: "ok" })).resolves.toStrictEqual({
         accessToken: "jwt-token",
         refreshToken: "jwt-token",
       });
@@ -83,11 +85,13 @@ describe("AuthService", () => {
 
   describe("session", () => {
     const tokens = {
-      sign: vi.fn().mockResolvedValue({ accessToken: "access", refreshToken: "refresh" }),
-      verify: vi.fn(),
+      sign: vi
+        .fn<SessionTokens["sign"]>()
+        .mockResolvedValue({ accessToken: "access", refreshToken: "refresh" }),
+      verify: vi.fn<SessionTokens["verify"]>(),
     };
 
-    const findById = vi.fn();
+    const findById = vi.fn<UserService["findById"]>();
     const sessionUsers = Object.assign(unconstructed(UserService), { findById });
 
     const unusedGoogle: GoogleIdentity = {
@@ -104,9 +108,9 @@ describe("AuthService", () => {
 
     it("authenticates with the current database email, not the token's", async () => {
       tokens.verify.mockResolvedValue({ id: "user-1", email: "old@b.com" });
-      findById.mockResolvedValue({ id: "user-1", email: "new@b.com", userName: "x" });
+      findById.mockResolvedValue(Object.assign(new User("new@b.com", "x"), { id: "user-1" }));
 
-      await expect(sessions.authenticate("jwt")).resolves.toEqual({
+      await expect(sessions.authenticate("jwt")).resolves.toStrictEqual({
         id: "user-1",
         email: "new@b.com",
       });
@@ -123,9 +127,9 @@ describe("AuthService", () => {
 
     it("refreshes into the user and a new token pair", async () => {
       tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
-      findById.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      findById.mockResolvedValue(Object.assign(new User("a@b.com", "x"), { id: "user-1" }));
 
-      await expect(sessions.refreshSession("jwt")).resolves.toEqual({
+      await expect(sessions.refreshSession("jwt")).resolves.toStrictEqual({
         user: { id: "user-1", email: "a@b.com" },
         tokens: { accessToken: "access", refreshToken: "refresh" },
       });
@@ -198,7 +202,8 @@ describe("AuthService", () => {
           Object.assign(new User(email, name, null, googleId), { id: `user-${googleId}` }),
       );
       jwtService.signAsync.mockImplementation(
-        async (payload: { id: string }) => `jwt-${payload.id}`,
+        async (payload) =>
+          `jwt-${payload instanceof Object && "id" in payload ? String(payload.id) : ""}`,
       );
 
       const first = service.handleGoogleCallback("code-a");
@@ -207,7 +212,7 @@ describe("AuthService", () => {
       await waitUntil(() => getTokenStarted === 2);
       releaseGetToken(undefined);
 
-      await expect(Promise.all([first, second])).resolves.toEqual([
+      await expect(Promise.all([first, second])).resolves.toStrictEqual([
         { accessToken: "jwt-user-google-a", refreshToken: "jwt-user-google-a" },
         { accessToken: "jwt-user-google-b", refreshToken: "jwt-user-google-b" },
       ]);

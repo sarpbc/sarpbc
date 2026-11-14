@@ -36,12 +36,12 @@ const games: PlayerGameLine[] = [
   line("g3", zen, vitality, 0, [0, 0, 4, 0, 3]),
 ];
 
-describe("aggregatePlayerStats", () => {
+describe(aggregatePlayerStats, () => {
   it("sums every game of a player into totals and derives averages from them", () => {
     const stats = aggregatePlayerStats(games);
 
     expect(stats.games).toBe(3);
-    expect(stats.players).toEqual([
+    expect(stats.players).toStrictEqual([
       {
         player: kaydop,
         team: solary,
@@ -84,7 +84,7 @@ describe("aggregatePlayerStats", () => {
         goals: totals.goals,
         goalParticipation,
       })),
-    ).toEqual([
+    ).toStrictEqual([
       { team: "Solary", games: 2, goals: 1, goalParticipation: 33.3 },
       { team: "Vitality", games: 1, goals: 2, goalParticipation: 100 },
     ]);
@@ -97,7 +97,7 @@ describe("aggregatePlayerStats", () => {
       line("g2", null, vitality, 2, [2, 0, 0, 2, 0]),
     ]);
 
-    expect(stats).toEqual({ games: 2, players: [], unlinkedAccounts: 2 });
+    expect(stats).toStrictEqual({ games: 2, players: [], unlinkedAccounts: 2 });
   });
 
   it("groups a player without a team by participant name across stages", () => {
@@ -118,6 +118,6 @@ describe("aggregatePlayerStats", () => {
   });
 
   it("returns no rows and no games when nothing was imported", () => {
-    expect(aggregatePlayerStats([])).toEqual({ games: 0, players: [], unlinkedAccounts: 0 });
+    expect(aggregatePlayerStats([])).toStrictEqual({ games: 0, players: [], unlinkedAccounts: 0 });
   });
 });

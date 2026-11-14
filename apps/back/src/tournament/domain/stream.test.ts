@@ -37,9 +37,11 @@ function matchIn(tournament: { streams: Stream[]; eventStreams: Stream[] }): Mat
   });
 }
 
-describe("replaceStreams", () => {
+describe(replaceStreams, () => {
   it("normalizes each stream and derives its platform and channel", () => {
-    expect(replaceStreams([], [official, { ...costream, language: " FR " }], "manual")).toEqual([
+    expect(
+      replaceStreams([], [official, { ...costream, language: " FR " }], "manual"),
+    ).toStrictEqual([
       {
         url: "https://twitch.tv/rlesports",
         platform: "twitch",
@@ -92,7 +94,9 @@ describe("replaceStreams", () => {
   });
 
   it("marks every stream of a start.gg sourced list", () => {
-    expect(replaceStreams([], [official], "startgg").map((s) => s.source)).toEqual(["startgg"]);
+    expect(replaceStreams([], [official], "startgg").map((s) => s.source)).toStrictEqual([
+      "startgg",
+    ]);
   });
 
   it("keeps the start.gg mark of a stream a staff edit carries over", () => {
@@ -104,14 +108,14 @@ describe("replaceStreams", () => {
       "manual",
     );
 
-    expect(edited.map((s) => [s.url, s.source])).toEqual([
+    expect(edited.map((s) => [s.url, s.source])).toStrictEqual([
       ["https://twitch.tv/rlesports", "startgg"],
       ["https://kick.com/kameto", "manual"],
     ]);
   });
 });
 
-describe("pandascoreStreams", () => {
+describe(pandascoreStreams, () => {
   it("puts the main stream first and skips unusable entries", () => {
     expect(
       pandascoreStreams([
@@ -120,7 +124,7 @@ describe("pandascoreStreams", () => {
         { url: "not a url", language: "en", main: false },
         { url: "https://www.twitch.tv/unknown", language: "", main: false },
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       {
         url: "https://www.twitch.tv/rocketleague",
         platform: "twitch",
@@ -147,7 +151,7 @@ describe("pandascoreStreams upgrades", () => {
       pandascoreStreams([{ url: "http://www.twitch.tv/legacy", language: "en", main: true }]).map(
         (s) => s.url,
       ),
-    ).toEqual(["https://www.twitch.tv/legacy"]);
+    ).toStrictEqual(["https://www.twitch.tv/legacy"]);
   });
 });
 
@@ -158,30 +162,30 @@ describe("watch streams", () => {
 
   it("shows the tournament list on a match without its own list", () => {
     const match = matchIn({ streams: [stageStream], eventStreams: [eventStream] });
-    expect(match.watchStreams()).toEqual([stageStream]);
+    expect(match.watchStreams()).toStrictEqual([stageStream]);
   });
 
   it("falls back to the event list when neither the match nor the tournament has one", () => {
     const match = matchIn({ streams: [], eventStreams: [eventStream] });
-    expect(match.watchStreams()).toEqual([eventStream]);
-    expect(Object.assign(new Tournament(), { eventStreams: [eventStream] }).watchStreams()).toEqual(
-      [eventStream],
-    );
+    expect(match.watchStreams()).toStrictEqual([eventStream]);
+    expect(
+      Object.assign(new Tournament(), { eventStreams: [eventStream] }).watchStreams(),
+    ).toStrictEqual([eventStream]);
   });
 
   it("replaces the inherited list entirely with the match override", () => {
     const match = matchIn({ streams: [stageStream], eventStreams: [eventStream] });
     match.streams = [matchStream];
-    expect(match.watchStreams()).toEqual([matchStream]);
-    expect(match.inheritedStreams()).toEqual([stageStream]);
+    expect(match.watchStreams()).toStrictEqual([matchStream]);
+    expect(match.inheritedStreams()).toStrictEqual([stageStream]);
   });
 
   it("prefers the PandaScore match feed over the tournament list, and staff overrides over both", () => {
     const match = matchIn({ streams: [stageStream], eventStreams: [] });
     match.officialStreams = [{ url: "https://twitch.tv/rocketleague", language: "en", main: true }];
-    expect(match.watchStreams().map((s) => s.source)).toEqual(["pandascore"]);
+    expect(match.watchStreams().map((s) => s.source)).toStrictEqual(["pandascore"]);
     match.streams = [matchStream];
-    expect(match.watchStreams()).toEqual([matchStream]);
+    expect(match.watchStreams()).toStrictEqual([matchStream]);
   });
 
   it("prefers a tournament list over its event list", () => {
@@ -190,6 +194,6 @@ describe("watch streams", () => {
       eventStreams: [eventStream],
     });
 
-    expect(tournament.watchStreams()).toEqual([stageStream]);
+    expect(tournament.watchStreams()).toStrictEqual([stageStream]);
   });
 });

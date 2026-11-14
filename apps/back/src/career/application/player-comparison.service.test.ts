@@ -10,21 +10,42 @@ import {
 } from "../../../test/career-fixtures";
 import { PlayerComparisonService } from "./player-comparison.service";
 
-describe("PlayerComparisonService", () => {
-  it("compares the two careers without start.gg competition data", async () => {
-    const { sources, playerEarnings } = careerSources();
-    const comparison = await new PlayerComparisonService(sources).compare("zen", "vatira");
+async function compareZenWithVatira() {
+  const { sources, playerEarnings } = careerSources();
+  const comparison = await new PlayerComparisonService(sources).compare("zen", "vatira");
+
+  return { comparison, playerEarnings };
+}
+
+describe(PlayerComparisonService, () => {
+  it("compares the two players", async () => {
+    const { comparison } = await compareZenWithVatira();
 
     expect(comparison.a.player).toBe(zen);
     expect(comparison.b.player).toBe(vatira);
-    expect(comparison.a.titles.map(({ id }) => id)).toEqual(["rlcs"]);
-    expect(comparison.a.awards.map(({ id }) => id)).toEqual(["major-mvp"]);
-    expect(comparison.a.seasonAwards).toEqual([zenSeasonAward]);
-    expect(comparison.a.contracts.map(({ id }) => id)).toEqual(["zen-kc"]);
-    expect(comparison.a.series).toEqual({ wins: 2, losses: 2 });
-    expect(comparison.b.series).toEqual({ wins: 1, losses: 2 });
-    expect(comparison.headToHead).toEqual({ a: 1, b: 1 });
-    expect(comparison.a.earnings).toEqual(careerEarnings(1500));
+    expect(comparison.headToHead).toStrictEqual({ a: 1, b: 1 });
+  });
+
+  it("lists the first player's titles, awards and contracts", async () => {
+    const { comparison } = await compareZenWithVatira();
+
+    expect(comparison.a.titles.map(({ id }) => id)).toStrictEqual(["rlcs"]);
+    expect(comparison.a.awards.map(({ id }) => id)).toStrictEqual(["major-mvp"]);
+    expect(comparison.a.seasonAwards).toStrictEqual([zenSeasonAward]);
+    expect(comparison.a.contracts.map(({ id }) => id)).toStrictEqual(["zen-kc"]);
+  });
+
+  it("counts each player's series record", async () => {
+    const { comparison } = await compareZenWithVatira();
+
+    expect(comparison.a.series).toStrictEqual({ wins: 2, losses: 2 });
+    expect(comparison.b.series).toStrictEqual({ wins: 1, losses: 2 });
+  });
+
+  it("totals earnings from redistributable prizes only", async () => {
+    const { comparison, playerEarnings } = await compareZenWithVatira();
+
+    expect(comparison.a.earnings).toStrictEqual(careerEarnings(1500));
     expect(playerEarnings).toHaveBeenCalledWith(zen.id, { redistributableOnly: true });
     expect(playerEarnings).toHaveBeenCalledWith(vatira.id, { redistributableOnly: true });
   });
@@ -34,8 +55,8 @@ describe("PlayerComparisonService", () => {
     const comparison = await new PlayerComparisonService(sources).compare("vatira", "zen");
 
     expect(comparison.a.player).toBe(vatira);
-    expect(comparison.headToHead).toEqual({ a: 1, b: 1 });
-    expect(comparison.b.series).toEqual({ wins: 2, losses: 2 });
+    expect(comparison.headToHead).toStrictEqual({ a: 1, b: 1 });
+    expect(comparison.b.series).toStrictEqual({ wins: 2, losses: 2 });
   });
 
   it("rejects a player compared with themselves", async () => {

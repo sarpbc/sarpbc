@@ -80,7 +80,7 @@ describe("native Nest Zod validation over Fastify", () => {
   it("applies inherited defaults and converts explicit false without truthiness coercion", async () => {
     const defaults = await app.inject({ method: "GET", url: "/tournaments" });
     expect(defaults.statusCode).toBe(200);
-    expect(defaults.json()).toEqual({ limit: 20, offset: 0 });
+    expect(defaults.json()).toStrictEqual({ limit: 20, offset: 0 });
 
     const query = await app.inject({
       method: "GET",
@@ -88,9 +88,9 @@ describe("native Nest Zod validation over Fastify", () => {
     });
 
     expect(query.statusCode).toBe(200);
-    expect(query.json()).toEqual({ limit: 3, offset: 2, pickems: false, activeOnly: true });
+    expect(query.json()).toStrictEqual({ limit: 3, offset: 2, pickems: false, activeOnly: true });
     const notifications = await app.inject({ method: "GET", url: "/notifications" });
-    expect(notifications.json()).toEqual({ page: 0, limit: 30 });
+    expect(notifications.json()).toStrictEqual({ page: 0, limit: 30 });
   });
 
   it.each([
@@ -156,7 +156,7 @@ describe("native Nest Zod validation over Fastify", () => {
     });
 
     expect(cleared.statusCode).toBe(201);
-    expect(cleared.json()).toEqual({
+    expect(cleared.json()).toStrictEqual({
       name: "RLCS",
       leagueId: null,
       beginAt: "2026-10-17",
@@ -181,7 +181,7 @@ describe("native Nest Zod validation over Fastify", () => {
     });
 
     expect(accepted.statusCode).toBe(201);
-    expect(accepted.json()).toEqual({
+    expect(accepted.json()).toStrictEqual({
       title: "News",
       content: "Content",
       titleFr: null,

@@ -22,11 +22,23 @@ const NEWS_REQUEST: FakeRequest = {
   method: "GET",
 };
 
-function hostWith(send: Mock, sent = false, request = NEWS_REQUEST): ExecutionContextHost {
-  return new ExecutionContextHost([request, { sent, status: vi.fn().mockReturnThis(), send }]);
+interface FakeBody {
+  statusCode?: number;
+  error?: string;
+  message: string;
+  code?: string;
 }
 
-describe("AllExceptionsFilter", () => {
+type Send = (body: FakeBody) => void;
+
+function hostWith(send: Mock<Send>, sent = false, request = NEWS_REQUEST): ExecutionContextHost {
+  return new ExecutionContextHost([
+    request,
+    { sent, status: vi.fn<(code: number) => void>().mockReturnThis(), send },
+  ]);
+}
+
+describe(AllExceptionsFilter, () => {
   const filter = new AllExceptionsFilter();
 
   const logError = vi.spyOn(log, "error");
@@ -36,7 +48,7 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("preserves HttpException response bodies", () => {
-    const send = vi.fn();
+    const send = vi.fn<Send>();
     filter.catch(new HttpException("Tournament not found", HttpStatus.NOT_FOUND), hostWith(send));
     expect(send).toHaveBeenCalledWith({
       statusCode: 404,
@@ -46,7 +58,7 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("logs HTTP 5xx with environment and user", () => {
-    const send = vi.fn();
+    const send = vi.fn<Send>();
     filter.catch(
       new InternalServerErrorException("Cover image could not be stored."),
       hostWith(send, false, {
@@ -78,13 +90,13 @@ describe("AllExceptionsFilter", () => {
     [new UnprocessableError("Unknown team"), 422, "Unprocessable Entity"],
     [new IntegrationError("Provider unavailable"), 500, "Internal Server Error"],
   ])("translates application failure %p to HTTP %p", (failure, statusCode, error) => {
-    const send = vi.fn();
+    const send = vi.fn<Send>();
     filter.catch(failure, hostWith(send));
     expect(send).toHaveBeenCalledWith({ statusCode, error, message: failure.message });
   });
 
   it("preserves coded business error payloads", () => {
-    const send = vi.fn();
+    const send = vi.fn<Send>();
     filter.catch(
       new ConflictError({ message: "Already reported", code: "REPLY_ALREADY_REPORTED" }),
       hostWith(send),
@@ -96,13 +108,18 @@ describe("AllExceptionsFilter", () => {
   });
 
   it("hides unexpected error details", () => {
-    const send = vi.fn();
+    const send = vi.fn<Send>();
     filter.catch(new Error("secret stack"), hostWith(send));
     expect(send).toHaveBeenCalledWith({
       statusCode: 500,
       message:
         "The server hit an unexpected error. Try again, or report this if it keeps happening.",
     });
-    expect(logError).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledOnce();
+    expect(logError.mock.calls[0]?.[0]).toMatchObject({
+      component: AllExceptionsFilter.name,
+      message: "Unhandled exception",
+      error: new Error("secret stack"),
+    });
   });
 });

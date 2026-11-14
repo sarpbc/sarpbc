@@ -28,16 +28,18 @@ const deletion = (reason: string | null) => ({
   videogame_id: 14,
 });
 
-describe("parseProviderDeletion", () => {
+describe(parseProviderDeletion, () => {
   it("reads a merge into another serie", () => {
-    expect(parseProviderDeletion(deletionReason(deletion("Merged with 9417")))).toEqual({
+    expect(parseProviderDeletion(deletionReason(deletion("Merged with 9417")))).toStrictEqual({
       kind: "merged",
       intoId: 9417,
     });
   });
 
   it.each(["serie", "tournament"] as const)("reads a replacement by a %s", (entity) => {
-    expect(parseProviderDeletion(deletionReason(deletion(`Replaced by ${entity} 512`)))).toEqual({
+    expect(
+      parseProviderDeletion(deletionReason(deletion(`Replaced by ${entity} 512`))),
+    ).toStrictEqual({
       kind: "replaced",
       entity,
       byId: 512,
@@ -51,7 +53,7 @@ describe("parseProviderDeletion", () => {
     { reason: 42 },
     null,
   ])("treats %p as a plain deletion", (object) => {
-    expect(parseProviderDeletion(deletionReason(object))).toEqual({ kind: "deleted" });
+    expect(parseProviderDeletion(deletionReason(object))).toStrictEqual({ kind: "deleted" });
   });
 });
 
@@ -67,7 +69,7 @@ describe("serie incidents", () => {
 
     if (incident.change_type === "deletion" || incident.type !== "serie")
       throw new Error("expected a serie update");
-    expect(toUpsertSerieCommand(incident.object)).toEqual({
+    expect(toUpsertSerieCommand(incident.object)).toStrictEqual({
       pandascoreId: 9417,
       fullName: "Paris 2026",
       year: undefined,

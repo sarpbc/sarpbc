@@ -11,7 +11,7 @@ const vod = (url: string, overrides: Partial<{ game: number; language: string }>
   ...overrides,
 });
 
-describe("normalizeMatchVods", () => {
+describe(normalizeMatchVods, () => {
   it.each([
     ["https://www.twitch.tv/videos/2245891234?t=1h2m3s", "twitch"],
     ["https://twitch.tv/videos/2245891234", "twitch"],
@@ -22,7 +22,7 @@ describe("normalizeMatchVods", () => {
     ["https://youtu.be/dQw4w9WgXcQ?t=3600", "youtube"],
     ["https://WWW.YouTube.com/watch?v=dQw4w9WgXcQ", "youtube"],
   ])("accepts %s as %s", (url, source) => {
-    expect(normalizeMatchVods([vod(url)], 5)).toEqual([
+    expect(normalizeMatchVods([vod(url)], 5)).toStrictEqual([
       expect.objectContaining({ game: 1, language: "en", source }),
     ]);
   });
@@ -95,7 +95,7 @@ describe("normalizeMatchVods", () => {
       5,
     );
 
-    expect(vods.map((v) => [v.game, v.source, v.language])).toEqual([
+    expect(vods.map((v) => [v.game, v.source, v.language])).toStrictEqual([
       [1, "twitch", "fr"],
       [1, "youtube", "de"],
       [2, "youtube", "en"],
@@ -115,7 +115,7 @@ describe("normalizeMatchVods", () => {
   });
 });
 
-describe("replaceGameVods", () => {
+describe(replaceGameVods, () => {
   const current = normalizeMatchVods(
     [vod("https://youtu.be/g1"), vod("https://youtu.be/g2", { game: 2 })],
     5,
@@ -124,14 +124,14 @@ describe("replaceGameVods", () => {
   it("replaces only the targeted game", () => {
     expect(
       replaceGameVods(current, 1, [{ url: "https://twitch.tv/videos/9", language: "fr" }], 5),
-    ).toEqual([
+    ).toStrictEqual([
       { game: 1, url: "https://twitch.tv/videos/9", language: "fr", source: "twitch" },
       { game: 2, url: "https://youtu.be/g2", language: "en", source: "youtube" },
     ]);
   });
 
   it("clears a game with an empty list", () => {
-    expect(replaceGameVods(current, 2, [], 5).map((v) => v.game)).toEqual([1]);
+    expect(replaceGameVods(current, 2, [], 5).map((v) => v.game)).toStrictEqual([1]);
   });
 
   it("rejects a game outside the match format even when clearing it", () => {

@@ -27,7 +27,7 @@ function line(
   };
 }
 
-describe("summarizeEarnings", () => {
+describe(summarizeEarnings, () => {
   it("totals each currency separately without converting", () => {
     const earnings = summarizeEarnings([
       line("a", 1000, "USD", "2026-05-01T00:00:00Z"),
@@ -35,11 +35,11 @@ describe("summarizeEarnings", () => {
       line("c", 250, "USD", "2025-12-31T23:00:00Z"),
     ]);
 
-    expect(earnings.totals).toEqual([
+    expect(earnings.totals).toStrictEqual([
       { currency: "EUR", amount: 500 },
       { currency: "USD", amount: 1250 },
     ]);
-    expect(earnings.years.map(({ year, totals }) => ({ year, totals }))).toEqual([
+    expect(earnings.years.map(({ year, totals }) => ({ year, totals }))).toStrictEqual([
       {
         year: 2026,
         totals: [
@@ -57,8 +57,8 @@ describe("summarizeEarnings", () => {
       line("b", 1000, "USD", "2026-06-01T00:00:00Z", 3),
     ]);
 
-    expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toEqual([333.33, 333.33]);
-    expect(earnings.totals).toEqual([{ currency: "USD", amount: 666.66 }]);
+    expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toStrictEqual([333.33, 333.33]);
+    expect(earnings.totals).toStrictEqual([{ currency: "USD", amount: 666.66 }]);
   });
 
   it("rounds shares to the minor unit of each currency", () => {
@@ -68,8 +68,10 @@ describe("summarizeEarnings", () => {
       line("c", 1000, "KWD", "2026-05-01T00:00:00Z", 3),
     ]);
 
-    expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toEqual([333, 333, 333.333]);
-    expect(earnings.totals).toEqual([
+    expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toStrictEqual([
+      333, 333, 333.333,
+    ]);
+    expect(earnings.totals).toStrictEqual([
       { currency: "JPY", amount: 333 },
       { currency: "KRW", amount: 333 },
       { currency: "KWD", amount: 333.333 },
@@ -82,6 +84,6 @@ describe("summarizeEarnings", () => {
       line("b", 100, "USD", "2024-01-01T00:00:00Z"),
     ]);
 
-    expect(earnings.years.map(({ year }) => year)).toEqual([2024, null]);
+    expect(earnings.years.map(({ year }) => year)).toStrictEqual([2024, null]);
   });
 });

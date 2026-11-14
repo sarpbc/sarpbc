@@ -41,7 +41,7 @@ function match(overrides: Partial<Match>): Match {
   });
 }
 
-describe("mapMatchBlockItem", () => {
+describe(mapMatchBlockItem, () => {
   it("derives the state the public lists use", () => {
     const upcoming = match({ beginAt: new Date("2026-10-31T20:00:00Z") });
     const live = match({ beginAt: new Date("2026-10-31T17:00:00Z") });

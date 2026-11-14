@@ -6,11 +6,11 @@ import { Player } from "../../domain/player";
 import { MikroPlayerStore } from "./player.store";
 
 function fixture() {
-  const execute = vi.fn();
-  const findOne = vi.fn();
+  const execute = vi.fn<(query: string) => Promise<{ id: string }[]>>();
+  const findOne = vi.fn<EntityManager["findOne"]>();
 
   const manager = Object.assign(unconstructed(EntityManager), {
-    getConnection: vi.fn().mockReturnValue({ execute }),
+    getConnection: vi.fn<() => { execute: typeof execute }>().mockReturnValue({ execute }),
     findOne,
   });
 

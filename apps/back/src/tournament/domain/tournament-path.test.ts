@@ -4,15 +4,15 @@ import { parseTournamentPath } from "./tournament-path";
 const ID = "0B6F2D3E-6C1A-4B8E-9A51-2F7C3D4E5A6B";
 const id = ID.toLowerCase();
 
-describe("parseTournamentPath", () => {
+describe(parseTournamentPath, () => {
   it("reads a UUID as a legacy stage, with an optional matches tab", () => {
-    expect(parseTournamentPath([ID])).toEqual({ kind: "legacyStage", id, tab: "overview" });
-    expect(parseTournamentPath([id, "matches"])).toEqual({
+    expect(parseTournamentPath([ID])).toStrictEqual({ kind: "legacyStage", id, tab: "overview" });
+    expect(parseTournamentPath([id, "matches"])).toStrictEqual({
       kind: "legacyStage",
       id,
       tab: "matches",
     });
-    expect(parseTournamentPath([id, "MATCHES"])).toEqual({
+    expect(parseTournamentPath([id, "MATCHES"])).toStrictEqual({
       kind: "legacyStage",
       id,
       tab: "matches",
@@ -24,11 +24,11 @@ describe("parseTournamentPath", () => {
   });
 
   it("reads lowercased event and stage slugs", () => {
-    expect(parseTournamentPath(["RLCS-Major-Paris-2026"])).toEqual({
+    expect(parseTournamentPath(["RLCS-Major-Paris-2026"])).toStrictEqual({
       kind: "event",
       eventSlug: "rlcs-major-paris-2026",
     });
-    expect(parseTournamentPath(["rlcs-major-paris-2026", "Playoffs"])).toEqual({
+    expect(parseTournamentPath(["rlcs-major-paris-2026", "Playoffs"])).toStrictEqual({
       kind: "stage",
       eventSlug: "rlcs-major-paris-2026",
       stageSlug: "playoffs",
@@ -36,7 +36,7 @@ describe("parseTournamentPath", () => {
   });
 
   it("treats a stage slugged matches as a stage", () => {
-    expect(parseTournamentPath(["cup", "matches"])).toEqual({
+    expect(parseTournamentPath(["cup", "matches"])).toStrictEqual({
       kind: "stage",
       eventSlug: "cup",
       stageSlug: "matches",

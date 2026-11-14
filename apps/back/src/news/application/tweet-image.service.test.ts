@@ -8,7 +8,7 @@ import { TweetImageService } from "./tweet-image.service";
 const image = (body: ConstructorParameters<typeof Response>[0], init: ResponseInit = {}) =>
   new Response(body, { status: 200, headers: { "content-type": "image/jpeg" }, ...init });
 
-describe("TweetImageService", () => {
+describe(TweetImageService, () => {
   const fetchMock = vi.fn<typeof fetch>();
   const imageUrl = "https://pbs.twimg.com/media/photo.jpg?name=small";
   const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
@@ -30,8 +30,8 @@ describe("TweetImageService", () => {
 
     const result = await service.load(imageUrl);
 
-    expect(result).toEqual({ contentType: "image/jpeg", body: Buffer.from(jpeg) });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result).toStrictEqual({ contentType: "image/jpeg", body: Buffer.from(jpeg) });
+    expect(fetchMock).toHaveBeenCalledOnce();
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url).toBe(imageUrl);
     expect(init?.redirect).toBe("manual");
@@ -96,7 +96,7 @@ describe("TweetImageService", () => {
     );
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it("stops after too many redirects", async () => {

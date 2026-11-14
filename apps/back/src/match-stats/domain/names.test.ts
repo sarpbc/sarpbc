@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { normalizeName, playerNameMatches, teamNameMatches } from "./names";
 
-describe("normalizeName", () => {
+describe(normalizeName, () => {
   it("drops case, accents, spaces and punctuation", () => {
     expect(normalizeName("  Atow. ")).toBe("atow");
     expect(normalizeName("Équipe Évoluée")).toBe("equipeevoluee");
@@ -9,7 +9,7 @@ describe("normalizeName", () => {
   });
 });
 
-describe("playerNameMatches", () => {
+describe(playerNameMatches, () => {
   it.each([
     ["Vatira", "vatira"],
     ["Vatira.", "Vatira"],
@@ -35,7 +35,7 @@ describe("playerNameMatches", () => {
   });
 });
 
-describe("teamNameMatches", () => {
+describe(teamNameMatches, () => {
   it.each([
     ["KARMINE CORP", "Karmine Corp"],
     ["KC", "Karmine Corp"],
