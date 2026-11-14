@@ -115,6 +115,7 @@ const bracketMatchStatus = (match: (typeof layout.matches)[number]) =>
           :participant-b-id="match.participantBId"
           :results="match.results"
           :winner-participant-id="match.winnerParticipantId"
+          :forfeited-by="match.forfeitedBy"
           :tournament-id="tournamentId"
           :match-status="bracketMatchStatus(match)"
           discovery-source="tournament_hub"

@@ -55,7 +55,7 @@ const participantClass = (participantId: string | undefined): string => {
   <SListItem :size="compact ? 'compact' : 'default'" class="min-w-0">
     <div
       v-if="teamA && teamB"
-      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_2rem_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
+      class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(2rem,auto)_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
     >
       <span class="truncate text-end" :class="participantClass(teamA.id)" :title="nameA">
         {{ shortTeamName(nameA) || $t("components.match.tbd") }}
@@ -64,11 +64,13 @@ const participantClass = (participantId: string | undefined): string => {
       <SpoilerHidden v-if="concealed" />
       <span v-else class="flex items-center justify-center gap-1 tabular-nums">
         <span :class="participantClass(teamA.id)">
-          {{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}
+          <MatchForfeitMark v-if="match.forfeitedBy === teamA.id" />
+          <template v-else>{{ getMatchParticipantScore(match.results, teamA.id) ?? "–" }}</template>
         </span>
         <span class="text-muted" aria-hidden="true">-</span>
         <span :class="participantClass(teamB.id)">
-          {{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}
+          <MatchForfeitMark v-if="match.forfeitedBy === teamB.id" />
+          <template v-else>{{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}</template>
         </span>
       </span>
       <TeamImg :team-name="nameB" :logo="teamB.team" size="xs" />

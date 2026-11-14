@@ -30,6 +30,7 @@ export interface MatchRowItem {
   beginAt?: Date | string | null;
   participants?: ParticipantRef<ThemedLogo & { name: string }>[];
   results?: MatchResult[];
+  forfeitedBy: string | null;
   tournament?: { id: string };
 }
 
@@ -118,6 +119,7 @@ export interface Match {
   winner?: TournamentParticipant;
   numberOfGames?: number;
   results?: MatchResult[];
+  forfeitedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
   tournament: Tournament;

@@ -21,6 +21,7 @@ const {
   participantBId = null,
   results = null,
   winnerParticipantId = null,
+  forfeitedBy = null,
   tournamentId = null,
   compact = false,
   bracket = false,
@@ -38,6 +39,7 @@ const {
   participantBId?: string | null;
   results?: MatchResult[] | null;
   winnerParticipantId?: string | null;
+  forfeitedBy?: string | null;
   tournamentId?: string | null;
   compact?: boolean;
   bracket?: boolean;
@@ -73,6 +75,9 @@ const displayScoreA = computed(() => displayMatchScore(scoreA.value, matchStatus
 const displayScoreB = computed(() => displayMatchScore(scoreB.value, matchStatus));
 
 const showScores = computed(() => displayScoreA.value !== null || displayScoreB.value !== null);
+
+const isForfeiter = (participantId: string | null): boolean =>
+  forfeitedBy !== null && participantId === forfeitedBy;
 
 const onMatchClick = () => {
   if (!discoverySource || !discoveryStatus) {
@@ -137,6 +142,7 @@ const participantRowClass = (participantId: string | null): string => {
         <span class="truncate text-xs">{{ displayTeamA }}</span>
         <template v-if="showScores">
           <SpoilerHidden v-if="concealed" />
+          <MatchForfeitMark v-else-if="isForfeiter(participantAId)" class="text-xs" />
           <span v-else class="tabular-nums text-xs">{{ displayScoreA }}</span>
         </template>
       </div>
@@ -150,6 +156,7 @@ const participantRowClass = (participantId: string | null): string => {
         <span class="truncate text-xs">{{ displayTeamB }}</span>
         <template v-if="showScores">
           <SpoilerHidden v-if="concealed" />
+          <MatchForfeitMark v-else-if="isForfeiter(participantBId)" class="text-xs" />
           <span v-else class="tabular-nums text-xs">{{ displayScoreB }}</span>
         </template>
       </div>
@@ -168,6 +175,7 @@ const participantRowClass = (participantId: string | null): string => {
         <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
           <template v-if="showScores">
             <SpoilerHidden v-if="concealed" />
+            <MatchForfeitMark v-else-if="isForfeiter(participantAId)" />
             <template v-else>{{ displayScoreA }}</template>
           </template>
         </span>
@@ -184,6 +192,7 @@ const participantRowClass = (participantId: string | null): string => {
         <span :class="['tabular-nums', compact ? 'text-xs' : 'text-sm']">
           <template v-if="showScores">
             <SpoilerHidden v-if="concealed" />
+            <MatchForfeitMark v-else-if="isForfeiter(participantBId)" />
             <template v-else>{{ displayScoreB }}</template>
           </template>
         </span>
